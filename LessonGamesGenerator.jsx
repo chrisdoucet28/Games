@@ -21,7 +21,7 @@ function teamsGridCols(n) {
 
 const GAME_MODES = [
   { id: "auction",   name: "Sentence Auction",  icon: "🏛️", desc: "Bet points on correct or incorrect sentences",               color: "#8B5CF6", tag: "Read & analyse sentences" },
-  { id: "battleship",name: "Grammar Battleship", icon: "⚓",  desc: "Attack coordinates by answering correctly",                 color: "#3B82F6", tag: "Short answers & recall" },
+  { id: "battleship",name: "Battleship", icon: "⚓",  desc: "Attack coordinates by answering correctly",                 color: "#3B82F6", tag: "Short answers & recall" },
   { id: "hotpotato", name: "Hot Potato",         icon: "🥔",  desc: "Answer fast or keep the potato — the timer ends randomly",  color: "#F97316", tag: "Quick completions under pressure" },
   { id: "castle",    name: "Castle Defense",     icon: "🏰",  desc: "Correct answers let you attack enemies",                    color: "#10B981", tag: "Short answers & recall" },
   { id: "hill",      name: "King of the Hill",   icon: "👑",  desc: "Capture zones by answering questions",                     color: "#EC4899", tag: "Short answers & recall" },
@@ -70,9 +70,9 @@ const TOPIC_LIBRARY = {
     ],
     minefieldGrid: {
       topic: "Irregular Verbs",
-      instructions: "Students combine the subject (top) with the verb prompt (side). Conjugate the verb correctly in past simple or past participle — then complete the sentence.",
+      instructions: "Combine the subject (top) with the verb (side) to make a correct past simple sentence using the irregular form. Add your own details.",
       colLabels: ["I", "She", "They", "We", "He"],
-      rowLabels: ["___ (go) to…", "___ (eat) …", "___ (see) …", "___ (buy) …", "___ (write) …"],
+      rowLabels: ["… went to … last weekend.", "… ate … for dinner.", "… saw … yesterday.", "… bought … because …", "… wrote … to …"],
     },
     hotSeatWords: [
       {word:"went"},{word:"ate"},{word:"saw"},{word:"bought"},
@@ -136,7 +136,12 @@ const TOPIC_LIBRARY = {
       { task:"Make three present perfect sentences beginning 'I have never…'" },
       { task:"Tell a childhood memory using at least six irregular past simple verbs." },
       { task:"Spot the error: read a partner's sentence and correct the irregular verb if wrong." },
-    ],
+    
+      { task:"Tell a short story about your last trip using five irregular past simple verbs." },
+      { task:"Give the past simple and past participle of: see, write, take, break, and run." },
+      { task:"Make three sentences about things you have done recently using present perfect." },
+      { task:"Describe a childhood memory using at least four irregular past simple verbs." },
+      { task:"Ask your partner for the past simple of five irregular verbs and correct them if wrong." },],
   },
 
   present_perfect: {
@@ -172,9 +177,9 @@ const TOPIC_LIBRARY = {
     ],
     minefieldGrid: {
       topic: "Present Perfect",
-      instructions: "Combine the subject (top) with the sentence starter (side) to make a full present perfect sentence — add your own details.",
-      colLabels: ["I", "She", "They", "We", "He"],
-      rowLabels: ["___ just ___.", "___ already ___.", "___ never ___.", "___ been to ___ for ___.", "___ not ___ yet."],
+      instructions: "Combine the subject (top) with the sentence pattern (side) to make a grammatically correct present perfect sentence — fill in the gaps with your own details.",
+      colLabels: ["I have…", "She has…", "They have…", "We have…", "He has…"],
+      rowLabels: ["… just arrived / finished / seen it.", "… already done / visited / tried it.", "… never been to / tried / met …", "… not replied / started / finished yet.", "… lived / worked here for …"],
     },
     hotSeatWords: [
       {word:"already"},{word:"yet"},{word:"just"},{word:"ever"},
@@ -188,7 +193,7 @@ const TOPIC_LIBRARY = {
       {prompt:"'For' or 'since'? 'I've lived here ___ 2015.'", answer:"since"},
       {prompt:"'For' or 'since'? 'She's been ill ___ three days.'", answer:"for"},
       {prompt:"'Have you finished ___?' (yet/already/just)", answer:"yet"},
-      {prompt:"'I've ___ finished.' (completion before expected — already/yet/just)", answer:"already"},
+      {prompt:"'I've ___ finished.'", answer:"already"},
       {prompt:"'I've ___ arrived.' (very recent — already/yet/just)", answer:"just"},
       {prompt:"'I ___ him yesterday.' Present perfect or past simple?", answer:"past simple (specific time: yesterday)"},
       {prompt:"'I ___ him three times.' (this week) Which tense?", answer:"present perfect (unfinished time period)"},
@@ -238,7 +243,12 @@ const TOPIC_LIBRARY = {
       { task:"Use present perfect to react to news: 'Oh no! I've lost my…'" },
       { task:"Ask three 'Have you ever…?' questions and answer them honestly." },
       { task:"Describe your country's recent achievements using present perfect." },
-    ],
+    
+      { task:"Use 'I have never…' to make three sentences about experiences you haven't had." },
+      { task:"Tell a partner about something you have just done using present perfect." },
+      { task:"Use present perfect to describe three ways your life has changed in the last five years." },
+      { task:"Make two sentences using 'for' and two using 'since' with present perfect." },
+      { task:"Ask a partner three present perfect questions using 'ever', 'yet', and 'already'." },],
   },
 
   first_conditional: {
@@ -340,7 +350,12 @@ const TOPIC_LIBRARY = {
       { task:"Make a first conditional about healthy habits: 'If you eat well, you'll…'" },
       { task:"Discuss: 'If you could change one thing at school/work, what will happen?'" },
       { task:"Create a first conditional dialogue: one person makes a suggestion, the other responds." },
-    ],
+    
+      { task:"Make three first conditional sentences about what you will do this weekend if the weather is good." },
+      { task:"Tell your partner what you will do if you pass your next exam." },
+      { task:"Use first conditional to warn someone about a consequence — e.g. 'If you don't…, you will…'" },
+      { task:"Make a first conditional sentence about something that might really happen to you this year." },
+      { task:"Ask a partner two first conditional questions starting with 'What will you do if…?'" },],
   },
 
   phrasal_verbs: {
@@ -442,7 +457,12 @@ const TOPIC_LIBRARY = {
       { task:"Describe a problem you had to 'work out' or 'sort out'." },
       { task:"Use 'break down', 'break up', 'break out', and 'break in' — what do they mean?" },
       { task:"Create a short dialogue using at least six different phrasal verbs naturally." },
-    ],
+    
+      { task:"Use 'give up', 'look after', and 'find out' in three separate sentences about your life." },
+      { task:"Tell a partner about a hobby you took up or gave up and why." },
+      { task:"Make sentences using 'put up with' and 'come across' — explain what they mean." },
+      { task:"Describe a time you had to look after someone or something — use at least two phrasal verbs." },
+      { task:"Ask your partner two questions using phrasal verbs from the lesson." },],
   },
 
   past_simple: {
@@ -478,9 +498,9 @@ const TOPIC_LIBRARY = {
     ],
     minefieldGrid: {
       topic: "Past Simple",
-      instructions: "Combine the subject (top) with the verb prompt (side) to make a correct past simple sentence. Add your own details to complete it.",
-      colLabels: ["I …", "She …", "They …", "We …", "He …"],
-      rowLabels: ["___ (go) to …", "___ (eat) … for dinner.", "___ not ___ (like) …", "___ (see) … yesterday.", "___ (be) very …"],
+      instructions: "Combine the subject (top) with the verb (side) to make a correct past simple sentence. Add your own details to complete it.",
+      colLabels: ["I", "She", "They", "We", "He"],
+      rowLabels: ["… went to … last …", "… ate … for dinner.", "… didn't like … because …", "… saw … yesterday.", "… was/were very … when …"],
     },
     hotSeatWords: [
       {word:"yesterday"},{word:"last week"},{word:"last night"},{word:"ago"},
@@ -544,7 +564,12 @@ const TOPIC_LIBRARY = {
       { task:"Make two sentences: one positive, one negative, about the same event." },
       { task:"Tell your partner about a time you were late or forgot something." },
       { task:"Describe the best day you had last month using past simple." },
-    ],
+    
+      { task:"Describe what you did last weekend in at least five past simple sentences." },
+      { task:"Tell a partner about the last time you travelled somewhere using past simple." },
+      { task:"Make three negative past simple sentences about things you didn't do last week." },
+      { task:"Ask your partner three past simple questions about their childhood." },
+      { task:"Describe a memorable meal you had — where, what, and who with — using past simple." },],
   },
 
   present_simple_vs_continuous: {
@@ -580,9 +605,9 @@ const TOPIC_LIBRARY = {
     ],
     minefieldGrid: {
       topic: "Present Simple vs Continuous",
-      instructions: "Combine the subject (top) with the time clue (side). Decide whether to use present simple or continuous — then build the full sentence.",
-      colLabels: ["I …", "She …", "They …", "He …", "We …"],
-      rowLabels: ["… every day. (habit)", "… right now. (continuous)", "… always … (frequency)", "… at the moment. (continuous)", "… usually … but today …"],
+      instructions: "Combine the subject (top) with the time clue (side). Use present simple for habits and present continuous for actions happening now — build a full sentence.",
+      colLabels: ["I", "She", "They", "He", "We"],
+      rowLabels: ["… every day. (use simple)", "… right now. (use continuous)", "… always … (use simple + adverb)", "… at the moment. (use continuous)", "… usually … but today … (contrast both)"],
     },
     hotSeatWords: [
       {word:"right now"},{word:"at the moment"},{word:"every day"},{word:"always"},
@@ -646,7 +671,12 @@ const TOPIC_LIBRARY = {
       { task:"Ask 'Are you enjoying the lesson?' and 'Do you enjoy English class?' — what's the difference?" },
       { task:"Describe the difference between 'I think you're right' and 'I'm thinking about it'." },
       { task:"Use 'is working', 'is studying', and 'is travelling' to describe three people you know." },
-    ],
+    
+      { task:"Talk about this topic for one minute — share your personal opinion and experience." },
+      { task:"Ask a partner two questions related to this topic and discuss the answers together." },
+      { task:"Describe a real situation from your own life that relates to this topic." },
+      { task:"Give your partner two tips or pieces of advice related to this topic." },
+      { task:"Summarise the most important idea from this topic in two or three sentences." },],
   },
 
   invitations: {
@@ -702,8 +732,8 @@ const TOPIC_LIBRARY = {
       {prompt:"Formal way to invite someone to a party?", answer:"(free — Would you like to come to…? / I'd like to invite you to…)"},
       {prompt:"Informal way to invite a friend?", answer:"(free — Do you fancy…? / How about…? / Wanna come?)"},
       {prompt:"'I'm afraid I ___ make it.' (can/can't/won't)", answer:"can't"},
-      {prompt:"'Are you ___ on Friday?' (available/free/busy)", answer:"free / available"},
-      {prompt:"'That's a ___ idea!' (great/big/good)", answer:"great / good / fantastic"},
+      {prompt:"'Are you ___ on Friday?'", answer:"free / available"},
+      {prompt:"'That's a ___ idea!'", answer:"great / good / fantastic"},
       {prompt:"What does 'RSVP' mean?", answer:"please reply (French: Répondez s'il vous plaît)"},
       {prompt:"'Why don't ___ go bowling?' (you/we/us)", answer:"we"},
       {prompt:"'___ you like to join us?' (Would/Do/Will)", answer:"Would"},
@@ -748,7 +778,12 @@ const TOPIC_LIBRARY = {
       { task:"Make a spoken invitation and a written invitation for the same event." },
       { task:"What do you say when you're not sure if you can come? Practise." },
       { task:"Role-play a full invitation conversation: invite, ask questions, accept or reject, and arrange a time." },
-    ],
+    
+      { task:"Invite your partner to do something this weekend and respond naturally when they accept or decline." },
+      { task:"Make an invitation using 'Would you like to…?' and practise two different responses." },
+      { task:"Roleplay: one person suggests an activity, the other politely declines and suggests an alternative." },
+      { task:"Use 'How about…?' and 'Are you free on…?' to make two invitations with time and place." },
+      { task:"Practise a full invitation exchange — invite, respond, check the time, and confirm." },],
   },
 
   telling_stories: {
@@ -850,7 +885,12 @@ const TOPIC_LIBRARY = {
       { task:"Make up a story using these words: stranger, forest, letter, midnight, surprise." },
       { task:"Tell a story about a lucky escape — something bad that almost happened." },
       { task:"Describe the scariest, funniest, or strangest thing that ever happened to you." },
-    ],
+    
+      { task:"Tell a two-minute story about something surprising that happened to you — use at least three connectives." },
+      { task:"Continue this story starter: 'It was a perfectly normal day until…' — use five story connectives." },
+      { task:"Tell a partner about a time something went wrong on a trip — use 'suddenly', 'luckily', and 'in the end'." },
+      { task:"Use 'one day', 'then', 'unfortunately', and 'eventually' in a short story about a mistake you made." },
+      { task:"Describe a time you were in an unexpected situation — build tension using narrative connectives." },],
   },
 
   so_neither: {
@@ -952,7 +992,12 @@ const TOPIC_LIBRARY = {
       { task:"Make a two-part exchange using 'neither' for something nobody likes." },
       { task:"Use 'so does he' to describe a shared habit." },
       { task:"Respond to 'She hadn't heard the news' using 'neither had I'." },
-    ],
+    
+      { task:"Talk about this topic for one minute — share your personal opinion and experience." },
+      { task:"Ask a partner two questions related to this topic and discuss the answers together." },
+      { task:"Describe a real situation from your own life that relates to this topic." },
+      { task:"Give your partner two tips or pieces of advice related to this topic." },
+      { task:"Summarise the most important idea from this topic in two or three sentences." },],
   },
 
   prefer_rather: {
@@ -1054,7 +1099,12 @@ const TOPIC_LIBRARY = {
       { task:"Use 'I'd rather you didn't...' to express a preference about someone's behaviour." },
       { task:"Make a 'rather than' sentence about weekend activities." },
       { task:"Use 'I'd prefer to wait' in a real-life situation." },
-    ],
+    
+      { task:"Talk about this topic for one minute — share your personal opinion and experience." },
+      { task:"Ask a partner two questions related to this topic and discuss the answers together." },
+      { task:"Describe a real situation from your own life that relates to this topic." },
+      { task:"Give your partner two tips or pieces of advice related to this topic." },
+      { task:"Summarise the most important idea from this topic in two or three sentences." },],
   },
 
   passive_simple: {
@@ -1156,7 +1206,12 @@ const TOPIC_LIBRARY = {
       { task:"Make a present passive sentence about something that happens at school." },
       { task:"Use 'was arrested', 'was rescued', or 'was saved' in a mini news story." },
       { task:"Describe something that will be completed next year using the future passive." },
-    ],
+    
+      { task:"Describe three things that are made, grown, or produced in your country using passive voice." },
+      { task:"Tell a partner about a famous building — when it was built and what it is used for." },
+      { task:"Make three passive sentences about rules in your school or workplace." },
+      { task:"Use passive voice to describe what will be done to improve your town or city." },
+      { task:"Explain the difference between 'They built the bridge' and 'The bridge was built' — give two more examples." },],
   },
 
   passive_complex: {
@@ -1258,7 +1313,12 @@ const TOPIC_LIBRARY = {
       { task:"Use 'It is thought that...' or 'It is believed that...' about a local issue." },
       { task:"Describe something that might have been lost, stolen, or moved." },
       { task:"Use future perfect passive: 'By [year/date], X will have been...'." },
-    ],
+    
+      { task:"Use 'is being' and 'has been' to describe two things happening in your city right now." },
+      { task:"Describe a historical event using 'had been … before …' with passive voice." },
+      { task:"Make a sentence with 'should be done' about a problem in your community." },
+      { task:"Use 'is being investigated' or 'has been announced' in a sentence about recent news." },
+      { task:"Explain a process — how something is made or how a service works — using at least three passive tenses." },],
   },
 
   indefinite_pronouns: {
@@ -1361,7 +1421,12 @@ const TOPIC_LIBRARY = {
       { task:"Make a sentence with 'somewhere' about a dream destination." },
       { task:"Use 'nobody knows...' in a mysterious or surprising sentence." },
       { task:"Use 'everything went wrong' or 'everything went well' to describe a day." },
-    ],
+    
+      { task:"Use 'somebody', 'nobody', and 'everybody' in three sentences about your neighbourhood." },
+      { task:"Describe a situation where 'nothing' and 'everything' would both be true — give an example." },
+      { task:"Make two sentences about a place using 'somewhere' and 'nowhere'." },
+      { task:"Tell a partner about a time when 'nobody helped' or 'everyone was kind' — be specific." },
+      { task:"Use 'anything', 'something', and 'nothing' in sentences about what you need right now." },],
   },
 
   future_in_past: {
@@ -1463,7 +1528,12 @@ const TOPIC_LIBRARY = {
       { task:"Describe a near-miss or close call using 'was about to'." },
       { task:"Make a sentence with 'she thought she would never...'." },
       { task:"Use 'it was meant to be' or 'it was going to be different' in a sentence." },
-    ],
+    
+      { task:"Describe a plan you had last year that didn't happen — use 'was going to'." },
+      { task:"Tell a partner about something you were about to do when something else interrupted." },
+      { task:"Use 'I thought it would…' to describe a prediction you had that turned out wrong." },
+      { task:"Describe a journey or event you had planned in the past — what was going to happen?" },
+      { task:"Use 'was to' in a sentence about a formal plan or obligation from the past." },],
   },
 
   relative_clauses: {
@@ -1499,9 +1569,9 @@ const TOPIC_LIBRARY = {
     ],
     minefieldGrid: {
       topic: "Relative Clauses",
-      instructions: "Students combine the noun (top) with the relative pronoun starter (side) to make a full relative clause sentence — then complete it with their own idea.",
-      colLabels: ["The city …", "My neighbour …", "The moment …", "The reason …", "A restaurant …"],
-      rowLabels: ["… who …", "… which/that …", "… where …", "… when …", "… whose …"],
+      instructions: "Combine the noun phrase (top) with the correct relative pronoun (side) to make a complete relative clause. Check which pronoun is grammatically correct for each combination.",
+      colLabels: ["The person …", "My neighbour …", "The place …", "The reason …", "A restaurant …"],
+      rowLabels: ["… who … (for people)", "… which/that … (for things)", "… where … (for places)", "… when … (for time)", "… whose …"],
     },
     hotSeatWords: [
       {word:"who"},{word:"which"},{word:"whose"},{word:"where"},
@@ -1565,7 +1635,12 @@ const TOPIC_LIBRARY = {
       { task:"Use 'that I've always wanted to do' about a goal or dream." },
       { task:"Describe a problem using 'which is something we need to address'." },
       { task:"Make a sentence using 'whoever is responsible for...' about a situation." },
-    ],
+    
+      { task:"Describe a person you admire using a defining relative clause with 'who'." },
+      { task:"Make a sentence about a place using a relative clause with 'where' — be specific." },
+      { task:"Use 'which' to add extra information about an object in a non-defining relative clause." },
+      { task:"Describe someone using 'whose' — e.g. a person whose job or family is unusual." },
+      { task:"Combine two sentences into one using a relative clause — practise with 'when' and 'where'." },],
   },
 
   adverbs: {
@@ -1667,7 +1742,12 @@ const TOPIC_LIBRARY = {
       { task:"Use 'unfortunately' or 'fortunately' at the start of a sentence about your week." },
       { task:"Describe a performance or presentation using at least one adverb." },
       { task:"Use 'too' or 'not enough' in a sentence about a problem you face." },
-    ],
+    
+      { task:"Describe how you do three things differently from most people — use an adverb in each sentence." },
+      { task:"Use 'barely', 'hardly', and 'nearly' in three sentences about your week." },
+      { task:"Tell a partner how you handled a difficult situation — use at least two manner adverbs." },
+      { task:"Make three sentences comparing how two people you know do the same thing differently." },
+      { task:"Use 'incredibly', 'surprisingly', and 'confidently' in sentences about someone you know." },],
   },
 
   double_comparatives: {
@@ -1769,7 +1849,12 @@ const TOPIC_LIBRARY = {
       { task:"Make a sentence about food using 'the fresher the ingredients, the...'." },
       { task:"Use 'the more time we spend together, the...' about a relationship." },
       { task:"Make a double comparative about reading or watching the news." },
-    ],
+    
+      { task:"Use 'the more… the better' to give advice about learning a language." },
+      { task:"Make a double comparative sentence about work — e.g. effort and results." },
+      { task:"Tell a partner about a situation where 'the less… the more' applies in real life." },
+      { task:"Use a double comparative to describe a trend you've noticed in your country." },
+      { task:"Make two double comparative sentences about health, then discuss if you agree." },],
   },
 
   third_conditional: {
@@ -1871,7 +1956,12 @@ const TOPIC_LIBRARY = {
       { task:"Use 'they would have succeeded if...' to analyse a failure." },
       { task:"Make a third conditional about a travel experience or adventure." },
       { task:"Use 'had she arrived on time, everything would have...' in a story." },
-    ],
+    
+      { task:"Use third conditional to talk about a decision you regret — what would have been different?" },
+      { task:"Tell a partner about a historical event — what might have happened if something had changed?" },
+      { task:"Make a third conditional sentence about a time you were late or missed something." },
+      { task:"Use 'If I had known…, I would have…' to describe a situation where you lacked information." },
+      { task:"Ask a partner a third conditional question about their past choices and discuss the answers." },],
   },
 
   // ── VOCABULARY TOPICS ────────────────────────────────────────────────────────
@@ -1974,7 +2064,12 @@ const TOPIC_LIBRARY = {
       { task:"Make a sentence with 'I strongly believe that...' about an environmental issue." },
       { task:"Use 'In my view, the most important thing is...' about relationships." },
       { task:"Give a two-sided opinion using 'On the one hand... On the other hand...'." },
-    ],
+    
+      { task:"Give your opinion on social media using 'In my opinion' and 'From my point of view'." },
+      { task:"Use 'I tend to think that' to share a view on a topic you feel strongly about." },
+      { task:"Tell a partner your opinion on technology in schools — use at least two opinion phrases." },
+      { task:"Use 'As far as I'm concerned' and 'Personally speaking' in two different sentences." },
+      { task:"Give a balanced opinion on working from home — use opinion phrases on both sides." },],
   },
 
   // ── A1 TOPICS ────────────────────────────────────────────────────────────────
@@ -2078,7 +2173,12 @@ const TOPIC_LIBRARY = {
       { task:"Introduce yourself and ask your partner one personal question." },
       { task:"Use 'Thank you' and 'You're welcome' naturally in a short exchange." },
       { task:"Start with 'Hi, I'm…' and introduce yourself to two different classmates." },
-    ],
+    
+      { task:"Introduce yourself to your partner as if you are meeting for the first time — use three phrases." },
+      { task:"Roleplay meeting a new classmate — greet, introduce yourself, and ask two questions." },
+      { task:"Practise saying goodbye in three different situations: to a friend, a teacher, and a stranger." },
+      { task:"Introduce a partner to the class using 'This is…' and three things you know about them." },
+      { task:"Roleplay: you meet someone at a party — greet them, find out their name and where they're from." },],
   },
 
   introducing_others: {
@@ -2180,7 +2280,12 @@ const TOPIC_LIBRARY = {
       { task:"Use all six possessive adjectives (my, your, his, her, our, their) in six short sentences." },
       { task:"Introduce an imaginary famous person using 'This is…. His/Her name is…'" },
       { task:"Say 'These are my… Their names are…' about a group of people." },
-    ],
+    
+      { task:"Introduce an imaginary friend to your partner — use possessives and give three details." },
+      { task:"Use 'These are my…' to introduce two imaginary family members with their names and relationship." },
+      { task:"Practise: one student introduces two others to the class using 'He/She is from…' and 'His/Her name is…'" },
+      { task:"Roleplay introducing your partner to someone new — use their real name and one true fact." },
+      { task:"Make three sentences introducing different people — use 'his', 'her', and 'their' correctly." },],
   },
 
   present_simple: {
@@ -2216,9 +2321,9 @@ const TOPIC_LIBRARY = {
     ],
     minefieldGrid: {
       topic: "Present Simple",
-      instructions: "Students combine the subject (top) with the verb phrase (side) to make a correct present simple sentence — completing it with real details.",
-      colLabels: ["I …", "She …", "He …", "We …", "They …"],
-      rowLabels: ["… live in …", "… study … every day.", "… like / love …", "… don't / doesn't …", "… work / works in …"],
+      instructions: "Combine the subject (top) with the verb phrase (side) to make a correct present simple sentence — add your own details to complete it.",
+      colLabels: ["I", "She", "He", "We", "They"],
+      rowLabels: ["… live/lives in …", "… study/studies … every day.", "… like/likes …", "… don't/doesn't …", "… work/works in …"],
     },
     hotSeatWords: [
       {word:"routine"},{word:"habit"},{word:"daily"},{word:"regular"},
@@ -2282,7 +2387,12 @@ const TOPIC_LIBRARY = {
       { task:"Use 'they study', 'we live', and 'I speak' in three sentences." },
       { task:"Ask your partner 'Do you like…?' — use three different nouns." },
       { task:"Say what your partner does and doesn't do, based on what they told you." },
-    ],
+    
+      { task:"Describe your weekly routine in five present simple sentences — include frequency adverbs." },
+      { task:"Tell a partner three true facts about your life using 'I don't…' and 'I always…'" },
+      { task:"Make three present simple sentences about what a friend or family member does regularly." },
+      { task:"Ask a partner five present simple questions about their habits and hobbies." },
+      { task:"Describe a typical day for someone in a job you find interesting — use present simple." },],
   },
 
   likes_dislikes: {
@@ -2318,9 +2428,9 @@ const TOPIC_LIBRARY = {
     ],
     minefieldGrid: {
       topic: "Likes & Dislikes",
-      instructions: "Students combine the subject (top) with the like/dislike expression (side) to make a full sentence — adding their own activity or thing.",
-      colLabels: ["I …", "She …", "He …", "We …", "They …"],
-      rowLabels: ["… love/loves …ing", "… like/likes …ing", "… don't/doesn't like …", "… hate/hates …ing", "… enjoy/enjoys …"],
+      instructions: "Combine the subject (top) with the verb (side) to make a correct sentence. Choose the right verb form for each subject and add your own hobby or activity.",
+      colLabels: ["I", "She", "He", "We", "They"],
+      rowLabels: ["… love/loves … because …", "… like/likes … a lot.", "… don't/doesn't like … at all.", "… hate/hates … — it's …", "… enjoy/enjoys … every …"],
     },
     hotSeatWords: [
       {word:"pizza"},{word:"chocolate"},{word:"football"},{word:"music"},
@@ -2384,7 +2494,12 @@ const TOPIC_LIBRARY = {
       { task:"Describe your food likes and dislikes using at least four sentences." },
       { task:"Use 'he/she likes…ing' to describe a classmate's hobby." },
       { task:"Make a sentence using 'enjoy' about something you do with friends." },
-    ],
+    
+      { task:"Tell a partner three things you love and three things you hate — give a reason for each." },
+      { task:"Use 'enjoy', 'can't stand', and 'don't mind' in sentences about your hobbies." },
+      { task:"Describe something you used to dislike but now enjoy — explain what changed." },
+      { task:"Ask a partner about their food preferences using 'Do you like…?' and 'How do you feel about…?'" },
+      { task:"Compare your likes and dislikes with a partner — find two things you both love and one you disagree on." },],
   },
 
   what_do_you_do: {
@@ -2486,7 +2601,12 @@ const TOPIC_LIBRARY = {
       { task:"Describe your teacher's job using 'She/He is a teacher. She/He…'" },
       { task:"Use 'They are…s. They work in…' to describe two people with the same job." },
       { task:"Name five jobs and say whether each uses 'a' or 'an'." },
-    ],
+    
+      { task:"Talk about this topic for one minute — share your personal opinion and experience." },
+      { task:"Ask a partner two questions related to this topic and discuss the answers together." },
+      { task:"Describe a real situation from your own life that relates to this topic." },
+      { task:"Give your partner two tips or pieces of advice related to this topic." },
+      { task:"Summarise the most important idea from this topic in two or three sentences." },],
   },
 
   hobbies: {
@@ -2522,9 +2642,9 @@ const TOPIC_LIBRARY = {
     ],
     minefieldGrid: {
       topic: "Hobbies",
-      instructions: "Students combine the subject (top) with the hobby expression (side) to make a full sentence — adding their own hobby or details.",
-      colLabels: ["I …", "She …", "He …", "We …", "My friend …"],
-      rowLabels: ["… love/loves …ing", "… go/goes …ing", "… am/is interested in …", "… spend/spends time …ing", "… don't/doesn't like …ing"],
+      instructions: "Combine the subject (top) with the hobby phrase (side). Choose the right verb form for each subject and name a real hobby to complete the sentence.",
+      colLabels: ["I", "She", "He", "We", "My friend"],
+      rowLabels: ["… love/loves … because …", "… go/goes … every week.", "… am/is/are really interested in …", "… spend/spends a lot of time …ing", "… don't/doesn't enjoy … at all."],
     },
     hotSeatWords: [
       {word:"swimming"},{word:"cycling"},{word:"fishing"},{word:"cooking"},
@@ -2588,7 +2708,12 @@ const TOPIC_LIBRARY = {
       { task:"Describe a hobby you had as a child using 'I used to…'" },
       { task:"Ask your partner about three activities: 'Do you go…ing?'" },
       { task:"Use 'He spends his free time…ing' to describe a friend or family member." },
-    ],
+    
+      { task:"Tell a partner about a hobby you love and one you'd like to try — give reasons." },
+      { task:"Use 'I'm really interested in' and 'I spend a lot of time…ing' in two sentences." },
+      { task:"Describe how your hobbies have changed since you were a child." },
+      { task:"Ask a partner three questions about how they spend their free time." },
+      { task:"Tell the class about an unusual hobby — describe what it involves and why people enjoy it." },],
   },
 
   personality: {
@@ -2690,7 +2815,12 @@ const TOPIC_LIBRARY = {
       { task:"Use 'hardworking', 'creative', and 'honest' in sentences about real people." },
       { task:"Describe your own personality in four sentences, using 'but' once." },
       { task:"Ask 'What is your ideal partner like?' and answer with five adjectives." },
-    ],
+    
+      { task:"Talk about this topic for one minute — share your personal opinion and experience." },
+      { task:"Ask a partner two questions related to this topic and discuss the answers together." },
+      { task:"Describe a real situation from your own life that relates to this topic." },
+      { task:"Give your partner two tips or pieces of advice related to this topic." },
+      { task:"Summarise the most important idea from this topic in two or three sentences." },],
   },
 
   feelings: {
@@ -2792,7 +2922,12 @@ const TOPIC_LIBRARY = {
       { task:"Say 'I am scared of…' — name three things that make you scared." },
       { task:"Describe how a character in a film feels using 'She/He looks/feels…'" },
       { task:"Use 'I'm sorry' in a sentence where you express regret." },
-    ],
+    
+      { task:"Describe how you feel before an important event — use three different feeling expressions." },
+      { task:"Tell a partner about a time you felt very proud or very disappointed — what happened?" },
+      { task:"Use 'He is very … because …' to describe how someone might feel in two different situations." },
+      { task:"Describe a time you felt conflicted about a decision — what were the two sides?" },
+      { task:"Ask a partner how they feel about starting something new — school, a job, or a trip." },],
   },
 
   appearance: {
@@ -2894,7 +3029,12 @@ const TOPIC_LIBRARY = {
       { task:"Describe someone's appearance and add one personality adjective." },
       { task:"Use 'about … years old' to describe three people in the room." },
       { task:"Describe what an ideal superhero looks like using appearance language." },
-    ],
+    
+      { task:"Describe the appearance of a family member using height, hair, eyes, and build." },
+      { task:"Describe a famous person's appearance without saying their name — can your partner guess?" },
+      { task:"Use 'She/He is about … years old and has …' to describe someone in your class." },
+      { task:"Describe how someone's appearance can change over time — use before and after language." },
+      { task:"Ask a partner to describe someone from memory — a friend, teacher, or family member." },],
   },
 
   clothes: {
@@ -2996,7 +3136,12 @@ const TOPIC_LIBRARY = {
       { task:"Describe a superhero's outfit using 'He/She is wearing…'" },
       { task:"Ask a classmate 'Are you wearing…?' — use three different clothing items." },
       { task:"Describe the perfect outfit for cold/hot weather using 'I would wear…'" },
-    ],
+    
+      { task:"Describe what three people in the room are wearing right now — be specific with colours." },
+      { task:"Tell a partner about an outfit you love and one you'd never wear — explain why." },
+      { task:"Use 'looks great in' and 'isn't wearing' in sentences about people you know." },
+      { task:"Describe the ideal outfit for a job interview, a beach, and a formal dinner." },
+      { task:"Ask a partner to describe what they wore to an important event — what were they wearing and why?" },],
   },
 
   // ── SPEAKING TOPICS ────────────────────────────────────────────────────────
@@ -3099,7 +3244,12 @@ const TOPIC_LIBRARY = {
       { task:"How might remote work affect young workers starting their first job?" },
       { task:"What would you miss most about the office?" },
       { task:"How has the rise of remote work changed cities and transport?" },
-    ],
+    
+      { task:"Describe your ideal home office setup — what would you need and why?" },
+      { task:"Talk about how remote work has changed relationships between colleagues." },
+      { task:"Do you think remote work is better for introverts or extroverts? Explain." },
+      { task:"Describe what 'burnout' feels like and how someone working from home could avoid it." },
+      { task:"Argue both sides: give one strong reason for and one strong reason against remote work." },],
   },
 
   learning_language: {
@@ -3201,7 +3351,12 @@ const TOPIC_LIBRARY = {
       { task:"How important is pronunciation when learning a language?" },
       { task:"What advice would you give someone just starting to learn English?" },
       { task:"Do you think adults can become as fluent as children in a second language?" },
-    ],
+    
+      { task:"Tell a partner about the most effective method you've used to learn a language." },
+      { task:"Describe a time you made a mistake in another language — what happened and what did you learn?" },
+      { task:"Do you think immersion is the best way to learn a language? Give reasons." },
+      { task:"Talk about how technology has changed the way people learn languages." },
+      { task:"Would you rather learn a language in a class or independently? Explain your reasons." },],
   },
 
   education_systems: {
@@ -3303,7 +3458,12 @@ const TOPIC_LIBRARY = {
       { task:"How can schools better support students with different learning needs?" },
       { task:"Describe your ideal school — what would it look like?" },
       { task:"How do education systems differ between countries? Give examples." },
-    ],
+    
+      { task:"Describe the education system in your country — what do you think works well?" },
+      { task:"Do you think exams are the best way to measure a student's ability? Give reasons." },
+      { task:"Talk about a teacher who had a big impact on you — what made them effective?" },
+      { task:"Compare private and state education — what are the advantages and disadvantages of each?" },
+      { task:"What one thing would you change about your country's education system and why?" },],
   },
 
   career_choices: {
@@ -3405,7 +3565,12 @@ const TOPIC_LIBRARY = {
       { task:"How do gender and background affect career opportunities?" },
       { task:"What does success in a career mean to you personally?" },
       { task:"How do cultural expectations affect career choices in your country?" },
-    ],
+    
+      { task:"Describe the career you would choose if money was no obstacle — explain why." },
+      { task:"Talk about a job that is very different from what you'd normally consider — what appeals to you?" },
+      { task:"Do you think it's better to choose a career based on passion or salary? Give reasons." },
+      { task:"Describe the biggest challenges young people face when choosing a career today." },
+      { task:"Talk about a skill or qualification that you think is essential for most careers." },],
   },
 
   work_life_balance: {
@@ -3507,7 +3672,12 @@ const TOPIC_LIBRARY = {
       { task:"Do people in your country work too much? What could change?" },
       { task:"How can parents with young children manage work-life balance?" },
       { task:"What is the relationship between work-life balance and productivity?" },
-    ],
+    
+      { task:"Describe what a perfect work-life balance looks like to you personally." },
+      { task:"Talk about a time you felt your work and personal life were out of balance — what happened?" },
+      { task:"Do you think it's the employer's responsibility to protect work-life balance? Explain." },
+      { task:"Describe how someone could improve their work-life balance — give three practical suggestions." },
+      { task:"Talk about how work-life balance differs between generations — do younger people prioritise it more?" },],
   },
 
   success_motivation: {
@@ -3609,7 +3779,12 @@ const TOPIC_LIBRARY = {
       { task:"What would motivate you to work much harder than you do now?" },
       { task:"Is it more important to achieve your own goals or make others proud?" },
       { task:"What is the relationship between confidence and success?" },
-    ],
+    
+      { task:"Describe a time you succeeded at something difficult — what motivated you?" },
+      { task:"Talk about someone you consider successful — what qualities do they have?" },
+      { task:"Do you think success is mainly about talent or hard work? Give your reasons." },
+      { task:"Describe a failure that taught you something valuable — what did you learn?" },
+      { task:"Talk about what motivates you most — money, recognition, purpose, or challenge?" },],
   },
 
   time_management: {
@@ -3711,7 +3886,12 @@ const TOPIC_LIBRARY = {
       { task:"What is the Pomodoro technique and would you try it?" },
       { task:"Why do some people always seem to have more time than others?" },
       { task:"How do students and workers have different time management challenges?" },
-    ],
+    
+      { task:"Describe how you currently manage your time — what works and what doesn't?" },
+      { task:"Tell a partner about a time you procrastinated on something important — what happened?" },
+      { task:"Give three practical tips for better time management based on your experience." },
+      { task:"Talk about the difference between being busy and being productive — give examples." },
+      { task:"Do you think saying 'no' to people is an important time management skill? Why?" },],
   },
 
   free_time_hobbies: {
@@ -3813,7 +3993,12 @@ const TOPIC_LIBRARY = {
       { task:"What is one new hobby you would like to try this year?" },
       { task:"How do you feel when you have nothing planned — do you enjoy it?" },
       { task:"What do you think is the most beneficial way to spend free time?" },
-    ],
+    
+      { task:"Describe a hobby you've had since childhood — how has it changed as you've grown up?" },
+      { task:"Talk about a hobby you'd recommend to someone who is often stressed — and explain why." },
+      { task:"Do you think it's important to have hobbies outside of work or school? Give reasons." },
+      { task:"Describe the most interesting hobby you've ever heard of — would you try it?" },
+      { task:"Talk about how hobbies can bring people together — give a personal example if you can." },],
   },
 
   social_media: {
@@ -3915,7 +4100,12 @@ const TOPIC_LIBRARY = {
       { task:"Is social media addiction a real problem? Why?" },
       { task:"How do you decide what to share and what to keep private online?" },
       { task:"What are the positives and negatives of social media for small businesses?" },
-    ],
+    
+      { task:"Describe how social media has changed the way people communicate — give examples." },
+      { task:"Talk about a positive and a negative experience you've had related to social media." },
+      { task:"Do you think governments should regulate social media more strictly? Give reasons." },
+      { task:"Describe how influencers affect people's opinions and behaviour — is this a problem?" },
+      { task:"Talk about a time you or someone you know spent too much time on social media — what effect did it have?" },],
   },
 
   causative_verbs: {
@@ -4017,7 +4207,12 @@ const TOPIC_LIBRARY = {
       { task:"Make a sentence using 'get + object + past participle' about your phone or car." },
       { task:"Describe getting ready for an important event using at least one causative." },
       { task:"Use 'they don't make us' or 'they let us' to describe your school or workplace." },
-    ],
+    
+      { task:"Use 'have/get something done' to describe three services you've used recently." },
+      { task:"Tell a partner about a time you got someone to do something for you — use causative verbs." },
+      { task:"Use 'make someone do' and 'let someone do' to talk about rules in your home or school." },
+      { task:"Describe a situation where you had to get something repaired — what happened?" },
+      { task:"Use 'have done' and 'get done' in sentences about things you plan to do this month." },],
   },
 
   get_used_to: {
@@ -4119,7 +4314,12 @@ const TOPIC_LIBRARY = {
       { task:"Use 'would' instead of 'used to' for a childhood habit." },
       { task:"Ask your partner if there is something they are still getting used to." },
       { task:"Tell a short story about moving somewhere new using all three structures." },
-    ],
+    
+      { task:"Talk about this topic for one minute — share your personal opinion and experience." },
+      { task:"Ask a partner two questions related to this topic and discuss the answers together." },
+      { task:"Describe a real situation from your own life that relates to this topic." },
+      { task:"Give your partner two tips or pieces of advice related to this topic." },
+      { task:"Summarise the most important idea from this topic in two or three sentences." },],
   },
 
   reported_speech: {
@@ -4221,7 +4421,12 @@ const TOPIC_LIBRARY = {
       { task:"Use 'mentioned' or 'explained' to report something in a conversation." },
       { task:"Report a question from a job interview using reported speech." },
       { task:"Tell your partner something someone told you, then have them report it." },
-    ],
+    
+      { task:"Tell a partner something a teacher or parent told you last week — use reported speech." },
+      { task:"Report what a friend asked you recently — use 'he/she asked if/whether…'" },
+      { task:"Use 'She told me not to…' to report a piece of advice or instruction you received." },
+      { task:"Report three things from a conversation you had recently — use a mix of reporting verbs." },
+      { task:"Tell a story about a misunderstanding — report what each person said using reported speech." },],
   },
 
   embedded_questions: {
@@ -4323,7 +4528,12 @@ const TOPIC_LIBRARY = {
       { task:"Compare 'Where is the train?' and 'I'd like to know where the train is.'" },
       { task:"Use 'Do you have any idea why...' in a complaint or concern." },
       { task:"Roleplay asking for information at an airport using three embedded questions." },
-    ],
+    
+      { task:"Use 'Could you tell me…?' to ask three polite questions in a shop or office roleplay." },
+      { task:"Rewrite three direct questions as embedded questions starting with 'I wonder…'" },
+      { task:"Use 'Do you know…?' and 'I'm not sure…' in a conversation about directions." },
+      { task:"Practise asking for information politely — use embedded questions to ask about times or prices." },
+      { task:"Tell a partner something you're uncertain about using 'I have no idea…' and 'I'm not sure…'" },],
   },
 
   reading: {
@@ -4425,7 +4635,12 @@ const TOPIC_LIBRARY = {
       { task:"How is reading a novel different from watching the same story as a film?" },
       { task:"What role does your local library play in your community?" },
       { task:"Should governments invest more in promoting reading? How?" },
-    ],
+    
+      { task:"Describe the last book you read — what was it about and would you recommend it?" },
+      { task:"Talk about how reading fiction can help you understand other people's experiences." },
+      { task:"Do you prefer reading physical books or e-books? Give three reasons." },
+      { task:"Describe a book that changed the way you think about something — what did you learn?" },
+      { task:"Talk about whether you think reading is becoming less popular — and if that matters." },],
   },
 
   cultural_differences: {
@@ -4527,7 +4742,12 @@ const TOPIC_LIBRARY = {
       { task:"What can young people learn from experiencing cultures different from their own?" },
       { task:"Do you think cultures are becoming more similar over time? Is this a good thing?" },
       { task:"Describe someone you know who has successfully adapted to a new culture." },
-    ],
+    
+      { task:"Describe a cultural difference between your country and another you've noticed or experienced." },
+      { task:"Talk about a time you misunderstood something because of a cultural difference." },
+      { task:"Do you think globalisation is making cultures more similar? Is that a good thing?" },
+      { task:"Describe an aspect of your own culture that you think is unique — explain it to a partner." },
+      { task:"Talk about how being open to other cultures can help people in their professional life." },],
   },
 
   climate_change: {
@@ -4629,7 +4849,12 @@ const TOPIC_LIBRARY = {
       { task:"Do you feel hopeful or pessimistic about the future of the planet? Why?" },
       { task:"How has the news coverage of climate change changed in the last decade?" },
       { task:"What would you say to someone who does not believe in climate change?" },
-    ],
+    
+      { task:"Describe three things individuals can do to reduce their impact on the environment." },
+      { task:"Talk about a visible effect of climate change in your region or country." },
+      { task:"Do you think governments or individuals bear more responsibility for tackling climate change?" },
+      { task:"Describe how renewable energy could change the way people live in the next 20 years." },
+      { task:"Talk about how young people's attitudes to climate change differ from older generations." },],
   },
 
   city_vs_country: {
@@ -4731,7 +4956,12 @@ const TOPIC_LIBRARY = {
       { task:"What should governments do to make rural areas more attractive to young people?" },
       { task:"Describe a city or rural place you have visited. What made an impression on you?" },
       { task:"Do you think the gap between city and country life is growing or shrinking? Why?" },
-    ],
+    
+      { task:"Describe the place you grew up in — was it more city or countryside? What did you enjoy?" },
+      { task:"Talk about two advantages of city life and two advantages of rural life." },
+      { task:"Do you think remote working has changed where people choose to live? How?" },
+      { task:"Describe your ideal place to live — city, suburb, or countryside — and explain why." },
+      { task:"Talk about how the needs of families with children differ from young professionals when choosing where to live." },],
   },
 
   fast_fashion: {
@@ -4833,7 +5063,12 @@ const TOPIC_LIBRARY = {
       { task:"Are luxury fashion brands more ethical than high street brands? Discuss." },
       { task:"Describe a time you bought something and regretted it. Could this relate to fast fashion?" },
       { task:"What can young people do to make the fashion industry more ethical?" },
-    ],
+    
+      { task:"Describe how fast fashion affects the environment — give two specific examples." },
+      { task:"Talk about your own shopping habits — do you buy fast fashion or try to avoid it?" },
+      { task:"Do you think it's realistic to expect most people to buy sustainable fashion? Why?" },
+      { task:"Describe what 'buying second-hand' means and why it's becoming more popular." },
+      { task:"Talk about what fashion brands could do differently to reduce their environmental impact." },],
   },
 
   inversion: {
@@ -4894,7 +5129,7 @@ const TOPIC_LIBRARY = {
       {prompt:"Inverted conditional: 'Should you need help, ___.'", answer:"(free — please call me / I will be there)"},
       {prompt:"Inverted conditional: 'Were I to leave, ___.'", answer:"(free — who would run the project?)"},
       {prompt:"Inverted conditional: 'Had they known, ___.'", answer:"(free — they would have acted differently)"},
-      {prompt:"'On no account ___ this be repeated.' (should/must/is)", answer:"should / must"},
+      {prompt:"'On no account ___ this be repeated.'", answer:"should / must"},
       {prompt:"'Seldom ___ we see such commitment.' (do/have/did)", answer:"do"},
       {prompt:"'Only then ___ we realise the truth.' (did/had/were)", answer:"did"},
       {prompt:"After 'Not only', which tense uses 'did'?", answer:"past simple"},
@@ -4935,7 +5170,12 @@ const TOPIC_LIBRARY = {
       { task:"Make a speech excerpt using at least three different inversion structures." },
       { task:"Use 'Only when…did…' to describe a turning point in a story." },
       { task:"Discuss: why do writers use inversion? What effect does it create?" },
-    ],
+    
+      { task:"Use 'Never have I…' to talk about an experience you've never had — add a full sentence." },
+      { task:"Make a sentence with 'Not only did… but also…' about something impressive you've done." },
+      { task:"Use 'Hardly had… when…' to describe two events that happened in rapid succession." },
+      { task:"Make a sentence starting with 'So + adjective + was…' to emphasise something dramatic." },
+      { task:"Use 'Under no circumstances…' to state a strong rule or principle you believe in." },],
   },
 
   mixed_conditionals: {
@@ -5037,7 +5277,12 @@ const TOPIC_LIBRARY = {
       { task:"Debate: who is responsible for a current problem? Use mixed conditionals." },
       { task:"Make three mixed conditional sentences about different time combinations." },
       { task:"Explain the mixed conditional to a partner as if you were the teacher." },
-    ],
+    
+      { task:"Use a mixed conditional to talk about how a past decision affects your life now." },
+      { task:"Tell a partner about a skill you wish you had learnt — how would it change your present?" },
+      { task:"Use 'If she weren't…, she would have…' to describe someone whose personality affected a past event." },
+      { task:"Make a mixed conditional sentence about a historical event and its present consequences." },
+      { task:"Describe how your life would be different now if you had made a different choice years ago." },],
   },
 
   advanced_vocabulary: {
@@ -5139,7 +5384,12 @@ const TOPIC_LIBRARY = {
       { task:"Use 'trigger', 'spark', and 'prompt' to describe three different reactions or events." },
       { task:"Discuss the importance of collocation in sounding natural in English." },
       { task:"Use 'yield results', 'sustain growth', and 'address concerns' in professional sentences." },
-    ],
+    
+      { task:"Use 'raise awareness', 'draw conclusions', and 'meet expectations' in three sentences." },
+      { task:"Describe a situation where something had 'far-reaching consequences' — be specific." },
+      { task:"Use 'shed light on' in a sentence about a topic you've recently learnt about." },
+      { task:"Make three sentences using advanced collocations from the lesson — use them naturally." },
+      { task:"Choose two collocations from the lesson and explain what they mean in your own words." },],
   },
 
   globalisation: {
@@ -5241,7 +5491,12 @@ const TOPIC_LIBRARY = {
       { task:"Discuss the role of organisations like the WTO in managing globalisation." },
       { task:"How do you personally see the effects of globalisation in your daily life?" },
       { task:"Debate: 'Globalisation does more harm than good.' — take a side and defend it." },
-    ],
+    
+      { task:"Describe two ways globalisation has affected daily life in your country." },
+      { task:"Talk about whether globalisation benefits developing countries — give reasons for both sides." },
+      { task:"Explain what 'brain drain' means and describe its effect on the countries it affects most." },
+      { task:"Discuss whether cultural homogenisation is an inevitable result of globalisation." },
+      { task:"Talk about a multinational company you know — how has it affected local businesses?" },],
   },
 
   technology_daily_life: {
@@ -5343,7 +5598,12 @@ const TOPIC_LIBRARY = {
       { task:"What are the ethical concerns around artificial intelligence?" },
       { task:"Do you think children have too much screen time?" },
       { task:"Does technology bring people together or push them apart?" },
-    ],
+    
+      { task:"Describe how smartphones have changed daily life compared to 20 years ago." },
+      { task:"Talk about a piece of technology you couldn't live without — explain why." },
+      { task:"Do you think AI will create more jobs or take them away? Give your reasons." },
+      { task:"Describe the biggest risk of depending too much on technology in everyday life." },
+      { task:"Talk about how young people's use of technology differs from older generations." },],
   },
 
 
@@ -5446,7 +5706,12 @@ const TOPIC_LIBRARY = {
       { task:"Ask five questions to find out about someone's job." },
       { task:"Make a question for every day of last week: 'What did you do on Monday?'" },
       { task:"Interview a partner as if you are a journalist — use many question types." },
-    ],
+    
+      { task:"Ask a partner five questions using different question words — who, what, where, why, when." },
+      { task:"Make three questions in past simple starting with 'Did…?' and answer them yourself." },
+      { task:"Use 'How many…?' and 'How much…?' to ask about things in the classroom or school." },
+      { task:"Practise: one student answers, the other forms the question that would get that answer." },
+      { task:"Make a question for each of these answers: 'Last Friday.', 'My sister.', 'Because I was tired.'" },],
   },
 
   there_is_are: {
@@ -5548,7 +5813,12 @@ const TOPIC_LIBRARY = {
       { task:"Ask 'Are there any…?' questions about a partner's home." },
       { task:"Use 'there will be' to describe your city in twenty years." },
       { task:"Make one sentence using both 'there is' and 'there are'." },
-    ],
+    
+      { task:"Describe your classroom or home using five 'there is/are' sentences." },
+      { task:"Tell a partner about your neighbourhood — what is there and what isn't there?" },
+      { task:"Use 'Is there…?' to ask a partner three questions about their town." },
+      { task:"Make two affirmative and two negative 'there is/are' sentences about your school." },
+      { task:"Describe an ideal city using 'there would be…' and 'there wouldn't be…'" },],
   },
 
   daily_life_a2: {
@@ -5584,9 +5854,9 @@ const TOPIC_LIBRARY = {
     ],
     minefieldGrid: {
       topic: "Daily Life & Routines",
-      instructions: "Combine the subject (top) with the time/activity phrase (side) to make a complete sentence about a daily routine.",
-      colLabels: ["I …", "She …", "My brother …", "We …", "Most people …"],
-      rowLabels: ["… wake up at …", "… usually … in the morning.", "… never … before …", "… always … after …", "… go to bed at …"],
+      instructions: "Combine the subject (top) with the routine phrase (side) to make a complete sentence. Choose the right verb form and add your own details.",
+      colLabels: ["I", "She", "My brother", "We", "Most people"],
+      rowLabels: ["… wake/wakes up at … every day.", "… usually … in the morning.", "… never … before … o'clock.", "… always … after … finishing …", "… go/goes to bed at … on weekdays."],
     },
     hotSeatWords: [
       {word:"routine"},{word:"alarm"},{word:"commute"},{word:"breakfast"},
@@ -5650,7 +5920,12 @@ const TOPIC_LIBRARY = {
       { task:"Compare morning people and evening people — which are you?" },
       { task:"Describe the morning routine of someone famous." },
       { task:"What is the most unusual part of your daily routine?" },
-    ],
+    
+      { task:"Describe your morning routine from when you wake up to when you leave the house." },
+      { task:"Tell a partner what you usually do in the evening — use time expressions." },
+      { task:"Ask a partner three questions about their daily routine using 'What time…?' and 'How often…?'" },
+      { task:"Describe the daily routine of someone in your family — what do they do and when?" },
+      { task:"Tell a partner one thing you always do, one thing you sometimes do, and one thing you never do." },],
   },
 
   food_and_eating: {
@@ -5752,7 +6027,12 @@ const TOPIC_LIBRARY = {
       { task:"Talk about a food you are allergic to or that you can't eat." },
       { task:"Describe your ideal dinner party — who comes, and what do you eat?" },
       { task:"How has food in your country changed in the last twenty years?" },
-    ],
+    
+      { task:"Describe your favourite meal — what is it, where do you usually eat it, and why do you love it?" },
+      { task:"Tell a partner about a food you disliked as a child but enjoy now — or still dislike." },
+      { task:"Compare eating at home and eating out — give two advantages and one disadvantage of each." },
+      { task:"Describe a traditional dish from your country — what's in it and how is it made?" },
+      { task:"Tell a partner about the last time you ate somewhere new — what did you order and did you like it?" },],
   },
 
   second_conditional: {
@@ -5804,7 +6084,7 @@ const TOPIC_LIBRARY = {
       {prompt:"Result clause of second conditional?", answer:"would + base verb"},
       {prompt:"'If I ___ you, I would leave.' (were/was/am)", answer:"were"},
       {prompt:"Can you use 'would' in the if-clause?", answer:"no"},
-      {prompt:"'If I had a million euros, I ___ buy a house.' (would/will/could)", answer:"would / could"},
+      {prompt:"'If I had a million euros, I ___ buy a house.'", answer:"would / could"},
       {prompt:"Is second conditional real or imaginary?", answer:"imaginary / hypothetical"},
       {prompt:"'If she ___ more time, she would learn piano.' (had/has/have)", answer:"had"},
       {prompt:"Make a second conditional about a superpower.", answer:"(free — If I could fly, I would…)"},
@@ -5814,11 +6094,11 @@ const TOPIC_LIBRARY = {
       {prompt:"'I wouldn't do that if I ___ you.' (were/was/am)", answer:"were"},
       {prompt:"Second conditional is for ___ situations.", answer:"unreal / hypothetical"},
       {prompt:"First vs second conditional?", answer:"first = real; second = unreal/imaginary"},
-      {prompt:"'If I ___ invisible, I would spy on everyone!' (was/were/am)", answer:"were / was"},
+      {prompt:"'If I ___ invisible, I would spy on everyone!'", answer:"were / was"},
       {prompt:"Make a sentence: 'If I lived in another country, I would…'", answer:"(free answer)"},
-      {prompt:"'She would travel more if she ___ scared of flying.' (wasn't/weren't/isn't)", answer:"weren't / wasn't"},
+      {prompt:"'She would travel more if she ___ scared of flying.'", answer:"weren't / wasn't"},
       {prompt:"'If you could change one thing, what ___ it be?' (would/will/could)", answer:"would"},
-      {prompt:"'What would you do if you ___ the president?' (were/was/are)", answer:"were / was"},
+      {prompt:"'What would you do if you ___ the president?'", answer:"were / was"},
       {prompt:"Make a second conditional sentence about your dream job.", answer:"(free answer)"},
     ],
     auctionSentences: [
@@ -5854,7 +6134,12 @@ const TOPIC_LIBRARY = {
       { task:"Use 'What would you buy if money were no object?'" },
       { task:"Give three pieces of advice using 'If I were you'." },
       { task:"Make a second conditional about an important life decision." },
-    ],
+    
+      { task:"Use second conditional to talk about what you would do if you won a large amount of money." },
+      { task:"Tell a partner what you would change about your life if you could — give three things." },
+      { task:"Use 'If she were…, she would…' to imagine a different version of someone you know." },
+      { task:"Make a second conditional sentence about what you would do if you didn't have to work." },
+      { task:"Ask a partner two 'What would you do if…?' questions and discuss the answers." },],
   },
 
   modal_verbs: {
@@ -5956,7 +6241,12 @@ const TOPIC_LIBRARY = {
       { task:"Use 'must have been + adjective' to describe how someone felt." },
       { task:"Discuss rules at work — what must you do? What don't you have to do?" },
       { task:"Use 'may I…?' to practise very formal requests." },
-    ],
+    
+      { task:"Use 'must', 'might', and 'can't' to make deductions about three situations." },
+      { task:"Tell a partner about a rule at school or work using 'must' and 'should'." },
+      { task:"Use 'could' to talk about three things you were able to do as a child." },
+      { task:"Make a sentence with 'might' about something uncertain in your future." },
+      { task:"Use 'should have' to talk about something you regret not doing — give two examples." },],
   },
 
   health_and_body: {
@@ -5992,9 +6282,9 @@ const TOPIC_LIBRARY = {
     ],
     minefieldGrid: {
       topic: "Health & the Body",
-      instructions: "Combine the health topic starter (top) with the phrase (side) to make a complete sentence.",
-      colLabels: ["I have a …", "She twisted her …", "The doctor told me to …", "He goes to the gym to …", "I feel much better since …"],
-      rowLabels: ["… terrible …", "… ankle during …", "… rest and …", "… stay fit and …", "… I started …"],
+      instructions: "Combine the health situation (top) with the sentence frame (side) — then complete it with your own symptoms, advice, or experience.",
+      colLabels: ["When I feel unwell,…", "After an injury,…", "To stay healthy,…", "A doctor once told me…", "Since I changed my habits,…"],
+      rowLabels: ["… I usually …", "… the most important thing is to …", "… I've noticed that …", "… it helps to … for at least …", "… I try to avoid … because …"],
     },
     hotSeatWords: [
       {word:"headache"},{word:"stomachache"},{word:"sore throat"},{word:"fever"},
@@ -6058,7 +6348,12 @@ const TOPIC_LIBRARY = {
       { task:"What advice would you give someone who wants to get fit?" },
       { task:"Talk about a sport or activity that is good for your health." },
       { task:"Is it the individual's or the government's responsibility to keep people healthy?" },
-    ],
+    
+      { task:"Talk about this topic for one minute — share your personal opinion and experience." },
+      { task:"Ask a partner two questions related to this topic and discuss the answers together." },
+      { task:"Describe a real situation from your own life that relates to this topic." },
+      { task:"Give your partner two tips or pieces of advice related to this topic." },
+      { task:"Summarise the most important idea from this topic in two or three sentences." },],
   },
 
   travel_and_holidays: {
@@ -6160,7 +6455,12 @@ const TOPIC_LIBRARY = {
       { task:"Describe a cultural experience you had while travelling." },
       { task:"Do you prefer travelling by plane, train, or car? Why?" },
       { task:"Is mass tourism good or bad for local communities?" },
-    ],
+    
+      { task:"Describe your favourite holiday destination — what makes it special?" },
+      { task:"Tell a partner about an unexpected thing that happened on a trip — good or bad." },
+      { task:"Compare two types of holiday — beach and city — give two advantages of each." },
+      { task:"Describe what you always pack when you travel and why each item is important." },
+      { task:"Talk about a place you'd love to visit one day — what would you do there?" },],
   },
 
 
@@ -6197,9 +6497,9 @@ const TOPIC_LIBRARY = {
     ],
     minefieldGrid: {
       topic: "Asking for Clarification",
-      instructions: "Combine the clarification opener (top) with the follow-up (side) to make a complete, natural request for clarification.",
-      colLabels: ["Could you repeat…?", "What do you mean by…?", "Are you saying that…?", "Just to clarify,…", "Could you give an example of…?"],
-      rowLabels: ["… that, please?", "… 'urgent'?", "… the deadline is Monday?", "… you mean next week?", "… what you mean?"],
+      instructions: "Combine the clarification phrase (top) with a word or topic (side) to make a complete, natural request. Speak the full clarification question.",
+      colLabels: ["Could you repeat…", "What do you mean by…", "Are you saying that…", "Just to clarify —", "Could you explain…"],
+      rowLabels: ["… that last part, please?", "… 'urgent' / 'flexible' / 'soon'?", "… the deadline has changed?", "… you mean next Friday, not this one?", "… that in simpler terms?"],
     },
     hotSeatWords: [
       {word:"clarify"},{word:"repeat"},{word:"rephrase"},{word:"elaborate"},
@@ -6211,21 +6511,21 @@ const TOPIC_LIBRARY = {
     hotPotatoPrompts: [
       {prompt:"'Could you ___ that?' (repeat/said/say)", answer:"repeat"},
       {prompt:"'What do you ___ by that?' (mean/say/think)", answer:"mean"},
-      {prompt:"'___ you mind speaking more slowly?' (Would/Do/Will)", answer:"Would / Could"},
-      {prompt:"'I'm not sure I ___.' (follow/understand/get)", answer:"follow / understand / get"},
+      {prompt:"'___ you mind speaking more slowly?'", answer:"Would / Could"},
+      {prompt:"'I'm not sure I ___.'", answer:"follow / understand / get"},
       {prompt:"'Let me get this ___.' (straight/right/correct)", answer:"straight"},
       {prompt:"'Could you give me an ___ of that?' (example/idea/sense)", answer:"example"},
       {prompt:"'In ___ words…' (other/different/simple)", answer:"other"},
-      {prompt:"'Just to ___…' (clarify/confirm/check)", answer:"clarify / confirm / check"},
+      {prompt:"'Just to ___…'", answer:"clarify / confirm / check"},
       {prompt:"'Are you ___ that the meeting is cancelled?' (saying/telling/meaning)", answer:"saying"},
-      {prompt:"'I didn't ___ that.' (catch/hear/get)", answer:"catch / hear / get"},
-      {prompt:"'Could you put that in ___ terms?' (simpler/easier/plainer)", answer:"simpler / easier / plainer"},
+      {prompt:"'I didn't ___ that.'", answer:"catch / hear / get"},
+      {prompt:"'Could you put that in ___ terms?'", answer:"simpler / easier / plainer"},
       {prompt:"'Sorry, could you ___?' — 2 possible verbs", answer:"repeat / clarify / elaborate"},
       {prompt:"Formal: 'I ___ if you could clarify…' (wonder/think/hope)", answer:"wonder"},
-      {prompt:"'___ I understand correctly, you mean…?' (If/Do/When)", answer:"If / Do"},
+      {prompt:"'___ I understand correctly, you mean…?'", answer:"If / Do"},
       {prompt:"Informal way to ask for repetition?", answer:"(free — Sorry, what? / Can you say that again? / Pardon?)"},
       {prompt:"Formal way to ask someone to repeat?", answer:"(free — Could you repeat that? / Would you mind saying that again?)"},
-      {prompt:"'When you say X, what ___ do you mean?' (exactly/precisely)", answer:"exactly / precisely"},
+      {prompt:"'When you say X, what ___ do you mean?'", answer:"exactly / precisely"},
       {prompt:"'___ me get this straight — the price includes tax?' (Let/Make/Have)", answer:"Let"},
       {prompt:"Ask for clarification if someone says 'Do it soon'.", answer:"(free — What do you mean by 'soon'? / Could you specify when?)"},
       {prompt:"Ask for clarification about a word you don't know.", answer:"(free — Sorry, what does X mean? / Could you explain what you mean by X?)"},
@@ -6263,7 +6563,12 @@ const TOPIC_LIBRARY = {
       { task:"Ask for clarification about directions to somewhere in the city." },
       { task:"Use 'Could you be more specific?' in a professional role-play scenario." },
       { task:"Practise a misunderstanding — one person explains, the other keeps asking for clarification." },
-    ],
+    
+      { task:"Talk about this topic for one minute — share your personal opinion and experience." },
+      { task:"Ask a partner two questions related to this topic and discuss the answers together." },
+      { task:"Describe a real situation from your own life that relates to this topic." },
+      { task:"Give your partner two tips or pieces of advice related to this topic." },
+      { task:"Summarise the most important idea from this topic in two or three sentences." },],
   },
 
   ordering_food: {
@@ -6299,9 +6604,9 @@ const TOPIC_LIBRARY = {
     ],
     minefieldGrid: {
       topic: "Ordering Food and Drink",
-      instructions: "Combine the ordering phrase (top) with the food/drink item (side) to make a complete, natural restaurant exchange.",
+      instructions: "Combine the ordering phrase (top) with the situation (side) — then complete it by naming the actual dish, drink, or detail yourself.",
       colLabels: ["Could I have…?", "I'll have…", "Could we have…?", "Is the … suitable for…?", "Does it come with…?"],
-      rowLabels: ["… the pasta, please.", "… the bill, please.", "… more water, please.", "… vegetarians?", "… a side salad?"],
+      rowLabels: ["… [a dish from the menu].", "… something to drink.", "… [something for the table].", "… [a dish] — is it suitable for …?", "… [a side or extra]?"],
     },
     hotSeatWords: [
       {word:"menu"},{word:"starter"},{word:"main course"},{word:"dessert"},
@@ -6311,14 +6616,14 @@ const TOPIC_LIBRARY = {
       {word:"swap"},{word:"without"},{word:"recommend"},{word:"specials"},
     ],
     hotPotatoPrompts: [
-      {prompt:"'Could ___ have the pasta, please?' (I/we/you)", answer:"I / we"},
+      {prompt:"'Could ___ have the pasta, please?'", answer:"I / we"},
       {prompt:"'Are you ___ to order?' (waiter's question)", answer:"ready"},
       {prompt:"'I'll ___ the fish.' (have/take/get)", answer:"have"},
-      {prompt:"'Could we have the ___?' (bill/check/receipt)", answer:"bill / check"},
+      {prompt:"'Could we have the ___?'", answer:"bill / check"},
       {prompt:"'___ it come with chips?' (Does/Is/Has)", answer:"Does"},
       {prompt:"'Could I have it ___ cheese?' (without/no/not)", answer:"without"},
       {prompt:"'What would you ___?' (waiter's question)", answer:"like"},
-      {prompt:"'Can I ___ a table for 7pm?' (book/reserve/have)", answer:"book / reserve"},
+      {prompt:"'Can I ___ a table for 7pm?'", answer:"book / reserve"},
       {prompt:"'I'll have the ___.' — name a starter.", answer:"(free — soup, salad, garlic bread)"},
       {prompt:"'___ the pasta suitable for vegans?' (Is/Does/Has)", answer:"Is"},
       {prompt:"How do you ask for the bill politely?", answer:"(free — Could we have the bill? / Could I have the check?)"},
@@ -6365,7 +6670,12 @@ const TOPIC_LIBRARY = {
       { task:"Ask 'What's in the…?' about a dish you don't recognise." },
       { task:"Practise paying — ask for the bill, check it, and ask about service charge." },
       { task:"Order for someone who isn't there: 'And my friend will have…'" },
-    ],
+    
+      { task:"Roleplay ordering a full meal in a restaurant — starter, main, drink, and dessert." },
+      { task:"Use 'Is the … suitable for…?' to ask about three different dietary requirements." },
+      { task:"Practise asking about what's included in a dish and whether substitutions are possible." },
+      { task:"Roleplay: the restaurant has run out of what you ordered — ask for alternatives politely." },
+      { task:"Use 'Could we have the bill?' and 'Does it come with…?' in a full restaurant conversation." },],
   },
 
   making_excuses: {
@@ -6401,9 +6711,9 @@ const TOPIC_LIBRARY = {
     ],
     minefieldGrid: {
       topic: "Making Excuses",
-      instructions: "Combine the excuse opener (top) with the reason (side) to make a complete, natural excuse.",
+      instructions: "Combine the excuse opener (top) with the situation (side) — then complete it with your own specific reason or detail.",
       colLabels: ["I'm so sorry I'm late —", "Something came up —", "I'm afraid I can't make it —", "I should have…", "Unfortunately,…"],
-      rowLabels: ["… I missed the bus.", "… a family emergency.", "… I have another commitment.", "… let you know earlier.", "… I was unable to attend."],
+      rowLabels: ["… there was a transport problem — I …", "… an unexpected personal situation — I …", "… a prior commitment — I …", "… contacted you sooner — I …", "… something outside my control — I …"],
     },
     hotSeatWords: [
       {word:"excuse"},{word:"sorry"},{word:"apologise"},{word:"came up"},
@@ -6415,24 +6725,24 @@ const TOPIC_LIBRARY = {
     hotPotatoPrompts: [
       {prompt:"'I ___ the bus.' (common excuse for being late)", answer:"missed"},
       {prompt:"'Something ___ up.' (unexpected problem)", answer:"came"},
-      {prompt:"'I'm afraid I ___ make it.' (can/can't/will)", answer:"can't / won't"},
+      {prompt:"'I'm afraid I ___ make it.'", answer:"can't / won't"},
       {prompt:"'I was ___ in traffic.' (stuck/caught/trapped)", answer:"stuck"},
       {prompt:"'Please ___ my apologies.' (accept/take/receive)", answer:"accept"},
       {prompt:"'I ___ have called — sorry!' (should/would/could)", answer:"should"},
       {prompt:"'My alarm didn't ___ off.' (go/come/set)", answer:"go"},
       {prompt:"'I had a family ___.' (emergency/problem/thing)", answer:"emergency"},
-      {prompt:"'I ___ stayed up too late.' (must have/should have/would)", answer:"must have / should have"},
-      {prompt:"'Sorry for the ___.' (inconvenience/trouble/problem)", answer:"inconvenience / trouble"},
+      {prompt:"'I ___ stayed up too late.'", answer:"must have / should have"},
+      {prompt:"'Sorry for the ___.'", answer:"inconvenience / trouble"},
       {prompt:"'I ___ you in advance — it's my fault.' (should have told)", answer:"should have told"},
       {prompt:"Formal way to say 'I can't come'?", answer:"(free — I'm afraid I won't be able to attend / Unfortunately I can't make it)"},
       {prompt:"Informal way to say 'I can't come'?", answer:"(free — Sorry, I can't make it! / I won't be able to come — sorry!)"},
-      {prompt:"'I know this is not a good ___.' (excuse/reason/thing)", answer:"excuse / reason"},
-      {prompt:"'I ___ it — it's completely my fault.' (know/admit/understand)", answer:"know / admit"},
-      {prompt:"'I ___ to call but my phone died.' (tried/wanted/meant)", answer:"tried / wanted / meant"},
+      {prompt:"'I know this is not a good ___.'", answer:"excuse / reason"},
+      {prompt:"'I ___ it — it's completely my fault.'", answer:"know / admit"},
+      {prompt:"'I ___ to call but my phone died.'", answer:"tried / wanted / meant"},
       {prompt:"Make an excuse for being late to class.", answer:"(free answer)"},
       {prompt:"Make a formal excuse for missing a meeting.", answer:"(free answer)"},
-      {prompt:"'Something ___ and I couldn't get away.' (came up/happened/arose)", answer:"came up / happened / arose"},
-      {prompt:"'I was ___ able to attend — I had another commitment.' (not/un/in)", answer:"not / unable to"},
+      {prompt:"'Something ___ and I couldn't get away.'", answer:"came up / happened / arose"},
+      {prompt:"'I was ___ able to attend — I had another commitment.'", answer:"not / unable to"},
     ],
     auctionSentences: [
       { sentence:"I'm so sorry I'm late — I missed the bus.", isCorrect:true, explanation:"'Missed the bus' is the natural collocation for this excuse." },
@@ -6467,7 +6777,12 @@ const TOPIC_LIBRARY = {
       { task:"Use 'I meant to… but…' to describe something you intended but didn't do." },
       { task:"Make three progressively worse excuses for the same situation." },
       { task:"Discuss: is making excuses ever the right thing to do? When?" },
-    ],
+    
+      { task:"Roleplay apologising for being late to a meeting — use a natural excuse and follow-up." },
+      { task:"Tell a partner about a time you had to cancel plans — what excuse did you give?" },
+      { task:"Use 'I'm afraid I can't make it' and 'Something came up' in a short conversation." },
+      { task:"Practise making an excuse and then suggesting an alternative plan to make up for it." },
+      { task:"Roleplay: one person gives an excuse, the other responds — either accepting or questioning it." },],
   },
 
   making_suggestions: {
@@ -6503,9 +6818,9 @@ const TOPIC_LIBRARY = {
     ],
     minefieldGrid: {
       topic: "Making Suggestions",
-      instructions: "Combine the suggestion opener (top) with the activity (side) to make a complete, natural suggestion.",
+      instructions: "Combine the suggestion opener (top) with the activity starter (side) — then complete it with your own place, time, or idea.",
       colLabels: ["Shall we…?", "Why don't we…?", "How about…?", "You should…", "What if we…?"],
-      rowLabels: ["… go to the cinema?", "… try the new restaurant?", "… take a break?", "… book in advance?", "… leave a bit earlier?"],
+      rowLabels: ["… do something fun this … — I think we should …", "… try somewhere different for … — how about …?", "… take a break from … — maybe we could …", "… plan ahead for … — we need to …", "… leave a little earlier than usual because …"],
     },
     hotSeatWords: [
       {word:"shall we"},{word:"why don't we"},{word:"how about"},{word:"what about"},
@@ -6519,13 +6834,13 @@ const TOPIC_LIBRARY = {
       {prompt:"'Why ___ we try somewhere new?' (don't/not/can't)", answer:"don't"},
       {prompt:"'How about ___ for a walk?' (go/going/to go)", answer:"going"},
       {prompt:"'What about ___ the new exhibition?' (visit/visiting/to visit)", answer:"visiting"},
-      {prompt:"'Let's ___ a break.' (have/take/do)", answer:"have / take"},
+      {prompt:"'Let's ___ a break.'", answer:"have / take"},
       {prompt:"'Why not ___ a taxi?' (take/to take/taking)", answer:"take"},
-      {prompt:"'You ___ try the pasta here — it's amazing.' (should/must/could)", answer:"should / must / could"},
+      {prompt:"'You ___ try the pasta here — it's amazing.'", answer:"should / must / could"},
       {prompt:"'I suggest ___ it sooner rather than later.' (to do/doing/do)", answer:"doing"},
-      {prompt:"'___ I suggest we start with the agenda?' (May/Should/Will)", answer:"May / Could / Might"},
+      {prompt:"'___ I suggest we start with the agenda?'", answer:"May / Could / Might"},
       {prompt:"'If I ___ you, I'd book now.' (was/were/am)", answer:"were"},
-      {prompt:"'Have you ___ trying meditation?' (thought of/considered/tried)", answer:"thought of / considered / tried"},
+      {prompt:"'Have you ___ trying meditation?'", answer:"thought of / considered / tried"},
       {prompt:"'Shall we to meet at 6?' — correct?", answer:"no — 'Shall we meet at 6?' (no 'to')"},
       {prompt:"'I recommend you to visit.' — correct?", answer:"no — 'I recommend visiting' or 'I recommend you visit'"},
       {prompt:"'What about to go?' — correct?", answer:"no — 'What about going?'"},
@@ -6569,7 +6884,12 @@ const TOPIC_LIBRARY = {
       { task:"Respond to your partner's suggestions — accept some, reject some with reasons." },
       { task:"Make a suggestion in a work meeting context using formal language." },
       { task:"Role-play planning a surprise party — make and respond to suggestions." },
-    ],
+    
+      { task:"Use 'Shall we…?' and 'Why don't we…?' to plan an imaginary weekend with your partner." },
+      { task:"Practise: one person makes a suggestion, the other declines and offers an alternative." },
+      { task:"Use 'How about…?' to suggest three activities for a class party — explain your choices." },
+      { task:"Roleplay planning a trip with a partner — make and respond to at least three suggestions." },
+      { task:"Use 'What if we…?' to suggest a solution to a problem your partner describes." },],
   },
 
   agreeing_disagreeing: {
@@ -6605,9 +6925,9 @@ const TOPIC_LIBRARY = {
     ],
     minefieldGrid: {
       topic: "Agreeing and Disagreeing",
-      instructions: "Combine the agreement/disagreement opener (top) with the continuation (side) to make a complete, natural response.",
+      instructions: "Combine the agreement/disagreement opener (top) with the continuation starter (side) — then finish it with your own reason, evidence, or example.",
       colLabels: ["I couldn't agree more —", "I see your point, but…", "To some extent, yes, but…", "I'm afraid I disagree —", "That's a fair point, although…"],
-      rowLabels: ["… the data supports this.", "… there are exceptions.", "… the evidence suggests otherwise.", "… I think it's more complex.", "… we need to consider…"],
+      rowLabels: ["… the evidence tends to show that …", "… there are exceptions, especially when …", "… it really depends on …", "… I'd argue that …", "… we also need to consider …"],
     },
     hotSeatWords: [
       {word:"agree"},{word:"disagree"},{word:"I see your point"},{word:"I take your point"},
@@ -6620,16 +6940,16 @@ const TOPIC_LIBRARY = {
       {prompt:"'I'm agree with you.' — correct?", answer:"no — 'I agree with you' (agree is a verb, not adjective)"},
       {prompt:"'I couldn't ___ more.' (agree/disagree)", answer:"agree"},
       {prompt:"'I ___ with you on that.' (agree/agreed)", answer:"agree"},
-      {prompt:"'To some ___.' (extent/degree/amount)", answer:"extent / degree"},
+      {prompt:"'To some ___.'", answer:"extent / degree"},
       {prompt:"'I see your ___.' (point/idea/thought)", answer:"point"},
       {prompt:"'I take your ___.' (point/argument/view)", answer:"point"},
-      {prompt:"'With ___, I think that's an oversimplification.' (respect/due/all)", answer:"respect / all due respect"},
-      {prompt:"'I'm afraid I ___ with you.' (disagree/don't agree)", answer:"disagree / don't agree"},
-      {prompt:"'I'm not entirely ___.' (convinced/sure/certain)", answer:"convinced / sure / certain"},
+      {prompt:"'With ___, I think that's an oversimplification.'", answer:"respect / all due respect"},
+      {prompt:"'I'm afraid I ___ with you.'", answer:"disagree / don't agree"},
+      {prompt:"'I'm not entirely ___.'", answer:"convinced / sure / certain"},
       {prompt:"'Disagree WITH' or 'disagree TO' someone?", answer:"disagree WITH"},
       {prompt:"'You ___ a good point, but I think…' (make/have/do)", answer:"make"},
-      {prompt:"'That's ___ true, but there are exceptions.' (generally/broadly)", answer:"generally / broadly / largely"},
-      {prompt:"'To be ___, I don't think that's realistic.' (honest/frank/fair)", answer:"honest / frank / fair"},
+      {prompt:"'That's ___ true, but there are exceptions.'", answer:"generally / broadly / largely"},
+      {prompt:"'To be ___, I don't think that's realistic.'", answer:"honest / frank / fair"},
       {prompt:"Polite way to say someone is wrong?", answer:"(free — I'm not sure that's right / I'm afraid I disagree / With respect…)"},
       {prompt:"'I'd ___ argue the opposite.' (actually/rather/prefer)", answer:"actually"},
       {prompt:"What does 'I couldn't agree more' mean?", answer:"I agree completely / I agree 100%"},
@@ -6671,8 +6991,1909 @@ const TOPIC_LIBRARY = {
       { task:"Practise a full disagreement sequence: acknowledge → disagree → give reason → invite response." },
       { task:"Use 'Broadly speaking' and 'In principle' to partially agree." },
       { task:"Role-play a debate: one student argues for, one against — then swap sides." },
+    
+      { task:"Use 'I couldn't agree more' and 'I see your point, but…' in a conversation about a topic you feel strongly about." },
+      { task:"Practise a short debate — one person argues for, the other against — use disagreement phrases." },
+      { task:"Use 'To some extent, yes, but…' to give a balanced response to an opinion your partner shares." },
+      { task:"Tell a partner a controversial opinion — they must respond using a formal disagreement phrase." },
+      { task:"Use 'That's a fair point, although…' to acknowledge and then challenge an argument." },],
+  },
+
+  hedging_uncertainty: {
+    label: "Hedging and Expressing Uncertainty",
+    category: "vocabulary",
+    questions: [
+      { type:"choose correct grammar", question:"'This ___ suggest that the policy has had little effect.' (would/could/might)", answer:"would / could / might", hint:"All three hedging modals soften a claim", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'It seems that the results are definitively conclusive.'", answer:"It seems that the results are fairly / somewhat conclusive.", hint:"'Definitively conclusive' contradicts the hedging 'it seems' — pick one or the other", difficulty:"hard" },
+      { type:"finish the sentence", question:"'The evidence ___ to suggest a link between sleep and productivity.'", answer:"appears / seems / tends", hint:"'Appears/seems to suggest' hedges the claim", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'This is ___ due to a lack of investment in infrastructure.' (arguably/largely/possibly)", answer:"arguably / largely / possibly / partly", hint:"All four soften a causal claim", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'It is possible that some exceptions might perhaps exist.'", answer:"It is possible that exceptions exist. / Some exceptions might exist.", hint:"'Possible' and 'might' and 'perhaps' all hedge — using all three is redundant over-hedging", difficulty:"hard" },
+      { type:"finish the sentence", question:"'___ speaking, the results support the hypothesis — but further research is needed.'", answer:"Broadly / Generally / Roughly", hint:"'Broadly/Generally speaking' signals partial truth", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'There ___ be a connection between the two variables.' (could/would/should)", answer:"could / might / may", hint:"'Could/might/may be' all express possibility without certainty", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'It is widely believed that this approach is always effective.'", answer:"It is widely believed that this approach is generally / often / largely effective.", hint:"'Widely believed' is already hedged — 'always' removes the hedging and overstates the claim", difficulty:"hard" },
+      { type:"finish the sentence", question:"'The findings ___ that a more nuanced approach may be required.'", answer:"suggest / indicate / imply", hint:"Tentative verbs: suggest/indicate/imply soften conclusions", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'This is ___ an oversimplification of a complex issue.' (somewhat/rather/quite)", answer:"somewhat / rather / quite / perhaps", hint:"All four soften the assertion", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'The data clearly proves beyond doubt that X causes Y.'", answer:"The data suggests / indicates that X may be linked to / associated with Y.", hint:"'Clearly proves beyond doubt' is almost never appropriate — use tentative language", difficulty:"medium" },
+      { type:"finish the sentence", question:"'To ___ extent, this argument holds — but it ignores several key factors.'", answer:"some / a certain / a large", hint:"'To some/a certain extent' = partially true", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'The cause of this ___ in the economic conditions of the period.' (may lie/might lie/could lie)", answer:"may lie / might lie / could lie", hint:"All three modal + base verb combinations express possibility", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"'It appears to be true that this policy definitely will succeed.'", answer:"It appears that this policy may succeed. / This policy seems likely to succeed.", hint:"'Appears' hedges — 'definitely will succeed' contradicts it", difficulty:"medium" },
+      { type:"finish the sentence", question:"'___ is difficult to determine without further evidence.'", answer:"It / This / That", hint:"'It is difficult to determine' is a hedging structure", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'The results ___ be interpreted with some caution.' (should/must/need)", answer:"should / must", hint:"'Should/must be interpreted with caution' is a standard hedging phrase", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'This might possibly perhaps suggest a tentative link.'", answer:"This might suggest a link. / This tentatively suggests a link.", hint:"Stacking hedges (might, possibly, perhaps, tentative) is redundant — use one or two", difficulty:"hard" },
+      { type:"finish the sentence", question:"'While the evidence is not ___, it does suggest a pattern.'", answer:"conclusive / definitive / clear-cut", hint:"'Not conclusive/definitive' = still uncertain", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'___ is worth noting that this study has several limitations.' (It/There/This)", answer:"It", hint:"'It is worth noting that…' is a common hedging opener", difficulty:"easy" },
+      { type:"finish the sentence", question:"'The relationship between the two factors ___ more complex than initially thought.'", answer:"appears to be / seems to be / may be / could be", hint:"Tentative verbs or modals soften the claim", difficulty:"easy" },
+    ],
+    spyRounds: [
+      { crewmateTopic:"Hedging (Uncertain Claims)", spyTopic:"Asserting (Certain Claims)", crewmatePrompt:"Discuss a topic using hedging language — 'This might suggest…', 'It appears that…', 'To some extent…', 'The evidence could indicate…', 'It is possible that…' Avoid being definitive.", spyPrompt:"Discuss the same topic using assertive, confident language — 'This proves that…', 'It is clear that…', 'The evidence definitively shows…', 'Without doubt…', 'This is certainly…' Be direct and confident.", explanation:"Crewmates used hedged, tentative language. The spy used assertive, definitive language.", spyGuessOptions:["Hedging (Uncertain)","Asserting (Certain)","Speculating (Hypothetical)","Reporting What Others Said"] },
+      { crewmateTopic:"Academic Hedging", spyTopic:"Everyday Uncertainty", crewmatePrompt:"Express uncertainty using formal, academic hedging — 'The data suggests…', 'It is arguably the case that…', 'This may be attributed to…', 'Further research is required to establish…'", spyPrompt:"Express uncertainty using everyday spoken language — 'I think maybe…', 'I'm not totally sure, but…', 'It could be something to do with…', 'I suppose it might be…', 'Who knows, really?'", explanation:"Crewmates used formal academic hedging language. The spy used casual, conversational uncertainty markers.", spyGuessOptions:["Academic Hedging","Everyday Spoken Uncertainty","Scientific Language","Formal Reporting"] },
+      { crewmateTopic:"Hedging Verbs (suggest/appear/indicate)", spyTopic:"Reporting Verbs (claim/argue/state)", crewmatePrompt:"Present uncertain findings using hedging verbs — 'The results suggest…', 'The data appears to show…', 'The findings indicate…', 'This seems to imply…'", spyPrompt:"Report what other people have said using reporting verbs — 'Researchers claim that…', 'The authors argue that…', 'The report states that…', 'Critics contend that…'", explanation:"Crewmates used hedging verbs (suggest, appear, indicate) to express their own tentative conclusions. The spy used reporting verbs (claim, argue, state) to relay others' views.", spyGuessOptions:["Hedging Verbs","Reporting Verbs","Opinion Verbs","Evaluative Verbs"] },
+      { crewmateTopic:"Hedging with Adverbs", spyTopic:"Intensifying with Adverbs", crewmatePrompt:"Use adverbs to soften claims — 'This is arguably…', 'This is largely due to…', 'This is broadly consistent with…', 'The findings are somewhat surprising.', 'This is generally accepted.'", spyPrompt:"Use adverbs to strengthen claims — 'This is absolutely certain.', 'This is clearly the best approach.', 'The evidence is entirely conclusive.', 'This is undeniably true.', 'This is completely wrong.'", explanation:"Crewmates used hedging adverbs to soften claims (arguably, largely, broadly). The spy used intensifying adverbs to strengthen claims (absolutely, clearly, entirely).", spyGuessOptions:["Hedging Adverbs (soften)","Intensifying Adverbs (strengthen)","Modal Verbs","Reporting Structures"] },
+    ],
+    minefieldGrid: {
+      topic: "Hedging and Expressing Uncertainty",
+      instructions: "Combine the hedging opener (top) with the claim (side) to make a tentative, appropriately hedged statement.",
+      colLabels: ["This suggests…", "It appears that…", "To some extent,…", "The evidence may…", "It is worth noting that…"],
+      rowLabels: ["… a link between X and Y.", "… further research is needed.", "… this argument holds.", "… indicate a pattern.", "… there are exceptions."],
+    },
+    hotSeatWords: [
+      {word:"suggest"},{word:"indicate"},{word:"appear"},{word:"imply"},
+      {word:"arguably"},{word:"broadly"},{word:"largely"},{word:"somewhat"},
+      {word:"to some extent"},{word:"it is possible that"},{word:"may be"},{word:"could be"},
+      {word:"tentative"},{word:"inconclusive"},{word:"preliminary"},{word:"speculative"},
+      {word:"it is worth noting"},{word:"further research"},{word:"limitations"},{word:"cautiously"},
+    ],
+    hotPotatoPrompts: [
+      {prompt:"Name a verb that hedges a claim. ('The data ___ that…')", answer:"suggests / indicates / implies / appears to show"},
+      {prompt:"'This is ___ due to poor planning.' (hedging adverb)", answer:"arguably / largely / partly / possibly"},
+      {prompt:"'___ speaking, the results support this.'", answer:"Broadly / Generally / Roughly"},
+      {prompt:"'To ___ extent, yes — but there are exceptions.'", answer:"some / a certain / a large"},
+      {prompt:"'It is ___ to determine the exact cause.'", answer:"difficult / hard / impossible"},
+      {prompt:"'The evidence ___ suggest a pattern.'", answer:"may / could / might / would"},
+      {prompt:"'The results should be interpreted with ___.'", answer:"caution / care"},
+      {prompt:"'It ___ worth noting that this is preliminary data.' (is/seems/appears)", answer:"is"},
+      {prompt:"'While the evidence is not ___, it is suggestive.'", answer:"conclusive / definitive / clear-cut"},
+      {prompt:"Name an adverb that STRENGTHENS a claim.", answer:"(free — clearly, definitely, certainly, absolutely, undeniably)"},
+      {prompt:"Name an adverb that SOFTENS a claim.", answer:"(free — arguably, largely, broadly, somewhat, possibly)"},
+      {prompt:"'The data ___ that X may be linked to Y.'", answer:"suggests / indicates / implies"},
+      {prompt:"'This is ___ an oversimplification.'", answer:"somewhat / rather / quite / arguably"},
+      {prompt:"'It ___ that further research is needed.'", answer:"appears / seems"},
+      {prompt:"'The findings are ___.' — one hedging adjective?", answer:"(free — preliminary / tentative / inconclusive / mixed)"},
+      {prompt:"What does 'inconclusive' mean?", answer:"not clear enough to give a definite answer or result"},
+      {prompt:"What does 'tentative' mean?", answer:"not definite or certain — cautious and provisional"},
+      {prompt:"Why do scientists hedge their claims?", answer:"(free — results may not be final / to avoid overstating / open to revision)"},
+      {prompt:"What is over-hedging? Give an example.", answer:"(free — using too many hedges at once: 'might possibly perhaps suggest')"},
+      {prompt:"Rewrite confidently: 'It is possible that X might cause Y.'", answer:"X causes Y. / X is linked to Y."},
+    ],
+    auctionSentences: [
+      { sentence:"The data suggests a possible link between diet and cognitive performance.", isCorrect:true, explanation:"'Suggests' and 'possible' appropriately hedge the claim." },
+      { sentence:"The data clearly proves beyond doubt that diet causes cognitive decline.", isCorrect:false, explanation:"'Clearly proves beyond doubt' overstates — use 'suggests' or 'indicates' with cautious language." },
+      { sentence:"It appears that further research may be needed to confirm these findings.", isCorrect:true, explanation:"'It appears' and 'may be needed' are both appropriate hedges." },
+      { sentence:"It appears that further research is definitely and certainly needed.", isCorrect:false, explanation:"'Appears' hedges — 'definitely and certainly' contradicts the hedge." },
+      { sentence:"To some extent, this argument holds — but there are notable exceptions.", isCorrect:true, explanation:"'To some extent' is the correct hedging phrase for partial agreement." },
+      { sentence:"This is arguably the most significant finding of the study.", isCorrect:true, explanation:"'Arguably' correctly softens what would otherwise be a definitive claim." },
+      { sentence:"It is worth noting that the sample size was relatively small.", isCorrect:true, explanation:"'It is worth noting that' is a standard hedging opener for limitations." },
+      { sentence:"This might possibly perhaps suggest a tentative link between the variables.", isCorrect:false, explanation:"Over-hedging: 'might', 'possibly', 'perhaps', and 'tentative' all hedge — choose one or two." },
+      { sentence:"The results should be interpreted with some caution.", isCorrect:true, explanation:"'Should be interpreted with caution' is a standard academic hedging phrase." },
+      { sentence:"The relationship between the variables seems to be more complex than initially assumed.", isCorrect:true, explanation:"'Seems to be' appropriately hedges the revised conclusion." },
+    ],
+    cardTasks: [
+      { task:"Rewrite this overconfident claim using hedging language: 'Social media causes depression.'" },
+      { task:"Use 'The data suggests…', 'It appears that…', and 'To some extent…' in one paragraph." },
+      { task:"Practise hedging: make a bold claim, then restate it more cautiously." },
+      { task:"Use 'arguably', 'largely', and 'broadly' in three separate sentences." },
+      { task:"Write a conclusion to a report using at least three hedging devices." },
+      { task:"Identify the hedging language in: 'It is possible that this approach might be somewhat effective.'" },
+      { task:"Use 'It is worth noting that…' to introduce a limitation in an argument." },
+      { task:"Discuss the pros and cons of hedging — when is it useful? When is it evasive?" },
+      { task:"Rewrite assertively: 'This suggests a link.' — then back to hedged form." },
+      { task:"Use 'While the evidence is not conclusive…' to introduce a cautious finding." },
+      { task:"Practise academic hedging in a mini-presentation about a topic you know." },
+      { task:"Use 'further research is needed' and 'preliminary findings suggest' in context." },
+      { task:"Compare hedging in English with how uncertainty is expressed in your language." },
+      { task:"Spot the over-hedging: 'It might possibly perhaps indicate a tentative link.'" },
+      { task:"Use 'The results should be interpreted with caution because…'" },
+      { task:"Write three sentences about climate change using appropriate hedging." },
+      { task:"Use 'To a certain extent' and 'broadly speaking' in a discussion about education." },
+      { task:"Discuss: is it dishonest to hedge? Or is it intellectually responsible?" },
+      { task:"Use 'It is difficult to determine whether…' to introduce an unanswered question." },
+      { task:"Write a hedged summary of a news story you know about." },
+    
+      { task:"Talk about this topic for one minute — share your personal opinion and experience." },
+      { task:"Ask a partner two questions related to this topic and discuss the answers together." },
+      { task:"Describe a real situation from your own life that relates to this topic." },
+      { task:"Give your partner two tips or pieces of advice related to this topic." },
+      { task:"Summarise the most important idea from this topic in two or three sentences." },],
+  },
+
+
+  regrets: {
+    label: "Expressing Regrets (I wish / If only / regret + -ing)",
+    category: "grammar",
+    questions: [
+      { type:"choose correct grammar", question:"'I wish I ___ harder at school.' (studied/had studied/would study)", answer:"had studied", hint:"Regret about the past: I wish + past perfect", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'I regret to not call her before she left.'", answer:"I regret not calling her before she left.", hint:"Regret + -ing (not 'to not + infinitive')", difficulty:"easy" },
+      { type:"finish the sentence", question:"'If ___ I had listened to my parents when I was younger!'", answer:"only", hint:"'If only' is a stronger, more emotional form of 'I wish'", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'She wishes she ___ more time with her family.' (spent/had spent/spends)", answer:"spent", hint:"Wish + past simple = regret about a present situation", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'I wish I would have taken that job offer.'", answer:"I wish I had taken that job offer.", hint:"Wish + past perfect — never 'would have' in the wish clause", difficulty:"medium" },
+      { type:"finish the sentence", question:"'He deeply regrets ___ (sell) his grandfather's watch.'", answer:"selling", hint:"Regret + verb-ing for past actions", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'If only I ___ what I know now!' (knew/had known/know)", answer:"had known", hint:"If only + past perfect = wish about a past situation", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"'I wish I wouldn't have shouted at her — I feel terrible.'", answer:"I wish I hadn't shouted at her — I feel terrible.", hint:"Wish + past perfect for past regrets — not 'wouldn't have'", difficulty:"medium" },
+      { type:"rewrite sentences", question:"Rewrite: 'It's a pity I didn't apply for that scholarship.'", answer:"I wish I had applied for that scholarship. / If only I had applied for that scholarship.", hint:"Past regret: wish/if only + past perfect", difficulty:"easy" },
+      { type:"finish the sentence", question:"'She wishes she ___ (not/move) to a different city — she misses home.'", answer:"hadn't moved", hint:"Wish + past perfect negative for past regret", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'I regret ___ so much time on social media.' (spending/to spend/spent)", answer:"spending", hint:"Regret + verb-ing", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'If only I studied harder back then.'", answer:"If only I had studied harder back then.", hint:"If only + past perfect for past regrets", difficulty:"easy" },
+      { type:"rewrite sentences", question:"Rewrite: 'I'm sorry I said that.'", answer:"I regret saying that. / I wish I hadn't said that.", hint:"Two regret structures — regret + -ing, or wish + past perfect", difficulty:"easy" },
+      { type:"finish the sentence", question:"'I wish I ___ (be) taller — I find it hard to reach the top shelves.'", answer:"were", hint:"Wish + past simple for present situations — 'were' not 'was' in formal use", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'He regrets ___ his friends when he moved away.' (losing/to lose/lost)", answer:"losing", hint:"Regret + verb-ing", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'I wish I can speak French — it would be so useful.'", answer:"I wish I could speak French — it would be so useful.", hint:"Wish + past form of modal: 'could', not 'can'", difficulty:"easy" },
+      { type:"rewrite sentences", question:"Rewrite as a regret: 'I didn't save enough money when I was younger.'", answer:"I wish I had saved more money when I was younger. / I regret not saving enough money when I was younger.", hint:"Past regret: wish + past perfect OR regret + not + -ing", difficulty:"medium" },
+      { type:"finish the sentence", question:"'___ only we had left earlier — we wouldn't have missed the train.'", answer:"If", hint:"'If only' to express a strong past regret", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'She wishes her job ___ more interesting.' (was/were/would be)", answer:"were / was", hint:"Wish + past simple for present situations — 'were' preferred formally", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"'Do you regret to choose that career?'", answer:"Do you regret choosing that career?", hint:"Regret + verb-ing — not 'to + infinitive' for past actions", difficulty:"easy" },
+    ],
+    spyRounds: [
+      { crewmateTopic:"Regrets about the Past (wish + past perfect)", spyTopic:"Wishes about the Present (wish + past simple)", crewmatePrompt:"Talk about things you regret from your past — things you did or didn't do. Use: 'I wish I had…', 'If only I hadn't…', 'I regret not…ing', 'I should have…'", spyPrompt:"Talk about things you wish were different RIGHT NOW — current situations you'd like to change. Use: 'I wish I had more time.', 'I wish I were better at…', 'I wish I could…', 'If only things were different.'", explanation:"Crewmates expressed regrets about the past (wish + past perfect). The spy expressed wishes about the present (wish + past simple).", spyGuessOptions:["Past Regrets (wish + past perfect)","Present Wishes (wish + past simple)","Future Hopes (wish + would)","Third Conditional"] },
+      { crewmateTopic:"I wish / If only", spyTopic:"Should have / Shouldn't have", crewmatePrompt:"Express regrets using 'I wish' and 'If only' — 'I wish I had studied medicine.', 'If only I had listened to my parents.', 'I wish I hadn't left that job.'", spyPrompt:"Express the same regrets using 'should have' and 'shouldn't have' — 'I should have studied medicine.', 'I should have listened to my parents.', 'I shouldn't have left that job.'", explanation:"Crewmates used 'I wish / If only' for regrets. The spy used 'should have / shouldn't have' to express the same regrets.", spyGuessOptions:["I wish / If only","Should have / Shouldn't have","Third Conditional","Regret + -ing"] },
+      { crewmateTopic:"Regret + -ing", spyTopic:"Regret + to + infinitive", crewmatePrompt:"Talk about past actions you feel sorry about using 'regret + -ing' — 'I regret saying that.', 'She regrets not applying.', 'He regrets losing touch with old friends.', 'I regret not travelling more when I was young.'", spyPrompt:"Use 'regret + to + infinitive' — but be careful, this means something different! 'I regret to inform you that…', 'We regret to announce that…', 'I regret to say that this will not be possible.' (formal, present announcement)", explanation:"Crewmates used 'regret + -ing' for past actions they're sorry about. The spy used 'regret + to + infinitive' — which expresses sorrow about a present fact being communicated (formal register).", spyGuessOptions:["Regret + -ing (past action)","Regret + to + infinitive (formal announcement)","Wish + past perfect","Should have"] },
+      { crewmateTopic:"Personal Regrets", spyTopic:"No Regrets", crewmatePrompt:"Talk about genuine regrets in your life — things you wish you had done differently. Use: 'I wish I had…', 'I regret not…ing', 'If only I had…', 'I should have…'", spyPrompt:"Talk about the same areas of life (education, relationships, work, travel) but argue you have NO regrets — 'I'm glad I chose this path.', 'I don't regret it at all.', 'Everything worked out for the best.', 'I wouldn't change a thing.'", explanation:"Crewmates expressed personal regrets. The spy argued they had no regrets about the same topics.", spyGuessOptions:["Personal Regrets","No Regrets / Positive Reflection","Mixed Feelings","Future Plans"] },
+    ],
+    minefieldGrid: {
+      topic: "Expressing Regrets",
+      instructions: "Combine the regret opener (top) with the ending (side) to make a complete, natural sentence about a regret. Add your own context.",
+      colLabels: ["I wish I had…", "I regret not…", "If only I hadn't…", "She wishes she…", "I should have…"],
+      rowLabels: ["… studied harder / saved more / travelled more.", "… calling / applying / trying sooner.", "… said that / left / reacted like that.", "… were more confident / had more time.", "… listened to the advice / been more patient."],
+    },
+    hotSeatWords: [
+      {word:"I wish"},{word:"if only"},{word:"regret"},{word:"should have"},
+      {word:"shouldn't have"},{word:"past perfect"},{word:"hadn't"},{word:"could have"},
+      {word:"missed opportunity"},{word:"turning point"},{word:"in hindsight"},{word:"looking back"},
+      {word:"with hindsight"},{word:"at the time"},{word:"if I could go back"},{word:"lesson learned"},
+      {word:"no regrets"},{word:"bittersweet"},{word:"reflect"},{word:"move on"},
+    ],
+    hotPotatoPrompts: [
+      {prompt:"'I wish I ___ harder at university.' (study — past regret)", answer:"had studied"},
+      {prompt:"'I regret ___ that job.'", answer:"not taking"},
+      {prompt:"'If only I ___ the truth sooner!' (tell)", answer:"had told"},
+      {prompt:"'She wishes she ___ in a warmer country.' (live — present)", answer:"lived"},
+      {prompt:"'I wish I ___ speak Italian.' (present wish — ability)", answer:"could"},
+      {prompt:"'I regret ___ so much time worrying.' (spend)", answer:"spending"},
+      {prompt:"'Wish + past simple' refers to which time — past or present?", answer:"present (a wish about now)"},
+      {prompt:"'Wish + past perfect' refers to which time — past or present?", answer:"past (a regret about the past)"},
+      {prompt:"'I wish I ___ said that.' (hadn't/haven't/didn't)", answer:"hadn't"},
+      {prompt:"'If only' is stronger or weaker than 'I wish'?", answer:"stronger / more emotional"},
+      {prompt:"'She regrets ___ her old friends.' (lose/losing/lost)", answer:"losing"},
+      {prompt:"'I regret ___ inform you the event is cancelled.' (formal)", answer:"to inform"},
+      {prompt:"'I ___ have called — I'm sorry.' (should/would/could)", answer:"should"},
+      {prompt:"'I wish I ___ be taller.' (could/can/would)", answer:"could"},
+      {prompt:"Rewrite: 'It's a pity I didn't travel more.'", answer:"I wish I had travelled more. / I regret not travelling more."},
+      {prompt:"'If only I ___ listened!' (had/have/would)", answer:"had"},
+      {prompt:"'Regret + -ing' OR 'regret + to + infinitive' for a past action?", answer:"regret + -ing"},
+      {prompt:"'Regret + to + infinitive' is used when…?", answer:"making a formal announcement about something unfortunate now"},
+      {prompt:"Make a sentence using 'I wish I had…'", answer:"(free answer)"},
+      {prompt:"Make a sentence using 'If only I hadn't…'", answer:"(free answer)"},
+    ],
+    auctionSentences: [
+      { sentence:"I wish I had studied medicine instead of law.", isCorrect:true, explanation:"Correct past regret: wish + past perfect." },
+      { sentence:"I wish I would have studied medicine instead of law.", isCorrect:false, explanation:"Wish + past perfect — never 'would have' in the wish clause." },
+      { sentence:"If only I hadn't said those things — I really hurt her feelings.", isCorrect:true, explanation:"Correct: if only + past perfect negative for a past regret." },
+      { sentence:"She regrets not applying for that scholarship when she had the chance.", isCorrect:true, explanation:"Correct: regret + not + -ing." },
+      { sentence:"Do you regret to choose this career path?", isCorrect:false, explanation:"Regret + -ing for past actions: 'Do you regret choosing this career path?'" },
+      { sentence:"I wish I could speak another language — it would open so many doors.", isCorrect:true, explanation:"Correct present wish: wish + could (past form of 'can')." },
+      { sentence:"I wish I can speak another language — it would open so many doors.", isCorrect:false, explanation:"Wish + past form of modal: 'I wish I could', not 'I wish I can'." },
+      { sentence:"If only we had left earlier — we would have caught the train.", isCorrect:true, explanation:"Correct: if only + past perfect, would have + past participle." },
+      { sentence:"I regret to inform you that your application has been unsuccessful.", isCorrect:true, explanation:"Correct formal use: regret + to + infinitive for a present announcement." },
+      { sentence:"He wishes he spent more time with his children when they were young.", isCorrect:false, explanation:"Past regret needs past perfect: 'He wishes he had spent more time'." },
+    ],
+    cardTasks: [
+      { task:"Use 'I wish I had…' to describe three regrets from your past." },
+      { task:"Use 'If only I hadn't…' to describe something you wish you hadn't done." },
+      { task:"Use 'I regret + -ing' in three sentences about decisions you've made." },
+      { task:"Use 'I wish I could…' to express three present wishes or limitations." },
+      { task:"Rewrite: 'It's a pity I didn't…' using three different regret structures." },
+      { task:"Discuss: what's the biggest regret of your life so far?" },
+      { task:"Use 'I should have…' and 'I shouldn't have…' about a past decision." },
+      { task:"Compare 'I wish I studied' vs 'I wish I had studied' — what's the difference?" },
+      { task:"Use 'If only' to describe a historical event you wish had turned out differently." },
+      { task:"Use 'In hindsight…' and 'Looking back…' in sentences about your past." },
+      { task:"Write a short speech starting: 'If I could go back and change one thing…'" },
+      { task:"Discuss the difference between 'regret + -ing' and 'regret + to + infinitive'." },
+      { task:"Use 'I wish things were different' to talk about a current situation." },
+      { task:"Express a regret about your education using at least two different structures." },
+      { task:"Use 'I wish I were better at…' to talk about skills you'd like to have." },
+      { task:"Talk about a risk you didn't take — what do you wish you had done?" },
+      { task:"Write a formal sentence using 'We regret to inform you that…'" },
+      { task:"Discuss: is it healthy to have regrets? What can we learn from them?" },
+      { task:"Use 'I regret not…ing earlier' about something you started too late in life." },
+      { task:"Interview your partner: 'What's one thing you wish you had done differently?'" },
+    
+      { task:"Talk about this topic for one minute — share your personal opinion and experience." },
+      { task:"Ask a partner two questions related to this topic and discuss the answers together." },
+      { task:"Describe a real situation from your own life that relates to this topic." },
+      { task:"Give your partner two tips or pieces of advice related to this topic." },
+      { task:"Summarise the most important idea from this topic in two or three sentences." },],
+  },
+
+  school_and_study: {
+    label: "School and Study",
+    category: "topic",
+    questions: [
+      { type:"finish the sentence", question:"My favourite ___ at school is English because I love languages.", answer:"subject / lesson", hint:"The name for an area you study", difficulty:"easy" },
+      { type:"finish the sentence", question:"I find maths quite ___ — I always make mistakes with numbers.", answer:"difficult / hard / challenging", hint:"Not easy", difficulty:"easy" },
+      { type:"finish the sentence", question:"Our teacher gave us a lot of ___ to do for tomorrow.", answer:"homework", hint:"Work you do at home for school", difficulty:"easy" },
+      { type:"finish the sentence", question:"She always ___ for her exams at least two weeks before.", answer:"studies / revises / prepares", hint:"Getting ready for a test", difficulty:"easy" },
+      { type:"finish the sentence", question:"I have a big ___ next week — I need to study all weekend.", answer:"exam / test", hint:"A formal way of testing knowledge", difficulty:"easy" },
+      { type:"finish the sentence", question:"He ___ his homework in the library because it is quiet there.", answer:"does / finishes / completes", hint:"What you do with homework", difficulty:"easy" },
+      { type:"finish the sentence", question:"We learn best when we work in ___ — everyone helps each other.", answer:"groups / pairs / teams", hint:"More than one person", difficulty:"easy" },
+      { type:"finish the sentence", question:"I ___ my pencil case at home today and I have no pen.", answer:"left / forgot", hint:"You didn't bring it with you", difficulty:"easy" },
+      { type:"finish the sentence", question:"Our school has a great ___ with thousands of books.", answer:"library", hint:"A place to read and borrow books", difficulty:"easy" },
+      { type:"finish the sentence", question:"She got a very good ___ in her English exam — 95 out of 100.", answer:"grade / mark / score / result", hint:"A number or letter showing how well you did", difficulty:"easy" },
+      { type:"finish the sentence", question:"I don't ___ history — I can never remember all the dates.", answer:"understand / enjoy / like", hint:"Finding it difficult", difficulty:"easy" },
+      { type:"finish the sentence", question:"The ___ explained the grammar rule and then we did an exercise.", answer:"teacher", hint:"The person in charge of the class", difficulty:"easy" },
+      { type:"finish the sentence", question:"We have a ten-minute ___ between lessons.", answer:"break", hint:"A short rest time", difficulty:"easy" },
+      { type:"finish the sentence", question:"I learn new vocabulary by writing words in a ___.", answer:"notebook / vocabulary book / diary", hint:"A small book you write in", difficulty:"easy" },
+      { type:"finish the sentence", question:"He is very ___ — he always gets the best grades in the class.", answer:"clever / intelligent / hardworking / bright", hint:"Good at studying", difficulty:"easy" },
+      { type:"finish the sentence", question:"Our lesson ___ at 9am and finishes at 10am.", answer:"starts / begins", hint:"When the lesson begins", difficulty:"easy" },
+      { type:"finish the sentence", question:"She ___ a question because she didn't understand the explanation.", answer:"asked", hint:"What you do when you need help", difficulty:"easy" },
+      { type:"finish the sentence", question:"I love learning English but I find speaking in ___ quite scary.", answer:"class / public / front of people", hint:"When everyone can hear you", difficulty:"easy" },
+      { type:"finish the sentence", question:"He forgot to ___ his homework and the teacher was not happy.", answer:"do / hand in / submit / finish", hint:"Complete the work", difficulty:"easy" },
+      { type:"finish the sentence", question:"At the end of the year, we have ___ exams that cover everything we studied.", answer:"final / end-of-year", hint:"The last, most important tests", difficulty:"easy" },
+    ],
+    spyRounds: [
+      { crewmateTopic:"Talking About School Subjects", spyTopic:"Talking About School Rules", crewmatePrompt:"Talk about your favourite and least favourite school subjects — which subjects you enjoy, which are difficult, what you like about them, and how important they are.", spyPrompt:"Talk about the rules at your school — things you must and mustn't do, what happens if you break the rules, and what you think about school rules in general.", explanation:"Crewmates talked about subjects they study. The spy talked about school rules and discipline.", spyGuessOptions:["School Subjects","School Rules","Teachers","Exams and Grades"] },
+      { crewmateTopic:"Studying Habits", spyTopic:"Not Studying / Procrastinating", crewmatePrompt:"Talk about how you study — when, where, and how you prepare for exams. Do you make notes? Do you study alone or in groups? Use present simple.", spyPrompt:"Talk about how you avoid studying — what you do instead, how you procrastinate, how you feel before exams when you haven't prepared enough.", explanation:"Crewmates described good study habits. The spy described procrastination and avoiding work.", spyGuessOptions:["Good Study Habits","Procrastinating / Avoiding Work","Exam Preparation","Learning Styles"] },
+      { crewmateTopic:"Your Best School Memory", spyTopic:"Your Worst School Memory", crewmatePrompt:"Describe your best memory from school — a fun lesson, a trip, a good grade, a funny moment, or a great teacher. Use past simple.", spyPrompt:"Describe your worst memory from school — a difficult exam, an embarrassing moment, a strict teacher, or a time things went wrong. Use past simple.", explanation:"Crewmates shared positive school memories. The spy shared negative ones.", spyGuessOptions:["Best School Memory","Worst School Memory","A Funny School Moment","A School Achievement"] },
+      { crewmateTopic:"School in Your Country", spyTopic:"An Ideal School", crewmatePrompt:"Describe what school is like in your country — what time it starts, what subjects students study, how long the school day is, what uniforms are like.", spyPrompt:"Describe your ideal school — one you would design yourself. What subjects would you teach? What time would it start? What rules would you have?", explanation:"Crewmates described real schools in their country. The spy described an imaginary, ideal school.", spyGuessOptions:["School in Your Country","Your Ideal School","School Rules","University vs School"] },
+    ],
+    minefieldGrid: {
+      topic: "School and Study",
+      instructions: "Combine the subject (top) with the phrase (side) to make a complete sentence about school or study. Add your own details.",
+      colLabels: ["I …", "My teacher …", "We …", "My favourite subject …", "I find … very …"],
+      rowLabels: ["… love/hate … because …", "… gave us a lot of homework on …", "… have an exam on … next week.", "… is … because it helps me …", "… challenging / rewarding / useful."],
+    },
+    hotSeatWords: [
+      {word:"subject"},{word:"homework"},{word:"exam"},{word:"grade"},
+      {word:"teacher"},{word:"classroom"},{word:"library"},{word:"break"},
+      {word:"revise"},{word:"study"},{word:"notebook"},{word:"timetable"},
+      {word:"mark"},{word:"fail"},{word:"pass"},{word:"uniform"},
+      {word:"canteen"},{word:"playground"},{word:"headteacher"},{word:"term"},
+    ],
+    hotPotatoPrompts: [
+      {prompt:"What is your favourite school subject?", answer:"(free answer)"},
+      {prompt:"What subject do you find most difficult?", answer:"(free answer)"},
+      {prompt:"'She ___ for her exam every evening.' (study/studies/studied)", answer:"studies"},
+      {prompt:"What do you call the work you do at home for school?", answer:"homework"},
+      {prompt:"What is a 'grade'?", answer:"a mark or score that shows how well you did"},
+      {prompt:"Name three school subjects.", answer:"(free — maths, English, history, science, PE)"},
+      {prompt:"What does 'revise' mean?", answer:"to study again before an exam"},
+      {prompt:"'He ___ his homework in the library.' (does/makes/studies)", answer:"does"},
+      {prompt:"What is a 'timetable' at school?", answer:"a schedule showing when each subject is taught"},
+      {prompt:"What does 'pass an exam' mean?", answer:"to get a good enough grade to succeed"},
+      {prompt:"What does 'fail an exam' mean?", answer:"to get a grade that is too low to pass"},
+      {prompt:"'She asked a ___.' (question/query/doubt)", answer:"question"},
+      {prompt:"What is the person who teaches you called?", answer:"a teacher"},
+      {prompt:"What is a 'school term'?", answer:"a period of the school year between holidays"},
+      {prompt:"Name one place in a school.", answer:"(free — classroom, library, canteen, playground, gym)"},
+      {prompt:"'I ___ my homework at home.'", answer:"left / forgot"},
+      {prompt:"What does 'hand in' mean?", answer:"to give your completed work to the teacher"},
+      {prompt:"What is a 'school uniform'?", answer:"special clothes that all students wear at school"},
+      {prompt:"Describe your ideal school day.", answer:"(free answer)"},
+      {prompt:"What subject do you wish you studied at school?", answer:"(free answer)"},
+    ],
+    auctionSentences: [
+      { sentence:"My favourite subject at school is English because I love reading.", isCorrect:true, explanation:"Correct present simple sentence about a school subject." },
+      { sentence:"She always studies for her exams at least two weeks before.", isCorrect:true, explanation:"'Studies' (third person -s) and 'at least two weeks before' are correct." },
+      { sentence:"I made my homework at the kitchen table last night.", isCorrect:false, explanation:"'Do homework' — not 'make homework'." },
+      { sentence:"He got a very good grade in his science exam — he was so proud.", isCorrect:true, explanation:"'Got a grade' is the correct collocation." },
+      { sentence:"We have a ten-minute break between every lesson.", isCorrect:true, explanation:"Correct: 'a break between lessons'." },
+      { sentence:"She asked a question because she didn't understand the grammar rule.", isCorrect:true, explanation:"'Asked a question' is the correct collocation." },
+      { sentence:"I forgot my homework book at home so the teacher was not happy.", isCorrect:true, explanation:"'Forgot … at home' is natural and correct." },
+      { sentence:"He always makes a lot of mistakes in the maths exam.", isCorrect:true, explanation:"'Make mistakes' is the correct collocation." },
+      { sentence:"Our teacher explained the rule and then we made an exercise.", isCorrect:false, explanation:"'Do an exercise' — not 'make an exercise'." },
+      { sentence:"She revised all weekend and passed the exam with a great mark.", isCorrect:true, explanation:"'Revised', 'passed the exam', and 'got a great mark' are all correct." },
+    ],
+    cardTasks: [
+      { task:"Describe your typical school or study day from start to finish." },
+      { task:"Tell your partner about your favourite and least favourite subjects — and why." },
+      { task:"Describe a teacher you really liked or didn't like." },
+      { task:"How do you prepare for an exam? Describe your study method." },
+      { task:"Talk about a subject you found very difficult at school." },
+      { task:"Use 'I find… very…' to describe three school subjects." },
+      { task:"Ask your partner: 'What was your best subject at school?'" },
+      { task:"Talk about a school memory — something funny, embarrassing, or memorable." },
+      { task:"Describe what school is like in your country." },
+      { task:"Do you prefer studying alone or in groups? Why?" },
+      { task:"Describe your ideal classroom — what would it look like?" },
+      { task:"Use 'I always', 'I usually', 'I never' to describe your study habits." },
+      { task:"Talk about a time you forgot your homework — what happened?" },
+      { task:"What is one subject you wish you had studied more? Why?" },
+      { task:"Compare school life now with school life when your parents were young." },
+      { task:"Use 'I passed / I failed' to talk about exams you remember." },
+      { task:"Describe the best lesson you ever had." },
+      { task:"What rules does your school have? Which do you agree or disagree with?" },
+      { task:"Talk about what you are studying now and why you chose it." },
+      { task:"If you could add one new subject to the school curriculum, what would it be?" },
+    
+      { task:"Describe your favourite subject at school — why did you enjoy it?" },
+      { task:"Tell a partner about an exam you found very difficult — how did you prepare and how did it go?" },
+      { task:"Talk about a teacher who influenced you positively — what made them special?" },
+      { task:"Describe how you prefer to study — alone or with others, morning or evening?" },
+      { task:"Talk about the most useful thing you've learnt in school — is it something academic or a life skill?" },],
+  },
+
+  friends_and_family: {
+    label: "Friends and Family",
+    category: "topic",
+    questions: [
+      { type:"finish the sentence", question:"I have a very close ___ with my sister — we tell each other everything.", answer:"relationship / bond / friendship", hint:"How two people feel connected", difficulty:"easy" },
+      { type:"finish the sentence", question:"My best friend and I ___ since we were five years old.", answer:"have been friends / have known each other", hint:"How long you have been friends", difficulty:"easy" },
+      { type:"finish the sentence", question:"He gets ___ with his older brother — they never argue.", answer:"on well / along well", hint:"'Get on/along well' means having a good relationship", difficulty:"easy" },
+      { type:"finish the sentence", question:"She ___ after her mother — they have the same eyes and smile.", answer:"takes", hint:"'Take after' = to look or behave like a family member", difficulty:"easy" },
+      { type:"finish the sentence", question:"My grandparents are very ___ — they tell amazing stories about the old days.", answer:"wise / funny / kind / interesting", hint:"Positive adjective", difficulty:"easy" },
+      { type:"finish the sentence", question:"We had a big ___ argument last week, but we made up the next day.", answer:"family", hint:"A disagreement within the family", difficulty:"easy" },
+      { type:"finish the sentence", question:"My cousin is ___ — we grew up together and are very close.", answer:"like a brother/sister to me / my best friend", hint:"Feeling very close to a family member", difficulty:"easy" },
+      { type:"finish the sentence", question:"She is a true friend — she is always there for me ___ things are difficult.", answer:"when / if", hint:"Being there in difficult moments", difficulty:"easy" },
+      { type:"finish the sentence", question:"We ___ up in the same neighbourhood, which is why we are so close.", answer:"grew", hint:"To grow up = to spend your childhood somewhere", difficulty:"easy" },
+      { type:"finish the sentence", question:"I have a lot of ___ but only one or two really close friends.", answer:"acquaintances / friends", hint:"People you know but are not close to", difficulty:"easy" },
+      { type:"finish the sentence", question:"My parents have been ___ for thirty years.", answer:"married / together", hint:"A long relationship", difficulty:"easy" },
+      { type:"finish the sentence", question:"We ___ every Sunday for a family dinner — it's our tradition.", answer:"meet / get together / gather", hint:"Coming together regularly", difficulty:"easy" },
+      { type:"finish the sentence", question:"He is an only ___ — he has no brothers or sisters.", answer:"child", hint:"A child with no siblings", difficulty:"easy" },
+      { type:"finish the sentence", question:"She is the ___ child — she has two older brothers.", answer:"youngest", hint:"The last child in age order", difficulty:"easy" },
+      { type:"finish the sentence", question:"My family is very ___ — we always support each other.", answer:"close / tight-knit", hint:"A family that stays together", difficulty:"easy" },
+      { type:"finish the sentence", question:"We ___ in touch even though we live in different countries.", answer:"keep / stay", hint:"'Keep/stay in touch' = maintain contact", difficulty:"easy" },
+      { type:"finish the sentence", question:"He ___ up with a lot of siblings — there were seven children in his family.", answer:"grew", hint:"Past simple of 'grow up'", difficulty:"easy" },
+      { type:"finish the sentence", question:"She is my ___ aunt — she is always fun and very kind to me.", answer:"favourite / best / lovely", hint:"The aunt you like most", difficulty:"easy" },
+      { type:"finish the sentence", question:"A good friend is someone who ___ honest with you even when it's hard to hear.", answer:"is", hint:"A quality of a true friend", difficulty:"easy" },
+      { type:"finish the sentence", question:"We don't ___ very often because we live far apart, but when we do it feels like no time has passed.", answer:"see each other / meet", hint:"Seeing someone infrequently", difficulty:"easy" },
+    ],
+    spyRounds: [
+      { crewmateTopic:"Talking About Friends", spyTopic:"Talking About Family", crewmatePrompt:"Talk about your friends — your best friend, how you met, what you do together, how long you have been friends, what you like about them.", spyPrompt:"Talk about your family — your parents, siblings, grandparents. Describe who they are, what they are like, and how close you are.", explanation:"Crewmates talked about friends. The spy talked about family members.", spyGuessOptions:["Friends","Family","Neighbours","Colleagues"] },
+      { crewmateTopic:"A Close Relationship", spyTopic:"A Difficult Relationship", crewmatePrompt:"Describe a close relationship you have — with a friend, sibling, or family member. Talk about why you are close, what you do together, and how long you have known each other.", spyPrompt:"Describe a relationship that is sometimes difficult — someone you argue with, don't understand, or find hard to get along with. Be honest but tactful.", explanation:"Crewmates described close, positive relationships. The spy described a more complicated or difficult relationship.", spyGuessOptions:["A Close Relationship","A Difficult Relationship","A New Friendship","A Lost Friendship"] },
+      { crewmateTopic:"What Makes a Good Friend?", spyTopic:"What Makes a Good Family Member?", crewmatePrompt:"Talk about the qualities of a good friend — what makes someone a true friend? Honesty? Loyalty? Being fun? Being there in difficult times? Give examples.", spyPrompt:"Talk about the qualities of a good family member — what makes a good parent, sibling, or partner? Being supportive? Patient? Understanding?", explanation:"Crewmates discussed the qualities of good friendship. The spy discussed what makes a good family member.", spyGuessOptions:["Qualities of a Good Friend","Qualities of a Good Family Member","Qualities of a Good Partner","Qualities of a Good Colleague"] },
+      { crewmateTopic:"How You Met", spyTopic:"Keeping in Touch", crewmatePrompt:"Tell the story of how you met your best friend or a close person in your life — where, when, what happened, and how the relationship developed.", spyPrompt:"Talk about how you stay in touch with important people in your life — do you text, call, meet up? What do you do when someone moves away?", explanation:"Crewmates told the story of how they met someone important. The spy talked about maintaining relationships over distance or time.", spyGuessOptions:["How You Met","Keeping in Touch","First Impressions","Growing Apart"] },
+    ],
+    minefieldGrid: {
+      topic: "Friends and Family",
+      instructions: "Combine the subject or opener (top) with the phrase (side) to make a complete, natural sentence about friends or family.",
+      colLabels: ["My best friend …", "My family …", "I get on well with …", "We grew up …", "A good friend …"],
+      rowLabels: ["… is … because …", "… always spends time together / supports each other.", "… my sister/brother/colleague because …", "… in the same street / town / school.", "… is someone who always …"],
+    },
+    hotSeatWords: [
+      {word:"best friend"},{word:"sibling"},{word:"close"},{word:"relationship"},
+      {word:"get on well"},{word:"take after"},{word:"grow up"},{word:"keep in touch"},
+      {word:"only child"},{word:"eldest"},{word:"youngest"},{word:"tight-knit"},
+      {word:"argument"},{word:"make up"},{word:"trust"},{word:"loyal"},
+      {word:"acquaintance"},{word:"neighbour"},{word:"colleague"},{word:"childhood friend"},
+    ],
+    hotPotatoPrompts: [
+      {prompt:"'We ___ on well.' (get/go/keep)", answer:"get"},
+      {prompt:"'She ___ after her mother.' (takes/looks/goes)", answer:"takes"},
+      {prompt:"'We ___ up in the same street.' (grew/growed/grow)", answer:"grew"},
+      {prompt:"'We ___ in touch every week.'", answer:"keep / stay"},
+      {prompt:"What is an 'only child'?", answer:"a child with no brothers or sisters"},
+      {prompt:"What does 'tight-knit family' mean?", answer:"a family that is very close and supportive"},
+      {prompt:"What is an 'acquaintance'?", answer:"someone you know but are not close friends with"},
+      {prompt:"'They had an argument but they ___ up.' (made/sorted/fixed)", answer:"made"},
+      {prompt:"What does 'take after someone' mean?", answer:"to look or behave like a family member"},
+      {prompt:"'My cousin is ___ a brother to me.' (like/as/similar)", answer:"like"},
+      {prompt:"Name three family members.", answer:"(free — mother, father, brother, sister, grandparent, uncle, aunt)"},
+      {prompt:"What does 'childhood friend' mean?", answer:"a friend you have known since you were a child"},
+      {prompt:"'She is the ___ of three children.'", answer:"eldest / oldest"},
+      {prompt:"Describe a quality of a good friend.", answer:"(free — loyal, honest, kind, funny, reliable)"},
+      {prompt:"'We don't ___ very often but we are still close.'", answer:"meet / see each other"},
+      {prompt:"What does 'make up' mean after an argument?", answer:"to become friends again after a disagreement"},
+      {prompt:"How many siblings do you have?", answer:"(free answer)"},
+      {prompt:"Describe your best friend in three words.", answer:"(free answer)"},
+      {prompt:"Who in your family do you take after?", answer:"(free answer)"},
+      {prompt:"How do you keep in touch with friends who live far away?", answer:"(free answer)"},
+    ],
+    auctionSentences: [
+      { sentence:"She takes after her mother — they have the same eyes and personality.", isCorrect:true, explanation:"'Take after' correctly means to resemble a family member." },
+      { sentence:"She looks like after her mother — they have the same eyes.", isCorrect:false, explanation:"The phrasal verb is 'take after' — not 'look like after'." },
+      { sentence:"We grew up in the same neighbourhood, which is why we are so close.", isCorrect:true, explanation:"'Grew up' and 'which is why' are both correct." },
+      { sentence:"I get on well with my sister — we never argue.", isCorrect:true, explanation:"'Get on well with' is the correct collocation." },
+      { sentence:"We keep in touch even though we live in different countries.", isCorrect:true, explanation:"'Keep in touch' is the correct phrase for maintaining contact." },
+      { sentence:"He is an only child — he has no brothers or sisters.", isCorrect:true, explanation:"'Only child' is the correct expression." },
+      { sentence:"They had a big argument but they made up the next morning.", isCorrect:true, explanation:"'Had an argument' and 'made up' are both correct collocations." },
+      { sentence:"She is my eldest sister — she is ten years older than me.", isCorrect:true, explanation:"'Eldest' correctly describes the oldest sibling." },
+      { sentence:"I have a lot of acquaintances but only two or three really close friends.", isCorrect:true, explanation:"'Acquaintances' vs 'close friends' is an accurate and natural distinction." },
+      { sentence:"My family meets every Sunday for dinner — it is our tradition.", isCorrect:true, explanation:"'Meets' and 'tradition' are both correct." },
+    ],
+    cardTasks: [
+      { task:"Describe your family — who is in it, and what are they like?" },
+      { task:"Tell the story of how you met your best friend." },
+      { task:"Use 'get on well with' to describe three relationships in your life." },
+      { task:"Describe a family member using 'takes after' — who do they look or act like?" },
+      { task:"Talk about someone you grew up with — a childhood friend or sibling." },
+      { task:"Describe your ideal friendship — what qualities does your perfect friend have?" },
+      { task:"Ask your partner: 'Do you have any brothers or sisters?' — continue the conversation." },
+      { task:"Use 'keep in touch' to talk about a friend or relative you don't see often." },
+      { task:"Describe a funny or memorable family moment." },
+      { task:"Talk about a family tradition — something you always do together." },
+      { task:"Are you more like your mother or your father? In what ways?" },
+      { task:"Describe the person in your family you are closest to." },
+      { task:"Talk about a friend who has been important in your life." },
+      { task:"Use 'we always…' and 'we never…' to describe your friendship." },
+      { task:"What do you think makes a family close? Discuss." },
+      { task:"Compare being an only child with having siblings — advantages and disadvantages." },
+      { task:"Use past simple to tell a story about a family argument and how it was resolved." },
+      { task:"What is your favourite thing to do with your family?" },
+      { task:"Describe someone in your family using five adjectives." },
+      { task:"Ask three questions to find out about your partner's family." },
+    
+      { task:"Describe your best friend — what makes them a good friend to you?" },
+      { task:"Tell a partner about a family tradition you have — what do you do and when?" },
+      { task:"Talk about a time a friend or family member supported you when you needed it." },
+      { task:"Describe a quality you think is essential in a good friend — give a real example." },
+      { task:"Tell a partner about someone in your family who you admire — explain why." },],
+  },
+
+  free_time_a2: {
+    label: "Free Time and Interests",
+    category: "topic",
+    questions: [
+      { type:"finish the sentence", question:"At the weekend, I love to ___ — it helps me relax.", answer:"(free — read / cook / go for walks / watch films)", hint:"Your favourite free-time activity", difficulty:"easy" },
+      { type:"finish the sentence", question:"I am ___ cooking — I make a new recipe every weekend.", answer:"into / passionate about / really keen on", hint:"Really enjoying something", difficulty:"easy" },
+      { type:"finish the sentence", question:"She goes to the gym ___ times a week to keep fit.", answer:"three / two / four", hint:"How often she exercises", difficulty:"easy" },
+      { type:"finish the sentence", question:"I ___ playing video games with my friends online in the evenings.", answer:"love / enjoy / like", hint:"Expressing enthusiasm for an activity", difficulty:"easy" },
+      { type:"finish the sentence", question:"He took ___ photography last year and now it's his biggest passion.", answer:"up", hint:"'Take up' = to start a new hobby", difficulty:"easy" },
+      { type:"finish the sentence", question:"She is ___ music — she plays three different instruments.", answer:"mad about / passionate about / crazy about / into", hint:"An informal expression for loving something", difficulty:"easy" },
+      { type:"finish the sentence", question:"I don't have much ___ time during the week because of work.", answer:"free / spare", hint:"Time that belongs to you", difficulty:"easy" },
+      { type:"finish the sentence", question:"We go for a long ___ in the countryside every Sunday morning.", answer:"walk / hike / run / cycle", hint:"An outdoor activity", difficulty:"easy" },
+      { type:"finish the sentence", question:"He is not very ___ — he prefers staying at home to going out.", answer:"outgoing / sociable / active", hint:"Not enjoying going out much", difficulty:"easy" },
+      { type:"finish the sentence", question:"I usually ___ in the evenings — I watch a series or read a book.", answer:"relax / unwind / chill", hint:"How you spend a quiet evening", difficulty:"easy" },
+      { type:"finish the sentence", question:"She ___ up surfing when she moved to the coast.", answer:"took", hint:"Started a new hobby", difficulty:"easy" },
+      { type:"finish the sentence", question:"He spends a lot of time ___ — he has been to over forty countries.", answer:"travelling / backpacking", hint:"Going to different places", difficulty:"easy" },
+      { type:"finish the sentence", question:"I like ___ music at concerts — there's nothing better than a live show.", answer:"seeing / listening to / watching", hint:"Experiencing music in person", difficulty:"easy" },
+      { type:"finish the sentence", question:"She is ___ in art — she visits galleries whenever she can.", answer:"interested / really keen", hint:"Having an interest in something", difficulty:"easy" },
+      { type:"finish the sentence", question:"I try to ___ a book a month — I love getting lost in a good story.", answer:"read / finish", hint:"Completing one book per month", difficulty:"easy" },
+      { type:"finish the sentence", question:"They meet every Saturday to ___ football in the park.", answer:"play", hint:"A team sport", difficulty:"easy" },
+      { type:"finish the sentence", question:"She gave ___ watching TV and now she goes for evening walks instead.", answer:"up", hint:"'Give up' = to stop doing something", difficulty:"easy" },
+      { type:"finish the sentence", question:"My favourite way to ___ my mind is to go for a run.", answer:"clear / relax / free", hint:"Stopping thinking about stress", difficulty:"easy" },
+      { type:"finish the sentence", question:"He is really ___ into cooking — he watches food videos all day.", answer:"(into = he'd say just 'into')", hint:"A casual phrase for really liking something", difficulty:"easy" },
+      { type:"finish the sentence", question:"We love ___ new restaurants when we visit a new city.", answer:"trying / exploring / discovering", hint:"Finding something new", difficulty:"easy" },
+    ],
+    spyRounds: [
+      { crewmateTopic:"Active Free Time", spyTopic:"Relaxing Free Time", crewmatePrompt:"Talk about how you spend free time doing active things — sports, exercise, hiking, dancing, going out, meeting friends, exploring the city.", spyPrompt:"Talk about how you spend free time relaxing — watching TV, reading, listening to music, sleeping in, cooking at home, doing puzzles, quiet hobbies.", explanation:"Crewmates described active leisure. The spy described relaxing leisure.", spyGuessOptions:["Active Free Time","Relaxing Free Time","Creative Hobbies","Social Activities"] },
+      { crewmateTopic:"Hobbies You Love", spyTopic:"Hobbies You Tried but Didn't Like", crewmatePrompt:"Talk about hobbies you genuinely love — things you do regularly and are passionate about. Use: 'I'm really into…', 'I love…ing', 'I'm mad about…', 'I can't imagine life without…'", spyPrompt:"Talk about hobbies you tried but didn't enjoy — things you gave up or didn't stick with. Use: 'I tried… but it wasn't for me.', 'I used to… but I gave it up.', 'I thought I'd enjoy… but…'", explanation:"Crewmates talked about hobbies they love. The spy talked about hobbies they tried but abandoned.", spyGuessOptions:["Hobbies You Love","Hobbies You Tried and Gave Up","New Hobbies","Childhood Hobbies"] },
+      { crewmateTopic:"Free Time Alone", spyTopic:"Free Time with Others", crewmatePrompt:"Talk about how you enjoy spending free time ALONE — reading, cooking, listening to music, going for a walk, meditating, watching films by yourself.", spyPrompt:"Talk about how you enjoy spending free time WITH OTHERS — meeting friends, group sports, family dinners, going out, team activities, social hobbies.", explanation:"Crewmates described solo free time activities. The spy described social leisure activities.", spyGuessOptions:["Free Time Alone","Free Time with Others","Outdoor Activities","Indoor Activities"] },
+      { crewmateTopic:"Free Time Now", spyTopic:"Free Time as a Child", crewmatePrompt:"Talk about what you do in your free time NOW — your current hobbies, how you relax, what you enjoy spending time on.", spyPrompt:"Talk about what you did in your free time as a CHILD — toys, games, sports, activities you loved when you were young. Use past simple.", explanation:"Crewmates described current free time activities. The spy described childhood leisure.", spyGuessOptions:["Free Time Now (present)","Free Time as a Child (past)","Dream Free Time","Free Time in the Future"] },
+    ],
+    minefieldGrid: {
+      topic: "Free Time and Interests",
+      instructions: "Combine the phrase (top) with the ending (side) to make a complete, natural sentence about free time. Add your own hobby or activity.",
+      colLabels: ["I love …", "She is really into …", "At the weekend, I …", "He took up …", "In my free time, I …"],
+      rowLabels: ["… [your hobby] because it helps me …", "… something creative / active / relaxing like …", "… [your activity] or sometimes …", "… [a hobby] recently and now …", "… always try to … at least once a week."],
+    },
+    hotSeatWords: [
+      {word:"hobby"},{word:"interest"},{word:"passion"},{word:"into"},
+      {word:"take up"},{word:"give up"},{word:"keen on"},{word:"mad about"},
+      {word:"spare time"},{word:"unwind"},{word:"outdoors"},{word:"indoors"},
+      {word:"sociable"},{word:"outgoing"},{word:"creative"},{word:"active"},
+      {word:"bored"},{word:"relaxed"},{word:"concert"},{word:"exhibition"},
+    ],
+    hotPotatoPrompts: [
+      {prompt:"'She is ___ into photography.'", answer:"really / very / so"},
+      {prompt:"'He ___ up running last year.' (took/picked/started)", answer:"took"},
+      {prompt:"'I ___ up coffee and now I drink tea.' (gave/stopped/quit)", answer:"gave"},
+      {prompt:"'I'm ___ about jazz music — I listen every day.'", answer:"mad / crazy / passionate"},
+      {prompt:"'I'm ___ in art.'", answer:"interested / keen"},
+      {prompt:"What does 'spare time' mean?", answer:"free time — time that is yours to use"},
+      {prompt:"'Take up' vs 'give up' — what's the difference?", answer:"take up = start a hobby; give up = stop a hobby"},
+      {prompt:"Name one active hobby.", answer:"(free — football, running, swimming, hiking, dancing)"},
+      {prompt:"Name one relaxing hobby.", answer:"(free — reading, cooking, painting, watching films)"},
+      {prompt:"'She is very ___ — she loves meeting new people.'", answer:"sociable / outgoing"},
+      {prompt:"'I try to ___ a book a month.'", answer:"read / finish"},
+      {prompt:"'We go for a long ___ every Sunday.'", answer:"walk / run / hike"},
+      {prompt:"What does 'unwind' mean?", answer:"to relax after being stressed or busy"},
+      {prompt:"What does 'outgoing' mean?", answer:"confident and enjoying being with other people"},
+      {prompt:"What is your favourite hobby?", answer:"(free answer)"},
+      {prompt:"When did you last try something new as a hobby?", answer:"(free answer)"},
+      {prompt:"Name a hobby you would like to take up.", answer:"(free answer)"},
+      {prompt:"'I am ___ at sport — I never was good.'", answer:"terrible / bad / awful"},
+      {prompt:"How many hours of free time do you have per week?", answer:"(free answer)"},
+      {prompt:"Describe your ideal free afternoon.", answer:"(free answer)"},
+    ],
+    auctionSentences: [
+      { sentence:"She is really into photography — she takes photos everywhere she goes.", isCorrect:true, explanation:"'Really into' is the natural informal phrase for a strong interest." },
+      { sentence:"He took up running last year and has already run two half-marathons.", isCorrect:true, explanation:"'Took up' correctly describes starting a new hobby." },
+      { sentence:"I gave up watching TV and now I read every evening instead.", isCorrect:true, explanation:"'Gave up' correctly describes stopping a habit." },
+      { sentence:"She is mad about jazz — she goes to concerts every month.", isCorrect:true, explanation:"'Mad about' is an informal but correct expression of passion." },
+      { sentence:"I'm interested on art — I visit galleries whenever I can.", isCorrect:false, explanation:"'Interested IN' — not 'interested on'." },
+      { sentence:"We meet every Saturday to play football in the park.", isCorrect:true, explanation:"'Meet to play' and 'in the park' are both correct." },
+      { sentence:"In my spare time, I love to cook new recipes from different countries.", isCorrect:true, explanation:"'Spare time' and 'love to cook' are both correct." },
+      { sentence:"She is very sociable — she loves meeting new people and going out.", isCorrect:true, explanation:"'Sociable' correctly describes someone who enjoys social situations." },
+      { sentence:"He spends a lot of time to travel — he visited fifteen countries last year.", isCorrect:false, explanation:"'Spend time + -ing': 'spends a lot of time travelling'." },
+      { sentence:"I try to read a book a month — I love getting lost in a good story.", isCorrect:true, explanation:"'Try to read' and 'getting lost in a story' are both correct." },
+    ],
+    cardTasks: [
+      { task:"Describe your favourite free-time activity — what is it, when do you do it, and why do you love it?" },
+      { task:"Use 'I'm really into…' and 'I'm mad about…' to describe your interests." },
+      { task:"Talk about a hobby you took up recently." },
+      { task:"Describe a hobby you tried but gave up — why didn't it work?" },
+      { task:"Compare active and relaxing hobbies — which do you prefer?" },
+      { task:"Ask your partner five questions about their free time." },
+      { task:"Describe your perfect free day — hour by hour." },
+      { task:"Use 'take up', 'give up', and 'be into' in a conversation about hobbies." },
+      { task:"Talk about a hobby you'd love to try if you had more time or money." },
+      { task:"Describe what you did last weekend using past simple." },
+      { task:"Use 'I usually… but this weekend I…' to describe a typical vs unusual weekend." },
+      { task:"Are you more of an indoor or outdoor person? Explain." },
+      { task:"Talk about a sport or activity you played or did as a child." },
+      { task:"What hobbies or activities do you enjoy with other people?" },
+      { task:"Describe a hobby that is unusual or surprising — something people don't expect." },
+      { task:"Use 'I spend a lot of time…ing' to describe three of your free-time activities." },
+      { task:"Talk about a concert, exhibition, or event you attended recently." },
+      { task:"How do you prefer to relax after a stressful week?" },
+      { task:"Would you rather have more money or more free time? Discuss." },
+      { task:"Interview your partner about their hobbies as if you are writing a magazine article." },
+    
+      { task:"Tell a partner about your favourite way to spend a free afternoon — give details." },
+      { task:"Describe a hobby you took up recently — how did you start and do you enjoy it?" },
+      { task:"Ask a partner three questions about what they like to do in their free time." },
+      { task:"Describe a sport or activity you'd like to try — why does it appeal to you?" },
+      { task:"Tell a partner something creative you enjoy doing — explain how you got into it." },],
+  },
+
+  my_town_city: {
+    label: "My Town and City",
+    category: "topic",
+    questions: [
+      { type:"finish the sentence", question:"I live in a small ___ in the north of the country.", answer:"town / village / city", hint:"A place where people live", difficulty:"easy" },
+      { type:"finish the sentence", question:"The town centre has a great ___ with shops, cafés, and restaurants.", answer:"high street / area / square", hint:"The main shopping area", difficulty:"easy" },
+      { type:"finish the sentence", question:"There is a beautiful old ___ in the middle of town — it's over five hundred years old.", answer:"castle / church / cathedral / building", hint:"A historic building", difficulty:"easy" },
+      { type:"finish the sentence", question:"The public ___ is really good here — I take the bus everywhere.", answer:"transport", hint:"Buses, trains, and trams for everyone", difficulty:"easy" },
+      { type:"finish the sentence", question:"It is a very ___ city — lots of different nationalities live here.", answer:"multicultural / diverse / international / cosmopolitan", hint:"Having people from many countries", difficulty:"easy" },
+      { type:"finish the sentence", question:"The best thing about living here is that everything is within ___ distance.", answer:"walking", hint:"Close enough to walk to", difficulty:"easy" },
+      { type:"finish the sentence", question:"Unfortunately, there is not much to do for young people — the nightlife is quite ___.", answer:"poor / quiet / limited / boring", hint:"Not much happening", difficulty:"easy" },
+      { type:"finish the sentence", question:"The city has a lot of ___ — parks, squares, and open spaces where you can relax.", answer:"green space / open space", hint:"Areas of grass or nature in a city", difficulty:"easy" },
+      { type:"finish the sentence", question:"I live in the ___ — about twenty minutes from the city centre.", answer:"suburbs / outskirts", hint:"The residential area outside the centre", difficulty:"easy" },
+      { type:"finish the sentence", question:"The main ___ of my city is the old harbour — tourists love it.", answer:"attraction / landmark / sight", hint:"A famous place people visit", difficulty:"easy" },
+      { type:"finish the sentence", question:"There is a lot of traffic ___ during rush hour — it takes forever to get anywhere.", answer:"congestion / pollution / noise", hint:"Too many cars on the road", difficulty:"easy" },
+      { type:"finish the sentence", question:"My town is very ___ — nothing ever changes and everyone knows each other.", answer:"quiet / traditional / small / conservative", hint:"Not much excitement", difficulty:"easy" },
+      { type:"finish the sentence", question:"The city ___ has improved a lot — there are more cycle lanes and green areas now.", answer:"centre / infrastructure / environment", hint:"How the city looks and works", difficulty:"easy" },
+      { type:"finish the sentence", question:"It is a popular tourist ___ — thousands of visitors come every summer.", answer:"destination / spot / attraction", hint:"A place people come to visit", difficulty:"easy" },
+      { type:"finish the sentence", question:"I love that you can always find somewhere to ___ — the food scene is amazing.", answer:"eat / try something new / get a coffee", hint:"The restaurants and cafés", difficulty:"easy" },
+      { type:"finish the sentence", question:"The streets in the old ___ are very narrow and full of character.", answer:"quarter / town / part", hint:"The historic part of a city", difficulty:"easy" },
+      { type:"finish the sentence", question:"One of the biggest problems in my city is the ___ of affordable housing.", answer:"lack / shortage", hint:"Not enough of something", difficulty:"easy" },
+      { type:"finish the sentence", question:"The city has a wonderful ___ with museums, theatres, and galleries.", answer:"cultural scene / arts scene", hint:"Art, music, and culture", difficulty:"easy" },
+      { type:"finish the sentence", question:"I grew up here and I can't ___ living anywhere else.", answer:"imagine", hint:"Not being able to picture life somewhere different", difficulty:"easy" },
+      { type:"finish the sentence", question:"If I could change one thing about my city, I would improve the ___.", answer:"(free — transport / air quality / parks / nightlife)", hint:"Something you'd like to be better", difficulty:"easy" },
+    ],
+    spyRounds: [
+      { crewmateTopic:"Living in a City", spyTopic:"Living in a Small Town or Village", crewmatePrompt:"Talk about living in a big city — the advantages: culture, transport, variety, job opportunities, nightlife, diversity. What do you love about city life?", spyPrompt:"Talk about living in a small town or village — the advantages: quiet, safe, friendly community, close to nature, lower cost of living. What do you love about it?", explanation:"Crewmates described city life. The spy described small-town or village life.", spyGuessOptions:["City Life","Small Town or Village Life","Suburban Life","Life Abroad"] },
+      { crewmateTopic:"What You Love About Your Town/City", spyTopic:"What You Dislike About Your Town/City", crewmatePrompt:"Talk about the things you love about where you live — the food, the people, the sights, the culture, the transport, the parks.", spyPrompt:"Talk about the things you dislike or find difficult about where you live — the traffic, the cost, the weather, the lack of activities, the noise.", explanation:"Crewmates described the positives of their town/city. The spy described the negatives.", spyGuessOptions:["Things You Love","Things You Dislike","Tourist Attractions","Comparing Cities"] },
+      { crewmateTopic:"Describing Your Town to a Tourist", spyTopic:"Describing Your Town to Someone Moving There", crewmatePrompt:"You are a tour guide. Describe your city to tourists — the main sights, the best places to eat, the history, what to see and do.", spyPrompt:"You are helping someone who is moving to your city. Describe practical things — the best neighbourhoods, transport, schools, cost of living, local tips.", explanation:"Crewmates described tourist highlights. The spy gave practical advice for a new resident.", spyGuessOptions:["Tourism (what to see and do)","Practical Advice (living there)","City History","City Problems"] },
+      { crewmateTopic:"Your City Now", spyTopic:"Your City in the Past", crewmatePrompt:"Describe your city or town as it is NOW — what it looks like, what there is to do, how people live there, what is changing.", spyPrompt:"Describe your city or town as it WAS in the past — how it has changed, what used to be there, how life was different. Use 'there used to be…', 'people used to…'", explanation:"Crewmates described the present city. The spy talked about how the city used to be.", spyGuessOptions:["Your City Now (present)","Your City in the Past (used to)","Your Ideal City","Your City in the Future"] },
+    ],
+    minefieldGrid: {
+      topic: "My Town and City",
+      instructions: "Combine the city topic starter (top) with the phrase (side) to make a complete, natural sentence about where you live.",
+      colLabels: ["My city has …", "The best thing about … is …", "One problem in my town is …", "I live in …", "I would like my city to have …"],
+      rowLabels: ["… a great … scene.", "… living here is …", "… the lack of …", "… the suburbs / centre.", "… more … for young people."],
+    },
+    hotSeatWords: [
+      {word:"suburb"},{word:"outskirts"},{word:"city centre"},{word:"high street"},
+      {word:"landmark"},{word:"attraction"},{word:"multicultural"},{word:"cosmopolitan"},
+      {word:"transport"},{word:"traffic"},{word:"congestion"},{word:"affordable"},
+      {word:"green space"},{word:"nightlife"},{word:"cultural scene"},{word:"neighbourhood"},
+      {word:"old quarter"},{word:"tourist"},{word:"locals"},{word:"community"},
+    ],
+    hotPotatoPrompts: [
+      {prompt:"What is the 'city centre'?", answer:"the main area of a city with shops, offices, and attractions"},
+      {prompt:"What are the 'suburbs'?", answer:"residential areas outside the city centre"},
+      {prompt:"What is a 'landmark'?", answer:"a famous or recognisable building or place"},
+      {prompt:"What does 'multicultural' mean?", answer:"having people from many different countries and cultures"},
+      {prompt:"What is 'traffic congestion'?", answer:"too many cars on the road causing slow traffic"},
+      {prompt:"What is 'public transport'?", answer:"buses, trains, trams, and metro that everyone can use"},
+      {prompt:"What does 'within walking distance' mean?", answer:"close enough that you can walk there"},
+      {prompt:"Name one advantage of living in a city.", answer:"(free — culture, transport, jobs, variety of food)"},
+      {prompt:"Name one disadvantage of living in a city.", answer:"(free — noise, expensive, pollution, crowded)"},
+      {prompt:"What is the 'nightlife' of a city?", answer:"bars, clubs, restaurants, and events open in the evening"},
+      {prompt:"What is an 'old quarter'?", answer:"the historic part of a city with old buildings and streets"},
+      {prompt:"What does 'affordable' mean?", answer:"not too expensive — within most people's budget"},
+      {prompt:"What is 'green space' in a city?", answer:"parks, gardens, and open areas of nature"},
+      {prompt:"What does 'cosmopolitan' mean?", answer:"international and diverse — welcoming to people from everywhere"},
+      {prompt:"What is a 'neighbourhood'?", answer:"a small area of a town or city where people live"},
+      {prompt:"Describe your city in three adjectives.", answer:"(free answer)"},
+      {prompt:"Name one tourist attraction in your city.", answer:"(free answer)"},
+      {prompt:"What would you improve about your city?", answer:"(free answer)"},
+      {prompt:"Do you prefer living in a city or the countryside?", answer:"(free answer)"},
+      {prompt:"What is the most famous street or area in your city?", answer:"(free answer)"},
+    ],
+    auctionSentences: [
+      { sentence:"My city has a wonderful cultural scene — there are always concerts and exhibitions on.", isCorrect:true, explanation:"'Cultural scene' and 'always on' are natural collocations." },
+      { sentence:"The public transport is excellent — I take the metro everywhere.", isCorrect:true, explanation:"'Public transport is excellent' and 'take the metro' are both correct." },
+      { sentence:"There is a lot of traffic congestion during rush hour — it's very frustrating.", isCorrect:true, explanation:"'Traffic congestion' and 'rush hour' are correct collocations." },
+      { sentence:"The city is very multicultural — people from over sixty countries live here.", isCorrect:true, explanation:"'Multicultural' correctly describes ethnic and cultural diversity." },
+      { sentence:"I live at the suburbs — about fifteen minutes from the city centre.", isCorrect:false, explanation:"'Live IN the suburbs' — not 'live at the suburbs'." },
+      { sentence:"The main attraction of my city is the old harbour.", isCorrect:true, explanation:"'Main attraction' is the correct collocation." },
+      { sentence:"One of the biggest problems is the lack of affordable housing.", isCorrect:true, explanation:"'Lack of affordable housing' is a common and correct collocation." },
+      { sentence:"Everything is in walking distance — I never need to take the bus.", isCorrect:false, explanation:"'Within walking distance' — not 'in walking distance'." },
+      { sentence:"I grew up here and I can't imagine living anywhere else.", isCorrect:true, explanation:"'Can't imagine + -ing' is correct." },
+      { sentence:"The city has a lot of green space — parks and squares where you can relax.", isCorrect:true, explanation:"'Green space' and 'parks and squares' are both correct." },
+    ],
+    cardTasks: [
+      { task:"Describe where you live to someone who has never been there." },
+      { task:"Talk about the best and worst things about your city or town." },
+      { task:"Describe your neighbourhood — what is it like to live there?" },
+      { task:"Give a tourist three recommendations for your city." },
+      { task:"Compare living in a city with living in a small town or village." },
+      { task:"Use 'there is/are' to describe what is in your town." },
+      { task:"Talk about how your city has changed in the last ten years." },
+      { task:"Describe the most famous landmark or attraction in your city." },
+      { task:"What would you change about your city if you could? Why?" },
+      { task:"Use 'The best thing about living here is…' and 'One problem is…'" },
+      { task:"Describe your city's public transport — is it good or bad?" },
+      { task:"Talk about the cultural scene in your city — music, art, theatre, food." },
+      { task:"Would you prefer to live in the city centre or the suburbs? Why?" },
+      { task:"Describe what your city is famous for." },
+      { task:"Is your city a good place for tourists? What would you recommend?" },
+      { task:"Talk about the people who live in your city — what are they like?" },
+      { task:"Use 'within walking distance' and 'traffic congestion' in sentences." },
+      { task:"Describe a city you have visited — would you like to live there?" },
+      { task:"Is your city expensive to live in? Discuss the cost of living." },
+      { task:"Design your ideal city — what would it have? What wouldn't it have?" },
+    
+      { task:"Describe three things you love about where you live — give specific details." },
+      { task:"Tell a partner about something you wish your town or city had — explain why." },
+      { task:"Describe a place in your town that is special to you — where is it and why do you like it?" },
+      { task:"Compare where you live now with somewhere you've visited — what's different?" },
+      { task:"Talk about a problem in your town and suggest one way it could be improved." },],
+  },
+
+
+
+  emotions_feelings: {
+    label: "Feelings and Emotions (Advanced)",
+    category: "vocabulary",
+    questions: [
+      { type:"finish the sentence", question:"She felt completely ___ after working three weeks without a day off.", answer:"exhausted / burnt out / drained / overwhelmed", hint:"Extreme tiredness from overwork", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'He was ___ about the job interview — excited but nervous at the same time.' (apprehensive/ambivalent/conflicted)", answer:"apprehensive / conflicted / ambivalent", hint:"All three describe mixed or uncertain feelings", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"'I feel very frustrate when people don't listen to me.'", answer:"I feel very frustrated when people don't listen to me.", hint:"'Frustrated' is a past participle used as an adjective", difficulty:"easy" },
+      { type:"finish the sentence", question:"She was ___ with herself for forgetting such an important appointment.", answer:"annoyed / frustrated / angry / disappointed", hint:"A negative feeling directed at yourself", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'After weeks of worry, he felt an enormous sense of ___.' (relief/relieving/relieved)", answer:"relief", hint:"'A sense of relief' — noun after 'sense of'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'She was deeply moved of the speech — she couldn't hold back her tears.'", answer:"She was deeply moved by the speech — she couldn't hold back her tears.", hint:"'Moved BY something' — not 'moved of'", difficulty:"easy" },
+      { type:"finish the sentence", question:"'I felt ___ when I realised everyone else already knew — like I was the last to find out.'", answer:"embarrassed / humiliated / left out / foolish", hint:"The feeling of being caught unaware", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'She was completely ___ by the sudden news — she didn't know what to say.' (speechless/wordless/silent)", answer:"speechless", hint:"'Speechless' = so shocked or moved you can't speak", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'He felt very alone and isolated — he missed his family deeply.'", answer:"He felt very lonely and isolated — he missed his family deeply.", hint:"'Alone' = physically without others; 'lonely' = the emotional feeling of isolation", difficulty:"medium" },
+      { type:"finish the sentence", question:"'I was ___ — I could hardly believe the news was true.'", answer:"stunned / astonished / taken aback / gobsmacked", hint:"Extremely surprised", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'She felt ___ about the decision — it wasn't what she wanted, but she understood.' (resigned/accepting/indifferent)", answer:"resigned", hint:"'Resigned' = accepting something unwillingly", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"'He was very enthusiast about the new project — he talked about it all day.'", answer:"He was very enthusiastic about the new project — he talked about it all day.", hint:"'Enthusiastic' is the adjective — not 'enthusiast'", difficulty:"easy" },
+      { type:"finish the sentence", question:"'She felt ___ — she had worked so hard and it had finally paid off.'", answer:"proud / fulfilled / elated / triumphant", hint:"The feeling of deserved success", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'He was ___ by the level of support he received from his colleagues.' (overwhelmed/overloaded/overcome)", answer:"overwhelmed / overcome", hint:"'Overwhelmed/overcome with emotion' = flooded with feeling", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"'I am feeling very anxious about of the presentation tomorrow.'", answer:"I am feeling very anxious about the presentation tomorrow.", hint:"'Anxious about something' — not 'about of'", difficulty:"easy" },
+      { type:"finish the sentence", question:"'She felt ___ after the conversation — as if a weight had been lifted from her shoulders.'", answer:"relieved / lighter / at ease / unburdened", hint:"The feeling of relief after something difficult is resolved", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'He felt ___ in his new city — he hadn't made any friends yet.' (homesick/nostalgic/lonely)", answer:"homesick / lonely", hint:"Both work — 'homesick' = missing home; 'lonely' = lacking company", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'She was deeply disappointed of the results — she had expected much better.'", answer:"She was deeply disappointed with / by the results — she had expected much better.", hint:"'Disappointed with/by' — not 'disappointed of'", difficulty:"easy" },
+      { type:"finish the sentence", question:"'He was ___ — everything was going wrong and he didn't know where to start.'", answer:"overwhelmed / at his wit's end / flustered / frazzled", hint:"Too many problems at once", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'I feel ___ about the whole situation — I can see both sides.' (torn/split/divided)", answer:"torn / divided / conflicted", hint:"All three work for feeling unable to choose between two positions", difficulty:"easy" },
+    ],
+    spyRounds: [
+      { crewmateTopic:"Negative Emotions (Stress/Anxiety)", spyTopic:"Positive Emotions (Joy/Relief)", crewmatePrompt:"Talk about times when you felt negative emotions — stressed, anxious, overwhelmed, frustrated, or exhausted. What caused it? How did you deal with it?", spyPrompt:"Talk about times when you felt strong positive emotions — elated, relieved, proud, moved, or grateful. What caused it? How did it feel?", explanation:"Crewmates discussed negative emotional experiences. The spy discussed positive ones.", spyGuessOptions:["Negative Emotions (stress/anxiety)","Positive Emotions (joy/relief)","Conflicted or Mixed Feelings","Describing Others' Emotions"] },
+      { crewmateTopic:"Describing Your Own Emotions", spyTopic:"Describing Someone Else's Emotions", crewmatePrompt:"Talk about emotions YOU have felt recently — use 'I feel', 'I felt', 'I've been feeling'. Describe two or three emotional experiences from your own life.", spyPrompt:"Talk about emotions you have NOTICED in others — a friend, family member, or colleague. Use 'she seemed', 'he appeared', 'they looked', 'I could tell she was feeling'.", explanation:"Crewmates described their own emotional experiences. The spy described emotions they observed in other people.", spyGuessOptions:["Your Own Emotions","Observing Others' Emotions","Emotions in Literature or Film","Emotional Reactions to News"] },
+      { crewmateTopic:"Overwhelming Emotions", spyTopic:"Subtle or Conflicted Feelings", crewmatePrompt:"Talk about moments of extreme emotion — times you felt speechless, stunned, overwhelmed, deeply moved, or completely exhausted. Describe the intensity.", spyPrompt:"Talk about subtle or mixed emotions — times you felt torn, resigned, ambivalent, indifferent, or quietly proud. Focus on nuanced feelings rather than extremes.", explanation:"Crewmates described intense, overwhelming emotions. The spy described subtle, complex, or conflicted feelings.", spyGuessOptions:["Overwhelming Emotions","Subtle or Mixed Feelings","Positive Emotions","Negative Emotions"] },
+      { crewmateTopic:"Emotions at Work", spyTopic:"Emotions in Personal Relationships", crewmatePrompt:"Talk about emotions related to work or study — feeling frustrated with colleagues, proud of achievements, anxious before a presentation, motivated by a challenge, or burnt out.", spyPrompt:"Talk about emotions related to personal relationships — feeling grateful to a friend, lonely in a new city, conflicted about a family situation, or overwhelmed by someone's kindness.", explanation:"Crewmates described emotions in professional or academic contexts. The spy described emotions arising from personal relationships.", spyGuessOptions:["Emotions at Work / Study","Emotions in Relationships","Emotions about Big Life Events","Emotional Reactions to the News"] },
+    ],
+    minefieldGrid: {
+      topic: "Feelings and Emotions",
+      instructions: "Combine the emotion (top) with the situation (side) to make a complete, natural sentence.",
+      colLabels: ["I felt overwhelmed when…", "She was relieved that…", "He was frustrated by…", "I was deeply moved by…", "They felt conflicted about…"],
+      rowLabels: ["… the deadline…", "… the result…", "… the decision…", "… the speech / performance…", "… the unexpected news…"],
+    },
+    hotSeatWords: [
+      {word:"overwhelmed"},{word:"relieved"},{word:"frustrated"},{word:"conflicted"},
+      {word:"apprehensive"},{word:"resigned"},{word:"elated"},{word:"devastated"},
+      {word:"moved"},{word:"speechless"},{word:"burnt out"},{word:"at ease"},
+      {word:"torn"},{word:"indifferent"},{word:"nostalgic"},{word:"homesick"},
+      {word:"anxious"},{word:"proud"},{word:"startled"},{word:"taken aback"},
+    ],
+    hotPotatoPrompts: [
+      {prompt:"What's the difference between 'alone' and 'lonely'?", answer:"alone = physically without others; lonely = emotional feeling of isolation"},
+      {prompt:"'She was ___ by the kindness.' (moved/moving/movement)", answer:"moved"},
+      {prompt:"'He felt completely ___ after months of overwork.'", answer:"burnt out / exhausted"},
+      {prompt:"'Apprehensive' means…?", answer:"anxious or worried about something that is going to happen"},
+      {prompt:"'She felt ___ about the decision — she understood but didn't like it.' (resigned/resolved)", answer:"resigned"},
+      {prompt:"'Disappointed ___ the result.'", answer:"with / by"},
+      {prompt:"'Anxious ___.' (of/about/for)", answer:"about"},
+      {prompt:"Name one emotion that means extremely happy.", answer:"(free — elated / overjoyed / ecstatic / thrilled)"},
+      {prompt:"Name one emotion that means extremely sad.", answer:"(free — devastated / heartbroken / distraught / gutted)"},
+      {prompt:"'I feel ___ — I can see both sides.'", answer:"torn / divided / conflicted"},
+      {prompt:"'She was ___ — she couldn't say a word.' (speechless/wordless)", answer:"speechless"},
+      {prompt:"'Moved BY' or 'moved OF'?", answer:"moved BY"},
+      {prompt:"What does 'overwhelmed' mean?", answer:"having too much to deal with — emotionally or practically"},
+      {prompt:"What does 'nostalgic' mean?", answer:"feeling a warm sadness when thinking about the past"},
+      {prompt:"'Enthusiastic ___.' (about/for/of)", answer:"about"},
+      {prompt:"What does 'at ease' mean?", answer:"relaxed and comfortable — not anxious"},
+      {prompt:"Describe how you feel right now using one B2-level emotion word.", answer:"(free answer)"},
+      {prompt:"What does 'taken aback' mean?", answer:"surprised or shocked by something unexpected"},
+      {prompt:"Name a situation that would make you feel 'relieved'.", answer:"(free answer)"},
+      {prompt:"What is the difference between 'frustrated' and 'annoyed'?", answer:"(free — frustrated = blocked from a goal; annoyed = irritated by something)"},
+    ],
+    auctionSentences: [
+      { sentence:"She felt completely overwhelmed by the amount of work she had to do.", isCorrect:true, explanation:"'Overwhelmed by' is the correct collocation." },
+      { sentence:"He was deeply moved of the speech — he had tears in his eyes.", isCorrect:false, explanation:"'Moved BY' — not 'moved of'." },
+      { sentence:"I feel torn about the decision — I can see strong arguments on both sides.", isCorrect:true, explanation:"'Torn about' correctly expresses a conflicted feeling." },
+      { sentence:"She was very enthusiast about the new role and couldn't wait to start.", isCorrect:false, explanation:"'Enthusiastic' is the adjective — 'enthusiast' is a noun." },
+      { sentence:"After weeks of worry, he felt an enormous sense of relief.", isCorrect:true, explanation:"'A sense of relief' is the correct noun phrase." },
+      { sentence:"I was completely speechless when they announced I had won the award.", isCorrect:true, explanation:"'Speechless' correctly describes being too surprised to speak." },
+      { sentence:"He felt very alone even when he was surrounded by people.", isCorrect:false, explanation:"'Lonely' is the emotional feeling — 'alone' means physically without others." },
+      { sentence:"She was disappointed with the outcome but understood why the decision was made.", isCorrect:true, explanation:"'Disappointed with' is the correct preposition." },
+      { sentence:"I feel anxious about of the presentation — it's a really important one.", isCorrect:false, explanation:"'Anxious about' — not 'anxious about of'." },
+      { sentence:"He was completely burnt out after the project — he needed a long break.", isCorrect:true, explanation:"'Burnt out' correctly describes exhaustion from overwork." },
+    ],
+    cardTasks: [
+      { task:"Describe a time you felt overwhelmed — what caused it and how did you deal with it?" },
+      { task:"Use 'relieved', 'elated', and 'proud' to describe three positive life moments." },
+      { task:"Explain the difference between 'frustrated', 'annoyed', and 'furious'." },
+      { task:"Describe a time you felt conflicted or torn about a decision." },
+      { task:"Use 'apprehensive' in a sentence about something coming up in your life." },
+      { task:"Talk about a time you felt deeply moved by something — a speech, a film, or an event." },
+      { task:"Describe how you feel when you are burnt out and how you recover." },
+      { task:"Use 'resigned', 'indifferent', and 'ambivalent' — what's the subtle difference?" },
+      { task:"Describe a moment when you were completely speechless." },
+      { task:"Talk about a time you felt homesick or nostalgic — what triggered it?" },
+      { task:"Use 'at ease' and 'apprehensive' to contrast two different situations." },
+      { task:"Describe how your emotions changed throughout a difficult day." },
+      { task:"Talk about emotions you find difficult to express in English." },
+      { task:"Use 'taken aback' and 'stunned' in sentences about surprising events." },
+      { task:"Describe how you look when you feel anxious — what physical signs are there?" },
+      { task:"Talk about a time a friend or colleague seemed 'off' — how did you notice?" },
+      { task:"How do you usually manage feelings of frustration or stress?" },
+      { task:"Use 'devastated', 'heartbroken', and 'gutted' — are they exactly the same?" },
+      { task:"Describe your emotional reaction to an important piece of news recently." },
+      { task:"Discuss: is it important to talk about your emotions? How does your culture approach this?" },
+    
+      { task:"Talk about this topic for one minute — share your personal opinion and experience." },
+      { task:"Ask a partner two questions related to this topic and discuss the answers together." },
+      { task:"Describe a real situation from your own life that relates to this topic." },
+      { task:"Give your partner two tips or pieces of advice related to this topic." },
+      { task:"Summarise the most important idea from this topic in two or three sentences." },],
+  },
+
+  socialising_small_talk: {
+    label: "Socialising and Small Talk",
+    category: "vocabulary",
+    questions: [
+      { type:"finish the sentence", question:"'___ the weather — I can't believe how cold it's been lately!'", answer:"What about / Speaking of / Can you believe", hint:"Opening a conversation about the weather", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'___ a small world — I know her too!' (It's/What/That's)", answer:"It's / What", hint:"'It's a small world!' is the fixed expression", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'How do you do? — Fine, thanks, and you?'", answer:"'How do you do?' is a formal greeting — the reply is also 'How do you do?', not 'Fine, thanks'.", hint:"'How do you do?' is a formal ritual — both people say it; 'How are you?' takes 'Fine, thanks'", difficulty:"hard" },
+      { type:"finish the sentence", question:"'So, ___ do you do?' — a classic small talk opener at a party.", answer:"what", hint:"'What do you do?' asks about someone's job", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'___ you here for the conference?' (Are/Do/Have)", answer:"Are", hint:"'Are you here for…?' checks someone's reason for being somewhere", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'Speaking of which, have you heard from Sarah recently?'", answer:"Speaking of which, have you heard from Sarah recently?", hint:"This sentence is correct — 'speaking of which' is a natural topic-change phrase", difficulty:"medium" },
+      { type:"finish the sentence", question:"'That ___ me think of something — have you seen the new restaurant on the high street?'", answer:"reminds", hint:"'That reminds me' — linking to a new topic naturally", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'___ change the subject for a second — did you watch the match last night?' (Can I/Shall we/Let me)", answer:"Can I / Let me / Actually, can I", hint:"Natural ways to shift topic in conversation", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'I know what you mean — I have exactly the same.'", answer:"I know what you mean — I feel exactly the same. / I've had exactly the same experience.", hint:"'I have exactly the same' sounds incomplete — use 'feel the same' or specify", difficulty:"medium" },
+      { type:"finish the sentence", question:"'___ you mention it — I was actually thinking the same thing.'", answer:"Now that / Since / Come to think of it,", hint:"'Now that you mention it' = connecting to what someone just said", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'Sorry, I didn't ___ your name.' (get/catch/hear)", answer:"catch / get / hear", hint:"All three are natural in conversation", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'I must say, the venue is really impressive.'", answer:"I must say, the venue is really impressive.", hint:"This is correct — 'I must say' is a natural conversational emphatic", difficulty:"medium" },
+      { type:"finish the sentence", question:"'Anyway, ___ get back to what I was saying earlier…'", answer:"let me / to / shall we", hint:"'Anyway, let me get back to…' — returning to a previous topic", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'___ on that — have you had any luck with the application?' (Following up/Building/Coming back)", answer:"Following up on / Coming back to / Building on", hint:"All three work as conversational topic connectors", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"'He's really easy to talk with.'", answer:"He's really easy to talk to.", hint:"'Easy to talk TO' — not 'with' in this construction", difficulty:"medium" },
+      { type:"finish the sentence", question:"'Don't ___ me to that — what were you saying about the new project?'", answer:"hold", hint:"'Don't hold me to that' — asking not to be committed to something", difficulty:"hard" },
+      { type:"choose correct grammar", question:"'___ between us — I don't think the plan is working.' (Just/Only/Between)", answer:"Just / Between", hint:"'Just between us' = confidential; 'Between you and me'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'I was just thinking about you! What a coincident.'", answer:"I was just thinking about you! What a coincidence.", hint:"The noun is 'coincidence' — not 'coincident'", difficulty:"easy" },
+      { type:"finish the sentence", question:"'___ the topic, but have you heard about the new policy?'", answer:"Changing / On / Sorry to change", hint:"'Changing the topic / On a different topic'", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'Well, I ___ let you go — it was great catching up!' (should/must/will)", answer:"should / must / will", hint:"All three work for politely ending a conversation", difficulty:"easy" },
+    ],
+    spyRounds: [
+      { crewmateTopic:"Small Talk (Asking Questions)", spyTopic:"Small Talk (Sharing Information)", crewmatePrompt:"Keep the conversation going by asking questions — 'What do you do?', 'Have you been here before?', 'What did you think of the event?', 'Are you here for the whole conference?'", spyPrompt:"Keep the conversation going by sharing information and making comments — 'I've been working in marketing for years.', 'The venue is fantastic, isn't it?', 'I heard this event sold out in minutes.', 'I must say, the food is excellent.'", explanation:"Crewmates kept small talk going with questions. The spy used statements and comments to drive the conversation.", spyGuessOptions:["Small Talk with Questions","Small Talk with Statements","Formal Introductions","Ending a Conversation"] },
+      { crewmateTopic:"Starting a Conversation", spyTopic:"Ending a Conversation", crewmatePrompt:"Practise starting conversations naturally — comment on the setting, introduce yourself, ask what someone does, use conversation openers: 'It's a great event, isn't it?', 'Have you met many people here?'", spyPrompt:"Practise ending conversations politely — 'Well, I should let you go.', 'It was lovely meeting you.', 'We must catch up properly soon.', 'I'll let you enjoy the rest of the evening.'", explanation:"Crewmates started conversations. The spy used polite conversation-closers.", spyGuessOptions:["Starting a Conversation","Ending a Conversation","Changing the Subject","Keeping the Conversation Going"] },
+      { crewmateTopic:"Formal Small Talk", spyTopic:"Informal Small Talk", crewmatePrompt:"Make small talk in a formal setting — a work event, a conference, a professional dinner. Use formal language: 'Have you been involved in this industry long?', 'What brings you to the event?'", spyPrompt:"Make small talk in an informal setting — with friends or acquaintances you know a little. Use informal language: 'What have you been up to?', 'Did you catch the game?', 'How are things?'", explanation:"Crewmates used formal small talk language. The spy used casual, informal conversation.", spyGuessOptions:["Formal Small Talk","Informal Small Talk","Networking","Introductions at a Party"] },
+      { crewmateTopic:"Changing the Subject", spyTopic:"Staying on the Subject", crewmatePrompt:"Keep trying to change the subject! Use: 'That reminds me…', 'On a different note…', 'Speaking of which…', 'Sorry to change the topic, but…', 'Anyway, what I wanted to say was…'", spyPrompt:"Keep returning to the SAME topic whenever the conversation wanders. Use: 'Getting back to what I was saying…', 'Anyway, as I was saying…', 'Coming back to that point…', 'I still think we should discuss…'", explanation:"Crewmates changed the subject throughout. The spy kept trying to return to the same topic.", spyGuessOptions:["Changing the Subject","Returning to the Same Topic","Starting a New Topic","Avoiding a Topic"] },
+    ],
+    minefieldGrid: {
+      topic: "Socialising and Small Talk",
+      instructions: "Combine the conversation phrase (top) with the continuation (side) to make a complete, natural conversational exchange. Speak the full thing as part of a conversation.",
+      colLabels: ["That reminds me —", "Speaking of which,", "Anyway, getting back to…", "Just between us,", "On a completely different note,"],
+      rowLabels: ["… have you heard about…?", "… did you see / hear…?", "… what you said earlier about…", "… I'm not entirely sure about…", "… how are things going with…?"],
+    },
+    hotSeatWords: [
+      {word:"small talk"},{word:"conversation opener"},{word:"change the subject"},{word:"catch up"},
+      {word:"that reminds me"},{word:"speaking of which"},{word:"by the way"},{word:"anyway"},
+      {word:"now that you mention it"},{word:"coincidence"},{word:"networking"},{word:"break the ice"},
+      {word:"common ground"},{word:"let you go"},{word:"easy to talk to"},{word:"in passing"},
+      {word:"bring up"},{word:"touch on"},{word:"get back to"},{word:"follow up"},
+    ],
+    hotPotatoPrompts: [
+      {prompt:"Name a typical small talk topic.", answer:"(free — weather, weekend plans, local events, sport, food, work)"},
+      {prompt:"'What a ___!' (surprising meeting someone you know)", answer:"coincidence / small world"},
+      {prompt:"'Sorry, I didn't ___ your name.'", answer:"catch / get / hear"},
+      {prompt:"'___ me — have you heard about the new office?' (That reminds/Speaking of)", answer:"That reminds"},
+      {prompt:"'Speaking of ___.' (follow-up connector)", answer:"which / that / whom"},
+      {prompt:"'Just ___ us — I don't think it's going well.' (between/among/within)", answer:"between"},
+      {prompt:"'Well, I ___ let you go.'", answer:"should / must / will"},
+      {prompt:"'He's really easy to talk ___.' (to/with)", answer:"to"},
+      {prompt:"'It's a ___ world!' (small/tiny/little)", answer:"small"},
+      {prompt:"'___ change the topic — did you hear about the event?'", answer:"Can I / Shall we / Let me"},
+      {prompt:"What does 'catch up' mean in conversation?", answer:"to talk to someone you haven't seen for a while and update each other"},
+      {prompt:"What does 'break the ice' mean?", answer:"to do or say something to make people feel more relaxed in a social situation"},
+      {prompt:"'___ you mention it, I was thinking the same thing.'", answer:"Now that / Come to think of it"},
+      {prompt:"What is 'networking'?", answer:"meeting people professionally to build useful contacts"},
+      {prompt:"'Anyway, ___ back to what I was saying.' (let me get/getting/to get)", answer:"let me get"},
+      {prompt:"Name a polite way to end a conversation.", answer:"(free — 'I'll let you go', 'It was great catching up', 'We must do this again')"},
+      {prompt:"What does 'in passing' mean?", answer:"mentioned briefly, not as the main point of conversation"},
+      {prompt:"'By the ___' — an expression to introduce a new topic.", answer:"way"},
+      {prompt:"Start a small talk conversation about the weather.", answer:"(free answer)"},
+      {prompt:"How do you politely leave a conversation in English?", answer:"(free answer)"},
+    ],
+    auctionSentences: [
+      { sentence:"What a small world — I know her too! We went to university together.", isCorrect:true, explanation:"'What a small world!' is the correct fixed expression." },
+      { sentence:"That reminds me — did you see the documentary about climate change last night?", isCorrect:true, explanation:"'That reminds me' correctly links to a new topic naturally." },
+      { sentence:"I was just thinking about you! What a coincident.", isCorrect:false, explanation:"'Coincidence' is the noun — not 'coincident'." },
+      { sentence:"He's really easy to talk to — I felt comfortable with him immediately.", isCorrect:true, explanation:"'Easy to talk to' is the correct construction." },
+      { sentence:"He's really easy to talk with — I felt comfortable with him immediately.", isCorrect:false, explanation:"'Easy to talk TO' is the standard fixed construction in English." },
+      { sentence:"Well, I should let you go — it was really lovely catching up.", isCorrect:true, explanation:"'I should let you go' and 'catching up' are both correct conversational phrases." },
+      { sentence:"Just between us, I'm not convinced the new strategy is going to work.", isCorrect:true, explanation:"'Just between us' correctly signals confidential information." },
+      { sentence:"Speaking of which, have you heard about the changes to the schedule?", isCorrect:true, explanation:"'Speaking of which' correctly links to a related new topic." },
+      { sentence:"Now that you mention it, I've been thinking exactly the same thing.", isCorrect:true, explanation:"'Now that you mention it' is a natural conversational connector." },
+      { sentence:"Anyway, let me get back to what I was saying about the project.", isCorrect:true, explanation:"'Let me get back to' correctly signals returning to a previous topic." },
+    ],
+    cardTasks: [
+      { task:"Start a conversation with your partner using only small talk — no serious topics for 2 minutes." },
+      { task:"Use 'That reminds me', 'Speaking of which', and 'Anyway' in one natural conversation." },
+      { task:"Practise meeting someone new at a party — introduce yourself and find common ground." },
+      { task:"Practise ending a conversation politely — three different ways." },
+      { task:"Use 'It's a small world!' in a role-play where you discover you have a mutual contact." },
+      { task:"Practise changing the subject naturally — use at least three different phrases." },
+      { task:"Role-play a professional networking event — make small talk with three different people." },
+      { task:"Use 'Just between us' to share a secret opinion in a conversation." },
+      { task:"Practise: 'Sorry, I didn't catch your name' and how to re-introduce yourself." },
+      { task:"Use 'Now that you mention it' and 'Come to think of it' to respond to your partner." },
+      { task:"Talk about what topics are typical for small talk in your culture." },
+      { task:"Compare small talk in English with small talk in your language — what's different?" },
+      { task:"Practise breaking the ice with a group of people you don't know." },
+      { task:"Role-play: you run into someone you know vaguely — catch up for two minutes." },
+      { task:"Discuss: why is small talk important? Is it a skill you find easy or difficult?" },
+      { task:"Use 'By the way' and 'On a different note' to practise switching topics." },
+      { task:"Practise formal small talk at a business dinner — what topics are safe?" },
+      { task:"Use 'Don't hold me to that' — when and why would you say it?" },
+      { task:"Practise the full arc of a social conversation: open, develop, close." },
+      { task:"What do you do when conversation dries up? Practise filling silence naturally." },
+    
+      { task:"Use 'That reminds me…' and 'Speaking of which…' to change topics naturally in conversation." },
+      { task:"Practise small talk with a partner — talk about the weather, weekend plans, and a current event." },
+      { task:"Use 'On a completely different note…' to introduce a new topic in a conversation." },
+      { task:"Roleplay: you meet someone at a party — keep a conversation going for two minutes using small talk." },
+      { task:"Use 'Just between us…' and 'Anyway, getting back to…' in a natural flowing conversation." },],
+  },
+
+  money_and_finance: {
+    label: "Money and Personal Finance",
+    category: "vocabulary",
+    questions: [
+      { type:"finish the sentence", question:"At the end of the month, I always ___ my expenses to see where my money went.", answer:"track / review / check / go through", hint:"Checking where your money was spent", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'She's ___ to save three months' salary as an emergency fund.' (trying/aiming/managing)", answer:"trying / aiming", hint:"'Aiming to' = setting a goal; 'trying to' = making an effort", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'I can't afford buying a new phone right now — I'm saving for a holiday.'", answer:"I can't afford to buy a new phone right now — I'm saving for a holiday.", hint:"'Afford + to + infinitive' — not 'afford + -ing'", difficulty:"easy" },
+      { type:"finish the sentence", question:"He has a large ___ — he owes money on his credit cards, student loan, and car loan.", answer:"debt", hint:"Money you owe to others", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'She ___ a lot of money on clothes she never wears.' (wastes/spends/blows)", answer:"wastes / spends / blows", hint:"All three work — 'blows' is more informal", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'I've been overdrawn on my account since two weeks.'", answer:"I've been overdrawn on my account for two weeks.", hint:"Duration: 'for' + a period of time — not 'since'", difficulty:"easy" },
+      { type:"finish the sentence", question:"She managed to ___ a significant amount of money by switching to a cheaper energy provider.", answer:"save / put aside / set aside / cut", hint:"Reducing spending or keeping money", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'He ___ a standing order to transfer money to his savings account every month.' (set up/set/made)", answer:"set up", hint:"'Set up a standing order' — the correct collocation", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"'I made a big economy by cooking at home instead of eating out.'", answer:"I made a big saving by cooking at home instead of eating out.", hint:"'Make a saving' — not 'make an economy' in this context", difficulty:"medium" },
+      { type:"finish the sentence", question:"'The rent in this area is ___ — there's no way I can afford it on my salary.'", answer:"extortionate / astronomical / way too high / ridiculous", hint:"Shockingly expensive", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'She ___ her rent and now risks losing her flat.' (defaulted on/missed/didn't pay)", answer:"missed / defaulted on / didn't pay", hint:"All work — 'defaulted on' is more formal", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"'I'm broke — I spent all my money on the weekend.'", answer:"I'm broke — I spent all my money over the weekend.", hint:"'Over the weekend' — 'on the weekend' is possible but 'over' is more natural for a period", difficulty:"medium" },
+      { type:"finish the sentence", question:"'I occasionally ___ and spend more than I planned — it's hard to resist a sale.'", answer:"splurge / overspend / treat myself", hint:"Spending more than usual", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'___ making a budget has helped me understand where my money goes.' (Honestly/To be honest/Truthfully)", answer:"Honestly / To be honest / Truthfully", hint:"Any of these work as sentence openers", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'He earns a six figures salary working in finance.'", answer:"He earns a six-figure salary working in finance.", hint:"'Six-figure' is a compound adjective and needs a hyphen; no 's' on 'figure'", difficulty:"medium" },
+      { type:"finish the sentence", question:"'I try to put ___ a little money each month for unexpected expenses.'", answer:"aside / away", hint:"'Put aside / put away money' = save it", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'They took ___ a mortgage to buy their first home.' (out/up/on)", answer:"out", hint:"'Take out a mortgage' — fixed collocation", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'She invested her savings on stocks and shares.'", answer:"She invested her savings in stocks and shares.", hint:"'Invest IN something' — not 'invest on'", difficulty:"easy" },
+      { type:"finish the sentence", question:"'After paying rent, bills, and food, I barely have anything ___ at the end of the month.'", answer:"left / left over / remaining", hint:"What remains after all expenses", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'The cost of living has ___ significantly in the last few years.' (risen/raised/increased)", answer:"risen / increased", hint:"'Rise' is intransitive — prices rise by themselves; 'raise' needs an object", difficulty:"medium" },
+    ],
+    spyRounds: [
+      { crewmateTopic:"Saving Money", spyTopic:"Spending Money", crewmatePrompt:"Talk about how you or people you know save money — budgeting, cutting costs, putting money aside, finding deals, making sacrifices, building an emergency fund.", spyPrompt:"Talk about how you or people you know spend money — treating yourself, splurging, shopping habits, impulse buying, eating out, holidays, and enjoying your income.", explanation:"Crewmates talked about saving and cutting costs. The spy talked about spending and enjoying money.", spyGuessOptions:["Saving Money","Spending Money","Investing Money","Borrowing Money"] },
+      { crewmateTopic:"Financial Stress", spyTopic:"Financial Security", crewmatePrompt:"Talk about financial difficulties and stress — being broke, debt, struggling to pay bills, being overdrawn, worry about money, and the emotional impact of financial problems.", spyPrompt:"Talk about financial security and peace of mind — having savings, a stable income, no debt, a pension, and not having to worry about money.", explanation:"Crewmates talked about financial stress and difficulty. The spy talked about financial security and stability.", spyGuessOptions:["Financial Stress","Financial Security","Budgeting","Investing"] },
+      { crewmateTopic:"Everyday Financial Decisions", spyTopic:"Big Financial Decisions", crewmatePrompt:"Talk about small, everyday financial decisions — whether to buy a coffee, meal prep vs eating out, subscriptions, choosing a cheaper brand, monthly budget.", spyPrompt:"Talk about big, life-changing financial decisions — buying a house, taking out a mortgage, investing, starting a business, paying off a student loan.", explanation:"Crewmates discussed small everyday financial choices. The spy discussed major life financial decisions.", spyGuessOptions:["Everyday Financial Decisions","Big Financial Decisions","Emergency Spending","Financial Advice"] },
+      { crewmateTopic:"Attitudes to Money", spyTopic:"Talking About Prices and Costs", crewmatePrompt:"Talk about your attitude to money and how you relate to it — are you a saver or a spender? Do you worry about money? Is money important to you? What do you spend on?", spyPrompt:"Talk about prices and the cost of things — how expensive things are, whether prices have risen, what seems good value, what feels extortionate.", explanation:"Crewmates discussed personal attitudes and relationships with money. The spy discussed prices, costs, and value for money.", spyGuessOptions:["Attitudes to Money","Prices and Cost of Living","Financial Goals","Earning and Income"] },
+    ],
+    minefieldGrid: {
+      topic: "Money and Personal Finance",
+      instructions: "Combine the financial phrase (top) with the situation (side) to make a complete, natural sentence.",
+      colLabels: ["I can't afford to…", "She managed to save…", "He set up a standing order to…", "The cost of … has risen…", "I try to put aside…"],
+      rowLabels: ["… go on holiday this year.", "… a significant amount by…", "… transfer money monthly.", "… significantly recently.", "… a little each month."],
+    },
+    hotSeatWords: [
+      {word:"budget"},{word:"debt"},{word:"savings"},{word:"mortgage"},
+      {word:"overdrawn"},{word:"standing order"},{word:"direct debit"},{word:"interest rate"},
+      {word:"afford"},{word:"splurge"},{word:"broke"},{word:"put aside"},
+      {word:"invest"},{word:"cut back"},{word:"cost of living"},{word:"emergency fund"},
+      {word:"extortionate"},{word:"six-figure"},{word:"overspend"},{word:"make a saving"},
+    ],
+    hotPotatoPrompts: [
+      {prompt:"'I can't afford ___ a new laptop.' (to buy/buying)", answer:"to buy"},
+      {prompt:"'She ___ a standing order to save £200 a month.' (set up/set/made)", answer:"set up"},
+      {prompt:"'Invest ___ stocks.' (in/on/at)", answer:"in"},
+      {prompt:"'I've been overdrawn ___ two weeks.' (for/since/during)", answer:"for"},
+      {prompt:"What does 'broke' mean?", answer:"having no money / completely out of money"},
+      {prompt:"What is a 'mortgage'?", answer:"a loan from a bank to buy a house"},
+      {prompt:"What does 'overdrawn' mean?", answer:"your bank account has gone below zero"},
+      {prompt:"What is an 'emergency fund'?", answer:"savings set aside for unexpected costs or crises"},
+      {prompt:"'Put money ___.'", answer:"aside / away / by"},
+      {prompt:"What does 'splurge' mean?", answer:"to spend a lot of money on something as a treat"},
+      {prompt:"'The cost of living has ___.' (risen/raised)", answer:"risen"},
+      {prompt:"What is a 'standing order'?", answer:"a regular automatic payment from your bank account"},
+      {prompt:"'She made a big ___ by shopping in the sales.' (saving/economy/discount)", answer:"saving"},
+      {prompt:"What does 'extortionate' mean?", answer:"shockingly and unreasonably expensive"},
+      {prompt:"What is 'interest' on a loan?", answer:"extra money you pay back on top of the original amount borrowed"},
+      {prompt:"'Take ___ a mortgage.' (out/up/on)", answer:"out"},
+      {prompt:"Name one way to save money each month.", answer:"(free — budget, cook at home, cancel subscriptions, compare prices)"},
+      {prompt:"'He earns a six-___ salary.' (figure/figures/digit)", answer:"figure"},
+      {prompt:"What does 'cut back' mean with money?", answer:"to reduce spending in a particular area"},
+      {prompt:"Are you a saver or a spender?", answer:"(free answer)"},
+    ],
+    auctionSentences: [
+      { sentence:"I can't afford to go on holiday this year — I'm trying to pay off my debt.", isCorrect:true, explanation:"'Afford to + infinitive' and 'pay off debt' are both correct." },
+      { sentence:"I can't afford buying a new car — I'm saving for a house deposit.", isCorrect:false, explanation:"'Afford + to + infinitive': 'I can't afford to buy a new car'." },
+      { sentence:"She managed to save a significant amount by meal prepping instead of eating out.", isCorrect:true, explanation:"'Manage to save' and 'meal prepping' are both correct." },
+      { sentence:"He set up a standing order to automatically transfer money to his savings account.", isCorrect:true, explanation:"'Set up a standing order' is the correct collocation." },
+      { sentence:"She invested her savings on property in the city centre.", isCorrect:false, explanation:"'Invest IN' — not 'invest on'." },
+      { sentence:"The rent in this area is extortionate — it's gone up 30% in two years.", isCorrect:true, explanation:"'Extortionate' correctly describes shockingly high prices." },
+      { sentence:"I've been overdrawn on my account since three weeks.", isCorrect:false, explanation:"'Overdrawn FOR three weeks' — 'since' needs a specific point in time." },
+      { sentence:"I try to put aside a little money each month for unexpected expenses.", isCorrect:true, explanation:"'Put aside money' is the correct collocation." },
+      { sentence:"He earns a six figures salary and still claims he can't afford to save.", isCorrect:false, explanation:"'Six-figure salary' — hyphenated compound adjective, no 's' on figure." },
+      { sentence:"The cost of living has risen significantly in the past few years.", isCorrect:true, explanation:"'Cost of living has risen' — intransitive 'rise' is correct." },
+    ],
+    cardTasks: [
+      { task:"Describe your approach to budgeting — do you track your spending?" },
+      { task:"Use 'afford', 'save', 'put aside', and 'splurge' in a conversation about money." },
+      { task:"Talk about the cost of living in your city — has it got more expensive recently?" },
+      { task:"Discuss: what is the biggest financial decision you have ever made?" },
+      { task:"Use 'can't afford to', 'manage to save', and 'cut back on' in sentences." },
+      { task:"Describe a time you splurged on something — do you regret it?" },
+      { task:"Talk about what an 'emergency fund' is and whether you think it's important." },
+      { task:"Discuss: is it better to save aggressively or to enjoy your money now?" },
+      { task:"Use 'overdrawn', 'in debt', and 'broke' — what's the difference?" },
+      { task:"Talk about a purchase that turned out to be a great deal or terrible value." },
+      { task:"Describe your ideal approach to money if you had a higher income." },
+      { task:"Use 'set up a standing order', 'take out a mortgage', and 'invest in' in context." },
+      { task:"Discuss: what do people in your country typically spend their money on?" },
+      { task:"Talk about how you would advise a friend who is spending too much." },
+      { task:"Use 'extortionate', 'reasonable', and 'good value' to describe things you buy." },
+      { task:"What does financial security mean to you personally?" },
+      { task:"Discuss: should schools teach personal finance? What would you include?" },
+      { task:"Talk about the rising cost of housing — is it a problem in your country?" },
+      { task:"Describe your attitude to money — are you more of a saver or a spender?" },
+      { task:"Use 'make a saving', 'cut back on', and 'put money aside' about everyday life." },
+    
+      { task:"Talk about this topic for one minute — share your personal opinion and experience." },
+      { task:"Ask a partner two questions related to this topic and discuss the answers together." },
+      { task:"Describe a real situation from your own life that relates to this topic." },
+      { task:"Give your partner two tips or pieces of advice related to this topic." },
+      { task:"Summarise the most important idea from this topic in two or three sentences." },],
+  },
+
+  workplace_language: {
+    label: "Workplace Language and Communicating at Work",
+    category: "vocabulary",
+    questions: [
+      { type:"finish the sentence", question:"'Can we ___ a meeting for Thursday afternoon to discuss the proposal?'", answer:"schedule / arrange / set up / book", hint:"Planning a meeting in advance", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'I'll ___ the minutes from today's meeting and send them around.' (take/write/do)", answer:"take", hint:"'Take the minutes' = record what was said in a meeting", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"'I need to delegate some tasks — I'm up to the neck in work.'", answer:"I need to delegate some tasks — I'm up to my neck in work.", hint:"'Up to my neck in work' — possessive pronoun needed", difficulty:"medium" },
+      { type:"finish the sentence", question:"'The project is ___ schedule — we're going to miss the deadline.'", answer:"behind", hint:"'Behind schedule' = running late", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'Could you ___ on that email I sent last week?' (follow up/chase up/respond)", answer:"follow up on / chase up", hint:"'Follow up on' and 'chase up' both mean to check on something", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'She gave me a very constructive feedback on my presentation.'", answer:"She gave me very constructive feedback on my presentation.", hint:"'Feedback' is uncountable — no 'a' before it", difficulty:"easy" },
+      { type:"finish the sentence", question:"'Let's ___ a deadline of Friday for the first draft.'", answer:"set / agree on / fix", hint:"Deciding when something must be finished", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'___ going forward, let's agree that all updates are shared weekly.' (Moving/Going/From now)", answer:"Moving / Going forward / From now on", hint:"'Moving forward' is a common workplace phrase for 'in the future'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'He was asked to circle back with the client after the meeting.'", answer:"He was asked to circle back with the client after the meeting.", hint:"'Circle back with' = correct workplace phrase meaning to follow up", difficulty:"hard" },
+      { type:"finish the sentence", question:"'Could you ___ me in on the email chain? I seem to have been missed off.'", answer:"copy / cc / include", hint:"'Copy me in' = add me to the email recipients", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'We need to ___ the issue before it becomes a bigger problem.' (address/tackle/deal with)", answer:"address / tackle / deal with", hint:"All three work for handling a problem", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'I'm going to take ownership of this task and make sure it delivers on time.'", answer:"I'm going to take ownership of this task and make sure it is delivered on time.", hint:"'Delivers' needs a passive — the task doesn't deliver itself", difficulty:"hard" },
+      { type:"finish the sentence", question:"'We need to ___ priorities here — not everything can be urgent.'", answer:"clarify / set / agree on / reassess", hint:"Deciding what is most important", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'___ the figures you shared, our projections look strong.' (Based on/According to/From)", answer:"Based on / According to / From", hint:"All three work as formal data reference openers", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'She's very proactive — she always takes initiative in her own.'", answer:"She's very proactive — she always takes initiative on her own.", hint:"'On her own' — not 'in her own'", difficulty:"easy" },
+      { type:"finish the sentence", question:"'I'd like to ___ the point about budget before we move on.'", answer:"revisit / come back to / address / raise", hint:"Returning to or raising a point in a meeting", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'He's very good at ___ expectations from the start.' (managing/setting/clarifying)", answer:"managing / setting / clarifying", hint:"All three collocate with 'expectations'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'Can we take this offline and discuss it in a smaller group?'", answer:"Can we take this offline and discuss it in a smaller group?", hint:"'Take this offline' is correct workplace English — it means discuss separately", difficulty:"hard" },
+      { type:"finish the sentence", question:"'I'll ___ by end of day to confirm whether the meeting is going ahead.'", answer:"get back to you / follow up / confirm / let you know", hint:"Promising to update someone", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'She ___ above and beyond on this project — the results speak for themselves.' (went/did/worked)", answer:"went", hint:"'Go above and beyond' — fixed phrasal expression", difficulty:"easy" },
+    ],
+    spyRounds: [
+      { crewmateTopic:"Running a Meeting", spyTopic:"Following Up After a Meeting", crewmatePrompt:"Talk about what happens DURING a meeting — setting the agenda, going through items, taking minutes, managing time, making decisions, assigning action points.", spyPrompt:"Talk about what happens AFTER a meeting — sending minutes, following up on action points, chasing people who haven't responded, circling back with clients, updating stakeholders.", explanation:"Crewmates discussed running and participating in meetings. The spy discussed follow-up actions after meetings.", spyGuessOptions:["Running a Meeting","Following Up After a Meeting","Preparing for a Meeting","Difficult Meetings"] },
+      { crewmateTopic:"Dealing with Problems at Work", spyTopic:"Giving and Receiving Feedback", crewmatePrompt:"Talk about handling problems and challenges at work — tight deadlines, difficult colleagues, technical issues, mistakes, being behind schedule, managing pressure.", spyPrompt:"Talk about giving and receiving feedback at work — constructive criticism, performance reviews, praising good work, responding to feedback professionally.", explanation:"Crewmates discussed dealing with workplace problems and pressure. The spy discussed feedback and professional development.", spyGuessOptions:["Dealing with Problems at Work","Giving and Receiving Feedback","Workplace Communication","Time Management at Work"] },
+      { crewmateTopic:"Formal Workplace Language", spyTopic:"Informal Workplace Language", crewmatePrompt:"Use formal workplace phrases — 'I would like to bring to your attention…', 'Following our discussion…', 'Please find attached…', 'As per our agreement…', 'I am writing to confirm…'", spyPrompt:"Use informal, everyday workplace phrases — 'Just checking in…', 'Can you give me a heads up?', 'Let's loop in Sarah.', 'I'll ping you later.', 'What's the ETA on this?'", explanation:"Crewmates used formal written/professional workplace language. The spy used informal, everyday office slang.", spyGuessOptions:["Formal Workplace Language","Informal Office Language","Email Language","Meeting Language"] },
+      { crewmateTopic:"Workload and Time Management", spyTopic:"Working with Others (Teamwork)", crewmatePrompt:"Talk about managing your workload — being behind schedule, prioritising tasks, setting deadlines, delegating, being up to your neck in work, working overtime.", spyPrompt:"Talk about working with colleagues and collaborating — delegating to others, giving feedback, managing expectations, supporting teammates, asking for help.", explanation:"Crewmates discussed personal workload and time management. The spy discussed working with and depending on other people.", spyGuessOptions:["Workload and Time Management","Teamwork and Collaboration","Remote Working","Career Development"] },
+    ],
+    minefieldGrid: {
+      topic: "Workplace Language",
+      instructions: "Combine the workplace phrase (top) with the situation starter (side) — then complete it with your own specific task, deadline, or detail.",
+      colLabels: ["Could you follow up on…?", "We need to address…", "I'll get back to you…", "Moving forward,…", "She went above and beyond…"],
+      rowLabels: ["… a communication issue — I …", "… a problem with …", "… once I've checked …", "… the team will need to …", "… by doing … on this project."],
+    },
+    hotSeatWords: [
+      {word:"deadline"},{word:"agenda"},{word:"action point"},{word:"minutes"},
+      {word:"delegate"},{word:"follow up"},{word:"copy in"},{word:"behind schedule"},
+      {word:"take ownership"},{word:"proactive"},{word:"go above and beyond"},{word:"circle back"},
+      {word:"feedback"},{word:"set expectations"},{word:"moving forward"},{word:"take offline"},
+      {word:"up to my neck"},{word:"chase up"},{word:"stakeholder"},{word:"sign off"},
+    ],
+    hotPotatoPrompts: [
+      {prompt:"'She gave me very constructive ___.'", answer:"feedback (uncountable — no 'a', no 's')"},
+      {prompt:"'The project is ___ schedule.' (behind/after/late)", answer:"behind"},
+      {prompt:"'Take the ___.' = write down what was said in a meeting.", answer:"minutes"},
+      {prompt:"'___ me in on the email.'", answer:"Copy / CC"},
+      {prompt:"What does 'delegate' mean at work?", answer:"to give a task or responsibility to someone else"},
+      {prompt:"'She went above and ___.' (beyond/over/extra)", answer:"beyond"},
+      {prompt:"'Moving ___.' = in the future (workplace phrase)", answer:"forward"},
+      {prompt:"'I'm up to my ___ in work.' (neck/head/ears)", answer:"neck"},
+      {prompt:"What is an 'action point'?", answer:"a task assigned during a meeting that someone must complete"},
+      {prompt:"'Could you ___ up on that?'", answer:"follow / chase"},
+      {prompt:"What does 'take ownership' mean?", answer:"to accept full responsibility for a task or outcome"},
+      {prompt:"'Based ___ the data, the results are positive.' (on/in/from)", answer:"on"},
+      {prompt:"What is an 'agenda'?", answer:"a list of topics to be discussed in a meeting"},
+      {prompt:"'She takes initiative ___ her own.' (on/in/by)", answer:"on"},
+      {prompt:"What does 'circle back' mean?", answer:"to return to a topic or follow up later"},
+      {prompt:"What does 'sign off' mean in a work context?", answer:"to formally approve something"},
+      {prompt:"'Let's take this ___.' = discuss it separately.", answer:"offline"},
+      {prompt:"What is a 'stakeholder'?", answer:"anyone with an interest in the outcome of a project or decision"},
+      {prompt:"Name one phrase for promising to update someone.", answer:"(free — 'I'll get back to you', 'I'll follow up', 'I'll let you know by...')"},
+      {prompt:"What does 'behind schedule' mean?", answer:"running late — not meeting the planned timeline"},
+    ],
+    auctionSentences: [
+      { sentence:"Could you follow up on the proposal we sent to the client last Tuesday?", isCorrect:true, explanation:"'Follow up on' is the correct phrasal verb for checking on something." },
+      { sentence:"She gave me a very constructive feedback after my presentation.", isCorrect:false, explanation:"'Feedback' is uncountable — no 'a': 'She gave me very constructive feedback'." },
+      { sentence:"The project is behind schedule — we may need to push back the deadline.", isCorrect:true, explanation:"'Behind schedule' and 'push back the deadline' are both correct collocations." },
+      { sentence:"I need to delegate some tasks — I'm up to my neck in work.", isCorrect:true, explanation:"'Up to my neck in work' is the correct fixed expression." },
+      { sentence:"I need to delegate some tasks — I'm up to the neck in work.", isCorrect:false, explanation:"'Up to MY neck' — possessive pronoun required." },
+      { sentence:"Moving forward, all project updates will be shared in the weekly team meeting.", isCorrect:true, explanation:"'Moving forward' is correct workplace English for 'in future'." },
+      { sentence:"Could you copy me in on the email chain? I seem to have been left off.", isCorrect:true, explanation:"'Copy me in on' is the correct collocation." },
+      { sentence:"She went above and beyond on this project — the results were exceptional.", isCorrect:true, explanation:"'Go above and beyond' is the correct fixed expression." },
+      { sentence:"She takes initiative in her own — she never waits to be told what to do.", isCorrect:false, explanation:"'Takes initiative ON her own' — not 'in her own'." },
+      { sentence:"Let's set a deadline of Friday for the first draft and review it together.", isCorrect:true, explanation:"'Set a deadline' is the correct collocation." },
+    ],
+    cardTasks: [
+      { task:"Use 'follow up on', 'copy me in', and 'circle back' in workplace sentences." },
+      { task:"Describe what you would do if your project was behind schedule." },
+      { task:"Role-play: run a short work meeting — set the agenda, go through items, assign action points." },
+      { task:"Use 'take ownership', 'delegate', and 'go above and beyond' about a colleague or yourself." },
+      { task:"Practise giving constructive feedback to a colleague about their work." },
+      { task:"Use 'moving forward', 'based on the data', and 'set expectations' in professional sentences." },
+      { task:"Describe the ideal meeting — how long, how structured, how many people?" },
+      { task:"Use 'I'll get back to you by…' and 'Could you follow up on…?' in a role-play." },
+      { task:"Talk about a time you had to deal with a difficult deadline." },
+      { task:"Practise formal workplace email openers and closers." },
+      { task:"Use 'up to my neck in work', 'behind schedule', and 'prioritise' in context." },
+      { task:"Discuss: what makes a good workplace communicator?" },
+      { task:"Role-play: give a colleague feedback on a presentation they just gave." },
+      { task:"Describe your workplace communication style — formal, informal, or mixed?" },
+      { task:"Compare formal and informal workplace language — when do you use each?" },
+      { task:"Use 'take the minutes', 'set the agenda', and 'action point' in a meeting role-play." },
+      { task:"Discuss: what is the most common communication problem in workplaces?" },
+      { task:"Practise asking for help professionally: 'I'm struggling with…, could you…?'" },
+      { task:"Use 'sign off', 'stakeholder', and 'take offline' in professional sentences." },
+      { task:"Discuss: is working from home better or worse for communication? Why?" },
+    
+      { task:"Use workplace phrases to describe a project update to a partner — include a deadline." },
+      { task:"Roleplay a short work meeting — use 'moving forward', 'action points', and 'follow up'." },
+      { task:"Describe a time someone went above and beyond at work — what did they do?" },
+      { task:"Use 'I'll get back to you' and 'We need to address' in a short professional conversation." },
+      { task:"Practise delegating a task to a partner — use clear, professional language." },],
+  },
+
+  problems_and_solutions: {
+    label: "Talking About Problems and Solutions",
+    category: "vocabulary",
+    questions: [
+      { type:"finish the sentence", question:"'The main ___ with this approach is that it takes too long to implement.'", answer:"problem / issue / drawback / downside", hint:"A negative aspect or difficulty", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'She ___ a solution to the problem after thinking about it overnight.' (came up with/found out/thought up)", answer:"came up with / found / thought up", hint:"All three work for finding a solution", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'I have a big problem with my landlord — he refuses to fix the heating.'", answer:"I have a big problem with my landlord — he refuses to fix the heating.", hint:"This sentence is correct — 'have a problem with' is the right collocation", difficulty:"medium" },
+      { type:"finish the sentence", question:"'The situation ___ out of hand — we need to do something about it now.'", answer:"got / is getting / has got", hint:"'Get out of hand' = become uncontrollable", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'We should ___ the problem head-on rather than avoiding it.' (tackle/face/address)", answer:"tackle / face / address", hint:"All three mean to deal with something directly", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'One possible solve could be to bring in a specialist to assess the situation.'", answer:"One possible solution could be to bring in a specialist to assess the situation.", hint:"'Solution' is the noun — not 'solve'", difficulty:"easy" },
+      { type:"finish the sentence", question:"'We need to ___ to the root cause of the problem, not just the symptoms.'", answer:"get / address / look", hint:"'Get to the root cause' = find the underlying reason", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'The issue ___ due to a miscommunication between the two departments.' (arose/raised/came)", answer:"arose / came about", hint:"'Arise' = to come about; 'raise' needs an object", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"'I'm having difficulties to concentrate with all this noise.'", answer:"I'm having difficulty concentrating with all this noise.", hint:"'Have difficulty + -ing' — not 'difficulty to + infinitive'; 'difficulty' often uncountable", difficulty:"medium" },
+      { type:"finish the sentence", question:"'In the short ___, this solution won't be cheap, but it will save money long term.'", answer:"term", hint:"'In the short term / long term'", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'We need to ___ this before it escalates further.' (deal with/sort out/handle)", answer:"deal with / sort out / handle / resolve", hint:"All four work for fixing a problem", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'The best workaround is temporarily bypass the broken system.'", answer:"The best workaround is to temporarily bypass the broken system.", hint:"'Is to + infinitive' — 'to' is needed before the verb", difficulty:"medium" },
+      { type:"finish the sentence", question:"'One ___ to this problem would be to hire more staff during peak periods.'", answer:"solution / approach / answer / way", hint:"A possible answer to the problem", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'The project ___ into difficulties when the key supplier pulled out.' (ran/fell/got)", answer:"ran / fell / got into", hint:"'Run into difficulties', 'fall into difficulties', 'get into difficulties' all work", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"'We should look for an alternative rather than give up.'", answer:"We should look for an alternative rather than giving up.", hint:"'Rather than + -ing' in this construction", difficulty:"medium" },
+      { type:"finish the sentence", question:"'This is a ___ fix — we need a proper long-term solution.'", answer:"temporary / short-term / quick", hint:"Something that works for now but won't last", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'___ the issue at hand, I think we need to consider all options carefully.' (Given/Considering/Regarding)", answer:"Given / Considering / Regarding", hint:"All three introduce a formal statement about the situation", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'The problem resolved itself once we gave the system more time.'", answer:"The problem resolved itself once we gave the system more time.", hint:"This is correct — 'resolve itself' is a natural phrase", difficulty:"hard" },
+      { type:"finish the sentence", question:"'This could be a real ___ — if we solve it, we'll be much more efficient.'", answer:"game-changer / breakthrough / turning point", hint:"A solution that makes a big positive difference", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'___ forward, what steps can we take to prevent this happening again?' (Going/Moving/Looking)", answer:"Going / Moving forward / Looking ahead", hint:"All three introduce future-focused thinking after a problem", difficulty:"easy" },
+    ],
+    spyRounds: [
+      { crewmateTopic:"Describing a Problem", spyTopic:"Proposing a Solution", crewmatePrompt:"Describe a problem clearly — what it is, when it started, what caused it, who is affected, and how serious it is. Use: 'The main issue is…', 'It arose because…', 'The situation got out of hand when…'", spyPrompt:"Propose solutions — without dwelling on the problem, focus on what can be done: 'One solution would be to…', 'We could tackle this by…', 'In the short term, we should…', 'A more sustainable approach might be to…'", explanation:"Crewmates described and analysed the problem. The spy jumped to solutions.", spyGuessOptions:["Describing a Problem","Proposing a Solution","Evaluating Options","Assigning Blame"] },
+      { crewmateTopic:"Practical/Logistical Problems", spyTopic:"Interpersonal/Relationship Problems", crewmatePrompt:"Talk about practical or logistical problems — technical issues, delivery delays, broken equipment, scheduling conflicts, budget shortfalls, systems failing.", spyPrompt:"Talk about interpersonal or relationship problems — miscommunication between colleagues, a difficult conversation you had to have, a conflict at work or home, a misunderstanding.", explanation:"Crewmates discussed practical, logistical problems. The spy discussed human, interpersonal challenges.", spyGuessOptions:["Practical or Logistical Problems","Interpersonal or Relationship Problems","Financial Problems","Environmental Problems"] },
+      { crewmateTopic:"Short-term Solutions", spyTopic:"Long-term Solutions", crewmatePrompt:"Talk about immediate, quick-fix solutions — temporary workarounds, emergency measures, buying time, patching the problem until a proper solution can be found.", spyPrompt:"Talk about long-term, sustainable solutions — addressing root causes, structural changes, prevention strategies, investing in lasting improvements.", explanation:"Crewmates discussed quick, temporary fixes. The spy discussed sustainable, long-term solutions.", spyGuessOptions:["Short-term / Quick Fixes","Long-term / Sustainable Solutions","Prevention Strategies","Radical Solutions"] },
+      { crewmateTopic:"A Problem You Have Faced", spyTopic:"A Problem Someone Else Faced", crewmatePrompt:"Describe a real problem YOU have faced — at work, at home, or in daily life. What was it, how did you feel, and how did you resolve it?", spyPrompt:"Describe a problem SOMEONE ELSE faced — a friend, colleague, or family member. What was their problem, how did they deal with it, and what did you do to help?", explanation:"Crewmates described a personal problem. The spy described helping someone else with their problem.", spyGuessOptions:["A Problem You Faced","A Problem Someone Else Faced","A Problem Without a Solution","A Problem That Resolved Itself"] },
+    ],
+    minefieldGrid: {
+      topic: "Problems and Solutions",
+      instructions: "Combine the problem/solution opener (top) with the situation starter (side) — then complete it with your own specific problem, cause, or action.",
+      colLabels: ["The main issue is…", "One solution would be to…", "The situation got out of hand…", "In the short term,…", "Going forward,…"],
+      rowLabels: ["… a lack of …", "… improve …", "… because nobody …", "… we could try …", "… it's essential that …"],
+    },
+    hotSeatWords: [
+      {word:"problem"},{word:"issue"},{word:"solution"},{word:"workaround"},
+      {word:"drawback"},{word:"root cause"},{word:"escalate"},{word:"resolve"},
+      {word:"out of hand"},{word:"tackle"},{word:"address"},{word:"come up with"},
+      {word:"in the short term"},{word:"long-term"},{word:"temporary fix"},{word:"game-changer"},
+      {word:"run into difficulties"},{word:"approach"},{word:"arise"},{word:"prevent"},
+    ],
+    hotPotatoPrompts: [
+      {prompt:"'She came ___ with a brilliant solution.' (up/out/in)", answer:"up"},
+      {prompt:"'The situation got ___ of hand.' (out/away/beyond)", answer:"out"},
+      {prompt:"'We need to get to the ___ cause.' (root/real/main)", answer:"root"},
+      {prompt:"'She ___ having difficulty concentrating.'", answer:"is / was"},
+      {prompt:"'Have difficulty ___.' (to concentrate/concentrating)", answer:"concentrating"},
+      {prompt:"'One possible ___.'", answer:"solution / answer"},
+      {prompt:"'The issue ___.'", answer:"arose / came up"},
+      {prompt:"'In the ___ term.' (short/near/current)", answer:"short"},
+      {prompt:"What does 'escalate' mean?", answer:"to become more serious or to refer a problem to a higher level"},
+      {prompt:"What is a 'workaround'?", answer:"a temporary solution that avoids a problem without fixing it properly"},
+      {prompt:"What does 'resolve' mean?", answer:"to find a solution to a problem and fix it"},
+      {prompt:"'We should look for an alternative rather than ___ up.' (give/giving)", answer:"giving"},
+      {prompt:"What does 'game-changer' mean?", answer:"something that makes a significant positive difference to a situation"},
+      {prompt:"'Going ___.' (forward/ahead/on)", answer:"forward"},
+      {prompt:"What does 'address' mean in the context of problems?", answer:"to deal with or tackle a problem"},
+      {prompt:"'The best workaround is ___ temporarily bypass it.' (to/for/by)", answer:"to"},
+      {prompt:"Name one verb that means to deal with a problem.", answer:"(free — tackle, address, handle, resolve, sort out, deal with)"},
+      {prompt:"What is a 'root cause'?", answer:"the underlying or original reason a problem exists"},
+      {prompt:"Describe a problem in your life using 'the main issue is'.", answer:"(free answer)"},
+      {prompt:"What's the difference between a 'short-term' and 'long-term' solution?", answer:"(free — short-term fixes the immediate problem; long-term prevents it from returning)"},
+    ],
+    auctionSentences: [
+      { sentence:"The main issue with this approach is that it doesn't address the root cause.", isCorrect:true, explanation:"'Main issue' and 'address the root cause' are both correct collocations." },
+      { sentence:"One possible solve would be to bring in a specialist consultant.", isCorrect:false, explanation:"'Solution' is the noun — 'One possible solution would be to…'" },
+      { sentence:"She came up with a brilliant solution after thinking it through overnight.", isCorrect:true, explanation:"'Come up with a solution' is the correct collocation." },
+      { sentence:"The situation got out of hand quickly — we need to act immediately.", isCorrect:true, explanation:"'Get out of hand' correctly describes an uncontrollable situation." },
+      { sentence:"I'm having difficulties to concentrate with all the noise.", isCorrect:false, explanation:"'Have difficulty concentrating' — not 'difficulties to concentrate'." },
+      { sentence:"We should look for an alternative rather than giving up.", isCorrect:true, explanation:"'Rather than + -ing' is the correct construction." },
+      { sentence:"The issue arose due to a miscommunication between the two teams.", isCorrect:true, explanation:"'Arise' (intransitive) correctly describes how the issue came about." },
+      { sentence:"This is just a temporary fix — we need a more sustainable long-term solution.", isCorrect:true, explanation:"'Temporary fix' and 'sustainable long-term solution' are both correct." },
+      { sentence:"The best workaround is temporarily bypass the system.", isCorrect:false, explanation:"'Is to temporarily bypass' — 'to' is needed before the infinitive." },
+      { sentence:"Going forward, what steps can we take to prevent this from happening again?", isCorrect:true, explanation:"'Going forward' and 'prevent this from happening' are both correct." },
+    ],
+    cardTasks: [
+      { task:"Describe a problem using 'the main issue is', 'it arose because', and 'it got out of hand'." },
+      { task:"Use 'come up with', 'tackle', and 'address' to propose solutions to a problem." },
+      { task:"Talk about a time a situation got out of hand and how you resolved it." },
+      { task:"Use 'in the short term' and 'in the long term' to discuss a two-stage solution." },
+      { task:"Role-play: one person describes a problem at work, the other proposes solutions." },
+      { task:"Use 'root cause', 'symptom', and 'workaround' in a discussion about a problem." },
+      { task:"Describe a problem that resolved itself — what happened?" },
+      { task:"Use 'game-changer', 'breakthrough', and 'turning point' in sentences." },
+      { task:"Practise: 'I'm having difficulty + -ing' about something challenging in your life." },
+      { task:"Talk about a problem in your city or country and suggest a realistic solution." },
+      { task:"Use 'going forward', 'in the short term', and 'rather than + -ing' in one discussion." },
+      { task:"Discuss: what's worse — a problem with no solution, or a solution that creates new problems?" },
+      { task:"Describe a time you 'ran into difficulties' — what were they and how did you handle them?" },
+      { task:"Role-play: you need to explain a problem to your manager. Be clear and solutions-focused." },
+      { task:"Use 'the main drawback', 'one option would be', and 'this approach has the advantage of'." },
+      { task:"Discuss: is it better to tackle problems immediately or wait to see if they resolve themselves?" },
+      { task:"Use 'escalate', 'resolve', and 'prevent' in sentences about a specific problem." },
+      { task:"Talk about a problem that required a creative or unexpected solution." },
+      { task:"Discuss: who should be responsible for solving problems — individuals or institutions?" },
+      { task:"Describe a global problem and evaluate both a short-term and long-term solution." },
+    
+      { task:"Talk about this topic for one minute — share your personal opinion and experience." },
+      { task:"Ask a partner two questions related to this topic and discuss the answers together." },
+      { task:"Describe a real situation from your own life that relates to this topic." },
+      { task:"Give your partner two tips or pieces of advice related to this topic." },
+      { task:"Summarise the most important idea from this topic in two or three sentences." },],
+  },
+
+// NEW TOPICS TO INSERT
+// Insert before the closing }; of LESSON_LIBRARY
+
+  // ── A1 GRAMMAR ─────────────────────────────────────────────────────────────
+
+  can_cant: {
+    label: "Can / Can't (Ability & Permission)",
+    level: "A1", focus: "grammar",
+    questions: [
+      { type:"choose correct grammar", question:"'___ you swim?' (Can/Do/Are)", answer:"Can", hint:"'Can' is used for ability", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'She ___ drive — she's only ten.' (can't/doesn't/isn't)", answer:"can't", hint:"'Can't' = not able to", difficulty:"easy" },
+      { type:"finish the sentence", question:"'I can ___.' (name one thing you are good at)", answer:"(free — e.g. speak English / cook / play guitar)", hint:"Use the base verb after 'can'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'He can to play piano.'", answer:"He can play piano.", hint:"No 'to' after 'can'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'Can you to help me?'", answer:"Can you help me?", hint:"No 'to' after 'can'", difficulty:"easy" },
+      { type:"finish the sentence", question:"'She can't ___.' (name one thing she is unable to do)", answer:"(free — e.g. drive / speak French)", hint:"'Can't' = not able to", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'___ I open the window?' (Can/Do/Am)", answer:"Can", hint:"'Can I…?' = asking permission", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'I cans speak English.'", answer:"I can speak English.", hint:"'Can' never has an 's'", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'___ they come to the party?' (Can/Are/Do)", answer:"Can", hint:"'Can' for ability/permission", difficulty:"easy" },
+      { type:"finish the sentence", question:"'Can you ___?' (ask your partner about an ability)", answer:"(free — e.g. Can you cook? Can you swim?)", hint:"Use base verb", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'She can sings very well.'", answer:"She can sing very well.", hint:"Base verb after 'can' — no -s", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'You ___ park here. It is not allowed.' (can't/cannot/both are correct)", answer:"both are correct", hint:"Can't = cannot — both fine", difficulty:"easy" },
+      { type:"finish the sentence", question:"'In my city, you can ___.' (name an activity)", answer:"(free — e.g. visit museums / swim in the sea)", hint:"Use base verb", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'Can he speaks French?'", answer:"Can he speak French?", hint:"Base verb after 'can' — no -s", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'___ we take photos here?' (Can/Do/Should)", answer:"Can", hint:"'Can we…?' = asking permission", difficulty:"easy" },
+      { type:"finish the sentence", question:"'I can't ___, but I'd like to learn.'", answer:"(free — e.g. ski / play chess)", hint:"'Can't' + base verb", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'She can't to drive.'", answer:"She can't drive.", hint:"No 'to' after 'can't'", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'My dog ___ shake hands.' (can/cans/is can)", answer:"can", hint:"'Can' never changes form", difficulty:"easy" },
+      { type:"finish the sentence", question:"'Can I ___?' (ask for permission to do something)", answer:"(free — e.g. Can I sit here? Can I borrow your pen?)", hint:"'Can I…?' for permission", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'They can't comes to class today.'", answer:"They can't come to class today.", hint:"Base verb after 'can't'", difficulty:"easy" },
+    ],
+    cardTasks: [
+      { task:"Tell your partner two things you can do well and one thing you can't do." },
+      { task:"Ask a partner 'Can you…?' for five different activities." },
+      { task:"Say three sentences about what your family members can and can't do." },
+      { task:"Ask permission for three things using 'Can I…?' in a classroom roleplay." },
+      { task:"Tell the class about a skill you can do that most people can't." },
+      { task:"Say what animals can and can't do — name at least three animals." },
+      { task:"Make three sentences about what you could do as a child that you can't do now." },
+      { task:"Roleplay: ask if you can do things in a shop, library, or park." },
+      { task:"Tell a partner three rules using 'You can' and 'You can't' for your school." },
+      { task:"Describe a sport — what can you do in it and what can't you do?" },
+      { task:"Ask a partner what they can cook — respond naturally." },
+      { task:"Say three sentences: 'I can… but I can't…'" },
+      { task:"Make a mini dialogue asking and giving permission using 'Can I…?'" },
+      { task:"Tell the class one thing you can do now that you couldn't do a year ago." },
+      { task:"Describe your country using 'You can…' and 'You can't…' — name three things." },
+      { task:"Ask three classmates what language they can speak." },
+      { task:"Say what you can and can't do at work or school." },
+      { task:"Use 'can' to describe an ability you are proud of and explain it." },
+      { task:"Make two questions with 'Can…?' and ask them to a partner." },
+      { task:"Describe your ideal job using 'I can…' and 'I would like to be able to…'" },
+      { task:"Say three things children can do that adults often can't — and why." },
+      { task:"Roleplay: phone a hotel and ask what facilities are available using 'Can I…?'" },
+      { task:"Describe a skill you are learning — 'I can't yet, but soon I will be able to…'" },
+      { task:"Compare two people you know using 'can' and 'can't'." },
+      { task:"Tell the class something surprising you can do." },
+    ],
+    hotPotatoPrompts: [
+      {prompt:"'___ you swim?'", answer:"Can"},
+      {prompt:"'She ___ drive — she is too young.'", answer:"can't"},
+      {prompt:"'___ I sit here?' (permission)", answer:"Can"},
+      {prompt:"'My cat ___ open doors!'", answer:"can"},
+      {prompt:"'He ___ speaks French.' — is this correct?", answer:"No — 'can speak' (no -s)"},
+      {prompt:"Ability: 'I ___ play guitar.'", answer:"can"},
+      {prompt:"'___ we take photos here?'", answer:"Can"},
+      {prompt:"'She can ___ English well.'", answer:"speak"},
+      {prompt:"No ability: 'I ___ drive.'", answer:"can't / cannot"},
+      {prompt:"'You ___ park here — it is a bus lane.'", answer:"can't"},
+      {prompt:"'___ I borrow your pen?' — what type of 'can' is this?", answer:"permission"},
+      {prompt:"'He can to sing.' — find the mistake.", answer:"can sing (no 'to')"},
+      {prompt:"'Dolphins ___ swim very fast.'", answer:"can"},
+      {prompt:"'___ she speak Japanese?' 'Yes, a little.'", answer:"Can"},
+      {prompt:"'I ___ cook but I want to learn.'", answer:"can't"},
+      {prompt:"'Babies ___ walk when they are born.'", answer:"can't"},
+      {prompt:"'You ___ use your phone in the exam.'", answer:"can't"},
+      {prompt:"'___ elephants jump?'", answer:"No, they can't"},
+      {prompt:"'Can they comes?' — find the mistake.", answer:"Can they come? (no -s)"},
+      {prompt:"'I ___ run 10km!' — expressing ability.", answer:"can"},
+    ],
+    minefieldGrid: {
+      topic: "Can / Can't",
+      instructions: "Combine the subject (top) with the ability frame (side) to make a sentence — then complete it with your own activity.",
+      colLabels: ["I can…", "She can't…", "Can you…?", "They can both…", "He couldn't…"],
+      rowLabels: ["… really well because …", "… yet, but I'm learning …", "… better than most people.", "… at all, which surprises people.", "… as a child, but now …"],
+    },
+    hotSeatWords: [
+      {word:"swim"},{word:"drive"},{word:"cook"},{word:"fly"},{word:"ski"},
+      {word:"paint"},{word:"dance"},{word:"sing"},{word:"climb"},{word:"juggle"},
+      {word:"permission"},{word:"ability"},{word:"allowed"},{word:"skill"},{word:"talent"},
+      {word:"possible"},{word:"impossible"},{word:"can"},{word:"practise"},{word:"learn"},
     ],
   },
+
+  have_got: {
+    label: "Have Got (Possession & Description)",
+    level: "A1", focus: "grammar",
+    questions: [
+      { type:"choose correct grammar", question:"'I ___ a new phone.' (have got/have gets/am got)", answer:"have got", hint:"'Have got' = possess", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'She have got brown eyes.'", answer:"She has got brown eyes.", hint:"3rd person: 'has got'", difficulty:"easy" },
+      { type:"finish the sentence", question:"'I've got ___.' (describe something you own)", answer:"(free — e.g. a dog / two brothers / a red coat)", hint:"'I've got' = I have got", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'___ you got a pen I can borrow?' (Have/Has/Do)", answer:"Have", hint:"Question: 'Have you got…?'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'He hasn't got no car.'", answer:"He hasn't got a car.", hint:"No double negative", difficulty:"easy" },
+      { type:"finish the sentence", question:"'She's got ___.' (describe a person's appearance)", answer:"(free — e.g. long hair / blue eyes / a big smile)", hint:"'She's got' = she has got", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'___ he got a brother?' (Has/Have/Is)", answer:"Has", hint:"3rd person question: 'Has he got…?'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'They hasn't got a garden.'", answer:"They haven't got a garden.", hint:"Plural: 'haven't got'", difficulty:"easy" },
+      { type:"finish the sentence", question:"'Have you got ___?' (ask your partner a question)", answer:"(free — e.g. Have you got a pet? / Have you got any siblings?)", hint:"'Have you got…?' = do you have…?", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'I ___ got any money today.' (haven't/hasn't/don't)", answer:"haven't", hint:"Negative: 'haven't got'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'Has you got the homework?'", answer:"Have you got the homework?", hint:"'Have you got' — not 'Has you'", difficulty:"easy" },
+      { type:"finish the sentence", question:"'My town has got ___.' (describe your town)", answer:"(free — e.g. a big park / two cinemas / a river)", hint:"'Has got' for 3rd person singular", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'We ___ got a test on Friday.' (have/has/are)", answer:"have", hint:"'We have got' = plural", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'I have got a black hairs.'", answer:"I have got black hair.", hint:"Hair is uncountable — no article, no plural", difficulty:"easy" },
+      { type:"finish the sentence", question:"'My friend has got ___.' (describe a friend)", answer:"(free — e.g. a great sense of humour / a lovely flat)", hint:"3rd person: 'has got'", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'___ she got blue or brown eyes?' (Has/Have/Is)", answer:"Has", hint:"3rd person question: 'Has she got…?'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'He have got two cats and one dog.'", answer:"He has got two cats and one dog.", hint:"3rd person: 'has got'", difficulty:"easy" },
+      { type:"finish the sentence", question:"'I haven't got ___.' (something you don't have but would like)", answer:"(free — e.g. a car / a garden / a pet)", hint:"Negative: 'haven't got'", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'___ got any tickets left?' (Have they/Has they/Do them)", answer:"Have they", hint:"'Have they got…?' — plural question", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'She has got a hairs that are very long.'", answer:"She has got very long hair.", hint:"Hair = uncountable", difficulty:"easy" },
+    ],
+    cardTasks: [
+      { task:"Describe yourself using 'I've got…' — mention hair, eyes, and one other feature." },
+      { task:"Ask a partner 'Have you got…?' for five different things." },
+      { task:"Describe your home using 'My home has got…' — mention three things." },
+      { task:"Tell a partner about your family using 'have got' for each person." },
+      { task:"Describe a celebrity using 'He/She has got…' without saying the name — can your partner guess?" },
+      { task:"Make three sentences about what your school has and hasn't got." },
+      { task:"Ask three classmates 'Have you got…?' — find something you all have in common." },
+      { task:"Describe your ideal house using 'It's got…' — mention at least four things." },
+      { task:"Use 'have got' to describe a pet — real or imaginary." },
+      { task:"Tell the class three things you've got and three things you haven't got." },
+      { task:"Describe a friend without saying their name — use 'has got' for appearance." },
+      { task:"Make a question for your partner using 'Have you got…?' and respond." },
+      { task:"Describe your town: what has it got? What hasn't it got?" },
+      { task:"Use 'has got' to describe a famous building or landmark." },
+      { task:"Tell a partner about your perfect weekend bag — 'In my bag I've got…'" },
+      { task:"Ask a partner three questions using 'Has she/he got…?'" },
+      { task:"Compare yourself with a partner: 'I've got… but you've got…'" },
+      { task:"Describe a character from a book or film using 'has got'." },
+      { task:"Make two negative 'haven't got' sentences that are true for you." },
+      { task:"Tell a story: 'Once there was a man who had got…' — describe his possessions." },
+      { task:"Describe the ideal teacher using 'has got' — what qualities?" },
+      { task:"Ask your partner what their city has got — 'Has your city got…?'" },
+      { task:"Use 'have got' to list what you need for a camping trip." },
+      { task:"Describe your appearance to a partner using only 'have got' sentences." },
+      { task:"Make a silly animal: 'It has got the wings of a bird and the legs of a giraffe…'" },
+    ],
+    hotPotatoPrompts: [
+      {prompt:"'I ___ got a new phone.' (have/has)", answer:"have"},
+      {prompt:"'She ___ got long hair.' (have/has)", answer:"has"},
+      {prompt:"'___ you got a pen?' (Have/Has)", answer:"Have"},
+      {prompt:"'He ___ got a brother.' — negative", answer:"hasn't"},
+      {prompt:"'They ___ got a big house.' (have/has)", answer:"have"},
+      {prompt:"Contraction of 'I have got'?", answer:"I've got"},
+      {prompt:"Contraction of 'She has got'?", answer:"She's got"},
+      {prompt:"'___ she got blue eyes?' (Have/Has)", answer:"Has"},
+      {prompt:"'We ___ got any homework today.' — negative", answer:"haven't"},
+      {prompt:"'He have got a car.' — find the mistake.", answer:"He has got a car."},
+      {prompt:"'My flat has got ___ bedrooms.' (two/a/to)", answer:"two"},
+      {prompt:"Negative of 'They have got a garden.'", answer:"They haven't got a garden."},
+      {prompt:"'___ he got a sister?' (Have/Has)", answer:"Has"},
+      {prompt:"Negative of 'She has got long hair.'", answer:"She hasn't got long hair."},
+      {prompt:"'I haven't got ___ money.' (some/any/no)", answer:"any"},
+      {prompt:"'Has they got tickets?' — find the mistake.", answer:"Have they got tickets?"},
+      {prompt:"'Our school ___ got a swimming pool.' (have/has)", answer:"has"},
+      {prompt:"'I ___ got a headache.' (have/am/do)", answer:"have"},
+      {prompt:"'___ your town got a cinema?' (Have/Has/Is)", answer:"Has"},
+      {prompt:"'She has got a hairs.' — find the mistake.", answer:"She has got hair. (uncountable)"},
+    ],
+    minefieldGrid: {
+      topic: "Have Got",
+      instructions: "Combine the subject (top) with the frame (side) to make a sentence — add your own detail.",
+      colLabels: ["I've got…", "She's got…", "Have you got…?", "We haven't got…", "Has he got…?"],
+      rowLabels: ["… really beautiful …", "… two … in my …", "… a very unusual …", "… any … at the moment?", "… the same … as me?"],
+    },
+    hotSeatWords: [
+      {word:"hair"},{word:"eyes"},{word:"brother"},{word:"sister"},{word:"pet"},
+      {word:"garden"},{word:"bedroom"},{word:"phone"},{word:"ticket"},{word:"headache"},
+      {word:"flat"},{word:"car"},{word:"money"},{word:"friend"},{word:"idea"},
+      {word:"passport"},{word:"bicycle"},{word:"umbrella"},{word:"key"},{word:"problem"},
+    ],
+  },
+
+  present_continuous_a1: {
+    label: "Present Continuous (What are you doing?)",
+    level: "A1", focus: "grammar",
+    questions: [
+      { type:"choose correct grammar", question:"'She ___ (read) a book right now.' (is reading/reads/reading)", answer:"is reading", hint:"Present continuous = is/am/are + -ing", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'I am watch TV.'", answer:"I am watching TV.", hint:"Add -ing to the verb", difficulty:"easy" },
+      { type:"finish the sentence", question:"'I am ___ing right now.' (describe what you are doing at this moment)", answer:"(free — e.g. I am sitting / studying / listening)", hint:"Use am + verb-ing", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'What ___ you doing?' (are/is/am)", answer:"are", hint:"'What are you doing?' — question form", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'He is sleeps.'", answer:"He is sleeping.", hint:"Is + verb-ing", difficulty:"easy" },
+      { type:"finish the sentence", question:"'Look! They are ___.' (describe an action)", answer:"(free — e.g. running / laughing / dancing)", hint:"Are + verb-ing", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'She ___ not eating her dinner.' (is/am/are)", answer:"is", hint:"Negative: 'She is not eating'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'Are they dance?'", answer:"Are they dancing?", hint:"Add -ing to the verb", difficulty:"easy" },
+      { type:"finish the sentence", question:"'My teacher is ___ing at the moment.'", answer:"(free — e.g. speaking / writing / explaining)", hint:"Is + verb-ing", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'___ he working today?' (Is/Are/Am)", answer:"Is", hint:"3rd person: 'Is he…?'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'I am not goes to school today.'", answer:"I am not going to school today.", hint:"Negative: am not + verb-ing", difficulty:"easy" },
+      { type:"finish the sentence", question:"'We are not ___ing today because ___.'", answer:"(free — e.g. We are not working today because it's a holiday.)", hint:"Are not + verb-ing", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'The children ___ playing in the garden.' (are/is/am)", answer:"are", hint:"Plural: 'are'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'She is runing.'", answer:"She is running.", hint:"Double the final consonant before -ing", difficulty:"easy" },
+      { type:"finish the sentence", question:"'___ is sitting next to me.'", answer:"(free — name a classmate and say they are sitting next to you)", hint:"Name + is + verb-ing", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'I ___ listening to music right now.' (am/is/are)", answer:"am", hint:"'I am' — first person", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'He are reading a book.'", answer:"He is reading a book.", hint:"3rd person singular: 'is'", difficulty:"easy" },
+      { type:"finish the sentence", question:"'What is the teacher doing? She is ___.'", answer:"(free — e.g. She is writing on the board / explaining the lesson)", hint:"Is + verb-ing", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'___ you listening to me?' (Are/Is/Am)", answer:"Are", hint:"'Are you…?' — question with 'you'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'They are swiming in the pool.'", answer:"They are swimming in the pool.", hint:"Double m before -ing", difficulty:"easy" },
+    ],
+    cardTasks: [
+      { task:"Describe what five people in the room are doing right now." },
+      { task:"Mime an action — your partner says 'You are ___ing!'" },
+      { task:"Tell your partner three things you are NOT doing right now." },
+      { task:"Ask a partner 'What are you doing this evening?' and respond." },
+      { task:"Describe a busy street scene — say five things people are doing." },
+      { task:"Make three sentences about what you are doing this week that is different from normal." },
+      { task:"Roleplay a phone call: 'What are you doing? I'm…'" },
+      { task:"Describe a photo in your mind — say what everyone is doing." },
+      { task:"Ask your partner 'Are you ___ing?' for five different activities." },
+      { task:"Tell the class what you are thinking about right now." },
+      { task:"Make a sentence for each person in your family about what they are doing today." },
+      { task:"Describe what is happening outside the window right now." },
+      { task:"Make a mini story: 'The man is walking… he is carrying… he is looking for…'" },
+      { task:"Ask three classmates what music they are listening to this week." },
+      { task:"Roleplay: you are at a party. Tell your partner what different people are doing." },
+      { task:"Use present continuous to describe your plans for tomorrow." },
+      { task:"Make three negative sentences: 'I am not ___ing today because…'" },
+      { task:"Describe an animal in action: 'The lion is…'" },
+      { task:"Tell your partner what your best friend is probably doing right now." },
+      { task:"Ask your partner 'Is your phone ___ing?' — be creative!" },
+      { task:"Describe what people in your favourite TV show are doing in a typical episode." },
+      { task:"Make a question and answer: 'Are you ___ing?' 'Yes, I am / No, I'm not.'" },
+      { task:"Tell the class something funny that is happening in your life this week." },
+      { task:"Describe the weather outside using present continuous." },
+      { task:"Make a sentence about what the whole class is doing right now." },
+    ],
+    hotPotatoPrompts: [
+      {prompt:"'She ___ reading.' (is/are/am)", answer:"is"},
+      {prompt:"'___ you listening?' (Are/Is/Am)", answer:"Are"},
+      {prompt:"'I ___ (not) watching TV — I'm studying.'", answer:"am not / 'm not"},
+      {prompt:"'They ___ playing football.' (is/are/am)", answer:"are"},
+      {prompt:"'He is run.' — find the mistake.", answer:"He is running."},
+      {prompt:"'What ___ you doing?' (are/is/am)", answer:"are"},
+      {prompt:"'___ she cooking?' (Is/Are/Am)", answer:"Is"},
+      {prompt:"'The baby ___ sleeping.' (is/are/am)", answer:"is"},
+      {prompt:"'I am swiming.' — find the mistake.", answer:"I am swimming. (double m)"},
+      {prompt:"'We ___ studying English right now.' (is/are/am)", answer:"are"},
+      {prompt:"Spell: cook + -ing", answer:"cooking"},
+      {prompt:"Spell: run + -ing", answer:"running"},
+      {prompt:"Spell: sit + -ing", answer:"sitting"},
+      {prompt:"Spell: write + -ing", answer:"writing"},
+      {prompt:"'___ I doing this correctly?' (Am/Are/Is)", answer:"Am"},
+      {prompt:"'He are working.' — find the mistake.", answer:"He is working."},
+      {prompt:"'She is writeing.' — find the mistake.", answer:"She is writing. (drop the e)"},
+      {prompt:"'Are they dance?' — find the mistake.", answer:"Are they dancing?"},
+      {prompt:"'Look! The birds ___ flying south.'", answer:"are"},
+      {prompt:"'___ it raining outside?' (Is/Are/Am)", answer:"Is"},
+    ],
+    minefieldGrid: {
+      topic: "Present Continuous",
+      instructions: "Combine the subject (top) with the action frame (side) — then complete it with your own verb and details.",
+      colLabels: ["I am…", "She is…", "Are you…?", "They are not…", "What is he…?"],
+      rowLabels: ["… ___ing something in the kitchen.", "… ___ing because …", "… still ___ing at this hour?", "… ___ing today — they prefer to …", "… ___ing right now?"],
+    },
+    hotSeatWords: [
+      {word:"run"},{word:"swim"},{word:"cook"},{word:"read"},{word:"sleep"},
+      {word:"dance"},{word:"laugh"},{word:"cry"},{word:"write"},{word:"eat"},
+      {word:"drink"},{word:"walk"},{word:"talk"},{word:"listen"},{word:"play"},
+      {word:"work"},{word:"study"},{word:"rain"},{word:"shine"},{word:"wait"},
+    ],
+  },
+
+  // ── A2 GRAMMAR ─────────────────────────────────────────────────────────────
+
+  present_perfect_vs_past_simple: {
+    label: "Present Perfect vs Past Simple",
+    level: "A2", focus: "grammar",
+    questions: [
+      { type:"choose correct grammar", question:"'I ___ to Paris three times.' (have been/went/was)", answer:"have been", hint:"'Have been' — life experience, no specific time", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"'I have seen him yesterday.'", answer:"I saw him yesterday.", hint:"'Yesterday' = specific past time → past simple", difficulty:"medium" },
+      { type:"finish the sentence", question:"'I have never ___.' (share an experience you've never had)", answer:"(free — e.g. I have never eaten sushi / been to Australia)", hint:"Present perfect for life experiences", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'She ___ the homework yet.' (hasn't done/didn't do — no time given)", answer:"hasn't done", hint:"'Yet' with present perfect — no specific time", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"'Have you seen her last night?'", answer:"Did you see her last night?", hint:"'Last night' = specific time → past simple", difficulty:"medium" },
+      { type:"finish the sentence", question:"'I went to ___ last ___.' (give a specific past time and place)", answer:"(free — e.g. I went to the cinema last Friday.)", hint:"Past simple for specific times", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'We ___ this film last week.' (watched/have watched)", answer:"watched", hint:"'Last week' = specific time → past simple", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"'She have worked here for ten years.'", answer:"She has worked here for ten years.", hint:"Present perfect: 'has worked'", difficulty:"medium" },
+      { type:"finish the sentence", question:"'Have you ever ___?' (ask a partner about an experience)", answer:"(free — e.g. Have you ever eaten frog legs? / tried surfing?)", hint:"'Have you ever…?' = life experience", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'I ___ in London since 2019.' (have lived/lived)", answer:"have lived", hint:"'Since' + present perfect — still true now", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"'Did you ever been to Spain?'", answer:"Have you ever been to Spain?", hint:"'Ever' with life experience → present perfect", difficulty:"medium" },
+      { type:"finish the sentence", question:"'I have already ___.' (something you have done before today)", answer:"(free — e.g. I have already eaten / done my homework)", hint:"'Already' + present perfect", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'When ___ you start learning English?' (did/have)", answer:"did", hint:"'When' needs a specific time → past simple", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"'I lived here since 2015.'", answer:"I have lived here since 2015.", hint:"'Since' + ongoing situation → present perfect", difficulty:"medium" },
+      { type:"finish the sentence", question:"'She has just ___.' (something completed very recently)", answer:"(free — e.g. She has just arrived / finished the exam)", hint:"'Just' + present perfect = very recent", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'___ you finish the report yet?' (Have/Did)", answer:"Have", hint:"'Yet' goes with present perfect", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"'He has went to the shop.'", answer:"He has gone to the shop.", hint:"Past participle of 'go' = gone", difficulty:"medium" },
+      { type:"finish the sentence", question:"'I didn't ___ yesterday because ___.'", answer:"(free — e.g. I didn't go out yesterday because I was tired.)", hint:"Past simple: specific past time 'yesterday'", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'How long ___ you known her?' (have/did)", answer:"have", hint:"'How long' = ongoing → present perfect", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"'I have bought this bag in 2022.'", answer:"I bought this bag in 2022.", hint:"Specific year = past simple", difficulty:"medium" },
+    ],
+    cardTasks: [
+      { task:"Say three things you have done this week and one thing you did last week." },
+      { task:"Ask a partner 'Have you ever…?' for three different experiences." },
+      { task:"Tell a partner about a trip you took in the past — when exactly did you go?" },
+      { task:"Use 'I have never…' to share three life experiences you haven't had." },
+      { task:"Tell the class something you have just done — use 'just'." },
+      { task:"Explain the difference between 'I lived in Paris' and 'I have lived in Paris'." },
+      { task:"Ask a partner 'How long have you…?' for two things in their life." },
+      { task:"Make three sentences with 'already', 'yet', and 'just'." },
+      { task:"Tell a partner about your morning using past simple — give specific times." },
+      { task:"Say something you have done and something you didn't do today." },
+      { task:"Use 'since' and 'for' to describe two things in your life." },
+      { task:"Ask a partner 'When did you last…?' for five activities." },
+      { task:"Tell a partner about the best trip you have ever taken." },
+      { task:"Explain why 'Have you seen him yesterday?' is wrong and correct it." },
+      { task:"Use 'never' to describe three things and ask if your partner has done them." },
+      { task:"Make a mini conversation using both tenses naturally." },
+      { task:"Tell the class about an experience that changed you — use both tenses." },
+      { task:"Say what you did at the weekend using past simple with time expressions." },
+      { task:"Describe how long you have known someone important in your life." },
+      { task:"Use 'Have you finished…yet?' in a roleplay with your partner." },
+      { task:"Ask your partner what they have achieved this year." },
+      { task:"Describe a skill you have developed — when did you start?" },
+      { task:"Tell a partner three things that have happened in the news recently." },
+      { task:"Compare: 'Did you eat breakfast?' vs 'Have you eaten today?' — when do you use each?" },
+      { task:"Tell a partner about the best meal you have ever eaten — when and where exactly?" },
+    ],
+    hotPotatoPrompts: [
+      {prompt:"'I ___ never been to Japan.' (have/did/was)", answer:"have"},
+      {prompt:"'She ___ the report yesterday.' (finished/has finished)", answer:"finished"},
+      {prompt:"'___ you ever tried sushi?' (Have/Did)", answer:"Have"},
+      {prompt:"'I ___ in London since 2019.' (live/lived/have lived)", answer:"have lived"},
+      {prompt:"'He ___ the keys!' — just happened, no specific time.", answer:"has lost"},
+      {prompt:"'When ___ you start this job?' (did/have)", answer:"did"},
+      {prompt:"'I have seen him yesterday.' — find the mistake.", answer:"I saw him yesterday."},
+      {prompt:"'She ___ here for ten years.' (works/worked/has worked)", answer:"has worked"},
+      {prompt:"'Have you ___ this film?' (see/saw/seen)", answer:"seen"},
+      {prompt:"'I ___ already eaten.' (have/did/was)", answer:"have"},
+      {prompt:"'Did you ever been abroad?' — find the mistake.", answer:"Have you ever been abroad?"},
+      {prompt:"'He ___ gone to the shop.' (has/have/had)", answer:"has"},
+      {prompt:"'I ___ it in 2022.' — specific year: which tense?", answer:"past simple — bought / found / etc."},
+      {prompt:"'She has went home.' — find the mistake.", answer:"She has gone home."},
+      {prompt:"'___ she finished yet?' (Has/Have/Did)", answer:"Has"},
+      {prompt:"'I ___ lived here since I was a child.' (have/had/am)", answer:"have"},
+      {prompt:"'We ___ this film last week.' (watched/have watched)", answer:"watched"},
+      {prompt:"'How long ___ you known her?' (have/did)", answer:"have"},
+      {prompt:"Past participle of 'go'?", answer:"gone"},
+      {prompt:"Past participle of 'see'?", answer:"seen"},
+    ],
+    minefieldGrid: {
+      topic: "Present Perfect vs Past Simple",
+      instructions: "Combine the opener (top) with the time frame (side) — decide which tense fits and complete the sentence.",
+      colLabels: ["I have…", "She went…", "Have you ever…?", "They haven't…", "I didn't…"],
+      rowLabels: ["… three times in my life.", "… last summer with my family.", "… yet — it's still on my list.", "… since I was young.", "… because I didn't have time."],
+    },
+    hotSeatWords: [
+      {word:"already"},{word:"yet"},{word:"just"},{word:"ever"},{word:"never"},
+      {word:"since"},{word:"for"},{word:"experience"},{word:"recently"},{word:"before"},
+      {word:"last week"},{word:"yesterday"},{word:"so far"},{word:"still"},{word:"finish"},
+      {word:"achieve"},{word:"visit"},{word:"try"},{word:"complete"},{word:"discover"},
+    ],
+  },
+
+  comparatives_superlatives: {
+    label: "Comparatives & Superlatives",
+    level: "A2", focus: "grammar",
+    questions: [
+      { type:"choose correct grammar", question:"'This book is ___ than that one.' (more interesting/most interesting/interestinger)", answer:"more interesting", hint:"Long adjectives: more + adjective + than", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'She is the most tall girl in the class.'", answer:"She is the tallest girl in the class.", hint:"Short adjectives: add -est", difficulty:"easy" },
+      { type:"finish the sentence", question:"'My city is ___ than ___.' (use a comparative)", answer:"(free — e.g. My city is bigger than the next town.)", hint:"Comparative: adjective + -er + than OR more + adjective + than", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'He runs ___ than anyone in the school.' (faster/more fast/fastest)", answer:"faster", hint:"Short adjective: add -er + than", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'This is the more expensive restaurant in town.'", answer:"This is the most expensive restaurant in town.", hint:"Superlative: the most + long adjective", difficulty:"easy" },
+      { type:"finish the sentence", question:"'The ___ city in the world is ___.' (use a superlative)", answer:"(free — e.g. The most expensive city in the world is Zurich.)", hint:"Superlative: the most/the -est", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'This is ___ film I have ever seen.' (the best/the most good/better)", answer:"the best", hint:"Irregular superlative: good → best", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'She is more young than her sister.'", answer:"She is younger than her sister.", hint:"Short adjective: add -er", difficulty:"easy" },
+      { type:"finish the sentence", question:"'Summer is ___ than winter because ___.'", answer:"(free — e.g. Summer is hotter / more enjoyable than winter.)", hint:"Use a comparative adjective", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'This exercise is ___ than the last one.' (easier/more easy/most easy)", answer:"easier", hint:"Short adjective: change y→i, add -er", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'He is the most old person here.'", answer:"He is the oldest person here.", hint:"Short adjective: add -est", difficulty:"easy" },
+      { type:"finish the sentence", question:"'The ___ thing about my country is ___.'", answer:"(free — e.g. The best/most beautiful thing about my country is the landscape.)", hint:"Use a superlative", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'This coffee is ___ than yesterday's.' (worse/more bad/badder)", answer:"worse", hint:"Irregular comparative: bad → worse", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"'London is more big than Manchester.'", answer:"London is bigger than Manchester.", hint:"Short adjective: add -er", difficulty:"easy" },
+      { type:"finish the sentence", question:"'I am ___ at ___ than my friends.' (use comparative)", answer:"(free — e.g. I am better at cooking than my friends.)", hint:"Better/worse/faster at…", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'Mount Everest is ___ mountain in the world.' (the highest/the most high/higher)", answer:"the highest", hint:"Superlative: the + adjective + -est", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'This is the worse day of my life.'", answer:"This is the worst day of my life.", hint:"Irregular superlative: bad → worst", difficulty:"medium" },
+      { type:"finish the sentence", question:"'___ is the most popular sport in my country.'", answer:"(free — e.g. Football / Basketball is the most popular sport in my country.)", hint:"Superlative + in + place", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'She speaks ___ than her brother.' (more clearly/more clear/clearlier)", answer:"more clearly", hint:"Adverbs: more + adverb", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"'This jacket is the most cheap in the shop.'", answer:"This jacket is the cheapest in the shop.", hint:"Short adjective: add -est", difficulty:"easy" },
+    ],
+    cardTasks: [
+      { task:"Compare two cities you know using three different comparatives." },
+      { task:"Use superlatives to describe the most amazing place you have ever visited." },
+      { task:"Compare yourself to a family member using three adjectives." },
+      { task:"Tell your partner: what is the best and worst film you have ever seen?" },
+      { task:"Use comparatives to compare two animals — which is faster / heavier / more dangerous?" },
+      { task:"Say which season is the best and worst where you live, and why." },
+      { task:"Make three sentences comparing life today vs life 50 years ago." },
+      { task:"Describe the most beautiful place in your country using superlatives." },
+      { task:"Compare two phones, cars, or gadgets using at least four comparatives." },
+      { task:"Say which subject at school was the most and least interesting for you, and why." },
+      { task:"Use comparatives to compare two sports — which is more exciting / harder to learn?" },
+      { task:"Tell your partner the best meal you have ever had and why it was the best." },
+      { task:"Compare your hometown with where you are now — use three comparatives." },
+      { task:"Use 'the most' + adjective to make three sentences about famous people." },
+      { task:"Compare summer and winter in your country — which is better for you?" },
+      { task:"Say which is worse: being too hot or too cold — give three reasons." },
+      { task:"Use irregular comparatives: better, worse, farther — make one sentence with each." },
+      { task:"Describe the hardest and easiest things about learning English." },
+      { task:"Make five comparative sentences about your classmates — be kind!" },
+      { task:"Use superlatives to describe a recent film, book, or experience." },
+      { task:"Compare two restaurants or cafes you know — which is better value?" },
+      { task:"Say which is more important: money or health — give three reasons." },
+      { task:"Describe the oldest and newest thing in your home." },
+      { task:"Compare learning a language in a class vs independently — what is more effective?" },
+      { task:"Use 'not as…as' to make three sentences comparing things in your life." },
+    ],
+    hotPotatoPrompts: [
+      {prompt:"Comparative of 'big'?", answer:"bigger"},
+      {prompt:"Superlative of 'good'?", answer:"best"},
+      {prompt:"Comparative of 'bad'?", answer:"worse"},
+      {prompt:"Superlative of 'bad'?", answer:"worst"},
+      {prompt:"Comparative of 'expensive'?", answer:"more expensive"},
+      {prompt:"Superlative of 'tall'?", answer:"tallest"},
+      {prompt:"'She is the most tall.' — find the mistake.", answer:"She is the tallest."},
+      {prompt:"'London is more big than Paris.' — find the mistake.", answer:"London is bigger than Paris."},
+      {prompt:"Comparative of 'happy'?", answer:"happier"},
+      {prompt:"Superlative of 'difficult'?", answer:"most difficult"},
+      {prompt:"'This is the worse film.' — find the mistake.", answer:"This is the worst film."},
+      {prompt:"Comparative of 'far'?", answer:"farther / further"},
+      {prompt:"'She is more young.' — find the mistake.", answer:"She is younger."},
+      {prompt:"Superlative of 'hot'?", answer:"hottest"},
+      {prompt:"'He is gooder than me.' — find the mistake.", answer:"He is better than me."},
+      {prompt:"Comparative of 'comfortable'?", answer:"more comfortable"},
+      {prompt:"Superlative of 'cheap'?", answer:"cheapest"},
+      {prompt:"'This is the most big.' — find the mistake.", answer:"This is the biggest."},
+      {prompt:"Comparative of 'carefully'?", answer:"more carefully"},
+      {prompt:"Superlative of 'little'?", answer:"least"},
+    ],
+    minefieldGrid: {
+      topic: "Comparatives & Superlatives",
+      instructions: "Combine the frame (top) with the ending (side) — complete with your own adjective and subject.",
+      colLabels: ["… is bigger than…", "… is the most…", "… is worse than…", "… is the best…", "… is not as … as…"],
+      rowLabels: ["… in my opinion, because …", "… I have ever seen / tried / visited.", "… especially during …", "… in my country / city.", "… most people think."],
+    },
+    hotSeatWords: [
+      {word:"bigger"},{word:"smaller"},{word:"faster"},{word:"slower"},{word:"better"},
+      {word:"worse"},{word:"cheaper"},{word:"expensive"},{word:"highest"},{word:"lowest"},
+      {word:"more beautiful"},{word:"most popular"},{word:"older"},{word:"younger"},{word:"heavier"},
+      {word:"easier"},{word:"hardest"},{word:"further"},{word:"nearest"},{word:"coldest"},
+    ],
+  },
+
+  // ── B1 GRAMMAR ─────────────────────────────────────────────────────────────
+
+  past_continuous: {
+    label: "Past Continuous",
+    level: "B1", focus: "grammar",
+    questions: [
+      { type:"choose correct grammar", question:"'At 8pm last night, I ___ (watch) TV.' (was watching/watched/watch)", answer:"was watching", hint:"Past continuous = was/were + -ing, for ongoing action", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"'She were cooking when I arrived.'", answer:"She was cooking when I arrived.", hint:"Singular: 'was cooking'", difficulty:"medium" },
+      { type:"finish the sentence", question:"'I was ___ing when my phone rang.'", answer:"(free — e.g. I was sleeping / studying / cooking when my phone rang.)", hint:"Past continuous for interrupted action", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'While I ___ (sleep), someone knocked on the door.' (was sleeping/slept)", answer:"was sleeping", hint:"'While' + past continuous = ongoing background action", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"'They were dance at the party.'", answer:"They were dancing at the party.", hint:"Were + verb-ing", difficulty:"medium" },
+      { type:"finish the sentence", question:"'While she was talking to me, he ___.'", answer:"(free — e.g. he walked away / he fell asleep / he started laughing)", hint:"Past simple for interrupting event", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'What ___ you doing at midnight?' (were/was/did)", answer:"were", hint:"'Were you…?' — question form", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"'I was cooked dinner when she called.'", answer:"I was cooking dinner when she called.", hint:"Was + verb-ing — not past tense verb", difficulty:"medium" },
+      { type:"finish the sentence", question:"'At this time yesterday, I was ___.'", answer:"(free — e.g. At this time yesterday, I was working / eating lunch)", hint:"Past continuous for a point in time yesterday", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'He ___ reading when the lights went out.' (was/were/had)", answer:"was", hint:"Singular: 'was reading'", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"'While I read, she was watching TV.'", answer:"While I was reading, she was watching TV.", hint:"Both background actions: past continuous", difficulty:"medium" },
+      { type:"finish the sentence", question:"'I wasn't ___ing when ___.'", answer:"(free — e.g. I wasn't paying attention when the teacher asked me a question.)", hint:"Past continuous negative + past simple interrupt", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'The sun ___ shining when we left the house.' (was/were/did)", answer:"was", hint:"Weather: 'was shining'", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"'Were he waiting for long?'", answer:"Was he waiting for long?", hint:"Singular: 'Was he…?'", difficulty:"medium" },
+      { type:"finish the sentence", question:"'While everyone was ___ing, I decided to ___.'", answer:"(free — e.g. While everyone was arguing, I decided to leave.)", hint:"While + past continuous, past simple", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'She dropped her bag ___ she was running.' (while/when/as)", answer:"while / as", hint:"'While/as' + past continuous = simultaneous actions", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"'We was eating when the fire alarm went off.'", answer:"We were eating when the fire alarm went off.", hint:"Plural: 'were eating'", difficulty:"medium" },
+      { type:"finish the sentence", question:"'It was raining heavily when ___.'", answer:"(free — e.g. It was raining heavily when we arrived at the stadium.)", hint:"Past continuous for weather setting", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'I ___ thinking about you when you called!' (was/were/am)", answer:"was", hint:"'I was thinking' — past continuous", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"'As I walked to school, it rained.'", answer:"As I was walking to school, it rained.", hint:"Background: past continuous; interrupt: past simple", difficulty:"medium" },
+    ],
+    cardTasks: [
+      { task:"Tell a partner what you were doing at 9pm last night." },
+      { task:"Describe a moment when something unexpected interrupted what you were doing." },
+      { task:"Use 'while' to describe two things happening at the same time in the past." },
+      { task:"Tell a story that uses 'was/were …ing when suddenly…'" },
+      { task:"Ask a partner 'What were you doing when…?' for a famous historical event." },
+      { task:"Describe the scene when you arrived somewhere unexpected — use past continuous." },
+      { task:"Tell the class what everyone was doing when the teacher walked in today." },
+      { task:"Use past continuous to set the scene for a short story." },
+      { task:"Explain the difference between 'I read when she called' and 'I was reading when she called'." },
+      { task:"Describe what the weather was doing on a memorable day." },
+      { task:"Use 'while' and 'when' in the same story about something that happened to you." },
+      { task:"Tell a partner about a time you were doing something embarrassing when someone arrived." },
+      { task:"Make three sentences using 'at this time last week, I was…'" },
+      { task:"Describe a dream using past continuous — what was happening?" },
+      { task:"Tell the class what you were studying / working on a year ago today." },
+      { task:"Use negative past continuous: 'I wasn't ___ing, I was ___ing instead.'" },
+      { task:"Ask a partner 'Were you ___ing when…?' and respond." },
+      { task:"Describe a busy market or station using past continuous for five actions." },
+      { task:"Tell a partner the funniest thing that happened while you were doing something ordinary." },
+      { task:"Use past continuous to describe what different people were doing at a party." },
+      { task:"Make a sentence with both 'while' and 'when' about the same event." },
+      { task:"Tell a story about a misunderstanding — use 'was doing' to explain." },
+      { task:"Describe what you were doing when you heard some important news." },
+      { task:"Use past continuous to describe your commute or journey this morning." },
+      { task:"Tell a partner what you were dreaming about last night." },
+    ],
+    hotPotatoPrompts: [
+      {prompt:"'She ___ (cook) when I arrived.' (was/were)", answer:"was cooking"},
+      {prompt:"'We ___ dancing when the music stopped.' (was/were)", answer:"were"},
+      {prompt:"'What ___ you doing at 8pm?' (was/were)", answer:"were"},
+      {prompt:"'She were cooking.' — find the mistake.", answer:"She was cooking."},
+      {prompt:"'While I ___ (sleep), someone knocked.' (was sleeping/slept)", answer:"was sleeping"},
+      {prompt:"'It ___ raining when we left.' (was/were)", answer:"was"},
+      {prompt:"'We was eating.' — find the mistake.", answer:"We were eating."},
+      {prompt:"'___ he waiting long?' (Was/Were)", answer:"Was"},
+      {prompt:"'I was cooked.' — find the mistake.", answer:"I was cooking."},
+      {prompt:"'While she talked, he read.' — improve it.", answer:"While she was talking, he was reading."},
+      {prompt:"'As I walked, it rained.' — improve it.", answer:"As I was walking, it rained."},
+      {prompt:"'Were he sleeping?' — find the mistake.", answer:"Was he sleeping?"},
+      {prompt:"'At midnight, they ___ (still / celebrate).'", answer:"were still celebrating"},
+      {prompt:"'I ___ (not / pay) attention when she asked me.'", answer:"wasn't paying"},
+      {prompt:"Past continuous negative of 'I was listening'?", answer:"I wasn't listening"},
+      {prompt:"'The sun ___ when we arrived.' (shone/was shining)", answer:"was shining"},
+      {prompt:"'They were dance.' — find the mistake.", answer:"They were dancing."},
+      {prompt:"'He ___ (read) when the lights went out.' (was/were)", answer:"was"},
+      {prompt:"'I was thinking about you ___ you called!' (when/while)", answer:"when"},
+      {prompt:"Past continuous of 'I run'?", answer:"I was running"},
+    ],
+    minefieldGrid: {
+      topic: "Past Continuous",
+      instructions: "Combine the time frame (top) with the action frame (side) — then complete with your own details.",
+      colLabels: ["While I was…", "When she arrived,…", "At 9pm,…", "I wasn't…", "What were you…?"],
+      rowLabels: ["… ___ing, something unexpected happened.", "… he was still ___ing in the garden.", "… we were all quietly ___ing.", "… ___ing — I was ___ing instead.", "… ___ing when you called me?"],
+    },
+    hotSeatWords: [
+      {word:"interrupt"},{word:"meanwhile"},{word:"background"},{word:"while"},{word:"suddenly"},
+      {word:"scene"},{word:"ongoing"},{word:"at the time"},{word:"overlap"},{word:"simultaneous"},
+      {word:"cook"},{word:"sleep"},{word:"argue"},{word:"laugh"},{word:"rain"},
+      {word:"wait"},{word:"run"},{word:"study"},{word:"travel"},{word:"dream"},
+    ],
+  },
+
+  past_perfect: {
+    label: "Past Perfect (had + past participle)",
+    level: "B1", focus: "grammar",
+    questions: [
+      { type:"choose correct grammar", question:"'When I arrived, she ___ already left.' (had/has/have)", answer:"had", hint:"Past perfect: had + past participle — completed before another past event", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"'By the time I got there, they finished.'", answer:"By the time I got there, they had finished.", hint:"Action completed before another past point: past perfect", difficulty:"medium" },
+      { type:"finish the sentence", question:"'When I arrived at the party, everyone had already ___.'", answer:"(free — e.g. gone home / eaten / started dancing)", hint:"Past perfect for completed action before arrival", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'She was tired because she ___ worked all night.' (had/has/did)", answer:"had", hint:"Had + past participle explains past cause", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"'I have met him before I moved.'", answer:"I had met him before I moved.", hint:"Before another past event: past perfect", difficulty:"medium" },
+      { type:"finish the sentence", question:"'I had never ___ before that day.'", answer:"(free — e.g. I had never eaten sushi / seen the sea / flown before that day.)", hint:"Past perfect for new experience before a past moment", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'The film ___ already started when we arrived.' (had/has/was)", answer:"had", hint:"Past perfect: had + past participle", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"'She realised she forgot her keys.'", answer:"She realised she had forgotten her keys.", hint:"The forgetting happened before the realising — past perfect", difficulty:"medium" },
+      { type:"finish the sentence", question:"'He was upset because ___.'", answer:"(free — e.g. He was upset because he had failed his exam / lost his job)", hint:"Past perfect explains cause in the past", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'___ they ever met before the party?' (Had/Have/Did)", answer:"Had", hint:"Question: 'Had they…?' — past perfect", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"'Before he went to Paris, he never studied French.'", answer:"Before he went to Paris, he had never studied French.", hint:"Before a past event: past perfect", difficulty:"medium" },
+      { type:"finish the sentence", question:"'I hadn't ___ before, so I was nervous.'", answer:"(free — e.g. I hadn't spoken in public / driven before, so I was nervous.)", hint:"Past perfect negative before a past event", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'She ___ never seen snow before she visited Canada.' (had/has/did)", answer:"had", hint:"Past perfect: experience before a past point", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"'I was hungry — I didn't ate anything all day.'", answer:"I was hungry — I hadn't eaten anything all day.", hint:"Hadn't + past participle", difficulty:"medium" },
+      { type:"finish the sentence", question:"'By the time the teacher arrived, ___.'", answer:"(free — e.g. By the time the teacher arrived, the students had already done the exercise.)", hint:"By the time + past perfect", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'He ___ just finished eating when the phone rang.' (had/was/did)", answer:"had", hint:"'Just' + past perfect = completed very recently before another event", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"'After she had left, we talked about it.'", answer:"After she had left, we talked about it. (already correct!)", hint:"This is correct — past perfect for the earlier action", difficulty:"medium" },
+      { type:"finish the sentence", question:"'I recognised her because I ___.'", answer:"(free — e.g. I recognised her because I had seen her photo before.)", hint:"Past perfect explains why something was possible", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'They were exhausted. They ___ been travelling for 20 hours.' (had/have/were)", answer:"had", hint:"Past perfect: explains past state", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"'She has already gone before we arrived.'", answer:"She had already gone before we arrived.", hint:"Before another past event: past perfect, not present perfect", difficulty:"medium" },
+    ],
+    cardTasks: [
+      { task:"Tell a partner about something that had already happened when you arrived somewhere." },
+      { task:"Use 'had never…before' to describe a new experience you had in the past." },
+      { task:"Explain why someone was upset using 'because he/she had…'" },
+      { task:"Tell a story using 'By the time I arrived…'" },
+      { task:"Ask a partner 'Had you ever…before you…?' for two experiences." },
+      { task:"Describe a moment when you realised you had forgotten something — what happened?" },
+      { task:"Use past perfect to explain why you were prepared or unprepared for something." },
+      { task:"Tell a partner about a film or book where something had happened before the main story." },
+      { task:"Use 'I hadn't…before that day' to describe something new you experienced." },
+      { task:"Make three sentences using 'already', 'just', and 'never' with past perfect." },
+      { task:"Describe a misunderstanding that happened because someone hadn't told the full story." },
+      { task:"Use 'After she had…, he…' to tell a short sequence of past events." },
+      { task:"Tell your partner about a time you arrived late — what had happened before you got there?" },
+      { task:"Explain the difference between 'I ate' and 'I had eaten' with an example story." },
+      { task:"Describe a surprise — why were you surprised? Use 'I hadn't expected…'" },
+      { task:"Tell a partner about a skill you had already developed before you started school or university." },
+      { task:"Use past perfect to describe what you had done before a big event in your life." },
+      { task:"Tell a partner a story where the order of events matters — use past perfect for the earlier one." },
+      { task:"Describe the state of your house when guests arrived — use 'I had already…'" },
+      { task:"Use 'They had been…for…' to describe an ongoing past situation." },
+      { task:"Tell the class about a time when you realised you had made a mistake — when did you notice?" },
+      { task:"Describe a journey where something had gone wrong before you even set off." },
+      { task:"Use 'hadn't' + participle to explain why something was difficult for you in the past." },
+      { task:"Tell a partner about a person who had worked hard before they became successful." },
+      { task:"Make a mini story using past perfect at least three times naturally." },
+    ],
+    hotPotatoPrompts: [
+      {prompt:"'When I arrived, she ___ already left.' (has/had/have)", answer:"had"},
+      {prompt:"'She was tired because she ___ worked all night.' (has/had)", answer:"had"},
+      {prompt:"'By the time I got there, they finished.' — find the mistake.", answer:"they had finished"},
+      {prompt:"'___ they met before?' (Had/Have/Did)", answer:"Had"},
+      {prompt:"Past perfect of 'eat'?", answer:"had eaten"},
+      {prompt:"'She has already gone before we arrived.' — find the mistake.", answer:"She had already gone…"},
+      {prompt:"Past perfect of 'see'?", answer:"had seen"},
+      {prompt:"'I have met him before I moved.' — find the mistake.", answer:"I had met him…"},
+      {prompt:"'The film ___ already started when we arrived.' (has/had)", answer:"had"},
+      {prompt:"'I didn't ate anything.' — find the mistake (past perfect context).", answer:"I hadn't eaten anything."},
+      {prompt:"Past perfect of 'go'?", answer:"had gone"},
+      {prompt:"'She realised she forgot her keys.' — find the mistake.", answer:"she had forgotten her keys"},
+      {prompt:"'I ___ never been abroad before that trip.' (had/have)", answer:"had"},
+      {prompt:"'They ___ been travelling for 20 hours.' (has/had/were)", answer:"had"},
+      {prompt:"'He ___ just finished eating when the phone rang.' (had/was)", answer:"had"},
+      {prompt:"Negative past perfect of 'I had eaten'?", answer:"I hadn't eaten"},
+      {prompt:"'Before she ___ (go) to Paris, she had never tried escargots.'", answer:"went"},
+      {prompt:"'I was nervous because I ___ (never / speak) in public before.'", answer:"had never spoken"},
+      {prompt:"'Had she ___ (see) the film before?' (saw/seen)", answer:"seen"},
+      {prompt:"Past perfect of 'write'?", answer:"had written"},
+    ],
+    minefieldGrid: {
+      topic: "Past Perfect",
+      instructions: "Combine the time clause (top) with the result frame (side) — complete with your own past perfect action.",
+      colLabels: ["By the time I arrived,…", "She was upset because…", "I hadn't…before", "When he opened the door,…", "Had you ever…?"],
+      rowLabels: ["… everyone had already …", "… she had never …", "… so I was completely …", "… he realised he had …", "… before you came to this country?"],
+    },
+    hotSeatWords: [
+      {word:"already"},{word:"just"},{word:"never"},{word:"by the time"},{word:"before"},
+      {word:"after"},{word:"realise"},{word:"forget"},{word:"arrive"},{word:"expect"},
+      {word:"complete"},{word:"finish"},{word:"prepare"},{word:"experience"},{word:"discover"},
+      {word:"sequence"},{word:"earlier"},{word:"previous"},{word:"background"},{word:"cause"},
+    ],
+  },
+
+  // ── C1 GRAMMAR ─────────────────────────────────────────────────────────────
+
+  cleft_sentences: {
+    label: "Cleft Sentences (It is… / What…)",
+    level: "C1", focus: "grammar",
+    questions: [
+      { type:"choose correct grammar", question:"'___ I need is a holiday.' (What/It/That)", answer:"What", hint:"'What + clause + is' — emphasises what is needed", difficulty:"hard" },
+      { type:"correct grammar mistakes", question:"'It is him who said it.'", answer:"It is he who said it. / It was him who said it.", hint:"Formal: 'It is he'; informal: 'It was him'", difficulty:"hard" },
+      { type:"finish the sentence", question:"'What I really enjoy about English is ___.'", answer:"(free — e.g. What I really enjoy about English is the variety of vocabulary.)", hint:"What-cleft for emphasis", difficulty:"hard" },
+      { type:"choose correct grammar", question:"'It ___ John who broke the window.' (was/is/were)", answer:"was", hint:"It-cleft: 'It was X who/that…'", difficulty:"hard" },
+      { type:"correct grammar mistakes", question:"'What I need it is more time.'", answer:"What I need is more time.", hint:"No extra 'it' in what-clefts", difficulty:"hard" },
+      { type:"finish the sentence", question:"'It was in ___ that I first realised ___.'", answer:"(free — e.g. It was in university that I first realised I loved linguistics.)", hint:"It-cleft emphasises time/place", difficulty:"hard" },
+      { type:"choose correct grammar", question:"'What ___ me is the lack of communication.' (bothers/bother/bothering)", answer:"bothers", hint:"'What bothers me is…' — subject cleft", difficulty:"hard" },
+      { type:"correct grammar mistakes", question:"'It is the environment that we must to protect.'", answer:"It is the environment that we must protect.", hint:"No 'to' after modal", difficulty:"hard" },
+      { type:"finish the sentence", question:"'What surprised me most was ___.'", answer:"(free — e.g. What surprised me most was how quickly things changed.)", hint:"What-cleft for emphasis on reaction", difficulty:"hard" },
+      { type:"choose correct grammar", question:"'It was ___ that she said, not what she did.' (what/which/that)", answer:"what", hint:"'It was what she said that…'", difficulty:"hard" },
+      { type:"correct grammar mistakes", question:"'What I want it is that you listen.'", answer:"What I want is for you to listen.", hint:"No double subject in what-cleft", difficulty:"hard" },
+      { type:"finish the sentence", question:"'It was only when ___ that I understood ___.'", answer:"(free — e.g. It was only when I read it again that I understood the meaning.)", hint:"'It was only when' — delays and emphasises timing", difficulty:"hard" },
+      { type:"choose correct grammar", question:"'___ I find most challenging is speaking under pressure.' (What/That/It)", answer:"What", hint:"What-cleft: emphasises the subject", difficulty:"hard" },
+      { type:"correct grammar mistakes", question:"'It is a good night's sleep that I needs.'", answer:"It is a good night's sleep that I need.", hint:"Subject-verb agreement in the main clause", difficulty:"hard" },
+      { type:"finish the sentence", question:"'What the government should do is ___.'", answer:"(free — e.g. What the government should do is invest more in education.)", hint:"What-cleft with modal + base verb", difficulty:"hard" },
+      { type:"choose correct grammar", question:"'It is ___ that makes a great leader.' (character/characters/the character)", answer:"character", hint:"Uncountable noun — no article", difficulty:"hard" },
+      { type:"correct grammar mistakes", question:"'What I think about is that he is wrong.'", answer:"What I think is that he is wrong.", hint:"'What I think is…' — not 'about is that'", difficulty:"hard" },
+      { type:"finish the sentence", question:"'It was her voice ___ first caught my attention.'", answer:"that", hint:"It-cleft: 'It was X that…'", difficulty:"hard" },
+      { type:"choose correct grammar", question:"'What really ___ me was the ending.' (shocked/shocking/shocks)", answer:"shocked", hint:"Past tense inside what-cleft when describing past experience", difficulty:"hard" },
+      { type:"correct grammar mistakes", question:"'It was in the evening when we arrived.'", answer:"It was in the evening that we arrived.", hint:"It-cleft uses 'that', not 'when'", difficulty:"hard" },
+    ],
+    cardTasks: [
+      { task:"Rewrite three simple sentences as cleft sentences to add emphasis." },
+      { task:"Use 'What I find most interesting about this topic is…' to discuss something you care about." },
+      { task:"Use an it-cleft to emphasise who did something important in your life." },
+      { task:"Explain the difference between 'I need sleep' and 'What I need is sleep'." },
+      { task:"Use 'It was only when…that I realised…' to describe a moment of understanding." },
+      { task:"Make three what-clefts about things you value in life." },
+      { task:"Rewrite: 'Money causes problems' as a cleft sentence three different ways." },
+      { task:"Use a cleft sentence to emphasise your opinion on a controversial topic." },
+      { task:"Tell a partner about a surprising discovery using 'What I didn't expect was…'" },
+      { task:"Make an it-cleft to correct a misunderstanding — 'It wasn't X, it was Y.'" },
+      { task:"Use 'What the research suggests is…' to discuss something you have read." },
+      { task:"Describe a turning point in your life using 'It was when/that…'" },
+      { task:"Use cleft sentences in a short argument for or against a position." },
+      { task:"Make three sentences starting with 'What worries/excites/bothers me is…'" },
+      { task:"Explain an idea to a partner using a what-cleft to make your main point clear." },
+      { task:"Rewrite a paragraph from a text using at least two cleft sentences." },
+      { task:"Use 'It is X that…' to emphasise the most important factor in a problem." },
+      { task:"Tell a partner about a film using 'What made it special was…'" },
+      { task:"Use 'What I appreciate about…is…' to compliment something or someone." },
+      { task:"Make a persuasive statement using a cleft to highlight your strongest argument." },
+      { task:"Use 'It was not until…that…' to describe delayed realisation." },
+      { task:"Tell a partner about a challenge using 'What made it hard was…'" },
+      { task:"Use a cleft to describe a cultural difference you have noticed." },
+      { task:"Make three it-clefts about historical events — emphasise time, place, or person." },
+      { task:"Use 'What concerns me most is…' in a discussion about a global issue." },
+    ],
+    hotPotatoPrompts: [
+      {prompt:"'___ I need is a holiday.' (What/It/That)", answer:"What"},
+      {prompt:"'It was ___ who told me.' — which pronoun is formal?", answer:"he / she"},
+      {prompt:"'What I need it is sleep.' — find the mistake.", answer:"What I need is sleep. (remove 'it')"},
+      {prompt:"'It was in ___ that we met.' (when/where/that)", answer:"that"},
+      {prompt:"'___ surprised me was the ending.' (What/It/Which)", answer:"What"},
+      {prompt:"'It is environment that we must protect.' — improve it.", answer:"It is the environment that we must protect."},
+      {prompt:"'What I think about is that he is wrong.' — improve it.", answer:"What I think is that he is wrong."},
+      {prompt:"'It was ___ that first caught my attention.' — use 'her voice'.", answer:"It was her voice that first caught my attention."},
+      {prompt:"'___ the company needs is better communication.' (What/It/That)", answer:"What"},
+      {prompt:"'It was when we arrived.' — improve it (it-cleft).", answer:"It was when we arrived that… / It was at that moment that…"},
+      {prompt:"What type of cleft is 'What I enjoy is reading'?", answer:"what-cleft"},
+      {prompt:"What type of cleft is 'It was John who called'?", answer:"it-cleft"},
+      {prompt:"'What bothers ___ most is the noise.' (I/me)", answer:"me"},
+      {prompt:"'It is a honest mistake.' — find the mistake.", answer:"It is an honest mistake."},
+      {prompt:"Rewrite: 'She said something strange.' as a what-cleft.", answer:"What she said was strange."},
+      {prompt:"'It was her kindness ___ moved me.' (what/which/that)", answer:"that"},
+      {prompt:"'What make me angry is injustice.' — find the mistake.", answer:"What makes me angry is injustice."},
+      {prompt:"'It was not until midnight ___ I finished.' (when/that/which)", answer:"that"},
+      {prompt:"Cleft sentence: emphasise 'Paris' in 'She visited Paris last year'.", answer:"It was Paris that she visited last year."},
+      {prompt:"'What I want it is that you try.' — find the mistake.", answer:"What I want is for you to try."},
+    ],
+    minefieldGrid: {
+      topic: "Cleft Sentences",
+      instructions: "Combine the cleft opener (top) with the focus (side) — then complete the sentence naturally.",
+      colLabels: ["What I really…", "It was…", "What bothers me…", "It is only when…", "What the evidence…"],
+      rowLabels: ["… enjoy about this topic is …", "… in this city that I first …", "… most is the lack of …", "… you listen carefully that …", "… suggests is that …"],
+    },
+    hotSeatWords: [
+      {word:"emphasis"},{word:"focus"},{word:"highlight"},{word:"stress"},{word:"foreground"},
+      {word:"contrast"},{word:"clarify"},{word:"assert"},{word:"reframe"},{word:"specify"},
+      {word:"what-cleft"},{word:"it-cleft"},{word:"inversion"},{word:"fronting"},{word:"theme"},
+      {word:"syntax"},{word:"discourse"},{word:"persuasion"},{word:"structure"},{word:"rhetoric"},
+    ],
+  },
+
 
 };
 
@@ -6743,6 +8964,33 @@ const TOPIC_OPTIONS = [
   { value: "making_excuses",           label: "Making Excuses",                  level: "A2",  focus: "vocabulary" },
   { value: "making_suggestions",       label: "Making Suggestions",              level: "A2",  focus: "vocabulary" },
   { value: "agreeing_disagreeing",     label: "Agreeing and Disagreeing",        level: "B1",  focus: "vocabulary" },
+  { value: "hedging_uncertainty",      label: "Hedging and Expressing Uncertainty", level: "B2",  focus: "vocabulary" },
+  { value: "emotions_feelings",        label: "Feelings and Emotions (Advanced)",   level: "B2",  focus: "vocabulary" },
+  { value: "socialising_small_talk",   label: "Socialising and Small Talk",          level: "B2",  focus: "vocabulary" },
+  { value: "money_and_finance",        label: "Money and Personal Finance",          level: "B2",  focus: "vocabulary" },
+  { value: "workplace_language",       label: "Workplace Language and Communicating at Work", level: "B2", focus: "vocabulary" },
+  { value: "problems_and_solutions",   label: "Talking About Problems and Solutions", level: "B2", focus: "vocabulary" },
+  { value: "regrets",                  label: "Expressing Regrets (I wish / If only / regret + -ing)", level: "B2", focus: "grammar" },
+  { value: "school_and_study",         label: "School and Study",                  level: "A2",  focus: "topic"     },
+  { value: "friends_and_family",       label: "Friends and Family",               level: "A2",  focus: "topic"     },
+  { value: "free_time_a2",             label: "Free Time and Interests",           level: "A2",  focus: "topic"     },
+  { value: "my_town_city",             label: "My Town and City",                  level: "A2",  focus: "topic"     },
+
+  // ── New A1 grammar ──────────────────────────────────────────────────────────
+  { value: "can_cant",                  label: "Can / Can't (Ability & Permission)",  level: "A1",  focus: "grammar"   },
+  { value: "have_got",                  label: "Have Got (Possession & Description)", level: "A1",  focus: "grammar"   },
+  { value: "present_continuous_a1",     label: "Present Continuous (What are you doing?)", level: "A1", focus: "grammar" },
+
+  // ── New A2 grammar ──────────────────────────────────────────────────────────
+  { value: "present_perfect_vs_past_simple", label: "Present Perfect vs Past Simple", level: "A2", focus: "grammar"  },
+  { value: "comparatives_superlatives",  label: "Comparatives & Superlatives",        level: "A2",  focus: "grammar"   },
+
+  // ── New B1 grammar ──────────────────────────────────────────────────────────
+  { value: "past_continuous",            label: "Past Continuous",                    level: "B1",  focus: "grammar"   },
+  { value: "past_perfect",               label: "Past Perfect (had + past participle)", level: "B1", focus: "grammar"  },
+
+  // ── New C1 grammar ──────────────────────────────────────────────────────────
+  { value: "cleft_sentences",            label: "Cleft Sentences (It is… / What…)",  level: "C1",  focus: "grammar"   },
 ];
 
 // ─── API ──────────────────────────────────────────────────────────────────────
@@ -7250,12 +9498,48 @@ function TurnTimerBar({ timeLeft, totalSeconds, color }) {
 
 // ─── GAME SCREENS ─────────────────────────────────────────────────────────────
 
-function AuctionGame({ questions, teams, onUpdateScore, onEnd }) {
+function AuctionGame({ questions, teams, onUpdateScore, onEnd, earlyEndRef }) {
+  const AUCTION_START = 200;
+
   const [qi, setQi] = useState(0);
   const [phase, setPhase] = useState("intro");
   const [bets, setBets] = useState({});
   const [resultMsg, setResultMsg] = useState([]);
   const [satOutLastRound, setSatOutLastRound] = useState(new Set());
+
+  // Each team gets a private 200pt auction bank — separate from their running score.
+  // At the end of the game, their final bank balance is added to their real score.
+  const [auctionBank, setAuctionBank] = useState(() =>
+    Object.fromEntries(teams.map(t => [t.id, AUCTION_START]))
+  );
+
+  // Use a ref so the flush always reads the latest bank, even if called early
+  const auctionBankRef = useRef(auctionBank);
+  useEffect(() => { auctionBankRef.current = auctionBank; }, [auctionBank]);
+
+  // Always flush the auction bank to real scores before ending —
+  // whether the game finishes naturally or is ended early via "End & See Results"
+  const flushAndEnd = useCallback(() => {
+    teams.forEach(t => {
+      const bank = auctionBankRef.current[t.id] ?? 0;
+      if (bank > 0) onUpdateScore(t.id, bank);
+    });
+    onEnd();
+  }, [teams, onUpdateScore, onEnd]);
+
+  // Register the flush with the top-level early-exit handler
+  // so clicking "End & See Results" also triggers the bank flush
+  useEffect(() => {
+    if (earlyEndRef) {
+      earlyEndRef.current = () => {
+        teams.forEach(t => {
+          const bank = auctionBankRef.current[t.id] ?? 0;
+          if (bank > 0) onUpdateScore(t.id, bank);
+        });
+      };
+    }
+    return () => { if (earlyEndRef) earlyEndRef.current = null; };
+  }, [earlyEndRef, teams, onUpdateScore]);
 
   const s = questions[qi];
   if (!s) return null;
@@ -7264,8 +9548,8 @@ function AuctionGame({ questions, teams, onUpdateScore, onEnd }) {
     setBets(b => ({ ...b, [teamId]: { ...(b[teamId]||{}), [field]: value } }));
   };
 
-  // A team is broke if score is 0 — they sit out this round
-  const isBroke = (t) => t.score <= 0;
+  // A team is broke if their auction bank is 0 — they sit out this round
+  const isBroke = (t) => (auctionBank[t.id] ?? 0) <= 0;
   const activeTeams = teams.filter(t => !isBroke(t));
 
   const allBetsPlaced = activeTeams.every(t => {
@@ -7276,10 +9560,10 @@ function AuctionGame({ questions, teams, onUpdateScore, onEnd }) {
   const resolveRound = () => {
     const msgs = [];
     const brokeThisRound = new Set();
+    const newBank = { ...auctionBank };
 
     teams.forEach(t => {
       if (isBroke(t)) {
-        // Sat out — record them, no bet processed
         brokeThisRound.add(t.id);
         msgs.push({ teamId: t.id, won: false, delta: 0, vote: null, amount: 0, satOut: true });
         return;
@@ -7290,22 +9574,30 @@ function AuctionGame({ questions, teams, onUpdateScore, onEnd }) {
       const wasCorrect = s.isCorrect;
       const won = votedCorrect === wasCorrect;
       const delta = won ? amount : -amount;
-      onUpdateScore(t.id, delta);
+      newBank[t.id] = Math.max(0, (newBank[t.id] ?? 0) + delta);
       msgs.push({ teamId: t.id, won, delta, vote: b.vote, amount, satOut: false });
     });
 
+    setAuctionBank(newBank);
     setSatOutLastRound(brokeThisRound);
     setResultMsg(msgs);
     setPhase("result");
   };
 
   const nextRound = () => {
-    // Revival: teams that sat out last round get 25pts to re-enter
-    satOutLastRound.forEach(teamId => {
-      onUpdateScore(teamId, 25);
-    });
+    // Revival: teams that sat out get 25pts back in their auction bank
+    if (satOutLastRound.size > 0) {
+      setAuctionBank(prev => {
+        const next = { ...prev };
+        satOutLastRound.forEach(id => { next[id] = (next[id] ?? 0) + 25; });
+        return next;
+      });
+    }
 
-    if (qi + 1 >= questions.length) { onEnd(); return; }
+    if (qi + 1 >= questions.length) {
+      flushAndEnd();
+      return;
+    }
     setQi(i => i + 1);
     setBets({});
     setResultMsg([]);
@@ -7328,7 +9620,7 @@ function AuctionGame({ questions, teams, onUpdateScore, onEnd }) {
         <div style={{position:"absolute",bottom:"-14px",left:"50%",transform:"translateX(-50%)",width:0,height:0,borderLeft:"14px solid transparent",borderRight:"14px solid transparent",borderTop:"14px solid #7C3AED"}}/>
       </div>
       <div style={{marginTop:"24px",marginBottom:"20px",fontSize:"14px",color:"#6B7280",fontWeight:"600"}}>
-        Each team starts with <strong>200 points</strong> to bet with. Minimum bet is 25 pts.
+        Each team gets a <strong>200 pt auction bank</strong> — separate from your score. Bet wisely — your final bank total adds to your score!
       </div>
       <div style={{display:"flex",gap:"10px",justifyContent:"center",flexWrap:"wrap",marginBottom:"24px"}}>
         {teams.map(t => (<div key={t.id} style={{background:t.color.light,border:`3px solid ${t.color.bg}`,borderRadius:"14px",padding:"10px 18px",fontWeight:"800",fontSize:"14px",color:t.color.dark}}>{t.color.emoji} {t.name}</div>))}
@@ -7366,7 +9658,7 @@ function AuctionGame({ questions, teams, onUpdateScore, onEnd }) {
               if (broke) {
                 return (
                   <div key={t.id} style={{background:"#F3F4F6",border:`3px solid #D1D5DB`,borderRadius:"16px",padding:"14px",opacity:0.75,textAlign:"center"}}>
-                    <div style={{fontWeight:"900",color:"#6B7280",fontSize:"15px",marginBottom:"8px"}}>{t.name} — 0 pts</div>
+                    <div style={{fontWeight:"900",color:"#6B7280",fontSize:"15px",marginBottom:"8px"}}>{t.name} — 0 auction pts</div>
                     <div style={{fontSize:"28px",marginBottom:"6px"}}>💸</div>
                     <div style={{fontWeight:"800",color:"#6B7280",fontSize:"13px",marginBottom:"4px"}}>Sitting out this round</div>
                     <div style={{fontWeight:"700",color:"#22C55E",fontSize:"12px"}}>+25 pts revival next round!</div>
@@ -7376,7 +9668,7 @@ function AuctionGame({ questions, teams, onUpdateScore, onEnd }) {
 
               return (
                 <div key={t.id} style={{background:t.color.light,border:`3px solid ${t.color.bg}`,borderRadius:"16px",padding:"14px"}}>
-                  <div style={{fontWeight:"900",color:t.color.dark,fontSize:"15px",marginBottom:"10px"}}>{t.name} — {t.score} pts</div>
+                  <div style={{fontWeight:"900",color:t.color.dark,fontSize:"15px",marginBottom:"10px"}}>{t.name} — {auctionBank[t.id] ?? 0} auction pts</div>
 
                   {/* True/False vote */}
                   <div style={{display:"flex",gap:"8px",marginBottom:"10px"}}>
@@ -7394,7 +9686,7 @@ function AuctionGame({ questions, teams, onUpdateScore, onEnd }) {
 
                   {/* Point bet */}
                   <div style={{display:"flex",gap:"6px",flexWrap:"wrap"}}>
-                    {BET_AMOUNTS.filter(amt => amt <= t.score).map(amt => (
+                    {BET_AMOUNTS.filter(amt => amt <= (auctionBank[t.id] ?? 0)).map(amt => (
                       <button key={amt} onClick={()=>setBetField(t.id,"amount",amt)} style={{
                         padding:"5px 10px",fontWeight:"700",fontSize:"13px",
                         border:`2px solid ${t.color.bg}`,borderRadius:"8px",cursor:"pointer",
@@ -7402,11 +9694,11 @@ function AuctionGame({ questions, teams, onUpdateScore, onEnd }) {
                         color: b.amount===amt ? "white" : t.color.dark
                       }}>{amt}</button>
                     ))}
-                    <button onClick={()=>setBetField(t.id,"amount",t.score)} style={{
+                    <button onClick={()=>setBetField(t.id,"amount",auctionBank[t.id]??0)} style={{
                       padding:"5px 10px",fontWeight:"700",fontSize:"12px",
                       border:`2px solid ${t.color.bg}`,borderRadius:"8px",cursor:"pointer",
-                      background: b.amount===t.score ? t.color.bg : "white",
-                      color: b.amount===t.score ? "white" : t.color.dark
+                      background: b.amount===(auctionBank[t.id]??0) ? t.color.bg : "white",
+                      color: b.amount===(auctionBank[t.id]??0) ? "white" : t.color.dark
                     }}>ALL IN</button>
                   </div>
 
@@ -7483,6 +9775,7 @@ function AuctionGame({ questions, teams, onUpdateScore, onEnd }) {
                     {r.won ? `+${r.delta}` : `${r.delta}`}
                   </div>
                   <div style={{fontSize:"13px",color: r.won?"#166534":"#B91C1C",fontWeight:"700"}}>{r.won?"Correct!":"Wrong!"}</div>
+                  <div style={{fontSize:"12px",color:"#6B7280",fontWeight:"700",marginTop:"4px"}}>Bank: {auctionBank[r.teamId] ?? 0} pts</div>
                 </div>
               );
             })}
@@ -7897,8 +10190,8 @@ function generateShipsNxN(cols) {
 }
 
 // Build a coordinate→question map so every coord has a fixed, unique question.
-// Column letter determines the preferred question type; rows must each get a DIFFERENT question.
-// If a type pool is too small or missing, we fall back to other available types — still unique per row.
+// Uniqueness is enforced GLOBALLY across the entire board — no question repeats in any square.
+// Column letter determines the preferred question type, but global uniqueness takes priority.
 function buildCoordMap(questions, cols) {
   const byType = {};
   questions.forEach(q => {
@@ -7917,8 +10210,7 @@ function buildCoordMap(questions, cols) {
     }));
   }
 
-  // For "use vocabulary in a sentence" — grammar topics have none, so fall back
-  // to "rewrite sentences" first, then any other type
+  // For "use vocabulary in a sentence" — fall back to rewrite, then finish, then any
   if (!byType["use vocabulary in a sentence"] || byType["use vocabulary in a sentence"].length === 0) {
     const fallbackPool =
       byType["rewrite sentences"]?.length ? byType["rewrite sentences"] :
@@ -7933,7 +10225,7 @@ function buildCoordMap(questions, cols) {
     }));
   }
 
-  // For A/B/D columns — topic-based lessons only have "finish the sentence", fall back
+  // For A/B/D columns — topic-based lessons may lack these types, fall back
   ["correct grammar mistakes", "choose correct grammar", "finish the sentence"].forEach(t => {
     if (!byType[t] || byType[t].length === 0) {
       const any = questions.filter(q => q.type !== t);
@@ -7942,30 +10234,53 @@ function buildCoordMap(questions, cols) {
   });
 
   const rows = cols.length; // 4 or 5
+
+  // Build coord list in column-major order to respect preferred types per column
+  const coords = [];
+  cols.forEach(col => {
+    for (let r = 1; r <= rows; r++) coords.push({ coord: col.letter + r, type: col.type });
+  });
+
+  // Track used questions by their text — NOT by object reference.
+  // This is critical because questions are often created as new objects (via .map())
+  // so Set identity checks (has(q)) would never match. Using the question string
+  // as the key guarantees true global uniqueness across the whole board.
+  const usedTexts = new Set();
   const map = {};
 
-  cols.forEach(col => {
-    const pool = [...(byType[col.type] || questions)].sort(() => Math.random() - 0.5);
-    const used = new Set();
-    for (let r = 1; r <= rows; r++) {
-      const coord = col.letter + r;
-      let chosen = pool.find(q => !used.has(q));
-      if (!chosen) {
-        // Pool exhausted — pick fresh and reset used set
-        const fresh = [...pool].sort(() => Math.random() - 0.5);
-        chosen = fresh[0] || questions[0];
-        used.clear();
-      }
-      used.add(chosen);
+  const qText = q => q.question || q.task || String(q);
+
+  // First pass: assign each coord its preferred-type question if text is unused
+  coords.forEach(({ coord, type }) => {
+    const pool = [...(byType[type] || questions)].sort(() => Math.random() - 0.5);
+    const chosen = pool.find(q => !usedTexts.has(qText(q)));
+    if (chosen) {
       map[coord] = chosen;
+      usedTexts.add(qText(chosen));
+    }
+  });
+
+  // Second pass: fill any gaps using any remaining unused question text
+  const allShuffled = [...questions].sort(() => Math.random() - 0.5);
+  coords.forEach(({ coord }) => {
+    if (!map[coord]) {
+      const fallback = allShuffled.find(q => !usedTexts.has(qText(q)));
+      if (fallback) {
+        map[coord] = fallback;
+        usedTexts.add(qText(fallback));
+      } else {
+        // Absolute last resort — bank smaller than board; cycle (should never happen now)
+        map[coord] = allShuffled[Object.keys(map).length % allShuffled.length];
+      }
     }
   });
 
   return map;
 }
 
-function BattleshipGame({ questions, teams, onUpdateScore, onEnd }) {
+function BattleshipGame({ questions, teams, onUpdateScore, onEnd, isTopic }) {
   const TURN_SECONDS = 25;
+  const gameTitle = isTopic ? "Battleship" : "Grammar Battleship";
 
   // 4×4 for 3-4 teams, 5×5 for 2 teams
   const COLS = teams.length === 2 ? BATTLESHIP_COLS_5 : BATTLESHIP_COLS_4;
@@ -8037,13 +10352,13 @@ function BattleshipGame({ questions, teams, onUpdateScore, onEnd }) {
     if (correct && isShip) {
       newHits = { ...hits, [targetTeamId]: [...(hits[targetTeamId] || []), pendingCoord] };
       setHits(newHits);
-      onUpdateScore(activeTeam.id, 100);
+      onUpdateScore(activeTeam.id, 60);
       if (isEliminated(targetTeamId, newHits)) {
         if (teams.filter(t => !isEliminated(t.id, newHits)).length <= 1) { onEnd(); return; }
       }
     } else if (correct && !isShip) {
       setMisses(m => ({ ...m, [targetTeamId]: [...(m[targetTeamId] || []), pendingCoord] }));
-      onUpdateScore(activeTeam.id, 20);
+      onUpdateScore(activeTeam.id, 15);
     } else {
       setMisses(m => ({ ...m, [targetTeamId]: [...(m[targetTeamId] || []), pendingCoord] }));
     }
@@ -8065,12 +10380,12 @@ function BattleshipGame({ questions, teams, onUpdateScore, onEnd }) {
         <div style={{textAlign:"center"}}>
           <div style={{background:"linear-gradient(135deg,#1E3A8A,#2563EB)",borderRadius:"20px",padding:"28px 24px",marginBottom:"10px",position:"relative",color:"white",maxWidth:"520px",margin:"0 auto 10px"}}>
             <div style={{fontSize:"36px",marginBottom:"10px"}}>⚓</div>
-            <div style={{fontWeight:"900",fontSize:"20px",marginBottom:"10px"}}>Grammar Battleship</div>
+            <div style={{fontWeight:"900",fontSize:"20px",marginBottom:"10px"}}>{gameTitle}</div>
             <div style={{fontSize:"15px",lineHeight:1.7,opacity:0.95}}>
               Each team has a hidden fleet of ships on their ocean grid.<br/>
               On your turn: <strong>pick an enemy team</strong>, then <strong>fire at a square</strong>.<br/>
-              Each <strong>column is a different task type</strong> — answer correctly to fire!<br/>
-              Hit a ship = <strong>+100 pts</strong>. Hit water and answer = <strong>+20 pts</strong>.<br/>
+              {isTopic ? <>Each <strong>square is a unique speaking prompt</strong> — answer to fire!</> : <>Each <strong>column is a different task type</strong> — answer correctly to fire!</>}<br/>
+              Hit a ship = <strong>+60 pts</strong>. Hit water and answer = <strong>+15 pts</strong>.<br/>
               Sink all of a team's ships to eliminate them. Last fleet wins!
             </div>
             <div style={{position:"absolute",bottom:"-14px",left:"50%",transform:"translateX(-50%)",width:0,height:0,borderLeft:"14px solid transparent",borderRight:"14px solid transparent",borderTop:"14px solid #2563EB"}}/>
@@ -8089,7 +10404,8 @@ function BattleshipGame({ questions, teams, onUpdateScore, onEnd }) {
 
   return (
     <div>
-      {/* Column legend */}
+      {/* Column legend — hidden for topic mode since all squares are speaking prompts */}
+      {!isTopic && (
       <div style={{display:"flex",gap:"6px",flexWrap:"wrap",justifyContent:"center",marginBottom:"12px"}}>
         {COLS.map(col => (
           <div key={col.letter} style={{
@@ -8103,6 +10419,7 @@ function BattleshipGame({ questions, teams, onUpdateScore, onEnd }) {
           </div>
         ))}
       </div>
+      )}
 
       {/* Turn header */}
       <div style={{background:activeTeam.color.bg,borderRadius:"14px",padding:"10px 16px",marginBottom:"14px",display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:"8px"}}>
@@ -8281,26 +10598,35 @@ function BattleshipGame({ questions, teams, onUpdateScore, onEnd }) {
 function CardShuffleGame({ questions, teams, onUpdateScore, onEnd }) {
   const TURN_SECONDS = 25;
   const NUM_CARDS = 4;
-  const CARD_W = 120;
-  const CARD_H = 160;
-  const GAP = 14;
-  const ROW_W = NUM_CARDS * CARD_W + (NUM_CARDS - 1) * GAP;
-  const slotX = (i) => i * (CARD_W + GAP);
+  // 2×2 grid layout
+  const CARD_W = 130;
+  const CARD_H = 170;
+  const COL_GAP = 18;
+  const ROW_GAP = 18;
+  // Slot positions: 0=top-left, 1=top-right, 2=bottom-left, 3=bottom-right
+  const slotPos = (slot) => ({
+    x: (slot % 2) * (CARD_W + COL_GAP),
+    y: Math.floor(slot / 2) * (CARD_H + ROW_GAP),
+  });
+  const GRID_W = 2 * CARD_W + COL_GAP;
+  const GRID_H = 2 * CARD_H + ROW_GAP;
 
-  // Build a round: 4 cards each with a DIFFERENT task, one is the star
+  // Shuffle the question pool once on load — cards draw linearly so no question repeats
+  const shuffledQs = useRef([...questions].sort(() => Math.random() - 0.5)).current;
+
+  // Build a round: 4 cards each with a DIFFERENT task drawn from the shuffled pool, one is the star
   const buildRound = useCallback((roundIdx) => {
     const start = roundIdx * NUM_CARDS;
-    const slice = questions.slice(start, start + NUM_CARDS);
-    // Fallback: cycle if not enough questions
-    const pool = Array.from({length: NUM_CARDS}, (_, i) => questions[(start + i) % questions.length]);
+    const pool = Array.from({length: NUM_CARDS}, (_, i) => shuffledQs[(start + i) % shuffledQs.length]);
     const starIdx = Math.floor(Math.random() * NUM_CARDS);
     return pool.map((q, i) => ({ cid: i, isStar: i === starIdx, task: q.task || q.question || q.word || String(q) }));
-  }, [questions]);
+  }, [shuffledQs]);
 
   const [roundCount, setRoundCount] = useState(0);
   const [cards, setCards] = useState(() => buildRound(0));
   const [cardSlots, setCardSlots] = useState([0, 1, 2, 3]);
-  const [cardX, setCardX] = useState(() => [0, 1, 2, 3].map(slotX));
+  // cardPos[cardIdx] = {x, y}
+  const [cardPos, setCardPos] = useState(() => [0,1,2,3].map(slotPos));
   const [phase, setPhase] = useState("intro"); // intro | preview | shuffling | picking | answering | reveal
   const [teamPicks, setTeamPicks] = useState({});
   const [answeringTeamIdx, setAnsweringTeamIdx] = useState(0);
@@ -8310,12 +10636,17 @@ function CardShuffleGame({ questions, teams, onUpdateScore, onEnd }) {
 
   const slotToCard = (slot) => slotsRef.current.findIndex(s => s === slot);
 
-  // Animate a single swap — moves cards visibly across screen
+  // Animate a single swap — moves cards to new (x, y) positions
   const animateSwap = (cA, cB, duration) => new Promise(resolve => {
-    const xA = slotX(slotsRef.current[cB]);
-    const xB = slotX(slotsRef.current[cA]);
+    const posA = slotPos(slotsRef.current[cB]);
+    const posB = slotPos(slotsRef.current[cA]);
     setTransitioning(true);
-    setCardX(prev => { const next=[...prev]; next[cA]=xA; next[cB]=xB; return next; });
+    setCardPos(prev => {
+      const next = [...prev];
+      next[cA] = posA;
+      next[cB] = posB;
+      return next;
+    });
     setTimeout(() => {
       const newSlots = [...slotsRef.current];
       [newSlots[cA], newSlots[cB]] = [newSlots[cB], newSlots[cA]];
@@ -8326,38 +10657,72 @@ function CardShuffleGame({ questions, teams, onUpdateScore, onEnd }) {
     }, duration);
   });
 
-  // Deterministic shuffle sequence — predictable swaps so attentive students CAN track
-  // Pattern: rotate pairs slowly, then increase speed, short pause between early swaps
-  // All durations scaled to 0.75× speed (×1.333 vs previous values)
+  // Generate a varied shuffle sequence each call — different length, speed curve, and swap selection
+  // so students cannot learn to predict the pattern across rounds
+  const buildShuffleSequence = () => {
+    const allPairs = [[0,1],[0,2],[0,3],[1,2],[1,3],[2,3]];
+    const rng = () => Math.random();
+
+    // Pick a style for this round — varies total moves and speed profile
+    const style = Math.floor(rng() * 4);
+    let slowCount, medCount, fastCount, blurCount;
+    if (style === 0) { slowCount=3; medCount=4; fastCount=5; blurCount=7; }       // standard
+    else if (style === 1) { slowCount=2; medCount=3; fastCount=7; blurCount=8; }  // quick acceleration
+    else if (style === 2) { slowCount=4; medCount=5; fastCount=4; blurCount=6; }  // longer slow phase
+    else             { slowCount=3; medCount=6; fastCount=6; blurCount=5; }       // long medium
+
+    const pickPair = (exclude) => {
+      const choices = allPairs.filter(p => !exclude || !(p[0]===exclude[0]&&p[1]===exclude[1]));
+      return choices[Math.floor(rng() * choices.length)];
+    };
+
+    // Occasionally do a 3-card cycle (A→B→C→A) instead of a simple swap
+    const maybeCycle = (count, dur) => {
+      const seq = [], durs = [];
+      let last = null;
+      for (let i = 0; i < count; i++) {
+        if (rng() < 0.3 && i < count - 1) {
+          // Insert a cycle: swap A↔B then B↔C (net: A→C, C→B, B→A)
+          const p1 = pickPair(last);
+          const p2 = pickPair(p1);
+          seq.push(p1, p2); durs.push(dur, dur); i++; last = p2;
+        } else {
+          const p = pickPair(last); seq.push(p); durs.push(dur); last = p;
+        }
+      }
+      return { seq, durs };
+    };
+
+    const slow   = maybeCycle(slowCount, 620);
+    const medium = maybeCycle(medCount,  370);
+    const fast   = maybeCycle(fastCount, 170);
+    const blur   = maybeCycle(blurCount, 95);
+
+    // Occasionally add a pause-then-burst in the middle to throw off tracking
+    const addBurst = rng() < 0.5;
+    const burstPos = Math.floor(rng() * medium.seq.length);
+
+    const seq = [...slow.seq, ...medium.seq, ...fast.seq, ...blur.seq];
+    const dur = [...slow.durs, ...medium.durs, ...fast.durs, ...blur.durs];
+    const pauseAfter = [...slow.durs.map(d => d >= 500), ...medium.durs.map((_,i) => addBurst && i === burstPos), ...fast.durs.map(() => false), ...blur.durs.map(() => false)];
+
+    return { seq, dur, pauseAfter };
+  };
+
   const runShuffle = async () => {
     setPhase("shuffling");
     slotsRef.current = [0, 1, 2, 3];
     setCardSlots([0, 1, 2, 3]);
-    setCardX([0, 1, 2, 3].map(slotX));
+    setCardPos([0,1,2,3].map(slotPos));
 
-    // Short pause before first movement so students can lock eyes on the star
-    await new Promise(r => setTimeout(r, 600));
+    await new Promise(r => setTimeout(r, 500));
 
-    // Build a swap sequence: pairs cycle in a pattern, not random chaos
-    // Phases: slow trackable (667ms), medium (400ms), fast (187ms), blur (107ms)
-    const swapSequence = [
-      [0,3],[1,2],[0,2],[1,3],          // slow — 667ms each, clearly trackable
-      [0,1],[2,3],[0,3],[1,2],          // medium — 400ms
-      [0,2],[1,3],[0,1],[2,3],[0,3],    // fast — 187ms
-      [1,2],[0,2],[1,3],[0,1],[2,3],[0,3],[1,2], // blur — 107ms
-    ];
-    const durations = [
-      667,667,667,667,
-      400,400,400,400,
-      187,187,187,187,187,
-      107,107,107,107,107,107,107,
-    ];
+    const { seq, dur, pauseAfter } = buildShuffleSequence();
 
-    for (let i = 0; i < swapSequence.length; i++) {
-      const [cA, cB] = swapSequence[i];
-      await animateSwap(cA, cB, durations[i]);
-      // Pause after slow swaps so eyes can follow
-      if (durations[i] >= 500) await new Promise(r => setTimeout(r, 107));
+    for (let i = 0; i < seq.length; i++) {
+      const [cA, cB] = seq[i];
+      await animateSwap(cA, cB, dur[i]);
+      if (pauseAfter[i]) await new Promise(r => setTimeout(r, 90 + Math.random() * 80));
     }
 
     setPhase("picking");
@@ -8400,8 +10765,8 @@ function CardShuffleGame({ questions, teams, onUpdateScore, onEnd }) {
     teams.forEach(t => {
       const pick = teamPicks[t.id];
       if (!pick) return;
-      if (cards[pick.cardIdx]?.isStar && pick.correct) onUpdateScore(t.id, 120);
-      else if (!cards[pick.cardIdx]?.isStar && pick.correct) onUpdateScore(t.id, 30);
+      if (cards[pick.cardIdx]?.isStar && pick.correct) onUpdateScore(t.id, 80);
+      else if (!cards[pick.cardIdx]?.isStar && pick.correct) onUpdateScore(t.id, 20);
     });
   }, [phase]);
   useEffect(() => { if (phase === "preview") hasScored.current = false; }, [phase]);
@@ -8413,7 +10778,7 @@ function CardShuffleGame({ questions, teams, onUpdateScore, onEnd }) {
     setCards(newCards);
     slotsRef.current = [0, 1, 2, 3];
     setCardSlots([0, 1, 2, 3]);
-    setCardX([0, 1, 2, 3].map(slotX));
+    setCardPos([0,1,2,3].map(slotPos));
     setTeamPicks({});
     setAnsweringTeamIdx(0);
     setShowAns(false);
@@ -8466,20 +10831,20 @@ function CardShuffleGame({ questions, teams, onUpdateScore, onEnd }) {
         {phase==="picking" && <TurnTimerBar timeLeft={timeLeft} totalSeconds={TURN_SECONDS}/>}
       </div>
 
-      {/* Card animation stage */}
-      <div style={{position:"relative",height:`${CARD_H}px`,width:`${ROW_W}px`,margin:"0 auto",marginBottom:"16px"}}>
+      {/* Card animation stage — 2×2 grid */}
+      <div style={{position:"relative",height:`${GRID_H}px`,width:`${GRID_W}px`,margin:"0 auto",marginBottom:"16px"}}>
         {cards.map((card, cardIdx) => {
-          const x = cardX[cardIdx];
+          const pos = cardPos[cardIdx];
           const slot = cardSlots[cardIdx];
           const isPickedSlot = myPickSlot === slot || (phase==="reveal" && teams.some(t=>teamPicks[t.id]?.slot===slot));
           const pickerTeams = phase==="reveal" ? teams.filter(t=>teamPicks[t.id]?.slot===slot) : [];
-          const transitionMs = transitioning ? (phase==="shuffling"?80:140) : 350;
+          const transitionMs = transitioning ? (phase==="shuffling"?75:130) : 340;
 
           return (
             <div key={card.cid} style={{
-              position:"absolute", top:0, left:`${x}px`,
+              position:"absolute", top:`${pos.y}px`, left:`${pos.x}px`,
               width:`${CARD_W}px`, height:`${CARD_H}px`,
-              transition:`left ${transitionMs}ms ease-in-out`,
+              transition:`left ${transitionMs}ms ease-in-out, top ${transitionMs}ms ease-in-out`,
               zIndex: isPickedSlot ? 2 : 1,
             }}>
               <div
@@ -8613,7 +10978,7 @@ function CardShuffleGame({ questions, teams, onUpdateScore, onEnd }) {
             padding:"20px",textAlign:"center",marginBottom:"14px"
           }}>
             <div style={{fontSize:"12px",fontWeight:"700",color:"#4338CA",marginBottom:"8px",textTransform:"uppercase",letterSpacing:"0.05em"}}>
-              🗣️ {currentTeam.name}'s task {pickedCard.isStar ? "⭐" : ""}
+              🗣️ {currentTeam.name}'s task
             </div>
             <div style={{fontSize:"clamp(14px,2.5vw,18px)",fontWeight:"800",color:"#1E1B4B",lineHeight:1.5}}>
               {pickedCard.task}
@@ -8659,14 +11024,14 @@ function CardShuffleGame({ questions, teams, onUpdateScore, onEnd }) {
 // ── RPG CONSTANTS ──────────────────────────────────────────────────────────────
 const LEVELS = [
   { level:1, label:"Lvl 1", xpNeeded:0,   nextXp:100, mult:1.0, color:"#6B7280" },
-  { level:2, label:"Lvl 2", xpNeeded:100, nextXp:250, mult:1.6, color:"#3B82F6" },
+  { level:2, label:"Lvl 2", xpNeeded:100, nextXp:250, mult:1.5, color:"#3B82F6" },
   { level:3, label:"Lvl 3", xpNeeded:250, nextXp:Infinity, mult:2.5, color:"#F59E0B" },
 ];
-const BASE_DAMAGE = 8;     // damage = roll × BASE_DAMAGE × levelMult
-const XP_PER_ROLL  = 12;   // xp gained = roll × XP_PER_ROLL
-const APPLE_CHANCE = 0.08; // 8% chance
-const APPLE_HEAL   = 25;
-const MAX_HP       = 100;
+const BASE_DAMAGE = 5;     // damage = roll × BASE_DAMAGE × levelMult (reduced for longer games)
+const XP_PER_ROLL  = 15;   // xp gained = roll × XP_PER_ROLL (faster levelling)
+const APPLE_CHANCE = 0.12; // 12% chance
+const APPLE_HEAL   = 20;   // heal amount per apple
+const MAX_HP       = 150;  // higher HP so castles survive long enough to level up
 
 function StatBar({ value, max, color, bg, label, icon }) {
   const pct = Math.max(0, Math.min(100, (value / max) * 100));
@@ -8708,6 +11073,9 @@ function DiceRoller({ rolling, result }) {
 function CastleGame({ questions, teams, onUpdateScore, onEnd }) {
   const TURN_SECONDS = 25;
 
+  // Shuffle questions once on load so they never repeat in order
+  const shuffledQs = useRef([...questions].sort(() => Math.random() - 0.5)).current;
+
   // Per-team RPG state
   const [rpg, setRpg] = useState(() => Object.fromEntries(
     teams.map(t => [t.id, { hp: MAX_HP, xp: 0, level: 1 }])
@@ -8722,7 +11090,7 @@ function CastleGame({ questions, teams, onUpdateScore, onEnd }) {
   const [lastEvent, setLastEvent] = useState(null); // { damage, xpGained, apple, targetId, levelUp }
 
   const activeTeam = teams[activeTeamIdx];
-  const q = questions[qi];
+  const q = shuffledQs[qi % shuffledQs.length];
 
   const getLevelInfo = (xp) => [...LEVELS].reverse().find(l => xp >= l.xpNeeded) || LEVELS[0];
   const getNextLevelInfo = (xp) => {
@@ -8734,7 +11102,7 @@ function CastleGame({ questions, teams, onUpdateScore, onEnd }) {
 
   const advanceTurn = useCallback(() => {
     setPhase("answer"); setShowAns(false); setDiceRoll(null); setLastEvent(null);
-    setQi(i => (i + 1) % questions.length);
+    setQi(i => i + 1);
     let next = (activeTeamIdx + 1) % teams.length;
     let tries = 0;
     while (isEliminated(teams[next].id) && tries < teams.length) { next = (next + 1) % teams.length; tries++; }
@@ -8759,7 +11127,7 @@ function CastleGame({ questions, teams, onUpdateScore, onEnd }) {
         <div style={{position:"absolute",bottom:"-14px",left:"50%",transform:"translateX(-50%)",width:0,height:0,borderLeft:"14px solid transparent",borderRight:"14px solid transparent",borderTop:"14px solid #059669"}}/>
       </div>
       <div style={{marginTop:"24px",marginBottom:"20px",fontSize:"14px",color:"#6B7280",fontWeight:"600"}}>
-        Each castle starts with 100 HP. Level 1 → 2 → 3 multiplies your dice damage!
+        Each castle starts with 150 HP. Answer correctly to attack — 🍎 apples heal you! Level up to multiply damage!
       </div>
       <div style={{display:"flex",gap:"10px",justifyContent:"center",flexWrap:"wrap",marginBottom:"24px"}}>
         {teams.map(t => (<div key={t.id} style={{background:t.color.light,border:"3px solid "+t.color.bg,borderRadius:"14px",padding:"10px 18px",fontWeight:"800",fontSize:"14px",color:t.color.dark}}>{t.color.emoji} {t.name}</div>))}
@@ -8987,6 +11355,9 @@ function KingOfHillGame({ questions, teams, onUpdateScore, onEnd }) {
   // Detect mode from question types
   const isTopicMode = questions.length > 0 && questions.every(q => q.type === "speaking task");
 
+  // Shuffle questions once on load so they never repeat in order
+  const shuffledQs = useRef([...questions].sort(() => Math.random() - 0.5)).current;
+
   const [owners, setOwners] = useState({});
   const [roundPoints, setRoundPoints] = useState(() => Object.fromEntries(teams.map(t=>[t.id,0])));
   const [round, setRound] = useState(1);
@@ -9088,7 +11459,7 @@ function KingOfHillGame({ questions, teams, onUpdateScore, onEnd }) {
 
   const activeTeamRealIdx = turnOrder[activeTeamIdx];
   const activeTeam = teams[activeTeamRealIdx];
-  const q = questions[qi % questions.length];
+  const q = shuffledQs[qi % shuffledQs.length];
 
   // ── TIMER ──
   const { timeLeft, stop } = useTurnTimer(TURN_SECONDS, phase === "pick", () => nextTeamTurn(false, owners), activeTeamIdx);
@@ -9768,11 +12139,28 @@ function HotSeatGame({ questions, teams, onUpdateScore, onEnd }) {
 // ─── SPY AMONG US GAME ────────────────────────────────────────────────────────
 function SpyAmongUsGame({ questions, teams, onUpdateScore, onEnd }) {
   const DISCUSS_SECONDS = 30;
+  const isTwoPlayer = teams.length === 2;
+
+  // Build a shuffled rotation of spy team indices upfront.
+  // This guarantees every team gets the spy role equally across rounds
+  // before any team repeats — no more streaks of the same team being spy.
+  // NOTE: useRef does NOT support lazy initialisers — must build the value eagerly.
+  const spyRotation = useRef(null);
+  if (!spyRotation.current) {
+    const rotation = [];
+    const cycles = Math.ceil((questions.length + teams.length) / teams.length);
+    for (let c = 0; c < cycles; c++) {
+      const cycle = [...Array(teams.length).keys()].sort(() => Math.random() - 0.5);
+      rotation.push(...cycle);
+    }
+    spyRotation.current = rotation;
+  }
 
   const [ri, setRi]           = useState(0);
-  const [spyTeamIdx, setSpyTeamIdx] = useState(() => Math.floor(Math.random() * teams.length));
-  // phase: "peek" | "discuss" | "order-roll" | "speak" | "vote" | "spy-guess" | "reveal"
-  const [phase, setPhase]     = useState("peek");
+  const [spyTeamIdx, setSpyTeamIdx] = useState(() => spyRotation.current[0]);
+  // Standard phases: "peek" | "discuss" | "order-roll" | "speak" | "vote" | "spy-guess" | "reveal"
+  // Two-player phases: "peek" | "speak-2p" | "guess-2p" | "reveal-2p"
+  const [phase, setPhase]     = useState("intro");
   const [peekIdx, setPeekIdx] = useState(0);
   const [revealed, setRevealed] = useState(false);
   const [votes, setVotes]     = useState({});
@@ -9785,6 +12173,12 @@ function SpyAmongUsGame({ questions, teams, onUpdateScore, onEnd }) {
   // Dice roll state for speaking order
   const [rollDice, setRollDice]   = useState(() => teams.map(() => null)); // null | number
   const [rollDone, setRollDone]   = useState(false);
+
+  // Two-player mode state
+  const [tp2SpeakIdx, setTp2SpeakIdx] = useState(0);   // 0 = first speaker, 1 = second speaker
+  const [tp2Guesses, setTp2Guesses]   = useState({});  // { teamId: guessedOption }
+  const [tp2GuessIdx, setTp2GuessIdx] = useState(0);   // 0 = first guesser, 1 = second guesser
+  const [tp2SpeakOrder, setTp2SpeakOrder] = useState(() => [...teams]); // who speaks first
 
   const round = questions[ri];
   if (!round) return <div style={{textAlign:"center",padding:"32px",fontWeight:"700",color:"#374151"}}>No rounds available.</div>;
@@ -9871,7 +12265,7 @@ function SpyAmongUsGame({ questions, teams, onUpdateScore, onEnd }) {
   const nextRound = () => {
     if (ri + 1 >= questions.length) { onEnd(); return; }
     setRi(r => r + 1);
-    setSpyTeamIdx(Math.floor(Math.random() * teams.length));
+    setSpyTeamIdx(spyRotation.current[(ri + 1) % spyRotation.current.length]);
     setPhase("peek");
     setPeekIdx(0);
     setRevealed(false);
@@ -9881,11 +12275,15 @@ function SpyAmongUsGame({ questions, teams, onUpdateScore, onEnd }) {
     setSpeakOrder([...teams]);
     setRollDice(teams.map(() => null));
     setRollDone(false);
+    // Reset two-player state
+    setTp2SpeakIdx(0);
+    setTp2Guesses({});
+    setTp2GuessIdx(0);
+    setTp2SpeakOrder([...teams].sort(() => Math.random() - 0.5));
   };
 
   // ── SCORING ──
   const resolveVotes = () => {
-    // Count votes for each team
     const voteCounts = {};
     teams.forEach(t => { voteCounts[t.id] = 0; });
     Object.values(votes).forEach(v => { if (v !== null && v !== undefined) voteCounts[v] = (voteCounts[v]||0) + 1; });
@@ -9893,12 +12291,17 @@ function SpyAmongUsGame({ questions, teams, onUpdateScore, onEnd }) {
     const mostVoted = teams.filter(t => voteCounts[t.id] === maxVotes).map(t => t.id);
     const spyCaught = mostVoted.includes(spyTeam.id) && mostVoted.length === 1;
 
+    // Award crewmates who correctly voted for the spy — regardless of outcome
+    teams.filter(t => !isSpy(t.id) && votes[t.id] === spyTeam.id).forEach(t => {
+      onUpdateScore(t.id, 60);
+    });
+
     if (spyCaught) {
       // Spy caught — move to spy guess phase
       setPhase("spy-guess");
     } else {
-      // Spy escaped — spy gets points, reveal
-      onUpdateScore(spyTeam.id, 120);
+      // Spy escaped without being caught — spy earns points for blending in
+      onUpdateScore(spyTeam.id, 100);
       setPhase("reveal");
     }
   };
@@ -9906,11 +12309,11 @@ function SpyAmongUsGame({ questions, teams, onUpdateScore, onEnd }) {
   const resolveSpyGuess = () => {
     const guessedCorrectly = spyGuess === round.crewmateTopic;
     if (guessedCorrectly) {
-      // Spy guessed the topic — spy wins even though caught
-      onUpdateScore(spyTeam.id, 80);
+      // Spy was caught but correctly guessed the topic — partial salvage
+      onUpdateScore(spyTeam.id, 60);
     } else {
-      // Spy was caught AND guessed wrong — crewmates win big
-      teams.filter(t => !isSpy(t.id)).forEach(t => onUpdateScore(t.id, 100));
+      // Spy was caught AND guessed wrong — crewmates who hadn't already voted correctly get bonus
+      teams.filter(t => !isSpy(t.id)).forEach(t => onUpdateScore(t.id, 80));
     }
     setPhase("reveal");
   };
@@ -9936,15 +12339,71 @@ function SpyAmongUsGame({ questions, teams, onUpdateScore, onEnd }) {
     vote:        "🗳️ Phase 5: Vote",
     "spy-guess": "🕵️ Spy's Last Chance",
     reveal:      "🎭 Reveal",
+    // Two-player phases
+    "speak-2p":  "🗣️ Phase 2: Speak",
+    "guess-2p":  "🔎 Phase 3: Guess!",
+    "reveal-2p": "🎭 Reveal",
   };
+
+  // Two-player scoring
+  const resolve2pGuesses = () => {
+    const spyT  = teams[spyTeamIdx];
+    const crewT = teams.find(t => t.id !== spyT.id);
+    // What each player had to guess:
+    // Spy guesses the CREWMATE topic (round.crewmateTopic)
+    // Crewmate guesses the SPY topic (round.spyTopic)
+    const spyGuessedRight  = tp2Guesses[spyT.id]  === round.crewmateTopic;
+    const crewGuessedRight = tp2Guesses[crewT.id] === round.spyTopic;
+    if (spyGuessedRight)  onUpdateScore(spyT.id, 100);
+    if (crewGuessedRight) onUpdateScore(crewT.id, 100);
+    setPhase("reveal-2p");
+  };
+
+  if (phase === "intro") return (
+    <div style={{textAlign:"center"}}>
+      <div style={{background:"linear-gradient(135deg,#1F2937,#4B5563)",borderRadius:"20px",padding:"28px 24px",marginBottom:"10px",position:"relative",color:"white",maxWidth:"520px",margin:"0 auto 10px"}}>        <div style={{fontSize:"36px",marginBottom:"10px"}}>🕵️</div>
+        <div style={{fontWeight:"900",fontSize:"20px",marginBottom:"10px"}}>Spy Among Us</div>
+        <div style={{fontSize:"15px",lineHeight:1.7,opacity:0.95}}>
+          Each round, one team is secretly the <strong>Spy</strong> — given a different topic to everyone else.<br/>
+          All teams <strong>peek their secret card</strong>, then take turns speaking about it.<br/>
+          After everyone speaks, teams <strong>vote for who they think the spy is</strong>.<br/>
+          <strong>Voting for the spy correctly = +60 pts</strong> (even if the spy escapes!).<br/>
+          <strong>Spy not caught = +100 pts</strong> · <strong>Spy caught but guesses topic = +60 pts</strong><br/>
+          <strong>Spy caught + wrong guess = +80 pts</strong> for all crewmates.
+        </div>
+        <div style={{position:"absolute",bottom:"-14px",left:"50%",transform:"translateX(-50%)",width:0,height:0,borderLeft:"14px solid transparent",borderRight:"14px solid transparent",borderTop:"14px solid #4B5563"}}/>
+      </div>
+      <div style={{marginTop:"24px",marginBottom:"20px",fontSize:"14px",color:"#6B7280",fontWeight:"600"}}>
+        {isTwoPlayer
+          ? "1v1 mode — both players peek, speak, then guess each other's topic."
+          : `${teams.length} teams — one spy per round. Discuss, vote, and reveal!`}
+      </div>
+      <div style={{display:"flex",gap:"10px",justifyContent:"center",flexWrap:"wrap",marginBottom:"24px"}}>        {teams.map(t => (<div key={t.id} style={{background:t.color.light,border:"3px solid "+t.color.bg,borderRadius:"14px",padding:"10px 18px",fontWeight:"800",fontSize:"14px",color:t.color.dark}}>{t.color.emoji} {t.name}</div>))}
+      </div>
+      <button onClick={() => setPhase("peek")} style={{background:"linear-gradient(135deg,#1F2937,#4B5563)",color:"white",border:"none",borderRadius:"16px",padding:"16px 48px",fontSize:"19px",fontWeight:"900",cursor:"pointer",boxShadow:"0 6px 24px rgba(31,41,55,0.4)"}}>
+        🕵️ Start Mission!
+      </button>
+    </div>
+  );
 
   return (
     <div>
       {/* Phase header */}
       <div style={{background:"linear-gradient(135deg,#1F2937,#374151)",borderRadius:"14px",padding:"12px 20px",marginBottom:"14px",display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:"8px"}}>
-        <span style={{color:"white",fontWeight:"900",fontSize:"16px"}}>🕵️ Spy Among Us — Round {ri+1}/{questions.length}</span>
+        <span style={{color:"white",fontWeight:"900",fontSize:"16px"}}>
+          🕵️ Spy Among Us{isTwoPlayer ? " — 1v1" : ""} — Round {ri+1}/{questions.length}
+        </span>
         <span style={{background:"rgba(255,255,255,0.15)",color:"white",padding:"4px 14px",borderRadius:"20px",fontWeight:"700",fontSize:"13px"}}>{PHASES[phase]}</span>
       </div>
+
+      {/* Two-player mode info banner — shown only on peek phase */}
+      {isTwoPlayer && phase === "peek" && peekIdx === 0 && (
+        <div style={{background:"#1E3A8A",border:"2px solid #3B82F6",borderRadius:"12px",padding:"12px 16px",marginBottom:"14px",color:"white",fontSize:"13px",lineHeight:1.6}}>
+          <div style={{fontWeight:"900",fontSize:"14px",marginBottom:"4px"}}>🕵️ 1v1 Mode</div>
+          Both players peek their secret card, then each speaks about their topic.
+          Afterwards, <strong>each player tries to guess what the other's topic was</strong> — spy or crewmate, you both need to listen carefully!
+        </div>
+      )}
 
       {/* ── PEEK PHASE ── One team at a time sees their role */}
       {phase === "peek" && (
@@ -10008,7 +12467,14 @@ function SpyAmongUsGame({ questions, teams, onUpdateScore, onEnd }) {
                     if (peekIdx + 1 < teams.length) {
                       setPeekIdx(i => i + 1);
                     } else {
-                      setPhase("discuss");
+                      // Branch: two-player gets speak-2p, multi gets discuss
+                      if (isTwoPlayer) {
+                        setTp2SpeakOrder([...teams].sort(() => Math.random() - 0.5));
+                        setTp2SpeakIdx(0);
+                        setPhase("speak-2p");
+                      } else {
+                        setPhase("discuss");
+                      }
                     }
                   }}
                   style={{
@@ -10285,8 +12751,8 @@ function SpyAmongUsGame({ questions, teams, onUpdateScore, onEnd }) {
               borderRadius:"12px",padding:"12px",marginBottom:"14px",textAlign:"center"
             }}>
               {spyGuess === round.crewmateTopic
-                ? <div style={{fontWeight:"900",color:"#991B1B"}}>🕵️ {spyTeam.name} guessed "{spyGuess}" — correct! Spy earns 80 pts despite being caught.</div>
-                : <div style={{fontWeight:"900",color:"#14532D"}}>👨‍🚀 {spyTeam.name} guessed "{spyGuess}" — wrong! Crewmates win +100 pts each.</div>
+                ? <div style={{fontWeight:"900",color:"#991B1B"}}>🕵️ {spyTeam.name} guessed "{spyGuess}" — correct! Spy earns +60 pts.</div>
+                : <div style={{fontWeight:"900",color:"#14532D"}}>👨‍🚀 {spyTeam.name} guessed "{spyGuess}" — wrong! Crewmates win +80 pts each.</div>
               }
             </div>
           )}
@@ -10315,6 +12781,214 @@ function SpyAmongUsGame({ questions, teams, onUpdateScore, onEnd }) {
           </div>
         </div>
       )}
+
+      {/* ── TWO-PLAYER: SPEAK PHASE ── One at a time, no dice needed */}
+      {phase === "speak-2p" && (() => {
+        const speaker = tp2SpeakOrder[tp2SpeakIdx];
+        const isLast = tp2SpeakIdx >= tp2SpeakOrder.length - 1;
+        return (
+          <div>
+            <div style={{
+              background: speaker.color.light,
+              border: `3px solid ${speaker.color.bg}`,
+              borderRadius:"16px", padding:"22px", textAlign:"center", marginBottom:"14px"
+            }}>
+              <div style={{fontWeight:"900",fontSize:"20px",color:speaker.color.dark,marginBottom:"8px"}}>
+                {speaker.color.emoji} {speaker.name} — speak now!
+              </div>
+              <div style={{fontSize:"14px",color:"#6B7280",marginBottom:"16px"}}>
+                Talk about your topic. <strong>Don't say what your role is</strong> — your opponent is listening carefully!
+              </div>
+              <button
+                onClick={() => {
+                  if (isLast) {
+                    setTp2GuessIdx(0);
+                    setTp2Guesses({});
+                    setPhase("guess-2p");
+                  } else {
+                    setTp2SpeakIdx(i => i + 1);
+                  }
+                }}
+                style={{
+                  background: speaker.color.bg, color:"white",
+                  border:"none", borderRadius:"12px",
+                  padding:"12px 28px", fontSize:"15px", fontWeight:"800", cursor:"pointer"
+                }}
+              >
+                ✅ Done — {isLast ? "Start guessing!" : `Next: ${tp2SpeakOrder[tp2SpeakIdx + 1].name}`}
+              </button>
+            </div>
+            {/* Progress dots */}
+            <div style={{display:"flex",gap:"8px",justifyContent:"center"}}>
+              {tp2SpeakOrder.map((t,i) => (
+                <div key={t.id} style={{
+                  width:"12px",height:"12px",borderRadius:"50%",
+                  background: i < tp2SpeakIdx ? "#22C55E" : i === tp2SpeakIdx ? t.color.bg : "#D1D5DB"
+                }}/>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* ── TWO-PLAYER: GUESS PHASE ── Each player guesses the other's role/topic */}
+      {phase === "guess-2p" && (() => {
+        const spyT  = teams[spyTeamIdx];
+        const crewT = teams.find(t => t.id !== spyT.id);
+        const guesserOrder = [spyT, crewT]; // spy guesses first, then crewmate
+        const guesser = guesserOrder[tp2GuessIdx];
+        const isSpyGuessing = guesser.id === spyT.id;
+        const isLastGuesser = tp2GuessIdx >= guesserOrder.length - 1;
+        const alreadyGuessed = tp2Guesses[guesser.id] !== undefined;
+
+        return (
+          <div>
+            {/* Hide-your-screen prompt */}
+            <div style={{background:"#FEF9C3",border:"2px solid #F59E0B",borderRadius:"12px",padding:"12px",textAlign:"center",marginBottom:"14px"}}>
+              <div style={{fontWeight:"800",color:"#92400E",fontSize:"14px"}}>
+                📱 {guesserOrder[tp2GuessIdx === 0 ? 1 : 0].name} — look away! It's {guesser.name}'s turn to guess.
+              </div>
+            </div>
+
+            <div style={{background:"linear-gradient(135deg,#1F2937,#374151)",borderRadius:"16px",padding:"24px",marginBottom:"16px",color:"white",textAlign:"center"}}>
+              <div style={{fontSize:"32px",marginBottom:"10px"}}>
+                {isSpyGuessing ? "🕵️" : "👨‍🚀"}
+              </div>
+              <div style={{fontWeight:"900",fontSize:"18px",marginBottom:"6px"}}>
+                {guesser.name}
+              </div>
+              <div style={{fontSize:"14px",opacity:0.85,marginBottom:"18px"}}>
+                {isSpyGuessing
+                  ? "You were the spy. Based on what you heard, what topic was your opponent talking about?"
+                  : "You were the crewmate. Based on what you heard, what was the spy's topic?"}
+              </div>
+
+              <div style={{display:"flex",flexDirection:"column",gap:"10px",maxWidth:"340px",margin:"0 auto 18px"}}>
+                {round.spyGuessOptions.map(opt => (
+                  <button key={opt} onClick={() => setTp2Guesses(g => ({...g, [guesser.id]: opt}))} style={{
+                    background: tp2Guesses[guesser.id] === opt ? "#6366F1" : "rgba(255,255,255,0.10)",
+                    color:"white",
+                    border: `2px solid ${tp2Guesses[guesser.id] === opt ? "#818CF8" : "rgba(255,255,255,0.2)"}`,
+                    borderRadius:"10px", padding:"10px 16px",
+                    fontWeight:"800", fontSize:"15px", cursor:"pointer",
+                    textAlign:"left"
+                  }}>
+                    {tp2Guesses[guesser.id] === opt ? "✅ " : "○ "}{opt}
+                  </button>
+                ))}
+              </div>
+
+              <button
+                onClick={() => {
+                  if (!alreadyGuessed && !tp2Guesses[guesser.id]) return;
+                  if (isLastGuesser) {
+                    resolve2pGuesses();
+                  } else {
+                    setTp2GuessIdx(i => i + 1);
+                  }
+                }}
+                disabled={!tp2Guesses[guesser.id]}
+                style={{
+                  background: tp2Guesses[guesser.id] ? "#EF4444" : "#6B7280",
+                  color:"white", border:"none", borderRadius:"12px",
+                  padding:"12px 28px", fontSize:"15px", fontWeight:"900",
+                  cursor: tp2Guesses[guesser.id] ? "pointer" : "not-allowed"
+                }}
+              >
+                🎯 {isLastGuesser ? "Reveal answers!" : `Lock in — pass to ${guesserOrder[1].name}`}
+              </button>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* ── TWO-PLAYER: REVEAL PHASE ── Show both guesses and correct answers */}
+      {phase === "reveal-2p" && (() => {
+        const spyT  = teams[spyTeamIdx];
+        const crewT = teams.find(t => t.id !== spyT.id);
+        const spyGuessedRight  = tp2Guesses[spyT.id]  === round.crewmateTopic;
+        const crewGuessedRight = tp2Guesses[crewT.id] === round.spyTopic;
+        return (
+          <div>
+            {/* Roles revealed */}
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px",marginBottom:"14px"}}>
+              <div style={{background:crewT.color.light,border:`3px solid ${crewT.color.bg}`,borderRadius:"14px",padding:"14px",textAlign:"center"}}>
+                <div style={{fontSize:"28px",marginBottom:"4px"}}>👨‍🚀</div>
+                <div style={{fontWeight:"900",fontSize:"14px",color:crewT.color.dark}}>{crewT.name}</div>
+                <div style={{fontSize:"12px",color:crewT.color.dark,opacity:0.75,marginBottom:"8px"}}>was the Crewmate</div>
+                <div style={{background:"rgba(255,255,255,0.7)",borderRadius:"8px",padding:"6px 10px",fontSize:"12px",fontWeight:"700",color:"#1E3A8A"}}>
+                  Topic: {round.crewmateTopic}
+                </div>
+              </div>
+              <div style={{background:"#1F2937",border:"3px solid #374151",borderRadius:"14px",padding:"14px",textAlign:"center"}}>
+                <div style={{fontSize:"28px",marginBottom:"4px"}}>🕵️</div>
+                <div style={{fontWeight:"900",fontSize:"14px",color:"#F9FAFB"}}>{spyT.name}</div>
+                <div style={{fontSize:"12px",color:"#9CA3AF",marginBottom:"8px"}}>was the Spy</div>
+                <div style={{background:"rgba(255,255,255,0.1)",borderRadius:"8px",padding:"6px 10px",fontSize:"12px",fontWeight:"700",color:"#D1D5DB"}}>
+                  Topic: {round.spyTopic}
+                </div>
+              </div>
+            </div>
+
+            {/* Guess results */}
+            <div style={{display:"flex",flexDirection:"column",gap:"10px",marginBottom:"14px"}}>
+              {/* Spy's guess */}
+              <div style={{
+                background: spyGuessedRight ? "#DCFCE7" : "#FEE2E2",
+                border:`2px solid ${spyGuessedRight ? "#22C55E" : "#EF4444"}`,
+                borderRadius:"12px",padding:"14px"
+              }}>
+                <div style={{display:"flex",alignItems:"center",gap:"8px",marginBottom:"4px"}}>
+                  <span style={{fontSize:"20px"}}>{spyGuessedRight ? "✅" : "❌"}</span>
+                  <span style={{fontWeight:"900",fontSize:"14px",color:spyGuessedRight?"#14532D":"#991B1B"}}>
+                    {spyT.name} (Spy) guessed the crewmate topic:
+                  </span>
+                </div>
+                <div style={{fontSize:"13px",color:"#374151",marginBottom:"4px"}}>
+                  Guessed: <strong>"{tp2Guesses[spyT.id] || "—"}"</strong>
+                </div>
+                <div style={{fontSize:"13px",color:"#374151"}}>
+                  Correct answer: <strong>"{round.crewmateTopic}"</strong>
+                </div>
+                {spyGuessedRight && <div style={{marginTop:"6px",fontWeight:"700",fontSize:"13px",color:"#14532D"}}>🕵️ Spy earns 100 pts!</div>}
+              </div>
+
+              {/* Crewmate's guess */}
+              <div style={{
+                background: crewGuessedRight ? "#DCFCE7" : "#FEE2E2",
+                border:`2px solid ${crewGuessedRight ? "#22C55E" : "#EF4444"}`,
+                borderRadius:"12px",padding:"14px"
+              }}>
+                <div style={{display:"flex",alignItems:"center",gap:"8px",marginBottom:"4px"}}>
+                  <span style={{fontSize:"20px"}}>{crewGuessedRight ? "✅" : "❌"}</span>
+                  <span style={{fontWeight:"900",fontSize:"14px",color:crewGuessedRight?"#14532D":"#991B1B"}}>
+                    {crewT.name} (Crewmate) guessed the spy topic:
+                  </span>
+                </div>
+                <div style={{fontSize:"13px",color:"#374151",marginBottom:"4px"}}>
+                  Guessed: <strong>"{tp2Guesses[crewT.id] || "—"}"</strong>
+                </div>
+                <div style={{fontSize:"13px",color:"#374151"}}>
+                  Correct answer: <strong>"{round.spyTopic}"</strong>
+                </div>
+                {crewGuessedRight && <div style={{marginTop:"6px",fontWeight:"700",fontSize:"13px",color:"#14532D"}}>👨‍🚀 Crewmate earns 100 pts!</div>}
+              </div>
+            </div>
+
+            {/* Explanation */}
+            <div style={{background:"#FEF9C3",border:"2px solid #F59E0B",borderRadius:"12px",padding:"12px",marginBottom:"14px"}}>
+              <div style={{fontWeight:"800",fontSize:"13px",color:"#92400E",marginBottom:"4px"}}>💡 The difference</div>
+              <div style={{color:"#713F12",fontSize:"14px"}}>{round.explanation}</div>
+            </div>
+
+            <div style={{textAlign:"center"}}>
+              <button onClick={nextRound} style={{background:"#374151",color:"white",border:"none",borderRadius:"12px",padding:"12px 28px",fontSize:"15px",fontWeight:"800",cursor:"pointer"}}>
+                {ri+1 >= questions.length ? "🏁 End Game" : "➡️ Next Round"}
+              </button>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }
@@ -10352,6 +13026,9 @@ function BridgeBuilderGame({ questions, teams, onUpdateScore, onEnd }) {
   const isTopicMode = questions.length > 0 && questions.every(q => q.type === "speaking task");
   const ACTIVE_SEGMENTS = isTopicMode ? BRIDGE_TOPIC_SEGMENT_TYPES : BRIDGE_SEGMENT_TYPES;
 
+  // Shuffle questions once on load — used for topic mode linear advance
+  const shuffledQs = useRef([...questions].sort(() => Math.random() - 0.5)).current;
+
   const [progress, setProgress] = useState(() => Object.fromEntries(teams.map(t=>[t.id,0])));
   const [phase, setPhase] = useState("intro");
   const [showAns, setShowAns] = useState(false);
@@ -10359,7 +13036,7 @@ function BridgeBuilderGame({ questions, teams, onUpdateScore, onEnd }) {
   const [finished, setFinished] = useState(null);
   const [qIdx, setQIdx] = useState(0); // simple index for topic mode
 
-  // Group questions by type for grammar mode
+  // Group questions by type for grammar mode — each type pool is also shuffled
   const qByType = useRef(null);
   if (!qByType.current && !isTopicMode) {
     const map = {};
@@ -10381,6 +13058,8 @@ function BridgeBuilderGame({ questions, teams, onUpdateScore, onEnd }) {
       if (map[t].length === 0) {
         map[t] = questions.map(q => ({...q, type: t}));
       }
+      // Shuffle each type pool so grammar questions don't repeat in the same order
+      map[t] = [...map[t]].sort(() => Math.random() - 0.5);
     });
     qByType.current = map;
   }
@@ -10397,8 +13076,8 @@ function BridgeBuilderGame({ questions, teams, onUpdateScore, onEnd }) {
 
   let currentQ;
   if (isTopicMode) {
-    // Topic mode: cycle through questions simply, apply segment prompt prefix
-    const raw = questions[qIdx % Math.max(questions.length, 1)];
+    // Topic mode: advance through shuffled questions, apply segment prompt prefix
+    const raw = shuffledQs[qIdx % Math.max(shuffledQs.length, 1)];
     currentQ = {
       ...raw,
       type: "speaking task",
@@ -10416,7 +13095,7 @@ function BridgeBuilderGame({ questions, teams, onUpdateScore, onEnd }) {
     if (correct) {
       const newProg = Math.min(SEGMENTS, teamProgress + 1);
       setProgress(prev => ({...prev, [teamId]: newProg}));
-      onUpdateScore(teamId, 40);
+      onUpdateScore(teamId, 30);
       if (isTopicMode) {
         setQIdx(i => i + 1);
       } else {
@@ -10424,7 +13103,7 @@ function BridgeBuilderGame({ questions, teams, onUpdateScore, onEnd }) {
       }
       if (newProg >= SEGMENTS) {
         setFinished(teamId);
-        onUpdateScore(teamId, 100);
+        onUpdateScore(teamId, 70);
         return;
       }
     }
@@ -10609,7 +13288,7 @@ function HotPotatoGame({ questions, teams, onUpdateScore, onEnd, level }) {
   const TOTAL_ROUNDS  = 5;
   const ROUND_SECONDS = 40;
   const Q_SECONDS     = 10;
-  const PENALTY_PTS   = 50;
+  const PENALTY_PTS   = 30;
 
   const [phase, setPhase]           = useState("intro"); // intro | play | roundend | gameover
   const [round, setRound]           = useState(1);
@@ -10743,6 +13422,8 @@ function HotPotatoGame({ questions, teams, onUpdateScore, onEnd, level }) {
   const q            = questions[qi % Math.max(questions.length, 1)];
 
   // ── INTRO ──
+  const [showQPreview, setShowQPreview] = React.useState(false);
+
   if (phase === "intro") return (
     <div style={{textAlign:"center"}}>
       <div style={{background:"linear-gradient(135deg,#EA580C,#F97316)",borderRadius:"20px",padding:"28px 24px",marginBottom:"10px",position:"relative",color:"white",maxWidth:"520px",margin:"0 auto 10px"}}>
@@ -10757,9 +13438,52 @@ function HotPotatoGame({ questions, teams, onUpdateScore, onEnd, level }) {
         </div>
         <div style={{position:"absolute",bottom:"-14px",left:"50%",transform:"translateX(-50%)",width:0,height:0,borderLeft:"14px solid transparent",borderRight:"14px solid transparent",borderTop:"14px solid #F97316"}}/>
       </div>
-      <div style={{marginTop:"24px",marginBottom:"20px",fontSize:"14px",color:"#6B7280",fontWeight:"600"}}>
+      <div style={{marginTop:"24px",marginBottom:"16px",fontSize:"14px",color:"#6B7280",fontWeight:"600"}}>
         Pass the potato as fast as possible — the clock is always ticking!
       </div>
+
+      {/* Question preview — teacher can check all prompts and answers before starting */}
+      <div style={{marginBottom:"20px"}}>
+        <button
+          onClick={() => setShowQPreview(v => !v)}
+          style={{
+            background: showQPreview ? "#7C2D12" : "white",
+            color: showQPreview ? "white" : "#7C2D12",
+            border: "2px solid #7C2D12",
+            borderRadius:"10px", padding:"8px 20px",
+            fontWeight:"800", fontSize:"13px", cursor:"pointer",
+            transition:"all 0.15s"
+          }}
+        >
+          {showQPreview ? "🙈 Hide question list" : "👁️ Preview all questions & answers"}
+        </button>
+
+        {showQPreview && (
+          <div style={{
+            background:"white", border:"2px solid #FED7AA",
+            borderRadius:"14px", padding:"16px", marginTop:"12px",
+            textAlign:"left", maxHeight:"340px", overflowY:"auto"
+          }}>
+            <div style={{fontWeight:"800",color:"#7C2D12",fontSize:"13px",marginBottom:"12px"}}>
+              📋 All questions in this game ({questions.length} total) — pre-teach anything unfamiliar!
+            </div>
+            {questions.map((q, i) => (
+              <div key={i} style={{
+                borderBottom: i < questions.length - 1 ? "1px solid #FED7AA" : "none",
+                paddingBottom:"10px", marginBottom:"10px"
+              }}>
+                <div style={{fontWeight:"700",color:"#1C1917",fontSize:"13px",marginBottom:"3px"}}>
+                  {i + 1}. {q.prompt}
+                </div>
+                <div style={{fontWeight:"600",color:"#EA580C",fontSize:"12px"}}>
+                  ✅ {q.answer}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
       <div style={{display:"flex",gap:"10px",justifyContent:"center",flexWrap:"wrap",marginBottom:"24px"}}>
         {teams.map(t => (<div key={t.id} style={{background:t.color.light,border:`3px solid ${t.color.bg}`,borderRadius:"14px",padding:"10px 18px",fontWeight:"800",fontSize:"14px",color:t.color.dark}}>{t.color.emoji} {t.name}</div>))}
       </div>
@@ -11012,8 +13736,12 @@ export default function LessonGamesGenerator() {
   const handleSetup = () => {
     if (topic === "ai" && !lessonContent.trim()) { setError("Please paste your lesson content first!"); return; }
     setError("");
+    // Preserve existing scores when returning from game-select to change topic/teams.
+    // Only build fresh teams (score 0) when there are none yet.
+    const existingScores = Object.fromEntries(teams.map(t => [t.name, t.score]));
     const builtTeams = teamNames.slice(0, numTeams).map((name, i) => ({
-      id: i, name, color: TEAM_COLORS[teamColors[i] ?? i], score: 200
+      id: i, name, color: TEAM_COLORS[teamColors[i] ?? i],
+      score: existingScores[name] ?? 0,
     }));
     setTeams(builtTeams);
     setScreen("game-select");
@@ -11089,8 +13817,9 @@ export default function LessonGamesGenerator() {
         } else if (mode.id === "spy") {
           qs = [...lib.spyRounds].sort(() => Math.random() - 0.5);
         } else if (mode.id === "hotseat") {
-          const pool = [...lib.hotSeatWords].sort(() => Math.random() - 0.5);
-          qs = Array.from({length: 20 * numTeams}, (_, i) => pool[i % pool.length]);
+          // Pass all unique words shuffled — game ends naturally when pool is exhausted.
+          // Previously padded to 20*numTeams with modulo, causing repeats after ~10 rounds with 2 teams.
+          qs = [...lib.hotSeatWords].sort(() => Math.random() - 0.5);
         } else if (mode.id === "hotpotato") {
           qs = [...(lib.hotPotatoPrompts || [])].sort(() => Math.random() - 0.5);
         } else if (mode.id === "battleship") {
@@ -11181,7 +13910,15 @@ export default function LessonGamesGenerator() {
     }
   };
 
+  // earlyEndRef lets individual games register a cleanup to run before ending
+  // (e.g. Auction needs to flush its bank to real scores on early exit)
+  const earlyEndRef = useRef(null);
+
   const handleGameEnd = () => {
+    if (earlyEndRef.current) {
+      earlyEndRef.current();
+      earlyEndRef.current = null;
+    }
     setConfetti(true);
     setScreen("results");
     setTimeout(()=>setConfetti(false),4000);
@@ -11505,21 +14242,97 @@ export default function LessonGamesGenerator() {
   if(screen==="game-select") return (
     <div style={{minHeight:"100vh",background:"#F8F7FF",padding:"20px",fontFamily:"'Segoe UI',system-ui,sans-serif"}}>
       <div style={{maxWidth:"760px",margin:"0 auto"}}>
-        <div style={{textAlign:"center",marginBottom:"24px"}}>
-          <h2 style={{fontSize:"28px",fontWeight:"900",color:"#1E1B4B",margin:"0 0 8px"}}>Choose Your Game</h2>
-          <div style={{display:"flex",gap:"8px",justifyContent:"center",flexWrap:"wrap",marginBottom:"10px"}}>
-            <span style={{background:"#EEF2FF",border:"2px solid #6366F1",borderRadius:"20px",padding:"4px 14px",fontWeight:"700",fontSize:"13px",color:"#4338CA"}}>
-              {topic === "ai" ? `✨ AI · ${level || "any level"}` : `${TOPIC_OPTIONS.find(o=>o.value===topic)?.level || ""} · ${TOPIC_OPTIONS.find(o=>o.value===topic)?.label || topic}`}
-            </span>
-            <span style={{background:"#F0FDF4",border:"2px solid #22C55E",borderRadius:"20px",padding:"4px 14px",fontWeight:"700",fontSize:"13px",color:"#15803D"}}>
-              Focus: {focus === "grammar" ? "📐 Grammar" : focus === "vocabulary" ? "📖 Vocabulary" : "💬 Topics"}
-            </span>
-            <button onClick={()=>setScreen("setup")} style={{background:"none",border:"2px solid #D1D5DB",borderRadius:"20px",padding:"4px 14px",fontWeight:"700",fontSize:"13px",color:"#6B7280",cursor:"pointer"}}>
-              ✏️ Change
-            </button>
+
+        {/* ── Topic front and center ── */}
+        <div style={{background:"linear-gradient(135deg,#1E1B4B,#312E81)",borderRadius:"20px",padding:"20px 24px",marginBottom:"20px",color:"white"}}>
+          <div style={{textAlign:"center",marginBottom:"16px"}}>
+            <div style={{fontSize:"13px",fontWeight:"700",color:"#A5B4FC",marginBottom:"4px",letterSpacing:"0.06em",textTransform:"uppercase"}}>Current Topic</div>
+            <div style={{fontSize:"clamp(18px,4vw,26px)",fontWeight:"900",lineHeight:1.2}}>
+              {topic === "ai" ? "✨ AI Generated" : (TOPIC_OPTIONS.find(o=>o.value===topic)?.label || topic)}
+            </div>
           </div>
-          <p style={{color:"#6B7280",fontSize:"13px",marginBottom:"16px"}}>Questions generate fresh each time you start a game ✨</p>
+
+          {/* Inline dropdowns — level, focus, topic */}
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 2fr",gap:"10px",alignItems:"end"}}>
+            {/* Level */}
+            <div>
+              <div style={{fontSize:"11px",fontWeight:"700",color:"#A5B4FC",marginBottom:"5px",letterSpacing:"0.05em"}}>LEVEL</div>
+              <select value={level} onChange={e=>{
+                const newLevel = e.target.value;
+                setLevel(newLevel);
+                const match = TOPIC_OPTIONS.find(o => o.value !== "ai" && o.level === newLevel && o.focus === focus);
+                if (match) setTopic(match.value);
+              }} style={{
+                width:"100%",background:"rgba(255,255,255,0.12)",color:"white",border:"2px solid rgba(255,255,255,0.25)",
+                borderRadius:"10px",padding:"8px 10px",fontWeight:"700",fontSize:"13px",cursor:"pointer",
+                appearance:"none",WebkitAppearance:"none"
+              }}>
+                {["A1","A2","B1","B2","C1","C2"].map(l => <option key={l} value={l} style={{color:"#1E1B4B",background:"white"}}>{l}</option>)}
+              </select>
+            </div>
+            {/* Focus */}
+            <div>
+              <div style={{fontSize:"11px",fontWeight:"700",color:"#A5B4FC",marginBottom:"5px",letterSpacing:"0.05em"}}>FOCUS</div>
+              <select value={focus} onChange={e=>{
+                const newFocus = e.target.value;
+                setFocus(newFocus);
+                const match = TOPIC_OPTIONS.find(o => o.value !== "ai" && o.level === level && o.focus === newFocus);
+                if (match) setTopic(match.value);
+              }} style={{
+                width:"100%",background:"rgba(255,255,255,0.12)",color:"white",border:"2px solid rgba(255,255,255,0.25)",
+                borderRadius:"10px",padding:"8px 10px",fontWeight:"700",fontSize:"13px",cursor:"pointer",
+                appearance:"none",WebkitAppearance:"none"
+              }}>
+                <option value="grammar" style={{color:"#1E1B4B",background:"white"}}>📐 Grammar</option>
+                <option value="vocabulary" style={{color:"#1E1B4B",background:"white"}}>📖 Vocabulary</option>
+                <option value="topic" style={{color:"#1E1B4B",background:"white"}}>💬 Topics</option>
+              </select>
+            </div>
+            {/* Topic — filtered by level and focus */}
+            <div>
+              <div style={{fontSize:"11px",fontWeight:"700",color:"#A5B4FC",marginBottom:"5px",letterSpacing:"0.05em"}}>TOPIC</div>
+              <select
+                value={topic}
+                onChange={e=>setTopic(e.target.value)}
+                style={{
+                  width:"100%",background:"rgba(255,255,255,0.12)",color:"white",border:"2px solid rgba(255,255,255,0.25)",
+                  borderRadius:"10px",padding:"8px 10px",fontWeight:"700",fontSize:"13px",cursor:"pointer",
+                  appearance:"none",WebkitAppearance:"none"
+                }}
+              >
+                {(() => {
+                  const filtered = TOPIC_OPTIONS.filter(o =>
+                    o.value === "ai" ||
+                    (o.level === level && o.focus === focus)
+                  );
+                  // If current topic not in filtered list, auto-select first match
+                  const inList = filtered.some(o => o.value === topic);
+                  if (!inList && filtered.length > 0) {
+                    // Side-effect inside render — use setTimeout to avoid React warning
+                    setTimeout(() => setTopic(filtered[0].value), 0);
+                  }
+                  return filtered.map(o => (
+                    <option key={o.value} value={o.value} style={{color:"#1E1B4B",background:"white"}}>{o.label}</option>
+                  ));
+                })()}
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* ScoreBoard + Reset */}
+        <div style={{marginBottom:"20px"}}>
           <ScoreBoard teams={teams} />
+          <div style={{textAlign:"center",marginTop:"10px",display:"flex",gap:"10px",justifyContent:"center",flexWrap:"wrap"}}>
+            <button onClick={()=>setTeams(ts=>ts.map(t=>({...t,score:0})))} style={{
+              background:"none",border:"2px solid #D1D5DB",borderRadius:"20px",
+              padding:"4px 16px",fontWeight:"700",fontSize:"12px",color:"#9CA3AF",cursor:"pointer"
+            }}>🔄 Reset all scores to 0</button>
+            <button onClick={()=>setScreen("setup")} style={{
+              background:"none",border:"2px solid #D1D5DB",borderRadius:"20px",
+              padding:"4px 16px",fontWeight:"700",fontSize:"12px",color:"#9CA3AF",cursor:"pointer"
+            }}>⚙️ Edit teams & settings</button>
+          </div>
         </div>
 
         {/* Question count — only relevant for AI generation */}
@@ -11601,7 +14414,7 @@ export default function LessonGamesGenerator() {
               {isFullscreen ? "⛶" : "⛶"}
               <span style={{fontSize:"13px",marginLeft:"6px"}}>{isFullscreen ? "Exit" : "Fullscreen"}</span>
             </button>
-            <button onClick={()=>setScreen("game-select")} style={{background:"rgba(255,255,255,0.15)",color:"white",border:"none",borderRadius:"8px",padding:"6px 12px",cursor:"pointer",fontWeight:"700"}}>🔄 Change Game</button>
+            <button onClick={handleGameEnd} style={{background:"rgba(255,255,255,0.15)",color:"white",border:"none",borderRadius:"8px",padding:"6px 12px",cursor:"pointer",fontWeight:"700"}}>🏁 End & See Results</button>
           </div>
         </div>
         <div style={{padding:"16px",maxWidth:"900px",margin:"0 auto"}}>
@@ -11611,6 +14424,7 @@ export default function LessonGamesGenerator() {
               <AuctionGame
                 questions={questions}
                 teams={teams}
+                earlyEndRef={earlyEndRef}
                 onUpdateScore={updateScore}
                 onEnd={handleGameEnd}
               />
@@ -11643,6 +14457,7 @@ export default function LessonGamesGenerator() {
                 onEnd={handleGameEnd}
                 lessonContent={lessonContent}
                 level={level}
+                isTopic={focus === "topic"}
               />
             )}
           </div>
@@ -11678,7 +14493,7 @@ export default function LessonGamesGenerator() {
             ))}
           </div>
           <div style={{display:"flex",gap:"12px",justifyContent:"center",flexWrap:"wrap"}}>
-            <button onClick={()=>{setScreen("game-select");setTeams(t=>t.map(tm=>({...tm,score:200})));}} style={{
+            <button onClick={()=>setScreen("game-select")} style={{
               background:"linear-gradient(135deg,#22C55E,#16A34A)",color:"white",border:"none",
               borderRadius:"14px",padding:"14px 28px",fontSize:"17px",fontWeight:"800",cursor:"pointer"
             }}>🎮 Play Again</button>
