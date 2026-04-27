@@ -20,8 +20,8 @@ import { HotPotatoGame } from "./components/games/HotPotatoGame";
 export default function LessonGamesGenerator() {
   const [screen, setScreen] = useState<"welcome" | "setup" | "game-select" | "game" | "results">("welcome");
   const [numTeams, setNumTeams] = useState(2);
-  const [teamNames] = useState(["Team Red", "Team Blue", "Team Green", "Team Yellow", "Team Purple"]);
-  const [teamColors] = useState([0, 1, 2, 3, 4]);
+  const [teamNames, setTeamNames] = useState(["Team Red", "Team Blue", "Team Green", "Team Yellow", "Team Purple"]);
+  const [teamColors, setTeamColors] = useState([0, 1, 2, 3, 4]);
   const [teams, setTeams] = useState<Team[]>([]);
   const [questions, setQuestions] = useState<QuestionData[]>([]);
   const [level, setLevel] = useState("B1");
@@ -230,6 +230,68 @@ export default function LessonGamesGenerator() {
               {[2, 3, 4, 5].map(n => (
                 <button key={n} onClick={() => setNumTeams(n)} style={{ background: numTeams === n ? "#6366F1" : "white", color: numTeams === n ? "white" : "#374151", border: `3px solid ${numTeams === n ? "#6366F1" : "#D1D5DB"}`, borderRadius: "12px", padding: "10px 24px", fontSize: "18px", fontWeight: "800", cursor: "pointer" }}>{n}</button>
               ))}
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: `repeat(auto-fit,minmax(${numTeams > 3 ? "160px" : "180px"},1fr))`, gap: "12px" }}>
+              {Array.from({ length: numTeams }).map((_, i) => {
+                const color = TEAM_COLORS[teamColors[i] ?? i];
+
+                return (
+                  <div key={i} style={{ border: `3px solid ${color.bg}`, borderRadius: "14px", overflow: "hidden", background: "white" }}>
+                    <div style={{ background: color.bg, padding: "8px 10px", display: "flex", alignItems: "center", gap: "6px" }}>
+                      <span style={{ fontSize: "16px" }}>{color.emoji}</span>
+                      <span style={{ color: "white", fontWeight: "800", fontSize: "13px" }}>{color.name}</span>
+                    </div>
+                    <input
+                      value={teamNames[i]}
+                      onChange={e => {
+                        const next = [...teamNames];
+                        next[i] = e.target.value;
+                        setTeamNames(next);
+                      }}
+                      style={{
+                        width: "100%",
+                        padding: "10px 12px",
+                        fontSize: "14px",
+                        fontWeight: "700",
+                        border: "none",
+                        borderBottom: `2px solid ${color.bg}20`,
+                        color: color.dark,
+                        background: color.light,
+                        outline: "none",
+                        boxSizing: "border-box"
+                      }}
+                      placeholder="Team name..."
+                    />
+                    <div style={{ background: color.light, padding: "8px 10px", display: "flex", flexWrap: "wrap", gap: "6px" }}>
+                      {TEAM_COLORS.map((swatch, swatchIndex) => (
+                        <button
+                          key={swatchIndex}
+                          type="button"
+                          onClick={() => {
+                            const next = [...teamColors];
+                            next[i] = swatchIndex;
+                            setTeamColors(next);
+                          }}
+                          title={swatch.name}
+                          aria-label={`${teamNames[i] || `Team ${i + 1}`} color ${swatch.name}`}
+                          style={{
+                            width: "24px",
+                            height: "24px",
+                            borderRadius: "50%",
+                            background: swatch.bg,
+                            cursor: "pointer",
+                            border: teamColors[i] === swatchIndex ? `3px solid ${swatch.dark}` : `2px solid ${swatch.bg}`,
+                            transform: teamColors[i] === swatchIndex ? "scale(1.25)" : "scale(1)",
+                            transition: "all 0.15s",
+                            flexShrink: 0,
+                            boxShadow: teamColors[i] === swatchIndex ? `0 0 0 2px white, 0 0 0 4px ${swatch.bg}` : "none"
+                          }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
 

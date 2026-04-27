@@ -26,7 +26,7 @@ export function ScoreBoard({ teams, highlight }: ScoreBoardProps) {
             {i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : i === 3 ? "🏅" : "🎖️"}
           </div>
           <div style={{ fontWeight: "800", fontSize: "15px", color: highlight === t.id ? "white" : t.color.dark }}>
-            {t.name}
+            {t.color.emoji} {t.name}
           </div>
           <div style={{ fontWeight: "900", fontSize: "28px", color: highlight === t.id ? "white" : t.color.dark }}>
             {t.score}
