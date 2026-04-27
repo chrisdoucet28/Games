@@ -150,8 +150,8 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd }: Game
     teams.forEach(t => {
       const pick = teamPicks[t.id];
       if (!pick) return;
-      if (cards[pick.cardIdx]?.isStar && pick.correct) onUpdateScore(t.id, 80);
-      else if (!cards[pick.cardIdx]?.isStar && pick.correct) onUpdateScore(t.id, 20);
+      if (cards[pick.cardIdx]?.isStar && pick.correct) onUpdateScore(t.id, 120);
+      else if (!cards[pick.cardIdx]?.isStar && pick.correct) onUpdateScore(t.id, 30);
     });
   }, [phase, teams, teamPicks, cards, onUpdateScore]);
   
