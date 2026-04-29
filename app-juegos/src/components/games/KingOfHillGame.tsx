@@ -272,7 +272,7 @@ export function KingOfHillGame({ questions, teams, onUpdateScore, onEnd }: GameP
                       <span key={entry.teamIdx} style={{ display: "flex", alignItems: "center", gap: "4px" }}>
                         <span style={{ fontWeight: "900", fontSize: "13px", color: "#6B7280" }}>{pos + 1}.</span>
                         <span style={{ background: team.color.bg, color: "white", borderRadius: "8px", padding: "3px 10px", fontWeight: "800", fontSize: "13px" }}>{team.name}</span>
-                        {pos < finalOrder.length - 1 && <span style={{ color: "#9CA3AF" }}>-></span>}
+                        {pos < finalOrder.length - 1 && <span style={{ color: "#9CA3AF" }}>{"->"}</span>}
                       </span>
                     );
                   })}
