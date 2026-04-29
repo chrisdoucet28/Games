@@ -4,6 +4,7 @@ import { teamsGridCols } from "../../data/constants";
 
 export function HotPotatoGame({ questions, teams, onUpdateScore, onEnd, level }: GameProps) {
   const showSpanish = level === "A1" || level === "A2";
+  const STARTING_BANK = 100;
   const TOTAL_ROUNDS = 5;
   const ROUND_SECONDS = 40;
   const Q_SECONDS = 10;
@@ -25,6 +26,7 @@ export function HotPotatoGame({ questions, teams, onUpdateScore, onEnd, level }:
   const qTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const roundEndedRef = useRef(false);
   const holderIdxRef = useRef(0);
+  const seededStartRef = useRef(false);
 
   useEffect(() => { holderIdxRef.current = holderIdx; }, [holderIdx]);
 
@@ -136,6 +138,7 @@ export function HotPotatoGame({ questions, teams, onUpdateScore, onEnd, level }:
         <div style={{ fontSize: "40px", marginBottom: "10px" }}>🥔</div>
         <div style={{ fontWeight: "900", fontSize: "20px", marginBottom: "10px" }}>Hot Potato</div>
         <div style={{ fontSize: "15px", lineHeight: 1.8, opacity: 0.95 }}>
+          Each team starts with <strong>{STARTING_BANK} pts</strong> for this game.<br />
           <strong>5 rounds × 40 seconds.</strong> One team holds the potato.<br />
           Each team has <strong>10 seconds</strong> to answer — timer auto-reveals.<br />
           Teacher judges: <strong>✅ Answered in time → Pass it on!</strong><br />
@@ -192,7 +195,13 @@ export function HotPotatoGame({ questions, teams, onUpdateScore, onEnd, level }:
       <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "24px" }}>
         {teams.map(t => (<div key={t.id} style={{ background: t.color.light, border: `3px solid ${t.color.bg}`, borderRadius: "14px", padding: "10px 18px", fontWeight: "800", fontSize: "14px", color: t.color.dark }}>{t.color.emoji} {t.name}</div>))}
       </div>
-      <button onClick={() => setPhase("play")} style={{ background: "linear-gradient(135deg,#EA580C,#F97316)", color: "white", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(249,115,22,0.4)" }}>
+      <button onClick={() => {
+        if (!seededStartRef.current) {
+          teams.forEach(team => onUpdateScore(team.id, STARTING_BANK));
+          seededStartRef.current = true;
+        }
+        setPhase("play");
+      }} style={{ background: "linear-gradient(135deg,#EA580C,#F97316)", color: "white", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(249,115,22,0.4)" }}>
         🥔 Start Round 1!
       </button>
     </div>

@@ -192,6 +192,10 @@ export function KingOfHillGame({ questions, teams, onUpdateScore, onEnd }: GameP
     setContest((c: any) => ({ ...c, step: "result", winner: winnerId, reason }));
   };
 
+  const finishContest = () => {
+    nextTeamTurn(false, owners);
+  };
+
   if (phase === "intro") return (
     <div style={{ textAlign: "center" }}>
       <div style={{ background: "linear-gradient(135deg,#831843,#DB2777)", borderRadius: "20px", padding: "28px 24px", marginBottom: "10px", color: "white", maxWidth: "520px", margin: "0 auto 10px", position: "relative" }}>
@@ -330,11 +334,38 @@ export function KingOfHillGame({ questions, teams, onUpdateScore, onEnd }: GameP
 
           {phase === "contested" && contest?.step === "simultaneous" && (
             <div>
+              <div style={{ background: "linear-gradient(90deg,rgba(255,255,255,0) 0%, rgba(239,68,68,0.15) 50%, rgba(255,255,255,0) 100%)", border: "2px solid #FCA5A5", borderRadius: "16px", padding: "14px", marginBottom: "12px", textAlign: "center" }}>
+                <div style={{ fontWeight: "900", fontSize: "18px", color: "#991B1B", marginBottom: "6px" }}>Battle for {contest.zoneId}!</div>
+                <div style={{ fontSize: "13px", color: "#7F1D1D", fontWeight: "700", lineHeight: 1.5 }}>
+                  {attacker?.name} is attacking a claimed zone. Both teams face the same question, and only one can control it.
+                </div>
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginBottom: "12px" }}>
+                <div style={{ background: attacker?.color.light, border: `3px solid ${attacker?.color.bg}`, borderRadius: "12px", padding: "10px", textAlign: "center" }}>
+                  <div style={{ fontSize: "18px", marginBottom: "2px" }}>ATK</div>
+                  <div style={{ fontWeight: "900", fontSize: "13px", color: attacker?.color.dark }}>{attacker?.name}</div>
+                  <div style={{ fontSize: "11px", color: attacker?.color.dark, opacity: 0.7 }}>Attacker</div>
+                </div>
+                <div style={{ background: defender?.color.light, border: `3px solid ${defender?.color.bg}`, borderRadius: "12px", padding: "10px", textAlign: "center" }}>
+                  <div style={{ fontSize: "18px", marginBottom: "2px" }}>DEF</div>
+                  <div style={{ fontWeight: "900", fontSize: "13px", color: defender?.color.dark }}>{defender?.name}</div>
+                  <div style={{ fontSize: "11px", color: defender?.color.dark, opacity: 0.7 }}>Defender of {contest.zoneId}</div>
+                </div>
+              </div>
               <QuestionCard question={q} showAnswer={showAns} onReveal={() => { stop(); setShowAns(true); }} />
+              <div style={{ textAlign: "center", fontWeight: "700", fontSize: "13px", color: "#374151", marginTop: "10px" }}>
+                {isTopicMode || q?.type === "speaking task"
+                  ? "Teacher judges which team gave the better answer."
+                  : "Judge which team answered correctly first."}
+              </div>
               {(showAns || q?.type === "speaking task") && (
-                <div style={{ marginTop: "14px", textAlign: "center" }}>
-                  <p>Who answered correctly first?</p>
-                  <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
+                <div style={{ marginTop: "14px" }}>
+                  <div style={{ textAlign: "center", fontWeight: "700", fontSize: "13px", color: "#374151", marginBottom: "10px" }}>
+                    {isTopicMode || q?.type === "speaking task"
+                      ? "Teacher judges - whose answer was better?"
+                      : "Who answered correctly first?"}
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "8px" }}>
                     <button onClick={() => resolveContest(contest.attackerId)} style={{ background: attacker?.color.bg, color: "white", border: "none", borderRadius: "12px", padding: "14px 10px", cursor: "pointer" }}>⚔️ {attacker?.name}</button>
                     <button onClick={() => resolveContest(contest.defenderId)} style={{ background: defender?.color.bg, color: "white", border: "none", borderRadius: "12px", padding: "14px 10px", cursor: "pointer" }}>🛡️ {defender?.name}</button>
                   </div>
@@ -346,6 +377,15 @@ export function KingOfHillGame({ questions, teams, onUpdateScore, onEnd }: GameP
 
           {phase === "contested" && contest?.step === "result" && (
             <div style={{ textAlign: "center" }}>
+              <div style={{
+                background: contest.winner ? teams.find(t => t.id === contest.winner)?.color.light : "#F3F4F6",
+                border: `3px solid ${contest.winner ? teams.find(t => t.id === contest.winner)?.color.bg : "#D1D5DB"}`,
+                borderRadius: "14px", padding: "16px", marginBottom: "14px"
+              }}>
+                {contest.reason === "attacker" && <div style={{ fontWeight: "900", fontSize: "16px", color: attacker?.color.dark }}>{attacker?.name} captured {contest.zoneId}! +30 pts</div>}
+                {contest.reason === "defender" && <div style={{ fontWeight: "900", fontSize: "16px", color: defender?.color.dark }}>{defender?.name} defended {contest.zoneId}! +20 bonus pts</div>}
+                {contest.reason === "neither" && <div style={{ fontWeight: "900", fontSize: "16px", color: "#374151" }}>Neither wins - {contest.zoneId} stays with {defender?.name}!</div>}
+              </div>
               <div style={{ padding: "16px", marginBottom: "14px" }}>
                 <div style={{ fontWeight: "900", fontSize: "18px", color: "#1E1B4B", marginBottom: "6px" }}>Contest resolved!</div>
                 {contest.reason === "attacker" && <div style={{ color: attacker?.color.dark, fontWeight: "700" }}>⚔️ {attacker?.name} steals {contest.zoneId} and gains +30 points.</div>}
