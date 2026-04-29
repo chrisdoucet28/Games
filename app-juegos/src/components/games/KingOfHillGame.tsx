@@ -192,10 +192,6 @@ export function KingOfHillGame({ questions, teams, onUpdateScore, onEnd }: GameP
     setContest((c: any) => ({ ...c, step: "result", winner: winnerId, reason }));
   };
 
-  const finishContest = () => {
-    nextTeamTurn(false, owners);
-  };
-
   if (phase === "intro") return (
     <div style={{ textAlign: "center" }}>
       <div style={{ background: "linear-gradient(135deg,#831843,#DB2777)", borderRadius: "20px", padding: "28px 24px", marginBottom: "10px", color: "white", maxWidth: "520px", margin: "0 auto 10px", position: "relative" }}>
