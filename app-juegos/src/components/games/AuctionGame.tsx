@@ -31,27 +31,30 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, earlyEndRe
   );
 
   const auctionBankRef = useRef(auctionBank);
+  const hasFlushedBankRef = useRef(false);
   useEffect(() => { auctionBankRef.current = auctionBank; }, [auctionBank]);
 
-  const flushAndEnd = useCallback(() => {
+  const flushBankToScores = useCallback(() => {
+    if (hasFlushedBankRef.current) return;
+    hasFlushedBankRef.current = true;
     teams.forEach(t => {
       const bank = auctionBankRef.current[t.id] ?? 0;
       if (bank > 0) onUpdateScore(t.id, bank);
     });
+  }, [teams, onUpdateScore]);
+
+  const flushAndEnd = useCallback(() => {
+    flushBankToScores();
+    if (earlyEndRef) earlyEndRef.current = null;
     onEnd();
-  }, [teams, onUpdateScore, onEnd]);
+  }, [flushBankToScores, earlyEndRef, onEnd]);
 
   useEffect(() => {
     if (earlyEndRef) {
-      earlyEndRef.current = () => {
-        teams.forEach(t => {
-          const bank = auctionBankRef.current[t.id] ?? 0;
-          if (bank > 0) onUpdateScore(t.id, bank);
-        });
-      };
+      earlyEndRef.current = flushBankToScores;
     }
     return () => { if (earlyEndRef) earlyEndRef.current = null; };
-  }, [earlyEndRef, teams, onUpdateScore]);
+  }, [earlyEndRef, flushBankToScores]);
 
   const s = questions[qi];
   if (!s) return null;

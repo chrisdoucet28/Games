@@ -66,9 +66,9 @@ export function SpyAmongUsGame({ questions, teams, onUpdateScore, onEnd }: GameP
   const peekTeam = teams[peekIdx];
   const speakTeam = speakOrder[speakIdx] ?? speakOrder[0] ?? teams[0];
   const isSpy = (teamId: string | number) => teamId === spyTeam.id;
-  const spyGuessOptions = (round.spyGuessOptions?.length
-    ? round.spyGuessOptions
-    : [round.crewmateTopic, round.spyTopic].filter(Boolean)) as string[];
+  const spyGuessOptions = Array.from(
+    new Set([round.crewmateTopic, round.spyTopic].filter(Boolean)),
+  ) as string[];
 
   const runOrderRoll = useCallback(
     (indicesToRoll: number[], existingRolls: Record<number, number>) => {

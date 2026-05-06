@@ -27,11 +27,13 @@ export function HotPotatoGame({ questions, teams, onUpdateScore, onEnd, level }:
   const roundEndedRef = useRef(false);
   const holderIdxRef = useRef(0);
   const seededStartRef = useRef(false);
+  const penalizedRoundRef = useRef<number | null>(null);
 
   useEffect(() => { holderIdxRef.current = holderIdx; }, [holderIdx]);
 
   useEffect(() => {
-    if (phase === "roundend") {
+    if (phase === "roundend" && penalizedRoundRef.current !== round) {
+      penalizedRoundRef.current = round;
       onUpdateScore(teams[holderIdxRef.current].id, -PENALTY_PTS);
     }
   }, [phase, round, onUpdateScore, teams]);

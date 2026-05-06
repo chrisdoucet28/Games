@@ -40,6 +40,7 @@ export interface TeamColor {
     crewmatePrompt?: string;
     crewmateTopic?: string;
     spyTopic?: string;
+    spyGuessOptions?: string[];
   }
   
   export interface GameProps {
