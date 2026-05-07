@@ -118,13 +118,13 @@ export default function LessonGamesGenerator() {
         }));
 
       if (mode.id === "auction") {
-        qs = [...lib.auctionSentences].sort(() => Math.random() - 0.5);
+        qs = [...(lib.auctionSentences ?? [])].sort(() => Math.random() - 0.5);
       } else if (mode.id === "cards") {
-        qs = [...lib.cardTasks].sort(() => Math.random() - 0.5);
+        qs = [...(lib.cardTasks ?? [])].sort(() => Math.random() - 0.5);
       } else if (mode.id === "spy") {
-        qs = [...lib.spyRounds].sort(() => Math.random() - 0.5);
+        qs = [...(lib.spyRounds ?? [])].sort(() => Math.random() - 0.5);
       } else if (mode.id === "hotseat") {
-        qs = [...lib.hotSeatWords].sort(() => Math.random() - 0.5);
+        qs = [...(lib.hotSeatWords ?? [])].sort(() => Math.random() - 0.5);
       } else if (mode.id === "hotpotato") {
         qs = [...(lib.hotPotatoPrompts || [])].sort(() => Math.random() - 0.5);
       } else if (mode.id === "battleship") {
