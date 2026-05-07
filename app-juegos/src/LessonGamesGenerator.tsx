@@ -17,6 +17,16 @@ import { KingOfHillGame } from "./components/games/KingOfHillGame";
 import { BridgeBuilderGame } from "./components/games/BridgeBuilderGame";
 import { HotPotatoGame } from "./components/games/HotPotatoGame";
 
+type TopicLibraryEntry = {
+  questions: QuestionData[];
+  minefieldGrid?: any;
+  auctionSentences?: any[];
+  cardTasks?: { task: string }[];
+  spyRounds?: any[];
+  hotSeatWords?: any[];
+  hotPotatoPrompts?: any[];
+};
+
 export default function LessonGamesGenerator() {
   const [screen, setScreen] = useState<"welcome" | "setup" | "game-select" | "game" | "results">("welcome");
   const [numTeams, setNumTeams] = useState(2);
@@ -82,7 +92,7 @@ export default function LessonGamesGenerator() {
     setLoadError("");
 
     try {
-      const lib = TOPIC_LIBRARY[topic as keyof typeof TOPIC_LIBRARY];
+      const lib = TOPIC_LIBRARY[topic as keyof typeof TOPIC_LIBRARY] as TopicLibraryEntry | undefined;
       if (!lib) {
         setLoadError("Topic data not found.");
         setLoadingGame(false);
