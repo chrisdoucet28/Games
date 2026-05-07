@@ -44,6 +44,15 @@ export default function LessonGamesGenerator() {
     return () => document.removeEventListener("fullscreenchange", onFsChange);
   }, []);
 
+  useEffect(() => {
+    const filtered = TOPIC_OPTIONS.filter(
+      o => o.value !== "ai" && o.level === level && o.focus === focus,
+    );
+    if (filtered.length > 0 && !filtered.some(o => o.value === topic)) {
+      setTopic(filtered[0].value);
+    }
+  }, [level, focus, topic]);
+
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
       appRef.current?.requestFullscreen?.();
@@ -191,41 +200,114 @@ export default function LessonGamesGenerator() {
   if (screen === "setup") {
     // Solo tópicos pre-programados
     const filteredTopics = TOPIC_OPTIONS.filter(o => o.value !== "ai" && (!level || o.level === level) && (!focus || o.focus === focus));
+    const LEVELS_META = [
+      { id: "A1", desc: "Beginner", color: "#22C55E" },
+      { id: "A2", desc: "Elementary", color: "#84CC16" },
+      { id: "B1", desc: "Intermediate", color: "#F59E0B" },
+      { id: "B2", desc: "Upper-Int.", color: "#F97316" },
+      { id: "C1", desc: "Advanced", color: "#EF4444" },
+    ];
+    const FOCUS_META = [
+      { id: "grammar", icon: "📐", label: "Grammar", desc: "Structures & rules" },
+      { id: "vocabulary", icon: "📖", label: "Vocabulary", desc: "Words in context" },
+      { id: "topic", icon: "💬", label: "Topics", desc: "Speaking themes" },
+    ];
 
     return (
       <div style={{ minHeight: "100vh", background: "#F8F7FF", padding: "20px", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
         <div style={{ maxWidth: "720px", margin: "0 auto" }}>
           <button onClick={() => setScreen("welcome")} style={{ background: "none", border: "2px solid #6366F1", color: "#6366F1", borderRadius: "10px", padding: "8px 16px", cursor: "pointer", fontWeight: "700", marginBottom: "20px" }}>← Back</button>
           
-          <div style={{ background: "white", border: "2px solid #E0E7FF", borderRadius: "16px", padding: "20px", marginBottom: "16px" }}>
-            <div style={{ fontWeight: "800", color: "#1E1B4B", fontSize: "16px" }}>Level & Focus</div>
-            <select value={level} onChange={e => {
-                setLevel(e.target.value);
-                const match = TOPIC_OPTIONS.find(o => o.level === e.target.value && o.focus === focus && o.value !== "ai");
-                if (match) setTopic(match.value);
-              }} style={{ margin: "10px", padding: "10px" }}>
-              {["A1", "A2", "B1", "B2", "C1"].map(l => <option key={l} value={l}>{l}</option>)}
-            </select>
-            <select value={focus} onChange={e => {
-                setFocus(e.target.value);
-                const match = TOPIC_OPTIONS.find(o => o.level === level && o.focus === e.target.value && o.value !== "ai");
-                if (match) setTopic(match.value);
-              }} style={{ margin: "10px", padding: "10px" }}>
-              <option value="grammar">Grammar</option>
-              <option value="vocabulary">Vocabulary</option>
-              <option value="topic">Topics</option>
-            </select>
+          <div style={{ textAlign: "center", marginBottom: "28px" }}>
+            <h2 style={{ fontSize: "32px", fontWeight: "900", color: "#1E1B4B", margin: 0 }}>⚙️ Game Setup</h2>
+            <p style={{ color: "#6B7280", marginTop: "8px" }}>Set up your class, then pick a topic and game</p>
           </div>
 
           <div style={{ background: "white", border: "2px solid #E0E7FF", borderRadius: "16px", padding: "20px", marginBottom: "16px" }}>
-            <div style={{ fontWeight: "800", color: "#1E1B4B", fontSize: "16px", marginBottom: "10px" }}>Choose Topic</div>
-            <select value={topic} onChange={e => setTopic(e.target.value)} style={{ width: "100%", padding: "10px" }}>
-              {filteredTopics.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-            </select>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px" }}>
+              <div style={{ background: "#6366F1", color: "white", borderRadius: "50%", width: "28px", height: "28px", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "900", fontSize: "14px", flexShrink: 0 }}>1</div>
+              <div>
+                <div style={{ fontWeight: "800", color: "#1E1B4B", fontSize: "16px" }}>What level is your class?</div>
+                <div style={{ color: "#6B7280", fontSize: "12px", marginTop: "2px" }}>Filters the topic list below</div>
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "16px" }}>
+              {LEVELS_META.map(l => (
+                <button key={l.id} onClick={() => setLevel(l.id)} style={{
+                  background: level === l.id ? l.color : "white",
+                  color: level === l.id ? "white" : "#374151",
+                  border: `3px solid ${level === l.id ? l.color : "#D1D5DB"}`,
+                  borderRadius: "12px", padding: "10px 16px", cursor: "pointer",
+                  textAlign: "center", minWidth: "72px", transition: "all 0.15s",
+                  fontWeight: level === l.id ? "900" : "700"
+                }}>
+                  <div style={{ fontSize: "18px", fontWeight: "900" }}>{l.id}</div>
+                  <div style={{ fontSize: "11px", opacity: 0.85, marginTop: "2px" }}>{l.desc}</div>
+                </button>
+              ))}
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px" }}>
+              <div style={{ background: "#6366F1", color: "white", borderRadius: "50%", width: "28px", height: "28px", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "900", fontSize: "14px", flexShrink: 0 }}>2</div>
+              <div>
+                <div style={{ fontWeight: "800", color: "#1E1B4B", fontSize: "16px" }}>Grammar, Vocabulary, or Topics?</div>
+                <div style={{ color: "#6B7280", fontSize: "12px", marginTop: "2px" }}>Filters the topic list below</div>
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+              {FOCUS_META.map(f => (
+                <button key={f.id} onClick={() => setFocus(f.id)} style={{
+                  flex: 1, minWidth: "120px", background: focus === f.id ? "#6366F1" : "white",
+                  color: focus === f.id ? "white" : "#374151",
+                  border: `3px solid ${focus === f.id ? "#6366F1" : "#D1D5DB"}`,
+                  borderRadius: "12px", padding: "14px 12px", cursor: "pointer",
+                  textAlign: "left", transition: "all 0.15s"
+                }}>
+                  <div style={{ fontWeight: "800", fontSize: "16px" }}>{f.icon} {f.label}</div>
+                  <div style={{ fontSize: "12px", opacity: 0.75, marginTop: "3px" }}>{f.desc}</div>
+                </button>
+              ))}
+            </div>
           </div>
 
           <div style={{ background: "white", border: "2px solid #E0E7FF", borderRadius: "16px", padding: "20px", marginBottom: "16px" }}>
-            <div style={{ fontWeight: "800", color: "#1E1B4B", fontSize: "16px", marginBottom: "10px" }}>Teams</div>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px" }}>
+              <div style={{ background: "#6366F1", color: "white", borderRadius: "50%", width: "28px", height: "28px", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "900", fontSize: "14px", flexShrink: 0 }}>3</div>
+              <div>
+                <div style={{ fontWeight: "800", color: "#1E1B4B", fontSize: "16px" }}>Choose a topic</div>
+                <div style={{ color: "#6B7280", fontSize: "12px", marginTop: "2px" }}>
+                  {filteredTopics.length > 0
+                    ? `${filteredTopics.length} topic${filteredTopics.length !== 1 ? "s" : ""} available`
+                    : "No built-in topics match these filters"}
+                </div>
+              </div>
+            </div>
+            {filteredTopics.length > 0 && (
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(190px,1fr))", gap: "8px" }}>
+                {filteredTopics.map(o => {
+                  const isSelected = topic === o.value;
+                  const levelColor = LEVELS_META.find(l => l.id === o.level)?.color || "#6366F1";
+                  return (
+                    <button key={o.value} onClick={() => setTopic(o.value)} style={{
+                      background: isSelected ? levelColor : "#F8F7FF",
+                      color: isSelected ? "white" : "#1E1B4B",
+                      border: `2px solid ${isSelected ? levelColor : "#E0E7FF"}`,
+                      borderRadius: "10px", padding: "10px 14px",
+                      cursor: "pointer", textAlign: "left", transition: "all 0.15s",
+                      fontWeight: isSelected ? "800" : "700", fontSize: "13px", lineHeight: 1.4
+                    }}>
+                      {o.focus === "grammar" ? "📐" : o.focus === "vocabulary" ? "📖" : "💬"} {o.label}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          <div style={{ background: "white", border: "2px solid #E0E7FF", borderRadius: "16px", padding: "20px", marginBottom: "16px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px" }}>
+              <div style={{ background: "#6366F1", color: "white", borderRadius: "50%", width: "28px", height: "28px", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "900", fontSize: "14px", flexShrink: 0 }}>4</div>
+              <div style={{ fontWeight: "800", color: "#1E1B4B", fontSize: "16px" }}>How many teams?</div>
+            </div>
             <div style={{ display: "flex", gap: "10px", marginBottom: "16px" }}>
               {[2, 3, 4, 5].map(n => (
                 <button key={n} onClick={() => setNumTeams(n)} style={{ background: numTeams === n ? "#6366F1" : "white", color: numTeams === n ? "white" : "#374151", border: `3px solid ${numTeams === n ? "#6366F1" : "#D1D5DB"}`, borderRadius: "12px", padding: "10px 24px", fontSize: "18px", fontWeight: "800", cursor: "pointer" }}>{n}</button>
