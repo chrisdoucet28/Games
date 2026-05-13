@@ -17,14 +17,66 @@ import { KingOfHillGame } from "./components/games/KingOfHillGame";
 import { BridgeBuilderGame } from "./components/games/BridgeBuilderGame";
 import { HotPotatoGame } from "./components/games/HotPotatoGame";
 
+type TopicOption = {
+  value: string;
+  label: string;
+  level: string | null;
+  focus: string | null;
+};
+
 type TopicLibraryEntry = {
   questions: QuestionData[];
-  minefieldGrid?: any;
-  auctionSentences?: any[];
+  minefieldGrid?: {
+    topic: string;
+    instructions: string;
+    colLabels: string[];
+    rowLabels: string[];
+  };
+  auctionSentences?: QuestionData[];
   cardTasks?: { task: string }[];
-  spyRounds?: any[];
-  hotSeatWords?: any[];
-  hotPotatoPrompts?: any[];
+  spyRounds?: QuestionData[];
+  hotSeatWords?: QuestionData[];
+  hotPotatoPrompts?: QuestionData[];
+};
+
+const realTopicOptions = TOPIC_OPTIONS.filter(o => o.value !== "ai") as TopicOption[];
+
+const shuffle = <T,>(items: T[]) => [...items].sort(() => Math.random() - 0.5);
+
+const uniqueValues = (values: string[]) => Array.from(new Set(values));
+
+const getTopicOption = (value: string) => realTopicOptions.find(o => o.value === value);
+
+const getTopicLabel = (value: string) => getTopicOption(value)?.label ?? value;
+
+const getFilteredTopicOptions = (level: string, focus: string) =>
+  realTopicOptions.filter(o => (level === "all" || o.level === level) && (focus === "all" || o.focus === focus));
+
+const getSelectedTopicEntries = (selectedTopics: string[]) =>
+  selectedTopics
+    .map(value => TOPIC_LIBRARY[value as keyof typeof TOPIC_LIBRARY] as TopicLibraryEntry | undefined)
+    .filter((entry): entry is TopicLibraryEntry => Boolean(entry));
+
+const cardTasksAsQuestions = (tasks: { task: string }[]): QuestionData[] =>
+  shuffle(tasks).map(ct => ({
+    type: "speaking task",
+    question: ct.task,
+    answer: "Open - teacher judges",
+    hint: undefined,
+    difficulty: "medium"
+  }));
+
+const buildMixedMinefieldGrid = (entries: TopicLibraryEntry[], selectedTopics: string[]) => {
+  const grids = entries.map(entry => entry.minefieldGrid).filter((grid): grid is NonNullable<TopicLibraryEntry["minefieldGrid"]> => Boolean(grid));
+  if (grids.length === 0) return null;
+  if (grids.length === 1) return grids[0];
+
+  return {
+    topic: `Mixed: ${selectedTopics.map(getTopicLabel).join(" + ")}`,
+    instructions: "Mixed review grid. Combine any top prompt with any side prompt and answer using one of the selected lesson areas.",
+    colLabels: shuffle(grids.flatMap(grid => grid.colLabels)).slice(0, 5),
+    rowLabels: shuffle(grids.flatMap(grid => grid.rowLabels)).slice(0, 5),
+  };
 };
 
 export default function LessonGamesGenerator() {
@@ -36,16 +88,14 @@ export default function LessonGamesGenerator() {
   const [questions, setQuestions] = useState<QuestionData[]>([]);
   const [level, setLevel] = useState("B1");
   const [focus, setFocus] = useState("grammar");
-  
-  // Inicializamos con el primer tema real en lugar de "ai"
-  const [topic, setTopic] = useState("present_perfect"); 
+  const [selectedTopics, setSelectedTopics] = useState<string[]>(["present_perfect"]);
   
   const [loadingGame, setLoadingGame] = useState(false);
   const [loadError, setLoadError] = useState("");
   const [selectedGame, setSelectedGame] = useState<GameMode | null>(null);
   const [confetti, setConfetti] = useState(false);
   const [, setIsFullscreen] = useState(false);
-  const [minefieldGridData, setMinefieldGridData] = useState<any>(null);
+  const [minefieldGridData, setMinefieldGridData] = useState<NonNullable<TopicLibraryEntry["minefieldGrid"]> | null>(null);
   const appRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -54,14 +104,6 @@ export default function LessonGamesGenerator() {
     return () => document.removeEventListener("fullscreenchange", onFsChange);
   }, []);
 
-  useEffect(() => {
-    const filtered = TOPIC_OPTIONS.filter(
-      o => o.value !== "ai" && o.level === level && o.focus === focus,
-    );
-    if (filtered.length > 0 && !filtered.some(o => o.value === topic)) {
-      setTopic(filtered[0].value);
-    }
-  }, [level, focus, topic]);
 
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
@@ -77,6 +119,12 @@ export default function LessonGamesGenerator() {
 
   const handleSetup = () => {
     setLoadError("");
+
+    if (selectedTopics.length === 0) {
+      setLoadError("Choose at least one topic.");
+      return;
+    }
+
     const existingScores = Object.fromEntries(teams.map(t => [t.name, t.score]));
     const builtTeams = teamNames.slice(0, numTeams).map((name, i) => ({
       id: i, name, color: TEAM_COLORS[teamColors[i] ?? i],
@@ -86,69 +134,90 @@ export default function LessonGamesGenerator() {
     setScreen("game-select");
   };
 
+  const toggleTopicSelection = (topicValue: string) => {
+    setSelectedTopics(current => {
+      if (current.includes(topicValue)) {
+        return current.length === 1 ? current : current.filter(value => value !== topicValue);
+      }
+
+      return [...current, topicValue];
+    });
+  };
+
+  const selectAllVisibleTopics = () => {
+    const visibleTopicValues = getFilteredTopicOptions(level, focus).map(o => o.value);
+    setSelectedTopics(current => uniqueValues([...current, ...visibleTopicValues]));
+  };
+
   const startGame = (mode: GameMode) => {
     setSelectedGame(mode);
     setLoadingGame(true);
     setLoadError("");
 
     try {
-      const lib = TOPIC_LIBRARY[topic as keyof typeof TOPIC_LIBRARY] as TopicLibraryEntry | undefined;
-      if (!lib) {
+      const selectedEntries = getSelectedTopicEntries(selectedTopics);
+      if (selectedEntries.length === 0) {
         setLoadError("Topic data not found.");
         setLoadingGame(false);
         return;
       }
 
       if (mode.id === "minefield") {
-        setMinefieldGridData(lib.minefieldGrid);
+        const mixedGrid = buildMixedMinefieldGrid(selectedEntries, selectedTopics);
+        if (!mixedGrid) {
+          setLoadError("Minefield grid data not found for the selected topic.");
+          setLoadingGame(false);
+          return;
+        }
+
+        setMinefieldGridData(mixedGrid);
         setQuestions([]);
         setScreen("game");
         setLoadingGame(false);
         return;
       }
 
-      let qs: any[] = [];
-      const cardTasksAsQuestions = (tasks: any[]) =>
-        [...tasks].sort(() => Math.random() - 0.5).map(ct => ({
-          type: "speaking task",
-          question: ct.task,
-          answer: "Open — teacher judges",
-          hint: null,
-          difficulty: "medium"
-        }));
+      const allQuestions = selectedEntries.flatMap(entry => entry.questions ?? []);
+      const allCardTasks = selectedEntries.flatMap(entry => entry.cardTasks ?? []);
+      const selectedFocuses = uniqueValues(selectedTopics.map(value => getTopicOption(value)?.focus).filter((value): value is string => Boolean(value)));
+      const isMixedSelection = selectedTopics.length > 1;
+      const isTopicOnlySelection = selectedFocuses.length === 1 && selectedFocuses[0] === "topic";
+
+      let qs: QuestionData[] = [];
 
       if (mode.id === "auction") {
-        qs = [...(lib.auctionSentences ?? [])].sort(() => Math.random() - 0.5);
+        qs = selectedEntries.flatMap(entry => entry.auctionSentences ?? []);
       } else if (mode.id === "cards") {
-        qs = [...(lib.cardTasks ?? [])].sort(() => Math.random() - 0.5);
+        qs = selectedEntries.flatMap(entry => entry.cardTasks ?? []);
       } else if (mode.id === "spy") {
-        qs = [...(lib.spyRounds ?? [])].sort(() => Math.random() - 0.5);
+        qs = selectedEntries.flatMap(entry => entry.spyRounds ?? []);
       } else if (mode.id === "hotseat") {
-        qs = [...(lib.hotSeatWords ?? [])].sort(() => Math.random() - 0.5);
+        qs = selectedEntries.flatMap(entry => entry.hotSeatWords ?? []);
       } else if (mode.id === "hotpotato") {
-        qs = [...(lib.hotPotatoPrompts || [])].sort(() => Math.random() - 0.5);
+        qs = selectedEntries.flatMap(entry => entry.hotPotatoPrompts ?? []);
       } else if (mode.id === "battleship") {
-        if (focus === "topic" && lib.cardTasks) {
-          qs = cardTasksAsQuestions(lib.cardTasks);
-        } else {
-          qs = [...lib.questions, ...(lib.cardTasks ? cardTasksAsQuestions(lib.cardTasks) : [])];
-        }
+        qs = isTopicOnlySelection && allCardTasks.length > 0
+          ? cardTasksAsQuestions(allCardTasks)
+          : [...allQuestions, ...cardTasksAsQuestions(allCardTasks)];
+      } else if (isTopicOnlySelection && allCardTasks.length > 0) {
+        qs = cardTasksAsQuestions(allCardTasks);
       } else {
-        if (focus === "topic" && lib.cardTasks) {
-          qs = cardTasksAsQuestions(lib.cardTasks);
-        } else {
-          const baseQs = [...lib.questions].sort(() => Math.random() - 0.5);
-          if (mode.id === "bridge" && lib.cardTasks) {
-            qs = [...baseQs, ...cardTasksAsQuestions(lib.cardTasks)];
-          } else {
-            qs = baseQs;
-          }
-        }
+        qs = mode.id === "bridge" || isMixedSelection
+          ? [...allQuestions, ...cardTasksAsQuestions(allCardTasks)]
+          : allQuestions;
       }
 
-      if (mode.id !== "spy") qs = [...qs].sort(() => Math.random() - 0.5);
+      if (qs.length === 0 && allCardTasks.length > 0) {
+        qs = cardTasksAsQuestions(allCardTasks);
+      }
 
-      setQuestions(qs);
+      if (qs.length === 0) {
+        setLoadError("No game content found for the selected topic combination.");
+        setLoadingGame(false);
+        return;
+      }
+
+      setQuestions(shuffle(qs));
       setScreen("game");
     } catch {
       setLoadError("An error occurred loading the game.");
@@ -208,9 +277,11 @@ export default function LessonGamesGenerator() {
   );
 
   if (screen === "setup") {
-    // Solo tópicos pre-programados
-    const filteredTopics = TOPIC_OPTIONS.filter(o => o.value !== "ai" && (!level || o.level === level) && (!focus || o.focus === focus));
+    const filteredTopics = getFilteredTopicOptions(level, focus);
+    const selectedTopicOptions = selectedTopics.map(getTopicOption).filter((option): option is TopicOption => Boolean(option));
+    const selectedTopicSummary = selectedTopicOptions.map(o => o.label).join(", ");
     const LEVELS_META = [
+      { id: "all", desc: "All levels", color: "#6366F1" },
       { id: "A1", desc: "Beginner", color: "#22C55E" },
       { id: "A2", desc: "Elementary", color: "#84CC16" },
       { id: "B1", desc: "Intermediate", color: "#F59E0B" },
@@ -218,9 +289,10 @@ export default function LessonGamesGenerator() {
       { id: "C1", desc: "Advanced", color: "#EF4444" },
     ];
     const FOCUS_META = [
-      { id: "grammar", icon: "📐", label: "Grammar", desc: "Structures & rules" },
-      { id: "vocabulary", icon: "📖", label: "Vocabulary", desc: "Words in context" },
-      { id: "topic", icon: "💬", label: "Topics", desc: "Speaking themes" },
+      { id: "all", icon: "*", label: "All", desc: "Grammar, words & themes" },
+      { id: "grammar", icon: "G", label: "Grammar", desc: "Structures & rules" },
+      { id: "vocabulary", icon: "V", label: "Vocabulary", desc: "Words in context" },
+      { id: "topic", icon: "T", label: "Topics", desc: "Speaking themes" },
     ];
 
     return (
@@ -230,7 +302,7 @@ export default function LessonGamesGenerator() {
           
           <div style={{ textAlign: "center", marginBottom: "28px" }}>
             <h2 style={{ fontSize: "32px", fontWeight: "900", color: "#1E1B4B", margin: 0 }}>⚙️ Game Setup</h2>
-            <p style={{ color: "#6B7280", marginTop: "8px" }}>Set up your class, then pick a topic and game</p>
+            <p style={{ color: "#6B7280", marginTop: "8px" }}>Set up your class, then pick one or more topics and a game</p>
           </div>
 
           <div style={{ background: "white", border: "2px solid #E0E7FF", borderRadius: "16px", padding: "20px", marginBottom: "16px" }}>
@@ -283,33 +355,46 @@ export default function LessonGamesGenerator() {
             <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px" }}>
               <div style={{ background: "#6366F1", color: "white", borderRadius: "50%", width: "28px", height: "28px", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "900", fontSize: "14px", flexShrink: 0 }}>3</div>
               <div>
-                <div style={{ fontWeight: "800", color: "#1E1B4B", fontSize: "16px" }}>Choose a topic</div>
+                <div style={{ fontWeight: "800", color: "#1E1B4B", fontSize: "16px" }}>Choose topic mix</div>
                 <div style={{ color: "#6B7280", fontSize: "12px", marginTop: "2px" }}>
                   {filteredTopics.length > 0
-                    ? `${filteredTopics.length} topic${filteredTopics.length !== 1 ? "s" : ""} available`
+                    ? `${filteredTopics.length} topic${filteredTopics.length !== 1 ? "s" : ""} shown - ${selectedTopics.length} selected`
                     : "No built-in topics match these filters"}
                 </div>
               </div>
             </div>
-            {filteredTopics.length > 0 && (
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(190px,1fr))", gap: "8px" }}>
-                {filteredTopics.map(o => {
-                  const isSelected = topic === o.value;
-                  const levelColor = LEVELS_META.find(l => l.id === o.level)?.color || "#6366F1";
-                  return (
-                    <button key={o.value} onClick={() => setTopic(o.value)} style={{
-                      background: isSelected ? levelColor : "#F8F7FF",
-                      color: isSelected ? "white" : "#1E1B4B",
-                      border: `2px solid ${isSelected ? levelColor : "#E0E7FF"}`,
-                      borderRadius: "10px", padding: "10px 14px",
-                      cursor: "pointer", textAlign: "left", transition: "all 0.15s",
-                      fontWeight: isSelected ? "800" : "700", fontSize: "13px", lineHeight: 1.4
-                    }}>
-                      {o.focus === "grammar" ? "📐" : o.focus === "vocabulary" ? "📖" : "💬"} {o.label}
-                    </button>
-                  );
-                })}
+            {selectedTopics.length > 0 && (
+              <div style={{ background: "#EEF2FF", border: "2px solid #C7D2FE", color: "#312E81", borderRadius: "12px", padding: "10px 12px", fontWeight: "700", fontSize: "13px", marginBottom: "12px", lineHeight: 1.5 }}>
+                Playing with: {selectedTopicSummary}
               </div>
+            )}
+            {filteredTopics.length > 0 && (
+              <>
+                <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "10px" }}>
+                  <button type="button" onClick={selectAllVisibleTopics} style={{ background: "white", border: "2px solid #C7D2FE", color: "#4338CA", borderRadius: "999px", padding: "6px 14px", fontWeight: "800", fontSize: "12px", cursor: "pointer" }}>
+                    Select all shown
+                  </button>
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(190px,1fr))", gap: "8px" }}>
+                  {filteredTopics.map(o => {
+                    const isSelected = selectedTopics.includes(o.value);
+                    const levelColor = LEVELS_META.find(l => l.id === o.level)?.color || "#6366F1";
+                    return (
+                      <button key={o.value} onClick={() => toggleTopicSelection(o.value)} style={{
+                        background: isSelected ? levelColor : "#F8F7FF",
+                        color: isSelected ? "white" : "#1E1B4B",
+                        border: `2px solid ${isSelected ? levelColor : "#E0E7FF"}`,
+                        borderRadius: "10px", padding: "10px 14px",
+                        cursor: "pointer", textAlign: "left", transition: "all 0.15s",
+                        fontWeight: isSelected ? "800" : "700", fontSize: "13px", lineHeight: 1.4
+                      }}>
+                        <span style={{ marginRight: "6px" }}>{isSelected ? "Selected" : "+"}</span>
+                        [{o.level}] {o.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </>
             )}
           </div>
 
@@ -387,6 +472,8 @@ export default function LessonGamesGenerator() {
             </div>
           </div>
 
+          {loadError && <div style={{ color: "#DC2626", fontWeight: "800", textAlign: "center", marginBottom: "12px" }}>{loadError}</div>}
+
           <button onClick={handleSetup} style={{ width: "100%", background: "linear-gradient(135deg,#6366F1,#8B5CF6)", color: "white", border: "none", borderRadius: "16px", padding: "18px", fontSize: "20px", fontWeight: "900", cursor: "pointer" }}>
             🎮 Choose a Game!
           </button>
@@ -401,10 +488,15 @@ export default function LessonGamesGenerator() {
         
         <div style={{ background: "linear-gradient(135deg,#1E1B4B,#312E81)", borderRadius: "20px", padding: "20px 24px", marginBottom: "20px", color: "white" }}>
           <div style={{ textAlign: "center", marginBottom: "16px" }}>
-            <div style={{ fontSize: "13px", fontWeight: "700", color: "#A5B4FC", marginBottom: "4px", letterSpacing: "0.06em", textTransform: "uppercase" }}>Current Topic</div>
+            <div style={{ fontSize: "13px", fontWeight: "700", color: "#A5B4FC", marginBottom: "4px", letterSpacing: "0.06em", textTransform: "uppercase" }}>Current Topic Mix</div>
             <div style={{ fontSize: "clamp(18px,4vw,26px)", fontWeight: "900", lineHeight: 1.2 }}>
-              {TOPIC_OPTIONS.find(o => o.value === topic)?.label || topic}
+              {selectedTopics.length === 1 ? getTopicLabel(selectedTopics[0]) : `${selectedTopics.length} topics mixed`}
             </div>
+            {selectedTopics.length > 1 && (
+              <div style={{ color: "#C4B5FD", fontWeight: "700", fontSize: "13px", marginTop: "8px", lineHeight: 1.5 }}>
+                {selectedTopics.map(getTopicLabel).join(" + ")}
+              </div>
+            )}
           </div>
         </div>
 
@@ -430,7 +522,11 @@ export default function LessonGamesGenerator() {
   );
 
   if (screen === "game" && selectedGame) {
-    const isTopicFocus = focus === "topic";
+    const selectedFocuses = uniqueValues(selectedTopics.map(value => getTopicOption(value)?.focus).filter((value): value is string => Boolean(value)));
+    const isTopicFocus = selectedFocuses.length === 1 && selectedFocuses[0] === "topic";
+    const selectedLevels = uniqueValues(selectedTopics.map(value => getTopicOption(value)?.level).filter((value): value is string => Boolean(value)));
+    const hotPotatoLevel = selectedLevels.length === 1 ? selectedLevels[0] : "mixed";
+
     return (
       <div ref={appRef} style={{ minHeight: "100vh", background: "#0F0A2E", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
         <div style={{ background: "linear-gradient(90deg,#6366F1,#8B5CF6)", padding: "12px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -452,7 +548,7 @@ export default function LessonGamesGenerator() {
             {selectedGame.id === "castle" && <CastleGame questions={questions} teams={teams} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
             {selectedGame.id === "hill" && <KingOfHillGame questions={questions} teams={teams} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
             {selectedGame.id === "bridge" && <BridgeBuilderGame questions={questions} teams={teams} onUpdateScore={updateScore} onEnd={handleGameEnd} isTopic={isTopicFocus} />}
-            {selectedGame.id === "hotpotato" && <HotPotatoGame questions={questions} teams={teams} onUpdateScore={updateScore} onEnd={handleGameEnd} level={level} />}
+            {selectedGame.id === "hotpotato" && <HotPotatoGame questions={questions} teams={teams} onUpdateScore={updateScore} onEnd={handleGameEnd} level={hotPotatoLevel} />}
           </div>
         </div>
       </div>
