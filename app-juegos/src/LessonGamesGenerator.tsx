@@ -137,7 +137,7 @@ export default function LessonGamesGenerator() {
   const toggleTopicSelection = (topicValue: string) => {
     setSelectedTopics(current => {
       if (current.includes(topicValue)) {
-        return current.length === 1 ? current : current.filter(value => value !== topicValue);
+        return current.filter(value => value !== topicValue);
       }
 
       return [...current, topicValue];
@@ -147,6 +147,10 @@ export default function LessonGamesGenerator() {
   const selectAllVisibleTopics = () => {
     const visibleTopicValues = getFilteredTopicOptions(level, focus).map(o => o.value);
     setSelectedTopics(current => uniqueValues([...current, ...visibleTopicValues]));
+  };
+
+  const clearSelectedTopics = () => {
+    setSelectedTopics([]);
   };
 
   const startGame = (mode: GameMode) => {
@@ -370,7 +374,10 @@ export default function LessonGamesGenerator() {
             )}
             {filteredTopics.length > 0 && (
               <>
-                <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "10px" }}>
+                <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px", flexWrap: "wrap", marginBottom: "10px" }}>
+                  <button type="button" onClick={clearSelectedTopics} style={{ background: "white", border: "2px solid #FCA5A5", color: "#B91C1C", borderRadius: "999px", padding: "6px 14px", fontWeight: "800", fontSize: "12px", cursor: "pointer" }}>
+                    Deselect all
+                  </button>
                   <button type="button" onClick={selectAllVisibleTopics} style={{ background: "white", border: "2px solid #C7D2FE", color: "#4338CA", borderRadius: "999px", padding: "6px 14px", fontWeight: "800", fontSize: "12px", cursor: "pointer" }}>
                     Select all shown
                   </button>
@@ -388,8 +395,7 @@ export default function LessonGamesGenerator() {
                         cursor: "pointer", textAlign: "left", transition: "all 0.15s",
                         fontWeight: isSelected ? "800" : "700", fontSize: "13px", lineHeight: 1.4
                       }}>
-                        <span style={{ marginRight: "6px" }}>{isSelected ? "Selected" : "+"}</span>
-                        [{o.level}] {o.label}
+                        {o.label}
                       </button>
                     );
                   })}
@@ -474,7 +480,7 @@ export default function LessonGamesGenerator() {
 
           {loadError && <div style={{ color: "#DC2626", fontWeight: "800", textAlign: "center", marginBottom: "12px" }}>{loadError}</div>}
 
-          <button onClick={handleSetup} style={{ width: "100%", background: "linear-gradient(135deg,#6366F1,#8B5CF6)", color: "white", border: "none", borderRadius: "16px", padding: "18px", fontSize: "20px", fontWeight: "900", cursor: "pointer" }}>
+          <button onClick={handleSetup} disabled={selectedTopics.length === 0} style={{ width: "100%", background: selectedTopics.length === 0 ? "#CBD5E1" : "linear-gradient(135deg,#6366F1,#8B5CF6)", color: "white", border: "none", borderRadius: "16px", padding: "18px", fontSize: "20px", fontWeight: "900", cursor: selectedTopics.length === 0 ? "not-allowed" : "pointer" }}>
             🎮 Choose a Game!
           </button>
         </div>
