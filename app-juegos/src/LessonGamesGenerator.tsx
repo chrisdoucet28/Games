@@ -41,7 +41,38 @@ type TopicLibraryEntry = {
 
 const realTopicOptions = TOPIC_OPTIONS.filter(o => o.value !== "ai") as TopicOption[];
 
-const shuffle = <T,>(items: T[]) => [...items].sort(() => Math.random() - 0.5);
+const shuffle = <T,>(items: T[]) => {
+  const shuffled = [...items];
+
+  for (let i = shuffled.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+
+  return shuffled;
+};
+
+const buildBalancedMixedPool = <T,>(topicBuckets: T[][]) => {
+  const activeBuckets = topicBuckets.map(bucket => shuffle(bucket)).filter(bucket => bucket.length > 0);
+  const mixed: T[] = [];
+
+  while (activeBuckets.length > 0) {
+    const bucketOrder = shuffle(activeBuckets.map((_, index) => index));
+    const emptiedBuckets: number[] = [];
+
+    bucketOrder.forEach(bucketIndex => {
+      const nextItem = activeBuckets[bucketIndex].shift();
+      if (nextItem) mixed.push(nextItem);
+      if (activeBuckets[bucketIndex].length === 0) emptiedBuckets.push(bucketIndex);
+    });
+
+    [...new Set(emptiedBuckets)].sort((a, b) => b - a).forEach(bucketIndex => {
+      activeBuckets.splice(bucketIndex, 1);
+    });
+  }
+
+  return mixed;
+};
 
 const uniqueValues = (values: string[]) => Array.from(new Set(values));
 
@@ -58,7 +89,7 @@ const getSelectedTopicEntries = (selectedTopics: string[]) =>
     .filter((entry): entry is TopicLibraryEntry => Boolean(entry));
 
 const cardTasksAsQuestions = (tasks: { task: string }[]): QuestionData[] =>
-  shuffle(tasks).map(ct => ({
+  tasks.map(ct => ({
     type: "speaking task",
     question: ct.task,
     answer: "Open - teacher judges",
@@ -88,7 +119,7 @@ export default function LessonGamesGenerator() {
   const [questions, setQuestions] = useState<QuestionData[]>([]);
   const [level, setLevel] = useState("B1");
   const [focus, setFocus] = useState("grammar");
-  const [selectedTopics, setSelectedTopics] = useState<string[]>(["present_perfect"]);
+  const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
   
   const [loadingGame, setLoadingGame] = useState(false);
   const [loadError, setLoadError] = useState("");
@@ -181,38 +212,40 @@ export default function LessonGamesGenerator() {
         return;
       }
 
-      const allQuestions = selectedEntries.flatMap(entry => entry.questions ?? []);
+      const questionBuckets = selectedEntries.map(entry => entry.questions ?? []);
+      const cardTaskBuckets = selectedEntries.map(entry => cardTasksAsQuestions(entry.cardTasks ?? []));
       const allCardTasks = selectedEntries.flatMap(entry => entry.cardTasks ?? []);
       const selectedFocuses = uniqueValues(selectedTopics.map(value => getTopicOption(value)?.focus).filter((value): value is string => Boolean(value)));
       const isMixedSelection = selectedTopics.length > 1;
       const isTopicOnlySelection = selectedFocuses.length === 1 && selectedFocuses[0] === "topic";
+      const mixByTopic = (buckets: QuestionData[][]) => isMixedSelection ? buildBalancedMixedPool(buckets) : shuffle(buckets.flat());
 
       let qs: QuestionData[] = [];
 
       if (mode.id === "auction") {
-        qs = selectedEntries.flatMap(entry => entry.auctionSentences ?? []);
+        qs = mixByTopic(selectedEntries.map(entry => entry.auctionSentences ?? []));
       } else if (mode.id === "cards") {
-        qs = selectedEntries.flatMap(entry => entry.cardTasks ?? []);
+        qs = mixByTopic(cardTaskBuckets);
       } else if (mode.id === "spy") {
-        qs = selectedEntries.flatMap(entry => entry.spyRounds ?? []);
+        qs = mixByTopic(selectedEntries.map(entry => entry.spyRounds ?? []));
       } else if (mode.id === "hotseat") {
-        qs = selectedEntries.flatMap(entry => entry.hotSeatWords ?? []);
+        qs = mixByTopic(selectedEntries.map(entry => entry.hotSeatWords ?? []));
       } else if (mode.id === "hotpotato") {
-        qs = selectedEntries.flatMap(entry => entry.hotPotatoPrompts ?? []);
+        qs = mixByTopic(selectedEntries.map(entry => entry.hotPotatoPrompts ?? []));
       } else if (mode.id === "battleship") {
         qs = isTopicOnlySelection && allCardTasks.length > 0
-          ? cardTasksAsQuestions(allCardTasks)
-          : [...allQuestions, ...cardTasksAsQuestions(allCardTasks)];
+          ? mixByTopic(cardTaskBuckets)
+          : mixByTopic(selectedEntries.map((entry, index) => [...(entry.questions ?? []), ...cardTaskBuckets[index]]));
       } else if (isTopicOnlySelection && allCardTasks.length > 0) {
-        qs = cardTasksAsQuestions(allCardTasks);
+        qs = mixByTopic(cardTaskBuckets);
       } else {
         qs = mode.id === "bridge" || isMixedSelection
-          ? [...allQuestions, ...cardTasksAsQuestions(allCardTasks)]
-          : allQuestions;
+          ? mixByTopic(selectedEntries.map((entry, index) => [...(entry.questions ?? []), ...cardTaskBuckets[index]]))
+          : mixByTopic(questionBuckets);
       }
 
       if (qs.length === 0 && allCardTasks.length > 0) {
-        qs = cardTasksAsQuestions(allCardTasks);
+        qs = mixByTopic(cardTaskBuckets);
       }
 
       if (qs.length === 0) {
@@ -221,7 +254,7 @@ export default function LessonGamesGenerator() {
         return;
       }
 
-      setQuestions(shuffle(qs));
+      setQuestions(isMixedSelection ? qs : shuffle(qs));
       setScreen("game");
     } catch {
       setLoadError("An error occurred loading the game.");
