@@ -7297,309 +7297,2734 @@ export const TOPIC_LIBRARY = {
 
 
   family_members_possessive_s: {
-    label: "Family Members + Possessive 's",
-    level: "A1", focus: "grammar",
-    questions: [
-      { type:"finish the sentence", question:"My mother's sister is my ___.", answer:"aunt", hint:"A female family member", difficulty:"easy" },
-      { type:"choose correct grammar", question:"'This is ___ car.' (my father / my father's)", answer:"my father's", hint:"Use possessive 's for a person", difficulty:"easy" },
-      { type:"correct grammar mistakes", question:"'This is the sister of Tom.'", answer:"This is Tom's sister.", hint:"Use possessive 's", difficulty:"easy" },
-      { type:"finish the sentence", question:"My brother's son is my ___.", answer:"nephew", hint:"A male child in the family", difficulty:"easy" },
-      { type:"choose correct grammar", question:"'___ name is Ana.' (My cousin's / My cousins)", answer:"My cousin's", hint:"Possessive 's shows belonging", difficulty:"easy" },
-      { type:"correct grammar mistakes", question:"'It is my parents house.'", answer:"It is my parents' house.", hint:"Plural possessive uses apostrophe after s", difficulty:"medium" },
+    "label": "Family Members + Possessive 's",
+    "level": "A1",
+    "focus": "grammar",
+    "questions": [
+      {
+        "type": "choose correct grammar",
+        "question": "'This is ___ car.' (my father / my father's)",
+        "answer": "my father's",
+        "hint": "Use possessive 's for a person",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'___ name is Ana.' (My cousin's / My cousins)",
+        "answer": "My cousin's",
+        "hint": "Possessive 's shows belonging",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'This is ___ room.' (my sister / my sister's)",
+        "answer": "my sister's",
+        "hint": "Use possessive 's before the thing",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'My ___ brother is a doctor.' (mother / mother's)",
+        "answer": "mother's",
+        "hint": "Your mother's brother is your uncle",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'That is ___ house.' (my parents / my parents')",
+        "answer": "my parents'",
+        "hint": "Plural possessive uses apostrophe after s",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'This is the sister of Tom.'",
+        "answer": "This is Tom's sister.",
+        "hint": "Use possessive 's",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'It is my parents house.'",
+        "answer": "It is my parents' house.",
+        "hint": "Plural possessive uses apostrophe after s",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'She is my father sister.'",
+        "answer": "She is my father's sister.",
+        "hint": "Use possessive 's",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'My brother son is five.'",
+        "answer": "My brother's son is five.",
+        "hint": "Use possessive 's",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'This is Maria bag.'",
+        "answer": "This is Maria's bag.",
+        "hint": "Use possessive 's with names",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "My mother's sister is my ___.",
+        "answer": "aunt",
+        "hint": "Female family member",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "My father's brother is my ___.",
+        "answer": "uncle",
+        "hint": "Male family member",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "My brother's son is my ___.",
+        "answer": "nephew",
+        "hint": "Male child in the family",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "My sister's daughter is my ___.",
+        "answer": "niece",
+        "hint": "Female child in the family",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "My mother's father is my ___.",
+        "answer": "grandfather / grandpa",
+        "hint": "Parent of a parent",
+        "difficulty": "easy"
+      },
+      {
+        "type": "use vocabulary in a sentence",
+        "question": "Use 'aunt' in a sentence.",
+        "answer": "Open - teacher judges",
+        "hint": "Say a complete sentence",
+        "difficulty": "easy"
+      },
+      {
+        "type": "use vocabulary in a sentence",
+        "question": "Use 'uncle' in a sentence.",
+        "answer": "Open - teacher judges",
+        "hint": "Say a complete sentence",
+        "difficulty": "easy"
+      },
+      {
+        "type": "use vocabulary in a sentence",
+        "question": "Use 'cousin' in a sentence.",
+        "answer": "Open - teacher judges",
+        "hint": "Say a complete sentence",
+        "difficulty": "easy"
+      },
+      {
+        "type": "use vocabulary in a sentence",
+        "question": "Use 'grandparents' in a sentence.",
+        "answer": "Open - teacher judges",
+        "hint": "Say a complete sentence",
+        "difficulty": "easy"
+      },
+      {
+        "type": "use vocabulary in a sentence",
+        "question": "Use 'my sister's phone' in a sentence.",
+        "answer": "Open - teacher judges",
+        "hint": "Say a complete sentence",
+        "difficulty": "easy"
+      }
     ],
-    spyRounds: [
-      { crewmateTopic:"Family Members", spyTopic:"Possessions", crewmatePrompt:"Talk about people in your family: mother, father, sister, brother, cousin, aunt, uncle, grandparents.", spyPrompt:"Talk about things people own: phones, cars, bags, rooms, books, and houses.", explanation:"Crewmates focused on family members. The spy focused on possessions.", spyGuessOptions:["Family Members","Possessions"] },
-      { crewmateTopic:"Possessive 's", spyTopic:"The verb be", crewmatePrompt:"Describe who owns things using possessive 's: my sister's bag, my father's car, Ana's phone.", spyPrompt:"Describe people using the verb be: she is my sister, he is tall, they are friendly.", explanation:"Crewmates used possessive 's. The spy used descriptions with be.", spyGuessOptions:["Possessive 's","The verb be"] },
+    "spyRounds": [
+      {
+        "crewmateTopic": "Family Members",
+        "spyTopic": "Possessions",
+        "crewmatePrompt": "Talk about people in your family: mother, father, sister, brother, cousin, aunt, uncle, grandparents.",
+        "spyPrompt": "Talk about things people own: phones, cars, bags, rooms, books, and houses.",
+        "explanation": "Crewmates focused on family members. The spy focused on possessions.",
+        "spyGuessOptions": [
+          "Family Members",
+          "Possessions"
+        ]
+      },
+      {
+        "crewmateTopic": "Possessive 's",
+        "spyTopic": "The verb be",
+        "crewmatePrompt": "Describe who owns things using possessive 's: my sister's bag, my father's car, Ana's phone.",
+        "spyPrompt": "Describe people using the verb be: she is my sister, he is tall, they are friendly.",
+        "explanation": "Crewmates used possessive 's. The spy used descriptions with be.",
+        "spyGuessOptions": [
+          "Possessive 's",
+          "The verb be"
+        ]
+      },
+      {
+        "crewmateTopic": "Family Relationships",
+        "spyTopic": "Family Homes",
+        "crewmatePrompt": "Explain family relationships: my mother's brother, my cousin's sister, my grandparents' house.",
+        "spyPrompt": "Describe homes and rooms where family members live.",
+        "explanation": "Crewmates explained relationships. The spy described homes.",
+        "spyGuessOptions": [
+          "Family Relationships",
+          "Family Homes"
+        ]
+      },
+      {
+        "crewmateTopic": "Names and Belonging",
+        "spyTopic": "Basic Introductions",
+        "crewmatePrompt": "Use names plus possessive 's: Carlos's cousin, Ana's aunt, Pedro's parents.",
+        "spyPrompt": "Introduce people with names, ages, and countries.",
+        "explanation": "Crewmates used names with possession. The spy introduced people.",
+        "spyGuessOptions": [
+          "Names and Belonging",
+          "Basic Introductions"
+        ]
+      }
     ],
-    auctionSentences: [
-      { sentence:"This is my brother's phone.", isCorrect:true, explanation:"Correct possessive 's." },
-      { sentence:"She is my mother sister.", isCorrect:false, explanation:"Say 'my mother's sister'." },
-      { sentence:"My grandparents' house is small.", isCorrect:true, explanation:"Correct plural possessive." },
-      { sentence:"Tom's cousin is from Chile.", isCorrect:true, explanation:"Correct possessive 's." },
-      { sentence:"That is the car of my father.", isCorrect:false, explanation:"More natural: 'my father's car'." },
-      { sentence:"My aunt's name is Laura.", isCorrect:true, explanation:"Correct family vocabulary and possessive 's." },
+    "auctionSentences": [
+      {
+        "sentence": "This is my brother's phone.",
+        "isCorrect": true,
+        "explanation": "Correct possessive 's."
+      },
+      {
+        "sentence": "She is my mother sister.",
+        "isCorrect": false,
+        "explanation": "Say 'my mother's sister'."
+      },
+      {
+        "sentence": "My grandparents' house is small.",
+        "isCorrect": true,
+        "explanation": "Correct plural possessive."
+      },
+      {
+        "sentence": "Tom's cousin is from Chile.",
+        "isCorrect": true,
+        "explanation": "Correct possessive 's."
+      },
+      {
+        "sentence": "That is the car of my father.",
+        "isCorrect": false,
+        "explanation": "More natural: 'my father's car'."
+      },
+      {
+        "sentence": "My aunt's name is Laura.",
+        "isCorrect": true,
+        "explanation": "Correct family vocabulary and possessive 's."
+      },
+      {
+        "sentence": "My parents' names are Luis and Marta.",
+        "isCorrect": true,
+        "explanation": "Correct plural possessive."
+      },
+      {
+        "sentence": "This is Sofia brother.",
+        "isCorrect": false,
+        "explanation": "Say 'Sofia's brother'."
+      },
+      {
+        "sentence": "My cousin's children are young.",
+        "isCorrect": true,
+        "explanation": "Correct possessive 's."
+      },
+      {
+        "sentence": "My uncle car is red.",
+        "isCorrect": false,
+        "explanation": "Say 'my uncle's car'."
+      },
+      {
+        "sentence": "My sister's room is next to mine.",
+        "isCorrect": true,
+        "explanation": "Correct possessive 's."
+      },
+      {
+        "sentence": "My grandparents house is old.",
+        "isCorrect": false,
+        "explanation": "Say 'my grandparents' house'."
+      }
     ],
-    cardTasks: [
-      { task:"Describe three people in your family using possessive 's." },
-      { task:"Say five family words and give an example sentence for each." },
-      { task:"Talk about things your family members own." },
-      { task:"Ask your partner about their family members." },
-      { task:"Make sentences with: mother's, father's, sister's, brother's." },
-      { task:"Draw a tiny family tree and explain it." },
+    "cardTasks": [
+      {
+        "task": "Describe three people in your family using possessive 's."
+      },
+      {
+        "task": "Say five family words and give an example sentence for each."
+      },
+      {
+        "task": "Talk about things your family members own."
+      },
+      {
+        "task": "Ask your partner about their family members."
+      },
+      {
+        "task": "Make sentences with: mother's, father's, sister's, brother's."
+      },
+      {
+        "task": "Draw a tiny family tree and explain it."
+      },
+      {
+        "task": "Describe your cousin, aunt, uncle, and grandparents."
+      },
+      {
+        "task": "Say three sentences about a friend's family."
+      },
+      {
+        "task": "Use two names with possessive 's in sentences."
+      },
+      {
+        "task": "Explain the difference between sister and cousin."
+      },
+      {
+        "task": "Describe a family member's house, car, or job."
+      },
+      {
+        "task": "Ask and answer: Who is your mother's brother?"
+      }
     ],
-    hotPotatoPrompts: [
-      {prompt:"Your mother's sister is your...?", answer:"aunt"},
-      {prompt:"Your father's brother is your...?", answer:"uncle"},
-      {prompt:"Fix: 'my brother phone'", answer:"my brother's phone"},
-      {prompt:"Your brother's daughter is your...?", answer:"niece"},
-      {prompt:"Plural possessive: my parents ___ house", answer:"parents'"},
-      {prompt:"Say one sentence with 'cousin's'.", answer:"(free answer)"},
+    "hotPotatoPrompts": [
+      {
+        "prompt": "Your mother's sister is your...?",
+        "answer": "aunt"
+      },
+      {
+        "prompt": "Your father's brother is your...?",
+        "answer": "uncle"
+      },
+      {
+        "prompt": "Your brother's daughter is your...?",
+        "answer": "niece"
+      },
+      {
+        "prompt": "Your sister's son is your...?",
+        "answer": "nephew"
+      },
+      {
+        "prompt": "Your mother's mother is your...?",
+        "answer": "grandmother / grandma"
+      },
+      {
+        "prompt": "Your father's father is your...?",
+        "answer": "grandfather / grandpa"
+      },
+      {
+        "prompt": "Your aunt's child is your...?",
+        "answer": "cousin"
+      },
+      {
+        "prompt": "Fix: 'my brother phone'",
+        "answer": "my brother's phone"
+      },
+      {
+        "prompt": "Fix: 'Ana bag'",
+        "answer": "Ana's bag"
+      },
+      {
+        "prompt": "Fix: 'my parents house'",
+        "answer": "my parents' house"
+      },
+      {
+        "prompt": "Plural possessive: my sisters ___ room",
+        "answer": "sisters' / sister's depending on meaning"
+      },
+      {
+        "prompt": "Say one sentence with 'cousin's'.",
+        "answer": "(free answer)"
+      },
+      {
+        "prompt": "Say one sentence with 'mother's'.",
+        "answer": "(free answer)"
+      },
+      {
+        "prompt": "Say one sentence with 'parents''.",
+        "answer": "(free answer)"
+      },
+      {
+        "prompt": "Who is your uncle?",
+        "answer": "(free answer)"
+      },
+      {
+        "prompt": "Name three family members.",
+        "answer": "(free answer)"
+      },
+      {
+        "prompt": "Possessive of 'Tom':",
+        "answer": "Tom's"
+      },
+      {
+        "prompt": "Possessive of 'my grandparents':",
+        "answer": "my grandparents'"
+      },
+      {
+        "prompt": "Complete: This is my ___ phone.",
+        "answer": "father's / mother's / sister's etc."
+      },
+      {
+        "prompt": "Complete: My ___ name is...",
+        "answer": "mother's / father's / cousin's etc."
+      }
     ],
-    minefieldGrid: {
-      topic: "Family Members + Possessive 's",
-      instructions: "Combine a family member with an object and make a sentence using possessive 's.",
-      colLabels: ["mother", "father", "sister", "brother", "cousin"],
-      rowLabels: ["... phone", "... car", "... house", "... name", "... bag"],
+    "minefieldGrid": {
+      "topic": "Family Members + Possessive 's",
+      "instructions": "Combine a family member with an object and make a sentence using possessive 's.",
+      "colLabels": [
+        "mother",
+        "father",
+        "sister",
+        "brother",
+        "cousin"
+      ],
+      "rowLabels": [
+        "... phone",
+        "... car",
+        "... house",
+        "... name",
+        "... bag"
+      ]
     },
-    hotSeatWords: [
-      {word:"mother"},{word:"father"},{word:"sister"},{word:"brother"},{word:"cousin"},
-      {word:"aunt"},{word:"uncle"},{word:"grandparents"},{word:"niece"},{word:"nephew"},
-    ],
+    "hotSeatWords": [
+      {
+        "word": "mother"
+      },
+      {
+        "word": "father"
+      },
+      {
+        "word": "sister"
+      },
+      {
+        "word": "brother"
+      },
+      {
+        "word": "cousin"
+      },
+      {
+        "word": "aunt"
+      },
+      {
+        "word": "uncle"
+      },
+      {
+        "word": "grandmother"
+      },
+      {
+        "word": "grandfather"
+      },
+      {
+        "word": "parents"
+      },
+      {
+        "word": "grandparents"
+      },
+      {
+        "word": "niece"
+      },
+      {
+        "word": "nephew"
+      },
+      {
+        "word": "daughter"
+      },
+      {
+        "word": "son"
+      },
+      {
+        "word": "wife"
+      },
+      {
+        "word": "husband"
+      },
+      {
+        "word": "Maria's"
+      },
+      {
+        "word": "parents'"
+      },
+      {
+        "word": "brother's"
+      }
+    ]
   },
-
   days_dates_prepositions_time: {
-    label: "Days and Dates + Prepositions of Time",
-    level: "A1", focus: "grammar",
-    questions: [
-      { type:"choose correct grammar", question:"'My class is ___ Monday.' (in/on/at)", answer:"on", hint:"Use on with days", difficulty:"easy" },
-      { type:"choose correct grammar", question:"'My birthday is ___ July.' (in/on/at)", answer:"in", hint:"Use in with months", difficulty:"easy" },
-      { type:"finish the sentence", question:"The day after Tuesday is ___.", answer:"Wednesday", hint:"Days of the week", difficulty:"easy" },
-      { type:"choose correct grammar", question:"'The meeting is ___ 6 o'clock.' (in/on/at)", answer:"at", hint:"Use at with clock times", difficulty:"easy" },
-      { type:"correct grammar mistakes", question:"'I go to English class in Friday.'", answer:"I go to English class on Friday.", hint:"Use on with days", difficulty:"easy" },
-      { type:"finish the sentence", question:"New Year's Day is ___ January 1st.", answer:"on", hint:"Use on with specific dates", difficulty:"easy" },
+    "label": "Days and Dates + Prepositions of Time",
+    "level": "A1",
+    "focus": "grammar",
+    "questions": [
+      {
+        "type": "choose correct grammar",
+        "question": "'My class is ___ Monday.' (in/on/at)",
+        "answer": "on",
+        "hint": "Use on with days",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'My birthday is ___ July.' (in/on/at)",
+        "answer": "in",
+        "hint": "Use in with months",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'The meeting is ___ 6 o'clock.' (in/on/at)",
+        "answer": "at",
+        "hint": "Use at with clock times",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'The party is ___ May 10th.' (in/on/at)",
+        "answer": "on",
+        "hint": "Use on with specific dates",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'I study ___ the morning.' (in/on/at)",
+        "answer": "in",
+        "hint": "Use in with parts of the day",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'I go to English class in Friday.'",
+        "answer": "I go to English class on Friday.",
+        "hint": "Use on with days",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'My birthday is on July.'",
+        "answer": "My birthday is in July.",
+        "hint": "Use in with months",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'The lesson starts in 8 o'clock.'",
+        "answer": "The lesson starts at 8 o'clock.",
+        "hint": "Use at with clock times",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'Christmas is in December 25th.'",
+        "answer": "Christmas is on December 25th.",
+        "hint": "Use on with dates",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'We meet at the morning.'",
+        "answer": "We meet in the morning.",
+        "hint": "Use in with morning",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "The day after Tuesday is ___.",
+        "answer": "Wednesday",
+        "hint": "Days of the week",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "The month after March is ___.",
+        "answer": "April",
+        "hint": "Months of the year",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "New Year's Day is ___ January 1st.",
+        "answer": "on",
+        "hint": "Use on with dates",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "I usually relax ___ the weekend.",
+        "answer": "at / on",
+        "hint": "Both are possible depending on variety",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "The day before Sunday is ___.",
+        "answer": "Saturday",
+        "hint": "Days of the week",
+        "difficulty": "easy"
+      },
+      {
+        "type": "use vocabulary in a sentence",
+        "question": "Use 'Monday' in a sentence.",
+        "answer": "Open - teacher judges",
+        "hint": "Say a complete sentence",
+        "difficulty": "easy"
+      },
+      {
+        "type": "use vocabulary in a sentence",
+        "question": "Use 'birthday' in a sentence.",
+        "answer": "Open - teacher judges",
+        "hint": "Say a complete sentence",
+        "difficulty": "easy"
+      },
+      {
+        "type": "use vocabulary in a sentence",
+        "question": "Use 'in July' in a sentence.",
+        "answer": "Open - teacher judges",
+        "hint": "Say a complete sentence",
+        "difficulty": "easy"
+      },
+      {
+        "type": "use vocabulary in a sentence",
+        "question": "Use 'on Friday' in a sentence.",
+        "answer": "Open - teacher judges",
+        "hint": "Say a complete sentence",
+        "difficulty": "easy"
+      },
+      {
+        "type": "use vocabulary in a sentence",
+        "question": "Use 'at 7 o'clock' in a sentence.",
+        "answer": "Open - teacher judges",
+        "hint": "Say a complete sentence",
+        "difficulty": "easy"
+      }
     ],
-    spyRounds: [
-      { crewmateTopic:"Days and Dates", spyTopic:"Clock Times", crewmatePrompt:"Talk about days, dates, birthdays, weekends, and months.", spyPrompt:"Talk about times of day and clock times: at 7, at noon, in the morning.", explanation:"Crewmates focused on days and dates. The spy focused on clock times.", spyGuessOptions:["Days and Dates","Clock Times"] },
-      { crewmateTopic:"Prepositions of Time", spyTopic:"Prepositions of Place", crewmatePrompt:"Use in, on, and at for time: in July, on Monday, at 5 o'clock.", spyPrompt:"Use in, on, and at for places: in the bag, on the table, at school.", explanation:"Crewmates used time prepositions. The spy used place prepositions.", spyGuessOptions:["Time Prepositions","Place Prepositions"] },
+    "spyRounds": [
+      {
+        "crewmateTopic": "Days and Dates",
+        "spyTopic": "Clock Times",
+        "crewmatePrompt": "Talk about days, dates, birthdays, weekends, and months.",
+        "spyPrompt": "Talk about times of day and clock times: at 7, at noon, in the morning.",
+        "explanation": "Crewmates focused on days and dates. The spy focused on clock times.",
+        "spyGuessOptions": [
+          "Days and Dates",
+          "Clock Times"
+        ]
+      },
+      {
+        "crewmateTopic": "Prepositions of Time",
+        "spyTopic": "Prepositions of Place",
+        "crewmatePrompt": "Use in, on, and at for time: in July, on Monday, at 5 o'clock.",
+        "spyPrompt": "Use in, on, and at for places: in the bag, on the table, at school.",
+        "explanation": "Crewmates used time prepositions. The spy used place prepositions.",
+        "spyGuessOptions": [
+          "Prepositions of Time",
+          "Prepositions of Place"
+        ]
+      },
+      {
+        "crewmateTopic": "Weekly Schedule",
+        "spyTopic": "Daily Routine",
+        "crewmatePrompt": "Talk about what happens on Monday, Tuesday, Wednesday, and the weekend.",
+        "spyPrompt": "Talk about what happens in the morning, afternoon, evening, and at night.",
+        "explanation": "Crewmates used days. The spy used parts of the day.",
+        "spyGuessOptions": [
+          "Weekly Schedule",
+          "Daily Routine"
+        ]
+      },
+      {
+        "crewmateTopic": "Important Dates",
+        "spyTopic": "Important Places",
+        "crewmatePrompt": "Talk about birthdays, holidays, and special dates.",
+        "spyPrompt": "Talk about important places in your city or school.",
+        "explanation": "Crewmates focused on dates. The spy focused on places.",
+        "spyGuessOptions": [
+          "Important Dates",
+          "Important Places"
+        ]
+      }
     ],
-    auctionSentences: [
-      { sentence:"My birthday is in September.", isCorrect:true, explanation:"Use in with months." },
-      { sentence:"We have class on Monday.", isCorrect:true, explanation:"Use on with days." },
-      { sentence:"The party is at Saturday.", isCorrect:false, explanation:"Use on Saturday." },
-      { sentence:"The test is on June 3rd.", isCorrect:true, explanation:"Use on with specific dates." },
-      { sentence:"I wake up in 7 o'clock.", isCorrect:false, explanation:"Use at 7 o'clock." },
-      { sentence:"December comes after November.", isCorrect:true, explanation:"Correct month order." },
+    "auctionSentences": [
+      {
+        "sentence": "My birthday is in September.",
+        "isCorrect": true,
+        "explanation": "Use in with months."
+      },
+      {
+        "sentence": "We have class on Monday.",
+        "isCorrect": true,
+        "explanation": "Use on with days."
+      },
+      {
+        "sentence": "The party is at Saturday.",
+        "isCorrect": false,
+        "explanation": "Use on Saturday."
+      },
+      {
+        "sentence": "The test is on June 3rd.",
+        "isCorrect": true,
+        "explanation": "Use on with specific dates."
+      },
+      {
+        "sentence": "I wake up in 7 o'clock.",
+        "isCorrect": false,
+        "explanation": "Use at 7 o'clock."
+      },
+      {
+        "sentence": "December comes after November.",
+        "isCorrect": true,
+        "explanation": "Correct month order."
+      },
+      {
+        "sentence": "I study in the evening.",
+        "isCorrect": true,
+        "explanation": "Use in with evening."
+      },
+      {
+        "sentence": "We meet on 9pm.",
+        "isCorrect": false,
+        "explanation": "Use at 9pm."
+      },
+      {
+        "sentence": "The concert is in August.",
+        "isCorrect": true,
+        "explanation": "Use in with months."
+      },
+      {
+        "sentence": "My appointment is on Friday morning.",
+        "isCorrect": true,
+        "explanation": "Use on with day + part of day."
+      },
+      {
+        "sentence": "School starts at Monday.",
+        "isCorrect": false,
+        "explanation": "Use on Monday."
+      },
+      {
+        "sentence": "Halloween is on October 31st.",
+        "isCorrect": true,
+        "explanation": "Use on with a date."
+      }
     ],
-    cardTasks: [
-      { task:"Tell your partner your weekly schedule using on, in, and at." },
-      { task:"Say three important dates in your life." },
-      { task:"Ask your partner when their birthday is." },
-      { task:"Plan a simple class calendar for next week." },
-      { task:"Make five sentences with days of the week." },
-      { task:"Explain the difference between in, on, and at for time." },
+    "cardTasks": [
+      {
+        "task": "Tell your partner your weekly schedule using on, in, and at."
+      },
+      {
+        "task": "Say three important dates in your life."
+      },
+      {
+        "task": "Ask your partner when their birthday is."
+      },
+      {
+        "task": "Plan a simple class calendar for next week."
+      },
+      {
+        "task": "Make five sentences with days of the week."
+      },
+      {
+        "task": "Explain the difference between in, on, and at for time."
+      },
+      {
+        "task": "Talk about what you do on weekends."
+      },
+      {
+        "task": "Say what you usually do in the morning and at night."
+      },
+      {
+        "task": "Ask three questions with when."
+      },
+      {
+        "task": "Make a mini calendar with three appointments."
+      },
+      {
+        "task": "Say five months in order and use one in a sentence."
+      },
+      {
+        "task": "Compare your Monday schedule and Saturday schedule."
+      }
     ],
-    hotPotatoPrompts: [
-      {prompt:"Preposition: ___ Monday", answer:"on"},
-      {prompt:"Preposition: ___ July", answer:"in"},
-      {prompt:"Preposition: ___ 8 o'clock", answer:"at"},
-      {prompt:"Day after Friday?", answer:"Saturday"},
-      {prompt:"Month after March?", answer:"April"},
-      {prompt:"Preposition: ___ May 10th", answer:"on"},
+    "hotPotatoPrompts": [
+      {
+        "prompt": "Preposition: ___ Monday",
+        "answer": "on"
+      },
+      {
+        "prompt": "Preposition: ___ July",
+        "answer": "in"
+      },
+      {
+        "prompt": "Preposition: ___ 8 o'clock",
+        "answer": "at"
+      },
+      {
+        "prompt": "Preposition: ___ May 10th",
+        "answer": "on"
+      },
+      {
+        "prompt": "Preposition: ___ the morning",
+        "answer": "in"
+      },
+      {
+        "prompt": "Preposition: ___ night",
+        "answer": "at"
+      },
+      {
+        "prompt": "Day after Friday?",
+        "answer": "Saturday"
+      },
+      {
+        "prompt": "Day before Wednesday?",
+        "answer": "Tuesday"
+      },
+      {
+        "prompt": "Month after March?",
+        "answer": "April"
+      },
+      {
+        "prompt": "Month before December?",
+        "answer": "November"
+      },
+      {
+        "prompt": "First day of the week in many calendars?",
+        "answer": "Monday / Sunday"
+      },
+      {
+        "prompt": "A date: January ___",
+        "answer": "1st / 2nd etc."
+      },
+      {
+        "prompt": "Fix: 'in Friday'",
+        "answer": "on Friday"
+      },
+      {
+        "prompt": "Fix: 'at July'",
+        "answer": "in July"
+      },
+      {
+        "prompt": "Fix: 'on 6 o'clock'",
+        "answer": "at 6 o'clock"
+      },
+      {
+        "prompt": "Complete: My birthday is ___ April.",
+        "answer": "in"
+      },
+      {
+        "prompt": "Complete: The test is ___ Tuesday.",
+        "answer": "on"
+      },
+      {
+        "prompt": "Complete: Class starts ___ noon.",
+        "answer": "at"
+      },
+      {
+        "prompt": "Name three days.",
+        "answer": "(free answer)"
+      },
+      {
+        "prompt": "Name three months.",
+        "answer": "(free answer)"
+      }
     ],
-    minefieldGrid: {
-      topic: "Days, Dates and Time",
-      instructions: "Combine the time expression with the sentence starter and choose in, on, or at.",
-      colLabels: ["Monday", "January", "7 o'clock", "May 5th", "the weekend"],
-      rowLabels: ["I study English...", "My birthday is...", "The meeting starts...", "We have a test...", "I relax..."],
+    "minefieldGrid": {
+      "topic": "Days, Dates and Time",
+      "instructions": "Combine the time expression with the sentence starter and choose in, on, or at.",
+      "colLabels": [
+        "Monday",
+        "January",
+        "7 o'clock",
+        "May 5th",
+        "the weekend"
+      ],
+      "rowLabels": [
+        "I study English...",
+        "My birthday is...",
+        "The meeting starts...",
+        "We have a test...",
+        "I relax..."
+      ]
     },
-    hotSeatWords: [
-      {word:"Monday"},{word:"Wednesday"},{word:"weekend"},{word:"birthday"},{word:"January"},
-      {word:"calendar"},{word:"date"},{word:"morning"},{word:"on"},{word:"at"},
-    ],
+    "hotSeatWords": [
+      {
+        "word": "Monday"
+      },
+      {
+        "word": "Tuesday"
+      },
+      {
+        "word": "Wednesday"
+      },
+      {
+        "word": "Thursday"
+      },
+      {
+        "word": "Friday"
+      },
+      {
+        "word": "Saturday"
+      },
+      {
+        "word": "Sunday"
+      },
+      {
+        "word": "weekend"
+      },
+      {
+        "word": "birthday"
+      },
+      {
+        "word": "calendar"
+      },
+      {
+        "word": "date"
+      },
+      {
+        "word": "January"
+      },
+      {
+        "word": "February"
+      },
+      {
+        "word": "March"
+      },
+      {
+        "word": "April"
+      },
+      {
+        "word": "morning"
+      },
+      {
+        "word": "afternoon"
+      },
+      {
+        "word": "evening"
+      },
+      {
+        "word": "on"
+      },
+      {
+        "word": "at"
+      }
+    ]
   },
-
   weather_temperature_seasons: {
-    label: "Weather, Temperature and Seasons",
-    level: "A1", focus: "vocabulary",
-    questions: [
-      { type:"finish the sentence", question:"When there is a lot of sun, it is ___.", answer:"sunny", hint:"Weather adjective", difficulty:"easy" },
-      { type:"finish the sentence", question:"In winter, it is often ___.", answer:"cold", hint:"Temperature word", difficulty:"easy" },
-      { type:"choose correct vocabulary", question:"Which season is usually hot? (summer/winter)", answer:"summer", hint:"Season", difficulty:"easy" },
-      { type:"finish the sentence", question:"When water falls from the sky, it is ___.", answer:"rainy / raining", hint:"Weather word", difficulty:"easy" },
-      { type:"correct grammar mistakes", question:"'Today is very heat.'", answer:"Today is very hot.", hint:"Use the adjective hot", difficulty:"easy" },
-      { type:"finish the sentence", question:"The four seasons are spring, summer, autumn, and ___.", answer:"winter", hint:"Season", difficulty:"easy" },
+    "label": "Weather, Temperature and Seasons",
+    "level": "A1",
+    "focus": "vocabulary",
+    "questions": [
+      {
+        "type": "choose correct grammar",
+        "question": "Which season is usually hot? (summer/winter)",
+        "answer": "summer",
+        "hint": "Season",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "Which word means not hot? (cold/cloudy)",
+        "answer": "cold",
+        "hint": "Temperature word",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "Which weather has a lot of sun? (sunny/rainy)",
+        "answer": "sunny",
+        "hint": "Weather adjective",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "Which season comes after summer? (autumn/spring)",
+        "answer": "autumn / fall",
+        "hint": "Season order",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "Which word describes a lot of wind? (windy/wet)",
+        "answer": "windy",
+        "hint": "Weather adjective",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'Today is very heat.'",
+        "answer": "Today is very hot.",
+        "hint": "Use the adjective hot",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'It is rain today.'",
+        "answer": "It is rainy today. / It is raining today.",
+        "hint": "Use rainy or raining",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'The weather is sun.'",
+        "answer": "The weather is sunny.",
+        "hint": "Use sunny",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'Winter is very freezing today.'",
+        "answer": "It is freezing today. / Winter is very cold.",
+        "hint": "Use a natural sentence",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'It is cloud today.'",
+        "answer": "It is cloudy today.",
+        "hint": "Use cloudy",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "When there is a lot of sun, it is ___.",
+        "answer": "sunny",
+        "hint": "Weather adjective",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "In winter, it is often ___.",
+        "answer": "cold",
+        "hint": "Temperature word",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "When water falls from the sky, it is ___.",
+        "answer": "rainy / raining",
+        "hint": "Weather word",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "The four seasons are spring, summer, autumn, and ___.",
+        "answer": "winter",
+        "hint": "Season",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "When it is very cold, we can say it is ___.",
+        "answer": "freezing",
+        "hint": "Strong cold adjective",
+        "difficulty": "easy"
+      },
+      {
+        "type": "use vocabulary in a sentence",
+        "question": "Use 'sunny' in a sentence.",
+        "answer": "Open - teacher judges",
+        "hint": "Say a complete sentence",
+        "difficulty": "easy"
+      },
+      {
+        "type": "use vocabulary in a sentence",
+        "question": "Use 'rainy' in a sentence.",
+        "answer": "Open - teacher judges",
+        "hint": "Say a complete sentence",
+        "difficulty": "easy"
+      },
+      {
+        "type": "use vocabulary in a sentence",
+        "question": "Use 'cold' in a sentence.",
+        "answer": "Open - teacher judges",
+        "hint": "Say a complete sentence",
+        "difficulty": "easy"
+      },
+      {
+        "type": "use vocabulary in a sentence",
+        "question": "Use 'summer' in a sentence.",
+        "answer": "Open - teacher judges",
+        "hint": "Say a complete sentence",
+        "difficulty": "easy"
+      },
+      {
+        "type": "use vocabulary in a sentence",
+        "question": "Use 'winter' in a sentence.",
+        "answer": "Open - teacher judges",
+        "hint": "Say a complete sentence",
+        "difficulty": "easy"
+      }
     ],
-    spyRounds: [
-      { crewmateTopic:"Weather", spyTopic:"Clothes", crewmatePrompt:"Talk about today's weather and weather you like: sunny, rainy, cloudy, windy, hot, cold.", spyPrompt:"Talk about clothes for different situations: jacket, coat, T-shirt, shoes, hat.", explanation:"Crewmates discussed weather. The spy discussed clothes.", spyGuessOptions:["Weather","Clothes"] },
-      { crewmateTopic:"Seasons", spyTopic:"Months", crewmatePrompt:"Talk about spring, summer, autumn, and winter and what people do in each season.", spyPrompt:"Talk about months of the year and important dates.", explanation:"Crewmates focused on seasons. The spy focused on months.", spyGuessOptions:["Seasons","Months"] },
+    "spyRounds": [
+      {
+        "crewmateTopic": "Weather",
+        "spyTopic": "Clothes",
+        "crewmatePrompt": "Talk about today's weather and weather you like: sunny, rainy, cloudy, windy, hot, cold.",
+        "spyPrompt": "Talk about clothes for different situations: jacket, coat, T-shirt, shoes, hat.",
+        "explanation": "Crewmates discussed weather. The spy discussed clothes.",
+        "spyGuessOptions": [
+          "Weather",
+          "Clothes"
+        ]
+      },
+      {
+        "crewmateTopic": "Seasons",
+        "spyTopic": "Months",
+        "crewmatePrompt": "Talk about spring, summer, autumn, and winter and what people do in each season.",
+        "spyPrompt": "Talk about months of the year and important dates.",
+        "explanation": "Crewmates focused on seasons. The spy focused on months.",
+        "spyGuessOptions": [
+          "Seasons",
+          "Months"
+        ]
+      },
+      {
+        "crewmateTopic": "Temperature",
+        "spyTopic": "Food and Drinks",
+        "crewmatePrompt": "Talk about hot, warm, cool, cold, and freezing weather.",
+        "spyPrompt": "Talk about hot and cold food or drinks.",
+        "explanation": "Crewmates discussed temperature. The spy discussed food and drinks.",
+        "spyGuessOptions": [
+          "Temperature",
+          "Food and Drinks"
+        ]
+      },
+      {
+        "crewmateTopic": "Bad Weather",
+        "spyTopic": "Outdoor Activities",
+        "crewmatePrompt": "Talk about rain, storms, wind, snow, and cloudy days.",
+        "spyPrompt": "Talk about walking, swimming, cycling, and playing sports outside.",
+        "explanation": "Crewmates focused on bad weather. The spy focused on activities.",
+        "spyGuessOptions": [
+          "Bad Weather",
+          "Outdoor Activities"
+        ]
+      }
     ],
-    auctionSentences: [
-      { sentence:"It is sunny today.", isCorrect:true, explanation:"Correct weather adjective." },
-      { sentence:"The weather is very cold in winter.", isCorrect:true, explanation:"Correct temperature word." },
-      { sentence:"Today is rain.", isCorrect:false, explanation:"Say 'It is rainy' or 'It is raining'." },
-      { sentence:"Summer is usually hot.", isCorrect:true, explanation:"Correct season and temperature." },
-      { sentence:"I like cloudy weather.", isCorrect:true, explanation:"Natural weather vocabulary." },
-      { sentence:"It is very wind today.", isCorrect:false, explanation:"Use the adjective 'windy'." },
+    "auctionSentences": [
+      {
+        "sentence": "It is sunny today.",
+        "isCorrect": true,
+        "explanation": "Correct weather adjective."
+      },
+      {
+        "sentence": "The weather is very cold in winter.",
+        "isCorrect": true,
+        "explanation": "Correct temperature word."
+      },
+      {
+        "sentence": "Today is rain.",
+        "isCorrect": false,
+        "explanation": "Say 'It is rainy' or 'It is raining'."
+      },
+      {
+        "sentence": "Summer is usually hot.",
+        "isCorrect": true,
+        "explanation": "Correct season and temperature."
+      },
+      {
+        "sentence": "I like cloudy weather.",
+        "isCorrect": true,
+        "explanation": "Natural weather vocabulary."
+      },
+      {
+        "sentence": "It is very wind today.",
+        "isCorrect": false,
+        "explanation": "Use the adjective 'windy'."
+      },
+      {
+        "sentence": "Spring comes after winter.",
+        "isCorrect": true,
+        "explanation": "Correct season order."
+      },
+      {
+        "sentence": "It is freezing, so wear a coat.",
+        "isCorrect": true,
+        "explanation": "Natural temperature sentence."
+      },
+      {
+        "sentence": "The weather is cloud.",
+        "isCorrect": false,
+        "explanation": "Use 'cloudy'."
+      },
+      {
+        "sentence": "Autumn is also called fall.",
+        "isCorrect": true,
+        "explanation": "Correct vocabulary."
+      },
+      {
+        "sentence": "The day is very hot in summer.",
+        "isCorrect": true,
+        "explanation": "Natural enough at A1."
+      },
+      {
+        "sentence": "I don't like storm weather.",
+        "isCorrect": false,
+        "explanation": "Say 'stormy weather'."
+      }
     ],
-    cardTasks: [
-      { task:"Describe today's weather and temperature." },
-      { task:"Say what people wear in hot and cold weather." },
-      { task:"Talk about your favourite season and why." },
-      { task:"Compare summer and winter." },
-      { task:"Describe weather you do not like." },
-      { task:"Plan a weekend activity for sunny, rainy, and cold weather." },
+    "cardTasks": [
+      {
+        "task": "Describe today's weather and temperature."
+      },
+      {
+        "task": "Say what people wear in hot and cold weather."
+      },
+      {
+        "task": "Talk about your favourite season and why."
+      },
+      {
+        "task": "Compare summer and winter."
+      },
+      {
+        "task": "Describe weather you do not like."
+      },
+      {
+        "task": "Plan a weekend activity for sunny, rainy, and cold weather."
+      },
+      {
+        "task": "Give a weather report for your city."
+      },
+      {
+        "task": "Say three things you do in summer."
+      },
+      {
+        "task": "Say three things you do in winter."
+      },
+      {
+        "task": "Describe perfect weather for a holiday."
+      },
+      {
+        "task": "Ask your partner what weather they like."
+      },
+      {
+        "task": "Talk about weather in your country."
+      }
     ],
-    hotPotatoPrompts: [
-      {prompt:"Opposite of hot?", answer:"cold"},
-      {prompt:"Weather with a lot of sun?", answer:"sunny"},
-      {prompt:"Weather with a lot of wind?", answer:"windy"},
-      {prompt:"Season after spring?", answer:"summer"},
-      {prompt:"Season before spring?", answer:"winter"},
-      {prompt:"Fix: 'It is rain.'", answer:"It is rainy / It is raining."},
+    "hotPotatoPrompts": [
+      {
+        "prompt": "Opposite of hot?",
+        "answer": "cold"
+      },
+      {
+        "prompt": "Weather with a lot of sun?",
+        "answer": "sunny"
+      },
+      {
+        "prompt": "Weather with a lot of wind?",
+        "answer": "windy"
+      },
+      {
+        "prompt": "Weather with clouds?",
+        "answer": "cloudy"
+      },
+      {
+        "prompt": "Weather with rain?",
+        "answer": "rainy / raining"
+      },
+      {
+        "prompt": "Very cold means...?",
+        "answer": "freezing"
+      },
+      {
+        "prompt": "Season after spring?",
+        "answer": "summer"
+      },
+      {
+        "prompt": "Season before spring?",
+        "answer": "winter"
+      },
+      {
+        "prompt": "Season after summer?",
+        "answer": "autumn / fall"
+      },
+      {
+        "prompt": "Season before winter?",
+        "answer": "autumn / fall"
+      },
+      {
+        "prompt": "Fix: 'It is rain.'",
+        "answer": "It is rainy / It is raining."
+      },
+      {
+        "prompt": "Fix: 'It is wind.'",
+        "answer": "It is windy."
+      },
+      {
+        "prompt": "Name two temperature words.",
+        "answer": "hot / warm / cool / cold / freezing"
+      },
+      {
+        "prompt": "Name the four seasons.",
+        "answer": "spring, summer, autumn/fall, winter"
+      },
+      {
+        "prompt": "What do you wear when it is cold?",
+        "answer": "(free answer)"
+      },
+      {
+        "prompt": "What do you do when it is sunny?",
+        "answer": "(free answer)"
+      },
+      {
+        "prompt": "Complete: Today is very ___.",
+        "answer": "hot / cold / sunny etc."
+      },
+      {
+        "prompt": "Complete: In winter, I wear a ___.",
+        "answer": "coat / jacket etc."
+      },
+      {
+        "prompt": "Weather with snow?",
+        "answer": "snowy / snowing"
+      },
+      {
+        "prompt": "Weather with a storm?",
+        "answer": "stormy"
+      }
     ],
-    minefieldGrid: {
-      topic: "Weather and Seasons",
-      instructions: "Combine the weather or season with the sentence starter and complete the sentence.",
-      colLabels: ["sunny", "rainy", "cold", "hot", "winter"],
-      rowLabels: ["Today is...", "I like...", "I wear...", "In my country...", "I do not like..."],
+    "minefieldGrid": {
+      "topic": "Weather and Seasons",
+      "instructions": "Combine the weather or season with the sentence starter and complete the sentence.",
+      "colLabels": [
+        "sunny",
+        "rainy",
+        "cold",
+        "hot",
+        "winter"
+      ],
+      "rowLabels": [
+        "Today is...",
+        "I like...",
+        "I wear...",
+        "In my country...",
+        "I do not like..."
+      ]
     },
-    hotSeatWords: [
-      {word:"sunny"},{word:"rainy"},{word:"cloudy"},{word:"windy"},{word:"stormy"},
-      {word:"hot"},{word:"cold"},{word:"spring"},{word:"summer"},{word:"winter"},
-    ],
+    "hotSeatWords": [
+      {
+        "word": "sunny"
+      },
+      {
+        "word": "rainy"
+      },
+      {
+        "word": "cloudy"
+      },
+      {
+        "word": "windy"
+      },
+      {
+        "word": "stormy"
+      },
+      {
+        "word": "snowy"
+      },
+      {
+        "word": "foggy"
+      },
+      {
+        "word": "hot"
+      },
+      {
+        "word": "warm"
+      },
+      {
+        "word": "cool"
+      },
+      {
+        "word": "cold"
+      },
+      {
+        "word": "freezing"
+      },
+      {
+        "word": "spring"
+      },
+      {
+        "word": "summer"
+      },
+      {
+        "word": "autumn"
+      },
+      {
+        "word": "fall"
+      },
+      {
+        "word": "winter"
+      },
+      {
+        "word": "temperature"
+      },
+      {
+        "word": "weather"
+      },
+      {
+        "word": "season"
+      }
+    ]
   },
-
   daily_routines_frequency: {
-    label: "Daily Routines, Times and Frequency",
-    level: "A1", focus: "topic",
-    questions: [
-      { type:"finish the sentence", question:"I usually ___ up at 7 o'clock.", answer:"wake / get", hint:"Morning routine", difficulty:"easy" },
-      { type:"choose correct grammar", question:"'I ___ brush my teeth in the morning.' (always/am always)", answer:"always", hint:"Adverb before main verb", difficulty:"easy" },
-      { type:"finish the sentence", question:"In the evening, I usually ___.", answer:"(free answer)", hint:"Daily routine", difficulty:"easy" },
-      { type:"correct grammar mistakes", question:"'I go always to bed at 11.'", answer:"I always go to bed at 11.", hint:"Adverb before the main verb", difficulty:"easy" },
-      { type:"choose correct vocabulary", question:"Which is a time of day? (morning / Monday)", answer:"morning", hint:"Time of day", difficulty:"easy" },
-      { type:"finish the sentence", question:"I ___ have breakfast before work.", answer:"always / usually / sometimes / never", hint:"Adverb of frequency", difficulty:"easy" },
+    "label": "Daily Routines, Times and Frequency",
+    "level": "A1",
+    "focus": "topic",
+    "questions": [
+      {
+        "type": "choose correct grammar",
+        "question": "'I ___ brush my teeth in the morning.' (always/am always)",
+        "answer": "always",
+        "hint": "Adverb before main verb",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'She ___ breakfast at 7.' (has/have)",
+        "answer": "has",
+        "hint": "Third person singular",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'I go to bed ___ night.' (at/in)",
+        "answer": "at",
+        "hint": "Use at night",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'We study ___ the afternoon.' (in/on)",
+        "answer": "in",
+        "hint": "Use in the afternoon",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'He ___ to work at 8.' (go/goes)",
+        "answer": "goes",
+        "hint": "He/she/it + s",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'I go always to bed at 11.'",
+        "answer": "I always go to bed at 11.",
+        "hint": "Adverb before the main verb",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'He wake up at 6 o'clock.'",
+        "answer": "He wakes up at 6 o'clock.",
+        "hint": "He/she/it + s",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'She have breakfast in the morning.'",
+        "answer": "She has breakfast in the morning.",
+        "hint": "Use has with she",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'I never am late.'",
+        "answer": "I am never late.",
+        "hint": "With be, adverb goes after be",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'They goes home at 5.'",
+        "answer": "They go home at 5.",
+        "hint": "They + base verb",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "I usually ___ up at 7 o'clock.",
+        "answer": "wake / get",
+        "hint": "Morning routine",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "In the evening, I usually ___.",
+        "answer": "(free answer)",
+        "hint": "Daily routine",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "I ___ have breakfast before work.",
+        "answer": "always / usually / sometimes / never",
+        "hint": "Adverb of frequency",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "At night, I usually go to ___.",
+        "answer": "bed / sleep",
+        "hint": "Night routine",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "After lunch, I sometimes ___.",
+        "answer": "(free answer)",
+        "hint": "Afternoon routine",
+        "difficulty": "easy"
+      },
+      {
+        "type": "use vocabulary in a sentence",
+        "question": "Use 'wake up' in a sentence.",
+        "answer": "Open - teacher judges",
+        "hint": "Say a complete sentence",
+        "difficulty": "easy"
+      },
+      {
+        "type": "use vocabulary in a sentence",
+        "question": "Use 'usually' in a sentence.",
+        "answer": "Open - teacher judges",
+        "hint": "Say a complete sentence",
+        "difficulty": "easy"
+      },
+      {
+        "type": "use vocabulary in a sentence",
+        "question": "Use 'in the morning' in a sentence.",
+        "answer": "Open - teacher judges",
+        "hint": "Say a complete sentence",
+        "difficulty": "easy"
+      },
+      {
+        "type": "use vocabulary in a sentence",
+        "question": "Use 'go to bed' in a sentence.",
+        "answer": "Open - teacher judges",
+        "hint": "Say a complete sentence",
+        "difficulty": "easy"
+      },
+      {
+        "type": "use vocabulary in a sentence",
+        "question": "Use 'never' in a sentence.",
+        "answer": "Open - teacher judges",
+        "hint": "Say a complete sentence",
+        "difficulty": "easy"
+      }
     ],
-    spyRounds: [
-      { crewmateTopic:"Daily Routines", spyTopic:"Free Time", crewmatePrompt:"Talk about your normal day: wake up, have breakfast, go to work or school, study, eat dinner, go to bed.", spyPrompt:"Talk about free-time activities: music, films, games, sports, reading, and relaxing.", explanation:"Crewmates talked about daily routines. The spy talked about free time.", spyGuessOptions:["Daily Routines","Free Time"] },
-      { crewmateTopic:"Adverbs of Frequency", spyTopic:"Times of Day", crewmatePrompt:"Use always, usually, sometimes, rarely, and never to talk about routines.", spyPrompt:"Use morning, afternoon, evening, night, noon, and midnight to talk about a day.", explanation:"Crewmates focused on frequency. The spy focused on times of day.", spyGuessOptions:["Frequency","Times of Day"] },
+    "spyRounds": [
+      {
+        "crewmateTopic": "Daily Routines",
+        "spyTopic": "Free Time",
+        "crewmatePrompt": "Talk about your normal day: wake up, have breakfast, go to work or school, study, eat dinner, go to bed.",
+        "spyPrompt": "Talk about free-time activities: music, films, games, sports, reading, and relaxing.",
+        "explanation": "Crewmates talked about daily routines. The spy talked about free time.",
+        "spyGuessOptions": [
+          "Daily Routines",
+          "Free Time"
+        ]
+      },
+      {
+        "crewmateTopic": "Adverbs of Frequency",
+        "spyTopic": "Times of Day",
+        "crewmatePrompt": "Use always, usually, sometimes, rarely, and never to talk about routines.",
+        "spyPrompt": "Use morning, afternoon, evening, night, noon, and midnight to talk about a day.",
+        "explanation": "Crewmates focused on frequency. The spy focused on times of day.",
+        "spyGuessOptions": [
+          "Adverbs of Frequency",
+          "Times of Day"
+        ]
+      },
+      {
+        "crewmateTopic": "Morning Routine",
+        "spyTopic": "Evening Routine",
+        "crewmatePrompt": "Talk about what you do after you wake up.",
+        "spyPrompt": "Talk about what you do after dinner or before bed.",
+        "explanation": "Crewmates discussed mornings. The spy discussed evenings.",
+        "spyGuessOptions": [
+          "Morning Routine",
+          "Evening Routine"
+        ]
+      },
+      {
+        "crewmateTopic": "Weekday Routine",
+        "spyTopic": "Weekend Routine",
+        "crewmatePrompt": "Talk about your normal Monday to Friday routine.",
+        "spyPrompt": "Talk about Saturday and Sunday routines.",
+        "explanation": "Crewmates discussed weekdays. The spy discussed weekends.",
+        "spyGuessOptions": [
+          "Weekday Routine",
+          "Weekend Routine"
+        ]
+      }
     ],
-    auctionSentences: [
-      { sentence:"I always have breakfast in the morning.", isCorrect:true, explanation:"Correct adverb position." },
-      { sentence:"She goes usually to work at 8.", isCorrect:false, explanation:"Say 'She usually goes to work'." },
-      { sentence:"We sometimes watch TV in the evening.", isCorrect:true, explanation:"Correct frequency adverb." },
-      { sentence:"He wake up at 6 o'clock.", isCorrect:false, explanation:"Use 'wakes up' with he." },
-      { sentence:"I never drink coffee at night.", isCorrect:true, explanation:"Correct routine sentence." },
-      { sentence:"They go to bed at midnight.", isCorrect:true, explanation:"Correct time expression." },
+    "auctionSentences": [
+      {
+        "sentence": "I always have breakfast in the morning.",
+        "isCorrect": true,
+        "explanation": "Correct adverb position."
+      },
+      {
+        "sentence": "She goes usually to work at 8.",
+        "isCorrect": false,
+        "explanation": "Say 'She usually goes to work'."
+      },
+      {
+        "sentence": "We sometimes watch TV in the evening.",
+        "isCorrect": true,
+        "explanation": "Correct frequency adverb."
+      },
+      {
+        "sentence": "He wake up at 6 o'clock.",
+        "isCorrect": false,
+        "explanation": "Use 'wakes up' with he."
+      },
+      {
+        "sentence": "I never drink coffee at night.",
+        "isCorrect": true,
+        "explanation": "Correct routine sentence."
+      },
+      {
+        "sentence": "They go to bed at midnight.",
+        "isCorrect": true,
+        "explanation": "Correct time expression."
+      },
+      {
+        "sentence": "She has lunch at noon.",
+        "isCorrect": true,
+        "explanation": "Correct daily routine."
+      },
+      {
+        "sentence": "I am always tired in the morning.",
+        "isCorrect": true,
+        "explanation": "Correct adverb position with be."
+      },
+      {
+        "sentence": "We goes home in the afternoon.",
+        "isCorrect": false,
+        "explanation": "Use 'go' with we."
+      },
+      {
+        "sentence": "He usually studies after dinner.",
+        "isCorrect": true,
+        "explanation": "Correct routine sentence."
+      },
+      {
+        "sentence": "I brush always my teeth.",
+        "isCorrect": false,
+        "explanation": "Say 'I always brush my teeth'."
+      },
+      {
+        "sentence": "They sometimes play football on weekends.",
+        "isCorrect": true,
+        "explanation": "Correct frequency sentence."
+      }
     ],
-    cardTasks: [
-      { task:"Describe your normal day from morning to night." },
-      { task:"Ask your partner about their morning routine." },
-      { task:"Use always, usually, sometimes, and never in four sentences." },
-      { task:"Talk about what you do at 7am, noon, and 9pm." },
-      { task:"Compare your weekday routine and weekend routine." },
-      { task:"Describe a very busy day." },
+    "cardTasks": [
+      {
+        "task": "Describe your normal day from morning to night."
+      },
+      {
+        "task": "Ask your partner about their morning routine."
+      },
+      {
+        "task": "Use always, usually, sometimes, and never in four sentences."
+      },
+      {
+        "task": "Talk about what you do at 7am, noon, and 9pm."
+      },
+      {
+        "task": "Compare your weekday routine and weekend routine."
+      },
+      {
+        "task": "Describe a very busy day."
+      },
+      {
+        "task": "Say five things you do before school or work."
+      },
+      {
+        "task": "Say five things you do after dinner."
+      },
+      {
+        "task": "Interview a partner about daily routines."
+      },
+      {
+        "task": "Make a timetable for a perfect day."
+      },
+      {
+        "task": "Talk about habits you never do."
+      },
+      {
+        "task": "Describe someone else's daily routine."
+      }
     ],
-    hotPotatoPrompts: [
-      {prompt:"Name one morning routine.", answer:"(free answer)"},
-      {prompt:"Adverb: 100% frequency", answer:"always"},
-      {prompt:"Adverb: 0% frequency", answer:"never"},
-      {prompt:"Fix: 'I go usually home at 6.'", answer:"I usually go home at 6."},
-      {prompt:"Name one time of day.", answer:"morning / afternoon / evening / night"},
-      {prompt:"What do you do before bed?", answer:"(free answer)"},
+    "hotPotatoPrompts": [
+      {
+        "prompt": "Name one morning routine.",
+        "answer": "(free answer)"
+      },
+      {
+        "prompt": "Name one evening routine.",
+        "answer": "(free answer)"
+      },
+      {
+        "prompt": "Adverb: 100% frequency",
+        "answer": "always"
+      },
+      {
+        "prompt": "Adverb: 0% frequency",
+        "answer": "never"
+      },
+      {
+        "prompt": "Fix: 'I go usually home at 6.'",
+        "answer": "I usually go home at 6."
+      },
+      {
+        "prompt": "Fix: 'He wake up at 7.'",
+        "answer": "He wakes up at 7."
+      },
+      {
+        "prompt": "Name one time of day.",
+        "answer": "morning / afternoon / evening / night"
+      },
+      {
+        "prompt": "What do you do before bed?",
+        "answer": "(free answer)"
+      },
+      {
+        "prompt": "Complete: I ___ breakfast at 8.",
+        "answer": "have"
+      },
+      {
+        "prompt": "Complete: She ___ lunch at noon.",
+        "answer": "has"
+      },
+      {
+        "prompt": "Complete: I go to bed ___ night.",
+        "answer": "at"
+      },
+      {
+        "prompt": "Complete: I study ___ the afternoon.",
+        "answer": "in"
+      },
+      {
+        "prompt": "Frequency word between always and sometimes?",
+        "answer": "usually / often"
+      },
+      {
+        "prompt": "Frequency word meaning not often?",
+        "answer": "rarely / seldom"
+      },
+      {
+        "prompt": "Say a sentence with 'sometimes'.",
+        "answer": "(free answer)"
+      },
+      {
+        "prompt": "Say a sentence with 'never'.",
+        "answer": "(free answer)"
+      },
+      {
+        "prompt": "Question: What time do you...?",
+        "answer": "(free answer)"
+      },
+      {
+        "prompt": "Name two daily routine verbs.",
+        "answer": "wake up / eat / study / work / sleep etc."
+      },
+      {
+        "prompt": "What do you do after lunch?",
+        "answer": "(free answer)"
+      },
+      {
+        "prompt": "What do you do on weekends?",
+        "answer": "(free answer)"
+      }
     ],
-    minefieldGrid: {
-      topic: "Daily Routines",
-      instructions: "Combine a time expression with a frequency adverb and complete a routine sentence.",
-      colLabels: ["always", "usually", "sometimes", "rarely", "never"],
-      rowLabels: ["In the morning I...", "At noon I...", "In the afternoon I...", "In the evening I...", "At night I..."],
+    "minefieldGrid": {
+      "topic": "Daily Routines",
+      "instructions": "Combine a time expression with a frequency adverb and complete a routine sentence.",
+      "colLabels": [
+        "always",
+        "usually",
+        "sometimes",
+        "rarely",
+        "never"
+      ],
+      "rowLabels": [
+        "In the morning I...",
+        "At noon I...",
+        "In the afternoon I...",
+        "In the evening I...",
+        "At night I..."
+      ]
     },
-    hotSeatWords: [
-      {word:"wake up"},{word:"breakfast"},{word:"lunch"},{word:"dinner"},{word:"go to bed"},
-      {word:"morning"},{word:"afternoon"},{word:"evening"},{word:"always"},{word:"usually"},
-    ],
+    "hotSeatWords": [
+      {
+        "word": "wake up"
+      },
+      {
+        "word": "get up"
+      },
+      {
+        "word": "brush teeth"
+      },
+      {
+        "word": "have breakfast"
+      },
+      {
+        "word": "go to work"
+      },
+      {
+        "word": "go to school"
+      },
+      {
+        "word": "study"
+      },
+      {
+        "word": "have lunch"
+      },
+      {
+        "word": "go home"
+      },
+      {
+        "word": "cook dinner"
+      },
+      {
+        "word": "watch TV"
+      },
+      {
+        "word": "read"
+      },
+      {
+        "word": "go to bed"
+      },
+      {
+        "word": "morning"
+      },
+      {
+        "word": "afternoon"
+      },
+      {
+        "word": "evening"
+      },
+      {
+        "word": "night"
+      },
+      {
+        "word": "always"
+      },
+      {
+        "word": "usually"
+      },
+      {
+        "word": "sometimes"
+      }
+    ]
   },
-
   house_objects_rooms_there_is_are: {
-    label: "Objects and Rooms in the House",
-    level: "A1", focus: "grammar",
-    questions: [
-      { type:"choose correct grammar", question:"'___ a sofa in the living room.' (There is/There are)", answer:"There is", hint:"Singular noun", difficulty:"easy" },
-      { type:"choose correct grammar", question:"'___ two chairs in the kitchen.' (There is/There are)", answer:"There are", hint:"Plural noun", difficulty:"easy" },
-      { type:"finish the sentence", question:"The bed is ___ the bedroom.", answer:"in", hint:"Place preposition", difficulty:"easy" },
-      { type:"correct grammar mistakes", question:"'There are a table in the dining room.'", answer:"There is a table in the dining room.", hint:"Singular noun", difficulty:"easy" },
-      { type:"finish the sentence", question:"The lamp is ___ the table.", answer:"on", hint:"Place preposition", difficulty:"easy" },
-      { type:"choose correct grammar", question:"'Is there a fridge in the kitchen?' 'Yes, ___.'", answer:"there is", hint:"Short answer", difficulty:"easy" },
+    "label": "Objects and Rooms in the House",
+    "level": "A1",
+    "focus": "grammar",
+    "questions": [
+      {
+        "type": "choose correct grammar",
+        "question": "'___ a sofa in the living room.' (There is/There are)",
+        "answer": "There is",
+        "hint": "Singular noun",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'___ two chairs in the kitchen.' (There is/There are)",
+        "answer": "There are",
+        "hint": "Plural noun",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'The lamp is ___ the table.' (in/on)",
+        "answer": "on",
+        "hint": "Place preposition",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'The books are ___ the bag.' (in/under)",
+        "answer": "in",
+        "hint": "Inside something",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'Is there a fridge?' 'Yes, ___.'",
+        "answer": "there is",
+        "hint": "Short answer",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'There are a table in the dining room.'",
+        "answer": "There is a table in the dining room.",
+        "hint": "Singular noun",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'There is two bedrooms.'",
+        "answer": "There are two bedrooms.",
+        "hint": "Plural noun",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'The lamp is in the table.'",
+        "answer": "The lamp is on the table.",
+        "hint": "Use on for a surface",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'Are there a bathroom upstairs?'",
+        "answer": "Is there a bathroom upstairs?",
+        "hint": "Singular question",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'There aren't a sofa in the living room.'",
+        "answer": "There isn't a sofa in the living room.",
+        "hint": "Singular negative",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "The bed is ___ the bedroom.",
+        "answer": "in",
+        "hint": "Place preposition",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "The lamp is ___ the table.",
+        "answer": "on",
+        "hint": "Place preposition",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "There ___ three chairs in the kitchen.",
+        "answer": "are",
+        "hint": "Plural noun",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "There ___ a mirror in the bathroom.",
+        "answer": "is",
+        "hint": "Singular noun",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "The rug is ___ the table.",
+        "answer": "under",
+        "hint": "Place preposition",
+        "difficulty": "easy"
+      },
+      {
+        "type": "use vocabulary in a sentence",
+        "question": "Use 'kitchen' in a sentence.",
+        "answer": "Open - teacher judges",
+        "hint": "Say a complete sentence",
+        "difficulty": "easy"
+      },
+      {
+        "type": "use vocabulary in a sentence",
+        "question": "Use 'there is' in a sentence.",
+        "answer": "Open - teacher judges",
+        "hint": "Say a complete sentence",
+        "difficulty": "easy"
+      },
+      {
+        "type": "use vocabulary in a sentence",
+        "question": "Use 'there are' in a sentence.",
+        "answer": "Open - teacher judges",
+        "hint": "Say a complete sentence",
+        "difficulty": "easy"
+      },
+      {
+        "type": "use vocabulary in a sentence",
+        "question": "Use 'next to' in a sentence.",
+        "answer": "Open - teacher judges",
+        "hint": "Say a complete sentence",
+        "difficulty": "easy"
+      },
+      {
+        "type": "use vocabulary in a sentence",
+        "question": "Use 'bedroom' in a sentence.",
+        "answer": "Open - teacher judges",
+        "hint": "Say a complete sentence",
+        "difficulty": "easy"
+      }
     ],
-    spyRounds: [
-      { crewmateTopic:"Rooms in a House", spyTopic:"Furniture and Objects", crewmatePrompt:"Talk about rooms: kitchen, bedroom, bathroom, living room, dining room, garage.", spyPrompt:"Talk about furniture and objects: sofa, table, chair, bed, lamp, fridge.", explanation:"Crewmates discussed rooms. The spy discussed objects.", spyGuessOptions:["Rooms","Objects"] },
-      { crewmateTopic:"There is / There are", spyTopic:"Prepositions of Place", crewmatePrompt:"Describe a room using there is and there are.", spyPrompt:"Describe where things are using in, on, under, next to, behind.", explanation:"Crewmates focused on existence. The spy focused on location.", spyGuessOptions:["There is / There are","Prepositions of Place"] },
+    "spyRounds": [
+      {
+        "crewmateTopic": "Rooms in a House",
+        "spyTopic": "Furniture and Objects",
+        "crewmatePrompt": "Talk about rooms: kitchen, bedroom, bathroom, living room, dining room, garage.",
+        "spyPrompt": "Talk about furniture and objects: sofa, table, chair, bed, lamp, fridge.",
+        "explanation": "Crewmates discussed rooms. The spy discussed objects.",
+        "spyGuessOptions": [
+          "Rooms in a House",
+          "Furniture and Objects"
+        ]
+      },
+      {
+        "crewmateTopic": "There is / There are",
+        "spyTopic": "Prepositions of Place",
+        "crewmatePrompt": "Describe a room using there is and there are.",
+        "spyPrompt": "Describe where things are using in, on, under, next to, behind.",
+        "explanation": "Crewmates focused on existence. The spy focused on location.",
+        "spyGuessOptions": [
+          "There is / There are",
+          "Prepositions of Place"
+        ]
+      },
+      {
+        "crewmateTopic": "Bedroom Description",
+        "spyTopic": "Kitchen Description",
+        "crewmatePrompt": "Describe a bedroom and what is in it.",
+        "spyPrompt": "Describe a kitchen and what is in it.",
+        "explanation": "Crewmates described bedrooms. The spy described kitchens.",
+        "spyGuessOptions": [
+          "Bedroom Description",
+          "Kitchen Description"
+        ]
+      },
+      {
+        "crewmateTopic": "House Tour",
+        "spyTopic": "Classroom Tour",
+        "crewmatePrompt": "Give a tour of a house with rooms and objects.",
+        "spyPrompt": "Give a tour of a classroom with school objects.",
+        "explanation": "Crewmates talked about a house. The spy talked about a classroom.",
+        "spyGuessOptions": [
+          "House Tour",
+          "Classroom Tour"
+        ]
+      }
     ],
-    auctionSentences: [
-      { sentence:"There is a bed in the bedroom.", isCorrect:true, explanation:"Correct singular form." },
-      { sentence:"There are two chairs in the kitchen.", isCorrect:true, explanation:"Correct plural form." },
-      { sentence:"There is three rooms upstairs.", isCorrect:false, explanation:"Use 'There are' with plural nouns." },
-      { sentence:"The book is on the table.", isCorrect:true, explanation:"Correct place preposition." },
-      { sentence:"The sofa is in the living room.", isCorrect:true, explanation:"Correct room vocabulary." },
-      { sentence:"There are a lamp next to the bed.", isCorrect:false, explanation:"Use 'There is a lamp'." },
+    "auctionSentences": [
+      {
+        "sentence": "There is a bed in the bedroom.",
+        "isCorrect": true,
+        "explanation": "Correct singular form."
+      },
+      {
+        "sentence": "There are two chairs in the kitchen.",
+        "isCorrect": true,
+        "explanation": "Correct plural form."
+      },
+      {
+        "sentence": "There is three rooms upstairs.",
+        "isCorrect": false,
+        "explanation": "Use 'There are' with plural nouns."
+      },
+      {
+        "sentence": "The book is on the table.",
+        "isCorrect": true,
+        "explanation": "Correct place preposition."
+      },
+      {
+        "sentence": "The sofa is in the living room.",
+        "isCorrect": true,
+        "explanation": "Correct room vocabulary."
+      },
+      {
+        "sentence": "There are a lamp next to the bed.",
+        "isCorrect": false,
+        "explanation": "Use 'There is a lamp'."
+      },
+      {
+        "sentence": "There isn't a TV in the bedroom.",
+        "isCorrect": true,
+        "explanation": "Correct singular negative."
+      },
+      {
+        "sentence": "Are there any windows in the kitchen?",
+        "isCorrect": true,
+        "explanation": "Correct plural question."
+      },
+      {
+        "sentence": "The chair is under the desk.",
+        "isCorrect": true,
+        "explanation": "Correct place preposition."
+      },
+      {
+        "sentence": "Is there two bathrooms?",
+        "isCorrect": false,
+        "explanation": "Use 'Are there two bathrooms?'"
+      },
+      {
+        "sentence": "There are some books on the shelf.",
+        "isCorrect": true,
+        "explanation": "Correct plural sentence."
+      },
+      {
+        "sentence": "The fridge is on the kitchen.",
+        "isCorrect": false,
+        "explanation": "Say 'in the kitchen'."
+      }
     ],
-    cardTasks: [
-      { task:"Describe your living room using there is and there are." },
-      { task:"Describe where five objects are in your bedroom." },
-      { task:"Ask your partner: Is there a...? Are there any...?" },
-      { task:"Design a small apartment and describe each room." },
-      { task:"Use in, on, under, next to, and behind in five sentences." },
-      { task:"Compare two rooms in a house." },
+    "cardTasks": [
+      {
+        "task": "Describe your living room using there is and there are."
+      },
+      {
+        "task": "Describe where five objects are in your bedroom."
+      },
+      {
+        "task": "Ask your partner: Is there a...? Are there any...?"
+      },
+      {
+        "task": "Design a small apartment and describe each room."
+      },
+      {
+        "task": "Use in, on, under, next to, and behind in five sentences."
+      },
+      {
+        "task": "Compare two rooms in a house."
+      },
+      {
+        "task": "Describe your dream bedroom."
+      },
+      {
+        "task": "Give directions inside a house."
+      },
+      {
+        "task": "Talk about objects in your kitchen."
+      },
+      {
+        "task": "Ask your partner about their home."
+      },
+      {
+        "task": "Describe a messy room."
+      },
+      {
+        "task": "Draw a simple house and explain it."
+      }
     ],
-    hotPotatoPrompts: [
-      {prompt:"Singular: ___ a sofa.", answer:"There is"},
-      {prompt:"Plural: ___ two chairs.", answer:"There are"},
-      {prompt:"Name one room in a house.", answer:"(free answer)"},
-      {prompt:"Name one object in a bedroom.", answer:"(free answer)"},
-      {prompt:"The lamp is ___ the table.", answer:"on"},
-      {prompt:"Fix: 'There are a bed.'", answer:"There is a bed."},
+    "hotPotatoPrompts": [
+      {
+        "prompt": "Singular: ___ a sofa.",
+        "answer": "There is"
+      },
+      {
+        "prompt": "Plural: ___ two chairs.",
+        "answer": "There are"
+      },
+      {
+        "prompt": "Negative singular: There ___ a TV.",
+        "answer": "isn't / is not"
+      },
+      {
+        "prompt": "Question singular: ___ there a fridge?",
+        "answer": "Is"
+      },
+      {
+        "prompt": "Question plural: ___ there two windows?",
+        "answer": "Are"
+      },
+      {
+        "prompt": "Name one room in a house.",
+        "answer": "(free answer)"
+      },
+      {
+        "prompt": "Name one object in a bedroom.",
+        "answer": "(free answer)"
+      },
+      {
+        "prompt": "Name one object in a kitchen.",
+        "answer": "(free answer)"
+      },
+      {
+        "prompt": "The lamp is ___ the table.",
+        "answer": "on"
+      },
+      {
+        "prompt": "The shoes are ___ the bed.",
+        "answer": "under"
+      },
+      {
+        "prompt": "The sofa is ___ the living room.",
+        "answer": "in"
+      },
+      {
+        "prompt": "The table is ___ the sofa.",
+        "answer": "next to / near"
+      },
+      {
+        "prompt": "Fix: 'There are a bed.'",
+        "answer": "There is a bed."
+      },
+      {
+        "prompt": "Fix: 'There is two chairs.'",
+        "answer": "There are two chairs."
+      },
+      {
+        "prompt": "Fix: 'The fridge is on the kitchen.'",
+        "answer": "The fridge is in the kitchen."
+      },
+      {
+        "prompt": "Complete: There ___ some books.",
+        "answer": "are"
+      },
+      {
+        "prompt": "Complete: There ___ a bathroom.",
+        "answer": "is"
+      },
+      {
+        "prompt": "Say a sentence with 'behind'.",
+        "answer": "(free answer)"
+      },
+      {
+        "prompt": "Say a sentence with 'between'.",
+        "answer": "(free answer)"
+      },
+      {
+        "prompt": "Describe one room in your house.",
+        "answer": "(free answer)"
+      }
     ],
-    minefieldGrid: {
-      topic: "Rooms, Objects and There Is/Are",
-      instructions: "Combine a room with an object and make a sentence using there is/are plus a preposition.",
-      colLabels: ["kitchen", "bedroom", "bathroom", "living room", "dining room"],
-      rowLabels: ["There is a...", "There are two...", "The ... is on...", "The ... is next to...", "Is there a...?"],
+    "minefieldGrid": {
+      "topic": "Rooms, Objects and There Is/Are",
+      "instructions": "Combine a room with an object and make a sentence using there is/are plus a preposition.",
+      "colLabels": [
+        "kitchen",
+        "bedroom",
+        "bathroom",
+        "living room",
+        "dining room"
+      ],
+      "rowLabels": [
+        "There is a...",
+        "There are two...",
+        "The ... is on...",
+        "The ... is next to...",
+        "Is there a...?"
+      ]
     },
-    hotSeatWords: [
-      {word:"kitchen"},{word:"bedroom"},{word:"bathroom"},{word:"living room"},{word:"sofa"},
-      {word:"table"},{word:"chair"},{word:"lamp"},{word:"fridge"},{word:"there are"},
-    ],
+    "hotSeatWords": [
+      {
+        "word": "kitchen"
+      },
+      {
+        "word": "bedroom"
+      },
+      {
+        "word": "bathroom"
+      },
+      {
+        "word": "living room"
+      },
+      {
+        "word": "dining room"
+      },
+      {
+        "word": "garage"
+      },
+      {
+        "word": "sofa"
+      },
+      {
+        "word": "table"
+      },
+      {
+        "word": "chair"
+      },
+      {
+        "word": "lamp"
+      },
+      {
+        "word": "fridge"
+      },
+      {
+        "word": "bed"
+      },
+      {
+        "word": "mirror"
+      },
+      {
+        "word": "shelf"
+      },
+      {
+        "word": "window"
+      },
+      {
+        "word": "door"
+      },
+      {
+        "word": "there is"
+      },
+      {
+        "word": "there are"
+      },
+      {
+        "word": "next to"
+      },
+      {
+        "word": "under"
+      }
+    ]
   },
-
   possessive_adjectives_pronouns: {
-    label: "Possessive Adjectives vs Possessive Pronouns",
-    level: "A1", focus: "grammar",
-    questions: [
-      { type:"choose correct grammar", question:"'This is ___ book.' (my/mine)", answer:"my", hint:"Possessive adjective before a noun", difficulty:"easy" },
-      { type:"choose correct grammar", question:"'This book is ___.' (my/mine)", answer:"mine", hint:"Possessive pronoun without a noun", difficulty:"easy" },
-      { type:"finish the sentence", question:"'Whose bag is this?' 'It is ___.'", answer:"mine / hers / his / ours", hint:"Possessive pronoun", difficulty:"easy" },
-      { type:"correct grammar mistakes", question:"'This is mine pen.'", answer:"This is my pen.", hint:"Use my before a noun", difficulty:"easy" },
-      { type:"choose correct grammar", question:"'Is this ___ phone?' (your/yours)", answer:"your", hint:"Before a noun, use your", difficulty:"easy" },
-      { type:"correct grammar mistakes", question:"'That jacket is her.'", answer:"That jacket is hers.", hint:"Use hers as a pronoun", difficulty:"medium" },
+    "label": "Possessive Adjectives vs Possessive Pronouns",
+    "level": "A1",
+    "focus": "grammar",
+    "questions": [
+      {
+        "type": "choose correct grammar",
+        "question": "'This is ___ book.' (my/mine)",
+        "answer": "my",
+        "hint": "Possessive adjective before a noun",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'This book is ___.' (my/mine)",
+        "answer": "mine",
+        "hint": "Possessive pronoun without a noun",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'Is this ___ phone?' (your/yours)",
+        "answer": "your",
+        "hint": "Before a noun, use your",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'The phone is ___.' (your/yours)",
+        "answer": "yours",
+        "hint": "Without a noun, use yours",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'That is ___ jacket.' (her/hers)",
+        "answer": "her",
+        "hint": "Before a noun, use her",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'This is mine pen.'",
+        "answer": "This is my pen.",
+        "hint": "Use my before a noun",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'That jacket is her.'",
+        "answer": "That jacket is hers.",
+        "hint": "Use hers as a pronoun",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'It is your.'",
+        "answer": "It is yours.",
+        "hint": "Use yours without a noun",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'This is theirs house.'",
+        "answer": "This is their house.",
+        "hint": "Use their before a noun",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'The bag is my.'",
+        "answer": "The bag is mine.",
+        "hint": "Use mine without a noun",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "'Whose bag is this?' 'It is ___.'",
+        "answer": "mine / hers / his / ours",
+        "hint": "Possessive pronoun",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "This is my book. The book is ___.",
+        "answer": "mine",
+        "hint": "Possessive pronoun",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "This is her phone. The phone is ___.",
+        "answer": "hers",
+        "hint": "Possessive pronoun",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "This is our classroom. The classroom is ___.",
+        "answer": "ours",
+        "hint": "Possessive pronoun",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "Those are their keys. The keys are ___.",
+        "answer": "theirs",
+        "hint": "Possessive pronoun",
+        "difficulty": "easy"
+      },
+      {
+        "type": "use vocabulary in a sentence",
+        "question": "Use 'my' in a sentence.",
+        "answer": "Open - teacher judges",
+        "hint": "Say a complete sentence",
+        "difficulty": "easy"
+      },
+      {
+        "type": "use vocabulary in a sentence",
+        "question": "Use 'mine' in a sentence.",
+        "answer": "Open - teacher judges",
+        "hint": "Say a complete sentence",
+        "difficulty": "easy"
+      },
+      {
+        "type": "use vocabulary in a sentence",
+        "question": "Use 'whose' in a sentence.",
+        "answer": "Open - teacher judges",
+        "hint": "Say a complete sentence",
+        "difficulty": "easy"
+      },
+      {
+        "type": "use vocabulary in a sentence",
+        "question": "Use 'hers' in a sentence.",
+        "answer": "Open - teacher judges",
+        "hint": "Say a complete sentence",
+        "difficulty": "easy"
+      },
+      {
+        "type": "use vocabulary in a sentence",
+        "question": "Use 'their' in a sentence.",
+        "answer": "Open - teacher judges",
+        "hint": "Say a complete sentence",
+        "difficulty": "easy"
+      }
     ],
-    spyRounds: [
-      { crewmateTopic:"Possessive Adjectives", spyTopic:"Possessive Pronouns", crewmatePrompt:"Use my, your, his, her, our, and their before nouns: my bag, your phone, her book.", spyPrompt:"Use mine, yours, his, hers, ours, and theirs without nouns: It is mine, That is hers.", explanation:"Crewmates used possessive adjectives. The spy used possessive pronouns.", spyGuessOptions:["Possessive Adjectives","Possessive Pronouns"] },
-      { crewmateTopic:"Whose Questions", spyTopic:"This/That Questions", crewmatePrompt:"Ask and answer questions with whose: Whose pen is this? It is mine.", spyPrompt:"Ask and answer questions with this and that: What is this? Is that a pen?", explanation:"Crewmates used whose. The spy used this/that questions.", spyGuessOptions:["Whose Questions","This/That Questions"] },
+    "spyRounds": [
+      {
+        "crewmateTopic": "Possessive Adjectives",
+        "spyTopic": "Possessive Pronouns",
+        "crewmatePrompt": "Use my, your, his, her, our, and their before nouns: my bag, your phone, her book.",
+        "spyPrompt": "Use mine, yours, his, hers, ours, and theirs without nouns: It is mine, That is hers.",
+        "explanation": "Crewmates used possessive adjectives. The spy used possessive pronouns.",
+        "spyGuessOptions": [
+          "Possessive Adjectives",
+          "Possessive Pronouns"
+        ]
+      },
+      {
+        "crewmateTopic": "Whose Questions",
+        "spyTopic": "This/That Questions",
+        "crewmatePrompt": "Ask and answer questions with whose: Whose pen is this? It is mine.",
+        "spyPrompt": "Ask and answer questions with this and that: What is this? Is that a pen?",
+        "explanation": "Crewmates used whose. The spy used this/that questions.",
+        "spyGuessOptions": [
+          "Whose Questions",
+          "This/That Questions"
+        ]
+      },
+      {
+        "crewmateTopic": "Classroom Objects and Owners",
+        "spyTopic": "Classroom Object Names",
+        "crewmatePrompt": "Talk about who owns classroom objects: my pen, yours, her notebook, their bags.",
+        "spyPrompt": "Name classroom objects without focusing on owners.",
+        "explanation": "Crewmates focused on ownership. The spy focused on object names.",
+        "spyGuessOptions": [
+          "Classroom Objects and Owners",
+          "Classroom Object Names"
+        ]
+      },
+      {
+        "crewmateTopic": "Lost and Found",
+        "spyTopic": "Shopping",
+        "crewmatePrompt": "Ask whose things are in a lost-and-found box.",
+        "spyPrompt": "Talk about buying or choosing objects in a shop.",
+        "explanation": "Crewmates used whose and ownership. The spy talked about shopping.",
+        "spyGuessOptions": [
+          "Lost and Found",
+          "Shopping"
+        ]
+      }
     ],
-    auctionSentences: [
-      { sentence:"This is my notebook.", isCorrect:true, explanation:"Use my before a noun." },
-      { sentence:"This notebook is mine.", isCorrect:true, explanation:"Use mine without a noun." },
-      { sentence:"That is hers bag.", isCorrect:false, explanation:"Say 'her bag' or 'the bag is hers'." },
-      { sentence:"Whose phone is this?", isCorrect:true, explanation:"Correct question with whose." },
-      { sentence:"It is your.", isCorrect:false, explanation:"Use yours without a noun." },
-      { sentence:"Their house is big.", isCorrect:true, explanation:"Use their before a noun." },
+    "auctionSentences": [
+      {
+        "sentence": "This is my notebook.",
+        "isCorrect": true,
+        "explanation": "Use my before a noun."
+      },
+      {
+        "sentence": "This notebook is mine.",
+        "isCorrect": true,
+        "explanation": "Use mine without a noun."
+      },
+      {
+        "sentence": "That is hers bag.",
+        "isCorrect": false,
+        "explanation": "Say 'her bag' or 'the bag is hers'."
+      },
+      {
+        "sentence": "Whose phone is this?",
+        "isCorrect": true,
+        "explanation": "Correct question with whose."
+      },
+      {
+        "sentence": "It is your.",
+        "isCorrect": false,
+        "explanation": "Use yours without a noun."
+      },
+      {
+        "sentence": "Their house is big.",
+        "isCorrect": true,
+        "explanation": "Use their before a noun."
+      },
+      {
+        "sentence": "The red jacket is hers.",
+        "isCorrect": true,
+        "explanation": "Correct possessive pronoun."
+      },
+      {
+        "sentence": "This is ours classroom.",
+        "isCorrect": false,
+        "explanation": "Say 'our classroom'."
+      },
+      {
+        "sentence": "Are these keys yours?",
+        "isCorrect": true,
+        "explanation": "Correct possessive pronoun."
+      },
+      {
+        "sentence": "His bag is under the table.",
+        "isCorrect": true,
+        "explanation": "His can be adjective or pronoun."
+      },
+      {
+        "sentence": "The books are their.",
+        "isCorrect": false,
+        "explanation": "Use theirs."
+      },
+      {
+        "sentence": "Whose is this pencil?",
+        "isCorrect": true,
+        "explanation": "Acceptable ownership question."
+      }
     ],
-    cardTasks: [
-      { task:"Ask your partner 'Whose ... is this?' with five classroom objects." },
-      { task:"Make sentences with my, your, his, her, our, and their." },
-      { task:"Make sentences with mine, yours, his, hers, ours, and theirs." },
-      { task:"Compare 'my book' and 'the book is mine' with examples." },
-      { task:"Pretend you found objects in class and ask who owns them." },
-      { task:"Describe three objects you own and three objects your partner owns." },
+    "cardTasks": [
+      {
+        "task": "Ask your partner 'Whose ... is this?' with five classroom objects."
+      },
+      {
+        "task": "Make sentences with my, your, his, her, our, and their."
+      },
+      {
+        "task": "Make sentences with mine, yours, his, hers, ours, and theirs."
+      },
+      {
+        "task": "Compare 'my book' and 'the book is mine' with examples."
+      },
+      {
+        "task": "Pretend you found objects in class and ask who owns them."
+      },
+      {
+        "task": "Describe three objects you own and three objects your partner owns."
+      },
+      {
+        "task": "Use whose to ask five questions."
+      },
+      {
+        "task": "Make a lost-and-found dialogue."
+      },
+      {
+        "task": "Correct three wrong possessive sentences."
+      },
+      {
+        "task": "Describe objects on your desk and who owns them."
+      },
+      {
+        "task": "Play a guessing game: Is it yours or mine?"
+      },
+      {
+        "task": "Explain the difference between her and hers."
+      }
     ],
-    hotPotatoPrompts: [
-      {prompt:"Before a noun: my or mine?", answer:"my"},
-      {prompt:"Without a noun: your or yours?", answer:"yours"},
-      {prompt:"Question word for ownership?", answer:"whose"},
-      {prompt:"Fix: 'This is mine bag.'", answer:"This is my bag."},
-      {prompt:"Possessive pronoun for 'her'?", answer:"hers"},
-      {prompt:"'This phone is ___.'", answer:"mine / yours / his / hers / ours / theirs"},
+    "hotPotatoPrompts": [
+      {
+        "prompt": "Before a noun: my or mine?",
+        "answer": "my"
+      },
+      {
+        "prompt": "Without a noun: my or mine?",
+        "answer": "mine"
+      },
+      {
+        "prompt": "Before a noun: your or yours?",
+        "answer": "your"
+      },
+      {
+        "prompt": "Without a noun: your or yours?",
+        "answer": "yours"
+      },
+      {
+        "prompt": "Question word for ownership?",
+        "answer": "whose"
+      },
+      {
+        "prompt": "Fix: 'This is mine bag.'",
+        "answer": "This is my bag."
+      },
+      {
+        "prompt": "Fix: 'It is your.'",
+        "answer": "It is yours."
+      },
+      {
+        "prompt": "Fix: 'That jacket is her.'",
+        "answer": "That jacket is hers."
+      },
+      {
+        "prompt": "Possessive pronoun for 'her'?",
+        "answer": "hers"
+      },
+      {
+        "prompt": "Possessive pronoun for 'our'?",
+        "answer": "ours"
+      },
+      {
+        "prompt": "Possessive pronoun for 'their'?",
+        "answer": "theirs"
+      },
+      {
+        "prompt": "'This phone is ___.'",
+        "answer": "mine / yours / his / hers / ours / theirs"
+      },
+      {
+        "prompt": "'This is ___ phone.'",
+        "answer": "my / your / his / her / our / their"
+      },
+      {
+        "prompt": "Ask a whose question.",
+        "answer": "(free answer)"
+      },
+      {
+        "prompt": "Say a sentence with 'his'.",
+        "answer": "(free answer)"
+      },
+      {
+        "prompt": "Say a sentence with 'hers'.",
+        "answer": "(free answer)"
+      },
+      {
+        "prompt": "Complete: The books are ___.",
+        "answer": "mine / yours / ours / theirs"
+      },
+      {
+        "prompt": "Complete: This is ___ pencil.",
+        "answer": "my / your / his / her etc."
+      },
+      {
+        "prompt": "What is the difference: my vs mine?",
+        "answer": "my + noun; mine without noun"
+      },
+      {
+        "prompt": "What is the difference: her vs hers?",
+        "answer": "her + noun; hers without noun"
+      }
     ],
-    minefieldGrid: {
-      topic: "Possessive Adjectives and Pronouns",
-      instructions: "Combine a person with an object and make a sentence using a possessive adjective or pronoun.",
-      colLabels: ["I", "you", "he", "she", "they"],
-      rowLabels: ["This is ... book.", "The phone is ...", "Whose bag is this?", "That is ... jacket.", "The keys are ..."],
+    "minefieldGrid": {
+      "topic": "Possessive Adjectives and Pronouns",
+      "instructions": "Combine a person with an object and make a sentence using a possessive adjective or pronoun.",
+      "colLabels": [
+        "I",
+        "you",
+        "he",
+        "she",
+        "they"
+      ],
+      "rowLabels": [
+        "This is ... book.",
+        "The phone is ...",
+        "Whose bag is this?",
+        "That is ... jacket.",
+        "The keys are ..."
+      ]
     },
-    hotSeatWords: [
-      {word:"my"},{word:"your"},{word:"his"},{word:"her"},{word:"their"},
-      {word:"mine"},{word:"yours"},{word:"hers"},{word:"ours"},{word:"whose"},
-    ],
+    "hotSeatWords": [
+      {
+        "word": "my"
+      },
+      {
+        "word": "your"
+      },
+      {
+        "word": "his"
+      },
+      {
+        "word": "her"
+      },
+      {
+        "word": "our"
+      },
+      {
+        "word": "their"
+      },
+      {
+        "word": "mine"
+      },
+      {
+        "word": "yours"
+      },
+      {
+        "word": "hers"
+      },
+      {
+        "word": "ours"
+      },
+      {
+        "word": "theirs"
+      },
+      {
+        "word": "whose"
+      },
+      {
+        "word": "owner"
+      },
+      {
+        "word": "phone"
+      },
+      {
+        "word": "bag"
+      },
+      {
+        "word": "keys"
+      },
+      {
+        "word": "notebook"
+      },
+      {
+        "word": "pencil"
+      },
+      {
+        "word": "jacket"
+      },
+      {
+        "word": "classroom"
+      }
+    ]
   },
 
 };
