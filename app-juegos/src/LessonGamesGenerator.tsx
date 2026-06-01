@@ -39,6 +39,8 @@ type TopicLibraryEntry = {
   hotPotatoPrompts?: QuestionData[];
 };
 
+type MinefieldGridData = NonNullable<TopicLibraryEntry["minefieldGrid"]>;
+
 const realTopicOptions = TOPIC_OPTIONS.filter(o => o.value !== "ai") as TopicOption[];
 
 const shuffle = <T,>(items: T[]) => {
@@ -97,18 +99,8 @@ const cardTasksAsQuestions = (tasks: { task: string }[]): QuestionData[] =>
     difficulty: "medium"
   }));
 
-const buildMixedMinefieldGrid = (entries: TopicLibraryEntry[], selectedTopics: string[]) => {
-  const grids = entries.map(entry => entry.minefieldGrid).filter((grid): grid is NonNullable<TopicLibraryEntry["minefieldGrid"]> => Boolean(grid));
-  if (grids.length === 0) return null;
-  if (grids.length === 1) return grids[0];
-
-  return {
-    topic: `Mixed: ${selectedTopics.map(getTopicLabel).join(" + ")}`,
-    instructions: "Mixed review grid. Combine any top prompt with any side prompt and answer using one of the selected lesson areas.",
-    colLabels: shuffle(grids.flatMap(grid => grid.colLabels)).slice(0, 5),
-    rowLabels: shuffle(grids.flatMap(grid => grid.rowLabels)).slice(0, 5),
-  };
-};
+const buildMinefieldGrids = (entries: TopicLibraryEntry[]) =>
+  entries.map(entry => entry.minefieldGrid).filter((grid): grid is MinefieldGridData => Boolean(grid));
 
 export default function LessonGamesGenerator() {
   const [screen, setScreen] = useState<"welcome" | "setup" | "game-select" | "game" | "results">("welcome");
@@ -126,7 +118,7 @@ export default function LessonGamesGenerator() {
   const [selectedGame, setSelectedGame] = useState<GameMode | null>(null);
   const [confetti, setConfetti] = useState(false);
   const [, setIsFullscreen] = useState(false);
-  const [minefieldGridData, setMinefieldGridData] = useState<NonNullable<TopicLibraryEntry["minefieldGrid"]> | null>(null);
+  const [minefieldGridData, setMinefieldGridData] = useState<MinefieldGridData | MinefieldGridData[] | null>(null);
   const appRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -198,14 +190,14 @@ export default function LessonGamesGenerator() {
       }
 
       if (mode.id === "minefield") {
-        const mixedGrid = buildMixedMinefieldGrid(selectedEntries, selectedTopics);
-        if (!mixedGrid) {
+        const minefieldGrids = buildMinefieldGrids(selectedEntries);
+        if (minefieldGrids.length === 0) {
           setLoadError("Minefield grid data not found for the selected topic.");
           setLoadingGame(false);
           return;
         }
 
-        setMinefieldGridData(mixedGrid);
+        setMinefieldGridData(minefieldGrids.length === 1 ? minefieldGrids[0] : minefieldGrids);
         setQuestions([]);
         setScreen("game");
         setLoadingGame(false);
