@@ -19,7 +19,7 @@ const createMines = () =>
 export function MinefieldGame({ gridData, teams, onUpdateScore, onEnd }: GameProps) {
   const grids = (Array.isArray(gridData) ? gridData : gridData ? [gridData] : []) as MinefieldGrid[];
   const [gridIndex, setGridIndex] = useState(0);
-  const [mines, setMines] = useState<Set<number>>(() => createMines());
+  const [mines] = useState<Set<number>>(() => createMines());
   const [revealed, setRevealed] = useState<Set<number>>(new Set());
   const [activeTeam, setActiveTeam] = useState(0);
   const [phase, setPhase] = useState<"intro" | "pick" | "speaking" | "judging">("intro");
@@ -57,9 +57,7 @@ export function MinefieldGame({ gridData, teams, onUpdateScore, onEnd }: GamePro
   };
 
   const advanceToNextTopic = () => {
-    setGridIndex(index => index + 1);
-    setMines(createMines());
-    setRevealed(new Set());
+    setGridIndex(index => (index + 1) % grids.length);
     setActiveTeam(0);
     setSelectedTile(null);
     setLastResult(null);
@@ -74,6 +72,7 @@ export function MinefieldGame({ gridData, teams, onUpdateScore, onEnd }: GamePro
     const isMine = mines.has(selectedTile);
     const { col, row } = getSentence(selectedTile);
     const nextRevealed = new Set([...revealed, selectedTile]);
+    const nextSafeRevealed = [...nextRevealed].filter(index => !mines.has(index)).length;
     const nextTeamIndex = (activeTeam + 1) % teams.length;
     const completedTopicRound = topicRotation && nextTeamIndex === 0;
 
@@ -90,12 +89,12 @@ export function MinefieldGame({ gridData, teams, onUpdateScore, onEnd }: GamePro
 
     setSelectedTile(null);
 
-    if (completedTopicRound) {
-      if (gridIndex >= grids.length - 1) {
-        onEnd();
-        return;
-      }
+    if (nextSafeRevealed >= totalSafe) {
+      onEnd();
+      return;
+    }
 
+    if (completedTopicRound) {
       advanceToNextTopic();
       return;
     }
@@ -103,7 +102,6 @@ export function MinefieldGame({ gridData, teams, onUpdateScore, onEnd }: GamePro
     setPhase("pick");
     setActiveTeam(nextTeamIndex);
 
-    if (!topicRotation && safeRevealed + (isMine ? 0 : 1) >= totalSafe) onEnd();
   };
 
   const TILE_H = 58;
@@ -172,15 +170,13 @@ export function MinefieldGame({ gridData, teams, onUpdateScore, onEnd }: GamePro
           {phase === "judging" && "Teacher - Judge the sentence"}
         </span>
         <div style={{ background: "rgba(255,255,255,0.2)", borderRadius: "20px", padding: "4px 12px", color: "white", fontWeight: "700", fontSize: "13px" }}>
-          {topicRotation ? `Team ${activeTeam + 1}/${teams.length} on this topic` : `${safeRevealed}/${totalSafe} safe | ${MINE_COUNT} mines`}
+          {topicRotation ? `Team ${activeTeam + 1}/${teams.length} | ${safeRevealed}/${totalSafe} safe` : `${safeRevealed}/${totalSafe} safe | ${MINE_COUNT} mines`}
         </div>
       </div>
 
-      {!topicRotation && (
-        <div style={{ height: "8px", background: "#E5E7EB", borderRadius: "4px", overflow: "hidden", marginBottom: "14px" }}>
-          <div style={{ height: "100%", width: `${(safeRevealed / totalSafe) * 100}%`, background: "#22C55E", borderRadius: "4px", transition: "width 0.4s ease" }} />
-        </div>
-      )}
+      <div style={{ height: "8px", background: "#E5E7EB", borderRadius: "4px", overflow: "hidden", marginBottom: "14px" }}>
+        <div style={{ height: "100%", width: `${(safeRevealed / totalSafe) * 100}%`, background: "#22C55E", borderRadius: "4px", transition: "width 0.4s ease" }} />
+      </div>
 
       {boom && lastResult && (
         <div style={{ textAlign: "center", background: "#7F1D1D", border: "3px solid #EF4444", borderRadius: "14px", padding: "14px", marginBottom: "14px", animation: "boomPulse 0.3s ease-out" }}>
