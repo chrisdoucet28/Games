@@ -21,20 +21,10 @@ type SpyRound = QuestionData & {
 export function SpyAmongUsGame({ questions, teams, onUpdateScore, onEnd }: GameProps) {
   const DISCUSS_SECONDS = 30;
   const isTwoPlayer = teams.length === 2;
-
-  const spyRotation = useRef<number[] | null>(null);
-  if (!spyRotation.current) {
-    const rotation: number[] = [];
-    const cycles = Math.ceil((questions.length + teams.length) / teams.length);
-    for (let c = 0; c < cycles; c++) {
-      const cycle = [...Array(teams.length).keys()].sort(() => Math.random() - 0.5);
-      rotation.push(...cycle);
-    }
-    spyRotation.current = rotation;
-  }
+  const randomTeamIndex = () => Math.floor(Math.random() * Math.max(teams.length, 1));
 
   const [ri, setRi] = useState(0);
-  const [spyTeamIdx, setSpyTeamIdx] = useState(() => spyRotation.current![0]);
+  const [spyTeamIdx, setSpyTeamIdx] = useState(randomTeamIndex);
   const [phase, setPhase] = useState<Phase>("intro");
   const [peekIdx, setPeekIdx] = useState(0);
   const [revealed, setRevealed] = useState(false);
@@ -166,7 +156,7 @@ export function SpyAmongUsGame({ questions, teams, onUpdateScore, onEnd }: GameP
     }
 
     setRi((value) => value + 1);
-    setSpyTeamIdx(spyRotation.current![(ri + 1) % spyRotation.current!.length]);
+    setSpyTeamIdx(randomTeamIndex());
     setPhase("peek");
     setPeekIdx(0);
     setRevealed(false);
