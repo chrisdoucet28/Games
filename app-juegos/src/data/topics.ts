@@ -340,7 +340,7 @@ export const TOPIC_LIBRARY = {
     minefieldGrid: {
       topic: "Phrasal Verbs",
       instructions: "Combine the subject (top) with the phrasal verb prompt (side) to make a full, natural sentence.",
-      colLabels: ["I always …", "She needs to …", "They decided to …", "Can you …", "He finally …"],
+      colLabels: ["I always …", "She needs to …", "They decided to …", "Can you …", "He'll probably …"],
       rowLabels: ["… give up …", "… look after …", "… find out …", "… put up with …", "… come across …"],
     },
     hotSeatWords: [
@@ -849,9 +849,9 @@ export const TOPIC_LIBRARY = {
     ],
     minefieldGrid: {
       topic: "So do I / Neither do I",
-      instructions: "Students combine the statement (top) with the response starter (side) to make a full agreement sentence — then complete it naturally.",
-      colLabels: ["I love jazz.", "I'm not tired.", "She can swim.", "They haven't eaten.", "I didn't go."],
-      rowLabels: ["So …", "Neither …", "So … either.", "Nor …", "And … too."],
+      instructions: "Combine the connector (top) with the statement and response (side). Fill in the blank with the auxiliary that agrees with the statement's own verb and polarity (so do/am/can/have/did I... or neither do/am/can/have/did I...).",
+      colLabels: ["Listen,", "Honestly,", "You know,", "Well,", "Actually,"],
+      rowLabels: ["I love jazz. So ___ (do) I!", "I'm not tired. Neither ___ (am) I!", "She can swim. So ___ (can) I!", "They haven't eaten. Neither ___ (have) I!", "I didn't go. Neither ___ (did) I!"],
     },
     hotSeatWords: [
       {word:"agreement"},{word:"same"},{word:"both"},{word:"also"},
@@ -1360,9 +1360,9 @@ export const TOPIC_LIBRARY = {
     ],
     minefieldGrid: {
       topic: "Future in the Past",
-      instructions: "Students combine the past situation (top) with the future-in-past starter (side) to make a full sentence — then complete it naturally.",
-      colLabels: ["She looked at the map and …", "He packed his bags because …", "They sat down nervously because …", "I checked the weather since …", "We booked the tickets as …"],
-      rowLabels: ["… was going to …", "… would …", "… were about to …", "… was to …", "… thought … would …"],
+      instructions: "Combine the subject (top) with the future-in-the-past template (side) - choosing was or were correctly for your subject - to build a full sentence, then finish it with your own idea.",
+      colLabels: ["I", "She", "He", "They", "We"],
+      rowLabels: ["___ was/were going to ___, but then everything changed.", "___ was/were about to ___ when the phone rang.", "___ thought ___ would ___ soon.", "___ was/were supposed to ___ that day.", "___ knew ___ would never ___."],
     },
     hotSeatWords: [
       {word:"plan"},{word:"dream"},{word:"hope"},{word:"prediction"},
@@ -1462,9 +1462,9 @@ export const TOPIC_LIBRARY = {
     ],
     minefieldGrid: {
       topic: "Relative Clauses",
-      instructions: "Students combine the noun (top) with the relative pronoun starter (side) to make a full relative clause sentence — then complete it with their own idea.",
-      colLabels: ["The city …", "My neighbour …", "The moment …", "The reason …", "A restaurant …"],
-      rowLabels: ["… who …", "… which/that …", "… where …", "… when …", "… whose …"],
+      instructions: "Combine the sentence starter (top) with the relative clause template (side) - the correct relative pronoun is already built in - to build a full sentence, then finish it with your own idea.",
+      colLabels: ["I know", "Tell me about", "This is", "Can you describe", "Do you remember"],
+      rowLabels: ["a person who ___.", "a place where ___.", "a time when ___.", "something which/that ___.", "a person whose ___."],
     },
     hotSeatWords: [
       {word:"who"},{word:"which"},{word:"whose"},{word:"where"},
@@ -1564,9 +1564,9 @@ export const TOPIC_LIBRARY = {
     ],
     minefieldGrid: {
       topic: "Adverbs",
-      instructions: "Students combine the subject/verb starter (top) with the adverb (side) to make a natural full sentence — then finish it with their own detail.",
-      colLabels: ["She speaks English …", "He finished the test …", "They drive …", "I work …", "She handled it …"],
-      rowLabels: ["… fluently / beautifully …", "… quickly / carefully …", "… incredibly well …", "… barely / hardly …", "… confidently / quietly …"],
+      instructions: "Combine the subject (top) with the adverb template (side) - add your own verb - to make a natural sentence describing how someone does something.",
+      colLabels: ["I", "She", "He", "They", "We"],
+      rowLabels: ["___ ___ fluently.", "___ ___ quickly and carefully.", "___ ___ incredibly well.", "___ ___ confidently.", "___ ___ quietly."],
     },
     hotSeatWords: [
       {word:"quickly"},{word:"slowly"},{word:"quietly"},{word:"loudly"},
@@ -1871,9 +1871,9 @@ export const TOPIC_LIBRARY = {
     ],
     minefieldGrid: {
       topic: "Giving Opinions",
-      instructions: "Students combine the topic (top) with the opinion phrase (side) to make a full, natural opinion statement — completing it with their own view.",
-      colLabels: ["… social media …", "… working from home …", "… learning English …", "… city life …", "… technology in schools …"],
-      rowLabels: ["In my opinion, …", "As far as I'm concerned, …", "Personally speaking, …", "I tend to think that …", "From my point of view, …"],
+      instructions: "Combine the topic (top) with the opinion phrase template (side) - the topic fills the blank - to make a full, natural opinion statement, then complete it with your own view.",
+      colLabels: ["social media", "working from home", "learning English", "city life", "technology in schools"],
+      rowLabels: ["In my opinion, ___ is/are ___.", "As far as I'm concerned, ___ ___.", "Personally speaking, ___ ___.", "I tend to think that ___ ___.", "From my point of view, ___ ___."],
     },
     hotSeatWords: [
       {word:"opinion"},{word:"view"},{word:"belief"},{word:"idea"},
@@ -1975,9 +1975,9 @@ export const TOPIC_LIBRARY = {
     ],
     minefieldGrid: {
       topic: "Greetings & Introductions",
-      instructions: "Students combine the greeting situation (top) with the phrase starter (side) to make a natural introduction — then complete it with their own details.",
-      colLabels: ["Meeting someone new at school", "Seeing a friend in the morning", "Meeting your teacher", "Talking to someone at a party", "Saying goodbye to a classmate"],
-      rowLabels: ["Hi! My name is …", "Nice to meet you! I'm …", "Good morning! How …", "I'm from … and I'm …", "See you …! Goodbye!"],
+      instructions: "Combine the greeting (top) with the phrase template (side) to build a natural introduction, then complete it with your own details.",
+      colLabels: ["Hi!", "Good morning!", "Hello there!", "Excuse me,", "Hey!"],
+      rowLabels: ["My name is ___ and I'm from ___.", "I'm ___ years old and I live in ___.", "I study at ___ and I like ___.", "What's your ___?", "See you ___! Take care!"],
     },
     hotSeatWords: [
       {word:"hello"},{word:"goodbye"},{word:"name"},{word:"age"},
@@ -2077,9 +2077,9 @@ export const TOPIC_LIBRARY = {
     ],
     minefieldGrid: {
       topic: "Introducing Others & Possessives",
-      instructions: "Students combine the person (top) with the introduction phrase (side) — completing the sentence with real or imaginary details.",
-      colLabels: ["… my friend (female) …", "… my brother …", "… my teacher (female) …", "… my classmate (male) …", "… my parents …"],
-      rowLabels: ["This is … Her/His name is …", "He/She is from …", "His/Her name is … and he/she is …", "These are … Their names are …", "Meet …! He/She is my …"],
+      instructions: "Students combine the person (top) with the description (side) to introduce someone — completing the sentence with real or imaginary details and possessive words like his/her.",
+      colLabels: ["My friend …", "My brother …", "My teacher …", "My classmate …", "My cousin …"],
+      rowLabels: ["… is from …", "… is … years old.", "… has … hair and … eyes.", "… is really … and …", "… likes … but doesn't like …"],
     },
     hotSeatWords: [
       {word:"family"},{word:"friend"},{word:"brother"},{word:"sister"},
@@ -2383,9 +2383,9 @@ export const TOPIC_LIBRARY = {
     ],
     minefieldGrid: {
       topic: "What do you do? + Professions",
-      instructions: "Students combine the question (top) with the job or workplace (side) to give a full, natural answer — adding real or imaginary details.",
-      colLabels: ["What do you do?", "Where does she work?", "What does he do?", "Is she a…?", "What do they do?"],
-      rowLabels: ["I'm a / an …", "She works in a …", "He is a … He …", "Yes, she is a … She …", "They are … They work …"],
+      instructions: "Students combine the subject (top) with the profession phrase (side) to make a full sentence — adding a real or imaginary job and details.",
+      colLabels: ["I …", "She …", "He …", "We …", "They …"],
+      rowLabels: ["… am/is/are a …", "… work/works as a …", "… work/works in a … every day.", "… don't/doesn't work as a … — … am/is/are a …", "… want/wants to be a … in the future."],
     },
     hotSeatWords: [
       {word:"teacher"},{word:"doctor"},{word:"nurse"},{word:"chef"},
@@ -2587,9 +2587,9 @@ export const TOPIC_LIBRARY = {
     ],
     minefieldGrid: {
       topic: "Personality Adjectives",
-      instructions: "Students combine the subject (top) with the personality phrase (side) to make a full sentence — completing it with a real or imaginary person and adjective.",
+      instructions: "Students combine the subject (top) with the personality phrase (side) to make a full sentence — completing it with a real or imaginary person and adjective. Use 'am' for I and 'is' for other subjects.",
       colLabels: ["My best friend …", "My teacher …", "My brother/sister …", "A famous person …", "I …"],
-      rowLabels: ["… is very … because …", "What is … like? He/She is …", "… is not very … but …", "… is really … and …", "He/She looks … but he/she is …"],
+      rowLabels: ["… am/is very … because …", "… can be … at first, but …", "… am/is not very … but …", "… am/is really … and …", "… look(s) … but am/is actually …"],
     },
     hotSeatWords: [
       {word:"friendly"},{word:"shy"},{word:"funny"},{word:"kind"},
@@ -2895,7 +2895,7 @@ export const TOPIC_LIBRARY = {
       topic: "I am wearing… (Clothes)",
       instructions: "Students combine the person (top) with the sentence frame (side) to describe what someone is wearing right now — adding colour and clothing items.",
       colLabels: ["I …", "She …", "He …", "My friend …", "The teacher …"],
-      rowLabels: ["… am/is wearing a … and …", "… isn't/aren't wearing …", "What … wearing? He/She is …", "… am/is wearing … colour …", "… look(s) great in …"],
+      rowLabels: ["… am/is wearing a … and …", "… isn't/aren't wearing …", "… am/is wearing … today because …", "… am/is wearing … colour …", "… look(s) great in …"],
     },
     hotSeatWords: [
       {word:"T-shirt"},{word:"jeans"},{word:"dress"},{word:"skirt"},
@@ -2996,9 +2996,9 @@ export const TOPIC_LIBRARY = {
     ],
     minefieldGrid: {
       topic: "Working from Home",
-      instructions: "Combine the subject (top) with the phrase (side) to make a sentence about working from home — then add your opinion.",
-      colLabels: ["Working from home…", "Remote workers…", "The biggest challenge…", "One advantage is that…", "I think companies should…"],
-      rowLabels: ["… saves time because…", "… can be difficult when…", "… is better than the office because…", "… requires you to…", "… has changed since…"],
+      instructions: "Students combine the sentence starter (top) with the statement (side) to build a full opinion sentence about working from home — then add their own reason or example.",
+      colLabels: ["I think that…", "In my experience,…", "One big advantage is that…", "A common challenge is that…", "Compared to the office,…"],
+      rowLabels: ["working from home saves time because …", "remote work can be difficult when …", "working from home is better because …", "working from home requires you to …", "things have changed a lot since …"],
     },
     hotSeatWords: [
       {word:"commute"},{word:"remote"},{word:"flexible"},{word:"productive"},
@@ -3099,7 +3099,7 @@ export const TOPIC_LIBRARY = {
     minefieldGrid: {
       topic: "Learning a Foreign Language",
       instructions: "Combine the subject (top) with the phrase (side) to make a sentence about language learning — then add your opinion or experience.",
-      colLabels: ["Learning a language…", "The best way to practise…", "Making mistakes…", "Living abroad…", "I think bilingual people…"],
+      colLabels: ["Learning a language…", "The best way to practise…", "Making mistakes…", "Living abroad…", "Being bilingual…"],
       rowLabels: ["… is difficult because…", "… helps you…", "… is important because…", "… is easier if you…", "… can improve your career because…"],
     },
     hotSeatWords: [
@@ -3200,9 +3200,9 @@ export const TOPIC_LIBRARY = {
     ],
     minefieldGrid: {
       topic: "Education Systems",
-      instructions: "Combine the subject (top) with the phrase (side) to make a sentence about education — then add your opinion or experience.",
+      instructions: "Combine the subject (top) with the phrase (side) to make a sentence about education — then add your opinion or experience. Choose the correct verb form (singular or plural) to match your subject.",
       colLabels: ["Exams…", "Private schools…", "Teachers…", "University…", "The education system in my country…"],
-      rowLabels: ["… are important because…", "… should be changed because…", "… help students by…", "… are better than before because…", "… need to improve in terms of…"],
+      rowLabels: ["… is/are important because…", "… should be changed because…", "… helps/help students by…", "… is/are better than before because…", "… needs/need to improve in terms of…"],
     },
     hotSeatWords: [
       {word:"exam"},{word:"homework"},{word:"curriculum"},{word:"scholarship"},
@@ -3302,9 +3302,9 @@ export const TOPIC_LIBRARY = {
     ],
     minefieldGrid: {
       topic: "Career Choices",
-      instructions: "Combine the subject (top) with the phrase (side) to make a sentence about careers — then add your opinion or experience.",
-      colLabels: ["Choosing a career…", "Job satisfaction…", "Young people today…", "I think a good job should…", "Salary…"],
-      rowLabels: ["… is important because…", "… depends on your…", "… is harder than before because…", "… should be based on…", "… can affect your wellbeing because…"],
+      instructions: "Combine the subject (top) with the phrase (side) to make a sentence about careers — then add your opinion or experience. Choose the correct verb form (singular or plural) to match your subject.",
+      colLabels: ["Choosing a career…", "Job satisfaction…", "Young people today…", "A good job…", "Salary…"],
+      rowLabels: ["… is/are important because…", "… depends/depend on…", "… is/are harder than before because…", "… should be based on…", "… can affect your wellbeing because…"],
     },
     hotSeatWords: [
       {word:"salary"},{word:"passion"},{word:"career"},{word:"internship"},
@@ -3404,9 +3404,9 @@ export const TOPIC_LIBRARY = {
     ],
     minefieldGrid: {
       topic: "Work-Life Balance",
-      instructions: "Combine the subject (top) with the phrase (side) to make a sentence about work-life balance — then add your own view.",
-      colLabels: ["A good work-life balance…", "Burnout…", "Flexible working hours…", "In my country, people…", "I think companies should…"],
-      rowLabels: ["… is important because…", "… can happen when…", "… help workers by…", "… work too much because…", "… give employees more…"],
+      instructions: "Combine the subject (top) with the phrase (side) to make a sentence about work-life balance — then add your own view. Choose the correct verb form (singular or plural) to match your subject.",
+      colLabels: ["A good work-life balance…", "Burnout…", "Flexible working hours…", "In my country, people…", "Companies…"],
+      rowLabels: ["… is/are important because…", "… can happen when…", "… helps/help workers by…", "… works/work too much because…", "… gives/give employees more…"],
     },
     hotSeatWords: [
       {word:"burnout"},{word:"flexible"},{word:"boundary"},{word:"stress"},
@@ -3507,7 +3507,7 @@ export const TOPIC_LIBRARY = {
     minefieldGrid: {
       topic: "Success and Motivation",
       instructions: "Combine the subject (top) with the phrase (side) to make a sentence about success and motivation — then add your view.",
-      colLabels: ["Success…", "Motivation…", "Failure…", "I feel most motivated when…", "A growth mindset means…"],
+      colLabels: ["Success…", "Motivation…", "Failure…", "Confidence…", "A growth mindset…"],
       rowLabels: ["… means different things because…", "… can disappear when…", "… is important because…", "… comes from…", "… helps you succeed by…"],
     },
     hotSeatWords: [
@@ -3609,7 +3609,7 @@ export const TOPIC_LIBRARY = {
     minefieldGrid: {
       topic: "Time Management",
       instructions: "Combine the subject (top) with the phrase (side) to make a sentence about time management — then add your experience or opinion.",
-      colLabels: ["Good time management…", "Procrastination…", "A to-do list…", "I find it hardest to focus when…", "Saying no to people…"],
+      colLabels: ["Good time management…", "Procrastination…", "A to-do list…", "Multitasking…", "Saying no to people…"],
       rowLabels: ["… helps you by…", "… happens when…", "… is useful because…", "… wastes time because…", "… is difficult because…"],
     },
     hotSeatWords: [
@@ -3711,8 +3711,8 @@ export const TOPIC_LIBRARY = {
     minefieldGrid: {
       topic: "Free Time and Hobbies",
       instructions: "Combine the subject (top) with the phrase (side) to make a sentence about free time and hobbies — then add your personal view.",
-      colLabels: ["My favourite hobby…", "People who have hobbies…", "Spending free time well…", "I think outdoor activities…", "In my free time I usually…"],
-      rowLabels: ["… helps me because…", "… are happier because…", "… is important because…", "… are better because…", "… but I'd like to try…"],
+      colLabels: ["My favourite hobby…", "Having a hobby…", "Spending free time outdoors…", "Trying a new activity…", "Relaxing after a busy day…"],
+      rowLabels: ["… helps me because…", "… makes people happier because…", "… is important because…", "… is a great way to spend free time because…", "… is something I'd recommend because…"],
     },
     hotSeatWords: [
       {word:"relaxing"},{word:"creative"},{word:"outdoor"},{word:"sport"},
@@ -3813,8 +3813,8 @@ export const TOPIC_LIBRARY = {
     minefieldGrid: {
       topic: "Social Media",
       instructions: "Combine the subject (top) with the phrase (side) to make a sentence about social media — then add your opinion or experience.",
-      colLabels: ["Social media…", "Young people today…", "Influencers…", "Governments should…", "I think spending too much time online…"],
-      rowLabels: ["… can be dangerous because…", "… use social media to…", "… have an effect because…", "… regulate social media because…", "… affects people by…"],
+      colLabels: ["Social media…", "Young people today…", "Influencers…", "Governments…", "Spending too much time online…"],
+      rowLabels: ["… can be dangerous because…", "… can be used to…", "… can have a big effect because…", "… should face more regulation because…", "… can affect people by…"],
     },
     hotSeatWords: [
       {word:"influencer"},{word:"viral"},{word:"algorithm"},{word:"privacy"},
@@ -3915,8 +3915,8 @@ export const TOPIC_LIBRARY = {
     minefieldGrid: {
       topic: "Causative Verbs",
       instructions: "Combine the subject (top) with the causative structure (side) to make a full, natural sentence — add your own details.",
-      colLabels: ["I need to …", "She has already …", "My parents never …", "The company is …", "We should …"],
-      rowLabels: ["… have/get … repaired.", "… make us …", "… let me …", "… get someone to …", "… have … done by …"],
+      colLabels: ["I need to …", "We should …", "You have to …", "They want to …", "I'd like to …"],
+      rowLabels: ["… have/get … repaired.", "… make someone …", "… let someone …", "… get someone to …", "… have … done by …"],
     },
     hotSeatWords: [
       {word:"repaired"},{word:"cut"},{word:"printed"},{word:"cleaned"},
@@ -4018,7 +4018,7 @@ export const TOPIC_LIBRARY = {
       topic: "Used To / Be Used To / Get Used To",
       instructions: "Combine the subject (top) with the structure (side) to make a full, natural sentence. Make sure to use the correct form after each structure.",
       colLabels: ["I …", "She …", "When I was a child, …", "Living abroad, …", "New students …"],
-      rowLabels: ["… used to …", "… am/is/are used to …ing", "… get/got used to …ing", "… didn't use to …", "… have got used to …ing"],
+      rowLabels: ["… used to …", "… am/is/are used to …ing", "… get/gets/got used to …ing", "… didn't use to …", "… have/has got used to …ing"],
     },
     hotSeatWords: [
       {word:"habit"},{word:"routine"},{word:"adjust"},{word:"familiar"},
@@ -4118,9 +4118,9 @@ export const TOPIC_LIBRARY = {
     ],
     minefieldGrid: {
       topic: "Direct & Reported Speech",
-      instructions: "Convert the direct speech (top) using the reporting verb and structure (side) to make a full reported speech sentence.",
-      colLabels: ["'I'm tired.'", "'Will you help?'", "'We have finished.'", "'Don't be late!'", "'Where do you live?'"],
-      rowLabels: ["She said (that) …", "He asked if/whether …", "They told me (that) …", "She asked me not to …", "He asked where …"],
+      instructions: "Combine the subject (top) with the reporting structure (side), filling the blank with your own reported content, to make a complete reported speech sentence.",
+      colLabels: ["She", "He", "They", "My teacher", "The manager"],
+      rowLabels: ["said (that) ___.", "asked if/whether ___.", "told me not to ___.", "asked where ___.", "wondered why ___."],
     },
     hotSeatWords: [
       {word:"backshift"},{word:"say"},{word:"tell"},{word:"ask"},
@@ -4324,7 +4324,7 @@ export const TOPIC_LIBRARY = {
       topic: "Reading",
       instructions: "Combine the subject (top) with the phrase (side) to make a sentence about reading — then add your own opinion or experience.",
       colLabels: ["Reading fiction…", "People who read a lot…", "E-books and digital reading…", "Reading as a child…", "A good book…"],
-      rowLabels: ["… helps you because…", "… tend to be better at…", "… is better/worse because…", "… is important because…", "… makes you feel…"],
+      rowLabels: ["… can help you because…", "… can make you feel…", "… can be better or worse because…", "… can be important because…", "… can change the way you think by…"],
     },
     hotSeatWords: [
       {word:"novel"},{word:"plot"},{word:"character"},{word:"setting"},
@@ -4426,7 +4426,7 @@ export const TOPIC_LIBRARY = {
       topic: "Cultural Differences",
       instructions: "Combine the subject (top) with the phrase (side) to make a sentence about cultural differences — then add your own experience or opinion.",
       colLabels: ["Cultural differences…", "Living in another country…", "Stereotypes about cultures…", "Globalisation…", "Being open to other cultures…"],
-      rowLabels: ["… can cause problems when…", "… teaches you to…", "… are harmful because…", "… has led to…", "… is important because…"],
+      rowLabels: ["… can cause problems when…", "… can teach you to…", "… can be harmful because…", "… can lead to…", "… can be important because…"],
     },
     hotSeatWords: [
       {word:"culture shock"},{word:"etiquette"},{word:"gesture"},{word:"stereotype"},
@@ -4527,8 +4527,8 @@ export const TOPIC_LIBRARY = {
     minefieldGrid: {
       topic: "Climate Change",
       instructions: "Combine the subject (top) with the phrase (side) to make a sentence about climate change — then add your own view or evidence.",
-      colLabels: ["Governments…", "Individuals can…", "Renewable energy…", "The effects of climate change…", "Young people today…"],
-      rowLabels: ["… must act now because…", "… help by…", "… is important because…", "… are already visible in…", "… feel… about the future because…"],
+      colLabels: ["Governments…", "Individuals…", "Renewable energy…", "The effects of climate change…", "Young people today…"],
+      rowLabels: ["… must act now because…", "… can help by…", "… can be important because…", "… can already be seen in…", "… can worry people about the future because…"],
     },
     hotSeatWords: [
       {word:"greenhouse gas"},{word:"fossil fuels"},{word:"emissions"},{word:"renewable energy"},
@@ -4630,7 +4630,7 @@ export const TOPIC_LIBRARY = {
       topic: "City Life vs. Country Life",
       instructions: "Combine the subject (top) with the phrase (side) to make a sentence about city or country life — then add your own view.",
       colLabels: ["Living in a city…", "The countryside…", "Remote working…", "Young people…", "Families with children…"],
-      rowLabels: ["… offers more… because…", "… is better for… because…", "… has changed… by…", "… often prefer… because…", "… tend to choose… because…"],
+      rowLabels: ["… can offer more opportunities because…", "… can be better for people because…", "… can change the way we live by…", "… can often be the better choice because…", "… can be a difficult decision because…"],
     },
     hotSeatWords: [
       {word:"urbanisation"},{word:"commute"},{word:"pollution"},{word:"community"},
@@ -4732,7 +4732,7 @@ export const TOPIC_LIBRARY = {
       topic: "Fast Fashion",
       instructions: "Combine the subject (top) with the phrase (side) to make a sentence about fast fashion — then add your own view or evidence.",
       colLabels: ["Fast fashion brands…", "Consumers who buy fast fashion…", "Sustainable fashion…", "The fashion industry…", "Buying second-hand clothes…"],
-      rowLabels: ["… damage the environment by…", "… often don't think about…", "… is better because…", "… is responsible for…", "… is a good choice because…"],
+      rowLabels: ["… can damage the environment by…", "… can make people think about…", "… can be a good choice because…", "… can be responsible for…", "… can help reduce…"],
     },
     hotSeatWords: [
       {word:"fast fashion"},{word:"sustainable"},{word:"ethical"},{word:"greenwashing"},
@@ -4832,9 +4832,9 @@ export const TOPIC_LIBRARY = {
     ],
     minefieldGrid: {
       topic: "Inversion",
-      instructions: "Combine the inverted opener (top) with the continuation (side) to make a complete, emphatic sentence.",
-      colLabels: ["Never have I…", "Not only did she…", "Hardly had we…", "So great was the…", "Under no circumstances…"],
-      rowLabels: ["… seen such…", "… win, but also…", "… arrived when…", "… that we had to…", "… should you…"],
+      instructions: "Combine the inverted opener (top) with the continuation (side) to make a complete, emphatic inverted sentence — extend it with your own words if you like.",
+      colLabels: ["Not only did I…", "Rarely did she…", "Seldom did they…", "Never once did we…", "Only then did he…"],
+      rowLabels: ["… realize the truth.", "… expect such a result.", "… manage to finish on time.", "… feel this way before.", "… agree to the plan."],
     },
     hotSeatWords: [
       {word:"never"},{word:"rarely"},{word:"seldom"},{word:"hardly"},
@@ -4934,9 +4934,9 @@ export const TOPIC_LIBRARY = {
     ],
     minefieldGrid: {
       topic: "Mixed Conditionals",
-      instructions: "Combine the if-clause (top) with the result clause (side) — decide which time frame the result refers to and complete the sentence.",
+      instructions: "Combine the if-clause (top) with the result-clause template (side), filling the blanks to match the if-clause's subject and time frame, to complete the mixed conditional sentence.",
       colLabels: ["If I had studied medicine,…", "If she weren't so shy,…", "If they had invested earlier,…", "If he hadn't been so reckless,…", "If we hadn't moved cities,…"],
-      rowLabels: ["… I/she/they would be … now.", "… I/she/they would have … by now.", "… my/her/their life would be …", "… things would be very different …", "… we wouldn't be facing … today."],
+      rowLabels: ["… ___ would be ___ now.", "… ___ would have ___ by now.", "… ___ life would be ___.", "… things would be very different for ___.", "… ___ wouldn't be ___ today."],
     },
     hotSeatWords: [
       {word:"consequence"},{word:"hypothetical"},{word:"regret"},{word:"alternative"},
@@ -5036,9 +5036,9 @@ export const TOPIC_LIBRARY = {
     ],
     minefieldGrid: {
       topic: "Advanced Vocabulary & Collocation",
-      instructions: "Combine the verb/adjective (top) with the noun it collocates with (side) to make a natural, advanced phrase — then use it in a sentence.",
-      colLabels: ["raise …", "draw …", "far-reaching …", "shed … on", "meet …"],
-      rowLabels: ["… awareness", "… conclusions", "… consequences", "… light", "… expectations"],
+      instructions: "Combine the subject (top) with the sentence starter (side), completing the blank with extra detail, to practise the advanced collocation embedded in the sentence.",
+      colLabels: ["The new policy", "This report", "Her decision", "The scandal", "His actions"],
+      rowLabels: ["will raise awareness about ___.", "helped people draw conclusions about ___.", "had far-reaching consequences for ___.", "shed light on ___.", "didn't meet ___'s expectations."],
     },
     hotSeatWords: [
       {word:"invaluable"},{word:"groundbreaking"},{word:"far-reaching"},{word:"compelling"},
@@ -5140,7 +5140,7 @@ export const TOPIC_LIBRARY = {
       topic: "Globalisation",
       instructions: "Combine the subject (top) with the phrase (side) to make an analytical sentence about globalisation — add evidence or your own view.",
       colLabels: ["Globalisation…", "Multinational corporations…", "Cultural homogenisation…", "Free trade agreements…", "Brain drain…"],
-      rowLabels: ["… has led to… by…", "… exploit(s)… because…", "… threatens… by…", "… benefit(s) some but…", "… is caused by… and results in…"],
+      rowLabels: ["… can lead to… by…", "… can exploit… because…", "… can threaten… by…", "… can benefit some people but…", "… can be linked to… and can result in…"],
     },
     hotSeatWords: [
       {word:"globalisation"},{word:"multinational"},{word:"outsourcing"},{word:"supply chain"},
@@ -5241,8 +5241,8 @@ export const TOPIC_LIBRARY = {
     minefieldGrid: {
       topic: "Technology in Daily Life",
       instructions: "Combine the subject (top) with the phrase (side) to make a sentence about technology — then add your experience or view.",
-      colLabels: ["Smartphones…", "Artificial intelligence…", "In the future, technology…", "The biggest risk of technology is…", "Young people today…"],
-      rowLabels: ["… have changed daily life by…", "… will affect jobs because…", "… will make life easier by…", "… affects privacy because…", "… use technology to…"],
+      colLabels: ["Smartphones…", "Artificial intelligence…", "Technology…", "Social media…", "Young people today…"],
+      rowLabels: ["… can change daily life by…", "… will affect jobs because…", "… can make life easier by…", "… can affect people's privacy because…", "… can help people to…"],
     },
     hotSeatWords: [
       {word:"smartphone"},{word:"artificial intelligence"},{word:"robot"},{word:"internet"},
@@ -5445,9 +5445,9 @@ export const TOPIC_LIBRARY = {
     ],
     minefieldGrid: {
       topic: "There is / There are",
-      instructions: "Combine the start (top) with the noun phrase (side) to make a complete, correct sentence.",
-      colLabels: ["There is …", "There are …", "There isn't …", "There aren't any …", "Is there …?"],
-      rowLabels: ["… a park near …", "… two shops …", "… any milk …", "… lots of …", "… a good … ?"],
+      instructions: "Combine the start (top) with the location phrase (side), adding a noun that matches (singular for is/isn't, plural for are/aren't), to make a complete, correct sentence.",
+      colLabels: ["There is…", "There are…", "There isn't…", "There aren't any…", "Is/Are there…?"],
+      rowLabels: ["… near here.", "… in my bag.", "… on the table.", "… in this town.", "… at school."],
     },
     hotSeatWords: [
       {word:"there is"},{word:"there are"},{word:"there was"},{word:"there were"},
@@ -5549,7 +5549,7 @@ export const TOPIC_LIBRARY = {
       topic: "Daily Life & Routines",
       instructions: "Combine the subject (top) with the time/activity phrase (side) to make a complete sentence about a daily routine.",
       colLabels: ["I …", "She …", "My brother …", "We …", "Most people …"],
-      rowLabels: ["… wake up at …", "… usually … in the morning.", "… never … before …", "… always … after …", "… go to bed at …"],
+      rowLabels: ["… wake(s) up at …", "… usually … in the morning.", "… never … before …", "… always … after …", "… go(es) to bed at …"],
     },
     hotSeatWords: [
       {word:"routine"},{word:"alarm"},{word:"commute"},{word:"breakfast"},
@@ -5751,9 +5751,9 @@ export const TOPIC_LIBRARY = {
     ],
     minefieldGrid: {
       topic: "Second Conditional",
-      instructions: "Combine the if-clause (top) with the result starter (side) to make a complete second conditional sentence.",
+      instructions: "Combine the if-clause (top) with the result starter (side), adding the matching subject pronoun, to make a complete second conditional sentence.",
       colLabels: ["If I had more money,…", "If she were more confident,…", "If we lived in the city,…", "If he didn't have a job,…", "If you could fly,…"],
-      rowLabels: ["… I/she/we would …", "… I/she/we wouldn't …", "… I/she/we could …", "… what would you/she …?", "… life would be …"],
+      rowLabels: ["… would …", "… wouldn't …", "… could …", "what would … do?", "… life would be …"],
     },
     hotSeatWords: [
       {word:"hypothetical"},{word:"imaginary"},{word:"unreal"},{word:"would"},
@@ -5955,9 +5955,9 @@ export const TOPIC_LIBRARY = {
     ],
     minefieldGrid: {
       topic: "Health & the Body",
-      instructions: "Combine the health topic starter (top) with the phrase (side) to make a complete sentence.",
-      colLabels: ["I have a …", "She twisted her …", "The doctor told me to …", "He goes to the gym to …", "I feel much better since …"],
-      rowLabels: ["… terrible …", "… ankle during …", "… rest and …", "… stay fit and …", "… I started …"],
+      instructions: "Combine the subject (top) with the health phrase (side), choosing the matching verb form, to make a complete sentence about health or the body.",
+      colLabels: ["I…", "She…", "He…", "We…", "My friend…"],
+      rowLabels: ["… have/has a … .", "… twisted … ankle while … .", "… said to rest and … .", "… go(es) to the gym to … .", "… feel/feels much better since … ."],
     },
     hotSeatWords: [
       {word:"headache"},{word:"stomachache"},{word:"sore throat"},{word:"fever"},
@@ -6057,9 +6057,9 @@ export const TOPIC_LIBRARY = {
     ],
     minefieldGrid: {
       topic: "Travel & Holidays",
-      instructions: "Combine the travel starter (top) with the phrase (side) to make a natural sentence.",
-      colLabels: ["My favourite holiday…", "When I travel, I always…", "The best thing about travel is…", "Last summer, I…", "I would love to visit…"],
-      rowLabels: ["… was in … because …", "… pack / book / try …", "… experiencing …", "… stayed / went / saw …", "… because …"],
+      instructions: "Combine the subject (top) with the travel phrase (side) to make a natural sentence about travel and holidays.",
+      colLabels: ["I…", "My family…", "We…", "Most tourists…", "My best friend…"],
+      rowLabels: ["… went to … last year.", "… loved … because … .", "… stayed in … during the trip.", "… would love to visit … because … .", "… packed … before the trip."],
     },
     hotSeatWords: [
       {word:"suitcase"},{word:"passport"},{word:"boarding pass"},{word:"departure"},
@@ -6160,9 +6160,9 @@ export const TOPIC_LIBRARY = {
     ],
     minefieldGrid: {
       topic: "Asking for Clarification",
-      instructions: "Combine the clarification opener (top) with the follow-up (side) to make a complete, natural request for clarification.",
-      colLabels: ["Could you repeat…?", "What do you mean by…?", "Are you saying that…?", "Just to clarify,…", "Could you give an example of…?"],
-      rowLabels: ["… that, please?", "… 'urgent'?", "… the deadline is Monday?", "… you mean next week?", "… what you mean?"],
+      instructions: "Combine the topic (top) with the question frame (side) - insert the topic into the blank (___) to make a complete, natural request for clarification.",
+      colLabels: ["that", "this word", "the instructions", "your plan", "what you said"],
+      rowLabels: ["Could you repeat ___, please?", "What do you mean by ___?", "Could you explain ___?", "Could you give an example of ___?", "Sorry, could you clarify ___?"],
     },
     hotSeatWords: [
       {word:"clarify"},{word:"repeat"},{word:"rephrase"},{word:"elaborate"},
@@ -6262,9 +6262,9 @@ export const TOPIC_LIBRARY = {
     ],
     minefieldGrid: {
       topic: "Ordering Food and Drink",
-      instructions: "Combine the ordering phrase (top) with the food/drink item (side) to make a complete, natural restaurant exchange.",
-      colLabels: ["Could I have…?", "I'll have…", "Could we have…?", "Is the … suitable for…?", "Does it come with…?"],
-      rowLabels: ["… the pasta, please.", "… the bill, please.", "… more water, please.", "… vegetarians?", "… a side salad?"],
+      instructions: "Combine the food or drink item (top) with the ordering phrase (side) - insert the item into the blank (___) to make a complete, natural restaurant exchange.",
+      colLabels: ["the pasta", "the soup", "a coffee", "the fish", "a side salad"],
+      rowLabels: ["Could I have ___, please?", "I'll have ___, please.", "Could we get ___?", "Does ___ come with a drink?", "Is ___ suitable for vegetarians?"],
     },
     hotSeatWords: [
       {word:"menu"},{word:"starter"},{word:"main course"},{word:"dessert"},
@@ -6364,9 +6364,9 @@ export const TOPIC_LIBRARY = {
     ],
     minefieldGrid: {
       topic: "Making Excuses",
-      instructions: "Combine the excuse opener (top) with the reason (side) to make a complete, natural excuse.",
-      colLabels: ["I'm so sorry I'm late —", "Something came up —", "I'm afraid I can't make it —", "I should have…", "Unfortunately,…"],
-      rowLabels: ["… I missed the bus.", "… a family emergency.", "… I have another commitment.", "… let you know earlier.", "… I was unable to attend."],
+      instructions: "Combine the reason (top) with the excuse frame (side) - insert the reason into the blank (___) to make a complete, natural excuse.",
+      colLabels: ["a family emergency", "another commitment", "a scheduling mix-up", "some unexpected traffic", "a last-minute change of plans"],
+      rowLabels: ["It was ___.", "There was ___.", "I'm afraid I can't make it because of ___.", "Unfortunately, ___ got in the way.", "Please excuse me - I had ___."],
     },
     hotSeatWords: [
       {word:"excuse"},{word:"sorry"},{word:"apologise"},{word:"came up"},
@@ -6467,7 +6467,7 @@ export const TOPIC_LIBRARY = {
     minefieldGrid: {
       topic: "Making Suggestions",
       instructions: "Combine the suggestion opener (top) with the activity (side) to make a complete, natural suggestion.",
-      colLabels: ["Shall we…?", "Why don't we…?", "How about…?", "You should…", "What if we…?"],
+      colLabels: ["Shall we…?", "Why don't we…?", "Could we…?", "You should…", "What if we…?"],
       rowLabels: ["… go to the cinema?", "… try the new restaurant?", "… take a break?", "… book in advance?", "… leave a bit earlier?"],
     },
     hotSeatWords: [
@@ -6568,9 +6568,9 @@ export const TOPIC_LIBRARY = {
     ],
     minefieldGrid: {
       topic: "Agreeing and Disagreeing",
-      instructions: "Combine the agreement/disagreement opener (top) with the continuation (side) to make a complete, natural response.",
-      colLabels: ["I couldn't agree more —", "I see your point, but…", "To some extent, yes, but…", "I'm afraid I disagree —", "That's a fair point, although…"],
-      rowLabels: ["… the data supports this.", "… there are exceptions.", "… the evidence suggests otherwise.", "… I think it's more complex.", "… we need to consider…"],
+      instructions: "Combine the opinion opener (top) with the reason frame (side) and fill in the blank (___) with your own reason to make a complete, natural response.",
+      colLabels: ["I completely agree", "I disagree", "I partly agree", "I'm not so sure", "That's a fair point"],
+      rowLabels: ["— because ___.", "— especially when you consider ___.", "— it depends on ___.", "— particularly regarding ___.", "— when you think about ___."],
     },
     hotSeatWords: [
       {word:"agree"},{word:"disagree"},{word:"I see your point"},{word:"I take your point"},
@@ -6710,7 +6710,7 @@ export const TOPIC_LIBRARY = {
       topic: "Can / Can't",
       instructions: "Combine the subject (top) with the ability frame (side) to make a sentence, then complete it with your own activity.",
       colLabels: ["I can...", "She can't...", "Can you...?", "They can both...", "He couldn't..."],
-      rowLabels: ["... really well because ...", "... yet, but I'm learning ...", "... better than most people.", "... at all, which surprises people.", "... as a child, but now ..."],
+      rowLabels: ["... really well.", "... every day.", "... better than most people.", "... without any help.", "... for fun."],
     },
     hotSeatWords: [
       {word:"swim"},{word:"drive"},{word:"cook"},{word:"fly"},{word:"ski"},
@@ -6793,7 +6793,7 @@ export const TOPIC_LIBRARY = {
       topic: "Present Continuous",
       instructions: "Combine the sentence starter (top) with the ending (side), then complete it with your own verb and details.",
       colLabels: ["I am...", "She is...", "Are you...?", "They are not...", "What is he...?"],
-      rowLabels: ["... doing something in the kitchen.", "... because ...", "... still ...ing at this hour?", "... today - they prefer to ...", "... right now?"],
+      rowLabels: ["... in the kitchen right now.", "... because ...", "... still ...ing at this hour.", "... at school today.", "... right now."],
     },
     hotSeatWords: [
       {word:"run"},{word:"swim"},{word:"cook"},{word:"read"},{word:"sleep"},
@@ -6874,9 +6874,9 @@ export const TOPIC_LIBRARY = {
     ],
     minefieldGrid: {
       topic: "Present Perfect vs Past Simple",
-      instructions: "Combine the opener (top) with the time frame (side), decide which tense fits, and complete the sentence.",
-      colLabels: ["I have...", "She went...", "Have you ever...?", "They haven't...", "I didn't..."],
-      rowLabels: ["... three times in my life.", "... last summer with my family.", "... yet - it's still on my list.", "... since I was young.", "... because I didn't have time."],
+      instructions: "Combine the subject (top) with the time cue (side); decide whether the cue needs present perfect or past simple, then complete the sentence with the correct verb form.",
+      colLabels: ["I", "She", "They", "We", "He"],
+      rowLabels: ["___ already ___.", "___ ___ yesterday.", "___ never ___ before.", "___ ___ last year.", "___ just ___."],
     },
     hotSeatWords: [
       {word:"already"},{word:"yet"},{word:"just"},{word:"ever"},{word:"never"},
@@ -6959,7 +6959,7 @@ export const TOPIC_LIBRARY = {
       topic: "Comparatives & Superlatives",
       instructions: "Combine the frame (top) with the ending (side) and complete it with your own adjective and subject.",
       colLabels: ["... is bigger than...", "... is the most...", "... is worse than...", "... is the best...", "... is not as ... as..."],
-      rowLabels: ["... in my opinion, because ...", "... I have ever seen / tried / visited.", "... especially during ...", "... in my country / city.", "... most people think."],
+      rowLabels: ["... in my opinion, because ...", "... without a doubt.", "... especially during ...", "... in my country / city.", "... most people think."],
     },
     hotSeatWords: [
       {word:"bigger"},{word:"smaller"},{word:"faster"},{word:"slower"},{word:"better"},
@@ -7020,7 +7020,7 @@ export const TOPIC_LIBRARY = {
       topic: "School and Study",
       instructions: "Combine the starter (top) with the ending (side) and complete it with your own detail.",
       colLabels: ["I like...", "My teacher...", "We usually...", "I find ...", "My school has..."],
-      rowLabels: ["... because ...", "... every week.", "... before exams.", "... very useful.", "... in the morning."],
+      rowLabels: ["... because ...", "... every week.", "... before exams.", "... after school.", "... in the morning."],
     },
     hotSeatWords: [
       {word:"subject"},{word:"homework"},{word:"exam"},{word:"teacher"},{word:"library"},
@@ -7077,9 +7077,9 @@ export const TOPIC_LIBRARY = {
     ],
     minefieldGrid: {
       topic: "Friends and Family",
-      instructions: "Combine the starter (top) with the ending (side) and complete it with your own detail.",
-      colLabels: ["My best friend...", "My family...", "I get on...", "We keep...", "I take after..."],
-      rowLabels: ["... very well because ...", "... every weekend.", "... in touch by ...", "... when we were children.", "... more than most people think."],
+      instructions: "Combine the person (top) with the sentence template (side) and fill in the blanks (___) with your own words to make a complete sentence about friends and family.",
+      colLabels: ["My best friend", "My family", "My neighbours", "My grandparents", "My close friends"],
+      rowLabels: ["___ and I always ___ together.", "I get on well with ___ because ___.", "___ always ___ me when ___.", "I have known ___ for ___.", "___ ___ a lot to me because ___."],
     },
     hotSeatWords: [
       {word:"friendship"},{word:"relationship"},{word:"sibling"},{word:"cousin"},{word:"grandparents"},
@@ -7252,9 +7252,9 @@ export const TOPIC_LIBRARY = {
     ],
     minefieldGrid: {
       topic: "Past Continuous",
-      instructions: "Combine the time frame (top) with the action frame (side) and complete with your own details.",
-      colLabels: ["While I was...", "At 9pm...", "When she arrived...", "I wasn't...", "What were you..."],
-      rowLabels: ["...ing, something happened.", "... in the kitchen.", "... because ...", "... when the phone rang.", "...ing last night?"],
+      instructions: "Combine the subject (top) with the sentence template (side). Use the correct form of 'be' (was/were) and add '-ing' to the verb to complete each past continuous sentence.",
+      colLabels: ["I", "She", "They", "We", "He"],
+      rowLabels: ["___ (be) ...ing when the phone rang.", "While ___ (be) ...ing, something happened.", "At 9pm, ___ (be) ...ing in the kitchen.", "___ (be) not ...ing when the teacher walked in.", "Guess what ___ (be) ...ing last night!"],
     },
     hotSeatWords: [
       {word:"interrupt"},{word:"background"},{word:"meanwhile"},{word:"rain"},{word:"sleep"},
@@ -7309,9 +7309,9 @@ export const TOPIC_LIBRARY = {
     ],
     minefieldGrid: {
       topic: "Past Perfect",
-      instructions: "Combine the time clause (top) with the result frame (side) and complete with your own past perfect action.",
-      colLabels: ["By the time I arrived...", "She was upset because...", "I had never...", "When he opened the door...", "Had you ever..."],
-      rowLabels: ["... everyone had already ...", "... she had ...", "... before that day.", "... he realised he had ...", "... before you moved here?"],
+      instructions: "Combine the subject (top) with the sentence template (side) and fill in the blanks (___) using past perfect (had + past participle).",
+      colLabels: ["I", "She", "They", "We", "He"],
+      rowLabels: ["___ had already ___ before the film started.", "___ had never ___ before that day.", "___ had just ___ when the phone rang.", "___ hadn't ___ before ___ moved here.", "Had ___ ever ___ before moving here?"],
     },
     hotSeatWords: [
       {word:"already"},{word:"before"},{word:"forgotten"},{word:"arrived"},{word:"realised"},
@@ -10084,9 +10084,9 @@ export const TOPIC_LIBRARY = {
     ],
     minefieldGrid: {
       topic: "Future: Will and Going To",
-      instructions: "Combine the future function (top) with the situation (side). Make a sentence using will or going to correctly.",
-      colLabels: ["prediction", "plan", "instant decision", "promise", "evidence now"],
-      rowLabels: ["I ... help you.", "She ... study tonight.", "Look! It ... fall.", "People ... travel more.", "We ... not be late."],
+      instructions: "Combine the subject (top) with the sentence template (side). Fill in the blanks and use the correct form (will or going to/am-is-are going to) shown by each template.",
+      colLabels: ["I", "She", "They", "We", "He"],
+      rowLabels: ["___ (think) ___ (will) win the match. (prediction)", "___ (be) going to study tonight because it's already planned. (plan)", "___ will help you right now! (instant decision)", "___ (promise) ___ (will) never be late again. (promise)", "Look! ___ (be) going to fall! (evidence now)"],
     },
     hotSeatWords: [
       {word:"will"},{word:"won't"},{word:"going to"},{word:"gonna"},
@@ -10186,9 +10186,9 @@ export const TOPIC_LIBRARY = {
     ],
     minefieldGrid: {
       topic: "Zero Conditional",
-      instructions: "Combine the condition (top) with the result starter (side). Make a general fact, rule, or habit in the present simple.",
-      colLabels: ["If you heat ice,...", "When it rains,...", "If people don't sleep,...", "If you press this button,...", "When I am hungry,..."],
-      rowLabels: ["... it ...", "... they ...", "... I usually ...", "... the machine ...", "... the streets ..."],
+      instructions: "Combine the condition (top) with the result starter (side) and complete it with a general fact or habit using the present simple (zero conditional).",
+      colLabels: ["If people don't sleep enough,", "If people eat too much sugar,", "If people exercise regularly,", "If people study hard,", "If people are kind to others,"],
+      rowLabels: ["... they usually ___.", "... they often feel ___.", "... they tend to ___.", "... they usually become ___.", "... they generally ___."],
     },
     hotSeatWords: [
       {word:"if"},{word:"when"},{word:"present simple"},{word:"general truth"},

@@ -22,7 +22,7 @@ export function MinefieldGame({ gridData, teams, onUpdateScore, onEnd }: GamePro
   const [mines] = useState<Set<number>>(() => createMines());
   const [revealed, setRevealed] = useState<Set<number>>(new Set());
   const [activeTeam, setActiveTeam] = useState(0);
-  const [phase, setPhase] = useState<"intro" | "pick" | "speaking" | "judging">("intro");
+  const [phase, setPhase] = useState<"intro" | "pick" | "speaking" | "judging" | "topicComplete">("intro");
   const [selectedTile, setSelectedTile] = useState<number | null>(null);
   const [boom, setBoom] = useState<boolean | null>(null);
   const [lastResult, setLastResult] = useState<{ correct: boolean; isMine: boolean; col: string; row: string; teamName: string } | null>(null);
@@ -95,7 +95,8 @@ export function MinefieldGame({ gridData, teams, onUpdateScore, onEnd }: GamePro
     }
 
     if (completedTopicRound) {
-      advanceToNextTopic();
+      setPhase("topicComplete");
+      setTimeout(() => advanceToNextTopic(), 2200);
       return;
     }
 
@@ -168,6 +169,7 @@ export function MinefieldGame({ gridData, teams, onUpdateScore, onEnd }: GamePro
           {phase === "pick" && `${t.name} - Pick a square!`}
           {phase === "speaking" && `${t.name} - Say the sentence!`}
           {phase === "judging" && "Teacher - Judge the sentence"}
+          {phase === "topicComplete" && "Topic complete!"}
         </span>
         <div style={{ background: "rgba(255,255,255,0.2)", borderRadius: "20px", padding: "4px 12px", color: "white", fontWeight: "700", fontSize: "13px" }}>
           {topicRotation ? `Team ${activeTeam + 1}/${teams.length} | ${safeRevealed}/${totalSafe} safe` : `${safeRevealed}/${totalSafe} safe | ${MINE_COUNT} mines`}
@@ -187,14 +189,20 @@ export function MinefieldGame({ gridData, teams, onUpdateScore, onEnd }: GamePro
         </div>
       )}
 
-      {!boom && lastResult && phase === "pick" && (
+      {!boom && lastResult && (phase === "pick" || phase === "topicComplete") && (
         <div style={{
           background: lastResult.correct && !lastResult.isMine ? "#ECFDF5" : lastResult.isMine ? "#FEF2F2" : "#FFF7ED",
           border: `2px solid ${lastResult.correct && !lastResult.isMine ? "#22C55E" : lastResult.isMine ? "#EF4444" : "#F97316"}`,
           borderRadius: "12px", padding: "10px 16px", marginBottom: "12px", textAlign: "center", fontSize: "13px", fontWeight: "700",
           color: lastResult.correct && !lastResult.isMine ? "#14532D" : lastResult.isMine ? "#991B1B" : "#7C2D12"
         }}>
-          {lastResult.isMine ? "Mine! -75 pts" : lastResult.correct ? "Great sentence! +50 pts" : "Incorrect - no points"}
+          {lastResult.isMine ? `Mine! ${lastResult.teamName} loses 75 pts` : lastResult.correct ? `Great sentence! ${lastResult.teamName} gets +50 pts` : `Incorrect - ${lastResult.teamName} gets no points`}
+        </div>
+      )}
+
+      {phase === "topicComplete" && (
+        <div style={{ textAlign: "center", marginBottom: "14px", fontSize: "13px", color: "#9CA3AF", fontWeight: "700" }}>
+          Moving to the next topic…
         </div>
       )}
 
@@ -226,6 +234,8 @@ export function MinefieldGame({ gridData, teams, onUpdateScore, onEnd }: GamePro
         </div>
       )}
 
+      {phase !== "topicComplete" && (
+      <>
       <div style={{ overflowX: "auto", marginBottom: "8px" }}>
         <table style={{ borderCollapse: "separate", borderSpacing: `${GAP}px`, margin: "0 auto" }}>
           <thead>
@@ -280,6 +290,8 @@ export function MinefieldGame({ gridData, teams, onUpdateScore, onEnd }: GamePro
       <div style={{ textAlign: "center", fontSize: "12px", color: "#9CA3AF", fontWeight: "600", marginTop: "6px" }}>
         {MINE_COUNT} mines hidden - click a square, say the sentence, then the teacher judges
       </div>
+      </>
+      )}
       <style>{`@keyframes boomPulse { 0% { transform: scale(0.92); opacity: 0.6; } 60% { transform: scale(1.04); } 100% { transform: scale(1); opacity: 1; } }`}</style>
     </div>
   );
