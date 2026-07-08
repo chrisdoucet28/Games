@@ -78,6 +78,11 @@ const buildBalancedMixedPool = <T,>(topicBuckets: T[][]) => {
 
 const uniqueValues = (values: string[]) => Array.from(new Set(values));
 
+const matchesTopicSearch = (label: string, search: string) => {
+  const term = search.trim().toLowerCase();
+  return term === "" || label.toLowerCase().includes(term);
+};
+
 const getTopicOption = (value: string) => realTopicOptions.find(o => o.value === value);
 
 const getTopicLabel = (value: string) => getTopicOption(value)?.label ?? value;
@@ -112,7 +117,8 @@ export default function LessonGamesGenerator() {
   const [level, setLevel] = useState("B1");
   const [focus, setFocus] = useState("grammar");
   const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
-  
+  const [topicSearch, setTopicSearch] = useState("");
+
   const [loadingGame, setLoadingGame] = useState(false);
   const [loadError, setLoadError] = useState("");
   const [selectedGame, setSelectedGame] = useState<GameMode | null>(null);
@@ -168,7 +174,9 @@ export default function LessonGamesGenerator() {
   };
 
   const selectAllVisibleTopics = () => {
-    const visibleTopicValues = getFilteredTopicOptions(level, focus).map(o => o.value);
+    const visibleTopicValues = getFilteredTopicOptions(level, focus)
+      .filter(o => matchesTopicSearch(o.label, topicSearch))
+      .map(o => o.value);
     setSelectedTopics(current => uniqueValues([...current, ...visibleTopicValues]));
   };
 
@@ -308,7 +316,7 @@ export default function LessonGamesGenerator() {
   );
 
   if (screen === "setup") {
-    const filteredTopics = getFilteredTopicOptions(level, focus);
+    const filteredTopics = getFilteredTopicOptions(level, focus).filter(o => matchesTopicSearch(o.label, topicSearch));
     const selectedTopicOptions = selectedTopics.map(getTopicOption).filter((option): option is TopicOption => Boolean(option));
     const selectedTopicSummary = selectedTopicOptions.map(o => o.label).join(", ");
     const LEVELS_META = [
@@ -390,9 +398,36 @@ export default function LessonGamesGenerator() {
                 <div style={{ color: "#6B7280", fontSize: "12px", marginTop: "2px" }}>
                   {filteredTopics.length > 0
                     ? `${filteredTopics.length} topic${filteredTopics.length !== 1 ? "s" : ""} shown - ${selectedTopics.length} selected`
-                    : "No built-in topics match these filters"}
+                    : topicSearch.trim() !== ""
+                      ? `No topics match "${topicSearch.trim()}"`
+                      : "No built-in topics match these filters"}
                 </div>
               </div>
+            </div>
+
+            <div style={{ position: "relative", marginBottom: "14px" }}>
+              <span style={{ position: "absolute", left: "14px", top: "50%", transform: "translateY(-50%)", fontSize: "15px", color: "#9CA3AF", pointerEvents: "none" }}>🔍</span>
+              <input
+                type="text"
+                value={topicSearch}
+                onChange={e => setTopicSearch(e.target.value)}
+                placeholder="Search topics..."
+                style={{
+                  width: "100%", boxSizing: "border-box", padding: "11px 40px 11px 38px",
+                  border: "2px solid #E0E7FF", borderRadius: "12px", fontSize: "14px",
+                  fontWeight: "600", color: "#1E1B4B", outline: "none",
+                }}
+              />
+              {topicSearch !== "" && (
+                <button
+                  type="button"
+                  onClick={() => setTopicSearch("")}
+                  aria-label="Clear search"
+                  style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", background: "#EEF2FF", border: "none", borderRadius: "50%", width: "22px", height: "22px", color: "#4338CA", fontWeight: "800", fontSize: "12px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
+                >
+                  ✕
+                </button>
+              )}
             </div>
             {selectedTopics.length > 0 && (
               <div style={{ background: "#EEF2FF", border: "2px solid #C7D2FE", color: "#312E81", borderRadius: "12px", padding: "10px 12px", fontWeight: "700", fontSize: "13px", marginBottom: "12px", lineHeight: 1.5 }}>

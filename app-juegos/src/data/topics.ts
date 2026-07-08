@@ -45,26 +45,26 @@ export const TOPIC_LIBRARY = {
       {word:"chose"},{word:"ran"},{word:"caught"},{word:"thought"},
     ],
     hotPotatoPrompts: [
-      {prompt:"Yesterday I ___ to the park. (go)", answer:"went"},
-      {prompt:"Last night we ___ pizza. (eat)", answer:"ate"},
-      {prompt:"I ___ a great film yesterday. (see)", answer:"saw"},
-      {prompt:"She ___ a new jacket last weekend. (buy)", answer:"bought"},
-      {prompt:"They ___ the bus to school. (take)", answer:"took"},
-      {prompt:"He ___ his phone by accident. (break)", answer:"broke"},
-      {prompt:"The glass ___ off the table. (fall)", answer:"fell"},
-      {prompt:"We ___ to the beach on Saturday. (drive)", answer:"drove"},
-      {prompt:"She ___ to the teacher after class. (speak)", answer:"spoke"},
-      {prompt:"My uncle ___ me how to cook. (teach)", answer:"taught"},
-      {prompt:"The baby ___ for ten hours. (sleep)", answer:"slept"},
-      {prompt:"I ___ my keys yesterday. (lose)", answer:"lost"},
-      {prompt:"He ___ his homework at home. (forget)", answer:"forgot"},
-      {prompt:"I ___ the blue shirt. (choose)", answer:"chose"},
-      {prompt:"They ___ very fast in the race. (run)", answer:"ran"},
-      {prompt:"I have never ___ that movie. (see)", answer:"seen"},
-      {prompt:"She has ___ three emails today. (write)", answer:"written"},
-      {prompt:"Have you ever ___ sushi? (eat)", answer:"eaten"},
-      {prompt:"The city has ___ a lot this year. (grow)", answer:"grown"},
-      {prompt:"Someone has ___ my bike. (steal)", answer:"stolen"},
+      {prompt:"Yesterday I ___ to the park. (go)", answer:"went", spanish:"Completa la frase con la forma correcta del verbo 'go' en pasado."},
+      {prompt:"Last night we ___ pizza. (eat)", answer:"ate", spanish:"Completa la frase con la forma correcta del verbo 'eat' en pasado."},
+      {prompt:"I ___ a great film yesterday. (see)", answer:"saw", spanish:"Completa la frase con la forma correcta del verbo 'see' en pasado."},
+      {prompt:"She ___ a new jacket last weekend. (buy)", answer:"bought", spanish:"Completa la frase con la forma correcta del verbo 'buy' en pasado."},
+      {prompt:"They ___ the bus to school. (take)", answer:"took", spanish:"Completa la frase con la forma correcta del verbo 'take' en pasado."},
+      {prompt:"He ___ his phone by accident. (break)", answer:"broke", spanish:"Completa la frase con la forma correcta del verbo 'break' en pasado."},
+      {prompt:"The glass ___ off the table. (fall)", answer:"fell", spanish:"Completa la frase con la forma correcta del verbo 'fall' en pasado."},
+      {prompt:"We ___ to the beach on Saturday. (drive)", answer:"drove", spanish:"Completa la frase con la forma correcta del verbo 'drive' en pasado."},
+      {prompt:"She ___ to the teacher after class. (speak)", answer:"spoke", spanish:"Completa la frase con la forma correcta del verbo 'speak' en pasado."},
+      {prompt:"My uncle ___ me how to cook. (teach)", answer:"taught", spanish:"Completa la frase con la forma correcta del verbo 'teach' en pasado."},
+      {prompt:"The baby ___ for ten hours. (sleep)", answer:"slept", spanish:"Completa la frase con la forma correcta del verbo 'sleep' en pasado."},
+      {prompt:"I ___ my keys yesterday. (lose)", answer:"lost", spanish:"Completa la frase con la forma correcta del verbo 'lose' en pasado."},
+      {prompt:"He ___ his homework at home. (forget)", answer:"forgot", spanish:"Completa la frase con la forma correcta del verbo 'forget' en pasado."},
+      {prompt:"I ___ the blue shirt. (choose)", answer:"chose", spanish:"Completa la frase con la forma correcta del verbo 'choose' en pasado."},
+      {prompt:"They ___ very fast in the race. (run)", answer:"ran", spanish:"Completa la frase con la forma correcta del verbo 'run' en pasado."},
+      {prompt:"I have never ___ that movie. (see)", answer:"seen", spanish:"Completa la frase con el participio pasado del verbo 'see'."},
+      {prompt:"She has ___ three emails today. (write)", answer:"written", spanish:"Completa la frase con el participio pasado del verbo 'write'."},
+      {prompt:"Have you ever ___ sushi? (eat)", answer:"eaten", spanish:"Completa la frase con el participio pasado del verbo 'eat'."},
+      {prompt:"The city has ___ a lot this year. (grow)", answer:"grown", spanish:"Completa la frase con el participio pasado del verbo 'grow'."},
+      {prompt:"Someone has ___ my bike. (steal)", answer:"stolen", spanish:"Completa la frase con el participio pasado del verbo 'steal'."},
     ],
     auctionSentences: [
       { sentence:"My brother broke his arm while skiing last winter.", isCorrect:true, explanation:"'Broke' is the correct irregular past simple form of 'break'." },
@@ -249,26 +249,26 @@ export const TOPIC_LIBRARY = {
       {word:"will"},{word:"if"},{word:"then"},{word:"situation"},
     ],
     hotPotatoPrompts: [
-      {prompt:"Choose: 'If it rains, we will stay home' or 'If it will rain, we stay home'?", answer:"If it rains, we will stay home."},
-      {prompt:"Complete: 'If I see her, I ___ say hello.'", answer:"will"},
-      {prompt:"'If it ___ tomorrow, we'll go out.' (rain)", answer:"rains"},
-      {prompt:"'If you ___ hard, you'll pass.' (study)", answer:"study"},
-      {prompt:"'Unless' means the same as ___.", answer:"if not"},
-      {prompt:"'Unless you hurry, you ___ be late.' (will/won't)", answer:"will"},
-      {prompt:"Fix: 'If you will arrive early, call me.'", answer:"If you arrive early, call me."},
-      {prompt:"'If she calls, I ___ answer.' (will/would)", answer:"will"},
-      {prompt:"Choose the realistic future sentence: 'If I study, I'll pass' or 'If I studied, I'd pass'?", answer:"If I study, I'll pass."},
-      {prompt:"Make a first conditional about weather.", answer:"(free — If it rains, I'll…)"},
-      {prompt:"'You'll feel better ___ you rest.' (if/unless)", answer:"if"},
-      {prompt:"'If I see him, I ___ tell him.' (will/would)", answer:"will"},
-      {prompt:"Rewrite: 'Study or you'll fail.' Using 'if'.", answer:"If you don't study, you'll fail."},
-      {prompt:"'If you ___ (not come), we'll start without you.'", answer:"don't come"},
-      {prompt:"Complete: 'She'll ___ to retake it.'", answer:"have"},
-      {prompt:"Make a first conditional warning.", answer:"(free — If you don't…, you'll…)"},
-      {prompt:"'If we leave ___ (now), will + we'll catch the bus.'", answer:"now"},
-      {prompt:"'___ you be here if it snows?' (Will/Would)", answer:"Will"},
-      {prompt:"Finish: 'If the bus is late, I will ___.'", answer:"(free answer)"},
-      {prompt:"Make a first conditional promise.", answer:"(free — If you help me, I'll…)"},
+      {prompt:"Choose: 'If it rains, we will stay home' or 'If it will rain, we stay home'?", answer:"If it rains, we will stay home.", spanish:"Elige la frase correcta."},
+      {prompt:"Complete: 'If I see her, I ___ say hello.'", answer:"will", spanish:"Completa el espacio con 'will'."},
+      {prompt:"'If it ___ tomorrow, we'll go out.' (rain)", answer:"rains", spanish:"Completa el espacio con la forma correcta del verbo 'rain' en presente simple."},
+      {prompt:"'If you ___ hard, you'll pass.' (study)", answer:"study", spanish:"Completa el espacio con la forma correcta del verbo 'study' en presente simple."},
+      {prompt:"'Unless' means the same as ___.", answer:"if not", spanish:"Completa: ¿qué significa 'unless'?"},
+      {prompt:"'Unless you hurry, you ___ be late.' (will/won't)", answer:"will", spanish:"Elige la palabra correcta: 'will' o 'won't'."},
+      {prompt:"Fix: 'If you will arrive early, call me.'", answer:"If you arrive early, call me.", spanish:"Corrige el error en la frase."},
+      {prompt:"'If she calls, I ___ answer.' (will/would)", answer:"will", spanish:"Elige la palabra correcta: 'will' o 'would'."},
+      {prompt:"Choose the realistic future sentence: 'If I study, I'll pass' or 'If I studied, I'd pass'?", answer:"If I study, I'll pass.", spanish:"Elige la frase que expresa un futuro realista."},
+      {prompt:"Make a first conditional about weather.", answer:"(free — If it rains, I'll…)", spanish:"Escribe una frase de primer condicional sobre el clima."},
+      {prompt:"'You'll feel better ___ you rest.' (if/unless)", answer:"if", spanish:"Elige la palabra correcta: 'if' o 'unless'."},
+      {prompt:"'If I see him, I ___ tell him.' (will/would)", answer:"will", spanish:"Elige la palabra correcta: 'will' o 'would'."},
+      {prompt:"Rewrite: 'Study or you'll fail.' Using 'if'.", answer:"If you don't study, you'll fail.", spanish:"Reescribe la frase usando 'if'."},
+      {prompt:"'If you ___ (not come), we'll start without you.'", answer:"don't come", spanish:"Completa el espacio con la forma negativa correcta del verbo 'come'."},
+      {prompt:"Complete: 'She'll ___ to retake it.'", answer:"have", spanish:"Completa el espacio con el verbo apropiado."},
+      {prompt:"Make a first conditional warning.", answer:"(free — If you don't…, you'll…)", spanish:"Escribe una advertencia usando el primer condicional."},
+      {prompt:"'If we leave ___ (now), will + we'll catch the bus.'", answer:"now", spanish:"Completa el espacio con la palabra correcta."},
+      {prompt:"'___ you be here if it snows?' (Will/Would)", answer:"Will", spanish:"Elige la palabra correcta: 'Will' o 'Would'."},
+      {prompt:"Finish: 'If the bus is late, I will ___.'", answer:"(free answer)", spanish:"Completa la frase con tu propia idea."},
+      {prompt:"Make a first conditional promise.", answer:"(free — If you help me, I'll…)", spanish:"Escribe una promesa usando el primer condicional."},
     ],
     auctionSentences: [
       { sentence:"If you don't hurry, you'll miss the bus.", isCorrect:true, explanation:"Correct first conditional: present simple in the if-clause, 'will' in the main clause." },
@@ -453,26 +453,26 @@ export const TOPIC_LIBRARY = {
       {word:"visited"},{word:"stayed"},{word:"called"},{word:"watched"},
     ],
     hotPotatoPrompts: [
-      {prompt:"Yesterday I ___ home late. (go)", answer:"went"},
-      {prompt:"Last night we ___ dinner at 8. (eat)", answer:"ate"},
-      {prompt:"I ___ my cousin yesterday. (see)", answer:"saw"},
-      {prompt:"She ___ a new phone last month. (buy)", answer:"bought"},
-      {prompt:"Past negative: I ___ go. (didn't/don't/wasn't)", answer:"didn't"},
-      {prompt:"Past question: ___ you see her? (Did/Do/Was)", answer:"Did"},
-      {prompt:"Complete: 'She ___ football yesterday.' (play)", answer:"played"},
-      {prompt:"Complete: 'She ___ to the supermarket yesterday.' (go)", answer:"went"},
-      {prompt:"Choose: 'I didn't went' or 'I didn't go'?", answer:"I didn't go."},
-      {prompt:"Choose: 'Did you saw her?' or 'Did you see her?'?", answer:"Did you see her?"},
-      {prompt:"Complete: 'I ___ at home yesterday.' (be)", answer:"was"},
-      {prompt:"Complete: 'They ___ tired after the trip.' (be)", answer:"were"},
-      {prompt:"'I/she/he' — past of 'be'?", answer:"was"},
-      {prompt:"'We/they/you' — past of 'be'?", answer:"were"},
-      {prompt:"Make a sentence: 'Yesterday I ___.'", answer:"(free answer)"},
-      {prompt:"Complete: 'She ___ a message yesterday.' (write)", answer:"wrote"},
-      {prompt:"Complete: 'They ___ to my party last week.' (come)", answer:"came"},
-      {prompt:"Regular past: 'play' → ?", answer:"played"},
-      {prompt:"Regular past: 'watch' → ?", answer:"watched"},
-      {prompt:"Regular past: 'study' → ?", answer:"studied"},
+      {prompt:"Yesterday I ___ home late. (go)", answer:"went", spanish:"Completa el espacio con la forma correcta del verbo 'go' en pasado simple."},
+      {prompt:"Last night we ___ dinner at 8. (eat)", answer:"ate", spanish:"Completa el espacio con la forma correcta del verbo 'eat' en pasado simple."},
+      {prompt:"I ___ my cousin yesterday. (see)", answer:"saw", spanish:"Completa el espacio con la forma correcta del verbo 'see' en pasado simple."},
+      {prompt:"She ___ a new phone last month. (buy)", answer:"bought", spanish:"Completa el espacio con la forma correcta del verbo 'buy' en pasado simple."},
+      {prompt:"Past negative: I ___ go. (didn't/don't/wasn't)", answer:"didn't", spanish:"Elige la palabra correcta para formar la negación en pasado simple."},
+      {prompt:"Past question: ___ you see her? (Did/Do/Was)", answer:"Did", spanish:"Elige la palabra correcta para formar la pregunta en pasado."},
+      {prompt:"Complete: 'She ___ football yesterday.' (play)", answer:"played", spanish:"Completa la frase con la forma correcta del verbo 'play' en pasado simple."},
+      {prompt:"Complete: 'She ___ to the supermarket yesterday.' (go)", answer:"went", spanish:"Completa la frase con la forma correcta del verbo 'go' en pasado simple."},
+      {prompt:"Choose: 'I didn't went' or 'I didn't go'?", answer:"I didn't go.", spanish:"Elige la frase correcta."},
+      {prompt:"Choose: 'Did you saw her?' or 'Did you see her?'?", answer:"Did you see her?", spanish:"Elige la frase correcta."},
+      {prompt:"Complete: 'I ___ at home yesterday.' (be)", answer:"was", spanish:"Completa la frase con la forma correcta del verbo 'be' en pasado simple."},
+      {prompt:"Complete: 'They ___ tired after the trip.' (be)", answer:"were", spanish:"Completa la frase con la forma correcta del verbo 'be' en pasado simple."},
+      {prompt:"'I/she/he' — past of 'be'?", answer:"was", spanish:"¿Cuál es el pasado del verbo 'be' para 'I/she/he'?"},
+      {prompt:"'We/they/you' — past of 'be'?", answer:"were", spanish:"¿Cuál es el pasado del verbo 'be' para 'we/they/you'?"},
+      {prompt:"Make a sentence: 'Yesterday I ___.'", answer:"(free answer)", spanish:"Completa la frase con tu propia idea en pasado simple."},
+      {prompt:"Complete: 'She ___ a message yesterday.' (write)", answer:"wrote", spanish:"Completa la frase con la forma correcta del verbo 'write' en pasado simple."},
+      {prompt:"Complete: 'They ___ to my party last week.' (come)", answer:"came", spanish:"Completa la frase con la forma correcta del verbo 'come' en pasado simple."},
+      {prompt:"Regular past: 'play' → ?", answer:"played", spanish:"¿Cuál es el pasado del verbo regular 'play'?"},
+      {prompt:"Regular past: 'watch' → ?", answer:"watched", spanish:"¿Cuál es el pasado del verbo regular 'watch'?"},
+      {prompt:"Regular past: 'study' → ?", answer:"studied", spanish:"¿Cuál es el pasado del verbo regular 'study'?"},
     ],
     auctionSentences: [
       { sentence:"She visited her grandmother in Chicago last weekend.", isCorrect:true, explanation:"Regular verb 'visit' correctly forms the past simple by adding -ed to make 'visited'." },
@@ -555,26 +555,26 @@ export const TOPIC_LIBRARY = {
       {word:"-ing form"},{word:"am/is/are"},{word:"fact"},{word:"in progress"},
     ],
     hotPotatoPrompts: [
-      {prompt:"'Look! She ___ (run).'", answer:"is running"},
-      {prompt:"'I ___ (go) to the gym every day.'", answer:"go"},
-      {prompt:"'Water ___ (boil) at 100°C.'", answer:"boils"},
-      {prompt:"'Be quiet! The baby ___ (sleep).'", answer:"is sleeping"},
-      {prompt:"'He ___ (know) the answer.' — simple or continuous?", answer:"simple ('know' is a state verb)"},
-      {prompt:"'She ___ (want) to leave.' — simple or continuous?", answer:"simple ('want' is a state verb)"},
-      {prompt:"'They ___ (play) football now.'", answer:"are playing"},
-      {prompt:"'I always ___ (have) coffee in the morning.'", answer:"have"},
-      {prompt:"Signal word for present continuous?", answer:"(free — now, at the moment, look, right now)"},
-      {prompt:"Signal word for present simple?", answer:"(free — always, usually, every day, never)"},
-      {prompt:"'He ___ (love) pizza.' — simple or continuous?", answer:"simple"},
-      {prompt:"'She ___ (work) in a bank.' (permanent job)", answer:"works"},
-      {prompt:"'She ___ (work) from home today.' (temporary)", answer:"is working"},
-      {prompt:"'I ___ (not/understand) this.'", answer:"don't understand"},
-      {prompt:"'What ___ you ___ (do) right now?'", answer:"are … doing"},
-      {prompt:"'What ___ you ___ (do) every evening?'", answer:"do … do"},
-      {prompt:"Name one state verb.", answer:"(free — know, love, want, like, believe, have, need)"},
-      {prompt:"Present continuous = be + ___.", answer:"verb + -ing"},
-      {prompt:"'I ___ (think) you're right.' (opinion)", answer:"think"},
-      {prompt:"'I ___ (think) about the problem now.' (mental process in progress)", answer:"am thinking"},
+      {prompt:"'Look! She ___ (run).'", answer:"is running", spanish:"Completa la frase con la forma correcta del verbo 'run' en presente continuo."},
+      {prompt:"'I ___ (go) to the gym every day.'", answer:"go", spanish:"Completa la frase con la forma correcta del verbo 'go' en presente simple."},
+      {prompt:"'Water ___ (boil) at 100°C.'", answer:"boils", spanish:"Completa la frase con la forma correcta del verbo 'boil' en presente simple."},
+      {prompt:"'Be quiet! The baby ___ (sleep).'", answer:"is sleeping", spanish:"Completa la frase con la forma correcta del verbo 'sleep' en presente continuo."},
+      {prompt:"'He ___ (know) the answer.' — simple or continuous?", answer:"simple ('know' is a state verb)", spanish:"Elige si el verbo 'know' va en presente simple o continuo."},
+      {prompt:"'She ___ (want) to leave.' — simple or continuous?", answer:"simple ('want' is a state verb)", spanish:"Elige si el verbo 'want' va en presente simple o continuo."},
+      {prompt:"'They ___ (play) football now.'", answer:"are playing", spanish:"Completa la frase con la forma correcta del verbo 'play' en presente continuo."},
+      {prompt:"'I always ___ (have) coffee in the morning.'", answer:"have", spanish:"Completa la frase con la forma correcta del verbo 'have' en presente simple."},
+      {prompt:"Signal word for present continuous?", answer:"(free — now, at the moment, look, right now)", spanish:"Nombra una palabra que indica presente continuo."},
+      {prompt:"Signal word for present simple?", answer:"(free — always, usually, every day, never)", spanish:"Nombra una palabra que indica presente simple."},
+      {prompt:"'He ___ (love) pizza.' — simple or continuous?", answer:"simple", spanish:"Elige si el verbo 'love' va en presente simple o continuo."},
+      {prompt:"'She ___ (work) in a bank.' (permanent job)", answer:"works", spanish:"Completa la frase con la forma correcta del verbo 'work' en presente simple."},
+      {prompt:"'She ___ (work) from home today.' (temporary)", answer:"is working", spanish:"Completa la frase con la forma correcta del verbo 'work' en presente continuo."},
+      {prompt:"'I ___ (not/understand) this.'", answer:"don't understand", spanish:"Completa la frase con la forma negativa correcta del verbo 'understand' en presente simple."},
+      {prompt:"'What ___ you ___ (do) right now?'", answer:"are … doing", spanish:"Completa la pregunta con la forma correcta del verbo 'do' en presente continuo."},
+      {prompt:"'What ___ you ___ (do) every evening?'", answer:"do … do", spanish:"Completa la pregunta con la forma correcta del verbo 'do' en presente simple."},
+      {prompt:"Name one state verb.", answer:"(free — know, love, want, like, believe, have, need)", spanish:"Nombra un verbo de estado."},
+      {prompt:"Present continuous = be + ___.", answer:"verb + -ing", spanish:"Completa la regla del presente continuo."},
+      {prompt:"'I ___ (think) you're right.' (opinion)", answer:"think", spanish:"Completa la frase con la forma correcta del verbo 'think' en presente simple."},
+      {prompt:"'I ___ (think) about the problem now.' (mental process in progress)", answer:"am thinking", spanish:"Completa la frase con la forma correcta del verbo 'think' en presente continuo."},
     ],
     auctionSentences: [
       { sentence:"I usually take the bus to work, but today I'm walking.", isCorrect:true, explanation:"Correct contrast: present simple for the habit, continuous for today's exception." },
@@ -657,26 +657,26 @@ export const TOPIC_LIBRARY = {
       {word:"RSVP"},{word:"plans"},{word:"suggest"},{word:"What time?"},
     ],
     hotPotatoPrompts: [
-      {prompt:"'Would you like ___ come to dinner?' (to/and/that)", answer:"to"},
-      {prompt:"Accept enthusiastically: 'Would you like to come?'", answer:"(free — That sounds great! / I'd love to! / Count me in!)"},
-      {prompt:"Reject politely: 'Are you free on Saturday?'", answer:"(free — I'm afraid I can't. / Unfortunately I'm busy.)"},
-      {prompt:"'How about ___ to the cinema?' (-ing form)", answer:"going"},
-      {prompt:"'I'd love ___, but I have plans.' (to/it/that)", answer:"to"},
-      {prompt:"Formal way to invite someone to a party?", answer:"(free — Would you like to come to…? / I'd like to invite you to…)"},
-      {prompt:"Informal way to invite a friend?", answer:"(free — Do you fancy…? / How about…? / Wanna come?)"},
-      {prompt:"'I'm afraid I ___ make it.' (can/can't/won't)", answer:"can't"},
-      {prompt:"'Are you ___ on Friday?' (available/free/busy)", answer:"free / available"},
-      {prompt:"'That's a ___ idea!' (great/big/good)", answer:"great / good / fantastic"},
-      {prompt:"What does 'RSVP' mean?", answer:"please reply (French: Répondez s'il vous plaît)"},
-      {prompt:"'Why don't ___ go bowling?' (you/we/us)", answer:"we"},
-      {prompt:"'___ you like to join us?' (Would/Do/Will)", answer:"Would"},
-      {prompt:"Politely give a reason for rejecting: 'I'm sorry, I can't come because ___.'", answer:"(free answer)"},
-      {prompt:"'Maybe ___ time!' (another/other/next)", answer:"another"},
-      {prompt:"'Do you ___ coming to the party?' (fancy/like/want)", answer:"fancy"},
-      {prompt:"Name one phrase to accept an invitation.", answer:"(free — I'd love to / That sounds great / Count me in)"},
-      {prompt:"Name one phrase to reject an invitation.", answer:"(free — I'm afraid I can't / Unfortunately I'm busy)"},
-      {prompt:"'What time ___?' — what comes next?", answer:"(free — shall we meet? / does it start?)"},
-      {prompt:"Is 'Come to my party!' formal or informal?", answer:"informal (a command)"},
+      {prompt:"'Would you like ___ come to dinner?' (to/and/that)", answer:"to", spanish:"Elige la palabra correcta para completar la invitación."},
+      {prompt:"Accept enthusiastically: 'Would you like to come?'", answer:"(free — That sounds great! / I'd love to! / Count me in!)", spanish:"Acepta la invitación con entusiasmo."},
+      {prompt:"Reject politely: 'Are you free on Saturday?'", answer:"(free — I'm afraid I can't. / Unfortunately I'm busy.)", spanish:"Rechaza la invitación de forma educada."},
+      {prompt:"'How about ___ to the cinema?' (-ing form)", answer:"going", spanish:"Completa la frase con la forma correcta del verbo (-ing)."},
+      {prompt:"'I'd love ___, but I have plans.' (to/it/that)", answer:"to", spanish:"Elige la palabra correcta para completar la frase."},
+      {prompt:"Formal way to invite someone to a party?", answer:"(free — Would you like to come to…? / I'd like to invite you to…)", spanish:"Di una forma formal de invitar a alguien a una fiesta."},
+      {prompt:"Informal way to invite a friend?", answer:"(free — Do you fancy…? / How about…? / Wanna come?)", spanish:"Di una forma informal de invitar a un amigo."},
+      {prompt:"'I'm afraid I ___ make it.' (can/can't/won't)", answer:"can't", spanish:"Elige la palabra correcta para completar la frase."},
+      {prompt:"'Are you ___ on Friday?' (available/free/busy)", answer:"free / available", spanish:"Elige la palabra correcta para completar la frase."},
+      {prompt:"'That's a ___ idea!' (great/big/good)", answer:"great / good / fantastic", spanish:"Elige la palabra correcta para completar la frase."},
+      {prompt:"What does 'RSVP' mean?", answer:"please reply (French: Répondez s'il vous plaît)", spanish:"¿Qué significa 'RSVP'?"},
+      {prompt:"'Why don't ___ go bowling?' (you/we/us)", answer:"we", spanish:"Elige la palabra correcta para completar la frase."},
+      {prompt:"'___ you like to join us?' (Would/Do/Will)", answer:"Would", spanish:"Elige la palabra correcta para completar la pregunta."},
+      {prompt:"Politely give a reason for rejecting: 'I'm sorry, I can't come because ___.'", answer:"(free answer)", spanish:"Da una razón educada para rechazar la invitación."},
+      {prompt:"'Maybe ___ time!' (another/other/next)", answer:"another", spanish:"Elige la palabra correcta para completar la frase."},
+      {prompt:"'Do you ___ coming to the party?' (fancy/like/want)", answer:"fancy", spanish:"Elige la palabra correcta para completar la frase."},
+      {prompt:"Name one phrase to accept an invitation.", answer:"(free — I'd love to / That sounds great / Count me in)", spanish:"Nombra una frase para aceptar una invitación."},
+      {prompt:"Name one phrase to reject an invitation.", answer:"(free — I'm afraid I can't / Unfortunately I'm busy)", spanish:"Nombra una frase para rechazar una invitación."},
+      {prompt:"'What time ___?' — what comes next?", answer:"(free — shall we meet? / does it start?)", spanish:"Completa la pregunta sobre la hora."},
+      {prompt:"Is 'Come to my party!' formal or informal?", answer:"informal (a command)", spanish:"Di si la frase 'Come to my party!' es formal o informal."},
     ],
     auctionSentences: [
       { sentence:"Shall we go for a walk after lunch today?", isCorrect:true, explanation:"Correct casual invitation using 'Shall we + base verb?'" },
@@ -759,26 +759,26 @@ export const TOPIC_LIBRARY = {
       {word:"narrator"},{word:"character"},{word:"plot twist"},{word:"cliffhanger"},
     ],
     hotPotatoPrompts: [
-      {prompt:"Stories often start with '___'. (two words)", answer:"One day"},
-      {prompt:"'___ the lights went off.' (dramatic word)", answer:"Suddenly"},
-      {prompt:"'First… ___ … Finally' — what goes in the middle?", answer:"Then / Next / After that"},
-      {prompt:"'We ___ (watch) TV when the door opened.' (continuous)", answer:"were watching"},
-      {prompt:"Background action in a story → past ___ tense.", answer:"continuous"},
-      {prompt:"Main events in a story → past ___ tense.", answer:"simple"},
-      {prompt:"'All of ___ sudden, the alarm rang.'", answer:"a"},
-      {prompt:"'___ things worse, it started to rain.' (to make)", answer:"To make things worse"},
-      {prompt:"'In the ___, everything worked out.' (end)", answer:"end"},
-      {prompt:"'___, we found a taxi just in time.' (lucky word)", answer:"Luckily"},
-      {prompt:"'___, the journey took five hours.' (unfortunately)", answer:"Unfortunately"},
-      {prompt:"'To ___ a long story short...'", answer:"cut"},
-      {prompt:"'You won't ___ this, but...' (believe)", answer:"believe"},
-      {prompt:"Name one word to add drama to a story.", answer:"(free — suddenly, luckily, unfortunately, amazingly)"},
-      {prompt:"'She was ___ tired that she fell asleep on the bus.' (so)", answer:"so"},
-      {prompt:"'No sooner ___ I left than it started to rain.' (had)", answer:"had"},
-      {prompt:"Name a sequencing word to start the second event.", answer:"(free — then, next, after that, following that)"},
-      {prompt:"'___, we realised we had missed the last train.' (eventually)", answer:"Eventually"},
-      {prompt:"Describe where you were when something happened.", answer:"(free — I was at home when…)"},
-      {prompt:"Finish a story with one sentence starting 'In the end…'", answer:"(free answer)"},
+      {prompt:"Stories often start with '___'. (two words)", answer:"One day", spanish:"Completa la expresión con la que suelen empezar las historias."},
+      {prompt:"'___ the lights went off.' (dramatic word)", answer:"Suddenly", spanish:"Completa la frase con una palabra dramática."},
+      {prompt:"'First… ___ … Finally' — what goes in the middle?", answer:"Then / Next / After that", spanish:"Completa la secuencia con la palabra que va en el medio."},
+      {prompt:"'We ___ (watch) TV when the door opened.' (continuous)", answer:"were watching", spanish:"Completa la frase con la forma correcta del verbo 'watch' en pasado continuo."},
+      {prompt:"Background action in a story → past ___ tense.", answer:"continuous", spanish:"Completa la regla: la acción de fondo en una historia usa qué tiempo pasado."},
+      {prompt:"Main events in a story → past ___ tense.", answer:"simple", spanish:"Completa la regla: los eventos principales de una historia usan qué tiempo pasado."},
+      {prompt:"'All of ___ sudden, the alarm rang.'", answer:"a", spanish:"Completa la expresión."},
+      {prompt:"'___ things worse, it started to rain.' (to make)", answer:"To make things worse", spanish:"Completa la expresión."},
+      {prompt:"'In the ___, everything worked out.' (end)", answer:"end", spanish:"Completa la expresión."},
+      {prompt:"'___, we found a taxi just in time.' (lucky word)", answer:"Luckily", spanish:"Completa la frase con una palabra que significa 'con suerte'."},
+      {prompt:"'___, the journey took five hours.' (unfortunately)", answer:"Unfortunately", spanish:"Completa la frase con una palabra que significa 'desafortunadamente'."},
+      {prompt:"'To ___ a long story short...'", answer:"cut", spanish:"Completa la expresión."},
+      {prompt:"'You won't ___ this, but...' (believe)", answer:"believe", spanish:"Completa la expresión con el verbo correcto."},
+      {prompt:"Name one word to add drama to a story.", answer:"(free — suddenly, luckily, unfortunately, amazingly)", spanish:"Nombra una palabra para darle dramatismo a una historia."},
+      {prompt:"'She was ___ tired that she fell asleep on the bus.' (so)", answer:"so", spanish:"Completa la frase con la palabra correcta."},
+      {prompt:"'No sooner ___ I left than it started to rain.' (had)", answer:"had", spanish:"Completa la frase con la palabra correcta."},
+      {prompt:"Name a sequencing word to start the second event.", answer:"(free — then, next, after that, following that)", spanish:"Nombra una palabra para empezar el segundo evento de una secuencia."},
+      {prompt:"'___, we realised we had missed the last train.' (eventually)", answer:"Eventually", spanish:"Completa la frase con una palabra que significa 'finalmente'."},
+      {prompt:"Describe where you were when something happened.", answer:"(free — I was at home when…)", spanish:"Describe dónde estabas cuando pasó algo."},
+      {prompt:"Finish a story with one sentence starting 'In the end…'", answer:"(free answer)", spanish:"Termina una historia con una frase que empiece con 'In the end…'."},
     ],
     auctionSentences: [
       { sentence:"Last summer, I was travelling through Spain when I met my best friend.", isCorrect:true, explanation:"Correct: past continuous for the background, past simple for the main event." },
@@ -1988,23 +1988,23 @@ export const TOPIC_LIBRARY = {
     ],
     hotPotatoPrompts: [
       {prompt:"Say hello to someone you've never met.", answer:"Hi! / Hello!", spanish:"Di hola a alguien que no conoces."},
-      {prompt:"'___ to meet you!' (first meeting)", answer:"Nice / Pleased"},
+      {prompt:"'___ to meet you!' (first meeting)", answer:"Nice / Pleased", spanish:"Completa la expresión para conocer a alguien por primera vez."},
       {prompt:"Ask someone their name.", answer:"What's your name?", spanish:"Pregunta cómo se llama alguien."},
-      {prompt:"'Where ___ you from?'", answer:"are"},
-      {prompt:"Reply to 'How are you?'", answer:"I'm fine, thanks!"},
-      {prompt:"'Good ___!' (10am)", answer:"morning"},
-      {prompt:"'Good ___!' (3pm)", answer:"afternoon"},
+      {prompt:"'Where ___ you from?'", answer:"are", spanish:"Completa la pregunta con la forma correcta del verbo 'to be'."},
+      {prompt:"Reply to 'How are you?'", answer:"I'm fine, thanks!", spanish:"Responde a la pregunta '¿Cómo estás?'."},
+      {prompt:"'Good ___!' (10am)", answer:"morning", spanish:"Completa el saludo para las 10 de la mañana."},
+      {prompt:"'Good ___!' (3pm)", answer:"afternoon", spanish:"Completa el saludo para las 3 de la tarde."},
       {prompt:"Say your name and country in one sentence.", answer:"I'm [name], I'm from [country].", spanish:"Di tu nombre y tu país en una frase."},
-      {prompt:"'How ___ are you?' (asking age)", answer:"old"},
+      {prompt:"'How ___ are you?' (asking age)", answer:"old", spanish:"Completa la pregunta para preguntar la edad de alguien."},
       {prompt:"Say goodbye to a friend.", answer:"Bye! / See you later!", spanish:"Di adiós a un amigo."},
-      {prompt:"'___ to meet you' — one word.", answer:"Nice / Good / Pleased"},
+      {prompt:"'___ to meet you' — one word.", answer:"Nice / Good / Pleased", spanish:"Completa la expresión con una palabra."},
       {prompt:"Ask someone how old they are.", answer:"How old are you?", spanish:"Pregunta la edad de alguien."},
-      {prompt:"'I ___ from Spain.' (to be)", answer:"am"},
-      {prompt:"'My ___ is Anna.' (what you're called)", answer:"name"},
+      {prompt:"'I ___ from Spain.' (to be)", answer:"am", spanish:"Completa la frase con la forma correcta del verbo 'to be'."},
+      {prompt:"'My ___ is Anna.' (what you're called)", answer:"name", spanish:"Completa la frase para decir tu nombre."},
       {prompt:"Greet your teacher in the morning.", answer:"Good morning!", spanish:"Saluda a tu profesor/a por la mañana."},
       {prompt:"Say 'see you tomorrow' in English.", answer:"See you tomorrow!", spanish:"Di \"hasta mañana\" en inglés."},
-      {prompt:"'___ your name?' (question form)", answer:"What's"},
-      {prompt:"'Thank ___!' ", answer:"you"},
+      {prompt:"'___ your name?' (question form)", answer:"What's", spanish:"Completa la pregunta para preguntar el nombre de alguien."},
+      {prompt:"'Thank ___!' ", answer:"you", spanish:"Completa la expresión para dar las gracias."},
       {prompt:"Say please and thank you in a sentence.", answer:"(free answer)", spanish:"Di \"por favor\" y \"gracias\" en una frase."},
       {prompt:"Ask a classmate where they are from.", answer:"Where are you from?", spanish:"Pregunta a un compañero de dónde es."},
     ],
@@ -2089,26 +2089,26 @@ export const TOPIC_LIBRARY = {
       {word:"my"},{word:"your"},{word:"our"},{word:"share"},
     ],
     hotPotatoPrompts: [
-      {prompt:"'___ is my friend Ana.' (introducing her)", answer:"This"},
-      {prompt:"'___ name is Marco.' (he)", answer:"His"},
-      {prompt:"'___ name is Sofia.' (she)", answer:"Her"},
-      {prompt:"'These ___ my parents.'", answer:"are"},
+      {prompt:"'___ is my friend Ana.' (introducing her)", answer:"This", spanish:"Completa la frase para presentar a alguien."},
+      {prompt:"'___ name is Marco.' (he)", answer:"His", spanish:"Completa la frase con el adjetivo posesivo correcto para 'he'."},
+      {prompt:"'___ name is Sofia.' (she)", answer:"Her", spanish:"Completa la frase con el adjetivo posesivo correcto para 'she'."},
+      {prompt:"'These ___ my parents.'", answer:"are", spanish:"Completa la frase con la forma correcta del verbo 'to be'."},
       {prompt:"Introduce your brother using 'This is...'", answer:"This is my brother.", spanish:"Presenta a tu hermano usando \"This is...\"."},
-      {prompt:"'His name ___ Tom.'", answer:"is"},
-      {prompt:"'___ are my friends.' (more than one)", answer:"These"},
-      {prompt:"'___ names are Ana and Carlos.' (they)", answer:"Their"},
-      {prompt:"'My ___ is Carlos.' (teacher is male)", answer:"teacher's name"},
-      {prompt:"'Her bag is ___.' (colour — you choose)", answer:"(any colour)"},
-      {prompt:"'This is ___.' (introduce someone)", answer:"(a name)"},
-      {prompt:"'___ is my sister.' — which word introduces?", answer:"This"},
-      {prompt:"'His/Her/Their' — what type of word?", answer:"possessive adjective"},
-      {prompt:"'Their house is big.' — how many people?", answer:"more than one"},
+      {prompt:"'His name ___ Tom.'", answer:"is", spanish:"Completa la frase con la forma correcta del verbo 'to be'."},
+      {prompt:"'___ are my friends.' (more than one)", answer:"These", spanish:"Completa la frase eligiendo entre 'This' y 'These'."},
+      {prompt:"'___ names are Ana and Carlos.' (they)", answer:"Their", spanish:"Completa la frase con el adjetivo posesivo correcto para 'they'."},
+      {prompt:"'My ___ is Carlos.' (teacher is male)", answer:"teacher's name", spanish:"Completa la frase para decir el nombre de tu profesor."},
+      {prompt:"'Her bag is ___.' (colour — you choose)", answer:"(any colour)", spanish:"Completa la frase con un color."},
+      {prompt:"'This is ___.' (introduce someone)", answer:"(a name)", spanish:"Completa la frase para presentar a alguien."},
+      {prompt:"'___ is my sister.' — which word introduces?", answer:"This", spanish:"Elige la palabra correcta para presentar a alguien."},
+      {prompt:"'His/Her/Their' — what type of word?", answer:"possessive adjective", spanish:"Responde: ¿qué tipo de palabra son 'his', 'her' y 'their'?"},
+      {prompt:"'Their house is big.' — how many people?", answer:"more than one", spanish:"Responde: ¿cuántas personas hay en 'their house'?"},
       {prompt:"Introduce two friends at once.", answer:"These are my friends...", spanish:"Presenta a dos amigos al mismo tiempo."},
-      {prompt:"'Meet ___! She is my ___.' (introduce a female)", answer:"(free answer)"},
-      {prompt:"'___ phone is new.' (Marco)", answer:"His"},
-      {prompt:"'___ bag is red.' (Ana)", answer:"Her"},
-      {prompt:"'___ teacher is kind.' (our class)", answer:"Our"},
-      {prompt:"Use 'his' in a sentence about a male classmate.", answer:"(free answer)"},
+      {prompt:"'Meet ___! She is my ___.' (introduce a female)", answer:"(free answer)", spanish:"Completa la frase para presentar a una mujer."},
+      {prompt:"'___ phone is new.' (Marco)", answer:"His", spanish:"Completa la frase con el adjetivo posesivo correcto para 'Marco'."},
+      {prompt:"'___ bag is red.' (Ana)", answer:"Her", spanish:"Completa la frase con el adjetivo posesivo correcto para 'Ana'."},
+      {prompt:"'___ teacher is kind.' (our class)", answer:"Our", spanish:"Completa la frase con el adjetivo posesivo correcto para 'our class'."},
+      {prompt:"Use 'his' in a sentence about a male classmate.", answer:"(free answer)", spanish:"Escribe una frase usando 'his' sobre un compañero de clase."},
     ],
     auctionSentences: [
       { sentence:"This is my colleague Sam. He works in the marketing department.", isCorrect:true, explanation:"'He' correctly uses the subject pronoun to describe Sam." },
@@ -2191,25 +2191,25 @@ export const TOPIC_LIBRARY = {
       {word:"weekday"},{word:"weekend"},{word:"morning"},{word:"evening"},
     ],
     hotPotatoPrompts: [
-      {prompt:"'She ___ to school.' (go — she)", answer:"goes"},
-      {prompt:"'He ___ like coffee.' (negative)", answer:"doesn't"},
-      {prompt:"'___ you speak English?' (question)", answer:"Do"},
-      {prompt:"'___ she work here?' (question)", answer:"Does"},
-      {prompt:"'They ___ (not) play football.'", answer:"don't"},
-      {prompt:"'I ___ in Madrid.' (live)", answer:"live"},
-      {prompt:"'She ___ early.' (wake up — she)", answer:"wakes up"},
-      {prompt:"'He ___ English.' (teach — he)", answer:"teaches"},
-      {prompt:"Present simple — for habits or now?", answer:"habits"},
-      {prompt:"'Do' or 'does' for he/she/it?", answer:"does"},
-      {prompt:"'She ___ a dog.' (have — she)", answer:"has"},
-      {prompt:"'They ___ happy.' (be)", answer:"are"},
+      {prompt:"'She ___ to school.' (go — she)", answer:"goes", spanish:"Completa el espacio con la forma correcta del verbo 'go' en presente simple."},
+      {prompt:"'He ___ like coffee.' (negative)", answer:"doesn't", spanish:"Completa el espacio con la forma negativa correcta en presente simple."},
+      {prompt:"'___ you speak English?' (question)", answer:"Do", spanish:"Completa la pregunta con la palabra correcta en presente simple."},
+      {prompt:"'___ she work here?' (question)", answer:"Does", spanish:"Completa la pregunta con la palabra correcta en presente simple."},
+      {prompt:"'They ___ (not) play football.'", answer:"don't", spanish:"Completa el espacio con la forma negativa correcta en presente simple."},
+      {prompt:"'I ___ in Madrid.' (live)", answer:"live", spanish:"Completa el espacio con la forma correcta del verbo 'live' en presente simple."},
+      {prompt:"'She ___ early.' (wake up — she)", answer:"wakes up", spanish:"Completa el espacio con la forma correcta del verbo 'wake up' en presente simple."},
+      {prompt:"'He ___ English.' (teach — he)", answer:"teaches", spanish:"Completa el espacio con la forma correcta del verbo 'teach' en presente simple."},
+      {prompt:"Present simple — for habits or now?", answer:"habits", spanish:"¿El presente simple se usa para hábitos o para el momento actual?"},
+      {prompt:"'Do' or 'does' for he/she/it?", answer:"does", spanish:"¿Se usa 'do' o 'does' con he/she/it?"},
+      {prompt:"'She ___ a dog.' (have — she)", answer:"has", spanish:"Completa el espacio con la forma correcta del verbo 'have' en presente simple."},
+      {prompt:"'They ___ happy.' (be)", answer:"are", spanish:"Completa el espacio con la forma correcta del verbo 'be' en presente simple."},
       {prompt:"Say something you do every day.", answer:"(free answer)", spanish:"Di algo que haces todos los días."},
-      {prompt:"'He ___ TV every evening.' (watch)", answer:"watches"},
-      {prompt:"'___ he like pizza?'", answer:"Does"},
-      {prompt:"'She always ___ the bus.' (take)", answer:"takes"},
-      {prompt:"'We ___ school on Sundays.' (not have)", answer:"don't have"},
-      {prompt:"'I ___ coffee in the morning.' (drink)", answer:"drink"},
-      {prompt:"'Does she ___?' — verb form after 'does'?", answer:"base form"},
+      {prompt:"'He ___ TV every evening.' (watch)", answer:"watches", spanish:"Completa el espacio con la forma correcta del verbo 'watch' en presente simple."},
+      {prompt:"'___ he like pizza?'", answer:"Does", spanish:"Completa la pregunta con la palabra correcta en presente simple."},
+      {prompt:"'She always ___ the bus.' (take)", answer:"takes", spanish:"Completa el espacio con la forma correcta del verbo 'take' en presente simple."},
+      {prompt:"'We ___ school on Sundays.' (not have)", answer:"don't have", spanish:"Completa el espacio con la forma negativa correcta del verbo 'have' en presente simple."},
+      {prompt:"'I ___ coffee in the morning.' (drink)", answer:"drink", spanish:"Completa el espacio con la forma correcta del verbo 'drink' en presente simple."},
+      {prompt:"'Does she ___?' — verb form after 'does'?", answer:"base form", spanish:"¿Qué forma del verbo se usa después de 'does'?"},
       {prompt:"Say where someone you know works.", answer:"(free answer)", spanish:"Di dónde trabaja alguien que conoces."},
     ],
     auctionSentences: [
@@ -2293,26 +2293,26 @@ export const TOPIC_LIBRARY = {
       {word:"summer"},{word:"winter"},{word:"maths"},{word:"fast food"},
     ],
     hotPotatoPrompts: [
-      {prompt:"'I love ___ing.' (name an activity)", answer:"(free answer)"},
-      {prompt:"'She ___ football.' (like — she)", answer:"likes"},
-      {prompt:"'I don't ___ getting up early.'", answer:"like"},
-      {prompt:"Complete: 'I like ___ing after school.'", answer:"(free — playing, reading, cooking)"},
-      {prompt:"'He ___ horror films.' (hate)", answer:"hates"},
+      {prompt:"'I love ___ing.' (name an activity)", answer:"(free answer)", spanish:"Completa la frase con una actividad, usando la forma '-ing'."},
+      {prompt:"'She ___ football.' (like — she)", answer:"likes", spanish:"Completa el espacio con la forma correcta del verbo 'like' en presente simple."},
+      {prompt:"'I don't ___ getting up early.'", answer:"like", spanish:"Completa el espacio con la forma correcta del verbo 'like'."},
+      {prompt:"Complete: 'I like ___ing after school.'", answer:"(free — playing, reading, cooking)", spanish:"Completa la frase con una actividad, usando la forma '-ing'."},
+      {prompt:"'He ___ horror films.' (hate)", answer:"hates", spanish:"Completa el espacio con la forma correcta del verbo 'hate' en presente simple."},
       {prompt:"Name something you love.", answer:"(free answer)", spanish:"Nombra algo que te encanta."},
       {prompt:"Name something you hate.", answer:"(free answer)", spanish:"Nombra algo que odias."},
-      {prompt:"'___ you like spiders?' (question)", answer:"Do"},
-      {prompt:"'She ___ coffee.' (not like)", answer:"doesn't like"},
-      {prompt:"'I enjoy ___.' (name something)", answer:"(free — swimming, reading)"},
-      {prompt:"Choose the stronger feeling: 'I like pizza' or 'I love pizza'?", answer:"I love pizza."},
-      {prompt:"'I ___ cleaning.' (hate)", answer:"hate"},
-      {prompt:"'He loves ___ing.' (cook)", answer:"cooking"},
-      {prompt:"'___ he like sport?' (question)", answer:"Does"},
+      {prompt:"'___ you like spiders?' (question)", answer:"Do", spanish:"Completa la pregunta con la palabra correcta."},
+      {prompt:"'She ___ coffee.' (not like)", answer:"doesn't like", spanish:"Completa el espacio con la forma negativa correcta del verbo 'like'."},
+      {prompt:"'I enjoy ___.' (name something)", answer:"(free — swimming, reading)", spanish:"Completa la frase nombrando algo que disfrutas."},
+      {prompt:"Choose the stronger feeling: 'I like pizza' or 'I love pizza'?", answer:"I love pizza.", spanish:"Elige la frase que expresa un sentimiento más fuerte."},
+      {prompt:"'I ___ cleaning.' (hate)", answer:"hate", spanish:"Completa el espacio con la forma correcta del verbo 'hate'."},
+      {prompt:"'He loves ___ing.' (cook)", answer:"cooking", spanish:"Completa el espacio con la forma correcta del verbo 'cook' en forma '-ing'."},
+      {prompt:"'___ he like sport?' (question)", answer:"Does", spanish:"Completa la pregunta con la palabra correcta."},
       {prompt:"Name a food you love.", answer:"(free answer)", spanish:"Nombra una comida que te encanta."},
       {prompt:"Name a subject you don't like.", answer:"(free answer)", spanish:"Nombra una asignatura que no te gusta."},
-      {prompt:"'I ___ like waiting.' (not)", answer:"don't"},
-      {prompt:"'They ___ the film.' (not enjoy)", answer:"didn't enjoy"},
+      {prompt:"'I ___ like waiting.' (not)", answer:"don't", spanish:"Completa el espacio con la forma negativa correcta."},
+      {prompt:"'They ___ the film.' (not enjoy)", answer:"didn't enjoy", spanish:"Completa el espacio con la forma negativa correcta del verbo 'enjoy' en pasado."},
       {prompt:"Say what your best friend loves.", answer:"(free answer)", spanish:"Di qué le encanta a tu mejor amigo/a."},
-      {prompt:"'I can't stand ___.' (name something)", answer:"(free answer)"},
+      {prompt:"'I can't stand ___.' (name something)", answer:"(free answer)", spanish:"Completa la frase nombrando algo que no soportas."},
     ],
     auctionSentences: [
       { sentence:"I like listening to music on the way to school.", isCorrect:true, explanation:"'Like' is followed by a gerund (-ing), so 'listening' is correct here." },
@@ -2395,25 +2395,25 @@ export const TOPIC_LIBRARY = {
       {word:"hospital"},{word:"school"},{word:"restaurant"},{word:"office"},
     ],
     hotPotatoPrompts: [
-      {prompt:"'___ do you do?' (asking job)", answer:"What"},
-      {prompt:"'I ___ a teacher.' (to be)", answer:"am"},
-      {prompt:"'She is ___ nurse.' (article)", answer:"a"},
-      {prompt:"'He is ___ engineer.' (article)", answer:"an"},
-      {prompt:"Where does a doctor work?", answer:"hospital"},
-      {prompt:"Where does a chef work?", answer:"restaurant / kitchen"},
-      {prompt:"Where does a teacher work?", answer:"school"},
-      {prompt:"'I work ___ a hospital.' (preposition)", answer:"in"},
+      {prompt:"'___ do you do?' (asking job)", answer:"What", spanish:"Completa el espacio con la palabra correcta para preguntar sobre el trabajo de alguien."},
+      {prompt:"'I ___ a teacher.' (to be)", answer:"am", spanish:"Completa el espacio con la forma correcta del verbo 'to be'."},
+      {prompt:"'She is ___ nurse.' (article)", answer:"a", spanish:"Completa el espacio con el artículo correcto ('a' o 'an')."},
+      {prompt:"'He is ___ engineer.' (article)", answer:"an", spanish:"Completa el espacio con el artículo correcto ('a' o 'an')."},
+      {prompt:"Where does a doctor work?", answer:"hospital", spanish:"¿Dónde trabaja un médico?"},
+      {prompt:"Where does a chef work?", answer:"restaurant / kitchen", spanish:"¿Dónde trabaja un chef?"},
+      {prompt:"Where does a teacher work?", answer:"school", spanish:"¿Dónde trabaja un profesor/a?"},
+      {prompt:"'I work ___ a hospital.' (preposition)", answer:"in", spanish:"Completa el espacio con la preposición correcta."},
       {prompt:"Name a job that helps sick people.", answer:"doctor / nurse", spanish:"Nombra un trabajo que ayuda a los enfermos."},
       {prompt:"Name a job that flies planes.", answer:"pilot", spanish:"Nombra un trabajo que conduce aviones."},
-      {prompt:"'She ___ for a bank.' (work)", answer:"works"},
-      {prompt:"'What does he ___?' (asking job)", answer:"do"},
+      {prompt:"'She ___ for a bank.' (work)", answer:"works", spanish:"Completa el espacio con la forma correcta del verbo 'work'."},
+      {prompt:"'What does he ___?' (asking job)", answer:"do", spanish:"Completa el espacio con el verbo correcto para preguntar sobre su trabajo."},
       {prompt:"Name a job that teaches people.", answer:"teacher", spanish:"Nombra un trabajo que enseña a personas."},
-      {prompt:"'___ is your job?' (question word)", answer:"What"},
-      {prompt:"'He is a ___.' Name a job with uniform.", answer:"police officer / nurse / soldier"},
+      {prompt:"'___ is your job?' (question word)", answer:"What", spanish:"Completa el espacio con la palabra interrogativa correcta."},
+      {prompt:"'He is a ___.' Name a job with uniform.", answer:"police officer / nurse / soldier", spanish:"Nombra un trabajo que usa uniforme."},
       {prompt:"Name a job that makes food.", answer:"chef / baker / cook", spanish:"Nombra un trabajo relacionado con la comida."},
-      {prompt:"'Do you like your ___?' (asking about job)", answer:"job"},
+      {prompt:"'Do you like your ___?' (asking about job)", answer:"job", spanish:"Completa el espacio con la palabra correcta."},
       {prompt:"Name a job in a hospital that isn't a doctor.", answer:"nurse", spanish:"Nombra un trabajo en un hospital que no es médico."},
-      {prompt:"'A' or 'an' before 'artist'?", answer:"an"},
+      {prompt:"'A' or 'an' before 'artist'?", answer:"an", spanish:"Elige el artículo correcto antes de 'artist'."},
       {prompt:"Say your dream job in a sentence.", answer:"I want to be a ___", spanish:"Di cuál es tu trabajo soñado en una frase."},
     ],
     auctionSentences: [
@@ -2497,25 +2497,25 @@ export const TOPIC_LIBRARY = {
       {word:"chess"},{word:"gardening"},{word:"hiking"},{word:"photography"},
     ],
     hotPotatoPrompts: [
-      {prompt:"'I go ___.' (swimming — use go + -ing)", answer:"swimming"},
-      {prompt:"'I play ___.' (name a sport)", answer:"(football / tennis / chess)"},
-      {prompt:"'My hobby is ___.' (complete it)", answer:"(free answer)"},
-      {prompt:"'I go ___ing at weekends.' (cycle)", answer:"cycling"},
-      {prompt:"'She plays the ___.' (instrument)", answer:"(guitar / piano / violin)"},
-      {prompt:"'Go' + sport or 'play' + sport? Swimming?", answer:"go swimming"},
-      {prompt:"'Play' + sport or 'go' + sport? Football?", answer:"play football"},
+      {prompt:"'I go ___.' (swimming — use go + -ing)", answer:"swimming", spanish:"Completa el espacio con la forma correcta del verbo (go + -ing)."},
+      {prompt:"'I play ___.' (name a sport)", answer:"(football / tennis / chess)", spanish:"Nombra un deporte para completar la frase."},
+      {prompt:"'My hobby is ___.' (complete it)", answer:"(free answer)", spanish:"Completa la frase con tu hobby."},
+      {prompt:"'I go ___ing at weekends.' (cycle)", answer:"cycling", spanish:"Completa el espacio con la forma correcta del verbo 'cycle'."},
+      {prompt:"'She plays the ___.' (instrument)", answer:"(guitar / piano / violin)", spanish:"Nombra un instrumento para completar la frase."},
+      {prompt:"'Go' + sport or 'play' + sport? Swimming?", answer:"go swimming", spanish:"Elige 'go' o 'play' para 'swimming'."},
+      {prompt:"'Play' + sport or 'go' + sport? Football?", answer:"play football", spanish:"Elige 'play' o 'go' para 'football'."},
       {prompt:"Name a hobby you do inside.", answer:"(free answer)", spanish:"Nombra un hobby que haces en casa."},
       {prompt:"Name a hobby you do outside.", answer:"(free answer)", spanish:"Nombra un hobby que haces al aire libre."},
-      {prompt:"'I ___ reading.' (love)", answer:"love"},
-      {prompt:"'He goes ___.' (fish — use go + -ing)", answer:"fishing"},
-      {prompt:"'She plays ___.' (chess)", answer:"chess"},
-      {prompt:"'In my free time I ___.'", answer:"(free answer)"},
-      {prompt:"'Play' or 'go'? Tennis?", answer:"play tennis"},
-      {prompt:"'Play' or 'go'? Skiing?", answer:"go skiing"},
-      {prompt:"Name a hobby that uses a screen.", answer:"(gaming / watching films / photography)"},
-      {prompt:"Name a hobby that uses your hands.", answer:"(cooking / painting / knitting)"},
-      {prompt:"'She goes ___ in the mornings.' (run)", answer:"running"},
-      {prompt:"'My favourite ___ is reading.' (hobby word)", answer:"hobby"},
+      {prompt:"'I ___ reading.' (love)", answer:"love", spanish:"Completa el espacio con la forma correcta del verbo 'love'."},
+      {prompt:"'He goes ___.' (fish — use go + -ing)", answer:"fishing", spanish:"Completa el espacio con la forma correcta del verbo 'fish'."},
+      {prompt:"'She plays ___.' (chess)", answer:"chess", spanish:"Completa el espacio con la palabra correcta."},
+      {prompt:"'In my free time I ___.'", answer:"(free answer)", spanish:"Completa la frase sobre tu tiempo libre."},
+      {prompt:"'Play' or 'go'? Tennis?", answer:"play tennis", spanish:"Elige 'play' o 'go' para 'tennis'."},
+      {prompt:"'Play' or 'go'? Skiing?", answer:"go skiing", spanish:"Elige 'play' o 'go' para 'skiing'."},
+      {prompt:"Name a hobby that uses a screen.", answer:"(gaming / watching films / photography)", spanish:"Nombra un hobby que usa una pantalla."},
+      {prompt:"Name a hobby that uses your hands.", answer:"(cooking / painting / knitting)", spanish:"Nombra un hobby que usa las manos."},
+      {prompt:"'She goes ___ in the mornings.' (run)", answer:"running", spanish:"Completa el espacio con la forma correcta del verbo 'run'."},
+      {prompt:"'My favourite ___ is reading.' (hobby word)", answer:"hobby", spanish:"Completa el espacio con la palabra correcta."},
       {prompt:"Say what you do at the weekend.", answer:"(free answer)", spanish:"Di qué haces el fin de semana."},
     ],
     auctionSentences: [
@@ -2599,25 +2599,25 @@ export const TOPIC_LIBRARY = {
       {word:"stubborn"},{word:"cheerful"},{word:"ambitious"},{word:"caring"},
     ],
     hotPotatoPrompts: [
-      {prompt:"'She is very ___.' (always helps people)", answer:"kind / helpful"},
-      {prompt:"'He never speaks in class.' He is ___.", answer:"shy / quiet"},
-      {prompt:"'She makes everyone laugh.' She is ___.", answer:"funny / humorous"},
-      {prompt:"'He works 12 hours a day.' He is ___.", answer:"hardworking"},
-      {prompt:"'She never does her homework.' She is ___.", answer:"lazy"},
-      {prompt:"Opposite of 'lazy'?", answer:"hardworking"},
-      {prompt:"Opposite of 'shy'?", answer:"outgoing / confident"},
-      {prompt:"'He always tells the truth.' He is ___.", answer:"honest"},
-      {prompt:"'She shares everything.' She is ___.", answer:"generous"},
-      {prompt:"'He gets angry fast.' He is ___.", answer:"impatient"},
-      {prompt:"Opposite of 'mean'?", answer:"generous / kind"},
-      {prompt:"'She loves meeting new people.' She is ___.", answer:"outgoing / sociable"},
-      {prompt:"'He talks all the time.' He is ___.", answer:"talkative"},
-      {prompt:"'She thinks of new ideas.' She is ___.", answer:"creative"},
-      {prompt:"Opposite of 'serious'?", answer:"funny / light-hearted"},
-      {prompt:"'He never gets angry.' He is ___.", answer:"patient / calm"},
+      {prompt:"'She is very ___.' (always helps people)", answer:"kind / helpful", spanish:"Completa la frase con el adjetivo que describe a esta persona."},
+      {prompt:"'He never speaks in class.' He is ___.", answer:"shy / quiet", spanish:"Completa la frase con el adjetivo que describe a esta persona."},
+      {prompt:"'She makes everyone laugh.' She is ___.", answer:"funny / humorous", spanish:"Completa la frase con el adjetivo que describe a esta persona."},
+      {prompt:"'He works 12 hours a day.' He is ___.", answer:"hardworking", spanish:"Completa la frase con el adjetivo que describe a esta persona."},
+      {prompt:"'She never does her homework.' She is ___.", answer:"lazy", spanish:"Completa la frase con el adjetivo que describe a esta persona."},
+      {prompt:"Opposite of 'lazy'?", answer:"hardworking", spanish:"Di el opuesto de 'lazy'."},
+      {prompt:"Opposite of 'shy'?", answer:"outgoing / confident", spanish:"Di el opuesto de 'shy'."},
+      {prompt:"'He always tells the truth.' He is ___.", answer:"honest", spanish:"Completa la frase con el adjetivo que describe a esta persona."},
+      {prompt:"'She shares everything.' She is ___.", answer:"generous", spanish:"Completa la frase con el adjetivo que describe a esta persona."},
+      {prompt:"'He gets angry fast.' He is ___.", answer:"impatient", spanish:"Completa la frase con el adjetivo que describe a esta persona."},
+      {prompt:"Opposite of 'mean'?", answer:"generous / kind", spanish:"Di el opuesto de 'mean'."},
+      {prompt:"'She loves meeting new people.' She is ___.", answer:"outgoing / sociable", spanish:"Completa la frase con el adjetivo que describe a esta persona."},
+      {prompt:"'He talks all the time.' He is ___.", answer:"talkative", spanish:"Completa la frase con el adjetivo que describe a esta persona."},
+      {prompt:"'She thinks of new ideas.' She is ___.", answer:"creative", spanish:"Completa la frase con el adjetivo que describe a esta persona."},
+      {prompt:"Opposite of 'serious'?", answer:"funny / light-hearted", spanish:"Di el opuesto de 'serious'."},
+      {prompt:"'He never gets angry.' He is ___.", answer:"patient / calm", spanish:"Completa la frase con el adjetivo que describe a esta persona."},
       {prompt:"Describe your best friend in one word.", answer:"(free answer)", spanish:"Describe a tu mejor amigo/a con una palabra."},
-      {prompt:"'She always does her best.' She is ___.", answer:"ambitious / hardworking"},
-      {prompt:"Opposite of 'confident'?", answer:"shy / insecure"},
+      {prompt:"'She always does her best.' She is ___.", answer:"ambitious / hardworking", spanish:"Completa la frase con el adjetivo que describe a esta persona."},
+      {prompt:"Opposite of 'confident'?", answer:"shy / insecure", spanish:"Di el opuesto de 'confident'."},
       {prompt:"Describe yourself in one word.", answer:"(free answer)", spanish:"Descríbete a ti mismo/a con una palabra."},
     ],
     auctionSentences: [
@@ -2701,19 +2701,19 @@ export const TOPIC_LIBRARY = {
       {word:"jealous"},{word:"lonely"},{word:"relieved"},{word:"disgusted"},
     ],
     hotPotatoPrompts: [
-      {prompt:"'I got 100% on my test!' I feel ___.", answer:"happy / excited"},
-      {prompt:"'My dog died.' I feel ___.", answer:"sad"},
-      {prompt:"'I have an exam tomorrow.' I feel ___.", answer:"nervous"},
-      {prompt:"'Nothing is happening.' I feel ___.", answer:"bored"},
-      {prompt:"'Someone took my lunch!' I feel ___.", answer:"angry"},
-      {prompt:"'There's a spider on my arm!' I feel ___.", answer:"scared"},
-      {prompt:"'I worked 10 hours.' I feel ___.", answer:"tired / exhausted"},
-      {prompt:"'I haven't eaten all day.' I feel ___.", answer:"hungry"},
-      {prompt:"Opposite of 'happy'?", answer:"sad"},
-      {prompt:"Opposite of 'calm'?", answer:"nervous / stressed"},
-      {prompt:"'She ___ happy today.' (to look)", answer:"looks"},
-      {prompt:"'I feel ___.' (after finishing a big project)", answer:"relieved / proud"},
-      {prompt:"'He ___ nervous before the presentation.'", answer:"felt"},
+      {prompt:"'I got 100% on my test!' I feel ___.", answer:"happy / excited", spanish:"Completa la frase con el sentimiento correcto según la situación."},
+      {prompt:"'My dog died.' I feel ___.", answer:"sad", spanish:"Completa la frase con el sentimiento correcto según la situación."},
+      {prompt:"'I have an exam tomorrow.' I feel ___.", answer:"nervous", spanish:"Completa la frase con el sentimiento correcto según la situación."},
+      {prompt:"'Nothing is happening.' I feel ___.", answer:"bored", spanish:"Completa la frase con el sentimiento correcto según la situación."},
+      {prompt:"'Someone took my lunch!' I feel ___.", answer:"angry", spanish:"Completa la frase con el sentimiento correcto según la situación."},
+      {prompt:"'There's a spider on my arm!' I feel ___.", answer:"scared", spanish:"Completa la frase con el sentimiento correcto según la situación."},
+      {prompt:"'I worked 10 hours.' I feel ___.", answer:"tired / exhausted", spanish:"Completa la frase con el sentimiento correcto según la situación."},
+      {prompt:"'I haven't eaten all day.' I feel ___.", answer:"hungry", spanish:"Completa la frase con el sentimiento correcto según la situación."},
+      {prompt:"Opposite of 'happy'?", answer:"sad", spanish:"Di el opuesto de 'happy'."},
+      {prompt:"Opposite of 'calm'?", answer:"nervous / stressed", spanish:"Di el opuesto de 'calm'."},
+      {prompt:"'She ___ happy today.' (to look)", answer:"looks", spanish:"Completa el espacio con la forma correcta del verbo 'to look'."},
+      {prompt:"'I feel ___.' (after finishing a big project)", answer:"relieved / proud", spanish:"Completa la frase con el sentimiento correcto después de terminar un proyecto grande."},
+      {prompt:"'He ___ nervous before the presentation.'", answer:"felt", spanish:"Completa el espacio con la forma correcta del verbo 'to feel' en pasado."},
       {prompt:"Name a feeling you have on your birthday.", answer:"(free — happy, excited)", spanish:"Nombra un sentimiento que tienes en tu cumpleaños."},
       {prompt:"Name a feeling before an exam.", answer:"nervous / scared / stressed", spanish:"Nombra un sentimiento antes de un examen."},
       {prompt:"'You got the job!' How do you feel?", answer:"(free — happy, excited, relieved)", spanish:"¡Conseguiste el trabajo! ¿Cómo te sientes?"},
@@ -2803,26 +2803,26 @@ export const TOPIC_LIBRARY = {
       {word:"big nose"},{word:"long hair"},{word:"short hair"},{word:"smile"},
     ],
     hotPotatoPrompts: [
-      {prompt:"'She ___ tall.' (to be)", answer:"is"},
-      {prompt:"'He ___ dark hair.' (to have)", answer:"has"},
-      {prompt:"'Is' or 'has'? She ___ blue eyes.", answer:"has"},
-      {prompt:"'Is' or 'has'? He ___ short.", answer:"is"},
+      {prompt:"'She ___ tall.' (to be)", answer:"is", spanish:"Completa el espacio con la forma correcta del verbo 'to be'."},
+      {prompt:"'He ___ dark hair.' (to have)", answer:"has", spanish:"Completa el espacio con la forma correcta del verbo 'to have'."},
+      {prompt:"'Is' or 'has'? She ___ blue eyes.", answer:"has", spanish:"Elige 'is' o 'has' para completar la frase."},
+      {prompt:"'Is' or 'has'? He ___ short.", answer:"is", spanish:"Elige 'is' o 'has' para completar la frase."},
       {prompt:"Describe your hair in one sentence.", answer:"(free answer)", spanish:"Describe tu pelo en una frase."},
-      {prompt:"'She has ___ hair.' (not straight)", answer:"curly / wavy"},
-      {prompt:"'He is very ___.' (2 metres tall)", answer:"tall"},
-      {prompt:"Opposite of 'tall'?", answer:"short"},
-      {prompt:"'___ does she look like?' (question)", answer:"What"},
-      {prompt:"Describe someone's eye colour.", answer:"She has ___ eyes."},
-      {prompt:"'He has a ___.' (hair on his face)", answer:"beard"},
-      {prompt:"'She wears ___.' (to see better)", answer:"glasses"},
+      {prompt:"'She has ___ hair.' (not straight)", answer:"curly / wavy", spanish:"Completa el espacio con la palabra correcta para describir el pelo."},
+      {prompt:"'He is very ___.' (2 metres tall)", answer:"tall", spanish:"Completa el espacio con el adjetivo correcto."},
+      {prompt:"Opposite of 'tall'?", answer:"short", spanish:"Di el opuesto de 'tall'."},
+      {prompt:"'___ does she look like?' (question)", answer:"What", spanish:"Completa el espacio con la palabra interrogativa correcta."},
+      {prompt:"Describe someone's eye colour.", answer:"She has ___ eyes.", spanish:"Describe el color de ojos de alguien."},
+      {prompt:"'He has a ___.' (hair on his face)", answer:"beard", spanish:"Completa el espacio con la palabra correcta."},
+      {prompt:"'She wears ___.' (to see better)", answer:"glasses", spanish:"Completa el espacio con la palabra correcta."},
       {prompt:"Describe your teacher's hair.", answer:"(free answer)", spanish:"Describe el pelo de tu profesor/a."},
-      {prompt:"'She is ___.' (not fat, not thin)", answer:"slim / medium build"},
-      {prompt:"'Blonde' describes?", answer:"hair colour"},
-      {prompt:"'Tall' describes?", answer:"height"},
-      {prompt:"Use 'has' to describe someone's hair.", answer:"(free answer)"},
-      {prompt:"Use 'is' to describe someone's height.", answer:"(free answer)"},
+      {prompt:"'She is ___.' (not fat, not thin)", answer:"slim / medium build", spanish:"Completa el espacio con el adjetivo correcto."},
+      {prompt:"'Blonde' describes?", answer:"hair colour", spanish:"¿Qué describe la palabra 'blonde'?"},
+      {prompt:"'Tall' describes?", answer:"height", spanish:"¿Qué describe la palabra 'tall'?"},
+      {prompt:"Use 'has' to describe someone's hair.", answer:"(free answer)", spanish:"Usa 'has' para describir el pelo de alguien."},
+      {prompt:"Use 'is' to describe someone's height.", answer:"(free answer)", spanish:"Usa 'is' para describir la estatura de alguien."},
       {prompt:"Describe a famous person's appearance.", answer:"(free answer)", spanish:"Describe el aspecto de una persona famosa."},
-      {prompt:"'He is ___ height.' (not short, not tall)", answer:"medium"},
+      {prompt:"'He is ___ height.' (not short, not tall)", answer:"medium", spanish:"Completa el espacio con la palabra correcta."},
     ],
     auctionSentences: [
       { sentence:"She has long, curly hair and green eyes.", isCorrect:true, explanation:"'Has' correctly matches the third person singular subject for physical features." },
@@ -2905,24 +2905,24 @@ export const TOPIC_LIBRARY = {
       {word:"uniform"},{word:"pyjamas"},{word:"swimsuit"},{word:"raincoat"},
     ],
     hotPotatoPrompts: [
-      {prompt:"'She is ___ing a red dress.' (wear)", answer:"wearing"},
-      {prompt:"'He is wearing ___.' (name any clothes)", answer:"(free answer)"},
-      {prompt:"Name something you wear on your feet.", answer:"shoes / boots / socks"},
-      {prompt:"Name something you wear in winter.", answer:"coat / scarf / gloves / jumper"},
-      {prompt:"Name something you wear in summer.", answer:"shorts / T-shirt / sandals / dress"},
-      {prompt:"'He is ___ a suit.' (wear — present continuous)", answer:"wearing"},
-      {prompt:"Name something you wear on your head.", answer:"hat / cap"},
-      {prompt:"Name something you wear around your neck.", answer:"scarf / tie / necklace"},
-      {prompt:"'She is wearing a ___.' (formal work item)", answer:"suit / jacket / blouse"},
-      {prompt:"'I am ___ jeans and a T-shirt.'", answer:"wearing"},
-      {prompt:"'Is wearing' — what tense?", answer:"present continuous"},
+      {prompt:"'She is ___ing a red dress.' (wear)", answer:"wearing", spanish:"Completa el espacio con la forma correcta del verbo 'wear' en presente continuo."},
+      {prompt:"'He is wearing ___.' (name any clothes)", answer:"(free answer)", spanish:"Completa la frase con una prenda de ropa que él lleva puesta."},
+      {prompt:"Name something you wear on your feet.", answer:"shoes / boots / socks", spanish:"Nombra algo que llevas en los pies."},
+      {prompt:"Name something you wear in winter.", answer:"coat / scarf / gloves / jumper", spanish:"Nombra algo que llevas en invierno."},
+      {prompt:"Name something you wear in summer.", answer:"shorts / T-shirt / sandals / dress", spanish:"Nombra algo que llevas en verano."},
+      {prompt:"'He is ___ a suit.' (wear — present continuous)", answer:"wearing", spanish:"Completa el espacio con la forma correcta del verbo 'wear' en presente continuo."},
+      {prompt:"Name something you wear on your head.", answer:"hat / cap", spanish:"Nombra algo que llevas en la cabeza."},
+      {prompt:"Name something you wear around your neck.", answer:"scarf / tie / necklace", spanish:"Nombra algo que llevas alrededor del cuello."},
+      {prompt:"'She is wearing a ___.' (formal work item)", answer:"suit / jacket / blouse", spanish:"Completa la frase con una prenda de ropa formal para el trabajo."},
+      {prompt:"'I am ___ jeans and a T-shirt.'", answer:"wearing", spanish:"Completa el espacio con la forma correcta del verbo 'wear' en presente continuo."},
+      {prompt:"'Is wearing' — what tense?", answer:"present continuous", spanish:"¿Qué tiempo verbal es 'is wearing'?"},
       {prompt:"Describe what you're wearing now.", answer:"(free answer)", spanish:"Describe lo que llevas puesto ahora."},
       {prompt:"'He is ___ wearing a tie.' (negative)", answer:"not", spanish:"Él ___ lleva corbata. (negativo)"},
       {prompt:"Name a piece of clothing that's blue.", answer:"(free answer)", spanish:"Nombra una prenda de ropa azul."},
-      {prompt:"Name a piece of clothing for sport.", answer:"trainers / shorts / T-shirt"},
-      {prompt:"'She wears a ___.' (protection from rain)", answer:"raincoat"},
-      {prompt:"Name a clothing item for cold hands.", answer:"gloves"},
-      {prompt:"'They are wearing ___.' (school clothes)", answer:"uniforms"},
+      {prompt:"Name a piece of clothing for sport.", answer:"trainers / shorts / T-shirt", spanish:"Nombra una prenda de ropa para hacer deporte."},
+      {prompt:"'She wears a ___.' (protection from rain)", answer:"raincoat", spanish:"Completa la frase con una prenda que protege de la lluvia."},
+      {prompt:"Name a clothing item for cold hands.", answer:"gloves", spanish:"Nombra una prenda de ropa para las manos frías."},
+      {prompt:"'They are wearing ___.' (school clothes)", answer:"uniforms", spanish:"Completa la frase con el nombre de la ropa escolar."},
       {prompt:"What is your teacher wearing today?", answer:"(free answer)", spanish:"¿Qué lleva tu profesor/a hoy?"},
       {prompt:"'He is wearing a ___ jacket.' (colour)", answer:"(free answer)", spanish:"Él lleva una chaqueta ___. (color)"},
     ],
@@ -4854,7 +4854,7 @@ export const TOPIC_LIBRARY = {
       {prompt:"Name one problem with city life.", answer:"(free — pollution, congestion, high cost, stress)"},
       {prompt:"Name one problem with rural life.", answer:"(free — isolation, poor transport, limited jobs, services)"},
       {prompt:"What are the suburbs?", answer:"the residential areas on the outskirts of a city"},
-      {prompt:"What does 'commute' mean?", answer:"to travel regularly between home and work"},
+      {prompt:"What does 'commute' mean?", answer:"to travel regularly between home and work", spanish:"¿Qué significa 'commute'?"},
       {prompt:"How has remote working changed where people choose to live?", answer:"(free — people can now live further from cities)"},
       {prompt:"What is rural depopulation?", answer:"the decline in population in rural areas as people move to cities"},
       {prompt:"Which do you prefer — city or country? Why?", answer:"(free answer)"},
@@ -5611,26 +5611,26 @@ export const TOPIC_LIBRARY = {
       {word:"question word"},{word:"auxiliary"},{word:"base verb"},{word:"intonation"},
     ],
     hotPotatoPrompts: [
-      {prompt:"Question word for place?", answer:"where"},
-      {prompt:"Question word for time?", answer:"when"},
-      {prompt:"Question word for reason?", answer:"why"},
-      {prompt:"Question word for person?", answer:"who"},
-      {prompt:"Question word for thing?", answer:"what"},
-      {prompt:"Question word for manner?", answer:"how"},
-      {prompt:"Question word for quantity (countable)?", answer:"how many"},
-      {prompt:"Question word for price or uncountable?", answer:"how much"},
-      {prompt:"Question word for frequency?", answer:"how often"},
-      {prompt:"Question word for duration?", answer:"how long"},
-      {prompt:"'___ she work?' (third person present)", answer:"Does"},
-      {prompt:"'___ you go?' (past)", answer:"Did"},
-      {prompt:"Choose: 'Does she work?' or 'Does she works?'?", answer:"Does she work?"},
-      {prompt:"Choose: 'Did you see her?' or 'Did you saw her?'?", answer:"Did you see her?"},
-      {prompt:"Which is correct: 'Who called you?' or 'Who did call you?'", answer:"Who called you?"},
-      {prompt:"Which is correct: 'Who you called?' or 'Who did you call?'", answer:"Who did you call?"},
-      {prompt:"Make a question: 'She works in a hospital.'", answer:"Does she work in a hospital?"},
-      {prompt:"Make a past question about time.", answer:"(free — When did she arrive?)"},
-      {prompt:"'What ___ you do last night?' (did/does/do)", answer:"did"},
-      {prompt:"Make a question with 'How often'.", answer:"(free — How often do you exercise?)"},
+      {prompt:"Question word for place?", answer:"where", spanish:"¿Qué palabra interrogativa se usa para el lugar?"},
+      {prompt:"Question word for time?", answer:"when", spanish:"¿Qué palabra interrogativa se usa para el tiempo?"},
+      {prompt:"Question word for reason?", answer:"why", spanish:"¿Qué palabra interrogativa se usa para la razón?"},
+      {prompt:"Question word for person?", answer:"who", spanish:"¿Qué palabra interrogativa se usa para la persona?"},
+      {prompt:"Question word for thing?", answer:"what", spanish:"¿Qué palabra interrogativa se usa para la cosa?"},
+      {prompt:"Question word for manner?", answer:"how", spanish:"¿Qué palabra interrogativa se usa para la manera?"},
+      {prompt:"Question word for quantity (countable)?", answer:"how many", spanish:"¿Qué palabra interrogativa se usa para la cantidad (contable)?"},
+      {prompt:"Question word for price or uncountable?", answer:"how much", spanish:"¿Qué palabra interrogativa se usa para el precio o lo incontable?"},
+      {prompt:"Question word for frequency?", answer:"how often", spanish:"¿Qué palabra interrogativa se usa para la frecuencia?"},
+      {prompt:"Question word for duration?", answer:"how long", spanish:"¿Qué palabra interrogativa se usa para la duración?"},
+      {prompt:"'___ she work?' (third person present)", answer:"Does", spanish:"Completa el espacio con el auxiliar correcto en presente simple, tercera persona."},
+      {prompt:"'___ you go?' (past)", answer:"Did", spanish:"Completa el espacio con el auxiliar correcto para la pregunta en pasado."},
+      {prompt:"Choose: 'Does she work?' or 'Does she works?'?", answer:"Does she work?", spanish:"Elige la pregunta correcta."},
+      {prompt:"Choose: 'Did you see her?' or 'Did you saw her?'?", answer:"Did you see her?", spanish:"Elige la pregunta correcta."},
+      {prompt:"Which is correct: 'Who called you?' or 'Who did call you?'", answer:"Who called you?", spanish:"Elige la pregunta correcta."},
+      {prompt:"Which is correct: 'Who you called?' or 'Who did you call?'", answer:"Who did you call?", spanish:"Elige la pregunta correcta."},
+      {prompt:"Make a question: 'She works in a hospital.'", answer:"Does she work in a hospital?", spanish:"Convierte la frase en una pregunta."},
+      {prompt:"Make a past question about time.", answer:"(free — When did she arrive?)", spanish:"Haz una pregunta en pasado sobre el tiempo."},
+      {prompt:"'What ___ you do last night?' (did/does/do)", answer:"did", spanish:"Elige la palabra correcta para completar la pregunta en pasado."},
+      {prompt:"Make a question with 'How often'.", answer:"(free — How often do you exercise?)", spanish:"Haz una pregunta usando 'How often'."},
     ],
     auctionSentences: [
       { sentence:"What time does the pharmacy open on Sundays?", isCorrect:true, explanation:"Correct wh- question: what time + does + subject + base verb." },
@@ -5713,26 +5713,26 @@ export const TOPIC_LIBRARY = {
       {word:"nearby"},{word:"in the room"},{word:"on the table"},{word:"in my bag"},
     ],
     hotPotatoPrompts: [
-      {prompt:"'___ a dog in the garden.'", answer:"There is"},
-      {prompt:"'___ three cats on the roof.'", answer:"There are"},
-      {prompt:"'___ any milk?' (question)", answer:"Is there"},
-      {prompt:"'___ any eggs?' (question, plural)", answer:"Are there"},
-      {prompt:"'___ (not) a bus stop here.'", answer:"There isn't"},
-      {prompt:"'___ (not) any seats.'", answer:"There aren't"},
-      {prompt:"'There ___ fifty people at the party.' (past)", answer:"were"},
-      {prompt:"'There ___ a problem yesterday.' (past)", answer:"was"},
-      {prompt:"Uncountable noun → 'there is' or 'there are'?", answer:"there is"},
-      {prompt:"'There is a lot of people.' — correct?", answer:"no — 'There are a lot of people'"},
-      {prompt:"'How many rooms ___ in the house?'", answer:"are there"},
-      {prompt:"'It is a nice park near school.' — correct?", answer:"no — 'There is a nice park'"},
-      {prompt:"'There aren't no chairs.' — correct?", answer:"no — 'There aren't any chairs'"},
-      {prompt:"Negative singular: 'There ___ any water.'", answer:"isn't"},
-      {prompt:"Negative plural: 'There ___ any students.'", answer:"aren't"},
-      {prompt:"Describe your classroom using 'there is/are'.", answer:"(free answer)"},
-      {prompt:"'There was a cinema here.' — is the cinema still there?", answer:"probably not"},
-      {prompt:"'___ a lot of noise last night.' (past)", answer:"There was"},
-      {prompt:"'Some' or 'any' in negatives?", answer:"any"},
-      {prompt:"'Some' or 'any' in positive sentences?", answer:"some"},
+      {prompt:"'___ a dog in the garden.'", answer:"There is", spanish:"Completa el espacio con 'there is' o 'there are'."},
+      {prompt:"'___ three cats on the roof.'", answer:"There are", spanish:"Completa el espacio con 'there is' o 'there are'."},
+      {prompt:"'___ any milk?' (question)", answer:"Is there", spanish:"Completa el espacio para formar la pregunta con 'is there' o 'are there'."},
+      {prompt:"'___ any eggs?' (question, plural)", answer:"Are there", spanish:"Completa el espacio para formar la pregunta con 'is there' o 'are there'."},
+      {prompt:"'___ (not) a bus stop here.'", answer:"There isn't", spanish:"Completa el espacio con la forma negativa de 'there is'."},
+      {prompt:"'___ (not) any seats.'", answer:"There aren't", spanish:"Completa el espacio con la forma negativa de 'there are'."},
+      {prompt:"'There ___ fifty people at the party.' (past)", answer:"were", spanish:"Completa el espacio con la forma correcta de 'there is/are' en pasado."},
+      {prompt:"'There ___ a problem yesterday.' (past)", answer:"was", spanish:"Completa el espacio con la forma correcta de 'there is/are' en pasado."},
+      {prompt:"Uncountable noun → 'there is' or 'there are'?", answer:"there is", spanish:"¿Se usa 'there is' o 'there are' con un sustantivo incontable?"},
+      {prompt:"'There is a lot of people.' — correct?", answer:"no — 'There are a lot of people'", spanish:"¿Es correcta esta frase?"},
+      {prompt:"'How many rooms ___ in the house?'", answer:"are there", spanish:"Completa el espacio con 'is there' o 'are there'."},
+      {prompt:"'It is a nice park near school.' — correct?", answer:"no — 'There is a nice park'", spanish:"¿Es correcta esta frase?"},
+      {prompt:"'There aren't no chairs.' — correct?", answer:"no — 'There aren't any chairs'", spanish:"¿Es correcta esta frase?"},
+      {prompt:"Negative singular: 'There ___ any water.'", answer:"isn't", spanish:"Completa el espacio con la forma negativa singular de 'there is'."},
+      {prompt:"Negative plural: 'There ___ any students.'", answer:"aren't", spanish:"Completa el espacio con la forma negativa plural de 'there are'."},
+      {prompt:"Describe your classroom using 'there is/are'.", answer:"(free answer)", spanish:"Describe tu salón de clase usando 'there is/are'."},
+      {prompt:"'There was a cinema here.' — is the cinema still there?", answer:"probably not", spanish:"¿Todavía existe el cine?"},
+      {prompt:"'___ a lot of noise last night.' (past)", answer:"There was", spanish:"Completa el espacio con la forma correcta de 'there was/were' en pasado."},
+      {prompt:"'Some' or 'any' in negatives?", answer:"any", spanish:"¿Se usa 'some' o 'any' en las frases negativas?"},
+      {prompt:"'Some' or 'any' in positive sentences?", answer:"some", spanish:"¿Se usa 'some' o 'any' en las frases afirmativas?"},
     ],
     auctionSentences: [
       { sentence:"There is a beautiful garden behind the old church.", isCorrect:true, explanation:"Correct: singular noun 'garden' takes 'there is'." },
@@ -5831,26 +5831,26 @@ export const TOPIC_LIBRARY = {
       {word:"weekday"},{word:"weekend"},{word:"lunchbreak"},{word:"evening"},
     ],
     hotPotatoPrompts: [
-      {prompt:"What time do you usually wake up?", answer:"(free answer)"},
-      {prompt:"Name three things you do every morning.", answer:"(free — shower, breakfast, brush teeth)"},
+      {prompt:"What time do you usually wake up?", answer:"(free answer)", spanish:"¿A qué hora sueles despertarte?"},
+      {prompt:"Name three things you do every morning.", answer:"(free — shower, breakfast, brush teeth)", spanish:"Nombra tres cosas que haces cada mañana."},
       {prompt:"What does 'commute' mean?", answer:"to travel regularly between home and work or school"},
-      {prompt:"What are 'chores'?", answer:"household jobs like cleaning, washing, and cooking"},
-      {prompt:"'She ___ her alarm for 7am.' (set/sets/setting)", answer:"sets"},
-      {prompt:"Name one thing you do to relax after school or work.", answer:"(free answer)"},
-      {prompt:"'I ___ asleep quickly last night.' (fall/fell/fallen)", answer:"fell"},
-      {prompt:"What does 'spare time' mean?", answer:"free time — time that is yours to use"},
-      {prompt:"'He ___ the bus at 8am.' (catch/caught/catches)", answer:"catches"},
-      {prompt:"Name one difference between weekday and weekend routines.", answer:"(free answer)"},
-      {prompt:"What is your favourite part of your daily routine?", answer:"(free answer)"},
-      {prompt:"What time do most people in your country eat dinner?", answer:"(free answer)"},
-      {prompt:"'Breakfast is the most important ___ of the day.'", answer:"meal"},
-      {prompt:"'I stay in ___ until ten on Saturdays.'", answer:"bed"},
-      {prompt:"Name one healthy morning habit.", answer:"(free — exercise, eat well, sleep enough)"},
-      {prompt:"What does 'rush' mean in the morning?", answer:"to do things quickly because you are late"},
-      {prompt:"'She ___ to the gym three times a week.' (go/goes/went)", answer:"goes"},
-      {prompt:"Name one thing you do before bed.", answer:"(free — brush teeth, read, watch TV)"},
-      {prompt:"What is a 'lunchbreak'?", answer:"time in the middle of the day to eat lunch"},
-      {prompt:"Describe your ideal morning routine.", answer:"(free answer)"},
+      {prompt:"What are 'chores'?", answer:"household jobs like cleaning, washing, and cooking", spanish:"¿Qué son las 'chores'?"},
+      {prompt:"'She ___ her alarm for 7am.' (set/sets/setting)", answer:"sets", spanish:"Elige la forma correcta del verbo 'set' para completar la frase."},
+      {prompt:"Name one thing you do to relax after school or work.", answer:"(free answer)", spanish:"Nombra algo que haces para relajarte después de la escuela o el trabajo."},
+      {prompt:"'I ___ asleep quickly last night.' (fall/fell/fallen)", answer:"fell", spanish:"Elige la forma correcta del verbo 'fall' en pasado simple."},
+      {prompt:"What does 'spare time' mean?", answer:"free time — time that is yours to use", spanish:"¿Qué significa 'spare time'?"},
+      {prompt:"'He ___ the bus at 8am.' (catch/caught/catches)", answer:"catches", spanish:"Elige la forma correcta del verbo 'catch' en presente simple."},
+      {prompt:"Name one difference between weekday and weekend routines.", answer:"(free answer)", spanish:"Nombra una diferencia entre la rutina de los días de semana y la del fin de semana."},
+      {prompt:"What is your favourite part of your daily routine?", answer:"(free answer)", spanish:"¿Cuál es tu parte favorita de tu rutina diaria?"},
+      {prompt:"What time do most people in your country eat dinner?", answer:"(free answer)", spanish:"¿A qué hora cena la mayoría de la gente en tu país?"},
+      {prompt:"'Breakfast is the most important ___ of the day.'", answer:"meal", spanish:"Completa el espacio con la palabra correcta."},
+      {prompt:"'I stay in ___ until ten on Saturdays.'", answer:"bed", spanish:"Completa el espacio con la palabra correcta."},
+      {prompt:"Name one healthy morning habit.", answer:"(free — exercise, eat well, sleep enough)", spanish:"Nombra un hábito saludable por la mañana."},
+      {prompt:"What does 'rush' mean in the morning?", answer:"to do things quickly because you are late", spanish:"¿Qué significa 'rush' por la mañana?"},
+      {prompt:"'She ___ to the gym three times a week.' (go/goes/went)", answer:"goes", spanish:"Elige la forma correcta del verbo 'go' en presente simple."},
+      {prompt:"Name one thing you do before bed.", answer:"(free — brush teeth, read, watch TV)", spanish:"Nombra algo que haces antes de dormir."},
+      {prompt:"What is a 'lunchbreak'?", answer:"time in the middle of the day to eat lunch", spanish:"¿Qué es un 'lunchbreak'?"},
+      {prompt:"Describe your ideal morning routine.", answer:"(free answer)", spanish:"Describe tu rutina matutina ideal."},
     ],
     auctionSentences: [
       { sentence:"My father drives to work every day except Friday.", isCorrect:true, explanation:"Correct third person present simple: 'drives' takes -s." },
@@ -5949,26 +5949,26 @@ export const TOPIC_LIBRARY = {
       {word:"nutritious"},{word:"appetiser"},{word:"dessert"},{word:"reservation"},
     ],
     hotPotatoPrompts: [
-      {prompt:"What is a vegetarian?", answer:"a person who doesn't eat meat or fish"},
-      {prompt:"What does 'allergic to' mean with food?", answer:"your body reacts badly when you eat it"},
-      {prompt:"What do you ask for to see food options in a restaurant?", answer:"the menu"},
-      {prompt:"What do you ask for when you want to pay?", answer:"the bill / the check"},
-      {prompt:"What does 'spicy' mean?", answer:"food that is hot and burns your mouth"},
-      {prompt:"What does 'bland' mean?", answer:"food with no flavour or taste"},
-      {prompt:"Name one healthy food.", answer:"(free — fruit, vegetables, fish, nuts)"},
-      {prompt:"Name one unhealthy food.", answer:"(free — chips, cake, sweets, fast food)"},
-      {prompt:"What does 'eat out' mean?", answer:"to eat at a restaurant rather than at home"},
-      {prompt:"What is a 'portion'?", answer:"the amount of food served to one person"},
-      {prompt:"What is a 'recipe'?", answer:"instructions for how to make a dish"},
-      {prompt:"What does 'fully booked' mean?", answer:"all the tables are reserved — no space left"},
-      {prompt:"What is a takeaway?", answer:"food you order to eat somewhere else"},
-      {prompt:"What is a 'cuisine'?", answer:"a style of cooking from a country or region"},
-      {prompt:"Name a dish from your country.", answer:"(free answer)"},
-      {prompt:"Name one international cuisine you enjoy.", answer:"(free answer)"},
-      {prompt:"What does 'on a diet' mean?", answer:"following a controlled eating plan"},
-      {prompt:"'She ___ her own bread.' (bake)", answer:"bakes"},
-      {prompt:"What is a 'dessert'?", answer:"a sweet dish eaten at the end of a meal"},
-      {prompt:"What is your favourite meal of the day?", answer:"(free answer)"},
+      {prompt:"What is a vegetarian?", answer:"a person who doesn't eat meat or fish", spanish:"¿Qué es un vegetariano?"},
+      {prompt:"What does 'allergic to' mean with food?", answer:"your body reacts badly when you eat it", spanish:"¿Qué significa 'allergic to' con la comida?"},
+      {prompt:"What do you ask for to see food options in a restaurant?", answer:"the menu", spanish:"¿Qué pides para ver las opciones de comida en un restaurante?"},
+      {prompt:"What do you ask for when you want to pay?", answer:"the bill / the check", spanish:"¿Qué pides cuando quieres pagar?"},
+      {prompt:"What does 'spicy' mean?", answer:"food that is hot and burns your mouth", spanish:"¿Qué significa 'spicy'?"},
+      {prompt:"What does 'bland' mean?", answer:"food with no flavour or taste", spanish:"¿Qué significa 'bland'?"},
+      {prompt:"Name one healthy food.", answer:"(free — fruit, vegetables, fish, nuts)", spanish:"Nombra una comida saludable."},
+      {prompt:"Name one unhealthy food.", answer:"(free — chips, cake, sweets, fast food)", spanish:"Nombra una comida poco saludable."},
+      {prompt:"What does 'eat out' mean?", answer:"to eat at a restaurant rather than at home", spanish:"¿Qué significa 'eat out'?"},
+      {prompt:"What is a 'portion'?", answer:"the amount of food served to one person", spanish:"¿Qué es una 'portion'?"},
+      {prompt:"What is a 'recipe'?", answer:"instructions for how to make a dish", spanish:"¿Qué es una 'recipe'?"},
+      {prompt:"What does 'fully booked' mean?", answer:"all the tables are reserved — no space left", spanish:"¿Qué significa 'fully booked'?"},
+      {prompt:"What is a takeaway?", answer:"food you order to eat somewhere else", spanish:"¿Qué es un 'takeaway'?"},
+      {prompt:"What is a 'cuisine'?", answer:"a style of cooking from a country or region", spanish:"¿Qué es una 'cuisine'?"},
+      {prompt:"Name a dish from your country.", answer:"(free answer)", spanish:"Nombra un plato de tu país."},
+      {prompt:"Name one international cuisine you enjoy.", answer:"(free answer)", spanish:"Nombra una cocina internacional que te guste."},
+      {prompt:"What does 'on a diet' mean?", answer:"following a controlled eating plan", spanish:"¿Qué significa 'on a diet'?"},
+      {prompt:"'She ___ her own bread.' (bake)", answer:"bakes", spanish:"Completa el espacio con la forma correcta del verbo 'bake' en presente simple."},
+      {prompt:"What is a 'dessert'?", answer:"a sweet dish eaten at the end of a meal", spanish:"¿Qué es un 'dessert'?"},
+      {prompt:"What is your favourite meal of the day?", answer:"(free answer)", spanish:"¿Cuál es tu comida favorita del día?"},
     ],
     auctionSentences: [
       { sentence:"I've been a vegetarian for five years and I don't miss meat at all.", isCorrect:true, explanation:"Correct: 'for' introduces a period of time with the present perfect." },
@@ -6271,26 +6271,26 @@ export const TOPIC_LIBRARY = {
       {word:"ambulance"},{word:"surgery"},{word:"diet"},{word:"check-up"},
     ],
     hotPotatoPrompts: [
-      {prompt:"What do you call a pain in your head?", answer:"a headache"},
-      {prompt:"What do you call a pain in your stomach?", answer:"a stomachache"},
-      {prompt:"What does 'sore throat' mean?", answer:"pain in the throat when you swallow"},
-      {prompt:"What is a 'fever'?", answer:"a high body temperature when you are ill"},
-      {prompt:"What does a doctor give you to buy medicine?", answer:"a prescription"},
-      {prompt:"'She ___ her ankle.' — what verb?", answer:"twisted / sprained"},
-      {prompt:"What does 'allergic to' mean?", answer:"your body reacts badly to something"},
-      {prompt:"What is a 'check-up'?", answer:"a medical examination to see if you are healthy"},
-      {prompt:"What does 'out of breath' mean?", answer:"having difficulty breathing after exercise"},
-      {prompt:"Name one thing you should do when you have a cold.", answer:"(free — rest, drink water, take medicine)"},
-      {prompt:"What is a 'symptom'?", answer:"a sign of an illness, like a cough or fever"},
-      {prompt:"'She is ___ to penicillin.' (allergic/allergy)", answer:"allergic"},
-      {prompt:"What do you say when you call a doctor to arrange a visit?", answer:"(free — I'd like to make an appointment)"},
-      {prompt:"Name one healthy habit.", answer:"(free — exercise, eat well, sleep enough)"},
-      {prompt:"Name one unhealthy habit.", answer:"(free — smoking, not sleeping, junk food)"},
-      {prompt:"What does 'recover' mean?", answer:"to get better after being ill or injured"},
-      {prompt:"What is a 'cast'?", answer:"hard covering put on a broken bone"},
-      {prompt:"'He ___ up smoking last year.' (give/gave/giving)", answer:"gave"},
-      {prompt:"What does the nurse check to see if you have a fever?", answer:"your temperature"},
-      {prompt:"Describe one symptom of the flu.", answer:"(free — high temperature, headache, body aches)"},
+      {prompt:"What do you call a pain in your head?", answer:"a headache", spanish:"¿Cómo se llama un dolor de cabeza?"},
+      {prompt:"What do you call a pain in your stomach?", answer:"a stomachache", spanish:"¿Cómo se llama un dolor de estómago?"},
+      {prompt:"What does 'sore throat' mean?", answer:"pain in the throat when you swallow", spanish:"¿Qué significa 'sore throat'?"},
+      {prompt:"What is a 'fever'?", answer:"a high body temperature when you are ill", spanish:"¿Qué es una 'fever'?"},
+      {prompt:"What does a doctor give you to buy medicine?", answer:"a prescription", spanish:"¿Qué te da el médico para comprar medicina?"},
+      {prompt:"'She ___ her ankle.' — what verb?", answer:"twisted / sprained", spanish:"Elige el verbo correcto para completar la frase."},
+      {prompt:"What does 'allergic to' mean?", answer:"your body reacts badly to something", spanish:"¿Qué significa 'allergic to'?"},
+      {prompt:"What is a 'check-up'?", answer:"a medical examination to see if you are healthy", spanish:"¿Qué es un 'check-up'?"},
+      {prompt:"What does 'out of breath' mean?", answer:"having difficulty breathing after exercise", spanish:"¿Qué significa 'out of breath'?"},
+      {prompt:"Name one thing you should do when you have a cold.", answer:"(free — rest, drink water, take medicine)", spanish:"Nombra algo que debes hacer cuando tienes un resfriado."},
+      {prompt:"What is a 'symptom'?", answer:"a sign of an illness, like a cough or fever", spanish:"¿Qué es un 'symptom'?"},
+      {prompt:"'She is ___ to penicillin.' (allergic/allergy)", answer:"allergic", spanish:"Elige la palabra correcta para completar la frase."},
+      {prompt:"What do you say when you call a doctor to arrange a visit?", answer:"(free — I'd like to make an appointment)", spanish:"¿Qué dices cuando llamas al médico para pedir una cita?"},
+      {prompt:"Name one healthy habit.", answer:"(free — exercise, eat well, sleep enough)", spanish:"Nombra un hábito saludable."},
+      {prompt:"Name one unhealthy habit.", answer:"(free — smoking, not sleeping, junk food)", spanish:"Nombra un hábito poco saludable."},
+      {prompt:"What does 'recover' mean?", answer:"to get better after being ill or injured", spanish:"¿Qué significa 'recover'?"},
+      {prompt:"What is a 'cast'?", answer:"hard covering put on a broken bone", spanish:"¿Qué es un 'cast'?"},
+      {prompt:"'He ___ up smoking last year.' (give/gave/giving)", answer:"gave", spanish:"Elige la forma correcta del verbo 'give' en pasado."},
+      {prompt:"What does the nurse check to see if you have a fever?", answer:"your temperature", spanish:"¿Qué revisa la enfermera para ver si tienes fiebre?"},
+      {prompt:"Describe one symptom of the flu.", answer:"(free — high temperature, headache, body aches)", spanish:"Describe un síntoma de la gripe."},
     ],
     auctionSentences: [
       { sentence:"My throat feels really sore, and I can barely swallow.", isCorrect:true, explanation:"Correct: 'sore throat' and 'can barely swallow' are natural collocations for this symptom." },
@@ -6594,26 +6594,26 @@ export const TOPIC_LIBRARY = {
       {word:"swap"},{word:"without"},{word:"recommend"},{word:"specials"},
     ],
     hotPotatoPrompts: [
-      {prompt:"'Could ___ have the pasta, please?' (I/we/you)", answer:"I / we"},
-      {prompt:"'Are you ___ to order?' (waiter's question)", answer:"ready"},
-      {prompt:"'I'll ___ the fish.' (have/take/get)", answer:"have"},
-      {prompt:"'Could we have the ___?' (bill/check/receipt)", answer:"bill / check"},
-      {prompt:"'___ it come with chips?' (Does/Is/Has)", answer:"Does"},
-      {prompt:"'Could I have it ___ cheese?' (without/no/not)", answer:"without"},
-      {prompt:"'What would you ___?' (waiter's question)", answer:"like"},
-      {prompt:"'Can I ___ a table for 7pm?' (book/reserve/have)", answer:"book / reserve"},
-      {prompt:"'I'll have the ___.' — name a starter.", answer:"(free — soup, salad, garlic bread)"},
-      {prompt:"'___ the pasta suitable for vegans?' (Is/Does/Has)", answer:"Is"},
-      {prompt:"How do you ask for the bill politely?", answer:"(free — Could we have the bill? / Could I have the check?)"},
-      {prompt:"'Could you bring ___ some more water?' (us/we/our)", answer:"us"},
-      {prompt:"'There is a problem ___ my order.' (with/to/in)", answer:"with"},
-      {prompt:"'I'd like to ___ the chips for a salad.' (swap/change/replace)", answer:"swap"},
-      {prompt:"'I'll have the ___ as my friend.' (same/one/dish)", answer:"same"},
-      {prompt:"Name three ways a steak can be cooked.", answer:"rare / medium rare / medium / well-done"},
-      {prompt:"What does 'the specials' mean?", answer:"dishes available today that are not always on the menu"},
-      {prompt:"What does 'to go' mean in a café?", answer:"takeaway — not to eat in the café"},
-      {prompt:"'Could I see the ___?' — start of a restaurant visit.", answer:"menu"},
-      {prompt:"'Does that include a ___?' — what follows?", answer:"(free — dessert / drink / side dish)"},
+      {prompt:"'Could ___ have the pasta, please?' (I/we/you)", answer:"I / we", spanish:"Elige la palabra correcta para completar la frase."},
+      {prompt:"'Are you ___ to order?' (waiter's question)", answer:"ready", spanish:"Completa la pregunta del camarero con la palabra correcta."},
+      {prompt:"'I'll ___ the fish.' (have/take/get)", answer:"have", spanish:"Elige la palabra correcta para completar la frase."},
+      {prompt:"'Could we have the ___?' (bill/check/receipt)", answer:"bill / check", spanish:"Elige la palabra correcta para completar la frase."},
+      {prompt:"'___ it come with chips?' (Does/Is/Has)", answer:"Does", spanish:"Elige la palabra correcta para formar la pregunta."},
+      {prompt:"'Could I have it ___ cheese?' (without/no/not)", answer:"without", spanish:"Elige la palabra correcta para completar la frase."},
+      {prompt:"'What would you ___?' (waiter's question)", answer:"like", spanish:"Completa la pregunta del camarero con la palabra correcta."},
+      {prompt:"'Can I ___ a table for 7pm?' (book/reserve/have)", answer:"book / reserve", spanish:"Elige la palabra correcta para completar la frase."},
+      {prompt:"'I'll have the ___.' — name a starter.", answer:"(free — soup, salad, garlic bread)", spanish:"Completa la frase nombrando un entrante."},
+      {prompt:"'___ the pasta suitable for vegans?' (Is/Does/Has)", answer:"Is", spanish:"Elige la palabra correcta para formar la pregunta."},
+      {prompt:"How do you ask for the bill politely?", answer:"(free — Could we have the bill? / Could I have the check?)", spanish:"¿Cómo pides la cuenta de forma educada?"},
+      {prompt:"'Could you bring ___ some more water?' (us/we/our)", answer:"us", spanish:"Elige la palabra correcta para completar la frase."},
+      {prompt:"'There is a problem ___ my order.' (with/to/in)", answer:"with", spanish:"Elige la preposición correcta para completar la frase."},
+      {prompt:"'I'd like to ___ the chips for a salad.' (swap/change/replace)", answer:"swap", spanish:"Elige la palabra correcta para completar la frase."},
+      {prompt:"'I'll have the ___ as my friend.' (same/one/dish)", answer:"same", spanish:"Elige la palabra correcta para completar la frase."},
+      {prompt:"Name three ways a steak can be cooked.", answer:"rare / medium rare / medium / well-done", spanish:"Nombra tres formas de cocinar un filete."},
+      {prompt:"What does 'the specials' mean?", answer:"dishes available today that are not always on the menu", spanish:"¿Qué significa 'the specials'?"},
+      {prompt:"What does 'to go' mean in a café?", answer:"takeaway — not to eat in the café", spanish:"¿Qué significa 'to go' en una cafetería?"},
+      {prompt:"'Could I see the ___?' — start of a restaurant visit.", answer:"menu", spanish:"Completa la frase con la palabra correcta para empezar una visita al restaurante."},
+      {prompt:"'Does that include a ___?' — what follows?", answer:"(free — dessert / drink / side dish)", spanish:"Completa la frase con la palabra correcta."},
     ],
     auctionSentences: [
       { sentence:"Could I have the chicken curry, please, with rice on the side?", isCorrect:true, explanation:"Correct: 'Could I have…?' is the standard polite way to order in a restaurant." },
@@ -6696,26 +6696,26 @@ export const TOPIC_LIBRARY = {
       {word:"should have"},{word:"meant to"},{word:"forgot"},{word:"unavoidable"},
     ],
     hotPotatoPrompts: [
-      {prompt:"'I ___ the bus.' (common excuse for being late)", answer:"missed"},
-      {prompt:"'Something ___ up.' (unexpected problem)", answer:"came"},
-      {prompt:"'I'm afraid I ___ make it.' (can/can't/will)", answer:"can't / won't"},
-      {prompt:"'I was ___ in traffic.' (stuck/caught/trapped)", answer:"stuck"},
-      {prompt:"'Please ___ my apologies.' (accept/take/receive)", answer:"accept"},
-      {prompt:"'I ___ have called — sorry!' (should/would/could)", answer:"should"},
-      {prompt:"'My alarm didn't ___ off.' (go/come/set)", answer:"go"},
-      {prompt:"'I had a family ___.' (emergency/problem/thing)", answer:"emergency"},
-      {prompt:"'I ___ stayed up too late.' (must have/should have/would)", answer:"must have / should have"},
-      {prompt:"'Sorry for the ___.' (inconvenience/trouble/problem)", answer:"inconvenience / trouble"},
-      {prompt:"'I ___ you in advance — it's my fault.' (should have told)", answer:"should have told"},
-      {prompt:"Formal way to say 'I can't come'?", answer:"(free — I'm afraid I won't be able to attend / Unfortunately I can't make it)"},
-      {prompt:"Informal way to say 'I can't come'?", answer:"(free — Sorry, I can't make it! / I won't be able to come — sorry!)"},
-      {prompt:"'I know this is not a good ___.' (excuse/reason/thing)", answer:"excuse / reason"},
-      {prompt:"'I ___ it — it's completely my fault.' (know/admit/understand)", answer:"know / admit"},
-      {prompt:"'I ___ to call but my phone died.' (tried/wanted/meant)", answer:"tried / wanted / meant"},
-      {prompt:"Make an excuse for being late to class.", answer:"(free answer)"},
-      {prompt:"Make a formal excuse for missing a meeting.", answer:"(free answer)"},
-      {prompt:"'Something ___ and I couldn't get away.' (came up/happened/arose)", answer:"came up / happened / arose"},
-      {prompt:"'I was ___ able to attend — I had another commitment.' (not/un/in)", answer:"not / unable to"},
+      {prompt:"'I ___ the bus.' (common excuse for being late)", answer:"missed", spanish:"Elige la forma correcta del verbo para completar la excusa."},
+      {prompt:"'Something ___ up.' (unexpected problem)", answer:"came", spanish:"Elige la forma correcta del verbo para completar la frase."},
+      {prompt:"'I'm afraid I ___ make it.' (can/can't/will)", answer:"can't / won't", spanish:"Elige la palabra correcta para completar la frase."},
+      {prompt:"'I was ___ in traffic.' (stuck/caught/trapped)", answer:"stuck", spanish:"Elige la palabra correcta para completar la frase."},
+      {prompt:"'Please ___ my apologies.' (accept/take/receive)", answer:"accept", spanish:"Elige la palabra correcta para completar la frase."},
+      {prompt:"'I ___ have called — sorry!' (should/would/could)", answer:"should", spanish:"Elige la palabra correcta para completar la frase."},
+      {prompt:"'My alarm didn't ___ off.' (go/come/set)", answer:"go", spanish:"Elige la palabra correcta para completar la frase."},
+      {prompt:"'I had a family ___.' (emergency/problem/thing)", answer:"emergency", spanish:"Elige la palabra correcta para completar la frase."},
+      {prompt:"'I ___ stayed up too late.' (must have/should have/would)", answer:"must have / should have", spanish:"Elige la expresión correcta para completar la frase."},
+      {prompt:"'Sorry for the ___.' (inconvenience/trouble/problem)", answer:"inconvenience / trouble", spanish:"Elige la palabra correcta para completar la frase."},
+      {prompt:"'I ___ you in advance — it's my fault.' (should have told)", answer:"should have told", spanish:"Completa la frase con la forma correcta del verbo."},
+      {prompt:"Formal way to say 'I can't come'?", answer:"(free — I'm afraid I won't be able to attend / Unfortunately I can't make it)", spanish:"¿Cuál es una forma formal de decir que no puedes venir?"},
+      {prompt:"Informal way to say 'I can't come'?", answer:"(free — Sorry, I can't make it! / I won't be able to come — sorry!)", spanish:"¿Cuál es una forma informal de decir que no puedes venir?"},
+      {prompt:"'I know this is not a good ___.' (excuse/reason/thing)", answer:"excuse / reason", spanish:"Elige la palabra correcta para completar la frase."},
+      {prompt:"'I ___ it — it's completely my fault.' (know/admit/understand)", answer:"know / admit", spanish:"Elige la palabra correcta para completar la frase."},
+      {prompt:"'I ___ to call but my phone died.' (tried/wanted/meant)", answer:"tried / wanted / meant", spanish:"Elige la palabra correcta para completar la frase."},
+      {prompt:"Make an excuse for being late to class.", answer:"(free answer)", spanish:"Inventa una excusa por llegar tarde a clase."},
+      {prompt:"Make a formal excuse for missing a meeting.", answer:"(free answer)", spanish:"Inventa una excusa formal por no asistir a una reunión."},
+      {prompt:"'Something ___ and I couldn't get away.' (came up/happened/arose)", answer:"came up / happened / arose", spanish:"Elige la expresión correcta para completar la frase."},
+      {prompt:"'I was ___ able to attend — I had another commitment.' (not/un/in)", answer:"not / unable to", spanish:"Elige la palabra correcta para completar la frase."},
     ],
     auctionSentences: [
       { sentence:"I'm really sorry I'm late — my car broke down on the motorway.", isCorrect:true, explanation:"Correct: 'broke down' is the correct phrasal verb for a car failing." },
@@ -6798,26 +6798,26 @@ export const TOPIC_LIBRARY = {
       {word:"that's a great idea"},{word:"good thinking"},{word:"I'd rather"},{word:"counter-suggest"},
     ],
     hotPotatoPrompts: [
-      {prompt:"'___ we go out tonight?' (Shall/Should/Will)", answer:"Shall"},
-      {prompt:"'Why ___ we try somewhere new?' (don't/not/can't)", answer:"don't"},
-      {prompt:"'How about ___ for a walk?' (go/going/to go)", answer:"going"},
-      {prompt:"'What about ___ the new exhibition?' (visit/visiting/to visit)", answer:"visiting"},
-      {prompt:"'Let's ___ a break.' (have/take/do)", answer:"have / take"},
-      {prompt:"'Why not ___ a taxi?' (take/to take/taking)", answer:"take"},
-      {prompt:"'You ___ try the pasta here — it's amazing.' (should/must/could)", answer:"should / must / could"},
-      {prompt:"'I suggest ___ it sooner rather than later.' (to do/doing/do)", answer:"doing"},
-      {prompt:"'___ I suggest we start with the agenda?' (May/Should/Will)", answer:"May / Could / Might"},
-      {prompt:"'If I ___ you, I'd book now.' (was/were/am)", answer:"were"},
-      {prompt:"'Have you ___ trying meditation?' (thought of/considered/tried)", answer:"thought of / considered / tried"},
-      {prompt:"'Shall we to meet at 6?' — correct?", answer:"no — 'Shall we meet at 6?' (no 'to')"},
-      {prompt:"'I recommend you to visit.' — correct?", answer:"no — 'I recommend visiting' or 'I recommend you visit'"},
-      {prompt:"'What about to go?' — correct?", answer:"no — 'What about going?'"},
-      {prompt:"Respond enthusiastically to a suggestion.", answer:"(free — That's a great idea! / Sounds good! / Let's do it!)"},
-      {prompt:"Respond politely but negatively to a suggestion.", answer:"(free — I'd rather not. / Maybe not this time. / Not really my thing.)"},
-      {prompt:"Name three informal ways to make a suggestion.", answer:"(free — Shall we? / Why don't we? / How about? / Let's)"},
-      {prompt:"Name one formal way to make a suggestion.", answer:"(free — May I suggest…? / Perhaps we could… / I'd like to propose…)"},
-      {prompt:"Make a suggestion for what to do this weekend.", answer:"(free answer)"},
-      {prompt:"Make a suggestion using 'if I were you'.", answer:"(free — If I were you, I'd…)"},
+      {prompt:"'___ we go out tonight?' (Shall/Should/Will)", answer:"Shall", spanish:"Elige la palabra correcta para hacer la sugerencia."},
+      {prompt:"'Why ___ we try somewhere new?' (don't/not/can't)", answer:"don't", spanish:"Elige la palabra correcta para completar la sugerencia."},
+      {prompt:"'How about ___ for a walk?' (go/going/to go)", answer:"going", spanish:"Elige la forma correcta del verbo para completar la sugerencia."},
+      {prompt:"'What about ___ the new exhibition?' (visit/visiting/to visit)", answer:"visiting", spanish:"Elige la forma correcta del verbo para completar la sugerencia."},
+      {prompt:"'Let's ___ a break.' (have/take/do)", answer:"have / take", spanish:"Elige la palabra correcta para completar la frase."},
+      {prompt:"'Why not ___ a taxi?' (take/to take/taking)", answer:"take", spanish:"Elige la forma correcta del verbo para completar la sugerencia."},
+      {prompt:"'You ___ try the pasta here — it's amazing.' (should/must/could)", answer:"should / must / could", spanish:"Elige la palabra correcta para completar la frase."},
+      {prompt:"'I suggest ___ it sooner rather than later.' (to do/doing/do)", answer:"doing", spanish:"Elige la forma correcta del verbo para completar la frase."},
+      {prompt:"'___ I suggest we start with the agenda?' (May/Should/Will)", answer:"May / Could / Might", spanish:"Elige la palabra correcta para completar la sugerencia formal."},
+      {prompt:"'If I ___ you, I'd book now.' (was/were/am)", answer:"were", spanish:"Elige la forma correcta del verbo 'be' para completar la frase condicional."},
+      {prompt:"'Have you ___ trying meditation?' (thought of/considered/tried)", answer:"thought of / considered / tried", spanish:"Elige la expresión correcta para completar la frase."},
+      {prompt:"'Shall we to meet at 6?' — correct?", answer:"no — 'Shall we meet at 6?' (no 'to')", spanish:"Di si la frase es correcta o incorrecta."},
+      {prompt:"'I recommend you to visit.' — correct?", answer:"no — 'I recommend visiting' or 'I recommend you visit'", spanish:"Di si la frase es correcta o incorrecta."},
+      {prompt:"'What about to go?' — correct?", answer:"no — 'What about going?'", spanish:"Di si la frase es correcta o incorrecta."},
+      {prompt:"Respond enthusiastically to a suggestion.", answer:"(free — That's a great idea! / Sounds good! / Let's do it!)", spanish:"Responde con entusiasmo a una sugerencia."},
+      {prompt:"Respond politely but negatively to a suggestion.", answer:"(free — I'd rather not. / Maybe not this time. / Not really my thing.)", spanish:"Responde de forma educada pero negativa a una sugerencia."},
+      {prompt:"Name three informal ways to make a suggestion.", answer:"(free — Shall we? / Why don't we? / How about? / Let's)", spanish:"Nombra tres formas informales de hacer una sugerencia."},
+      {prompt:"Name one formal way to make a suggestion.", answer:"(free — May I suggest…? / Perhaps we could… / I'd like to propose…)", spanish:"Nombra una forma formal de hacer una sugerencia."},
+      {prompt:"Make a suggestion for what to do this weekend.", answer:"(free answer)", spanish:"Haz una sugerencia sobre qué hacer este fin de semana."},
+      {prompt:"Make a suggestion using 'if I were you'.", answer:"(free — If I were you, I'd…)", spanish:"Haz una sugerencia usando 'if I were you'."},
     ],
     auctionSentences: [
       { sentence:"Shall we try that new sushi place for dinner tonight?", isCorrect:true, explanation:"Correct: 'Shall we + base verb?' is a correct way to make a suggestion." },
@@ -7005,26 +7005,26 @@ export const TOPIC_LIBRARY = {
       { task:"Describe your ideal job using 'I can...' and 'I would like to be able to...'" },
     ],
     hotPotatoPrompts: [
-      {prompt:"'___ you swim?'", answer:"Can"},
-      {prompt:"'She ___ drive - she is too young.'", answer:"can't"},
-      {prompt:"'___ I sit here?' (permission)", answer:"Can"},
-      {prompt:"'My cat ___ open doors!'", answer:"can"},
-      {prompt:"Fix: 'He can speaks French.'", answer:"He can speak French."},
-      {prompt:"Ability: 'I ___ play guitar.'", answer:"can"},
-      {prompt:"'___ we take photos here?'", answer:"Can"},
-      {prompt:"'She can ___ English well.'", answer:"speak"},
-      {prompt:"No ability: 'I ___ drive.'", answer:"can't / cannot"},
-      {prompt:"'You ___ park here - it is a bus lane.'", answer:"can't"},
-      {prompt:"'___ I borrow your pen?' - what type of 'can' is this?", answer:"permission"},
-      {prompt:"'He can to sing.' - find the mistake.", answer:"can sing (no 'to')"},
-      {prompt:"'Dolphins ___ swim very fast.'", answer:"can"},
-      {prompt:"'___ she speak Japanese?' 'Yes, a little.'", answer:"Can"},
-      {prompt:"'I ___ cook but I want to learn.'", answer:"can't"},
-      {prompt:"'Babies ___ walk when they are born.'", answer:"can't"},
-      {prompt:"'You ___ use your phone in the exam.'", answer:"can't"},
-      {prompt:"'___ elephants jump?'", answer:"No, they can't"},
-      {prompt:"'Can they comes?' - find the mistake.", answer:"Can they come? (no -s)"},
-      {prompt:"'I ___ run 10km!' - expressing ability.", answer:"can"},
+      {prompt:"'___ you swim?'", answer:"Can", spanish:"Completa la pregunta con la palabra correcta."},
+      {prompt:"'She ___ drive - she is too young.'", answer:"can't", spanish:"Completa el espacio con la forma correcta de 'can'."},
+      {prompt:"'___ I sit here?' (permission)", answer:"Can", spanish:"Completa la pregunta para pedir permiso."},
+      {prompt:"'My cat ___ open doors!'", answer:"can", spanish:"Completa el espacio con la forma correcta de 'can'."},
+      {prompt:"Fix: 'He can speaks French.'", answer:"He can speak French.", spanish:"Corrige el error en la frase."},
+      {prompt:"Ability: 'I ___ play guitar.'", answer:"can", spanish:"Completa el espacio para expresar habilidad."},
+      {prompt:"'___ we take photos here?'", answer:"Can", spanish:"Completa la pregunta para pedir permiso."},
+      {prompt:"'She can ___ English well.'", answer:"speak", spanish:"Completa el espacio con la forma correcta del verbo."},
+      {prompt:"No ability: 'I ___ drive.'", answer:"can't / cannot", spanish:"Completa el espacio para expresar falta de habilidad."},
+      {prompt:"'You ___ park here - it is a bus lane.'", answer:"can't", spanish:"Completa el espacio con la forma correcta de 'can't'."},
+      {prompt:"'___ I borrow your pen?' - what type of 'can' is this?", answer:"permission", spanish:"¿Qué tipo de uso de 'can' es este: habilidad o permiso?"},
+      {prompt:"'He can to sing.' - find the mistake.", answer:"can sing (no 'to')", spanish:"Encuentra el error en la frase."},
+      {prompt:"'Dolphins ___ swim very fast.'", answer:"can", spanish:"Completa el espacio con la forma correcta de 'can'."},
+      {prompt:"'___ she speak Japanese?' 'Yes, a little.'", answer:"Can", spanish:"Completa la pregunta con la palabra correcta."},
+      {prompt:"'I ___ cook but I want to learn.'", answer:"can't", spanish:"Completa el espacio con la forma correcta de 'can't'."},
+      {prompt:"'Babies ___ walk when they are born.'", answer:"can't", spanish:"Completa el espacio con la forma correcta de 'can't'."},
+      {prompt:"'You ___ use your phone in the exam.'", answer:"can't", spanish:"Completa el espacio con la forma correcta de 'can't'."},
+      {prompt:"'___ elephants jump?'", answer:"No, they can't", spanish:"Completa la pregunta con la palabra correcta."},
+      {prompt:"'Can they comes?' - find the mistake.", answer:"Can they come? (no -s)", spanish:"Encuentra el error en la frase."},
+      {prompt:"'I ___ run 10km!' - expressing ability.", answer:"can", spanish:"Completa el espacio para expresar habilidad."},
     ],
     minefieldGrid: {
       topic: "Can / Can't",
@@ -7088,26 +7088,26 @@ export const TOPIC_LIBRARY = {
       { task:"Say five verbs you can use in present continuous and make a sentence with each." },
     ],
     hotPotatoPrompts: [
-      {prompt:"'She ___ reading now.' (is/are/am)", answer:"is"},
-      {prompt:"'I am watch TV.' - fix it.", answer:"I am watching TV."},
-      {prompt:"'What ___ you doing?' (is/are/am)", answer:"are"},
-      {prompt:"'He is sleeps.' - fix it.", answer:"He is sleeping."},
-      {prompt:"'They are ___.' (run)", answer:"running"},
-      {prompt:"'___ he working today?' (Is/Are)", answer:"Is"},
-      {prompt:"'We are play football.' - fix it.", answer:"We are playing football."},
-      {prompt:"'I ___ sitting near the door.' (am/is/are)", answer:"am"},
-      {prompt:"Negative of 'She is eating.'", answer:"She isn't eating."},
-      {prompt:"'It is ___ing outside.' (rain)", answer:"raining"},
-      {prompt:"'Are they dance?' - fix it.", answer:"Are they dancing?"},
-      {prompt:"'The children ___ playing.' (is/are)", answer:"are"},
-      {prompt:"'She is runing.' - fix it.", answer:"She is running."},
-      {prompt:"Question form: 'you / study / now?'", answer:"Are you studying now?"},
-      {prompt:"'Why ___ she crying?' (is/are)", answer:"is"},
-      {prompt:"'I reading a book.' - fix it.", answer:"I am reading a book."},
-      {prompt:"Present continuous of 'swim'?", answer:"am/is/are swimming"},
-      {prompt:"Present continuous of 'write'?", answer:"am/is/are writing"},
-      {prompt:"'We are not ___ing today.' (work)", answer:"working"},
-      {prompt:"What verb form comes after am/is/are?", answer:"verb + -ing"},
+      {prompt:"'She ___ reading now.' (is/are/am)", answer:"is", spanish:"Elige la forma correcta de 'be' para completar la frase."},
+      {prompt:"'I am watch TV.' - fix it.", answer:"I am watching TV.", spanish:"Corrige el error en la frase."},
+      {prompt:"'What ___ you doing?' (is/are/am)", answer:"are", spanish:"Elige la forma correcta de 'be' para completar la pregunta."},
+      {prompt:"'He is sleeps.' - fix it.", answer:"He is sleeping.", spanish:"Corrige el error en la frase."},
+      {prompt:"'They are ___.' (run)", answer:"running", spanish:"Completa el espacio con la forma correcta del verbo 'run' en presente continuo."},
+      {prompt:"'___ he working today?' (Is/Are)", answer:"Is", spanish:"Elige la forma correcta de 'be' para completar la pregunta."},
+      {prompt:"'We are play football.' - fix it.", answer:"We are playing football.", spanish:"Corrige el error en la frase."},
+      {prompt:"'I ___ sitting near the door.' (am/is/are)", answer:"am", spanish:"Elige la forma correcta de 'be' para completar la frase."},
+      {prompt:"Negative of 'She is eating.'", answer:"She isn't eating.", spanish:"Escribe la forma negativa de la frase."},
+      {prompt:"'It is ___ing outside.' (rain)", answer:"raining", spanish:"Completa el espacio con la forma correcta del verbo 'rain' en presente continuo."},
+      {prompt:"'Are they dance?' - fix it.", answer:"Are they dancing?", spanish:"Corrige el error en la frase."},
+      {prompt:"'The children ___ playing.' (is/are)", answer:"are", spanish:"Elige la forma correcta de 'be' para completar la frase."},
+      {prompt:"'She is runing.' - fix it.", answer:"She is running.", spanish:"Corrige el error en la frase."},
+      {prompt:"Question form: 'you / study / now?'", answer:"Are you studying now?", spanish:"Forma la pregunta con estas palabras."},
+      {prompt:"'Why ___ she crying?' (is/are)", answer:"is", spanish:"Elige la forma correcta de 'be' para completar la pregunta."},
+      {prompt:"'I reading a book.' - fix it.", answer:"I am reading a book.", spanish:"Corrige el error en la frase."},
+      {prompt:"Present continuous of 'swim'?", answer:"am/is/are swimming", spanish:"¿Cuál es la forma en presente continuo del verbo 'swim'?"},
+      {prompt:"Present continuous of 'write'?", answer:"am/is/are writing", spanish:"¿Cuál es la forma en presente continuo del verbo 'write'?"},
+      {prompt:"'We are not ___ing today.' (work)", answer:"working", spanish:"Completa el espacio con la forma correcta del verbo 'work' en presente continuo negativo."},
+      {prompt:"What verb form comes after am/is/are?", answer:"verb + -ing", spanish:"¿Qué forma del verbo va después de am/is/are?"},
     ],
     minefieldGrid: {
       topic: "Present Continuous",
@@ -7171,26 +7171,26 @@ export const TOPIC_LIBRARY = {
       { task:"Use 'Have you finished...yet?' in a roleplay with your partner." },
     ],
     hotPotatoPrompts: [
-      {prompt:"'I ___ never been to Japan.' (have/did/was)", answer:"have"},
-      {prompt:"'She ___ the report yesterday.' (finished/has finished)", answer:"finished"},
-      {prompt:"'___ you ever tried sushi?' (Have/Did)", answer:"Have"},
-      {prompt:"'I ___ in London since 2019.' (live/lived/have lived)", answer:"have lived"},
-      {prompt:"'He ___ the keys!' - just happened, no specific time.", answer:"has lost"},
-      {prompt:"'When ___ you start this job?' (did/have)", answer:"did"},
-      {prompt:"'I have seen him yesterday.' - find the mistake.", answer:"I saw him yesterday."},
-      {prompt:"'She ___ here for ten years.' (works/worked/has worked)", answer:"has worked"},
-      {prompt:"'Have you ___ this film?' (see/saw/seen)", answer:"seen"},
-      {prompt:"'I ___ already eaten.' (have/did/was)", answer:"have"},
-      {prompt:"'Did you ever been abroad?' - find the mistake.", answer:"Have you ever been abroad?"},
-      {prompt:"'He ___ gone to the shop.' (has/have/had)", answer:"has"},
-      {prompt:"Complete: 'I ___ it in 2022.' (buy)", answer:"bought"},
-      {prompt:"'She has went home.' - find the mistake.", answer:"She has gone home."},
-      {prompt:"'___ she finished yet?' (Has/Have/Did)", answer:"Has"},
-      {prompt:"'I ___ lived here since I was a child.' (have/had/am)", answer:"have"},
-      {prompt:"'We ___ this film last week.' (watched/have watched)", answer:"watched"},
-      {prompt:"'How long ___ you known her?' (have/did)", answer:"have"},
-      {prompt:"Complete: 'She has ___ home.' (go)", answer:"gone"},
-      {prompt:"Complete: 'Have you ___ this film?' (see)", answer:"seen"},
+      {prompt:"'I ___ never been to Japan.' (have/did/was)", answer:"have", spanish:"Elige la palabra correcta para completar la frase en presente perfecto."},
+      {prompt:"'She ___ the report yesterday.' (finished/has finished)", answer:"finished", spanish:"Elige la forma correcta del verbo para el pasado simple."},
+      {prompt:"'___ you ever tried sushi?' (Have/Did)", answer:"Have", spanish:"Elige la palabra correcta para formar la pregunta en presente perfecto."},
+      {prompt:"'I ___ in London since 2019.' (live/lived/have lived)", answer:"have lived", spanish:"Elige la forma correcta del verbo para el presente perfecto."},
+      {prompt:"'He ___ the keys!' - just happened, no specific time.", answer:"has lost", spanish:"Completa la frase con la forma correcta del verbo en presente perfecto."},
+      {prompt:"'When ___ you start this job?' (did/have)", answer:"did", spanish:"Elige la palabra correcta para formar la pregunta en pasado simple."},
+      {prompt:"'I have seen him yesterday.' - find the mistake.", answer:"I saw him yesterday.", spanish:"Encuentra el error en la frase."},
+      {prompt:"'She ___ here for ten years.' (works/worked/has worked)", answer:"has worked", spanish:"Elige la forma correcta del verbo para el presente perfecto."},
+      {prompt:"'Have you ___ this film?' (see/saw/seen)", answer:"seen", spanish:"Elige la forma correcta del verbo 'see' en presente perfecto."},
+      {prompt:"'I ___ already eaten.' (have/did/was)", answer:"have", spanish:"Elige la palabra correcta para completar la frase en presente perfecto."},
+      {prompt:"'Did you ever been abroad?' - find the mistake.", answer:"Have you ever been abroad?", spanish:"Encuentra el error en la frase."},
+      {prompt:"'He ___ gone to the shop.' (has/have/had)", answer:"has", spanish:"Elige el auxiliar correcto para el presente perfecto."},
+      {prompt:"Complete: 'I ___ it in 2022.' (buy)", answer:"bought", spanish:"Completa la frase con la forma correcta del verbo 'buy' en pasado simple."},
+      {prompt:"'She has went home.' - find the mistake.", answer:"She has gone home.", spanish:"Encuentra el error en la frase."},
+      {prompt:"'___ she finished yet?' (Has/Have/Did)", answer:"Has", spanish:"Elige el auxiliar correcto para la pregunta en presente perfecto."},
+      {prompt:"'I ___ lived here since I was a child.' (have/had/am)", answer:"have", spanish:"Elige la palabra correcta para completar la frase en presente perfecto."},
+      {prompt:"'We ___ this film last week.' (watched/have watched)", answer:"watched", spanish:"Elige la forma correcta del verbo para el pasado simple."},
+      {prompt:"'How long ___ you known her?' (have/did)", answer:"have", spanish:"Elige la palabra correcta para formar la pregunta en presente perfecto."},
+      {prompt:"Complete: 'She has ___ home.' (go)", answer:"gone", spanish:"Completa la frase con la forma correcta del verbo 'go' en presente perfecto."},
+      {prompt:"Complete: 'Have you ___ this film?' (see)", answer:"seen", spanish:"Completa la frase con la forma correcta del verbo 'see' en presente perfecto."},
     ],
     minefieldGrid: {
       topic: "Present Perfect vs Past Simple",
@@ -7254,26 +7254,26 @@ export const TOPIC_LIBRARY = {
       { task:"Use superlatives to describe a recent film, book, or experience." },
     ],
     hotPotatoPrompts: [
-      {prompt:"Comparative of 'big'?", answer:"bigger"},
-      {prompt:"Superlative of 'good'?", answer:"best"},
-      {prompt:"Comparative of 'bad'?", answer:"worse"},
-      {prompt:"Superlative of 'bad'?", answer:"worst"},
-      {prompt:"Comparative of 'expensive'?", answer:"more expensive"},
-      {prompt:"Superlative of 'tall'?", answer:"tallest"},
-      {prompt:"'She is the most tall.' - find the mistake.", answer:"She is the tallest."},
-      {prompt:"'London is more big than Paris.' - find the mistake.", answer:"London is bigger than Paris."},
-      {prompt:"Comparative of 'happy'?", answer:"happier"},
-      {prompt:"Superlative of 'difficult'?", answer:"most difficult"},
-      {prompt:"'This is the worse film.' - find the mistake.", answer:"This is the worst film."},
-      {prompt:"Comparative of 'far'?", answer:"farther / further"},
-      {prompt:"'She is more young.' - find the mistake.", answer:"She is younger."},
-      {prompt:"Superlative of 'hot'?", answer:"hottest"},
-      {prompt:"'He is gooder than me.' - find the mistake.", answer:"He is better than me."},
-      {prompt:"Comparative of 'comfortable'?", answer:"more comfortable"},
-      {prompt:"Superlative of 'cheap'?", answer:"cheapest"},
-      {prompt:"'This is the most big.' - find the mistake.", answer:"This is the biggest."},
-      {prompt:"Comparative of 'carefully'?", answer:"more carefully"},
-      {prompt:"Superlative of 'little'?", answer:"least"},
+      {prompt:"Comparative of 'big'?", answer:"bigger", spanish:"¿Cuál es el comparativo de 'big'?"},
+      {prompt:"Superlative of 'good'?", answer:"best", spanish:"¿Cuál es el superlativo de 'good'?"},
+      {prompt:"Comparative of 'bad'?", answer:"worse", spanish:"¿Cuál es el comparativo de 'bad'?"},
+      {prompt:"Superlative of 'bad'?", answer:"worst", spanish:"¿Cuál es el superlativo de 'bad'?"},
+      {prompt:"Comparative of 'expensive'?", answer:"more expensive", spanish:"¿Cuál es el comparativo de 'expensive'?"},
+      {prompt:"Superlative of 'tall'?", answer:"tallest", spanish:"¿Cuál es el superlativo de 'tall'?"},
+      {prompt:"'She is the most tall.' - find the mistake.", answer:"She is the tallest.", spanish:"Encuentra el error en la frase."},
+      {prompt:"'London is more big than Paris.' - find the mistake.", answer:"London is bigger than Paris.", spanish:"Encuentra el error en la frase."},
+      {prompt:"Comparative of 'happy'?", answer:"happier", spanish:"¿Cuál es el comparativo de 'happy'?"},
+      {prompt:"Superlative of 'difficult'?", answer:"most difficult", spanish:"¿Cuál es el superlativo de 'difficult'?"},
+      {prompt:"'This is the worse film.' - find the mistake.", answer:"This is the worst film.", spanish:"Encuentra el error en la frase."},
+      {prompt:"Comparative of 'far'?", answer:"farther / further", spanish:"¿Cuál es el comparativo de 'far'?"},
+      {prompt:"'She is more young.' - find the mistake.", answer:"She is younger.", spanish:"Encuentra el error en la frase."},
+      {prompt:"Superlative of 'hot'?", answer:"hottest", spanish:"¿Cuál es el superlativo de 'hot'?"},
+      {prompt:"'He is gooder than me.' - find the mistake.", answer:"He is better than me.", spanish:"Encuentra el error en la frase."},
+      {prompt:"Comparative of 'comfortable'?", answer:"more comfortable", spanish:"¿Cuál es el comparativo de 'comfortable'?"},
+      {prompt:"Superlative of 'cheap'?", answer:"cheapest", spanish:"¿Cuál es el superlativo de 'cheap'?"},
+      {prompt:"'This is the most big.' - find the mistake.", answer:"This is the biggest.", spanish:"Encuentra el error en la frase."},
+      {prompt:"Comparative of 'carefully'?", answer:"more carefully", spanish:"¿Cuál es el comparativo de 'carefully'?"},
+      {prompt:"Superlative of 'little'?", answer:"least", spanish:"¿Cuál es el superlativo de 'little'?"},
     ],
     minefieldGrid: {
       topic: "Comparatives & Superlatives",
@@ -7345,12 +7345,12 @@ export const TOPIC_LIBRARY = {
       { task:"Talk about a time you forgot your homework or school materials." },
     ],
     hotPotatoPrompts: [
-      {prompt:"Name three school subjects.", answer:"(free answer)"},
-      {prompt:"What do you call work you do at home for school?", answer:"homework"},
-      {prompt:"A place where you borrow books?", answer:"library"},
-      {prompt:"'She ___ for her exam every evening.'", answer:"studies / revises"},
-      {prompt:"What is a 'grade'?", answer:"a mark / score / result"},
-      {prompt:"What is a short rest between lessons?", answer:"a break"},
+      {prompt:"Name three school subjects.", answer:"(free answer)", spanish:"Nombra tres asignaturas escolares."},
+      {prompt:"What do you call work you do at home for school?", answer:"homework", spanish:"¿Cómo se llama el trabajo que haces en casa para la escuela?"},
+      {prompt:"A place where you borrow books?", answer:"library", spanish:"¿Un lugar donde pides libros prestados?"},
+      {prompt:"'She ___ for her exam every evening.'", answer:"studies / revises", spanish:"Completa el espacio con la palabra correcta."},
+      {prompt:"What is a 'grade'?", answer:"a mark / score / result", spanish:"¿Qué es una 'grade'?"},
+      {prompt:"What is a short rest between lessons?", answer:"a break", spanish:"¿Qué es un descanso corto entre clases?"},
     ],
     minefieldGrid: {
       topic: "School and Study",
@@ -7420,12 +7420,12 @@ export const TOPIC_LIBRARY = {
       { task:"Describe someone you take after in your family." },
     ],
     hotPotatoPrompts: [
-      {prompt:"What does 'take after' mean?", answer:"to look or behave like a family member"},
-      {prompt:"What does 'keep in touch' mean?", answer:"stay in contact"},
-      {prompt:"'My best friend and I ___ known each other for years.'", answer:"have"},
-      {prompt:"An 'only child' has how many siblings?", answer:"none / zero"},
-      {prompt:"'Get on well with' means...?", answer:"have a good relationship"},
-      {prompt:"Name one quality of a good friend.", answer:"(free answer)"},
+      {prompt:"What does 'take after' mean?", answer:"to look or behave like a family member", spanish:"¿Qué significa 'take after'?"},
+      {prompt:"What does 'keep in touch' mean?", answer:"stay in contact", spanish:"¿Qué significa 'keep in touch'?"},
+      {prompt:"'My best friend and I ___ known each other for years.'", answer:"have", spanish:"Completa el espacio con la forma correcta del verbo 'have' en presente perfecto."},
+      {prompt:"An 'only child' has how many siblings?", answer:"none / zero", spanish:"¿Cuántos hermanos tiene un 'only child'?"},
+      {prompt:"'Get on well with' means...?", answer:"have a good relationship", spanish:"¿Qué significa 'get on well with'?"},
+      {prompt:"Name one quality of a good friend.", answer:"(free answer)", spanish:"Nombra una cualidad de un buen amigo."},
     ],
     minefieldGrid: {
       topic: "Friends and Family",
@@ -7495,12 +7495,12 @@ export const TOPIC_LIBRARY = {
       { task:"Describe your perfect free day from morning to evening." },
     ],
     hotPotatoPrompts: [
-      {prompt:"Name one hobby.", answer:"(free answer)"},
-      {prompt:"What do you do 'in your free time'?", answer:"(free answer)"},
-      {prompt:"'At weekends, I often ___ with friends.'", answer:"go out / meet up"},
-      {prompt:"A hobby that helps you relax?", answer:"(free answer)"},
-      {prompt:"Outdoor hobby: name one.", answer:"(free answer)"},
-      {prompt:"What does 'relax' mean?", answer:"rest / feel calm"},
+      {prompt:"Name one hobby.", answer:"(free answer)", spanish:"Nombra un pasatiempo."},
+      {prompt:"What do you do 'in your free time'?", answer:"(free answer)", spanish:"¿Qué haces 'in your free time'?"},
+      {prompt:"'At weekends, I often ___ with friends.'", answer:"go out / meet up", spanish:"Completa el espacio con la palabra o frase correcta."},
+      {prompt:"A hobby that helps you relax?", answer:"(free answer)", spanish:"¿Un pasatiempo que te ayuda a relajarte?"},
+      {prompt:"Outdoor hobby: name one.", answer:"(free answer)", spanish:"Nombra un pasatiempo al aire libre."},
+      {prompt:"What does 'relax' mean?", answer:"rest / feel calm", spanish:"¿Qué significa 'relax'?"},
     ],
     minefieldGrid: {
       topic: "Free Time and Interests",
@@ -7570,12 +7570,12 @@ export const TOPIC_LIBRARY = {
       { task:"Describe your ideal place to live." },
     ],
     hotPotatoPrompts: [
-      {prompt:"Name one place in a town.", answer:"(free answer)"},
-      {prompt:"What is a 'neighbourhood'?", answer:"the area where you live"},
-      {prompt:"A common city problem?", answer:"traffic / pollution / noise"},
-      {prompt:"'There ___ a park near my home.'", answer:"is"},
-      {prompt:"'There ___ lots of cafés in the centre.'", answer:"are"},
-      {prompt:"What does 'rush hour' mean?", answer:"the busiest time for traffic"},
+      {prompt:"Name one place in a town.", answer:"(free answer)", spanish:"Nombra un lugar en un pueblo."},
+      {prompt:"What is a 'neighbourhood'?", answer:"the area where you live", spanish:"¿Qué es un 'neighbourhood'?"},
+      {prompt:"A common city problem?", answer:"traffic / pollution / noise", spanish:"¿Un problema común en la ciudad?"},
+      {prompt:"'There ___ a park near my home.'", answer:"is", spanish:"Completa el espacio con 'is' o 'are'."},
+      {prompt:"'There ___ lots of cafés in the centre.'", answer:"are", spanish:"Completa el espacio con 'is' o 'are'."},
+      {prompt:"What does 'rush hour' mean?", answer:"the busiest time for traffic", spanish:"¿Qué significa 'rush hour'?"},
     ],
     minefieldGrid: {
       topic: "My Town and City",
@@ -8167,83 +8167,103 @@ export const TOPIC_LIBRARY = {
     "hotPotatoPrompts": [
       {
         "prompt": "Your mother's sister is your...?",
-        "answer": "aunt"
+        "answer": "aunt",
+        "spanish": "¿La hermana de tu madre es tu...?"
       },
       {
         "prompt": "Your father's brother is your...?",
-        "answer": "uncle"
+        "answer": "uncle",
+        "spanish": "¿El hermano de tu padre es tu...?"
       },
       {
         "prompt": "Your brother's daughter is your...?",
-        "answer": "niece"
+        "answer": "niece",
+        "spanish": "¿La hija de tu hermano es tu...?"
       },
       {
         "prompt": "Your sister's son is your...?",
-        "answer": "nephew"
+        "answer": "nephew",
+        "spanish": "¿El hijo de tu hermana es tu...?"
       },
       {
         "prompt": "Your mother's mother is your...?",
-        "answer": "grandmother / grandma"
+        "answer": "grandmother / grandma",
+        "spanish": "¿La madre de tu madre es tu...?"
       },
       {
         "prompt": "Your father's father is your...?",
-        "answer": "grandfather / grandpa"
+        "answer": "grandfather / grandpa",
+        "spanish": "¿El padre de tu padre es tu...?"
       },
       {
         "prompt": "Your aunt's child is your...?",
-        "answer": "cousin"
+        "answer": "cousin",
+        "spanish": "¿El hijo o la hija de tu tía es tu...?"
       },
       {
         "prompt": "Fix: 'my brother phone'",
-        "answer": "my brother's phone"
+        "answer": "my brother's phone",
+        "spanish": "Corrige el error en la frase usando el posesivo con 's."
       },
       {
         "prompt": "Fix: 'Ana bag'",
-        "answer": "Ana's bag"
+        "answer": "Ana's bag",
+        "spanish": "Corrige el error en la frase usando el posesivo con 's."
       },
       {
         "prompt": "Fix: 'my parents house'",
-        "answer": "my parents' house"
+        "answer": "my parents' house",
+        "spanish": "Corrige el error en la frase usando el posesivo con 's."
       },
       {
         "prompt": "Plural possessive: my sisters ___ room",
-        "answer": "sisters' / sister's depending on meaning"
+        "answer": "sisters' / sister's depending on meaning",
+        "spanish": "Completa el espacio con la forma posesiva plural correcta."
       },
       {
         "prompt": "Say one sentence with 'cousin's'.",
-        "answer": "(free answer)"
+        "answer": "(free answer)",
+        "spanish": "Di una frase usando 'cousin's'."
       },
       {
         "prompt": "Say one sentence with 'mother's'.",
-        "answer": "(free answer)"
+        "answer": "(free answer)",
+        "spanish": "Di una frase usando 'mother's'."
       },
       {
         "prompt": "Say one sentence with 'parents''.",
-        "answer": "(free answer)"
+        "answer": "(free answer)",
+        "spanish": "Di una frase usando 'parents''."
       },
       {
         "prompt": "Who is your uncle?",
-        "answer": "(free answer)"
+        "answer": "(free answer)",
+        "spanish": "¿Quién es tu tío?"
       },
       {
         "prompt": "Name three family members.",
-        "answer": "(free answer)"
+        "answer": "(free answer)",
+        "spanish": "Nombra tres miembros de tu familia."
       },
       {
         "prompt": "Possessive of 'Tom':",
-        "answer": "Tom's"
+        "answer": "Tom's",
+        "spanish": "Escribe la forma posesiva de 'Tom'."
       },
       {
         "prompt": "Possessive of 'my grandparents':",
-        "answer": "my grandparents'"
+        "answer": "my grandparents'",
+        "spanish": "Escribe la forma posesiva de 'my grandparents'."
       },
       {
         "prompt": "Complete: This is my ___ phone.",
-        "answer": "father's / mother's / sister's etc."
+        "answer": "father's / mother's / sister's etc.",
+        "spanish": "Completa la frase con el posesivo correcto (padre, madre, hermana, etc.)."
       },
       {
         "prompt": "Complete: My ___ name is...",
-        "answer": "mother's / father's / cousin's etc."
+        "answer": "mother's / father's / cousin's etc.",
+        "spanish": "Completa la frase con el posesivo correcto (madre, padre, primo, etc.)."
       }
     ],
     "minefieldGrid": {
@@ -8790,83 +8810,103 @@ export const TOPIC_LIBRARY = {
     "hotPotatoPrompts": [
       {
         "prompt": "Complete: 'I have English class ___ Monday.'",
-        "answer": "on"
+        "answer": "on",
+        "spanish": "Completa el espacio con la preposición de tiempo correcta (on/in/at)."
       },
       {
         "prompt": "Complete: 'My birthday is ___ July.'",
-        "answer": "in"
+        "answer": "in",
+        "spanish": "Completa el espacio con la preposición de tiempo correcta (on/in/at)."
       },
       {
         "prompt": "Complete: 'The lesson starts ___ 8 o'clock.'",
-        "answer": "at"
+        "answer": "at",
+        "spanish": "Completa el espacio con la preposición de tiempo correcta (on/in/at)."
       },
       {
         "prompt": "Complete: 'The test is ___ May 10th.'",
-        "answer": "on"
+        "answer": "on",
+        "spanish": "Completa el espacio con la preposición de tiempo correcta (on/in/at)."
       },
       {
         "prompt": "Complete: 'I study ___ the morning.'",
-        "answer": "in"
+        "answer": "in",
+        "spanish": "Completa el espacio con la preposición de tiempo correcta (on/in/at)."
       },
       {
         "prompt": "Complete: 'I usually read ___ night.'",
-        "answer": "at"
+        "answer": "at",
+        "spanish": "Completa el espacio con la preposición de tiempo correcta (on/in/at)."
       },
       {
         "prompt": "Day after Friday?",
-        "answer": "Saturday"
+        "answer": "Saturday",
+        "spanish": "¿Qué día viene después del viernes?"
       },
       {
         "prompt": "Day before Wednesday?",
-        "answer": "Tuesday"
+        "answer": "Tuesday",
+        "spanish": "¿Qué día viene antes del miércoles?"
       },
       {
         "prompt": "Month after March?",
-        "answer": "April"
+        "answer": "April",
+        "spanish": "¿Qué mes viene después de marzo?"
       },
       {
         "prompt": "Month before December?",
-        "answer": "November"
+        "answer": "November",
+        "spanish": "¿Qué mes viene antes de diciembre?"
       },
       {
         "prompt": "First day of the week in many calendars?",
-        "answer": "Monday / Sunday"
+        "answer": "Monday / Sunday",
+        "spanish": "¿Cuál es el primer día de la semana en muchos calendarios?"
       },
       {
         "prompt": "A date: January ___",
-        "answer": "1st / 2nd etc."
+        "answer": "1st / 2nd etc.",
+        "spanish": "Completa la fecha con el número ordinal correcto."
       },
       {
         "prompt": "Fix: 'in Friday'",
-        "answer": "on Friday"
+        "answer": "on Friday",
+        "spanish": "Corrige el error usando la preposición de tiempo correcta."
       },
       {
         "prompt": "Fix: 'at July'",
-        "answer": "in July"
+        "answer": "in July",
+        "spanish": "Corrige el error usando la preposición de tiempo correcta."
       },
       {
         "prompt": "Fix: 'on 6 o'clock'",
-        "answer": "at 6 o'clock"
+        "answer": "at 6 o'clock",
+        "spanish": "Corrige el error usando la preposición de tiempo correcta."
       },
       {
         "prompt": "Complete: My birthday is ___ April.",
-        "answer": "in"
+        "answer": "in",
+        "spanish": "Completa el espacio con la preposición de tiempo correcta (on/in/at)."
       },
       {
         "prompt": "Complete: The test is ___ Tuesday.",
-        "answer": "on"
+        "answer": "on",
+        "spanish": "Completa el espacio con la preposición de tiempo correcta (on/in/at)."
       },
       {
         "prompt": "Complete: Class starts ___ noon.",
-        "answer": "at"
+        "answer": "at",
+        "spanish": "Completa el espacio con la preposición de tiempo correcta (on/in/at)."
       },
       {
         "prompt": "Name three days.",
-        "answer": "(free answer)"
+        "answer": "(free answer)",
+        "spanish": "Nombra tres días de la semana."
       },
       {
         "prompt": "Name three months.",
-        "answer": "(free answer)"
+        "answer": "(free answer)",
+        "spanish": "Nombra tres meses del año."
       }
     ],
     "minefieldGrid": {
@@ -9413,83 +9453,103 @@ export const TOPIC_LIBRARY = {
     "hotPotatoPrompts": [
       {
         "prompt": "Opposite of hot?",
-        "answer": "cold"
+        "answer": "cold",
+        "spanish": "¿Cuál es el opuesto de 'hot' (caliente)?"
       },
       {
         "prompt": "Weather with a lot of sun?",
-        "answer": "sunny"
+        "answer": "sunny",
+        "spanish": "¿Cómo se llama el clima con mucho sol?"
       },
       {
         "prompt": "Weather with a lot of wind?",
-        "answer": "windy"
+        "answer": "windy",
+        "spanish": "¿Cómo se llama el clima con mucho viento?"
       },
       {
         "prompt": "Weather with clouds?",
-        "answer": "cloudy"
+        "answer": "cloudy",
+        "spanish": "¿Cómo se llama el clima con nubes?"
       },
       {
         "prompt": "Weather with rain?",
-        "answer": "rainy / raining"
+        "answer": "rainy / raining",
+        "spanish": "¿Cómo se llama el clima con lluvia?"
       },
       {
         "prompt": "Very cold means...?",
-        "answer": "freezing"
+        "answer": "freezing",
+        "spanish": "¿Cómo se dice cuando hace muchísimo frío?"
       },
       {
         "prompt": "Season after spring?",
-        "answer": "summer"
+        "answer": "summer",
+        "spanish": "¿Qué estación viene después de la primavera?"
       },
       {
         "prompt": "Season before spring?",
-        "answer": "winter"
+        "answer": "winter",
+        "spanish": "¿Qué estación viene antes de la primavera?"
       },
       {
         "prompt": "Season after summer?",
-        "answer": "autumn / fall"
+        "answer": "autumn / fall",
+        "spanish": "¿Qué estación viene después del verano?"
       },
       {
         "prompt": "Season before winter?",
-        "answer": "autumn / fall"
+        "answer": "autumn / fall",
+        "spanish": "¿Qué estación viene antes del invierno?"
       },
       {
         "prompt": "Fix: 'It is rain.'",
-        "answer": "It is rainy / It is raining."
+        "answer": "It is rainy / It is raining.",
+        "spanish": "Corrige el error en la frase."
       },
       {
         "prompt": "Fix: 'It is wind.'",
-        "answer": "It is windy."
+        "answer": "It is windy.",
+        "spanish": "Corrige el error en la frase."
       },
       {
         "prompt": "Name two temperature words.",
-        "answer": "hot / warm / cool / cold / freezing"
+        "answer": "hot / warm / cool / cold / freezing",
+        "spanish": "Nombra dos palabras para describir la temperatura."
       },
       {
         "prompt": "Name the four seasons.",
-        "answer": "spring, summer, autumn/fall, winter"
+        "answer": "spring, summer, autumn/fall, winter",
+        "spanish": "Nombra las cuatro estaciones del año."
       },
       {
         "prompt": "What do you wear when it is cold?",
-        "answer": "(free answer)"
+        "answer": "(free answer)",
+        "spanish": "¿Qué te pones cuando hace frío?"
       },
       {
         "prompt": "What do you do when it is sunny?",
-        "answer": "(free answer)"
+        "answer": "(free answer)",
+        "spanish": "¿Qué haces cuando hace sol?"
       },
       {
         "prompt": "Complete: Today is very ___.",
-        "answer": "hot / cold / sunny etc."
+        "answer": "hot / cold / sunny etc.",
+        "spanish": "Completa la frase con una palabra del clima o la temperatura."
       },
       {
         "prompt": "Complete: In winter, I wear a ___.",
-        "answer": "coat / jacket etc."
+        "answer": "coat / jacket etc.",
+        "spanish": "Completa la frase con una prenda de ropa."
       },
       {
         "prompt": "Weather with snow?",
-        "answer": "snowy / snowing"
+        "answer": "snowy / snowing",
+        "spanish": "¿Cómo se llama el clima con nieve?"
       },
       {
         "prompt": "Weather with a storm?",
-        "answer": "stormy"
+        "answer": "stormy",
+        "spanish": "¿Cómo se llama el clima con tormenta?"
       }
     ],
     "minefieldGrid": {
@@ -10036,83 +10096,103 @@ export const TOPIC_LIBRARY = {
     "hotPotatoPrompts": [
       {
         "prompt": "Name one morning routine.",
-        "answer": "(free answer)"
+        "answer": "(free answer)",
+        "spanish": "Nombra una rutina de la mañana."
       },
       {
         "prompt": "Name one evening routine.",
-        "answer": "(free answer)"
+        "answer": "(free answer)",
+        "spanish": "Nombra una rutina de la noche."
       },
       {
         "prompt": "Complete: 'I ___ brush my teeth in the morning.'",
-        "answer": "always"
+        "answer": "always",
+        "spanish": "Completa el espacio con el adverbio de frecuencia correcto."
       },
       {
         "prompt": "Complete: 'I ___ go to school on Sunday.'",
-        "answer": "never"
+        "answer": "never",
+        "spanish": "Completa el espacio con el adverbio de frecuencia correcto."
       },
       {
         "prompt": "Fix: 'I go usually home at 6.'",
-        "answer": "I usually go home at 6."
+        "answer": "I usually go home at 6.",
+        "spanish": "Corrige el error en la posición del adverbio de frecuencia."
       },
       {
         "prompt": "Fix: 'He wake up at 7.'",
-        "answer": "He wakes up at 7."
+        "answer": "He wakes up at 7.",
+        "spanish": "Corrige el error verbal en la frase."
       },
       {
         "prompt": "Name one time of day.",
-        "answer": "morning / afternoon / evening / night"
+        "answer": "morning / afternoon / evening / night",
+        "spanish": "Nombra un momento del día."
       },
       {
         "prompt": "What do you do before bed?",
-        "answer": "(free answer)"
+        "answer": "(free answer)",
+        "spanish": "¿Qué haces antes de dormir?"
       },
       {
         "prompt": "Complete: I ___ breakfast at 8.",
-        "answer": "have"
+        "answer": "have",
+        "spanish": "Completa la frase con el verbo correcto ('have' o 'has')."
       },
       {
         "prompt": "Complete: She ___ lunch at noon.",
-        "answer": "has"
+        "answer": "has",
+        "spanish": "Completa la frase con el verbo correcto ('have' o 'has')."
       },
       {
         "prompt": "Complete: I go to bed ___ night.",
-        "answer": "at"
+        "answer": "at",
+        "spanish": "Completa el espacio con la preposición de tiempo correcta."
       },
       {
         "prompt": "Complete: I study ___ the afternoon.",
-        "answer": "in"
+        "answer": "in",
+        "spanish": "Completa el espacio con la preposición de tiempo correcta."
       },
       {
         "prompt": "Frequency word between always and sometimes?",
-        "answer": "usually / often"
+        "answer": "usually / often",
+        "spanish": "¿Qué palabra de frecuencia está entre 'always' y 'sometimes'?"
       },
       {
         "prompt": "Frequency word meaning not often?",
-        "answer": "rarely / seldom"
+        "answer": "rarely / seldom",
+        "spanish": "¿Qué palabra de frecuencia significa 'no muy a menudo'?"
       },
       {
         "prompt": "Say a sentence with 'sometimes'.",
-        "answer": "(free answer)"
+        "answer": "(free answer)",
+        "spanish": "Di una frase usando 'sometimes'."
       },
       {
         "prompt": "Say a sentence with 'never'.",
-        "answer": "(free answer)"
+        "answer": "(free answer)",
+        "spanish": "Di una frase usando 'never'."
       },
       {
         "prompt": "Question: What time do you...?",
-        "answer": "(free answer)"
+        "answer": "(free answer)",
+        "spanish": "Responde a la pregunta: ¿A qué hora tú...?"
       },
       {
         "prompt": "Say two things you do every morning.",
-        "answer": "wake up / eat / study / work / sleep etc."
+        "answer": "wake up / eat / study / work / sleep etc.",
+        "spanish": "Di dos cosas que haces todas las mañanas."
       },
       {
         "prompt": "What do you do after lunch?",
-        "answer": "(free answer)"
+        "answer": "(free answer)",
+        "spanish": "¿Qué haces después de almorzar?"
       },
       {
         "prompt": "What do you do on weekends?",
-        "answer": "(free answer)"
+        "answer": "(free answer)",
+        "spanish": "¿Qué haces los fines de semana?"
       }
     ],
     "minefieldGrid": {
@@ -10659,83 +10739,103 @@ export const TOPIC_LIBRARY = {
     "hotPotatoPrompts": [
       {
         "prompt": "Singular: ___ a sofa.",
-        "answer": "There is"
+        "answer": "There is",
+        "spanish": "Completa el espacio con 'There is' o 'There are' en singular."
       },
       {
         "prompt": "Plural: ___ two chairs.",
-        "answer": "There are"
+        "answer": "There are",
+        "spanish": "Completa el espacio con 'There is' o 'There are' en plural."
       },
       {
         "prompt": "Negative singular: There ___ a TV.",
-        "answer": "isn't / is not"
+        "answer": "isn't / is not",
+        "spanish": "Completa el espacio con la forma negativa correcta."
       },
       {
         "prompt": "Question singular: ___ there a fridge?",
-        "answer": "Is"
+        "answer": "Is",
+        "spanish": "Completa el espacio para formar la pregunta en singular."
       },
       {
         "prompt": "Question plural: ___ there two windows?",
-        "answer": "Are"
+        "answer": "Are",
+        "spanish": "Completa el espacio para formar la pregunta en plural."
       },
       {
         "prompt": "Name one room in a house.",
-        "answer": "(free answer)"
+        "answer": "(free answer)",
+        "spanish": "Nombra una habitación de la casa."
       },
       {
         "prompt": "Name one object in a bedroom.",
-        "answer": "(free answer)"
+        "answer": "(free answer)",
+        "spanish": "Nombra un objeto de un dormitorio."
       },
       {
         "prompt": "Name one object in a kitchen.",
-        "answer": "(free answer)"
+        "answer": "(free answer)",
+        "spanish": "Nombra un objeto de una cocina."
       },
       {
         "prompt": "The lamp is ___ the table.",
-        "answer": "on"
+        "answer": "on",
+        "spanish": "Completa el espacio con la preposición de lugar correcta."
       },
       {
         "prompt": "The shoes are ___ the bed.",
-        "answer": "under"
+        "answer": "under",
+        "spanish": "Completa el espacio con la preposición de lugar correcta."
       },
       {
         "prompt": "The sofa is ___ the living room.",
-        "answer": "in"
+        "answer": "in",
+        "spanish": "Completa el espacio con la preposición de lugar correcta."
       },
       {
         "prompt": "The table is ___ the sofa.",
-        "answer": "next to / near"
+        "answer": "next to / near",
+        "spanish": "Completa el espacio con la preposición de lugar correcta."
       },
       {
         "prompt": "Fix: 'There are a bed.'",
-        "answer": "There is a bed."
+        "answer": "There is a bed.",
+        "spanish": "Corrige el error en la frase."
       },
       {
         "prompt": "Fix: 'There is two chairs.'",
-        "answer": "There are two chairs."
+        "answer": "There are two chairs.",
+        "spanish": "Corrige el error en la frase."
       },
       {
         "prompt": "Fix: 'The fridge is on the kitchen.'",
-        "answer": "The fridge is in the kitchen."
+        "answer": "The fridge is in the kitchen.",
+        "spanish": "Corrige el error en la frase."
       },
       {
         "prompt": "Complete: There ___ some books.",
-        "answer": "are"
+        "answer": "are",
+        "spanish": "Completa el espacio con 'is' o 'are'."
       },
       {
         "prompt": "Complete: There ___ a bathroom.",
-        "answer": "is"
+        "answer": "is",
+        "spanish": "Completa el espacio con 'is' o 'are'."
       },
       {
         "prompt": "Say a sentence with 'behind'.",
-        "answer": "(free answer)"
+        "answer": "(free answer)",
+        "spanish": "Di una frase usando 'behind'."
       },
       {
         "prompt": "Say a sentence with 'between'.",
-        "answer": "(free answer)"
+        "answer": "(free answer)",
+        "spanish": "Di una frase usando 'between'."
       },
       {
         "prompt": "Describe one room in your house.",
-        "answer": "(free answer)"
+        "answer": "(free answer)",
+        "spanish": "Describe una habitación de tu casa."
       }
     ],
     "minefieldGrid": {
@@ -11282,83 +11382,103 @@ export const TOPIC_LIBRARY = {
     "hotPotatoPrompts": [
       {
         "prompt": "Complete: 'This is ___ book.' (my/mine)",
-        "answer": "my"
+        "answer": "my",
+        "spanish": "Elige entre 'my' y 'mine' para completar la frase."
       },
       {
         "prompt": "Complete: 'This book is ___.' (my/mine)",
-        "answer": "mine"
+        "answer": "mine",
+        "spanish": "Elige entre 'my' y 'mine' para completar la frase."
       },
       {
         "prompt": "Complete: 'Is this ___ phone?' (your/yours)",
-        "answer": "your"
+        "answer": "your",
+        "spanish": "Elige entre 'your' y 'yours' para completar la frase."
       },
       {
         "prompt": "Complete: 'The phone is ___.' (your/yours)",
-        "answer": "yours"
+        "answer": "yours",
+        "spanish": "Elige entre 'your' y 'yours' para completar la frase."
       },
       {
         "prompt": "Question word for ownership?",
-        "answer": "whose"
+        "answer": "whose",
+        "spanish": "¿Qué palabra interrogativa se usa para preguntar de quién es algo?"
       },
       {
         "prompt": "Fix: 'This is mine bag.'",
-        "answer": "This is my bag."
+        "answer": "This is my bag.",
+        "spanish": "Corrige el error en la frase."
       },
       {
         "prompt": "Fix: 'It is your.'",
-        "answer": "It is yours."
+        "answer": "It is yours.",
+        "spanish": "Corrige el error en la frase."
       },
       {
         "prompt": "Fix: 'That jacket is her.'",
-        "answer": "That jacket is hers."
+        "answer": "That jacket is hers.",
+        "spanish": "Corrige el error en la frase."
       },
       {
         "prompt": "Complete: 'That jacket is ___.' (her/hers)",
-        "answer": "hers"
+        "answer": "hers",
+        "spanish": "Elige entre 'her' y 'hers' para completar la frase."
       },
       {
         "prompt": "Complete: 'This classroom is ___.' (our/ours)",
-        "answer": "ours"
+        "answer": "ours",
+        "spanish": "Completa el espacio con el pronombre posesivo correcto."
       },
       {
         "prompt": "Complete: 'Those keys are ___.' (their/theirs)",
-        "answer": "theirs"
+        "answer": "theirs",
+        "spanish": "Elige entre 'their' y 'theirs' para completar la frase."
       },
       {
         "prompt": "'This phone is ___.'",
-        "answer": "mine / yours / his / hers / ours / theirs"
+        "answer": "mine / yours / his / hers / ours / theirs",
+        "spanish": "Completa la frase con el pronombre posesivo correcto."
       },
       {
         "prompt": "'This is ___ phone.'",
-        "answer": "my / your / his / her / our / their"
+        "answer": "my / your / his / her / our / their",
+        "spanish": "Completa la frase con el adjetivo posesivo correcto."
       },
       {
         "prompt": "Ask a whose question.",
-        "answer": "(free answer)"
+        "answer": "(free answer)",
+        "spanish": "Haz una pregunta con 'whose'."
       },
       {
         "prompt": "Say a sentence with 'his'.",
-        "answer": "(free answer)"
+        "answer": "(free answer)",
+        "spanish": "Di una frase con 'his'."
       },
       {
         "prompt": "Say a sentence with 'hers'.",
-        "answer": "(free answer)"
+        "answer": "(free answer)",
+        "spanish": "Di una frase con 'hers'."
       },
       {
         "prompt": "Complete: The books are ___.",
-        "answer": "mine / yours / ours / theirs"
+        "answer": "mine / yours / ours / theirs",
+        "spanish": "Completa la frase con el pronombre posesivo correcto."
       },
       {
         "prompt": "Complete: This is ___ pencil.",
-        "answer": "my / your / his / her etc."
+        "answer": "my / your / his / her etc.",
+        "spanish": "Completa la frase con el adjetivo posesivo correcto."
       },
       {
         "prompt": "Choose both correct: 'my book' / 'mine book' / 'the book is mine'",
-        "answer": "my + noun; mine without noun"
+        "answer": "my + noun; mine without noun",
+        "spanish": "Elige las dos opciones correctas."
       },
       {
         "prompt": "Choose both correct: 'her jacket' / 'hers jacket' / 'the jacket is hers'",
-        "answer": "her + noun; hers without noun"
+        "answer": "her + noun; hers without noun",
+        "spanish": "Elige las dos opciones correctas."
       }
     ],
     "minefieldGrid": {
@@ -11488,26 +11608,26 @@ export const TOPIC_LIBRARY = {
       {word:"am going to"},{word:"is going to"},{word:"are going to"},{word:"base verb"},
     ],
     hotPotatoPrompts: [
-      {prompt:"Complete: 'I think it ___ be sunny tomorrow.'", answer:"will"},
-      {prompt:"Complete: 'Look at the clouds! It ___ rain.'", answer:"is going to"},
-      {prompt:"Fix: 'She will to help us.'", answer:"She will help us."},
-      {prompt:"Fix: 'They going to visit us.'", answer:"They are going to visit us."},
-      {prompt:"Use will for an instant decision: 'The phone is ringing. ___ answer it.'", answer:"I'll"},
-      {prompt:"Use going to for a plan: 'I ___ study tonight.'", answer:"am going to"},
-      {prompt:"Choose: 'I promise I will call' or 'I promise I am going to call'?", answer:"I promise I will call."},
-      {prompt:"Complete: 'Are you ___ watch the film?'", answer:"going to"},
-      {prompt:"Complete: 'Will you ___ me later?'", answer:"call / help / text"},
-      {prompt:"Fix: 'He is going to buys a car.'", answer:"He is going to buy a car."},
-      {prompt:"Which one is for evidence now: will or going to?", answer:"going to"},
-      {prompt:"Which one is common for promises: will or going to?", answer:"will"},
-      {prompt:"Make a sentence with 'won't'.", answer:"(free answer)"},
-      {prompt:"Make a going-to question.", answer:"(free answer)"},
-      {prompt:"Make a prediction about technology with will.", answer:"(free answer)"},
-      {prompt:"Make a plan for next weekend with going to.", answer:"(free answer)"},
-      {prompt:"Complete: 'We ___ not going to be late.'", answer:"are"},
-      {prompt:"Complete: 'I hope you ___ enjoy it.'", answer:"will"},
-      {prompt:"Choose: 'Careful, you will fall' or 'Careful, you're going to fall'?", answer:"Careful, you're going to fall."},
-      {prompt:"After will, use verb with or without 'to'?", answer:"without to / base verb"},
+      {prompt:"Complete: 'I think it ___ be sunny tomorrow.'", answer:"will", spanish:"Completa el espacio eligiendo entre 'will' y 'going to'."},
+      {prompt:"Complete: 'Look at the clouds! It ___ rain.'", answer:"is going to", spanish:"Completa el espacio eligiendo entre 'will' y 'going to'."},
+      {prompt:"Fix: 'She will to help us.'", answer:"She will help us.", spanish:"Corrige el error en la frase."},
+      {prompt:"Fix: 'They going to visit us.'", answer:"They are going to visit us.", spanish:"Corrige el error en la frase."},
+      {prompt:"Use will for an instant decision: 'The phone is ringing. ___ answer it.'", answer:"I'll", spanish:"Completa la frase usando 'will' para una decisión instantánea."},
+      {prompt:"Use going to for a plan: 'I ___ study tonight.'", answer:"am going to", spanish:"Completa la frase usando 'going to' para un plan."},
+      {prompt:"Choose: 'I promise I will call' or 'I promise I am going to call'?", answer:"I promise I will call.", spanish:"Elige la frase correcta."},
+      {prompt:"Complete: 'Are you ___ watch the film?'", answer:"going to", spanish:"Completa la pregunta con 'going to'."},
+      {prompt:"Complete: 'Will you ___ me later?'", answer:"call / help / text", spanish:"Completa la frase con un verbo apropiado."},
+      {prompt:"Fix: 'He is going to buys a car.'", answer:"He is going to buy a car.", spanish:"Corrige el error en la frase."},
+      {prompt:"Which one is for evidence now: will or going to?", answer:"going to", spanish:"Elige cuál se usa para una evidencia presente: 'will' o 'going to'."},
+      {prompt:"Which one is common for promises: will or going to?", answer:"will", spanish:"Elige cuál se usa normalmente para promesas: 'will' o 'going to'."},
+      {prompt:"Make a sentence with 'won't'.", answer:"(free answer)", spanish:"Escribe una frase usando 'won't'."},
+      {prompt:"Make a going-to question.", answer:"(free answer)", spanish:"Escribe una pregunta usando 'going to'."},
+      {prompt:"Make a prediction about technology with will.", answer:"(free answer)", spanish:"Escribe una predicción sobre la tecnología usando 'will'."},
+      {prompt:"Make a plan for next weekend with going to.", answer:"(free answer)", spanish:"Escribe un plan para el próximo fin de semana usando 'going to'."},
+      {prompt:"Complete: 'We ___ not going to be late.'", answer:"are", spanish:"Completa el espacio con la forma correcta del verbo 'to be'."},
+      {prompt:"Complete: 'I hope you ___ enjoy it.'", answer:"will", spanish:"Completa el espacio con 'will'."},
+      {prompt:"Choose: 'Careful, you will fall' or 'Careful, you're going to fall'?", answer:"Careful, you're going to fall.", spanish:"Elige la frase correcta."},
+      {prompt:"After will, use verb with or without 'to'?", answer:"without to / base verb", spanish:"Responde: después de 'will', ¿se usa el verbo con o sin 'to'?"},
     ],
     auctionSentences: [
       { sentence:"I think the lesson will be interesting.", isCorrect:true, explanation:"'Will' is natural for opinions and general predictions." },
@@ -11590,26 +11710,26 @@ export const TOPIC_LIBRARY = {
       {word:"science"},{word:"routine"},{word:"no will"},{word:"every time"},
     ],
     hotPotatoPrompts: [
-      {prompt:"Complete: 'If you heat ice, it ___.'", answer:"melts"},
-      {prompt:"Complete: 'If water reaches 100 degrees, it ___.'", answer:"boils"},
-      {prompt:"Fix: 'If you will press this button, the machine starts.'", answer:"If you press this button, the machine starts."},
-      {prompt:"Choose: 'If it rains, streets get wet' or 'If it rains, streets will get wet' for a general fact.", answer:"If it rains, streets get wet."},
-      {prompt:"Zero conditional uses present simple + ___.", answer:"present simple"},
-      {prompt:"Complete: 'When I am tired, I ___ coffee.'", answer:"drink / have"},
-      {prompt:"Complete: 'If plants don't get water, they ___.'", answer:"die"},
-      {prompt:"Make a zero conditional about school rules.", answer:"(free answer)"},
-      {prompt:"Use when instead of if: 'If I feel sick, I stay home.'", answer:"When I feel sick, I stay home."},
-      {prompt:"Complete: 'If you mix red and blue, you ___ purple.'", answer:"get / make"},
-      {prompt:"Which conditional is for general truths: zero or first?", answer:"zero conditional"},
-      {prompt:"Which conditional uses will for future results: zero or first?", answer:"first conditional"},
-      {prompt:"Fix: 'If people don't sleep, they will feel tired' as a general truth.", answer:"If people don't sleep, they feel tired."},
-      {prompt:"Complete: 'If the alarm rings, students ___ outside.'", answer:"go / leave / wait"},
-      {prompt:"Make a zero conditional about food.", answer:"(free answer)"},
-      {prompt:"Make a zero conditional about health.", answer:"(free answer)"},
-      {prompt:"Complete: 'When the sun goes down, it ___ colder.'", answer:"gets"},
-      {prompt:"Is 'when' possible in zero conditional?", answer:"yes"},
-      {prompt:"Complete: 'If you add two and two, you ___ four.'", answer:"get"},
-      {prompt:"Make a zero conditional about your routine.", answer:"(free answer)"},
+      {prompt:"Complete: 'If you heat ice, it ___.'", answer:"melts", spanish:"Completa el espacio con el verbo en presente simple."},
+      {prompt:"Complete: 'If water reaches 100 degrees, it ___.'", answer:"boils", spanish:"Completa el espacio con el verbo en presente simple."},
+      {prompt:"Fix: 'If you will press this button, the machine starts.'", answer:"If you press this button, the machine starts.", spanish:"Corrige el error en la frase."},
+      {prompt:"Choose: 'If it rains, streets get wet' or 'If it rains, streets will get wet' for a general fact.", answer:"If it rains, streets get wet.", spanish:"Elige la frase correcta para expresar un hecho general."},
+      {prompt:"Zero conditional uses present simple + ___.", answer:"present simple", spanish:"Completa la regla del condicional cero."},
+      {prompt:"Complete: 'When I am tired, I ___ coffee.'", answer:"drink / have", spanish:"Completa el espacio con el verbo en presente simple."},
+      {prompt:"Complete: 'If plants don't get water, they ___.'", answer:"die", spanish:"Completa el espacio con el verbo en presente simple."},
+      {prompt:"Make a zero conditional about school rules.", answer:"(free answer)", spanish:"Escribe una frase de condicional cero sobre las reglas del colegio."},
+      {prompt:"Use when instead of if: 'If I feel sick, I stay home.'", answer:"When I feel sick, I stay home.", spanish:"Reescribe la frase usando 'when' en vez de 'if'."},
+      {prompt:"Complete: 'If you mix red and blue, you ___ purple.'", answer:"get / make", spanish:"Completa el espacio con el verbo en presente simple."},
+      {prompt:"Which conditional is for general truths: zero or first?", answer:"zero conditional", spanish:"Elige qué condicional se usa para verdades generales: cero o primero."},
+      {prompt:"Which conditional uses will for future results: zero or first?", answer:"first conditional", spanish:"Elige qué condicional usa 'will' para resultados futuros: cero o primero."},
+      {prompt:"Fix: 'If people don't sleep, they will feel tired' as a general truth.", answer:"If people don't sleep, they feel tired.", spanish:"Corrige la frase para expresar una verdad general."},
+      {prompt:"Complete: 'If the alarm rings, students ___ outside.'", answer:"go / leave / wait", spanish:"Completa el espacio con el verbo en presente simple."},
+      {prompt:"Make a zero conditional about food.", answer:"(free answer)", spanish:"Escribe una frase de condicional cero sobre la comida."},
+      {prompt:"Make a zero conditional about health.", answer:"(free answer)", spanish:"Escribe una frase de condicional cero sobre la salud."},
+      {prompt:"Complete: 'When the sun goes down, it ___ colder.'", answer:"gets", spanish:"Completa el espacio con el verbo en presente simple."},
+      {prompt:"Is 'when' possible in zero conditional?", answer:"yes", spanish:"Responde: ¿se puede usar 'when' en el condicional cero?"},
+      {prompt:"Complete: 'If you add two and two, you ___ four.'", answer:"get", spanish:"Completa el espacio con el verbo en presente simple."},
+      {prompt:"Make a zero conditional about your routine.", answer:"(free answer)", spanish:"Escribe una frase de condicional cero sobre tu rutina."},
     ],
     auctionSentences: [
       { sentence:"If you heat water to 100 degrees, it boils.", isCorrect:true, explanation:"Correct zero conditional: present simple in the if-clause and present simple in the result." },

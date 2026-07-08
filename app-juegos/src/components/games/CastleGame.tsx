@@ -62,7 +62,7 @@ const ACTION_DEFS: ActionDef[] = [
   { id: "focus",  type: "finish the sentence",       label: "Focus",        emoji: "🔮", character: "🧘", color: "#D97706", glow: "#FCD34D", verb: "focus" },
 ];
 
-type TeamRpg = { hp: number; xp: number; level: number; mp: number; maxMp: number; shieldTurnsLeft: number };
+type TeamRpg = { hp: number; xp: number; level: number; mp: number; maxMp: number; shieldTurnsLeft: number; shieldFresh: boolean };
 type Phase = "intro" | "select-action" | "answer" | "pick-target" | "rolling" | "result";
 type LastEvent = {
   action: ActionId;
@@ -188,7 +188,7 @@ export function CastleGame({ questions, teams, onUpdateScore, onEnd }: GameProps
   const TURN_SECONDS = 25;
 
   const [rpg, setRpg] = useState<Record<string | number, TeamRpg>>(() => Object.fromEntries(
-    teams.map(t => [t.id, { hp: MAX_HP, xp: 0, level: 1, mp: START_MP, maxMp: MAX_MP, shieldTurnsLeft: 0 }])
+    teams.map(t => [t.id, { hp: MAX_HP, xp: 0, level: 1, mp: START_MP, maxMp: MAX_MP, shieldTurnsLeft: 0, shieldFresh: false }])
   ));
   const [activeTeamIdx, setActiveTeamIdx] = useState(0);
   const [selectedAction, setSelectedAction] = useState<ActionId | null>(null);
@@ -248,10 +248,15 @@ export function CastleGame({ questions, teams, onUpdateScore, onEnd }: GameProps
       const next = { ...prev };
       teams.forEach(t => {
         if (next[t.id].hp <= 0) return;
+        // A freshly-raised shield skips its first tick so "3 turns" means 3 turns of
+        // actual protection, not 2 — otherwise it decrements the instant you hand off
+        // the turn, before any opponent has had a chance to attack.
+        const skipTick = next[t.id].shieldFresh;
         next[t.id] = {
           ...next[t.id],
           mp: Math.min(next[t.id].maxMp, next[t.id].mp + MP_REGEN_PER_TURN),
-          shieldTurnsLeft: Math.max(0, next[t.id].shieldTurnsLeft - 1),
+          shieldTurnsLeft: skipTick ? next[t.id].shieldTurnsLeft : Math.max(0, next[t.id].shieldTurnsLeft - 1),
+          shieldFresh: false,
         };
       });
       return next;
@@ -338,7 +343,7 @@ export function CastleGame({ questions, teams, onUpdateScore, onEnd }: GameProps
   const handleReveal = () => setShowAns(true);
 
   const resolveDefend = () => {
-    setRpg(prev => ({ ...prev, [activeTeam.id]: { ...prev[activeTeam.id], shieldTurnsLeft: SHIELD_DURATION_TURNS } }));
+    setRpg(prev => ({ ...prev, [activeTeam.id]: { ...prev[activeTeam.id], shieldTurnsLeft: SHIELD_DURATION_TURNS, shieldFresh: true } }));
     onUpdateScore(activeTeam.id, DEFEND_SCORE);
     setLastEvent({ action: "defend" });
     setPhase("result");

@@ -2,13 +2,18 @@ import { useState, useEffect, useRef } from "react";
 import type { GameProps } from "../../types";
 import { teamsGridCols } from "../../data/constants";
 
+const TURN_SECONDS_OPTIONS = [15, 20, 25, 30];
+const ROUND_SECONDS_MULT = 4;
+
 export function HotPotatoGame({ questions, teams, onUpdateScore, onEnd, level }: GameProps) {
   const showSpanish = level === "A1" || level === "A2";
   const STARTING_BANK = 100;
   const TOTAL_ROUNDS = 5;
-  const ROUND_SECONDS = 40;
-  const Q_SECONDS = 10;
   const PENALTY_PTS = 30;
+
+  const [turnSeconds, setTurnSeconds] = useState(TURN_SECONDS_OPTIONS[0]);
+  const Q_SECONDS = turnSeconds;
+  const ROUND_SECONDS = turnSeconds * ROUND_SECONDS_MULT;
 
   const [phase, setPhase] = useState<"intro" | "play" | "roundend" | "gameover">("intro");
   const [round, setRound] = useState(1);
@@ -43,7 +48,10 @@ export function HotPotatoGame({ questions, teams, onUpdateScore, onEnd, level }:
     roundEndedRef.current = false;
     timerPaused.current = false;
     setRoundTimeLeft(ROUND_SECONDS);
-  }, [round]);
+    // ROUND_SECONDS depends on turnSeconds, which can only change on the intro screen
+    // (before "round" ever changes) — including it here keeps roundTimeLeft in sync if
+    // the teacher picks a duration after this effect's first mount-time run.
+  }, [round, ROUND_SECONDS]);
 
   useEffect(() => {
     if (phase !== "play") {
@@ -141,8 +149,8 @@ export function HotPotatoGame({ questions, teams, onUpdateScore, onEnd, level }:
         <div style={{ fontWeight: "900", fontSize: "20px", marginBottom: "10px" }}>Hot Potato</div>
         <div style={{ fontSize: "15px", lineHeight: 1.8, opacity: 0.95 }}>
           Each team starts with <strong>{STARTING_BANK} pts</strong> for this game.<br />
-          <strong>5 rounds × 40 seconds.</strong> One team holds the potato.<br />
-          Each team has <strong>10 seconds</strong> to answer — timer auto-reveals.<br />
+          <strong>{TOTAL_ROUNDS} rounds × {ROUND_SECONDS} seconds.</strong> One team holds the potato.<br />
+          Each team has <strong>{Q_SECONDS} seconds</strong> to answer — timer auto-reveals.<br />
           Teacher judges: <strong>✅ Answered in time → Pass it on!</strong><br />
           <strong>❌ Too slow or wrong → Keep the potato!</strong><br />
           Whoever holds it at 0 <strong>loses {PENALTY_PTS} pts 🔥</strong>
@@ -197,6 +205,25 @@ export function HotPotatoGame({ questions, teams, onUpdateScore, onEnd, level }:
       <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "24px" }}>
         {teams.map(t => (<div key={t.id} style={{ background: t.color.light, border: `3px solid ${t.color.bg}`, borderRadius: "14px", padding: "10px 18px", fontWeight: "800", fontSize: "14px", color: t.color.dark }}>{t.color.emoji} {t.name}</div>))}
       </div>
+
+      <div style={{ marginBottom: "24px" }}>
+        <div style={{ fontSize: "13px", fontWeight: "700", color: "#7C2D12", marginBottom: "8px" }}>⏱️ Answer time per turn (round time is always {ROUND_SECONDS_MULT}×):</div>
+        <div style={{ display: "flex", gap: "8px", justifyContent: "center", flexWrap: "wrap" }}>
+          {TURN_SECONDS_OPTIONS.map(secs => (
+            <button key={secs} onClick={() => setTurnSeconds(secs)} style={{
+              background: turnSeconds === secs ? "linear-gradient(135deg,#EA580C,#F97316)" : "white",
+              color: turnSeconds === secs ? "white" : "#7C2D12",
+              border: `2px solid ${turnSeconds === secs ? "#EA580C" : "#FED7AA"}`,
+              borderRadius: "12px", padding: "10px 16px", cursor: "pointer",
+              fontWeight: "800", fontSize: "14px", minWidth: "78px", transition: "all 0.15s"
+            }}>
+              {secs}s
+              <div style={{ fontSize: "10px", fontWeight: "700", opacity: 0.8, marginTop: "2px" }}>round: {secs * ROUND_SECONDS_MULT}s</div>
+            </button>
+          ))}
+        </div>
+      </div>
+
       <button onClick={() => {
         if (!seededStartRef.current) {
           teams.forEach(team => onUpdateScore(team.id, STARTING_BANK));
