@@ -2987,6 +2987,22 @@ export const TOPIC_LIBRARY = {
       { type:"finish the sentence", question:"Hybrid working means splitting time between home and the ___.", answer:"office", hint:"The other place people work", difficulty:"easy" },
       { type:"finish the sentence", question:"Working from home can improve ___ by cutting out commuting.", answer:"work-life balance / wellbeing", hint:"More time for yourself", difficulty:"medium" },
       { type:"finish the sentence", question:"The biggest challenge for managers is ___ remote teams.", answer:"managing / trusting / communicating with", hint:"Leading people they cannot see", difficulty:"medium" },
+      { type:"choose correct grammar", question:"Working from home ___ popular since the pandemic began. (become/became/has become)", answer:"has become", hint:"Present perfect for a change continuing to now (since...)", difficulty:"medium" },
+      { type:"choose correct grammar", question:"My manager often ___ me messages late at night when I work from home. (send/sends/sending)", answer:"sends", hint:"Third-person singular needs -s", difficulty:"easy" },
+      { type:"choose correct grammar", question:"Working from home is ___ than commuting every day for most people. (relax/more relaxing/relaxinger)", answer:"more relaxing", hint:"Long adjectives use 'more' for comparatives", difficulty:"easy" },
+      { type:"choose correct grammar", question:"It can be hard to concentrate ___ your work when the kids are at home. (on/at/in)", answer:"on", hint:"'Concentrate on' is the correct preposition", difficulty:"medium" },
+      { type:"choose correct grammar", question:"She set up ___ home office in the spare bedroom. (a/an/the)", answer:"a", hint:"Use 'a' before a consonant sound", difficulty:"easy" },
+      { type:"choose correct grammar", question:"Many employees enjoy ___ from home because it saves time. (work/working/to work)", answer:"working", hint:"'Enjoy' is followed by a gerund (-ing)", difficulty:"easy" },
+      { type:"choose correct grammar", question:"Employees ___ work remotely often report better work-life balance. (who/which/whose)", answer:"who", hint:"Use 'who' for people", difficulty:"easy" },
+      { type:"choose correct grammar", question:"Video calls ___ instead of face-to-face meetings during the pandemic. (used/were used/have use)", answer:"were used", hint:"Passive past simple: were + past participle", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"She have worked from home for three years now.", answer:"She has worked from home for three years now.", hint:"Use 'has' with third-person singular subjects", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"My colleague always forget to mute her microphone during calls.", answer:"My colleague always forgets to mute her microphone during calls.", hint:"Third-person singular verbs need -s", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"Remote work is more easier than going to the office every day.", answer:"Remote work is easier than going to the office every day.", hint:"Don't use 'more' with short comparative adjectives ending in -er", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"It's difficult to focus in your tasks when your family is around.", answer:"It's difficult to focus on your tasks when your family is around.", hint:"The correct preposition after 'focus' is 'on'", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"He turned the spare room into an home office last year.", answer:"He turned the spare room into a home office last year.", hint:"Use 'a' before a consonant sound, not 'an'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"Some managers avoid to trust their remote employees.", answer:"Some managers avoid trusting their remote employees.", hint:"'Avoid' is followed by a gerund, not an infinitive", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"Employees which work from home need a reliable internet connection.", answer:"Employees who work from home need a reliable internet connection.", hint:"Use 'who' for people, not 'which'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"Many face-to-face meetings has been replaced by video calls.", answer:"Many face-to-face meetings have been replaced by video calls.", hint:"Plural subject needs 'have' in the present perfect passive", difficulty:"medium" },
     ],
     spyRounds: [
       { crewmateTopic:"Advantages of Working from Home", spyTopic:"Disadvantages of Working from Home", crewmatePrompt:"Tell the group TWO good things about working from home. Give reasons. Example: 'You save time because you don't commute.' or 'You can work in comfortable clothes.'", spyPrompt:"Tell the group TWO problems with working from home. Give reasons. Example: 'It's hard to concentrate.' or 'You feel lonely without colleagues.'", explanation:"Crewmates gave advantages. The spy gave disadvantages.", spyGuessOptions:["Advantages of Working from Home","Disadvantages of Working from Home","Office Work Benefits","Working Hours"] },
@@ -3089,6 +3105,22 @@ export const TOPIC_LIBRARY = {
       { type:"finish the sentence", question:"Grammar rules are important, but ___ is what makes you sound natural.", answer:"fluency / practice", hint:"Constant use", difficulty:"medium" },
       { type:"finish the sentence", question:"Children learn languages faster because their brains are more ___.", answer:"flexible / plastic / receptive", hint:"Adaptable", difficulty:"medium" },
       { type:"finish the sentence", question:"Reading books in a foreign language helps you learn ___ words.", answer:"new / vocabulary", hint:"Expanding your knowledge", difficulty:"easy" },
+      { type:"choose correct grammar", question:"She ___ Spanish for six years and is now fluent. (learns/learned/has learned)", answer:"has learned", hint:"Present perfect for an unfinished duration (for six years)", difficulty:"medium" },
+      { type:"choose correct grammar", question:"A good language app ___ your progress every day. (track/tracks/tracking)", answer:"tracks", hint:"Third-person singular needs -s", difficulty:"easy" },
+      { type:"choose correct grammar", question:"Learning French is ___ than learning Mandarin for most English speakers. (easy/easier/more easy)", answer:"easier", hint:"Short adjectives add -er for comparatives", difficulty:"easy" },
+      { type:"choose correct grammar", question:"You can improve your fluency by practising ___ native speakers. (with/at/for)", answer:"with", hint:"'Practise with someone' is the correct preposition", difficulty:"easy" },
+      { type:"choose correct grammar", question:"He wants to become ___ fluent speaker of Japanese. (a/an/the)", answer:"a", hint:"'Fluent' starts with a consonant sound", difficulty:"easy" },
+      { type:"choose correct grammar", question:"She decided ___ Italian before her trip to Rome. (learning/learn/to learn)", answer:"to learn", hint:"'Decide' is followed by an infinitive", difficulty:"medium" },
+      { type:"choose correct grammar", question:"Immersion, ___ means surrounding yourself with a language, speeds up learning. (who/which/whose)", answer:"which", hint:"Use 'which' for things and ideas", difficulty:"medium" },
+      { type:"choose correct grammar", question:"Duolingo ___ by millions of people around the world. (uses/is used/used)", answer:"is used", hint:"Passive present simple: is/are + past participle", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"She have studied German for two years now.", answer:"She has studied German for two years now.", hint:"Use 'has' with third-person singular subjects", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"A good tutor always correct your pronunciation mistakes.", answer:"A good tutor always corrects your pronunciation mistakes.", hint:"Third-person singular verbs need -s", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"Learning Mandarin is more harder than learning Spanish.", answer:"Learning Mandarin is harder than learning Spanish.", hint:"Don't use 'more' with short comparative adjectives ending in -er", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"Many learners depend too much in translation apps.", answer:"Many learners depend too much on translation apps.", hint:"The correct preposition after 'depend' is 'on'", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"She bought an new dictionary to help with vocabulary.", answer:"She bought a new dictionary to help with vocabulary.", hint:"Use 'a' before a consonant sound, not 'an'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"He avoids to speak in front of the class because he feels nervous.", answer:"He avoids speaking in front of the class because he feels nervous.", hint:"'Avoid' is followed by a gerund, not an infinitive", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"Students which practise every day improve much faster.", answer:"Students who practise every day improve much faster.", hint:"Use 'who' for people, not 'which'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"Millions of new words is learned by children before school age.", answer:"Millions of new words are learned by children before school age.", hint:"Plural subject needs 'are' in the passive voice", difficulty:"medium" },
     ],
     spyRounds: [
       { crewmateTopic:"Benefits of Learning a Language", spyTopic:"Challenges of Learning a Language", crewmatePrompt:"Tell the group TWO benefits of learning a foreign language. 'It helps you communicate' or 'It opens career opportunities.'", spyPrompt:"Tell the group TWO challenges of learning a foreign language. 'It takes a long time' or 'Grammar is confusing' or 'You feel embarrassed speaking.'", explanation:"Crewmates discussed benefits. The spy discussed challenges.", spyGuessOptions:["Benefits of Learning a Language","Challenges of Learning a Language","Reasons to Travel","University Studies"] },
@@ -3191,6 +3223,22 @@ export const TOPIC_LIBRARY = {
       { type:"finish the sentence", question:"In Finland, students start formal schooling at ___, later than most countries.", answer:"seven / age 7", hint:"A specific age", difficulty:"medium" },
       { type:"finish the sentence", question:"Students who study abroad gain ___ experience and meet different cultures.", answer:"international / global", hint:"Experience beyond their country", difficulty:"medium" },
       { type:"finish the sentence", question:"Some people believe grades are less important than ___ skills for real life.", answer:"practical / life", hint:"Skills you actually use", difficulty:"medium" },
+      { type:"choose correct grammar", question:"Finland ___ its education system significantly over the past decade. (change/changed/has changed)", answer:"has changed", hint:"Present perfect for change over an unfinished time period ('over the past decade')", difficulty:"medium" },
+      { type:"choose correct grammar", question:"Every teacher ___ a responsibility to inspire their students. (have/has/having)", answer:"has", hint:"Third-person singular needs -s ('have' becomes 'has')", difficulty:"easy" },
+      { type:"choose correct grammar", question:"Private education is often ___ than public education. (expensive/more expensive/expensiver)", answer:"more expensive", hint:"Long adjectives use 'more' for comparatives", difficulty:"easy" },
+      { type:"choose correct grammar", question:"The curriculum focuses ___ practical skills as well as theory. (on/at/in)", answer:"on", hint:"'Focus on' is the correct preposition", difficulty:"easy" },
+      { type:"choose correct grammar", question:"She received ___ scholarship to study abroad. (a/an/the)", answer:"a", hint:"'Scholarship' starts with a consonant sound", difficulty:"easy" },
+      { type:"choose correct grammar", question:"Many students struggle ___ information under exam pressure. (memorising/memorise/to memorise)", answer:"to memorise", hint:"'Struggle' is followed by an infinitive", difficulty:"medium" },
+      { type:"choose correct grammar", question:"Teachers ___ inspire their students often shape entire careers. (who/which/whose)", answer:"who", hint:"Use 'who' for people", difficulty:"easy" },
+      { type:"choose correct grammar", question:"University fees ___ significantly over the last twenty years. (raised/have been raised/raise)", answer:"have been raised", hint:"Present perfect passive: have/has + been + past participle", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"Finland have changed its approach to early education.", answer:"Finland has changed its approach to early education.", hint:"Use 'has' with singular subjects like country names", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"Each student need to complete the compulsory subjects.", answer:"Each student needs to complete the compulsory subjects.", hint:"Third-person singular verbs need -s", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"University is more expensiver than most people expect.", answer:"University is more expensive than most people expect.", hint:"Don't use 'more' together with '-er' endings", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"The curriculum focuses in practical skills this year.", answer:"The curriculum focuses on practical skills this year.", hint:"The correct preposition after 'focus' is 'on'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"He was awarded an scholarship for his excellent grades.", answer:"He was awarded a scholarship for his excellent grades.", hint:"Use 'a' before a consonant sound, not 'an'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"Many students struggle memorising long lists of dates.", answer:"Many students struggle to memorise long lists of dates.", hint:"'Struggle' is followed by an infinitive ('to' + verb)", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"Teachers which inspire their students are often remembered for life.", answer:"Teachers who inspire their students are often remembered for life.", hint:"Use 'who' for people, not 'which'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"Tuition fees has increased sharply in the last decade.", answer:"Tuition fees have increased sharply in the last decade.", hint:"Plural subject needs 'have', not 'has'", difficulty:"medium" },
     ],
     spyRounds: [
       { crewmateTopic:"Advantages of Exams", spyTopic:"Disadvantages of Exams", crewmatePrompt:"Tell the group TWO reasons why exams are useful. 'Exams motivate students to study' or 'They show what a student has learned.'", spyPrompt:"Tell the group TWO problems with exams. 'Exams cause a lot of stress' or 'They don't test creativity' or 'Students just memorise facts.'", explanation:"Crewmates supported exams. The spy argued against them.", spyGuessOptions:["Advantages of Exams","Disadvantages of Exams","University Life","School Subjects"] },
@@ -3293,6 +3341,22 @@ export const TOPIC_LIBRARY = {
       { type:"finish the sentence", question:"Automation and AI are making ___ skills more important for future careers.", answer:"digital / technical", hint:"Skills for the modern world", difficulty:"medium" },
       { type:"finish the sentence", question:"A career counsellor helps people ___ which career suits their personality.", answer:"decide / discover / figure out", hint:"Making a decision with support", difficulty:"easy" },
       { type:"finish the sentence", question:"People often pursue a career in medicine because it is both respected and well-___.", answer:"paid", hint:"The salary", difficulty:"easy" },
+      { type:"choose correct grammar", question:"She ___ three different jobs since she graduated. (had/has had/have had)", answer:"has had", hint:"Present perfect for actions repeated up to now ('since she graduated')", difficulty:"medium" },
+      { type:"choose correct grammar", question:"A good CV always ___ your key achievements. (highlight/highlights/highlighting)", answer:"highlights", hint:"Third-person singular needs -s", difficulty:"easy" },
+      { type:"choose correct grammar", question:"Freelancing can be ___ than working for a company, but less secure. (flexible/more flexible/flexibler)", answer:"more flexible", hint:"Long adjectives use 'more' for comparatives", difficulty:"easy" },
+      { type:"choose correct grammar", question:"He applied ___ a job at the new marketing agency. (for/to/at)", answer:"for", hint:"'Apply for a job' is the correct preposition", difficulty:"easy" },
+      { type:"choose correct grammar", question:"She is looking for ___ internship in a design company. (a/an/the)", answer:"an", hint:"'Internship' starts with a vowel sound", difficulty:"easy" },
+      { type:"choose correct grammar", question:"He is thinking about ___ his career in his thirties. (change/changing/to change)", answer:"changing", hint:"After a preposition ('about'), use the gerund", difficulty:"medium" },
+      { type:"choose correct grammar", question:"A mentor is someone ___ experience helps you grow professionally. (who/which/whose)", answer:"whose", hint:"Use 'whose' to show possession", difficulty:"medium" },
+      { type:"choose correct grammar", question:"Most job interviews ___ within a week of the application. (schedule/are scheduled/scheduled)", answer:"are scheduled", hint:"Passive present simple: are + past participle", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"She have changed careers twice in the last five years.", answer:"She has changed careers twice in the last five years.", hint:"Use 'has' with third-person singular subjects", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"A strong CV always highlight your achievements clearly.", answer:"A strong CV always highlights your achievements clearly.", hint:"Third-person singular verbs need -s", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"This new job is more flexibler than my last one.", answer:"This new job is more flexible than my last one.", hint:"Don't use 'more' together with '-er' endings", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"He didn't apply for the job because he wasn't interested at it.", answer:"He didn't apply for the job because he wasn't interested in it.", hint:"The correct preposition after 'interested' is 'in'", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"He got a internship at a tech company last summer.", answer:"He got an internship at a tech company last summer.", hint:"Use 'an' before a vowel sound, not 'a'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"He is considering to switch to a completely different industry.", answer:"He is considering switching to a completely different industry.", hint:"'Consider' is followed by a gerund, not an infinitive", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"She found a mentor which advice changed her career path.", answer:"She found a mentor whose advice changed her career path.", hint:"Use 'whose' to show possession, not 'which'", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"Most job offers is negotiated before the contract is signed.", answer:"Most job offers are negotiated before the contract is signed.", hint:"Plural subject needs 'are', not 'is'", difficulty:"medium" },
     ],
     spyRounds: [
       { crewmateTopic:"Choosing Based on Passion", spyTopic:"Choosing Based on Salary", crewmatePrompt:"Argue that you should choose a career based on what you love. Give reasons and examples.", spyPrompt:"Argue that you should choose a career based on how much it pays. Give reasons and examples.", explanation:"Crewmates argued for passion. The spy argued for salary.", spyGuessOptions:["Following Your Passion","Prioritising Salary","Job Security","Work-Life Balance"] },
@@ -3395,6 +3459,22 @@ export const TOPIC_LIBRARY = {
       { type:"finish the sentence", question:"Exercise and hobbies outside work are important for mental ___.", answer:"health / wellbeing", hint:"How your mind feels", difficulty:"easy" },
       { type:"finish the sentence", question:"Employers who care about balance often offer mental ___ support.", answer:"health", hint:"Mind and emotional support", difficulty:"easy" },
       { type:"finish the sentence", question:"A good balance means working enough to be successful but not at the expense of ___.", answer:"health / relationships / happiness", hint:"What you lose if you overwork", difficulty:"easy" },
+      { type:"choose correct grammar", question:"Many companies ___ flexible hours since the pandemic started. (introduce/introduced/have introduced)", answer:"have introduced", hint:"Present perfect for change continuing since a point in time", difficulty:"medium" },
+      { type:"choose correct grammar", question:"Constant stress often ___ to burnout over time. (lead/leads/leading)", answer:"leads", hint:"Third-person singular needs -s", difficulty:"easy" },
+      { type:"choose correct grammar", question:"A four-day week can be ___ than a five-day week for wellbeing. (good/better/more good)", answer:"better", hint:"'Good' has an irregular comparative form: 'better'", difficulty:"easy" },
+      { type:"choose correct grammar", question:"It's important to switch ___ work at the end of the day. (off/of/from)", answer:"off", hint:"'Switch off' is the correct phrasal verb", difficulty:"easy" },
+      { type:"choose correct grammar", question:"She took ___ day off to recover from stress. (a/an/the)", answer:"a", hint:"'Day' starts with a consonant sound", difficulty:"easy" },
+      { type:"choose correct grammar", question:"He struggles ___ off work even during his holidays. (switch/switching/to switch)", answer:"to switch", hint:"'Struggle' is followed by an infinitive", difficulty:"medium" },
+      { type:"choose correct grammar", question:"Employees ___ boundaries are clear tend to feel less stressed. (who/which/whose)", answer:"whose", hint:"Use 'whose' to show possession", difficulty:"medium" },
+      { type:"choose correct grammar", question:"Mental health support ___ by more employers than ever before. (offers/is offered/offered)", answer:"is offered", hint:"Passive present simple: is + past participle", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"Her company have introduced a four-day working week.", answer:"Her company has introduced a four-day working week.", hint:"Use 'has' with singular subjects like 'company'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"Constant overwork often lead to serious health problems.", answer:"Constant overwork often leads to serious health problems.", hint:"Third-person singular verbs need -s", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"Working fewer hours can be more better for your mental health.", answer:"Working fewer hours can be better for your mental health.", hint:"'Better' is already comparative; don't add 'more'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"It's hard to switch of work when your phone keeps buzzing.", answer:"It's hard to switch off work when your phone keeps buzzing.", hint:"The correct phrasal verb is 'switch off', not 'switch of'", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"He took an day off after finishing the big project.", answer:"He took a day off after finishing the big project.", hint:"Use 'a' before a consonant sound, not 'an'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"She struggles switch off after a stressful day at work.", answer:"She struggles to switch off after a stressful day at work.", hint:"'Struggle' needs 'to' before the following verb", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"Employees which boundaries are unclear often feel overwhelmed.", answer:"Employees whose boundaries are unclear often feel overwhelmed.", hint:"Use 'whose' to show possession, not 'which'", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"More mental health programmes is offered by companies now.", answer:"More mental health programmes are offered by companies now.", hint:"Plural subject needs 'are', not 'is'", difficulty:"medium" },
     ],
     spyRounds: [
       { crewmateTopic:"Good Work-Life Balance", spyTopic:"Poor Work-Life Balance", crewmatePrompt:"Describe what life is like for someone who has a healthy work-life balance. How do they spend their time? How do they feel?", spyPrompt:"Describe what life is like for someone who has a very poor work-life balance. How do they feel? What consequences do they face?", explanation:"Crewmates described a healthy balance. The spy described an unhealthy, work-dominated life.", spyGuessOptions:["Good Work-Life Balance","Poor Work-Life Balance","Life in Retirement","Student Life"] },
@@ -3497,6 +3577,22 @@ export const TOPIC_LIBRARY = {
       { type:"finish the sentence", question:"Being accountable to a ___ can help you stay on track.", answer:"friend / mentor / coach", hint:"Another person who checks progress", difficulty:"easy" },
       { type:"finish the sentence", question:"People who are self-___ set their own goals and work without being told.", answer:"motivated / driven / disciplined", hint:"Motivated from within", difficulty:"easy" },
       { type:"finish the sentence", question:"Success without ___ can feel empty — relationships and meaning matter too.", answer:"meaning / purpose / happiness", hint:"What makes success worthwhile", difficulty:"medium" },
+      { type:"choose correct grammar", question:"She ___ hard for this promotion for the last two years. (works/worked/has worked)", answer:"has worked", hint:"Present perfect for unfinished duration ('for the last two years')", difficulty:"medium" },
+      { type:"choose correct grammar", question:"A growth mindset ___ people to see failure as a learning opportunity. (help/helps/helping)", answer:"helps", hint:"Third-person singular needs -s", difficulty:"easy" },
+      { type:"choose correct grammar", question:"Intrinsic motivation is usually ___ than motivation based on rewards. (strong/stronger/more strong)", answer:"stronger", hint:"Short adjectives add -er for comparatives", difficulty:"easy" },
+      { type:"choose correct grammar", question:"Success often depends ___ persistence rather than talent alone. (on/of/at)", answer:"on", hint:"'Depend on' is the correct preposition", difficulty:"easy" },
+      { type:"choose correct grammar", question:"He became ___ role model for young entrepreneurs. (a/an/the)", answer:"a", hint:"'Role' starts with a consonant sound", difficulty:"easy" },
+      { type:"choose correct grammar", question:"She keeps ___ toward her goals despite the setbacks. (work/working/to work)", answer:"working", hint:"'Keep' is followed by a gerund", difficulty:"medium" },
+      { type:"choose correct grammar", question:"People ___ goals are clear tend to stay more motivated. (who/which/whose)", answer:"whose", hint:"Use 'whose' to show possession", difficulty:"medium" },
+      { type:"choose correct grammar", question:"Small wins ___ to keep people motivated during long projects. (use/are used/used)", answer:"are used", hint:"Passive present simple: are + past participle", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"She have pursued her goals with real determination this year.", answer:"She has pursued her goals with real determination this year.", hint:"Use 'has' with third-person singular subjects", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"A strong sense of purpose often lead to greater motivation.", answer:"A strong sense of purpose often leads to greater motivation.", hint:"Third-person singular verbs need -s", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"His confidence became more stronger after each small success.", answer:"His confidence became stronger after each small success.", hint:"Don't use 'more' with short comparative adjectives ending in -er", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"Long-term success depends of consistent daily habits.", answer:"Long-term success depends on consistent daily habits.", hint:"The correct preposition after 'depend' is 'on'", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"She wanted to become an role model for other young women.", answer:"She wanted to become a role model for other young women.", hint:"Use 'a' before a consonant sound, not 'an'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"He keeps to work toward his goals even when he feels unmotivated.", answer:"He keeps working toward his goals even when he feels unmotivated.", hint:"'Keep' is followed by a gerund, not an infinitive", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"People which goals are unclear often lose motivation quickly.", answer:"People whose goals are unclear often lose motivation quickly.", hint:"Use 'whose' to show possession, not 'which'", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"Small rewards is used to keep employees motivated at work.", answer:"Small rewards are used to keep employees motivated at work.", hint:"Plural subject needs 'are', not 'is'", difficulty:"medium" },
     ],
     spyRounds: [
       { crewmateTopic:"What Success Means to You", spyTopic:"What Success Means to Society", crewmatePrompt:"Talk about what success means to you personally. What are your goals? What would make you feel successful in life?", spyPrompt:"Talk about what society generally considers success. What does your culture value — money, status, education, or family?", explanation:"Crewmates talked about personal success. The spy talked about society's definition.", spyGuessOptions:["Personal Success","Society's Definition of Success","Celebrity Success","Academic Success"] },
@@ -3599,6 +3695,22 @@ export const TOPIC_LIBRARY = {
       { type:"finish the sentence", question:"If you ___ tasks effectively, you focus on high-impact work first.", answer:"prioritise", hint:"Deciding what is most important", difficulty:"easy" },
       { type:"finish the sentence", question:"Spending time on things that do not help your goals is called ___ time.", answer:"wasting / losing", hint:"Not using time wisely", difficulty:"easy" },
       { type:"finish the sentence", question:"The most productive time of day for most people is in the ___.", answer:"morning", hint:"When you first start the day", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'Good time management ___ people feel less stressed.' (help/helps/helping)", answer:"helps", hint:"Third-person singular subject 'management' takes -s", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'She ___ her deadline by finishing the report a day early.' (beat/beated/beaten)", answer:"beat", hint:"Past simple of 'beat' is irregular, same form as base", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'Working smarter is ___ than working harder.' (more effective/effectiver/most effective)", answer:"more effective", hint:"Comparative of a long adjective uses 'more'", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'Procrastination often comes from ___ overwhelmed by too many tasks.' (feel/feeling/felt)", answer:"feeling", hint:"After a preposition, use the -ing form", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'To meet the deadline, you ___ finish the report by Friday.' (must/would/could)", answer:"must", hint:"'Must' expresses strong obligation", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'I ___ my to-do list this morning, and I already crossed off three tasks.' (made/have made/making)", answer:"made", hint:"'This morning' is a finished time period, so use past simple", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'If you set clear deadlines, people ___ their tasks on time.' (finish/finished/will finished)", answer:"finish", hint:"Zero conditional uses present simple in both clauses", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'A to-do list is a tool ___ helps you prioritise tasks.' (who/which/whom)", answer:"which", hint:"Use 'which' for things, not people", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"She don't prioritise her tasks well.", answer:"She doesn't prioritise her tasks well.", hint:"Third person singular needs 'doesn't'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"He have finished the report before the deadline.", answer:"He has finished the report before the deadline.", hint:"Present perfect uses 'has' with he/she/it", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"Time management help you achieve more in less time.", answer:"Time management helps you achieve more in less time.", hint:"Singular subject needs -s", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"I am used to work under pressure now.", answer:"I am used to working under pressure now.", hint:"'Used to' + gerund when it means accustomed to", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"This to-do list is more good than my old planner.", answer:"This to-do list is better than my old planner.", hint:"Irregular comparative of 'good' is 'better'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"If I will finish my tasks early, I will relax.", answer:"If I finish my tasks early, I will relax.", hint:"Don't use 'will' in the if-clause of a first conditional", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"He always procrastinate when the deadline is far away.", answer:"He always procrastinates when the deadline is far away.", hint:"Third person singular verb needs -s", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"Yesterday, she has delegated three tasks to her team.", answer:"Yesterday, she delegated three tasks to her team.", hint:"Use past simple with a specific past time expression like 'yesterday'", difficulty:"medium" },
     ],
     spyRounds: [
       { crewmateTopic:"Good Time Management Habits", spyTopic:"Bad Time Management Habits", crewmatePrompt:"Tell the group three things that people with GOOD time management do. For example: they make a to-do list, they set deadlines, they avoid distractions.", spyPrompt:"Tell the group three things that people with POOR time management do. For example: they procrastinate, they say yes to everything, they don't plan ahead.", explanation:"Crewmates described good habits. The spy described bad habits.", spyGuessOptions:["Good Time Management","Bad Time Management","Relaxation Habits","Study Habits"] },
@@ -3701,6 +3813,22 @@ export const TOPIC_LIBRARY = {
       { type:"finish the sentence", question:"A hobby turned into a business is sometimes called a ___ business.", answer:"passion / hobby", hint:"A business from something you love", difficulty:"medium" },
       { type:"finish the sentence", question:"Some people find it hard to ___ doing nothing because they feel guilty.", answer:"enjoy / relax while", hint:"Accepting rest", difficulty:"medium" },
       { type:"finish the sentence", question:"Mindless scrolling on social media is often not a ___ way to spend free time.", answer:"productive / fulfilling", hint:"Not beneficial", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'___ a new hobby can boost your confidence.' (Learn/Learning/Learned)", answer:"Learning", hint:"Gerunds work as the subject of a sentence", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'She usually ___ hiking on Saturday mornings.' (go/goes/going)", answer:"goes", hint:"Third person singular routine needs -s", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'Painting is ___ relaxing than watching TV, according to many studies.' (more/most/much)", answer:"more", hint:"'More' + adjective forms the comparative", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'Many people don't have ___ free time to enjoy their hobbies.' (enough/very/too)", answer:"enough", hint:"'Enough' goes before the noun it quantifies", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'I ___ playing the guitar for two years now.' (am/have been/was)", answer:"have been", hint:"Present perfect continuous for an action that started in the past and still continues, with 'for'", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'It's important ___ time for hobbies every week.' (make/to make/making)", answer:"to make", hint:"Adjective + 'to' + infinitive", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'Team sports are often ___ by children to build friendships.' (play/played/playing)", answer:"played", hint:"Passive voice = be + past participle", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'___ people say they don't have enough leisure time nowadays.' (Much/Many/A little)", answer:"Many", hint:"'Many' is used with countable plural nouns like 'people'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"Hobbies helps people relax after a busy week.", answer:"Hobbies help people relax after a busy week.", hint:"Plural subject 'hobbies' doesn't take -s", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"I enjoy to read books in my free time.", answer:"I enjoy reading books in my free time.", hint:"'Enjoy' is followed by a gerund, not an infinitive", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"She is playing guitar since she was ten years old.", answer:"She has played guitar since she was ten years old.", hint:"Use present perfect, not present continuous, with 'since' for an action continuing from the past", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"Volunteering make people feel more connected to their community.", answer:"Volunteering makes people feel more connected to their community.", hint:"Gerund subjects take a third-person singular verb", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"Many hobbies are cheaper than start a new sport.", answer:"Many hobbies are cheaper than starting a new sport.", hint:"After 'than' in a comparison, use the gerund form", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"If people has more free time, they would try new hobbies.", answer:"If people had more free time, they would try new hobbies.", hint:"Second conditional uses the past simple in the if-clause", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"Hiking is one of the most popular hobby in this town.", answer:"Hiking is one of the most popular hobbies in this town.", hint:"'One of the' is followed by a plural noun", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"She spent her weekend to paint a landscape.", answer:"She spent her weekend painting a landscape.", hint:"'Spend time' + gerund, not infinitive", difficulty:"easy" },
     ],
     spyRounds: [
       { crewmateTopic:"Active Hobbies", spyTopic:"Passive or Indoor Hobbies", crewmatePrompt:"Talk about active hobbies involving physical activity or being outdoors. What do you do? What are the benefits? Examples: running, football, hiking, yoga.", spyPrompt:"Talk about passive or relaxing hobbies done at home or quietly. What do you do? What are the benefits? Examples: reading, watching films, gaming, cooking.", explanation:"Crewmates discussed active physical hobbies. The spy discussed passive indoor hobbies.", spyGuessOptions:["Active Hobbies","Passive or Indoor Hobbies","Creative Hobbies","Social Hobbies"] },
@@ -3803,6 +3931,22 @@ export const TOPIC_LIBRARY = {
       { type:"finish the sentence", question:"Many parents worry about the amount of ___ content children can access online.", answer:"harmful / inappropriate", hint:"Not suitable for children", difficulty:"easy" },
       { type:"finish the sentence", question:"Social media ___ like likes and comments give people a sense of validation.", answer:"feedback / reactions / engagement", hint:"What others do with your posts", difficulty:"easy" },
       { type:"finish the sentence", question:"The average person spends over ___ hours per day on social media.", answer:"two / 2 / three / 3", hint:"A surprisingly large number", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'Millions of posts ___ shared on social media every day.' (is/are/be)", answer:"are", hint:"Plural subject 'posts' needs the plural verb 'are'", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'Social media ___ dramatically changed the way we communicate.' (has/have/had)", answer:"has", hint:"'Social media' is treated as a singular subject and takes 'has'", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'Instagram is one of the ___ popular platforms among teenagers.' (more/most/much)", answer:"most", hint:"Superlative form is used with 'one of the'", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'Parents ___ monitor how much screen time their children have.' (should/would/must)", answer:"should", hint:"'Should' gives advice or a recommendation", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'An influencer is someone ___ has a large following online.' (which/who/whose)", answer:"who", hint:"Use 'who' for people", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'Many teenagers are addicted to ___ their phones constantly.' (check/checking/checked)", answer:"checking", hint:"'Addicted to' is followed by a gerund", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'She said that she ___ take a social media detox soon.' (will/would/is)", answer:"would", hint:"Backshift 'will' to 'would' in reported speech", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'If people spent less time online, they ___ feel happier.' (will/would/would have)", answer:"would", hint:"Second conditional pairs a past simple if-clause with 'would'", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"Social media have changed how businesses reach customers.", answer:"Social media has changed how businesses reach customers.", hint:"'Social media' is treated as singular", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"A lot of fake news is spread by people who don't check they facts.", answer:"A lot of fake news is spread by people who don't check their facts.", hint:"Use the possessive adjective 'their', not the subject pronoun 'they'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"She spend too much time scrolling through her feed every night.", answer:"She spends too much time scrolling through her feed every night.", hint:"Third person singular needs -s", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"If I would post that photo, everyone will comment on it.", answer:"If I posted that photo, everyone would comment on it.", hint:"Second conditional: past simple + 'would', not 'would' in both clauses", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"The influencer is famous since she posted a viral video.", answer:"The influencer has been famous since she posted a viral video.", hint:"Use present perfect with 'since' for a state that continues to now", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"Cyberbullying make many teenagers feel anxious and alone.", answer:"Cyberbullying makes many teenagers feel anxious and alone.", hint:"Singular subject needs -s", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"Many people avoid to share personal information online.", answer:"Many people avoid sharing personal information online.", hint:"'Avoid' is followed by a gerund", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"The number of teenagers using social media daily are increasing.", answer:"The number of teenagers using social media daily is increasing.", hint:"'The number of' is followed by a singular verb", difficulty:"hard" },
     ],
     spyRounds: [
       { crewmateTopic:"Positive Effects of Social Media", spyTopic:"Negative Effects of Social Media", crewmatePrompt:"Tell the group TWO positive effects of social media. For example: it helps people stay connected, it helps small businesses, or it raises awareness of social issues.", spyPrompt:"Tell the group TWO negative effects of social media. For example: it spreads fake news, causes anxiety, or invades people's privacy.", explanation:"Crewmates gave positive effects. The spy gave negative effects.", spyGuessOptions:["Positive Effects of Social Media","Negative Effects of Social Media","The Future of Social Media","Social Media Regulation"] },
@@ -4313,6 +4457,22 @@ export const TOPIC_LIBRARY = {
       { type:"finish the sentence", question:"Reading news articles and opinion pieces helps people stay ___ about the world.", answer:"informed / up to date", hint:"Knowing what is happening", difficulty:"easy" },
       { type:"finish the sentence", question:"The ___ of a story is the sequence of events that drives the narrative forward.", answer:"plot", hint:"What happens in the story", difficulty:"easy" },
       { type:"finish the sentence", question:"Many classics remain popular because their ___ about human nature are still relevant today.", answer:"themes / messages / insights", hint:"The deeper meaning", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'I ___ read that novel three times because I love the plot.' (have/has/had)", answer:"have", hint:"Present perfect with 'I' uses 'have'", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'This is ___ gripping book I have ever read.' (more/most/the most)", answer:"the most", hint:"Superlative needs 'the' before 'most + adjective'", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'The protagonist is a character ___ struggles to find her identity.' (who/which/whom)", answer:"who", hint:"'Who' refers to people", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'She finished ___ the novel just before midnight.' (read/reading/to read)", answer:"reading", hint:"'Finish' is followed by a gerund", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'This classic novel ___ translated into over forty languages.' (has/has been/have been)", answer:"has been", hint:"Passive with a singular subject uses 'has been'", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'Audiobooks are ___ convenient than physical books for commuters.' (convenient/more convenient/most convenient)", answer:"more convenient", hint:"Comparative adjective form is used with 'than'", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'She is reading ___ interesting book about ancient history.' (a/an/the)", answer:"an", hint:"Use 'an' before a word starting with a vowel sound", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'Every book club member ___ a chapter before the meeting.' (read/reads/reading)", answer:"reads", hint:"Singular subject 'member' needs -s", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"This book is more better than the one I read last month.", answer:"This book is better than the one I read last month.", hint:"Don't combine 'more' with an irregular comparative like 'better'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"The plot were confusing at the beginning of the story.", answer:"The plot was confusing at the beginning of the story.", hint:"Singular subject 'plot' takes 'was'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"She enjoys to discuss books with her book club every month.", answer:"She enjoys discussing books with her book club every month.", hint:"'Enjoy' is followed by a gerund", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"He has read that novel when he was at university.", answer:"He read that novel when he was at university.", hint:"Use past simple, not present perfect, with a specific past time reference", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"The protagonist don't trust anyone in the story.", answer:"The protagonist doesn't trust anyone in the story.", hint:"Third person singular needs 'doesn't'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"This is the most gripping book that I ever read.", answer:"This is the most gripping book that I have ever read.", hint:"Use present perfect with superlatives like 'the most... ever'", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"Many classics is still popular because their themes are timeless.", answer:"Many classics are still popular because their themes are timeless.", hint:"Plural subject 'classics' needs 'are'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"If she has more free time, she would read every day.", answer:"If she had more free time, she would read every day.", hint:"Second conditional uses past simple in the if-clause", difficulty:"medium" },
     ],
     spyRounds: [
       { crewmateTopic:"Fiction", spyTopic:"Non-Fiction", crewmatePrompt:"Talk about fiction — novels, short stories, and imaginary worlds. Discuss genres you enjoy (thriller, romance, fantasy), favourite authors, and why you like made-up stories.", spyPrompt:"Talk about non-fiction — biographies, history books, self-help, and true stories. Discuss books based on real events or people and why you prefer fact to fiction.", explanation:"Crewmates discussed made-up stories and fictional genres. The spy discussed books based on real facts, events, or people.", spyGuessOptions:["Fiction","Non-Fiction","Poetry","Graphic Novels"] },
@@ -4415,6 +4575,22 @@ export const TOPIC_LIBRARY = {
       { type:"finish the sentence", question:"Festivals and celebrations are a window into a culture's ___ and values.", answer:"traditions / beliefs / identity", hint:"What a culture holds dear", difficulty:"easy" },
       { type:"finish the sentence", question:"Being ___ means being aware of and sensitive to cultural differences in communication.", answer:"culturally aware / culturally sensitive", hint:"Respectful of other cultures", difficulty:"medium" },
       { type:"finish the sentence", question:"Living abroad forces you to ___ to new customs, food, and ways of thinking.", answer:"adapt / adjust", hint:"Changing to fit a new environment", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'Body language ___ interpreted differently across cultures.' (is/are/be)", answer:"is", hint:"Singular uncountable subject 'body language' takes 'is'", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'Culture shock is a feeling ___ many travellers experience abroad.' (who/which/whose)", answer:"which", hint:"'Which' refers to things or feelings, not people", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'Some cultures are ___ direct in communication than others.' (more/most/much)", answer:"more", hint:"Comparative form of a long adjective uses 'more'", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'When visiting a new country, you ___ learn about local customs to avoid offending people.' (should/would/might)", answer:"should", hint:"'Should' is used for advice or recommendation", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'Living abroad forces you to get used to ___ new customs.' (follow/following/followed)", answer:"following", hint:"'Get used to' is followed by a gerund", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'She ___ lived in three different countries, so she understands cultural differences well.' (has/have/had)", answer:"has", hint:"Singular subject 'she' takes 'has' in present perfect", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'Removing your shoes before entering a home is ___ sign of respect in many cultures.' (a/an/the)", answer:"a", hint:"Use 'a' before a word starting with a consonant sound", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'If you understood local etiquette, you ___ avoid embarrassing mistakes.' (will/would/would have)", answer:"would", hint:"Second conditional uses 'would' in the main clause", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"Eye contact mean different things in different cultures.", answer:"Eye contact means different things in different cultures.", hint:"Singular subject needs -s", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"She adapted to the new customs quickly since she moved there.", answer:"She has adapted to the new customs quickly since she moved there.", hint:"Use present perfect with 'since' for a state continuing to now", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"Many tourists doesn't understand local etiquette.", answer:"Many tourists don't understand local etiquette.", hint:"Plural subject 'tourists' takes 'don't', not 'doesn't'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"Stereotypes can be more harmful than people think it.", answer:"Stereotypes can be more harmful than people think.", hint:"No extra object pronoun is needed after 'think' here", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"If she understand cultural differences better, she wouldn't have made that mistake.", answer:"If she had understood cultural differences better, she wouldn't have made that mistake.", hint:"Third conditional needs the past perfect in the if-clause", difficulty:"hard" },
+      { type:"correct grammar mistakes", question:"He is respect the traditions of his host country.", answer:"He respects the traditions of his host country.", hint:"Use the simple present verb form, not 'is' + base verb", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"Cultures who value group harmony are described as collectivist.", answer:"Cultures which value group harmony are described as collectivist.", hint:"Use 'which' or 'that' for things like 'cultures', not 'who'", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"Living in another country teach you to be more open-minded.", answer:"Living in another country teaches you to be more open-minded.", hint:"Gerund subject takes a third-person singular verb", difficulty:"medium" },
     ],
     spyRounds: [
       { crewmateTopic:"Cultural Differences in Communication", spyTopic:"Cultural Differences in Food", crewmatePrompt:"Talk about how communication styles differ between cultures — directness, eye contact, silence, gestures, and what is considered polite or rude when speaking.", spyPrompt:"Talk about how food culture differs around the world — eating habits, mealtimes, what is considered a delicacy, and how meals are shared socially.", explanation:"Crewmates discussed communication styles across cultures. The spy discussed food and eating habits across cultures.", spyGuessOptions:["Communication Styles","Food Culture","Body Language","Family Structures"] },
@@ -4517,6 +4693,22 @@ export const TOPIC_LIBRARY = {
       { type:"finish the sentence", question:"Eating less ___ is one of the most effective individual actions to reduce your carbon footprint.", answer:"meat / beef", hint:"Animal products with high emissions", difficulty:"easy" },
       { type:"finish the sentence", question:"The melting of ___ ice and glaciers is one of the most visible signs of global warming.", answer:"Arctic / polar / sea", hint:"Frozen water at the poles", difficulty:"easy" },
       { type:"finish the sentence", question:"___ is the process of planting large numbers of trees to help absorb CO₂ from the atmosphere.", answer:"Reforestation / Afforestation", hint:"Growing back forests", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'Fossil fuels ___ burned to produce most of the world's energy.' (is/are/be)", answer:"are", hint:"Plural subject 'fossil fuels' needs 'are'", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'Global temperatures ___ risen significantly over the last century.' (has/have/had)", answer:"have", hint:"Plural subject 'temperatures' takes 'have'", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'Renewable energy is becoming ___ affordable than fossil fuels.' (more/most/much)", answer:"more", hint:"Comparative form is used with 'than'", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'Governments ___ act quickly to reduce carbon emissions.' (must/can/might)", answer:"must", hint:"'Must' expresses strong necessity", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'If sea levels ___ rise, coastal cities flood more often.' (rise/rises/rose)", answer:"rise", hint:"Zero conditional uses the present simple in both clauses", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'___ fewer fossil fuels is essential to slow climate change.' (Burn/Burning/Burned)", answer:"Burning", hint:"Gerund used as the subject of a sentence", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'Carbon emissions ___ reduced through renewable energy investment.' (can be/can/can being)", answer:"can be", hint:"Modal passive = modal + be + past participle", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'If governments had acted sooner, the planet ___ warmed less.' (would have/will have/would)", answer:"would have", hint:"Third conditional uses 'would have' + past participle", difficulty:"hard" },
+      { type:"correct grammar mistakes", question:"The greenhouse effect trap heat in the Earth's atmosphere.", answer:"The greenhouse effect traps heat in the Earth's atmosphere.", hint:"Singular subject needs -s", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"Sea levels has risen significantly over the past fifty years.", answer:"Sea levels have risen significantly over the past fifty years.", hint:"Plural subject 'sea levels' takes 'have'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"If we don't reduce emissions, the planet will continued to warm.", answer:"If we don't reduce emissions, the planet will continue to warm.", hint:"After 'will', use the base form of the verb", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"Deforestation are one of the main causes of rising carbon dioxide levels.", answer:"Deforestation is one of the main causes of rising carbon dioxide levels.", hint:"'Deforestation' is an uncountable singular noun and takes 'is'", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"Many scientists believe extreme weather events becomes more common.", answer:"Many scientists believe extreme weather events become more common.", hint:"Plural subject 'events' takes the base form 'become', not 'becomes'", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"Switching to renewable energy help countries lower their carbon footprint.", answer:"Switching to renewable energy helps countries lower their carbon footprint.", hint:"Gerund subject takes a third-person singular verb", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"If the Paris Agreement was signed earlier, global warming would have slowed sooner.", answer:"If the Paris Agreement had been signed earlier, global warming would have slowed sooner.", hint:"Third conditional needs the past perfect in the if-clause", difficulty:"hard" },
+      { type:"correct grammar mistakes", question:"Coral reefs is threatened by rising ocean temperatures.", answer:"Coral reefs are threatened by rising ocean temperatures.", hint:"Plural subject 'reefs' takes 'are'", difficulty:"easy" },
     ],
     spyRounds: [
       { crewmateTopic:"Causes of Climate Change", spyTopic:"Effects of Climate Change", crewmatePrompt:"Talk about what is causing climate change — burning fossil fuels, deforestation, agriculture, industrial emissions, and the role of individuals and governments.", spyPrompt:"Talk about what climate change is doing to the planet — extreme weather, rising seas, melting ice, threats to biodiversity, and impacts on human communities.", explanation:"Crewmates discussed the causes of climate change. The spy discussed the consequences and effects.", spyGuessOptions:["Causes of Climate Change","Effects of Climate Change","Solutions to Climate Change","Climate Activism"] },
@@ -4619,6 +4811,22 @@ export const TOPIC_LIBRARY = {
       { type:"finish the sentence", question:"___ is the movement of people from rural areas to cities in search of better opportunities.", answer:"Rural-to-urban migration", hint:"Moving from countryside to city", difficulty:"medium" },
       { type:"finish the sentence", question:"Some people enjoy the ___ of the countryside but find it isolating in the long term.", answer:"peace / tranquility / quiet", hint:"Calmness and silence", difficulty:"easy" },
       { type:"finish the sentence", question:"Despite its drawbacks, city life exposes you to a wider variety of ___, ideas, and people.", answer:"experiences / cultures / perspectives", hint:"What variety brings", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'City life is ___ than life in a small village.' (busy/busier/more busy)", answer:"busier", hint:"Comparative form of 'busy' is 'busier'", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'She ___ to the countryside last year to find a quieter life.' (moved/has moved/move)", answer:"moved", hint:"Past simple with a finished time ('last year')", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'People who want more space ___ consider moving to a rural area.' (should/must to/can to)", answer:"should", hint:"Modal verbs are followed by the base verb, no 'to'", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'Many families move ___ the suburbs to find cheaper housing.' (to/at/for)", answer:"to", hint:"'Move to' + place", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'___ countryside offers cleaner air and a slower pace of life.' (A/The/An)", answer:"The", hint:"Use 'the' for something specific and well-known", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'Country life often ___ a stronger sense of community than city life.' (offer/offers/offering)", answer:"offers", hint:"Third-person singular subject needs -s", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'Many city dwellers dream of ___ to a quieter rural town.' (move/moving/to move)", answer:"moving", hint:"'Dream of' is followed by a gerund (-ing)", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'The countryside is often ___ as peaceful, but it can be isolating too.' (describe/described/describing)", answer:"described", hint:"Passive voice: be + past participle", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"'The city have more job opportunities than the countryside.'", answer:"The city has more job opportunities than the countryside.", hint:"'City' is singular, so use 'has'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'She has lived in the countryside since three years.'", answer:"She has lived in the countryside for three years.", hint:"Use 'for' with a period of time, not 'since'", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"'Rural areas has a stronger sense of community than cities.'", answer:"Rural areas have a stronger sense of community than cities.", hint:"'Areas' is plural, so use 'have'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'Many people enjoy to live in the quiet suburbs.'", answer:"Many people enjoy living in the quiet suburbs.", hint:"'Enjoy' is followed by a gerund (-ing), not 'to'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'The cost of living in city is very high this year.'", answer:"The cost of living in the city is very high this year.", hint:"Use 'the' before a specific place already mentioned", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'The countryside are more peaceful than most cities.'", answer:"The countryside is more peaceful than most cities.", hint:"'Countryside' is singular, so use 'is'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'Cities are more busier than small towns because of traffic.'", answer:"Cities are busier than small towns because of traffic.", hint:"Don't use 'more' with an -er comparative", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'If people will move to the countryside, they will find life slower.'", answer:"If people move to the countryside, they will find life slower.", hint:"Don't use 'will' in the if-clause of a first conditional", difficulty:"medium" },
     ],
     spyRounds: [
       { crewmateTopic:"Advantages of City Life", spyTopic:"Advantages of Country Life", crewmatePrompt:"Argue in favour of city life — better jobs, transport, entertainment, cultural diversity, and opportunities. Why is living in a city better?", spyPrompt:"Argue in favour of country life — cleaner air, space, community, nature, lower cost of living, and a slower pace. Why is living in the country better?", explanation:"Crewmates argued for city life. The spy argued for country life.", spyGuessOptions:["Advantages of City Life","Advantages of Country Life","Suburban Life","Moving Abroad"] },
@@ -4721,6 +4929,22 @@ export const TOPIC_LIBRARY = {
       { type:"finish the sentence", question:"A capsule ___ is a small collection of versatile, high-quality items that can be mixed and matched.", answer:"wardrobe", hint:"A minimalist clothing collection", difficulty:"medium" },
       { type:"finish the sentence", question:"Thrift shops and ___ markets are popular places to find affordable, second-hand clothing.", answer:"charity / flea / vintage", hint:"Shops selling used items", difficulty:"easy" },
       { type:"finish the sentence", question:"The ___ economy aims to extend the life of products through repair, reuse, and recycling rather than disposal.", answer:"circular", hint:"No waste — everything gets reused", difficulty:"hard" },
+      { type:"choose correct grammar", question:"'Fast fashion brands ___ new collections every few weeks.' (release/releases/releasing)", answer:"release", hint:"Plural subject 'brands' needs the base form, no -s", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'Many garments ___ in landfill within weeks of being bought.' (end up/ends up/ending up)", answer:"end up", hint:"Plural subject 'garments' takes the base verb", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'Buying second-hand clothes is ___ than buying brand new items.' (cheap/cheaper/cheapest)", answer:"cheaper", hint:"Comparative form for comparing two things", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'Fast fashion has been criticised ___ exploiting workers in poor countries.' (for/to/of)", answer:"for", hint:"'Criticise someone for' doing something", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'If people bought fewer clothes, the industry ___ less waste.' (would produce/will produce/produces)", answer:"would produce", hint:"Second conditional: if + past simple, would + base verb", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'___ fashion industry produces around 10% of global carbon emissions.' (A/An/The)", answer:"The", hint:"Use 'the' for a specific, known industry", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'Consumers who avoid buying too much are known ___ conscious shoppers.' (as/like/for)", answer:"as", hint:"'Known as' + role or label", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'The jeans, ___ took over 7,000 litres of water to make, were sold for just ten pounds.' (which/who/where)", answer:"which", hint:"Relative pronoun for things, not people", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"'Fast fashion brands releases dozens of new collections every year.'", answer:"Fast fashion brands release dozens of new collections every year.", hint:"Plural subject 'brands' doesn't take -s", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'She has bought that dress last week from a fast fashion website.'", answer:"She bought that dress last week from a fast fashion website.", hint:"Use past simple with a finished time like 'last week'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'Many workers in the factories is paid very low wages.'", answer:"Many workers in the factories are paid very low wages.", hint:"'Workers' is plural, so use 'are'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'Second-hand clothing is more cheaper than buying new.'", answer:"Second-hand clothing is cheaper than buying new.", hint:"Don't use 'more' with an -er comparative", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'The factory collapse in Bangladesh killed more than 1,100 workers and it shock the world.'", answer:"The factory collapse in Bangladesh killed more than 1,100 workers and it shocked the world.", hint:"Past simple of 'shock' is 'shocked'", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"'Consumers should to think carefully before buying cheap clothes.'", answer:"Consumers should think carefully before buying cheap clothes.", hint:"Modal verbs like 'should' are followed by the base verb, no 'to'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'Synthetic fabrics releases microplastics every time they are washed.'", answer:"Synthetic fabrics release microplastics every time they are washed.", hint:"Plural subject 'fabrics' doesn't take -s", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"'A capsule wardrobe are a small collection of versatile clothes.'", answer:"A capsule wardrobe is a small collection of versatile clothes.", hint:"'A capsule wardrobe' is singular, so use 'is'", difficulty:"medium" },
     ],
     spyRounds: [
       { crewmateTopic:"Problems with Fast Fashion", spyTopic:"Defending Fast Fashion", crewmatePrompt:"Talk about the problems with fast fashion — environmental damage, worker exploitation, mountains of waste, and the culture of overconsumption.", spyPrompt:"Defend fast fashion — it makes clothing affordable for everyone, creates jobs in developing countries, and allows self-expression. Is it really that bad?", explanation:"Crewmates criticised fast fashion and its harms. The spy defended it by pointing out its economic and social benefits.", spyGuessOptions:["Problems with Fast Fashion","Defending Fast Fashion","Sustainable Fashion","Shopping Habits"] },
@@ -5129,6 +5353,22 @@ export const TOPIC_LIBRARY = {
       { type:"finish the sentence", question:"___ agreements like the EU or ASEAN allow member countries to trade freely with each other.", answer:"Regional trade / Free trade", hint:"Groups of countries with reduced trade barriers", difficulty:"medium" },
       { type:"finish the sentence", question:"The pandemic exposed the ___ of over-reliance on global supply chains when shortages occurred worldwide.", answer:"fragility / vulnerability / risks", hint:"How easily they break down", difficulty:"medium" },
       { type:"finish the sentence", question:"Advocates argue that globalisation spreads ___ values such as democracy and human rights.", answer:"universal / liberal", hint:"Values seen as applicable to everyone", difficulty:"hard" },
+      { type:"choose correct grammar", question:"'Globalisation ___ economies and cultures around the world closer together.' (bring/brings/bringing)", answer:"brings", hint:"Third-person singular subject 'globalisation' needs -s", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'Multinational corporations ___ criticised for prioritising profit over workers' rights.' (is/are/be)", answer:"are", hint:"Plural subject 'corporations' takes 'are'", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'Globalisation has ___ hundreds of millions of people out of poverty since the 1990s.' (lift/lifted/lifting)", answer:"lifted", hint:"Present perfect: has + past participle", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'Some countries protect their industries ___ foreign competition using tariffs.' (from/of/with)", answer:"from", hint:"'Protect something from' a threat", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'Skilled workers often move ___ developing countries to find better-paid jobs abroad.' (from/since/at)", answer:"from", hint:"Preposition showing origin", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'If governments removed all trade barriers, competition ___ increase sharply.' (would/will/must)", answer:"would", hint:"Second conditional: if + past simple, would + base verb", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'The World Trade Organisation, ___ regulates trade between nations, was founded in 1995.' (which/who/whose)", answer:"which", hint:"Relative pronoun for an organisation (a thing)", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'Local industries can be damaged by ___ competition from larger foreign companies.' (cheap/cheaper/cheapest)", answer:"cheaper", hint:"Comparative form when comparing to local prices", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'Globalisation bring people, cultures, and economies closer together.'", answer:"Globalisation brings people, cultures, and economies closer together.", hint:"Third-person singular subject needs -s: 'brings'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'Multinational corporations is often blamed for exploiting cheap labour.'", answer:"Multinational corporations are often blamed for exploiting cheap labour.", hint:"'Corporations' is plural, so use 'are'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'Many economists believe globalisation have reduced global poverty.'", answer:"Many economists believe globalisation has reduced global poverty.", hint:"'Globalisation' is singular, so use 'has'", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"'Since the 1990s, world trade have grown enormously.'", answer:"Since the 1990s, world trade has grown enormously.", hint:"'Trade' is treated as singular, so use 'has'", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"'Critics say free trade agreements benefits big corporations more than ordinary workers.'", answer:"Critics say free trade agreements benefit big corporations more than ordinary workers.", hint:"Plural subject 'agreements' doesn't take -s", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"'Skilled workers are migrating to countries where wages is higher.'", answer:"Skilled workers are migrating to countries where wages are higher.", hint:"'Wages' is plural, so use 'are'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'The pandemic showed how fragile is global supply chains.'", answer:"The pandemic showed how fragile global supply chains are.", hint:"Statement word order: subject before verb, not question order", difficulty:"hard" },
+      { type:"correct grammar mistakes", question:"'If countries close their borders completely, trade will collapsed.'", answer:"If countries close their borders completely, trade will collapse.", hint:"Use the base verb after 'will', not the past participle", difficulty:"easy" },
     ],
     spyRounds: [
       { crewmateTopic:"Economic Globalisation", spyTopic:"Cultural Globalisation", crewmatePrompt:"Discuss the economic dimensions of globalisation — free trade, global supply chains, multinational corporations, the outsourcing of labour, and the impact on wages and inequality.", spyPrompt:"Discuss the cultural dimensions of globalisation — the spread of dominant cultures, cultural homogenisation, the loss of local traditions, the rise of hybrid identities, and cultural exchange.", explanation:"Crewmates discussed the economic aspects. The spy discussed the cultural dimensions.", spyGuessOptions:["Economic Globalisation","Cultural Globalisation","Political Globalisation","Technological Globalisation"] },
@@ -5231,6 +5471,22 @@ export const TOPIC_LIBRARY = {
       { type:"finish the sentence", question:"Screen ___ is increasing among all age groups, raising health concerns.", answer:"addiction / time", hint:"Using screens too much", difficulty:"easy" },
       { type:"finish the sentence", question:"___ technology may soon mean we do not need cash or cards to pay.", answer:"Contactless / Payment / Cashless", hint:"Paying without touching", difficulty:"medium" },
       { type:"finish the sentence", question:"Technology in healthcare means doctors can now perform ___ surgery using robots.", answer:"remote / robotic", hint:"From a distance using machines", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'Smartphones ___ people to check emails, take photos, and message friends.' (allow/allows/allowing)", answer:"allow", hint:"Plural subject 'smartphones' takes the base form", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'Artificial intelligence ___ many industries over the last decade.' (has changed/have changed/changed)", answer:"has changed", hint:"Present perfect for a change continuing up to now", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'Many jobs in factories ___ by robots and automated machines.' (have replaced/have been replaced/replaced)", answer:"have been replaced", hint:"Passive voice: have been + past participle", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'Streaming services are ___ than buying DVDs every month.' (convenient/more convenient/most convenient)", answer:"more convenient", hint:"Comparative form for comparing two options", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'Some people worry that too much technology stops them ___ real human connection.' (having/to have/have)", answer:"having", hint:"'Stop someone (from)' + gerund (-ing)", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'Children who grow up surrounded by technology are called digital ___.' (native/natives/nativity)", answer:"natives", hint:"Plural noun for a group of people", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'If we ___ so dependent on screens, we would probably sleep better.' (weren't/wasn't/aren't)", answer:"weren't", hint:"Second conditional uses 'were' for all subjects", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'Cybersecurity protects computers and networks ___ hackers and cyberattacks.' (from/of/for)", answer:"from", hint:"'Protect something from' a danger", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'Smartphones allows people to stay connected wherever they are.'", answer:"Smartphones allow people to stay connected wherever they are.", hint:"Plural subject 'smartphones' doesn't take -s", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'Artificial intelligence have changed the way doctors diagnose illness.'", answer:"Artificial intelligence has changed the way doctors diagnose illness.", hint:"'Artificial intelligence' is treated as singular, so use 'has'", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"'Many factory jobs was replaced by automated machines last decade.'", answer:"Many factory jobs were replaced by automated machines last decade.", hint:"'Jobs' is plural, so use 'were'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'Working remote have become much easier since the pandemic.'", answer:"Working remotely has become much easier since the pandemic.", hint:"Use the adverb 'remotely' to describe how people work", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"'She has bought a new smartphone yesterday because her old one broke.'", answer:"She bought a new smartphone yesterday because her old one broke.", hint:"Use past simple with a finished time like 'yesterday'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'Online streaming is more cheaper than going to the cinema every week.'", answer:"Online streaming is cheaper than going to the cinema every week.", hint:"Don't use 'more' with an -er comparative", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'Children who grow up with technology is often called digital natives.'", answer:"Children who grow up with technology are often called digital natives.", hint:"'Children' is plural, so use 'are'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'If robots will do more jobs in the future, many people could lose work.'", answer:"If robots do more jobs in the future, many people could lose work.", hint:"Don't use 'will' in the if-clause of a first conditional", difficulty:"medium" },
     ],
     spyRounds: [
       { crewmateTopic:"Technology Making Life Better", spyTopic:"Technology Making Life Worse", crewmatePrompt:"Tell the group TWO ways technology has improved daily life. For example: we communicate instantly, online shopping is convenient, or medical technology saves lives.", spyPrompt:"Tell the group TWO ways technology has made life worse. For example: we are addicted to phones, technology causes job losses, or we have less privacy.", explanation:"Crewmates gave positive impacts. The spy gave negative impacts.", spyGuessOptions:["Technology Improving Life","Technology Making Life Worse","Technology and the Environment","Technology and Young People"] },
@@ -5538,6 +5794,22 @@ export const TOPIC_LIBRARY = {
       { type:"finish the sentence", question:"He usually ___ his lunch at his desk because he is very busy.", answer:"eats / has", hint:"Taking a meal somewhere", difficulty:"easy" },
       { type:"finish the sentence", question:"I try to go to bed before midnight so I get ___ sleep.", answer:"enough", hint:"The right amount — not too little", difficulty:"easy" },
       { type:"finish the sentence", question:"At the weekend, I love to ___ long walks in the countryside.", answer:"go on / take", hint:"'___ a walk' — what verb?", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'Every morning, she ___ up at seven o'clock.' (wake/wakes/waking)", answer:"wakes", hint:"Third-person singular subject needs -s", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'I usually ___ the bus to work, but yesterday I walked.' (take/took/taken)", answer:"take", hint:"'Usually' signals present simple for habits", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'Last night I ___ asleep before I finished my dinner.' (fall/fell/fallen)", answer:"fell", hint:"Past simple of 'fall' is irregular", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'She enjoys ___ for a walk after dinner every evening.' (go/going/to going)", answer:"going", hint:"'Enjoy' is followed by a gerund (-ing)", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'I need to finish my chores ___ I can relax on the sofa.' (before/since/during)", answer:"before", hint:"'Before' shows the order of events", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'On Saturdays, we usually stay in bed ___ ten o'clock.' (until/since/for)", answer:"until", hint:"'Until' shows when an action stops", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'She has ___ her teeth every morning since she was a child.' (brush/brushed/brushing)", answer:"brushed", hint:"Present perfect: has + past participle", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'My commute to school takes about thirty minutes ___ bus.' (by/in/with)", answer:"by", hint:"'By' + means of transport", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'She wake up at six every morning before work.'", answer:"She wakes up at six every morning before work.", hint:"Third-person singular subject needs -s: 'wakes'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'Yesterday I have taken the bus to school instead of walking.'", answer:"Yesterday I took the bus to school instead of walking.", hint:"Use past simple with a finished time like 'yesterday'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'He fall asleep on the sofa while watching television last night.'", answer:"He fell asleep on the sofa while watching television last night.", hint:"Past simple of 'fall' is 'fell'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'She enjoys to go for a run every morning before breakfast.'", answer:"She enjoys going for a run every morning before breakfast.", hint:"'Enjoy' is followed by a gerund (-ing), not 'to'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'We usually do the housework on Sunday morning before we relaxes.'", answer:"We usually do the housework on Sunday morning before we relax.", hint:"Use the base form after 'we', not -s", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'He catch the bus at 7:45 every morning without fail.'", answer:"He catches the bus at 7:45 every morning without fail.", hint:"Third-person singular subject needs -s: 'catches'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'I try to go to bed early so I get enough of sleep.'", answer:"I try to go to bed early so I get enough sleep.", hint:"'Enough' comes directly before an uncountable noun, no 'of'", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"'On weekends, she stay in bed until midday.'", answer:"On weekends, she stays in bed until midday.", hint:"Third-person singular subject needs -s: 'stays'", difficulty:"easy" },
     ],
     spyRounds: [
       { crewmateTopic:"Morning Routine", spyTopic:"Evening Routine", crewmatePrompt:"Describe everything you do in the MORNING from when you wake up to when you leave the house. Use: first, then, after that, next.", spyPrompt:"Describe everything you do in the EVENING from when you finish school or work to when you go to bed. Use: first, then, after that, finally.", explanation:"Crewmates described morning activities. The spy described evening activities.", spyGuessOptions:["Morning Routine","Evening Routine","Weekend Routine","Work Routine"] },
@@ -5640,6 +5912,22 @@ export const TOPIC_LIBRARY = {
       { type:"finish the sentence", question:"I prefer to ___ my own food at home rather than buy ready meals.", answer:"cook / make / prepare", hint:"Making food from scratch", difficulty:"easy" },
       { type:"finish the sentence", question:"She is on a ___ because she wants to eat more healthily.", answer:"diet", hint:"A controlled eating plan", difficulty:"easy" },
       { type:"finish the sentence", question:"Could I have the ___ without onions, please?", answer:"dish / meal", hint:"What you ordered", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'She ___ vegetarian food because she doesn't eat meat or fish.' (eat/eats/eating)", answer:"eats", hint:"Third-person singular subject needs -s", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'He is allergic ___ nuts, so he always checks the menu carefully.' (to/of/with)", answer:"to", hint:"'Allergic to' + the thing that causes the reaction", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'This restaurant's food is ___ than the place we went to last week.' (spicy/spicier/spiciest)", answer:"spicier", hint:"Comparative form for comparing two restaurants", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'By the time the waiter arrived, we ___ already decided what to order.' (have/had/has)", answer:"had", hint:"Past perfect for an action completed before another past action", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'She is trying to ___ weight by eating smaller portions.' (lose/loose/losing)", answer:"lose", hint:"'Lose weight' — don't confuse with 'loose'", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'If the soup ___ more seasoning, it would taste much better.' (had/has/have)", answer:"had", hint:"Second conditional: if + past simple, would + base verb", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'The bread, ___ she baked herself, tasted much better than shop-bought.' (which/who/where)", answer:"which", hint:"Relative pronoun for things, not people", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'We enjoy ___ out to new restaurants at the weekend.' (eat/eating/to eating)", answer:"eating", hint:"'Enjoy' is followed by a gerund (-ing)", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'She eat only vegetarian food when she goes to restaurants.'", answer:"She eats only vegetarian food when she goes to restaurants.", hint:"Third-person singular subject needs -s: 'eats'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'He is allergic of nuts, so he always reads the ingredients.'", answer:"He is allergic to nuts, so he always reads the ingredients.", hint:"'Allergic to', not 'allergic of'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'This curry is more spicier than the one I had last night.'", answer:"This curry is spicier than the one I had last night.", hint:"Don't use 'more' with an -er comparative", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'By the time we arrived, the restaurant have already closed.'", answer:"By the time we arrived, the restaurant had already closed.", hint:"Past perfect needed before another past action: 'had closed'", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"'She is trying to loose weight by cooking healthier meals at home.'", answer:"She is trying to lose weight by cooking healthier meals at home.", hint:"'Lose weight' is spelled with one 'o', not 'loose'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'If the soup had more salt, it will taste much better.'", answer:"If the soup had more salt, it would taste much better.", hint:"Second conditional needs 'would', not 'will'", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"'The waiter bringed us the bill at the end of the meal.'", answer:"The waiter brought us the bill at the end of the meal.", hint:"Past simple of 'bring' is irregular: 'brought'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"'We enjoy to try local food whenever we travel abroad.'", answer:"We enjoy trying local food whenever we travel abroad.", hint:"'Enjoy' is followed by a gerund (-ing), not 'to'", difficulty:"easy" },
     ],
     spyRounds: [
       { crewmateTopic:"Eating Out (Restaurants)", spyTopic:"Eating In (Cooking at Home)", crewmatePrompt:"Talk about your experience of going to restaurants — choosing one, reading the menu, ordering, asking the waiter, paying the bill.", spyPrompt:"Talk about cooking at home — planning meals, shopping, cooking methods, cleaning up, and your favourite home-cooked dishes.", explanation:"Crewmates discussed eating out. The spy discussed cooking and eating at home.", spyGuessOptions:["Eating Out","Eating In / Cooking","Fast Food","Street Food"] },
@@ -5946,6 +6234,22 @@ export const TOPIC_LIBRARY = {
       { type:"finish the sentence", question:"She is ___ recovering from the operation — she should be home by Friday.", answer:"still / slowly / gradually", hint:"The recovery process", difficulty:"easy" },
       { type:"finish the sentence", question:"The doctor told him to ___ up smoking immediately.", answer:"give / stop / cut", hint:"To stop a bad habit", difficulty:"easy" },
       { type:"finish the sentence", question:"I always have a ___ check-up at the dentist every six months.", answer:"regular / routine / dental", hint:"A regular health check", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'You ___ rest if you have a fever.' (should/must/can)", answer:"should", hint:"'Should' is used for advice", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'She ___ ill since Monday.' (has been/was/is)", answer:"has been", hint:"Present perfect for a state continuing to now", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'He feels ___ today than he did yesterday.' (worse/bad/more bad)", answer:"worse", hint:"Irregular comparative of 'bad'", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'The doctor always ___ patients carefully before prescribing medicine.' (examine/examines/examining)", answer:"examines", hint:"Third-person singular verbs take -s", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'She is very good at ___ care of sick people.' (take/taking/took)", answer:"taking", hint:"Preposition 'at' is followed by a gerund", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'This medicine ___ twice a day, after meals.' (should take/should be taken/should taking)", answer:"should be taken", hint:"Passive voice: modal + be + past participle", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'I have ___ awful headache — I can't concentrate.' (a/an/the)", answer:"an", hint:"'Awful' starts with a vowel sound", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'If you ___ chest pain, you should call an ambulance immediately.' (have/had/will have)", answer:"have", hint:"Zero conditional uses present simple", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"She have a terrible headache today.", answer:"She has a terrible headache today.", hint:"Third person singular needs 'has'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"He is allergic at penicillin, so he can't take it.", answer:"He is allergic to penicillin, so he can't take it.", hint:"'Allergic' is followed by 'to'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"I am go to the hospital tomorrow for a check-up.", answer:"I am going to the hospital tomorrow for a check-up.", hint:"Present continuous needs -ing", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"I have broke my arm playing football.", answer:"I have broken my arm playing football.", hint:"Past participle of 'break' is 'broken'", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"She is more fit than her brother since she started exercising.", answer:"She is fitter than her brother since she started exercising.", hint:"One-syllable adjectives add -er, not 'more'", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"He should stopped smoking immediately.", answer:"He should stop smoking immediately.", hint:"Modal + base verb, no '-ed'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"The doctor gave me some advices about my diet.", answer:"The doctor gave me some advice about my diet.", hint:"'Advice' is uncountable, no plural -s", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"The ambulance bringed her to hospital very quickly.", answer:"The ambulance brought her to hospital very quickly.", hint:"Irregular past simple of 'bring' is 'brought'", difficulty:"easy" },
     ],
     spyRounds: [
       { crewmateTopic:"Talking About Illness", spyTopic:"Talking About Injuries", crewmatePrompt:"Talk about illnesses — colds, flu, stomachaches, headaches, infections. What are the symptoms? What do you do when you are ill?", spyPrompt:"Talk about injuries — sprains, broken bones, cuts, burns, sports injuries. What happened? What treatment did you need?", explanation:"Crewmates discussed illnesses. The spy discussed injuries.", spyGuessOptions:["Illnesses and Symptoms","Injuries and Accidents","Going to the Doctor","Healthy Lifestyle"] },
@@ -6048,6 +6352,22 @@ export const TOPIC_LIBRARY = {
       { type:"finish the sentence", question:"I prefer ___ holidays — relaxing on a beach with a good book.", answer:"beach / sun / relaxing", hint:"The opposite of an adventure holiday", difficulty:"easy" },
       { type:"finish the sentence", question:"We got completely ___ in the old town because we didn't have a map.", answer:"lost", hint:"Not knowing where you are", difficulty:"easy" },
       { type:"finish the sentence", question:"The airline ___ our luggage, so we had to buy new clothes.", answer:"lost / misplaced", hint:"When the airline can't find your bags", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'We ___ to Spain last summer.' (have gone/went/go)", answer:"went", hint:"Past simple with a finished time expression", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'She ___ to Japan three times.' (has been/was/is)", answer:"has been", hint:"Present perfect for life experience", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'Travelling by train is ___ than flying, in my opinion.' (more relaxing/relaxinger/relaxing)", answer:"more relaxing", hint:"Long adjectives use 'more' for comparatives", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'You ___ show your passport at border control.' (must/can/would)", answer:"must", hint:"Obligation at immigration", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'We arrived ___ the airport two hours before our flight.' (at/in/to)", answer:"at", hint:"'Arrive at' + small places", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'She really enjoys ___ new places when she travels.' (discover/discovering/discovered)", answer:"discovering", hint:"'Enjoy' is followed by a gerund", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'Our luggage ___ by the airline during the flight.' (lost/was lost/loses)", answer:"was lost", hint:"Passive voice: past simple", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'If we ___ our flight, we will have to buy new tickets.' (miss/missed/will miss)", answer:"miss", hint:"First conditional uses present simple in the if-clause", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"We goed to Spain last summer for two weeks.", answer:"We went to Spain last summer for two weeks.", hint:"Irregular past simple of 'go' is 'went'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"She has visit Japan three times.", answer:"She has visited Japan three times.", hint:"Present perfect needs a past participle", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"Travelling by train is more relaxing that flying.", answer:"Travelling by train is more relaxing than flying.", hint:"Comparatives use 'than', not 'that'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"You must to show your passport at border control.", answer:"You must show your passport at border control.", hint:"Modal + base verb, no 'to'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"We arrived to the airport two hours early.", answer:"We arrived at the airport two hours early.", hint:"'Arrive at' for small places", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"She really enjoys to discover new places.", answer:"She really enjoys discovering new places.", hint:"'Enjoy' + gerund", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"Our luggage was losed by the airline.", answer:"Our luggage was lost by the airline.", hint:"Irregular past participle 'lost'", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"If we will miss our flight, we will have to buy new tickets.", answer:"If we miss our flight, we will have to buy new tickets.", hint:"No 'will' in the if-clause of a first conditional", difficulty:"medium" },
     ],
     spyRounds: [
       { crewmateTopic:"Beach Holiday", spyTopic:"City Break", crewmatePrompt:"Talk about your ideal beach holiday — the sea, sand, sunshine, water sports, relaxing, local seafood.", spyPrompt:"Talk about your ideal city break — visiting museums, famous sights, restaurants, shopping, culture.", explanation:"Crewmates described beach holidays. The spy described city breaks.", spyGuessOptions:["Beach Holiday","City Break","Adventure Holiday","Cultural Tour"] },
@@ -6983,6 +7303,22 @@ export const TOPIC_LIBRARY = {
       { type:"finish the sentence", question:"I ___ my notebook at home.", answer:"left / forgot", hint:"You did not bring it", difficulty:"easy" },
       { type:"finish the sentence", question:"The lesson ___ at 9 o'clock.", answer:"starts / begins", hint:"When something begins", difficulty:"easy" },
       { type:"finish the sentence", question:"She asked a ___ because she didn't understand.", answer:"question", hint:"You ask it when you need help", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'The lesson ___ at 9 o'clock every day.' (start/starts/starting)", answer:"starts", hint:"Third-person singular takes -s", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'I ___ my homework already, so I can go out.' (have finished/finished/finish)", answer:"have finished", hint:"Present perfect for a recently completed action", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'Students ___ arrive on time for exams.' (must/can/would)", answer:"must", hint:"Obligation/rule", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'Maths is ___ than history, in my opinion.' (more difficult/difficulter/difficult)", answer:"more difficult", hint:"Long adjectives use 'more' for comparatives", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'She is very good ___ science subjects.' (at/in/on)", answer:"at", hint:"'Good at' + skill/subject", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'He decided ___ harder before the exam.' (study/to study/studying)", answer:"to study", hint:"'Decide' is followed by the infinitive", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'The homework ___ before Friday.' (must hand in/must be handed in/must handed in)", answer:"must be handed in", hint:"Passive voice with a modal", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'She ___ a very good grade in the science test.' (getted/got/gets)", answer:"got", hint:"Irregular past simple of 'get'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"The lesson start at 9 o'clock every day.", answer:"The lesson starts at 9 o'clock every day.", hint:"Third-person singular takes -s", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"I have finish my homework, so I can go out.", answer:"I have finished my homework, so I can go out.", hint:"Present perfect needs a past participle", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"Students must to arrive on time for exams.", answer:"Students must arrive on time for exams.", hint:"Modal + base verb, no 'to'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"Maths is more difficult that history.", answer:"Maths is more difficult than history.", hint:"Comparatives use 'than', not 'that'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"She is very good in science subjects.", answer:"She is very good at science subjects.", hint:"'Good at' + subject", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"He decided studying harder before the exam.", answer:"He decided to study harder before the exam.", hint:"'Decide' + infinitive", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"The homework must handed in before Friday.", answer:"The homework must be handed in before Friday.", hint:"Passive voice needs 'be'", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"She getted a very good grade in the test.", answer:"She got a very good grade in the test.", hint:"Irregular past simple of 'get'", difficulty:"easy" },
     ],
     spyRounds: [
       { crewmateTopic:"School Subjects", spyTopic:"School Rules", crewmatePrompt:"Talk about your favourite and least favourite school subjects and explain why.", spyPrompt:"Talk about school rules, what students can and can't do, and what you think about those rules.", explanation:"Crewmates discussed school subjects. The spy discussed school rules.", spyGuessOptions:["School Subjects","School Rules"] },
@@ -7042,6 +7378,22 @@ export const TOPIC_LIBRARY = {
       { type:"finish the sentence", question:"A good friend is always there for you ___ things are difficult.", answer:"when", hint:"Difficult moments", difficulty:"easy" },
       { type:"finish the sentence", question:"My parents have been ___ for thirty years.", answer:"married / together", hint:"A long relationship", difficulty:"easy" },
       { type:"finish the sentence", question:"We often ___ together on Sundays.", answer:"meet / get together", hint:"Spend time together", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'My best friend and I ___ friends since primary school.' (have been/was/are)", answer:"have been", hint:"Present perfect for a state continuing to now", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'I get on very well ___ my sister.' (with/on/to)", answer:"with", hint:"'Get on with' someone", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'She is the ___ child in the family.' (young/younger/youngest)", answer:"youngest", hint:"Superlative — the most in a group", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'We ___ together every Sunday for lunch.' (get/gets/getting)", answer:"get", hint:"Present simple with 'we' — no -s", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'My uncle, ___ lives in Canada, is visiting us this summer.' (who/which/whose)", answer:"who", hint:"Relative pronoun for people", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'She is interested in ___ more about her family history.' (learn/learning/learned)", answer:"learning", hint:"Preposition 'in' is followed by a gerund", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'My grandparents' house ___ built over a hundred years ago.' (was/is/has)", answer:"was", hint:"Passive voice, past simple", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'My parents ___ been married for thirty years.' (has/have/is)", answer:"have", hint:"Plural subject takes 'have'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"My best friend and I are friends since primary school.", answer:"My best friend and I have been friends since primary school.", hint:"Present perfect is needed with 'since'", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"I get on very well on my sister.", answer:"I get on very well with my sister.", hint:"'Get on with' someone", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"She is the younger child in the family.", answer:"She is the youngest child in the family.", hint:"Superlative needed for more than two people", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"We gets together every Sunday for lunch.", answer:"We get together every Sunday for lunch.", hint:"No -s with the plural subject 'we'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"My uncle, which lives in Canada, is visiting us this summer.", answer:"My uncle, who lives in Canada, is visiting us this summer.", hint:"'Who' is used for people", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"She is interested in learn more about her family history.", answer:"She is interested in learning more about her family history.", hint:"Preposition + gerund", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"My grandparents' house were built over a hundred years ago.", answer:"My grandparents' house was built over a hundred years ago.", hint:"Singular subject 'house' takes 'was'", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"My parents has been married for thirty years.", answer:"My parents have been married for thirty years.", hint:"Plural subject 'parents' takes 'have'", difficulty:"easy" },
     ],
     spyRounds: [
       { crewmateTopic:"Talking About Friends", spyTopic:"Talking About Family", crewmatePrompt:"Talk about your closest friend, how you met, and what you do together.", spyPrompt:"Talk about your family members and what they are like.", explanation:"Crewmates talked about friends. The spy talked about family.", spyGuessOptions:["Friends","Family"] },
@@ -7101,6 +7453,22 @@ export const TOPIC_LIBRARY = {
       { type:"finish the sentence", question:"I prefer ___ to ___ when I want to relax.", answer:"(free answer)", hint:"Compare two free-time activities", difficulty:"easy" },
       { type:"finish the sentence", question:"I don't really enjoy ___ because I find it boring.", answer:"(free answer)", hint:"An activity you dislike", difficulty:"easy" },
       { type:"finish the sentence", question:"A hobby can help you ___ after a stressful day.", answer:"relax / switch off / feel better", hint:"A positive effect", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'In my free time, I usually ___ TV after work.' (watch/watches/watching)", answer:"watch", hint:"Present simple with 'I' — no -s", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'I really enjoy ___ at the weekend.' (cook/cooking/cooked)", answer:"cooking", hint:"'Enjoy' is followed by a gerund", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'Reading is ___ than watching TV, for me.' (more relaxing/relaxinger/relaxing)", answer:"more relaxing", hint:"Long adjectives use 'more' for comparatives", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'I prefer swimming ___ running.' (to/than/from)", answer:"to", hint:"'Prefer X to Y'", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'I would ___ to try surfing one day.' (like/liking/likes)", answer:"like", hint:"'Would like' + infinitive with 'to'", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'This weekend, I ___ to the cinema with some friends.' (go/going/am going)", answer:"am going", hint:"Present continuous for future arrangements", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'I usually go cycling ___ the morning.' (in/on/at)", answer:"in", hint:"'In the morning'", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'My brother ___ football every Saturday.' (play/plays/playing)", answer:"plays", hint:"Third-person singular takes -s", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"In my free time, I usually watches TV after work.", answer:"In my free time, I usually watch TV after work.", hint:"'I' doesn't take -s", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"I really enjoy to cook at the weekend.", answer:"I really enjoy cooking at the weekend.", hint:"'Enjoy' + gerund", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"Reading is more relaxing that watching TV.", answer:"Reading is more relaxing than watching TV.", hint:"Comparatives use 'than', not 'that'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"I prefer swimming than running.", answer:"I prefer swimming to running.", hint:"'Prefer X to Y'", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"I would like try surfing one day.", answer:"I would like to try surfing one day.", hint:"'Would like' + infinitive with 'to'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"This weekend, I go to the cinema with some friends.", answer:"This weekend, I am going to the cinema with some friends.", hint:"Present continuous for future arrangements", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"I usually go cycling on the morning.", answer:"I usually go cycling in the morning.", hint:"Preposition 'in the morning'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"My brother play football every Saturday.", answer:"My brother plays football every Saturday.", hint:"Third-person singular takes -s", difficulty:"easy" },
     ],
     spyRounds: [
       { crewmateTopic:"Relaxing Hobbies", spyTopic:"Active Hobbies", crewmatePrompt:"Talk about hobbies you do to relax, like reading, watching films, drawing, or listening to music.", spyPrompt:"Talk about hobbies that keep you active, like running, swimming, cycling, or playing sport.", explanation:"Crewmates talked about relaxing hobbies. The spy talked about active hobbies.", spyGuessOptions:["Relaxing Hobbies","Active Hobbies"] },
@@ -7160,6 +7528,22 @@ export const TOPIC_LIBRARY = {
       { type:"finish the sentence", question:"There isn't a ___ near my house, so I have to walk far.", answer:"bus stop / pharmacy / bank", hint:"Something useful in a neighbourhood", difficulty:"easy" },
       { type:"finish the sentence", question:"If a friend visited my city, I would take them to the ___.", answer:"(free answer)", hint:"A place you would show them", difficulty:"easy" },
       { type:"finish the sentence", question:"I prefer living in a ___ because ___.", answer:"city / town / village", hint:"Where you like living", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'There ___ a lot of traffic during rush hour.' (is/are/be)", answer:"is", hint:"'Traffic' is uncountable, so use a singular verb", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'My neighbourhood is ___ than the city centre.' (quieter/more quiet/quietest)", answer:"quieter", hint:"Short adjectives add -er for comparatives", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'The old town, ___ is very famous, attracts many tourists.' (who/which/where)", answer:"which", hint:"Relative pronoun for places/things", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'If a friend visited, I ___ take them to the museum.' (would/will/must)", answer:"would", hint:"Second conditional for a hypothetical situation", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'There isn't a bus stop ___ my house, so I have to walk far.' (near/on/at)", answer:"near", hint:"Preposition of location", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'The old cathedral ___ hundreds of years ago.' (built/was built/is built)", answer:"was built", hint:"Passive voice, past simple", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'This is ___ park in the whole city.' (beautiful/more beautiful/the most beautiful)", answer:"the most beautiful", hint:"Superlative with a long adjective", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'My town is famous ___ its old market.' (for/of/in)", answer:"for", hint:"'Famous for'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"There is a lot of shops near my home.", answer:"There are a lot of shops near my home.", hint:"'Shops' is plural, so use 'are'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"My neighbourhood is more quiet than the city centre.", answer:"My neighbourhood is quieter than the city centre.", hint:"Short adjectives add -er, not 'more'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"The old town, who is very famous, attracts many tourists.", answer:"The old town, which is very famous, attracts many tourists.", hint:"'Which' is used for places/things", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"If a friend visited, I will take them to the museum.", answer:"If a friend visited, I would take them to the museum.", hint:"Second conditional uses 'would'", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"There isn't a bus stop on my house.", answer:"There isn't a bus stop near my house.", hint:"Preposition 'near'", difficulty:"easy" },
+      { type:"correct grammar mistakes", question:"The old cathedral built hundreds of years ago.", answer:"The old cathedral was built hundreds of years ago.", hint:"Passive voice needs 'was/were'", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"This is the more beautiful park in the whole city.", answer:"This is the most beautiful park in the whole city.", hint:"Superlative uses 'the most'", difficulty:"medium" },
+      { type:"correct grammar mistakes", question:"My town is famous of its old market.", answer:"My town is famous for its old market.", hint:"'Famous for'", difficulty:"easy" },
     ],
     spyRounds: [
       { crewmateTopic:"Your Town Today", spyTopic:"Your Ideal Town", crewmatePrompt:"Describe your real town or city as it is now - places, transport, people, and atmosphere.", spyPrompt:"Describe your ideal town or city - what it would have, what it would be like, and what you would change.", explanation:"Crewmates described their real town. The spy described an ideal one.", spyGuessOptions:["My Real Town","My Ideal Town"] },
@@ -7463,6 +7847,174 @@ export const TOPIC_LIBRARY = {
         "question": "Use 'my sister's phone' in a sentence.",
         "answer": "Open - teacher judges",
         "hint": "Say a complete sentence",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'That is ___ car.' (my mother's/my mothers/my mother)",
+        "answer": "my mother's",
+        "hint": "Add 's to a singular noun to show possession",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'___ dog is very friendly.' (My sister's/My sisters/My sister)",
+        "answer": "My sister's",
+        "hint": "Add 's to show possession",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'This is ___ new house.' (Toms/Tom's/Tom)",
+        "answer": "Tom's",
+        "hint": "Singular name + apostrophe s",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'___ toys are on the floor.' (The children's/The childrens/The children)",
+        "answer": "The children's",
+        "hint": "'Children' is already plural, so just add 's",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'That is ___ bicycle.' (my brother's/my brothers'/my brother)",
+        "answer": "my brother's",
+        "hint": "Singular 'brother' takes 's, not s'",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'___ eyes are blue.' (My grandmother's/My grandmothers/My grandmother)",
+        "answer": "My grandmother's",
+        "hint": "Add 's to show possession",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'These are ___ shoes.' (my parents'/my parents/my parent's)",
+        "answer": "my parents'",
+        "hint": "Plural noun ending in s takes only an apostrophe",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'___ job is a doctor.' (My uncle's/My uncles/My uncle)",
+        "answer": "My uncle's",
+        "hint": "Add 's to show possession",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'This is my sisters cat.'",
+        "answer": "This is my sister's cat.",
+        "hint": "Missing apostrophe for singular possessive",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'That is Marks father.'",
+        "answer": "That is Mark's father.",
+        "hint": "Add 's to a name to show possession",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'The childrens room is upstairs.'",
+        "answer": "The children's room is upstairs.",
+        "hint": "'Children' is already plural, so add 's, not s'",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'My grandparents dog is old.'",
+        "answer": "My grandparents' dog is old.",
+        "hint": "Plural possessive needs an apostrophe after the s",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'This is my auntss house.'",
+        "answer": "This is my aunt's house.",
+        "hint": "Only add 's, never double s",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'That is her mother car.'",
+        "answer": "That is her mother's car.",
+        "hint": "Missing possessive 's",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'My cousins name is Emma.'",
+        "answer": "My cousin's name is Emma.",
+        "hint": "Missing apostrophe for singular possessive",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'That is my fathers new car.'",
+        "answer": "That is my father's new car.",
+        "hint": "Missing possessive 's",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "'The man who is my dad's brother is my ___.'",
+        "answer": "uncle",
+        "hint": "Family word for a parent's brother",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "'My mother's mother is my ___.'",
+        "answer": "grandmother",
+        "hint": "Family word for a parent's mother",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "'My brother's daughter is my ___.'",
+        "answer": "niece",
+        "hint": "Family word for a sibling's daughter",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "'My sister's son is my ___.'",
+        "answer": "nephew",
+        "hint": "Family word for a sibling's son",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "'My aunt's children are my ___.'",
+        "answer": "cousins",
+        "hint": "Family word for an aunt or uncle's children",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "'My parents' parents are my ___.'",
+        "answer": "grandparents",
+        "hint": "Family word for the parents of your parents",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "'This is ___ (Lucy) bag.'",
+        "answer": "Lucy's",
+        "hint": "Add 's for a singular possessive",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "'These are the ___ (boys) bikes.'",
+        "answer": "boys'",
+        "hint": "Plural possessive - apostrophe after the s",
         "difficulty": "easy"
       }
     ],
@@ -7919,6 +8471,174 @@ export const TOPIC_LIBRARY = {
         "answer": "Open - teacher judges",
         "hint": "Say a complete sentence",
         "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'I have English class ___ Monday.' (on/in/at)",
+        "answer": "on",
+        "hint": "Use 'on' with days of the week",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'My birthday is ___ July.' (on/in/at)",
+        "answer": "in",
+        "hint": "Use 'in' with months",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'The movie starts ___ 7 o'clock.' (on/in/at)",
+        "answer": "at",
+        "hint": "Use 'at' with clock times",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'We go swimming ___ the weekend.' (on/in/at)",
+        "answer": "on",
+        "hint": "Use 'on' with 'the weekend'",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'School finishes ___ 2026.' (on/in/at)",
+        "answer": "in",
+        "hint": "Use 'in' with years",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'Her party is ___ Saturday morning.' (on/in/at)",
+        "answer": "on",
+        "hint": "Use 'on' with a specific day, even with morning/afternoon",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'I always wake up ___ night if I hear a noise.' (on/in/at)",
+        "answer": "at",
+        "hint": "Use 'at' with 'night'",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'We have a test ___ two days.' (on/in/at)",
+        "answer": "in",
+        "hint": "Use 'in' for a future time period",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'The meeting is in Friday.'",
+        "answer": "The meeting is on Friday.",
+        "hint": "Use 'on' with days of the week",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'I was born at 2015.'",
+        "answer": "I was born in 2015.",
+        "hint": "Use 'in' with years",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'We eat dinner on 6 o'clock.'",
+        "answer": "We eat dinner at 6 o'clock.",
+        "hint": "Use 'at' with clock times",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'Her exam is on December.'",
+        "answer": "Her exam is in December.",
+        "hint": "Use 'in' with months",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'I visit my grandma on the summer.'",
+        "answer": "I visit my grandma in the summer.",
+        "hint": "Use 'in' with seasons",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'The shop opens on 9 am.'",
+        "answer": "The shop opens at 9 am.",
+        "hint": "Use 'at' with clock times",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'We have a holiday at Christmas Day.'",
+        "answer": "We have a holiday on Christmas Day.",
+        "hint": "Use 'on' with specific named days",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'I go to bed in midnight.'",
+        "answer": "I go to bed at midnight.",
+        "hint": "Use 'at' with midnight/noon/night",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "'The first day of the school week is ___.'",
+        "answer": "Monday",
+        "hint": "Day vocabulary",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "'There are ___ days in a week.'",
+        "answer": "seven",
+        "hint": "Number of days in a week",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "'There are twelve ___ in a year.'",
+        "answer": "months",
+        "hint": "Unit of the calendar between weeks and years",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "'My birthday is ___ March 5th.'",
+        "answer": "on",
+        "hint": "Preposition used with specific dates",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "'The lesson starts ___ nine o'clock.'",
+        "answer": "at",
+        "hint": "Preposition used with clock times",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "'The last month of the year is ___.'",
+        "answer": "December",
+        "hint": "Month vocabulary",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "'A weekend has two days: Saturday and ___.'",
+        "answer": "Sunday",
+        "hint": "Day vocabulary",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "'We celebrate New Year ___ January 1st.'",
+        "answer": "on",
+        "hint": "Preposition used with specific dates",
+        "difficulty": "easy"
       }
     ],
     "spyRounds": [
@@ -8373,6 +9093,174 @@ export const TOPIC_LIBRARY = {
         "question": "Use 'winter' in a sentence.",
         "answer": "Open - teacher judges",
         "hint": "Say a complete sentence",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'It ___ raining outside right now.' (is/are/be)",
+        "answer": "is",
+        "hint": "Present continuous with 'it' for weather",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'In winter, it ___ colder than in summer.' (is/be/are)",
+        "answer": "is",
+        "hint": "'It' takes the singular verb 'is'",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'Today is ___ than yesterday.' (hot/hotter/more hot)",
+        "answer": "hotter",
+        "hint": "Short adjectives form comparatives with -er",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'It usually ___ a lot in April.' (rain/rains/raining)",
+        "answer": "rains",
+        "hint": "Present simple, third person needs -s",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'The weather ___ terrible yesterday.' (was/were/is)",
+        "answer": "was",
+        "hint": "Past simple of 'be' for a singular subject",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'Summer is ___ season of the year.' (the hottest/hotter/most hot)",
+        "answer": "the hottest",
+        "hint": "Superlatives use 'the' + -est",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'There ___ a strong wind today.' (is/are/be)",
+        "answer": "is",
+        "hint": "Use 'is' with a singular uncountable noun like 'wind'",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'It's ___ degrees outside today.' (twenty/twenty's/the twenty)",
+        "answer": "twenty",
+        "hint": "No article is needed before a number of degrees",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'It are very cold today.'",
+        "answer": "It is very cold today.",
+        "hint": "Use 'is' with 'it', not 'are'",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'Yesterday it rain all day.'",
+        "answer": "Yesterday it rained all day.",
+        "hint": "Past simple needs -ed",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'Winter is more cold than autumn.'",
+        "answer": "Winter is colder than autumn.",
+        "hint": "Short adjectives use -er, not 'more'",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'There is many clouds in the sky.'",
+        "answer": "There are many clouds in the sky.",
+        "hint": "'Clouds' is plural, so use 'are'",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'Summer are my favorite season.'",
+        "answer": "Summer is my favorite season.",
+        "hint": "Singular subject needs 'is'",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'It snow every winter in the mountains.'",
+        "answer": "It snows every winter in the mountains.",
+        "hint": "Present simple third person needs -s",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'Today it is the hot day of the year.'",
+        "answer": "Today is the hottest day of the year.",
+        "hint": "Superlative needs 'the' + -est",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'This is the most sunny day of the summer.'",
+        "answer": "This is the sunniest day of the summer.",
+        "hint": "Short adjective 'sunny' takes -iest, not 'most'",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "'When it is very cold and white falls from the sky, we call it ___.'",
+        "answer": "snow",
+        "hint": "Weather word for cold white flakes",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "'The season after winter is ___.'",
+        "answer": "spring",
+        "hint": "Seasons vocabulary",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "'In summer the weather is usually ___ and sunny.'",
+        "answer": "hot / warm",
+        "hint": "Temperature adjective",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "'We use a ___ to measure temperature.'",
+        "answer": "thermometer",
+        "hint": "Instrument for checking degrees",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "'When there is a lot of wind, we say it is ___.'",
+        "answer": "windy",
+        "hint": "Weather adjective from the noun 'wind'",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "'The four seasons are spring, summer, autumn/fall and ___.'",
+        "answer": "winter",
+        "hint": "Seasons vocabulary",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "'If the sky is full of grey clouds and no sun, it is ___.'",
+        "answer": "cloudy",
+        "hint": "Weather adjective from the noun 'cloud'",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "'Water falling from the sky when it is warm is called ___.'",
+        "answer": "rain",
+        "hint": "Weather word for falling water",
         "difficulty": "easy"
       }
     ],
@@ -8829,6 +9717,174 @@ export const TOPIC_LIBRARY = {
         "answer": "Open - teacher judges",
         "hint": "Say a complete sentence",
         "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'She ___ up at seven every morning.' (get/gets/getting)",
+        "answer": "gets",
+        "hint": "Present simple, third person needs -s",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'I ___ brush my teeth twice a day.' (always/always am/am always)",
+        "answer": "always",
+        "hint": "Adverb of frequency goes before the main verb",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'She ___ tired after work.' (is usually/usually is/usually)",
+        "answer": "is usually",
+        "hint": "Adverb of frequency goes after the verb 'be'",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'They ___ breakfast before school.' (eat/eats/eating)",
+        "answer": "eat",
+        "hint": "Plural subjects take the base verb form",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'We ___ go to the gym on Sundays.' (usually/usual/usually are)",
+        "answer": "usually",
+        "hint": "Adverb of frequency, not adjective 'usual'",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'My dad ___ watches TV in the evening.' (sometimes/sometime/some times)",
+        "answer": "sometimes",
+        "hint": "Frequency adverb spelled as one word",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'I ___ eat vegetables I don't like.' (never/no/not)",
+        "answer": "never",
+        "hint": "Negative frequency adverb, no extra 'not' needed",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'Does she ___ her homework every day?' (do/does/doing)",
+        "answer": "do",
+        "hint": "Use the base form after 'does' in questions",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'She wake up at six every day.'",
+        "answer": "She wakes up at six every day.",
+        "hint": "Present simple third person needs -s",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'I usually am tired in the morning.'",
+        "answer": "I am usually tired in the morning.",
+        "hint": "Adverb of frequency goes after the verb 'be'",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'He don't ever eat vegetables.'",
+        "answer": "He doesn't ever eat vegetables.",
+        "hint": "Third person negative needs 'doesn't'",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'They always goes to bed early.'",
+        "answer": "They always go to bed early.",
+        "hint": "Plural subject, no -s on the verb",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'My sister sometimes are late for school.'",
+        "answer": "My sister is sometimes late for school.",
+        "hint": "Singular subject needs 'is'",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'We brush usually our teeth after meals.'",
+        "answer": "We usually brush our teeth after meals.",
+        "hint": "Adverb of frequency goes before the main verb",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'Do he take a shower every morning?'",
+        "answer": "Does he take a shower every morning?",
+        "hint": "Use 'does' with he/she/it",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'I never am late for work.'",
+        "answer": "I am never late for work.",
+        "hint": "Adverb of frequency goes after 'am'",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "'I ___ (wake) up at 7 o'clock every morning.'",
+        "answer": "wake",
+        "hint": "Present simple, first person - no -s",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "'She always ___ (brush) her hair before school.'",
+        "answer": "brushes",
+        "hint": "Third person needs -es after -sh",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "'We ___ (have) dinner at 6 pm every day.'",
+        "answer": "have",
+        "hint": "Present simple, plural subject - no -s",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "'He ___ (go) to bed at ten o'clock.'",
+        "answer": "goes",
+        "hint": "Third person needs -es after -o",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "'I ___ go to the gym on weekdays.' (frequency adverb meaning 100% of the time)",
+        "answer": "always",
+        "hint": "Adverb of frequency meaning every time",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "'She ___ eats fast food; she prefers cooking at home.' (frequency adverb meaning 0% of the time)",
+        "answer": "never",
+        "hint": "Adverb of frequency meaning not at any time",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "'They ___ (get) dressed before breakfast.'",
+        "answer": "get",
+        "hint": "Present simple, plural subject - no -s",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "'My brother ___ (do) his homework right after school.'",
+        "answer": "does",
+        "hint": "Third person needs -es for 'do'",
+        "difficulty": "easy"
       }
     ],
     "spyRounds": [
@@ -9284,6 +10340,174 @@ export const TOPIC_LIBRARY = {
         "answer": "Open - teacher judges",
         "hint": "Say a complete sentence",
         "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'___ a lamp on the table.' (There is/There are/There be)",
+        "answer": "There is",
+        "hint": "Singular noun 'lamp' takes 'is'",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'___ two windows in the bedroom.' (There is/There are/There am)",
+        "answer": "There are",
+        "hint": "Plural noun 'windows' takes 'are'",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'The sofa is ___ the coffee table.' (in front of/on/under)",
+        "answer": "in front of",
+        "hint": "Preposition of place for facing position",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'There isn't ___ milk in the fridge.' (any/some/a)",
+        "answer": "any",
+        "hint": "Use 'any' in negative sentences",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'Is there ___ bathroom upstairs?' (a/an/some)",
+        "answer": "a",
+        "hint": "Use 'a' with a singular countable noun",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'The magazines are ___ the coffee table.' (on/in/at)",
+        "answer": "on",
+        "hint": "Use 'on' for objects resting on a surface",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'There ___ some chairs around the table.' (is/are/be)",
+        "answer": "are",
+        "hint": "Plural noun 'chairs' takes 'are'",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'The keys are ___ the drawer.' (in/on/at)",
+        "answer": "in",
+        "hint": "Use 'in' for enclosed spaces",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'There is many pictures on the wall.'",
+        "answer": "There are many pictures on the wall.",
+        "hint": "Plural noun needs 'are'",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'There are a mirror in the bathroom.'",
+        "answer": "There is a mirror in the bathroom.",
+        "hint": "Singular noun needs 'is'",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'The lamp is in the desk.'",
+        "answer": "The lamp is on the desk.",
+        "hint": "Use 'on' for objects on a surface, not 'in'",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'There is any towels in the cupboard.'",
+        "answer": "There are some towels in the cupboard.",
+        "hint": "Use 'some' with plural nouns in affirmative sentences",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'The chairs is around the table.'",
+        "answer": "The chairs are around the table.",
+        "hint": "Plural subject needs 'are'",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'Is there a chairs in the living room?'",
+        "answer": "Are there any chairs in the living room?",
+        "hint": "Plural noun needs 'are' and 'any' in questions",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'There isn't some soap in the bathroom.'",
+        "answer": "There isn't any soap in the bathroom.",
+        "hint": "Use 'any' in negative sentences",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'The rug are under the table.'",
+        "answer": "The rug is under the table.",
+        "hint": "Singular subject needs 'is'",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "'You cook food in the ___.'",
+        "answer": "kitchen",
+        "hint": "Room vocabulary for cooking",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "'You sleep in the ___.'",
+        "answer": "bedroom",
+        "hint": "Room vocabulary for sleeping",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "'There ___ a fridge in the kitchen.'",
+        "answer": "is",
+        "hint": "Singular noun takes 'is'",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "'There ___ four chairs around the table.'",
+        "answer": "are",
+        "hint": "Plural noun takes 'are'",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "'You wash your hands in the ___.'",
+        "answer": "bathroom",
+        "hint": "Room vocabulary for washing",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "'The TV is ___ the wall opposite the sofa.'",
+        "answer": "on",
+        "hint": "Preposition for objects fixed to a surface",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "'We keep clothes in the ___.'",
+        "answer": "wardrobe / closet",
+        "hint": "Furniture vocabulary for storing clothes",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "'The shoes are ___ the bed.'",
+        "answer": "under",
+        "hint": "Preposition for a lower, hidden position",
+        "difficulty": "easy"
       }
     ],
     "spyRounds": [
@@ -9738,6 +10962,174 @@ export const TOPIC_LIBRARY = {
         "question": "Use 'their' in a sentence.",
         "answer": "Open - teacher judges",
         "hint": "Say a complete sentence",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'This is ___ book.' (I/my/mine)",
+        "answer": "my",
+        "hint": "Possessive adjective goes before a noun",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'Is this pen ___?' (you/your/yours)",
+        "answer": "yours",
+        "hint": "Possessive pronoun stands alone, no noun after",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'The dog wagged ___ tail.' (it/its/it's)",
+        "answer": "its",
+        "hint": "Possessive form of 'it' has no apostrophe",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'That car is ___.' (they/their/theirs)",
+        "answer": "theirs",
+        "hint": "Possessive pronoun replaces noun + possessive adjective",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'We love ___ new house.' (we/our/ours)",
+        "answer": "our",
+        "hint": "Possessive adjective goes before a noun",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'Is that bag ___?' (she/her/hers)",
+        "answer": "hers",
+        "hint": "Possessive pronoun, no noun follows",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'He forgot ___ keys at home.' (he/his/him)",
+        "answer": "his",
+        "hint": "Possessive adjective goes before a noun",
+        "difficulty": "easy"
+      },
+      {
+        "type": "choose correct grammar",
+        "question": "'This house is ___, not yours.' (we/our/ours)",
+        "answer": "ours",
+        "hint": "Possessive pronoun stands alone",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'This is her's phone.'",
+        "answer": "This is her phone.",
+        "hint": "'Her' is the possessive adjective; 'her's' doesn't exist",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'That book is my.'",
+        "answer": "That book is mine.",
+        "hint": "Use possessive pronoun 'mine' when no noun follows",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'The bird lost it's feathers.'",
+        "answer": "The bird lost its feathers.",
+        "hint": "Possessive 'its' has no apostrophe",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'Is this jacket you?'",
+        "answer": "Is this jacket yours?",
+        "hint": "Use possessive pronoun 'yours' without a noun",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'They love they house.'",
+        "answer": "They love their house.",
+        "hint": "Use possessive adjective 'their' before a noun",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'These shoes are theirs's.'",
+        "answer": "These shoes are theirs.",
+        "hint": "'Theirs' never takes an apostrophe s",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'We forgot our's umbrellas.'",
+        "answer": "We forgot our umbrellas.",
+        "hint": "'Our' is the possessive adjective; 'our's' doesn't exist",
+        "difficulty": "easy"
+      },
+      {
+        "type": "correct grammar mistakes",
+        "question": "'Him car is very fast.'",
+        "answer": "His car is very fast.",
+        "hint": "Use possessive adjective 'his', not 'him'",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "'I have a cat. ___ cat is black.' (possessive adjective for 'I')",
+        "answer": "My",
+        "hint": "Possessive adjective before a noun",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "'You have a bike. Is this bike ___?' (possessive pronoun for 'you')",
+        "answer": "yours",
+        "hint": "Possessive pronoun, no noun follows",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "'She has a bag. That is ___ bag.' (possessive adjective for 'she')",
+        "answer": "her",
+        "hint": "Possessive adjective before a noun",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "'The dog wags ___ tail when it is happy.' (possessive adjective for 'it')",
+        "answer": "its",
+        "hint": "No apostrophe in the possessive form of 'it'",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "'That red umbrella by the door belongs to us. It is ___.' (possessive pronoun for 'we')",
+        "answer": "ours",
+        "hint": "Possessive pronoun, no noun follows",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "'They have a house. That house is ___.' (possessive pronoun for 'they')",
+        "answer": "theirs",
+        "hint": "Possessive pronoun, no noun follows",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "'He has a dog. ___ dog is friendly.' (possessive adjective for 'he')",
+        "answer": "His",
+        "hint": "Possessive adjective before a noun",
+        "difficulty": "easy"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "'I lost my pen. Can I borrow one of ___?' (possessive pronoun for 'you')",
+        "answer": "yours",
+        "hint": "Possessive pronoun, no noun follows",
         "difficulty": "easy"
       }
     ],

@@ -228,6 +228,8 @@ export default function LessonGamesGenerator() {
         qs = isTopicOnlySelection && allCardTasks.length > 0
           ? mixByTopic(cardTaskBuckets)
           : mixByTopic(selectedEntries.map((entry, index) => [...(entry.questions ?? []), ...cardTaskBuckets[index]]));
+      } else if (mode.id === "castle") {
+        qs = mixByTopic(selectedEntries.map((entry, index) => [...(entry.questions ?? []), ...cardTaskBuckets[index]]));
       } else if (isTopicOnlySelection && allCardTasks.length > 0) {
         qs = mixByTopic(cardTaskBuckets);
       } else {
