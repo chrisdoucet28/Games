@@ -16,6 +16,7 @@ import { CastleGame } from "./components/games/CastleGame";
 import { KingOfHillGame } from "./components/games/KingOfHillGame";
 import { BridgeBuilderGame } from "./components/games/BridgeBuilderGame";
 import { HotPotatoGame } from "./components/games/HotPotatoGame";
+import { RaceTrackGame } from "./components/games/RaceTrackGame";
 
 type TopicOption = {
   value: string;
@@ -236,7 +237,7 @@ export default function LessonGamesGenerator() {
         qs = isTopicOnlySelection && allCardTasks.length > 0
           ? mixByTopic(cardTaskBuckets)
           : mixByTopic(selectedEntries.map((entry, index) => [...(entry.questions ?? []), ...cardTaskBuckets[index]]));
-      } else if (mode.id === "castle") {
+      } else if (mode.id === "castle" || mode.id === "racetrack") {
         qs = mixByTopic(selectedEntries.map((entry, index) => [...(entry.questions ?? []), ...cardTaskBuckets[index]]));
       } else if (isTopicOnlySelection && allCardTasks.length > 0) {
         qs = mixByTopic(cardTaskBuckets);
@@ -617,6 +618,7 @@ export default function LessonGamesGenerator() {
             {selectedGame.id === "hill" && <KingOfHillGame questions={questions} teams={teams} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
             {selectedGame.id === "bridge" && <BridgeBuilderGame questions={questions} teams={teams} onUpdateScore={updateScore} onEnd={handleGameEnd} isTopic={isTopicFocus} />}
             {selectedGame.id === "hotpotato" && <HotPotatoGame questions={questions} teams={teams} onUpdateScore={updateScore} onEnd={handleGameEnd} level={hotPotatoLevel} />}
+            {selectedGame.id === "racetrack" && <RaceTrackGame questions={questions} teams={teams} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
           </div>
         </div>
       </div>

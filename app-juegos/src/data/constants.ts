@@ -23,6 +23,7 @@ export const GAME_MODES: GameMode[] = [
   { id: "battleship",name: "Battleship", icon: "⚓",  desc: "Attack coordinates by answering correctly", color: "#3B82F6", tag: "Short answers & recall" },
   { id: "hotpotato", name: "Hot Potato", icon: "🥔",  desc: "Answer fast or keep the potato — the timer ends randomly", color: "#F97316", tag: "Quick completions under pressure" },
   { id: "castle",    name: "Castle Defense", icon: "🏰",  desc: "Correct answers let you attack enemies", color: "#10B981", tag: "Short answers & recall" },
+  { id: "racetrack", name: "Race Track", icon: "🏁",  desc: "Answer correctly to roll dice and race around the track", color: "#F7C948", tag: "Mixed — ramps up from grammar to speaking" },
   { id: "hill",      name: "King of the Hill", icon: "👑",  desc: "Capture zones by answering questions", color: "#EC4899", tag: "Short answers & recall" },
   { id: "bridge",    name: "Bridge Builder", icon: "🌉",  desc: "Race to build your bridge across four different task types", color: "#0EA5E9", tag: "Mixed — from recall to speaking" },
   { id: "minefield", name: "Minefield", icon: "💣",  desc: "Combine sentence fragments to speak — and dodge the mines", color: "#EF4444", tag: "Construct full sentences aloud" },
