@@ -14,9 +14,9 @@ import { BattleshipGame } from "./components/games/BattleshipGame";
 import { CardShuffleGame } from "./components/games/CardShuffleGame";
 import { CastleGame } from "./components/games/CastleGame";
 import { KingOfHillGame } from "./components/games/KingOfHillGame";
-import { BridgeBuilderGame } from "./components/games/BridgeBuilderGame";
 import { HotPotatoGame } from "./components/games/HotPotatoGame";
 import { RaceTrackGame } from "./components/games/RaceTrackGame";
+import { WordWhackGame } from "./components/games/WordWhackGame";
 
 type TopicOption = {
   value: string;
@@ -115,8 +115,8 @@ export default function LessonGamesGenerator() {
   const [teamColors, setTeamColors] = useState([0, 1, 2, 3, 4]);
   const [teams, setTeams] = useState<Team[]>([]);
   const [questions, setQuestions] = useState<QuestionData[]>([]);
-  const [level, setLevel] = useState("B1");
-  const [focus, setFocus] = useState("grammar");
+  const [level, setLevel] = useState("all");
+  const [focus, setFocus] = useState("all");
   const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
   const [topicSearch, setTopicSearch] = useState("");
 
@@ -234,15 +234,16 @@ export default function LessonGamesGenerator() {
       } else if (mode.id === "hotpotato") {
         qs = mixByTopic(selectedEntries.map(entry => entry.hotPotatoPrompts ?? []));
       } else if (mode.id === "battleship") {
-        qs = isTopicOnlySelection && allCardTasks.length > 0
-          ? mixByTopic(cardTaskBuckets)
-          : mixByTopic(selectedEntries.map((entry, index) => [...(entry.questions ?? []), ...cardTaskBuckets[index]]));
-      } else if (mode.id === "castle" || mode.id === "racetrack") {
+        // Battleship's identity is error-hunting: always merge entry.questions (which now
+        // includes L1-interference-flavored mistakes for topic-focus content) with cardTasks,
+        // rather than dropping grammar content entirely for topic-only selections.
+        qs = mixByTopic(selectedEntries.map((entry, index) => [...(entry.questions ?? []), ...cardTaskBuckets[index]]));
+      } else if (mode.id === "castle" || mode.id === "racetrack" || mode.id === "whack") {
         qs = mixByTopic(selectedEntries.map((entry, index) => [...(entry.questions ?? []), ...cardTaskBuckets[index]]));
       } else if (isTopicOnlySelection && allCardTasks.length > 0) {
         qs = mixByTopic(cardTaskBuckets);
       } else {
-        qs = mode.id === "bridge" || isMixedSelection
+        qs = isMixedSelection
           ? mixByTopic(selectedEntries.map((entry, index) => [...(entry.questions ?? []), ...cardTaskBuckets[index]]))
           : mixByTopic(questionBuckets);
       }
@@ -290,22 +291,25 @@ export default function LessonGamesGenerator() {
           </h1>
           <p style={{ color: "#C4B5FD", fontSize: "clamp(15px,2.5vw,18px)", margin: "0", lineHeight: 1.7, maxWidth: "500px", marginLeft: "auto", marginRight: "auto" }}>
             50+ built-in topics from A1 to C1 across Grammar, Vocabulary & Speaking.<br />
-            10 competitive game modes. Zero prep. Ready in seconds.
+            {GAME_MODES.length} competitive game modes. Zero prep. Ready in seconds.
           </p>
         </div>
         <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "28px" }}>
-          {[{ icon: "🎯", label: "10 Game Modes" }, { icon: "📚", label: "50+ Built-in Topics" }, { icon: "🏆", label: "Up to 5 Teams" }, { icon: "⚡", label: "Instant Play" }].map(s => (
+          {[{ icon: "🎯", label: `${GAME_MODES.length} Game Modes` }, { icon: "📚", label: "50+ Built-in Topics" }, { icon: "🏆", label: "Up to 5 Teams" }, { icon: "⚡", label: "Instant Play" }].map(s => (
             <div key={s.label} style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: "20px", padding: "8px 16px", backdropFilter: "blur(8px)", display: "flex", alignItems: "center", gap: "7px" }}>
               <span style={{ fontSize: "16px" }}>{s.icon}</span>
               <span style={{ color: "white", fontWeight: "700", fontSize: "13px" }}>{s.label}</span>
             </div>
           ))}
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(148px,1fr))", gap: "8px", marginBottom: "32px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(180px,1fr))", gap: "8px", marginBottom: "32px" }}>
           {GAME_MODES.map(g => (
-            <div key={g.id} style={{ background: "rgba(255,255,255,0.08)", borderRadius: "12px", padding: "10px 12px", border: "1px solid rgba(255,255,255,0.15)", display: "flex", alignItems: "center", gap: "9px", backdropFilter: "blur(6px)" }}>
-              <span style={{ fontSize: "20px", flexShrink: 0 }}>{g.icon}</span>
-              <span style={{ color: "rgba(255,255,255,0.9)", fontWeight: "600", fontSize: "13px", textAlign: "left", lineHeight: 1.3 }}>{g.name}</span>
+            <div key={g.id} style={{ background: "rgba(255,255,255,0.08)", borderRadius: "12px", padding: "10px 12px", border: "1px solid rgba(255,255,255,0.15)", display: "flex", flexDirection: "column", gap: "4px", backdropFilter: "blur(6px)" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "9px" }}>
+                <span style={{ fontSize: "20px", flexShrink: 0 }}>{g.icon}</span>
+                <span style={{ color: "rgba(255,255,255,0.9)", fontWeight: "600", fontSize: "13px", textAlign: "left", lineHeight: 1.3 }}>{g.name}</span>
+              </div>
+              <span style={{ color: "rgba(255,255,255,0.55)", fontSize: "11px", textAlign: "left", lineHeight: 1.35 }}>{g.tag}</span>
             </div>
           ))}
         </div>
@@ -582,7 +586,8 @@ export default function LessonGamesGenerator() {
             <div key={g.id} onClick={() => !loadingGame && startGame(g)} style={{ background: "white", border: `3px solid ${g.color}`, borderRadius: "18px", padding: "20px", cursor: "pointer", transition: "all 0.2s" }}>
               <div style={{ fontSize: "40px", marginBottom: "10px" }}>{g.icon}</div>
               <div style={{ fontWeight: "900", fontSize: "17px", color: "#1E1B4B", marginBottom: "4px" }}>{g.name}</div>
-              <div style={{ fontSize: "13px", color: "#6B7280" }}>{g.desc}</div>
+              <div style={{ fontSize: "13px", color: "#6B7280", marginBottom: "8px" }}>{g.desc}</div>
+              <div style={{ fontSize: "12px", color: g.color, fontWeight: "700", lineHeight: 1.4, borderTop: `1px solid ${g.color}33`, paddingTop: "8px" }}>🗣️ {g.tag}</div>
             </div>
           ))}
         </div>
@@ -591,8 +596,6 @@ export default function LessonGamesGenerator() {
   );
 
   if (screen === "game" && selectedGame) {
-    const selectedFocuses = uniqueValues(selectedTopics.map(value => getTopicOption(value)?.focus).filter((value): value is string => Boolean(value)));
-    const isTopicFocus = selectedFocuses.length === 1 && selectedFocuses[0] === "topic";
     const selectedLevels = uniqueValues(selectedTopics.map(value => getTopicOption(value)?.level).filter((value): value is string => Boolean(value)));
     const hotPotatoLevel = selectedLevels.length === 1 ? selectedLevels[0] : "mixed";
 
@@ -612,13 +615,13 @@ export default function LessonGamesGenerator() {
             {selectedGame.id === "minefield" && <MinefieldGame questions={[]} gridData={minefieldGridData} teams={teams} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
             {selectedGame.id === "hotseat" && <HotSeatGame questions={questions} teams={teams} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
             {selectedGame.id === "spy" && <SpyAmongUsGame questions={questions} teams={teams} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-            {selectedGame.id === "battleship" && <BattleshipGame questions={questions} teams={teams} onUpdateScore={updateScore} onEnd={handleGameEnd} isTopic={isTopicFocus} />}
+            {selectedGame.id === "battleship" && <BattleshipGame questions={questions} teams={teams} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
             {selectedGame.id === "cards" && <CardShuffleGame questions={questions} teams={teams} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
             {selectedGame.id === "castle" && <CastleGame questions={questions} teams={teams} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
             {selectedGame.id === "hill" && <KingOfHillGame questions={questions} teams={teams} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-            {selectedGame.id === "bridge" && <BridgeBuilderGame questions={questions} teams={teams} onUpdateScore={updateScore} onEnd={handleGameEnd} isTopic={isTopicFocus} />}
             {selectedGame.id === "hotpotato" && <HotPotatoGame questions={questions} teams={teams} onUpdateScore={updateScore} onEnd={handleGameEnd} level={hotPotatoLevel} />}
             {selectedGame.id === "racetrack" && <RaceTrackGame questions={questions} teams={teams} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
+            {selectedGame.id === "whack" && <WordWhackGame questions={questions} teams={teams} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
           </div>
         </div>
       </div>

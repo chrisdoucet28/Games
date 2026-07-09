@@ -18,18 +18,19 @@ export function teamsGridCols(n: number): string {
   return "repeat(3,1fr)"; // 5 → 3+2, natural CSS grid centering
 }
 
+// Ordered from least speaking asked of students to most — use this order for game-selection UI.
 export const GAME_MODES: GameMode[] = [
-  { id: "auction",   name: "Sentence Auction",  icon: "🏛️", desc: "Bet points on correct or incorrect sentences", color: "#8B5CF6", tag: "Read & analyse sentences" },
-  { id: "battleship",name: "Battleship", icon: "⚓",  desc: "Attack coordinates by answering correctly", color: "#3B82F6", tag: "Short answers & recall" },
-  { id: "hotpotato", name: "Hot Potato", icon: "🥔",  desc: "Answer fast or keep the potato — the timer ends randomly", color: "#F97316", tag: "Quick completions under pressure" },
-  { id: "castle",    name: "Castle Defense", icon: "🏰",  desc: "Correct answers let you attack enemies", color: "#10B981", tag: "Short answers & recall" },
-  { id: "racetrack", name: "Race Track", icon: "🏁",  desc: "Answer correctly to roll dice and race around the track", color: "#F7C948", tag: "Mixed — ramps up from grammar to speaking" },
-  { id: "hill",      name: "King of the Hill", icon: "👑",  desc: "Capture zones by answering questions", color: "#EC4899", tag: "Short answers & recall" },
-  { id: "bridge",    name: "Bridge Builder", icon: "🌉",  desc: "Race to build your bridge across four different task types", color: "#0EA5E9", tag: "Mixed — from recall to speaking" },
-  { id: "minefield", name: "Minefield", icon: "💣",  desc: "Combine sentence fragments to speak — and dodge the mines", color: "#EF4444", tag: "Construct full sentences aloud" },
-  { id: "cards",     name: "Card Shuffle", icon: "🃏",  desc: "Pick a card and complete an open speaking or writing task", color: "#F59E0B", tag: "Open speaking tasks" },
-  { id: "hotseat",   name: "Hot Seat", icon: "🔥",  desc: "Describe words to your teammate — no spelling allowed", color: "#EF4444", tag: "Free description & paraphrase" },
-  { id: "spy",       name: "Spy Among Us", icon: "🕵️",  desc: "Speak freely, listen carefully, find who has a different topic", color: "#374151", tag: "Free discussion & deduction" },
+  { id: "whack",     name: "Word Whack", icon: "🔨",  desc: "Solo 90-second time trial — whack the correct answer before it ducks", color: "#84CC16", tag: "No speech · pure reflexes · warm-up" },
+  { id: "auction",   name: "Sentence Auction",  icon: "🏛️", desc: "Bet points on correct or incorrect sentences", color: "#8B5CF6", tag: "No speech · silent judgment · icebreaker" },
+  { id: "battleship",name: "Battleship", icon: "⚓",  desc: "Attack coordinates by answering correctly", color: "#3B82F6", tag: "Short spoken corrections · low-pressure" },
+  { id: "hill",      name: "King of the Hill", icon: "👑",  desc: "Capture zones by answering questions", color: "#EC4899", tag: "Quick spoken completions · head-to-head" },
+  { id: "hotpotato", name: "Hot Potato", icon: "🥔",  desc: "Answer fast or keep the potato — the timer ends randomly", color: "#F97316", tag: "Short answers · timed bursts" },
+  { id: "castle",    name: "Castle Defense", icon: "🏰",  desc: "Correct answers let you attack enemies", color: "#10B981", tag: "Short answers + occasional full speech" },
+  { id: "racetrack", name: "Race Track", icon: "🏁",  desc: "Answer correctly to roll dice and race around the track", color: "#F7C948", tag: "Ramps from short answers to speaking" },
+  { id: "minefield", name: "Minefield", icon: "💣",  desc: "Combine sentence fragments to speak — and dodge the mines", color: "#EF4444", tag: "Full sentences, spoken aloud" },
+  { id: "cards",     name: "Card Shuffle", icon: "🃏",  desc: "Pick a card and complete an open speaking or writing task", color: "#F59E0B", tag: "One open speaking prompt" },
+  { id: "hotseat",   name: "Hot Seat", icon: "🔥",  desc: "Describe words to your teammate — no spelling allowed", color: "#EF4444", tag: "Nonstop improvised talking" },
+  { id: "spy",       name: "Spy Among Us", icon: "🕵️",  desc: "Speak freely, listen carefully, find who has a different topic", color: "#374151", tag: "Sustained free conversation" },
 ];
 
 export const TASK_TYPES: string[] = ["finish the sentence", "correct grammar mistakes", "use vocabulary in a sentence", "choose correct grammar", "rewrite sentences", "speaking task"];

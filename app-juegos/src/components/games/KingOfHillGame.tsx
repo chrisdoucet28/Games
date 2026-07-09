@@ -1,22 +1,82 @@
 import { useState, useRef, useCallback, useEffect } from "react";
-import type{ GameProps } from "../../types";
+import type { GameProps } from "../../types";
 import { useTurnTimer } from "../../hooks/useTurnTimer";
 import { TurnTimerBar } from "../shared/TurnTimerBar";
 import { QuestionCard } from "../shared/QuestionCard";
 
-const HILL_ZONES = [
-  { id:"North",  icon:"⬆️", pts:3 },
-  { id:"South",  icon:"⬇️", pts:3 },
-  { id:"East",   icon:"➡️", pts:2 },
-  { id:"West",   icon:"⬅️", pts:2 },
-  { id:"Center", icon:"⭐", pts:5 },
+type ZoneDef = { id: string; icon: string; pts: number; label?: string; prefix?: string };
+
+// Grammar-focus mode: King of the Hill's dominant flavor is "finish the sentence" — zones are
+// plain territory, the linguistic identity comes entirely from the shared, simultaneous-answer
+// duel mechanic (both teams face the exact same blank when contesting a claimed zone).
+const HILL_ZONES_GRAMMAR: ZoneDef[] = [
+  { id: "North", icon: "🚩", pts: 3 },
+  { id: "South", icon: "🚩", pts: 3 },
+  { id: "East", icon: "🚩", pts: 2 },
+  { id: "West", icon: "🚩", pts: 2 },
+  { id: "Center", icon: "👑", pts: 5 },
 ];
+
+// Topic-focus mode: zones are reflavored as discourse moves. Claiming zones across a round
+// literally assembles a class conversation about the topic — opinion, question, example,
+// pushback, alternative — instead of five disconnected one-liners. Each zone wraps whatever
+// speaking prompt comes up with a move-specific prefix, so no new content is needed.
+const HILL_ZONES_TOPIC: ZoneDef[] = [
+  { id: "North", icon: "❓", pts: 3, label: "Question", prefix: "Ask a follow-up question about: " },
+  { id: "South", icon: "💭", pts: 3, label: "Example", prefix: "Give a personal example about: " },
+  { id: "East", icon: "🤝", pts: 2, label: "Agree/Disagree", prefix: "Agree or disagree, and say why: " },
+  { id: "West", icon: "💡", pts: 2, label: "Alternative", prefix: "Suggest an alternative or solution about: " },
+  { id: "Center", icon: "👑", pts: 5, label: "Opinion", prefix: "Give your opinion: " },
+];
+
 const TOTAL_ROUNDS = 4;
+const DICE_FACES = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"];
+
+const AMBIENT_BITS = Array.from({ length: 12 }, (_, i) => ({
+  left: (i * 37) % 100,
+  top: (i * 29) % 100,
+  size: 10 + (i % 3) * 5,
+  dur: 5 + (i % 5),
+  delay: (i % 6) * 0.5,
+  emoji: ["👑", "✨", "🚩"][i % 3],
+}));
+
+const STYLE_TAG = (
+  <style>{`
+    @keyframes koDrift{0%{transform:translateY(0) rotate(0deg);opacity:0.14}50%{opacity:0.35}100%{transform:translateY(-40px) rotate(18deg);opacity:0.14}}
+    @keyframes koFlagPlant{0%{transform:scale(0.4) rotate(-18deg);opacity:0}60%{transform:scale(1.18) rotate(6deg);opacity:1}100%{transform:scale(1) rotate(0deg);opacity:1}}
+    @keyframes koZoneGlow{0%,100%{box-shadow:0 0 0 3px rgba(219,39,119,0.45)}50%{box-shadow:0 0 0 7px rgba(219,39,119,0.8)}}
+    @keyframes koDuelPulse{0%,100%{opacity:0.65;transform:scale(1)}50%{opacity:1;transform:scale(1.03)}}
+    @keyframes koDiceSpin{0%{transform:rotate(0deg) scale(1)}50%{transform:rotate(200deg) scale(1.1)}100%{transform:rotate(360deg) scale(1)}}
+    @keyframes koCoinShine{0%,100%{filter:brightness(1)}50%{filter:brightness(1.35)}}
+    @keyframes koCrownPop{0%{transform:scale(0) rotate(-20deg);opacity:0}70%{transform:scale(1.2) rotate(8deg);opacity:1}100%{transform:scale(1) rotate(0deg);opacity:1}}
+    .ko-btn:hover:not(:disabled){transform:translateY(-2px) scale(1.02);filter:brightness(1.08)}
+    .ko-btn:active:not(:disabled){transform:translateY(0) scale(0.97)}
+    .ko-zone:hover{filter:brightness(1.15)}
+  `}</style>
+);
+
+function AmbientBackdrop() {
+  return (
+    <div style={{ position: "absolute", inset: 0, pointerEvents: "none", overflow: "hidden" }}>
+      {AMBIENT_BITS.map((b, i) => (
+        <div key={i} style={{ position: "absolute", left: `${b.left}%`, top: `${b.top}%`, fontSize: `${b.size}px`, animation: `koDrift ${b.dur}s ease-in-out infinite ${b.delay}s` }}>{b.emoji}</div>
+      ))}
+    </div>
+  );
+}
 
 export function KingOfHillGame({ questions, teams, onUpdateScore, onEnd }: GameProps) {
   const TURN_SECONDS = 20;
   const isTopicMode = questions.length > 0 && questions.every(q => q.type === "speaking task");
-  const shuffledQs = useRef([...questions].sort(() => Math.random() - 0.5)).current;
+  const ZONES = isTopicMode ? HILL_ZONES_TOPIC : HILL_ZONES_GRAMMAR;
+
+  const pool = useRef((() => {
+    const base = isTopicMode
+      ? questions
+      : (questions.filter(q => q.type === "finish the sentence").length ? questions.filter(q => q.type === "finish the sentence") : questions);
+    return [...base].sort(() => Math.random() - 0.5);
+  })()).current;
 
   const [owners, setOwners] = useState<Record<string, string | number>>({});
   const [roundPoints, setRoundPoints] = useState(() => Object.fromEntries(teams.map(t => [t.id, 0])));
@@ -103,12 +163,18 @@ export function KingOfHillGame({ questions, teams, onUpdateScore, onEnd }: GameP
 
   const activeTeamRealIdx = turnOrder[activeTeamIdx];
   const activeTeam = teams[activeTeamRealIdx];
-  const q = shuffledQs[qi % Math.max(shuffledQs.length, 1)];
+
+  const activeZoneId = phase === "contested" ? contest?.zoneId : chosenZone;
+  const activeZoneDef = ZONES.find(z => z.id === activeZoneId);
+  const baseQ = pool[qi % Math.max(pool.length, 1)];
+  const q = isTopicMode && activeZoneDef?.prefix
+    ? { ...baseQ, question: activeZoneDef.prefix + (baseQ.question || (baseQ as any).task || "") }
+    : baseQ;
 
   const doRoundPayout = useCallback((ownersOverride?: Record<string, string | number>) => {
     const effectiveOwners = ownersOverride || owners;
     const summary = teams.map(t => {
-      const owned = HILL_ZONES.filter(z => effectiveOwners[z.id] === t.id);
+      const owned = ZONES.filter(z => effectiveOwners[z.id] === t.id);
       const pts = owned.reduce((sum, z) => sum + z.pts, 0);
       return { teamId: t.id, zonesOwned: owned, ptsEarned: pts };
     });
@@ -122,7 +188,7 @@ export function KingOfHillGame({ questions, teams, onUpdateScore, onEnd }: GameP
     });
     setRoundSummary(summary);
     setPhase("round-end");
-  }, [owners, teams, onUpdateScore]);
+  }, [owners, teams, onUpdateScore, ZONES]);
 
   const nextTeamTurn = useCallback((_scored: boolean, ownersOverride?: Record<string, string | number>) => {
     const nextIdx = (activeTeamIdx + 1) % teams.length;
@@ -192,239 +258,259 @@ export function KingOfHillGame({ questions, teams, onUpdateScore, onEnd }: GameP
     setContest((c: any) => ({ ...c, step: "result", winner: winnerId, reason }));
   };
 
+  const arenaStyle: React.CSSProperties = {
+    margin: "-20px", padding: "20px", borderRadius: "20px", position: "relative", overflow: "hidden",
+    background: "radial-gradient(ellipse at 50% -10%,#DB2777 0%,#831843 45%,#1F0A1F 100%)",
+  };
+
   if (phase === "intro") return (
-    <div style={{ textAlign: "center" }}>
-      <div style={{ background: "linear-gradient(135deg,#831843,#DB2777)", borderRadius: "20px", padding: "28px 24px", marginBottom: "10px", color: "white", maxWidth: "520px", margin: "0 auto 10px", position: "relative" }}>
-        <div style={{ fontSize: "36px", marginBottom: "10px" }}>👑</div>
-        <div style={{ fontWeight: "900", fontSize: "20px", marginBottom: "10px" }}>King of the Hill</div>
-        <div style={{ fontSize: "15px", lineHeight: 1.7 }}>
-          A map of <strong>5 zones</strong> is up for grabs - each worth different points.<br />
-          Roll dice to set the <strong>turn order</strong>, then answer to <strong>claim zones</strong>.<br />
-          Attack a claimed zone? <strong>Both teams face the same question!</strong><br />
-          {isTopicMode
-            ? <>On open questions, <strong>the teacher picks the better answer</strong> - defend well!</>
-            : <>On grammar questions, <strong>the fastest correct answer wins</strong> - be quick!</>
-          }<br />
-          Score points for <strong>every zone you own</strong> at the end of each round.<br />
-          Game lasts <strong>{TOTAL_ROUNDS} rounds</strong> - highest score wins!
-        </div>
-        <div style={{ position: "absolute", bottom: "-14px", left: "50%", transform: "translateX(-50%)", width: 0, height: 0, borderLeft: "14px solid transparent", borderRight: "14px solid transparent", borderTop: "14px solid #DB2777" }} />
-      </div>
-      <div style={{ marginTop: "24px", marginBottom: "20px", fontSize: "14px", color: "#6B7280", fontWeight: "600" }}>
-        The Center zone scores the most - expect fierce competition for it every round!
-      </div>
-      <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "24px" }}>
-        {teams.map(t => (
-          <div key={t.id} style={{ background: t.color.light, border: `3px solid ${t.color.bg}`, borderRadius: "14px", padding: "10px 18px", fontWeight: "800", fontSize: "14px", color: t.color.dark }}>
-            {t.color.emoji} {t.name}
+    <div style={{ ...arenaStyle, textAlign: "center" }}>
+      <AmbientBackdrop />
+      {STYLE_TAG}
+      <div style={{ position: "relative", zIndex: 1 }}>
+        <div style={{ background: "linear-gradient(160deg,#831843,#4C0519)", border: "2px solid #F9A8D455", borderRadius: "20px", padding: "28px 24px", marginBottom: "10px", color: "white", maxWidth: "540px", margin: "0 auto 10px", boxShadow: "0 0 50px rgba(219,39,119,0.4)" }}>
+          <div style={{ fontSize: "36px", marginBottom: "10px" }}>👑</div>
+          <div style={{ fontWeight: "900", fontSize: "20px", marginBottom: "10px", color: "#F9A8D4" }}>King of the Hill</div>
+          <div style={{ fontSize: "15px", lineHeight: 1.7 }}>
+            A map of <strong style={{ color: "#F9A8D4" }}>5 zones</strong> is up for grabs — each worth different points.<br />
+            Roll dice to set the <strong style={{ color: "#F9A8D4" }}>turn order</strong>, then answer to <strong style={{ color: "#F9A8D4" }}>claim zones</strong>.<br />
+            {isTopicMode ? (
+              <>Each zone is a different move in the conversation: <strong style={{ color: "#F9A8D4" }}>👑 Opinion, ❓ Question, 💭 Example, 🤝 Agree/Disagree, 💡 Alternative</strong> — claiming zones builds a full class conversation!<br /></>
+            ) : (
+              <>Every zone is a <strong style={{ color: "#F9A8D4" }}>finish-the-sentence</strong> challenge.<br /></>
+            )}
+            Attack a claimed zone? <strong style={{ color: "#F9A8D4" }}>Both teams face the same question!</strong><br />
+            {isTopicMode
+              ? <>Both teams respond, and <strong style={{ color: "#F9A8D4" }}>the teacher picks the stronger answer</strong> — defend well!</>
+              : <>Both teams see the exact same blank, and <strong style={{ color: "#F9A8D4" }}>the fastest correct answer wins</strong> — be quick!</>
+            }<br />
+            Score points for <strong style={{ color: "#F9A8D4" }}>every zone you own</strong> at the end of each round.<br />
+            Game lasts <strong style={{ color: "#F9A8D4" }}>{TOTAL_ROUNDS} rounds</strong> — highest score wins!
           </div>
-        ))}
+        </div>
+        <div style={{ marginTop: "18px", marginBottom: "20px", fontSize: "14px", color: "#F9A8D4", fontWeight: "600" }}>
+          The {isTopicMode ? "👑 Opinion" : "👑 Center"} zone scores the most — expect fierce competition for it every round!
+        </div>
+        <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "24px" }}>
+          {teams.map(t => (
+            <div key={t.id} style={{ background: `linear-gradient(160deg,${t.color.dark}55,#4C0519)`, border: `3px solid ${t.color.bg}`, borderRadius: "14px", padding: "10px 18px", fontWeight: "800", fontSize: "14px", color: "white" }}>
+              {t.color.emoji} {t.name}
+            </div>
+          ))}
+        </div>
+        <button onClick={() => setPhase("rolling")} className="ko-btn" style={{ background: "linear-gradient(135deg,#831843,#DB2777)", color: "white", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(219,39,119,0.5)", transition: "transform 0.15s ease" }}>👑 Roll for Turn Order!</button>
       </div>
-      <button onClick={() => setPhase("rolling")} style={{ background: "linear-gradient(135deg,#831843,#DB2777)", color: "white", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer" }}>👑 Roll for Turn Order!</button>
     </div>
   );
 
   const renderZone = (zId: string) => {
-    const z = HILL_ZONES.find(z => z.id === zId)!;
+    const z = ZONES.find(z => z.id === zId)!;
     const ownerId = owners[zId];
     const owner = ownerId !== undefined ? teams.find(t => t.id === ownerId) : null;
     const isChosen = chosenZone === zId;
     const isContested = contest?.zoneId === zId;
     const canPick = phase === "pick";
     return (
-      <div key={zId} onClick={() => canPick && pickZone(zId)} style={{ background: owner ? owner.color.light : "#F3F4F6", border: `3px solid ${isContested ? "#EF4444" : isChosen ? activeTeam.color.bg : owner ? owner.color.bg : "#D1D5DB"}`, borderRadius: "14px", padding: "10px 6px", textAlign: "center", cursor: canPick ? "pointer" : "default", transform: isChosen || isContested ? "scale(1.06)" : "scale(1)", transition: "all 0.2s", boxShadow: isContested ? "0 0 14px #EF444460" : isChosen ? `0 0 12px ${activeTeam.color.bg}60` : "none" }}>
-        <div style={{ fontSize: "18px" }}>{z.icon}</div>
-        <div style={{ fontWeight: "900", fontSize: "13px", color: owner ? owner.color.dark : "#374151" }}>{zId}</div>
-        <div style={{ fontWeight: "800", fontSize: "12px", color: "#F59E0B" }}>+{z.pts}/rnd</div>
-        <div style={{ fontSize: "11px", color: owner ? owner.color.dark : "#9CA3AF", marginTop: "2px" }}>{owner ? owner.name : "Free"}</div>
+      <div key={zId} onClick={() => canPick && pickZone(zId)} className="ko-zone" style={{
+        position: "relative", overflow: "hidden",
+        background: owner ? `linear-gradient(160deg,${owner.color.dark}55,#1F0A1F)` : "rgba(255,255,255,0.06)",
+        border: `2.5px solid ${isContested ? "#F87171" : isChosen ? activeTeam.color.bg : owner ? owner.color.bg : "#F9A8D455"}`,
+        borderRadius: "14px", padding: "10px 6px", textAlign: "center", cursor: canPick ? "pointer" : "default",
+        transform: isChosen || isContested ? "scale(1.06)" : "scale(1)", transition: "all 0.2s",
+        animation: isContested ? "koZoneGlow 1.2s ease-in-out infinite" : "none",
+      }}>
+        <div key={owner?.id ?? "free"} style={{ fontSize: "18px", animation: owner ? "koFlagPlant 0.4s ease-out" : "none" }}>{z.icon}</div>
+        <div style={{ fontWeight: "900", fontSize: "12px", color: owner ? "white" : "#F9A8D4" }}>{z.label ?? zId}</div>
+        <div style={{ fontWeight: "800", fontSize: "11px", color: "#FCD34D" }}>+{z.pts}/rnd</div>
+        <div style={{ fontSize: "10px", color: owner ? "#F3E8FF" : "#F9A8D488", marginTop: "2px" }}>{owner ? owner.name : "Free"}</div>
       </div>
     );
   };
 
-  const DICE_FACES = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"];
   const attacker = contest ? teams.find(t => t.id === contest.attackerId) : null;
   const defender = contest ? teams.find(t => t.id === contest.defenderId) : null;
 
   return (
-    <div>
-      {phase === "rolling" && (
-        <div style={{ textAlign: "center", padding: "16px 0" }}>
-          <div style={{ fontWeight: "900", fontSize: "17px", marginBottom: "16px" }}>🎲 Rolling for turn order — Round {round}!</div>
-          <div style={{ display: "flex", gap: "16px", justifyContent: "center", flexWrap: "wrap", marginBottom: "16px" }}>
-            {teams.map((t, i) => (
-              <div key={t.id} style={{ background: t.color.light, border: `3px solid ${t.color.bg}`, borderRadius: "16px", padding: "14px 20px", textAlign: "center" }}>
-                <div style={{ fontWeight: "800", fontSize: "13px", color: t.color.dark }}>{t.name}</div>
-                <div style={{ fontSize: "44px", lineHeight: 1 }}>{diceValues[i] != null ? DICE_FACES[diceValues[i]! - 1] : "🎲"}</div>
-                {rollDone && diceValues[i] != null && (
-                  <div style={{ fontWeight: "900", fontSize: "13px", color: t.color.dark, marginTop: "4px" }}>{diceValues[i]}</div>
+    <div style={arenaStyle}>
+      <AmbientBackdrop />
+      {STYLE_TAG}
+      <div style={{ position: "relative", zIndex: 1 }}>
+        {phase === "rolling" && (
+          <div style={{ textAlign: "center", padding: "16px 0" }}>
+            <div style={{ fontWeight: "900", fontSize: "17px", marginBottom: "16px", color: "white" }}>🎲 Rolling for turn order — Round {round}!</div>
+            <div style={{ display: "flex", gap: "16px", justifyContent: "center", flexWrap: "wrap", marginBottom: "16px" }}>
+              {teams.map((t, i) => (
+                <div key={t.id} style={{ background: `linear-gradient(160deg,${t.color.dark}55,#1F0A1F)`, border: `3px solid ${t.color.bg}`, borderRadius: "16px", padding: "14px 20px", textAlign: "center" }}>
+                  <div style={{ fontWeight: "800", fontSize: "13px", color: "white" }}>{t.name}</div>
+                  <div style={{ fontSize: "44px", lineHeight: 1, animation: diceValues[i] != null && !rollDone ? "koDiceSpin 0.3s linear infinite" : "none" }}>{diceValues[i] != null ? DICE_FACES[diceValues[i]! - 1] : "🎲"}</div>
+                  {rollDone && diceValues[i] != null && (
+                    <div style={{ fontWeight: "900", fontSize: "13px", color: "#FCD34D", marginTop: "4px" }}>{diceValues[i]}</div>
+                  )}
+                </div>
+              ))}
+            </div>
+            {rollDone && finalOrder && (
+              <div>
+                <div style={{ background: "rgba(255,255,255,0.08)", border: "2px solid #F9A8D4", borderRadius: "12px", padding: "12px 20px", marginBottom: "14px", display: "inline-block" }}>
+                  <div style={{ fontWeight: "700", fontSize: "13px", color: "#F9A8D4", marginBottom: "6px" }}>Turn order this round:</div>
+                  <div style={{ display: "flex", gap: "8px", justifyContent: "center", alignItems: "center", flexWrap: "wrap" }}>
+                    {finalOrder.map((entry, pos) => {
+                      const team = teams[entry.teamIdx];
+                      return (
+                        <span key={entry.teamIdx} style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                          <span style={{ fontWeight: "900", fontSize: "13px", color: "#F9A8D488" }}>{pos + 1}.</span>
+                          <span style={{ background: team.color.bg, color: "white", borderRadius: "8px", padding: "3px 10px", fontWeight: "800", fontSize: "13px" }}>{team.name}</span>
+                          {pos < finalOrder.length - 1 && <span style={{ color: "#F9A8D488" }}>{"->"}</span>}
+                        </span>
+                      );
+                    })}
+                  </div>
+                </div>
+                <div>
+                  <button onClick={() => setPhase("pick")} className="ko-btn" style={{ background: "linear-gradient(135deg,#831843,#DB2777)", color: "white", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "800", cursor: "pointer", transition: "transform 0.15s ease" }}>▶️ Start Round {round}</button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {phase !== "rolling" && (
+          <>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "10px", flexWrap: "wrap", gap: "8px" }}>
+              <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                <span style={{ fontWeight: "900", fontSize: "15px", color: "white" }}>Round {round}/{TOTAL_ROUNDS}</span>
+                <span style={{ fontSize: "12px", color: "#F9A8D4", fontWeight: "600" }}>
+                  {ZONES.map(z => `${z.icon} ${z.label ?? z.id}=${z.pts}pts`).join(" · ")}
+                </span>
+              </div>
+              {phase === "pick" && <TurnTimerBar timeLeft={timeLeft} totalSeconds={TURN_SECONDS} />}
+            </div>
+            <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "12px", justifyContent: "center" }}>
+              {teams.map(team => {
+                const ownedZones = ZONES.filter(zone => owners[zone.id] === team.id);
+                const income = ownedZones.reduce((sum, zone) => sum + zone.pts, 0);
+                return (
+                  <div key={team.id} style={{ background: `linear-gradient(160deg,${team.color.dark}44,#1F0A1F)`, border: `2px solid ${team.color.bg}`, borderRadius: "12px", padding: "8px 12px", fontSize: "12px", color: "white", fontWeight: "700" }}>
+                    {team.color.emoji} {team.name}: {income} pts/rnd
+                  </div>
+                );
+              })}
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "8px", maxWidth: "380px", margin: "0 auto 14px" }}>
+              <div />{renderZone("North")}<div />{renderZone("West")}{renderZone("Center")}{renderZone("East")}<div />{renderZone("South")}<div />
+            </div>
+
+            {phase !== "round-end" && (
+              <div style={{ background: `linear-gradient(90deg,${activeTeam.color.dark},${activeTeam.color.bg})`, borderRadius: "14px", padding: "10px 16px", marginBottom: "12px", boxShadow: `0 4px 18px ${activeTeam.color.bg}55` }}>
+                <span style={{ color: "white", fontWeight: "900", fontSize: "16px", textShadow: "0 1px 3px rgba(0,0,0,0.4)" }}>👑 {activeTeam.name}'s turn</span>
+              </div>
+            )}
+
+            {phase === "answer" && (
+              <>
+                <QuestionCard question={q} showAnswer={showAns} onReveal={() => { stop(); setShowAns(true); }} />
+                {(showAns || q?.type === "speaking task") && (
+                  <div style={{ display: "flex", gap: "10px", justifyContent: "center", marginTop: "12px" }}>
+                    <button onClick={() => resolveUncontested(true)} className="ko-btn" style={{ background: "#22C55E", color: "white", border: "none", borderRadius: "12px", padding: "12px 24px", fontSize: "16px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease" }}>✅ Correct! Claim!</button>
+                    <button onClick={() => resolveUncontested(false)} className="ko-btn" style={{ background: "#EF4444", color: "white", border: "none", borderRadius: "12px", padding: "12px 24px", fontSize: "16px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease" }}>❌ Wrong</button>
+                  </div>
+                )}
+              </>
+            )}
+
+            {phase === "contested" && contest?.step === "simultaneous" && (
+              <div>
+                <div style={{ background: "linear-gradient(90deg,rgba(255,255,255,0) 0%, rgba(248,113,113,0.18) 50%, rgba(255,255,255,0) 100%)", border: "2px solid #FCA5A5", borderRadius: "16px", padding: "14px", marginBottom: "12px", textAlign: "center", animation: "koDuelPulse 1.6s ease-in-out infinite" }}>
+                  <div style={{ fontWeight: "900", fontSize: "18px", color: "#FCA5A5" }}>⚔️ Battle for {contest.zoneId}!</div>
+                  <div style={{ fontSize: "13px", color: "#F3E8FF", fontWeight: "700", lineHeight: 1.5 }}>
+                    {attacker?.name} is attacking a claimed zone. Both teams face the same question, and only one can control it.
+                  </div>
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginBottom: "12px" }}>
+                  <div style={{ background: `linear-gradient(160deg,${attacker?.color.dark}55,#1F0A1F)`, border: `3px solid ${attacker?.color.bg}`, borderRadius: "12px", padding: "10px", textAlign: "center" }}>
+                    <div style={{ fontSize: "18px", marginBottom: "2px" }}>⚔️</div>
+                    <div style={{ fontWeight: "900", fontSize: "13px", color: "white" }}>{attacker?.name}</div>
+                    <div style={{ fontSize: "11px", color: "#F3E8FF", opacity: 0.8 }}>Attacker</div>
+                  </div>
+                  <div style={{ background: `linear-gradient(160deg,${defender?.color.dark}55,#1F0A1F)`, border: `3px solid ${defender?.color.bg}`, borderRadius: "12px", padding: "10px", textAlign: "center" }}>
+                    <div style={{ fontSize: "18px", marginBottom: "2px" }}>🛡️</div>
+                    <div style={{ fontWeight: "900", fontSize: "13px", color: "white" }}>{defender?.name}</div>
+                    <div style={{ fontSize: "11px", color: "#F3E8FF", opacity: 0.8 }}>Defender of {contest.zoneId}</div>
+                  </div>
+                </div>
+                <QuestionCard question={q} showAnswer={showAns} onReveal={() => { stop(); setShowAns(true); }} />
+                <div style={{ textAlign: "center", fontWeight: "700", fontSize: "13px", color: "#F9A8D4", marginTop: "10px" }}>
+                  {isTopicMode || q?.type === "speaking task"
+                    ? "Teacher judges which team gave the better answer."
+                    : "Judge which team answered correctly first."}
+                </div>
+                {(showAns || q?.type === "speaking task") && (
+                  <div style={{ marginTop: "14px" }}>
+                    <div style={{ textAlign: "center", fontWeight: "700", fontSize: "13px", color: "#F9A8D4", marginBottom: "10px" }}>
+                      {isTopicMode || q?.type === "speaking task"
+                        ? "Teacher judges - whose answer was better?"
+                        : "Who answered correctly first?"}
+                    </div>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "8px" }}>
+                      <button onClick={() => resolveContest(contest.attackerId)} className="ko-btn" style={{ background: attacker?.color.bg, color: "white", border: "none", borderRadius: "12px", padding: "14px 10px", cursor: "pointer", fontWeight: "800", transition: "transform 0.15s ease" }}>⚔️ {attacker?.name}</button>
+                      <button onClick={() => resolveContest(contest.defenderId)} className="ko-btn" style={{ background: defender?.color.bg, color: "white", border: "none", borderRadius: "12px", padding: "14px 10px", cursor: "pointer", fontWeight: "800", transition: "transform 0.15s ease" }}>🛡️ {defender?.name}</button>
+                    </div>
+                    <button onClick={() => resolveContest(null)} className="ko-btn" style={{ marginTop: "10px", background: "rgba(255,255,255,0.1)", color: "#F9A8D4", cursor: "pointer", border: "1px solid #F9A8D455", padding: "8px 16px", borderRadius: "10px", transition: "transform 0.15s ease" }}>🤝 Neither</button>
+                  </div>
                 )}
               </div>
-            ))}
-          </div>
-          {rollDone && finalOrder && (
-            <div>
-              <div style={{ background: "#EEF2FF", border: "2px solid #6366F1", borderRadius: "12px", padding: "12px 20px", marginBottom: "14px", display: "inline-block" }}>
-                <div style={{ fontWeight: "700", fontSize: "13px", color: "#4338CA", marginBottom: "6px" }}>Turn order this round:</div>
-                <div style={{ display: "flex", gap: "8px", justifyContent: "center", alignItems: "center", flexWrap: "wrap" }}>
-                  {finalOrder.map((entry, pos) => {
-                    const team = teams[entry.teamIdx];
+            )}
+
+            {phase === "contested" && contest?.step === "result" && (
+              <div style={{ textAlign: "center" }}>
+                <div style={{
+                  background: contest.winner ? `linear-gradient(160deg,${teams.find(t => t.id === contest.winner)?.color.dark}55,#1F0A1F)` : "rgba(255,255,255,0.06)",
+                  border: `3px solid ${contest.winner ? teams.find(t => t.id === contest.winner)?.color.bg : "#F9A8D455"}`,
+                  borderRadius: "14px", padding: "16px", marginBottom: "14px",
+                }}>
+                  <div style={{ fontSize: "34px", animation: "koCrownPop 0.5s ease-out" }}>{contest.reason === "neither" ? "🤝" : "👑"}</div>
+                  {contest.reason === "attacker" && <div style={{ fontWeight: "900", fontSize: "16px", color: "white" }}>{attacker?.name} captured {contest.zoneId}! +30 pts</div>}
+                  {contest.reason === "defender" && <div style={{ fontWeight: "900", fontSize: "16px", color: "white" }}>{defender?.name} defended {contest.zoneId}! +20 bonus pts</div>}
+                  {contest.reason === "neither" && <div style={{ fontWeight: "900", fontSize: "16px", color: "white" }}>Neither wins — {contest.zoneId} stays with {defender?.name}!</div>}
+                </div>
+                <button onClick={() => nextTeamTurn(false, owners)} className="ko-btn" style={{ background: "linear-gradient(135deg,#831843,#DB2777)", color: "white", border: "none", borderRadius: "12px", padding: "12px 28px", cursor: "pointer", fontWeight: "800", transition: "transform 0.15s ease" }}>➡️ Next Turn</button>
+              </div>
+            )}
+
+            {phase === "round-end" && roundSummary && (
+              <div style={{ textAlign: "center" }}>
+                <div style={{ background: "linear-gradient(160deg,#78350F,#451A03)", border: "2px solid #FCD34D66", borderRadius: "16px", padding: "16px", marginBottom: "14px" }}>
+                  <div style={{ fontWeight: "900", fontSize: "18px", color: "#FCD34D", animation: "koCoinShine 2s ease-in-out infinite" }}>💰 End of Round {round}</div>
+                </div>
+                <div style={{ display: "grid", gap: "10px", marginBottom: "16px" }}>
+                  {roundSummary.map(summary => {
+                    const team = teams.find(t => t.id === summary.teamId);
+                    if (!team) return null;
+                    const totalRoundControl = roundPoints[summary.teamId] ?? 0;
                     return (
-                      <span key={entry.teamIdx} style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                        <span style={{ fontWeight: "900", fontSize: "13px", color: "#6B7280" }}>{pos + 1}.</span>
-                        <span style={{ background: team.color.bg, color: "white", borderRadius: "8px", padding: "3px 10px", fontWeight: "800", fontSize: "13px" }}>{team.name}</span>
-                        {pos < finalOrder.length - 1 && <span style={{ color: "#9CA3AF" }}>{"->"}</span>}
-                      </span>
+                      <div key={summary.teamId} style={{ background: `linear-gradient(160deg,${team.color.dark}44,#1F0A1F)`, border: `3px solid ${team.color.bg}`, borderRadius: "16px", padding: "12px 16px", textAlign: "left" }}>
+                        <div style={{ fontWeight: "900", fontSize: "16px", color: "white", marginBottom: "6px" }}>
+                          {team.color.emoji} {team.name}
+                        </div>
+                        <div style={{ fontSize: "13px", color: "#F3E8FF", marginBottom: "4px" }}>
+                          Zones: {summary.zonesOwned.length > 0 ? summary.zonesOwned.map((zone: ZoneDef) => `${zone.icon} ${zone.label ?? zone.id}`).join(", ") : "None"}
+                        </div>
+                        <div style={{ fontWeight: "800", color: "#FCD34D" }}>
+                          +{summary.ptsEarned * 10} score this round ({summary.ptsEarned} control pts)
+                        </div>
+                        <div style={{ fontSize: "12px", color: "#F9A8D4", marginTop: "4px" }}>
+                          Total control points earned so far: {totalRoundControl}
+                        </div>
+                      </div>
                     );
                   })}
                 </div>
+                <button onClick={startNextRound} className="ko-btn" style={{ background: "linear-gradient(135deg,#831843,#DB2777)", color: "white", border: "none", borderRadius: "14px", padding: "14px 36px", fontSize: "17px", fontWeight: "900", cursor: "pointer", transition: "transform 0.15s ease" }}>{round >= TOTAL_ROUNDS ? "🏁 End Game" : `▶️ Start Round ${round + 1}`}</button>
               </div>
-              <div>
-                <button onClick={() => setPhase("pick")} style={{ background: "#6366F1", color: "white", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "800", cursor: "pointer" }}>▶️ Start Round {round}</button>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {phase !== "rolling" && (
-        <>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "10px", flexWrap: "wrap", gap: "8px" }}>
-            <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-              <span style={{ fontWeight: "900", fontSize: "15px" }}>Round {round}/{TOTAL_ROUNDS}</span>
-              <span style={{ fontSize: "12px", color: "#6B7280", fontWeight: "600" }}>⭐ Center = 5pts/rnd · N/S = 3pts · E/W = 2pts</span>
-            </div>
-            {phase === "pick" && <TurnTimerBar timeLeft={timeLeft} totalSeconds={TURN_SECONDS} />}
-          </div>
-          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "12px", justifyContent: "center" }}>
-            {teams.map(team => {
-              const ownedZones = HILL_ZONES.filter(zone => owners[zone.id] === team.id);
-              const income = ownedZones.reduce((sum, zone) => sum + zone.pts, 0);
-              return (
-                <div key={team.id} style={{ background: team.color.light, border: `2px solid ${team.color.bg}`, borderRadius: "12px", padding: "8px 12px", fontSize: "12px", color: team.color.dark, fontWeight: "700" }}>
-                  {team.color.emoji} {team.name}: {income} pts/rnd
-                </div>
-              );
-            })}
-          </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "8px", maxWidth: "380px", margin: "0 auto 14px" }}>
-            <div />{renderZone("North")}<div />{renderZone("West")}{renderZone("Center")}{renderZone("East")}<div />{renderZone("South")}<div />
-          </div>
-
-          {phase !== "round-end" && (
-            <div style={{ background: activeTeam.color.bg, borderRadius: "14px", padding: "10px 16px", marginBottom: "12px" }}>
-              <span style={{ color: "white", fontWeight: "900", fontSize: "16px" }}>👑 {activeTeam.name}'s turn</span>
-            </div>
-          )}
-
-          {phase === "answer" && (
-            <>
-              <QuestionCard question={q} showAnswer={showAns} onReveal={() => { stop(); setShowAns(true); }} />
-              {(showAns || q?.type === "speaking task") && (
-                <div style={{ display: "flex", gap: "10px", justifyContent: "center", marginTop: "12px" }}>
-                  <button onClick={() => resolveUncontested(true)} style={{ background: "#22C55E", color: "white", border: "none", borderRadius: "12px", padding: "12px 24px", fontSize: "16px", fontWeight: "700", cursor: "pointer" }}>✅ Correct! Claim!</button>
-                  <button onClick={() => resolveUncontested(false)} style={{ background: "#EF4444", color: "white", border: "none", borderRadius: "12px", padding: "12px 24px", fontSize: "16px", fontWeight: "700", cursor: "pointer" }}>❌ Wrong</button>
-                </div>
-              )}
-            </>
-          )}
-
-          {phase === "contested" && contest?.step === "simultaneous" && (
-            <div>
-              <div style={{ background: "linear-gradient(90deg,rgba(255,255,255,0) 0%, rgba(239,68,68,0.15) 50%, rgba(255,255,255,0) 100%)", border: "2px solid #FCA5A5", borderRadius: "16px", padding: "14px", marginBottom: "12px", textAlign: "center" }}>
-                <div style={{ fontWeight: "900", fontSize: "18px", color: "#991B1B", marginBottom: "6px" }}>Battle for {contest.zoneId}!</div>
-                <div style={{ fontSize: "13px", color: "#7F1D1D", fontWeight: "700", lineHeight: 1.5 }}>
-                  {attacker?.name} is attacking a claimed zone. Both teams face the same question, and only one can control it.
-                </div>
-              </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginBottom: "12px" }}>
-                <div style={{ background: attacker?.color.light, border: `3px solid ${attacker?.color.bg}`, borderRadius: "12px", padding: "10px", textAlign: "center" }}>
-                  <div style={{ fontSize: "18px", marginBottom: "2px" }}>ATK</div>
-                  <div style={{ fontWeight: "900", fontSize: "13px", color: attacker?.color.dark }}>{attacker?.name}</div>
-                  <div style={{ fontSize: "11px", color: attacker?.color.dark, opacity: 0.7 }}>Attacker</div>
-                </div>
-                <div style={{ background: defender?.color.light, border: `3px solid ${defender?.color.bg}`, borderRadius: "12px", padding: "10px", textAlign: "center" }}>
-                  <div style={{ fontSize: "18px", marginBottom: "2px" }}>DEF</div>
-                  <div style={{ fontWeight: "900", fontSize: "13px", color: defender?.color.dark }}>{defender?.name}</div>
-                  <div style={{ fontSize: "11px", color: defender?.color.dark, opacity: 0.7 }}>Defender of {contest.zoneId}</div>
-                </div>
-              </div>
-              <QuestionCard question={q} showAnswer={showAns} onReveal={() => { stop(); setShowAns(true); }} />
-              <div style={{ textAlign: "center", fontWeight: "700", fontSize: "13px", color: "#374151", marginTop: "10px" }}>
-                {isTopicMode || q?.type === "speaking task"
-                  ? "Teacher judges which team gave the better answer."
-                  : "Judge which team answered correctly first."}
-              </div>
-              {(showAns || q?.type === "speaking task") && (
-                <div style={{ marginTop: "14px" }}>
-                  <div style={{ textAlign: "center", fontWeight: "700", fontSize: "13px", color: "#374151", marginBottom: "10px" }}>
-                    {isTopicMode || q?.type === "speaking task"
-                      ? "Teacher judges - whose answer was better?"
-                      : "Who answered correctly first?"}
-                  </div>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "8px" }}>
-                    <button onClick={() => resolveContest(contest.attackerId)} style={{ background: attacker?.color.bg, color: "white", border: "none", borderRadius: "12px", padding: "14px 10px", cursor: "pointer" }}>⚔️ {attacker?.name}</button>
-                    <button onClick={() => resolveContest(contest.defenderId)} style={{ background: defender?.color.bg, color: "white", border: "none", borderRadius: "12px", padding: "14px 10px", cursor: "pointer" }}>🛡️ {defender?.name}</button>
-                  </div>
-                  <button onClick={() => resolveContest(null)} style={{ marginTop: "10px", background: "#F3F4F6", cursor: "pointer", border: "none", padding: "8px 16px" }}>🤝 Neither</button>
-                </div>
-              )}
-            </div>
-          )}
-
-          {phase === "contested" && contest?.step === "result" && (
-            <div style={{ textAlign: "center" }}>
-              <div style={{
-                background: contest.winner ? teams.find(t => t.id === contest.winner)?.color.light : "#F3F4F6",
-                border: `3px solid ${contest.winner ? teams.find(t => t.id === contest.winner)?.color.bg : "#D1D5DB"}`,
-                borderRadius: "14px", padding: "16px", marginBottom: "14px"
-              }}>
-                {contest.reason === "attacker" && <div style={{ fontWeight: "900", fontSize: "16px", color: attacker?.color.dark }}>{attacker?.name} captured {contest.zoneId}! +30 pts</div>}
-                {contest.reason === "defender" && <div style={{ fontWeight: "900", fontSize: "16px", color: defender?.color.dark }}>{defender?.name} defended {contest.zoneId}! +20 bonus pts</div>}
-                {contest.reason === "neither" && <div style={{ fontWeight: "900", fontSize: "16px", color: "#374151" }}>Neither wins - {contest.zoneId} stays with {defender?.name}!</div>}
-              </div>
-              <div style={{ padding: "16px", marginBottom: "14px" }}>
-                <div style={{ fontWeight: "900", fontSize: "18px", color: "#1E1B4B", marginBottom: "6px" }}>Contest resolved!</div>
-                {contest.reason === "attacker" && <div style={{ color: attacker?.color.dark, fontWeight: "700" }}>⚔️ {attacker?.name} steals {contest.zoneId} and gains +30 points.</div>}
-                {contest.reason === "defender" && <div style={{ color: defender?.color.dark, fontWeight: "700" }}>🛡️ {defender?.name} holds {contest.zoneId} and gains +20 points.</div>}
-                {contest.reason === "neither" && <div style={{ color: "#6B7280", fontWeight: "700" }}>🤝 Nobody wins the zone this turn.</div>}
-              </div>
-              <button onClick={() => nextTeamTurn(false, owners)} style={{ background: "#6366F1", color: "white", border: "none", borderRadius: "12px", padding: "12px 28px", cursor: "pointer" }}>➡️ Next Turn</button>
-            </div>
-          )}
-
-          {phase === "round-end" && roundSummary && (
-            <div style={{ textAlign: "center" }}>
-              <div style={{ background: "#FEF9C3", borderRadius: "16px", padding: "16px", marginBottom: "14px" }}>
-                <div style={{ fontWeight: "900", fontSize: "18px", color: "#92400E" }}>💰 End of Round {round}</div>
-              </div>
-              <div style={{ display: "grid", gap: "10px", marginBottom: "16px" }}>
-                {roundSummary.map(summary => {
-                  const team = teams.find(t => t.id === summary.teamId);
-                  if (!team) return null;
-                  const totalRoundControl = roundPoints[summary.teamId] ?? 0;
-                  return (
-                    <div key={summary.teamId} style={{ background: team.color.light, border: `3px solid ${team.color.bg}`, borderRadius: "16px", padding: "12px 16px", textAlign: "left" }}>
-                      <div style={{ fontWeight: "900", fontSize: "16px", color: team.color.dark, marginBottom: "6px" }}>
-                        {team.color.emoji} {team.name}
-                      </div>
-                      <div style={{ fontSize: "13px", color: team.color.dark, marginBottom: "4px" }}>
-                        Zones: {summary.zonesOwned.length > 0 ? summary.zonesOwned.map((zone: typeof HILL_ZONES[number]) => `${zone.icon} ${zone.id}`).join(", ") : "None"}
-                      </div>
-                      <div style={{ fontWeight: "800", color: "#92400E" }}>
-                        +{summary.ptsEarned * 10} score this round ({summary.ptsEarned} control pts)
-                      </div>
-                      <div style={{ fontSize: "12px", color: "#6B7280", marginTop: "4px" }}>
-                        Total control points earned so far: {totalRoundControl}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-              <button onClick={startNextRound} style={{ background: "#6366F1", color: "white", border: "none", borderRadius: "14px", padding: "14px 36px", fontSize: "17px", fontWeight: "900", cursor: "pointer" }}>{round >= TOTAL_ROUNDS ? "🏁 End Game" : `▶️ Start Round ${round + 1}`}</button>
-            </div>
-          )}
-        </>
-      )}
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 }

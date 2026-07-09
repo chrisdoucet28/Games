@@ -162,9 +162,9 @@ function AmbientBackdrop() {
 
 type CellFx = { teamId: string | number; coord: string; kind: "hit" | "miss"; key: number };
 
-export function BattleshipGame({ questions, teams, onUpdateScore, onEnd, isTopic }: GameProps) {
+export function BattleshipGame({ questions, teams, onUpdateScore, onEnd }: GameProps) {
   const TURN_SECONDS = 25;
-  const gameTitle = isTopic ? "Battleship" : "Grammar Battleship";
+  const gameTitle = "Battleship";
 
   const COLS = teams.length === 2 ? BATTLESHIP_COLS_5 : BATTLESHIP_COLS_4;
   const ROWS = COLS.map((_, i) => i + 1);
@@ -288,7 +288,7 @@ export function BattleshipGame({ questions, teams, onUpdateScore, onEnd, isTopic
           <div style={{ fontSize: "15px", lineHeight: 1.7, opacity: 0.95 }}>
             Each team has a hidden fleet of ships on their ocean grid.<br />
             On your turn: <strong style={{ color: "#93C5FD" }}>pick an enemy team</strong>, then <strong style={{ color: "#93C5FD" }}>fire at a square</strong>.<br />
-            {isTopic ? <>Each <strong style={{ color: "#93C5FD" }}>square is a unique speaking prompt</strong> — answer to fire!</> : <>Each <strong style={{ color: "#93C5FD" }}>column is a different task type</strong> — answer correctly to fire!</>}<br />
+            Each <strong style={{ color: "#93C5FD" }}>column is a different task type</strong> — answer correctly to fire!<br />
             Hit a ship = <strong style={{ color: "#FCA5A5" }}>+60 pts</strong>. Hit water and answer = <strong style={{ color: "#FCD34D" }}>+15 pts</strong>.<br />
             Sink all of a team's ships to eliminate them. Last fleet wins!
           </div>
@@ -309,16 +309,14 @@ export function BattleshipGame({ questions, teams, onUpdateScore, onEnd, isTopic
       <RadarBackdrop />
       {STYLE_TAG}
       <div style={{ position: "relative", zIndex: 1 }}>
-        {!isTopic && (
-          <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", justifyContent: "center", marginBottom: "12px" }}>
-            {COLS.map(col => (
-              <div key={col.letter} style={{ background: "rgba(255,255,255,0.06)", border: `1.5px solid ${colColor(col.letter)}88`, boxShadow: `0 0 10px ${colColor(col.letter)}33`, color: "white", borderRadius: "10px", padding: "5px 12px", fontSize: "12px", fontWeight: "800", display: "flex", alignItems: "center", gap: "5px" }}>
-                <span style={{ fontWeight: "900", color: colColor(col.letter) }}>{col.letter}</span>
-                <span style={{ opacity: 0.9 }}>{col.emoji} {col.label}</span>
-              </div>
-            ))}
-          </div>
-        )}
+        <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", justifyContent: "center", marginBottom: "12px" }}>
+          {COLS.map(col => (
+            <div key={col.letter} style={{ background: "rgba(255,255,255,0.06)", border: `1.5px solid ${colColor(col.letter)}88`, boxShadow: `0 0 10px ${colColor(col.letter)}33`, color: "white", borderRadius: "10px", padding: "5px 12px", fontSize: "12px", fontWeight: "800", display: "flex", alignItems: "center", gap: "5px" }}>
+              <span style={{ fontWeight: "900", color: colColor(col.letter) }}>{col.letter}</span>
+              <span style={{ opacity: 0.9 }}>{col.emoji} {col.label}</span>
+            </div>
+          ))}
+        </div>
 
         <div style={{ background: `linear-gradient(90deg,${activeTeam.color.dark},${activeTeam.color.bg})`, borderRadius: "14px", padding: "10px 16px", marginBottom: "14px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px", boxShadow: `0 4px 18px ${activeTeam.color.bg}55` }}>
           <span style={{ color: "white", fontWeight: "900", fontSize: "17px", textShadow: "0 1px 3px rgba(0,0,0,0.4)" }}>

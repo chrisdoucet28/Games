@@ -24,15 +24,20 @@ export function useTurnTimer(seconds: number, active: boolean, onExpire: () => v
       return;
     }
     setTimeLeft(seconds);
+    let remaining = seconds;
     timerRef.current = setInterval(() => {
-      setTimeLeft(t => {
-        if (t <= 1) {
-          if (timerRef.current) clearInterval(timerRef.current);
-          onExpireRef.current?.();
-          return seconds;
-        }
-        return t - 1;
-      });
+      remaining -= 1;
+      if (remaining <= 0) {
+        if (timerRef.current) clearInterval(timerRef.current);
+        // Call onExpire as a plain statement here, not from inside the setTimeLeft updater above —
+        // React can invoke updater functions during its own render pass, and onExpire often triggers
+        // state updates on ancestor components (e.g. onUpdateScore), which then throws "Cannot update
+        // a component while rendering a different component."
+        setTimeLeft(seconds);
+        onExpireRef.current?.();
+      } else {
+        setTimeLeft(remaining);
+      }
     }, 1000);
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
