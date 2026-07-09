@@ -5,27 +5,18 @@ import { useTurnTimer } from "../../hooks/useTurnTimer";
 import { TurnTimerBar } from "../shared/TurnTimerBar";
 import { QuestionCard } from "../shared/QuestionCard";
 
-type ColDef = { letter: string; label: string; emoji: string; type: string };
+type ColDef = { letter: string; label: string; emoji: string };
 
-// Full 5-column board — 1v1 only. "Use in a sentence" is reserved for this board since
-// real content for that type is scarce across topics (most of it falls back to a relabeled
-// "finish the sentence"/"rewrite sentences" prompt) — fine as an occasional 5th column in a
-// two-team game, but not worth spreading across every 3+ team board.
-const BATTLESHIP_COLS_5: ColDef[] = [
-  { letter: "A", label: "Correct the mistake", emoji: "✏️", type: "correct grammar mistakes" },
-  { letter: "B", label: "Choose correct grammar", emoji: "🔤", type: "choose correct grammar" },
-  { letter: "C", label: "Use in a sentence", emoji: "💬", type: "use vocabulary in a sentence" },
-  { letter: "D", label: "Finish the sentence", emoji: "✍️", type: "finish the sentence" },
-  { letter: "E", label: "Speaking challenge", emoji: "🗣️", type: "speaking task" },
-];
-// Smaller (3+ team) boards keep speaking instead — better content coverage and more variety
-// for the more common class-sized games.
-const BATTLESHIP_COLS_4: ColDef[] = [
-  { letter: "A", label: "Correct the mistake", emoji: "✏️", type: "correct grammar mistakes" },
-  { letter: "B", label: "Choose correct grammar", emoji: "🔤", type: "choose correct grammar" },
-  { letter: "C", label: "Speaking challenge", emoji: "🗣️", type: "speaking task" },
-  { letter: "D", label: "Finish the sentence", emoji: "✍️", type: "finish the sentence" },
-];
+// Battleship's whole identity is error-hunting — every square on every board is a
+// "correct grammar mistakes" question. No other task type appears here; that variety
+// belongs to other games now (Word Whack = choose the correct answer, King of the Hill =
+// finish the sentence). Column letters just name board coordinates, they're not categories.
+const BATTLESHIP_COLS_5: ColDef[] = ["A", "B", "C", "D", "E"].map(letter => (
+  { letter, label: "Fix the mistake", emoji: "✏️" }
+));
+const BATTLESHIP_COLS_4: ColDef[] = ["A", "B", "C", "D"].map(letter => (
+  { letter, label: "Fix the mistake", emoji: "✏️" }
+));
 
 function generateShipsNxN(cols: ColDef[]) {
   const all: string[] = [];
@@ -35,68 +26,36 @@ function generateShipsNxN(cols: ColDef[]) {
 }
 
 // Builds one independent question grid PER TEAM (rather than one grid shared by every
-// board), pulling round-robin through a shuffled pool per column type so the same
-// coordinate on different teams' boards doesn't show the identical question — and each
-// team's own board never repeats a question it's already used, as long as the pool for
-// that type has enough supply. With more teams than the pool can uniquely cover, repeats
-// become unavoidable and the pool simply wraps — which is the expected, graceful fallback.
+// board), pulling round-robin through a single shuffled "correct grammar mistakes" pool so
+// the same coordinate on different teams' boards doesn't show the identical question, and
+// each team's own board never repeats a question it's already used as long as the pool has
+// enough supply. Every column shares this one pool now (Battleship is 100% mistake-
+// correction) — when a board's demand exceeds the pool size, it wraps and repeats a mistake
+// question rather than ever pulling in a different task type, so a column never silently
+// shows the wrong kind of question just because the pool ran low.
 function buildCoordMap(questions: QuestionData[], cols: ColDef[], teamIds: (string | number)[]) {
-  const byType: Record<string, QuestionData[]> = {};
-  questions.forEach(q => {
-    const t = q.type || "unknown";
-    if (!byType[t]) byType[t] = [];
-    byType[t].push(q);
-  });
-
-  if (!byType["speaking task"] || byType["speaking task"].length === 0) {
-    byType["speaking task"] = questions.map(q => ({
-      ...q, type: "speaking task", question: q.task || q.question || q.word || String(q), answer: "Open — teacher judges", hint: "Speak a full sentence using the target language",
-    }));
-  }
-
-  if (!byType["use vocabulary in a sentence"] || byType["use vocabulary in a sentence"].length === 0) {
-    const fallbackPool = byType["rewrite sentences"]?.length ? byType["rewrite sentences"] : byType["finish the sentence"]?.length ? byType["finish the sentence"] : questions;
-    byType["use vocabulary in a sentence"] = fallbackPool.map(q => ({
-      ...q, type: "use vocabulary in a sentence", question: q.question || q.task || String(q), answer: q.answer || "Open — teacher judges", hint: q.hint || "Use the target word or structure in your own sentence",
-    }));
-  }
-
-  ["correct grammar mistakes", "choose correct grammar", "finish the sentence"].forEach(t => {
-    if (!byType[t] || byType[t].length === 0) {
-      const any = questions.filter(q => q.type !== t);
-      byType[t] = any.length ? any : questions;
-    }
-  });
-
-  Object.keys(byType).forEach(t => { byType[t] = [...byType[t]].sort(() => Math.random() - 0.5); });
+  const cgm = questions.filter(q => q.type === "correct grammar mistakes");
+  const pool = (cgm.length ? cgm : questions).slice().sort(() => Math.random() - 0.5);
 
   const rows = cols.length;
   const qText = (q: any) => q.question || q.task || String(q);
-  const cursor: Record<string, number> = {};
-
-  // Fallback pools (e.g. "use vocabulary in a sentence" cloned from "finish the sentence")
-  // can share identical underlying text with another column's pool under a different type
-  // label. If a column's own type-pool is fully used up on this board, fall back to ANY
-  // still-unused question across the whole set (matching every OTHER column's usual
-  // uniqueness) rather than forcing a literal duplicate.
-  const allShuffled = [...questions].sort(() => Math.random() - 0.5);
+  let cursor = 0;
 
   const perTeamMaps: Record<string | number, Record<string, QuestionData>> = {};
   teamIds.forEach(teamId => {
     const map: Record<string, QuestionData> = {};
     const usedOnThisBoard = new Set<string>();
     cols.forEach(col => {
-      const pool = byType[col.type]?.length ? byType[col.type] : questions;
       for (let r = 1; r <= rows; r++) {
         const coord = col.letter + r;
         let chosen: QuestionData | null = null;
         for (let attempt = 0; attempt < pool.length; attempt++) {
-          const idx = (cursor[col.type] ?? 0) % pool.length;
-          cursor[col.type] = idx + 1;
+          const idx = cursor % pool.length;
+          cursor++;
           const candidate = pool[idx];
           if (!usedOnThisBoard.has(qText(candidate))) { chosen = candidate; break; }
         }
-        if (!chosen) chosen = allShuffled.find(q => !usedOnThisBoard.has(qText(q))) || pool[(cursor[col.type] ?? 0) % pool.length];
+        if (!chosen) { chosen = pool[cursor % pool.length]; cursor++; }
         map[coord] = chosen;
         usedOnThisBoard.add(qText(chosen));
       }
@@ -288,7 +247,7 @@ export function BattleshipGame({ questions, teams, onUpdateScore, onEnd }: GameP
           <div style={{ fontSize: "15px", lineHeight: 1.7, opacity: 0.95 }}>
             Each team has a hidden fleet of ships on their ocean grid.<br />
             On your turn: <strong style={{ color: "#93C5FD" }}>pick an enemy team</strong>, then <strong style={{ color: "#93C5FD" }}>fire at a square</strong>.<br />
-            Each <strong style={{ color: "#93C5FD" }}>column is a different task type</strong> — answer correctly to fire!<br />
+            Every square is <strong style={{ color: "#93C5FD" }}>find-and-fix-the-mistake</strong> — answer correctly to fire!<br />
             Hit a ship = <strong style={{ color: "#FCA5A5" }}>+60 pts</strong>. Hit water and answer = <strong style={{ color: "#FCD34D" }}>+15 pts</strong>.<br />
             Sink all of a team's ships to eliminate them. Last fleet wins!
           </div>
@@ -309,13 +268,11 @@ export function BattleshipGame({ questions, teams, onUpdateScore, onEnd }: GameP
       <RadarBackdrop />
       {STYLE_TAG}
       <div style={{ position: "relative", zIndex: 1 }}>
-        <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", justifyContent: "center", marginBottom: "12px" }}>
-          {COLS.map(col => (
-            <div key={col.letter} style={{ background: "rgba(255,255,255,0.06)", border: `1.5px solid ${colColor(col.letter)}88`, boxShadow: `0 0 10px ${colColor(col.letter)}33`, color: "white", borderRadius: "10px", padding: "5px 12px", fontSize: "12px", fontWeight: "800", display: "flex", alignItems: "center", gap: "5px" }}>
-              <span style={{ fontWeight: "900", color: colColor(col.letter) }}>{col.letter}</span>
-              <span style={{ opacity: 0.9 }}>{col.emoji} {col.label}</span>
-            </div>
-          ))}
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: "12px" }}>
+          <div style={{ background: "rgba(255,255,255,0.06)", border: "1.5px solid #EF444488", boxShadow: "0 0 10px #EF444433", color: "white", borderRadius: "10px", padding: "6px 16px", fontSize: "12px", fontWeight: "800", display: "flex", alignItems: "center", gap: "6px" }}>
+            <span>✏️</span>
+            <span style={{ opacity: 0.9 }}>Every square hides a mistake to correct</span>
+          </div>
         </div>
 
         <div style={{ background: `linear-gradient(90deg,${activeTeam.color.dark},${activeTeam.color.bg})`, borderRadius: "14px", padding: "10px 16px", marginBottom: "14px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px", boxShadow: `0 4px 18px ${activeTeam.color.bg}55` }}>
