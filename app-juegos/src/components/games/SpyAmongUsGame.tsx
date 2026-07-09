@@ -269,17 +269,27 @@ export function SpyAmongUsGame({ questions, teams, onUpdateScore, onEnd }: GameP
           <div style={{ fontSize: "36px", marginBottom: "10px" }}>🕵️</div>
           <div style={{ fontWeight: "900", fontSize: "20px", marginBottom: "10px" }}>Spy Among Us</div>
           <div style={{ fontSize: "15px", lineHeight: 1.7, opacity: 0.95 }}>
-            Each round, one team is secretly the <strong>Spy</strong> and gets a different topic.
-            <br />
-            All teams <strong>peek their secret card</strong>, then take turns speaking about it.
-            <br />
-            After everyone speaks, teams <strong>vote for who they think the spy is</strong>.
-            <br />
-            <strong>Correct spy vote = +60 pts</strong>, even if the spy escapes.
-            <br />
-            <strong>Spy not caught = +100 pts</strong> and <strong>caught + correct guess = +60 pts</strong>.
-            <br />
-            <strong>Caught + wrong guess = +80 pts</strong> for each crewmate.
+            {isTwoPlayer ? (
+              <>
+                You'll each secretly get a <strong>different topic</strong>.
+                <br />
+                Take turns speaking about your own topic — without giving it away — then each try to <strong>guess the other player's topic</strong>.
+                <br />
+                Guess right and you score <strong>+100 pts</strong>. You can both win, or neither!
+              </>
+            ) : (
+              <>
+                Each round, one team is secretly the <strong>Spy</strong> and gets a slightly different topic than everyone else.
+                <br />
+                All teams <strong>peek their secret topic</strong>, then take turns speaking about it — try to sound like you belong!
+                <br />
+                After everyone speaks, every team <strong>votes for who they think the Spy is</strong>.
+                <br />
+                <strong>🕵️ If you're the Spy:</strong> get caught (most votes on you) and you get one shot to guess the real topic — guess it and you still escape with <strong>+60 pts</strong>; guess wrong and every crewmate gets <strong>+80 pts</strong>. Not caught at all (votes split, no clear leader)? You escape clean with <strong>+100 pts</strong>.
+                <br />
+                <strong>👥 If you're a crewmate:</strong> vote for the real Spy correctly and score <strong>+60 pts</strong>, whether or not the group ends up catching them.
+              </>
+            )}
           </div>
           <div
             style={{
@@ -297,8 +307,8 @@ export function SpyAmongUsGame({ questions, teams, onUpdateScore, onEnd }: GameP
         </div>
         <div style={{ marginTop: "24px", marginBottom: "20px", fontSize: "14px", color: "#6B7280", fontWeight: "600" }}>
           {isTwoPlayer
-            ? "1v1 mode: both players peek, speak, then guess each other's topic."
-            : `${teams.length} teams: one spy per round. Discuss, vote, and reveal.`}
+            ? "Just the two of you — take it in turns to be the sneaky one!"
+            : `${teams.length} teams this round — a new team becomes the Spy every round.`}
         </div>
         <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "24px" }}>
           {teams.map((team) => (

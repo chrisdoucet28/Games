@@ -121,26 +121,17 @@ export function MinefieldGame({ gridData, teams, onUpdateScore, onEnd }: GamePro
           )}
           <div style={{ fontWeight: "900", fontSize: "clamp(22px,4vw,30px)", marginBottom: "10px" }}>{topic}</div>
           <div style={{ fontSize: "15px", lineHeight: 1.7, opacity: 0.95 }}>
-            {topicRotation ? (
-              <>
-                This topic keeps its own full row and column prompts.
-                <br />
-                Each team gets one square, then the board switches to the next selected topic.
-              </>
-            ) : (
-              <>
-                A grid of tiles hides <strong>7 mines</strong>. Teams take turns picking a square.
-                <br />
-                Combine the column and row, then speak a full sentence using the target language.
-              </>
-            )}
+            Each tile pairs up a <strong>column label</strong> with a <strong>row label</strong> — pick a tile, then speak one full sentence combining both.
+            <br />
+            <strong>7 of the 25 tiles are hidden mines</strong> — you won't know which until you pick one.
             <br />
             Correct = <strong>+50 pts</strong>. Hit a mine = <strong>-75 pts</strong>.
+            {topicRotation && <><br />Every team gets one square on this topic, then the board moves on to the next selected topic.</>}
           </div>
         </div>
         <div style={{ marginTop: "24px", marginBottom: "20px", fontSize: "14px", color: "#6B7280", fontWeight: "600" }}>
           {topicRotation
-            ? "Every team will use this topic before the next topic appears."
+            ? "Every team plays this topic before the next one comes up — no repeats!"
             : "Take turns picking squares - the team with the most points when all safe tiles are cleared wins!"}
         </div>
         <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "24px" }}>

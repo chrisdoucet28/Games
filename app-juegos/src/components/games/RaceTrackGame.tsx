@@ -397,8 +397,8 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd }: GamePr
         <div style={{ fontSize: "36px", marginBottom: "10px" }}>🏁</div>
         <div style={{ fontWeight: "900", fontSize: "20px", marginBottom: "10px" }}>Race Track</div>
         <div style={{ fontSize: "15px", lineHeight: 1.7 }}>
-          Answer a task, tap the team that got it right — they roll the dice and race around the track!<br />
-          Difficulty ramps up as the leader advances: <strong>🔍 Error Fix → 🔤 Multiple Choice → ✏️ Fill Blank → 🗣️ Speaking</strong>.<br />
+          Every team sees the same task at once — <strong>tap whichever team answers it first and correctly</strong>, and they roll the dice and race around the track!<br />
+          The task type gets harder as the leading team advances: <strong>🔍 Error Fix → 🔤 Multiple Choice → ✏️ Fill Blank → 🗣️ Speaking</strong> — so everyone faces the same challenge as the frontrunner.<br />
           Land on special spaces for boosts, traps, coins and shields. Spend coins in the <strong>🛒 Shop</strong> on powerups. First to the finish line wins!
         </div>
       </div>

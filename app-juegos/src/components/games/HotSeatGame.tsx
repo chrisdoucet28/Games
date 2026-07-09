@@ -17,7 +17,7 @@ const shuffle = <T,>(items: T[]) => {
 };
 
 export function HotSeatGame({ questions, teams, onUpdateScore, onEnd }: GameProps) {
-  const [phase, setPhase] = useState<"intro" | "play" | "turnend">("intro");
+  const [phase, setPhase] = useState<"welcome" | "intro" | "play" | "turnend">("welcome");
   const [roundIndex, setRoundIndex] = useState(0);
   const [teamIndex, setTeamIndex] = useState(0);
   const [wordIndex, setWordIndex] = useState(0);
@@ -127,6 +127,55 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd }: GameProp
     );
   }
 
+  const wordListToggle = (
+    <div style={{ marginBottom: "18px" }}>
+      <button onClick={() => setShowWordList(v => !v)} style={{ background: showWordList ? "#1E1B4B" : "white", color: showWordList ? "white" : "#1E1B4B", border: "2px solid #1E1B4B", borderRadius: "10px", padding: "8px 20px", fontWeight: "800", cursor: "pointer" }}>
+        {showWordList ? "Hide word list" : "Show all words"}
+      </button>
+      {showWordList && (
+        <div style={{ background: "white", border: "2px solid #E0E7FF", borderRadius: "14px", padding: "16px", marginTop: "12px", textAlign: "left", display: "flex", flexWrap: "wrap", gap: "6px" }}>
+          {[...words].sort().map((word, index) => (
+            <span key={`${word}-${index}`} style={{ background: "#EEF2FF", color: "#4338CA", borderRadius: "6px", padding: "4px 10px", fontSize: "13px", fontWeight: "700" }}>{word}</span>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+
+  // One-time explainer shown before the very first turn — every other game has an equivalent
+  // "here's the whole picture" screen with a team roster. The old version skipped straight to
+  // a per-turn "get ready" card and re-explained the full rules before every single turn instead.
+  if (phase === "welcome") {
+    return (
+      <div style={{ textAlign: "center" }}>
+        <div style={{ background: "linear-gradient(135deg,#7C3AED,#DB2777)", borderRadius: "20px", padding: "28px 24px", marginBottom: "10px", color: "white", maxWidth: "520px", margin: "0 auto 10px" }}>
+          <div style={{ fontSize: "36px", marginBottom: "10px" }}>🔥</div>
+          <div style={{ fontWeight: "900", fontSize: "20px", marginBottom: "10px" }}>Hot Seat</div>
+          <div style={{ fontSize: "15px", lineHeight: 1.7, opacity: 0.95 }}>
+            One player on the team turns away from the screen — everyone else on their team gives clues.
+            <br />
+            Guess as many words as you can in <strong>{TURN_SECONDS} seconds</strong>. Each correct word is worth <strong>{POINTS_PER_WORD} points</strong>.
+            <br />
+            No spelling the word, and no saying the word itself!
+            <br />
+            Every team takes a turn each round, over <strong>{TOTAL_ROUNDS} rounds</strong> — most points when it's done wins.
+          </div>
+        </div>
+        <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "24px" }}>
+          {teams.map((t, i) => (
+            <div key={t.id} style={{ background: t.color.light, border: `3px solid ${t.color.bg}`, borderRadius: "14px", padding: "10px 18px", fontWeight: "800", fontSize: "14px", color: t.color.dark }}>
+              {i + 1}. {t.color.emoji} {t.name}
+            </div>
+          ))}
+        </div>
+        {wordListToggle}
+        <button onClick={() => setPhase("intro")} style={{ background: "linear-gradient(135deg,#7C3AED,#DB2777)", color: "white", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer" }}>
+          🔥 Let's Play!
+        </button>
+      </div>
+    );
+  }
+
   if (phase === "intro") {
     return (
       <div style={{ textAlign: "center" }}>
@@ -139,27 +188,12 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd }: GameProp
             <div style={{ fontSize: "13px", fontWeight: "800", textTransform: "uppercase", opacity: 0.85, marginBottom: "6px" }}>Up now</div>
             <div style={{ fontWeight: "900", fontSize: "clamp(24px,5vw,38px)" }}>{currentTeam.color.emoji} {currentTeam.name}</div>
           </div>
-          <div style={{ fontSize: "15px", lineHeight: 1.7, marginTop: "16px" }}>
-            One player faces away from the screen. Everyone else gives hints.
-            <br />
-            Guess as many words as possible in {TURN_SECONDS} seconds. Each correct word is worth {POINTS_PER_WORD} points.
-            <br />
-            No spelling and do not say the word.
+          <div style={{ fontSize: "14px", lineHeight: 1.6, marginTop: "16px", opacity: 0.9 }}>
+            One player faces away, teammates give clues — no spelling, no saying the word!
           </div>
         </div>
 
-        <div style={{ marginBottom: "18px" }}>
-          <button onClick={() => setShowWordList(v => !v)} style={{ background: showWordList ? "#1E1B4B" : "white", color: showWordList ? "white" : "#1E1B4B", border: "2px solid #1E1B4B", borderRadius: "10px", padding: "8px 20px", fontWeight: "800", cursor: "pointer" }}>
-            {showWordList ? "Hide word list" : "Show all words"}
-          </button>
-          {showWordList && (
-            <div style={{ background: "white", border: "2px solid #E0E7FF", borderRadius: "14px", padding: "16px", marginTop: "12px", textAlign: "left", display: "flex", flexWrap: "wrap", gap: "6px" }}>
-              {[...words].sort().map((word, index) => (
-                <span key={`${word}-${index}`} style={{ background: "#EEF2FF", color: "#4338CA", borderRadius: "6px", padding: "4px 10px", fontSize: "13px", fontWeight: "700" }}>{word}</span>
-              ))}
-            </div>
-          )}
-        </div>
+        {wordListToggle}
 
         <button onClick={startTurn} style={{ background: "linear-gradient(135deg,#7C3AED,#DB2777)", color: "white", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer" }}>
           Start {currentTeam.name}'s Turn

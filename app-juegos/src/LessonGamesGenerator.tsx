@@ -17,6 +17,7 @@ import { KingOfHillGame } from "./components/games/KingOfHillGame";
 import { HotPotatoGame } from "./components/games/HotPotatoGame";
 import { RaceTrackGame } from "./components/games/RaceTrackGame";
 import { WordWhackGame } from "./components/games/WordWhackGame";
+import { RocketFuelGame } from "./components/games/RocketFuelGame";
 
 type TopicOption = {
   value: string;
@@ -238,7 +239,7 @@ export default function LessonGamesGenerator() {
         // includes L1-interference-flavored mistakes for topic-focus content) with cardTasks,
         // rather than dropping grammar content entirely for topic-only selections.
         qs = mixByTopic(selectedEntries.map((entry, index) => [...(entry.questions ?? []), ...cardTaskBuckets[index]]));
-      } else if (mode.id === "castle" || mode.id === "racetrack" || mode.id === "whack") {
+      } else if (mode.id === "castle" || mode.id === "racetrack" || mode.id === "whack" || mode.id === "rocket") {
         qs = mixByTopic(selectedEntries.map((entry, index) => [...(entry.questions ?? []), ...cardTaskBuckets[index]]));
       } else if (isTopicOnlySelection && allCardTasks.length > 0) {
         qs = mixByTopic(cardTaskBuckets);
@@ -622,6 +623,7 @@ export default function LessonGamesGenerator() {
             {selectedGame.id === "hotpotato" && <HotPotatoGame questions={questions} teams={teams} onUpdateScore={updateScore} onEnd={handleGameEnd} level={hotPotatoLevel} />}
             {selectedGame.id === "racetrack" && <RaceTrackGame questions={questions} teams={teams} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
             {selectedGame.id === "whack" && <WordWhackGame questions={questions} teams={teams} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
+            {selectedGame.id === "rocket" && <RocketFuelGame questions={questions} teams={teams} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
           </div>
         </div>
       </div>
