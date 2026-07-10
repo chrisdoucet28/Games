@@ -103,12 +103,36 @@ const STYLE_TAG = (
     @keyframes dSpin{0%{transform:rotate(0) scale(1)}25%{transform:rotate(50deg) scale(1.15)}60%{transform:rotate(-25deg) scale(.9)}100%{transform:rotate(0) scale(1)}}
     @keyframes rtToast{0%{opacity:0;transform:translate(-50%,10px)}15%{opacity:1;transform:translate(-50%,0)}85%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,-6px)}}
     @keyframes rtConfetti{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(160px) rotate(360deg);opacity:0}}
+    @keyframes rtSpeedLine{0%{transform:translateX(-130%);opacity:0}12%{opacity:.5}88%{opacity:.5}100%{transform:translateX(230%);opacity:0}}
+    @keyframes rtLightPulse{0%,100%{opacity:.4}50%{opacity:1}}
     .rt-btn:hover:not(:disabled){transform:translateY(-2px) scale(1.02);filter:brightness(1.08)}
     .rt-btn:active:not(:disabled){transform:translateY(0) scale(0.97)}
     .rt-btn:disabled{opacity:.4;cursor:not-allowed}
     .rt-chip:hover{filter:brightness(1.2)}
   `}</style>
 );
+
+const SPEED_LINES = Array.from({ length: 7 }, (_, i) => ({ top: 8 + i * 12, dur: 1.6 + (i % 3) * 0.4, delay: i * 0.3, width: 70 + (i % 4) * 40 }));
+function SpeedLines() {
+  return (
+    <div style={{ position: "absolute", inset: 0, pointerEvents: "none", overflow: "hidden" }}>
+      {SPEED_LINES.map((l, i) => (
+        <div key={i} style={{ position: "absolute", top: `${l.top}%`, left: 0, width: `${l.width}px`, height: "3px", borderRadius: "2px", background: "linear-gradient(90deg,transparent,#EF444470,transparent)", animation: `rtSpeedLine ${l.dur}s linear infinite ${l.delay}s` }} />
+      ))}
+    </div>
+  );
+}
+
+function CheckeredStrip() {
+  const squares = Array.from({ length: 20 });
+  return (
+    <div style={{ display: "flex", width: "100%", maxWidth: "560px", margin: "0 auto", borderRadius: "4px", overflow: "hidden", height: "10px" }}>
+      {squares.map((_, i) => (
+        <div key={i} style={{ flex: 1, background: i % 2 === 0 ? "#F1F5F9" : "#0B0F17" }} />
+      ))}
+    </div>
+  );
+}
 
 export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd }: GameProps) {
   const [phase, setPhase] = useState<Phase>("intro");
@@ -391,25 +415,35 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd }: GamePr
   };
 
   if (phase === "intro") return (
-    <div style={{ ...arenaStyle, textAlign: "center" }}>
+    <div style={{ ...arenaStyle, textAlign: "center", position: "relative" }}>
       {STYLE_TAG}
-      <div style={{ background: "linear-gradient(135deg,#78350F,#F7C948)", borderRadius: "20px", padding: "28px 24px", marginBottom: "10px", color: "#150F00", maxWidth: "560px", margin: "0 auto 10px", boxShadow: "0 0 40px #F7C94855" }}>
-        <div style={{ fontSize: "36px", marginBottom: "10px" }}>🏁</div>
-        <div style={{ fontWeight: "900", fontSize: "20px", marginBottom: "10px" }}>Race Track</div>
-        <div style={{ fontSize: "15px", lineHeight: 1.7 }}>
-          Every team sees the same task at once — <strong>tap whichever team answers it first and correctly</strong>, and they roll the dice and race around the track!<br />
-          The task type gets harder as the leading team advances: <strong>🔍 Error Fix → 🔤 Multiple Choice → ✏️ Fill Blank → 🗣️ Speaking</strong> — so everyone faces the same challenge as the frontrunner.<br />
-          Land on special spaces for boosts, traps, coins and shields. Spend coins in the <strong>🛒 Shop</strong> on powerups. First to the finish line wins!
-        </div>
-      </div>
-      <div style={{ display: "flex", gap: "6px", justifyContent: "center", flexWrap: "wrap", margin: "18px 0 16px", maxWidth: "560px", marginLeft: "auto", marginRight: "auto" }}>
-        {SPACE_DEFS.filter(s => s.id !== "normal").map(s => (
-          <div key={s.id} style={{ background: s.color, color: "#150F00", borderRadius: "8px", padding: "5px 12px", fontSize: "12px", fontWeight: "800" }}>
-            {s.icon} {s.id}
+      <SpeedLines />
+      <div style={{ position: "relative", zIndex: 1 }}>
+        <CheckeredStrip />
+        <div style={{ background: "linear-gradient(160deg,#1E293B,#0B0F17)", border: "2px solid #EF4444", borderRadius: "18px", padding: "28px 24px", margin: "10px auto", color: "#E2E8F0", maxWidth: "560px", boxShadow: "0 0 44px rgba(239,68,68,0.35)" }}>
+          <div style={{ fontSize: "36px", marginBottom: "10px" }}>🏁</div>
+          <div style={{ fontWeight: "900", fontSize: "20px", marginBottom: "10px", color: "#F87171", letterSpacing: "0.5px" }}>RACE TRACK</div>
+          <div style={{ fontSize: "15px", lineHeight: 1.7 }}>
+            Every team sees the same task at once — <strong style={{ color: "#93C5FD" }}>tap whichever team answers it first and correctly</strong>, and they roll the dice and race around the track!<br />
+            The task type gets harder as the leading team advances: <strong style={{ color: "#93C5FD" }}>🔍 Error Fix → 🔤 Multiple Choice → ✏️ Fill Blank → 🗣️ Speaking</strong> — so everyone faces the same challenge as the frontrunner.<br />
+            Land on special spaces for boosts, traps, coins and shields. Spend coins in the <strong style={{ color: "#93C5FD" }}>🛒 Shop</strong> on powerups. First to the finish line wins!
           </div>
-        ))}
+        </div>
+        <CheckeredStrip />
+        <div style={{ display: "flex", gap: "6px", justifyContent: "center", flexWrap: "wrap", margin: "18px 0 16px", maxWidth: "560px", marginLeft: "auto", marginRight: "auto" }}>
+          {SPACE_DEFS.filter(s => s.id !== "normal").map(s => (
+            <div key={s.id} style={{ background: s.color, color: "#150F00", borderRadius: "8px", padding: "5px 12px", fontSize: "12px", fontWeight: "800" }}>
+              {s.icon} {s.id}
+            </div>
+          ))}
+        </div>
+        <div style={{ display: "flex", gap: "8px", justifyContent: "center", marginBottom: "14px" }}>
+          <div style={{ width: "14px", height: "14px", borderRadius: "50%", background: "#EF4444", animation: "rtLightPulse 1.4s ease-in-out infinite" }} />
+          <div style={{ width: "14px", height: "14px", borderRadius: "50%", background: "#FBBF24", animation: "rtLightPulse 1.4s ease-in-out infinite 0.25s" }} />
+          <div style={{ width: "14px", height: "14px", borderRadius: "50%", background: "#4ADE80", animation: "rtLightPulse 1.4s ease-in-out infinite 0.5s" }} />
+        </div>
+        <button onClick={() => setPhase("task")} className="rt-btn" style={{ background: "linear-gradient(135deg,#B91C1C,#EF4444)", color: "white", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(239,68,68,0.5)", transition: "transform 0.15s ease" }}>🚦 Start Race!</button>
       </div>
-      <button onClick={() => setPhase("task")} className="rt-btn" style={{ background: "linear-gradient(135deg,#78350F,#F7C948)", color: "#150F00", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(247,201,72,0.5)", transition: "transform 0.15s ease" }}>🚦 Start Race!</button>
     </div>
   );
 

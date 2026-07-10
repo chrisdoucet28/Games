@@ -10613,8 +10613,8 @@ export const TOPIC_LIBRARY = {
       { type:"use vocabulary in a sentence", question:"Use 'pass an exam' in a sentence.", answer:"She studied hard and passed the exam.", hint:"'Pass an exam' means to succeed in a test.", difficulty:"medium" },
     ],
     spyRounds: [
-      { crewmateTopic:"School Subjects", spyTopic:"School Rules", crewmatePrompt:"Talk about your favourite and least favourite school subjects and explain why.", spyPrompt:"Talk about school rules, what students can and can't do, and what you think about those rules.", explanation:"Crewmates discussed school subjects. The spy discussed school rules.", spyGuessOptions:["School Subjects","School Rules"] },
-      { crewmateTopic:"Study Habits", spyTopic:"Exam Stress", crewmatePrompt:"Talk about how you study, where you study, and how you prepare for exams.", spyPrompt:"Talk about how you feel before exams, what makes you nervous, and how you deal with stress.", explanation:"Crewmates described study habits. The spy described exam stress.", spyGuessOptions:["Study Habits","Exam Stress"] },
+      { crewmateTopic:"School Subjects", spyTopic:"School Rules", crewmatePrompt:"Talk about your favourite and least favourite school subjects and explain why.", spyPrompt:"Talk about school rules, what students can and can't do, and what you think about those rules.", explanation:"Crewmates discussed school subjects. The spy discussed school rules.", spyGuessOptions:["School Subjects","School Rules","Extracurricular Activities","Homework Habits"] },
+      { crewmateTopic:"Study Habits", spyTopic:"Exam Stress", crewmatePrompt:"Talk about how you study, where you study, and how you prepare for exams.", spyPrompt:"Talk about how you feel before exams, what makes you nervous, and how you deal with stress.", explanation:"Crewmates described study habits. The spy described exam stress.", spyGuessOptions:["Study Habits","Exam Stress","School Subjects","Time Management"] },
     ],
     auctionSentences: [
       { sentence:"She revises for her final exams a few weeks in advance.", isCorrect:true, explanation:"Correct: 'revise for' an exam is the natural school collocation." },
@@ -10732,8 +10732,8 @@ export const TOPIC_LIBRARY = {
       { type:"use vocabulary in a sentence", question:"Use 'loyal' in a sentence about a good friend.", answer:"A good friend is always loyal to you.", hint:"'Loyal' means faithful and supportive.", difficulty:"medium" },
     ],
     spyRounds: [
-      { crewmateTopic:"Talking About Friends", spyTopic:"Talking About Family", crewmatePrompt:"Talk about your closest friend, how you met, and what you do together.", spyPrompt:"Talk about your family members and what they are like.", explanation:"Crewmates talked about friends. The spy talked about family.", spyGuessOptions:["Friends","Family"] },
-      { crewmateTopic:"A Close Relationship", spyTopic:"A Difficult Relationship", crewmatePrompt:"Describe a close, positive relationship in your life.", spyPrompt:"Describe a relationship that is sometimes difficult or complicated.", explanation:"Crewmates described a close relationship. The spy described a difficult one.", spyGuessOptions:["Close Relationship","Difficult Relationship"] },
+      { crewmateTopic:"Talking About Friends", spyTopic:"Talking About Family", crewmatePrompt:"Talk about your closest friend, how you met, and what you do together.", spyPrompt:"Talk about your family members and what they are like.", explanation:"Crewmates talked about friends. The spy talked about family.", spyGuessOptions:["Friends","Family","Neighbours","Colleagues"] },
+      { crewmateTopic:"A Close Relationship", spyTopic:"A Difficult Relationship", crewmatePrompt:"Describe a close, positive relationship in your life.", spyPrompt:"Describe a relationship that is sometimes difficult or complicated.", explanation:"Crewmates described a close relationship. The spy described a difficult one.", spyGuessOptions:["Close Relationship","Difficult Relationship","New Friendship","Family Reunion"] },
     ],
     auctionSentences: [
       { sentence:"My best friend and I have been close since we were five years old.", isCorrect:true, explanation:"Present perfect is correct for a relationship that started in the past and continues now." },
@@ -10851,8 +10851,8 @@ export const TOPIC_LIBRARY = {
       { type:"use vocabulary in a sentence", question:"Use 'swimming' in a sentence.", answer:"Swimming is a great way to stay fit.", hint:"Swimming is a popular sport and hobby.", difficulty:"easy" },
     ],
     spyRounds: [
-      { crewmateTopic:"Relaxing Hobbies", spyTopic:"Active Hobbies", crewmatePrompt:"Talk about hobbies you do to relax, like reading, watching films, drawing, or listening to music.", spyPrompt:"Talk about hobbies that keep you active, like running, swimming, cycling, or playing sport.", explanation:"Crewmates talked about relaxing hobbies. The spy talked about active hobbies.", spyGuessOptions:["Relaxing Hobbies","Active Hobbies"] },
-      { crewmateTopic:"Weekend Activities", spyTopic:"Holiday Activities", crewmatePrompt:"Talk about what you normally do at the weekend.", spyPrompt:"Talk about what you like to do when you are on holiday.", explanation:"Crewmates described weekends. The spy described holidays.", spyGuessOptions:["Weekend Activities","Holiday Activities"] },
+      { crewmateTopic:"Relaxing Hobbies", spyTopic:"Active Hobbies", crewmatePrompt:"Talk about hobbies you do to relax, like reading, watching films, drawing, or listening to music.", spyPrompt:"Talk about hobbies that keep you active, like running, swimming, cycling, or playing sport.", explanation:"Crewmates talked about relaxing hobbies. The spy talked about active hobbies.", spyGuessOptions:["Relaxing Hobbies","Active Hobbies","Creative Hobbies","Social Hobbies"] },
+      { crewmateTopic:"Weekend Activities", spyTopic:"Holiday Activities", crewmatePrompt:"Talk about what you normally do at the weekend.", spyPrompt:"Talk about what you like to do when you are on holiday.", explanation:"Crewmates described weekends. The spy described holidays.", spyGuessOptions:["Weekend Activities","Holiday Activities","Evening Activities","School Activities"] },
     ],
     auctionSentences: [
       { sentence:"In my free time, I usually read or listen to music.", isCorrect:true, explanation:"Correct present simple for describing routine free-time activities." },
@@ -10970,8 +10970,8 @@ export const TOPIC_LIBRARY = {
       { type:"use vocabulary in a sentence", question:"Use 'suburb' in a sentence.", answer:"My family lives in a quiet suburb.", hint:"A suburb is a residential area outside the city centre.", difficulty:"medium" },
     ],
     spyRounds: [
-      { crewmateTopic:"Your Town Today", spyTopic:"Your Ideal Town", crewmatePrompt:"Describe your real town or city as it is now - places, transport, people, and atmosphere.", spyPrompt:"Describe your ideal town or city - what it would have, what it would be like, and what you would change.", explanation:"Crewmates described their real town. The spy described an ideal one.", spyGuessOptions:["My Real Town","My Ideal Town"] },
-      { crewmateTopic:"City Advantages", spyTopic:"City Problems", crewmatePrompt:"Talk about the advantages of living in a town or city.", spyPrompt:"Talk about the problems of living in a town or city.", explanation:"Crewmates focused on advantages. The spy focused on problems.", spyGuessOptions:["City Advantages","City Problems"] },
+      { crewmateTopic:"Your Town Today", spyTopic:"Your Ideal Town", crewmatePrompt:"Describe your real town or city as it is now - places, transport, people, and atmosphere.", spyPrompt:"Describe your ideal town or city - what it would have, what it would be like, and what you would change.", explanation:"Crewmates described their real town. The spy described an ideal one.", spyGuessOptions:["My Real Town","My Ideal Town","A Famous City","A Village"] },
+      { crewmateTopic:"City Advantages", spyTopic:"City Problems", crewmatePrompt:"Talk about the advantages of living in a town or city.", spyPrompt:"Talk about the problems of living in a town or city.", explanation:"Crewmates focused on advantages. The spy focused on problems.", spyGuessOptions:["City Advantages","City Problems","Country Life","Public Transport"] },
     ],
     auctionSentences: [
       { sentence:"My town has a lovely park near the river.", isCorrect:true, explanation:"Correct present simple sentence describing a place in town." },
@@ -11081,8 +11081,8 @@ export const TOPIC_LIBRARY = {
       { type:"use vocabulary in a sentence", question:"Use past continuous to describe what you were 'dreaming' when you woke up.", answer:"I was dreaming about flying when my alarm woke me up.", hint:"Past continuous can describe an ongoing mental state, like dreaming.", difficulty:"medium" },
     ],
     spyRounds: [
-      { crewmateTopic:"Past Continuous Background Actions", spyTopic:"Past Simple Finished Actions", crewmatePrompt:"Talk about what was happening during a memorable event using background actions.", spyPrompt:"Talk about a memorable event using only finished past simple actions.", explanation:"Crewmates focused on actions in progress. The spy focused on completed actions.", spyGuessOptions:["Past Continuous","Past Simple"] },
-      { crewmateTopic:"Interrupted Actions", spyTopic:"Habits in the Past", crewmatePrompt:"Talk about what you were doing when something interrupted you.", spyPrompt:"Talk about things you used to do regularly in the past.", explanation:"Crewmates described interruptions to ongoing actions. The spy described past habits.", spyGuessOptions:["Interrupted Actions","Past Habits"] },
+      { crewmateTopic:"Past Continuous Background Actions", spyTopic:"Past Simple Finished Actions", crewmatePrompt:"Talk about what was happening during a memorable event using background actions.", spyPrompt:"Talk about a memorable event using only finished past simple actions.", explanation:"Crewmates focused on actions in progress. The spy focused on completed actions.", spyGuessOptions:["Past Continuous","Past Simple","Present Continuous","Future Plans"] },
+      { crewmateTopic:"Interrupted Actions", spyTopic:"Habits in the Past", crewmatePrompt:"Talk about what you were doing when something interrupted you.", spyPrompt:"Talk about things you used to do regularly in the past.", explanation:"Crewmates described interruptions to ongoing actions. The spy described past habits.", spyGuessOptions:["Interrupted Actions","Past Habits","Future Predictions","Present Habits"] },
     ],
     auctionSentences: [
       { sentence:"I was walking home when it started to rain.", isCorrect:true, explanation:"Correct past continuous for a background action interrupted by a shorter past event." },
@@ -11192,8 +11192,8 @@ export const TOPIC_LIBRARY = {
       { type:"use vocabulary in a sentence", question:"Use past perfect after the verb 'realised' to explain something discovered too late.", answer:"I realised I had left my passport at home.", hint:"'Realised' is often followed by past perfect for something discovered afterward.", difficulty:"medium" },
     ],
     spyRounds: [
-      { crewmateTopic:"Earlier Past Actions", spyTopic:"Simple Past Sequence", crewmatePrompt:"Talk about a story where one important thing had already happened before something else.", spyPrompt:"Talk about a story using only simple past actions in order.", explanation:"Crewmates focused on earlier past actions. The spy used a simple sequence of past actions.", spyGuessOptions:["Past Perfect","Past Simple Sequence"] },
-      { crewmateTopic:"Past Causes", spyTopic:"Present Results", crewmatePrompt:"Explain why something happened in the past by using an earlier cause.", spyPrompt:"Talk about results or situations that are true now.", explanation:"Crewmates explained past causes. The spy talked about present results.", spyGuessOptions:["Past Causes","Present Results"] },
+      { crewmateTopic:"Earlier Past Actions", spyTopic:"Simple Past Sequence", crewmatePrompt:"Talk about a story where one important thing had already happened before something else.", spyPrompt:"Talk about a story using only simple past actions in order.", explanation:"Crewmates focused on earlier past actions. The spy used a simple sequence of past actions.", spyGuessOptions:["Past Perfect","Past Simple Sequence","Present Perfect","Future Perfect"] },
+      { crewmateTopic:"Past Causes", spyTopic:"Present Results", crewmatePrompt:"Explain why something happened in the past by using an earlier cause.", spyPrompt:"Talk about results or situations that are true now.", explanation:"Crewmates explained past causes. The spy talked about present results.", spyGuessOptions:["Past Causes","Present Results","Future Consequences","Past Habits"] },
     ],
     auctionSentences: [
       { sentence:"By the time I arrived, they had already eaten.", isCorrect:true, explanation:"Correct past perfect for an action completed before another past action." },
@@ -11762,7 +11762,9 @@ export const TOPIC_LIBRARY = {
         "explanation": "Crewmates focused on family members. The spy focused on possessions.",
         "spyGuessOptions": [
           "Family Members",
-          "Possessions"
+          "Possessions",
+          "Friends",
+          "Jobs"
         ]
       },
       {
@@ -11773,7 +11775,9 @@ export const TOPIC_LIBRARY = {
         "explanation": "Crewmates used possessive 's. The spy used descriptions with be.",
         "spyGuessOptions": [
           "Possessive 's",
-          "The verb be"
+          "The verb be",
+          "Plural Nouns",
+          "Present Simple"
         ]
       },
       {
@@ -11784,7 +11788,9 @@ export const TOPIC_LIBRARY = {
         "explanation": "Crewmates explained relationships. The spy described homes.",
         "spyGuessOptions": [
           "Family Relationships",
-          "Family Homes"
+          "Family Homes",
+          "Family History",
+          "Family Traditions"
         ]
       },
       {
@@ -11795,7 +11801,9 @@ export const TOPIC_LIBRARY = {
         "explanation": "Crewmates used names with possession. The spy introduced people.",
         "spyGuessOptions": [
           "Names and Belonging",
-          "Basic Introductions"
+          "Basic Introductions",
+          "Nationalities",
+          "Ages"
         ]
       }
     ],
@@ -12608,7 +12616,9 @@ export const TOPIC_LIBRARY = {
         "explanation": "Crewmates focused on days and dates. The spy focused on clock times.",
         "spyGuessOptions": [
           "Days and Dates",
-          "Clock Times"
+          "Clock Times",
+          "Months and Years",
+          "Seasons"
         ]
       },
       {
@@ -12619,7 +12629,9 @@ export const TOPIC_LIBRARY = {
         "explanation": "Crewmates used time prepositions. The spy used place prepositions.",
         "spyGuessOptions": [
           "Prepositions of Time",
-          "Prepositions of Place"
+          "Prepositions of Place",
+          "Prepositions of Movement",
+          "Frequency Adverbs"
         ]
       },
       {
@@ -12630,7 +12642,9 @@ export const TOPIC_LIBRARY = {
         "explanation": "Crewmates used days. The spy used parts of the day.",
         "spyGuessOptions": [
           "Weekly Schedule",
-          "Daily Routine"
+          "Daily Routine",
+          "Monthly Plans",
+          "Holiday Schedule"
         ]
       },
       {
@@ -12641,7 +12655,9 @@ export const TOPIC_LIBRARY = {
         "explanation": "Crewmates focused on dates. The spy focused on places.",
         "spyGuessOptions": [
           "Important Dates",
-          "Important Places"
+          "Important Places",
+          "Important People",
+          "Important Events"
         ]
       }
     ],
@@ -13461,7 +13477,9 @@ export const TOPIC_LIBRARY = {
         "explanation": "Crewmates discussed weather. The spy discussed clothes.",
         "spyGuessOptions": [
           "Weather",
-          "Clothes"
+          "Clothes",
+          "Seasons",
+          "Activities"
         ]
       },
       {
@@ -13472,7 +13490,9 @@ export const TOPIC_LIBRARY = {
         "explanation": "Crewmates focused on seasons. The spy focused on months.",
         "spyGuessOptions": [
           "Seasons",
-          "Months"
+          "Months",
+          "Weather",
+          "Holidays"
         ]
       },
       {
@@ -13483,7 +13503,9 @@ export const TOPIC_LIBRARY = {
         "explanation": "Crewmates discussed temperature. The spy discussed food and drinks.",
         "spyGuessOptions": [
           "Temperature",
-          "Food and Drinks"
+          "Food and Drinks",
+          "Weather",
+          "Health"
         ]
       },
       {
@@ -13494,7 +13516,9 @@ export const TOPIC_LIBRARY = {
         "explanation": "Crewmates focused on bad weather. The spy focused on activities.",
         "spyGuessOptions": [
           "Bad Weather",
-          "Outdoor Activities"
+          "Outdoor Activities",
+          "Good Weather",
+          "Indoor Activities"
         ]
       }
     ],
@@ -14314,7 +14338,9 @@ export const TOPIC_LIBRARY = {
         "explanation": "Crewmates talked about daily routines. The spy talked about free time.",
         "spyGuessOptions": [
           "Daily Routines",
-          "Free Time"
+          "Free Time",
+          "Weekend Plans",
+          "Work Schedule"
         ]
       },
       {
@@ -14325,7 +14351,9 @@ export const TOPIC_LIBRARY = {
         "explanation": "Crewmates focused on frequency. The spy focused on times of day.",
         "spyGuessOptions": [
           "Adverbs of Frequency",
-          "Times of Day"
+          "Times of Day",
+          "Daily Routines",
+          "Past Habits"
         ]
       },
       {
@@ -14336,7 +14364,9 @@ export const TOPIC_LIBRARY = {
         "explanation": "Crewmates discussed mornings. The spy discussed evenings.",
         "spyGuessOptions": [
           "Morning Routine",
-          "Evening Routine"
+          "Evening Routine",
+          "Afternoon Activities",
+          "Night Routine"
         ]
       },
       {
@@ -14347,7 +14377,9 @@ export const TOPIC_LIBRARY = {
         "explanation": "Crewmates discussed weekdays. The spy discussed weekends.",
         "spyGuessOptions": [
           "Weekday Routine",
-          "Weekend Routine"
+          "Weekend Routine",
+          "Holiday Routine",
+          "School Routine"
         ]
       }
     ],
@@ -15167,7 +15199,9 @@ export const TOPIC_LIBRARY = {
         "explanation": "Crewmates discussed rooms. The spy discussed objects.",
         "spyGuessOptions": [
           "Rooms in a House",
-          "Furniture and Objects"
+          "Furniture and Objects",
+          "Garden Areas",
+          "Kitchen Appliances"
         ]
       },
       {
@@ -15178,7 +15212,9 @@ export const TOPIC_LIBRARY = {
         "explanation": "Crewmates focused on existence. The spy focused on location.",
         "spyGuessOptions": [
           "There is / There are",
-          "Prepositions of Place"
+          "Prepositions of Place",
+          "This/That/These/Those",
+          "Have/Has"
         ]
       },
       {
@@ -15189,7 +15225,9 @@ export const TOPIC_LIBRARY = {
         "explanation": "Crewmates described bedrooms. The spy described kitchens.",
         "spyGuessOptions": [
           "Bedroom Description",
-          "Kitchen Description"
+          "Kitchen Description",
+          "Living Room Description",
+          "Bathroom Description"
         ]
       },
       {
@@ -15200,7 +15238,9 @@ export const TOPIC_LIBRARY = {
         "explanation": "Crewmates talked about a house. The spy talked about a classroom.",
         "spyGuessOptions": [
           "House Tour",
-          "Classroom Tour"
+          "Classroom Tour",
+          "Office Tour",
+          "Garden Tour"
         ]
       }
     ],
@@ -16013,7 +16053,9 @@ export const TOPIC_LIBRARY = {
         "explanation": "Crewmates used possessive adjectives. The spy used possessive pronouns.",
         "spyGuessOptions": [
           "Possessive Adjectives",
-          "Possessive Pronouns"
+          "Possessive Pronouns",
+          "Personal Pronouns",
+          "Demonstrative Pronouns"
         ]
       },
       {
@@ -16024,7 +16066,9 @@ export const TOPIC_LIBRARY = {
         "explanation": "Crewmates used whose. The spy used this/that questions.",
         "spyGuessOptions": [
           "Whose Questions",
-          "This/That Questions"
+          "This/That Questions",
+          "What Questions",
+          "Where Questions"
         ]
       },
       {
@@ -16035,7 +16079,9 @@ export const TOPIC_LIBRARY = {
         "explanation": "Crewmates focused on ownership. The spy focused on object names.",
         "spyGuessOptions": [
           "Classroom Objects and Owners",
-          "Classroom Object Names"
+          "Classroom Object Names",
+          "Classroom Colours",
+          "Classroom Numbers"
         ]
       },
       {
@@ -16046,7 +16092,9 @@ export const TOPIC_LIBRARY = {
         "explanation": "Crewmates used whose and ownership. The spy talked about shopping.",
         "spyGuessOptions": [
           "Lost and Found",
-          "Shopping"
+          "Shopping",
+          "Borrowing Things",
+          "Giving Gifts"
         ]
       }
     ],

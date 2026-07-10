@@ -297,7 +297,7 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd }: Game
                   className="cs-card"
                   style={{
                     width: "100%", height: "100%", borderRadius: "14px",
-                    background: revealed ? (card.isStar ? "linear-gradient(160deg,#FDE68A,#F59E0B)" : "linear-gradient(160deg,#FFFBEB,#FEF3C7)") : "repeating-linear-gradient(52deg,#B91C1C 0px,#B91C1C 12px,#FEF3C7 12px,#FEF3C7 24px)",
+                    background: revealed ? (card.isStar ? "linear-gradient(160deg,#FDE68A,#F59E0B)" : "linear-gradient(160deg,#FFFBEB,#FEF3C7)") : "radial-gradient(circle at 50% 35%,#DC2626,#7F1D1D 75%)",
                     border: `3px solid ${isPickedSlot && !revealed ? "#22C55E" : revealed ? (card.isStar ? "#F59E0B" : "#D97706") : "#450A0A"}`,
                     display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
                     cursor: phase === "picking" && !transitioning ? "pointer" : "default", boxSizing: "border-box", padding: "10px 8px", position: "relative", userSelect: "none",
