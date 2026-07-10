@@ -3,6 +3,57 @@ import type { GameProps } from "../../types";
 import { useTurnTimer } from "../../hooks/useTurnTimer";
 import { TurnTimerBar } from "../shared/TurnTimerBar";
 
+const AMBIENT_BITS = Array.from({ length: 12 }, (_, i) => ({
+  left: (i * 37) % 100,
+  top: (i * 29) % 90,
+  size: 14 + (i % 4) * 4,
+  dur: 5 + (i % 5),
+  delay: (i % 6) * 0.5,
+  emoji: ["🎈", "🎪", "🎟️", "🍿", "✨", "🎊"][i % 6],
+}));
+
+const STYLE_TAG = (
+  <style>{`
+    @keyframes csDrift{0%{transform:translateY(0) rotate(0deg);opacity:0.18}50%{opacity:0.4}100%{transform:translateY(-44px) rotate(14deg);opacity:0.18}}
+    @keyframes csSpotlightSweep{0%{transform:rotate(-38deg)}50%{transform:rotate(38deg)}100%{transform:rotate(-38deg)}}
+    @keyframes csMarquee{0%,100%{opacity:0.55}50%{opacity:1}}
+    @keyframes csStarPulse{0%,100%{transform:scale(1);filter:brightness(1)}50%{transform:scale(1.12);filter:brightness(1.3)}}
+    @keyframes csRevealPop{0%{transform:scale(0.85);opacity:0}60%{transform:scale(1.05)}100%{transform:scale(1);opacity:1}}
+    .cs-btn:hover:not(:disabled){transform:translateY(-2px) scale(1.02);filter:brightness(1.1)}
+    .cs-btn:active:not(:disabled){transform:translateY(0) scale(0.97)}
+    .cs-card:hover{filter:brightness(1.1)}
+  `}</style>
+);
+
+function AmbientBackdrop() {
+  return (
+    <div style={{ position: "absolute", inset: 0, pointerEvents: "none", overflow: "hidden" }}>
+      {AMBIENT_BITS.map((b, i) => (
+        <div key={i} style={{ position: "absolute", left: `${b.left}%`, top: `${b.top}%`, fontSize: `${b.size}px`, animation: `csDrift ${b.dur}s ease-in-out infinite ${b.delay}s` }}>{b.emoji}</div>
+      ))}
+    </div>
+  );
+}
+
+function SpotlightBackdrop() {
+  return (
+    <div style={{ position: "absolute", inset: 0, pointerEvents: "none", overflow: "hidden", display: "flex", justifyContent: "center" }}>
+      <div style={{
+        position: "absolute", top: "-120px", left: "50%", width: "10px", height: "480px", transformOrigin: "top center",
+        background: "linear-gradient(180deg,rgba(253,224,71,0.28),transparent 75%)",
+        clipPath: "polygon(48% 0%, 52% 0%, 100% 100%, 0% 100%)",
+        animation: "csSpotlightSweep 6s ease-in-out infinite",
+      }} />
+    </div>
+  );
+}
+
+// Diagonal big-top canvas stripes — a subtle, low-opacity texture layer.
+const TENT_STRIPES: React.CSSProperties = {
+  position: "absolute", inset: 0, pointerEvents: "none",
+  background: "repeating-linear-gradient(115deg, rgba(255,251,235,0.05) 0px, rgba(255,251,235,0.05) 26px, transparent 26px, transparent 52px)",
+};
+
 export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd }: GameProps) {
   const TURN_SECONDS = 25;
   const NUM_CARDS = 4;
@@ -154,12 +205,16 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd }: Game
       else if (!cards[pick.cardIdx]?.isStar && pick.correct) onUpdateScore(t.id, 30);
     });
   }, [phase, teams, teamPicks, cards, onUpdateScore]);
-  
+
   useEffect(() => { if (phase === "preview") hasScored.current = false; }, [phase]);
+
+  // Caps at 5 rounds, or fewer if there isn't enough content for 5 — matches the "Round X/Y"
+  // display below exactly, so the game actually ends when that counter says it should.
+  const maxRounds = Math.min(5, Math.floor(questions.length / NUM_CARDS)) || 5;
 
   const nextRound = () => {
     const next = roundCount + 1;
-    if (next * NUM_CARDS >= questions.length && next >= 5) { onEnd(); return; }
+    if (next >= maxRounds) { onEnd(); return; }
     const newCards = buildRound(next);
     setCards(newCards);
     slotsRef.current = [0, 1, 2, 3];
@@ -175,134 +230,161 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd }: Game
   const currentTeam = teams[answeringTeamIdx];
   const myPickSlot = phase === "answering" ? teamPicks[currentTeam?.id]?.slot : undefined;
   const pickedCard = myPickSlot !== undefined ? cards[slotToCard(myPickSlot)] : null;
-  const maxRounds = Math.min(5, Math.floor(questions.length / NUM_CARDS));
+
+  const arenaStyle: React.CSSProperties = {
+    margin: "-20px", padding: "20px", borderRadius: "20px", position: "relative", overflow: "hidden",
+    background: "radial-gradient(ellipse at 50% -10%,#DC2626 0%,#7F1D1D 48%,#2A0505 100%)",
+  };
 
   if (phase === "intro") return (
-    <div style={{ textAlign: "center" }}>
-      <div style={{ background: "linear-gradient(135deg,#4338CA,#6366F1)", borderRadius: "20px", padding: "28px 24px", marginBottom: "10px", position: "relative", color: "white", maxWidth: "520px", margin: "0 auto 10px" }}>
-        <div style={{ fontSize: "36px", marginBottom: "10px" }}>🃏</div>
-        <div style={{ fontWeight: "900", fontSize: "20px", marginBottom: "10px" }}>Card Shuffle</div>
-        <div style={{ fontSize: "15px", lineHeight: 1.7, opacity: 0.95 }}>
-          Four cards appear — one has a <strong>⭐ star</strong>. Remember which one!<br />
-          The cards <strong>shuffle fast</strong> — try to track the star card.<br />
-          Each team picks a card and gets a <strong>speaking task</strong> to complete.<br />
-          Land on the <strong>star card = 120 pts</strong>. Any other card = 30 pts.
+    <div style={{ ...arenaStyle, textAlign: "center" }}>
+      <AmbientBackdrop />
+      <div style={TENT_STRIPES} />
+      {STYLE_TAG}
+      <div style={{ position: "relative", zIndex: 1 }}>
+        <div style={{ background: "linear-gradient(160deg,#991B1B,#450A0A)", border: "2px solid #FCD34D66", borderRadius: "20px", padding: "28px 24px", marginBottom: "10px", color: "white", maxWidth: "540px", margin: "0 auto 10px", boxShadow: "0 0 50px rgba(220,38,38,0.45)" }}>
+          <div style={{ fontSize: "36px", marginBottom: "10px" }}>🎪</div>
+          <div style={{ fontWeight: "900", fontSize: "20px", marginBottom: "10px", color: "#FCD34D" }}>Card Shuffle</div>
+          <div style={{ fontSize: "15px", lineHeight: 1.7, opacity: 0.95 }}>
+            Roll up, roll up! Four cards take the stage — one hides a lucky <strong style={{ color: "#FCD34D" }}>⭐ star</strong>. Remember which one!<br />
+            The ringmaster <strong style={{ color: "#FCD34D" }}>shuffles fast</strong> — keep your eyes on the star card if you can!<br />
+            Each team picks a card and performs a <strong style={{ color: "#FCD34D" }}>speaking task</strong> for the crowd.<br />
+            Land on the star card = <strong style={{ color: "#FCD34D" }}>120 pts</strong>. Any other card = <strong>30 pts</strong>.
+          </div>
         </div>
-        <div style={{ position: "absolute", bottom: "-14px", left: "50%", transform: "translateX(-50%)", width: 0, height: 0, borderLeft: "14px solid transparent", borderRight: "14px solid transparent", borderTop: "14px solid #6366F1" }} />
+        <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "24px" }}>
+          {teams.map(t => (<div key={t.id} style={{ background: `linear-gradient(160deg,${t.color.dark}55,#450A0A)`, border: "3px solid " + t.color.bg, borderRadius: "14px", padding: "10px 18px", fontWeight: "800", fontSize: "14px", color: "white" }}>{t.color.emoji} {t.name}</div>))}
+        </div>
+        <button onClick={() => setPhase("preview")} className="cs-btn" style={{ background: "linear-gradient(135deg,#B91C1C,#FCD34D)", color: "#450A0A", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(252,211,77,0.4)", transition: "transform 0.15s ease" }}>
+          🎪 Step Right Up!
+        </button>
       </div>
-      <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "24px" }}>
-        {teams.map(t => (<div key={t.id} style={{ background: t.color.light, border: "3px solid " + t.color.bg, borderRadius: "14px", padding: "10px 18px", fontWeight: "800", fontSize: "14px", color: t.color.dark }}>{t.color.emoji} {t.name}</div>))}
-      </div>
-      <button onClick={() => setPhase("preview")} style={{ background: "linear-gradient(135deg,#4338CA,#6366F1)", color: "white", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(99,102,241,0.4)" }}>
-        🃏 Deal the Cards!
-      </button>
     </div>
   );
 
   return (
-    <div>
-      <div style={{ background: "#4338CA", borderRadius: "14px", padding: "10px 16px", marginBottom: "14px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px" }}>
-        <span style={{ color: "white", fontWeight: "900", fontSize: "16px" }}>
-          🃏 Round {roundCount + 1}/{maxRounds || 5} —{" "}
-          {phase === "preview" && "⭐ Remember which card is the star — then we shuffle!"}
-          {phase === "shuffling" && "👀 Watch carefully — track the star!"}
-          {phase === "picking" && `${currentTeam.name} — pick your card!`}
-          {phase === "answering" && `${currentTeam.name} — complete the task!`}
-          {phase === "reveal" && "🌟 Reveal time!"}
-        </span>
-        {phase === "picking" && <TurnTimerBar timeLeft={timeLeft} totalSeconds={TURN_SECONDS} />}
-      </div>
+    <div style={arenaStyle}>
+      <AmbientBackdrop />
+      <div style={TENT_STRIPES} />
+      {(phase === "shuffling" || phase === "preview") && <SpotlightBackdrop />}
+      {STYLE_TAG}
+      <div style={{ position: "relative", zIndex: 1 }}>
+        <div style={{ background: "linear-gradient(90deg,#991B1B,#B91C1C)", border: "1.5px solid #FCD34D55", borderRadius: "14px", padding: "10px 16px", marginBottom: "14px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px", boxShadow: "0 4px 18px rgba(153,27,27,0.5)" }}>
+          <span style={{ color: "white", fontWeight: "900", fontSize: "16px", textShadow: "0 1px 3px rgba(0,0,0,0.4)" }}>
+            🎪 Round {roundCount + 1}/{maxRounds} —{" "}
+            {phase === "preview" && "⭐ Remember which card is the star — then we shuffle!"}
+            {phase === "shuffling" && "👀 Watch carefully — track the star!"}
+            {phase === "picking" && `${currentTeam.name} — step right up and pick a card!`}
+            {phase === "answering" && `${currentTeam.name} — the crowd awaits your performance!`}
+            {phase === "reveal" && "🥁 Ta-da! Time for the big reveal!"}
+          </span>
+          {phase === "picking" && <TurnTimerBar timeLeft={timeLeft} totalSeconds={TURN_SECONDS} />}
+        </div>
 
-      <div style={{ position: "relative", height: `${GRID_H}px`, width: `${GRID_W}px`, margin: "0 auto", marginBottom: "16px" }}>
-        {cards.map((card, cardIdx) => {
-          const pos = cardPos[cardIdx];
-          const slot = cardSlots[cardIdx];
-          const isPickedSlot = myPickSlot === slot || (phase === "reveal" && teams.some(t => teamPicks[t.id]?.slot === slot));
-          const pickerTeams = phase === "reveal" ? teams.filter(t => teamPicks[t.id]?.slot === slot) : [];
-          const transitionMs = transitioning ? (phase === "shuffling" ? 75 : 130) : 340;
+        <div style={{ position: "relative", height: `${GRID_H}px`, width: `${GRID_W}px`, margin: "0 auto", marginBottom: "16px" }}>
+          {cards.map((card, cardIdx) => {
+            const pos = cardPos[cardIdx];
+            const slot = cardSlots[cardIdx];
+            const isPickedSlot = myPickSlot === slot || (phase === "reveal" && teams.some(t => teamPicks[t.id]?.slot === slot));
+            const pickerTeams = phase === "reveal" ? teams.filter(t => teamPicks[t.id]?.slot === slot) : [];
+            const transitionMs = transitioning ? (phase === "shuffling" ? 75 : 130) : 340;
+            const revealed = phase === "reveal";
 
-          return (
-            <div key={card.cid} style={{ position: "absolute", top: `${pos.y}px`, left: `${pos.x}px`, width: `${CARD_W}px`, height: `${CARD_H}px`, transition: `left ${transitionMs}ms ease-in-out, top ${transitionMs}ms ease-in-out`, zIndex: isPickedSlot ? 2 : 1 }}>
-              <div onClick={() => phase === "picking" && !transitioning && pickSlot(slot)} style={{ width: "100%", height: "100%", borderRadius: "14px", background: phase === "reveal" ? (card.isStar ? "#FCD34D" : "#6366F1") : "#6366F1", border: `3px solid ${isPickedSlot && phase !== "reveal" ? "#22C55E" : phase === "reveal" ? (card.isStar ? "#F59E0B" : "#4338CA") : "#4338CA"}`, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: phase === "picking" && !transitioning ? "pointer" : "default", boxSizing: "border-box", padding: "10px 8px", position: "relative", userSelect: "none" }}>
-                {phase === "preview" && (
-                  <>{card.isStar ? <div style={{ fontSize: "36px" }}>⭐</div> : <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "7px", opacity: 0.25 }}><div style={{ width: "56px", height: "2px", background: "white", borderRadius: "2px" }} /><div style={{ width: "40px", height: "2px", background: "white", borderRadius: "2px" }} /><div style={{ width: "50px", height: "2px", background: "white", borderRadius: "2px" }} /></div>}</>
-                )}
-                {(phase === "shuffling" || phase === "picking" || phase === "answering") && (
-                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "7px", opacity: phase === "answering" ? 0.3 : 0.3 }}><div style={{ width: "56px", height: "2px", background: "white", borderRadius: "2px" }} /><div style={{ width: "40px", height: "2px", background: "white", borderRadius: "2px" }} /><div style={{ width: "50px", height: "2px", background: "white", borderRadius: "2px" }} /></div>
-                )}
-                {phase === "reveal" && (
-                  <>
-                    {card.isStar && <div style={{ fontSize: "22px", marginBottom: "4px" }}>⭐</div>}
-                    <div style={{ fontSize: "10px", fontWeight: "800", color: "white", textAlign: "center", lineHeight: 1.4, padding: "0 4px" }}>{card.task}</div>
-                    {pickerTeams.length > 0 && (
-                      <div style={{ position: "absolute", top: "-10px", right: "-10px", display: "flex", flexDirection: "column", gap: "2px" }}>
-                        {pickerTeams.map(t => (<div key={t.id} style={{ width: "20px", height: "20px", borderRadius: "50%", background: t.color.bg, border: "2px solid white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "10px", fontWeight: "900", color: "white" }}>{t.name[0]}</div>))}
-                      </div>
-                    )}
-                  </>
+            return (
+              <div key={card.cid} style={{ position: "absolute", top: `${pos.y}px`, left: `${pos.x}px`, width: `${CARD_W}px`, height: `${CARD_H}px`, transition: `left ${transitionMs}ms ease-in-out, top ${transitionMs}ms ease-in-out`, zIndex: isPickedSlot ? 2 : 1 }}>
+                <div
+                  onClick={() => phase === "picking" && !transitioning && pickSlot(slot)}
+                  className="cs-card"
+                  style={{
+                    width: "100%", height: "100%", borderRadius: "14px",
+                    background: revealed ? (card.isStar ? "linear-gradient(160deg,#FDE68A,#F59E0B)" : "linear-gradient(160deg,#FFFBEB,#FEF3C7)") : "repeating-linear-gradient(52deg,#B91C1C 0px,#B91C1C 12px,#FEF3C7 12px,#FEF3C7 24px)",
+                    border: `3px solid ${isPickedSlot && !revealed ? "#22C55E" : revealed ? (card.isStar ? "#F59E0B" : "#D97706") : "#450A0A"}`,
+                    display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+                    cursor: phase === "picking" && !transitioning ? "pointer" : "default", boxSizing: "border-box", padding: "10px 8px", position: "relative", userSelect: "none",
+                    boxShadow: revealed && card.isStar ? "0 0 24px rgba(245,158,11,0.7)" : "0 4px 10px rgba(0,0,0,0.35)",
+                    animation: revealed ? "csRevealPop 0.35s ease-out" : "none",
+                  }}
+                >
+                  {phase === "preview" && (
+                    <>{card.isStar ? <div style={{ fontSize: "36px", animation: "csStarPulse 1.1s ease-in-out infinite" }}>⭐</div> : <div style={{ fontSize: "30px", opacity: 0.35 }}>🎪</div>}</>
+                  )}
+                  {(phase === "shuffling" || phase === "picking" || phase === "answering") && (
+                    <div style={{ fontSize: "30px", opacity: 0.4 }}>🎪</div>
+                  )}
+                  {revealed && (
+                    <>
+                      {card.isStar && <div style={{ fontSize: "22px", marginBottom: "4px" }}>⭐</div>}
+                      <div style={{ fontSize: "10px", fontWeight: "800", color: card.isStar ? "#450A0A" : "#78350F", textAlign: "center", lineHeight: 1.4, padding: "0 4px" }}>{card.task}</div>
+                      {pickerTeams.length > 0 && (
+                        <div style={{ position: "absolute", top: "-10px", right: "-10px", display: "flex", flexDirection: "column", gap: "2px" }}>
+                          {pickerTeams.map(t => (<div key={t.id} style={{ width: "20px", height: "20px", borderRadius: "50%", background: t.color.bg, border: "2px solid white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "10px", fontWeight: "900", color: "white" }}>{t.name[0]}</div>))}
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+                {revealed && pickerTeams.length > 0 && (
+                  <div style={{ marginTop: "6px" }}>
+                    {pickerTeams.map(t => {
+                      const pick = teamPicks[t.id];
+                      const won = card.isStar && pick.correct;
+                      const partial = !card.isStar && pick.correct;
+                      return (
+                        <div key={t.id} style={{ background: won ? "rgba(34,197,94,0.18)" : partial ? "rgba(96,165,250,0.18)" : "rgba(248,113,113,0.18)", border: `2px solid ${won ? "#22C55E" : partial ? "#60A5FA" : "#F87171"}`, borderRadius: "8px", padding: "3px 6px", marginBottom: "3px", textAlign: "center", fontSize: "11px", fontWeight: "800", color: "white" }}>
+                          {t.name}: {won ? "⭐ +120" : partial ? "+30" : "0"}
+                        </div>
+                      );
+                    })}
+                  </div>
                 )}
               </div>
-              {phase === "reveal" && pickerTeams.length > 0 && (
-                <div style={{ marginTop: "6px" }}>
-                  {pickerTeams.map(t => {
-                    const pick = teamPicks[t.id];
-                    const won = card.isStar && pick.correct;
-                    const partial = !card.isStar && pick.correct;
-                    return (
-                      <div key={t.id} style={{ background: won ? "#ECFDF5" : partial ? "#EFF6FF" : "#FEF2F2", border: `2px solid ${won ? "#22C55E" : partial ? "#3B82F6" : "#EF4444"}`, borderRadius: "8px", padding: "3px 6px", marginBottom: "3px", textAlign: "center", fontSize: "11px", fontWeight: "800", color: won ? "#14532D" : partial ? "#1E3A8A" : "#991B1B" }}>
-                        {t.name}: {won ? "⭐ +120" : partial ? "+30" : "0"}
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
+            );
+          })}
+        </div>
+
+        {phase === "preview" && (
+          <div style={{ textAlign: "center", marginTop: "20px" }}>
+            <p style={{ color: "#FEF3C7", fontWeight: "700", fontSize: "14px", marginBottom: "10px", animation: "csMarquee 1.6s ease-in-out infinite" }}>One card has a <strong style={{ color: "#FCD34D" }}>⭐ star</strong> — remember which one!</p>
+            <button onClick={runShuffle} className="cs-btn" style={{ background: "linear-gradient(135deg,#B91C1C,#FCD34D)", color: "#450A0A", border: "none", borderRadius: "14px", padding: "14px 36px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 20px rgba(252,211,77,0.4)", transition: "transform 0.15s ease" }}>🔀 Shuffle!</button>
+          </div>
+        )}
+
+        {phase === "picking" && (
+          <div style={{ background: "rgba(255,255,255,0.08)", border: `3px solid ${currentTeam.color.bg}`, borderRadius: "14px", padding: "14px", textAlign: "center", marginTop: "8px" }}>
+            <div style={{ fontWeight: "900", fontSize: "16px", color: "white", marginBottom: "4px" }}>{currentTeam.name} — pick a card to get your task!</div>
+          </div>
+        )}
+
+        {phase === "answering" && pickedCard && (
+          <div style={{ marginTop: "8px" }}>
+            <div style={{ background: "linear-gradient(160deg,#FFFBEB,#FEF3C7)", border: "3px solid #F59E0B", borderRadius: "16px", padding: "20px", textAlign: "center", marginBottom: "14px" }}>
+              <div style={{ fontSize: "12px", fontWeight: "700", color: "#B45309", marginBottom: "8px", textTransform: "uppercase", letterSpacing: "0.05em" }}>🎤 {currentTeam.name}'s task</div>
+              <div style={{ fontSize: "clamp(14px,2.5vw,18px)", fontWeight: "800", color: "#450A0A", lineHeight: 1.5 }}>{pickedCard.task}</div>
             </div>
-          );
-        })}
+            {!showAns ? (
+              <div style={{ textAlign: "center" }}>
+                <button onClick={() => { stop(); setShowAns(true); }} className="cs-btn" style={{ background: "linear-gradient(135deg,#B91C1C,#DC2626)", color: "white", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "15px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease" }}>✋ Performance complete!</button>
+              </div>
+            ) : (
+              <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
+                <button onClick={() => resolveAnswer(true)} className="cs-btn" style={{ background: "linear-gradient(135deg,#15803D,#22C55E)", color: "white", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease" }}>✅ Correct</button>
+                <button onClick={() => resolveAnswer(false)} className="cs-btn" style={{ background: "linear-gradient(135deg,#B91C1C,#EF4444)", color: "white", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease" }}>❌ Wrong</button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {phase === "reveal" && (
+          <div style={{ textAlign: "center", marginTop: "70px" }}>
+            <div style={{ background: "linear-gradient(160deg,#FDE68A,#F59E0B)", border: "3px solid #FCD34D", borderRadius: "14px", padding: "14px", marginBottom: "14px", boxShadow: "0 0 24px rgba(245,158,11,0.5)" }}>
+              <div style={{ fontSize: "22px", marginBottom: "6px", color: "#450A0A", fontWeight: "900" }}>⭐ Star card revealed!</div>
+            </div>
+            <button onClick={nextRound} className="cs-btn" style={{ background: "linear-gradient(135deg,#B91C1C,#FCD34D)", color: "#450A0A", border: "none", borderRadius: "14px", padding: "14px 32px", fontSize: "16px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 20px rgba(252,211,77,0.4)", transition: "transform 0.15s ease" }}>
+              {roundCount + 1 >= maxRounds ? "🏁 End Game" : "➡️ Next Round"}
+            </button>
+          </div>
+        )}
       </div>
-
-      {phase === "preview" && (
-        <div style={{ textAlign: "center", marginTop: "20px" }}>
-          <p style={{ color: "#374151", fontWeight: "700", fontSize: "14px", marginBottom: "4px" }}>One card has a <strong>⭐ star</strong> — remember which one!</p>
-          <button onClick={runShuffle} style={{ background: "#EF4444", color: "white", border: "none", borderRadius: "14px", padding: "14px 36px", fontSize: "17px", fontWeight: "900", cursor: "pointer" }}>🔀 Shuffle!</button>
-        </div>
-      )}
-
-      {phase === "picking" && (
-        <div style={{ background: currentTeam.color.light, border: `3px solid ${currentTeam.color.bg}`, borderRadius: "14px", padding: "14px", textAlign: "center", marginTop: "8px" }}>
-          <div style={{ fontWeight: "900", fontSize: "16px", color: currentTeam.color.dark, marginBottom: "4px" }}>{currentTeam.name} — pick a card to get your task!</div>
-        </div>
-      )}
-
-      {phase === "answering" && pickedCard && (
-        <div style={{ marginTop: "8px" }}>
-          <div style={{ background: "#EEF2FF", border: "3px solid #6366F1", borderRadius: "16px", padding: "20px", textAlign: "center", marginBottom: "14px" }}>
-            <div style={{ fontSize: "12px", fontWeight: "700", color: "#4338CA", marginBottom: "8px", textTransform: "uppercase", letterSpacing: "0.05em" }}>🗣️ {currentTeam.name}'s task</div>
-            <div style={{ fontSize: "clamp(14px,2.5vw,18px)", fontWeight: "800", color: "#1E1B4B", lineHeight: 1.5 }}>{pickedCard.task}</div>
-          </div>
-          {!showAns ? (
-            <div style={{ textAlign: "center" }}>
-              <button onClick={() => { stop(); setShowAns(true); }} style={{ background: "#6366F1", color: "white", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "15px", fontWeight: "700", cursor: "pointer" }}>✋ Ready to judge</button>
-            </div>
-          ) : (
-            <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
-              <button onClick={() => resolveAnswer(true)} style={{ background: "#22C55E", color: "white", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "700", cursor: "pointer" }}>✅ Correct</button>
-              <button onClick={() => resolveAnswer(false)} style={{ background: "#EF4444", color: "white", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "700", cursor: "pointer" }}>❌ Wrong</button>
-            </div>
-          )}
-        </div>
-      )}
-
-      {phase === "reveal" && (
-        <div style={{ textAlign: "center", marginTop: "70px" }}>
-          <div style={{ background: "#FEF9C3", border: "3px solid #FCD34D", borderRadius: "14px", padding: "14px", marginBottom: "14px" }}>
-            <div style={{ fontSize: "22px", marginBottom: "6px" }}>⭐ Star card revealed!</div>
-          </div>
-          <button onClick={nextRound} style={{ background: "#6366F1", color: "white", border: "none", borderRadius: "14px", padding: "14px 32px", fontSize: "16px", fontWeight: "900", cursor: "pointer" }}>
-            {roundCount + 1 >= (maxRounds || 5) ? "🏁 End Game" : "➡️ Next Round"}
-          </button>
-        </div>
-      )}
     </div>
   );
 }

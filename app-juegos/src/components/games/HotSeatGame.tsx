@@ -5,6 +5,43 @@ const TOTAL_ROUNDS = 3;
 const TURN_SECONDS = 90;
 const POINTS_PER_WORD = 10;
 
+const EMBERS = Array.from({ length: 16 }, (_, i) => ({
+  left: (i * 41) % 100,
+  size: 4 + (i % 4) * 3,
+  dur: 3 + (i % 5),
+  delay: (i % 8) * 0.4,
+}));
+
+const STYLE_TAG = (
+  <style>{`
+    @keyframes hsEmberRise{0%{transform:translateY(0) scale(1);opacity:0}15%{opacity:0.9}100%{transform:translateY(-280px) scale(0.4);opacity:0}}
+    @keyframes hsLavaGlow{0%,100%{opacity:0.5}50%{opacity:0.85}}
+    @keyframes hsPulseDanger{0%,100%{box-shadow:0 0 0px rgba(239,68,68,0)}50%{box-shadow:0 0 24px rgba(239,68,68,0.85)}}
+    .hs-btn:hover:not(:disabled){transform:translateY(-2px) scale(1.02);filter:brightness(1.12)}
+    .hs-btn:active:not(:disabled){transform:translateY(0) scale(0.97)}
+  `}</style>
+);
+
+function EmberField() {
+  return (
+    <div style={{ position: "absolute", inset: 0, pointerEvents: "none", overflow: "hidden" }}>
+      {EMBERS.map((e, i) => (
+        <div key={i} style={{
+          position: "absolute", left: `${e.left}%`, bottom: "-10px", width: `${e.size}px`, height: `${e.size}px`,
+          borderRadius: "50%", background: "radial-gradient(circle,#FDE68A,#F97316 60%,transparent 100%)",
+          animation: `hsEmberRise ${e.dur}s ease-in infinite ${e.delay}s`,
+        }} />
+      ))}
+    </div>
+  );
+}
+
+function LavaGlow() {
+  return (
+    <div style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: "150px", pointerEvents: "none", background: "radial-gradient(ellipse at 50% 100%,rgba(249,115,22,0.55),transparent 70%)", animation: "hsLavaGlow 3.2s ease-in-out infinite" }} />
+  );
+}
+
 const shuffle = <T,>(items: T[]) => {
   const shuffled = [...items];
 
@@ -118,24 +155,34 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd }: GameProp
     setPhase("intro");
   };
 
+  const arenaStyle: React.CSSProperties = {
+    margin: "-20px", padding: "20px", borderRadius: "20px", position: "relative", overflow: "hidden",
+    background: "radial-gradient(ellipse at 50% 105%,#9A3412 0%,#431407 45%,#0A0300 100%)",
+  };
+
   if (!currentTeam || words.length === 0) {
     return (
-      <div style={{ textAlign: "center", padding: "24px" }}>
-        <div style={{ fontWeight: "900", fontSize: "20px", color: "#1E1B4B", marginBottom: "10px" }}>Hot Seat needs words to play.</div>
-        <button onClick={onEnd} style={{ background: "#7C3AED", color: "white", border: "none", borderRadius: "14px", padding: "12px 28px", fontWeight: "900", cursor: "pointer" }}>End Game</button>
+      <div style={{ ...arenaStyle, textAlign: "center", padding: "24px" }}>
+        <EmberField />
+        <LavaGlow />
+        {STYLE_TAG}
+        <div style={{ position: "relative", zIndex: 1 }}>
+          <div style={{ fontWeight: "900", fontSize: "20px", color: "white", marginBottom: "10px" }}>Hot Seat needs words to play.</div>
+          <button onClick={onEnd} className="hs-btn" style={{ background: "linear-gradient(135deg,#B91C1C,#F97316)", color: "white", border: "none", borderRadius: "14px", padding: "12px 28px", fontWeight: "900", cursor: "pointer", transition: "transform 0.15s ease" }}>End Game</button>
+        </div>
       </div>
     );
   }
 
   const wordListToggle = (
     <div style={{ marginBottom: "18px" }}>
-      <button onClick={() => setShowWordList(v => !v)} style={{ background: showWordList ? "#1E1B4B" : "white", color: showWordList ? "white" : "#1E1B4B", border: "2px solid #1E1B4B", borderRadius: "10px", padding: "8px 20px", fontWeight: "800", cursor: "pointer" }}>
+      <button onClick={() => setShowWordList(v => !v)} className="hs-btn" style={{ background: showWordList ? "#7C2D12" : "rgba(255,255,255,0.08)", color: showWordList ? "white" : "#FED7AA", border: "2px solid #F9731688", borderRadius: "10px", padding: "8px 20px", fontWeight: "800", cursor: "pointer", transition: "transform 0.15s ease" }}>
         {showWordList ? "Hide word list" : "Show all words"}
       </button>
       {showWordList && (
-        <div style={{ background: "white", border: "2px solid #E0E7FF", borderRadius: "14px", padding: "16px", marginTop: "12px", textAlign: "left", display: "flex", flexWrap: "wrap", gap: "6px" }}>
+        <div style={{ background: "rgba(0,0,0,0.35)", border: "2px solid #F9731655", borderRadius: "14px", padding: "16px", marginTop: "12px", textAlign: "left", display: "flex", flexWrap: "wrap", gap: "6px" }}>
           {[...words].sort().map((word, index) => (
-            <span key={`${word}-${index}`} style={{ background: "#EEF2FF", color: "#4338CA", borderRadius: "6px", padding: "4px 10px", fontSize: "13px", fontWeight: "700" }}>{word}</span>
+            <span key={`${word}-${index}`} style={{ background: "rgba(249,115,22,0.18)", color: "#FED7AA", border: "1px solid #F9731655", borderRadius: "6px", padding: "4px 10px", fontSize: "13px", fontWeight: "700" }}>{word}</span>
           ))}
         </div>
       )}
@@ -147,116 +194,133 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd }: GameProp
   // a per-turn "get ready" card and re-explained the full rules before every single turn instead.
   if (phase === "welcome") {
     return (
-      <div style={{ textAlign: "center" }}>
-        <div style={{ background: "linear-gradient(135deg,#7C3AED,#DB2777)", borderRadius: "20px", padding: "28px 24px", marginBottom: "10px", color: "white", maxWidth: "520px", margin: "0 auto 10px" }}>
-          <div style={{ fontSize: "36px", marginBottom: "10px" }}>🔥</div>
-          <div style={{ fontWeight: "900", fontSize: "20px", marginBottom: "10px" }}>Hot Seat</div>
-          <div style={{ fontSize: "15px", lineHeight: 1.7, opacity: 0.95 }}>
-            One player on the team turns away from the screen — everyone else on their team gives clues.
-            <br />
-            Guess as many words as you can in <strong>{TURN_SECONDS} seconds</strong>. Each correct word is worth <strong>{POINTS_PER_WORD} points</strong>.
-            <br />
-            No spelling the word, and no saying the word itself!
-            <br />
-            Every team takes a turn each round, over <strong>{TOTAL_ROUNDS} rounds</strong> — most points when it's done wins.
-          </div>
-        </div>
-        <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "24px" }}>
-          {teams.map((t, i) => (
-            <div key={t.id} style={{ background: t.color.light, border: `3px solid ${t.color.bg}`, borderRadius: "14px", padding: "10px 18px", fontWeight: "800", fontSize: "14px", color: t.color.dark }}>
-              {i + 1}. {t.color.emoji} {t.name}
+      <div style={{ ...arenaStyle, textAlign: "center" }}>
+        <EmberField />
+        <LavaGlow />
+        {STYLE_TAG}
+        <div style={{ position: "relative", zIndex: 1 }}>
+          <div style={{ background: "linear-gradient(160deg,#7C2D12,#1C0701)", border: "2px solid #FDBA7455", borderRadius: "20px", padding: "28px 24px", marginBottom: "10px", color: "white", maxWidth: "520px", margin: "0 auto 10px", boxShadow: "0 0 50px rgba(234,88,12,0.45)" }}>
+            <div style={{ fontSize: "36px", marginBottom: "10px" }}>🌋</div>
+            <div style={{ fontWeight: "900", fontSize: "20px", marginBottom: "10px", color: "#FDBA74" }}>Hot Seat</div>
+            <div style={{ fontSize: "15px", lineHeight: 1.7, opacity: 0.95 }}>
+              One player on the team turns away from the screen — everyone else on their team gives clues.
+              <br />
+              Guess as many words as you can in <strong style={{ color: "#FDBA74" }}>{TURN_SECONDS} seconds</strong>. Each correct word is worth <strong style={{ color: "#FDBA74" }}>{POINTS_PER_WORD} points</strong>.
+              <br />
+              No spelling the word, and no saying the word itself!
+              <br />
+              Every team takes a turn each round, over <strong style={{ color: "#FDBA74" }}>{TOTAL_ROUNDS} rounds</strong> — most points when it's done wins.
             </div>
-          ))}
+          </div>
+          <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "24px" }}>
+            {teams.map((t, i) => (
+              <div key={t.id} style={{ background: `linear-gradient(160deg,${t.color.dark}55,#1C0701)`, border: `3px solid ${t.color.bg}`, borderRadius: "14px", padding: "10px 18px", fontWeight: "800", fontSize: "14px", color: "white" }}>
+                {i + 1}. {t.color.emoji} {t.name}
+              </div>
+            ))}
+          </div>
+          {wordListToggle}
+          <button onClick={() => setPhase("intro")} className="hs-btn" style={{ background: "linear-gradient(135deg,#B91C1C,#F97316)", color: "white", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(249,115,22,0.5)", transition: "transform 0.15s ease" }}>
+            🔥 Let's Play!
+          </button>
         </div>
-        {wordListToggle}
-        <button onClick={() => setPhase("intro")} style={{ background: "linear-gradient(135deg,#7C3AED,#DB2777)", color: "white", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer" }}>
-          🔥 Let's Play!
-        </button>
       </div>
     );
   }
 
   if (phase === "intro") {
     return (
-      <div style={{ textAlign: "center" }}>
-        <div style={{ background: "linear-gradient(135deg,#7C3AED,#DB2777)", borderRadius: "20px", padding: "28px 24px", marginBottom: "16px", color: "white" }}>
-          <div style={{ fontWeight: "900", fontSize: "clamp(22px,4vw,32px)", marginBottom: "8px" }}>Hot Seat</div>
-          <div style={{ fontWeight: "900", fontSize: "18px", marginBottom: "14px" }}>
-            Round {roundIndex + 1} of {TOTAL_ROUNDS} - Turn {turnNumber} of {totalTurns}
+      <div style={{ ...arenaStyle, textAlign: "center" }}>
+        <EmberField />
+        <LavaGlow />
+        {STYLE_TAG}
+        <div style={{ position: "relative", zIndex: 1 }}>
+          <div style={{ background: "linear-gradient(160deg,#7C2D12,#1C0701)", border: "2px solid #FDBA7455", borderRadius: "20px", padding: "28px 24px", marginBottom: "16px", color: "white" }}>
+            <div style={{ fontWeight: "900", fontSize: "clamp(22px,4vw,32px)", marginBottom: "8px", color: "#FDBA74" }}>Hot Seat</div>
+            <div style={{ fontWeight: "900", fontSize: "18px", marginBottom: "14px" }}>
+              Round {roundIndex + 1} of {TOTAL_ROUNDS} - Turn {turnNumber} of {totalTurns}
+            </div>
+            <div style={{ background: "rgba(0,0,0,0.3)", border: "1.5px solid #F9731655", borderRadius: "16px", padding: "16px", display: "inline-block", minWidth: "min(100%, 320px)" }}>
+              <div style={{ fontSize: "13px", fontWeight: "800", textTransform: "uppercase", opacity: 0.85, marginBottom: "6px", color: "#FDBA74" }}>Up now</div>
+              <div style={{ fontWeight: "900", fontSize: "clamp(24px,5vw,38px)" }}>{currentTeam.color.emoji} {currentTeam.name}</div>
+            </div>
+            <div style={{ fontSize: "14px", lineHeight: 1.6, marginTop: "16px", opacity: 0.9 }}>
+              One player faces away, teammates give clues — no spelling, no saying the word!
+            </div>
           </div>
-          <div style={{ background: "rgba(255,255,255,0.16)", borderRadius: "16px", padding: "16px", display: "inline-block", minWidth: "min(100%, 320px)" }}>
-            <div style={{ fontSize: "13px", fontWeight: "800", textTransform: "uppercase", opacity: 0.85, marginBottom: "6px" }}>Up now</div>
-            <div style={{ fontWeight: "900", fontSize: "clamp(24px,5vw,38px)" }}>{currentTeam.color.emoji} {currentTeam.name}</div>
-          </div>
-          <div style={{ fontSize: "14px", lineHeight: 1.6, marginTop: "16px", opacity: 0.9 }}>
-            One player faces away, teammates give clues — no spelling, no saying the word!
-          </div>
+
+          {wordListToggle}
+
+          <button onClick={startTurn} className="hs-btn" style={{ background: "linear-gradient(135deg,#B91C1C,#F97316)", color: "white", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(249,115,22,0.5)", transition: "transform 0.15s ease" }}>
+            Start {currentTeam.name}'s Turn
+          </button>
         </div>
-
-        {wordListToggle}
-
-        <button onClick={startTurn} style={{ background: "linear-gradient(135deg,#7C3AED,#DB2777)", color: "white", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer" }}>
-          Start {currentTeam.name}'s Turn
-        </button>
       </div>
     );
   }
 
+  const timeCritical = phase === "play" && timeLeft <= 10;
+
   return (
-    <div>
-      <div style={{ background: "linear-gradient(135deg,#7C3AED,#DB2777)", borderRadius: "14px", padding: "14px 16px", marginBottom: "16px", textAlign: "center", color: "white" }}>
-        <div style={{ fontWeight: "900", fontSize: "18px" }}>Round {roundIndex + 1} of {TOTAL_ROUNDS} - {currentTeam.name}</div>
-        <div style={{ fontWeight: "800", fontSize: "13px", opacity: 0.9, marginTop: "4px" }}>Turn {turnNumber} of {totalTurns}</div>
-      </div>
-
-      <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "16px", background: "white", border: "2px solid #E0E7FF", borderRadius: "14px", padding: "12px 16px" }}>
-        <div style={{ position: "relative", width: "78px", height: "78px", flexShrink: 0 }}>
-          <svg width="78" height="78" style={{ transform: "rotate(-90deg)" }}>
-            <circle cx="39" cy="39" r="32" fill="none" stroke="#E5E7EB" strokeWidth="7" />
-            <circle cx="39" cy="39" r="32" fill="none" stroke={timerColor} strokeWidth="7" strokeDasharray={`${2 * Math.PI * 32}`} strokeDashoffset={`${2 * Math.PI * 32 * (1 - timerPct / 100)}`} strokeLinecap="round" style={{ transition: "stroke-dashoffset 1s linear, stroke 0.3s" }} />
-          </svg>
-          <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "900", fontSize: "20px", color: timerColor }}>{timeLeft}</div>
+    <div style={arenaStyle}>
+      <EmberField />
+      <LavaGlow />
+      {STYLE_TAG}
+      <div style={{ position: "relative", zIndex: 1 }}>
+        <div style={{ background: "linear-gradient(90deg,#7C2D12,#9A3412)", border: "1.5px solid #FDBA7455", borderRadius: "14px", padding: "14px 16px", marginBottom: "16px", textAlign: "center", color: "white", boxShadow: "0 4px 18px rgba(154,52,18,0.5)" }}>
+          <div style={{ fontWeight: "900", fontSize: "18px" }}>Round {roundIndex + 1} of {TOTAL_ROUNDS} - {currentTeam.name}</div>
+          <div style={{ fontWeight: "800", fontSize: "13px", opacity: 0.9, marginTop: "4px" }}>Turn {turnNumber} of {totalTurns}</div>
         </div>
-        <div style={{ flex: 1 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", gap: "12px", flexWrap: "wrap", marginBottom: "8px" }}>
-            <div style={{ fontWeight: "900", color: currentTeam.color.dark, fontSize: "16px" }}>{currentTeam.color.emoji} {currentTeam.name}</div>
-            <div style={{ fontWeight: "900", color: "#1E1B4B", fontSize: "16px" }}>This turn: {turnCorrect} words / {turnCorrect * POINTS_PER_WORD} pts</div>
-          </div>
-          <div style={{ height: "10px", background: "#E5E7EB", borderRadius: "999px", overflow: "hidden" }}>
-            <div style={{ height: "100%", width: `${timerPct}%`, background: timerColor, borderRadius: "999px", transition: "width 1s linear, background 0.3s" }} />
-          </div>
-        </div>
-      </div>
 
-      {phase === "play" && (
-        <>
-          <div style={{ background: `linear-gradient(135deg,${currentTeam.color.light},white)`, border: `4px solid ${currentTeam.color.bg}`, borderRadius: "22px", padding: "26px 18px", textAlign: "center", marginBottom: "16px" }}>
-            <div style={{ color: "#6B7280", fontWeight: "800", fontSize: "13px", textTransform: "uppercase", marginBottom: "10px" }}>Describe this word</div>
-            <div style={{ background: "white", borderRadius: "18px", border: `3px solid ${currentTeam.color.bg}55`, padding: "24px 12px", color: currentTeam.color.dark, fontWeight: "900", fontSize: "clamp(36px,9vw,72px)", lineHeight: 1.05, minHeight: "120px", display: "flex", alignItems: "center", justifyContent: "center", overflowWrap: "anywhere" }}>
-              {currentWord}
+        <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "16px", background: "rgba(0,0,0,0.3)", border: "2px solid #F9731655", borderRadius: "14px", padding: "12px 16px" }}>
+          <div style={{ position: "relative", width: "78px", height: "78px", flexShrink: 0, borderRadius: "50%", animation: timeCritical ? "hsPulseDanger 0.8s ease-in-out infinite" : "none" }}>
+            <svg width="78" height="78" style={{ transform: "rotate(-90deg)" }}>
+              <circle cx="39" cy="39" r="32" fill="none" stroke="#1C0701" strokeWidth="7" />
+              <circle cx="39" cy="39" r="32" fill="none" stroke={timerColor} strokeWidth="7" strokeDasharray={`${2 * Math.PI * 32}`} strokeDashoffset={`${2 * Math.PI * 32 * (1 - timerPct / 100)}`} strokeLinecap="round" style={{ transition: "stroke-dashoffset 1s linear, stroke 0.3s" }} />
+            </svg>
+            <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "900", fontSize: "20px", color: timerColor }}>{timeLeft}</div>
+          </div>
+          <div style={{ flex: 1 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", gap: "12px", flexWrap: "wrap", marginBottom: "8px" }}>
+              <div style={{ fontWeight: "900", color: "white", fontSize: "16px" }}>{currentTeam.color.emoji} {currentTeam.name}</div>
+              <div style={{ fontWeight: "900", color: "#FED7AA", fontSize: "16px" }}>This turn: {turnCorrect} words / {turnCorrect * POINTS_PER_WORD} pts</div>
+            </div>
+            <div style={{ height: "10px", background: "#1C0701", borderRadius: "999px", overflow: "hidden" }}>
+              <div style={{ height: "100%", width: `${timerPct}%`, background: timerColor, borderRadius: "999px", transition: "width 1s linear, background 0.3s" }} />
             </div>
           </div>
-
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(160px,1fr))", gap: "12px" }}>
-            <button onClick={markCorrect} style={{ background: "linear-gradient(135deg,#22C55E,#15803D)", color: "white", border: "none", borderRadius: "14px", padding: "16px", fontSize: "18px", fontWeight: "900", cursor: "pointer" }}>Correct +{POINTS_PER_WORD}</button>
-            <button onClick={skipWord} style={{ background: "white", color: "#92400E", border: "3px solid #F59E0B", borderRadius: "14px", padding: "16px", fontSize: "18px", fontWeight: "900", cursor: "pointer" }}>Skip</button>
-            <button onClick={endTurn} style={{ background: "white", color: "#7F1D1D", border: "3px solid #FCA5A5", borderRadius: "14px", padding: "16px", fontSize: "18px", fontWeight: "900", cursor: "pointer" }}>End Turn</button>
-          </div>
-        </>
-      )}
-
-      {phase === "turnend" && (
-        <div style={{ textAlign: "center" }}>
-          <div style={{ background: "#ECFDF5", border: "2px solid #22C55E", borderRadius: "16px", padding: "18px", marginBottom: "16px" }}>
-            <div style={{ fontWeight: "900", fontSize: "22px", color: "#14532D", marginBottom: "6px" }}>{currentTeam.name} guessed {lastTurnCorrect} word{lastTurnCorrect === 1 ? "" : "s"}.</div>
-            <div style={{ color: "#14532D", fontWeight: "900", fontSize: "18px", marginBottom: "4px" }}>+{lastTurnCorrect * POINTS_PER_WORD} pts</div>
-            <div style={{ color: "#166534", fontWeight: "700" }}>Those points have been added to the scoreboard.</div>
-          </div>
-          <button onClick={goToNextTurn} style={{ background: "#7C3AED", color: "white", border: "none", borderRadius: "14px", padding: "13px 34px", fontSize: "17px", fontWeight: "900", cursor: "pointer" }}>
-            {isLastTurn ? "End Game" : teamIndex < teams.length - 1 ? "Next Team" : "Start Next Round"}
-          </button>
         </div>
-      )}
+
+        {phase === "play" && (
+          <>
+            <div style={{ background: "linear-gradient(160deg,#1C0701,#2D0A00)", border: "4px solid #F97316", borderRadius: "22px", padding: "26px 18px", textAlign: "center", marginBottom: "16px", boxShadow: "0 0 30px rgba(249,115,22,0.35)" }}>
+              <div style={{ color: "#FDBA74", fontWeight: "800", fontSize: "13px", textTransform: "uppercase", marginBottom: "10px" }}>Describe this word</div>
+              <div style={{ background: "rgba(0,0,0,0.4)", borderRadius: "18px", border: "3px solid #F9731655", padding: "24px 12px", color: "#FFF7ED", fontWeight: "900", fontSize: "clamp(36px,9vw,72px)", lineHeight: 1.05, minHeight: "120px", display: "flex", alignItems: "center", justifyContent: "center", overflowWrap: "anywhere", textShadow: "0 0 18px rgba(249,115,22,0.6)" }}>
+                {currentWord}
+              </div>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(160px,1fr))", gap: "12px" }}>
+              <button onClick={markCorrect} className="hs-btn" style={{ background: "linear-gradient(135deg,#15803D,#22C55E)", color: "white", border: "none", borderRadius: "14px", padding: "16px", fontSize: "18px", fontWeight: "900", cursor: "pointer", transition: "transform 0.15s ease" }}>Correct +{POINTS_PER_WORD}</button>
+              <button onClick={skipWord} className="hs-btn" style={{ background: "rgba(0,0,0,0.3)", color: "#FDBA74", border: "3px solid #F59E0B", borderRadius: "14px", padding: "16px", fontSize: "18px", fontWeight: "900", cursor: "pointer", transition: "transform 0.15s ease" }}>Skip</button>
+              <button onClick={endTurn} className="hs-btn" style={{ background: "rgba(0,0,0,0.3)", color: "#FCA5A5", border: "3px solid #EF4444", borderRadius: "14px", padding: "16px", fontSize: "18px", fontWeight: "900", cursor: "pointer", transition: "transform 0.15s ease" }}>End Turn</button>
+            </div>
+          </>
+        )}
+
+        {phase === "turnend" && (
+          <div style={{ textAlign: "center" }}>
+            <div style={{ background: "linear-gradient(160deg,#1C0701,#2D0A00)", border: "2px solid #22C55E", borderRadius: "16px", padding: "18px", marginBottom: "16px" }}>
+              <div style={{ fontWeight: "900", fontSize: "22px", color: "white", marginBottom: "6px" }}>{currentTeam.name} guessed {lastTurnCorrect} word{lastTurnCorrect === 1 ? "" : "s"}.</div>
+              <div style={{ color: "#86EFAC", fontWeight: "900", fontSize: "18px", marginBottom: "4px" }}>+{lastTurnCorrect * POINTS_PER_WORD} pts</div>
+              <div style={{ color: "#FED7AA", fontWeight: "700" }}>Those points have been added to the scoreboard.</div>
+            </div>
+            <button onClick={goToNextTurn} className="hs-btn" style={{ background: "linear-gradient(135deg,#B91C1C,#F97316)", color: "white", border: "none", borderRadius: "14px", padding: "13px 34px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 20px rgba(249,115,22,0.4)", transition: "transform 0.15s ease" }}>
+              {isLastTurn ? "End Game" : teamIndex < teams.length - 1 ? "Next Team" : "Start Next Round"}
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
