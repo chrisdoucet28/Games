@@ -58,17 +58,17 @@ const AMBIENT_BITS = Array.from({ length: 10 }, (_, i) => ({
 const STYLE_TAG = (
   <style>{`
     @keyframes wwDrift{0%{transform:translateY(0) rotate(0deg);opacity:0.15}50%{opacity:0.4}100%{transform:translateY(-36px) rotate(20deg);opacity:0.15}}
-    @keyframes wwPopUp{0%{transform:translateX(-50%) translateY(30px) scale(0.5);opacity:0}60%{transform:translateX(-50%) translateY(-4px) scale(1.08);opacity:1}100%{transform:translateX(-50%) translateY(0) scale(1);opacity:1}}
-    @keyframes wwDuckDown{0%{transform:translateX(-50%) translateY(0) scale(1);opacity:1}100%{transform:translateX(-50%) translateY(30px) scale(0.6);opacity:0}}
+    @keyframes wwPopUp{0%{transform:translateY(30px) scale(0.5);opacity:0}60%{transform:translateY(-4px) scale(1.08);opacity:1}100%{transform:translateY(0) scale(1);opacity:1}}
+    @keyframes wwDuckDown{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(30px) scale(0.6);opacity:0}}
     @keyframes wwHitBurst{0%{transform:scale(0.3);opacity:1}60%{transform:scale(1.6);opacity:0.9}100%{transform:scale(2);opacity:0}}
-    @keyframes wwBonk{0%,100%{transform:translateX(-50%) translate(0,0) rotate(0deg)}25%{transform:translateX(-50%) translate(-3px,1px) rotate(-8deg)}50%{transform:translateX(-50%) translate(3px,-1px) rotate(8deg)}75%{transform:translateX(-50%) translate(-2px,1px) rotate(-4deg)}}
+    @keyframes wwBonk{0%,100%{transform:translate(0,0) rotate(0deg)}25%{transform:translate(-3px,1px) rotate(-8deg)}50%{transform:translate(3px,-1px) rotate(8deg)}75%{transform:translate(-2px,1px) rotate(-4deg)}}
     @keyframes wwCountPulse{0%{transform:scale(0.5);opacity:0}50%{transform:scale(1.2);opacity:1}100%{transform:scale(1);opacity:1}}
     @keyframes wwComboGlow{0%,100%{filter:brightness(1)}50%{filter:brightness(1.4)}}
     @keyframes wwShine{0%,100%{opacity:0.5}50%{opacity:0.9}}
     .ww-btn:hover:not(:disabled){transform:translateY(-2px) scale(1.02);filter:brightness(1.08)}
     .ww-btn:active:not(:disabled){transform:translateY(0) scale(0.97)}
     .ww-mole:hover{filter:brightness(1.15)}
-    .ww-mole:active{transform:translateX(-50%) scale(0.92) !important}
+    .ww-mole:active{filter:brightness(0.85)}
   `}</style>
 );
 
@@ -318,7 +318,10 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd }: GamePr
                           onClick={() => hitMole(mole)}
                           className="ww-mole"
                           style={{
-                            position: "absolute", left: "50%", bottom: "10px", transform: "translateX(-50%)",
+                            // Centered via left/right/margin (not transform) so that no animation or
+                            // pseudo-class state can ever knock the button off-center by clobbering a
+                            // transform-based centering trick — transform is free for pure motion/scale.
+                            position: "absolute", left: 0, right: 0, margin: "0 auto", bottom: "10px",
                             width: "92px", minHeight: "56px", border: "none", borderRadius: "14px", cursor: "pointer",
                             background: "linear-gradient(160deg,#A16207,#78350F)", color: "#FEF3C7",
                             fontWeight: "800", fontSize: mole.text.length > 14 ? "9.5px" : mole.text.length > 9 ? "10.5px" : "12px",
