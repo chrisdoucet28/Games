@@ -322,7 +322,11 @@ export function KingOfHillGame({ questions, teams, onUpdateScore, onEnd }: GameP
         <div key={owner?.id ?? "free"} style={{ fontSize: "18px", animation: owner ? "koFlagPlant 0.4s ease-out" : "none" }}>{z.icon}</div>
         <div style={{ fontWeight: "900", fontSize: "12px", color: owner ? "white" : "#F9A8D4" }}>{z.label ?? zId}</div>
         <div style={{ fontWeight: "800", fontSize: "11px", color: "#FCD34D" }}>+{z.pts}/rnd</div>
-        <div style={{ fontSize: "10px", color: owner ? "#F3E8FF" : "#F9A8D488", marginTop: "2px" }}>{owner ? owner.name : "Free"}</div>
+        <div style={{ fontSize: "10px", color: owner ? "#F3E8FF" : "#F9A8D488", marginTop: "2px" }}>
+          {/* Zone tiles are small and clip overflow — a long custom team name would otherwise
+              get silently cut off mid-character with no ellipsis, so truncate defensively. */}
+          {owner ? (owner.name.length > 12 ? owner.name.slice(0, 11) + "…" : owner.name) : "Free"}
+        </div>
       </div>
     );
   };

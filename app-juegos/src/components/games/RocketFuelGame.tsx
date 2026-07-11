@@ -307,7 +307,10 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd }: GameP
                     )}
                     <div style={{ fontSize: "40px", filter: `drop-shadow(0 0 8px ${t.color.bg})`, animation: phase === "launchpad" ? "none" : "rfShake 0.1s linear infinite" }}>🚀</div>
                   </div>
-                  <div style={{ position: "absolute", bottom: "0", background: `linear-gradient(180deg,${t.color.dark}88,#0B0B2E)`, border: `2px solid ${t.color.bg}`, borderRadius: "10px", padding: "6px 10px", fontSize: "12px", fontWeight: "800", color: "white", whiteSpace: "nowrap" }}>
+                  {/* Centered explicitly (not just via the flex parent's static position) and
+                      capped with maxWidth so a long custom team name wraps onto another line
+                      instead of growing wide enough to overlap the neighbouring rocket's bubble. */}
+                  <div style={{ position: "absolute", bottom: "0", left: "50%", transform: "translateX(-50%)", maxWidth: "94px", background: `linear-gradient(180deg,${t.color.dark}88,#0B0B2E)`, border: `2px solid ${t.color.bg}`, borderRadius: "10px", padding: "6px 10px", fontSize: "12px", fontWeight: "800", color: "white", textAlign: "center" }}>
                     {t.color.emoji} {t.name}<br />
                     <span style={{ color: "#FDBA74" }}>⛽ ???</span>
                   </div>
