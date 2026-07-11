@@ -86,6 +86,8 @@ const STYLE_TAG = (
     @keyframes targetGlow{0%,100%{box-shadow:0 0 0 3px rgba(96,165,250,0.45)}50%{box-shadow:0 0 0 7px rgba(96,165,250,0.75)}}
     @keyframes missileDrop{0%{transform:translateY(-64px) rotate(-25deg) scale(0.7);opacity:0}55%{transform:translateY(6px) rotate(10deg) scale(1.05);opacity:1}75%{transform:translateY(-4px) rotate(-4deg) scale(1)}100%{transform:translateY(0) rotate(0deg) scale(1);opacity:1}}
     @keyframes missileTrail{0%{opacity:0.6;transform:translateY(0) scaleY(1)}100%{opacity:0;transform:translateY(-18px) scaleY(0.4)}}
+    @keyframes bshipToastIn{0%{opacity:0;transform:translate(-50%,10px)}12%{opacity:1;transform:translate(-50%,0)}88%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,-6px)}}
+    @keyframes bshipBannerIn{0%{opacity:0;transform:translate(-50%,-16px) scale(0.9)}15%{opacity:1;transform:translate(-50%,0) scale(1.03)}25%{transform:translate(-50%,0) scale(1)}85%{opacity:1;transform:translate(-50%,0) scale(1)}100%{opacity:0;transform:translate(-50%,-10px) scale(0.96)}}
     .bship-btn:hover:not(:disabled){transform:translateY(-2px) scale(1.02);filter:brightness(1.1)}
     .bship-btn:active:not(:disabled){transform:translateY(0) scale(0.97)}
     .bship-cell:hover{filter:brightness(1.25)}
@@ -120,6 +122,8 @@ function AmbientBackdrop() {
 }
 
 type CellFx = { teamId: string | number; coord: string; kind: "hit" | "miss"; key: number };
+type Toast = { text: string; kind: "hit" | "water" | "wrong"; key: number };
+type EliminationBanner = { teamName: string; color: string; key: number };
 
 export function BattleshipGame({ questions, teams, onUpdateScore, onEnd }: GameProps) {
   const TURN_SECONDS = 25;
@@ -135,13 +139,16 @@ export function BattleshipGame({ questions, teams, onUpdateScore, onEnd }: GameP
   const [misses, setMisses] = useState<Record<string | number, string[]>>(() => Object.fromEntries(teams.map(t => [t.id, []])));
 
   const [activeTeamIdx, setActiveTeamIdx] = useState(0);
-  const [phase, setPhase] = useState<"intro" | "pick-target" | "pick-coord" | "answer">("intro");
+  const [phase, setPhase] = useState<"intro" | "pick-target" | "pick-coord" | "answer" | "gameover">("intro");
   const [targetTeamId, setTargetTeamId] = useState<string | number | null>(null);
   const [pendingCoord, setPendingCoord] = useState<string | null>(null);
   const [showAns, setShowAns] = useState(false);
   const [cellFx, setCellFx] = useState<CellFx | null>(null);
   const [missile, setMissile] = useState<{ teamId: string | number; coord: string } | null>(null);
+  const [toast, setToast] = useState<Toast | null>(null);
+  const [elimBanner, setElimBanner] = useState<EliminationBanner | null>(null);
   const fxIdRef = useRef(0);
+  const eliminationOrderRef = useRef<(string | number)[]>([]);
 
   const activeTeam = teams[activeTeamIdx];
   const currentQ = (pendingCoord && targetTeamId !== null) ? coordMap[targetTeamId]?.[pendingCoord] : null;
@@ -150,6 +157,18 @@ export function BattleshipGame({ questions, teams, onUpdateScore, onEnd }: GameP
     const key = fxIdRef.current++;
     setCellFx({ teamId, coord, kind, key });
     setTimeout(() => setCellFx(prev => (prev?.key === key ? null : prev)), 700);
+  };
+
+  const showToast = (text: string, kind: Toast["kind"]) => {
+    const key = fxIdRef.current++;
+    setToast({ text, kind, key });
+    setTimeout(() => setToast(prev => (prev?.key === key ? null : prev)), 2400);
+  };
+
+  const showElimination = (teamName: string, color: string) => {
+    const key = fxIdRef.current++;
+    setElimBanner({ teamName, color, key });
+    setTimeout(() => setElimBanner(prev => (prev?.key === key ? null : prev)), 3200);
   };
 
   const isEliminated = useCallback((teamId: string | number, hitsOverride?: Record<string | number, string[]>) => {
@@ -195,6 +214,7 @@ export function BattleshipGame({ questions, teams, onUpdateScore, onEnd }: GameP
 
   const resolve = (correct: boolean) => {
     if (targetTeamId === null || pendingCoord === null) return;
+    const targetTeam = teams.find(t => t.id === targetTeamId)!;
     const isShip = fleets[targetTeamId].includes(pendingCoord);
     let newHits = hits;
 
@@ -203,16 +223,31 @@ export function BattleshipGame({ questions, teams, onUpdateScore, onEnd }: GameP
       setHits(newHits);
       spawnCellFx(targetTeamId, pendingCoord, "hit");
       onUpdateScore(activeTeam.id, 60);
-      if (isEliminated(targetTeamId, newHits)) {
-        if (teams.filter(t => !isEliminated(t.id, newHits)).length <= 1) { onEnd(); return; }
+      showToast(`💥 ${activeTeam.name} HIT ${targetTeam.name}'s ship at ${pendingCoord}!`, "hit");
+
+      const wasEliminated = isEliminated(targetTeamId);
+      const justEliminated = !wasEliminated && isEliminated(targetTeamId, newHits);
+      if (justEliminated) {
+        eliminationOrderRef.current.push(targetTeamId);
+        showElimination(targetTeam.name, targetTeam.color.bg);
+        const remaining = teams.filter(t => !isEliminated(t.id, newHits));
+        if (remaining.length <= 1) {
+          // Let the elimination banner actually be seen on the board before cutting to the
+          // game-over summary screen — otherwise the banner and the summary would both try to
+          // render in the same instant and only the summary (a separate early-return) would show.
+          setTimeout(() => setPhase("gameover"), 1700);
+          return;
+        }
       }
     } else if (correct && !isShip) {
       setMisses(m => ({ ...m, [targetTeamId]: [...(m[targetTeamId] || []), pendingCoord] }));
       spawnCellFx(targetTeamId, pendingCoord, "miss");
       onUpdateScore(activeTeam.id, 15);
+      showToast(`🌊 ${activeTeam.name} fired at ${pendingCoord} — splash, no ship there!`, "water");
     } else {
       setMisses(m => ({ ...m, [targetTeamId]: [...(m[targetTeamId] || []), pendingCoord] }));
       spawnCellFx(targetTeamId, pendingCoord, "miss");
+      showToast(`❌ ${activeTeam.name} got the question wrong — shot goes wide!`, "wrong");
     }
     advanceTurn(newHits);
   };
@@ -262,11 +297,68 @@ export function BattleshipGame({ questions, teams, onUpdateScore, onEnd }: GameP
     </div>
   );
 
+  if (phase === "gameover") {
+    // The winner is whichever team was never eliminated — not whoever currently has the most
+    // accumulated score, which may belong to a team that dominated an earlier game entirely.
+    const winnerTeam = teams.find(t => !eliminationOrderRef.current.includes(t.id))!;
+    const rankedLosers = [...eliminationOrderRef.current].reverse().map(id => teams.find(t => t.id === id)!);
+    return (
+      <div style={{ ...arenaStyle, textAlign: "center" }}>
+        <AmbientBackdrop />
+        {STYLE_TAG}
+        <div style={{ position: "relative", zIndex: 1 }}>
+          <div style={{ fontSize: "48px", marginBottom: "6px" }}>🏆</div>
+          <div style={{ fontWeight: "900", fontSize: "24px", color: "#93C5FD", marginBottom: "4px", textShadow: "0 0 24px rgba(96,165,250,0.6)" }}>
+            {winnerTeam.color.emoji} {winnerTeam.name}'s fleet wins the battle!
+          </div>
+          <div style={{ color: "#94A3B8", fontSize: "14px", marginBottom: "20px" }}>Last fleet still afloat — every other team was sunk.</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: "8px", maxWidth: "420px", margin: "0 auto 24px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "12px", background: `linear-gradient(160deg,${winnerTeam.color.dark}66,#0C1B3A)`, border: `2px solid ${winnerTeam.color.bg}`, borderRadius: "14px", padding: "12px 16px" }}>
+              <span style={{ fontSize: "24px" }}>🥇</span>
+              <span style={{ flex: 1, textAlign: "left", fontWeight: "900", color: "white", fontSize: "16px" }}>{winnerTeam.name}</span>
+              <span style={{ fontWeight: "800", color: "#93C5FD", fontSize: "13px" }}>SURVIVED</span>
+            </div>
+            {rankedLosers.map((t, i) => (
+              <div key={t.id} style={{ display: "flex", alignItems: "center", gap: "12px", background: "linear-gradient(160deg,#1F2937,#0B0F17)", border: "2px solid #4B5563", borderRadius: "14px", padding: "10px 16px", opacity: 0.85 }}>
+                <span style={{ fontSize: "20px" }}>{i === 0 ? "💀" : "☠️"}</span>
+                <span style={{ flex: 1, textAlign: "left", fontWeight: "800", color: "#D1D5DB", fontSize: "15px" }}>{t.name}</span>
+                <span style={{ fontWeight: "700", color: "#6B7280", fontSize: "12px" }}>SUNK</span>
+              </div>
+            ))}
+          </div>
+          <button onClick={onEnd} className="bship-btn" style={{ background: "linear-gradient(135deg,#1E3A8A,#2563EB)", color: "white", border: "none", borderRadius: "14px", padding: "14px 32px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(37,99,235,0.5)", transition: "transform 0.15s ease" }}>🏁 End Game</button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div style={arenaStyle}>
       <AmbientBackdrop />
       <RadarBackdrop />
       {STYLE_TAG}
+      {elimBanner && (
+        <div key={elimBanner.key} style={{
+          position: "absolute", top: "14px", left: "50%", zIndex: 20, whiteSpace: "nowrap",
+          background: `linear-gradient(135deg,${elimBanner.color},#7F1D1D)`, border: "2px solid #FCA5A5",
+          borderRadius: "14px", padding: "12px 24px", boxShadow: "0 8px 28px rgba(0,0,0,0.5)",
+          animation: "bshipBannerIn 3.2s ease-in-out forwards",
+        }}>
+          <span style={{ color: "white", fontWeight: "900", fontSize: "16px", textShadow: "0 1px 3px rgba(0,0,0,0.5)" }}>
+            ☠️ {elimBanner.teamName}'s fleet is SUNK — eliminated!
+          </span>
+        </div>
+      )}
+      {toast && (
+        <div key={toast.key} style={{
+          position: "absolute", bottom: "10px", left: "50%", zIndex: 20, whiteSpace: "nowrap",
+          background: "#0C1B3A", border: `2px solid ${toast.kind === "hit" ? "#EF4444" : toast.kind === "water" ? "#60A5FA" : "#94A3B8"}`,
+          borderRadius: "10px", padding: "8px 18px", boxShadow: "0 6px 20px rgba(0,0,0,0.5)",
+          animation: "bshipToastIn 2.4s ease-in-out forwards",
+        }}>
+          <span style={{ color: "white", fontWeight: "800", fontSize: "13px" }}>{toast.text}</span>
+        </div>
+      )}
       <div style={{ position: "relative", zIndex: 1 }}>
         <div style={{ display: "flex", justifyContent: "center", marginBottom: "12px" }}>
           <div style={{ background: "rgba(255,255,255,0.06)", border: "1.5px solid #EF444488", boxShadow: "0 0 10px #EF444433", color: "white", borderRadius: "10px", padding: "6px 16px", fontSize: "12px", fontWeight: "800", display: "flex", alignItems: "center", gap: "6px" }}>

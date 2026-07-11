@@ -63,7 +63,8 @@ const ACTION_DEFS: ActionDef[] = [
 ];
 
 type TeamRpg = { hp: number; xp: number; level: number; mp: number; maxMp: number; shieldTurnsLeft: number; shieldFresh: boolean };
-type Phase = "intro" | "select-action" | "answer" | "pick-target" | "rolling" | "result";
+type Phase = "intro" | "select-action" | "answer" | "pick-target" | "rolling" | "result" | "gameover";
+type EliminationBanner = { teamName: string; color: string; key: number };
 type LastEvent = {
   action: ActionId;
   targetId?: string | number;
@@ -200,7 +201,9 @@ export function CastleGame({ questions, teams, onUpdateScore, onEnd }: GameProps
   const [typeIdx, setTypeIdx] = useState<Record<string, number>>(() => Object.fromEntries(ACTION_DEFS.map(a => [a.type, 0])));
   const [impacts, setImpacts] = useState<Impact[]>([]);
   const [floatTexts, setFloatTexts] = useState<FloatText[]>([]);
+  const [elimBanner, setElimBanner] = useState<EliminationBanner | null>(null);
   const fxId = useRef(0);
+  const eliminationOrderRef = useRef<(string | number)[]>([]);
 
   const spawnImpact = (teamId: string | number, kind: ImpactKind, character?: string, duration = 650) => {
     const id = fxId.current++;
@@ -211,6 +214,11 @@ export function CastleGame({ questions, teams, onUpdateScore, onEnd }: GameProps
     const id = fxId.current++;
     setFloatTexts(prev => [...prev, { id, teamId, text, color }]);
     setTimeout(() => setFloatTexts(prev => prev.filter(f => f.id !== id)), 1300);
+  };
+  const showElimination = (teamName: string, color: string) => {
+    const id = fxId.current++;
+    setElimBanner({ teamName, color, key: id });
+    setTimeout(() => setElimBanner(prev => (prev?.key === id ? null : prev)), 3200);
   };
 
   const qByType = useRef<Record<string, any[]> | null>(null);
@@ -301,6 +309,7 @@ export function CastleGame({ questions, teams, onUpdateScore, onEnd }: GameProps
       @keyframes celebrate{0%{transform:scale(0.7);opacity:0}30%{transform:scale(1.12);opacity:1}60%{transform:scale(0.98)}100%{transform:scale(1);opacity:1}}
       @keyframes characterStrike{0%{opacity:0;transform:translate(-50%,-50%) scale(0.4) rotate(-15deg)}35%{opacity:1;transform:translate(-50%,-50%) scale(1.3) rotate(8deg)}60%{opacity:1;transform:translate(-50%,-50%) scale(1.05) rotate(-4deg)}100%{opacity:0;transform:translate(-50%,-50%) scale(0.9) rotate(0deg)}}
       @keyframes attackerWindup{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-6px) rotate(4deg)}}
+      @keyframes castleBannerIn{0%{opacity:0;transform:translate(-50%,-16px) scale(0.9)}15%{opacity:1;transform:translate(-50%,0) scale(1.03)}25%{transform:translate(-50%,0) scale(1)}85%{opacity:1;transform:translate(-50%,0) scale(1)}100%{opacity:0;transform:translate(-50%,-10px) scale(0.96)}}
       .castle-action-btn:hover:not(:disabled){transform:translateY(-3px) scale(1.03);filter:brightness(1.15)}
       .castle-action-btn:active:not(:disabled){transform:translateY(0) scale(0.97)}
       .castle-target-btn:hover{transform:translateY(-2px) scale(1.03);filter:brightness(1.1)}
@@ -330,6 +339,41 @@ export function CastleGame({ questions, teams, onUpdateScore, onEnd }: GameProps
       </div>
     </div>
   );
+
+  if (phase === "gameover") {
+    // The winner is whichever castle was never knocked out — not whoever currently has the most
+    // accumulated score, which may belong to a team that dominated an earlier game entirely.
+    const winnerTeam = teams.find(t => !eliminationOrderRef.current.includes(t.id))!;
+    const rankedLosers = [...eliminationOrderRef.current].reverse().map(id => teams.find(t => t.id === id)!);
+    return (
+      <div style={{ ...arenaStyle, textAlign: "center" }}>
+        {ambientLayer}
+        {styleTag}
+        <div style={{ position: "relative", zIndex: 1 }}>
+          <div style={{ fontSize: "48px", marginBottom: "6px" }}>🏆</div>
+          <div style={{ fontWeight: "900", fontSize: "24px", color: "#6EE7B7", marginBottom: "4px", textShadow: "0 0 24px rgba(16,185,129,0.6)" }}>
+            🏰 {winnerTeam.name}'s castle stood strong — they win the battle!
+          </div>
+          <div style={{ color: "#94A3B8", fontSize: "14px", marginBottom: "20px" }}>Last castle standing — every other castle fell.</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: "8px", maxWidth: "420px", margin: "0 auto 24px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "12px", background: `linear-gradient(160deg,${winnerTeam.color.dark}66,#0B0B1F)`, border: `2px solid ${winnerTeam.color.bg}`, borderRadius: "14px", padding: "12px 16px" }}>
+              <span style={{ fontSize: "24px" }}>🥇</span>
+              <span style={{ flex: 1, textAlign: "left", fontWeight: "900", color: "white", fontSize: "16px" }}>{winnerTeam.name}</span>
+              <span style={{ fontWeight: "800", color: "#6EE7B7", fontSize: "13px" }}>STOOD STRONG</span>
+            </div>
+            {rankedLosers.map((t, i) => (
+              <div key={t.id} style={{ display: "flex", alignItems: "center", gap: "12px", background: "linear-gradient(160deg,#1F2937,#0B0F17)", border: "2px solid #4B5563", borderRadius: "14px", padding: "10px 16px", opacity: 0.85 }}>
+                <span style={{ fontSize: "20px" }}>{i === 0 ? "💀" : "🏚️"}</span>
+                <span style={{ flex: 1, textAlign: "left", fontWeight: "800", color: "#D1D5DB", fontSize: "15px" }}>{t.name}</span>
+                <span style={{ fontWeight: "700", color: "#6B7280", fontSize: "12px" }}>FELL</span>
+              </div>
+            ))}
+          </div>
+          <button onClick={onEnd} className="castle-next-btn" style={{ background: "linear-gradient(135deg,#064E3B,#059669)", color: "white", border: "none", borderRadius: "14px", padding: "14px 32px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(5,150,105,0.5)", transition: "transform 0.15s ease" }}>🏁 End Game</button>
+        </div>
+      </div>
+    );
+  }
 
   const bumpType = (type: string) => setTypeIdx(prev => ({ ...prev, [type]: (prev[type] ?? 0) + 1 }));
 
@@ -440,11 +484,22 @@ export function CastleGame({ questions, teams, onUpdateScore, onEnd }: GameProps
       spawnFloat(activeTeam.id, `+${healAmount}`, "#86EFAC");
     }
 
+    const justEliminated = target.hp > 0 && newTargetHp <= 0;
+    if (justEliminated) {
+      eliminationOrderRef.current.push(targetId);
+      const targetTeam = teams.find(t => t.id === targetId)!;
+      showElimination(targetTeam.name, targetTeam.color.bg);
+    }
+
     const aliveAfter = teams.filter(t => {
       if (t.id === targetId) return newTargetHp > 0;
       return rpg[t.id].hp > 0;
     });
-    if (aliveAfter.length <= 1) { setTimeout(() => onEnd(), 2200); }
+    if (aliveAfter.length <= 1) {
+      // Give the elimination banner a real chance to be seen (it stays up ~3.2s) before cutting
+      // to the game-over summary, same fix as Battleship's "banner never had time to show" bug.
+      setTimeout(() => setPhase("gameover"), 3400);
+    }
   };
 
   const aliveEnemies = teams.filter(t => t.id !== activeTeam.id && !isEliminated(t.id));
@@ -469,6 +524,18 @@ export function CastleGame({ questions, teams, onUpdateScore, onEnd }: GameProps
     <div style={arenaStyle}>
       {ambientLayer}
       {styleTag}
+      {elimBanner && (
+        <div key={elimBanner.key} style={{
+          position: "absolute", top: "14px", left: "50%", zIndex: 20, whiteSpace: "nowrap",
+          background: `linear-gradient(135deg,${elimBanner.color},#7F1D1D)`, border: "2px solid #FCA5A5",
+          borderRadius: "14px", padding: "12px 24px", boxShadow: "0 8px 28px rgba(0,0,0,0.5)",
+          animation: "castleBannerIn 3.2s ease-in-out forwards",
+        }}>
+          <span style={{ color: "white", fontWeight: "900", fontSize: "16px", textShadow: "0 1px 3px rgba(0,0,0,0.5)" }}>
+            💀 {elimBanner.teamName}'s castle has fallen — eliminated!
+          </span>
+        </div>
+      )}
       <div style={{ position: "relative", zIndex: 1 }}>
         <div style={{ display: "grid", gridTemplateColumns: teamsGridCols(teams.length), gap: "10px", marginBottom: "16px" }}>
           {teams.map(tm => {
