@@ -68,7 +68,7 @@ const STYLE_TAG = (
     .ww-btn:hover:not(:disabled){transform:translateY(-2px) scale(1.02);filter:brightness(1.08)}
     .ww-btn:active:not(:disabled){transform:translateY(0) scale(0.97)}
     .ww-mole:hover{filter:brightness(1.15)}
-    .ww-mole:active{transform:scale(0.92) !important}
+    .ww-mole:active{transform:translateX(-50%) scale(0.92) !important}
   `}</style>
 );
 
@@ -319,9 +319,15 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd }: GamePr
                           className="ww-mole"
                           style={{
                             position: "absolute", left: "50%", bottom: "10px", transform: "translateX(-50%)",
-                            width: "82px", minHeight: "56px", border: "none", borderRadius: "14px", cursor: "pointer",
+                            width: "92px", minHeight: "56px", border: "none", borderRadius: "14px", cursor: "pointer",
                             background: "linear-gradient(160deg,#A16207,#78350F)", color: "#FEF3C7",
-                            fontWeight: "800", fontSize: "12px", padding: "8px 6px", boxShadow: "0 4px 10px rgba(0,0,0,0.5)",
+                            fontWeight: "800", fontSize: mole.text.length > 14 ? "9.5px" : mole.text.length > 9 ? "10.5px" : "12px",
+                            lineHeight: 1.15, padding: "8px 5px", boxShadow: "0 4px 10px rgba(0,0,0,0.5)",
+                            // Long single words (e.g. "cosmopolitan", "extracurricular") have no space to wrap
+                            // on — without this they overflow past the button's own edge, so the tail of the
+                            // word renders outside the actual clickable hitbox and clicking it does nothing.
+                            overflowWrap: "break-word", wordBreak: "break-word", hyphens: "auto",
+                            display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center",
                             animation: holeFx?.kind === "miss" ? "wwBonk 0.35s ease-in-out" : "wwPopUp 0.3s ease-out",
                           }}
                         >
