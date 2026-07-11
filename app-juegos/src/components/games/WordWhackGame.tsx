@@ -58,10 +58,10 @@ const AMBIENT_BITS = Array.from({ length: 10 }, (_, i) => ({
 const STYLE_TAG = (
   <style>{`
     @keyframes wwDrift{0%{transform:translateY(0) rotate(0deg);opacity:0.15}50%{opacity:0.4}100%{transform:translateY(-36px) rotate(20deg);opacity:0.15}}
-    @keyframes wwPopUp{0%{transform:translateY(30px) scale(0.5);opacity:0}60%{transform:translateY(-4px) scale(1.08);opacity:1}100%{transform:translateY(0) scale(1);opacity:1}}
-    @keyframes wwDuckDown{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(30px) scale(0.6);opacity:0}}
+    @keyframes wwPopUp{0%{transform:translateX(-50%) translateY(30px) scale(0.5);opacity:0}60%{transform:translateX(-50%) translateY(-4px) scale(1.08);opacity:1}100%{transform:translateX(-50%) translateY(0) scale(1);opacity:1}}
+    @keyframes wwDuckDown{0%{transform:translateX(-50%) translateY(0) scale(1);opacity:1}100%{transform:translateX(-50%) translateY(30px) scale(0.6);opacity:0}}
     @keyframes wwHitBurst{0%{transform:scale(0.3);opacity:1}60%{transform:scale(1.6);opacity:0.9}100%{transform:scale(2);opacity:0}}
-    @keyframes wwBonk{0%,100%{transform:translate(0,0) rotate(0deg)}25%{transform:translate(-3px,1px) rotate(-8deg)}50%{transform:translate(3px,-1px) rotate(8deg)}75%{transform:translate(-2px,1px) rotate(-4deg)}}
+    @keyframes wwBonk{0%,100%{transform:translateX(-50%) translate(0,0) rotate(0deg)}25%{transform:translateX(-50%) translate(-3px,1px) rotate(-8deg)}50%{transform:translateX(-50%) translate(3px,-1px) rotate(8deg)}75%{transform:translateX(-50%) translate(-2px,1px) rotate(-4deg)}}
     @keyframes wwCountPulse{0%{transform:scale(0.5);opacity:0}50%{transform:scale(1.2);opacity:1}100%{transform:scale(1);opacity:1}}
     @keyframes wwComboGlow{0%,100%{filter:brightness(1)}50%{filter:brightness(1.4)}}
     @keyframes wwShine{0%,100%{opacity:0.5}50%{opacity:0.9}}
@@ -180,7 +180,9 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd }: GamePr
       if (comboRef.current > bestComboRef.current) { bestComboRef.current = comboRef.current; setBestCombo(bestComboRef.current); }
       spawnFx(mole.holeIdx, "hit");
       setMoles([]);
-      spawnRound();
+      // A brief pause before the next mole pops up — long enough to see the +hit land
+      // and to stop a reflexive next click from landing mid pop-up on the new mole.
+      roundTimerRef.current = setTimeout(() => spawnRound(), 260);
     } else {
       comboRef.current = 0;
       setCombo(0);
