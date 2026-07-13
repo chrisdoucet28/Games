@@ -11,6 +11,7 @@ import { MinefieldGame } from "./components/games/MinefieldGame";
 import { HotSeatGame } from "./components/games/HotSeatGame";
 import { SpyAmongUsGame } from "./components/games/SpyAmongUsGame";
 import { BattleshipGame } from "./components/games/BattleshipGame";
+import { VaultHeistGame } from "./components/games/VaultHeistGame";
 import { CardShuffleGame } from "./components/games/CardShuffleGame";
 import { CastleGame } from "./components/games/CastleGame";
 import { KingOfHillGame } from "./components/games/KingOfHillGame";
@@ -239,7 +240,7 @@ export default function LessonGamesGenerator() {
         // includes L1-interference-flavored mistakes for topic-focus content) with cardTasks,
         // rather than dropping grammar content entirely for topic-only selections.
         qs = mixByTopic(selectedEntries.map((entry, index) => [...(entry.questions ?? []), ...cardTaskBuckets[index]]));
-      } else if (mode.id === "castle" || mode.id === "racetrack" || mode.id === "whack" || mode.id === "rocket") {
+      } else if (mode.id === "castle" || mode.id === "racetrack" || mode.id === "whack" || mode.id === "rocket" || mode.id === "vault") {
         qs = mixByTopic(selectedEntries.map((entry, index) => [...(entry.questions ?? []), ...cardTaskBuckets[index]]));
       } else if (isTopicOnlySelection && allCardTasks.length > 0) {
         qs = mixByTopic(cardTaskBuckets);
@@ -617,6 +618,7 @@ export default function LessonGamesGenerator() {
             {selectedGame.id === "hotseat" && <HotSeatGame questions={questions} teams={teams} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
             {selectedGame.id === "spy" && <SpyAmongUsGame questions={questions} teams={teams} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
             {selectedGame.id === "battleship" && <BattleshipGame questions={questions} teams={teams} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
+            {selectedGame.id === "vault" && <VaultHeistGame questions={questions} teams={teams} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
             {selectedGame.id === "cards" && <CardShuffleGame questions={questions} teams={teams} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
             {selectedGame.id === "castle" && <CastleGame questions={questions} teams={teams} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
             {selectedGame.id === "hill" && <KingOfHillGame questions={questions} teams={teams} onUpdateScore={updateScore} onEnd={handleGameEnd} />}

@@ -30,6 +30,7 @@ export interface TeamColor {
     answer?: string;
     hint?: string;
     difficulty?: string;
+    transform?: string;
     word?: string;
     sentence?: string;
     isCorrect?: boolean;

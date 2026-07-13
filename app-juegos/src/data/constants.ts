@@ -23,6 +23,7 @@ export const GAME_MODES: GameMode[] = [
   { id: "whack",     name: "Word Whack", icon: "🔨",  desc: "Solo 90-second time trial — whack the correct answer before it ducks", color: "#84CC16", tag: "No speech · pure reflexes · warm-up" },
   { id: "auction",   name: "Sentence Auction",  icon: "🏛️", desc: "Bet points on correct or incorrect sentences", color: "#8B5CF6", tag: "No speech · silent judgment · icebreaker" },
   { id: "battleship",name: "Battleship", icon: "⚓",  desc: "Attack coordinates by answering correctly", color: "#3B82F6", tag: "Short spoken corrections · low-pressure" },
+  { id: "vault",     name: "Vault Heist", icon: "🔐",  desc: "Crack your team's vault by rewriting sentences correctly — one wrong answer re-locks your last crack", color: "#D4AF37", tag: "Short answers · high-stakes accuracy · no partial credit" },
   { id: "hill",      name: "King of the Hill", icon: "👑",  desc: "Capture zones by answering questions", color: "#EC4899", tag: "Quick spoken completions · head-to-head" },
   { id: "hotpotato", name: "Hot Potato", icon: "🥔",  desc: "Answer fast or keep the potato — the timer ends randomly", color: "#F97316", tag: "Short answers · timed bursts" },
   { id: "castle",    name: "Castle Defense", icon: "🏰",  desc: "Correct answers let you attack enemies", color: "#10B981", tag: "Short answers + occasional full speech" },
