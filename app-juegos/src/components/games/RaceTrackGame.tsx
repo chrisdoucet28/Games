@@ -93,6 +93,7 @@ function luckyOutcome(team: RaceTeamState, landedIdx: number, teamName: string):
   if (roll === 2) return { finalIdx: landedIdx, msg: `🍀 Lucky! ${teamName} earns a free Shield!`, patch: { shields: team.shields + 1 } };
   if (roll === 3) return { finalIdx: landedIdx, msg: `🍀 Lucky! ${teamName} gets 15 bonus coins!`, patch: { coins: team.coins + 15 } };
   const pu = POWERUPS[Math.floor(Math.random() * POWERUPS.length)];
+  if (pu.id === "shield") return { finalIdx: landedIdx, msg: `🍀 Lucky! ${teamName} earns a free Shield!`, patch: { shields: team.shields + 1 } };
   return { finalIdx: landedIdx, msg: `🍀 Lucky! ${teamName} earns a random powerup: ${pu.icon} ${pu.label}!`, patch: { powerups: [...team.powerups, pu.id] } };
 }
 
@@ -246,10 +247,10 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd }: GamePr
     };
 
     if (space.banana) {
+      setTrack(prev => prev.map((s, i) => (i === landedIdx ? { ...s, banana: false } : s)));
       if (team.shields > 0) {
         finish(landedIdx, `🛡️ ${name}'s shield blocked the banana trap!`, "#3B82F6", "🛡️", { shields: team.shields - 1 });
       } else {
-        setTrack(prev => prev.map((s, i) => (i === landedIdx ? { ...s, banana: false } : s)));
         finish(Math.max(0, landedIdx - 3), `🍌 Banana trap! ${name} slides back 3 spaces!`, "#FFE066", "🍌", {});
       }
       return;
@@ -292,6 +293,7 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd }: GamePr
       }
       case "question": {
         const pu = POWERUPS[Math.floor(Math.random() * POWERUPS.length)];
+        if (pu.id === "shield") { finish(landedIdx, `❓ Bonus question! ${name} answered and earned: 🛡️ Shield!`, "#F97316", "❓", { shields: team.shields + 1 }); return; }
         finish(landedIdx, `❓ Bonus question! ${name} answered and earned: ${pu.icon} ${pu.label}!`, "#F97316", "❓", { powerups: [...team.powerups, pu.id] });
         return;
       }
@@ -379,9 +381,6 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd }: GamePr
       setTrack(prev => prev.map((s, i) => (i === spaceIdx ? { ...s, banana: true } : s)));
       setRaceTeams(prev => { const powerups = [...prev[teamId].powerups]; powerups.splice(idx, 1); return { ...prev, [teamId]: { ...prev[teamId], powerups } }; });
       showToast(`🍌 ${name} places a banana trap on space ${spaceIdx}!`);
-    } else if (pid === "shield") {
-      setRaceTeams(prev => { const powerups = [...prev[teamId].powerups]; powerups.splice(idx, 1); return { ...prev, [teamId]: { ...prev[teamId], shields: prev[teamId].shields + 1, powerups } }; });
-      showToast(`🛡️ ${name} activates their Shield!`);
     } else {
       showToast(`${pu.icon} ${name}'s ${pu.label} is armed and ready.`);
     }
@@ -391,6 +390,11 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd }: GamePr
     const team = raceTeams[teamId];
     const pu = POWERUPS.find(p => p.id === pid)!;
     if (team.coins < pu.cost) return;
+    if (pid === "shield") {
+      setRaceTeams(prev => ({ ...prev, [teamId]: { ...prev[teamId], coins: prev[teamId].coins - pu.cost, shields: prev[teamId].shields + 1 } }));
+      showToast(`🛡️ ${teamName(teamId)} bought a Shield — active now!`);
+      return;
+    }
     setRaceTeams(prev => ({ ...prev, [teamId]: { ...prev[teamId], coins: prev[teamId].coins - pu.cost, powerups: [...prev[teamId].powerups, pid] } }));
     showToast(`${pu.icon} ${teamName(teamId)} bought ${pu.label}!`);
   };

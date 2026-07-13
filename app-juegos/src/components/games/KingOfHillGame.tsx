@@ -72,9 +72,16 @@ export function KingOfHillGame({ questions, teams, onUpdateScore, onEnd }: GameP
   const ZONES = isTopicMode ? HILL_ZONES_TOPIC : HILL_ZONES_GRAMMAR;
 
   const pool = useRef((() => {
+    // Grammar mode used to draw only from "finish the sentence" questions, but several topics
+    // only have a handful of those — the pool would exhaust and repeat well before a 4-round
+    // game ends. "correct grammar mistakes" is the same quick-answer, single-blank format, so
+    // pulling both in gives a much deeper pool without changing the duel's feel.
     const base = isTopicMode
       ? questions
-      : (questions.filter(q => q.type === "finish the sentence").length ? questions.filter(q => q.type === "finish the sentence") : questions);
+      : (() => {
+          const filtered = questions.filter(q => q.type === "finish the sentence" || q.type === "correct grammar mistakes");
+          return filtered.length ? filtered : questions;
+        })();
     return [...base].sort(() => Math.random() - 0.5);
   })()).current;
 
@@ -277,7 +284,7 @@ export function KingOfHillGame({ questions, teams, onUpdateScore, onEnd }: GameP
             {isTopicMode ? (
               <>Each zone is a different move in the conversation: <strong style={{ color: "#F9A8D4" }}>👑 Opinion, ❓ Question, 💭 Example, 🤝 Agree/Disagree, 💡 Alternative</strong> — claiming zones builds a full class conversation!<br /></>
             ) : (
-              <>Every zone is a <strong style={{ color: "#F9A8D4" }}>finish-the-sentence</strong> challenge.<br /></>
+              <>Every zone is a <strong style={{ color: "#F9A8D4" }}>quick grammar</strong> challenge — finish the sentence or fix the mistake.<br /></>
             )}
             Attack a claimed zone? <strong style={{ color: "#F9A8D4" }}>Both teams face the same question!</strong><br />
             {isTopicMode
