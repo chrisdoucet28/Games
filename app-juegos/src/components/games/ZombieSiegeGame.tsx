@@ -6,7 +6,7 @@ const TICK_MS = 1000; // 1 tick == 1 elapsed second — every timing constant be
 const APPROACH_TICKS = 14; // ticks a zombie spends visibly walking in before it reaches an entry point — long enough to see it coming and react
 const BARRICADE_ITEM_HP = 4; // hits a single barricade item survives before breaking
 const ZOMBIE_DAMAGE_PER_TICK = 1;
-const CORRECT_ANSWER_SCORE = 10;
+const CORRECT_ANSWER_SCORE = 20; // matches Rocket Fuel's per-sentence rate — the closest sibling game (open sentence production, prompt after prompt); 10 felt thin next to other games' totals
 // Two independent, deliberately decoupled-from-English-tasks defense resources:
 // - Bullets slowly recharge on a flat timer (not tied to rounds or answering). The instant a
 //   zombie arrives at a door, any team with a charged bullet auto-shoots it down before it can
@@ -28,29 +28,27 @@ const POWERUP_CHANCE = 0.25;
 type PowerUpKind = "maxAmmo" | "bulletCapUp" | "allDoorsChair";
 const POWERUP_KINDS: PowerUpKind[] = ["maxAmmo", "bulletCapUp", "allDoorsChair"];
 
-// Difficulty escalates in discrete ROUNDS rather than smoothly by the second — every ROUND_SECONDS
-// the horde gets meaningfully worse (more likely to spawn, eventually spawning more than once per
-// tick), but walk speed and prompt cadence never change. Tuned to start slow (round 1 should feel
-// almost too easy) and only really bite several rounds in — first-pass numbers, meant to be tuned
-// live in an actual classroom rather than calculated to a "correct" answer.
-const ROUND_SECONDS = 45;
-const SPAWN_CHANCE_BASE = 0.05;
-const SPAWN_CHANCE_PER_ROUND = 0.03;
-const SPAWN_CHANCE_CAP = 0.75;
-const EXTRA_ROLL_EVERY_ROUNDS = 4; // +1 independent spawn roll every 4 rounds, uncapped
+// Rounds are closed waves, not a clock — think Call of Duty Zombies. Each round has a fixed zombie
+// quota; they trickle in (not all at once) after a brief read pause, and the round doesn't end
+// until every zombie in the wave has been resolved (shot or breached — either way it's gone). Clear
+// a fast wave and the next, bigger one starts sooner; a slow class just holds at the same pressure
+// for longer. First-pass numbers, meant to be tuned live rather than calculated to a "correct" answer.
+const ROUND_READ_PAUSE_SECONDS = 3; // empty beat at the start of every round — time to read the new prompt before anything spawns
+const ROUND_QUOTA_BASE = 4; // zombies in round 1's wave
+const ROUND_QUOTA_GROWTH = 2; // extra zombies added to the wave each subsequent round
+const SPAWN_CHANCE_BASE = 0.12; // per-tick chance the next queued zombie in this round's wave actually spawns
+const SPAWN_CHANCE_PER_ROUND = 0.02; // spawns arrive a little more relentlessly each round
+const SPAWN_CHANCE_CAP = 0.6;
 
-// One word-prompt per round, not per answer — everyone gets a beat to read it before the room opens
-// up into free-for-all sentence-throwing. ROUND_BREAK_MS is that reading pause; the zombies don't
-// wait for it, only the credit buttons do.
-const ROUND_BREAK_MS = 3000;
+// One prompt per round, not per answer — everyone gets a beat to read it before the room opens up
+// into free-for-all sentence-throwing. ROUND_BREAK_MS is that reading pause; matches
+// ROUND_READ_PAUSE_SECONDS above so the credit buttons and the first zombie spawn unlock together.
+const ROUND_BREAK_MS = ROUND_READ_PAUSE_SECONDS * 1000;
 
-function roundForElapsed(elapsedSeconds: number): number {
-  return Math.floor(elapsedSeconds / ROUND_SECONDS) + 1;
+function roundZombieQuota(round: number): number {
+  return ROUND_QUOTA_BASE + (round - 1) * ROUND_QUOTA_GROWTH;
 }
-function spawnRollsThisTick(round: number): number {
-  return 1 + Math.floor((round - 1) / EXTRA_ROLL_EVERY_ROUNDS);
-}
-function spawnChanceThisTick(round: number): number {
+function spawnChanceForRound(round: number): number {
   return Math.min(SPAWN_CHANCE_CAP, SPAWN_CHANCE_BASE + (round - 1) * SPAWN_CHANCE_PER_ROUND);
 }
 
@@ -61,6 +59,16 @@ const ENTRY_POINTS: { id: EntryPointId; label: string; icon: string }[] = [
   { id: "window1", label: "Window", icon: "🪟" },
   { id: "window2", label: "Window", icon: "🪟" },
 ];
+
+// A new barricade always goes to whichever entry point currently has the fewest items (ties broken
+// randomly) — not a uniformly random door. Pure randomness meant bad luck could leave one side
+// permanently open while correct answers kept stacking up somewhere else; this guarantees the
+// weakest point is always the one that gets reinforced next.
+function weakestEntryPoint(barricades: Record<EntryPointId, BarricadeItem[]>): EntryPointId {
+  const minCount = Math.min(...ENTRY_POINTS.map(ep => barricades[ep.id].length));
+  const weakest = ENTRY_POINTS.filter(ep => barricades[ep.id].length === minCount);
+  return weakest[Math.floor(Math.random() * weakest.length)].id;
+}
 
 type BarricadeItem = { id: number; hp: number };
 type ZombieStatus = "approaching" | "attacking";
@@ -74,7 +82,10 @@ type SiegeState = {
   barricades: Record<EntryPointId, BarricadeItem[]>; // index 0 = frontmost, attacked first, never repaired
   zombies: Zombie[];
   persons: Record<string | number, PersonState>;
-  elapsedSeconds: number;
+  elapsedSeconds: number; // pure survived-time display, decoupled from rounds
+  round: number;
+  roundElapsedSeconds: number; // ticks since this round started — drives the read-pause before spawning begins
+  zombiesSpawnedThisRound: number; // counts toward roundZombieQuota(round); round clears once this hits quota AND zombies is empty
 };
 
 type TickEventKind = "barricadeDestroyed" | "zombieShot" | "axeUsed" | "personEliminated";
@@ -116,7 +127,9 @@ function advanceTick(
   let zombies = state.zombies.map(z => ({ ...z }));
   let persons = { ...state.persons };
   const elapsedSeconds = state.elapsedSeconds + 1;
-  const round = roundForElapsed(elapsedSeconds);
+  const roundElapsedSeconds = state.roundElapsedSeconds + 1;
+  const round = state.round;
+  let zombiesSpawnedThisRound = state.zombiesSpawnedThisRound;
 
   // 0. Recharge — a flat timer, completely independent of rounds or how the English tasks are
   // going. Axes never regenerate; only bullets do.
@@ -129,14 +142,14 @@ function advanceTick(
     });
   }
 
-  // 1. Spawn — a random entry point, pure chance, no targeting logic.
-  const rolls = spawnRollsThisTick(round);
-  const chance = spawnChanceThisTick(round);
-  for (let i = 0; i < rolls; i++) {
-    if (Math.random() < chance) {
-      const ep = ENTRY_POINTS[Math.floor(Math.random() * ENTRY_POINTS.length)];
-      zombies.push({ id: nextZombieId(), entryPointId: ep.id, status: "approaching", progress: 0, lane: Math.random() * 2 - 1 });
-    }
+  // 1. Spawn — gated by the read pause (nothing spawns while the class is still reading the new
+  // prompt) and capped by this round's wave quota. A random entry point, pure chance, no targeting.
+  const quota = roundZombieQuota(round);
+  const spawningAllowed = roundElapsedSeconds > ROUND_READ_PAUSE_SECONDS && zombiesSpawnedThisRound < quota;
+  if (spawningAllowed && Math.random() < spawnChanceForRound(round)) {
+    const ep = ENTRY_POINTS[Math.floor(Math.random() * ENTRY_POINTS.length)];
+    zombies.push({ id: nextZombieId(), entryPointId: ep.id, status: "approaching", progress: 0, lane: Math.random() * 2 - 1 });
+    zombiesSpawnedThisRound += 1;
   }
 
   // 2. Approach — walk speed is constant regardless of difficulty. Track which zombies arrive
@@ -208,7 +221,26 @@ function advanceTick(
     // Zombie is resolved either way — it does not linger inside the house.
   });
 
-  return { next: { barricades, zombies: survivors, persons, elapsedSeconds }, events };
+  // 5. Round clear — a closed wave, not a clock: the round only advances once every zombie
+  // promised for it has both spawned and been resolved (shot or breached). A fast class clears
+  // waves quickly and races into harder rounds sooner; a struggling class just holds at the same
+  // pressure for longer instead of the horde escalating out from under them regardless.
+  let nextRound = round;
+  let nextRoundElapsedSeconds = roundElapsedSeconds;
+  let nextZombiesSpawnedThisRound = zombiesSpawnedThisRound;
+  if (zombiesSpawnedThisRound >= quota && survivors.length === 0) {
+    nextRound = round + 1;
+    nextRoundElapsedSeconds = 0;
+    nextZombiesSpawnedThisRound = 0;
+  }
+
+  return {
+    next: {
+      barricades, zombies: survivors, persons, elapsedSeconds,
+      round: nextRound, roundElapsedSeconds: nextRoundElapsedSeconds, zombiesSpawnedThisRound: nextZombiesSpawnedThisRound,
+    },
+    events,
+  };
 }
 
 function formatClock(seconds: number): string {
@@ -365,7 +397,7 @@ function SiegeQuestionCard({ question }: { question: QuestionData | null }) {
         padding: "1px 8px", borderRadius: "20px", fontSize: "9px", fontWeight: "700", marginBottom: "4px",
         textTransform: "uppercase", letterSpacing: "0.04em",
       }}>
-        🗣️ make a sentence
+        📖 add to the prompt
       </div>
       {question.crewmateTopic && (
         <div style={{ fontSize: "15px", fontWeight: "900", color: "#1E1B4B", margin: "0 0 3px" }}>
@@ -389,6 +421,9 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd }: Game
     zombies: [],
     persons: Object.fromEntries(teams.map(t => [t.id, { bullets: BULLET_CAP_START, bulletCap: BULLET_CAP_START, axes: MAX_AXES, alive: true }])),
     elapsedSeconds: 0,
+    round: 1,
+    roundElapsedSeconds: 0,
+    zombiesSpawnedThisRound: 0,
   }));
   const [currentQuestion, setCurrentQuestion] = useState<QuestionData | null>(null);
   const [roundPhase, setRoundPhase] = useState<RoundPhase>("reveal");
@@ -462,12 +497,11 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd }: Game
     if (phase !== "playing") return;
     const id = setInterval(() => {
       const aliveTeamIds = teams.map(t => t.id);
-      const prevRound = roundForElapsed(siegeRef.current.elapsedSeconds);
+      const prevRound = siegeRef.current.round;
       const { next, events } = advanceTick(siegeRef.current, aliveTeamIds, () => zombieIdRef.current++);
       setSiege(next);
-      const nextRound = roundForElapsed(next.elapsedSeconds);
-      if (nextRound > prevRound) {
-        showRoundBanner(nextRound);
+      if (next.round > prevRound) {
+        showRoundBanner(next.round);
         startRound(pickNextQuestion());
       }
       events.forEach(ev => {
@@ -523,9 +557,11 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd }: Game
       const kind = POWERUP_KINDS[Math.floor(Math.random() * POWERUP_KINDS.length)];
       applyPowerUp(kind, teamId);
     } else {
-      const ep = ENTRY_POINTS[Math.floor(Math.random() * ENTRY_POINTS.length)];
       const newItem: BarricadeItem = { id: barricadeIdRef.current++, hp: BARRICADE_ITEM_HP };
-      setSiege(prev => ({ ...prev, barricades: { ...prev.barricades, [ep.id]: [newItem, ...prev.barricades[ep.id]] } }));
+      setSiege(prev => {
+        const ep = weakestEntryPoint(prev.barricades);
+        return { ...prev, barricades: { ...prev.barricades, [ep]: [newItem, ...prev.barricades[ep]] } };
+      });
       pushFx("barricadePlaced");
     }
   };
@@ -555,14 +591,10 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd }: Game
         <div style={{ background: "linear-gradient(135deg,#14210F,#365314)", border: "2px solid #65A30D55", borderRadius: "20px", padding: "28px 24px", marginBottom: "10px", color: "white", maxWidth: "560px", margin: "0 auto 10px", boxShadow: "0 0 40px #65A30D33" }}>
           <div style={{ fontSize: "36px", marginBottom: "10px" }}>🧟</div>
           <div style={{ fontWeight: "900", fontSize: "20px", marginBottom: "10px", color: "#BEF264" }}>Zombie Siege</div>
-          <div style={{ fontSize: "15px", lineHeight: 1.7, opacity: 0.95 }}>
-            The whole class defends <strong style={{ color: "#BEF264" }}>one shared house</strong> together — but every team still earns their own score.<br />
-            Every round drops a new <strong style={{ color: "#BEF264" }}>prompt</strong> — a few seconds to read it, then it's open season: any team can shout out a sentence using it, as many times as they like, all round long.
-            Most correct sentences barricade a random door or window — but sometimes a <strong style={{ color: "#BEF264" }}>power-up</strong> drops instead: extra ammo, a bigger ammo cap, or a chair on every door at once.<br />
-            Every team's <strong style={{ color: "#BEF264" }}>bullets slowly recharge over time</strong>, win or lose. The instant a zombie reaches a door, a charged bullet shoots it down for free — no barricade needed.
-            No bullet ready? It grinds through your barricades instead, and barricades are never repaired.<br />
-            Each team also has <strong style={{ color: "#BEF264" }}>2 axes that never recharge</strong> — your last resort if a zombie actually gets through. Survive two, and a third takes you out — but you'll still be cheering everyone else on.<br />
-            Round 1 is easy — every round, the horde gets a little worse. There's no finish line. Survive as many rounds as you can.
+          <div style={{ fontSize: "15px", lineHeight: 1.6, opacity: 0.95 }}>
+            One shared house, everyone's score. Each round is a <strong style={{ color: "#BEF264" }}>wave</strong> — read the prompt, then add a sentence to earn a barricade or a <strong style={{ color: "#BEF264" }}>power-up</strong>, as many times as you like.<br />
+            <strong style={{ color: "#BEF264" }}>Bullets recharge</strong> and auto-shoot zombies at the door. No bullet ready? It breaks your barricades instead. <strong style={{ color: "#BEF264" }}>2 axes</strong> per team are the last resort if one gets through.<br />
+            Clear the wave, and a bigger one begins.
           </div>
         </div>
         <button onClick={() => setPhase("playing")} className="zs-btn" style={{ background: "linear-gradient(135deg,#365314,#65A30D)", color: "#0D1A0D", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(101,163,13,0.5)", transition: "transform 0.15s ease" }}>🏠 Board Up the House!</button>
@@ -589,7 +621,9 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd }: Game
   }
 
   const aliveTeams = teams.filter(t => siege.persons[t.id]?.alive);
-  const round = roundForElapsed(siege.elapsedSeconds);
+  const round = siege.round;
+  const roundQuota = roundZombieQuota(round);
+  const roundDefeated = siege.zombiesSpawnedThisRound - siege.zombies.length;
 
   return (
     <div style={arenaStyle}>
@@ -647,7 +681,7 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd }: Game
       <div style={{ position: "relative", zIndex: 1 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "6px", marginBottom: "4px" }}>
           <div style={{ fontWeight: "800", fontSize: "12px", color: "#BEF264" }}>⏱️ {formatClock(siege.elapsedSeconds)}</div>
-          <div style={{ fontWeight: "900", fontSize: "13px", color: "#F87171", animation: round >= 6 ? "zsPulse 1s ease-in-out infinite" : "none" }}>🌊 Round {round}</div>
+          <div style={{ fontWeight: "900", fontSize: "13px", color: "#F87171", animation: round >= 6 ? "zsPulse 1s ease-in-out infinite" : "none" }}>🌊 Round {round} · {roundDefeated}/{roundQuota}</div>
         </div>
 
         <HouseScene siege={siege} teams={teams} />
@@ -661,7 +695,7 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd }: Game
 
           {roundPhase === "reveal" ? (
             <div style={{ textAlign: "center", fontSize: "12px", color: "#A3B899", fontWeight: "700", marginTop: "8px" }}>
-              📖 Read it... get ready!
+              📖 Read the prompt... get ready!
             </div>
           ) : (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "5px", marginTop: "6px" }}>
@@ -669,7 +703,7 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd }: Game
                 <button key={t.id} onClick={() => handleCorrectAnswer(t.id)} className="zs-btn" style={{
                   background: t.color.bg, color: "white", border: "none", borderRadius: "10px",
                   padding: "6px 8px", fontSize: "11px", fontWeight: "800", cursor: "pointer", transition: "transform 0.15s ease",
-                }}>🗣️ {t.color.emoji} {t.name} nailed it!</button>
+                }}>➕ {t.color.emoji} {t.name} added to it!</button>
               ))}
             </div>
           )}

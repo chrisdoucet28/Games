@@ -232,7 +232,7 @@ export default function LessonGamesGenerator() {
         qs = mixByTopic(cardTaskBuckets);
       } else if (mode.id === "spy" || mode.id === "zombie") {
         // Zombie Siege reuses Spy Among Us's spyRounds content (crewmateTopic/crewmatePrompt) for
-        // its "make a sentence" prompts — short grammar-topic labels with a scenario/example-word
+        // its sentence-response prompts — short grammar-topic labels with a scenario/example-word
         // cue, not the fixed-answer drill format the other mixed-pool games use.
         qs = mixByTopic(selectedEntries.map(entry => entry.spyRounds ?? []));
       } else if (mode.id === "hotseat") {

@@ -33,7 +33,7 @@ export const GAME_MODES: GameMode[] = [
   { id: "cards",     name: "Card Shuffle", icon: "🃏",  desc: "Pick a card and complete an open speaking or writing task", color: "#F59E0B", tag: "One open speaking prompt" },
   { id: "hotseat",   name: "Hot Seat", icon: "🔥",  desc: "Describe words to your teammate — no spelling allowed", color: "#EF4444", tag: "Nonstop improvised talking" },
   { id: "spy",       name: "Spy Among Us", icon: "🕵️",  desc: "Speak freely, listen carefully, find who has a different topic", color: "#374151", tag: "Sustained free conversation" },
-  { id: "zombie",    name: "Zombie Siege", icon: "🧟",  desc: "Throw sentences at a shared prompt to barricade the house — but the horde never stops coming, and every team's bullets run out eventually", color: "#65A30D", tag: "Free-for-all sentence-throwing · escalating pressure" },
+  { id: "zombie",    name: "Zombie Siege", icon: "🧟",  desc: "Add sentences to a shared prompt to barricade the house — clear each wave of zombies before the next, bigger one arrives", color: "#65A30D", tag: "Free-for-all sentence-throwing · wave-based pressure" },
 ];
 
 export const TASK_TYPES: string[] = ["finish the sentence", "correct grammar mistakes", "use vocabulary in a sentence", "choose correct grammar", "rewrite sentences", "speaking task"];
