@@ -17,9 +17,9 @@ const MAX_COMBO_BONUS = 40;
 type Difficulty = "easy" | "medium" | "hard";
 const DIFFICULTY_OPTIONS: Difficulty[] = ["easy", "medium", "hard"];
 const DUCK_MS: Record<Difficulty, [number, number, number, number]> = {
-  easy: [4800, 4100, 3500, 3000],
-  medium: [4000, 3400, 2800, 2300],
-  hard: [3600, 3000, 2400, 1900],
+  easy: [5300, 4500, 3900, 3300],
+  medium: [4400, 3700, 3100, 2500],
+  hard: [4000, 3300, 2600, 2100],
 };
 
 type ParsedMCQ = { prompt: string; choices: string[]; correctIdx: number };

@@ -107,9 +107,13 @@ export function SpyAmongUsGame({ questions, teams, onUpdateScore, onEnd }: GameP
   // so this guess isn't a trivial coin flip — previously this recomputed just the 2 real topics
   // from scratch and threw the decoys away entirely. Order is shuffled (deterministically per
   // round, so it doesn't jump around on re-render) so the real answer isn't always listed first.
+  // The real crewmateTopic/spyTopic strings are always unioned in even when spyGuessOptions is
+  // present — some authored rounds have a decoy that's a near-paraphrase of the real topic
+  // ("Hobbies You Do Regularly" vs. the actual "Hobbies") instead of the exact string, which made
+  // the true answer either impossible to select or silently marked wrong on an exact match.
   const rawGuessOptions = Array.from(
     new Set(
-      (round.spyGuessOptions?.length ? round.spyGuessOptions : [round.crewmateTopic, round.spyTopic]).filter(Boolean),
+      [round.crewmateTopic, round.spyTopic, ...(round.spyGuessOptions ?? [])].filter(Boolean),
     ),
   ) as string[];
   const spyGuessOptions = seededShuffle(rawGuessOptions, ri);
