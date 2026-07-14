@@ -20,6 +20,7 @@ import { RaceTrackGame } from "./components/games/RaceTrackGame";
 import { WordWhackGame } from "./components/games/WordWhackGame";
 import { RocketFuelGame } from "./components/games/RocketFuelGame";
 import { ZombieSiegeGame } from "./components/games/ZombieSiegeGame";
+import { OrderUpGame } from "./components/games/OrderUpGame";
 
 type TopicOption = {
   value: string;
@@ -239,6 +240,15 @@ export default function LessonGamesGenerator() {
         qs = mixByTopic(selectedEntries.map(entry => entry.hotSeatWords ?? []));
       } else if (mode.id === "hotpotato") {
         qs = mixByTopic(selectedEntries.map(entry => entry.hotPotatoPrompts ?? []));
+      } else if (mode.id === "orderup") {
+        // Merges two source arrays no other branch combines: transform-tagged rewrite-sentence
+        // items (grammar targets) and hotSeatWords (vocab targets) — OrderUpGame splits this back
+        // into its two pools by shape (q.transform vs q.word), same "merge upstream, filter-by-
+        // shape downstream" pattern Battleship/Castle already use for questions+cardTasks.
+        qs = mixByTopic(selectedEntries.map(entry => [
+          ...(entry.questions ?? []).filter(q => q.type === "rewrite sentences" && q.transform),
+          ...(entry.hotSeatWords ?? []),
+        ]));
       } else if (mode.id === "battleship") {
         // Battleship's identity is error-hunting: always merge entry.questions (which now
         // includes L1-interference-flavored mistakes for topic-focus content) with cardTasks,
@@ -604,6 +614,7 @@ export default function LessonGamesGenerator() {
   if (screen === "game" && selectedGame) {
     const selectedLevels = uniqueValues(selectedTopics.map(value => getTopicOption(value)?.level).filter((value): value is string => Boolean(value)));
     const hotPotatoLevel = selectedLevels.length === 1 ? selectedLevels[0] : "mixed";
+    const orderUpLevel = hotPotatoLevel;
 
     return (
       <div ref={appRef} style={{ minHeight: "100vh", background: "#0F0A2E", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
@@ -631,6 +642,7 @@ export default function LessonGamesGenerator() {
             {selectedGame.id === "whack" && <WordWhackGame questions={questions} teams={teams} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
             {selectedGame.id === "rocket" && <RocketFuelGame questions={questions} teams={teams} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
             {selectedGame.id === "zombie" && <ZombieSiegeGame questions={questions} teams={teams} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
+            {selectedGame.id === "orderup" && <OrderUpGame questions={questions} teams={teams} onUpdateScore={updateScore} onEnd={handleGameEnd} level={orderUpLevel} />}
           </div>
         </div>
       </div>
