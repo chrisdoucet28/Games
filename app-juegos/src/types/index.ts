@@ -31,6 +31,7 @@ export interface TeamColor {
     hint?: string;
     difficulty?: string;
     transform?: string;
+    form?: "positive" | "negative" | "question";
     word?: string;
     sentence?: string;
     isCorrect?: boolean;

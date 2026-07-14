@@ -14,6 +14,18 @@ const FIRST_FINISH_BONUS = 50;
 // Same "let the banner actually be seen" fix pattern as Castle Defense (3400ms) / Battleship (1700ms).
 const GAMEOVER_DELAY_MS = 2400;
 const DIFFICULTY_BY_LOCK_INDEX = ["easy", "easy", "medium", "medium", "hard"];
+// Which "form" (undefined = plain grammar, or negative/question stacked on top) a lock prefers to
+// draw, indexed the same way as DIFFICULTY_BY_LOCK_INDEX. Early locks stay plain; stacking phases
+// in from lock 3 onward, so the vault gets harder toward lock 5 the same way difficulty already
+// does. Positive/negative/question never combine with each other (no negative questions) — that's
+// enforced by content authoring (each item has at most one form), not by this preference list.
+const FORM_PREFERENCE_BY_LOCK_INDEX: (QuestionData["form"] | undefined)[][] = [
+  [undefined],
+  [undefined, "question"],
+  ["negative", "question"],
+  ["negative", "question"],
+  ["negative", "question"],
+];
 const DICE_FACES = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"];
 
 type Phase = "intro" | "rolling" | "reveal" | "answer" | "result" | "gameover";
@@ -111,15 +123,25 @@ export function VaultHeistGame({ questions, teams, onUpdateScore, onEnd }: GameP
   // back on every visit to that difficulty tier regardless of how many other questions existed
   // in the category overall.
   const lastQuestionRef = useRef<Record<string, string | undefined>>({});
-  const pickQuestion = useCallback((teamId: string | number, category: string, desiredDifficulty: string) => {
+  // Six-tier fallback: the first two tiers additionally prefer the lock's desired form (per
+  // FORM_PREFERENCE_BY_LOCK_INDEX) on top of the existing difficulty preference; tiers 3-6 are
+  // exactly the original four tiers, unchanged, so a topic with no form-tagged content anywhere
+  // (i.e. every item's form is undefined) falls straight through to tier 3 and plays exactly as it
+  // did before this feature existed — content can migrate topic-by-topic with nothing breaking.
+  const pickQuestion = useCallback((teamId: string | number, category: string, desiredDifficulty: string, desiredForms: (QuestionData["form"] | undefined)[]) => {
     const teamPool = pools[teamId]?.[category] ?? [];
     if (!teamPool.length) return null;
     const key = `${teamId}:${category}`;
     const last = lastQuestionRef.current[key];
+    const matchesForm = (q: QuestionData) => desiredForms.includes(q.form);
+    const byDifficultyFormFresh = teamPool.filter(q => q.difficulty === desiredDifficulty && matchesForm(q) && q.question !== last);
+    const anyDifficultyFormFresh = teamPool.filter(q => matchesForm(q) && q.question !== last);
     const byDifficultyFresh = teamPool.filter(q => q.difficulty === desiredDifficulty && q.question !== last);
     const anyFresh = teamPool.filter(q => q.question !== last);
     const byDifficultyAny = teamPool.filter(q => q.difficulty === desiredDifficulty);
-    const source = byDifficultyFresh.length ? byDifficultyFresh
+    const source = byDifficultyFormFresh.length ? byDifficultyFormFresh
+      : anyDifficultyFormFresh.length ? anyDifficultyFormFresh
+      : byDifficultyFresh.length ? byDifficultyFresh
       : anyFresh.length ? anyFresh
       : byDifficultyAny.length ? byDifficultyAny
       : teamPool;
@@ -132,10 +154,12 @@ export function VaultHeistGame({ questions, teams, onUpdateScore, onEnd }: GameP
     const teamId = teams[turnOrder[pos]].id;
     const category = pickCategory();
     const lockIndexAttempting = vaultLocks[teamId] ?? 0;
-    const desiredDifficulty = DIFFICULTY_BY_LOCK_INDEX[Math.min(lockIndexAttempting, DIFFICULTY_BY_LOCK_INDEX.length - 1)];
+    const clampedLockIndex = Math.min(lockIndexAttempting, DIFFICULTY_BY_LOCK_INDEX.length - 1);
+    const desiredDifficulty = DIFFICULTY_BY_LOCK_INDEX[clampedLockIndex];
+    const desiredForms = FORM_PREFERENCE_BY_LOCK_INDEX[clampedLockIndex];
     setOrderPos(pos);
     setCurrentCategory(category);
-    setCurrentQuestion(pickQuestion(teamId, category, desiredDifficulty));
+    setCurrentQuestion(pickQuestion(teamId, category, desiredDifficulty, desiredForms));
     setShowAns(false);
     setLastOutcome(null);
     setPhase("reveal");
@@ -453,6 +477,13 @@ export function VaultHeistGame({ questions, teams, onUpdateScore, onEnd }: GameP
             }}>
               <div style={{ fontSize: "13px", fontWeight: "700", color: "#E8D8AE", marginBottom: "6px", letterSpacing: "0.05em" }}>🔧 THIS LOCK NEEDS</div>
               <div style={{ fontSize: "24px", fontWeight: "900", color: "#FCD34D" }}>{formatCategory(currentCategory)}</div>
+              {currentQuestion?.form && (
+                <div style={{ marginTop: "10px", display: "inline-block", background: "#7F1D1D", border: "2px solid #FCA5A5", borderRadius: "10px", padding: "5px 14px" }}>
+                  <span style={{ fontSize: "13px", fontWeight: "800", color: "#FCA5A5" }}>
+                    {currentQuestion.form === "question" ? "❓ ALSO NEEDS: A QUESTION" : "🚫 ALSO NEEDS: NEGATIVE"}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         )}
