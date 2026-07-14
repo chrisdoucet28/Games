@@ -19,6 +19,7 @@ import { HotPotatoGame } from "./components/games/HotPotatoGame";
 import { RaceTrackGame } from "./components/games/RaceTrackGame";
 import { WordWhackGame } from "./components/games/WordWhackGame";
 import { RocketFuelGame } from "./components/games/RocketFuelGame";
+import { ZombieSiegeGame } from "./components/games/ZombieSiegeGame";
 
 type TopicOption = {
   value: string;
@@ -229,7 +230,10 @@ export default function LessonGamesGenerator() {
         qs = mixByTopic(selectedEntries.map(entry => entry.auctionSentences ?? []));
       } else if (mode.id === "cards") {
         qs = mixByTopic(cardTaskBuckets);
-      } else if (mode.id === "spy") {
+      } else if (mode.id === "spy" || mode.id === "zombie") {
+        // Zombie Siege reuses Spy Among Us's spyRounds content (crewmateTopic/crewmatePrompt) for
+        // its "make a sentence" prompts — short grammar-topic labels with a scenario/example-word
+        // cue, not the fixed-answer drill format the other mixed-pool games use.
         qs = mixByTopic(selectedEntries.map(entry => entry.spyRounds ?? []));
       } else if (mode.id === "hotseat") {
         qs = mixByTopic(selectedEntries.map(entry => entry.hotSeatWords ?? []));
@@ -626,6 +630,7 @@ export default function LessonGamesGenerator() {
             {selectedGame.id === "racetrack" && <RaceTrackGame questions={questions} teams={teams} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
             {selectedGame.id === "whack" && <WordWhackGame questions={questions} teams={teams} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
             {selectedGame.id === "rocket" && <RocketFuelGame questions={questions} teams={teams} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
+            {selectedGame.id === "zombie" && <ZombieSiegeGame questions={questions} teams={teams} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
           </div>
         </div>
       </div>
