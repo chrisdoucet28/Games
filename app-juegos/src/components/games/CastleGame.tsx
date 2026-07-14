@@ -411,7 +411,12 @@ export function CastleGame({ questions, teams, onUpdateScore, onEnd }: GameProps
     bumpType(actionDef.type);
     setShowAns(false);
     if (actionDef.id === "sword" || actionDef.id === "magic") {
-      setPhase("pick-target");
+      if (teams.length === 2) {
+        // Only one possible target in a 1v1 — skip the pointless "pick a castle" step.
+        rollDice(aliveEnemies[0].id);
+      } else {
+        setPhase("pick-target");
+      }
     } else if (actionDef.id === "defend") {
       resolveDefend();
     } else {

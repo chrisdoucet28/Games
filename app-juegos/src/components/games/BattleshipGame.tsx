@@ -177,9 +177,7 @@ export function BattleshipGame({ questions, teams, onUpdateScore, onEnd }: GameP
   }, [hits, fleets]);
 
   const advanceTurn = useCallback((hitsOverride?: Record<string | number, string[]>) => {
-    setPhase("pick-target");
     setShowAns(false);
-    setTargetTeamId(null);
     setPendingCoord(null);
     let next = (activeTeamIdx + 1) % teams.length;
     let tries = 0;
@@ -188,6 +186,15 @@ export function BattleshipGame({ questions, teams, onUpdateScore, onEnd }: GameP
       tries++;
     }
     setActiveTeamIdx(next);
+    if (teams.length === 2) {
+      // Only one possible opponent in a 1v1 — skip the pointless "choose a team" step.
+      const opponent = teams.find(t => t.id !== teams[next].id)!;
+      setTargetTeamId(opponent.id);
+      setPhase("pick-coord");
+    } else {
+      setTargetTeamId(null);
+      setPhase("pick-target");
+    }
   }, [activeTeamIdx, teams, isEliminated]);
 
   const { timeLeft, stop } = useTurnTimer(
@@ -290,7 +297,16 @@ export function BattleshipGame({ questions, teams, onUpdateScore, onEnd }: GameP
         <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "24px" }}>
           {teams.map(t => (<div key={t.id} style={{ background: `linear-gradient(160deg,${t.color.dark}55,#0C1B3A)`, border: "3px solid " + t.color.bg, borderRadius: "14px", padding: "10px 18px", fontWeight: "800", fontSize: "14px", color: "white" }}>{t.color.emoji} {t.name}</div>))}
         </div>
-        <button onClick={() => setPhase("pick-target")} className="bship-btn" style={{ background: "linear-gradient(135deg,#1E3A8A,#2563EB)", color: "white", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(37,99,235,0.5)", transition: "transform 0.15s ease" }}>
+        <button onClick={() => {
+          if (teams.length === 2) {
+            // Only one possible opponent in a 1v1 — skip the pointless "choose a team" step.
+            const opponent = teams.find(t => t.id !== activeTeam.id)!;
+            setTargetTeamId(opponent.id);
+            setPhase("pick-coord");
+          } else {
+            setPhase("pick-target");
+          }
+        }} className="bship-btn" style={{ background: "linear-gradient(135deg,#1E3A8A,#2563EB)", color: "white", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(37,99,235,0.5)", transition: "transform 0.15s ease" }}>
           ⚓ Battle Stations!
         </button>
       </div>
