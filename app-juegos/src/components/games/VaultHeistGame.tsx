@@ -14,7 +14,7 @@ const CRACK_SCORE = 10;
 // practicing) until the last team cracks their 5th lock. Finish order still matters: 1st place
 // gets the full bonus, 2nd gets half, 3rd a third, etc., so racing to finish first is still
 // worthwhile without cutting everyone else's practice short.
-const FIRST_FINISH_BONUS = 50;
+const FIRST_FINISH_BONUS = 100;
 function finishBonusForRank(rank: number): number {
   return Math.round(FIRST_FINISH_BONUS / rank);
 }
