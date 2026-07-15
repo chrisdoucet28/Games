@@ -7,7 +7,9 @@ import { Confetti } from "../shared/Confetti";
 import { teamsGridCols } from "../../data/constants";
 
 const LOCK_COUNT = 5;
-const TURN_SECONDS = 25;
+// 25s was the only speed on offer, and felt too tight as a default — kept as the "hard" option,
+// with easy/medium giving slower-writing teams more room. Chosen on the intro screen before rolling.
+const TURN_SECONDS_BY_DIFFICULTY: Record<Difficulty, number> = { easy: 40, medium: 30, hard: 25 };
 const REVEAL_MS = 3000;
 const CRACK_SCORE = 10;
 // The vault no longer ends the moment one team finishes — every team keeps playing (and
@@ -30,13 +32,14 @@ function medalFor(rank: number): string {
 const GAMEOVER_DELAY_MS = 2400;
 const DIFFICULTY_BY_LOCK_INDEX = ["easy", "easy", "medium", "medium", "hard"];
 // Which "form" (undefined = plain grammar, or negative/question stacked on top) a lock prefers to
-// draw, indexed the same way as DIFFICULTY_BY_LOCK_INDEX. Early locks stay plain; stacking phases
-// in from lock 3 onward, so the vault gets harder toward lock 5 the same way difficulty already
-// does. Positive/negative/question never combine with each other (no negative questions) — that's
-// enforced by content authoring (each item has at most one form), not by this preference list.
+// draw, indexed the same way as DIFFICULTY_BY_LOCK_INDEX. Locks 1-2 are guaranteed plain (no
+// stacking at all) so the first couple of locks are a reliably easier on-ramp; stacking only
+// starts at lock 3, guaranteed from there through lock 5. Positive/negative/question never combine
+// with each other (no negative questions) — that's enforced by content authoring (each item has
+// at most one form), not by this preference list.
 const FORM_PREFERENCE_BY_LOCK_INDEX: (QuestionData["form"] | undefined)[][] = [
   [undefined],
-  [undefined, "question"],
+  [undefined],
   ["negative", "question"],
   ["negative", "question"],
   ["negative", "question"],
@@ -44,7 +47,8 @@ const FORM_PREFERENCE_BY_LOCK_INDEX: (QuestionData["form"] | undefined)[][] = [
 const DICE_FACES = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"];
 
 type Phase = "intro" | "rolling" | "reveal" | "answer" | "result" | "gameover";
-type Outcome = { correct: boolean; category: string; locksNow: number };
+type Outcome = { correct: boolean; category: string; locksNow: number; timedOut?: boolean };
+type Difficulty = "easy" | "medium" | "hard";
 type WinBanner = { teamName: string; color: string; rank: number; bonus: number; key: number };
 type OrderEntry = { teamIdx: number; roll: number };
 
@@ -105,6 +109,7 @@ export function VaultHeistGame({ questions, teams, onUpdateScore, onEnd }: GameP
   const [finalOrder, setFinalOrder] = useState<OrderEntry[] | null>(null);
 
   const [phase, setPhase] = useState<Phase>("intro");
+  const [difficulty, setDifficulty] = useState<Difficulty>("medium");
   const [currentCategory, setCurrentCategory] = useState<string | null>(null);
   const [currentQuestion, setCurrentQuestion] = useState<QuestionData | null>(null);
   const [showAns, setShowAns] = useState(false);
@@ -264,7 +269,20 @@ export function VaultHeistGame({ questions, teams, onUpdateScore, onEnd }: GameP
     }
   }, [phase, runOrderRoll, teams]);
 
-  const { timeLeft, stop } = useTurnTimer(TURN_SECONDS, phase === "answer", () => advanceTurn(), orderPos);
+  const turnSeconds = TURN_SECONDS_BY_DIFFICULTY[difficulty];
+
+  // Time running out used to just call advanceTurn() directly — the team never saw what they were
+  // supposed to write, the card just vanished into the next team's reveal. Now it resolves like a
+  // (penalty-free) turn: locks stay exactly where they were, but the phase moves to "result" with
+  // the answer shown, same as a normal reveal, so there's always a learning moment before moving on.
+  const handleTimeout = () => {
+    if (!currentCategory) { advanceTurn(); return; }
+    setShowAns(true);
+    setLastOutcome({ correct: false, timedOut: true, category: currentCategory, locksNow: vaultLocks[activeTeam.id] ?? 0 });
+    setPhase("result");
+  };
+
+  const { timeLeft, stop } = useTurnTimer(turnSeconds, phase === "answer", handleTimeout, orderPos);
 
   const showWin = (teamName: string, color: string, rank: number, bonus: number) => {
     const id = fxId.current++;
@@ -362,6 +380,32 @@ export function VaultHeistGame({ questions, teams, onUpdateScore, onEnd }: GameP
             ✅ Correct → the lock cracks open and you keep going — same team, next lock.<br />
             ❌ Wrong → your most recently cracked lock re-locks and the turn passes to the next team. No partial credit — accuracy is everything.<br />
             Roll the dice to see who cracks first — finishing all {LOCK_COUNT} locks earns a bonus (1st place gets the most, 2nd gets half that, 3rd a third, and so on), but the vault stays open until every team finishes!
+          </div>
+        </div>
+        <div style={{ marginBottom: "20px" }}>
+          <div style={{ color: "#D6C9AE", fontWeight: "800", fontSize: "13px", marginBottom: "10px", letterSpacing: "0.04em", textTransform: "uppercase" }}>⏱️ Choose a timer speed</div>
+          <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap" }}>
+            {(["easy", "medium", "hard"] as const).map(d => {
+              const selected = difficulty === d;
+              const emoji = d === "easy" ? "🟢" : d === "medium" ? "🟡" : "🔴";
+              const label = d[0].toUpperCase() + d.slice(1);
+              return (
+                <button
+                  key={d}
+                  onClick={() => setDifficulty(d)}
+                  className="vault-next-btn"
+                  style={{
+                    background: selected ? "linear-gradient(135deg,#7A5C1E,#D4AF37)" : "rgba(255,255,255,0.08)",
+                    color: selected ? "#1F1608" : "#E8D8AE",
+                    border: `2px solid ${selected ? "#D4AF37" : "#6B5B3A"}`,
+                    borderRadius: "12px", padding: "10px 20px", fontWeight: "800", fontSize: "14px",
+                    cursor: "pointer", transition: "transform 0.15s ease",
+                  }}
+                >
+                  {emoji} {label} · {TURN_SECONDS_BY_DIFFICULTY[d]}s
+                </button>
+              );
+            })}
           </div>
         </div>
         <button onClick={() => setPhase("rolling")} className="vault-next-btn" style={{ background: "linear-gradient(135deg,#7A5C1E,#D4AF37)", color: "#1F1608", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(212,175,55,0.5)", transition: "transform 0.15s ease" }}>🎲 Roll to Start!</button>
@@ -506,7 +550,7 @@ export function VaultHeistGame({ questions, teams, onUpdateScore, onEnd }: GameP
 
         <div style={{ background: `linear-gradient(90deg, ${activeTeam.color.bg}, ${activeTeam.color.dark})`, borderRadius: "14px", padding: "10px 16px", marginBottom: "12px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px", boxShadow: `0 4px 18px ${activeTeam.color.bg}55` }}>
           <span style={{ color: "white", fontWeight: "900", fontSize: "16px", textShadow: "0 1px 3px rgba(0,0,0,0.4)" }}>🔐 {activeTeam.name} — {phaseHeaderText()}</span>
-          {phase === "answer" && <TurnTimerBar timeLeft={timeLeft} totalSeconds={TURN_SECONDS} />}
+          {phase === "answer" && <TurnTimerBar timeLeft={timeLeft} totalSeconds={turnSeconds} />}
         </div>
 
         {phase === "reveal" && currentCategory && (
@@ -546,7 +590,20 @@ export function VaultHeistGame({ questions, teams, onUpdateScore, onEnd }: GameP
           const allFinished = finishOrderRef.current.length >= teams.length;
           return (
             <div style={{ marginTop: "4px", textAlign: "center" }}>
-              {lastOutcome.correct ? (
+              {lastOutcome.timedOut ? (
+                <div style={{ background: "rgba(120,53,15,0.35)", border: "2px solid #F59E0B", borderRadius: "14px", padding: "14px", marginBottom: "10px", backdropFilter: "blur(4px)" }}>
+                  <div style={{ fontWeight: "900", fontSize: "17px", color: "#FCD34D" }}>⏰ Time's up for {activeTeam.name}!</div>
+                  <div style={{ color: "#E8D8AE", fontWeight: "700", fontSize: "13px", marginTop: "4px" }}>
+                    Still at {lastOutcome.locksNow}/{LOCK_COUNT} locks — no penalty, but here's what they were going for:
+                  </div>
+                  {currentQuestion && (
+                    <div style={{ background: "rgba(0,0,0,0.25)", borderRadius: "10px", padding: "10px 12px", marginTop: "10px", textAlign: "left" }}>
+                      <div style={{ fontWeight: "900", fontSize: "16px", color: "#86EFAC" }}>✅ {currentQuestion.answer}</div>
+                      {currentQuestion.hint && <div style={{ color: "#FDE68A", fontSize: "12px", marginTop: "6px" }}>💡 {currentQuestion.hint}</div>}
+                    </div>
+                  )}
+                </div>
+              ) : lastOutcome.correct ? (
                 <div style={{ background: "rgba(120,53,15,0.35)", border: "2px solid #D4AF37", borderRadius: "14px", padding: "14px", marginBottom: "10px", backdropFilter: "blur(4px)" }}>
                   <div style={{ fontWeight: "900", fontSize: "17px", color: "#FCD34D" }}>🔓 {activeTeam.name} cracked lock {lastOutcome.locksNow}/{LOCK_COUNT}!</div>
                   <div style={{ color: "#E8D8AE", fontWeight: "700", fontSize: "13px", marginTop: "4px" }}>
