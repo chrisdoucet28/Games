@@ -1665,9 +1665,9 @@ export const TOPIC_LIBRARY = {
     ],
     minefieldGrid: {
       topic: "So do I / Neither do I",
-      instructions: "Combine the connector (top) with the statement and response (side). Fill in the blank with the auxiliary that agrees with the statement's own verb and polarity (so do/am/can/have/did I... or neither do/am/can/have/did I...).",
+      instructions: "Combine the connector (top) with the statement and response (side). Work out the auxiliary that agrees with the statement's own verb and polarity (so do/am/can/have/did I... or neither do/am/can/have/did I...) — the answer isn't given, you have to figure it out.",
       colLabels: ["Listen,", "Honestly,", "You know,", "Well,", "Actually,"],
-      rowLabels: ["I love jazz. So ___ (do) I!", "I'm not tired. Neither ___ (am) I!", "She can swim. So ___ (can) I!", "They haven't eaten. Neither ___ (have) I!", "I didn't go. Neither ___ (did) I!"],
+      rowLabels: ["I love jazz. So ___ I!", "I'm not tired. Neither ___ I!", "She can swim. So ___ I!", "They haven't eaten. Neither ___ I!", "I didn't go. Neither ___ I!"],
     },
     hotSeatWords: [
       {word:"agreement"},{word:"same"},{word:"both"},{word:"also"},
@@ -2622,7 +2622,7 @@ export const TOPIC_LIBRARY = {
       topic: "Future in the Past",
       instructions: "Combine the subject (top) with the future-in-the-past template (side) - choosing was or were correctly for your subject - to build a full sentence, then finish it with your own idea.",
       colLabels: ["I", "She", "He", "They", "We"],
-      rowLabels: ["___ was/were going to ___, but then everything changed.", "___ was/were about to ___ when the phone rang.", "___ thought ___ would ___ soon.", "___ was/were supposed to ___ that day.", "___ knew ___ would never ___."],
+      rowLabels: ["___ was/were going to ___. (interrupted plan)", "___ was/were about to ___. (interrupted moment)", "___ thought ___ would ___. (past prediction)", "___ was/were supposed to ___. (cancelled arrangement)", "___ knew ___ would ___. (past certainty)"],
     },
     hotSeatWords: [
       {word:"plan"},{word:"dream"},{word:"hope"},{word:"prediction"},
@@ -9289,9 +9289,9 @@ export const TOPIC_LIBRARY = {
     ],
     minefieldGrid: {
       topic: "Inversion",
-      instructions: "Combine the inverted opener (top) with the continuation (side) to make a complete, emphatic inverted sentence — extend it with your own words if you like.",
+      instructions: "Combine the inverted opener (top) with the continuation (side) — the opener shows the correct inversion, but you have to supply the rest of the sentence yourself.",
       colLabels: ["Not only did I…", "Rarely did she…", "Seldom did they…", "Never once did we…", "Only then did he…"],
-      rowLabels: ["… realize the truth.", "… expect such a result.", "… manage to finish on time.", "… feel this way before.", "… agree to the plan."],
+      rowLabels: ["… (realize) ___.", "… (expect) ___.", "… (manage to) ___.", "… (feel) ___ before.", "… (agree to) ___."],
     },
     hotSeatWords: [
       {word:"never"},{word:"rarely"},{word:"seldom"},{word:"hardly"},
@@ -14376,7 +14376,7 @@ export const TOPIC_LIBRARY = {
       topic: "Past Perfect",
       instructions: "Combine the subject (top) with the sentence template (side) and fill in the blanks (___) using past perfect (had + past participle).",
       colLabels: ["I", "She", "They", "We", "He"],
-      rowLabels: ["___ had already ___ before the film started.", "___ had never ___ before that day.", "___ had just ___ when the phone rang.", "___ hadn't ___ before ___ moved here.", "Had ___ ever ___ before moving here?"],
+      rowLabels: ["___ had already ___ before ___.", "___ had never ___ before ___.", "___ had just ___ when ___.", "___ hadn't ___ before ___ moved here.", "Had ___ ever ___ before ___?"],
     },
     hotSeatWords: [
       {word:"already"},{word:"before"},{word:"forgotten"},{word:"arrived"},{word:"realised"},
@@ -19413,9 +19413,9 @@ export const TOPIC_LIBRARY = {
     ],
     minefieldGrid: {
       topic: "Future: Will and Going To",
-      instructions: "Combine the subject (top) with the sentence template (side). Fill in the blanks and use the correct form (will or going to/am-is-are going to) shown by each template.",
+      instructions: "Combine the subject (top) with the template (side). Use the correct form (will or going to/am-is-are going to) shown by each template — then complete the sentence yourself.",
       colLabels: ["I", "She", "They", "We", "He"],
-      rowLabels: ["___ (think) ___ (will) win the match. (prediction)", "___ (be) going to study tonight because it's already planned. (plan)", "___ will help you right now! (instant decision)", "___ (promise) ___ (will) never be late again. (promise)", "Look! ___ (be) going to fall! (evidence now)"],
+      rowLabels: ["___ (will) ___. (prediction)", "___ (going to) ___. (plan)", "___ (will) ___ right now! (instant decision)", "___ (promise) (will) ___. (promise)", "Look! ___ (going to) ___! (evidence now)"],
     },
     hotSeatWords: [
       {word:"will"},{word:"won't"},{word:"going to"},{word:"gonna"},
@@ -20811,9 +20811,9 @@ export const TOPIC_LIBRARY = {
     ],
     "minefieldGrid": {
       "topic": "Future Continuous",
-      "instructions": "Combine a subject (top) with a future continuous action (side) and say a complete sentence about a specific future time.",
+      "instructions": "Combine a subject (top) with a future continuous template (side) — supply your own verb in the ...ing gap — and say a complete sentence about a specific future time.",
       "colLabels": ["I …","She …","They …","We …","He …"],
-      "rowLabels": ["… will be flying to … at …","… will be having dinner at …","… will still be working when …","… will be sleeping by …","… will be studying this time next …"]
+      "rowLabels": ["… will be ...ing at 8pm tonight.","… will be ...ing by the time we arrive.","… will still be ...ing when we call.","… won't be ...ing at this time tomorrow.","… will be ...ing this time next week."]
     },
     "hotSeatWords": [
       { "word": "flying" },
