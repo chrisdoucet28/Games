@@ -103,20 +103,27 @@ export function SpyAmongUsGame({ questions, teams, onUpdateScore, onEnd }: GameP
   const peekTeam = teams[peekIdx];
   const speakTeam = speakOrder[speakIdx] ?? speakOrder[0] ?? teams[0];
   const isSpy = (teamId: string | number) => teamId === spyTeam.id;
-  // Each round's data carries 4 pre-authored options (the 2 real topics + 2 decoys) precisely
-  // so this guess isn't a trivial coin flip — previously this recomputed just the 2 real topics
-  // from scratch and threw the decoys away entirely. Order is shuffled (deterministically per
-  // round, so it doesn't jump around on re-render) so the real answer isn't always listed first.
-  // The real crewmateTopic/spyTopic strings are always unioned in even when spyGuessOptions is
-  // present — some authored rounds have a decoy that's a near-paraphrase of the real topic
-  // ("Hobbies You Do Regularly" vs. the actual "Hobbies") instead of the exact string, which made
-  // the true answer either impossible to select or silently marked wrong on an exact match.
-  const rawGuessOptions = Array.from(
-    new Set(
-      [round.crewmateTopic, round.spyTopic, ...(round.spyGuessOptions ?? [])].filter(Boolean),
-    ),
+  // Decoys used to come only from this one round's own hardcoded spyGuessOptions — always the
+  // exact same 2 fake options paired with the exact same 2 real ones every time this round came
+  // up. That taught players a shortcut, especially in 1v1: eliminate "my own topic," and whatever
+  // real-sounding option is left over is always the answer, no listening required. Decoys now get
+  // pulled from the wider pool of every crewmateTopic/spyTopic in play this game (across every
+  // round mixed into `questions`), so the options shown vary game to game and sometimes include
+  // other rounds' real topics as decoys — a genuine 1-in-3 guess instead of a memorizable pattern.
+  // Falls back to the round's own authored decoys when the game's pool is too small to supply 2
+  // (e.g. a single-topic, single-round game) so there's always a full set of options.
+  const realAnswers = Array.from(new Set([round.crewmateTopic, round.spyTopic].filter(Boolean))) as string[];
+  const gamePool = Array.from(
+    new Set(questions.flatMap(q => [q.crewmateTopic, q.spyTopic]).filter(Boolean)),
   ) as string[];
-  const spyGuessOptions = seededShuffle(rawGuessOptions, ri);
+  const decoyCandidates = gamePool.filter(topic => !realAnswers.includes(topic));
+  const fallbackDecoys = (round.spyGuessOptions ?? []).filter(topic => !realAnswers.includes(topic));
+  const decoyPool = decoyCandidates.length >= 2
+    ? decoyCandidates
+    : Array.from(new Set([...decoyCandidates, ...fallbackDecoys]));
+  const decoys = seededShuffle(decoyPool, ri).slice(0, Math.max(0, 4 - realAnswers.length));
+  const rawGuessOptions = Array.from(new Set([...realAnswers, ...decoys]));
+  const spyGuessOptions = seededShuffle(rawGuessOptions, ri + 1);
 
   const runOrderRoll = useCallback(
     (indicesToRoll: number[], existingRolls: Record<number, number>) => {
