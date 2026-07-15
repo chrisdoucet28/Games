@@ -10,7 +10,22 @@ const LOCK_COUNT = 5;
 const TURN_SECONDS = 25;
 const REVEAL_MS = 3000;
 const CRACK_SCORE = 10;
+// The vault no longer ends the moment one team finishes — every team keeps playing (and
+// practicing) until the last team cracks their 5th lock. Finish order still matters: 1st place
+// gets the full bonus, 2nd gets half, 3rd a third, etc., so racing to finish first is still
+// worthwhile without cutting everyone else's practice short.
 const FIRST_FINISH_BONUS = 50;
+function finishBonusForRank(rank: number): number {
+  return Math.round(FIRST_FINISH_BONUS / rank);
+}
+function ordinal(n: number): string {
+  const s = ["th", "st", "nd", "rd"];
+  const v = n % 100;
+  return n + (s[(v - 20) % 10] || s[v] || s[0]);
+}
+function medalFor(rank: number): string {
+  return rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : "🏅";
+}
 // Same "let the banner actually be seen" fix pattern as Castle Defense (3400ms) / Battleship (1700ms).
 const GAMEOVER_DELAY_MS = 2400;
 const DIFFICULTY_BY_LOCK_INDEX = ["easy", "easy", "medium", "medium", "hard"];
@@ -30,7 +45,7 @@ const DICE_FACES = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"];
 
 type Phase = "intro" | "rolling" | "reveal" | "answer" | "result" | "gameover";
 type Outcome = { correct: boolean; category: string; locksNow: number };
-type WinBanner = { teamName: string; color: string; key: number };
+type WinBanner = { teamName: string; color: string; rank: number; bonus: number; key: number };
 type OrderEntry = { teamIdx: number; roll: number };
 
 function formatCategory(tag: string): string {
@@ -97,7 +112,9 @@ export function VaultHeistGame({ questions, teams, onUpdateScore, onEnd }: GameP
   const [winBanner, setWinBanner] = useState<WinBanner | null>(null);
   const [confettiActive, setConfettiActive] = useState(false);
   const fxId = useRef(0);
-  const winnerIdRef = useRef<string | number | null>(null);
+  // Order teams finish in — index 0 is 1st place. Drives both the rank-based bonus and the
+  // gameover standings; a team's id lands here exactly once, the moment they crack lock 5.
+  const finishOrderRef = useRef<(string | number)[]>([]);
 
   const activeTeam = teams[turnOrder[orderPos]];
 
@@ -166,10 +183,19 @@ export function VaultHeistGame({ questions, teams, onUpdateScore, onEnd }: GameP
     setTimeout(() => setPhase(p => (p === "reveal" ? "answer" : p)), REVEAL_MS);
   }, [pickCategory, pickQuestion, teams, turnOrder, vaultLocks]);
 
-  // Wrong answer only: hands the turn to the next team in the rolled order.
+  // Hands the turn to the next team in the rolled order — on a wrong answer, or when the active
+  // team just finished and has nothing left to crack. Skips any team that's already finished
+  // (bounded by teams.length tries so this can never spin forever even if called right as the
+  // last team finishes, though the UI hides the button that would trigger that in practice).
   const advanceTurn = useCallback(() => {
-    beginReveal((orderPos + 1) % teams.length);
-  }, [orderPos, teams.length, beginReveal]);
+    let next = (orderPos + 1) % teams.length;
+    let tries = 0;
+    while (finishOrderRef.current.includes(teams[turnOrder[next]].id) && tries < teams.length) {
+      next = (next + 1) % teams.length;
+      tries++;
+    }
+    beginReveal(next);
+  }, [orderPos, teams, turnOrder, beginReveal]);
 
   // Correct answer, vault not yet finished: same team immediately faces their next lock.
   const keepGoing = useCallback(() => {
@@ -240,9 +266,9 @@ export function VaultHeistGame({ questions, teams, onUpdateScore, onEnd }: GameP
 
   const { timeLeft } = useTurnTimer(TURN_SECONDS, phase === "answer", () => advanceTurn(), orderPos);
 
-  const showWin = (teamName: string, color: string) => {
+  const showWin = (teamName: string, color: string, rank: number, bonus: number) => {
     const id = fxId.current++;
-    setWinBanner({ teamName, color, key: id });
+    setWinBanner({ teamName, color, rank, bonus, key: id });
   };
 
   const handleReveal = () => setShowAns(true);
@@ -256,12 +282,16 @@ export function VaultHeistGame({ questions, teams, onUpdateScore, onEnd }: GameP
     setLastOutcome({ correct: true, category: currentCategory, locksNow: newCount });
     setPhase("result");
 
-    if (newCount >= LOCK_COUNT) {
-      winnerIdRef.current = activeTeam.id;
-      onUpdateScore(activeTeam.id, FIRST_FINISH_BONUS);
-      setConfettiActive(true);
-      showWin(activeTeam.name, activeTeam.color.bg);
-      setTimeout(() => setPhase("gameover"), GAMEOVER_DELAY_MS);
+    if (newCount >= LOCK_COUNT && !finishOrderRef.current.includes(activeTeam.id)) {
+      finishOrderRef.current.push(activeTeam.id);
+      const rank = finishOrderRef.current.length;
+      const bonus = finishBonusForRank(rank);
+      onUpdateScore(activeTeam.id, bonus);
+      if (rank === 1) setConfettiActive(true);
+      showWin(activeTeam.name, activeTeam.color.bg, rank, bonus);
+      if (finishOrderRef.current.length >= teams.length) {
+        setTimeout(() => setPhase("gameover"), GAMEOVER_DELAY_MS);
+      }
     }
   };
 
@@ -331,7 +361,7 @@ export function VaultHeistGame({ questions, teams, onUpdateScore, onEnd }: GameP
             which transformation the lock needs — then you rewrite the sentence to match it.<br />
             ✅ Correct → the lock cracks open and you keep going — same team, next lock.<br />
             ❌ Wrong → your most recently cracked lock re-locks and the turn passes to the next team. No partial credit — accuracy is everything.<br />
-            Roll the dice to see who cracks first, then race to be the first team to crack all {LOCK_COUNT} locks!
+            Roll the dice to see who cracks first — finishing all {LOCK_COUNT} locks earns a bonus (1st place gets the most, 2nd gets half that, 3rd a third, and so on), but the vault stays open until every team finishes!
           </div>
         </div>
         <button onClick={() => setPhase("rolling")} className="vault-next-btn" style={{ background: "linear-gradient(135deg,#7A5C1E,#D4AF37)", color: "#1F1608", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(212,175,55,0.5)", transition: "transform 0.15s ease" }}>🎲 Roll to Start!</button>
@@ -383,10 +413,10 @@ export function VaultHeistGame({ questions, teams, onUpdateScore, onEnd }: GameP
   );
 
   if (phase === "gameover") {
-    const winnerTeam = teams.find(t => t.id === winnerIdRef.current)!;
-    const ranked = [...teams]
-      .filter(t => t.id !== winnerTeam.id)
-      .sort((a, b) => (vaultLocks[b.id] ?? 0) - (vaultLocks[a.id] ?? 0));
+    // Everyone has finished by the time this phase fires, so standings come straight from actual
+    // finish order — no need to fall back to lock-count, that would just show LOCK_COUNT for all.
+    const ranked = finishOrderRef.current.map(id => teams.find(t => t.id === id)!);
+    const winnerTeam = ranked[0];
     return (
       <div style={{ ...arenaStyle, textAlign: "center" }}>
         {ambientLayer}
@@ -397,20 +427,24 @@ export function VaultHeistGame({ questions, teams, onUpdateScore, onEnd }: GameP
           <div style={{ fontWeight: "900", fontSize: "24px", color: "#FCD34D", marginBottom: "4px", textShadow: "0 0 24px rgba(212,175,55,0.6)" }}>
             🔓 {winnerTeam.name} cracked the vault first!
           </div>
-          <div style={{ color: "#B8A98A", fontSize: "14px", marginBottom: "20px" }}>{LOCK_COUNT}/{LOCK_COUNT} locks cracked — heist complete.</div>
+          <div style={{ color: "#B8A98A", fontSize: "14px", marginBottom: "20px" }}>Every team cracked all {LOCK_COUNT} locks — heist complete. Final standings:</div>
           <div style={{ display: "flex", flexDirection: "column", gap: "8px", maxWidth: "420px", margin: "0 auto 24px" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "12px", background: `linear-gradient(160deg,${winnerTeam.color.dark}66,#0F0B05)`, border: `2px solid ${winnerTeam.color.bg}`, borderRadius: "14px", padding: "12px 16px" }}>
-              <span style={{ fontSize: "24px" }}>🥇</span>
-              <span style={{ flex: 1, textAlign: "left", fontWeight: "900", color: "white", fontSize: "16px" }}>{winnerTeam.name}</span>
-              <span style={{ fontWeight: "800", color: "#FCD34D", fontSize: "13px" }}>{LOCK_COUNT}/{LOCK_COUNT} CRACKED</span>
-            </div>
-            {ranked.map(t => (
-              <div key={t.id} style={{ display: "flex", alignItems: "center", gap: "12px", background: "linear-gradient(160deg,#2A2317,#0F0B05)", border: "2px solid #6B5B3A", borderRadius: "14px", padding: "10px 16px", opacity: 0.9 }}>
-                <span style={{ fontSize: "20px" }}>🔒</span>
-                <span style={{ flex: 1, textAlign: "left", fontWeight: "800", color: "#D6C9AE", fontSize: "15px" }}>{t.name}</span>
-                <span style={{ fontWeight: "700", color: "#9C8B6A", fontSize: "12px" }}>{vaultLocks[t.id] ?? 0}/{LOCK_COUNT} LOCKED</span>
-              </div>
-            ))}
+            {ranked.map((t, i) => {
+              const rank = i + 1;
+              const isFirst = rank === 1;
+              return (
+                <div key={t.id} style={{
+                  display: "flex", alignItems: "center", gap: "12px",
+                  background: isFirst ? `linear-gradient(160deg,${t.color.dark}66,#0F0B05)` : "linear-gradient(160deg,#2A2317,#0F0B05)",
+                  border: `2px solid ${isFirst ? t.color.bg : "#6B5B3A"}`, borderRadius: "14px", padding: isFirst ? "12px 16px" : "10px 16px",
+                  opacity: isFirst ? 1 : 0.9,
+                }}>
+                  <span style={{ fontSize: isFirst ? "24px" : "20px" }}>{medalFor(rank)}</span>
+                  <span style={{ flex: 1, textAlign: "left", fontWeight: isFirst ? "900" : "800", color: isFirst ? "white" : "#D6C9AE", fontSize: isFirst ? "16px" : "15px" }}>{t.name}</span>
+                  <span style={{ fontWeight: "800", color: isFirst ? "#FCD34D" : "#9C8B6A", fontSize: "13px" }}>{ordinal(rank)} · +{finishBonusForRank(rank)} pts</span>
+                </div>
+              );
+            })}
           </div>
           <button onClick={onEnd} className="vault-next-btn" style={{ background: "linear-gradient(135deg,#7A5C1E,#D4AF37)", color: "#1F1608", border: "none", borderRadius: "14px", padding: "14px 32px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(212,175,55,0.5)", transition: "transform 0.15s ease" }}>🏁 End Game</button>
         </div>
@@ -438,7 +472,7 @@ export function VaultHeistGame({ questions, teams, onUpdateScore, onEnd }: GameP
           animation: "vaultBannerIn 3.2s ease-in-out forwards",
         }}>
           <span style={{ color: "white", fontWeight: "900", fontSize: "16px", textShadow: "0 1px 3px rgba(0,0,0,0.5)" }}>
-            🔓 {winBanner.teamName} cracked the vault!
+            {medalFor(winBanner.rank)} {winBanner.teamName} finished {ordinal(winBanner.rank)}! +{winBanner.bonus} pts
           </span>
         </div>
       )}
@@ -448,15 +482,22 @@ export function VaultHeistGame({ questions, teams, onUpdateScore, onEnd }: GameP
             const cracked = vaultLocks[tm.id] ?? 0;
             const isActive = activeTeam.id === tm.id;
             const justChanged = isActive && phase === "result" && !!lastOutcome;
+            const finishRank = finishOrderRef.current.indexOf(tm.id);
+            const finished = finishRank !== -1;
             return (
               <div key={tm.id} style={{
                 position: "relative", overflow: "hidden",
                 background: `linear-gradient(160deg, ${tm.color.dark}33, #0F0B05)`,
                 border: `2px solid ${tm.color.bg}`, borderRadius: "18px", padding: "12px",
                 boxShadow: isActive ? `0 0 20px ${tm.color.bg}88, inset 0 0 20px ${tm.color.bg}22` : `0 0 10px ${tm.color.bg}44`,
-                transition: "box-shadow 0.3s ease",
+                transition: "box-shadow 0.3s ease", opacity: finished && !isActive ? 0.75 : 1,
               }}>
-                <div style={{ fontWeight: "900", fontSize: "13px", color: "#F3F4F6", textShadow: "0 1px 3px rgba(0,0,0,0.6)", marginBottom: "8px" }}>{tm.name}</div>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px" }}>
+                  <div style={{ fontWeight: "900", fontSize: "13px", color: "#F3F4F6", textShadow: "0 1px 3px rgba(0,0,0,0.6)" }}>{tm.name}</div>
+                  {finished && (
+                    <div style={{ fontSize: "11px", fontWeight: "800", color: "#FCD34D" }}>{medalFor(finishRank + 1)} {ordinal(finishRank + 1)}</div>
+                  )}
+                </div>
                 <LockRow cracked={cracked} total={LOCK_COUNT} justChanged={justChanged} />
               </div>
             );
@@ -500,28 +541,34 @@ export function VaultHeistGame({ questions, teams, onUpdateScore, onEnd }: GameP
           </>
         )}
 
-        {phase === "result" && lastOutcome && (
-          <div style={{ marginTop: "4px", textAlign: "center" }}>
-            {lastOutcome.correct ? (
-              <div style={{ background: "rgba(120,53,15,0.35)", border: "2px solid #D4AF37", borderRadius: "14px", padding: "14px", marginBottom: "10px", backdropFilter: "blur(4px)" }}>
-                <div style={{ fontWeight: "900", fontSize: "17px", color: "#FCD34D" }}>🔓 {activeTeam.name} cracked lock {lastOutcome.locksNow}/{LOCK_COUNT}!</div>
-                <div style={{ color: "#E8D8AE", fontWeight: "700", fontSize: "13px", marginTop: "4px" }}>+{CRACK_SCORE} pts — same team, next lock!</div>
-              </div>
-            ) : (
-              <div style={{ background: "rgba(127,29,29,0.35)", border: "2px solid #EF4444", borderRadius: "14px", padding: "14px", marginBottom: "10px", backdropFilter: "blur(4px)", animation: "alarmFlash 0.9s ease-in-out" }}>
-                <div style={{ fontWeight: "900", fontSize: "17px", color: "#FCA5A5" }}>🚨 Alarm! {activeTeam.name}'s last crack re-locked.</div>
-                <div style={{ color: "#FCA5A5", fontWeight: "700", fontSize: "13px", marginTop: "4px" }}>Now at {lastOutcome.locksNow}/{LOCK_COUNT} locks — turn passes.</div>
-              </div>
-            )}
-            {!winnerIdRef.current && (
-              lastOutcome.correct ? (
-                <button onClick={keepGoing} className="vault-next-btn" style={{ background: "#D4AF37", color: "#1F1608", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "800", cursor: "pointer", boxShadow: "0 4px 16px rgba(212,175,55,0.5)", transition: "transform 0.15s ease" }}>🔓 Keep Going!</button>
+        {phase === "result" && lastOutcome && (() => {
+          const justFinished = lastOutcome.correct && lastOutcome.locksNow >= LOCK_COUNT;
+          const allFinished = finishOrderRef.current.length >= teams.length;
+          return (
+            <div style={{ marginTop: "4px", textAlign: "center" }}>
+              {lastOutcome.correct ? (
+                <div style={{ background: "rgba(120,53,15,0.35)", border: "2px solid #D4AF37", borderRadius: "14px", padding: "14px", marginBottom: "10px", backdropFilter: "blur(4px)" }}>
+                  <div style={{ fontWeight: "900", fontSize: "17px", color: "#FCD34D" }}>🔓 {activeTeam.name} cracked lock {lastOutcome.locksNow}/{LOCK_COUNT}!</div>
+                  <div style={{ color: "#E8D8AE", fontWeight: "700", fontSize: "13px", marginTop: "4px" }}>
+                    {justFinished ? "Vault fully cracked!" : `+${CRACK_SCORE} pts — same team, next lock!`}
+                  </div>
+                </div>
               ) : (
-                <button onClick={advanceTurn} className="vault-next-btn" style={{ background: "#6366F1", color: "white", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "800", cursor: "pointer", boxShadow: "0 4px 16px rgba(99,102,241,0.5)", transition: "transform 0.15s ease" }}>➡️ Next Team</button>
-              )
-            )}
-          </div>
-        )}
+                <div style={{ background: "rgba(127,29,29,0.35)", border: "2px solid #EF4444", borderRadius: "14px", padding: "14px", marginBottom: "10px", backdropFilter: "blur(4px)", animation: "alarmFlash 0.9s ease-in-out" }}>
+                  <div style={{ fontWeight: "900", fontSize: "17px", color: "#FCA5A5" }}>🚨 Alarm! {activeTeam.name}'s last crack re-locked.</div>
+                  <div style={{ color: "#FCA5A5", fontWeight: "700", fontSize: "13px", marginTop: "4px" }}>Now at {lastOutcome.locksNow}/{LOCK_COUNT} locks — turn passes.</div>
+                </div>
+              )}
+              {!allFinished && (
+                lastOutcome.correct && !justFinished ? (
+                  <button onClick={keepGoing} className="vault-next-btn" style={{ background: "#D4AF37", color: "#1F1608", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "800", cursor: "pointer", boxShadow: "0 4px 16px rgba(212,175,55,0.5)", transition: "transform 0.15s ease" }}>🔓 Keep Going!</button>
+                ) : (
+                  <button onClick={advanceTurn} className="vault-next-btn" style={{ background: "#6366F1", color: "white", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "800", cursor: "pointer", boxShadow: "0 4px 16px rgba(99,102,241,0.5)", transition: "transform 0.15s ease" }}>➡️ Next Team</button>
+                )
+              )}
+            </div>
+          );
+        })()}
       </div>
     </div>
   );
