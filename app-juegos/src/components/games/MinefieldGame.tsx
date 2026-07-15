@@ -19,7 +19,7 @@ const createMines = () =>
 export function MinefieldGame({ gridData, teams, onUpdateScore, onEnd }: GameProps) {
   const grids = (Array.isArray(gridData) ? gridData : gridData ? [gridData] : []) as MinefieldGrid[];
   const [gridIndex, setGridIndex] = useState(0);
-  const [mines, setMines] = useState<Set<number>>(() => createMines());
+  const [mines] = useState<Set<number>>(() => createMines());
   const [revealed, setRevealed] = useState<Set<number>>(new Set());
   const [activeTeam, setActiveTeam] = useState(0);
   const [phase, setPhase] = useState<"intro" | "pick" | "speaking" | "judging" | "topicComplete">("intro");
@@ -32,6 +32,8 @@ export function MinefieldGame({ gridData, teams, onUpdateScore, onEnd }: GamePro
   const t = teams[activeTeam];
   const safeRevealed = [...revealed].filter(index => !mines.has(index)).length;
   const totalSafe = TOTAL - MINE_COUNT;
+  const minesFound = [...revealed].filter(index => mines.has(index)).length;
+  const minesLeft = MINE_COUNT - minesFound;
 
   if (!currentGrid || !t) {
     return (
@@ -57,9 +59,7 @@ export function MinefieldGame({ gridData, teams, onUpdateScore, onEnd }: GamePro
   };
 
   const advanceToNextTopic = () => {
-    setGridIndex(index => index + 1);
-    setMines(createMines());
-    setRevealed(new Set());
+    setGridIndex(index => (index + 1) % grids.length);
     setActiveTeam(0);
     setSelectedTile(null);
     setLastResult(null);
@@ -73,12 +73,16 @@ export function MinefieldGame({ gridData, teams, onUpdateScore, onEnd }: GamePro
     const judgingTeam = teams[activeTeam];
     const isMine = mines.has(selectedTile);
     const { col, row } = getSentence(selectedTile);
-    const nextRevealed = new Set([...revealed, selectedTile]);
+    // A wrong answer on a safe tile doesn't burn the square — it just goes back into the pool for
+    // someone else to try, so getting the grammar wrong costs 0 points, nothing more. Only a mine
+    // (regardless of correctness) or a correct answer actually reveals/consumes the tile.
+    const shouldReveal = isMine || correct;
+    const nextRevealed = shouldReveal ? new Set([...revealed, selectedTile]) : revealed;
     const nextSafeRevealed = [...nextRevealed].filter(index => !mines.has(index)).length;
     const nextTeamIndex = (activeTeam + 1) % teams.length;
     const completedTopicRound = topicRotation && nextTeamIndex === 0;
 
-    setRevealed(nextRevealed);
+    if (shouldReveal) setRevealed(nextRevealed);
     setLastResult({ correct, isMine, col, row, teamName: judgingTeam.name });
 
     if (isMine) {
@@ -91,15 +95,14 @@ export function MinefieldGame({ gridData, teams, onUpdateScore, onEnd }: GamePro
 
     setSelectedTile(null);
 
-    if (!topicRotation && nextSafeRevealed >= totalSafe) {
+    if (nextSafeRevealed >= totalSafe) {
       onEnd();
       return;
     }
 
     if (completedTopicRound) {
-      const isLastTopic = gridIndex >= grids.length - 1;
       setPhase("topicComplete");
-      setTimeout(() => (isLastTopic ? onEnd() : advanceToNextTopic()), 2200);
+      setTimeout(() => advanceToNextTopic(), 2200);
       return;
     }
 
@@ -128,7 +131,7 @@ export function MinefieldGame({ gridData, teams, onUpdateScore, onEnd }: GamePro
             <br />
             <strong>7 of the 25 tiles are hidden mines</strong> — you won't know which until you pick one.
             <br />
-            Correct = <strong>+50 pts</strong>. Hit a mine = <strong>-75 pts</strong>.
+            Correct = <strong>+50 pts</strong>. Hit a mine = <strong>-75 pts</strong>. Wrong answer on a safe tile = no points, but the square stays in play.
             {topicRotation && <><br />Every team gets one square on this topic, then the board moves on to the next selected topic.</>}
           </div>
         </div>
@@ -166,12 +169,30 @@ export function MinefieldGame({ gridData, teams, onUpdateScore, onEnd }: GamePro
           {phase === "topicComplete" && "Topic complete!"}
         </span>
         <div style={{ background: "rgba(255,255,255,0.2)", borderRadius: "20px", padding: "4px 12px", color: "white", fontWeight: "700", fontSize: "13px" }}>
-          {topicRotation ? `Team ${activeTeam + 1}/${teams.length} | ${revealed.size}/${teams.length} picked` : `${safeRevealed}/${totalSafe} safe | ${MINE_COUNT} mines`}
+          {topicRotation ? `Team ${activeTeam + 1}/${teams.length} | ${safeRevealed}/${totalSafe} safe` : `${safeRevealed}/${totalSafe} safe | ${MINE_COUNT} mines`}
         </div>
       </div>
 
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", marginBottom: "10px", flexWrap: "wrap" }}>
+        <span style={{ fontSize: "11px", fontWeight: "800", color: "#9CA3AF", marginRight: "4px", textTransform: "uppercase", letterSpacing: "0.04em" }}>Mines left:</span>
+        {Array.from({ length: MINE_COUNT }).map((_, i) => (
+          <span
+            key={i}
+            style={{
+              fontSize: "18px",
+              filter: i < minesFound ? "grayscale(1) opacity(0.35)" : "none",
+              transform: i < minesFound ? "scale(0.85)" : "scale(1)",
+              transition: "all 0.3s ease",
+              display: "inline-block",
+            }}
+          >
+            {i < minesFound ? "💥" : "💣"}
+          </span>
+        ))}
+      </div>
+
       <div style={{ height: "8px", background: "#E5E7EB", borderRadius: "4px", overflow: "hidden", marginBottom: "14px" }}>
-        <div style={{ height: "100%", width: `${(topicRotation ? revealed.size / teams.length : safeRevealed / totalSafe) * 100}%`, background: "#22C55E", borderRadius: "4px", transition: "width 0.4s ease" }} />
+        <div style={{ height: "100%", width: `${(safeRevealed / totalSafe) * 100}%`, background: "#22C55E", borderRadius: "4px", transition: "width 0.4s ease" }} />
       </div>
 
       {boom && lastResult && (
@@ -190,7 +211,7 @@ export function MinefieldGame({ gridData, teams, onUpdateScore, onEnd }: GamePro
           borderRadius: "12px", padding: "10px 16px", marginBottom: "12px", textAlign: "center", fontSize: "13px", fontWeight: "700",
           color: lastResult.correct && !lastResult.isMine ? "#14532D" : lastResult.isMine ? "#991B1B" : "#7C2D12"
         }}>
-          {lastResult.isMine ? `Mine! ${lastResult.teamName} loses 75 pts` : lastResult.correct ? `Great sentence! ${lastResult.teamName} gets +50 pts` : `Incorrect - ${lastResult.teamName} gets no points`}
+          {lastResult.isMine ? `Mine! ${lastResult.teamName} loses 75 pts` : lastResult.correct ? `Great sentence! ${lastResult.teamName} gets +50 pts` : `Incorrect - ${lastResult.teamName} gets no points, square stays open`}
         </div>
       )}
 
@@ -224,7 +245,7 @@ export function MinefieldGame({ gridData, teams, onUpdateScore, onEnd }: GamePro
             <button onClick={() => afterJudge(true)} style={{ background: "linear-gradient(135deg,#22C55E,#15803D)", color: "white", border: "none", borderRadius: "14px", padding: "14px 36px", fontSize: "18px", fontWeight: "900", cursor: "pointer", boxShadow: "0 4px 16px rgba(34,197,94,0.4)" }}>Correct! +50</button>
             <button onClick={() => afterJudge(false)} style={{ background: "linear-gradient(135deg,#EF4444,#B91C1C)", color: "white", border: "none", borderRadius: "14px", padding: "14px 36px", fontSize: "18px", fontWeight: "900", cursor: "pointer", boxShadow: "0 4px 16px rgba(239,68,68,0.4)" }}>Wrong - 0 pts</button>
           </div>
-          <div style={{ fontSize: "12px", color: "#6B7280", marginTop: "10px", fontWeight: "600" }}>(Mine risk still applies regardless of answer.)</div>
+          <div style={{ fontSize: "12px", color: "#6B7280", marginTop: "10px", fontWeight: "600" }}>(Mine risk still applies regardless of answer. A wrong answer on a safe tile leaves the square open for next time.)</div>
         </div>
       )}
 
@@ -282,7 +303,7 @@ export function MinefieldGame({ gridData, teams, onUpdateScore, onEnd }: GamePro
         </table>
       </div>
       <div style={{ textAlign: "center", fontSize: "12px", color: "#9CA3AF", fontWeight: "600", marginTop: "6px" }}>
-        {MINE_COUNT} mines hidden - click a square, say the sentence, then the teacher judges
+        {minesLeft} mine{minesLeft === 1 ? "" : "s"} still hidden - click a square, say the sentence, then the teacher judges
       </div>
       </>
       )}
