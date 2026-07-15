@@ -264,14 +264,14 @@ export function VaultHeistGame({ questions, teams, onUpdateScore, onEnd }: GameP
     }
   }, [phase, runOrderRoll, teams]);
 
-  const { timeLeft } = useTurnTimer(TURN_SECONDS, phase === "answer", () => advanceTurn(), orderPos);
+  const { timeLeft, stop } = useTurnTimer(TURN_SECONDS, phase === "answer", () => advanceTurn(), orderPos);
 
   const showWin = (teamName: string, color: string, rank: number, bonus: number) => {
     const id = fxId.current++;
     setWinBanner({ teamName, color, rank, bonus, key: id });
   };
 
-  const handleReveal = () => setShowAns(true);
+  const handleReveal = () => { stop(); setShowAns(true); };
 
   const handleCorrect = () => {
     if (!currentCategory) return;
