@@ -1,7 +1,18 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import type { GameProps } from "../../types";
 
-const QUEUE_SLOTS = 3;
+// The diner queue used to always sit at a fixed 3 customers regardless of class size — a 2-team
+// class found that overwhelming (2 people covering 3 orders) while a 5-team class found it too
+// quiet (5 teams idling over the same 3). Capacity now scales with team count, and — like the
+// item-count difficulty — ramps up from a single customer rather than starting at max immediately.
+const MAX_QUEUE_SLOTS_CAP = 6;
+const SLOT_RAMP_INTERVAL = 4;
+function maxQueueSlots(teamCount: number): number {
+  return Math.max(1, Math.min(teamCount, MAX_QUEUE_SLOTS_CAP));
+}
+function currentQueueCapacity(resolvedCount: number, maxSlots: number): number {
+  return Math.min(maxSlots, 1 + Math.floor(resolvedCount / SLOT_RAMP_INTERVAL));
+}
 // Difficulty ramps over the course of the session rather than staying at a flat 50/40/10 the
 // whole time — the first RAMP_TO_TWO_ITEM tickets resolved (served or expired) are 1-item only,
 // tickets up to RAMP_TO_THREE_ITEM add in 2-item, and only after that does the full 50/40/10 mix
@@ -269,11 +280,23 @@ export function OrderUpGame({ questions, teams, onUpdateScore, level }: GameProp
     setTimeout(() => setBanner(prev => (prev?.key === key ? null : prev)), 2400);
   }, []);
 
+  const maxSlots = maxQueueSlots(teams.length);
+
+  // Tops the queue up to whatever the current ramp allows — fires on mount (spawning the first
+  // customer) and again after every resolution (serve/expire), since removing a ticket changes
+  // tickets.length and re-triggers this effect. Reading resolvedCountRef.current here (rather than
+  // a state value) always reflects the latest count, including a threshold just crossed by the
+  // resolution that caused this re-run, so the ramp advances at the moment it should rather than
+  // one resolution late.
   useEffect(() => {
-    if (phase === "playing" && tickets.length === 0) {
-      setTickets(Array.from({ length: QUEUE_SLOTS }, () => generateTicket(grammarPool, vocabWordPool, () => ticketIdRef.current++, resolvedCountRef.current)));
+    if (phase !== "playing") return;
+    const capacity = currentQueueCapacity(resolvedCountRef.current, maxSlots);
+    if (tickets.length < capacity) {
+      const needed = capacity - tickets.length;
+      const newTickets = Array.from({ length: needed }, () => generateTicket(grammarPool, vocabWordPool, () => ticketIdRef.current++, resolvedCountRef.current));
+      setTickets(prev => [...prev, ...newTickets]);
     }
-  }, [phase, tickets.length, grammarPool, vocabWordPool]);
+  }, [phase, tickets.length, grammarPool, vocabWordPool, maxSlots]);
 
   useEffect(() => {
     if (phase !== "playing") return;
@@ -290,12 +313,13 @@ export function OrderUpGame({ questions, teams, onUpdateScore, level }: GameProp
           resolvedCountRef.current += expiredCount;
           pushBanner("😤 A customer left unhappy!", "expired");
         }
-        const replacements = Array.from({ length: expiredCount }, () => generateTicket(grammarPool, vocabWordPool, () => ticketIdRef.current++, resolvedCountRef.current));
-        return [...survivors, ...replacements];
+        // No inline replacement here — the top-up effect above handles spawning new customers
+        // once tickets.length changes, so capacity growth from the ramp is picked up naturally.
+        return survivors;
       });
     }, 1000);
     return () => clearInterval(id);
-  }, [phase, grammarPool, vocabWordPool, pushBanner]);
+  }, [phase, pushBanner]);
 
   // If the ticket currently being judged just expired out from under the teacher, drop the judge
   // view instead of leaving it pointed at a ticket that no longer exists.
@@ -312,8 +336,9 @@ export function OrderUpGame({ questions, teams, onUpdateScore, level }: GameProp
     const score = ORDER_SCORE_BY_ITEM_COUNT[ticket.items.length] ?? ORDER_SCORE_BY_ITEM_COUNT[1];
     onUpdateScore(judging.teamId, score);
     resolvedCountRef.current += 1;
-    const replacement = generateTicket(grammarPool, vocabWordPool, () => ticketIdRef.current++, resolvedCountRef.current);
-    setTickets(prev => prev.map(t => (t.id === ticket.id ? replacement : t)));
+    // No inline replacement — removing this ticket changes tickets.length, which re-triggers the
+    // top-up effect to spawn a new customer if the current ramp capacity allows it.
+    setTickets(prev => prev.filter(t => t.id !== ticket.id));
     pushBanner(`✅ Order served! +${score} pts`, "success");
     setJudging(null);
   };
@@ -335,7 +360,8 @@ export function OrderUpGame({ questions, teams, onUpdateScore, level }: GameProp
           <div style={{ fontSize: "15px", lineHeight: 1.7 }}>
             Customers line up outside the diner — each little dish above their head is one English requirement:
             a sentence <strong style={{ color: "#BE185D" }}>form</strong> (positive, negative, or a question), an <strong style={{ color: "#BE185D" }}>advanced grammar point</strong>, or a specific <strong style={{ color: "#BE185D" }}>vocabulary word</strong>.<br />
-            Any team can claim any customer. Write <strong style={{ color: "#BE185D" }}>one sentence</strong> that satisfies every dish at once — the teacher judges. Wait too long and the customer leaves unhappy!
+            Any team can claim any customer. Write <strong style={{ color: "#BE185D" }}>one sentence</strong> that satisfies every dish at once — the teacher judges. Wait too long and the customer leaves unhappy!<br />
+            The diner starts with just one customer and gets busier as orders get resolved, capped to match how many teams are playing — so it never feels overwhelming.
           </div>
         </div>
         <button onClick={() => setPhase("playing")} className="ou-btn" style={{ background: "linear-gradient(135deg,#F43F5E,#FB7185)", color: "white", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(244,63,94,0.4)", transition: "transform 0.15s ease" }}>🔔 Open the Diner!</button>
