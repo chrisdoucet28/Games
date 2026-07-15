@@ -402,9 +402,11 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd }: GamePr
   const triggerWin = (teamId: string | number) => {
     const finalPos: Record<string | number, number> = {};
     teams.forEach(t => { finalPos[t.id] = t.id === teamId ? TOTAL : (raceTeamsRef.current[t.id]?.pos ?? 0); });
+    const distinctPosDesc = [...new Set(teams.map(t => finalPos[t.id]))].sort((a, b) => b - a);
     const ranking = [...teams].sort((a, b) => finalPos[b.id] - finalPos[a.id]);
-    const rows: RankRow[] = ranking.map((t, i) => {
-      const pts = RANK_POINTS[i] ?? 5;
+    const rows: RankRow[] = ranking.map(t => {
+      const rank = distinctPosDesc.indexOf(finalPos[t.id]);
+      const pts = RANK_POINTS[rank] ?? 5;
       onUpdateScore(t.id, pts);
       return { id: t.id, name: t.name, pos: finalPos[t.id], points: pts };
     });

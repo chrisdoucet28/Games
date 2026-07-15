@@ -19,7 +19,7 @@ const createMines = () =>
 export function MinefieldGame({ gridData, teams, onUpdateScore, onEnd }: GameProps) {
   const grids = (Array.isArray(gridData) ? gridData : gridData ? [gridData] : []) as MinefieldGrid[];
   const [gridIndex, setGridIndex] = useState(0);
-  const [mines] = useState<Set<number>>(() => createMines());
+  const [mines, setMines] = useState<Set<number>>(() => createMines());
   const [revealed, setRevealed] = useState<Set<number>>(new Set());
   const [activeTeam, setActiveTeam] = useState(0);
   const [phase, setPhase] = useState<"intro" | "pick" | "speaking" | "judging" | "topicComplete">("intro");
@@ -57,7 +57,9 @@ export function MinefieldGame({ gridData, teams, onUpdateScore, onEnd }: GamePro
   };
 
   const advanceToNextTopic = () => {
-    setGridIndex(index => (index + 1) % grids.length);
+    setGridIndex(index => index + 1);
+    setMines(createMines());
+    setRevealed(new Set());
     setActiveTeam(0);
     setSelectedTile(null);
     setLastResult(null);
@@ -89,14 +91,15 @@ export function MinefieldGame({ gridData, teams, onUpdateScore, onEnd }: GamePro
 
     setSelectedTile(null);
 
-    if (nextSafeRevealed >= totalSafe) {
+    if (!topicRotation && nextSafeRevealed >= totalSafe) {
       onEnd();
       return;
     }
 
     if (completedTopicRound) {
+      const isLastTopic = gridIndex >= grids.length - 1;
       setPhase("topicComplete");
-      setTimeout(() => advanceToNextTopic(), 2200);
+      setTimeout(() => (isLastTopic ? onEnd() : advanceToNextTopic()), 2200);
       return;
     }
 
@@ -163,12 +166,12 @@ export function MinefieldGame({ gridData, teams, onUpdateScore, onEnd }: GamePro
           {phase === "topicComplete" && "Topic complete!"}
         </span>
         <div style={{ background: "rgba(255,255,255,0.2)", borderRadius: "20px", padding: "4px 12px", color: "white", fontWeight: "700", fontSize: "13px" }}>
-          {topicRotation ? `Team ${activeTeam + 1}/${teams.length} | ${safeRevealed}/${totalSafe} safe` : `${safeRevealed}/${totalSafe} safe | ${MINE_COUNT} mines`}
+          {topicRotation ? `Team ${activeTeam + 1}/${teams.length} | ${revealed.size}/${teams.length} picked` : `${safeRevealed}/${totalSafe} safe | ${MINE_COUNT} mines`}
         </div>
       </div>
 
       <div style={{ height: "8px", background: "#E5E7EB", borderRadius: "4px", overflow: "hidden", marginBottom: "14px" }}>
-        <div style={{ height: "100%", width: `${(safeRevealed / totalSafe) * 100}%`, background: "#22C55E", borderRadius: "4px", transition: "width 0.4s ease" }} />
+        <div style={{ height: "100%", width: `${(topicRotation ? revealed.size / teams.length : safeRevealed / totalSafe) * 100}%`, background: "#22C55E", borderRadius: "4px", transition: "width 0.4s ease" }} />
       </div>
 
       {boom && lastResult && (
