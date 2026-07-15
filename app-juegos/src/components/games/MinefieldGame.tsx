@@ -132,12 +132,12 @@ export function MinefieldGame({ gridData, teams, onUpdateScore, onEnd }: GamePro
             <strong>7 of the 25 tiles are hidden mines</strong> — you won't know which until you pick one.
             <br />
             Correct = <strong>+50 pts</strong>. Hit a mine = <strong>-75 pts</strong>. Wrong answer on a safe tile = no points, but the square stays in play.
-            {topicRotation && <><br />Every team gets one square on this topic, then the board moves on to the next selected topic.</>}
+            {topicRotation && <><br />It's one shared minefield all game — topics cycle through for variety, looping back around as needed, until every safe tile is found.</>}
           </div>
         </div>
         <div style={{ marginTop: "24px", marginBottom: "20px", fontSize: "14px", color: "#6B7280", fontWeight: "600" }}>
           {topicRotation
-            ? "Every team plays this topic before the next one comes up — no repeats!"
+            ? "Topics rotate each round for variety, looping back through the list if there's still board left to clear — the team with the most points when every safe tile is found wins!"
             : "Take turns picking squares - the team with the most points when all safe tiles are cleared wins!"}
         </div>
         <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "24px" }}>
