@@ -15985,18 +15985,18 @@ export const TOPIC_LIBRARY = {
       "topic": "Days, Dates and Time",
       "instructions": "Combine the time expression with the sentence starter and choose in, on, or at.",
       "colLabels": [
-        "Monday",
-        "January",
-        "7 o'clock",
-        "May 5th",
-        "the weekend"
-      ],
-      "rowLabels": [
         "I study English...",
         "My birthday is...",
         "The meeting starts...",
         "We have a test...",
         "I relax..."
+      ],
+      "rowLabels": [
+        "Monday",
+        "January",
+        "7 o'clock",
+        "May 5th",
+        "the weekend"
       ]
     },
     "hotSeatWords": [
@@ -16845,18 +16845,18 @@ export const TOPIC_LIBRARY = {
       "topic": "Weather and Seasons",
       "instructions": "Combine the weather or season with the sentence starter and complete the sentence.",
       "colLabels": [
-        "sunny",
-        "rainy",
-        "cold",
-        "hot",
-        "winter"
-      ],
-      "rowLabels": [
         "Today is...",
         "I like...",
         "I wear...",
         "In my country...",
         "I do not like..."
+      ],
+      "rowLabels": [
+        "sunny",
+        "rainy",
+        "cold",
+        "hot",
+        "winter"
       ]
     },
     "hotSeatWords": [
@@ -17752,18 +17752,18 @@ export const TOPIC_LIBRARY = {
       "topic": "Daily Routines",
       "instructions": "Combine a time expression with a frequency adverb and complete a routine sentence.",
       "colLabels": [
-        "always",
-        "usually",
-        "sometimes",
-        "rarely",
-        "never"
+        "In the morning",
+        "At noon",
+        "In the afternoon",
+        "In the evening",
+        "At night"
       ],
       "rowLabels": [
-        "In the morning I...",
-        "At noon I...",
-        "In the afternoon I...",
-        "In the evening I...",
-        "At night I..."
+        "I always...",
+        "I usually...",
+        "I sometimes...",
+        "I rarely...",
+        "I never..."
       ]
     },
     "hotSeatWords": [
@@ -18666,18 +18666,18 @@ export const TOPIC_LIBRARY = {
       "topic": "Rooms, Objects and There Is/Are",
       "instructions": "Combine a room with an object and make a sentence using there is/are plus a preposition.",
       "colLabels": [
-        "kitchen",
-        "bedroom",
-        "bathroom",
-        "living room",
-        "dining room"
-      ],
-      "rowLabels": [
         "There is a...",
         "There are two...",
         "The ... is on...",
         "The ... is next to...",
         "Is there a...?"
+      ],
+      "rowLabels": [
+        "kitchen",
+        "bedroom",
+        "bathroom",
+        "living room",
+        "dining room"
       ]
     },
     "hotSeatWords": [
@@ -19530,11 +19530,11 @@ export const TOPIC_LIBRARY = {
         "they"
       ],
       "rowLabels": [
-        "This is ... book.",
-        "The phone is ...",
-        "Whose bag is this?",
-        "That is ... jacket.",
-        "The keys are ..."
+        "... book is on the table.",
+        "... phone is ringing.",
+        "... bag is really heavy.",
+        "... jacket looks great.",
+        "... keys are missing."
       ]
     },
     "hotSeatWords": [
