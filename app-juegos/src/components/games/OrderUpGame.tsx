@@ -1,5 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import type { GameProps } from "../../types";
+import { useTurnTimer } from "../../hooks/useTurnTimer";
+import { teamsGridCols } from "../../data/constants";
 
 // The diner queue used to always sit at a fixed 3 customers regardless of class size — a 2-team
 // class found that overwhelming (2 people covering 3 orders) while a 5-team class found it too
@@ -10,9 +12,30 @@ const SLOT_RAMP_INTERVAL = 4;
 function maxQueueSlots(teamCount: number): number {
   return Math.max(1, Math.min(teamCount, MAX_QUEUE_SLOTS_CAP));
 }
-function currentQueueCapacity(resolvedCount: number, maxSlots: number): number {
-  return Math.min(maxSlots, 1 + Math.floor(resolvedCount / SLOT_RAMP_INTERVAL));
+// Every class used to start at exactly 1 customer no matter how many teams were playing, so a
+// 5-team class spent its first several resolutions with only one ticket to fight over. Bigger
+// classes now open with more choice on the board from the very first customer, still ramping up
+// to the full cap from there rather than starting at max immediately.
+function initialQueueSlots(teamCount: number): number {
+  return Math.max(1, Math.ceil(teamCount / 2));
 }
+function currentQueueCapacity(resolvedCount: number, maxSlots: number, initialSlots: number): number {
+  return Math.min(maxSlots, initialSlots + Math.floor(resolvedCount / SLOT_RAMP_INTERVAL));
+}
+// A shared round timer, rather than the old fully open-ended "End Game whenever" model — gives the
+// class a race-against-the-clock target ("how many can we serve before time's up?") instead of just
+// grinding until the teacher stops it. Picked on the intro screen like Vault Heist's timer speed.
+const SESSION_SECONDS_BY_LENGTH: Record<string, number> = { short: 300, medium: 480, long: 720 };
+// Every served ticket hands the serving team one "dish" (separate from the per-badge food icons,
+// which are just flavor on the requirement itself) — collect DISH_SET_SIZE matching dishes and it
+// converts into a bonus at the end of the round, on top of normal per-ticket points. Rewards
+// noticing "we're two burgers away from a set" as a live strategic layer, not just raw speed.
+const DISH_SET_SIZE = 3;
+const DISH_SET_BONUS = 30;
+// A shared-floor game means an expired ticket is everyone's failure, not just whoever almost
+// claimed it — a small collective penalty (not zero, not harsh) keeps the whole room invested in
+// not letting customers walk, rather than only the team who happened to be mid-sentence caring.
+const UNHAPPY_PENALTY = 5;
 // Difficulty ramps over the course of the session rather than staying at a flat 50/40/10 the
 // whole time — the first RAMP_TO_TWO_ITEM tickets resolved (served or expired) are 1-item only,
 // tickets up to RAMP_TO_THREE_ITEM add in 2-item, and only after that does the full 50/40/10 mix
@@ -99,10 +122,13 @@ function randomFrom<T>(arr: readonly T[]): T {
 type TicketItem =
   | { kind: "grammar"; transform: string; label: string; foodEmoji: string }
   | { kind: "vocab"; word: string; foodEmoji: string };
-type Ticket = { id: number; items: TicketItem[]; customerEmoji: string; totalSeconds: number; secondsLeft: number };
+// dishEmoji is the customer's overall order — separate from each item's own foodEmoji styling —
+// and is what gets collected toward that team's set-collection bonus when the ticket is served.
+type Ticket = { id: number; items: TicketItem[]; customerEmoji: string; dishEmoji: string; totalSeconds: number; secondsLeft: number };
 type JudgingState = { ticketId: number; teamId: string | number } | null;
-type Phase = "intro" | "playing";
+type Phase = "intro" | "playing" | "final";
 type Banner = { text: string; kind: "success" | "expired"; key: number };
+type DishCounts = Record<string, number>;
 
 function pickItemCount(resolvedCount: number): number {
   if (resolvedCount < RAMP_TO_TWO_ITEM) return 1;
@@ -151,9 +177,24 @@ function generateTicket(grammarPool: string[], vocabWordPool: string[], nextId: 
     id: nextId(),
     items,
     customerEmoji: randomFrom(CUSTOMER_EMOJIS),
+    dishEmoji: randomFrom(DINER_FOOD_EMOJIS),
     totalSeconds,
     secondsLeft: totalSeconds,
   };
+}
+
+function totalDishes(counts: DishCounts | undefined): number {
+  if (!counts) return 0;
+  return Object.values(counts).reduce((sum, c) => sum + c, 0);
+}
+function setBonusFor(counts: DishCounts | undefined): number {
+  if (!counts) return 0;
+  return Object.values(counts).reduce((sum, c) => sum + Math.floor(c / DISH_SET_SIZE) * DISH_SET_BONUS, 0);
+}
+function formatClock(seconds: number): string {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
 const STYLE_TAG = (
@@ -253,9 +294,10 @@ function TicketCard({ ticket, teams, judging, onClaim, onCorrect, onWrong }: {
   );
 }
 
-// No internal gameover phase (no lives/vault/rounds, matching Card Shuffle/Sentence Auction) — the
-// always-present top-bar "End Game" button in LessonGamesGenerator.tsx handles ending this game.
-export function OrderUpGame({ questions, teams, onUpdateScore, level }: GameProps) {
+// A round-length countdown drives its own "final" phase (results + set-collection payout), but the
+// always-present top-bar "End Game" button in LessonGamesGenerator.tsx can still bail out early at
+// any time, same as every other game — this only adds a natural end, it doesn't remove the old one.
+export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, level }: GameProps) {
   const isBeginner = level === "A1" || level === "A2";
 
   const contentGrammarTags = useRef([
@@ -265,9 +307,14 @@ export function OrderUpGame({ questions, teams, onUpdateScore, level }: GameProp
   const vocabWordPool = useRef([...new Set(questions.filter(q => q.word).map(q => q.word as string))]).current;
 
   const [phase, setPhase] = useState<Phase>("intro");
+  const [sessionLength, setSessionLength] = useState<string>("medium");
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [judging, setJudging] = useState<JudgingState>(null);
   const [banner, setBanner] = useState<Banner | null>(null);
+  // Per-team tally of collected dishes by emoji, e.g. { teamId: { "🍔": 2, "🍟": 1 } } — one dish is
+  // added whenever that team serves a ticket, and the set-collection bonus is paid out from this at
+  // the end of the round (see handleSessionEnd).
+  const [dishCounts, setDishCounts] = useState<Record<string | number, DishCounts>>({});
   const ticketIdRef = useRef(0);
   const bannerIdRef = useRef(0);
   // The session's difficulty "clock" — advances only as orders actually get resolved (served or
@@ -281,6 +328,21 @@ export function OrderUpGame({ questions, teams, onUpdateScore, level }: GameProp
   }, []);
 
   const maxSlots = maxQueueSlots(teams.length);
+  const initialSlots = initialQueueSlots(teams.length);
+
+  // Pays out each team's set-collection bonus (if any) once, then moves to the results screen.
+  // dishCounts/teams/onUpdateScore all need to be current at the moment the clock hits zero, so
+  // this is a plain useCallback (re-created each render) rather than a ref-frozen function —
+  // useTurnTimer already re-points its internal onExpire ref to the latest closure every render.
+  const handleSessionEnd = useCallback(() => {
+    teams.forEach(t => {
+      const bonus = setBonusFor(dishCounts[t.id]);
+      if (bonus > 0) onUpdateScore(t.id, bonus);
+    });
+    setPhase("final");
+  }, [teams, dishCounts, onUpdateScore]);
+
+  const { timeLeft: sessionTimeLeft } = useTurnTimer(SESSION_SECONDS_BY_LENGTH[sessionLength], phase === "playing", handleSessionEnd);
 
   // Tops the queue up to whatever the current ramp allows — fires on mount (spawning the first
   // customer) and again after every resolution (serve/expire), since removing a ticket changes
@@ -290,13 +352,13 @@ export function OrderUpGame({ questions, teams, onUpdateScore, level }: GameProp
   // one resolution late.
   useEffect(() => {
     if (phase !== "playing") return;
-    const capacity = currentQueueCapacity(resolvedCountRef.current, maxSlots);
+    const capacity = currentQueueCapacity(resolvedCountRef.current, maxSlots, initialSlots);
     if (tickets.length < capacity) {
       const needed = capacity - tickets.length;
       const newTickets = Array.from({ length: needed }, () => generateTicket(grammarPool, vocabWordPool, () => ticketIdRef.current++, resolvedCountRef.current));
       setTickets(prev => [...prev, ...newTickets]);
     }
-  }, [phase, tickets.length, grammarPool, vocabWordPool, maxSlots]);
+  }, [phase, tickets.length, grammarPool, vocabWordPool, maxSlots, initialSlots]);
 
   useEffect(() => {
     if (phase !== "playing") return;
@@ -311,7 +373,14 @@ export function OrderUpGame({ questions, teams, onUpdateScore, level }: GameProp
         });
         if (expiredCount > 0) {
           resolvedCountRef.current += expiredCount;
-          pushBanner("😤 A customer left unhappy!", "expired");
+          const penalty = UNHAPPY_PENALTY * expiredCount;
+          teams.forEach(t => onUpdateScore(t.id, -penalty));
+          pushBanner(
+            expiredCount > 1
+              ? `😤 ${expiredCount} customers left unhappy! Everyone -${penalty}pts`
+              : `😤 A customer left unhappy! Everyone -${penalty}pts`,
+            "expired",
+          );
         }
         // No inline replacement here — the top-up effect above handles spawning new customers
         // once tickets.length changes, so capacity growth from the ramp is picked up naturally.
@@ -319,7 +388,7 @@ export function OrderUpGame({ questions, teams, onUpdateScore, level }: GameProp
       });
     }, 1000);
     return () => clearInterval(id);
-  }, [phase, pushBanner]);
+  }, [phase, pushBanner, teams, onUpdateScore]);
 
   // If the ticket currently being judged just expired out from under the teacher, drop the judge
   // view instead of leaving it pointed at a ticket that no longer exists.
@@ -336,6 +405,11 @@ export function OrderUpGame({ questions, teams, onUpdateScore, level }: GameProp
     const score = ORDER_SCORE_BY_ITEM_COUNT[ticket.items.length] ?? ORDER_SCORE_BY_ITEM_COUNT[1];
     onUpdateScore(judging.teamId, score);
     resolvedCountRef.current += 1;
+    setDishCounts(prev => {
+      const teamCounts = { ...(prev[judging.teamId] ?? {}) };
+      teamCounts[ticket.dishEmoji] = (teamCounts[ticket.dishEmoji] ?? 0) + 1;
+      return { ...prev, [judging.teamId]: teamCounts };
+    });
     // No inline replacement — removing this ticket changes tickets.length, which re-triggers the
     // top-up effect to spawn a new customer if the current ramp capacity allows it.
     setTickets(prev => prev.filter(t => t.id !== ticket.id));
@@ -360,14 +434,72 @@ export function OrderUpGame({ questions, teams, onUpdateScore, level }: GameProp
           <div style={{ fontSize: "15px", lineHeight: 1.7 }}>
             Customers line up outside the diner — each little dish above their head is one English requirement:
             a sentence <strong style={{ color: "#BE185D" }}>form</strong> (positive, negative, or a question), an <strong style={{ color: "#BE185D" }}>advanced grammar point</strong>, or a specific <strong style={{ color: "#BE185D" }}>vocabulary word</strong>.<br />
-            Any team can claim any customer. Write <strong style={{ color: "#BE185D" }}>one sentence</strong> that satisfies every dish at once — the teacher judges. Wait too long and the customer leaves unhappy!<br />
-            The diner starts with just one customer and gets busier as orders get resolved, capped to match how many teams are playing — so it never feels overwhelming.
+            Any team can claim any customer. Write <strong style={{ color: "#BE185D" }}>one sentence</strong> that satisfies every dish at once — the teacher judges. Wait too long and the customer leaves unhappy for <strong style={{ color: "#BE185D" }}>everyone</strong>!<br />
+            Every served order also hands your team a dish — collect {DISH_SET_SIZE} matching dishes for a bonus payout when the clock runs out.<br />
+            Bigger classes start with more customers on the board at once, and it all gets busier as orders get resolved.
+          </div>
+        </div>
+        <div style={{ marginBottom: "22px" }}>
+          <div style={{ fontSize: "13px", fontWeight: "700", color: "#9D174D", marginBottom: "8px" }}>⏱️ How long is the dinner rush?</div>
+          <div style={{ display: "flex", gap: "8px", justifyContent: "center", flexWrap: "wrap" }}>
+            {(["short", "medium", "long"] as const).map(len => (
+              <button key={len} onClick={() => setSessionLength(len)} className="ou-btn" style={{
+                background: sessionLength === len ? "linear-gradient(135deg,#BE185D,#F43F5E)" : "rgba(255,255,255,0.6)",
+                color: sessionLength === len ? "white" : "#9D174D",
+                border: `2px solid ${sessionLength === len ? "#F43F5E" : "#FBCFE8"}`,
+                borderRadius: "12px", padding: "10px 18px", cursor: "pointer",
+                fontWeight: "800", fontSize: "14px", transition: "all 0.15s",
+              }}>
+                {len === "short" ? "Short · 5 min" : len === "medium" ? "Medium · 8 min" : "Long · 12 min"}
+              </button>
+            ))}
           </div>
         </div>
         <button onClick={() => setPhase("playing")} className="ou-btn" style={{ background: "linear-gradient(135deg,#F43F5E,#FB7185)", color: "white", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(244,63,94,0.4)", transition: "transform 0.15s ease" }}>🔔 Open the Diner!</button>
       </div>
     </div>
   );
+
+  if (phase === "final") {
+    const ranking = [...teams].sort((a, b) => b.score - a.score);
+    return (
+      <div style={{ ...arenaStyle, textAlign: "center" }}>
+        {STYLE_TAG}
+        <div style={{ position: "relative", zIndex: 1 }}>
+          <div style={{ fontSize: "44px", marginBottom: "6px" }}>🔔</div>
+          <div style={{ fontWeight: "900", fontSize: "22px", color: "#BE185D", marginBottom: "4px" }}>Kitchen's closed!</div>
+          <div style={{ fontSize: "13px", color: "#9D174D", marginBottom: "16px" }}>{ranking[0]?.name} served the best dinner rush.</div>
+          <div style={{ display: "grid", gridTemplateColumns: teamsGridCols(teams.length), gap: "10px", margin: "0 auto 20px", maxWidth: "760px" }}>
+            {ranking.map((t, i) => {
+              const counts = dishCounts[t.id];
+              const bonus = setBonusFor(counts);
+              const served = totalDishes(counts);
+              const dishEntries = Object.entries(counts ?? {});
+              return (
+                <div key={t.id} style={{ background: "linear-gradient(160deg,#FFFFFF,#FFF1F2)", border: `2px solid ${t.color.bg}`, borderRadius: "14px", padding: "12px" }}>
+                  <div style={{ fontSize: "20px" }}>{i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : "🍽️"}</div>
+                  <div style={{ fontWeight: "800", color: "#831843", fontSize: "14px", marginTop: "4px" }}>{t.color.emoji} {t.name}</div>
+                  <div style={{ color: "#BE185D", fontWeight: "900", fontSize: "16px", marginTop: "4px" }}>{t.score} pts</div>
+                  <div style={{ fontSize: "11px", color: "#9D174D", marginTop: "4px" }}>{served} order{served === 1 ? "" : "s"} served</div>
+                  {dishEntries.length > 0 && (
+                    <div style={{ display: "flex", gap: "3px", justifyContent: "center", flexWrap: "wrap", marginTop: "6px" }}>
+                      {dishEntries.map(([emoji, count]) => (
+                        <span key={emoji} style={{ background: "#FEF9C3", borderRadius: "8px", padding: "2px 6px", fontSize: "11px", fontWeight: "800", color: "#854D0E" }}>{emoji}×{count}</span>
+                      ))}
+                    </div>
+                  )}
+                  {bonus > 0 && (
+                    <div style={{ fontSize: "11px", fontWeight: "800", color: "#15803D", marginTop: "6px" }}>+{bonus} set bonus 🎉</div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+          <button onClick={onEnd} className="ou-btn" style={{ background: "linear-gradient(135deg,#BE185D,#F43F5E)", color: "white", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "800", cursor: "pointer", transition: "transform 0.15s ease" }}>🏁 End Game</button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={arenaStyle}>
@@ -386,9 +518,29 @@ export function OrderUpGame({ questions, teams, onUpdateScore, level }: GameProp
       )}
       <div style={{ position: "relative", zIndex: 1 }}>
         <DinerFacade />
-        <div style={{ textAlign: "center", color: "#BE185D", fontWeight: "800", fontSize: "13px", marginBottom: "12px" }}>
+        <div style={{
+          display: "inline-flex", alignItems: "center", gap: "6px", margin: "0 auto 10px", padding: "5px 14px",
+          background: sessionTimeLeft <= 30 ? "#FEE2E2" : "white", border: `2px solid ${sessionTimeLeft <= 30 ? "#EF4444" : "#FBCFE8"}`,
+          borderRadius: "999px", fontWeight: "900", fontSize: "13px", color: sessionTimeLeft <= 30 ? "#B91C1C" : "#BE185D",
+          animation: sessionTimeLeft <= 30 ? "ouUrgentPulse 0.8s ease-in-out infinite" : "none",
+        }}>
+          ⏱️ {formatClock(sessionTimeLeft)} left in the rush
+        </div>
+        <div style={{ textAlign: "center", color: "#BE185D", fontWeight: "800", fontSize: "13px", marginBottom: "10px" }}>
           🍽️ Write one sentence that satisfies every dish to serve a customer!
         </div>
+        {Object.keys(dishCounts).length > 0 && (
+          <div style={{ display: "flex", gap: "8px", justifyContent: "center", flexWrap: "wrap", marginBottom: "14px" }}>
+            {teams.filter(t => totalDishes(dishCounts[t.id]) > 0).map(t => (
+              <div key={t.id} style={{ display: "flex", alignItems: "center", gap: "5px", background: "white", border: `1.5px solid ${t.color.bg}`, borderRadius: "999px", padding: "3px 10px" }}>
+                <span style={{ fontWeight: "800", fontSize: "11px", color: t.color.dark }}>{t.color.emoji} {t.name}:</span>
+                {Object.entries(dishCounts[t.id] ?? {}).map(([emoji, count]) => (
+                  <span key={emoji} style={{ fontSize: "11px", fontWeight: "700", color: "#854D0E" }}>{emoji}×{count}</span>
+                ))}
+              </div>
+            ))}
+          </div>
+        )}
         <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
           {tickets.map(t => (
             <TicketCard key={t.id} ticket={t} teams={teams} judging={judging} onClaim={claimTicket} onCorrect={resolveCorrect} onWrong={resolveWrong} />
