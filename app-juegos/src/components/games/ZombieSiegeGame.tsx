@@ -8,12 +8,15 @@ const BARRICADE_ITEM_HP = 4; // hits a single barricade item survives before bre
 const ZOMBIE_DAMAGE_PER_TICK = 1;
 const CORRECT_ANSWER_SCORE = 20; // matches Rocket Fuel's per-sentence rate — the closest sibling game (open sentence production, prompt after prompt); 10 felt thin next to other games' totals
 // Two independent, deliberately decoupled-from-English-tasks defense resources:
-// - Bullets slowly recharge on a flat timer (not tied to rounds or answering). The instant a
-//   zombie arrives at a door, any team with a charged bullet auto-shoots it down before it can
-//   touch the barricades — one bullet per zombie. If nobody has a charge, it attacks barricades.
-//   Every team starts capped at BULLET_CAP_START and recharges on BULLET_RECHARGE_SECONDS — slow
-//   enough that this is a supplement to answering questions, not a replacement for it. A team's
-//   personal cap can be raised (via power-up, see below) up to BULLET_CAP_CEILING.
+// - Bullets slowly recharge on a flat timer (not tied to rounds or answering). Any team with a
+//   charged bullet auto-shoots an attacking zombie down, one bullet per zombie — freshly-arrived
+//   zombies are shot before they ever touch a barricade, and any bullet still available after that
+//   is spent on zombies already mid-attack, so a bullet that recharges (or is gifted) while the
+//   house is under siege doesn't sit idle waiting for a new arrival. If nobody has a charge, the
+//   zombie attacks barricades instead. Every team starts capped at BULLET_CAP_START and recharges
+//   on BULLET_RECHARGE_SECONDS — slow enough that this is a supplement to answering questions, not
+//   a replacement for it. A team's personal cap can be raised (via power-up, see below) up to
+//   BULLET_CAP_CEILING.
 // - Axes are fixed at MAX_AXES and never regenerate — the true last resort, spent only when a
 //   zombie actually breaches an empty barricade stack. Two breaches survived, the third eliminates.
 const BULLET_CAP_START = 3;
@@ -25,8 +28,11 @@ const MAX_AXES = 2;
 // crate instead — one of a small set of random bonuses, same "reward for answering" loop, just a
 // different prize.
 const POWERUP_CHANCE = 0.25;
-type PowerUpKind = "maxAmmo" | "bulletCapUp" | "allDoorsChair";
-const POWERUP_KINDS: PowerUpKind[] = ["maxAmmo", "bulletCapUp", "allDoorsChair"];
+// ammoAllTeamsPlus1/2 are the only power-ups that help every team at once (the other three are
+// scoped to whichever team happened to answer) — a deliberate room-wide "gift" alongside the
+// personal ones, per the user's own suggestion.
+type PowerUpKind = "maxAmmo" | "bulletCapUp" | "allDoorsChair" | "ammoAllTeamsPlus1" | "ammoAllTeamsPlus2";
+const POWERUP_KINDS: PowerUpKind[] = ["maxAmmo", "bulletCapUp", "allDoorsChair", "ammoAllTeamsPlus1", "ammoAllTeamsPlus2"];
 
 // Rounds are closed waves, not a clock — think Call of Duty Zombies. Each round has a fixed zombie
 // quota; they trickle in (not all at once) after a brief read pause, and the round doesn't end
@@ -103,6 +109,8 @@ const POWERUP_LABEL: Record<PowerUpKind, string> = {
   maxAmmo: "🔫 Max Ammo!",
   bulletCapUp: "🔫 Ammo Cap +1!",
   allDoorsChair: "🪑 Chair on Every Door!",
+  ammoAllTeamsPlus1: "🔫 +1 Ammo for Everyone!",
+  ammoAllTeamsPlus2: "🔫🔫 +2 Ammo for Everyone!",
 };
 
 function emptyBarricades(): Record<EntryPointId, BarricadeItem[]> {
@@ -166,21 +174,29 @@ function advanceTick(
     return { ...z, progress };
   });
 
-  // 2.5. Auto-shoot — the instant a zombie arrives, any team with a charged bullet takes it down
-  // for free, one bullet per zombie. Resolved sequentially against a threaded working copy of
-  // `persons` (mirroring the breach step below) so several simultaneous arrivals in one tick can't
-  // over-spend the same charge.
+  // 2.5. Auto-shoot — any team with a charged bullet takes down an attacking zombie, one bullet per
+  // zombie. Covers freshly-arrived zombies first (shot before they ever touch the barricade, same
+  // as the original framing), then falls through to zombies that were ALREADY attacking — a bullet
+  // that recharges (or arrives via a power-up gift) while zombies are already mid-siege gets spent
+  // on the current threat immediately instead of sitting idle until some future new arrival. Without
+  // this second pass, a team that finally got its first bullet back while barricades were already
+  // under attack would visibly hold a charge and never use it. Resolved sequentially against a
+  // threaded working copy of `persons` (mirroring the breach step below) so several simultaneous
+  // shots in one tick can't over-spend the same charge.
   const shooterIds = aliveTeamIds.filter(id => persons[id]?.alive);
-  zombies = zombies.filter(z => {
-    if (!justArrived.has(z.id)) return true;
+  const attackingNow = zombies.filter(z => z.status === "attacking");
+  const shootOrder = [...attackingNow.filter(z => justArrived.has(z.id)), ...attackingNow.filter(z => !justArrived.has(z.id))];
+  const shotIds = new Set<number>();
+  shootOrder.forEach(z => {
     const armed = shooterIds.filter(id => persons[id].bullets > 0);
-    if (!armed.length) return true; // nobody has a charge — it proceeds to attack the barricade
+    if (!armed.length) return; // nobody has a charge left — it proceeds to attack the barricade
     const shooterId = armed[Math.floor(Math.random() * armed.length)];
     const shooter = persons[shooterId];
     persons = { ...persons, [shooterId]: { ...shooter, bullets: shooter.bullets - 1 } };
     events.push({ kind: "zombieShot", teamId: shooterId, entryPointId: z.entryPointId });
-    return false; // shot down before it can attack
+    shotIds.add(z.id);
   });
+  zombies = zombies.filter(z => !shotIds.has(z.id));
 
   // 3. Attack — every attacking zombie that survived the auto-shoot damages whichever barricade
   // item is currently frontmost at its entry point. Barricades are never repaired, so this only
@@ -371,8 +387,14 @@ function PersonChip({ team, person }: { team: Team; person: PersonState }) {
       <div style={{ fontSize: "16px", lineHeight: 1.1 }}>{person.alive ? "🧑" : "💀"}</div>
       <div style={{ fontWeight: "800", fontSize: "11px", color: person.alive ? "white" : "#9CA3AF" }}>{team.name}</div>
       {person.alive ? (
-        <div style={{ fontSize: "11px", lineHeight: 1.3 }}>
-          {person.bullets > 0 ? "🔫".repeat(person.bullets) : "🚫"} {person.axes > 0 ? "🪓".repeat(person.axes) : ""}
+        <div style={{ fontSize: "11px", lineHeight: 1.3, display: "flex", gap: "1px", justifyContent: "center", alignItems: "center", flexWrap: "wrap" }}>
+          {/* Always shows bulletCap slots (not just current bullets) — a team with 1/3 bullets sees
+              three guns, two of them greyed out, so the empty capacity is always visible, not just
+              inferred from a bare count. */}
+          {Array.from({ length: person.bulletCap }, (_, i) => (
+            <span key={i} style={{ opacity: i < person.bullets ? 1 : 0.28, filter: i < person.bullets ? "none" : "grayscale(1)" }}>🔫</span>
+          ))}
+          {person.axes > 0 && <span style={{ marginLeft: "3px" }}>{"🪓".repeat(person.axes)}</span>}
         </div>
       ) : (
         <div style={{ fontSize: "9px", color: "#9CA3AF", fontWeight: "700" }}>📣 cheering</div>
@@ -541,6 +563,16 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd }: Game
           next[ep.id] = [newItem, ...prev.barricades[ep.id]];
         });
         barricades = next;
+      } else if (kind === "ammoAllTeamsPlus1" || kind === "ammoAllTeamsPlus2") {
+        // Room-wide gift — every still-alive team gets bullets, each capped at their OWN bulletCap
+        // (a team that already raised its cap via bulletCapUp can bank more from this than one that
+        // hasn't), never past it.
+        const amount = kind === "ammoAllTeamsPlus1" ? 1 : 2;
+        const next = { ...persons };
+        Object.entries(persons).forEach(([id, person]) => {
+          if (person.alive) next[id] = { ...person, bullets: Math.min(person.bulletCap, person.bullets + amount) };
+        });
+        persons = next;
       }
       return { ...prev, persons, barricades };
     });
