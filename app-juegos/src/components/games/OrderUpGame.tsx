@@ -27,10 +27,11 @@ function currentQueueCapacity(resolvedCount: number, maxSlots: number, initialSl
 // class a race-against-the-clock target ("how many can we serve before time's up?") instead of just
 // grinding until the teacher stops it. Picked on the intro screen like Vault Heist's timer speed.
 const SESSION_SECONDS_BY_LENGTH: Record<string, number> = { short: 300, medium: 480, long: 720 };
-// Every served ticket hands the serving team one "dish" (separate from the per-badge food icons,
-// which are just flavor on the requirement itself) — collect DISH_SET_SIZE matching dishes and it
-// converts into a bonus at the end of the round, on top of normal per-ticket points. Rewards
-// noticing "we're two burgers away from a set" as a live strategic layer, not just raw speed.
+// Every served ticket hands the serving team a dish matching that ticket's food icon — every time
+// a team's running count of ONE dish type hits a multiple of DISH_SET_SIZE, they get an instant
+// DISH_SET_BONUS combo payout on top of normal per-ticket points (paid immediately, not saved up
+// for round-end, so it lands as a real live moment — banner and all — not a hidden final-screen
+// calculation). Keeps paying out every DISH_SET_SIZE more of the same dish, no cap.
 const DISH_SET_SIZE = 3;
 const DISH_SET_BONUS = 30;
 // A shared-floor game means an expired ticket is everyone's failure, not just whoever almost
@@ -112,23 +113,22 @@ function grammarLabel(tag: string): string {
 }
 
 const CUSTOMER_EMOJIS = ["🧑", "👩", "👨", "🧔", "👵", "👴", "🧑‍🦱", "👩‍🦱", "🧑‍🦰", "👩‍🦳"];
-// Classic diner fare — one dish per TICKET (every badge on that ticket shows the same food icon),
-// so a customer's order visibly IS the dish a team banks toward their set-collection bonus. Teams
-// can scan the board and see "that one's a pizza order" before claiming, rather than the dish only
-// being revealed after serving.
+// Classic diner fare — one dish per BADGE, each drawn independently, so a multi-item order can mix
+// dishes (e.g. a cookie + a pizza on the same ticket). What's shown on a badge is exactly the dish
+// serving it hands the team, so bigger orders visibly advance (or complete) more than one combo at
+// once — that variety is deliberate, not a limitation to work around.
 const DINER_FOOD_EMOJIS = ["🍔", "🍟", "🌭", "🍕", "🥤", "🍦", "🥞", "🧇", "🍩", "🍪", "🥧", "🍰"];
 
 function randomFrom<T>(arr: readonly T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
+// Each item's foodEmoji IS the dish that item hands the serving team (see resolveCorrect) — no
+// separate ticket-level dish field, since a ticket can hand out several different dishes at once.
 type TicketItem =
   | { kind: "grammar"; transform: string; label: string; foodEmoji: string }
   | { kind: "vocab"; word: string; foodEmoji: string };
-// dishEmoji is the customer's overall order, and every item's foodEmoji is set to that same value
-// (see generateTicket) so what teams see on the ticket is exactly what gets collected toward that
-// team's set-collection bonus when the ticket is served.
-type Ticket = { id: number; items: TicketItem[]; customerEmoji: string; dishEmoji: string; totalSeconds: number; secondsLeft: number };
+type Ticket = { id: number; items: TicketItem[]; customerEmoji: string; totalSeconds: number; secondsLeft: number };
 type JudgingState = { ticketId: number; teamId: string | number } | null;
 type Phase = "intro" | "playing" | "final";
 type Banner = { text: string; kind: "success" | "expired"; key: number };
@@ -150,7 +150,6 @@ function pickItemCount(resolvedCount: number): number {
 // kind still has an unused entry if the flip lands on one this ticket has already exhausted.
 function generateTicket(grammarPool: string[], vocabWordPool: string[], nextId: () => number, resolvedCount: number): Ticket {
   const itemCount = pickItemCount(resolvedCount);
-  const dishEmoji = randomFrom(DINER_FOOD_EMOJIS);
   const usedGrammar = new Set<string>();
   const usedVocab = new Set<string>();
   const excludedGrammar = new Set<string>();
@@ -170,11 +169,11 @@ function generateTicket(grammarPool: string[], vocabWordPool: string[], nextId: 
       grammarCount += 1;
       const excluded = MUTUALLY_EXCLUSIVE_FORMS[tag];
       if (excluded) excludedGrammar.add(excluded);
-      items.push({ kind: "grammar", transform: tag, label: grammarLabel(tag), foodEmoji: dishEmoji });
+      items.push({ kind: "grammar", transform: tag, label: grammarLabel(tag), foodEmoji: randomFrom(DINER_FOOD_EMOJIS) });
     } else {
       const word = vocabLeft[Math.floor(Math.random() * vocabLeft.length)];
       usedVocab.add(word);
-      items.push({ kind: "vocab", word, foodEmoji: dishEmoji });
+      items.push({ kind: "vocab", word, foodEmoji: randomFrom(DINER_FOOD_EMOJIS) });
     }
   }
   const totalSeconds = TICKET_SECONDS_BY_ITEM_COUNT[items.length] ?? TICKET_SECONDS_BY_ITEM_COUNT[1];
@@ -182,7 +181,6 @@ function generateTicket(grammarPool: string[], vocabWordPool: string[], nextId: 
     id: nextId(),
     items,
     customerEmoji: randomFrom(CUSTOMER_EMOJIS),
-    dishEmoji,
     totalSeconds,
     secondsLeft: totalSeconds,
   };
@@ -191,10 +189,6 @@ function generateTicket(grammarPool: string[], vocabWordPool: string[], nextId: 
 function totalDishes(counts: DishCounts | undefined): number {
   if (!counts) return 0;
   return Object.values(counts).reduce((sum, c) => sum + c, 0);
-}
-function setBonusFor(counts: DishCounts | undefined): number {
-  if (!counts) return 0;
-  return Object.values(counts).reduce((sum, c) => sum + Math.floor(c / DISH_SET_SIZE) * DISH_SET_BONUS, 0);
 }
 function formatClock(seconds: number): string {
   const m = Math.floor(seconds / 60);
@@ -317,9 +311,12 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, level }: G
   const [judging, setJudging] = useState<JudgingState>(null);
   const [banner, setBanner] = useState<Banner | null>(null);
   // Per-team tally of collected dishes by emoji, e.g. { teamId: { "🍔": 2, "🍟": 1 } } — one dish is
-  // added whenever that team serves a ticket, and the set-collection bonus is paid out from this at
-  // the end of the round (see handleSessionEnd).
+  // added whenever that team serves a ticket. Combo bonuses fire live off this (see resolveCorrect)
+  // the instant one dish type's count hits a multiple of DISH_SET_SIZE.
   const [dishCounts, setDishCounts] = useState<Record<string | number, DishCounts>>({});
+  // Running total of combo bonuses already paid out per team — purely for the final screen's
+  // display (the actual points already landed live via onUpdateScore when each combo fired).
+  const [comboBonusByTeam, setComboBonusByTeam] = useState<Record<string | number, number>>({});
   const ticketIdRef = useRef(0);
   const bannerIdRef = useRef(0);
   // The session's difficulty "clock" — advances only as orders actually get resolved (served or
@@ -335,17 +332,9 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, level }: G
   const maxSlots = maxQueueSlots(teams.length);
   const initialSlots = initialQueueSlots(teams.length);
 
-  // Pays out each team's set-collection bonus (if any) once, then moves to the results screen.
-  // dishCounts/teams/onUpdateScore all need to be current at the moment the clock hits zero, so
-  // this is a plain useCallback (re-created each render) rather than a ref-frozen function —
-  // useTurnTimer already re-points its internal onExpire ref to the latest closure every render.
-  const handleSessionEnd = useCallback(() => {
-    teams.forEach(t => {
-      const bonus = setBonusFor(dishCounts[t.id]);
-      if (bonus > 0) onUpdateScore(t.id, bonus);
-    });
-    setPhase("final");
-  }, [teams, dishCounts, onUpdateScore]);
+  // Combo bonuses are already paid out live as they happen (see resolveCorrect) — nothing left to
+  // settle here, this just moves to the results screen.
+  const handleSessionEnd = useCallback(() => setPhase("final"), []);
 
   const { timeLeft: sessionTimeLeft } = useTurnTimer(SESSION_SECONDS_BY_LENGTH[sessionLength], phase === "playing", handleSessionEnd);
 
@@ -417,15 +406,49 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, level }: G
     const score = ORDER_SCORE_BY_ITEM_COUNT[ticket.items.length] ?? ORDER_SCORE_BY_ITEM_COUNT[1];
     onUpdateScore(judging.teamId, score);
     resolvedCountRef.current += 1;
+
+    // One dish per badge, not one dish for the whole ticket — a multi-item order can advance (or
+    // complete) several different combos at once. Tally gains per distinct emoji first (an order
+    // can carry two badges of the same dish), then read the team's current counts from render-time
+    // state (safe here — a click handler, not an interval, so the closure is already fresh) to work
+    // out how many DISH_SET_SIZE thresholds each gain crosses via floor-division deltas, which
+    // correctly credits multiple combo completions in one serve if a big gain jumps clean over more
+    // than one threshold.
+    const gains: Record<string, number> = {};
+    ticket.items.forEach(item => { gains[item.foodEmoji] = (gains[item.foodEmoji] ?? 0) + 1; });
+    const existingCounts = dishCounts[judging.teamId] ?? {};
+    let comboBonusEarned = 0;
+    const comboParts: string[] = [];
+    Object.entries(gains).forEach(([emoji, gain]) => {
+      const before = existingCounts[emoji] ?? 0;
+      const after = before + gain;
+      const combosHit = Math.floor(after / DISH_SET_SIZE) - Math.floor(before / DISH_SET_SIZE);
+      if (combosHit > 0) {
+        comboBonusEarned += combosHit * DISH_SET_BONUS;
+        comboParts.push(combosHit > 1 ? `${emoji}×${combosHit} combos` : `${emoji} combo`);
+      }
+    });
+
     setDishCounts(prev => {
       const teamCounts = { ...(prev[judging.teamId] ?? {}) };
-      teamCounts[ticket.dishEmoji] = (teamCounts[ticket.dishEmoji] ?? 0) + 1;
+      Object.entries(gains).forEach(([emoji, gain]) => {
+        teamCounts[emoji] = (teamCounts[emoji] ?? 0) + gain;
+      });
       return { ...prev, [judging.teamId]: teamCounts };
     });
+    if (comboBonusEarned > 0) {
+      onUpdateScore(judging.teamId, comboBonusEarned);
+      setComboBonusByTeam(prev => ({ ...prev, [judging.teamId]: (prev[judging.teamId] ?? 0) + comboBonusEarned }));
+    }
     // No inline replacement — removing this ticket changes tickets.length, which re-triggers the
     // top-up effect to spawn a new customer if the current ramp capacity allows it.
     setTickets(prev => prev.filter(t => t.id !== ticket.id));
-    pushBanner(`✅ Order served! +${score} pts`, "success");
+    pushBanner(
+      comboBonusEarned > 0
+        ? `✅ Order served! +${score} pts · ${comboParts.join(" · ")}! +${comboBonusEarned} pts`
+        : `✅ Order served! +${score} pts`,
+      "success",
+    );
     setJudging(null);
   };
 
@@ -447,7 +470,7 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, level }: G
             Customers line up outside the diner — each little dish above their head is one English requirement:
             a sentence <strong style={{ color: "#BE185D" }}>form</strong> (positive, negative, or a question), an <strong style={{ color: "#BE185D" }}>advanced grammar point</strong>, or a specific <strong style={{ color: "#BE185D" }}>vocabulary word</strong>.<br />
             Any team can claim any customer. Write <strong style={{ color: "#BE185D" }}>one sentence</strong> that satisfies every dish at once — the teacher judges. Wait too long and the customer leaves unhappy for <strong style={{ color: "#BE185D" }}>everyone</strong>!<br />
-            Every served order also hands your team a dish — collect {DISH_SET_SIZE} matching dishes for a bonus payout when the clock runs out.<br />
+            Every served order also hands your team a dish matching each badge's icon — a bigger order can hand out several different dishes at once. Collect {DISH_SET_SIZE} of the same dish for an instant +{DISH_SET_BONUS} combo bonus, and it keeps paying out every {DISH_SET_SIZE} more.<br />
             Bigger classes start with more customers on the board at once, and it all gets busier as orders get resolved.
           </div>
         </div>
@@ -491,7 +514,7 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, level }: G
           <div style={{ display: "grid", gridTemplateColumns: teamsGridCols(teams.length), gap: "10px", margin: "0 auto 20px", maxWidth: "760px" }}>
             {ranking.map(({ item: t, rank, value }) => {
               const counts = dishCounts[t.id];
-              const bonus = setBonusFor(counts);
+              const bonus = comboBonusByTeam[t.id] ?? 0;
               const served = totalDishes(counts);
               const dishEntries = Object.entries(counts ?? {});
               return (
@@ -508,7 +531,7 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, level }: G
                     </div>
                   )}
                   {bonus > 0 && (
-                    <div style={{ fontSize: "11px", fontWeight: "800", color: "#15803D", marginTop: "6px" }}>+{bonus} set bonus 🎉</div>
+                    <div style={{ fontSize: "11px", fontWeight: "800", color: "#15803D", marginTop: "6px" }}>+{bonus} from combos 🎉</div>
                   )}
                 </div>
               );
