@@ -1,5 +1,7 @@
 import { useState } from "react";
 import type { GameProps } from "../../types";
+import { teamsGridCols } from "../../data/constants";
+import { denseRank, medalForRank } from "../../utils/ranking";
 
 type MinefieldGrid = {
   topic: string;
@@ -22,10 +24,14 @@ export function MinefieldGame({ gridData, teams, onUpdateScore, onEnd }: GamePro
   const [mines] = useState<Set<number>>(() => createMines());
   const [revealed, setRevealed] = useState<Set<number>>(new Set());
   const [activeTeam, setActiveTeam] = useState(0);
-  const [phase, setPhase] = useState<"intro" | "pick" | "speaking" | "judging" | "topicComplete">("intro");
+  const [phase, setPhase] = useState<"intro" | "pick" | "speaking" | "judging" | "topicComplete" | "final">("intro");
   const [selectedTile, setSelectedTile] = useState<number | null>(null);
   const [boom, setBoom] = useState<boolean | null>(null);
   const [lastResult, setLastResult] = useState<{ correct: boolean; isMine: boolean; col: string; row: string; teamName: string } | null>(null);
+  // Correct sentences / mines hit per team — the only things worth surfacing on a results screen
+  // beyond raw score, since everything else about a tile (revealed/mine) is board-wide, not per-team.
+  const [correctByTeam, setCorrectByTeam] = useState<Record<string | number, number>>({});
+  const [minesHitByTeam, setMinesHitByTeam] = useState<Record<string | number, number>>({});
 
   const currentGrid = grids[Math.min(gridIndex, Math.max(0, grids.length - 1))];
   const topicRotation = grids.length > 1;
@@ -88,15 +94,17 @@ export function MinefieldGame({ gridData, teams, onUpdateScore, onEnd }: GamePro
     if (isMine) {
       setBoom(true);
       onUpdateScore(judgingTeam.id, -75);
+      setMinesHitByTeam(prev => ({ ...prev, [judgingTeam.id]: (prev[judgingTeam.id] ?? 0) + 1 }));
       setTimeout(() => setBoom(false), 2200);
     } else if (correct) {
       onUpdateScore(judgingTeam.id, 50);
+      setCorrectByTeam(prev => ({ ...prev, [judgingTeam.id]: (prev[judgingTeam.id] ?? 0) + 1 }));
     }
 
     setSelectedTile(null);
 
     if (nextSafeRevealed >= totalSafe) {
-      onEnd();
+      setPhase("final");
       return;
     }
 
@@ -148,6 +156,34 @@ export function MinefieldGame({ gridData, teams, onUpdateScore, onEnd }: GamePro
         <button onClick={() => setPhase("pick")} style={{ background: "linear-gradient(135deg,#4C1D95,#6D28D9)", color: "white", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(109,40,217,0.4)" }}>
           {topicRotation ? "Start This Topic" : "Enter the Minefield"}
         </button>
+      </div>
+    );
+  }
+
+  if (phase === "final") {
+    // Dense rank on final score — two teams tied for the lead both get gold instead of an
+    // arbitrary array-order winner.
+    const ranking = denseRank(teams, tm => tm.score).sort((a, b) => b.value - a.value);
+    const winners = ranking.filter(r => r.rank === 0);
+    const isTie = winners.length > 1;
+    const headline = isTie
+      ? `${winners.map(w => w.item.name).join(" & ")} tied for clearing the field!`
+      : `${winners[0]?.item.name} cleared the field!`;
+    return (
+      <div style={{ textAlign: "center" }}>
+        <div style={{ fontSize: "44px", marginBottom: "6px" }}>💣</div>
+        <div style={{ fontWeight: "900", fontSize: "22px", color: "#4C1D95", marginBottom: "16px" }}>{headline}</div>
+        <div style={{ display: "grid", gridTemplateColumns: teamsGridCols(teams.length), gap: "10px", margin: "0 auto 20px", maxWidth: "760px" }}>
+          {ranking.map(({ item: tm, rank, value }) => (
+            <div key={tm.id} style={{ background: tm.color.light, border: `2px solid ${tm.color.bg}`, borderRadius: "14px", padding: "12px" }}>
+              <div style={{ fontSize: "20px" }}>{medalForRank(rank)}</div>
+              <div style={{ fontWeight: "800", color: tm.color.dark, fontSize: "14px", marginTop: "4px" }}>{tm.color.emoji} {tm.name}</div>
+              <div style={{ color: tm.color.dark, fontWeight: "900", fontSize: "16px", marginTop: "4px" }}>{value} pts</div>
+              <div style={{ fontSize: "11px", color: "#4B5563", fontWeight: "700", marginTop: "4px" }}>{correctByTeam[tm.id] ?? 0} correct · {minesHitByTeam[tm.id] ?? 0} mine{(minesHitByTeam[tm.id] ?? 0) === 1 ? "" : "s"} hit</div>
+            </div>
+          ))}
+        </div>
+        <button onClick={onEnd} style={{ background: "linear-gradient(135deg,#4C1D95,#6D28D9)", color: "white", border: "none", borderRadius: "14px", padding: "14px 36px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(109,40,217,0.4)" }}>🏁 End Game</button>
       </div>
     );
   }

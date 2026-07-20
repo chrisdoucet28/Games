@@ -6,6 +6,7 @@ import { TOPIC_OPTIONS, TOPIC_LIBRARY } from "./data/topics";
 
 import { ScoreBoard } from "./components/shared/ScoreBoard";
 import { Confetti } from "./components/shared/Confetti";
+import { denseRank, medalForRank } from "./utils/ranking";
 import { AuctionGame } from "./components/games/AuctionGame";
 import { MinefieldGame } from "./components/games/MinefieldGame";
 import { HotSeatGame } from "./components/games/HotSeatGame";
@@ -303,7 +304,11 @@ export default function LessonGamesGenerator() {
     setTimeout(() => setConfetti(false), 4000);
   };
 
-  const winner = teams.length ? [...teams].sort((a, b) => b.score - a.score)[0] : null;
+  // Dense rank on score — two teams tied for first both get gold and share the "wins" headline
+  // instead of an arbitrary array-order winner (the old `sort()[0]` picked one team as "the
+  // winner" even when another team had the exact same score).
+  const finalRanking = teams.length ? denseRank(teams, t => t.score).sort((a, b) => b.value - a.value) : [];
+  const winners = finalRanking.filter(r => r.rank === 0).map(r => r.item);
 
   if (screen === "welcome") return (
     <div ref={appRef} style={{ minHeight: "100vh", background: "linear-gradient(160deg,#1E1B4B 0%,#312E81 45%,#4C1D95 100%)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "32px 20px 24px", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
@@ -658,20 +663,20 @@ export default function LessonGamesGenerator() {
   }
 
   if (screen === "results") {
-    const sorted = [...teams].sort((a, b) => b.score - a.score);
+    const headline = winners.length > 1 ? `${winners.map(w => w.name).join(" & ")} tie!` : `${winners[0]?.name} wins!`;
     return (
       <div style={{ minHeight: "100vh", background: "linear-gradient(135deg,#1E1B4B,#312E81)", padding: "20px", textAlign: "center", color: "white", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
         <Confetti active={confetti} />
         <div style={{ fontSize: "80px", margin: "20px 0" }}>🏆</div>
         <h1 style={{ fontSize: "clamp(24px,5vw,40px)", fontWeight: "900", margin: "0 0 8px" }}>Game Over!</h1>
-        <p style={{ color: "#C4B5FD", fontSize: "18px", marginBottom: "28px" }}>{winner?.name} wins! 🎉</p>
-        
+        <p style={{ color: "#C4B5FD", fontSize: "18px", marginBottom: "28px" }}>{headline} 🎉</p>
+
         <div style={{ background: "rgba(255,255,255,0.08)", borderRadius: "20px", padding: "24px", maxWidth: "600px", margin: "0 auto 24px" }}>
-          {sorted.map((t, i) => (
-            <div key={t.id} style={{ display: "flex", alignItems: "center", gap: "16px", padding: "12px 0", borderBottom: i < sorted.length - 1 ? "1px solid rgba(255,255,255,0.1)" : "none" }}>
-              <div style={{ fontSize: "32px" }}>{i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : "🎖️"}</div>
+          {finalRanking.map(({ item: t, rank, value }, i) => (
+            <div key={t.id} style={{ display: "flex", alignItems: "center", gap: "16px", padding: "12px 0", borderBottom: i < finalRanking.length - 1 ? "1px solid rgba(255,255,255,0.1)" : "none" }}>
+              <div style={{ fontSize: "32px" }}>{medalForRank(rank)}</div>
               <div style={{ flex: 1, textAlign: "left", fontWeight: "900", fontSize: "20px" }}>{t.name}</div>
-              <div style={{ fontWeight: "900", fontSize: "28px", color: t.color.bg }}>{t.score}</div>
+              <div style={{ fontWeight: "900", fontSize: "28px", color: t.color.bg }}>{value}</div>
             </div>
           ))}
         </div>

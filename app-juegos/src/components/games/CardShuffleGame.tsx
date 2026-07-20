@@ -2,6 +2,8 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import type { GameProps } from "../../types";
 import { useTurnTimer } from "../../hooks/useTurnTimer";
 import { TurnTimerBar } from "../shared/TurnTimerBar";
+import { teamsGridCols } from "../../data/constants";
+import { denseRank, medalForRank } from "../../utils/ranking";
 
 const AMBIENT_BITS = Array.from({ length: 12 }, (_, i) => ({
   left: (i * 37) % 100,
@@ -78,8 +80,12 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd }: Game
   const [cards, setCards] = useState(() => buildRound(0));
   const [cardSlots, setCardSlots] = useState([0, 1, 2, 3]);
   const [cardPos, setCardPos] = useState(() => [0, 1, 2, 3].map(slotPos));
-  const [phase, setPhase] = useState<"intro" | "preview" | "shuffling" | "picking" | "answering" | "reveal">("intro");
+  const [phase, setPhase] = useState<"intro" | "preview" | "shuffling" | "picking" | "answering" | "reveal" | "final">("intro");
   const [teamPicks, setTeamPicks] = useState<Record<string | number, { cardIdx: number, slot: number, correct: boolean }>>({});
+  // Running per-team tallies across every round — teamPicks itself resets each round, so this is
+  // what needs to survive to the final results screen.
+  const [starHitsByTeam, setStarHitsByTeam] = useState<Record<string | number, number>>({});
+  const [correctByTeam, setCorrectByTeam] = useState<Record<string | number, number>>({});
   const [answeringTeamIdx, setAnsweringTeamIdx] = useState(0);
   const [showAns, setShowAns] = useState(false);
   const [transitioning, setTransitioning] = useState(false);
@@ -201,8 +207,14 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd }: Game
     teams.forEach(t => {
       const pick = teamPicks[t.id];
       if (!pick) return;
-      if (cards[pick.cardIdx]?.isStar && pick.correct) onUpdateScore(t.id, 120);
-      else if (!cards[pick.cardIdx]?.isStar && pick.correct) onUpdateScore(t.id, 30);
+      if (cards[pick.cardIdx]?.isStar && pick.correct) {
+        onUpdateScore(t.id, 120);
+        setStarHitsByTeam(prev => ({ ...prev, [t.id]: (prev[t.id] ?? 0) + 1 }));
+        setCorrectByTeam(prev => ({ ...prev, [t.id]: (prev[t.id] ?? 0) + 1 }));
+      } else if (!cards[pick.cardIdx]?.isStar && pick.correct) {
+        onUpdateScore(t.id, 30);
+        setCorrectByTeam(prev => ({ ...prev, [t.id]: (prev[t.id] ?? 0) + 1 }));
+      }
     });
   }, [phase, teams, teamPicks, cards, onUpdateScore]);
 
@@ -214,7 +226,7 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd }: Game
 
   const nextRound = () => {
     const next = roundCount + 1;
-    if (next >= maxRounds) { onEnd(); return; }
+    if (next >= maxRounds) { setPhase("final"); return; }
     const newCards = buildRound(next);
     setCards(newCards);
     slotsRef.current = [0, 1, 2, 3];
@@ -261,6 +273,39 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd }: Game
       </div>
     </div>
   );
+
+  if (phase === "final") {
+    // Dense rank on final score — two teams tied for top billing both get gold instead of an
+    // arbitrary array-order winner.
+    const ranking = denseRank(teams, t => t.score).sort((a, b) => b.value - a.value);
+    const winners = ranking.filter(r => r.rank === 0);
+    const isTie = winners.length > 1;
+    const headline = isTie
+      ? `${winners.map(w => w.item.name).join(" & ")} tied for the star of the show!`
+      : `${winners[0]?.item.name} stole the show!`;
+    return (
+      <div style={{ ...arenaStyle, textAlign: "center" }}>
+        <AmbientBackdrop />
+        <div style={TENT_STRIPES} />
+        {STYLE_TAG}
+        <div style={{ position: "relative", zIndex: 1 }}>
+          <div style={{ fontSize: "44px", marginBottom: "6px" }}>🎪</div>
+          <div style={{ fontWeight: "900", fontSize: "22px", color: "#FCD34D", marginBottom: "16px" }}>{headline}</div>
+          <div style={{ display: "grid", gridTemplateColumns: teamsGridCols(teams.length), gap: "10px", margin: "0 auto 20px", maxWidth: "760px" }}>
+            {ranking.map(({ item: t, rank, value }) => (
+              <div key={t.id} style={{ background: `linear-gradient(160deg,${t.color.dark}55,#450A0A)`, border: `2px solid ${t.color.bg}`, borderRadius: "14px", padding: "12px" }}>
+                <div style={{ fontSize: "22px" }}>{medalForRank(rank)}</div>
+                <div style={{ fontWeight: "800", color: "white", fontSize: "14px", marginTop: "4px" }}>{t.color.emoji} {t.name}</div>
+                <div style={{ color: "#FCD34D", fontWeight: "900", fontSize: "16px", marginTop: "4px" }}>{value} pts</div>
+                <div style={{ fontSize: "11px", color: "#FEF3C7", fontWeight: "700", marginTop: "4px" }}>{correctByTeam[t.id] ?? 0} correct · ⭐ {starHitsByTeam[t.id] ?? 0} star{(starHitsByTeam[t.id] ?? 0) === 1 ? "" : "s"}</div>
+              </div>
+            ))}
+          </div>
+          <button onClick={onEnd} className="cs-btn" style={{ background: "linear-gradient(135deg,#B91C1C,#FCD34D)", color: "#450A0A", border: "none", borderRadius: "14px", padding: "14px 32px", fontSize: "16px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 20px rgba(252,211,77,0.4)", transition: "transform 0.15s ease" }}>🏁 End Game</button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={arenaStyle}>
@@ -380,7 +425,7 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd }: Game
               <div style={{ fontSize: "22px", marginBottom: "6px", color: "#450A0A", fontWeight: "900" }}>⭐ Star card revealed!</div>
             </div>
             <button onClick={nextRound} className="cs-btn" style={{ background: "linear-gradient(135deg,#B91C1C,#FCD34D)", color: "#450A0A", border: "none", borderRadius: "14px", padding: "14px 32px", fontSize: "16px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 20px rgba(252,211,77,0.4)", transition: "transform 0.15s ease" }}>
-              {roundCount + 1 >= maxRounds ? "🏁 End Game" : "➡️ Next Round"}
+              {roundCount + 1 >= maxRounds ? "🏆 See Final Results" : "➡️ Next Round"}
             </button>
           </div>
         )}

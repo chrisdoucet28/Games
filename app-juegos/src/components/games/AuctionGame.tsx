@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import type { GameProps } from "../../types";
 import { teamsGridCols } from "../../data/constants";
+import { denseRank, medalForRank } from "../../utils/ranking";
 
 interface Bet {
   amount?: number;
@@ -75,10 +76,13 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, earlyEndRe
   const BET_AMOUNTS = [25, 50, 100];
 
   const [qi, setQi] = useState(0);
-  const [phase, setPhase] = useState<"intro" | "betting" | "result">("intro");
+  const [phase, setPhase] = useState<"intro" | "betting" | "result" | "final">("intro");
   const [bets, setBets] = useState<Record<string | number, Bet>>({});
   const [resultMsg, setResultMsg] = useState<ResultMsg[]>([]);
   const [satOutLastRound, setSatOutLastRound] = useState<Set<string | number>>(new Set());
+  // Wins tracked per team across the whole auction — resultMsg itself resets every round, so this
+  // is the one thing that needs to survive to the final results screen.
+  const [roundsWon, setRoundsWon] = useState<Record<string | number, number>>({});
 
   const [auctionBank, setAuctionBank] = useState<Record<string | number, number>>(() =>
     Object.fromEntries(teams.map(t => [t.id, AUCTION_START]))
@@ -149,6 +153,11 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, earlyEndRe
     setAuctionBank(newBank);
     setSatOutLastRound(brokeThisRound);
     setResultMsg(msgs);
+    setRoundsWon(prev => {
+      const next = { ...prev };
+      msgs.forEach(m => { if (m.won) next[m.teamId] = (next[m.teamId] ?? 0) + 1; });
+      return next;
+    });
     setPhase("result");
   };
 
@@ -162,7 +171,10 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, earlyEndRe
     }
 
     if (qi + 1 >= questions.length) {
-      flushAndEnd();
+      // Flush the bank into real scores now so the final screen's ranking reflects it, but don't
+      // call onEnd yet — show this game's own results first, matching every other game's pattern.
+      flushBankToScores();
+      setPhase("final");
       return;
     }
     setQi(i => i + 1);
@@ -208,6 +220,42 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, earlyEndRe
       </div>
     </div>
   );
+
+  if (phase === "final") {
+    // Dense rank on final score (bank already flushed in) — a tie for the highest bank shows two
+    // gold gavels instead of an arbitrary array-order winner.
+    const ranking = denseRank(teams, t => t.score).sort((a, b) => b.value - a.value);
+    const winners = ranking.filter(r => r.rank === 0);
+    const isTie = winners.length > 1;
+    const headline = isTie
+      ? `${winners.map(w => w.item.name).join(" & ")} tied for the biggest bank!`
+      : `${winners[0]?.item.name} walked away with the biggest bank!`;
+    return (
+      <div style={{ ...arenaStyle, textAlign: "center" }}>
+        <AmbientBackdrop />
+        {STYLE_TAG}
+        <div style={{ position: "relative", zIndex: 1 }}>
+          <div style={{ fontSize: "44px", marginBottom: "6px" }}>🔨</div>
+          <div style={{ fontWeight: "900", fontSize: "22px", color: "#FCD34D", marginBottom: "16px" }}>{headline}</div>
+          <div style={{ display: "grid", gridTemplateColumns: teamsGridCols(teams.length), gap: "10px", margin: "0 auto 20px", maxWidth: "760px" }}>
+            {ranking.map(({ item: t, rank, value }) => (
+              <div key={t.id} style={{ background: `linear-gradient(160deg,${t.color.dark}55,#1E1033)`, border: `2px solid ${t.color.bg}`, borderRadius: "14px", padding: "12px" }}>
+                <div style={{ fontSize: "22px" }}>{medalForRank(rank)}</div>
+                <div style={{ fontWeight: "800", color: "white", fontSize: "14px", marginTop: "4px" }}>{t.color.emoji} {t.name}</div>
+                <div style={{ color: "#FCD34D", fontWeight: "900", fontSize: "16px", marginTop: "4px" }}>{value} pts</div>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "5px", marginTop: "6px" }}>
+                  <ChipStack amount={auctionBank[t.id] ?? 0} />
+                  <span style={{ fontSize: "12px", color: "#FCD34D", fontWeight: "700" }}>{auctionBank[t.id] ?? 0} final bank</span>
+                </div>
+                <div style={{ fontSize: "11px", color: "#C4B5FD", fontWeight: "700", marginTop: "4px" }}>Won {roundsWon[t.id] ?? 0} of {questions.length} lots</div>
+              </div>
+            ))}
+          </div>
+          <button onClick={flushAndEnd} className="auction-btn" style={{ background: "linear-gradient(135deg,#78350F,#F7C948)", color: "#150F00", border: "none", borderRadius: "14px", padding: "14px 36px", fontSize: "17px", fontWeight: "900", cursor: "pointer", transition: "transform 0.15s ease" }}>🏁 End Game</button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={arenaStyle}>
@@ -394,7 +442,7 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, earlyEndRe
               <button onClick={nextRound} className="auction-btn" style={{
                 background: "linear-gradient(135deg,#78350F,#F7C948)", color: "#150F00", border: "none",
                 borderRadius: "14px", padding: "14px 36px", fontSize: "17px", fontWeight: "900", cursor: "pointer", transition: "transform 0.15s ease"
-              }}>{qi + 1 >= questions.length ? "🏁 End Game" : "➡️ Next Sentence"}</button>
+              }}>{qi + 1 >= questions.length ? "🏆 See Final Results" : "➡️ Next Sentence"}</button>
             </div>
           </div>
         )}

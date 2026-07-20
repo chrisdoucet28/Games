@@ -3,6 +3,7 @@ import type { GameProps, QuestionData } from "../../types";
 import { useTurnTimer } from "../../hooks/useTurnTimer";
 import { TurnTimerBar } from "../shared/TurnTimerBar";
 import { teamsGridCols } from "../../data/constants";
+import { denseRank, medalForRank } from "../../utils/ranking";
 
 const TOTAL_HOLES = 6;
 const TURN_SECONDS = 90;
@@ -261,19 +262,26 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd }: GamePr
   );
 
   if (phase === "final") {
-    const ranking = [...teams].sort((a, b) => (finalScores[b.id] ?? 0) - (finalScores[a.id] ?? 0));
+    // Dense rank on final score — two teams tied for first both get gold instead of an
+    // arbitrary array-order winner/runner-up split.
+    const ranking = denseRank(teams, t => finalScores[t.id] ?? 0).sort((a, b) => b.value - a.value);
+    const winners = ranking.filter(r => r.rank === 0);
+    const isTie = winners.length > 1;
+    const headline = isTie
+      ? `${winners.map(w => w.item.name).join(" & ")} tied for the most whacks!`
+      : `${winners[0]?.item.name} whacked the most!`;
     return (
       <div style={{ ...arenaStyle, textAlign: "center" }}>
         <AmbientBackdrop />
         {STYLE_TAG}
         <div style={{ fontSize: "48px", marginBottom: "6px" }}>🏆</div>
-        <div style={{ fontWeight: "900", fontSize: "24px", color: "#BEF264", marginBottom: "16px" }}>{ranking[0]?.name} whacked the most!</div>
+        <div style={{ fontWeight: "900", fontSize: "24px", color: "#BEF264", marginBottom: "16px" }}>{headline}</div>
         <div style={{ display: "grid", gridTemplateColumns: teamsGridCols(teams.length), gap: "10px", margin: "0 auto 20px", maxWidth: "700px" }}>
-          {ranking.map((t, i) => (
+          {ranking.map(({ item: t, rank, value }) => (
             <div key={t.id} style={{ background: `linear-gradient(160deg,${t.color.dark}55,#1A2E05)`, border: `2px solid ${t.color.bg}`, borderRadius: "14px", padding: "12px" }}>
-              <div style={{ fontSize: "22px" }}>{i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : "🔨"}</div>
+              <div style={{ fontSize: "22px" }}>{medalForRank(rank)}</div>
               <div style={{ fontWeight: "800", color: "white", fontSize: "14px", marginTop: "4px" }}>{t.name}</div>
-              <div style={{ color: "#BEF264", fontWeight: "800", fontSize: "15px", marginTop: "4px" }}>{finalScores[t.id] ?? 0} pts</div>
+              <div style={{ color: "#BEF264", fontWeight: "800", fontSize: "15px", marginTop: "4px" }}>{value} pts</div>
             </div>
           ))}
         </div>

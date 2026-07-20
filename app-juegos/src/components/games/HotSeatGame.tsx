@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { GameProps } from "../../types";
+import { teamsGridCols } from "../../data/constants";
+import { denseRank, medalForRank } from "../../utils/ranking";
 
 const TOTAL_ROUNDS = 3;
 const TURN_SECONDS = 90;
@@ -54,12 +56,15 @@ const shuffle = <T,>(items: T[]) => {
 };
 
 export function HotSeatGame({ questions, teams, onUpdateScore, onEnd }: GameProps) {
-  const [phase, setPhase] = useState<"welcome" | "intro" | "play" | "turnend">("welcome");
+  const [phase, setPhase] = useState<"welcome" | "intro" | "play" | "turnend" | "final">("welcome");
   const [roundIndex, setRoundIndex] = useState(0);
   const [teamIndex, setTeamIndex] = useState(0);
   const [wordIndex, setWordIndex] = useState(0);
   const [turnCorrect, setTurnCorrect] = useState(0);
   const [lastTurnCorrect, setLastTurnCorrect] = useState(0);
+  // Words guessed correctly per team, summed across every turn/round — turnCorrect itself resets
+  // each turn, so this is the one thing that needs to survive to the final results screen.
+  const [totalWordsByTeam, setTotalWordsByTeam] = useState<Record<string | number, number>>({});
   const [timeLeft, setTimeLeft] = useState(TURN_SECONDS);
   const [showWordList, setShowWordList] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -128,6 +133,7 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd }: GameProp
     if (!currentTeam) return;
     onUpdateScore(currentTeam.id, POINTS_PER_WORD);
     setTurnCorrect(score => score + 1);
+    setTotalWordsByTeam(prev => ({ ...prev, [currentTeam.id]: (prev[currentTeam.id] ?? 0) + 1 }));
     setWordIndex(index => index + 1);
   };
 
@@ -137,7 +143,7 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd }: GameProp
 
   const goToNextTurn = () => {
     if (isLastTurn) {
-      onEnd();
+      setPhase("final");
       return;
     }
 
@@ -259,6 +265,39 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd }: GameProp
     );
   }
 
+  if (phase === "final") {
+    // Dense rank on final score — two teams tied for the top both get gold instead of an
+    // arbitrary array-order winner.
+    const ranking = denseRank(teams, t => t.score).sort((a, b) => b.value - a.value);
+    const winners = ranking.filter(r => r.rank === 0);
+    const isTie = winners.length > 1;
+    const headline = isTie
+      ? `${winners.map(w => w.item.name).join(" & ")} tied for the most words guessed!`
+      : `${winners[0]?.item.name} guessed the most words!`;
+    return (
+      <div style={{ ...arenaStyle, textAlign: "center" }}>
+        <EmberField />
+        <LavaGlow />
+        {STYLE_TAG}
+        <div style={{ position: "relative", zIndex: 1 }}>
+          <div style={{ fontSize: "44px", marginBottom: "6px" }}>🌋</div>
+          <div style={{ fontWeight: "900", fontSize: "22px", color: "#FDBA74", marginBottom: "16px" }}>{headline}</div>
+          <div style={{ display: "grid", gridTemplateColumns: teamsGridCols(teams.length), gap: "10px", margin: "0 auto 20px", maxWidth: "760px" }}>
+            {ranking.map(({ item: t, rank, value }) => (
+              <div key={t.id} style={{ background: `linear-gradient(160deg,${t.color.dark}55,#1C0701)`, border: `2px solid ${t.color.bg}`, borderRadius: "14px", padding: "12px" }}>
+                <div style={{ fontSize: "22px" }}>{medalForRank(rank)}</div>
+                <div style={{ fontWeight: "800", color: "white", fontSize: "14px", marginTop: "4px" }}>{t.color.emoji} {t.name}</div>
+                <div style={{ color: "#FDBA74", fontWeight: "900", fontSize: "16px", marginTop: "4px" }}>{value} pts</div>
+                <div style={{ fontSize: "11px", color: "#FED7AA", fontWeight: "700", marginTop: "4px" }}>{totalWordsByTeam[t.id] ?? 0} words guessed</div>
+              </div>
+            ))}
+          </div>
+          <button onClick={onEnd} className="hs-btn" style={{ background: "linear-gradient(135deg,#B91C1C,#F97316)", color: "white", border: "none", borderRadius: "14px", padding: "13px 34px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 20px rgba(249,115,22,0.4)", transition: "transform 0.15s ease" }}>🏁 End Game</button>
+        </div>
+      </div>
+    );
+  }
+
   const timeCritical = phase === "play" && timeLeft <= 10;
 
   return (
@@ -316,7 +355,7 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd }: GameProp
               <div style={{ color: "#FED7AA", fontWeight: "700" }}>Those points have been added to the scoreboard.</div>
             </div>
             <button onClick={goToNextTurn} className="hs-btn" style={{ background: "linear-gradient(135deg,#B91C1C,#F97316)", color: "white", border: "none", borderRadius: "14px", padding: "13px 34px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 20px rgba(249,115,22,0.4)", transition: "transform 0.15s ease" }}>
-              {isLastTurn ? "End Game" : teamIndex < teams.length - 1 ? "Next Team" : "Start Next Round"}
+              {isLastTurn ? "🏆 See Final Results" : teamIndex < teams.length - 1 ? "Next Team" : "Start Next Round"}
             </button>
           </div>
         )}

@@ -3,6 +3,8 @@ import type { GameProps } from "../../types";
 import { useTurnTimer } from "../../hooks/useTurnTimer";
 import { TurnTimerBar } from "../shared/TurnTimerBar";
 import { QuestionCard } from "../shared/QuestionCard";
+import { teamsGridCols } from "../../data/constants";
+import { denseRank, medalForRank } from "../../utils/ranking";
 
 type ZoneDef = { id: string; icon: string; pts: number; label?: string; prefix?: string };
 
@@ -92,7 +94,7 @@ export function KingOfHillGame({ questions, teams, onUpdateScore, onEnd }: GameP
   const [activeTeamIdx, setActiveTeamIdx] = useState(0);
   const [qi, setQi] = useState(0);
 
-  const [phase, setPhase] = useState<"intro" | "rolling" | "pick" | "answer" | "contested" | "round-end">("intro");
+  const [phase, setPhase] = useState<"intro" | "rolling" | "pick" | "answer" | "contested" | "round-end" | "final">("intro");
   const [chosenZone, setChosenZone] = useState<string | null>(null);
   const [showAns, setShowAns] = useState(false);
   const [contest, setContest] = useState<any>(null);
@@ -214,7 +216,7 @@ export function KingOfHillGame({ questions, teams, onUpdateScore, onEnd }: GameP
   const { timeLeft, stop } = useTurnTimer(TURN_SECONDS, phase === "pick", () => nextTeamTurn(false, owners), activeTeamIdx);
 
   const startNextRound = () => {
-    if (round >= TOTAL_ROUNDS) { onEnd(); return; }
+    if (round >= TOTAL_ROUNDS) { setPhase("final"); return; }
     setRound(r => r + 1);
     setActiveTeamIdx(0);
     setChosenZone(null);
@@ -309,6 +311,38 @@ export function KingOfHillGame({ questions, teams, onUpdateScore, onEnd }: GameP
       </div>
     </div>
   );
+
+  if (phase === "final") {
+    // Dense rank on final score — two teams tied for the throne both wear the crown instead of
+    // an arbitrary array-order winner.
+    const ranking = denseRank(teams, t => t.score).sort((a, b) => b.value - a.value);
+    const winners = ranking.filter(r => r.rank === 0);
+    const isTie = winners.length > 1;
+    const headline = isTie
+      ? `${winners.map(w => w.item.name).join(" & ")} share the crown!`
+      : `${winners[0]?.item.name} is King of the Hill!`;
+    return (
+      <div style={{ ...arenaStyle, textAlign: "center" }}>
+        <AmbientBackdrop />
+        {STYLE_TAG}
+        <div style={{ position: "relative", zIndex: 1 }}>
+          <div style={{ fontSize: "44px", marginBottom: "6px" }}>👑</div>
+          <div style={{ fontWeight: "900", fontSize: "22px", color: "#F9A8D4", marginBottom: "16px" }}>{headline}</div>
+          <div style={{ display: "grid", gridTemplateColumns: teamsGridCols(teams.length), gap: "10px", margin: "0 auto 20px", maxWidth: "760px" }}>
+            {ranking.map(({ item: t, rank, value }) => (
+              <div key={t.id} style={{ background: `linear-gradient(160deg,${t.color.dark}55,#1F0A1F)`, border: `2px solid ${t.color.bg}`, borderRadius: "14px", padding: "12px" }}>
+                <div style={{ fontSize: "22px" }}>{medalForRank(rank)}</div>
+                <div style={{ fontWeight: "800", color: "white", fontSize: "14px", marginTop: "4px" }}>{t.color.emoji} {t.name}</div>
+                <div style={{ color: "#FCD34D", fontWeight: "900", fontSize: "16px", marginTop: "4px" }}>{value} pts</div>
+                <div style={{ fontSize: "11px", color: "#F9A8D4", fontWeight: "700", marginTop: "4px" }}>{roundPoints[t.id] ?? 0} total control pts</div>
+              </div>
+            ))}
+          </div>
+          <button onClick={onEnd} className="ko-btn" style={{ background: "linear-gradient(135deg,#831843,#DB2777)", color: "white", border: "none", borderRadius: "14px", padding: "14px 36px", fontSize: "17px", fontWeight: "900", cursor: "pointer", transition: "transform 0.15s ease" }}>🏁 End Game</button>
+        </div>
+      </div>
+    );
+  }
 
   const renderZone = (zId: string) => {
     const z = ZONES.find(z => z.id === zId)!;
@@ -516,7 +550,7 @@ export function KingOfHillGame({ questions, teams, onUpdateScore, onEnd }: GameP
                     );
                   })}
                 </div>
-                <button onClick={startNextRound} className="ko-btn" style={{ background: "linear-gradient(135deg,#831843,#DB2777)", color: "white", border: "none", borderRadius: "14px", padding: "14px 36px", fontSize: "17px", fontWeight: "900", cursor: "pointer", transition: "transform 0.15s ease" }}>{round >= TOTAL_ROUNDS ? "🏁 End Game" : `▶️ Start Round ${round + 1}`}</button>
+                <button onClick={startNextRound} className="ko-btn" style={{ background: "linear-gradient(135deg,#831843,#DB2777)", color: "white", border: "none", borderRadius: "14px", padding: "14px 36px", fontSize: "17px", fontWeight: "900", cursor: "pointer", transition: "transform 0.15s ease" }}>{round >= TOTAL_ROUNDS ? "🏆 See Final Results" : `▶️ Start Round ${round + 1}`}</button>
               </div>
             )}
           </>

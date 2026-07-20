@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { GameProps, QuestionData, Team } from "../../types";
+import { teamsGridCols } from "../../data/constants";
+import { denseRank, medalForRank } from "../../utils/ranking";
 
 type Phase =
   | "intro"
@@ -12,7 +14,8 @@ type Phase =
   | "reveal"
   | "speak-2p"
   | "guess-2p"
-  | "reveal-2p";
+  | "reveal-2p"
+  | "final";
 
 type SpyRound = QuestionData & {
   spyGuessOptions?: string[];
@@ -72,6 +75,12 @@ export function SpyAmongUsGame({ questions, teams, onUpdateScore, onEnd }: GameP
 
   const [ri, setRi] = useState(0);
   const [spyTeamIdx, setSpyTeamIdx] = useState(randomTeamIndex);
+  // Cross-round tallies for the final results screen — everything else here (votes, guesses) resets
+  // every round. "Spy wins" = escaped the vote outright or guessed the real topic after being
+  // caught; "crew wins" = correctly voted for the spy, or correctly guessed the spy's topic.
+  const [timesWasSpy, setTimesWasSpy] = useState<Record<string | number, number>>(() => ({ [teams[spyTeamIdx]?.id ?? ""]: 1 }));
+  const [spyWinsByTeam, setSpyWinsByTeam] = useState<Record<string | number, number>>({});
+  const [crewWinsByTeam, setCrewWinsByTeam] = useState<Record<string | number, number>>({});
   const [phase, setPhase] = useState<Phase>("intro");
   const [peekIdx, setPeekIdx] = useState(0);
   const [revealed, setRevealed] = useState(false);
@@ -210,12 +219,17 @@ export function SpyAmongUsGame({ questions, teams, onUpdateScore, onEnd }: GameP
 
   const nextRound = () => {
     if (ri + 1 >= questions.length) {
-      onEnd();
+      setPhase("final");
       return;
     }
 
     setRi((value) => value + 1);
-    setSpyTeamIdx(randomTeamIndex());
+    const newSpyIdx = randomTeamIndex();
+    setSpyTeamIdx(newSpyIdx);
+    const newSpyId = teams[newSpyIdx]?.id;
+    if (newSpyId !== undefined) {
+      setTimesWasSpy((prev) => ({ ...prev, [newSpyId]: (prev[newSpyId] ?? 0) + 1 }));
+    }
     setPhase("peek");
     setPeekIdx(0);
     setRevealed(false);
@@ -248,12 +262,16 @@ export function SpyAmongUsGame({ questions, teams, onUpdateScore, onEnd }: GameP
 
     teams
       .filter((team) => !isSpy(team.id) && votes[team.id] === spyTeam.id)
-      .forEach((team) => onUpdateScore(team.id, 60));
+      .forEach((team) => {
+        onUpdateScore(team.id, 60);
+        setCrewWinsByTeam((prev) => ({ ...prev, [team.id]: (prev[team.id] ?? 0) + 1 }));
+      });
 
     if (spyCaught) {
       setPhase("spy-guess");
     } else {
       onUpdateScore(spyTeam.id, 100);
+      setSpyWinsByTeam((prev) => ({ ...prev, [spyTeam.id]: (prev[spyTeam.id] ?? 0) + 1 }));
       setPhase("reveal");
     }
   };
@@ -261,8 +279,12 @@ export function SpyAmongUsGame({ questions, teams, onUpdateScore, onEnd }: GameP
   const resolveSpyGuess = () => {
     if (spyGuess === round.crewmateTopic) {
       onUpdateScore(spyTeam.id, 60);
+      setSpyWinsByTeam((prev) => ({ ...prev, [spyTeam.id]: (prev[spyTeam.id] ?? 0) + 1 }));
     } else {
-      teams.filter((team) => !isSpy(team.id)).forEach((team) => onUpdateScore(team.id, 80));
+      teams.filter((team) => !isSpy(team.id)).forEach((team) => {
+        onUpdateScore(team.id, 80);
+        setCrewWinsByTeam((prev) => ({ ...prev, [team.id]: (prev[team.id] ?? 0) + 1 }));
+      });
     }
     setPhase("reveal");
   };
@@ -277,8 +299,14 @@ export function SpyAmongUsGame({ questions, teams, onUpdateScore, onEnd }: GameP
     const spyGuessedRight = tp2Guesses[spyPlayer.id] === round.crewmateTopic;
     const crewGuessedRight = tp2Guesses[crewPlayer.id] === round.spyTopic;
 
-    if (spyGuessedRight) onUpdateScore(spyPlayer.id, 100);
-    if (crewGuessedRight) onUpdateScore(crewPlayer.id, 100);
+    if (spyGuessedRight) {
+      onUpdateScore(spyPlayer.id, 100);
+      setSpyWinsByTeam((prev) => ({ ...prev, [spyPlayer.id]: (prev[spyPlayer.id] ?? 0) + 1 }));
+    }
+    if (crewGuessedRight) {
+      onUpdateScore(crewPlayer.id, 100);
+      setCrewWinsByTeam((prev) => ({ ...prev, [crewPlayer.id]: (prev[crewPlayer.id] ?? 0) + 1 }));
+    }
     setPhase("reveal-2p");
   };
 
@@ -308,6 +336,7 @@ export function SpyAmongUsGame({ questions, teams, onUpdateScore, onEnd }: GameP
     "speak-2p": "Phase 2: Speak",
     "guess-2p": "Phase 3: Guess",
     "reveal-2p": "Reveal",
+    final: "Final Results",
   };
 
   const arenaStyle: React.CSSProperties = {
@@ -401,6 +430,51 @@ export function SpyAmongUsGame({ questions, teams, onUpdateScore, onEnd }: GameP
             }}
           >
             🛸 Start Mission!
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (phase === "final") {
+    // Dense rank on final score — two teams tied for the top both get gold instead of an
+    // arbitrary array-order winner.
+    const ranking = denseRank(teams, (team) => team.score).sort((a, b) => b.value - a.value);
+    const winners = ranking.filter((r) => r.rank === 0);
+    const isTie = winners.length > 1;
+    const headline = isTie
+      ? `${winners.map((w) => w.item.name).join(" & ")} tied for the sharpest crew!`
+      : `${winners[0]?.item.name} outsmarted everyone!`;
+    return (
+      <div style={{ ...arenaStyle, textAlign: "center" }}>
+        <Starfield />
+        {STYLE_TAG}
+        <div style={{ position: "relative", zIndex: 1 }}>
+          <div style={{ fontSize: "44px", marginBottom: "6px" }}>🛸</div>
+          <div style={{ fontWeight: "900", fontSize: "22px", color: "#38BDF8", marginBottom: "16px" }}>{headline}</div>
+          <div style={{ display: "grid", gridTemplateColumns: teamsGridCols(teams.length), gap: "10px", margin: "0 auto 20px", maxWidth: "760px" }}>
+            {ranking.map(({ item: team, rank, value }) => {
+              const spyCount = timesWasSpy[team.id] ?? 0;
+              const spyWins = spyWinsByTeam[team.id] ?? 0;
+              const crewWins = crewWinsByTeam[team.id] ?? 0;
+              return (
+                <div key={team.id} style={{ background: `linear-gradient(160deg,${team.color.dark}55,#0F172A)`, border: `2px solid ${team.color.bg}`, borderRadius: "14px", padding: "12px" }}>
+                  <div style={{ fontSize: "22px" }}>{medalForRank(rank)}</div>
+                  <div style={{ fontWeight: "800", color: "white", fontSize: "14px", marginTop: "4px" }}>{team.color.emoji} {team.name}</div>
+                  <div style={{ color: "#38BDF8", fontWeight: "900", fontSize: "16px", marginTop: "4px" }}>{value} pts</div>
+                  <div style={{ fontSize: "11px", color: "#94A3B8", fontWeight: "700", marginTop: "4px" }}>
+                    🕵️ spy {spyCount}× (escaped {spyWins}×) · 👨‍🚀 caught/guessed right {crewWins}×
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <button
+            onClick={onEnd}
+            className="sau-btn"
+            style={{ background: "linear-gradient(135deg,#0284C7,#38BDF8)", color: "#0C1B2E", border: "none", borderRadius: "14px", padding: "14px 36px", fontSize: "17px", fontWeight: "900", cursor: "pointer", transition: "transform 0.15s ease" }}
+          >
+            🏁 End Game
           </button>
         </div>
       </div>
@@ -1044,7 +1118,7 @@ export function SpyAmongUsGame({ questions, teams, onUpdateScore, onEnd }: GameP
                   transition: "transform 0.15s ease",
                 }}
               >
-                {ri + 1 >= questions.length ? "End Game" : "Next Round"}
+                {ri + 1 >= questions.length ? "🏆 See Final Results" : "Next Round"}
               </button>
             </div>
           </div>
@@ -1358,7 +1432,7 @@ export function SpyAmongUsGame({ questions, teams, onUpdateScore, onEnd }: GameP
                       transition: "transform 0.15s ease",
                     }}
                   >
-                    {ri + 1 >= questions.length ? "End Game" : "Next Round"}
+                    {ri + 1 >= questions.length ? "🏆 See Final Results" : "Next Round"}
                   </button>
                 </div>
               </div>

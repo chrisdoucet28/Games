@@ -2,6 +2,7 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import type { GameProps } from "../../types";
 import { useTurnTimer } from "../../hooks/useTurnTimer";
 import { teamsGridCols } from "../../data/constants";
+import { denseRank, medalForRank } from "../../utils/ranking";
 
 // The diner queue used to always sit at a fixed 3 customers regardless of class size — a 2-team
 // class found that overwhelming (2 people covering 3 orders) while a 5-team class found it too
@@ -111,8 +112,10 @@ function grammarLabel(tag: string): string {
 }
 
 const CUSTOMER_EMOJIS = ["🧑", "👩", "👨", "🧔", "👵", "👴", "🧑‍🦱", "👩‍🦱", "🧑‍🦰", "👩‍🦳"];
-// Classic diner fare — one dish gets attached to each individual badge (not one icon per ticket),
-// matching the original brief literally: "each food item is tied to ONE fixed English target."
+// Classic diner fare — one dish per TICKET (every badge on that ticket shows the same food icon),
+// so a customer's order visibly IS the dish a team banks toward their set-collection bonus. Teams
+// can scan the board and see "that one's a pizza order" before claiming, rather than the dish only
+// being revealed after serving.
 const DINER_FOOD_EMOJIS = ["🍔", "🍟", "🌭", "🍕", "🥤", "🍦", "🥞", "🧇", "🍩", "🍪", "🥧", "🍰"];
 
 function randomFrom<T>(arr: readonly T[]): T {
@@ -122,8 +125,9 @@ function randomFrom<T>(arr: readonly T[]): T {
 type TicketItem =
   | { kind: "grammar"; transform: string; label: string; foodEmoji: string }
   | { kind: "vocab"; word: string; foodEmoji: string };
-// dishEmoji is the customer's overall order — separate from each item's own foodEmoji styling —
-// and is what gets collected toward that team's set-collection bonus when the ticket is served.
+// dishEmoji is the customer's overall order, and every item's foodEmoji is set to that same value
+// (see generateTicket) so what teams see on the ticket is exactly what gets collected toward that
+// team's set-collection bonus when the ticket is served.
 type Ticket = { id: number; items: TicketItem[]; customerEmoji: string; dishEmoji: string; totalSeconds: number; secondsLeft: number };
 type JudgingState = { ticketId: number; teamId: string | number } | null;
 type Phase = "intro" | "playing" | "final";
@@ -146,6 +150,7 @@ function pickItemCount(resolvedCount: number): number {
 // kind still has an unused entry if the flip lands on one this ticket has already exhausted.
 function generateTicket(grammarPool: string[], vocabWordPool: string[], nextId: () => number, resolvedCount: number): Ticket {
   const itemCount = pickItemCount(resolvedCount);
+  const dishEmoji = randomFrom(DINER_FOOD_EMOJIS);
   const usedGrammar = new Set<string>();
   const usedVocab = new Set<string>();
   const excludedGrammar = new Set<string>();
@@ -165,11 +170,11 @@ function generateTicket(grammarPool: string[], vocabWordPool: string[], nextId: 
       grammarCount += 1;
       const excluded = MUTUALLY_EXCLUSIVE_FORMS[tag];
       if (excluded) excludedGrammar.add(excluded);
-      items.push({ kind: "grammar", transform: tag, label: grammarLabel(tag), foodEmoji: randomFrom(DINER_FOOD_EMOJIS) });
+      items.push({ kind: "grammar", transform: tag, label: grammarLabel(tag), foodEmoji: dishEmoji });
     } else {
       const word = vocabLeft[Math.floor(Math.random() * vocabLeft.length)];
       usedVocab.add(word);
-      items.push({ kind: "vocab", word, foodEmoji: randomFrom(DINER_FOOD_EMOJIS) });
+      items.push({ kind: "vocab", word, foodEmoji: dishEmoji });
     }
   }
   const totalSeconds = TICKET_SECONDS_BY_ITEM_COUNT[items.length] ?? TICKET_SECONDS_BY_ITEM_COUNT[1];
@@ -177,7 +182,7 @@ function generateTicket(grammarPool: string[], vocabWordPool: string[], nextId: 
     id: nextId(),
     items,
     customerEmoji: randomFrom(CUSTOMER_EMOJIS),
-    dishEmoji: randomFrom(DINER_FOOD_EMOJIS),
+    dishEmoji,
     totalSeconds,
     secondsLeft: totalSeconds,
   };
@@ -360,32 +365,39 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, level }: G
     }
   }, [phase, tickets.length, grammarPool, vocabWordPool, maxSlots, initialSlots]);
 
+  // Mirrors `tickets` for the interval below to read synchronously — the interval callback needs
+  // to call onUpdateScore/pushBanner as plain statements, not from inside setTickets' own updater
+  // function (React can invoke a setState updater during its own render pass, and calling a
+  // DIFFERENT component's setState — onUpdateScore reaches back up to LessonGamesGenerator — from
+  // inside one triggers "Cannot update a component while rendering a different component"; the
+  // same hazard useTurnTimer.ts's own onExpire comment already warns about).
+  const ticketsRef = useRef<Ticket[]>([]);
+  useEffect(() => { ticketsRef.current = tickets; }, [tickets]);
+
   useEffect(() => {
     if (phase !== "playing") return;
     const id = setInterval(() => {
-      setTickets(prev => {
-        const survivors: Ticket[] = [];
-        let expiredCount = 0;
-        prev.forEach(t => {
-          const secondsLeft = t.secondsLeft - 1;
-          if (secondsLeft <= 0) expiredCount += 1;
-          else survivors.push({ ...t, secondsLeft });
-        });
-        if (expiredCount > 0) {
-          resolvedCountRef.current += expiredCount;
-          const penalty = UNHAPPY_PENALTY * expiredCount;
-          teams.forEach(t => onUpdateScore(t.id, -penalty));
-          pushBanner(
-            expiredCount > 1
-              ? `😤 ${expiredCount} customers left unhappy! Everyone -${penalty}pts`
-              : `😤 A customer left unhappy! Everyone -${penalty}pts`,
-            "expired",
-          );
-        }
-        // No inline replacement here — the top-up effect above handles spawning new customers
-        // once tickets.length changes, so capacity growth from the ramp is picked up naturally.
-        return survivors;
+      const survivors: Ticket[] = [];
+      let expiredCount = 0;
+      ticketsRef.current.forEach(t => {
+        const secondsLeft = t.secondsLeft - 1;
+        if (secondsLeft <= 0) expiredCount += 1;
+        else survivors.push({ ...t, secondsLeft });
       });
+      // No inline replacement here — the top-up effect above handles spawning new customers once
+      // tickets.length changes, so capacity growth from the ramp is picked up naturally.
+      setTickets(survivors);
+      if (expiredCount > 0) {
+        resolvedCountRef.current += expiredCount;
+        const penalty = UNHAPPY_PENALTY * expiredCount;
+        teams.forEach(t => onUpdateScore(t.id, -penalty));
+        pushBanner(
+          expiredCount > 1
+            ? `😤 ${expiredCount} customers left unhappy! Everyone -${penalty}pts`
+            : `😤 A customer left unhappy! Everyone -${penalty}pts`,
+          "expired",
+        );
+      }
     }, 1000);
     return () => clearInterval(id);
   }, [phase, pushBanner, teams, onUpdateScore]);
@@ -461,25 +473,32 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, level }: G
   );
 
   if (phase === "final") {
-    const ranking = [...teams].sort((a, b) => b.score - a.score);
+    // Dense rank on final score — two teams tied for first both get gold instead of an
+    // arbitrary array-order winner/runner-up split.
+    const ranking = denseRank(teams, t => t.score).sort((a, b) => b.value - a.value);
+    const winners = ranking.filter(r => r.rank === 0);
+    const isTie = winners.length > 1;
+    const headline = isTie
+      ? `${winners.map(w => w.item.name).join(" & ")} tied for the best dinner rush!`
+      : `${winners[0]?.item.name} served the best dinner rush.`;
     return (
       <div style={{ ...arenaStyle, textAlign: "center" }}>
         {STYLE_TAG}
         <div style={{ position: "relative", zIndex: 1 }}>
           <div style={{ fontSize: "44px", marginBottom: "6px" }}>🔔</div>
           <div style={{ fontWeight: "900", fontSize: "22px", color: "#BE185D", marginBottom: "4px" }}>Kitchen's closed!</div>
-          <div style={{ fontSize: "13px", color: "#9D174D", marginBottom: "16px" }}>{ranking[0]?.name} served the best dinner rush.</div>
+          <div style={{ fontSize: "13px", color: "#9D174D", marginBottom: "16px" }}>{headline}</div>
           <div style={{ display: "grid", gridTemplateColumns: teamsGridCols(teams.length), gap: "10px", margin: "0 auto 20px", maxWidth: "760px" }}>
-            {ranking.map((t, i) => {
+            {ranking.map(({ item: t, rank, value }) => {
               const counts = dishCounts[t.id];
               const bonus = setBonusFor(counts);
               const served = totalDishes(counts);
               const dishEntries = Object.entries(counts ?? {});
               return (
                 <div key={t.id} style={{ background: "linear-gradient(160deg,#FFFFFF,#FFF1F2)", border: `2px solid ${t.color.bg}`, borderRadius: "14px", padding: "12px" }}>
-                  <div style={{ fontSize: "20px" }}>{i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : "🍽️"}</div>
+                  <div style={{ fontSize: "20px" }}>{medalForRank(rank)}</div>
                   <div style={{ fontWeight: "800", color: "#831843", fontSize: "14px", marginTop: "4px" }}>{t.color.emoji} {t.name}</div>
-                  <div style={{ color: "#BE185D", fontWeight: "900", fontSize: "16px", marginTop: "4px" }}>{t.score} pts</div>
+                  <div style={{ color: "#BE185D", fontWeight: "900", fontSize: "16px", marginTop: "4px" }}>{value} pts</div>
                   <div style={{ fontSize: "11px", color: "#9D174D", marginTop: "4px" }}>{served} order{served === 1 ? "" : "s"} served</div>
                   {dishEntries.length > 0 && (
                     <div style={{ display: "flex", gap: "3px", justifyContent: "center", flexWrap: "wrap", marginTop: "6px" }}>
