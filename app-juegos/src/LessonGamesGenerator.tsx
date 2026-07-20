@@ -235,7 +235,15 @@ export default function LessonGamesGenerator() {
         // Zombie Siege reuses Spy Among Us's spyRounds content (crewmateTopic/crewmatePrompt) for
         // its sentence-response prompts — short grammar-topic labels with a scenario/example-word
         // cue, not the fixed-answer drill format the other mixed-pool games use.
-        qs = mixByTopic(selectedEntries.map(entry => entry.spyRounds ?? []));
+        // Tagged with which selected topic each round came from (by TOPIC_OPTIONS value, looked up
+        // per-topic rather than zipped by index against selectedEntries, since that array silently
+        // drops any topic value that doesn't resolve in TOPIC_LIBRARY and would misalign a zip) —
+        // SpyAmongUsGame uses this to scope its guess options to "same topic" instead of the whole
+        // mixed pool.
+        qs = mixByTopic(selectedTopics.map(value => {
+          const entry = TOPIC_LIBRARY[value as keyof typeof TOPIC_LIBRARY] as TopicLibraryEntry | undefined;
+          return (entry?.spyRounds ?? []).map(r => ({ ...r, spySourceTopic: value }));
+        }));
       } else if (mode.id === "hotseat") {
         qs = mixByTopic(selectedEntries.map(entry => entry.hotSeatWords ?? []));
       } else if (mode.id === "hotpotato") {

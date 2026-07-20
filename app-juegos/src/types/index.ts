@@ -43,6 +43,11 @@ export interface TeamColor {
     crewmateTopic?: string;
     spyTopic?: string;
     spyGuessOptions?: string[];
+    // Which selected topic (by its TOPIC_OPTIONS value/key) a spyRounds entry came from — tagged in
+    // LessonGamesGenerator.tsx before the per-topic buckets get mixed together, so SpyAmongUsGame
+    // can scope its guess options back down to "everything from this one topic" instead of the
+    // whole mixed pool.
+    spySourceTopic?: string;
   }
   
   export interface GameProps {

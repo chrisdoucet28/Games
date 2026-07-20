@@ -105,25 +105,24 @@ export function SpyAmongUsGame({ questions, teams, onUpdateScore, onEnd }: GameP
   const isSpy = (teamId: string | number) => teamId === spyTeam.id;
   // Decoys used to come only from this one round's own hardcoded spyGuessOptions — always the
   // exact same 2 fake options paired with the exact same 2 real ones every time this round came
-  // up. That taught players a shortcut, especially in 1v1: eliminate "my own topic," and whatever
-  // real-sounding option is left over is always the answer, no listening required. Decoys now get
-  // pulled from the wider pool of every crewmateTopic/spyTopic in play this game (across every
-  // round mixed into `questions`), so the options shown vary game to game and sometimes include
-  // other rounds' real topics as decoys — a genuine 1-in-3 guess instead of a memorizable pattern.
-  // Falls back to the round's own authored decoys when the game's pool is too small to supply 2
-  // (e.g. a single-topic, single-round game) so there's always a full set of options.
-  const realAnswers = Array.from(new Set([round.crewmateTopic, round.spyTopic].filter(Boolean))) as string[];
-  const gamePool = Array.from(
-    new Set(questions.flatMap(q => [q.crewmateTopic, q.spyTopic]).filter(Boolean)),
+  // up, a memorizable pattern. Pulling decoys from the *whole game's* mixed topic pool (a prior
+  // fix) overcorrected: with several unrelated topics selected, most decoys read as obviously
+  // foreign to whatever was just discussed, so eliminating them took no real listening either —
+  // right back to a narrow, easy guess. Options are now scoped to every round that shares this
+  // round's *source topic* (tagged as `spySourceTopic` in LessonGamesGenerator.tsx before topics
+  // get mixed together) — every option is a real possibility from that same topic family (e.g. all
+  // "Hobbies" contrasts), so nothing can be eliminated just for sounding unrelated, and the count
+  // isn't artificially capped at 4 — it's genuinely every option that topic has to offer. Falls
+  // back to just this round's own answers/decoys if the source-topic tag is ever missing.
+  const sameTopicRounds = round.spySourceTopic
+    ? questions.filter(q => q.spySourceTopic === round.spySourceTopic)
+    : [round];
+  const topicPool = Array.from(
+    new Set(
+      sameTopicRounds.flatMap(q => [q.crewmateTopic, q.spyTopic, ...(q.spyGuessOptions ?? [])]).filter(Boolean),
+    ),
   ) as string[];
-  const decoyCandidates = gamePool.filter(topic => !realAnswers.includes(topic));
-  const fallbackDecoys = (round.spyGuessOptions ?? []).filter(topic => !realAnswers.includes(topic));
-  const decoyPool = decoyCandidates.length >= 2
-    ? decoyCandidates
-    : Array.from(new Set([...decoyCandidates, ...fallbackDecoys]));
-  const decoys = seededShuffle(decoyPool, ri).slice(0, Math.max(0, 4 - realAnswers.length));
-  const rawGuessOptions = Array.from(new Set([...realAnswers, ...decoys]));
-  const spyGuessOptions = seededShuffle(rawGuessOptions, ri + 1);
+  const spyGuessOptions = seededShuffle(topicPool, ri);
 
   const runOrderRoll = useCallback(
     (indicesToRoll: number[], existingRolls: Record<number, number>) => {
