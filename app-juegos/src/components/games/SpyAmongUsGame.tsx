@@ -103,23 +103,18 @@ export function SpyAmongUsGame({ questions, teams, onUpdateScore, onEnd }: GameP
   const peekTeam = teams[peekIdx];
   const speakTeam = speakOrder[speakIdx] ?? speakOrder[0] ?? teams[0];
   const isSpy = (teamId: string | number) => teamId === spyTeam.id;
-  // Decoys used to come only from this one round's own hardcoded spyGuessOptions — always the
-  // exact same 2 fake options paired with the exact same 2 real ones every time this round came
-  // up, a memorizable pattern. Pulling decoys from the *whole game's* mixed topic pool (a prior
-  // fix) overcorrected: with several unrelated topics selected, most decoys read as obviously
-  // foreign to whatever was just discussed, so eliminating them took no real listening either —
-  // right back to a narrow, easy guess. Options are now scoped to every round that shares this
-  // round's *source topic* (tagged as `spySourceTopic` in LessonGamesGenerator.tsx before topics
-  // get mixed together) — every option is a real possibility from that same topic family (e.g. all
-  // "Hobbies" contrasts), so nothing can be eliminated just for sounding unrelated, and the count
-  // isn't artificially capped at 4 — it's genuinely every option that topic has to offer. Falls
-  // back to just this round's own answers/decoys if the source-topic tag is ever missing.
+  // No fabricated decoys — every option shown is a real crewmateTopic/spyTopic that some round in
+  // this same source topic actually uses (tagged as `spySourceTopic` in LessonGamesGenerator.tsx
+  // before topics get mixed together), not a hand-authored fake. Content is authored so every
+  // topic has at least 4 rounds with 8 fully distinct crewmateTopic/spyTopic strings between them,
+  // so this is never a near-binary guess even scoped to one topic. Falls back to just this round's
+  // own two answers if the source-topic tag is ever missing.
   const sameTopicRounds = round.spySourceTopic
     ? questions.filter(q => q.spySourceTopic === round.spySourceTopic)
     : [round];
   const topicPool = Array.from(
     new Set(
-      sameTopicRounds.flatMap(q => [q.crewmateTopic, q.spyTopic, ...(q.spyGuessOptions ?? [])]).filter(Boolean),
+      sameTopicRounds.flatMap(q => [q.crewmateTopic, q.spyTopic]).filter(Boolean),
     ),
   ) as string[];
   const spyGuessOptions = seededShuffle(topicPool, ri);
