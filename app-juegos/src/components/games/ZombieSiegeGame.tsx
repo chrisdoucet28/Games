@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import type { GameProps, QuestionData, Team } from "../../types";
 import { ScoreBoard } from "../shared/ScoreBoard";
+import { teamsGridCols } from "../../data/constants";
 
 const TICK_MS = 1000; // 1 tick == 1 elapsed second — every timing constant below is scaled against this.
 const APPROACH_TICKS = 14; // ticks a zombie spends visibly walking in before it reaches an entry point — long enough to see it coming and react
@@ -96,6 +97,11 @@ type SiegeState = {
 
 type TickEventKind = "barricadeDestroyed" | "zombieShot" | "axeUsed" | "personEliminated";
 type TickEvent = { kind: TickEventKind; entryPointId?: EntryPointId; teamId?: string | number };
+
+// Fun-stats-only tallies for the gameover screen — none of these feed scoring or difficulty, they
+// just answer "who did what" once the house falls. Axes deliberately excluded — every eliminated
+// team burns both on the way down, so it's a near-constant, not an interesting stat.
+type TeamStats = { kills: number; chairsPlaced: number };
 
 type Phase = "intro" | "playing" | "gameover";
 type RoundPhase = "reveal" | "active";
@@ -453,7 +459,17 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd }: Game
   const [elimBanner, setElimBanner] = useState<ElimBanner | null>(null);
   const [roundBanner, setRoundBanner] = useState<RoundBanner | null>(null);
   const [powerUpBanner, setPowerUpBanner] = useState<PowerUpBanner | null>(null);
+  const [statsByTeam, setStatsByTeam] = useState<Record<string | number, TeamStats>>(() =>
+    Object.fromEntries(teams.map(t => [t.id, { kills: 0, chairsPlaced: 0 }]))
+  );
   const breakTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const bumpStat = useCallback((teamId: string | number, key: keyof TeamStats, amount = 1) => {
+    setStatsByTeam(prev => ({
+      ...prev,
+      [teamId]: { ...(prev[teamId] ?? { kills: 0, chairsPlaced: 0 }), [key]: (prev[teamId]?.[key] ?? 0) + amount },
+    }));
+  }, []);
 
   const siegeRef = useRef(siege);
   useEffect(() => { siegeRef.current = siege; });
@@ -528,7 +544,10 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd }: Game
       }
       events.forEach(ev => {
         if (ev.kind === "barricadeDestroyed") pushFx("barricadeDestroyed");
-        if (ev.kind === "zombieShot") pushFx("zombieShot");
+        if (ev.kind === "zombieShot") {
+          pushFx("zombieShot");
+          if (ev.teamId !== undefined) bumpStat(ev.teamId, "kills");
+        }
         if (ev.kind === "axeUsed") pushFx("axeUsed");
         if (ev.kind === "personEliminated" && ev.teamId !== undefined) {
           const team = teams.find(t => t.id === ev.teamId);
@@ -539,7 +558,7 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd }: Game
       if (!stillAlive) setPhase("gameover");
     }, TICK_MS);
     return () => clearInterval(id);
-  }, [phase, teams, pushFx, showElimination, showRoundBanner, startRound, pickNextQuestion]);
+  }, [phase, teams, pushFx, showElimination, showRoundBanner, startRound, pickNextQuestion, bumpStat]);
 
   useEffect(() => {
     if (phase === "playing" && !currentQuestion) startRound(pickNextQuestion());
@@ -588,12 +607,14 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd }: Game
     if (Math.random() < POWERUP_CHANCE) {
       const kind = POWERUP_KINDS[Math.floor(Math.random() * POWERUP_KINDS.length)];
       applyPowerUp(kind, teamId);
+      if (kind === "allDoorsChair") bumpStat(teamId, "chairsPlaced", ENTRY_POINTS.length);
     } else {
       const newItem: BarricadeItem = { id: barricadeIdRef.current++, hp: BARRICADE_ITEM_HP };
       setSiege(prev => {
         const ep = weakestEntryPoint(prev.barricades);
         return { ...prev, barricades: { ...prev.barricades, [ep]: [newItem, ...prev.barricades[ep]] } };
       });
+      bumpStat(teamId, "chairsPlaced");
       pushFx("barricadePlaced");
     }
   };
@@ -643,8 +664,22 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd }: Game
           <div style={{ fontSize: "48px", marginBottom: "6px" }}>💀</div>
           <div style={{ fontWeight: "900", fontSize: "24px", color: "#BEF264", marginBottom: "4px" }}>The house has fallen</div>
           <div style={{ color: "#A3B899", fontSize: "14px", marginBottom: "20px" }}>You held out for {formatClock(siege.elapsedSeconds)}. Final scores:</div>
-          <div style={{ marginBottom: "24px" }}>
+          <div style={{ marginBottom: "20px" }}>
             <ScoreBoard teams={teams} />
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: teamsGridCols(teams.length), gap: "10px", margin: "0 auto 24px", maxWidth: "760px" }}>
+            {teams.map(t => {
+              const stats = statsByTeam[t.id] ?? { kills: 0, chairsPlaced: 0 };
+              return (
+                <div key={t.id} style={{ background: "linear-gradient(160deg,#14210F,#0D1A0D)", border: `2px solid ${t.color.bg}`, borderRadius: "14px", padding: "10px" }}>
+                  <div style={{ fontWeight: "800", color: "#BEF264", fontSize: "13px", marginBottom: "6px" }}>{t.color.emoji} {t.name}</div>
+                  <div style={{ fontSize: "12px", color: "#DCFCE7", lineHeight: 1.7 }}>
+                    <div>🧟 {stats.kills} zombie{stats.kills === 1 ? "" : "s"} shot</div>
+                    <div>🪑 {stats.chairsPlaced} chair{stats.chairsPlaced === 1 ? "" : "s"} placed</div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
           <button onClick={onEnd} className="zs-btn" style={{ background: "linear-gradient(135deg,#365314,#65A30D)", color: "#0D1A0D", border: "none", borderRadius: "14px", padding: "14px 32px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(101,163,13,0.5)", transition: "transform 0.15s ease" }}>🏁 End Game</button>
         </div>
