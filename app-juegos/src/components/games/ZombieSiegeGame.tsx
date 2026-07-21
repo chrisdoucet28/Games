@@ -107,6 +107,13 @@ type Phase = "intro" | "playing" | "gameover";
 type RoundPhase = "reveal" | "active";
 type FxKind = "barricadePlaced" | "barricadeDestroyed" | "zombieShot" | "axeUsed";
 type SiegeFx = { id: number; kind: FxKind; key: number; teamId?: string | number };
+
+// "zombieShot" names the shooting team ("🔫 🔴 Team Red sniped a zombie!"), noticeably longer
+// than the other FX messages — 600ms was tuned for a 3-word flash and left the longer text
+// barely readable, so this one alone gets more time on screen.
+function fxDurationMs(kind: FxKind): number {
+  return kind === "zombieShot" ? 1700 : 600;
+}
 type ElimBanner = { teamName: string; color: string; key: number };
 type RoundBanner = { round: number; key: number };
 type PowerUpBanner = { text: string; key: number };
@@ -487,7 +494,7 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
   const pushFx = useCallback((kind: FxKind, teamId?: string | number) => {
     const id = fxIdRef.current++;
     setFx(prev => [...prev, { id, kind, key: id, teamId }]);
-    setTimeout(() => setFx(prev => prev.filter(f => f.id !== id)), 600);
+    setTimeout(() => setFx(prev => prev.filter(f => f.id !== id)), fxDurationMs(kind));
   }, []);
 
   const showElimination = useCallback((teamName: string, color: string) => {
@@ -708,7 +715,7 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
           return (
             <div key={f.id} style={{
               background: "#0A140AE0", border: "1px solid #65A30D", borderRadius: "8px", padding: "4px 10px",
-              fontSize: "12px", color: "#BEF264", fontWeight: 700, animation: "zsFxIn 0.6s ease-out",
+              fontSize: "12px", color: "#BEF264", fontWeight: 700, animation: `zsFxIn ${fxDurationMs(f.kind)}ms ease-out`,
             }}>
               {f.kind === "barricadePlaced" && "🪑 barricade placed"}
               {f.kind === "barricadeDestroyed" && "💥 barricade destroyed"}
