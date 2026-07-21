@@ -106,7 +106,7 @@ type TeamStats = { kills: number; chairsPlaced: number };
 type Phase = "intro" | "playing" | "gameover";
 type RoundPhase = "reveal" | "active";
 type FxKind = "barricadePlaced" | "barricadeDestroyed" | "zombieShot" | "axeUsed";
-type SiegeFx = { id: number; kind: FxKind; key: number };
+type SiegeFx = { id: number; kind: FxKind; key: number; teamId?: string | number };
 type ElimBanner = { teamName: string; color: string; key: number };
 type RoundBanner = { round: number; key: number };
 type PowerUpBanner = { text: string; key: number };
@@ -484,9 +484,9 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
   const barricadeIdRef = useRef(0);
   const fxIdRef = useRef(0);
 
-  const pushFx = useCallback((kind: FxKind) => {
+  const pushFx = useCallback((kind: FxKind, teamId?: string | number) => {
     const id = fxIdRef.current++;
-    setFx(prev => [...prev, { id, kind, key: id }]);
+    setFx(prev => [...prev, { id, kind, key: id, teamId }]);
     setTimeout(() => setFx(prev => prev.filter(f => f.id !== id)), 600);
   }, []);
 
@@ -551,7 +551,7 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
       events.forEach(ev => {
         if (ev.kind === "barricadeDestroyed") pushFx("barricadeDestroyed");
         if (ev.kind === "zombieShot") {
-          pushFx("zombieShot");
+          pushFx("zombieShot", ev.teamId);
           if (ev.teamId !== undefined) bumpStat(ev.teamId, "kills");
         }
         if (ev.kind === "axeUsed") pushFx("axeUsed");
@@ -703,17 +703,20 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
       {fogLayer}
       {STYLE_TAG}
       <div style={{ position: "absolute", top: "8px", right: "8px", zIndex: 15, display: "flex", flexDirection: "column", gap: "4px", alignItems: "flex-end", pointerEvents: "none" }}>
-        {fx.map(f => (
-          <div key={f.id} style={{
-            background: "#0A140AE0", border: "1px solid #65A30D", borderRadius: "8px", padding: "4px 10px",
-            fontSize: "12px", color: "#BEF264", fontWeight: 700, animation: "zsFxIn 0.6s ease-out",
-          }}>
-            {f.kind === "barricadePlaced" && "🪑 barricade placed"}
-            {f.kind === "barricadeDestroyed" && "💥 barricade destroyed"}
-            {f.kind === "zombieShot" && "🔫 sniped a zombie!"}
-            {f.kind === "axeUsed" && "🪓 axe used!"}
-          </div>
-        ))}
+        {fx.map(f => {
+          const shooter = f.teamId !== undefined ? teams.find(t => t.id === f.teamId) : undefined;
+          return (
+            <div key={f.id} style={{
+              background: "#0A140AE0", border: "1px solid #65A30D", borderRadius: "8px", padding: "4px 10px",
+              fontSize: "12px", color: "#BEF264", fontWeight: 700, animation: "zsFxIn 0.6s ease-out",
+            }}>
+              {f.kind === "barricadePlaced" && "🪑 barricade placed"}
+              {f.kind === "barricadeDestroyed" && "💥 barricade destroyed"}
+              {f.kind === "zombieShot" && `🔫 ${shooter ? `${shooter.color.emoji} ${shooter.name} sniped` : "sniped"} a zombie!`}
+              {f.kind === "axeUsed" && "🪓 axe used!"}
+            </div>
+          );
+        })}
       </div>
       {elimBanner && (
         <div key={elimBanner.key} style={{
