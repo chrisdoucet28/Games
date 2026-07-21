@@ -7,7 +7,7 @@ import { TOPIC_OPTIONS, TOPIC_LIBRARY } from "./data/topics";
 import { ScoreBoard } from "./components/shared/ScoreBoard";
 import { Confetti } from "./components/shared/Confetti";
 import { ClassesScreen } from "./components/shared/ClassesScreen";
-import { saveProgress, clearProgress } from "./lib/classes";
+import { saveProgress, clearProgress, listClasses, createClass } from "./lib/classes";
 import { denseRank, medalForRank } from "./utils/ranking";
 import { AuctionGame } from "./components/games/AuctionGame";
 import { MinefieldGame } from "./components/games/MinefieldGame";
@@ -117,11 +117,17 @@ const buildMinefieldGrids = (entries: TopicLibraryEntry[]) =>
 
 export default function LessonGamesGenerator() {
   const [screen, setScreen] = useState<"welcome" | "classes" | "setup" | "game-select" | "game" | "results">("welcome");
-  // The class this session is tied to, if any — drives whether the top-bar "Save Progress"
-  // button shows, and which row gets updated. Ad-hoc games (started via "Start a Game" without
-  // going through "My Classes") leave this null, so nothing gets saved anywhere.
+  // The class this session is tied to, if any. Games started via "Start a Game" (not through "My
+  // Classes") leave this null — but "Save & Exit" is still available; clicking it with no class
+  // linked opens showSavePicker so the teacher can pick/create one on the spot instead of losing
+  // the save entirely.
   const [activeClassId, setActiveClassId] = useState<string | null>(null);
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const [showSavePicker, setShowSavePicker] = useState(false);
+  const [pickerClasses, setPickerClasses] = useState<SavedClass[] | null>(null);
+  const [pickerNewName, setPickerNewName] = useState("");
+  const [pickerBusy, setPickerBusy] = useState(false);
+  const [pickerError, setPickerError] = useState<string | null>(null);
   const [numTeams, setNumTeams] = useState(2);
   const [teamNames, setTeamNames] = useState(["Team Red", "Team Blue", "Team Green", "Team Yellow", "Team Purple"]);
   const [teamColors, setTeamColors] = useState([0, 1, 2, 3, 4]);
@@ -201,11 +207,12 @@ export default function LessonGamesGenerator() {
   // in-progress state, then backs out to My Classes so there's nothing left to accidentally keep
   // playing (and scoring) against an already-saved snapshot. A save that fails leaves the teacher
   // right where they were, so they can just try again.
-  const handleSaveAndExit = async () => {
-    if (!activeClassId || !selectedGame) return;
+  const saveToClass = async (classId: string) => {
+    if (!selectedGame) return;
+    setActiveClassId(classId);
     setSaveStatus("saving");
     try {
-      await saveProgress(activeClassId, {
+      await saveProgress(classId, {
         teams,
         selectedTopics,
         selectedGame: selectedGame.id,
@@ -220,6 +227,44 @@ export default function LessonGamesGenerator() {
     } catch {
       setSaveStatus("error");
       setTimeout(() => setSaveStatus("idle"), 3000);
+    }
+  };
+
+  // Games started directly (not via "My Classes") have no activeClassId yet — instead of hiding
+  // the button entirely in that case, open a quick pick-or-create prompt so the save still lands
+  // somewhere, then behaves exactly like a class-linked save from then on.
+  const handleSaveAndExit = () => {
+    if (!selectedGame) return;
+    if (activeClassId) {
+      saveToClass(activeClassId);
+      return;
+    }
+    setPickerError(null);
+    setPickerClasses(null);
+    setShowSavePicker(true);
+    listClasses()
+      .then(setPickerClasses)
+      .catch(err => setPickerError(err instanceof Error ? err.message : "Couldn't load your classes."));
+  };
+
+  const handlePickClassForSave = (cls: SavedClass) => {
+    setShowSavePicker(false);
+    saveToClass(cls.id);
+  };
+
+  const handleCreateClassForSave = async () => {
+    if (!pickerNewName.trim()) return;
+    setPickerBusy(true);
+    setPickerError(null);
+    try {
+      const created = await createClass(pickerNewName.trim());
+      setPickerNewName("");
+      setShowSavePicker(false);
+      await saveToClass(created.id);
+    } catch (err) {
+      setPickerError(err instanceof Error ? err.message : "Couldn't create the class.");
+    } finally {
+      setPickerBusy(false);
     }
   };
 
@@ -721,18 +766,57 @@ export default function LessonGamesGenerator() {
 
     return (
       <div ref={appRef} style={{ minHeight: "100vh", background: "#0F0A2E", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
+        {showSavePicker && (
+          <div style={{ position: "fixed", inset: 0, background: "rgba(15,10,46,0.75)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 2000, padding: "20px" }}>
+            <div style={{ background: "white", borderRadius: "20px", padding: "24px", maxWidth: "420px", width: "100%", maxHeight: "80vh", overflowY: "auto", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
+              <h3 style={{ margin: "0 0 6px", fontSize: "18px", fontWeight: 900, color: "#1E1B4B" }}>Save to which class?</h3>
+              <p style={{ margin: "0 0 16px", fontSize: "13px", color: "#6B7280" }}>Pick an existing class, or create a new one — you'll return to it later from "My Classes."</p>
+
+              {pickerError && <div style={{ background: "#FEE2E2", color: "#991B1B", padding: "8px 12px", borderRadius: "8px", fontSize: "13px", marginBottom: "12px" }}>{pickerError}</div>}
+
+              {pickerClasses === null ? (
+                <div style={{ textAlign: "center", color: "#6B7280", padding: "16px 0" }}>Loading your classes…</div>
+              ) : pickerClasses.length > 0 ? (
+                <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginBottom: "16px" }}>
+                  {pickerClasses.map(cls => (
+                    <button
+                      key={cls.id} onClick={() => handlePickClassForSave(cls)}
+                      style={{ textAlign: "left", background: "#F8F7FF", border: "2px solid #E5E7EB", borderRadius: "10px", padding: "10px 14px", cursor: "pointer", fontWeight: 700, color: "#1E1B4B", fontSize: "14px" }}
+                    >
+                      {cls.name}
+                      {cls.in_progress && <span style={{ display: "block", fontWeight: 500, fontSize: "12px", color: "#B45309", marginTop: "2px" }}>⚠️ Has a game in progress — saving here will replace it</span>}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+
+              <div style={{ display: "flex", gap: "8px" }}>
+                <input
+                  value={pickerNewName} onChange={e => setPickerNewName(e.target.value)} placeholder="e.g. Tuesday B2 Advanced"
+                  style={{ flex: 1, padding: "10px 12px", borderRadius: "10px", border: "2px solid #E5E7EB", fontSize: "14px" }}
+                />
+                <button
+                  onClick={handleCreateClassForSave} disabled={pickerBusy || !pickerNewName.trim()}
+                  style={{ background: "linear-gradient(135deg,#6366F1,#8B5CF6)", color: "white", border: "none", borderRadius: "10px", padding: "10px 16px", fontWeight: 800, cursor: pickerBusy ? "default" : "pointer", opacity: pickerBusy || !pickerNewName.trim() ? 0.6 : 1, whiteSpace: "nowrap" }}
+                >
+                  + New
+                </button>
+              </div>
+
+              <button onClick={() => setShowSavePicker(false)} style={{ marginTop: "16px", background: "none", border: "none", color: "#9CA3AF", fontWeight: 700, cursor: "pointer" }}>Cancel</button>
+            </div>
+          </div>
+        )}
         <div style={{ background: "linear-gradient(90deg,#6366F1,#8B5CF6)", padding: "12px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <h2 style={{ color: "white", margin: 0, fontSize: "20px" }}>{selectedGame.icon} {selectedGame.name}</h2>
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            {activeClassId && (
-              <button
-                onClick={handleSaveAndExit} disabled={saveStatus === "saving"}
-                title="Save exactly where you are and come back to it next class"
-                style={{ background: saveStatus === "saved" ? "#22C55E" : saveStatus === "error" ? "#EF4444" : "rgba(255,255,255,0.15)", color: "white", border: "none", borderRadius: "8px", padding: "6px 12px", cursor: saveStatus === "saving" ? "default" : "pointer", fontWeight: "700" }}
-              >
-                {saveStatus === "saving" ? "Saving…" : saveStatus === "saved" ? "✅ Saved!" : saveStatus === "error" ? "⚠️ Failed — try again" : "💾 Save & Exit"}
-              </button>
-            )}
+            <button
+              onClick={handleSaveAndExit} disabled={saveStatus === "saving"}
+              title="Save exactly where you are and come back to it next class"
+              style={{ background: saveStatus === "saved" ? "#22C55E" : saveStatus === "error" ? "#EF4444" : "rgba(255,255,255,0.15)", color: "white", border: "none", borderRadius: "8px", padding: "6px 12px", cursor: saveStatus === "saving" ? "default" : "pointer", fontWeight: "700" }}
+            >
+              {saveStatus === "saving" ? "Saving…" : saveStatus === "saved" ? "✅ Saved!" : saveStatus === "error" ? "⚠️ Failed — try again" : "💾 Save & Exit"}
+            </button>
             <button onClick={toggleFullscreen} style={{ background: "rgba(255,255,255,0.15)", color: "white", border: "none", borderRadius: "8px", padding: "6px 12px", cursor: "pointer", fontWeight: "700" }}>⛶ Fullscreen</button>
             <button onClick={handleTopBarEndGame} style={{ background: "rgba(255,255,255,0.15)", color: "white", border: "none", borderRadius: "8px", padding: "6px 12px", cursor: "pointer", fontWeight: "700" }}>🏁 End Game</button>
           </div>
