@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import type { Team, GameMode, QuestionData } from "./types";
+import type { Team, GameMode, QuestionData, SavedClass } from "./types";
 import { TEAM_COLORS, GAME_MODES } from "./data/constants";
 // Asegúrate de que TOPIC_LIBRARY esté exportado desde tu archivo topics.ts junto con TOPIC_OPTIONS
 import { TOPIC_OPTIONS, TOPIC_LIBRARY } from "./data/topics";
 
 import { ScoreBoard } from "./components/shared/ScoreBoard";
 import { Confetti } from "./components/shared/Confetti";
+import { ClassesScreen } from "./components/shared/ClassesScreen";
+import { saveProgress, clearProgress } from "./lib/classes";
 import { denseRank, medalForRank } from "./utils/ranking";
 import { AuctionGame } from "./components/games/AuctionGame";
 import { MinefieldGame } from "./components/games/MinefieldGame";
@@ -114,7 +116,12 @@ const buildMinefieldGrids = (entries: TopicLibraryEntry[]) =>
   entries.map(entry => entry.minefieldGrid).filter((grid): grid is MinefieldGridData => Boolean(grid));
 
 export default function LessonGamesGenerator() {
-  const [screen, setScreen] = useState<"welcome" | "setup" | "game-select" | "game" | "results">("welcome");
+  const [screen, setScreen] = useState<"welcome" | "classes" | "setup" | "game-select" | "game" | "results">("welcome");
+  // The class this session is tied to, if any — drives whether the top-bar "Save Progress"
+  // button shows, and which row gets updated. Ad-hoc games (started via "Start a Game" without
+  // going through "My Classes") leave this null, so nothing gets saved anywhere.
+  const [activeClassId, setActiveClassId] = useState<string | null>(null);
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [numTeams, setNumTeams] = useState(2);
   const [teamNames, setTeamNames] = useState(["Team Red", "Team Blue", "Team Green", "Team Yellow", "Team Purple"]);
   const [teamColors, setTeamColors] = useState([0, 1, 2, 3, 4]);
@@ -151,6 +158,70 @@ export default function LessonGamesGenerator() {
   const updateScore = useCallback((teamId: string | number, delta: number) => {
     setTeams(ts => ts.map(t => t.id === teamId ? { ...t, score: Math.max(0, t.score + delta) } : t));
   }, []);
+
+  // "Start New Game" from My Classes — brings the class's persistent roster/scores into the
+  // normal setup flow, same as if the teacher had typed those names in themselves.
+  const startWithClass = (cls: SavedClass) => {
+    setActiveClassId(cls.id);
+    if (cls.teams.length > 0) {
+      setNumTeams(cls.teams.length);
+      setTeamNames(prev => {
+        const next = [...prev];
+        cls.teams.forEach((t, i) => { next[i] = t.name; });
+        return next;
+      });
+      setTeamColors(prev => {
+        const next = [...prev];
+        cls.teams.forEach((t, i) => {
+          const idx = TEAM_COLORS.findIndex(c => c.name === t.color.name);
+          next[i] = idx === -1 ? i : idx;
+        });
+        return next;
+      });
+      setTeams(cls.teams);
+    }
+    setScreen("setup");
+  };
+
+  // "Resume" from My Classes — skips setup/game-select entirely and drops straight back into
+  // the exact game, teams, topics, and question pool that were in play when it was saved.
+  const resumeClass = (cls: SavedClass) => {
+    setActiveClassId(cls.id);
+    setTeams(cls.teams);
+    setSelectedTopics(cls.selected_topics ?? []);
+    setLevel(cls.level ?? "all");
+    setFocus(cls.focus ?? "all");
+    setSelectedGame(GAME_MODES.find(g => g.id === cls.selected_game) ?? null);
+    setQuestions(cls.questions_snapshot ?? []);
+    setMinefieldGridData((cls.minefield_grid_data as MinefieldGridData | MinefieldGridData[] | null) ?? null);
+    setScreen("game");
+  };
+
+  // One button for the "sorry class, that's all the time we have today" moment — saves the exact
+  // in-progress state, then backs out to My Classes so there's nothing left to accidentally keep
+  // playing (and scoring) against an already-saved snapshot. A save that fails leaves the teacher
+  // right where they were, so they can just try again.
+  const handleSaveAndExit = async () => {
+    if (!activeClassId || !selectedGame) return;
+    setSaveStatus("saving");
+    try {
+      await saveProgress(activeClassId, {
+        teams,
+        selectedTopics,
+        selectedGame: selectedGame.id,
+        level,
+        focus,
+        questionsSnapshot: questions,
+        minefieldGridData,
+        gameState: null, // per-game full board-state capture lands in a later pass
+      });
+      setSaveStatus("saved");
+      setTimeout(() => { setSaveStatus("idle"); setScreen("classes"); }, 900);
+    } catch {
+      setSaveStatus("error");
+      setTimeout(() => setSaveStatus("idle"), 3000);
+    }
+  };
 
   const handleSetup = () => {
     setLoadError("");
@@ -298,6 +369,9 @@ export default function LessonGamesGenerator() {
   const forceFinalRef = useRef<(() => boolean) | null>(null);
 
   const handleGameEnd = () => {
+    // The class's running scores persist either way; a naturally-finished game just has nothing
+    // left to resume, so the in-progress snapshot gets cleared rather than left stale.
+    if (activeClassId) clearProgress(activeClassId, teams).catch(() => {});
     setConfetti(true);
     setScreen("results");
     setTimeout(() => setConfetti(false), 4000);
@@ -349,11 +423,20 @@ export default function LessonGamesGenerator() {
             </div>
           ))}
         </div>
-        <div>
-          <button onClick={() => setScreen("setup")} style={{ background: "linear-gradient(135deg,#F59E0B,#EF4444)", color: "white", border: "none", borderRadius: "16px", padding: "18px 56px", fontSize: "20px", fontWeight: "900", cursor: "pointer", boxShadow: "0 8px 32px rgba(239,68,68,0.45)", letterSpacing: "0.01em" }}>🚀 Start a Game</button>
+        <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
+          <button onClick={() => { setActiveClassId(null); setScreen("setup"); }} style={{ background: "linear-gradient(135deg,#F59E0B,#EF4444)", color: "white", border: "none", borderRadius: "16px", padding: "18px 56px", fontSize: "20px", fontWeight: "900", cursor: "pointer", boxShadow: "0 8px 32px rgba(239,68,68,0.45)", letterSpacing: "0.01em" }}>🚀 Start a Game</button>
+          <button onClick={() => setScreen("classes")} style={{ background: "rgba(255,255,255,0.12)", border: "2px solid rgba(255,255,255,0.3)", color: "white", borderRadius: "16px", padding: "18px 40px", fontSize: "18px", fontWeight: "800", cursor: "pointer" }}>📚 My Classes</button>
         </div>
       </div>
     </div>
+  );
+
+  if (screen === "classes") return (
+    <ClassesScreen
+      onBack={() => setScreen("welcome")}
+      onResumeClass={resumeClass}
+      onStartWithClass={startWithClass}
+    />
   );
 
   if (screen === "setup") {
@@ -378,7 +461,7 @@ export default function LessonGamesGenerator() {
     return (
       <div style={{ minHeight: "100vh", background: "#F8F7FF", padding: "20px", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
         <div style={{ maxWidth: "720px", margin: "0 auto" }}>
-          <button onClick={() => setScreen("welcome")} style={{ background: "none", border: "2px solid #6366F1", color: "#6366F1", borderRadius: "10px", padding: "8px 16px", cursor: "pointer", fontWeight: "700", marginBottom: "20px" }}>← Back</button>
+          <button onClick={() => { setActiveClassId(null); setScreen("welcome"); }} style={{ background: "none", border: "2px solid #6366F1", color: "#6366F1", borderRadius: "10px", padding: "8px 16px", cursor: "pointer", fontWeight: "700", marginBottom: "20px" }}>← Back</button>
           
           <div style={{ textAlign: "center", marginBottom: "28px" }}>
             <h2 style={{ fontSize: "32px", fontWeight: "900", color: "#1E1B4B", margin: 0 }}>⚙️ Game Setup</h2>
@@ -640,8 +723,17 @@ export default function LessonGamesGenerator() {
       <div ref={appRef} style={{ minHeight: "100vh", background: "#0F0A2E", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
         <div style={{ background: "linear-gradient(90deg,#6366F1,#8B5CF6)", padding: "12px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <h2 style={{ color: "white", margin: 0, fontSize: "20px" }}>{selectedGame.icon} {selectedGame.name}</h2>
-          <div>
-            <button onClick={toggleFullscreen} style={{ background: "rgba(255,255,255,0.15)", color: "white", border: "none", borderRadius: "8px", padding: "6px 12px", cursor: "pointer", marginRight: "10px", fontWeight: "700" }}>⛶ Fullscreen</button>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            {activeClassId && (
+              <button
+                onClick={handleSaveAndExit} disabled={saveStatus === "saving"}
+                title="Save exactly where you are and come back to it next class"
+                style={{ background: saveStatus === "saved" ? "#22C55E" : saveStatus === "error" ? "#EF4444" : "rgba(255,255,255,0.15)", color: "white", border: "none", borderRadius: "8px", padding: "6px 12px", cursor: saveStatus === "saving" ? "default" : "pointer", fontWeight: "700" }}
+              >
+                {saveStatus === "saving" ? "Saving…" : saveStatus === "saved" ? "✅ Saved!" : saveStatus === "error" ? "⚠️ Failed — try again" : "💾 Save & Exit"}
+              </button>
+            )}
+            <button onClick={toggleFullscreen} style={{ background: "rgba(255,255,255,0.15)", color: "white", border: "none", borderRadius: "8px", padding: "6px 12px", cursor: "pointer", fontWeight: "700" }}>⛶ Fullscreen</button>
             <button onClick={handleTopBarEndGame} style={{ background: "rgba(255,255,255,0.15)", color: "white", border: "none", borderRadius: "8px", padding: "6px 12px", cursor: "pointer", fontWeight: "700" }}>🏁 End Game</button>
           </div>
         </div>

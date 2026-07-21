@@ -62,8 +62,42 @@ export interface TeamColor {
     // elimination-style game with more than one team still alive) — false tells the caller to
     // fall back to ending the game immediately, same as before this existed.
     forceFinalRef?: React.MutableRefObject<(() => boolean) | null>;
+    // "Save Progress" support (Phase 2, per-game rollout) — only wired up by games with a real
+    // persistent board worth resuming exactly (Vault Heist, Castle Defense, Minefield, Battleship,
+    // King of the Hill, Race Track, Card Shuffle, Spy Among Us). A game that registers this ref
+    // should return a JSON-serializable snapshot of whatever internal state it needs to fully
+    // restore itself later. Games driven by a continuous real-time clock or hidden multi-phase
+    // sequence (Rocket Fuel, Order Up, Zombie Siege, Hot Potato, Word Whack, Hot Seat) don't wire
+    // this up at all — resuming those just restarts the round fresh, which is the correct behavior
+    // for them, not a missing feature.
+    serializeStateRef?: React.MutableRefObject<(() => unknown) | null>;
+    // A previously-saved snapshot (from serializeStateRef) to seed this game's initial state with,
+    // instead of starting fresh. Only meaningful to games that also implement serializeStateRef.
+    initialGameState?: unknown;
     lessonContent?: string;
     level?: string;
     isTopic?: boolean;
     gridData?: any; // Específico para el Minefield
+  }
+
+  // A persistent, named "class" a teacher returns to repeatedly (e.g. "Tuesday B2 Advanced").
+  // Team scores accumulate across sessions; at most one unfinished game is tracked at a time
+  // (in_progress + the fields after it) — no history of past finished games is kept.
+  export interface SavedClass {
+    id: string;
+    user_id: string;
+    name: string;
+    teams: Team[];
+    in_progress: boolean;
+    selected_topics: string[] | null;
+    selected_game: string | null;
+    level: string | null;
+    focus: string | null;
+    questions_snapshot: QuestionData[] | null;
+    // Minefield uses a grid (or array of grids), not `questions` — needs its own snapshot slot
+    // since it's the "question content" equivalent for that one game.
+    minefield_grid_data: unknown | null;
+    game_state: unknown | null;
+    created_at: string;
+    updated_at: string;
   }

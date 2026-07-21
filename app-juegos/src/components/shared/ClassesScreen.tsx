@@ -1,0 +1,132 @@
+import { useEffect, useState } from "react";
+import type { SavedClass } from "../../types";
+import { TEAM_COLORS, GAME_MODES } from "../../data/constants";
+import { listClasses, createClass, deleteClass } from "../../lib/classes";
+
+type Props = {
+  onBack: () => void;
+  onResumeClass: (savedClass: SavedClass) => void;
+  onStartWithClass: (savedClass: SavedClass) => void;
+};
+
+const gameLabel = (gameId: string | null) => GAME_MODES.find(g => g.id === gameId)?.name ?? gameId ?? "a game";
+
+export function ClassesScreen({ onBack, onResumeClass, onStartWithClass }: Props) {
+  const [classes, setClasses] = useState<SavedClass[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [newName, setNewName] = useState("");
+  const [creating, setCreating] = useState(false);
+
+  const refresh = () => {
+    listClasses()
+      .then(setClasses)
+      .catch(err => setError(err instanceof Error ? err.message : "Couldn't load your classes."));
+  };
+
+  useEffect(refresh, []);
+
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newName.trim()) return;
+    setCreating(true);
+    setError(null);
+    try {
+      const created = await createClass(newName.trim());
+      setNewName("");
+      setClasses(prev => (prev ? [created, ...prev] : [created]));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Couldn't create the class.");
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    setClasses(prev => prev?.filter(c => c.id !== id) ?? prev);
+    try {
+      await deleteClass(id);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Couldn't delete the class.");
+      refresh();
+    }
+  };
+
+  return (
+    <div style={{ minHeight: "100vh", background: "#F8F7FF", padding: "20px", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
+      <div style={{ maxWidth: "640px", margin: "0 auto" }}>
+        <button onClick={onBack} style={{ background: "none", border: "2px solid #6366F1", color: "#6366F1", borderRadius: "10px", padding: "8px 16px", cursor: "pointer", fontWeight: "700", marginBottom: "20px" }}>← Back</button>
+
+        <div style={{ textAlign: "center", marginBottom: "24px" }}>
+          <h2 style={{ fontSize: "30px", fontWeight: "900", color: "#1E1B4B", margin: 0 }}>📚 My Classes</h2>
+          <p style={{ color: "#6B7280", marginTop: "8px" }}>Team scores carry over each time you return to a class. Pick one up where you left off, or start a fresh game with the same roster.</p>
+        </div>
+
+        <form onSubmit={handleCreate} style={{ display: "flex", gap: "8px", marginBottom: "20px" }}>
+          <input
+            value={newName} onChange={e => setNewName(e.target.value)} placeholder="e.g. Tuesday B2 Advanced"
+            style={{ flex: 1, padding: "12px 14px", borderRadius: "12px", border: "2px solid #E5E7EB", fontSize: "14px" }}
+          />
+          <button
+            type="submit" disabled={creating || !newName.trim()}
+            style={{ background: "linear-gradient(135deg,#6366F1,#8B5CF6)", color: "white", border: "none", borderRadius: "12px", padding: "12px 20px", fontWeight: "800", cursor: creating ? "default" : "pointer", opacity: creating || !newName.trim() ? 0.6 : 1, whiteSpace: "nowrap" }}
+          >
+            + New Class
+          </button>
+        </form>
+
+        {error && (
+          <div style={{ background: "#FEE2E2", color: "#991B1B", padding: "10px 14px", borderRadius: "10px", fontSize: "13px", marginBottom: "16px" }}>{error}</div>
+        )}
+
+        {classes === null ? (
+          <div style={{ textAlign: "center", color: "#6B7280", padding: "40px 0" }}>Loading your classes…</div>
+        ) : classes.length === 0 ? (
+          <div style={{ textAlign: "center", color: "#6B7280", padding: "40px 0" }}>No classes yet — create one above to get started.</div>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+            {classes.map(cls => (
+              <div key={cls.id} style={{ background: "white", border: "2px solid #E5E7EB", borderRadius: "16px", padding: "16px 18px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "10px" }}>
+                  <div style={{ fontWeight: "900", fontSize: "17px", color: "#1E1B4B" }}>{cls.name}</div>
+                  <button
+                    onClick={() => handleDelete(cls.id)} title="Delete class"
+                    style={{ background: "none", border: "none", color: "#9CA3AF", cursor: "pointer", fontSize: "14px", padding: "2px 4px" }}
+                  >
+                    🗑️
+                  </button>
+                </div>
+
+                {cls.teams.length > 0 && (
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", margin: "10px 0" }}>
+                    {cls.teams.map(t => (
+                      <span key={t.id} style={{ background: t.color?.light ?? TEAM_COLORS[0].light, color: t.color?.dark ?? TEAM_COLORS[0].dark, borderRadius: "8px", padding: "4px 10px", fontSize: "12px", fontWeight: "700" }}>
+                        {t.color?.emoji} {t.name}: {t.score}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                <div style={{ display: "flex", gap: "8px", marginTop: "12px", flexWrap: "wrap" }}>
+                  {cls.in_progress && (
+                    <button
+                      onClick={() => onResumeClass(cls)}
+                      style={{ background: "linear-gradient(135deg,#F59E0B,#EF4444)", color: "white", border: "none", borderRadius: "10px", padding: "10px 16px", fontWeight: "800", fontSize: "13px", cursor: "pointer" }}
+                    >
+                      ▶️ Resume {gameLabel(cls.selected_game)}
+                    </button>
+                  )}
+                  <button
+                    onClick={() => onStartWithClass(cls)}
+                    style={{ background: cls.in_progress ? "#EEF2FF" : "linear-gradient(135deg,#6366F1,#8B5CF6)", color: cls.in_progress ? "#4338CA" : "white", border: cls.in_progress ? "2px solid #C7D2FE" : "none", borderRadius: "10px", padding: "10px 16px", fontWeight: "800", fontSize: "13px", cursor: "pointer" }}
+                  >
+                    🆕 Start New Game
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

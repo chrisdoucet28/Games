@@ -21,13 +21,16 @@ function ConfigErrorScreen() {
   );
 }
 
+// Deliberately NOT position:fixed — an earlier version floated this over everything, which
+// meant it sat on top of (and blocked) LessonGamesGenerator's own top-right button row (Save
+// Progress/Fullscreen/End Game) whenever a game was in progress. A plain top strip in normal
+// document flow just pushes the rest of the page down instead, so it can never overlap anything
+// regardless of which screen is showing.
 function StatusBadge({ children, action, onAction }: { children: React.ReactNode; action: string; onAction: () => void }) {
   return (
     <div style={{
-      position: 'fixed', top: '10px', right: '10px', zIndex: 1000,
-      display: 'flex', alignItems: 'center', gap: '8px',
-      background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(4px)', border: '1px solid rgba(255,255,255,0.25)',
-      borderRadius: '20px', padding: '6px 8px 6px 14px',
+      display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '8px',
+      background: '#111827', padding: '6px 14px',
       fontFamily: "'Segoe UI',system-ui,sans-serif",
     }}>
       <span style={{ color: 'white', fontSize: '12px', fontWeight: 700 }}>{children}</span>
