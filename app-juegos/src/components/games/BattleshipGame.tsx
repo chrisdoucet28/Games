@@ -4,6 +4,7 @@ import { teamsGridCols } from "../../data/constants";
 import { useTurnTimer } from "../../hooks/useTurnTimer";
 import { TurnTimerBar } from "../shared/TurnTimerBar";
 import { QuestionCard } from "../shared/QuestionCard";
+import { denseRank, medalForRank } from "../../utils/ranking";
 
 type ColDef = { letter: string; label: string; emoji: string };
 
@@ -149,6 +150,11 @@ export function BattleshipGame({ questions, teams, onUpdateScore, onEnd, forceFi
   const [elimBanner, setElimBanner] = useState<EliminationBanner | null>(null);
   const fxIdRef = useRef(0);
   const eliminationOrderRef = useRef<(string | number)[]>([]);
+  // Whether the gameover screen was reached by a genuine full elimination (one fleet left) or
+  // by the top-bar End Game button cutting the battle short with several fleets still afloat —
+  // the two cases need different framing, since "last fleet standing" only makes sense for the
+  // first one.
+  const [interrupted, setInterrupted] = useState(false);
 
   const activeTeam = teams[activeTeamIdx];
   const currentQ = (pendingCoord && targetTeamId !== null) ? coordMap[targetTeamId]?.[pendingCoord] : null;
@@ -180,11 +186,11 @@ export function BattleshipGame({ questions, teams, onUpdateScore, onEnd, forceFi
     if (!forceFinalRef) return;
     if (phase === "gameover") { forceFinalRef.current = null; return; }
     forceFinalRef.current = () => {
-      // "Last fleet standing" only makes sense to declare with exactly one survivor left — with
-      // several fleets still afloat there's no fair winner to name, so this game has no valid
-      // final screen to show yet and the caller should just end the session outright instead.
+      // Always show Battleship's own end screen, same as every other game — "last fleet
+      // standing" narrative if the battle actually finished, otherwise a ranked-by-ships-
+      // remaining summary if the top-bar button cut it short with several fleets still afloat.
       const survivors = teams.filter(t => !isEliminated(t.id));
-      if (survivors.length !== 1) return false;
+      setInterrupted(survivors.length !== 1);
       setPhase("gameover");
       return true;
     };
@@ -329,6 +335,41 @@ export function BattleshipGame({ questions, teams, onUpdateScore, onEnd, forceFi
   );
 
   if (phase === "gameover") {
+    if (interrupted) {
+      // The battle was cut short with several fleets still afloat (the top-bar End Game button,
+      // usually because the class ran out of time) — there's no fair "last fleet standing" to
+      // declare, so rank everyone by how much of their fleet survived instead.
+      const shipsRemaining = (t: typeof teams[number]) => fleets[t.id].length - (hits[t.id] || []).length;
+      const ranking = denseRank(teams, shipsRemaining).sort((a, b) => b.value - a.value);
+      return (
+        <div style={{ ...arenaStyle, textAlign: "center" }}>
+          <AmbientBackdrop />
+          {STYLE_TAG}
+          <div style={{ position: "relative", zIndex: 1 }}>
+            <div style={{ fontSize: "48px", marginBottom: "6px" }}>⚓</div>
+            <div style={{ fontWeight: "900", fontSize: "24px", color: "#93C5FD", marginBottom: "4px", textShadow: "0 0 24px rgba(96,165,250,0.6)" }}>
+              Battle cut short — final standings
+            </div>
+            <div style={{ color: "#94A3B8", fontSize: "14px", marginBottom: "20px" }}>Ranked by how much of each fleet is still afloat.</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px", maxWidth: "420px", margin: "0 auto 24px" }}>
+              {ranking.map(({ item: t, rank, value }) => (
+                <div key={t.id} style={{
+                  display: "flex", alignItems: "center", gap: "12px",
+                  background: rank === 0 ? `linear-gradient(160deg,${t.color.dark}66,#0C1B3A)` : "linear-gradient(160deg,#1F2937,#0B0F17)",
+                  border: `2px solid ${rank === 0 ? t.color.bg : "#4B5563"}`, borderRadius: "14px", padding: rank === 0 ? "12px 16px" : "10px 16px",
+                  opacity: rank === 0 ? 1 : 0.85,
+                }}>
+                  <span style={{ fontSize: rank === 0 ? "24px" : "20px" }}>{medalForRank(rank)}</span>
+                  <span style={{ flex: 1, textAlign: "left", fontWeight: rank === 0 ? "900" : "800", color: rank === 0 ? "white" : "#D1D5DB", fontSize: rank === 0 ? "16px" : "15px" }}>{t.name}</span>
+                  <span style={{ fontWeight: "800", color: rank === 0 ? "#93C5FD" : "#6B7280", fontSize: "13px" }}>{value}/{fleets[t.id].length} ships left</span>
+                </div>
+              ))}
+            </div>
+            <button onClick={onEnd} className="bship-btn" style={{ background: "linear-gradient(135deg,#1E3A8A,#2563EB)", color: "white", border: "none", borderRadius: "14px", padding: "14px 32px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(37,99,235,0.5)", transition: "transform 0.15s ease" }}>🏁 End Game</button>
+          </div>
+        </div>
+      );
+    }
     // The winner is whichever team was never eliminated — not whoever currently has the most
     // accumulated score, which may belong to a team that dominated an earlier game entirely.
     const winnerTeam = teams.find(t => !eliminationOrderRef.current.includes(t.id))!;
