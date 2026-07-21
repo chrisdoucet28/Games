@@ -48,7 +48,7 @@ function ChaosBackdrop() {
   );
 }
 
-export function HotPotatoGame({ questions, teams, onUpdateScore, onEnd, level }: GameProps) {
+export function HotPotatoGame({ questions, teams, onUpdateScore, onEnd, level, forceFinalRef }: GameProps) {
   const showSpanish = level === "A1" || level === "A2";
   const STARTING_BANK = 100;
   const TOTAL_ROUNDS = 5;
@@ -59,6 +59,12 @@ export function HotPotatoGame({ questions, teams, onUpdateScore, onEnd, level }:
   const ROUND_SECONDS = turnSeconds * ROUND_SECONDS_MULT;
 
   const [phase, setPhase] = useState<"intro" | "play" | "exploding" | "roundend" | "gameover">("intro");
+
+  useEffect(() => {
+    if (!forceFinalRef) return;
+    forceFinalRef.current = phase === "gameover" ? null : () => { setPhase("gameover"); return true; };
+    return () => { if (forceFinalRef) forceFinalRef.current = null; };
+  }, [forceFinalRef, phase]);
   const [round, setRound] = useState(1);
   const [qi, setQi] = useState(0);
   const [holderIdx, setHolderIdx] = useState(0);

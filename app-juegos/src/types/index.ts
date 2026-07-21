@@ -55,7 +55,13 @@ export interface TeamColor {
     teams: Team[];
     onUpdateScore: (teamId: string | number, delta: number) => void;
     onEnd: () => void;
-    earlyEndRef?: React.MutableRefObject<(() => void) | null>;
+    // Lets the top-bar "End Game" button push a game into its own internal final/results phase
+    // (where one exists) instead of jumping straight to the app-level results screen. The
+    // registered function should return true once it has safely transitioned the game to that
+    // phase, or false if the game can't produce a valid final screen right now (e.g. an
+    // elimination-style game with more than one team still alive) — false tells the caller to
+    // fall back to ending the game immediately, same as before this existed.
+    forceFinalRef?: React.MutableRefObject<(() => boolean) | null>;
     lessonContent?: string;
     level?: string;
     isTopic?: boolean;

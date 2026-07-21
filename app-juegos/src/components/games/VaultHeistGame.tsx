@@ -89,7 +89,7 @@ function LockRow({ cracked, total, justChanged }: { cracked: number; total: numb
   );
 }
 
-export function VaultHeistGame({ questions, teams, onUpdateScore, onEnd }: GameProps) {
+export function VaultHeistGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef }: GameProps) {
   const rewriteQs = useRef(questions.filter(q => q.type === "rewrite sentences")).current;
   const categories = useRef([...new Set(rewriteQs.map(q => q.transform).filter((c): c is string => !!c))]).current;
   const pools = useRef(buildDrawPools(rewriteQs, categories, teams.map(t => t.id))).current;
@@ -120,6 +120,22 @@ export function VaultHeistGame({ questions, teams, onUpdateScore, onEnd }: GameP
   // Order teams finish in — index 0 is 1st place. Drives both the rank-based bonus and the
   // gameover standings; a team's id lands here exactly once, the moment they crack lock 5.
   const finishOrderRef = useRef<(string | number)[]>([]);
+
+  useEffect(() => {
+    if (!forceFinalRef) return;
+    forceFinalRef.current = phase === "gameover" ? null : () => {
+      // The gameover screen assumes finishOrderRef covers every team — backfill anyone who
+      // hasn't cracked all 5 locks yet, ranked below the teams who actually finished, ordered
+      // by how many locks they'd cracked so far.
+      const finishedIds = new Set(finishOrderRef.current);
+      const unfinished = teams.filter(t => !finishedIds.has(t.id))
+        .sort((a, b) => (vaultLocks[b.id] ?? 0) - (vaultLocks[a.id] ?? 0));
+      finishOrderRef.current = [...finishOrderRef.current, ...unfinished.map(t => t.id)];
+      setPhase("gameover");
+      return true;
+    };
+    return () => { if (forceFinalRef) forceFinalRef.current = null; };
+  }, [forceFinalRef, phase, teams, vaultLocks]);
 
   const activeTeam = teams[turnOrder[orderPos]];
 

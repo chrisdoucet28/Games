@@ -68,21 +68,24 @@ function AmbientBackdrop() {
   );
 }
 
-export function KingOfHillGame({ questions, teams, onUpdateScore, onEnd }: GameProps) {
+export function KingOfHillGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef }: GameProps) {
   const TURN_SECONDS = 20;
   const isTopicMode = questions.length > 0 && questions.every(q => q.type === "speaking task");
   const ZONES = isTopicMode ? HILL_ZONES_TOPIC : HILL_ZONES_GRAMMAR;
 
   const pool = useRef((() => {
-    // Grammar mode used to draw only from "finish the sentence" questions, but several topics
-    // only have a handful of those — the pool would exhaust and repeat well before a 4-round
-    // game ends. "correct grammar mistakes" is the same quick-answer, single-blank format, so
-    // pulling both in gives a much deeper pool without changing the duel's feel.
+    // Grammar mode's identity is "finish the sentence" — that's the format the duel is built
+    // around. Only top up with "correct grammar mistakes" (same quick single-blank shape) when
+    // a topic's finish-the-sentence pool is too thin to fill a 4-round game on its own.
+    const MIN_POOL = 10;
     const base = isTopicMode
       ? questions
       : (() => {
-          const filtered = questions.filter(q => q.type === "finish the sentence" || q.type === "correct grammar mistakes");
-          return filtered.length ? filtered : questions;
+          const finish = questions.filter(q => q.type === "finish the sentence");
+          if (finish.length >= MIN_POOL) return finish;
+          const mistakes = questions.filter(q => q.type === "correct grammar mistakes");
+          const combined = [...finish, ...mistakes];
+          return combined.length ? combined : questions;
         })();
     return [...base].sort(() => Math.random() - 0.5);
   })()).current;
@@ -95,6 +98,12 @@ export function KingOfHillGame({ questions, teams, onUpdateScore, onEnd }: GameP
   const [qi, setQi] = useState(0);
 
   const [phase, setPhase] = useState<"intro" | "rolling" | "pick" | "answer" | "contested" | "round-end" | "final">("intro");
+
+  useEffect(() => {
+    if (!forceFinalRef) return;
+    forceFinalRef.current = phase === "final" ? null : () => { setPhase("final"); return true; };
+    return () => { if (forceFinalRef) forceFinalRef.current = null; };
+  }, [forceFinalRef, phase]);
   const [chosenZone, setChosenZone] = useState<string | null>(null);
   const [showAns, setShowAns] = useState(false);
   const [contest, setContest] = useState<any>(null);

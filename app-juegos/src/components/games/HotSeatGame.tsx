@@ -55,8 +55,14 @@ const shuffle = <T,>(items: T[]) => {
   return shuffled;
 };
 
-export function HotSeatGame({ questions, teams, onUpdateScore, onEnd }: GameProps) {
+export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef }: GameProps) {
   const [phase, setPhase] = useState<"welcome" | "intro" | "play" | "turnend" | "final">("welcome");
+
+  useEffect(() => {
+    if (!forceFinalRef) return;
+    forceFinalRef.current = phase === "final" ? null : () => { setPhase("final"); return true; };
+    return () => { if (forceFinalRef) forceFinalRef.current = null; };
+  }, [forceFinalRef, phase]);
   const [roundIndex, setRoundIndex] = useState(0);
   const [teamIndex, setTeamIndex] = useState(0);
   const [wordIndex, setWordIndex] = useState(0);

@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import type { GameProps, QuestionData } from "../../types";
 import { useTurnTimer } from "../../hooks/useTurnTimer";
 import { TurnTimerBar } from "../shared/TurnTimerBar";
@@ -85,7 +85,7 @@ function rankByFuel(teams: GameProps["teams"], fuelById: Record<string | number,
     .sort((a, b) => b.fuel - a.fuel);
 }
 
-export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd }: GameProps) {
+export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef }: GameProps) {
   const pool = useRef((() => {
     const uvs = questions.filter(q => q.type === "use vocabulary in a sentence");
     const finalPool = uvs.length ? uvs : questions;
@@ -104,6 +104,30 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd }: GameP
   const cursorRef = useRef(0);
   const fuelRef = useRef<Record<string | number, number>>({});
   const turnFuelRef = useRef(0);
+  // Guards against double-awarding points if the launch payout fires both from the natural
+  // "landing" timeout and a forced early end racing each other.
+  const payoutDoneRef = useRef(false);
+
+  const finalizeLaunch = useCallback(() => {
+    if (payoutDoneRef.current) return;
+    payoutDoneRef.current = true;
+    const ranked = rankByFuel(teams, fuelRef.current);
+    const bonuses: Record<string | number, number> = {};
+    ranked.forEach(({ team, fuel, rank }) => {
+      const basePts = fuel * POINTS_PER_CORRECT;
+      const bonus = LAUNCH_BONUS_BY_RANK[rank] ?? 0;
+      bonuses[team.id] = bonus;
+      onUpdateScore(team.id, basePts + bonus);
+    });
+    setBonusAwarded(bonuses);
+    setPhase("final");
+  }, [teams, onUpdateScore]);
+
+  useEffect(() => {
+    if (!forceFinalRef) return;
+    forceFinalRef.current = phase === "final" ? null : () => { finalizeLaunch(); return true; };
+    return () => { if (forceFinalRef) forceFinalRef.current = null; };
+  }, [forceFinalRef, phase, finalizeLaunch]);
 
   const activeTeam = teams[teamIdx];
 
@@ -167,20 +191,9 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd }: GameP
   useEffect(() => {
     if (phase !== "launching") return;
     const liftoffT = setTimeout(() => setLaunched(true), 50);
-    const finishT = setTimeout(() => {
-      // All points — base fuel points AND the launch-rank bonus — land together right as
-      // the flight resolves, so the scoreboard stays blank through the whole simulation.
-      const ranked = rankByFuel(teams, fuelRef.current);
-      const bonuses: Record<string | number, number> = {};
-      ranked.forEach(({ team, fuel, rank }) => {
-        const basePts = fuel * POINTS_PER_CORRECT;
-        const bonus = LAUNCH_BONUS_BY_RANK[rank] ?? 0;
-        bonuses[team.id] = bonus;
-        onUpdateScore(team.id, basePts + bonus);
-      });
-      setBonusAwarded(bonuses);
-      setPhase("final");
-    }, ASCENT_MS + HOLD_MS);
+    // All points — base fuel points AND the launch-rank bonus — land together right as
+    // the flight resolves, so the scoreboard stays blank through the whole simulation.
+    const finishT = setTimeout(finalizeLaunch, ASCENT_MS + HOLD_MS);
     return () => { clearTimeout(liftoffT); clearTimeout(finishT); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase]);

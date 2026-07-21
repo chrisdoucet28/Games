@@ -135,7 +135,7 @@ function CheckeredStrip() {
   );
 }
 
-export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd }: GameProps) {
+export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef }: GameProps) {
   const [phase, setPhase] = useState<Phase>("intro");
   const [track, setTrack] = useState<TrackSpace[]>(() => buildTrack());
   const [raceTeams, setRaceTeams] = useState<Record<string | number, RaceTeamState>>(() =>
@@ -414,6 +414,30 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd }: GamePr
     setFinalRanking(rows);
     setPhase("gameover");
   };
+
+  // Ranks every team by wherever they currently stand on the track — no one gets bumped to the
+  // finish line, unlike triggerWin (which is only reached once someone genuinely crosses it).
+  const forceFinish = () => {
+    const finalPos: Record<string | number, number> = {};
+    teams.forEach(t => { finalPos[t.id] = raceTeamsRef.current[t.id]?.pos ?? 0; });
+    const distinctPosDesc = [...new Set(teams.map(t => finalPos[t.id]))].sort((a, b) => b - a);
+    const ranking = [...teams].sort((a, b) => finalPos[b.id] - finalPos[a.id]);
+    const rows: RankRow[] = ranking.map(t => {
+      const rank = distinctPosDesc.indexOf(finalPos[t.id]);
+      const pts = RANK_POINTS[rank] ?? 5;
+      onUpdateScore(t.id, pts);
+      return { id: t.id, name: t.name, pos: finalPos[t.id], points: pts };
+    });
+    setFinalRanking(rows);
+    setPhase("gameover");
+  };
+
+  useEffect(() => {
+    if (!forceFinalRef) return;
+    forceFinalRef.current = phase === "gameover" ? null : () => { forceFinish(); return true; };
+    return () => { if (forceFinalRef) forceFinalRef.current = null; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [forceFinalRef, phase]);
 
   const arenaStyle: React.CSSProperties = {
     margin: "-20px", padding: "20px", borderRadius: "20px", position: "relative", overflow: "hidden",

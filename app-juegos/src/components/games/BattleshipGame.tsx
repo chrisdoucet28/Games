@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import type { GameProps, QuestionData } from "../../types";
 import { teamsGridCols } from "../../data/constants";
 import { useTurnTimer } from "../../hooks/useTurnTimer";
@@ -125,7 +125,7 @@ type CellFx = { teamId: string | number; coord: string; kind: "hit" | "miss"; ke
 type Toast = { text: string; kind: "hit" | "water" | "wrong"; key: number };
 type EliminationBanner = { teamName: string; color: string; key: number };
 
-export function BattleshipGame({ questions, teams, onUpdateScore, onEnd }: GameProps) {
+export function BattleshipGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef }: GameProps) {
   const TURN_SECONDS = 25;
   const gameTitle = "Battleship";
 
@@ -175,6 +175,21 @@ export function BattleshipGame({ questions, teams, onUpdateScore, onEnd }: GameP
     const h = hitsOverride || hits;
     return fleets[teamId].every((s: string) => (h[teamId] || []).includes(s));
   }, [hits, fleets]);
+
+  useEffect(() => {
+    if (!forceFinalRef) return;
+    if (phase === "gameover") { forceFinalRef.current = null; return; }
+    forceFinalRef.current = () => {
+      // "Last fleet standing" only makes sense to declare with exactly one survivor left — with
+      // several fleets still afloat there's no fair winner to name, so this game has no valid
+      // final screen to show yet and the caller should just end the session outright instead.
+      const survivors = teams.filter(t => !isEliminated(t.id));
+      if (survivors.length !== 1) return false;
+      setPhase("gameover");
+      return true;
+    };
+    return () => { if (forceFinalRef) forceFinalRef.current = null; };
+  }, [forceFinalRef, phase, teams, isEliminated]);
 
   const advanceTurn = useCallback((hitsOverride?: Record<string | number, string[]>) => {
     setShowAns(false);

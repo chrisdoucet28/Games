@@ -68,7 +68,7 @@ function Starfield() {
 const PANEL_BG = "linear-gradient(160deg,#1E293B,#0F172A)";
 const PANEL_BORDER = "1.5px solid #38BDF855";
 
-export function SpyAmongUsGame({ questions, teams, onUpdateScore, onEnd }: GameProps) {
+export function SpyAmongUsGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef }: GameProps) {
   const DISCUSS_SECONDS = 30;
   const isTwoPlayer = teams.length === 2;
   const randomTeamIndex = () => Math.floor(Math.random() * Math.max(teams.length, 1));
@@ -82,6 +82,12 @@ export function SpyAmongUsGame({ questions, teams, onUpdateScore, onEnd }: GameP
   const [spyWinsByTeam, setSpyWinsByTeam] = useState<Record<string | number, number>>({});
   const [crewWinsByTeam, setCrewWinsByTeam] = useState<Record<string | number, number>>({});
   const [phase, setPhase] = useState<Phase>("intro");
+
+  useEffect(() => {
+    if (!forceFinalRef) return;
+    forceFinalRef.current = phase === "final" ? null : () => { setPhase("final"); return true; };
+    return () => { if (forceFinalRef) forceFinalRef.current = null; };
+  }, [forceFinalRef, phase]);
   const [peekIdx, setPeekIdx] = useState(0);
   const [revealed, setRevealed] = useState(false);
   const [votes, setVotes] = useState<Record<string | number, string | number>>({});

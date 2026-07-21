@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { GameProps } from "../../types";
 import { teamsGridCols } from "../../data/constants";
 import { denseRank, medalForRank } from "../../utils/ranking";
@@ -18,13 +18,19 @@ const MINE_COUNT = 7;
 const createMines = () =>
   new Set([...Array(TOTAL)].map((_, index) => index).sort(() => Math.random() - 0.5).slice(0, MINE_COUNT));
 
-export function MinefieldGame({ gridData, teams, onUpdateScore, onEnd }: GameProps) {
+export function MinefieldGame({ gridData, teams, onUpdateScore, onEnd, forceFinalRef }: GameProps) {
   const grids = (Array.isArray(gridData) ? gridData : gridData ? [gridData] : []) as MinefieldGrid[];
   const [gridIndex, setGridIndex] = useState(0);
   const [mines] = useState<Set<number>>(() => createMines());
   const [revealed, setRevealed] = useState<Set<number>>(new Set());
   const [activeTeam, setActiveTeam] = useState(0);
   const [phase, setPhase] = useState<"intro" | "pick" | "speaking" | "judging" | "topicComplete" | "final">("intro");
+
+  useEffect(() => {
+    if (!forceFinalRef) return;
+    forceFinalRef.current = phase === "final" ? null : () => { setPhase("final"); return true; };
+    return () => { if (forceFinalRef) forceFinalRef.current = null; };
+  }, [forceFinalRef, phase]);
   const [selectedTile, setSelectedTile] = useState<number | null>(null);
   const [boom, setBoom] = useState<boolean | null>(null);
   const [lastResult, setLastResult] = useState<{ correct: boolean; isMine: boolean; col: string; row: string; teamName: string } | null>(null);

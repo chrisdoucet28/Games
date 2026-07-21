@@ -296,7 +296,7 @@ function TicketCard({ ticket, teams, judging, onClaim, onCorrect, onWrong }: {
 // A round-length countdown drives its own "final" phase (results + set-collection payout), but the
 // always-present top-bar "End Game" button in LessonGamesGenerator.tsx can still bail out early at
 // any time, same as every other game — this only adds a natural end, it doesn't remove the old one.
-export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, level }: GameProps) {
+export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, level, forceFinalRef }: GameProps) {
   const isBeginner = level === "A1" || level === "A2";
 
   const contentGrammarTags = useRef([
@@ -335,6 +335,12 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, level }: G
   // Combo bonuses are already paid out live as they happen (see resolveCorrect) — nothing left to
   // settle here, this just moves to the results screen.
   const handleSessionEnd = useCallback(() => setPhase("final"), []);
+
+  useEffect(() => {
+    if (!forceFinalRef) return;
+    forceFinalRef.current = phase === "final" ? null : () => { handleSessionEnd(); return true; };
+    return () => { if (forceFinalRef) forceFinalRef.current = null; };
+  }, [forceFinalRef, phase, handleSessionEnd]);
 
   const { timeLeft: sessionTimeLeft } = useTurnTimer(SESSION_SECONDS_BY_LENGTH[sessionLength], phase === "playing", handleSessionEnd);
 

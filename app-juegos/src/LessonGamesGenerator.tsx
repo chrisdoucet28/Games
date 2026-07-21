@@ -292,16 +292,23 @@ export default function LessonGamesGenerator() {
     }
   };
 
-  const earlyEndRef = useRef<(() => void) | null>(null);
+  // Registered by whichever game is currently mounted (see GameProps.forceFinalRef) so the
+  // top-bar "End Game" button can push it into its own final/results phase first, instead of
+  // jumping straight past it to the app-level results screen.
+  const forceFinalRef = useRef<(() => boolean) | null>(null);
 
   const handleGameEnd = () => {
-    if (earlyEndRef.current) {
-      earlyEndRef.current();
-      earlyEndRef.current = null;
-    }
     setConfetti(true);
     setScreen("results");
     setTimeout(() => setConfetti(false), 4000);
+  };
+
+  // The top-bar button: try to hand off to the active game's own final screen first. Only fall
+  // through to ending the whole session immediately if the game has no final phase to show, or
+  // can't safely produce one right now (e.g. an elimination game with several teams still alive).
+  const handleTopBarEndGame = () => {
+    if (forceFinalRef.current && forceFinalRef.current()) return;
+    handleGameEnd();
   };
 
   // Dense rank on score — two teams tied for first both get gold and share the "wins" headline
@@ -635,27 +642,27 @@ export default function LessonGamesGenerator() {
           <h2 style={{ color: "white", margin: 0, fontSize: "20px" }}>{selectedGame.icon} {selectedGame.name}</h2>
           <div>
             <button onClick={toggleFullscreen} style={{ background: "rgba(255,255,255,0.15)", color: "white", border: "none", borderRadius: "8px", padding: "6px 12px", cursor: "pointer", marginRight: "10px", fontWeight: "700" }}>⛶ Fullscreen</button>
-            <button onClick={handleGameEnd} style={{ background: "rgba(255,255,255,0.15)", color: "white", border: "none", borderRadius: "8px", padding: "6px 12px", cursor: "pointer", fontWeight: "700" }}>🏁 End Game</button>
+            <button onClick={handleTopBarEndGame} style={{ background: "rgba(255,255,255,0.15)", color: "white", border: "none", borderRadius: "8px", padding: "6px 12px", cursor: "pointer", fontWeight: "700" }}>🏁 End Game</button>
           </div>
         </div>
         <div style={{ padding: "16px", maxWidth: "900px", margin: "0 auto" }}>
           <ScoreBoard teams={teams} />
           <div style={{ background: "white", borderRadius: "20px", padding: "20px", marginTop: "16px" }}>
-            {selectedGame.id === "auction" && <AuctionGame questions={questions} teams={teams} earlyEndRef={earlyEndRef} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-            {selectedGame.id === "minefield" && <MinefieldGame questions={[]} gridData={minefieldGridData} teams={teams} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-            {selectedGame.id === "hotseat" && <HotSeatGame questions={questions} teams={teams} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-            {selectedGame.id === "spy" && <SpyAmongUsGame questions={questions} teams={teams} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-            {selectedGame.id === "battleship" && <BattleshipGame questions={questions} teams={teams} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-            {selectedGame.id === "vault" && <VaultHeistGame questions={questions} teams={teams} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-            {selectedGame.id === "cards" && <CardShuffleGame questions={questions} teams={teams} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-            {selectedGame.id === "castle" && <CastleGame questions={questions} teams={teams} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-            {selectedGame.id === "hill" && <KingOfHillGame questions={questions} teams={teams} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-            {selectedGame.id === "hotpotato" && <HotPotatoGame questions={questions} teams={teams} onUpdateScore={updateScore} onEnd={handleGameEnd} level={hotPotatoLevel} />}
-            {selectedGame.id === "racetrack" && <RaceTrackGame questions={questions} teams={teams} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-            {selectedGame.id === "whack" && <WordWhackGame questions={questions} teams={teams} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-            {selectedGame.id === "rocket" && <RocketFuelGame questions={questions} teams={teams} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-            {selectedGame.id === "zombie" && <ZombieSiegeGame questions={questions} teams={teams} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-            {selectedGame.id === "orderup" && <OrderUpGame questions={questions} teams={teams} onUpdateScore={updateScore} onEnd={handleGameEnd} level={orderUpLevel} />}
+            {selectedGame.id === "auction" && <AuctionGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
+            {selectedGame.id === "minefield" && <MinefieldGame questions={[]} gridData={minefieldGridData} teams={teams} forceFinalRef={forceFinalRef} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
+            {selectedGame.id === "hotseat" && <HotSeatGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
+            {selectedGame.id === "spy" && <SpyAmongUsGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
+            {selectedGame.id === "battleship" && <BattleshipGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
+            {selectedGame.id === "vault" && <VaultHeistGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
+            {selectedGame.id === "cards" && <CardShuffleGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
+            {selectedGame.id === "castle" && <CastleGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
+            {selectedGame.id === "hill" && <KingOfHillGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
+            {selectedGame.id === "hotpotato" && <HotPotatoGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} onUpdateScore={updateScore} onEnd={handleGameEnd} level={hotPotatoLevel} />}
+            {selectedGame.id === "racetrack" && <RaceTrackGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
+            {selectedGame.id === "whack" && <WordWhackGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
+            {selectedGame.id === "rocket" && <RocketFuelGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
+            {selectedGame.id === "zombie" && <ZombieSiegeGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
+            {selectedGame.id === "orderup" && <OrderUpGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} onUpdateScore={updateScore} onEnd={handleGameEnd} level={orderUpLevel} />}
           </div>
         </div>
       </div>

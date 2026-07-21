@@ -83,7 +83,7 @@ function AmbientBackdrop() {
   );
 }
 
-export function WordWhackGame({ questions, teams, onUpdateScore, onEnd }: GameProps) {
+export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef }: GameProps) {
   const pool = useRef((() => {
     const mcqOnly = questions.filter(q => q.type === "choose correct grammar");
     const parsedMcq = mcqOnly.map(parseChoices).filter((p): p is ParsedMCQ => p !== null);
@@ -94,6 +94,12 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd }: GamePr
   })()).current;
 
   const [phase, setPhase] = useState<"intro" | "countdown" | "playing" | "turn-end" | "final">("intro");
+
+  useEffect(() => {
+    if (!forceFinalRef) return;
+    forceFinalRef.current = phase === "final" ? null : () => { setPhase("final"); return true; };
+    return () => { if (forceFinalRef) forceFinalRef.current = null; };
+  }, [forceFinalRef, phase]);
   const [difficulty, setDifficulty] = useState<Difficulty>("medium");
   const [teamIdx, setTeamIdx] = useState(0);
   const [countdown, setCountdown] = useState(3);

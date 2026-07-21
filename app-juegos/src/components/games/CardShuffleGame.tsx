@@ -56,7 +56,7 @@ const TENT_STRIPES: React.CSSProperties = {
   background: "repeating-linear-gradient(115deg, rgba(255,251,235,0.05) 0px, rgba(255,251,235,0.05) 26px, transparent 26px, transparent 52px)",
 };
 
-export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd }: GameProps) {
+export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef }: GameProps) {
   const TURN_SECONDS = 25;
   const NUM_CARDS = 4;
   const CARD_W = 130;
@@ -81,6 +81,13 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd }: Game
   const [cardSlots, setCardSlots] = useState([0, 1, 2, 3]);
   const [cardPos, setCardPos] = useState(() => [0, 1, 2, 3].map(slotPos));
   const [phase, setPhase] = useState<"intro" | "preview" | "shuffling" | "picking" | "answering" | "reveal" | "final">("intro");
+
+  useEffect(() => {
+    if (!forceFinalRef) return;
+    forceFinalRef.current = phase === "final" ? null : () => { setPhase("final"); return true; };
+    return () => { if (forceFinalRef) forceFinalRef.current = null; };
+  }, [forceFinalRef, phase]);
+
   const [teamPicks, setTeamPicks] = useState<Record<string | number, { cardIdx: number, slot: number, correct: boolean }>>({});
   // Running per-team tallies across every round — teamPicks itself resets each round, so this is
   // what needs to survive to the final results screen.

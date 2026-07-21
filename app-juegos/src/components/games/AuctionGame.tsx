@@ -71,7 +71,7 @@ function ChipStack({ amount, max = 200 }: { amount: number; max?: number }) {
   );
 }
 
-export function AuctionGame({ questions, teams, onUpdateScore, onEnd, earlyEndRef }: GameProps) {
+export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef }: GameProps) {
   const AUCTION_START = 200;
   const BET_AMOUNTS = [25, 50, 100];
 
@@ -103,16 +103,19 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, earlyEndRe
 
   const flushAndEnd = useCallback(() => {
     flushBankToScores();
-    if (earlyEndRef) earlyEndRef.current = null;
+    if (forceFinalRef) forceFinalRef.current = null;
     onEnd();
-  }, [flushBankToScores, earlyEndRef, onEnd]);
+  }, [flushBankToScores, forceFinalRef, onEnd]);
 
   useEffect(() => {
-    if (earlyEndRef) {
-      earlyEndRef.current = flushBankToScores;
-    }
-    return () => { if (earlyEndRef) earlyEndRef.current = null; };
-  }, [earlyEndRef, flushBankToScores]);
+    if (!forceFinalRef) return;
+    forceFinalRef.current = phase === "final" ? null : () => {
+      flushBankToScores();
+      setPhase("final");
+      return true;
+    };
+    return () => { if (forceFinalRef) forceFinalRef.current = null; };
+  }, [forceFinalRef, flushBankToScores, phase]);
 
   const s = questions[qi];
   if (!s) return null;

@@ -442,8 +442,14 @@ function SiegeQuestionCard({ question }: { question: QuestionData | null }) {
   );
 }
 
-export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd }: GameProps) {
+export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef }: GameProps) {
   const [phase, setPhase] = useState<Phase>("intro");
+
+  useEffect(() => {
+    if (!forceFinalRef) return;
+    forceFinalRef.current = phase === "gameover" ? null : () => { setPhase("gameover"); return true; };
+    return () => { if (forceFinalRef) forceFinalRef.current = null; };
+  }, [forceFinalRef, phase]);
   const [siege, setSiege] = useState<SiegeState>(() => ({
     barricades: emptyBarricades(),
     zombies: [],

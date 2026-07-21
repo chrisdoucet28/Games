@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import type { GameProps } from "../../types";
 import { useTurnTimer } from "../../hooks/useTurnTimer";
 import { TurnTimerBar } from "../shared/TurnTimerBar";
@@ -185,7 +185,7 @@ function DiceRoller({ rolling, result }: { rolling: boolean, result: number | nu
   );
 }
 
-export function CastleGame({ questions, teams, onUpdateScore, onEnd }: GameProps) {
+export function CastleGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef }: GameProps) {
   const TURN_SECONDS = 25;
 
   const [rpg, setRpg] = useState<Record<string | number, TeamRpg>>(() => Object.fromEntries(
@@ -250,6 +250,22 @@ export function CastleGame({ questions, teams, onUpdateScore, onEnd }: GameProps
   const getNextLevelInfo = (xp: number) => levelInfoFor(levelForXp(xp) + 1);
 
   const isEliminated = (teamId: string | number) => rpg[teamId]?.hp <= 0;
+
+  useEffect(() => {
+    if (!forceFinalRef) return;
+    if (phase === "gameover") { forceFinalRef.current = null; return; }
+    forceFinalRef.current = () => {
+      // "Last castle standing" only makes sense with exactly one survivor — with several castles
+      // still up there's no fair winner to name, so this game has no valid final screen yet and
+      // the caller should just end the session outright instead.
+      const survivors = teams.filter(t => !isEliminated(t.id));
+      if (survivors.length !== 1) return false;
+      setPhase("gameover");
+      return true;
+    };
+    return () => { if (forceFinalRef) forceFinalRef.current = null; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [forceFinalRef, phase, teams, rpg]);
 
   const advanceTurn = useCallback(() => {
     setRpg(prev => {
