@@ -74,18 +74,14 @@ export function KingOfHillGame({ questions, teams, onUpdateScore, onEnd, forceFi
   const ZONES = isTopicMode ? HILL_ZONES_TOPIC : HILL_ZONES_GRAMMAR;
 
   const pool = useRef((() => {
-    // Grammar mode's identity is "finish the sentence" — that's the format the duel is built
-    // around. Only top up with "correct grammar mistakes" (same quick single-blank shape) when
-    // a topic's finish-the-sentence pool is too thin to fill a 4-round game on its own.
-    const MIN_POOL = 10;
+    // Grammar mode is "finish the sentence" only — never "correct grammar mistakes", even as a
+    // fallback. Every topic's content pool is kept deep enough (see topics.ts) that this never
+    // needs a top-up.
     const base = isTopicMode
       ? questions
       : (() => {
           const finish = questions.filter(q => q.type === "finish the sentence");
-          if (finish.length >= MIN_POOL) return finish;
-          const mistakes = questions.filter(q => q.type === "correct grammar mistakes");
-          const combined = [...finish, ...mistakes];
-          return combined.length ? combined : questions;
+          return finish.length ? finish : questions;
         })();
     return [...base].sort(() => Math.random() - 0.5);
   })()).current;
