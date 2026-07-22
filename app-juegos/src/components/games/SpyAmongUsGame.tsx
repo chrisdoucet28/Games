@@ -496,7 +496,7 @@ export function SpyAmongUsGame({ questions, teams, onUpdateScore, onEnd, forceFi
               return (
                 <div key={team.id} style={{ background: `linear-gradient(160deg,${team.color.dark}55,#0F172A)`, border: `2px solid ${team.color.bg}`, borderRadius: "14px", padding: "12px" }}>
                   <div style={{ fontSize: "22px" }}>{medalForRank(rank)}</div>
-                  <div style={{ fontWeight: "800", color: "white", fontSize: "14px", marginTop: "4px" }}>{team.color.emoji} {team.name}</div>
+                  <div style={{ fontWeight: "800", color: "white", fontSize: "14px", marginTop: "4px" }}>{team.mascot ?? team.color.emoji} {team.name}</div>
                   <div style={{ color: "#38BDF8", fontWeight: "900", fontSize: "16px", marginTop: "4px" }}>{value} pts</div>
                   <div style={{ fontSize: "11px", color: "#94A3B8", fontWeight: "700", marginTop: "4px" }}>
                     🕵️ spy {spyCount}× (escaped {spyWins}×) · 👨‍🚀 caught/guessed right {crewWins}×
@@ -586,7 +586,7 @@ export function SpyAmongUsGame({ questions, teams, onUpdateScore, onEnd, forceFi
               }}
             >
               <div style={{ fontWeight: "900", fontSize: "22px", color: "white", marginBottom: "12px" }}>
-                {peekTeam.color.emoji} {peekTeam.name} - your turn to look!
+                {peekTeam.mascot ?? peekTeam.color.emoji} {peekTeam.name} - your turn to look!
               </div>
               <div style={{ fontSize: "14px", color: "#94A3B8", marginBottom: "16px" }}>Everyone else: eyes down!</div>
 
@@ -872,7 +872,7 @@ export function SpyAmongUsGame({ questions, teams, onUpdateScore, onEnd, forceFi
               }}
             >
               <div style={{ fontWeight: "900", fontSize: "20px", color: "white", marginBottom: "8px" }}>
-                🎙️ {speakTeam.color.emoji} {speakTeam.name} - speak now!
+                🎙️ {speakTeam.mascot ?? speakTeam.color.emoji} {speakTeam.name} - speak now!
               </div>
               <div style={{ fontSize: "14px", color: "#94A3B8", marginBottom: "14px" }}>
                 Answer your prompt. Other teams: listen carefully for anything that seems off.
@@ -956,7 +956,7 @@ export function SpyAmongUsGame({ questions, teams, onUpdateScore, onEnd, forceFi
                   }}
                 >
                   <div style={{ fontWeight: "800", color: "white", fontSize: "14px", marginBottom: "8px" }}>
-                    {voter.color.emoji} {voter.name} suspects:
+                    {voter.mascot ?? voter.color.emoji} {voter.name} suspects:
                   </div>
                   <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
                     {teams
@@ -1177,7 +1177,7 @@ export function SpyAmongUsGame({ questions, teams, onUpdateScore, onEnd, forceFi
                   }}
                 >
                   <div style={{ fontWeight: "900", fontSize: "20px", color: "white", marginBottom: "8px" }}>
-                    🎙️ {speaker.color.emoji} {speaker.name} - speak now!
+                    🎙️ {speaker.mascot ?? speaker.color.emoji} {speaker.name} - speak now!
                   </div>
                   <div style={{ fontSize: "14px", color: "#94A3B8", marginBottom: "16px" }}>
                     Talk about your topic. Do not say what your role is - your opponent is listening carefully.

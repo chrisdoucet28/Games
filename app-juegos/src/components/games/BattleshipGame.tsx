@@ -404,7 +404,7 @@ export function BattleshipGame({ questions, teams, onUpdateScore, onEnd, forceFi
                   opacity: rank === 0 ? 1 : 0.85,
                 }}>
                   <span style={{ fontSize: rank === 0 ? "24px" : "20px" }}>{medalForRank(rank)}</span>
-                  <span style={{ flex: 1, textAlign: "left", fontWeight: rank === 0 ? "900" : "800", color: rank === 0 ? "white" : "#D1D5DB", fontSize: rank === 0 ? "16px" : "15px" }}>{t.name}</span>
+                  <span style={{ flex: 1, textAlign: "left", fontWeight: rank === 0 ? "900" : "800", color: rank === 0 ? "white" : "#D1D5DB", fontSize: rank === 0 ? "16px" : "15px" }}>{t.mascot ?? t.color.emoji} {t.name}</span>
                   <span style={{ fontWeight: "800", color: rank === 0 ? "#93C5FD" : "#6B7280", fontSize: "13px" }}>{value}/{fleets[t.id].length} ships left</span>
                 </div>
               ))}
@@ -425,19 +425,19 @@ export function BattleshipGame({ questions, teams, onUpdateScore, onEnd, forceFi
         <div style={{ position: "relative", zIndex: 1 }}>
           <div style={{ fontSize: "48px", marginBottom: "6px" }}>🏆</div>
           <div style={{ fontWeight: "900", fontSize: "24px", color: "#93C5FD", marginBottom: "4px", textShadow: "0 0 24px rgba(96,165,250,0.6)" }}>
-            {winnerTeam.color.emoji} {winnerTeam.name}'s fleet wins the battle!
+            {winnerTeam.mascot ?? winnerTeam.color.emoji} {winnerTeam.name}'s fleet wins the battle!
           </div>
           <div style={{ color: "#94A3B8", fontSize: "14px", marginBottom: "20px" }}>Last fleet still afloat — every other team was sunk.</div>
           <div style={{ display: "flex", flexDirection: "column", gap: "8px", maxWidth: "420px", margin: "0 auto 24px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "12px", background: `linear-gradient(160deg,${winnerTeam.color.dark}66,#0C1B3A)`, border: `2px solid ${winnerTeam.color.bg}`, borderRadius: "14px", padding: "12px 16px" }}>
               <span style={{ fontSize: "24px" }}>🥇</span>
-              <span style={{ flex: 1, textAlign: "left", fontWeight: "900", color: "white", fontSize: "16px" }}>{winnerTeam.name}</span>
+              <span style={{ flex: 1, textAlign: "left", fontWeight: "900", color: "white", fontSize: "16px" }}>{winnerTeam.mascot ?? winnerTeam.color.emoji} {winnerTeam.name}</span>
               <span style={{ fontWeight: "800", color: "#93C5FD", fontSize: "13px" }}>SURVIVED</span>
             </div>
             {rankedLosers.map((t, i) => (
               <div key={t.id} style={{ display: "flex", alignItems: "center", gap: "12px", background: "linear-gradient(160deg,#1F2937,#0B0F17)", border: "2px solid #4B5563", borderRadius: "14px", padding: "10px 16px", opacity: 0.85 }}>
                 <span style={{ fontSize: "20px" }}>{i === 0 ? "💀" : "☠️"}</span>
-                <span style={{ flex: 1, textAlign: "left", fontWeight: "800", color: "#D1D5DB", fontSize: "15px" }}>{t.name}</span>
+                <span style={{ flex: 1, textAlign: "left", fontWeight: "800", color: "#D1D5DB", fontSize: "15px" }}>{t.mascot ?? t.color.emoji} {t.name}</span>
                 <span style={{ fontWeight: "700", color: "#6B7280", fontSize: "12px" }}>SUNK</span>
               </div>
             ))}
@@ -485,7 +485,7 @@ export function BattleshipGame({ questions, teams, onUpdateScore, onEnd, forceFi
 
         <div style={{ background: `linear-gradient(90deg,${activeTeam.color.dark},${activeTeam.color.bg})`, borderRadius: "14px", padding: "10px 16px", marginBottom: "14px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px", boxShadow: `0 4px 18px ${activeTeam.color.bg}55` }}>
           <span style={{ color: "white", fontWeight: "900", fontSize: "17px", textShadow: "0 1px 3px rgba(0,0,0,0.4)" }}>
-            ⚓ {activeTeam.name} —{" "}
+            ⚓ {activeTeam.mascot ?? activeTeam.color.emoji} {activeTeam.name} —{" "}
             {phase === "pick-target" && "Choose a team to attack!"}
             {phase === "pick-coord" && `Targeting ${teams.find(t => t.id === targetTeamId)?.name} — pick a square!`}
             {phase === "answer" && `Firing at ${teams.find(t => t.id === targetTeamId)?.name} — ${pendingCoord}!`}
@@ -575,7 +575,7 @@ export function BattleshipGame({ questions, teams, onUpdateScore, onEnd, forceFi
                               {isMissileHere && (
                                 <span style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
                                   <span style={{ position: "absolute", top: "-6px", fontSize: "9px", animation: "missileTrail 0.4s ease-out infinite" }}>💨</span>
-                                  <span style={{ fontSize: "18px", display: "inline-block", animation: "missileDrop 0.55s cubic-bezier(.3,.6,.4,1)" }}>🚀</span>
+                                  <span style={{ fontSize: "18px", display: "inline-block", animation: "missileDrop 0.55s cubic-bezier(.3,.6,.4,1)" }}>{activeTeam.mascot ?? "🚀"}</span>
                                 </span>
                               )}
                               {fx?.kind === "hit" && (
@@ -616,7 +616,7 @@ export function BattleshipGame({ questions, teams, onUpdateScore, onEnd, forceFi
 
             {missile ? (
               <div style={{ textAlign: "center", padding: "20px 0" }}>
-                <div style={{ fontSize: "40px", animation: "explodeShake 0.3s ease-in-out infinite" }}>🚀</div>
+                <div style={{ fontSize: "40px", animation: "explodeShake 0.3s ease-in-out infinite" }}>{activeTeam.mascot ?? "🚀"}</div>
                 <div style={{ fontWeight: "900", color: "#FCD34D", fontSize: "16px", marginTop: "6px" }}>Incoming!</div>
               </div>
             ) : isSpeakingTask ? (

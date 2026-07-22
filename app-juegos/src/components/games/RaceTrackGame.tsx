@@ -157,7 +157,7 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
   const [phase, setPhase] = useState<Phase>(() => resumed ? "task" : "intro");
   const [track, setTrack] = useState<TrackSpace[]>(() => resumed?.track ?? buildTrack());
   const [raceTeams, setRaceTeams] = useState<Record<string | number, RaceTeamState>>(() =>
-    resumed?.raceTeams ?? Object.fromEntries(teams.map((t, i) => [t.id, { pos: 0, coins: 0, shields: 0, skip: false, powerups: [], car: CARS[i % CARS.length] }]))
+    resumed?.raceTeams ?? Object.fromEntries(teams.map((t, i) => [t.id, { pos: 0, coins: 0, shields: 0, skip: false, powerups: [], car: t.mascot ?? CARS[i % CARS.length] }]))
   );
   const [winnerId, setWinnerId] = useState<string | number | null>(null);
   const [showAns, setShowAns] = useState(false);
@@ -513,7 +513,7 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
           return (
             <div key={r.id} style={{ background: `linear-gradient(160deg, ${t.color.dark}55, #0A0A18)`, border: `2px solid ${t.color.bg}`, borderRadius: "14px", padding: "12px" }}>
               <div style={{ fontSize: "22px" }}>{medal}</div>
-              <div style={{ fontWeight: "800", color: "#F3F4F6", fontSize: "14px", marginTop: "4px" }}>{r.name}</div>
+              <div style={{ fontWeight: "800", color: "#F3F4F6", fontSize: "14px", marginTop: "4px" }}>{t.mascot ?? t.color.emoji} {r.name}</div>
               <div style={{ color: "#9CA3AF", fontSize: "12px", marginTop: "2px" }}>Space {r.pos}/{TOTAL}</div>
               <div style={{ color: "#F7C948", fontWeight: "800", fontSize: "13px", marginTop: "4px" }}>+{r.points} pts</div>
             </div>

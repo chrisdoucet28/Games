@@ -222,7 +222,7 @@ export function MinefieldGame({ gridData, teams, onUpdateScore, onEnd, forceFina
           {ranking.map(({ item: tm, rank, value }) => (
             <div key={tm.id} style={{ background: tm.color.light, border: `2px solid ${tm.color.bg}`, borderRadius: "14px", padding: "12px" }}>
               <div style={{ fontSize: "20px" }}>{medalForRank(rank)}</div>
-              <div style={{ fontWeight: "800", color: tm.color.dark, fontSize: "14px", marginTop: "4px" }}>{tm.color.emoji} {tm.name}</div>
+              <div style={{ fontWeight: "800", color: tm.color.dark, fontSize: "14px", marginTop: "4px" }}>{tm.mascot ?? tm.color.emoji} {tm.name}</div>
               <div style={{ color: tm.color.dark, fontWeight: "900", fontSize: "16px", marginTop: "4px" }}>{value} pts</div>
               <div style={{ fontSize: "11px", color: "#4B5563", fontWeight: "700", marginTop: "4px" }}>{correctByTeam[tm.id] ?? 0} correct · {minesHitByTeam[tm.id] ?? 0} mine{(minesHitByTeam[tm.id] ?? 0) === 1 ? "" : "s"} hit</div>
             </div>
@@ -244,8 +244,8 @@ export function MinefieldGame({ gridData, teams, onUpdateScore, onEnd, forceFina
 
       <div style={{ background: t.color.bg, borderRadius: "14px", padding: "10px 18px", marginBottom: "14px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px" }}>
         <span style={{ color: "white", fontWeight: "900", fontSize: "17px" }}>
-          {phase === "pick" && `${t.name} - Pick a square!`}
-          {phase === "speaking" && `${t.name} - Say the sentence!`}
+          {phase === "pick" && `${t.mascot ?? t.color.emoji} ${t.name} - Pick a square!`}
+          {phase === "speaking" && `${t.mascot ?? t.color.emoji} ${t.name} - Say the sentence!`}
           {phase === "judging" && "Teacher - Judge the sentence"}
           {phase === "topicComplete" && "Topic complete!"}
         </span>
@@ -362,7 +362,7 @@ export function MinefieldGame({ gridData, teams, onUpdateScore, onEnd, forceFina
                     cursor = "default";
                   } else if (isSel) {
                     bg = "linear-gradient(135deg,#FCD34D,#F59E0B)";
-                    label = "?";
+                    label = t.mascot ?? "?";
                     cursor = "default";
                   } else {
                     bg = phase !== "pick" ? "linear-gradient(135deg,#818CF8,#6366F1)" : "linear-gradient(135deg,#6366F1,#4338CA)";

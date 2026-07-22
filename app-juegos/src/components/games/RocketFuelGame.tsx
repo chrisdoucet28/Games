@@ -252,7 +252,10 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
             {/* No number shown here on purpose — a live count would tip off every other team.
                 A correct answer just makes the rocket visibly gulp down a bit of fuel. */}
             <div style={{ textAlign: "center", marginBottom: "10px", position: "relative", height: "70px" }}>
-              <div key={`shake-${turnFuel}`} style={{ display: "inline-block", fontSize: "44px", filter: `drop-shadow(0 0 10px ${activeTeam.color.bg})`, animation: turnFuel > 0 ? "rfMiniShake 0.45s ease-in-out" : "none" }}>🚀</div>
+              <div key={`shake-${turnFuel}`} style={{ display: "inline-flex", alignItems: "flex-end", gap: "4px", filter: `drop-shadow(0 0 10px ${activeTeam.color.bg})`, animation: turnFuel > 0 ? "rfMiniShake 0.45s ease-in-out" : "none" }}>
+                {activeTeam.mascot && <span style={{ fontSize: "26px" }}>{activeTeam.mascot}</span>}
+                <span style={{ fontSize: "44px" }}>🚀</span>
+              </div>
               {turnFuel > 0 && (
                 <div key={`burst-${turnFuel}`} style={{ position: "absolute", left: "50%", bottom: "0", fontSize: "20px", animation: "rfFuelRise 0.6s ease-out forwards" }}>⛽</div>
               )}
@@ -318,6 +321,9 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
                     {(phase === "igniting" || (phase === "launching" && launched)) && (
                       <div style={{ position: "absolute", left: "50%", bottom: "-18px", transform: "translateX(-50%)", fontSize: "22px", animation: "rfFlameFlicker 0.15s ease-in-out infinite" }}>🔥</div>
                     )}
+                    {t.mascot && (
+                      <div style={{ position: "absolute", left: "-8px", top: "6px", fontSize: "18px", filter: `drop-shadow(0 0 4px ${t.color.bg})` }}>{t.mascot}</div>
+                    )}
                     <div style={{ fontSize: "40px", filter: `drop-shadow(0 0 8px ${t.color.bg})`, animation: phase === "launchpad" ? "none" : "rfShake 0.1s linear infinite" }}>🚀</div>
                   </div>
                   {/* Centered explicitly (not just via the flex parent's static position) and
@@ -360,7 +366,7 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
             return (
               <div key={t.id} style={{ background: `linear-gradient(160deg,${t.color.dark}55,#0B0B2E)`, border: `2px solid ${t.color.bg}`, borderRadius: "14px", padding: "12px" }}>
                 <div style={{ fontSize: "22px" }}>{rank === 0 ? "🥇" : rank === 1 ? "🥈" : rank === 2 ? "🥉" : "🚀"}</div>
-                <div style={{ fontWeight: "800", color: "white", fontSize: "14px", marginTop: "4px" }}>{t.name}</div>
+                <div style={{ fontWeight: "800", color: "white", fontSize: "14px", marginTop: "4px" }}>{t.mascot ?? t.color.emoji} {t.name}</div>
                 <div style={{ color: "#FDBA74", fontWeight: "800", fontSize: "13px", marginTop: "2px" }}>⛽ {fuelCount} fuelled · {basePts} pts</div>
                 {bonusAwarded[t.id] > 0 && <div style={{ color: "#86EFAC", fontWeight: "700", fontSize: "12px", marginTop: "2px" }}>+{bonusAwarded[t.id]} launch bonus</div>}
               </div>

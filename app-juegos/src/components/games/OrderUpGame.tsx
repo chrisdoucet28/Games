@@ -272,7 +272,7 @@ function TicketCard({ ticket, teams, judging, onClaim, onCorrect, onWrong }: {
       {isJudging ? (
         <div>
           <div style={{ fontSize: "12px", fontWeight: "800", color: "#9D174D", marginBottom: "6px" }}>
-            {judgingTeam?.color.emoji} {judgingTeam?.name} — one sentence, every dish above.
+            {judgingTeam?.mascot ?? judgingTeam?.color.emoji} {judgingTeam?.name} — one sentence, every dish above.
           </div>
           <div style={{ display: "flex", gap: "6px", justifyContent: "center" }}>
             <button onClick={onCorrect} className="ou-btn" style={{ background: "#22C55E", color: "white", border: "none", borderRadius: "10px", padding: "8px 12px", fontSize: "13px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease" }}>✅ Serve it!</button>
@@ -285,7 +285,7 @@ function TicketCard({ ticket, teams, judging, onClaim, onCorrect, onWrong }: {
             <button key={t.id} onClick={() => onClaim(ticket.id, t.id)} className="ou-btn" style={{
               background: t.color.bg, color: "white", border: "none", borderRadius: "8px",
               padding: "5px 9px", fontSize: "11px", fontWeight: "800", cursor: "pointer", transition: "transform 0.15s ease",
-            }}>{t.color.emoji} {t.name}</button>
+            }}>{t.mascot ?? t.color.emoji} {t.name}</button>
           ))}
         </div>
       )}
@@ -526,7 +526,7 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, level, for
               return (
                 <div key={t.id} style={{ background: "linear-gradient(160deg,#FFFFFF,#FFF1F2)", border: `2px solid ${t.color.bg}`, borderRadius: "14px", padding: "12px" }}>
                   <div style={{ fontSize: "20px" }}>{medalForRank(rank)}</div>
-                  <div style={{ fontWeight: "800", color: "#831843", fontSize: "14px", marginTop: "4px" }}>{t.color.emoji} {t.name}</div>
+                  <div style={{ fontWeight: "800", color: "#831843", fontSize: "14px", marginTop: "4px" }}>{t.mascot ?? t.color.emoji} {t.name}</div>
                   <div style={{ color: "#BE185D", fontWeight: "900", fontSize: "16px", marginTop: "4px" }}>{value} pts</div>
                   <div style={{ fontSize: "11px", color: "#9D174D", marginTop: "4px" }}>{served} order{served === 1 ? "" : "s"} served</div>
                   {dishEntries.length > 0 && (
@@ -581,7 +581,7 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, level, for
           <div style={{ display: "flex", gap: "8px", justifyContent: "center", flexWrap: "wrap", marginBottom: "14px" }}>
             {teams.filter(t => totalDishes(dishCounts[t.id]) > 0).map(t => (
               <div key={t.id} style={{ display: "flex", alignItems: "center", gap: "5px", background: "white", border: `1.5px solid ${t.color.bg}`, borderRadius: "999px", padding: "3px 10px" }}>
-                <span style={{ fontWeight: "800", fontSize: "11px", color: t.color.dark }}>{t.color.emoji} {t.name}:</span>
+                <span style={{ fontWeight: "800", fontSize: "11px", color: t.color.dark }}>{t.mascot ?? t.color.emoji} {t.name}:</span>
                 {Object.entries(dishCounts[t.id] ?? {}).map(([emoji, count]) => (
                   <span key={emoji} style={{ fontSize: "11px", fontWeight: "700", color: "#854D0E" }}>{emoji}×{count}</span>
                 ))}

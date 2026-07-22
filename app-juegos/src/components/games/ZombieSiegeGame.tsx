@@ -373,7 +373,7 @@ function HouseScene({ siege, teams }: { siege: SiegeState; teams: Team[] }) {
           <div key={t.id} title={t.name} style={{
             position: "absolute", left: `${pos.x}%`, top: `${pos.y}%`, transform: "translate(-50%,-50%)",
             fontSize: "15px", zIndex: 3, opacity: person.alive ? 1 : 0.45, filter: person.alive ? "none" : "grayscale(1)",
-          }}>{person.alive ? "🧑" : "💀"}</div>
+          }}>{person.alive ? (t.mascot ?? "🧑") : "💀"}</div>
         );
       })}
       {siege.zombies.map(z => {
@@ -397,7 +397,7 @@ function PersonChip({ team, person }: { team: Team; person: PersonState }) {
       border: `2px solid ${person.alive ? team.color.bg : "#4B5563"}`,
       borderRadius: "12px", padding: "5px 9px", textAlign: "center", opacity: person.alive ? 1 : 0.55, minWidth: "78px",
     }}>
-      <div style={{ fontSize: "16px", lineHeight: 1.1 }}>{person.alive ? "🧑" : "💀"}</div>
+      <div style={{ fontSize: "16px", lineHeight: 1.1 }}>{person.alive ? (team.mascot ?? "🧑") : "💀"}</div>
       <div style={{ fontWeight: "800", fontSize: "11px", color: person.alive ? "white" : "#9CA3AF" }}>{team.name}</div>
       {person.alive ? (
         <div style={{ fontSize: "11px", lineHeight: 1.3, display: "flex", gap: "1px", justifyContent: "center", alignItems: "center", flexWrap: "wrap" }}>
@@ -685,7 +685,7 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
               const stats = statsByTeam[t.id] ?? { kills: 0, chairsPlaced: 0 };
               return (
                 <div key={t.id} style={{ background: "linear-gradient(160deg,#14210F,#0D1A0D)", border: `2px solid ${t.color.bg}`, borderRadius: "14px", padding: "10px" }}>
-                  <div style={{ fontWeight: "800", color: "#BEF264", fontSize: "13px", marginBottom: "6px" }}>{t.color.emoji} {t.name}</div>
+                  <div style={{ fontWeight: "800", color: "#BEF264", fontSize: "13px", marginBottom: "6px" }}>{t.mascot ?? t.color.emoji} {t.name}</div>
                   <div style={{ fontSize: "12px", color: "#DCFCE7", lineHeight: 1.7 }}>
                     <div>🧟 {stats.kills} zombie{stats.kills === 1 ? "" : "s"} shot</div>
                     <div>🪑 {stats.chairsPlaced} chair{stats.chairsPlaced === 1 ? "" : "s"} placed</div>

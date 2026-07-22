@@ -254,7 +254,7 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
             </div>
             <div style={{ background: "rgba(0,0,0,0.3)", border: "1.5px solid #F9731655", borderRadius: "16px", padding: "16px", display: "inline-block", minWidth: "min(100%, 320px)" }}>
               <div style={{ fontSize: "13px", fontWeight: "800", textTransform: "uppercase", opacity: 0.85, marginBottom: "6px", color: "#FDBA74" }}>Up now</div>
-              <div style={{ fontWeight: "900", fontSize: "clamp(24px,5vw,38px)" }}>{currentTeam.color.emoji} {currentTeam.name}</div>
+              <div style={{ fontWeight: "900", fontSize: "clamp(24px,5vw,38px)" }}>{currentTeam.mascot ?? currentTeam.color.emoji} {currentTeam.name}</div>
             </div>
             <div style={{ fontSize: "14px", lineHeight: 1.6, marginTop: "16px", opacity: 0.9 }}>
               One player faces away, teammates give clues — no spelling, no saying the word!
@@ -292,7 +292,7 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
             {ranking.map(({ item: t, rank, value }) => (
               <div key={t.id} style={{ background: `linear-gradient(160deg,${t.color.dark}55,#1C0701)`, border: `2px solid ${t.color.bg}`, borderRadius: "14px", padding: "12px" }}>
                 <div style={{ fontSize: "22px" }}>{medalForRank(rank)}</div>
-                <div style={{ fontWeight: "800", color: "white", fontSize: "14px", marginTop: "4px" }}>{t.color.emoji} {t.name}</div>
+                <div style={{ fontWeight: "800", color: "white", fontSize: "14px", marginTop: "4px" }}>{t.mascot ?? t.color.emoji} {t.name}</div>
                 <div style={{ color: "#FDBA74", fontWeight: "900", fontSize: "16px", marginTop: "4px" }}>{value} pts</div>
                 <div style={{ fontSize: "11px", color: "#FED7AA", fontWeight: "700", marginTop: "4px" }}>{totalWordsByTeam[t.id] ?? 0} words guessed</div>
               </div>
@@ -327,7 +327,7 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
           </div>
           <div style={{ flex: 1 }}>
             <div style={{ display: "flex", justifyContent: "space-between", gap: "12px", flexWrap: "wrap", marginBottom: "8px" }}>
-              <div style={{ fontWeight: "900", color: "white", fontSize: "16px" }}>{currentTeam.color.emoji} {currentTeam.name}</div>
+              <div style={{ fontWeight: "900", color: "white", fontSize: "16px" }}>{currentTeam.mascot ?? currentTeam.color.emoji} {currentTeam.name}</div>
               <div style={{ fontWeight: "900", color: "#FED7AA", fontSize: "16px" }}>This turn: {turnCorrect} words / {turnCorrect * POINTS_PER_WORD} pts</div>
             </div>
             <div style={{ height: "10px", background: "#1C0701", borderRadius: "999px", overflow: "hidden" }}>

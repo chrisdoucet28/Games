@@ -286,7 +286,7 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
           {ranking.map(({ item: t, rank, value }) => (
             <div key={t.id} style={{ background: `linear-gradient(160deg,${t.color.dark}55,#1A2E05)`, border: `2px solid ${t.color.bg}`, borderRadius: "14px", padding: "12px" }}>
               <div style={{ fontSize: "22px" }}>{medalForRank(rank)}</div>
-              <div style={{ fontWeight: "800", color: "white", fontSize: "14px", marginTop: "4px" }}>{t.name}</div>
+              <div style={{ fontWeight: "800", color: "white", fontSize: "14px", marginTop: "4px" }}>{t.mascot ?? t.color.emoji} {t.name}</div>
               <div style={{ color: "#BEF264", fontWeight: "800", fontSize: "15px", marginTop: "4px" }}>{value} pts</div>
             </div>
           ))}
@@ -302,7 +302,7 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
       {STYLE_TAG}
       <div style={{ position: "relative", zIndex: 1 }}>
         <div style={{ background: `linear-gradient(90deg,${activeTeam.color.dark},${activeTeam.color.bg})`, borderRadius: "14px", padding: "10px 16px", marginBottom: "14px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px", boxShadow: `0 4px 18px ${activeTeam.color.bg}55` }}>
-          <span style={{ color: "white", fontWeight: "900", fontSize: "16px", textShadow: "0 1px 3px rgba(0,0,0,0.4)" }}>🔨 {activeTeam.name}'s turn — Team {teamIdx + 1} of {teams.length}</span>
+          <span style={{ color: "white", fontWeight: "900", fontSize: "16px", textShadow: "0 1px 3px rgba(0,0,0,0.4)" }}>🔨 {activeTeam.mascot ?? activeTeam.color.emoji} {activeTeam.name}'s turn — Team {teamIdx + 1} of {teams.length}</span>
           {phase === "playing" && <TurnTimerBar timeLeft={turnTimeLeft} totalSeconds={TURN_SECONDS} />}
         </div>
 
@@ -348,7 +348,7 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
                             animation: holeFx?.kind === "miss" ? "wwBonk 0.35s ease-in-out" : "wwPopUp 0.3s ease-out",
                           }}
                         >
-                          🦫 {mole.text}
+                          {activeTeam.mascot ?? "🦫"} {mole.text}
                         </button>
                       )}
                       {holeFx?.kind === "hit" && (

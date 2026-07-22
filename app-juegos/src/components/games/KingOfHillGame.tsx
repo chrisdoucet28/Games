@@ -366,7 +366,7 @@ export function KingOfHillGame({ questions, teams, onUpdateScore, onEnd, forceFi
             {ranking.map(({ item: t, rank, value }) => (
               <div key={t.id} style={{ background: `linear-gradient(160deg,${t.color.dark}55,#1F0A1F)`, border: `2px solid ${t.color.bg}`, borderRadius: "14px", padding: "12px" }}>
                 <div style={{ fontSize: "22px" }}>{medalForRank(rank)}</div>
-                <div style={{ fontWeight: "800", color: "white", fontSize: "14px", marginTop: "4px" }}>{t.color.emoji} {t.name}</div>
+                <div style={{ fontWeight: "800", color: "white", fontSize: "14px", marginTop: "4px" }}>{t.mascot ?? t.color.emoji} {t.name}</div>
                 <div style={{ color: "#FCD34D", fontWeight: "900", fontSize: "16px", marginTop: "4px" }}>{value} pts</div>
                 <div style={{ fontSize: "11px", color: "#F9A8D4", fontWeight: "700", marginTop: "4px" }}>{roundPoints[t.id] ?? 0} total control pts</div>
               </div>
@@ -394,7 +394,7 @@ export function KingOfHillGame({ questions, teams, onUpdateScore, onEnd, forceFi
         transform: isChosen || isContested ? "scale(1.06)" : "scale(1)", transition: "all 0.2s",
         animation: isContested ? "koZoneGlow 1.2s ease-in-out infinite" : "none",
       }}>
-        <div key={owner?.id ?? "free"} style={{ fontSize: "18px", animation: owner ? "koFlagPlant 0.4s ease-out" : "none" }}>{z.icon}</div>
+        <div key={owner?.id ?? "free"} style={{ fontSize: "18px", animation: owner ? "koFlagPlant 0.4s ease-out" : "none" }}>{owner ? (owner.mascot ?? z.icon) : z.icon}</div>
         <div style={{ fontWeight: "900", fontSize: "12px", color: owner ? "white" : "#F9A8D4" }}>{z.label ?? zId}</div>
         <div style={{ fontWeight: "800", fontSize: "11px", color: "#FCD34D" }}>+{z.pts}/rnd</div>
         <div style={{ fontSize: "10px", color: owner ? "#F3E8FF" : "#F9A8D488", marginTop: "2px" }}>

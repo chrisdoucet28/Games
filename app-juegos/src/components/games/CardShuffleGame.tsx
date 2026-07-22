@@ -327,7 +327,7 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
             {ranking.map(({ item: t, rank, value }) => (
               <div key={t.id} style={{ background: `linear-gradient(160deg,${t.color.dark}55,#450A0A)`, border: `2px solid ${t.color.bg}`, borderRadius: "14px", padding: "12px" }}>
                 <div style={{ fontSize: "22px" }}>{medalForRank(rank)}</div>
-                <div style={{ fontWeight: "800", color: "white", fontSize: "14px", marginTop: "4px" }}>{t.color.emoji} {t.name}</div>
+                <div style={{ fontWeight: "800", color: "white", fontSize: "14px", marginTop: "4px" }}>{t.mascot ?? t.color.emoji} {t.name}</div>
                 <div style={{ color: "#FCD34D", fontWeight: "900", fontSize: "16px", marginTop: "4px" }}>{value} pts</div>
                 <div style={{ fontSize: "11px", color: "#FEF3C7", fontWeight: "700", marginTop: "4px" }}>{correctByTeam[t.id] ?? 0} correct · ⭐ {starHitsByTeam[t.id] ?? 0} star{(starHitsByTeam[t.id] ?? 0) === 1 ? "" : "s"}</div>
               </div>
@@ -351,8 +351,8 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
             🎪 Round {roundCount + 1}/{maxRounds} —{" "}
             {phase === "preview" && "⭐ Remember which card is the star — then we shuffle!"}
             {phase === "shuffling" && "👀 Watch carefully — track the star!"}
-            {phase === "picking" && `${currentTeam.name} — step right up and pick a card!`}
-            {phase === "answering" && `${currentTeam.name} — the crowd awaits your performance!`}
+            {phase === "picking" && `${currentTeam.mascot ?? currentTeam.color.emoji} ${currentTeam.name} — step right up and pick a card!`}
+            {phase === "answering" && `${currentTeam.mascot ?? currentTeam.color.emoji} ${currentTeam.name} — the crowd awaits your performance!`}
             {phase === "reveal" && "🥁 Ta-da! Time for the big reveal!"}
           </span>
           {phase === "picking" && <TurnTimerBar timeLeft={timeLeft} totalSeconds={TURN_SECONDS} />}
@@ -394,7 +394,7 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
                       <div style={{ fontSize: "10px", fontWeight: "800", color: card.isStar ? "#450A0A" : "#78350F", textAlign: "center", lineHeight: 1.4, padding: "0 4px" }}>{card.task}</div>
                       {pickerTeams.length > 0 && (
                         <div style={{ position: "absolute", top: "-10px", right: "-10px", display: "flex", flexDirection: "column", gap: "2px" }}>
-                          {pickerTeams.map(t => (<div key={t.id} style={{ width: "20px", height: "20px", borderRadius: "50%", background: t.color.bg, border: "2px solid white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "10px", fontWeight: "900", color: "white" }}>{t.name[0]}</div>))}
+                          {pickerTeams.map(t => (<div key={t.id} style={{ width: "20px", height: "20px", borderRadius: "50%", background: t.color.bg, border: "2px solid white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: t.mascot ? "12px" : "10px", fontWeight: "900", color: "white" }}>{t.mascot ?? t.name[0]}</div>))}
                         </div>
                       )}
                     </>

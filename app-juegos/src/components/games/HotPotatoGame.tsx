@@ -369,7 +369,7 @@ export function HotPotatoGame({ questions, teams, onUpdateScore, onEnd, level, f
               return (
                 <div key={t.id} style={{ background: isWorst ? "linear-gradient(135deg,#FEF2F2,#FEE2E2)" : "white", border: `3px solid ${isWorst ? "#EF4444" : t.color.bg}`, borderRadius: "16px", padding: "14px", textAlign: "center", boxShadow: "0 4px 14px rgba(0,0,0,0.12)" }}>
                   <div style={{ fontSize: "28px", marginBottom: "4px" }}>{count === 0 ? "🏆" : isWorst ? "🥔" : "😬"}</div>
-                  <div style={{ fontWeight: "800", color: isWorst ? "#991B1B" : t.color.dark, fontSize: "14px", marginBottom: "4px" }}>{t.name}</div>
+                  <div style={{ fontWeight: "800", color: isWorst ? "#991B1B" : t.color.dark, fontSize: "14px", marginBottom: "4px" }}>{t.mascot ?? t.color.emoji} {t.name}</div>
                   <div style={{ fontSize: "12px", fontWeight: "700", color: "#6B7280" }}>Held potato {count}×</div>
                   <div style={{ fontWeight: "900", color: isWorst ? "#DC2626" : "#374151", fontSize: "15px", marginTop: "4px" }}>−{count * PENALTY_PTS} pts</div>
                 </div>
@@ -460,7 +460,7 @@ export function HotPotatoGame({ questions, teams, onUpdateScore, onEnd, level, f
                       userSelect: "none", transformBox: "fill-box", transformOrigin: "center",
                       animation: isThrowing ? "figureThrow 0.5s ease-out" : isCatching ? "figureCatch 0.42s ease-out" : `figureBob 2s ease-in-out infinite ${i * 0.2}s`,
                     }}
-                  >🧍</text>
+                  >{t.mascot ?? "🧍"}</text>
                 </g>
               );
             })}
@@ -506,7 +506,7 @@ export function HotPotatoGame({ questions, teams, onUpdateScore, onEnd, level, f
                 <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "900", fontSize: "15px", color: qColor }}>{qTimeLeft}</div>
               </div>
               <div style={{ flex: 1, fontWeight: "700", color: "#374151", fontSize: "13px" }}>
-                {holder.color.emoji} <strong>{holder.name}</strong> — answer now!<br />
+                {holder.mascot ?? holder.color.emoji} <strong>{holder.name}</strong> — answer now!<br />
                 <span style={{ color: qColor, fontSize: "12px" }}>{qTimeLeft > 6 ? "⏱️ Take your time…" : qTimeLeft > 3 ? "⚡ Hurry!" : "🔴 Last seconds!"}</span>
               </div>
             </div>

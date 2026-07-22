@@ -415,7 +415,7 @@ export function CastleGame({ questions, teams, onUpdateScore, onEnd, forceFinalR
                   opacity: rank === 0 ? 1 : 0.85,
                 }}>
                   <span style={{ fontSize: rank === 0 ? "24px" : "20px" }}>{medalForRank(rank)}</span>
-                  <span style={{ flex: 1, textAlign: "left", fontWeight: rank === 0 ? "900" : "800", color: rank === 0 ? "white" : "#D1D5DB", fontSize: rank === 0 ? "16px" : "15px" }}>{t.name}</span>
+                  <span style={{ flex: 1, textAlign: "left", fontWeight: rank === 0 ? "900" : "800", color: rank === 0 ? "white" : "#D1D5DB", fontSize: rank === 0 ? "16px" : "15px" }}>{t.mascot ?? t.color.emoji} {t.name}</span>
                   <span style={{ fontWeight: "800", color: rank === 0 ? "#6EE7B7" : "#6B7280", fontSize: "13px" }}>{value}/{MAX_HP} HP left</span>
                 </div>
               ))}
@@ -442,13 +442,13 @@ export function CastleGame({ questions, teams, onUpdateScore, onEnd, forceFinalR
           <div style={{ display: "flex", flexDirection: "column", gap: "8px", maxWidth: "420px", margin: "0 auto 24px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "12px", background: `linear-gradient(160deg,${winnerTeam.color.dark}66,#0B0B1F)`, border: `2px solid ${winnerTeam.color.bg}`, borderRadius: "14px", padding: "12px 16px" }}>
               <span style={{ fontSize: "24px" }}>🥇</span>
-              <span style={{ flex: 1, textAlign: "left", fontWeight: "900", color: "white", fontSize: "16px" }}>{winnerTeam.name}</span>
+              <span style={{ flex: 1, textAlign: "left", fontWeight: "900", color: "white", fontSize: "16px" }}>{winnerTeam.mascot ?? winnerTeam.color.emoji} {winnerTeam.name}</span>
               <span style={{ fontWeight: "800", color: "#6EE7B7", fontSize: "13px" }}>STOOD STRONG</span>
             </div>
             {rankedLosers.map((t, i) => (
               <div key={t.id} style={{ display: "flex", alignItems: "center", gap: "12px", background: "linear-gradient(160deg,#1F2937,#0B0F17)", border: "2px solid #4B5563", borderRadius: "14px", padding: "10px 16px", opacity: 0.85 }}>
                 <span style={{ fontSize: "20px" }}>{i === 0 ? "💀" : "🏚️"}</span>
-                <span style={{ flex: 1, textAlign: "left", fontWeight: "800", color: "#D1D5DB", fontSize: "15px" }}>{t.name}</span>
+                <span style={{ flex: 1, textAlign: "left", fontWeight: "800", color: "#D1D5DB", fontSize: "15px" }}>{t.mascot ?? t.color.emoji} {t.name}</span>
                 <span style={{ fontWeight: "700", color: "#6B7280", fontSize: "12px" }}>FELL</span>
               </div>
             ))}
@@ -566,7 +566,7 @@ export function CastleGame({ questions, teams, onUpdateScore, onEnd, forceFinalR
     setLastEvent({ action: selectedAction as ActionId, damage: finalDamage, xpGained, apple: gotApple, targetId, leveledUp, roll, shieldConsumed: targetShielded });
     setPhase("result");
 
-    spawnImpact(targetId, "hit", ACTION_DEFS.find(a => a.id === selectedAction)!.character);
+    spawnImpact(targetId, "hit", activeTeam.mascot ?? ACTION_DEFS.find(a => a.id === selectedAction)!.character);
     spawnFloat(targetId, `-${finalDamage}`, "#FCA5A5");
     if (gotApple) {
       spawnImpact(activeTeam.id, "heal");
@@ -744,7 +744,7 @@ export function CastleGame({ questions, teams, onUpdateScore, onEnd, forceFinalR
           <div style={{ textAlign: "center" }}>
             {actionDef && (
               <div style={{ fontSize: "40px", display: "inline-block", filter: `drop-shadow(0 0 12px ${actionDef.glow})`, animation: rolling ? "attackerWindup 0.5s ease-in-out infinite" : "none" }}>
-                {actionDef.character}
+                {activeTeam.mascot ?? actionDef.character}
               </div>
             )}
             <DiceRoller rolling={rolling} result={diceRoll} />

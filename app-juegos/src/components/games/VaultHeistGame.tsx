@@ -546,7 +546,7 @@ export function VaultHeistGame({ questions, teams, onUpdateScore, onEnd, forceFi
                   opacity: isFirst ? 1 : 0.9,
                 }}>
                   <span style={{ fontSize: isFirst ? "24px" : "20px" }}>{medalFor(rank)}</span>
-                  <span style={{ flex: 1, textAlign: "left", fontWeight: isFirst ? "900" : "800", color: isFirst ? "white" : "#D6C9AE", fontSize: isFirst ? "16px" : "15px" }}>{t.name}</span>
+                  <span style={{ flex: 1, textAlign: "left", fontWeight: isFirst ? "900" : "800", color: isFirst ? "white" : "#D6C9AE", fontSize: isFirst ? "16px" : "15px" }}>{t.mascot ?? t.color.emoji} {t.name}</span>
                   <span style={{ fontWeight: "800", color: isFirst ? "#FCD34D" : "#9C8B6A", fontSize: "13px" }}>{ordinal(rank)} · +{finishBonusForRank(rank)} pts</span>
                 </div>
               );
@@ -611,7 +611,7 @@ export function VaultHeistGame({ questions, teams, onUpdateScore, onEnd, forceFi
         </div>
 
         <div style={{ background: `linear-gradient(90deg, ${activeTeam.color.bg}, ${activeTeam.color.dark})`, borderRadius: "14px", padding: "10px 16px", marginBottom: "12px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px", boxShadow: `0 4px 18px ${activeTeam.color.bg}55` }}>
-          <span style={{ color: "white", fontWeight: "900", fontSize: "16px", textShadow: "0 1px 3px rgba(0,0,0,0.4)" }}>🔐 {activeTeam.name} — {phaseHeaderText()}</span>
+          <span style={{ color: "white", fontWeight: "900", fontSize: "16px", textShadow: "0 1px 3px rgba(0,0,0,0.4)" }}>🔐 {activeTeam.mascot ?? activeTeam.color.emoji} {activeTeam.name} — {phaseHeaderText()}</span>
           {phase === "answer" && <TurnTimerBar timeLeft={timeLeft} totalSeconds={turnSeconds} />}
         </div>
 
@@ -622,6 +622,7 @@ export function VaultHeistGame({ questions, teams, onUpdateScore, onEnd, forceFi
               borderRadius: "16px", padding: "20px 32px", boxShadow: "0 8px 28px rgba(212,175,55,0.4)",
               animation: "toolFlip 0.5s ease-out",
             }}>
+              <div style={{ fontSize: "30px", marginBottom: "4px" }}>{activeTeam.mascot ?? "🕵️"}</div>
               <div style={{ fontSize: "13px", fontWeight: "700", color: "#E8D8AE", marginBottom: "6px", letterSpacing: "0.05em" }}>🔧 THIS LOCK NEEDS</div>
               <div style={{ fontSize: "24px", fontWeight: "900", color: "#FCD34D" }}>{formatCategory(currentCategory)}</div>
               {currentQuestion?.form && (
