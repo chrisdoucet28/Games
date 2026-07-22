@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import type { SavedClass } from "../../types";
 import { TEAM_COLORS, GAME_MODES } from "../../data/constants";
 import { listClasses, createClass, deleteClass } from "../../lib/classes";
-import type { Theme } from "../../data/themes";
+import { hexToRgba, type Theme } from "../../data/themes";
 
 type Props = {
   onBack: () => void;
@@ -58,25 +58,25 @@ export function ClassesScreen({ onBack, onResumeClass, onStartWithClass, theme }
   return (
     <div style={{ minHeight: "100vh", background: "#F8F7FF", padding: "20px", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
       <div style={{ maxWidth: "640px", margin: "0 auto" }}>
-        <button onClick={onBack} style={{ background: "none", border: `2px solid ${theme.accentSolid}`, color: theme.accentSolid, borderRadius: "10px", padding: "8px 16px", cursor: "pointer", fontWeight: "700", marginBottom: "20px" }}>← Back</button>
+        <button onClick={onBack} style={{ background: "none", border: `2px solid ${theme.accentSolid}`, color: theme.accentSolid, borderRadius: "10px", padding: "8px 16px", cursor: "pointer", fontWeight: "700", marginBottom: "20px", fontFamily: theme.headingFont }}>← Back</button>
 
         <div style={{ textAlign: "center", marginBottom: "24px" }}>
-          <h2 style={{ fontSize: "30px", fontWeight: "900", color: "#1E1B4B", margin: 0, fontFamily: theme.headingFont }}>📚 My Classes</h2>
+          <h2 style={{ fontSize: "30px", fontWeight: "900", color: theme.heroBg[0], margin: 0, fontFamily: theme.headingFont }}>📚 My Classes</h2>
           <p style={{ color: "#6B7280", marginTop: "8px" }}>Team scores carry over each time you return to a class. Pick one up where you left off, or start a fresh game with the same roster.</p>
         </div>
 
         <form onSubmit={handleCreate} style={{ display: "flex", gap: "8px", marginBottom: "20px", flexWrap: "wrap" }}>
           <input
             value={newName} onChange={e => setNewName(e.target.value)} placeholder="e.g. Tuesday B2 Advanced"
-            style={{ flex: "2 1 200px", padding: "12px 14px", borderRadius: "12px", border: "2px solid #E5E7EB", fontSize: "14px" }}
+            style={{ flex: "2 1 200px", padding: "12px 14px", borderRadius: "12px", border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, fontSize: "14px" }}
           />
           <input
             value={newSchool} onChange={e => setNewSchool(e.target.value)} placeholder="School (optional)"
-            style={{ flex: "1 1 140px", padding: "12px 14px", borderRadius: "12px", border: "2px solid #E5E7EB", fontSize: "14px" }}
+            style={{ flex: "1 1 140px", padding: "12px 14px", borderRadius: "12px", border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, fontSize: "14px" }}
           />
           <button
             type="submit" disabled={creating || !newName.trim()}
-            style={{ background: `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "12px", padding: "12px 20px", fontWeight: "800", cursor: creating ? "default" : "pointer", opacity: creating || !newName.trim() ? 0.6 : 1, whiteSpace: "nowrap" }}
+            style={{ background: `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "12px", padding: "12px 20px", fontWeight: "800", cursor: creating ? "default" : "pointer", opacity: creating || !newName.trim() ? 0.6 : 1, whiteSpace: "nowrap", fontFamily: theme.headingFont }}
           >
             + New Class
           </button>
@@ -93,7 +93,7 @@ export function ClassesScreen({ onBack, onResumeClass, onStartWithClass, theme }
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
             {classes.map(cls => (
-              <div key={cls.id} style={{ background: "white", border: "2px solid #E5E7EB", borderRadius: "16px", padding: "16px 18px" }}>
+              <div key={cls.id} style={{ background: "white", border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, borderRadius: "16px", padding: "16px 18px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "10px" }}>
                   <div>
                     <div style={{ fontWeight: "900", fontSize: "17px", color: "#1E1B4B", fontFamily: theme.headingFont }}>{cls.name}</div>
@@ -121,14 +121,14 @@ export function ClassesScreen({ onBack, onResumeClass, onStartWithClass, theme }
                   {cls.in_progress && (
                     <button
                       onClick={() => onResumeClass(cls)}
-                      style={{ background: `linear-gradient(135deg,${theme.cta[0]},${theme.cta[1]})`, color: "white", border: "none", borderRadius: "10px", padding: "10px 16px", fontWeight: "800", fontSize: "13px", cursor: "pointer" }}
+                      style={{ background: `linear-gradient(135deg,${theme.cta[0]},${theme.cta[1]})`, color: "white", border: "none", borderRadius: "10px", padding: "10px 16px", fontWeight: "800", fontSize: "13px", cursor: "pointer", fontFamily: theme.headingFont }}
                     >
                       ▶️ Resume {gameLabel(cls.selected_game)}
                     </button>
                   )}
                   <button
                     onClick={() => onStartWithClass(cls)}
-                    style={{ background: cls.in_progress ? "#EEF2FF" : `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: cls.in_progress ? "#4338CA" : "white", border: cls.in_progress ? "2px solid #C7D2FE" : "none", borderRadius: "10px", padding: "10px 16px", fontWeight: "800", fontSize: "13px", cursor: "pointer" }}
+                    style={{ background: cls.in_progress ? hexToRgba(theme.accentSolid, 0.12) : `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: cls.in_progress ? theme.accentSolid : "white", border: cls.in_progress ? `2px solid ${hexToRgba(theme.accentSolid, 0.4)}` : "none", borderRadius: "10px", padding: "10px 16px", fontWeight: "800", fontSize: "13px", cursor: "pointer", fontFamily: theme.headingFont }}
                   >
                     🆕 Start New Game
                   </button>

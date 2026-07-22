@@ -1,7 +1,10 @@
+import { useEffect, useState } from 'react';
 import LessonGamesGenerator from './LessonGamesGenerator';
 import { AuthScreen } from './components/shared/AuthScreen';
 import { useAuth } from './hooks/useAuth';
 import { supabase, isSupabaseConfigured } from './lib/supabaseClient';
+import { getProfile } from './lib/profile';
+import { DEFAULT_THEME, getTheme, type Theme } from './data/themes';
 
 function ConfigErrorScreen() {
   return (
@@ -25,19 +28,20 @@ function ConfigErrorScreen() {
 // Progress/Fullscreen/End Game) whenever a game was in progress. A plain top strip in normal
 // document flow just pushes the rest of the page down instead, so it can never overlap anything
 // regardless of which screen is showing.
-function StatusBadge({ children, action, onAction }: { children: React.ReactNode; action: string; onAction: () => void }) {
+function StatusBadge({ children, action, onAction, theme }: { children: React.ReactNode; action: string; onAction: () => void; theme: Theme }) {
   return (
     <div style={{
       display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '8px',
-      background: '#111827', padding: '6px 14px',
+      background: theme.heroBg[0], padding: '6px 14px',
       fontFamily: "'Segoe UI',system-ui,sans-serif",
     }}>
-      <span style={{ color: 'white', fontSize: '12px', fontWeight: 700 }}>{children}</span>
+      <span style={{ color: 'white', fontSize: '12px', fontWeight: 700, fontFamily: theme.headingFont }}>{children}</span>
       <button
         onClick={onAction}
         style={{
           background: 'rgba(255,255,255,0.15)', color: 'white', border: 'none',
           borderRadius: '14px', padding: '6px 12px', fontSize: '12px', fontWeight: 700, cursor: 'pointer',
+          fontFamily: theme.headingFont,
         }}
       >
         {action}
@@ -53,6 +57,14 @@ function App() {
 
 function AuthenticatedApp() {
   const { session, loading } = useAuth();
+  // The single source of truth for the teacher's chosen accent theme — fetched here (not inside
+  // LessonGamesGenerator) so the top status bar can use it too, not just the screens below it.
+  const [theme, setTheme] = useState<Theme>(DEFAULT_THEME);
+
+  useEffect(() => {
+    if (!session) return;
+    getProfile().then(p => setTheme(getTheme(p.theme_id))).catch(() => {});
+  }, [session]);
 
   if (loading) {
     return (
@@ -68,10 +80,10 @@ function AuthenticatedApp() {
 
   return (
     <div>
-      <StatusBadge action="Log Out" onAction={() => supabase.auth.signOut()}>
+      <StatusBadge action="Log Out" onAction={() => supabase.auth.signOut()} theme={theme}>
         🟢 Logged in as {session.user.email}
       </StatusBadge>
-      <LessonGamesGenerator />
+      <LessonGamesGenerator theme={theme} onThemeChange={setTheme} />
     </div>
   );
 }

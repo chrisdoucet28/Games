@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { getProfile, updateProfile } from "../../lib/profile";
-import { THEMES, type Theme } from "../../data/themes";
+import { THEMES, hexToRgba, type Theme } from "../../data/themes";
 
 type Props = {
   onBack: () => void;
@@ -47,14 +47,14 @@ export function ProfileScreen({ onBack, theme, onThemeChange }: Props) {
   return (
     <div style={{ minHeight: "100vh", background: "#F8F7FF", padding: "20px", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
       <div style={{ maxWidth: "440px", margin: "0 auto" }}>
-        <button onClick={onBack} style={{ background: "none", border: `2px solid ${theme.accentSolid}`, color: theme.accentSolid, borderRadius: "10px", padding: "8px 16px", cursor: "pointer", fontWeight: "700", marginBottom: "20px" }}>← Back</button>
+        <button onClick={onBack} style={{ background: "none", border: `2px solid ${theme.accentSolid}`, color: theme.accentSolid, borderRadius: "10px", padding: "8px 16px", cursor: "pointer", fontWeight: "700", marginBottom: "20px", fontFamily: theme.headingFont }}>← Back</button>
 
         <div style={{ textAlign: "center", marginBottom: "24px" }}>
-          <h2 style={{ fontSize: "30px", fontWeight: "900", color: "#1E1B4B", margin: 0, fontFamily: theme.headingFont }}>👤 My Profile</h2>
+          <h2 style={{ fontSize: "30px", fontWeight: "900", color: theme.heroBg[0], margin: 0, fontFamily: theme.headingFont }}>👤 My Profile</h2>
           <p style={{ color: "#6B7280", marginTop: "8px" }}>Just the basics for now — more personalization is on the way.</p>
         </div>
 
-        <div style={{ background: "white", border: "2px solid #E5E7EB", borderRadius: "16px", padding: "20px" }}>
+        <div style={{ background: "white", border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, borderRadius: "16px", padding: "20px" }}>
           {loading ? (
             <div style={{ textAlign: "center", color: "#6B7280" }}>Loading…</div>
           ) : (
@@ -62,7 +62,7 @@ export function ProfileScreen({ onBack, theme, onThemeChange }: Props) {
               <label style={{ display: "block", color: "#4B5563", fontSize: "13px", fontWeight: "700", marginBottom: "6px" }}>Display name</label>
               <input
                 value={displayName} onChange={e => setDisplayName(e.target.value)} placeholder="e.g. Ms. Doucet"
-                style={{ width: "100%", boxSizing: "border-box", padding: "12px 14px", borderRadius: "12px", border: "2px solid #E5E7EB", fontSize: "14px", marginBottom: "20px" }}
+                style={{ width: "100%", boxSizing: "border-box", padding: "12px 14px", borderRadius: "12px", border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, fontSize: "14px", marginBottom: "20px" }}
               />
 
               <label style={{ display: "block", color: "#4B5563", fontSize: "13px", fontWeight: "700", marginBottom: "8px" }}>App color theme</label>
@@ -95,7 +95,7 @@ export function ProfileScreen({ onBack, theme, onThemeChange }: Props) {
 
               <button
                 type="submit" disabled={saving}
-                style={{ width: "100%", background: saved ? "#22C55E" : `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "12px", padding: "12px", fontSize: "15px", fontWeight: "800", cursor: saving ? "default" : "pointer", opacity: saving ? 0.7 : 1 }}
+                style={{ width: "100%", background: saved ? "#22C55E" : `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "12px", padding: "12px", fontSize: "15px", fontWeight: "800", cursor: saving ? "default" : "pointer", opacity: saving ? 0.7 : 1, fontFamily: theme.headingFont }}
               >
                 {saving ? "Saving…" : saved ? "✅ Saved!" : "Save"}
               </button>

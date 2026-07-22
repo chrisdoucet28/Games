@@ -3,14 +3,13 @@ import type { Team, GameMode, QuestionData, SavedClass } from "./types";
 import { TEAM_COLORS, GAME_MODES, MASCOT_OPTIONS } from "./data/constants";
 // Asegúrate de que TOPIC_LIBRARY esté exportado desde tu archivo topics.ts junto con TOPIC_OPTIONS
 import { TOPIC_OPTIONS, TOPIC_LIBRARY } from "./data/topics";
-import { DEFAULT_THEME, getTheme, hexToRgba, type Theme } from "./data/themes";
+import { hexToRgba, type Theme } from "./data/themes";
 
 import { ScoreBoard } from "./components/shared/ScoreBoard";
 import { Confetti } from "./components/shared/Confetti";
 import { ClassesScreen } from "./components/shared/ClassesScreen";
 import { ProfileScreen } from "./components/shared/ProfileScreen";
 import { saveProgress, clearProgress, listClasses, createClass } from "./lib/classes";
-import { getProfile } from "./lib/profile";
 import { denseRank, medalForRank } from "./utils/ranking";
 import { AuctionGame } from "./components/games/AuctionGame";
 import { MinefieldGame } from "./components/games/MinefieldGame";
@@ -118,7 +117,12 @@ const cardTasksAsQuestions = (tasks: { task: string }[]): QuestionData[] =>
 const buildMinefieldGrids = (entries: TopicLibraryEntry[]) =>
   entries.map(entry => entry.minefieldGrid).filter((grid): grid is MinefieldGridData => Boolean(grid));
 
-export default function LessonGamesGenerator() {
+type LessonGamesGeneratorProps = {
+  theme: Theme;
+  onThemeChange: (theme: Theme) => void;
+};
+
+export default function LessonGamesGenerator({ theme, onThemeChange }: LessonGamesGeneratorProps) {
   const [screen, setScreen] = useState<"welcome" | "classes" | "profile" | "setup" | "game-select" | "game" | "results">("welcome");
   // The class this session is tied to, if any. Games started via "Start a Game" (not through "My
   // Classes") leave this null — but "Save & Exit" is still available; clicking it with no class
@@ -136,9 +140,6 @@ export default function LessonGamesGenerator() {
   const [teamColors, setTeamColors] = useState([0, 1, 2, 3, 4]);
   const [teamMascots, setTeamMascots] = useState<(string | null)[]>([null, null, null, null, null]);
   const [teams, setTeams] = useState<Team[]>([]);
-  // The teacher's chosen accent theme for the app's shared (non-game) screens — each game keeps
-  // its own fixed visual identity regardless of this. Loaded from their profile on mount.
-  const [theme, setTheme] = useState<Theme>(DEFAULT_THEME);
   const [questions, setQuestions] = useState<QuestionData[]>([]);
   const [level, setLevel] = useState("all");
   const [focus, setFocus] = useState("all");
@@ -159,9 +160,6 @@ export default function LessonGamesGenerator() {
     return () => document.removeEventListener("fullscreenchange", onFsChange);
   }, []);
 
-  useEffect(() => {
-    getProfile().then(p => setTheme(getTheme(p.theme_id))).catch(() => {});
-  }, []);
 
 
   const toggleFullscreen = () => {
@@ -476,7 +474,7 @@ export default function LessonGamesGenerator() {
           <h1 style={{ fontSize: "clamp(30px,5.5vw,52px)", fontWeight: "900", color: "white", margin: "0 0 10px", letterSpacing: "-0.02em", lineHeight: 1.1, textShadow: "0 2px 24px rgba(0,0,0,0.4)", fontFamily: theme.headingFont }}>
             Lesson Games<br /><span style={{ color: "#FCD34D" }}>Generator</span>
           </h1>
-          <p style={{ color: "#C4B5FD", fontSize: "clamp(15px,2.5vw,18px)", margin: "0", lineHeight: 1.7, maxWidth: "500px", marginLeft: "auto", marginRight: "auto" }}>
+          <p style={{ color: theme.accent[1], fontSize: "clamp(15px,2.5vw,18px)", margin: "0", lineHeight: 1.7, maxWidth: "500px", marginLeft: "auto", marginRight: "auto" }}>
             50+ built-in topics from A1 to C1 across Grammar, Vocabulary & Speaking.<br />
             {GAME_MODES.length} competitive game modes. Zero prep. Ready in seconds.
           </p>
@@ -501,9 +499,9 @@ export default function LessonGamesGenerator() {
           ))}
         </div>
         <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
-          <button onClick={() => { setActiveClassId(null); setScreen("setup"); }} style={{ background: `linear-gradient(135deg,${theme.cta[0]},${theme.cta[1]})`, color: "white", border: "none", borderRadius: "16px", padding: "18px 56px", fontSize: "20px", fontWeight: "900", cursor: "pointer", boxShadow: `0 8px 32px ${hexToRgba(theme.cta[1], 0.45)}`, letterSpacing: "0.01em" }}>🚀 Start a Game</button>
-          <button onClick={() => setScreen("classes")} style={{ background: "rgba(255,255,255,0.12)", border: "2px solid rgba(255,255,255,0.3)", color: "white", borderRadius: "16px", padding: "18px 40px", fontSize: "18px", fontWeight: "800", cursor: "pointer" }}>📚 My Classes</button>
-          <button onClick={() => setScreen("profile")} style={{ background: "rgba(255,255,255,0.12)", border: "2px solid rgba(255,255,255,0.3)", color: "white", borderRadius: "16px", padding: "18px 40px", fontSize: "18px", fontWeight: "800", cursor: "pointer" }}>👤 My Profile</button>
+          <button onClick={() => { setActiveClassId(null); setScreen("setup"); }} style={{ background: `linear-gradient(135deg,${theme.cta[0]},${theme.cta[1]})`, color: "white", border: "none", borderRadius: "16px", padding: "18px 56px", fontSize: "20px", fontWeight: "900", cursor: "pointer", boxShadow: `0 8px 32px ${hexToRgba(theme.cta[1], 0.45)}`, letterSpacing: "0.01em", fontFamily: theme.headingFont }}>🚀 Start a Game</button>
+          <button onClick={() => setScreen("classes")} style={{ background: "rgba(255,255,255,0.12)", border: "2px solid rgba(255,255,255,0.3)", color: "white", borderRadius: "16px", padding: "18px 40px", fontSize: "18px", fontWeight: "800", cursor: "pointer", fontFamily: theme.headingFont }}>📚 My Classes</button>
+          <button onClick={() => setScreen("profile")} style={{ background: "rgba(255,255,255,0.12)", border: "2px solid rgba(255,255,255,0.3)", color: "white", borderRadius: "16px", padding: "18px 40px", fontSize: "18px", fontWeight: "800", cursor: "pointer", fontFamily: theme.headingFont }}>👤 My Profile</button>
         </div>
       </div>
     </div>
@@ -519,7 +517,7 @@ export default function LessonGamesGenerator() {
   );
 
   if (screen === "profile") return (
-    <ProfileScreen onBack={() => setScreen("welcome")} theme={theme} onThemeChange={setTheme} />
+    <ProfileScreen onBack={() => setScreen("welcome")} theme={theme} onThemeChange={onThemeChange} />
   );
 
   if (screen === "setup") {
@@ -544,18 +542,18 @@ export default function LessonGamesGenerator() {
     return (
       <div style={{ minHeight: "100vh", background: "#F8F7FF", padding: "20px", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
         <div style={{ maxWidth: "720px", margin: "0 auto" }}>
-          <button onClick={() => { setActiveClassId(null); setScreen("welcome"); }} style={{ background: "none", border: `2px solid ${theme.accentSolid}`, color: theme.accentSolid, borderRadius: "10px", padding: "8px 16px", cursor: "pointer", fontWeight: "700", marginBottom: "20px" }}>← Back</button>
+          <button onClick={() => { setActiveClassId(null); setScreen("welcome"); }} style={{ background: "none", border: `2px solid ${theme.accentSolid}`, color: theme.accentSolid, borderRadius: "10px", padding: "8px 16px", cursor: "pointer", fontWeight: "700", marginBottom: "20px", fontFamily: theme.headingFont }}>← Back</button>
 
           <div style={{ textAlign: "center", marginBottom: "28px" }}>
-            <h2 style={{ fontSize: "32px", fontWeight: "900", color: "#1E1B4B", margin: 0, fontFamily: theme.headingFont }}>⚙️ Game Setup</h2>
+            <h2 style={{ fontSize: "32px", fontWeight: "900", color: theme.heroBg[0], margin: 0, fontFamily: theme.headingFont }}>⚙️ Game Setup</h2>
             <p style={{ color: "#6B7280", marginTop: "8px" }}>Set up your class, then pick one or more topics and a game</p>
           </div>
 
-          <div style={{ background: "white", border: "2px solid #E0E7FF", borderRadius: "16px", padding: "20px", marginBottom: "16px" }}>
+          <div style={{ background: "white", border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, borderRadius: "16px", padding: "20px", marginBottom: "16px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px" }}>
               <div style={{ background: theme.accentSolid, color: "white", borderRadius: "50%", width: "28px", height: "28px", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "900", fontSize: "14px", flexShrink: 0 }}>1</div>
               <div>
-                <div style={{ fontWeight: "800", color: "#1E1B4B", fontSize: "16px", fontFamily: theme.headingFont }}>What level is your class?</div>
+                <div style={{ fontWeight: "800", color: theme.heroBg[0], fontSize: "16px", fontFamily: theme.headingFont }}>What level is your class?</div>
                 <div style={{ color: "#6B7280", fontSize: "12px", marginTop: "2px" }}>Filters the topic list below</div>
               </div>
             </div>
@@ -577,7 +575,7 @@ export default function LessonGamesGenerator() {
             <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px" }}>
               <div style={{ background: theme.accentSolid, color: "white", borderRadius: "50%", width: "28px", height: "28px", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "900", fontSize: "14px", flexShrink: 0 }}>2</div>
               <div>
-                <div style={{ fontWeight: "800", color: "#1E1B4B", fontSize: "16px", fontFamily: theme.headingFont }}>Grammar, Vocabulary, or Topics?</div>
+                <div style={{ fontWeight: "800", color: theme.heroBg[0], fontSize: "16px", fontFamily: theme.headingFont }}>Grammar, Vocabulary, or Topics?</div>
                 <div style={{ color: "#6B7280", fontSize: "12px", marginTop: "2px" }}>Filters the topic list below</div>
               </div>
             </div>
@@ -597,11 +595,11 @@ export default function LessonGamesGenerator() {
             </div>
           </div>
 
-          <div style={{ background: "white", border: "2px solid #E0E7FF", borderRadius: "16px", padding: "20px", marginBottom: "16px" }}>
+          <div style={{ background: "white", border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, borderRadius: "16px", padding: "20px", marginBottom: "16px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px" }}>
               <div style={{ background: theme.accentSolid, color: "white", borderRadius: "50%", width: "28px", height: "28px", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "900", fontSize: "14px", flexShrink: 0 }}>3</div>
               <div>
-                <div style={{ fontWeight: "800", color: "#1E1B4B", fontSize: "16px", fontFamily: theme.headingFont }}>Choose topic mix</div>
+                <div style={{ fontWeight: "800", color: theme.heroBg[0], fontSize: "16px", fontFamily: theme.headingFont }}>Choose topic mix</div>
                 <div style={{ color: "#6B7280", fontSize: "12px", marginTop: "2px" }}>
                   {filteredTopics.length > 0
                     ? `${filteredTopics.length} topic${filteredTopics.length !== 1 ? "s" : ""} shown - ${selectedTopics.length} selected`
@@ -621,8 +619,8 @@ export default function LessonGamesGenerator() {
                 placeholder="Search topics..."
                 style={{
                   width: "100%", boxSizing: "border-box", padding: "11px 40px 11px 38px",
-                  border: "2px solid #E0E7FF", borderRadius: "12px", fontSize: "14px",
-                  fontWeight: "600", color: "#1E1B4B", outline: "none",
+                  border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, borderRadius: "12px", fontSize: "14px",
+                  fontWeight: "600", color: theme.heroBg[0], outline: "none",
                 }}
               />
               {topicSearch !== "" && (
@@ -630,14 +628,14 @@ export default function LessonGamesGenerator() {
                   type="button"
                   onClick={() => setTopicSearch("")}
                   aria-label="Clear search"
-                  style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", background: "#EEF2FF", border: "none", borderRadius: "50%", width: "22px", height: "22px", color: "#4338CA", fontWeight: "800", fontSize: "12px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
+                  style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", background: hexToRgba(theme.accentSolid, 0.12), border: "none", borderRadius: "50%", width: "22px", height: "22px", color: theme.accentSolid, fontWeight: "800", fontSize: "12px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
                 >
                   ✕
                 </button>
               )}
             </div>
             {selectedTopics.length > 0 && (
-              <div style={{ background: "#EEF2FF", border: "2px solid #C7D2FE", color: "#312E81", borderRadius: "12px", padding: "10px 12px", fontWeight: "700", fontSize: "13px", marginBottom: "12px", lineHeight: 1.5 }}>
+              <div style={{ background: hexToRgba(theme.accentSolid, 0.12), border: `2px solid ${hexToRgba(theme.accentSolid, 0.4)}`, color: theme.accentSolid, borderRadius: "12px", padding: "10px 12px", fontWeight: "700", fontSize: "13px", marginBottom: "12px", lineHeight: 1.5 }}>
                 Playing with: {selectedTopicSummary}
               </div>
             )}
@@ -647,7 +645,7 @@ export default function LessonGamesGenerator() {
                   <button type="button" onClick={clearSelectedTopics} style={{ background: "white", border: "2px solid #FCA5A5", color: "#B91C1C", borderRadius: "999px", padding: "6px 14px", fontWeight: "800", fontSize: "12px", cursor: "pointer" }}>
                     Deselect all
                   </button>
-                  <button type="button" onClick={selectAllVisibleTopics} style={{ background: "white", border: "2px solid #C7D2FE", color: "#4338CA", borderRadius: "999px", padding: "6px 14px", fontWeight: "800", fontSize: "12px", cursor: "pointer" }}>
+                  <button type="button" onClick={selectAllVisibleTopics} style={{ background: "white", border: `2px solid ${hexToRgba(theme.accentSolid, 0.4)}`, color: theme.accentSolid, borderRadius: "999px", padding: "6px 14px", fontWeight: "800", fontSize: "12px", cursor: "pointer" }}>
                     Select all shown
                   </button>
                 </div>
@@ -658,8 +656,8 @@ export default function LessonGamesGenerator() {
                     return (
                       <button key={o.value} onClick={() => toggleTopicSelection(o.value)} style={{
                         background: isSelected ? levelColor : "#F8F7FF",
-                        color: isSelected ? "white" : "#1E1B4B",
-                        border: `2px solid ${isSelected ? levelColor : "#E0E7FF"}`,
+                        color: isSelected ? "white" : theme.heroBg[0],
+                        border: `2px solid ${isSelected ? levelColor : hexToRgba(theme.accentSolid, 0.25)}`,
                         borderRadius: "10px", padding: "10px 14px",
                         cursor: "pointer", textAlign: "left", transition: "all 0.15s",
                         fontWeight: isSelected ? "800" : "700", fontSize: "13px", lineHeight: 1.4
@@ -673,10 +671,10 @@ export default function LessonGamesGenerator() {
             )}
           </div>
 
-          <div style={{ background: "white", border: "2px solid #E0E7FF", borderRadius: "16px", padding: "20px", marginBottom: "16px" }}>
+          <div style={{ background: "white", border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, borderRadius: "16px", padding: "20px", marginBottom: "16px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px" }}>
               <div style={{ background: theme.accentSolid, color: "white", borderRadius: "50%", width: "28px", height: "28px", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "900", fontSize: "14px", flexShrink: 0 }}>4</div>
-              <div style={{ fontWeight: "800", color: "#1E1B4B", fontSize: "16px", fontFamily: theme.headingFont }}>How many teams?</div>
+              <div style={{ fontWeight: "800", color: theme.heroBg[0], fontSize: "16px", fontFamily: theme.headingFont }}>How many teams?</div>
             </div>
             <div style={{ display: "flex", gap: "10px", marginBottom: "16px" }}>
               {[2, 3, 4, 5].map(n => (
@@ -767,7 +765,7 @@ export default function LessonGamesGenerator() {
 
           {loadError && <div style={{ color: "#DC2626", fontWeight: "800", textAlign: "center", marginBottom: "12px" }}>{loadError}</div>}
 
-          <button onClick={handleSetup} disabled={selectedTopics.length === 0} style={{ width: "100%", background: selectedTopics.length === 0 ? "#CBD5E1" : `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "16px", padding: "18px", fontSize: "20px", fontWeight: "900", cursor: selectedTopics.length === 0 ? "not-allowed" : "pointer" }}>
+          <button onClick={handleSetup} disabled={selectedTopics.length === 0} style={{ width: "100%", background: selectedTopics.length === 0 ? "#CBD5E1" : `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "16px", padding: "18px", fontSize: "20px", fontWeight: "900", cursor: selectedTopics.length === 0 ? "not-allowed" : "pointer", fontFamily: theme.headingFont }}>
             🎮 Choose a Game!
           </button>
         </div>
@@ -781,12 +779,12 @@ export default function LessonGamesGenerator() {
         
         <div style={{ background: `linear-gradient(135deg,${theme.heroBg[0]},${theme.heroBg[2]})`, borderRadius: "20px", padding: "20px 24px", marginBottom: "20px", color: "white" }}>
           <div style={{ textAlign: "center", marginBottom: "16px" }}>
-            <div style={{ fontSize: "13px", fontWeight: "700", color: "#A5B4FC", marginBottom: "4px", letterSpacing: "0.06em", textTransform: "uppercase" }}>Current Topic Mix</div>
+            <div style={{ fontSize: "13px", fontWeight: "700", color: theme.accent[1], marginBottom: "4px", letterSpacing: "0.06em", textTransform: "uppercase" }}>Current Topic Mix</div>
             <div style={{ fontSize: "clamp(18px,4vw,26px)", fontWeight: "900", lineHeight: 1.2, fontFamily: theme.headingFont }}>
               {selectedTopics.length === 1 ? getTopicLabel(selectedTopics[0]) : `${selectedTopics.length} topics mixed`}
             </div>
             {selectedTopics.length > 1 && (
-              <div style={{ color: "#C4B5FD", fontWeight: "700", fontSize: "13px", marginTop: "8px", lineHeight: 1.5 }}>
+              <div style={{ color: theme.accent[1], fontWeight: "700", fontSize: "13px", marginTop: "8px", lineHeight: 1.5 }}>
                 {selectedTopics.map(getTopicLabel).join(" + ")}
               </div>
             )}
@@ -805,7 +803,7 @@ export default function LessonGamesGenerator() {
           {GAME_MODES.map(g => (
             <div key={g.id} onClick={() => !loadingGame && startGame(g)} style={{ background: "white", border: `3px solid ${g.color}`, borderRadius: "18px", padding: "20px", cursor: "pointer", transition: "all 0.2s" }}>
               <div style={{ fontSize: "40px", marginBottom: "10px" }}>{g.icon}</div>
-              <div style={{ fontWeight: "900", fontSize: "17px", color: "#1E1B4B", marginBottom: "4px", fontFamily: theme.headingFont }}>{g.name}</div>
+              <div style={{ fontWeight: "900", fontSize: "17px", color: theme.heroBg[0], marginBottom: "4px", fontFamily: theme.headingFont }}>{g.name}</div>
               <div style={{ fontSize: "13px", color: "#6B7280", marginBottom: "8px" }}>{g.desc}</div>
               <div style={{ fontSize: "12px", color: g.color, fontWeight: "700", lineHeight: 1.4, borderTop: `1px solid ${g.color}33`, paddingTop: "8px" }}>🗣️ {g.tag}</div>
             </div>
@@ -825,7 +823,7 @@ export default function LessonGamesGenerator() {
         {showSavePicker && (
           <div style={{ position: "fixed", inset: 0, background: "rgba(15,10,46,0.75)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 2000, padding: "20px" }}>
             <div style={{ background: "white", borderRadius: "20px", padding: "24px", maxWidth: "420px", width: "100%", maxHeight: "80vh", overflowY: "auto", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
-              <h3 style={{ margin: "0 0 6px", fontSize: "18px", fontWeight: 900, color: "#1E1B4B" }}>Save to which class?</h3>
+              <h3 style={{ margin: "0 0 6px", fontSize: "18px", fontWeight: 900, color: theme.heroBg[0], fontFamily: theme.headingFont }}>Save to which class?</h3>
               <p style={{ margin: "0 0 16px", fontSize: "13px", color: "#6B7280" }}>Pick an existing class, or create a new one — you'll return to it later from "My Classes."</p>
 
               {pickerError && <div style={{ background: "#FEE2E2", color: "#991B1B", padding: "8px 12px", borderRadius: "8px", fontSize: "13px", marginBottom: "12px" }}>{pickerError}</div>}
@@ -837,7 +835,7 @@ export default function LessonGamesGenerator() {
                   {pickerClasses.map(cls => (
                     <button
                       key={cls.id} onClick={() => handlePickClassForSave(cls)}
-                      style={{ textAlign: "left", background: "#F8F7FF", border: "2px solid #E5E7EB", borderRadius: "10px", padding: "10px 14px", cursor: "pointer", fontWeight: 700, color: "#1E1B4B", fontSize: "14px" }}
+                      style={{ textAlign: "left", background: "#F8F7FF", border: "2px solid #E5E7EB", borderRadius: "10px", padding: "10px 14px", cursor: "pointer", fontWeight: 700, color: theme.heroBg[0], fontSize: "14px" }}
                     >
                       {cls.name}
                       {cls.in_progress && <span style={{ display: "block", fontWeight: 500, fontSize: "12px", color: "#B45309", marginTop: "2px" }}>⚠️ Has a game in progress — saving here will replace it</span>}
@@ -853,7 +851,7 @@ export default function LessonGamesGenerator() {
                 />
                 <button
                   onClick={handleCreateClassForSave} disabled={pickerBusy || !pickerNewName.trim()}
-                  style={{ background: `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "10px", padding: "10px 16px", fontWeight: 800, cursor: pickerBusy ? "default" : "pointer", opacity: pickerBusy || !pickerNewName.trim() ? 0.6 : 1, whiteSpace: "nowrap" }}
+                  style={{ background: `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "10px", padding: "10px 16px", fontWeight: 800, cursor: pickerBusy ? "default" : "pointer", opacity: pickerBusy || !pickerNewName.trim() ? 0.6 : 1, whiteSpace: "nowrap", fontFamily: theme.headingFont }}
                 >
                   + New
                 </button>
@@ -869,12 +867,12 @@ export default function LessonGamesGenerator() {
             <button
               onClick={handleSaveAndExit} disabled={saveStatus === "saving"}
               title="Save exactly where you are and come back to it next class"
-              style={{ background: saveStatus === "saved" ? "#22C55E" : saveStatus === "error" ? "#EF4444" : "rgba(255,255,255,0.15)", color: "white", border: "none", borderRadius: "8px", padding: "6px 12px", cursor: saveStatus === "saving" ? "default" : "pointer", fontWeight: "700" }}
+              style={{ background: saveStatus === "saved" ? "#22C55E" : saveStatus === "error" ? "#EF4444" : "rgba(255,255,255,0.15)", color: "white", border: "none", borderRadius: "8px", padding: "6px 12px", cursor: saveStatus === "saving" ? "default" : "pointer", fontWeight: "700", fontFamily: theme.headingFont }}
             >
               {saveStatus === "saving" ? "Saving…" : saveStatus === "saved" ? "✅ Saved!" : saveStatus === "error" ? "⚠️ Failed — try again" : "💾 Save & Exit"}
             </button>
-            <button onClick={toggleFullscreen} style={{ background: "rgba(255,255,255,0.15)", color: "white", border: "none", borderRadius: "8px", padding: "6px 12px", cursor: "pointer", fontWeight: "700" }}>⛶ Fullscreen</button>
-            <button onClick={handleTopBarEndGame} style={{ background: "rgba(255,255,255,0.15)", color: "white", border: "none", borderRadius: "8px", padding: "6px 12px", cursor: "pointer", fontWeight: "700" }}>🏁 End Game</button>
+            <button onClick={toggleFullscreen} style={{ background: "rgba(255,255,255,0.15)", color: "white", border: "none", borderRadius: "8px", padding: "6px 12px", cursor: "pointer", fontWeight: "700", fontFamily: theme.headingFont }}>⛶ Fullscreen</button>
+            <button onClick={handleTopBarEndGame} style={{ background: "rgba(255,255,255,0.15)", color: "white", border: "none", borderRadius: "8px", padding: "6px 12px", cursor: "pointer", fontWeight: "700", fontFamily: theme.headingFont }}>🏁 End Game</button>
           </div>
         </div>
         <div style={{ padding: "16px", maxWidth: "900px", margin: "0 auto" }}>
@@ -908,21 +906,21 @@ export default function LessonGamesGenerator() {
         <Confetti active={confetti} />
         <div style={{ fontSize: "80px", margin: "20px 0" }}>🏆</div>
         <h1 style={{ fontSize: "clamp(24px,5vw,40px)", fontWeight: "900", margin: "0 0 8px", fontFamily: theme.headingFont }}>Game Over!</h1>
-        <p style={{ color: "#C4B5FD", fontSize: "18px", marginBottom: "28px" }}>{headline} 🎉</p>
+        <p style={{ color: theme.accent[1], fontSize: "18px", marginBottom: "28px" }}>{headline} 🎉</p>
 
         <div style={{ background: "rgba(255,255,255,0.08)", borderRadius: "20px", padding: "24px", maxWidth: "600px", margin: "0 auto 24px" }}>
           {finalRanking.map(({ item: t, rank, value }, i) => (
             <div key={t.id} style={{ display: "flex", alignItems: "center", gap: "16px", padding: "12px 0", borderBottom: i < finalRanking.length - 1 ? "1px solid rgba(255,255,255,0.1)" : "none" }}>
               <div style={{ fontSize: "32px" }}>{medalForRank(rank)}</div>
-              <div style={{ flex: 1, textAlign: "left", fontWeight: "900", fontSize: "20px" }}>{t.name}</div>
+              <div style={{ flex: 1, textAlign: "left", fontWeight: "900", fontSize: "20px", fontFamily: theme.headingFont }}>{t.name}</div>
               <div style={{ fontWeight: "900", fontSize: "28px", color: t.color.bg }}>{value}</div>
             </div>
           ))}
         </div>
         
         <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
-          <button onClick={() => setScreen("game-select")} style={{ background: `linear-gradient(135deg,${theme.cta[0]},${theme.cta[1]})`, color: "white", border: "none", borderRadius: "14px", padding: "14px 28px", fontSize: "17px", fontWeight: "800", cursor: "pointer" }}>🎮 Play Again</button>
-          <button onClick={() => setScreen("setup")} style={{ background: `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "14px", padding: "14px 28px", fontSize: "17px", fontWeight: "800", cursor: "pointer" }}>📚 New Lesson</button>
+          <button onClick={() => setScreen("game-select")} style={{ background: `linear-gradient(135deg,${theme.cta[0]},${theme.cta[1]})`, color: "white", border: "none", borderRadius: "14px", padding: "14px 28px", fontSize: "17px", fontWeight: "800", cursor: "pointer", fontFamily: theme.headingFont }}>🎮 Play Again</button>
+          <button onClick={() => setScreen("setup")} style={{ background: `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "14px", padding: "14px 28px", fontSize: "17px", fontWeight: "800", cursor: "pointer", fontFamily: theme.headingFont }}>📚 New Lesson</button>
         </div>
       </div>
     );
