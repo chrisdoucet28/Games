@@ -2,16 +2,18 @@ import { useEffect, useState } from "react";
 import type { SavedClass } from "../../types";
 import { TEAM_COLORS, GAME_MODES } from "../../data/constants";
 import { listClasses, createClass, deleteClass } from "../../lib/classes";
+import type { Theme } from "../../data/themes";
 
 type Props = {
   onBack: () => void;
   onResumeClass: (savedClass: SavedClass) => void;
   onStartWithClass: (savedClass: SavedClass) => void;
+  theme: Theme;
 };
 
 const gameLabel = (gameId: string | null) => GAME_MODES.find(g => g.id === gameId)?.name ?? gameId ?? "a game";
 
-export function ClassesScreen({ onBack, onResumeClass, onStartWithClass }: Props) {
+export function ClassesScreen({ onBack, onResumeClass, onStartWithClass, theme }: Props) {
   const [classes, setClasses] = useState<SavedClass[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [newName, setNewName] = useState("");
@@ -56,7 +58,7 @@ export function ClassesScreen({ onBack, onResumeClass, onStartWithClass }: Props
   return (
     <div style={{ minHeight: "100vh", background: "#F8F7FF", padding: "20px", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
       <div style={{ maxWidth: "640px", margin: "0 auto" }}>
-        <button onClick={onBack} style={{ background: "none", border: "2px solid #6366F1", color: "#6366F1", borderRadius: "10px", padding: "8px 16px", cursor: "pointer", fontWeight: "700", marginBottom: "20px" }}>← Back</button>
+        <button onClick={onBack} style={{ background: "none", border: `2px solid ${theme.accentSolid}`, color: theme.accentSolid, borderRadius: "10px", padding: "8px 16px", cursor: "pointer", fontWeight: "700", marginBottom: "20px" }}>← Back</button>
 
         <div style={{ textAlign: "center", marginBottom: "24px" }}>
           <h2 style={{ fontSize: "30px", fontWeight: "900", color: "#1E1B4B", margin: 0 }}>📚 My Classes</h2>
@@ -74,7 +76,7 @@ export function ClassesScreen({ onBack, onResumeClass, onStartWithClass }: Props
           />
           <button
             type="submit" disabled={creating || !newName.trim()}
-            style={{ background: "linear-gradient(135deg,#6366F1,#8B5CF6)", color: "white", border: "none", borderRadius: "12px", padding: "12px 20px", fontWeight: "800", cursor: creating ? "default" : "pointer", opacity: creating || !newName.trim() ? 0.6 : 1, whiteSpace: "nowrap" }}
+            style={{ background: `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "12px", padding: "12px 20px", fontWeight: "800", cursor: creating ? "default" : "pointer", opacity: creating || !newName.trim() ? 0.6 : 1, whiteSpace: "nowrap" }}
           >
             + New Class
           </button>
@@ -109,7 +111,7 @@ export function ClassesScreen({ onBack, onResumeClass, onStartWithClass }: Props
                   <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", margin: "10px 0" }}>
                     {cls.teams.map(t => (
                       <span key={t.id} style={{ background: t.color?.light ?? TEAM_COLORS[0].light, color: t.color?.dark ?? TEAM_COLORS[0].dark, borderRadius: "8px", padding: "4px 10px", fontSize: "12px", fontWeight: "700" }}>
-                        {t.color?.emoji} {t.name}: {t.score}
+                        {t.mascot ?? t.color?.emoji} {t.name}: {t.score}
                       </span>
                     ))}
                   </div>
@@ -119,14 +121,14 @@ export function ClassesScreen({ onBack, onResumeClass, onStartWithClass }: Props
                   {cls.in_progress && (
                     <button
                       onClick={() => onResumeClass(cls)}
-                      style={{ background: "linear-gradient(135deg,#F59E0B,#EF4444)", color: "white", border: "none", borderRadius: "10px", padding: "10px 16px", fontWeight: "800", fontSize: "13px", cursor: "pointer" }}
+                      style={{ background: `linear-gradient(135deg,${theme.cta[0]},${theme.cta[1]})`, color: "white", border: "none", borderRadius: "10px", padding: "10px 16px", fontWeight: "800", fontSize: "13px", cursor: "pointer" }}
                     >
                       ▶️ Resume {gameLabel(cls.selected_game)}
                     </button>
                   )}
                   <button
                     onClick={() => onStartWithClass(cls)}
-                    style={{ background: cls.in_progress ? "#EEF2FF" : "linear-gradient(135deg,#6366F1,#8B5CF6)", color: cls.in_progress ? "#4338CA" : "white", border: cls.in_progress ? "2px solid #C7D2FE" : "none", borderRadius: "10px", padding: "10px 16px", fontWeight: "800", fontSize: "13px", cursor: "pointer" }}
+                    style={{ background: cls.in_progress ? "#EEF2FF" : `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: cls.in_progress ? "#4338CA" : "white", border: cls.in_progress ? "2px solid #C7D2FE" : "none", borderRadius: "10px", padding: "10px 16px", fontWeight: "800", fontSize: "13px", cursor: "pointer" }}
                   >
                     🆕 Start New Game
                   </button>

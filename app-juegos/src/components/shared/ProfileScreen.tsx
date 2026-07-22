@@ -1,12 +1,16 @@
 import { useEffect, useState } from "react";
-import { getProfile, updateDisplayName } from "../../lib/profile";
+import { getProfile, updateProfile } from "../../lib/profile";
+import { THEMES, type Theme } from "../../data/themes";
 
 type Props = {
   onBack: () => void;
+  theme: Theme;
+  onThemeChange: (theme: Theme) => void;
 };
 
-export function ProfileScreen({ onBack }: Props) {
+export function ProfileScreen({ onBack, theme, onThemeChange }: Props) {
   const [displayName, setDisplayName] = useState("");
+  const [selectedThemeId, setSelectedThemeId] = useState(theme.id);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -14,7 +18,10 @@ export function ProfileScreen({ onBack }: Props) {
 
   useEffect(() => {
     getProfile()
-      .then(p => setDisplayName(p.display_name ?? ""))
+      .then(p => {
+        setDisplayName(p.display_name ?? "");
+        setSelectedThemeId(p.theme_id);
+      })
       .catch(err => setError(err instanceof Error ? err.message : "Couldn't load your profile."))
       .finally(() => setLoading(false));
   }, []);
@@ -25,7 +32,9 @@ export function ProfileScreen({ onBack }: Props) {
     setError(null);
     setSaved(false);
     try {
-      await updateDisplayName(displayName.trim());
+      await updateProfile({ displayName: displayName.trim(), themeId: selectedThemeId });
+      const newTheme = THEMES.find(t => t.id === selectedThemeId);
+      if (newTheme) onThemeChange(newTheme);
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
     } catch (err) {
@@ -38,7 +47,7 @@ export function ProfileScreen({ onBack }: Props) {
   return (
     <div style={{ minHeight: "100vh", background: "#F8F7FF", padding: "20px", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
       <div style={{ maxWidth: "440px", margin: "0 auto" }}>
-        <button onClick={onBack} style={{ background: "none", border: "2px solid #6366F1", color: "#6366F1", borderRadius: "10px", padding: "8px 16px", cursor: "pointer", fontWeight: "700", marginBottom: "20px" }}>← Back</button>
+        <button onClick={onBack} style={{ background: "none", border: `2px solid ${theme.accentSolid}`, color: theme.accentSolid, borderRadius: "10px", padding: "8px 16px", cursor: "pointer", fontWeight: "700", marginBottom: "20px" }}>← Back</button>
 
         <div style={{ textAlign: "center", marginBottom: "24px" }}>
           <h2 style={{ fontSize: "30px", fontWeight: "900", color: "#1E1B4B", margin: 0 }}>👤 My Profile</h2>
@@ -53,8 +62,32 @@ export function ProfileScreen({ onBack }: Props) {
               <label style={{ display: "block", color: "#4B5563", fontSize: "13px", fontWeight: "700", marginBottom: "6px" }}>Display name</label>
               <input
                 value={displayName} onChange={e => setDisplayName(e.target.value)} placeholder="e.g. Ms. Doucet"
-                style={{ width: "100%", boxSizing: "border-box", padding: "12px 14px", borderRadius: "12px", border: "2px solid #E5E7EB", fontSize: "14px", marginBottom: "16px" }}
+                style={{ width: "100%", boxSizing: "border-box", padding: "12px 14px", borderRadius: "12px", border: "2px solid #E5E7EB", fontSize: "14px", marginBottom: "20px" }}
               />
+
+              <label style={{ display: "block", color: "#4B5563", fontSize: "13px", fontWeight: "700", marginBottom: "8px" }}>App color theme</label>
+              <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "16px" }}>
+                {THEMES.map(t => {
+                  const isSelected = selectedThemeId === t.id;
+                  return (
+                    <button
+                      key={t.id} type="button" onClick={() => setSelectedThemeId(t.id)}
+                      title={t.name}
+                      style={{
+                        flex: "1 1 80px", display: "flex", flexDirection: "column", alignItems: "center", gap: "4px",
+                        background: isSelected ? `linear-gradient(135deg,${t.accent[0]},${t.accent[1]})` : "#F8F7FF",
+                        color: isSelected ? "white" : "#4B5563",
+                        border: `2px solid ${isSelected ? t.accentSolid : "#E5E7EB"}`,
+                        borderRadius: "12px", padding: "10px 6px", cursor: "pointer", fontWeight: "700", fontSize: "12px",
+                        transition: "transform 0.15s ease", transform: isSelected ? "scale(1.05)" : "scale(1)",
+                      }}
+                    >
+                      <span style={{ fontSize: "20px" }}>{t.emoji}</span>
+                      {t.name}
+                    </button>
+                  );
+                })}
+              </div>
 
               {error && (
                 <div style={{ background: "#FEE2E2", color: "#991B1B", padding: "10px 14px", borderRadius: "10px", fontSize: "13px", marginBottom: "14px" }}>{error}</div>
@@ -62,7 +95,7 @@ export function ProfileScreen({ onBack }: Props) {
 
               <button
                 type="submit" disabled={saving}
-                style={{ width: "100%", background: saved ? "#22C55E" : "linear-gradient(135deg,#6366F1,#8B5CF6)", color: "white", border: "none", borderRadius: "12px", padding: "12px", fontSize: "15px", fontWeight: "800", cursor: saving ? "default" : "pointer", opacity: saving ? 0.7 : 1 }}
+                style={{ width: "100%", background: saved ? "#22C55E" : `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "12px", padding: "12px", fontSize: "15px", fontWeight: "800", cursor: saving ? "default" : "pointer", opacity: saving ? 0.7 : 1 }}
               >
                 {saving ? "Saving…" : saved ? "✅ Saved!" : "Save"}
               </button>

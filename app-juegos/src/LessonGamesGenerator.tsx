@@ -1,14 +1,16 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import type { Team, GameMode, QuestionData, SavedClass } from "./types";
-import { TEAM_COLORS, GAME_MODES } from "./data/constants";
+import { TEAM_COLORS, GAME_MODES, MASCOT_OPTIONS } from "./data/constants";
 // Asegúrate de que TOPIC_LIBRARY esté exportado desde tu archivo topics.ts junto con TOPIC_OPTIONS
 import { TOPIC_OPTIONS, TOPIC_LIBRARY } from "./data/topics";
+import { DEFAULT_THEME, getTheme, hexToRgba, type Theme } from "./data/themes";
 
 import { ScoreBoard } from "./components/shared/ScoreBoard";
 import { Confetti } from "./components/shared/Confetti";
 import { ClassesScreen } from "./components/shared/ClassesScreen";
 import { ProfileScreen } from "./components/shared/ProfileScreen";
 import { saveProgress, clearProgress, listClasses, createClass } from "./lib/classes";
+import { getProfile } from "./lib/profile";
 import { denseRank, medalForRank } from "./utils/ranking";
 import { AuctionGame } from "./components/games/AuctionGame";
 import { MinefieldGame } from "./components/games/MinefieldGame";
@@ -132,7 +134,11 @@ export default function LessonGamesGenerator() {
   const [numTeams, setNumTeams] = useState(2);
   const [teamNames, setTeamNames] = useState(["Team Red", "Team Blue", "Team Green", "Team Yellow", "Team Purple"]);
   const [teamColors, setTeamColors] = useState([0, 1, 2, 3, 4]);
+  const [teamMascots, setTeamMascots] = useState<(string | null)[]>([null, null, null, null, null]);
   const [teams, setTeams] = useState<Team[]>([]);
+  // The teacher's chosen accent theme for the app's shared (non-game) screens — each game keeps
+  // its own fixed visual identity regardless of this. Loaded from their profile on mount.
+  const [theme, setTheme] = useState<Theme>(DEFAULT_THEME);
   const [questions, setQuestions] = useState<QuestionData[]>([]);
   const [level, setLevel] = useState("all");
   const [focus, setFocus] = useState("all");
@@ -151,6 +157,10 @@ export default function LessonGamesGenerator() {
     const onFsChange = () => setIsFullscreen(!!document.fullscreenElement);
     document.addEventListener("fullscreenchange", onFsChange);
     return () => document.removeEventListener("fullscreenchange", onFsChange);
+  }, []);
+
+  useEffect(() => {
+    getProfile().then(p => setTheme(getTheme(p.theme_id))).catch(() => {});
   }, []);
 
 
@@ -183,6 +193,11 @@ export default function LessonGamesGenerator() {
           const idx = TEAM_COLORS.findIndex(c => c.name === t.color.name);
           next[i] = idx === -1 ? i : idx;
         });
+        return next;
+      });
+      setTeamMascots(prev => {
+        const next = [...prev];
+        cls.teams.forEach((t, i) => { next[i] = t.mascot ?? null; });
         return next;
       });
       setTeams(cls.teams);
@@ -280,7 +295,7 @@ export default function LessonGamesGenerator() {
 
     const existingScores = Object.fromEntries(teams.map(t => [t.name, t.score]));
     const builtTeams = teamNames.slice(0, numTeams).map((name, i) => ({
-      id: i, name, color: TEAM_COLORS[teamColors[i] ?? i],
+      id: i, name, color: TEAM_COLORS[teamColors[i] ?? i], mascot: teamMascots[i] ?? null,
       score: existingScores[name] ?? 0,
     }));
     setTeams(builtTeams);
@@ -454,7 +469,7 @@ export default function LessonGamesGenerator() {
   const winners = finalRanking.filter(r => r.rank === 0).map(r => r.item);
 
   if (screen === "welcome") return (
-    <div ref={appRef} style={{ minHeight: "100vh", background: "linear-gradient(160deg,#1E1B4B 0%,#312E81 45%,#4C1D95 100%)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "32px 20px 24px", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
+    <div ref={appRef} style={{ minHeight: "100vh", background: `linear-gradient(160deg,${theme.heroBg[0]} 0%,${theme.heroBg[1]} 45%,${theme.heroBg[2]} 100%)`, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "32px 20px 24px", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
       <div style={{ maxWidth: "680px", width: "100%", textAlign: "center", flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
         <div style={{ marginBottom: "28px" }}>
           <div style={{ fontSize: "64px", marginBottom: "14px", filter: "drop-shadow(0 4px 16px rgba(0,0,0,0.4))" }}>🎮</div>
@@ -486,7 +501,7 @@ export default function LessonGamesGenerator() {
           ))}
         </div>
         <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
-          <button onClick={() => { setActiveClassId(null); setScreen("setup"); }} style={{ background: "linear-gradient(135deg,#F59E0B,#EF4444)", color: "white", border: "none", borderRadius: "16px", padding: "18px 56px", fontSize: "20px", fontWeight: "900", cursor: "pointer", boxShadow: "0 8px 32px rgba(239,68,68,0.45)", letterSpacing: "0.01em" }}>🚀 Start a Game</button>
+          <button onClick={() => { setActiveClassId(null); setScreen("setup"); }} style={{ background: `linear-gradient(135deg,${theme.cta[0]},${theme.cta[1]})`, color: "white", border: "none", borderRadius: "16px", padding: "18px 56px", fontSize: "20px", fontWeight: "900", cursor: "pointer", boxShadow: `0 8px 32px ${hexToRgba(theme.cta[1], 0.45)}`, letterSpacing: "0.01em" }}>🚀 Start a Game</button>
           <button onClick={() => setScreen("classes")} style={{ background: "rgba(255,255,255,0.12)", border: "2px solid rgba(255,255,255,0.3)", color: "white", borderRadius: "16px", padding: "18px 40px", fontSize: "18px", fontWeight: "800", cursor: "pointer" }}>📚 My Classes</button>
           <button onClick={() => setScreen("profile")} style={{ background: "rgba(255,255,255,0.12)", border: "2px solid rgba(255,255,255,0.3)", color: "white", borderRadius: "16px", padding: "18px 40px", fontSize: "18px", fontWeight: "800", cursor: "pointer" }}>👤 My Profile</button>
         </div>
@@ -499,11 +514,12 @@ export default function LessonGamesGenerator() {
       onBack={() => setScreen("welcome")}
       onResumeClass={resumeClass}
       onStartWithClass={startWithClass}
+      theme={theme}
     />
   );
 
   if (screen === "profile") return (
-    <ProfileScreen onBack={() => setScreen("welcome")} />
+    <ProfileScreen onBack={() => setScreen("welcome")} theme={theme} onThemeChange={setTheme} />
   );
 
   if (screen === "setup") {
@@ -674,7 +690,7 @@ export default function LessonGamesGenerator() {
                 return (
                   <div key={i} style={{ border: `3px solid ${color.bg}`, borderRadius: "14px", overflow: "hidden", background: "white" }}>
                     <div style={{ background: color.bg, padding: "8px 10px", display: "flex", alignItems: "center", gap: "6px" }}>
-                      <span style={{ fontSize: "16px" }}>{color.emoji}</span>
+                      <span style={{ fontSize: "16px" }}>{teamMascots[i] ?? color.emoji}</span>
                       <span style={{ color: "white", fontWeight: "800", fontSize: "13px" }}>{color.name}</span>
                     </div>
                     <input
@@ -723,6 +739,24 @@ export default function LessonGamesGenerator() {
                             boxShadow: teamColors[i] === swatchIndex ? `0 0 0 2px white, 0 0 0 4px ${swatch.bg}` : "none"
                           }}
                         />
+                      ))}
+                    </div>
+                    <div style={{ background: "white", padding: "8px 10px", display: "flex", flexWrap: "wrap", gap: "4px", borderTop: `1px solid ${color.bg}20` }}>
+                      <button
+                        type="button" title="No mascot"
+                        onClick={() => { const next = [...teamMascots]; next[i] = null; setTeamMascots(next); }}
+                        style={{ width: "22px", height: "22px", borderRadius: "6px", fontSize: "11px", color: "#9CA3AF", background: teamMascots[i] == null ? "#F3F4F6" : "transparent", border: teamMascots[i] == null ? `2px solid ${color.bg}` : "1px solid #E5E7EB", cursor: "pointer", flexShrink: 0 }}
+                      >✕</button>
+                      {MASCOT_OPTIONS.map(m => (
+                        <button
+                          key={m} type="button" title={m}
+                          onClick={() => { const next = [...teamMascots]; next[i] = m; setTeamMascots(next); }}
+                          style={{
+                            width: "22px", height: "22px", borderRadius: "6px", fontSize: "13px", cursor: "pointer", flexShrink: 0,
+                            background: teamMascots[i] === m ? color.light : "transparent",
+                            border: teamMascots[i] === m ? `2px solid ${color.bg}` : "1px solid transparent",
+                          }}
+                        >{m}</button>
                       ))}
                     </div>
                   </div>

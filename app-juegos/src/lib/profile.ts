@@ -20,11 +20,14 @@ export async function getProfile(): Promise<Profile> {
   return data as Profile;
 }
 
-export async function updateDisplayName(displayName: string): Promise<Profile> {
+export async function updateProfile(patch: { displayName?: string; themeId?: string }): Promise<Profile> {
   const userId = await currentUserId();
+  const dbPatch: Record<string, unknown> = {};
+  if (patch.displayName !== undefined) dbPatch.display_name = patch.displayName || null;
+  if (patch.themeId !== undefined) dbPatch.theme_id = patch.themeId;
   const { data, error } = await supabase
     .from("profiles")
-    .update({ display_name: displayName || null })
+    .update(dbPatch)
     .eq("id", userId)
     .select()
     .single();

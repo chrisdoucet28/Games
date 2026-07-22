@@ -10,6 +10,9 @@ export interface TeamColor {
     id: string | number;
     name: string;
     color: TeamColor;
+    // Optional emoji mascot, picked independently of color — falls back to color.emoji
+    // wherever a team's identity is shown if the team never picked one.
+    mascot?: string | null;
     score: number;
   }
   
@@ -86,6 +89,9 @@ export interface TeamColor {
   export interface Profile {
     id: string;
     display_name: string | null;
+    // References data/themes.ts's Theme.id — a preset accent for the app's shared (non-game)
+    // screens, not the individual games, which each keep their own fixed visual identity.
+    theme_id: string;
     created_at: string;
     updated_at: string;
   }

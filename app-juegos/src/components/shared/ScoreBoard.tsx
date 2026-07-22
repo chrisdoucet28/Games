@@ -29,7 +29,7 @@ export function ScoreBoard({ teams, highlight }: ScoreBoardProps) {
             {medalForRank(rank)}
           </div>
           <div style={{ fontWeight: "800", fontSize: "15px", color: highlight === t.id ? "white" : t.color.dark }}>
-            {t.color.emoji} {t.name}
+            {t.mascot ?? t.color.emoji} {t.name}
           </div>
           <div style={{ fontWeight: "900", fontSize: "28px", color: highlight === t.id ? "white" : t.color.dark }}>
             {t.score}

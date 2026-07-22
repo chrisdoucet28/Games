@@ -12,6 +12,14 @@ export const TEAM_COLORS: TeamColor[] = [
   { name: "Teal",   bg: "#14B8A6", light: "#CCFBF1", dark: "#134E4A", emoji: "🩵" },
 ];
 
+// Optional per-team mascot, independent of color — lets two teams share a color but not an
+// identity, and gives teams a bit of personality beyond a plain colored circle.
+export const MASCOT_OPTIONS: string[] = [
+  "🐉", "🦄", "🤖", "🦊", "🐸", "🦁", "🐧", "🦖",
+  "🐝", "🦋", "🐙", "🦅", "🐢", "🐺", "🦉", "🐯",
+  "🍕", "⚡", "🌟", "🎃", "👻", "🥷",
+];
+
 export function teamsGridCols(n: number): string {
   if (n <= 3) return `repeat(${n},1fr)`;
   if (n === 4) return "repeat(2,1fr)";
