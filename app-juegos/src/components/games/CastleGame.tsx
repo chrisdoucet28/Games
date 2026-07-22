@@ -81,6 +81,23 @@ type ImpactKind = "hit" | "heal" | "shield" | "focus";
 type Impact = { id: number; teamId: string | number; kind: ImpactKind; character?: string };
 type FloatText = { id: number; teamId: string | number; text: string; color: string };
 
+// What "Save & Exit" snapshots and "Resume" restores — the RPG stats board plus whose turn it is
+// and who's already been knocked out. Deliberately excludes the in-flight action/question choice:
+// resuming drops the active team straight into a fresh "choose your action" screen rather than
+// replaying whatever question happened to be on screen.
+type CastleSnapshot = {
+  rpg: Record<string | number, TeamRpg>;
+  activeTeamIdx: number;
+  eliminationOrder: (string | number)[];
+};
+
+function validateCastleSnapshot(raw: unknown, teamCount: number): CastleSnapshot | undefined {
+  const s = raw as Partial<CastleSnapshot> | null | undefined;
+  if (!s || typeof s.rpg !== "object" || s.rpg === null) return undefined;
+  if (typeof s.activeTeamIdx !== "number" || s.activeTeamIdx < 0 || s.activeTeamIdx >= teamCount) return undefined;
+  return { rpg: s.rpg, activeTeamIdx: s.activeTeamIdx, eliminationOrder: s.eliminationOrder ?? [] };
+}
+
 const AMBIENT_PARTICLES = Array.from({ length: 14 }, (_, i) => ({
   left: (i * 37) % 100,
   top: (i * 53) % 100,
@@ -186,16 +203,19 @@ function DiceRoller({ rolling, result }: { rolling: boolean, result: number | nu
   );
 }
 
-export function CastleGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef }: GameProps) {
+export function CastleGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState }: GameProps) {
   const TURN_SECONDS = 25;
+  const resumed = useRef(validateCastleSnapshot(initialGameState, teams.length)).current;
 
-  const [rpg, setRpg] = useState<Record<string | number, TeamRpg>>(() => Object.fromEntries(
+  const [rpg, setRpg] = useState<Record<string | number, TeamRpg>>(() => resumed?.rpg ?? Object.fromEntries(
     teams.map(t => [t.id, { hp: MAX_HP, xp: 0, level: 1, mp: START_MP, maxMp: MAX_MP, shieldTurnsLeft: 0, shieldFresh: false }])
   ));
-  const [activeTeamIdx, setActiveTeamIdx] = useState(0);
+  const [activeTeamIdx, setActiveTeamIdx] = useState(() => resumed?.activeTeamIdx ?? 0);
   const [selectedAction, setSelectedAction] = useState<ActionId | null>(null);
   const [showAns, setShowAns] = useState(false);
-  const [phase, setPhase] = useState<Phase>("intro");
+  // A resumed battle skips the intro screen and drops straight into a fresh action choice for
+  // whichever team was up.
+  const [phase, setPhase] = useState<Phase>(() => resumed ? "select-action" : "intro");
   const [diceRoll, setDiceRoll] = useState<number | null>(null);
   const [rolling, setRolling] = useState(false);
   const [lastEvent, setLastEvent] = useState<LastEvent | null>(null);
@@ -204,7 +224,7 @@ export function CastleGame({ questions, teams, onUpdateScore, onEnd, forceFinalR
   const [floatTexts, setFloatTexts] = useState<FloatText[]>([]);
   const [elimBanner, setElimBanner] = useState<EliminationBanner | null>(null);
   const fxId = useRef(0);
-  const eliminationOrderRef = useRef<(string | number)[]>([]);
+  const eliminationOrderRef = useRef<(string | number)[]>(resumed?.eliminationOrder ?? []);
   // Whether the gameover screen was reached by a genuine full elimination (one castle left) or
   // by the top-bar End Game button cutting the battle short with several castles still standing —
   // the two cases need different framing, since "last castle standing" only makes sense for the
@@ -272,6 +292,14 @@ export function CastleGame({ questions, teams, onUpdateScore, onEnd, forceFinalR
     return () => { if (forceFinalRef) forceFinalRef.current = null; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [forceFinalRef, phase, teams, rpg]);
+
+  useEffect(() => {
+    if (!serializeStateRef) return;
+    serializeStateRef.current = (): CastleSnapshot => ({
+      rpg, activeTeamIdx, eliminationOrder: eliminationOrderRef.current,
+    });
+    return () => { if (serializeStateRef) serializeStateRef.current = null; };
+  }, [serializeStateRef, rpg, activeTeamIdx]);
 
   const advanceTurn = useCallback(() => {
     setRpg(prev => {

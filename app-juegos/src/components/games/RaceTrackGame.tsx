@@ -135,11 +135,29 @@ function CheckeredStrip() {
   );
 }
 
-export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef }: GameProps) {
-  const [phase, setPhase] = useState<Phase>("intro");
-  const [track, setTrack] = useState<TrackSpace[]>(() => buildTrack());
+// What "Save & Exit" snapshots and "Resume" restores — every team's position/coins/shields/
+// powerups, plus the track layout itself (space types and any placed banana traps line up with
+// positions, so they travel together). Doesn't include which phase/roll was mid-flight; resuming
+// always drops back into "task" for a fresh question, same pattern as the other resumable games.
+type RaceSnapshot = {
+  raceTeams: Record<string | number, RaceTeamState>;
+  track?: TrackSpace[];
+};
+
+function validateRaceSnapshot(raw: unknown, teamIds: (string | number)[]): RaceSnapshot | undefined {
+  const s = raw as Partial<RaceSnapshot> | null | undefined;
+  if (!s || typeof s.raceTeams !== "object" || s.raceTeams === null) return undefined;
+  if (!teamIds.every(id => s.raceTeams![id] && typeof s.raceTeams![id].pos === "number")) return undefined;
+  return { raceTeams: s.raceTeams, track: Array.isArray(s.track) && s.track.length === TOTAL + 1 ? s.track : undefined };
+}
+
+export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState }: GameProps) {
+  const resumed = useRef(validateRaceSnapshot(initialGameState, teams.map(t => t.id))).current;
+  // A resumed race skips the intro and drops straight into a fresh task for the group.
+  const [phase, setPhase] = useState<Phase>(() => resumed ? "task" : "intro");
+  const [track, setTrack] = useState<TrackSpace[]>(() => resumed?.track ?? buildTrack());
   const [raceTeams, setRaceTeams] = useState<Record<string | number, RaceTeamState>>(() =>
-    Object.fromEntries(teams.map((t, i) => [t.id, { pos: 0, coins: 0, shields: 0, skip: false, powerups: [], car: CARS[i % CARS.length] }]))
+    resumed?.raceTeams ?? Object.fromEntries(teams.map((t, i) => [t.id, { pos: 0, coins: 0, shields: 0, skip: false, powerups: [], car: CARS[i % CARS.length] }]))
   );
   const [winnerId, setWinnerId] = useState<string | number | null>(null);
   const [showAns, setShowAns] = useState(false);
@@ -438,6 +456,12 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
     return () => { if (forceFinalRef) forceFinalRef.current = null; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [forceFinalRef, phase]);
+
+  useEffect(() => {
+    if (!serializeStateRef) return;
+    serializeStateRef.current = (): RaceSnapshot => ({ raceTeams, track });
+    return () => { if (serializeStateRef) serializeStateRef.current = null; };
+  }, [serializeStateRef, raceTeams, track]);
 
   const arenaStyle: React.CSSProperties = {
     margin: "-20px", padding: "20px", borderRadius: "20px", position: "relative", overflow: "hidden",

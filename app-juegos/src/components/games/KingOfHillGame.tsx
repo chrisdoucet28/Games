@@ -68,10 +68,31 @@ function AmbientBackdrop() {
   );
 }
 
-export function KingOfHillGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef }: GameProps) {
+// What "Save & Exit" snapshots and "Resume" restores — which team owns which zone, accumulated
+// control points, the current round number, and whose turn it is within this round's rolled
+// order. Resuming skips straight back to "pick" for the active team rather than re-rolling turn
+// order or replaying whatever question/contest was on screen.
+type HillSnapshot = {
+  owners: Record<string, string | number>;
+  roundPoints: Record<string | number, number>;
+  round: number;
+  turnOrder: number[];
+  activeTeamIdx: number;
+};
+
+function validateHillSnapshot(raw: unknown, teamCount: number): HillSnapshot | undefined {
+  const s = raw as Partial<HillSnapshot> | null | undefined;
+  if (!s || !Array.isArray(s.turnOrder) || s.turnOrder.length !== teamCount) return undefined;
+  if (typeof s.activeTeamIdx !== "number" || s.activeTeamIdx < 0 || s.activeTeamIdx >= teamCount) return undefined;
+  if (typeof s.round !== "number" || s.round < 1) return undefined;
+  return { owners: s.owners ?? {}, roundPoints: s.roundPoints ?? {}, round: s.round, turnOrder: s.turnOrder, activeTeamIdx: s.activeTeamIdx };
+}
+
+export function KingOfHillGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState }: GameProps) {
   const TURN_SECONDS = 20;
   const isTopicMode = questions.length > 0 && questions.every(q => q.type === "speaking task");
   const ZONES = isTopicMode ? HILL_ZONES_TOPIC : HILL_ZONES_GRAMMAR;
+  const resumed = useRef(validateHillSnapshot(initialGameState, teams.length)).current;
 
   const pool = useRef((() => {
     // Grammar mode is "finish the sentence" only — never "correct grammar mistakes", even as a
@@ -86,20 +107,28 @@ export function KingOfHillGame({ questions, teams, onUpdateScore, onEnd, forceFi
     return [...base].sort(() => Math.random() - 0.5);
   })()).current;
 
-  const [owners, setOwners] = useState<Record<string, string | number>>({});
-  const [roundPoints, setRoundPoints] = useState(() => Object.fromEntries(teams.map(t => [t.id, 0])));
-  const [round, setRound] = useState(1);
-  const [turnOrder, setTurnOrder] = useState(() => teams.map((_, i) => i));
-  const [activeTeamIdx, setActiveTeamIdx] = useState(0);
+  const [owners, setOwners] = useState<Record<string, string | number>>(() => resumed?.owners ?? {});
+  const [roundPoints, setRoundPoints] = useState(() => resumed?.roundPoints ?? Object.fromEntries(teams.map(t => [t.id, 0])));
+  const [round, setRound] = useState(() => resumed?.round ?? 1);
+  const [turnOrder, setTurnOrder] = useState(() => resumed?.turnOrder ?? teams.map((_, i) => i));
+  const [activeTeamIdx, setActiveTeamIdx] = useState(() => resumed?.activeTeamIdx ?? 0);
   const [qi, setQi] = useState(0);
 
-  const [phase, setPhase] = useState<"intro" | "rolling" | "pick" | "answer" | "contested" | "round-end" | "final">("intro");
+  // A resumed match skips the intro and this round's dice roll — turn order is already known —
+  // and drops straight into "pick" for whichever team was up.
+  const [phase, setPhase] = useState<"intro" | "rolling" | "pick" | "answer" | "contested" | "round-end" | "final">(() => resumed ? "pick" : "intro");
 
   useEffect(() => {
     if (!forceFinalRef) return;
     forceFinalRef.current = phase === "final" ? null : () => { setPhase("final"); return true; };
     return () => { if (forceFinalRef) forceFinalRef.current = null; };
   }, [forceFinalRef, phase]);
+
+  useEffect(() => {
+    if (!serializeStateRef) return;
+    serializeStateRef.current = (): HillSnapshot => ({ owners, roundPoints, round, turnOrder, activeTeamIdx });
+    return () => { if (serializeStateRef) serializeStateRef.current = null; };
+  }, [serializeStateRef, owners, roundPoints, round, turnOrder, activeTeamIdx]);
   const [chosenZone, setChosenZone] = useState<string | null>(null);
   const [showAns, setShowAns] = useState(false);
   const [contest, setContest] = useState<any>(null);

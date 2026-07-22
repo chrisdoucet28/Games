@@ -841,16 +841,16 @@ export default function LessonGamesGenerator() {
           <ScoreBoard teams={teams} />
           <div style={{ background: "white", borderRadius: "20px", padding: "20px", marginTop: "16px" }}>
             {selectedGame.id === "auction" && <AuctionGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-            {selectedGame.id === "minefield" && <MinefieldGame questions={[]} gridData={minefieldGridData} teams={teams} forceFinalRef={forceFinalRef} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
+            {selectedGame.id === "minefield" && <MinefieldGame questions={[]} gridData={minefieldGridData} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
             {selectedGame.id === "hotseat" && <HotSeatGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-            {selectedGame.id === "spy" && <SpyAmongUsGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-            {selectedGame.id === "battleship" && <BattleshipGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
+            {selectedGame.id === "spy" && <SpyAmongUsGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
+            {selectedGame.id === "battleship" && <BattleshipGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
             {selectedGame.id === "vault" && <VaultHeistGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-            {selectedGame.id === "cards" && <CardShuffleGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-            {selectedGame.id === "castle" && <CastleGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-            {selectedGame.id === "hill" && <KingOfHillGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
+            {selectedGame.id === "cards" && <CardShuffleGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
+            {selectedGame.id === "castle" && <CastleGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
+            {selectedGame.id === "hill" && <KingOfHillGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
             {selectedGame.id === "hotpotato" && <HotPotatoGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} onUpdateScore={updateScore} onEnd={handleGameEnd} level={hotPotatoLevel} />}
-            {selectedGame.id === "racetrack" && <RaceTrackGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
+            {selectedGame.id === "racetrack" && <RaceTrackGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
             {selectedGame.id === "whack" && <WordWhackGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
             {selectedGame.id === "rocket" && <RocketFuelGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
             {selectedGame.id === "zombie" && <ZombieSiegeGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} onUpdateScore={updateScore} onEnd={handleGameEnd} />}

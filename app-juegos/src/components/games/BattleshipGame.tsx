@@ -126,22 +126,58 @@ type CellFx = { teamId: string | number; coord: string; kind: "hit" | "miss"; ke
 type Toast = { text: string; kind: "hit" | "water" | "wrong"; key: number };
 type EliminationBanner = { teamName: string; color: string; key: number };
 
-export function BattleshipGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef }: GameProps) {
+// What "Save & Exit" snapshots and "Resume" restores. Fleet layout MUST be included — hits/misses
+// are just coordinate lists, meaningless without the exact same ship placement they were recorded
+// against, so a snapshot missing fleets is treated as unusable rather than partially restored.
+type BattleshipSnapshot = {
+  hits: Record<string | number, string[]>;
+  misses: Record<string | number, string[]>;
+  activeTeamIdx: number;
+  eliminationOrder: (string | number)[];
+  fleets: Record<string | number, string[]>;
+};
+
+function validateBattleshipSnapshot(raw: unknown, teamIds: (string | number)[]): BattleshipSnapshot | undefined {
+  const s = raw as Partial<BattleshipSnapshot> | null | undefined;
+  if (!s || typeof s.fleets !== "object" || s.fleets === null) return undefined;
+  if (typeof s.activeTeamIdx !== "number" || s.activeTeamIdx < 0 || s.activeTeamIdx >= teamIds.length) return undefined;
+  if (!teamIds.every(id => Array.isArray(s.fleets![id]))) return undefined;
+  return {
+    fleets: s.fleets,
+    hits: s.hits ?? {},
+    misses: s.misses ?? {},
+    activeTeamIdx: s.activeTeamIdx,
+    eliminationOrder: s.eliminationOrder ?? [],
+  };
+}
+
+export function BattleshipGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState }: GameProps) {
   const TURN_SECONDS = 25;
   const gameTitle = "Battleship";
 
   const COLS = teams.length === 2 ? BATTLESHIP_COLS_5 : BATTLESHIP_COLS_4;
   const ROWS = COLS.map((_, i) => i + 1);
 
+  const resumed = useRef(validateBattleshipSnapshot(initialGameState, teams.map(t => t.id))).current;
+
   const coordMap = useRef(buildCoordMap(questions, COLS, teams.map(t => t.id))).current;
-  const fleets = useRef(Object.fromEntries(teams.map(t => [t.id, [...generateShipsNxN(COLS)]]))).current;
+  const fleets = useRef(resumed?.fleets ?? Object.fromEntries(teams.map(t => [t.id, [...generateShipsNxN(COLS)]]))).current;
 
-  const [hits, setHits] = useState<Record<string | number, string[]>>(() => Object.fromEntries(teams.map(t => [t.id, []])));
-  const [misses, setMisses] = useState<Record<string | number, string[]>>(() => Object.fromEntries(teams.map(t => [t.id, []])));
+  const [hits, setHits] = useState<Record<string | number, string[]>>(() => resumed?.hits ?? Object.fromEntries(teams.map(t => [t.id, []])));
+  const [misses, setMisses] = useState<Record<string | number, string[]>>(() => resumed?.misses ?? Object.fromEntries(teams.map(t => [t.id, []])));
 
-  const [activeTeamIdx, setActiveTeamIdx] = useState(0);
-  const [phase, setPhase] = useState<"intro" | "pick-target" | "pick-coord" | "answer" | "gameover">("intro");
-  const [targetTeamId, setTargetTeamId] = useState<string | number | null>(null);
+  const [activeTeamIdx, setActiveTeamIdx] = useState(() => resumed?.activeTeamIdx ?? 0);
+  // A resumed battle skips the intro screen and drops straight into target/coordinate selection
+  // for whichever team was up, same as a fresh turn handoff would.
+  const [phase, setPhase] = useState<"intro" | "pick-target" | "pick-coord" | "answer" | "gameover">(() => {
+    if (!resumed) return "intro";
+    return teams.length === 2 ? "pick-coord" : "pick-target";
+  });
+  const [targetTeamId, setTargetTeamId] = useState<string | number | null>(() => {
+    if (!resumed || teams.length !== 2) return null;
+    const activeId = teams[resumed.activeTeamIdx].id;
+    return teams.find(t => t.id !== activeId)?.id ?? null;
+  });
   const [pendingCoord, setPendingCoord] = useState<string | null>(null);
   const [showAns, setShowAns] = useState(false);
   const [cellFx, setCellFx] = useState<CellFx | null>(null);
@@ -149,7 +185,7 @@ export function BattleshipGame({ questions, teams, onUpdateScore, onEnd, forceFi
   const [toast, setToast] = useState<Toast | null>(null);
   const [elimBanner, setElimBanner] = useState<EliminationBanner | null>(null);
   const fxIdRef = useRef(0);
-  const eliminationOrderRef = useRef<(string | number)[]>([]);
+  const eliminationOrderRef = useRef<(string | number)[]>(resumed?.eliminationOrder ?? []);
   // Whether the gameover screen was reached by a genuine full elimination (one fleet left) or
   // by the top-bar End Game button cutting the battle short with several fleets still afloat —
   // the two cases need different framing, since "last fleet standing" only makes sense for the
@@ -196,6 +232,14 @@ export function BattleshipGame({ questions, teams, onUpdateScore, onEnd, forceFi
     };
     return () => { if (forceFinalRef) forceFinalRef.current = null; };
   }, [forceFinalRef, phase, teams, isEliminated]);
+
+  useEffect(() => {
+    if (!serializeStateRef) return;
+    serializeStateRef.current = (): BattleshipSnapshot => ({
+      hits, misses, activeTeamIdx, eliminationOrder: eliminationOrderRef.current, fleets,
+    });
+    return () => { if (serializeStateRef) serializeStateRef.current = null; };
+  }, [serializeStateRef, hits, misses, activeTeamIdx, fleets]);
 
   const advanceTurn = useCallback((hitsOverride?: Record<string | number, string[]>) => {
     setShowAns(false);

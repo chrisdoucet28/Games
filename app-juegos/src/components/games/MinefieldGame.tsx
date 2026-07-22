@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import type { GameProps } from "../../types";
 import { teamsGridCols } from "../../data/constants";
 import { denseRank, medalForRank } from "../../utils/ranking";
@@ -18,13 +18,44 @@ const MINE_COUNT = 7;
 const createMines = () =>
   new Set([...Array(TOTAL)].map((_, index) => index).sort(() => Math.random() - 0.5).slice(0, MINE_COUNT));
 
-export function MinefieldGame({ gridData, teams, onUpdateScore, onEnd, forceFinalRef }: GameProps) {
+// What "Save & Exit" snapshots and "Resume" restores. Mine positions MUST be included — revealed
+// tile indices are meaningless without the exact same mine layout they were recorded against, so
+// a snapshot missing mines is treated as unusable rather than partially restored (same rule as
+// Battleship's fleets).
+type MinefieldSnapshot = {
+  mines: number[];
+  revealed: number[];
+  gridIndex: number;
+  activeTeam: number;
+  correctByTeam: Record<string | number, number>;
+  minesHitByTeam: Record<string | number, number>;
+};
+
+function validateMinefieldSnapshot(raw: unknown, teamCount: number, gridCount: number): MinefieldSnapshot | undefined {
+  const s = raw as Partial<MinefieldSnapshot> | null | undefined;
+  if (!s || !Array.isArray(s.mines) || s.mines.length === 0) return undefined;
+  if (typeof s.activeTeam !== "number" || s.activeTeam < 0 || s.activeTeam >= teamCount) return undefined;
+  if (typeof s.gridIndex !== "number" || s.gridIndex < 0 || s.gridIndex >= Math.max(gridCount, 1)) return undefined;
+  return {
+    mines: s.mines,
+    revealed: Array.isArray(s.revealed) ? s.revealed : [],
+    gridIndex: s.gridIndex,
+    activeTeam: s.activeTeam,
+    correctByTeam: s.correctByTeam ?? {},
+    minesHitByTeam: s.minesHitByTeam ?? {},
+  };
+}
+
+export function MinefieldGame({ gridData, teams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState }: GameProps) {
   const grids = (Array.isArray(gridData) ? gridData : gridData ? [gridData] : []) as MinefieldGrid[];
-  const [gridIndex, setGridIndex] = useState(0);
-  const [mines] = useState<Set<number>>(() => createMines());
-  const [revealed, setRevealed] = useState<Set<number>>(new Set());
-  const [activeTeam, setActiveTeam] = useState(0);
-  const [phase, setPhase] = useState<"intro" | "pick" | "speaking" | "judging" | "topicComplete" | "final">("intro");
+  const resumed = useRef(validateMinefieldSnapshot(initialGameState, teams.length, grids.length)).current;
+
+  const [gridIndex, setGridIndex] = useState(() => resumed?.gridIndex ?? 0);
+  const [mines] = useState<Set<number>>(() => resumed ? new Set(resumed.mines) : createMines());
+  const [revealed, setRevealed] = useState<Set<number>>(() => resumed ? new Set(resumed.revealed) : new Set());
+  const [activeTeam, setActiveTeam] = useState(() => resumed?.activeTeam ?? 0);
+  // A resumed board skips the intro and drops straight into tile selection.
+  const [phase, setPhase] = useState<"intro" | "pick" | "speaking" | "judging" | "topicComplete" | "final">(() => resumed ? "pick" : "intro");
 
   useEffect(() => {
     if (!forceFinalRef) return;
@@ -36,8 +67,16 @@ export function MinefieldGame({ gridData, teams, onUpdateScore, onEnd, forceFina
   const [lastResult, setLastResult] = useState<{ correct: boolean; isMine: boolean; col: string; row: string; teamName: string } | null>(null);
   // Correct sentences / mines hit per team — the only things worth surfacing on a results screen
   // beyond raw score, since everything else about a tile (revealed/mine) is board-wide, not per-team.
-  const [correctByTeam, setCorrectByTeam] = useState<Record<string | number, number>>({});
-  const [minesHitByTeam, setMinesHitByTeam] = useState<Record<string | number, number>>({});
+  const [correctByTeam, setCorrectByTeam] = useState<Record<string | number, number>>(() => resumed?.correctByTeam ?? {});
+  const [minesHitByTeam, setMinesHitByTeam] = useState<Record<string | number, number>>(() => resumed?.minesHitByTeam ?? {});
+
+  useEffect(() => {
+    if (!serializeStateRef) return;
+    serializeStateRef.current = (): MinefieldSnapshot => ({
+      mines: [...mines], revealed: [...revealed], gridIndex, activeTeam, correctByTeam, minesHitByTeam,
+    });
+    return () => { if (serializeStateRef) serializeStateRef.current = null; };
+  }, [serializeStateRef, mines, revealed, gridIndex, activeTeam, correctByTeam, minesHitByTeam]);
 
   const currentGrid = grids[Math.min(gridIndex, Math.max(0, grids.length - 1))];
   const topicRotation = grids.length > 1;

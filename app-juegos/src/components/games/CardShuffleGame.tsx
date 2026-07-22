@@ -56,7 +56,24 @@ const TENT_STRIPES: React.CSSProperties = {
   background: "repeating-linear-gradient(115deg, rgba(255,251,235,0.05) 0px, rgba(255,251,235,0.05) 26px, transparent 26px, transparent 52px)",
 };
 
-export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef }: GameProps) {
+// What "Save & Exit" snapshots and "Resume" restores — which round we're on and the running
+// per-team tallies (star hits, correct answers) that carry the final results screen. Deliberately
+// excludes in-round card positions/picks: resuming redraws a fresh set of cards for the same
+// round and starts it from "preview", rather than trying to replay a shuffle/pick in progress.
+type CardShuffleSnapshot = {
+  roundCount: number;
+  starHitsByTeam: Record<string | number, number>;
+  correctByTeam: Record<string | number, number>;
+};
+
+function validateCardShuffleSnapshot(raw: unknown): CardShuffleSnapshot | undefined {
+  const s = raw as Partial<CardShuffleSnapshot> | null | undefined;
+  if (!s || typeof s.roundCount !== "number" || s.roundCount < 0) return undefined;
+  return { roundCount: s.roundCount, starHitsByTeam: s.starHitsByTeam ?? {}, correctByTeam: s.correctByTeam ?? {} };
+}
+
+export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState }: GameProps) {
+  const resumed = useRef(validateCardShuffleSnapshot(initialGameState)).current;
   const TURN_SECONDS = 25;
   const NUM_CARDS = 4;
   const CARD_W = 130;
@@ -76,11 +93,12 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
     return pool.map((q, i) => ({ cid: i, isStar: i === starIdx, task: q.task || q.question || q.word || String(q) }));
   }, [shuffledQs]);
 
-  const [roundCount, setRoundCount] = useState(0);
-  const [cards, setCards] = useState(() => buildRound(0));
+  const [roundCount, setRoundCount] = useState(() => resumed?.roundCount ?? 0);
+  const [cards, setCards] = useState(() => buildRound(resumed?.roundCount ?? 0));
   const [cardSlots, setCardSlots] = useState([0, 1, 2, 3]);
   const [cardPos, setCardPos] = useState(() => [0, 1, 2, 3].map(slotPos));
-  const [phase, setPhase] = useState<"intro" | "preview" | "shuffling" | "picking" | "answering" | "reveal" | "final">("intro");
+  // A resumed game skips the intro and drops straight into "preview" for a freshly-drawn round.
+  const [phase, setPhase] = useState<"intro" | "preview" | "shuffling" | "picking" | "answering" | "reveal" | "final">(() => resumed ? "preview" : "intro");
 
   useEffect(() => {
     if (!forceFinalRef) return;
@@ -91,8 +109,15 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
   const [teamPicks, setTeamPicks] = useState<Record<string | number, { cardIdx: number, slot: number, correct: boolean }>>({});
   // Running per-team tallies across every round — teamPicks itself resets each round, so this is
   // what needs to survive to the final results screen.
-  const [starHitsByTeam, setStarHitsByTeam] = useState<Record<string | number, number>>({});
-  const [correctByTeam, setCorrectByTeam] = useState<Record<string | number, number>>({});
+  const [starHitsByTeam, setStarHitsByTeam] = useState<Record<string | number, number>>(() => resumed?.starHitsByTeam ?? {});
+  const [correctByTeam, setCorrectByTeam] = useState<Record<string | number, number>>(() => resumed?.correctByTeam ?? {});
+
+  useEffect(() => {
+    if (!serializeStateRef) return;
+    serializeStateRef.current = (): CardShuffleSnapshot => ({ roundCount, starHitsByTeam, correctByTeam });
+    return () => { if (serializeStateRef) serializeStateRef.current = null; };
+  }, [serializeStateRef, roundCount, starHitsByTeam, correctByTeam]);
+
   const [answeringTeamIdx, setAnsweringTeamIdx] = useState(0);
   const [showAns, setShowAns] = useState(false);
   const [transitioning, setTransitioning] = useState(false);

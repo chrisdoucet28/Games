@@ -68,26 +68,56 @@ function Starfield() {
 const PANEL_BG = "linear-gradient(160deg,#1E293B,#0F172A)";
 const PANEL_BORDER = "1.5px solid #38BDF855";
 
-export function SpyAmongUsGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef }: GameProps) {
+// What "Save & Exit" snapshots and "Resume" restores — which round we're on, who's currently the
+// spy, and the running cross-round tallies. Deliberately excludes in-round progress (who's peeked,
+// spoken, voted, or guessed so far) — resuming re-peeks everyone for the same round/spy instead of
+// trying to replay a discussion or vote in progress.
+type SpySnapshot = {
+  ri: number;
+  spyTeamIdx: number;
+  timesWasSpy: Record<string | number, number>;
+  spyWinsByTeam: Record<string | number, number>;
+  crewWinsByTeam: Record<string | number, number>;
+};
+
+function validateSpySnapshot(raw: unknown, teamCount: number, roundCount: number): SpySnapshot | undefined {
+  const s = raw as Partial<SpySnapshot> | null | undefined;
+  if (!s || typeof s.ri !== "number" || s.ri < 0 || s.ri >= Math.max(roundCount, 1)) return undefined;
+  if (typeof s.spyTeamIdx !== "number" || s.spyTeamIdx < 0 || s.spyTeamIdx >= teamCount) return undefined;
+  return {
+    ri: s.ri, spyTeamIdx: s.spyTeamIdx,
+    timesWasSpy: s.timesWasSpy ?? {}, spyWinsByTeam: s.spyWinsByTeam ?? {}, crewWinsByTeam: s.crewWinsByTeam ?? {},
+  };
+}
+
+export function SpyAmongUsGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState }: GameProps) {
   const DISCUSS_SECONDS = 30;
   const isTwoPlayer = teams.length === 2;
   const randomTeamIndex = () => Math.floor(Math.random() * Math.max(teams.length, 1));
+  const resumed = useRef(validateSpySnapshot(initialGameState, teams.length, questions.length)).current;
 
-  const [ri, setRi] = useState(0);
-  const [spyTeamIdx, setSpyTeamIdx] = useState(randomTeamIndex);
+  const [ri, setRi] = useState(() => resumed?.ri ?? 0);
+  const [spyTeamIdx, setSpyTeamIdx] = useState(() => resumed?.spyTeamIdx ?? randomTeamIndex());
   // Cross-round tallies for the final results screen — everything else here (votes, guesses) resets
   // every round. "Spy wins" = escaped the vote outright or guessed the real topic after being
   // caught; "crew wins" = correctly voted for the spy, or correctly guessed the spy's topic.
-  const [timesWasSpy, setTimesWasSpy] = useState<Record<string | number, number>>(() => ({ [teams[spyTeamIdx]?.id ?? ""]: 1 }));
-  const [spyWinsByTeam, setSpyWinsByTeam] = useState<Record<string | number, number>>({});
-  const [crewWinsByTeam, setCrewWinsByTeam] = useState<Record<string | number, number>>({});
-  const [phase, setPhase] = useState<Phase>("intro");
+  const [timesWasSpy, setTimesWasSpy] = useState<Record<string | number, number>>(() => resumed?.timesWasSpy ?? ({ [teams[spyTeamIdx]?.id ?? ""]: 1 }));
+  const [spyWinsByTeam, setSpyWinsByTeam] = useState<Record<string | number, number>>(() => resumed?.spyWinsByTeam ?? {});
+  const [crewWinsByTeam, setCrewWinsByTeam] = useState<Record<string | number, number>>(() => resumed?.crewWinsByTeam ?? {});
+  // A resumed mission skips the intro and re-peeks everyone for the same round/spy.
+  const [phase, setPhase] = useState<Phase>(() => resumed ? "peek" : "intro");
 
   useEffect(() => {
     if (!forceFinalRef) return;
     forceFinalRef.current = phase === "final" ? null : () => { setPhase("final"); return true; };
     return () => { if (forceFinalRef) forceFinalRef.current = null; };
   }, [forceFinalRef, phase]);
+
+  useEffect(() => {
+    if (!serializeStateRef) return;
+    serializeStateRef.current = (): SpySnapshot => ({ ri, spyTeamIdx, timesWasSpy, spyWinsByTeam, crewWinsByTeam });
+    return () => { if (serializeStateRef) serializeStateRef.current = null; };
+  }, [serializeStateRef, ri, spyTeamIdx, timesWasSpy, spyWinsByTeam, crewWinsByTeam]);
   const [peekIdx, setPeekIdx] = useState(0);
   const [revealed, setRevealed] = useState(false);
   const [votes, setVotes] = useState<Record<string | number, string | number>>({});
