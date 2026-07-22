@@ -4,9 +4,11 @@ import { denseRank, medalForRank } from "../../utils/ranking";
 interface ScoreBoardProps {
   teams: Team[];
   highlight?: string | number | null;
+  // Optional so games that don't have a theme handy (or don't want it) still work unstyled.
+  headingFont?: string;
 }
 
-export function ScoreBoard({ teams, highlight }: ScoreBoardProps) {
+export function ScoreBoard({ teams, highlight, headingFont }: ScoreBoardProps) {
   // Dense rank on score, not an array-index sort — two teams tied for the lead both show gold
   // instead of one arbitrarily reading as "winning" over the other.
   const ranked = denseRank(teams, t => t.score).sort((a, b) => b.value - a.value);
@@ -28,7 +30,7 @@ export function ScoreBoard({ teams, highlight }: ScoreBoardProps) {
           <div style={{ fontSize: "24px" }}>
             {medalForRank(rank)}
           </div>
-          <div style={{ fontWeight: "800", fontSize: "15px", color: highlight === t.id ? "white" : t.color.dark }}>
+          <div style={{ fontWeight: "800", fontSize: "15px", color: highlight === t.id ? "white" : t.color.dark, fontFamily: headingFont }}>
             {t.mascot ?? t.color.emoji} {t.name}
           </div>
           <div style={{ fontWeight: "900", fontSize: "28px", color: highlight === t.id ? "white" : t.color.dark }}>

@@ -96,7 +96,7 @@ export function ClassesScreen({ onBack, onResumeClass, onStartWithClass, theme }
               <div key={cls.id} style={{ background: "white", border: "2px solid #E5E7EB", borderRadius: "16px", padding: "16px 18px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "10px" }}>
                   <div>
-                    <div style={{ fontWeight: "900", fontSize: "17px", color: "#1E1B4B" }}>{cls.name}</div>
+                    <div style={{ fontWeight: "900", fontSize: "17px", color: "#1E1B4B", fontFamily: theme.headingFont }}>{cls.name}</div>
                     {cls.school && <div style={{ fontSize: "12px", color: "#6B7280", fontWeight: "600", marginTop: "2px" }}>🏫 {cls.school}</div>}
                   </div>
                   <button

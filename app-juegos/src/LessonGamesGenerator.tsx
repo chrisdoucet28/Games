@@ -494,7 +494,7 @@ export default function LessonGamesGenerator() {
             <div key={g.id} style={{ background: "rgba(255,255,255,0.08)", borderRadius: "12px", padding: "10px 12px", border: "1px solid rgba(255,255,255,0.15)", display: "flex", flexDirection: "column", gap: "4px", backdropFilter: "blur(6px)" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "9px" }}>
                 <span style={{ fontSize: "20px", flexShrink: 0 }}>{g.icon}</span>
-                <span style={{ color: "rgba(255,255,255,0.9)", fontWeight: "600", fontSize: "13px", textAlign: "left", lineHeight: 1.3 }}>{g.name}</span>
+                <span style={{ color: "rgba(255,255,255,0.9)", fontWeight: "600", fontSize: "13px", textAlign: "left", lineHeight: 1.3, fontFamily: theme.headingFont }}>{g.name}</span>
               </div>
               <span style={{ color: "rgba(255,255,255,0.55)", fontSize: "11px", textAlign: "left", lineHeight: 1.35 }}>{g.tag}</span>
             </div>
@@ -555,7 +555,7 @@ export default function LessonGamesGenerator() {
             <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px" }}>
               <div style={{ background: theme.accentSolid, color: "white", borderRadius: "50%", width: "28px", height: "28px", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "900", fontSize: "14px", flexShrink: 0 }}>1</div>
               <div>
-                <div style={{ fontWeight: "800", color: "#1E1B4B", fontSize: "16px" }}>What level is your class?</div>
+                <div style={{ fontWeight: "800", color: "#1E1B4B", fontSize: "16px", fontFamily: theme.headingFont }}>What level is your class?</div>
                 <div style={{ color: "#6B7280", fontSize: "12px", marginTop: "2px" }}>Filters the topic list below</div>
               </div>
             </div>
@@ -577,7 +577,7 @@ export default function LessonGamesGenerator() {
             <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px" }}>
               <div style={{ background: theme.accentSolid, color: "white", borderRadius: "50%", width: "28px", height: "28px", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "900", fontSize: "14px", flexShrink: 0 }}>2</div>
               <div>
-                <div style={{ fontWeight: "800", color: "#1E1B4B", fontSize: "16px" }}>Grammar, Vocabulary, or Topics?</div>
+                <div style={{ fontWeight: "800", color: "#1E1B4B", fontSize: "16px", fontFamily: theme.headingFont }}>Grammar, Vocabulary, or Topics?</div>
                 <div style={{ color: "#6B7280", fontSize: "12px", marginTop: "2px" }}>Filters the topic list below</div>
               </div>
             </div>
@@ -601,7 +601,7 @@ export default function LessonGamesGenerator() {
             <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px" }}>
               <div style={{ background: theme.accentSolid, color: "white", borderRadius: "50%", width: "28px", height: "28px", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "900", fontSize: "14px", flexShrink: 0 }}>3</div>
               <div>
-                <div style={{ fontWeight: "800", color: "#1E1B4B", fontSize: "16px" }}>Choose topic mix</div>
+                <div style={{ fontWeight: "800", color: "#1E1B4B", fontSize: "16px", fontFamily: theme.headingFont }}>Choose topic mix</div>
                 <div style={{ color: "#6B7280", fontSize: "12px", marginTop: "2px" }}>
                   {filteredTopics.length > 0
                     ? `${filteredTopics.length} topic${filteredTopics.length !== 1 ? "s" : ""} shown - ${selectedTopics.length} selected`
@@ -676,7 +676,7 @@ export default function LessonGamesGenerator() {
           <div style={{ background: "white", border: "2px solid #E0E7FF", borderRadius: "16px", padding: "20px", marginBottom: "16px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px" }}>
               <div style={{ background: theme.accentSolid, color: "white", borderRadius: "50%", width: "28px", height: "28px", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "900", fontSize: "14px", flexShrink: 0 }}>4</div>
-              <div style={{ fontWeight: "800", color: "#1E1B4B", fontSize: "16px" }}>How many teams?</div>
+              <div style={{ fontWeight: "800", color: "#1E1B4B", fontSize: "16px", fontFamily: theme.headingFont }}>How many teams?</div>
             </div>
             <div style={{ display: "flex", gap: "10px", marginBottom: "16px" }}>
               {[2, 3, 4, 5].map(n => (
@@ -793,7 +793,7 @@ export default function LessonGamesGenerator() {
           </div>
         </div>
 
-        <ScoreBoard teams={teams} />
+        <ScoreBoard teams={teams} headingFont={theme.headingFont} />
         <div style={{ textAlign: "center", marginTop: "10px", display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "20px" }}>
             <button onClick={() => setTeams(ts => ts.map(t => ({ ...t, score: 0 })))} style={{ background: "none", border: "2px solid #D1D5DB", borderRadius: "20px", padding: "4px 16px", fontWeight: "700", fontSize: "12px", color: "#9CA3AF", cursor: "pointer" }}>🔄 Reset all scores to 0</button>
             <button onClick={() => setScreen("setup")} style={{ background: "none", border: "2px solid #D1D5DB", borderRadius: "20px", padding: "4px 16px", fontWeight: "700", fontSize: "12px", color: "#9CA3AF", cursor: "pointer" }}>⚙️ Edit teams & settings</button>
@@ -805,7 +805,7 @@ export default function LessonGamesGenerator() {
           {GAME_MODES.map(g => (
             <div key={g.id} onClick={() => !loadingGame && startGame(g)} style={{ background: "white", border: `3px solid ${g.color}`, borderRadius: "18px", padding: "20px", cursor: "pointer", transition: "all 0.2s" }}>
               <div style={{ fontSize: "40px", marginBottom: "10px" }}>{g.icon}</div>
-              <div style={{ fontWeight: "900", fontSize: "17px", color: "#1E1B4B", marginBottom: "4px" }}>{g.name}</div>
+              <div style={{ fontWeight: "900", fontSize: "17px", color: "#1E1B4B", marginBottom: "4px", fontFamily: theme.headingFont }}>{g.name}</div>
               <div style={{ fontSize: "13px", color: "#6B7280", marginBottom: "8px" }}>{g.desc}</div>
               <div style={{ fontSize: "12px", color: g.color, fontWeight: "700", lineHeight: 1.4, borderTop: `1px solid ${g.color}33`, paddingTop: "8px" }}>🗣️ {g.tag}</div>
             </div>
@@ -878,7 +878,7 @@ export default function LessonGamesGenerator() {
           </div>
         </div>
         <div style={{ padding: "16px", maxWidth: "900px", margin: "0 auto" }}>
-          <ScoreBoard teams={teams} />
+          <ScoreBoard teams={teams} headingFont={theme.headingFont} />
           <div style={{ background: "white", borderRadius: "20px", padding: "20px", marginTop: "16px" }}>
             {selectedGame.id === "auction" && <AuctionGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
             {selectedGame.id === "minefield" && <MinefieldGame questions={[]} gridData={minefieldGridData} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
