@@ -200,6 +200,7 @@ export default function LessonGamesGenerator() {
     setSelectedGame(GAME_MODES.find(g => g.id === cls.selected_game) ?? null);
     setQuestions(cls.questions_snapshot ?? []);
     setMinefieldGridData((cls.minefield_grid_data as MinefieldGridData | MinefieldGridData[] | null) ?? null);
+    setResumeGameState(cls.game_state ?? null);
     setScreen("game");
   };
 
@@ -220,7 +221,7 @@ export default function LessonGamesGenerator() {
         focus,
         questionsSnapshot: questions,
         minefieldGridData,
-        gameState: null, // per-game full board-state capture lands in a later pass
+        gameState: serializeStateRef.current?.() ?? null,
       });
       setSaveStatus("saved");
       setTimeout(() => { setSaveStatus("idle"); setScreen("classes"); }, 900);
@@ -310,6 +311,9 @@ export default function LessonGamesGenerator() {
     setSelectedGame(mode);
     setLoadingGame(true);
     setLoadError("");
+    // Every fresh game launch (as opposed to "Resume") starts cold — clears out any snapshot left
+    // over from an earlier resume in this same session so it can never leak into an unrelated game.
+    setResumeGameState(null);
 
     try {
       const selectedEntries = getSelectedTopicEntries(selectedTopics);
@@ -412,6 +416,18 @@ export default function LessonGamesGenerator() {
   // top-bar "End Game" button can push it into its own final/results phase first, instead of
   // jumping straight past it to the app-level results screen.
   const forceFinalRef = useRef<(() => boolean) | null>(null);
+
+  // Phase 2: registered by whichever full-board-state game is currently mounted (see
+  // GameProps.serializeStateRef) so "Save & Exit" can capture its exact in-progress state
+  // (cracked locks, revealed tiles, etc.) instead of always saving game_state as null. Only the
+  // 8 full-state-tier games register into this — the rest leave it untouched, so saving under
+  // them just keeps behaving like session-level-only save (round restarts on resume).
+  const serializeStateRef = useRef<(() => unknown) | null>(null);
+  // The game_state snapshot restored by "Resume" (see resumeClass below), fed back in as
+  // initialGameState so the freshly-mounted game can seed itself from it instead of starting
+  // cold. Cleared whenever a game is started fresh (see startGame) so a stale snapshot from an
+  // earlier resume can never leak into an unrelated new game.
+  const [resumeGameState, setResumeGameState] = useState<unknown>(null);
 
   const handleGameEnd = () => {
     // The class's running scores persist either way; a naturally-finished game just has nothing
@@ -829,7 +845,7 @@ export default function LessonGamesGenerator() {
             {selectedGame.id === "hotseat" && <HotSeatGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
             {selectedGame.id === "spy" && <SpyAmongUsGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
             {selectedGame.id === "battleship" && <BattleshipGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-            {selectedGame.id === "vault" && <VaultHeistGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
+            {selectedGame.id === "vault" && <VaultHeistGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
             {selectedGame.id === "cards" && <CardShuffleGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
             {selectedGame.id === "castle" && <CastleGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
             {selectedGame.id === "hill" && <KingOfHillGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} onUpdateScore={updateScore} onEnd={handleGameEnd} />}

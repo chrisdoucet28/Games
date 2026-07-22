@@ -52,6 +52,31 @@ type Difficulty = "easy" | "medium" | "hard";
 type WinBanner = { teamName: string; color: string; rank: number; bonus: number; key: number };
 type OrderEntry = { teamIdx: number; roll: number };
 
+// What "Save & Exit" snapshots and "Resume" restores. Deliberately does NOT include the
+// in-flight question/category/timer — resuming just redraws a fresh question for whichever team
+// was up next, at the lock they were already on. That's a much smaller, sturdier surface than
+// trying to replay the exact reveal/answer/timer moment a save happened to land on.
+type VaultHeistSnapshot = {
+  vaultLocks: Record<string | number, number>;
+  turnOrder: number[];
+  orderPos: number;
+  difficulty: Difficulty;
+  finishOrder: (string | number)[];
+};
+
+function validateSnapshot(raw: unknown, teamCount: number): VaultHeistSnapshot | undefined {
+  const s = raw as Partial<VaultHeistSnapshot> | null | undefined;
+  if (!s || !Array.isArray(s.turnOrder) || s.turnOrder.length !== teamCount) return undefined;
+  if (typeof s.orderPos !== "number" || s.orderPos < 0 || s.orderPos >= teamCount) return undefined;
+  return {
+    vaultLocks: s.vaultLocks ?? {},
+    turnOrder: s.turnOrder,
+    orderPos: s.orderPos,
+    difficulty: s.difficulty ?? "medium",
+    finishOrder: s.finishOrder ?? [],
+  };
+}
+
 function formatCategory(tag: string): string {
   return tag.replace(/-/g, " ").toUpperCase();
 }
@@ -89,27 +114,30 @@ function LockRow({ cracked, total, justChanged }: { cracked: number; total: numb
   );
 }
 
-export function VaultHeistGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef }: GameProps) {
+export function VaultHeistGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState }: GameProps) {
   const rewriteQs = useRef(questions.filter(q => q.type === "rewrite sentences")).current;
   const categories = useRef([...new Set(rewriteQs.map(q => q.transform).filter((c): c is string => !!c))]).current;
   const pools = useRef(buildDrawPools(rewriteQs, categories, teams.map(t => t.id))).current;
+  const resumed = useRef(validateSnapshot(initialGameState, teams.length)).current;
 
   const [vaultLocks, setVaultLocks] = useState<Record<string | number, number>>(
-    () => Object.fromEntries(teams.map(t => [t.id, 0]))
+    () => resumed?.vaultLocks ?? Object.fromEntries(teams.map(t => [t.id, 0]))
   );
 
   // turnOrder[pos] = index into `teams`, established once by the dice roll before play begins.
   // orderPos is a position WITHIN that order — since a team keeps its turn on every correct
   // answer now (no longer round-robin per question), the dice roll is what keeps whichever team
   // rolls highest from having a permanent structural advantage as the perpetual first-mover.
-  const [turnOrder, setTurnOrder] = useState<number[]>(() => teams.map((_, i) => i));
-  const [orderPos, setOrderPos] = useState(0);
+  const [turnOrder, setTurnOrder] = useState<number[]>(() => resumed?.turnOrder ?? teams.map((_, i) => i));
+  const [orderPos, setOrderPos] = useState(() => resumed?.orderPos ?? 0);
   const [diceValues, setDiceValues] = useState<(number | null)[]>(() => teams.map(() => null));
   const [rollDone, setRollDone] = useState(false);
   const [finalOrder, setFinalOrder] = useState<OrderEntry[] | null>(null);
 
-  const [phase, setPhase] = useState<Phase>("intro");
-  const [difficulty, setDifficulty] = useState<Difficulty>("medium");
+  // A resumed vault skips the intro/roll screens entirely and drops straight into "reveal" for
+  // whichever team was up — bootstrapped once below, after finishOrderRef is seeded.
+  const [phase, setPhase] = useState<Phase>(() => resumed ? "reveal" : "intro");
+  const [difficulty, setDifficulty] = useState<Difficulty>(() => resumed?.difficulty ?? "medium");
   const [currentCategory, setCurrentCategory] = useState<string | null>(null);
   const [currentQuestion, setCurrentQuestion] = useState<QuestionData | null>(null);
   const [showAns, setShowAns] = useState(false);
@@ -119,7 +147,7 @@ export function VaultHeistGame({ questions, teams, onUpdateScore, onEnd, forceFi
   const fxId = useRef(0);
   // Order teams finish in — index 0 is 1st place. Drives both the rank-based bonus and the
   // gameover standings; a team's id lands here exactly once, the moment they crack lock 5.
-  const finishOrderRef = useRef<(string | number)[]>([]);
+  const finishOrderRef = useRef<(string | number)[]>(resumed?.finishOrder ?? []);
 
   useEffect(() => {
     if (!forceFinalRef) return;
@@ -203,6 +231,24 @@ export function VaultHeistGame({ questions, teams, onUpdateScore, onEnd, forceFi
     setPhase("reveal");
     setTimeout(() => setPhase(p => (p === "reveal" ? "answer" : p)), REVEAL_MS);
   }, [pickCategory, pickQuestion, teams, turnOrder, vaultLocks]);
+
+  // Runs exactly once, only for a resumed vault — draws a fresh question for whichever team/lock
+  // was active when it was saved, instead of trying to replay the exact card that was on screen.
+  const bootstrapped = useRef(false);
+  useEffect(() => {
+    if (!resumed || bootstrapped.current) return;
+    bootstrapped.current = true;
+    beginReveal(resumed.orderPos);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (!serializeStateRef) return;
+    serializeStateRef.current = (): VaultHeistSnapshot => ({
+      vaultLocks, turnOrder, orderPos, difficulty, finishOrder: finishOrderRef.current,
+    });
+    return () => { if (serializeStateRef) serializeStateRef.current = null; };
+  }, [serializeStateRef, vaultLocks, turnOrder, orderPos, difficulty]);
 
   // Hands the turn to the next team in the rolled order — on a wrong answer, or when the active
   // team just finished and has nothing left to crack. Skips any team that's already finished
