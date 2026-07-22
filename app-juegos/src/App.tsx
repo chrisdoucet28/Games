@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import LessonGamesGenerator from './LessonGamesGenerator';
 import { AuthScreen } from './components/shared/AuthScreen';
 import { useAuth } from './hooks/useAuth';
@@ -54,10 +53,6 @@ function App() {
 
 function AuthenticatedApp() {
   const { session, loading } = useAuth();
-  // A temporary escape hatch for testing while auth is still being verified — not tied to any
-  // real account, so nothing typed here can ever be saved. Resets on refresh (no persistence),
-  // and should go away once login is reliably working end to end.
-  const [guestMode, setGuestMode] = useState(false);
 
   if (loading) {
     return (
@@ -67,21 +62,15 @@ function AuthenticatedApp() {
     );
   }
 
-  if (!session && !guestMode) {
-    return <AuthScreen onSkip={() => setGuestMode(true)} />;
+  if (!session) {
+    return <AuthScreen />;
   }
 
   return (
     <div>
-      {session ? (
-        <StatusBadge action="Log Out" onAction={() => supabase.auth.signOut()}>
-          🟢 Logged in as {session.user.email}
-        </StatusBadge>
-      ) : (
-        <StatusBadge action="Log In" onAction={() => setGuestMode(false)}>
-          ⚠️ Guest mode — nothing will be saved
-        </StatusBadge>
-      )}
+      <StatusBadge action="Log Out" onAction={() => supabase.auth.signOut()}>
+        🟢 Logged in as {session.user.email}
+      </StatusBadge>
       <LessonGamesGenerator />
     </div>
   );

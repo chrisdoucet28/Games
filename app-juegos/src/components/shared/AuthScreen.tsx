@@ -3,7 +3,7 @@ import { supabase } from "../../lib/supabaseClient";
 
 type Mode = "sign-in" | "sign-up";
 
-export function AuthScreen({ onSkip }: { onSkip: () => void }) {
+export function AuthScreen() {
   const [mode, setMode] = useState<Mode>("sign-in");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -116,13 +116,6 @@ export function AuthScreen({ onSkip }: { onSkip: () => void }) {
             style={{ width: "100%", background: "white", color: "#1F2937", border: "none", borderRadius: "12px", padding: "12px", fontSize: "14px", fontWeight: "700", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}
           >
             <span aria-hidden="true">🔵</span> Continue with Google
-          </button>
-
-          <button
-            type="button" onClick={onSkip}
-            style={{ width: "100%", background: "none", border: "none", color: "#8B85B8", fontSize: "12px", marginTop: "16px", cursor: "pointer", textDecoration: "underline" }}
-          >
-            Skip for now — continue as guest (progress won't be saved)
           </button>
         </div>
       </div>
