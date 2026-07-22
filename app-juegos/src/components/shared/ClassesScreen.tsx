@@ -15,6 +15,7 @@ export function ClassesScreen({ onBack, onResumeClass, onStartWithClass }: Props
   const [classes, setClasses] = useState<SavedClass[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [newName, setNewName] = useState("");
+  const [newSchool, setNewSchool] = useState("");
   const [creating, setCreating] = useState(false);
 
   const refresh = () => {
@@ -31,8 +32,9 @@ export function ClassesScreen({ onBack, onResumeClass, onStartWithClass }: Props
     setCreating(true);
     setError(null);
     try {
-      const created = await createClass(newName.trim());
+      const created = await createClass(newName.trim(), newSchool.trim() || null);
       setNewName("");
+      setNewSchool("");
       setClasses(prev => (prev ? [created, ...prev] : [created]));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Couldn't create the class.");
@@ -61,10 +63,14 @@ export function ClassesScreen({ onBack, onResumeClass, onStartWithClass }: Props
           <p style={{ color: "#6B7280", marginTop: "8px" }}>Team scores carry over each time you return to a class. Pick one up where you left off, or start a fresh game with the same roster.</p>
         </div>
 
-        <form onSubmit={handleCreate} style={{ display: "flex", gap: "8px", marginBottom: "20px" }}>
+        <form onSubmit={handleCreate} style={{ display: "flex", gap: "8px", marginBottom: "20px", flexWrap: "wrap" }}>
           <input
             value={newName} onChange={e => setNewName(e.target.value)} placeholder="e.g. Tuesday B2 Advanced"
-            style={{ flex: 1, padding: "12px 14px", borderRadius: "12px", border: "2px solid #E5E7EB", fontSize: "14px" }}
+            style={{ flex: "2 1 200px", padding: "12px 14px", borderRadius: "12px", border: "2px solid #E5E7EB", fontSize: "14px" }}
+          />
+          <input
+            value={newSchool} onChange={e => setNewSchool(e.target.value)} placeholder="School (optional)"
+            style={{ flex: "1 1 140px", padding: "12px 14px", borderRadius: "12px", border: "2px solid #E5E7EB", fontSize: "14px" }}
           />
           <button
             type="submit" disabled={creating || !newName.trim()}
@@ -87,7 +93,10 @@ export function ClassesScreen({ onBack, onResumeClass, onStartWithClass }: Props
             {classes.map(cls => (
               <div key={cls.id} style={{ background: "white", border: "2px solid #E5E7EB", borderRadius: "16px", padding: "16px 18px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "10px" }}>
-                  <div style={{ fontWeight: "900", fontSize: "17px", color: "#1E1B4B" }}>{cls.name}</div>
+                  <div>
+                    <div style={{ fontWeight: "900", fontSize: "17px", color: "#1E1B4B" }}>{cls.name}</div>
+                    {cls.school && <div style={{ fontSize: "12px", color: "#6B7280", fontWeight: "600", marginTop: "2px" }}>🏫 {cls.school}</div>}
+                  </div>
                   <button
                     onClick={() => handleDelete(cls.id)} title="Delete class"
                     style={{ background: "none", border: "none", color: "#9CA3AF", cursor: "pointer", fontSize: "14px", padding: "2px 4px" }}

@@ -80,13 +80,27 @@ export interface TeamColor {
     gridData?: any; // Específico para el Minefield
   }
 
+  // A teacher's own personalization — separate from auth.users, which only holds login info.
+  // Auto-created (blank) by a database trigger the moment an account signs up, so the app never
+  // needs to check-and-create one before reading/writing display_name.
+  export interface Profile {
+    id: string;
+    display_name: string | null;
+    created_at: string;
+    updated_at: string;
+  }
+
   // A persistent, named "class" a teacher returns to repeatedly (e.g. "Tuesday B2 Advanced").
   // Team scores accumulate across sessions; at most one unfinished game is tracked at a time
   // (in_progress + the fields after it) — no history of past finished games is kept.
+  // `school` lives here rather than on the teacher's profile — a teacher can work at more than
+  // one school (or have private students), so "which school" is a property of a specific class,
+  // not a single fixed fact about the teacher.
   export interface SavedClass {
     id: string;
     user_id: string;
     name: string;
+    school: string | null;
     teams: Team[];
     in_progress: boolean;
     selected_topics: string[] | null;

@@ -7,6 +7,7 @@ import { TOPIC_OPTIONS, TOPIC_LIBRARY } from "./data/topics";
 import { ScoreBoard } from "./components/shared/ScoreBoard";
 import { Confetti } from "./components/shared/Confetti";
 import { ClassesScreen } from "./components/shared/ClassesScreen";
+import { ProfileScreen } from "./components/shared/ProfileScreen";
 import { saveProgress, clearProgress, listClasses, createClass } from "./lib/classes";
 import { denseRank, medalForRank } from "./utils/ranking";
 import { AuctionGame } from "./components/games/AuctionGame";
@@ -116,7 +117,7 @@ const buildMinefieldGrids = (entries: TopicLibraryEntry[]) =>
   entries.map(entry => entry.minefieldGrid).filter((grid): grid is MinefieldGridData => Boolean(grid));
 
 export default function LessonGamesGenerator() {
-  const [screen, setScreen] = useState<"welcome" | "classes" | "setup" | "game-select" | "game" | "results">("welcome");
+  const [screen, setScreen] = useState<"welcome" | "classes" | "profile" | "setup" | "game-select" | "game" | "results">("welcome");
   // The class this session is tied to, if any. Games started via "Start a Game" (not through "My
   // Classes") leave this null — but "Save & Exit" is still available; clicking it with no class
   // linked opens showSavePicker so the teacher can pick/create one on the spot instead of losing
@@ -258,7 +259,7 @@ export default function LessonGamesGenerator() {
     setPickerBusy(true);
     setPickerError(null);
     try {
-      const created = await createClass(pickerNewName.trim());
+      const created = await createClass(pickerNewName.trim(), null);
       setPickerNewName("");
       setShowSavePicker(false);
       await saveToClass(created.id);
@@ -487,6 +488,7 @@ export default function LessonGamesGenerator() {
         <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
           <button onClick={() => { setActiveClassId(null); setScreen("setup"); }} style={{ background: "linear-gradient(135deg,#F59E0B,#EF4444)", color: "white", border: "none", borderRadius: "16px", padding: "18px 56px", fontSize: "20px", fontWeight: "900", cursor: "pointer", boxShadow: "0 8px 32px rgba(239,68,68,0.45)", letterSpacing: "0.01em" }}>🚀 Start a Game</button>
           <button onClick={() => setScreen("classes")} style={{ background: "rgba(255,255,255,0.12)", border: "2px solid rgba(255,255,255,0.3)", color: "white", borderRadius: "16px", padding: "18px 40px", fontSize: "18px", fontWeight: "800", cursor: "pointer" }}>📚 My Classes</button>
+          <button onClick={() => setScreen("profile")} style={{ background: "rgba(255,255,255,0.12)", border: "2px solid rgba(255,255,255,0.3)", color: "white", borderRadius: "16px", padding: "18px 40px", fontSize: "18px", fontWeight: "800", cursor: "pointer" }}>👤 My Profile</button>
         </div>
       </div>
     </div>
@@ -498,6 +500,10 @@ export default function LessonGamesGenerator() {
       onResumeClass={resumeClass}
       onStartWithClass={startWithClass}
     />
+  );
+
+  if (screen === "profile") return (
+    <ProfileScreen onBack={() => setScreen("welcome")} />
   );
 
   if (screen === "setup") {
