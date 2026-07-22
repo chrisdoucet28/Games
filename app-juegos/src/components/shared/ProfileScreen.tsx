@@ -50,7 +50,7 @@ export function ProfileScreen({ onBack, theme, onThemeChange }: Props) {
         <button onClick={onBack} style={{ background: "none", border: `2px solid ${theme.accentSolid}`, color: theme.accentSolid, borderRadius: "10px", padding: "8px 16px", cursor: "pointer", fontWeight: "700", marginBottom: "20px" }}>← Back</button>
 
         <div style={{ textAlign: "center", marginBottom: "24px" }}>
-          <h2 style={{ fontSize: "30px", fontWeight: "900", color: "#1E1B4B", margin: 0 }}>👤 My Profile</h2>
+          <h2 style={{ fontSize: "30px", fontWeight: "900", color: "#1E1B4B", margin: 0, fontFamily: theme.headingFont }}>👤 My Profile</h2>
           <p style={{ color: "#6B7280", marginTop: "8px" }}>Just the basics for now — more personalization is on the way.</p>
         </div>
 

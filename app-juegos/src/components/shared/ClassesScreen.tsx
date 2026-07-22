@@ -61,7 +61,7 @@ export function ClassesScreen({ onBack, onResumeClass, onStartWithClass, theme }
         <button onClick={onBack} style={{ background: "none", border: `2px solid ${theme.accentSolid}`, color: theme.accentSolid, borderRadius: "10px", padding: "8px 16px", cursor: "pointer", fontWeight: "700", marginBottom: "20px" }}>← Back</button>
 
         <div style={{ textAlign: "center", marginBottom: "24px" }}>
-          <h2 style={{ fontSize: "30px", fontWeight: "900", color: "#1E1B4B", margin: 0 }}>📚 My Classes</h2>
+          <h2 style={{ fontSize: "30px", fontWeight: "900", color: "#1E1B4B", margin: 0, fontFamily: theme.headingFont }}>📚 My Classes</h2>
           <p style={{ color: "#6B7280", marginTop: "8px" }}>Team scores carry over each time you return to a class. Pick one up where you left off, or start a fresh game with the same roster.</p>
         </div>
 

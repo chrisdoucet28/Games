@@ -473,7 +473,7 @@ export default function LessonGamesGenerator() {
       <div style={{ maxWidth: "680px", width: "100%", textAlign: "center", flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
         <div style={{ marginBottom: "28px" }}>
           <div style={{ fontSize: "64px", marginBottom: "14px", filter: "drop-shadow(0 4px 16px rgba(0,0,0,0.4))" }}>🎮</div>
-          <h1 style={{ fontSize: "clamp(30px,5.5vw,52px)", fontWeight: "900", color: "white", margin: "0 0 10px", letterSpacing: "-0.02em", lineHeight: 1.1, textShadow: "0 2px 24px rgba(0,0,0,0.4)" }}>
+          <h1 style={{ fontSize: "clamp(30px,5.5vw,52px)", fontWeight: "900", color: "white", margin: "0 0 10px", letterSpacing: "-0.02em", lineHeight: 1.1, textShadow: "0 2px 24px rgba(0,0,0,0.4)", fontFamily: theme.headingFont }}>
             Lesson Games<br /><span style={{ color: "#FCD34D" }}>Generator</span>
           </h1>
           <p style={{ color: "#C4B5FD", fontSize: "clamp(15px,2.5vw,18px)", margin: "0", lineHeight: 1.7, maxWidth: "500px", marginLeft: "auto", marginRight: "auto" }}>
@@ -544,16 +544,16 @@ export default function LessonGamesGenerator() {
     return (
       <div style={{ minHeight: "100vh", background: "#F8F7FF", padding: "20px", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
         <div style={{ maxWidth: "720px", margin: "0 auto" }}>
-          <button onClick={() => { setActiveClassId(null); setScreen("welcome"); }} style={{ background: "none", border: "2px solid #6366F1", color: "#6366F1", borderRadius: "10px", padding: "8px 16px", cursor: "pointer", fontWeight: "700", marginBottom: "20px" }}>← Back</button>
-          
+          <button onClick={() => { setActiveClassId(null); setScreen("welcome"); }} style={{ background: "none", border: `2px solid ${theme.accentSolid}`, color: theme.accentSolid, borderRadius: "10px", padding: "8px 16px", cursor: "pointer", fontWeight: "700", marginBottom: "20px" }}>← Back</button>
+
           <div style={{ textAlign: "center", marginBottom: "28px" }}>
-            <h2 style={{ fontSize: "32px", fontWeight: "900", color: "#1E1B4B", margin: 0 }}>⚙️ Game Setup</h2>
+            <h2 style={{ fontSize: "32px", fontWeight: "900", color: "#1E1B4B", margin: 0, fontFamily: theme.headingFont }}>⚙️ Game Setup</h2>
             <p style={{ color: "#6B7280", marginTop: "8px" }}>Set up your class, then pick one or more topics and a game</p>
           </div>
 
           <div style={{ background: "white", border: "2px solid #E0E7FF", borderRadius: "16px", padding: "20px", marginBottom: "16px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px" }}>
-              <div style={{ background: "#6366F1", color: "white", borderRadius: "50%", width: "28px", height: "28px", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "900", fontSize: "14px", flexShrink: 0 }}>1</div>
+              <div style={{ background: theme.accentSolid, color: "white", borderRadius: "50%", width: "28px", height: "28px", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "900", fontSize: "14px", flexShrink: 0 }}>1</div>
               <div>
                 <div style={{ fontWeight: "800", color: "#1E1B4B", fontSize: "16px" }}>What level is your class?</div>
                 <div style={{ color: "#6B7280", fontSize: "12px", marginTop: "2px" }}>Filters the topic list below</div>
@@ -575,7 +575,7 @@ export default function LessonGamesGenerator() {
               ))}
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px" }}>
-              <div style={{ background: "#6366F1", color: "white", borderRadius: "50%", width: "28px", height: "28px", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "900", fontSize: "14px", flexShrink: 0 }}>2</div>
+              <div style={{ background: theme.accentSolid, color: "white", borderRadius: "50%", width: "28px", height: "28px", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "900", fontSize: "14px", flexShrink: 0 }}>2</div>
               <div>
                 <div style={{ fontWeight: "800", color: "#1E1B4B", fontSize: "16px" }}>Grammar, Vocabulary, or Topics?</div>
                 <div style={{ color: "#6B7280", fontSize: "12px", marginTop: "2px" }}>Filters the topic list below</div>
@@ -584,9 +584,9 @@ export default function LessonGamesGenerator() {
             <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
               {FOCUS_META.map(f => (
                 <button key={f.id} onClick={() => setFocus(f.id)} style={{
-                  flex: 1, minWidth: "120px", background: focus === f.id ? "#6366F1" : "white",
+                  flex: 1, minWidth: "120px", background: focus === f.id ? theme.accentSolid : "white",
                   color: focus === f.id ? "white" : "#374151",
-                  border: `3px solid ${focus === f.id ? "#6366F1" : "#D1D5DB"}`,
+                  border: `3px solid ${focus === f.id ? theme.accentSolid : "#D1D5DB"}`,
                   borderRadius: "12px", padding: "14px 12px", cursor: "pointer",
                   textAlign: "left", transition: "all 0.15s"
                 }}>
@@ -599,7 +599,7 @@ export default function LessonGamesGenerator() {
 
           <div style={{ background: "white", border: "2px solid #E0E7FF", borderRadius: "16px", padding: "20px", marginBottom: "16px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px" }}>
-              <div style={{ background: "#6366F1", color: "white", borderRadius: "50%", width: "28px", height: "28px", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "900", fontSize: "14px", flexShrink: 0 }}>3</div>
+              <div style={{ background: theme.accentSolid, color: "white", borderRadius: "50%", width: "28px", height: "28px", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "900", fontSize: "14px", flexShrink: 0 }}>3</div>
               <div>
                 <div style={{ fontWeight: "800", color: "#1E1B4B", fontSize: "16px" }}>Choose topic mix</div>
                 <div style={{ color: "#6B7280", fontSize: "12px", marginTop: "2px" }}>
@@ -675,12 +675,12 @@ export default function LessonGamesGenerator() {
 
           <div style={{ background: "white", border: "2px solid #E0E7FF", borderRadius: "16px", padding: "20px", marginBottom: "16px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px" }}>
-              <div style={{ background: "#6366F1", color: "white", borderRadius: "50%", width: "28px", height: "28px", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "900", fontSize: "14px", flexShrink: 0 }}>4</div>
+              <div style={{ background: theme.accentSolid, color: "white", borderRadius: "50%", width: "28px", height: "28px", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "900", fontSize: "14px", flexShrink: 0 }}>4</div>
               <div style={{ fontWeight: "800", color: "#1E1B4B", fontSize: "16px" }}>How many teams?</div>
             </div>
             <div style={{ display: "flex", gap: "10px", marginBottom: "16px" }}>
               {[2, 3, 4, 5].map(n => (
-                <button key={n} onClick={() => setNumTeams(n)} style={{ background: numTeams === n ? "#6366F1" : "white", color: numTeams === n ? "white" : "#374151", border: `3px solid ${numTeams === n ? "#6366F1" : "#D1D5DB"}`, borderRadius: "12px", padding: "10px 24px", fontSize: "18px", fontWeight: "800", cursor: "pointer" }}>{n}</button>
+                <button key={n} onClick={() => setNumTeams(n)} style={{ background: numTeams === n ? theme.accentSolid : "white", color: numTeams === n ? "white" : "#374151", border: `3px solid ${numTeams === n ? theme.accentSolid : "#D1D5DB"}`, borderRadius: "12px", padding: "10px 24px", fontSize: "18px", fontWeight: "800", cursor: "pointer" }}>{n}</button>
               ))}
             </div>
             <div style={{ display: "grid", gridTemplateColumns: `repeat(auto-fit,minmax(${numTeams > 3 ? "160px" : "180px"},1fr))`, gap: "12px" }}>
@@ -767,7 +767,7 @@ export default function LessonGamesGenerator() {
 
           {loadError && <div style={{ color: "#DC2626", fontWeight: "800", textAlign: "center", marginBottom: "12px" }}>{loadError}</div>}
 
-          <button onClick={handleSetup} disabled={selectedTopics.length === 0} style={{ width: "100%", background: selectedTopics.length === 0 ? "#CBD5E1" : "linear-gradient(135deg,#6366F1,#8B5CF6)", color: "white", border: "none", borderRadius: "16px", padding: "18px", fontSize: "20px", fontWeight: "900", cursor: selectedTopics.length === 0 ? "not-allowed" : "pointer" }}>
+          <button onClick={handleSetup} disabled={selectedTopics.length === 0} style={{ width: "100%", background: selectedTopics.length === 0 ? "#CBD5E1" : `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "16px", padding: "18px", fontSize: "20px", fontWeight: "900", cursor: selectedTopics.length === 0 ? "not-allowed" : "pointer" }}>
             🎮 Choose a Game!
           </button>
         </div>
@@ -779,10 +779,10 @@ export default function LessonGamesGenerator() {
     <div style={{ minHeight: "100vh", background: "#F8F7FF", padding: "20px", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
       <div style={{ maxWidth: "760px", margin: "0 auto" }}>
         
-        <div style={{ background: "linear-gradient(135deg,#1E1B4B,#312E81)", borderRadius: "20px", padding: "20px 24px", marginBottom: "20px", color: "white" }}>
+        <div style={{ background: `linear-gradient(135deg,${theme.heroBg[0]},${theme.heroBg[2]})`, borderRadius: "20px", padding: "20px 24px", marginBottom: "20px", color: "white" }}>
           <div style={{ textAlign: "center", marginBottom: "16px" }}>
             <div style={{ fontSize: "13px", fontWeight: "700", color: "#A5B4FC", marginBottom: "4px", letterSpacing: "0.06em", textTransform: "uppercase" }}>Current Topic Mix</div>
-            <div style={{ fontSize: "clamp(18px,4vw,26px)", fontWeight: "900", lineHeight: 1.2 }}>
+            <div style={{ fontSize: "clamp(18px,4vw,26px)", fontWeight: "900", lineHeight: 1.2, fontFamily: theme.headingFont }}>
               {selectedTopics.length === 1 ? getTopicLabel(selectedTopics[0]) : `${selectedTopics.length} topics mixed`}
             </div>
             {selectedTopics.length > 1 && (
@@ -853,7 +853,7 @@ export default function LessonGamesGenerator() {
                 />
                 <button
                   onClick={handleCreateClassForSave} disabled={pickerBusy || !pickerNewName.trim()}
-                  style={{ background: "linear-gradient(135deg,#6366F1,#8B5CF6)", color: "white", border: "none", borderRadius: "10px", padding: "10px 16px", fontWeight: 800, cursor: pickerBusy ? "default" : "pointer", opacity: pickerBusy || !pickerNewName.trim() ? 0.6 : 1, whiteSpace: "nowrap" }}
+                  style={{ background: `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "10px", padding: "10px 16px", fontWeight: 800, cursor: pickerBusy ? "default" : "pointer", opacity: pickerBusy || !pickerNewName.trim() ? 0.6 : 1, whiteSpace: "nowrap" }}
                 >
                   + New
                 </button>
@@ -863,8 +863,8 @@ export default function LessonGamesGenerator() {
             </div>
           </div>
         )}
-        <div style={{ background: "linear-gradient(90deg,#6366F1,#8B5CF6)", padding: "12px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <h2 style={{ color: "white", margin: 0, fontSize: "20px" }}>{selectedGame.icon} {selectedGame.name}</h2>
+        <div style={{ background: `linear-gradient(90deg,${theme.accent[0]},${theme.accent[1]})`, padding: "12px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <h2 style={{ color: "white", margin: 0, fontSize: "20px", fontFamily: theme.headingFont }}>{selectedGame.icon} {selectedGame.name}</h2>
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
             <button
               onClick={handleSaveAndExit} disabled={saveStatus === "saving"}
@@ -904,10 +904,10 @@ export default function LessonGamesGenerator() {
   if (screen === "results") {
     const headline = winners.length > 1 ? `${winners.map(w => w.name).join(" & ")} tie!` : `${winners[0]?.name} wins!`;
     return (
-      <div style={{ minHeight: "100vh", background: "linear-gradient(135deg,#1E1B4B,#312E81)", padding: "20px", textAlign: "center", color: "white", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
+      <div style={{ minHeight: "100vh", background: `linear-gradient(135deg,${theme.heroBg[0]},${theme.heroBg[2]})`, padding: "20px", textAlign: "center", color: "white", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
         <Confetti active={confetti} />
         <div style={{ fontSize: "80px", margin: "20px 0" }}>🏆</div>
-        <h1 style={{ fontSize: "clamp(24px,5vw,40px)", fontWeight: "900", margin: "0 0 8px" }}>Game Over!</h1>
+        <h1 style={{ fontSize: "clamp(24px,5vw,40px)", fontWeight: "900", margin: "0 0 8px", fontFamily: theme.headingFont }}>Game Over!</h1>
         <p style={{ color: "#C4B5FD", fontSize: "18px", marginBottom: "28px" }}>{headline} 🎉</p>
 
         <div style={{ background: "rgba(255,255,255,0.08)", borderRadius: "20px", padding: "24px", maxWidth: "600px", margin: "0 auto 24px" }}>
@@ -921,8 +921,8 @@ export default function LessonGamesGenerator() {
         </div>
         
         <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
-          <button onClick={() => setScreen("game-select")} style={{ background: "linear-gradient(135deg,#22C55E,#16A34A)", color: "white", border: "none", borderRadius: "14px", padding: "14px 28px", fontSize: "17px", fontWeight: "800", cursor: "pointer" }}>🎮 Play Again</button>
-          <button onClick={() => setScreen("setup")} style={{ background: "linear-gradient(135deg,#6366F1,#8B5CF6)", color: "white", border: "none", borderRadius: "14px", padding: "14px 28px", fontSize: "17px", fontWeight: "800", cursor: "pointer" }}>📚 New Lesson</button>
+          <button onClick={() => setScreen("game-select")} style={{ background: `linear-gradient(135deg,${theme.cta[0]},${theme.cta[1]})`, color: "white", border: "none", borderRadius: "14px", padding: "14px 28px", fontSize: "17px", fontWeight: "800", cursor: "pointer" }}>🎮 Play Again</button>
+          <button onClick={() => setScreen("setup")} style={{ background: `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "14px", padding: "14px 28px", fontSize: "17px", fontWeight: "800", cursor: "pointer" }}>📚 New Lesson</button>
         </div>
       </div>
     );
