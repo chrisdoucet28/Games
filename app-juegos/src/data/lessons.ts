@@ -3959,4 +3959,272 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ Is it long from here? → ✅ Is it far from here? (distance uses 'far', not 'long')",
     ],
   },
+
+  inversion: {
+    title: "Inversion",
+    intro: "Inversion moves the auxiliary verb before the subject for dramatic or formal emphasis — triggered by fronting a negative or limiting adverbial like 'never', 'rarely', or 'not until'.",
+    sections: [
+      {
+        heading: "Negative adverbials + auxiliary + subject",
+        body: ["After never, rarely, hardly, seldom, little, not only, at no point, under no circumstances — invert to auxiliary + subject.", "Match the auxiliary to the tense: have/has for present perfect, did for past simple, do/does for present simple."],
+        examples: [
+          "**Never have I** seen such a beautiful view.",
+          "**Rarely does she** go to bed before midnight.",
+          "**Not only did she** win the award, but she also gave a speech.",
+        ],
+      },
+      {
+        heading: "Hardly/no sooner + past perfect",
+        body: ["'Hardly had' pairs with **when**; 'no sooner had' pairs with **than** — don't mix them up."],
+        examples: [
+          "**Hardly had I** sat down **when** the alarm went off.",
+          "**No sooner had** we left the house **than** it started to rain.",
+        ],
+      },
+      {
+        heading: "So/such + be + that",
+        body: ["'So + adjective + was/were + subject + that' and 'Such + was/were + noun + that' front the description or noun for dramatic emphasis."],
+        examples: [
+          "**So tired was he** that he fell asleep at his desk.",
+          "**Such was the panic** that people ran for the exits.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ Never I have seen such a view. → ✅ Never have I seen such a view. (invert auxiliary and subject)",
+      "❌ Hardly had we arrived than the storm began. → ✅ ...when the storm began. ('hardly had' pairs with 'when', not 'than')",
+      "❌ Little did he knew about the dangers. → ✅ Little did he know... (base verb after 'did', not past tense)",
+      "❌ So proud was them that... → ✅ So proud were they that... (subject pronoun 'they', plural 'were')",
+    ],
+  },
+
+  mixed_conditionals: {
+    title: "Mixed Conditionals",
+    intro: "Mixed conditionals combine a condition from one time with a result from another — usually a past cause with a present result, or a present state with a past result.",
+    sections: [
+      {
+        heading: "Past cause, present result",
+        body: ["If + past perfect, + would + base verb — a past action or decision explains a present state."],
+        examples: [
+          "**If she had studied** medicine, she **would be** a doctor today.",
+          "**If I had taken** that job, I **would be** in Paris now.",
+        ],
+      },
+      {
+        heading: "Present state, past result",
+        body: ["If + past simple (or 'were'), + would have + past participle — an ongoing trait or state explains a missed past action."],
+        examples: [
+          "**If he weren't** so shy, he **would have spoken up** at the meeting.",
+          "**If I were** more confident, I **would have applied** for that position.",
+        ],
+      },
+      {
+        heading: "No 'would' in the if-clause",
+        body: ["Never put 'would' in the if-clause of any conditional — use past perfect or past simple/'were' instead."],
+        examples: [
+          "**If I had taken** that scholarship, I would be studying in London now. (not 'If I would have taken')",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ If I would have taken that job, I would be in Paris now. → ✅ If I had taken that job... (no 'would' in the if-clause)",
+      "❌ If she hadn't missed that flight, she is here with us now. → ✅ ...she would be here with us now. (result clause needs 'would be')",
+      "❌ If she was a native speaker, she would have got that job. → ✅ If she were a native speaker... (formal 'were', not 'was')",
+      "❌ If they had saved more money, they will own a house by now. → ✅ ...they would own a house by now. ('would', not 'will')",
+    ],
+  },
+
+  advanced_vocabulary: {
+    title: "Advanced Vocabulary & Collocation",
+    intro: "At this level, precision means using the verb that naturally collocates with a noun — 'make a decision' and 'have an impact', not the literal translation of 'do'.",
+    sections: [
+      {
+        heading: "Make/have/take + noun collocations",
+        body: ["'Make' a decision, contribution, impression, effort, argument.", "'Have' an impact/effect on.", "'Take' a stance, into account/consideration."],
+        examples: [
+          "She **made a strong impression** on the committee. (not 'did an impression')",
+          "Her presentation **had a huge impact** on our approach. (not 'did an impact')",
+          "The committee **took into consideration** all the evidence. (not 'made into consideration')",
+        ],
+      },
+      {
+        heading: "Fixed collocations with other verbs",
+        body: ["shed light on, reach a consensus/stalemate, draw criticism/a conclusion, raise questions, strike a balance, cast doubt on, set a precedent."],
+        examples: [
+          "The report **sheds light on** how the accident happened.",
+          "The findings **cast doubt on** his account of events.",
+          "They finally **reached a consensus** on the budget.",
+        ],
+      },
+      {
+        heading: "Prepositions after fixed phrases",
+        body: ["'Based on' (not 'in'); 'implications for' (not 'to'); 'effect on' (not 'in')."],
+        examples: [
+          "The argument was **based on** solid evidence. (not 'based in')",
+          "This has serious **implications for** future research. (not 'implications to')",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ He did a strong impression on the committee. → ✅ He made a strong impression... ('make an impression', not 'do')",
+      "❌ The company did a significant loss. → ✅ The company suffered/incurred a significant loss.",
+      "❌ The report made several conclusions. → ✅ The report drew several conclusions. ('draw a conclusion')",
+      "❌ The professor's argument was based in evidence. → ✅ ...based on evidence. (preposition 'on', not 'in')",
+    ],
+  },
+
+  cleft_sentences: {
+    title: "Cleft Sentences",
+    intro: "Cleft sentences split a simple sentence into two clauses to shift emphasis onto one specific element — using 'It was... who/that', 'What... is', or 'All... is'.",
+    sections: [
+      {
+        heading: "It-clefts",
+        body: ["'It + be + [emphasised element] + who' (for people) or 'that' (for things, times, places, reasons)."],
+        examples: [
+          "**It was Maria who** solved the problem, not James.",
+          "**It's not the money that** bothers me — it's the principle.",
+          "**It was in 2019 that** the company first launched the product.",
+        ],
+      },
+      {
+        heading: "What-clefts",
+        body: ["'What + clause + is/was + [emphasised element]' — the what-clause is treated as singular, so use is/was even if the emphasised noun is plural-sounding."],
+        examples: [
+          "**What I really need is** a good night's sleep.",
+          "**What surprised me most was** how calm she stayed.",
+          "A proper apology **is what** she deserves. (reversed order)",
+        ],
+      },
+      {
+        heading: "All-clefts",
+        body: ["'All + clause + is/was + [emphasised element]' presents something as the only thing that matters."],
+        examples: [
+          "**All she wants is** a little appreciation.",
+          "**All he did was** ask a simple question.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ It Maria who solved the problem. → ✅ It was Maria who solved the problem. (don't forget 'was' after 'It')",
+      "❌ What I need it a break. → ✅ What I need is a break. (needs 'is', not 'it')",
+      "❌ It weren't until Monday that we found out. → ✅ It wasn't until Monday... ('it' is singular: wasn't)",
+      "❌ What impressed the judges were her confidence. → ✅ ...was her confidence. (singular subject takes 'was')",
+    ],
+  },
+
+  globalisation: {
+    title: "Globalisation",
+    intro: "Discussing globalisation means handling abstract, mostly-singular subjects (globalisation, trade, wages) correctly, plus a set of topic-specific vocabulary for its causes and effects.",
+    sections: [
+      {
+        heading: "Key vocabulary",
+        body: ["multinational corporation, migration, outsourcing, supply chain, cultural homogenisation, trade barriers, protectionism, brain drain."],
+        examples: [
+          "Coca-Cola is a **multinational corporation** operating in almost every country.",
+          "Many brands rely on **outsourcing** to countries where labour is cheaper.",
+          "Critics worry about **cultural homogenisation** as local traditions disappear.",
+        ],
+      },
+      {
+        heading: "Subject-verb agreement with abstract nouns",
+        body: ["'Globalisation' and 'trade' are singular (has/is); 'corporations', 'wages', 'agreements' are plural (are/have)."],
+        examples: [
+          "**Globalisation has** lifted millions of people out of poverty. (not 'have')",
+          "**Multinational corporations are** often criticised for exploiting cheap labour.",
+          "Since the 1990s, world **trade has** grown enormously.",
+        ],
+      },
+      {
+        heading: "Finished time → past simple",
+        body: ["With a specific finished time period (e.g. 'in the 1990s'), use past simple, not present perfect."],
+        examples: [
+          "Globalisation **increased** trade a lot **in the 1990s**. (not 'has increased')",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ Delegates assisted to the trade summit. → ✅ ...attended the trade summit. ('assist' means 'to help'; 'attend' for going to an event)",
+      "❌ Companies depend of cheap labour. → ✅ ...depend on cheap labour. (preposition 'on', not 'of')",
+      "❌ Globalisation has increased trade a lot in the 1990s. → ✅ Globalisation increased trade... (finished time needs past simple)",
+      "❌ Critics say globalisation doesn't help nobody. → ✅ ...doesn't help anybody. (avoid double negatives)",
+    ],
+  },
+
+  business_professional_vocabulary: {
+    title: "Business & Professional Vocabulary",
+    intro: "Professional English relies heavily on fixed phrases (touch base, bottom line, in the pipeline) and precise verbs (streamline, leverage, spearhead) rather than generic words like 'do' or 'make'.",
+    sections: [
+      {
+        heading: "Fixed business phrases",
+        body: ["touch base, circle back, bottom line, red tape, in the pipeline, low-hanging fruit, conflict of interest, due diligence."],
+        examples: [
+          "Let's **touch base** next week once the figures are in.",
+          "At the end of the day, it comes down to the **bottom line**.",
+          "The investors carried out full **due diligence** before signing.",
+        ],
+      },
+      {
+        heading: "Precise business verbs",
+        body: ["streamline (simplify a process), delegate (assign a task), leverage (use to advantage), spearhead (lead a project), upskill (train to a higher level)."],
+        examples: [
+          "We need to **streamline** our processes to cut costs.",
+          "She was chosen **to spearhead** the new initiative.",
+          "The company is investing in training to **upskill** its workforce.",
+        ],
+      },
+      {
+        heading: "People and structures",
+        body: ["stakeholders, severance package, onboarding, cross-functional team — all take standard plural/singular agreement."],
+        examples: [
+          "All key **stakeholders were** consulted before the decision.",
+          "New hires **go through** a two-week **onboarding** programme.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ She delegate the task to her assistant. → ✅ She delegated the task... (past simple needs -ed)",
+      "❌ The company is streamline its processes. → ✅ ...is streamlining its processes. (present continuous needs -ing)",
+      "❌ It all comes down to the bottom lines. → ✅ ...the bottom line. (fixed singular phrase)",
+      "❌ Small businesses struggle of red tape. → ✅ ...struggle with red tape. (correct preposition is 'with')",
+    ],
+  },
+
+  media_misinformation: {
+    title: "Media & Misinformation",
+    intro: "Discussing media and misinformation combines specialised vocabulary (echo chamber, deepfake, disinformation) with advanced structures like inversion and cleft sentences for emphasis.",
+    sections: [
+      {
+        heading: "Key vocabulary",
+        body: ["echo chamber, filter bubble, fake news, clickbait, confirmation bias, fact-check, media literacy, deepfake, disinformation (deliberate) vs misinformation (accidental)."],
+        examples: [
+          "Social media can trap people in an **echo chamber** of similar opinions.",
+          "The article turned out to be **fake news** designed to provoke outrage.",
+          "The report accused the group of spreading **disinformation**.",
+        ],
+      },
+      {
+        heading: "Agreement with collective/abstract subjects",
+        body: ["'Algorithms', 'journalists', 'people' are plural (are/do); 'trust', 'confirmation bias', 'the algorithm', 'the platform' are singular (has/is/makes)."],
+        examples: [
+          "Social media **algorithms are** designed to maximise engagement. (not 'is')",
+          "**Confirmation bias makes** people less likely to question their views. (not 'make')",
+          "**Trust** in mainstream media **has** declined significantly. (not 'have')",
+        ],
+      },
+      {
+        heading: "Advanced emphasis structures",
+        body: ["Inversion after 'not only' (was/did + subject); it-clefts ('It is often the most sensational headlines that...') use 'that', not 'which'."],
+        examples: [
+          "**Not only was** the story false, but it was also misleading.",
+          "**It is often** the most sensational headlines **that** spread the fastest.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ Social media algorithms is designed to... → ✅ ...algorithms are designed to... (plural subject)",
+      "❌ The platform have been criticised... → ✅ The platform has been criticised... (singular subject 'platform')",
+      "❌ Not only the story was false... → ✅ Not only was the story false... ('not only' triggers inversion)",
+      "❌ It is often the headlines which spread fastest. → ✅ ...headlines that spread fastest. (it-clefts use 'that')",
+    ],
+  },
 };
