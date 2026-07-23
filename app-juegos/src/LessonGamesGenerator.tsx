@@ -809,7 +809,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange }: LessonGam
                 onClick={() => { setLearnFilter(selectedTopics.filter(id => LESSONS[id])); setScreen("learn"); }}
                 style={{ background: "rgba(255,255,255,0.15)", border: "2px solid rgba(255,255,255,0.35)", color: "white", borderRadius: "12px", padding: "8px 18px", fontSize: "13px", fontWeight: "800", cursor: "pointer", marginTop: "14px", fontFamily: theme.headingFont }}
               >
-                📖 Review the grammar
+                📖 Review these topics
               </button>
             )}
           </div>

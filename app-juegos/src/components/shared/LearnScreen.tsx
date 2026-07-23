@@ -88,7 +88,7 @@ export function LearnScreen({ onBack, theme, filterTopicIds }: Props) {
             {filterTopicIds ? "🎓 Learn: This Game's Topics" : "🎓 Learn"}
           </h2>
           <p style={{ color: "#6B7280", marginTop: "8px" }}>
-            {filterTopicIds ? "Grammar for the topics you picked for this game." : "Quick, no-fluff grammar explanations — the same rules the games actually test."}
+            {filterTopicIds ? "A quick refresher on the topics you picked for this game." : "Quick, no-fluff explanations — the same things the games actually test."}
           </p>
         </div>
 
