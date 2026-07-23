@@ -2423,4 +2423,338 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ I have visited Rome last year. → ✅ I visited Rome last year. (specific past time → past simple)",
     ],
   },
+
+  passive_complex: {
+    title: "Passive Voice — Complex Tenses",
+    intro: "Beyond simple tenses, the passive can combine with continuous, perfect, modal, and reporting structures — the key is keeping 'be'/'been'/'being' in the right slot.",
+    sections: [
+      {
+        heading: "Continuous and perfect passives",
+        body: [
+          "Present continuous passive: am/is/are + being + past participle",
+          "Present perfect passive: has/have + been + past participle",
+          "Past continuous passive: was/were + being + past participle",
+          "Past perfect passive: had + been + past participle",
+        ],
+        examples: [
+          "The suspect **is being questioned** by police.",
+          "The project **has been completed**.",
+          "Dinner **was being cooked** by my mum.",
+          "By the time she arrived, the food **had been eaten**.",
+        ],
+      },
+      {
+        heading: "Modal passives",
+        body: ["modal + be + past participle; modal + have been + past participle for the past."],
+        examples: [
+          "The homework **must be finished** by Friday.",
+          "The package **might have been delivered** already.",
+        ],
+      },
+      {
+        heading: "Reporting passives",
+        body: ["is said/thought/believed/reported + (to have) + past participle."],
+        examples: [
+          "The CEO **is reported to have resigned**.",
+          "He **is believed to be living** abroad.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ The letters are been sent. → ✅ The letters are being sent. (present continuous passive: am/is/are + being)",
+      "❌ The project has been completing. → ✅ The project has been completed. (past participle, not -ing)",
+      "❌ The homework must finished by Friday. → ✅ The homework must be finished by Friday. (modal passive needs 'be')",
+      "❌ The package might been delivered. → ✅ The package might have been delivered. (modal perfect passive needs 'have been')",
+      "❌ He is thought to stole the money. → ✅ He is thought to have stolen the money. (perfect infinitive for past reference)",
+    ],
+  },
+
+  causative_verbs: {
+    title: "Causative Verbs (have/get/make/let)",
+    intro: "Have/get + something + done means you arrange for someone else to do it; make/let + someone + base verb is about forcing or permitting — each pattern has its own fixed grammar.",
+    sections: [
+      {
+        heading: "Arranging a service: have/get + object + past participle",
+        body: ["Use when someone else does something for you."],
+        examples: [
+          "I **had my hair cut** yesterday.",
+          "I need to **get my phone screen repaired**.",
+        ],
+      },
+      {
+        heading: "Directing a person: have/get + person + verb",
+        body: [
+          "have + person + bare infinitive",
+          "get + person + to-infinitive",
+        ],
+        examples: [
+          "I'**ll have the plumber check** the pipes tomorrow.",
+          "She finally **got her brother to help** with the move.",
+        ],
+      },
+      {
+        heading: "Forcing or permitting: make/let + object + bare infinitive",
+        body: ["make = force; let = permit — both take the bare infinitive, never 'to'."],
+        examples: [
+          "The teacher **made us sit** in silence.",
+          "Our boss **lets us work** from home on Fridays.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ The teacher made us to sit in silence. → ✅ The teacher made us sit in silence. ('make' + bare infinitive, no 'to')",
+      "❌ She got the plumber fix the leak. → ✅ She got the plumber to fix the leak. ('get' + person + to-infinitive)",
+      "❌ My parents don't let me to stay out late. → ✅ ...don't let me stay out late. ('let' + bare infinitive, no 'to')",
+      "❌ I need to have my shoes repair. → ✅ I need to have my shoes repaired. ('have' + object + past participle)",
+      "❌ He had the electrician to check the wiring. → ✅ He had the electrician check the wiring. ('have' + person + bare infinitive, no 'to')",
+    ],
+  },
+
+  embedded_questions: {
+    title: "Embedded Questions",
+    intro: "An embedded question (a question inside a longer sentence) always uses statement word order — the #1 rule is: never invert the subject and auxiliary.",
+    sections: [
+      {
+        heading: "Form",
+        body: [
+          "Wh-question → statement word order, no 'do/does/did'.",
+          "Yes/no question → if/whether + statement word order.",
+        ],
+        examples: [
+          "**Do you know where** the post office **is**? (not 'where is the post office')",
+          "**Could you tell me what time** the film **starts**? (not 'does the film start')",
+          "**I'm not sure if** she**'s** coming.",
+          "**I wonder whether** she has already left.",
+        ],
+      },
+      {
+        heading: "Common starters",
+        body: ["Polite phrases that introduce an embedded question."],
+        examples: ["**Do you know...**, **Could you tell me...**, **I wonder...**, **I'm not sure...**, **Do you have any idea...**"],
+      },
+    ],
+    commonMistakes: [
+      "❌ Do you know where is the nearest bank? → ✅ Do you know where the nearest bank is? (no inversion)",
+      "❌ Can you tell me what does he want? → ✅ Can you tell me what he wants? (no auxiliary inversion)",
+      "❌ She asked me if was I ready. → ✅ She asked me if I was ready. (statement word order after 'if')",
+      "❌ Could you tell me where does he live? → ✅ Could you tell me where he lives? (drop 'does', statement order)",
+      "❌ Could you explain me how does this work? → ✅ Could you explain how this works? ('explain' has no object here; no inversion)",
+    ],
+  },
+
+  future_in_past: {
+    title: "Future in the Past",
+    intro: "Use these forms to describe the future as it looked from a point in the past — plans, imminent actions, and predictions that may or may not have come true.",
+    sections: [
+      {
+        heading: "Plans and imminent actions",
+        body: [
+          "was/were going to + base verb — a past plan (often unfulfilled)",
+          "was/were about to + base verb — something about to happen",
+        ],
+        examples: [
+          "I **was going to go** for a run, but it started raining.",
+          "I **was about to leave** the house when the phone rang.",
+        ],
+      },
+      {
+        heading: "Reported predictions and promises",
+        body: ["'Will' backshifts to 'would' when reporting what someone thought or said about the future."],
+        examples: [
+          "She said she **would call** me back later.",
+          "I never thought I **would live** abroad one day.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ She said she will call me. → ✅ She said she would call me. ('will' → 'would' in reported speech)",
+      "❌ They was about to leave. → ✅ They were about to leave. (plural subject needs 'were')",
+      "❌ I was going study medicine. → ✅ I was going to study medicine. ('going to' needs 'to')",
+      "❌ We would to visit Rome. → ✅ We were going to visit Rome. (use 'was/were going to' for plans, not 'would to')",
+      "❌ I knew she is going to win. → ✅ I knew she was going to win. (backshift 'is going to' → 'was going to')",
+    ],
+  },
+
+  third_conditional: {
+    title: "Third Conditional",
+    intro: "Use the third conditional to imagine a different past — something that didn't happen, and what would have resulted if it had.",
+    sections: [
+      {
+        heading: "Form",
+        body: [
+          "If + past perfect, + would have + past participle.",
+          "Formal inversion: Had + subject + past participle (drops 'if').",
+        ],
+        examples: [
+          "If she **had studied**, she **would have passed**.",
+          "**Had** I **been** more careful, the accident wouldn't have happened.",
+        ],
+      },
+      {
+        heading: "Variations",
+        body: ["might have / could have instead of 'would have' for a less certain result."],
+        examples: [
+          "If the fire alarm hadn't gone off, we **might not have escaped** in time.",
+          "If you had told me, I **could have helped**.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ If she studied, she would passed. → ✅ If she had studied, she would have passed. (past perfect in if-clause, 'would have' + participle in result)",
+      "❌ If they would have called, we would have known. → ✅ If they had called, we would have known. (never 'would have' in the if-clause)",
+      "❌ If I had knew the answer... → ✅ If I had known the answer... (past participle 'known', not 'knew')",
+      "❌ The project would been a success... → ✅ The project would have been a success... (don't drop 'have')",
+      "❌ What would have you done...? → ✅ What would you have done...? (word order: subject before 'have')",
+    ],
+  },
+
+  future_perfect: {
+    title: "Future Perfect (will have + past participle)",
+    intro: "Use the future perfect for an action that will already be completed before a specific point in the future — always with 'will have' + past participle.",
+    sections: [
+      {
+        heading: "Form",
+        body: [
+          "will have + past participle, often with 'by' + a future time.",
+          "Negative: won't have + past participle.",
+          "Question: Will + subject + have + past participle?",
+        ],
+        examples: [
+          "By June, she **will have finished** the course.",
+          "She **won't have finished** her thesis by the deadline.",
+          "**Will** they **have arrived** before the ceremony starts?",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ By next year, I will finished my degree. → ✅ By next year, I will have finished my degree. (don't drop 'have')",
+      "❌ She will has graduated by June. → ✅ She will have graduated by June. ('have', not 'has', after 'will')",
+      "❌ They will have finish the project by Friday. → ✅ ...will have finished the project... (past participle after 'have')",
+      "❌ By 2030, I have graduated from university. → ✅ By 2030, I will have graduated from university. (future deadline needs future perfect, not present perfect)",
+      "❌ Will have she completed the report by Monday? → ✅ Will she have completed the report by Monday? (word order: Will + subject + have)",
+    ],
+  },
+
+  wish_if_only: {
+    title: "I wish / If only",
+    intro: "Wish/if only follow the same three patterns as second and third conditionals — the tense you use signals whether you're wishing about now, the past, or someone's annoying behaviour.",
+    sections: [
+      {
+        heading: "Wishing about now",
+        body: [
+          "wish/if only + past simple → a present regret.",
+          "wish/if only + were (all persons, formal) → an unreal present state.",
+          "wish/if only + could → a present ability you don't have.",
+        ],
+        examples: [
+          "I **wish I had** more free time.",
+          "If only **I were** taller!",
+          "If only **I could speak** French!",
+        ],
+      },
+      {
+        heading: "Wishing about the past",
+        body: ["wish/if only + past perfect → a regret about something that already happened."],
+        examples: [
+          "I **wish I had studied** harder for the exam last week.",
+          "If only **I had known** what I know now back then!",
+        ],
+      },
+      {
+        heading: "Wishing someone/something would change",
+        body: ["wish + would + base verb → criticising an annoying repeated behaviour or situation."],
+        examples: [
+          "I **wish you would stop** interrupting me.",
+          "I **wish it would stop** raining.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ I wish I have more free time. → ✅ I wish I had more free time. (past simple, not present simple)",
+      "❌ If only I can speak French! → ✅ If only I could speak French! ('could', not 'can')",
+      "❌ I wish you will stop interrupting me. → ✅ I wish you would stop interrupting me. ('would', not 'will')",
+      "❌ If only she was here right now. → ✅ If only she were here right now. ('were' for all persons in formal style)",
+      "❌ I wish I studied harder for the exam last week. → ✅ I wish I had studied harder... (past perfect for a past regret)",
+    ],
+  },
+
+  gerunds_infinitives: {
+    title: "Gerunds vs Infinitives",
+    intro: "Some verbs are always followed by a gerund, others always by an infinitive, and a few (remember, stop, try) change meaning depending on which one follows.",
+    sections: [
+      {
+        heading: "Always gerund",
+        body: ["enjoy, finish, suggest, avoid, consider, admit, keep + -ing"],
+        examples: [
+          "I **enjoy visiting** new places.",
+          "I **finished doing** my homework.",
+          "He **suggested taking** a break.",
+        ],
+      },
+      {
+        heading: "Always infinitive",
+        body: ["decide, agree, hope, promise, manage, refuse, afford + to + base verb"],
+        examples: [
+          "She **decided to leave** her job.",
+          "They **agreed to accept** the plan.",
+          "We **managed to meet** the deadline.",
+        ],
+      },
+      {
+        heading: "Verbs that change meaning",
+        body: [
+          "remember + -ing = recall a past action; remember + to = a future task not to forget.",
+          "stop + -ing = stop an activity; stop + to = pause in order to do something else.",
+          "try + -ing = experiment with a solution; try + to = make an effort at something difficult.",
+        ],
+        examples: [
+          "I **remember watching** that film years ago. / Please **remember to lock** the door.",
+          "She **stopped walking** to answer her phone. / He **stopped to buy** a coffee.",
+          "**Try turning** the lights off to save energy. / I **tried to open** the window, but it was too high.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ I enjoy to visit new places. → ✅ I enjoy visiting new places. ('enjoy' + gerund)",
+      "❌ She decided leaving her job. → ✅ She decided to leave her job. ('decide' + infinitive)",
+      "❌ He suggested to take a break. → ✅ He suggested taking a break. ('suggest' + gerund)",
+      "❌ Please remember locking the door. → ✅ Please remember to lock the door. ('remember + infinitive' for a future task)",
+      "❌ He stopped to walk when his phone rang, then carried on. → ✅ He stopped walking... ('stop + gerund' = stop the activity)",
+    ],
+  },
+
+  past_modals_deduction: {
+    title: "Past Modals of Deduction",
+    intro: "Use modal + have + past participle to guess about the past — how confident you are (must/might/can't) or whether you regret an action (should/shouldn't have).",
+    sections: [
+      {
+        heading: "Deductions about the past",
+        body: [
+          "must have + past participle → a strong, confident guess.",
+          "might/could have + past participle → an uncertain possibility.",
+          "can't have + past participle → something is impossible given the evidence.",
+        ],
+        examples: [
+          "The lights are off — she **must have left** already.",
+          "He wasn't at the party — he **might have forgotten** about it.",
+          "She **can't have known** about the surprise — she looked so shocked.",
+        ],
+      },
+      {
+        heading: "Regrets and criticism",
+        body: ["should have / shouldn't have + past participle → a past mistake or regret."],
+        examples: [
+          "I **should have studied** harder — I failed the exam.",
+          "You **shouldn't have driven** so fast — you could have crashed!",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ She must has left already. → ✅ She must have left already. ('have', not 'has')",
+      "❌ He must have leave already. → ✅ He must have left already. (past participle, not base verb)",
+      "❌ I might have went to the wrong address. → ✅ I might have gone to the wrong address. (irregular past participle 'gone')",
+      "❌ You should have tell me earlier. → ✅ You should have told me earlier. (past participle 'told')",
+      "❌ They must to have missed the bus. → ✅ They must have missed the bus. (no 'to' — it's just 'must have')",
+    ],
+  },
 };
