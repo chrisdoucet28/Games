@@ -3464,4 +3464,499 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ Look in side the box. → ✅ Look inside the box. ('inside' is one word)",
     ],
   },
+
+  greetings_introductions: {
+    title: "Greetings & Introductions",
+    intro: "The first phrases you need for any conversation: saying hello, asking how someone is, and giving basic personal information.",
+    sections: [
+      {
+        heading: "Saying hello and asking how someone is",
+        body: ["Use 'Good morning/afternoon/evening' depending on the time of day.", "'How are you?' is answered with 'I'm fine, thank you' — don't forget the comma before 'thank you'."],
+        examples: [
+          "**Good morning**! How are you?",
+          "I'm **fine, thank you**. And you?",
+          "**Nice to meet you**! (not 'Nice meet you')",
+        ],
+      },
+      {
+        heading: "Basic personal information",
+        body: ["'What's your name?' / 'My name is...'", "'Where are you from?' / 'I'm from + country' — keep subject-verb order in the question.", "Age uses 'be', not 'have': **I am** ___ years old."],
+        examples: [
+          "**What's your name?** My name is Ana.",
+          "**Where are you from?** I'm from Spain. (not 'Where you are from?')",
+          "**How old are you?** I am fourteen years old.",
+        ],
+      },
+      {
+        heading: "Saying goodbye",
+        body: ["'Goodbye' or 'Bye' for leaving; 'See you later' for a casual, temporary goodbye."],
+        examples: [
+          "**Goodbye**! Have a nice day.",
+          "**See you later**!",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ I have twenty years old. → ✅ I am twenty years old. (age uses 'be', not 'have')",
+      "❌ Nice meet you! → ✅ Nice to meet you! (don't forget 'to')",
+      "❌ Where you are from? → ✅ Where are you from? (question word order: are + you)",
+      "❌ I am fine, thank. → ✅ I'm fine, thank you. (don't drop 'you')",
+    ],
+  },
+
+  introducing_others: {
+    title: "Introducing Other People",
+    intro: "Introducing someone else uses a possessive adjective (his/her/their) before their name or noun — a different pattern from talking about yourself.",
+    sections: [
+      {
+        heading: "This is... / possessive adjectives",
+        body: ["'This is [name]' introduces one person; 'These are' introduces more than one.", "Use **his/her/their** + noun, not the subject pronoun he/she/they, before a noun."],
+        examples: [
+          "**This is** Marco. **His** name is Marco.",
+          "**These are** my classmates. **Their** names are Ana and Leo.",
+          "This is my sister. **Her** name is Clara. (not 'She name is Clara')",
+        ],
+      },
+      {
+        heading: "More natural ways to introduce people",
+        body: ["'I'd like you to meet...' and 'Let me introduce you to...' are more polite/formal ways to introduce someone.", "'Have you met...?' checks if two people already know each other."],
+        examples: [
+          "**I'd like you to meet** my colleague, Sofia.",
+          "**Let me introduce you to** a friend of mine.",
+          "**Have you met** my brother?",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ He name is Marco. → ✅ His name is Marco. (possessive adjective before a noun, not subject pronoun)",
+      "❌ His name are Marco and Leo. → ✅ Their names are Marco and Leo. (plural subject needs 'their'/'are')",
+      "❌ This is my friends. → ✅ These are my friends. (plural people need 'these are')",
+      "❌ She is a friend of me. → ✅ She is a friend of mine. ('a friend of' + possessive pronoun)",
+    ],
+  },
+
+  likes_dislikes: {
+    title: "Likes & Dislikes",
+    intro: "Verbs like 'like', 'love', 'hate', and 'enjoy' are always followed by the -ing form of the next verb, never 'to' + verb.",
+    sections: [
+      {
+        heading: "Like/love/hate/enjoy + gerund",
+        body: ["After like, love, hate, enjoy, use verb-**ing**, not the bare infinitive or 'to + verb'.", "Third person singular needs -s: likes, loves, hates, enjoys."],
+        examples: [
+          "I **love playing** video games. (not 'love play' or 'love to playing')",
+          "She **enjoys swimming** in her free time.",
+          "He **hates waiting** in long queues.",
+        ],
+      },
+      {
+        heading: "Questions with do/does",
+        body: ["Use do/does + subject + base verb for questions about likes."],
+        examples: [
+          "**Do you like** pizza?",
+          "**Does she like** cooking?",
+        ],
+      },
+      {
+        heading: "More natural expressions",
+        body: ["'can't stand' + gerund = hate strongly.", "'not keen on' + noun/gerund = don't like.", "'be into' + gerund = like a lot (informal).", "'prefer X to Y' (not 'than').", "'be a big fan of' (not 'for')."],
+        examples: [
+          "I **can't stand waiting** in traffic.",
+          "She's **not keen on** spicy food.",
+          "He's really **into playing** the guitar.",
+          "I **prefer tea to** coffee. (not 'prefer tea than coffee')",
+          "I'm **a big fan of** this band. (not 'a big fan for')",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ I like to swimming. → ✅ I like swimming. (don't combine 'to' with the gerund)",
+      "❌ She like cooking. → ✅ She likes cooking. (third person singular needs -s)",
+      "❌ I prefer tea than coffee. → ✅ I prefer tea to coffee. ('prefer X to Y', not 'than')",
+      "❌ I'm a big fan for this band. → ✅ I'm a big fan of this band.",
+    ],
+  },
+
+  what_do_you_do: {
+    title: "What Do You Do? (Jobs)",
+    intro: "Talking about jobs means getting three things right: the article before the job noun, third-person 'does', and the preposition after 'work'.",
+    sections: [
+      {
+        heading: "What do you do? / I'm a...",
+        body: ["'What do you do?' asks about someone's job.", "Always use **a/an** before a job noun — choose based on the sound, not the spelling."],
+        examples: [
+          "**What do you do?** I'm **a** teacher. / I'm **an** engineer.",
+          "She's **an** actor. He's **a** dentist.",
+        ],
+      },
+      {
+        heading: "Third person and questions",
+        body: ["'What does he/she do?' — only one 'does' is needed in the question, don't repeat it in the answer."],
+        examples: [
+          "**What does she do?** She's a nurse. (not 'What does she does')",
+          "**Where does he work?** He works **in** a hospital. (not 'on a hospital')",
+        ],
+      },
+      {
+        heading: "Talking about wanting a job",
+        body: ["After 'want to', use the base verb 'be', not 'being'."],
+        examples: [
+          "I **want to be** a pilot. (not 'want to being')",
+          "She **works as a** vet.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ He is doctor. → ✅ He is a doctor. (don't forget the article before a job)",
+      "❌ She works on a hospital. → ✅ She works in a hospital. ('in' for buildings, not 'on')",
+      "❌ What does she does? → ✅ What does she do? (only one 'does' is needed)",
+      "❌ They is farmers. → ✅ They are farmers. (plural subject needs 'are')",
+    ],
+  },
+
+  hobbies: {
+    title: "Hobbies & Free Time",
+    intro: "Talking about hobbies relies on two patterns: 'go' + gerund for outdoor/sport activities, and verbs like 'love/enjoy/be interested in' followed by a gerund.",
+    sections: [
+      {
+        heading: "Go + gerund",
+        body: ["For outdoor and sport activities, use **go** + verb-**ing**, with no 'to' in between."],
+        examples: [
+          "I **go hiking** every weekend. (not 'go to hike')",
+          "She **goes swimming** at the pool. (not 'go to swim')",
+          "They **go fishing** on Saturdays.",
+        ],
+      },
+      {
+        heading: "Love/enjoy/be interested in + gerund",
+        body: ["'Be interested in' + noun or gerund — never 'interested to'.", "'Spend time' + gerund; 'take up' + gerund (start a new hobby)."],
+        examples: [
+          "He **is interested in** photography.",
+          "She **spends** her weekends **painting**.",
+          "He **took up learning** the violin last year.",
+        ],
+      },
+      {
+        heading: "More natural expressions",
+        body: ["'be really into' + gerund = love a hobby (informal).", "'in my spare/free time' introduces a hobby sentence."],
+        examples: [
+          "I'm **really into** rock climbing.",
+          "**In my spare time**, I like practising yoga.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ I go to hike every weekend. → ✅ I go hiking every weekend. ('go' + gerund, no 'to')",
+      "❌ His hobby are collecting stamps. → ✅ His hobby is collecting stamps. ('hobby' is singular)",
+      "❌ I interested in learning languages. → ✅ I am interested in learning languages. (don't forget 'am')",
+      "❌ What is your hobbies? → ✅ What are your hobbies? ('hobbies' is plural)",
+    ],
+  },
+
+  personality: {
+    title: "Personality Adjectives",
+    intro: "Describing personality uses 'What is [someone] like?' — a completely different question from 'What does [someone] like?', which asks about preferences.",
+    sections: [
+      {
+        heading: "What is ... like?",
+        body: ["'What is she/he like?' asks about personality; 'What does she/he like?' asks about preferences — don't confuse them."],
+        examples: [
+          "**What is she like?** She's very friendly. (not 'What does she like?')",
+          "**What are they like?** They're outgoing and kind.",
+        ],
+      },
+      {
+        heading: "Adjective, not adverb or noun",
+        body: ["After 'be', use the plain adjective — not the '-ly' adverb form or the noun form."],
+        examples: [
+          "He is very **kind**. (not 'kindly')",
+          "She is **confident**. (not 'confidence')",
+          "They are very **creative people**. (not 'creative persons')",
+        ],
+      },
+      {
+        heading: "Comparing personalities",
+        body: ["Short adjectives take -er + than; don't add 'more' as well."],
+        examples: [
+          "She is **shyer than** her brother. (not 'more shyer')",
+          "He is **more patient than** his brother.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ What does she like? She is friendly. → ✅ What is she like? She is friendly.",
+      "❌ He is a very kindly person. → ✅ He is a very kind person. ('kind' is the adjective)",
+      "❌ She is more shyer than her brother. → ✅ She is shyer than her brother. (don't double the comparative)",
+      "❌ They are very creative persons. → ✅ They are very creative people. (irregular plural)",
+    ],
+  },
+
+  feelings: {
+    title: "Feelings (Basic)",
+    intro: "Feelings use -ed adjectives to describe how a person feels, while -ing adjectives describe what causes that feeling — a classic mix-up.",
+    sections: [
+      {
+        heading: "-ed for people, -ing for the cause",
+        body: ["Use the **-ed** adjective for how a person feels; use **-ing** for the thing that causes the feeling."],
+        examples: [
+          "I am **bored**. This film is **boring**. (not 'I am boring')",
+          "She is **interested** in the news. This topic is **interesting**.",
+          "This puzzle is **confusing**, so he is **confused**.",
+        ],
+      },
+      {
+        heading: "How do you feel? / Look + adjective",
+        body: ["'How do you feel?' asks about feelings.", "'Look' + adjective describes how someone appears."],
+        examples: [
+          "**How do you feel?** I feel **tired**.",
+          "You **look** worried — is something wrong?",
+        ],
+      },
+      {
+        heading: "More feelings vocabulary",
+        body: ["embarrassed, relieved, jealous, overwhelmed, disgusted — all use the -ed form for the person."],
+        examples: [
+          "I felt **embarrassed** when I made a mistake.",
+          "She felt **relieved** when the exam was over.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ I am boring. → ✅ I am bored. ('bored' = feeling; 'boring' = describes something dull)",
+      "❌ This film is very bored. → ✅ This film is very boring. (use '-ing' for what causes the feeling)",
+      "❌ She feel sick today. → ✅ She feels sick today. (third person singular needs -s)",
+      "❌ I am so relief that it's over. → ✅ I am so relieved that it's over. (use the adjective, not the noun)",
+    ],
+  },
+
+  appearance: {
+    title: "What Do You Look Like?",
+    intro: "Describing appearance splits between 'be' (for height, build, age) and 'have/has' (for hair, eyes, and other features) — mixing them up is the most common mistake.",
+    sections: [
+      {
+        heading: "Be vs have/has",
+        body: ["Use **be** for height, build, and age.", "Use **have/has** for hair, eyes, and other features — never add 'is' before 'has'."],
+        examples: [
+          "She **is** tall and slim.",
+          "He **has** blue eyes and short hair. (not 'is have blue eyes')",
+          "He **is** 30 years old. (not 'has 30 years')",
+        ],
+      },
+      {
+        heading: "What does he/she look like?",
+        body: ["'What does he/she look like?' asks about appearance; answer with 'is' or 'has' depending on the feature."],
+        examples: [
+          "**What does she look like?** She's tall and has curly hair.",
+          "**What do they look like?** They have dark hair.",
+        ],
+      },
+      {
+        heading: "More appearance vocabulary",
+        body: ["'looks like' + noun (not 'looks as'); 'in his/her twenties' for approximate age; 'resembles' is a more formal way to say 'looks like'."],
+        examples: [
+          "She **looks like** her mother. (not 'looks like as')",
+          "He's **in his late twenties**.",
+          "My cousin **resembles** his father.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ He have blue eyes. → ✅ He has blue eyes. (third person: 'has')",
+      "❌ She is have green eyes. → ✅ She has green eyes. ('has' stands alone)",
+      "❌ She has 25 years old. → ✅ She is 25 years old. (age uses 'be', not 'have')",
+      "❌ My grandfather has tall and thin. → ✅ My grandfather is tall and thin. (height/build use 'be')",
+    ],
+  },
+
+  clothes: {
+    title: "I Am Wearing... (Clothes)",
+    intro: "Talking about what someone is wearing right now uses the present continuous — and several clothing words are always plural, with no article before them.",
+    sections: [
+      {
+        heading: "Present continuous for what you're wearing now",
+        body: ["'What are you wearing?' uses present continuous — don't forget 'is/are' before 'wearing'."],
+        examples: [
+          "**What are you wearing?** I'm wearing jeans.",
+          "She **is wearing** a red dress. (not 'She wear' or 'She wearing')",
+        ],
+      },
+      {
+        heading: "Always-plural clothing words",
+        body: ["jeans, trousers, shorts, glasses, gloves, socks, boots, pyjamas are always plural — never use 'a' before them."],
+        examples: [
+          "He is wearing **jeans**. (not 'a jeans')",
+          "She isn't wearing **gloves**. (not 'a gloves')",
+        ],
+      },
+      {
+        heading: "Adjective order and articles",
+        body: ["Colour/size adjectives go before the noun; choose a/an by sound."],
+        examples: [
+          "She is wearing a **long green** dress.",
+          "I bought **an** elegant evening gown. (vowel sound)",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ I wear a blue T-shirt right now. → ✅ I am wearing a blue T-shirt right now. ('right now' needs present continuous)",
+      "❌ I am wearing a jeans. → ✅ I am wearing jeans. ('jeans' is always plural)",
+      "❌ She is wear a coat. → ✅ She is wearing a coat. (don't forget 'is')",
+      "❌ We are wearing shorts blue today. → ✅ We are wearing blue shorts today. (adjective before noun)",
+    ],
+  },
+
+  family_members: {
+    title: "Family Members",
+    intro: "Family vocabulary is mostly about matching the right word to the right relationship, plus keeping subject-verb agreement correct for singular vs plural family members.",
+    sections: [
+      {
+        heading: "Family relationship words",
+        body: ["aunt/uncle (parent's sibling), cousin (aunt/uncle's child), niece/nephew (sibling's daughter/son), grandparents (parents' parents)."],
+        examples: [
+          "My mother's sister is my **aunt**.",
+          "My brother's son is my **nephew**.",
+          "My aunt's children are my **cousins**.",
+        ],
+      },
+      {
+        heading: "Have/has and is/are agreement",
+        body: ["Singular family members (my brother, my aunt) take is/has; plural (my parents, my cousins) take are/have."],
+        examples: [
+          "My parents **have** two cars. My brother **has** a car. (not 'My parents has')",
+          "My cousins **are** funny. My sister **is** ten. (not 'My cousins is')",
+        ],
+      },
+      {
+        heading: "More family vocabulary",
+        body: ["'only child' (no siblings), 'sibling' (brother or sister), 'stepmother/stepfather', 'in-laws', 'take after' (resemble a relative)."],
+        examples: [
+          "She is **an only child**.",
+          "I **take after** my mother — we both love cooking.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ My parents has two cars. → ✅ My parents have two cars. ('parents' is plural)",
+      "❌ My brother are tall. → ✅ My brother is tall. (singular subject needs 'is')",
+      "❌ I am an only children. → ✅ I am an only child. ('child' is singular after 'an only')",
+      "❌ My niece and nephew is twins. → ✅ My niece and nephew are twins. (compound subject is plural)",
+    ],
+  },
+
+  weather_temperature_seasons: {
+    title: "Weather, Temperature & Seasons",
+    intro: "Weather sentences use 'it is' + a weather adjective (sunny, rainy, cold) — not the noun form of the word.",
+    sections: [
+      {
+        heading: "It is + weather adjective",
+        body: ["Weather descriptions use **it is** + adjective (sunny, rainy, cloudy, windy, cold, hot, freezing) — not the plain noun."],
+        examples: [
+          "**It is sunny** today. (not 'It is sun')",
+          "**It is cloudy**. (not 'It is cloud')",
+          "**It is raining** / **It is rainy**. (not 'It is rain')",
+        ],
+      },
+      {
+        heading: "The four seasons",
+        body: ["spring, summer, autumn, winter — summer is usually hot, winter is usually cold."],
+        examples: [
+          "The four seasons are spring, summer, **autumn**, and **winter**.",
+          "**In winter**, it is often cold.",
+        ],
+      },
+      {
+        heading: "Comparing weather",
+        body: ["Short adjectives (hot, cold) form comparatives with -er."],
+        examples: [
+          "Today is **hotter** than yesterday.",
+          "It usually **rains** a lot in April.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ Today is very heat. → ✅ Today is very hot. (use the adjective 'hot', not the noun 'heat')",
+      "❌ It is rain today. → ✅ It is rainy today. / It is raining today.",
+      "❌ The weather is sun. → ✅ The weather is sunny.",
+      "❌ It is cloud today. → ✅ It is cloudy today.",
+    ],
+  },
+
+  daily_routines_frequency: {
+    title: "Daily Routines, Times & Frequency",
+    intro: "Talking about routines combines present simple (with correct third-person -s) with adverbs of frequency (always, usually, never) and the right time prepositions (at/in/on).",
+    sections: [
+      {
+        heading: "Adverb of frequency position",
+        body: ["With ordinary verbs, the frequency adverb goes **before** the main verb.", "With 'be', the frequency adverb goes **after** it."],
+        examples: [
+          "I **always brush** my teeth in the morning. (not 'brush always')",
+          "I **am never** late. (not 'I never am late')",
+          "She **is usually** tired after work.",
+        ],
+      },
+      {
+        heading: "Present simple third person",
+        body: ["He/she/it takes the -s form of the verb: goes, has, wakes, gets."],
+        examples: [
+          "He **goes** to work at 8. (not 'go')",
+          "She **has** breakfast at 7.",
+          "She **wakes** up at seven every morning.",
+        ],
+      },
+      {
+        heading: "Time prepositions: at/in/on",
+        body: ["'at' + a specific time or 'night' (at night, at 7 o'clock); 'in' + a part of the day (in the morning/afternoon/evening)."],
+        examples: [
+          "I go to bed **at** night.",
+          "We study **in** the afternoon.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ I go always to bed at 11. → ✅ I always go to bed at 11. (adverb before the main verb)",
+      "❌ I never am late. → ✅ I am never late. (with 'be', the adverb goes after it)",
+      "❌ He wake up at 6 o'clock. → ✅ He wakes up at 6 o'clock. (third person needs -s)",
+      "❌ They goes home at 5. → ✅ They go home at 5. ('they' doesn't take -s)",
+    ],
+  },
+
+  giving_directions: {
+    title: "Giving Directions",
+    intro: "Giving directions relies on a set of fixed phrases and prepositions — 'turn left', 'on your right', 'at the traffic lights' — that don't translate word-for-word from other languages.",
+    sections: [
+      {
+        heading: "Basic direction verbs",
+        body: ["turn left/right, go straight ahead, cross the road, go past, follow this road, keep going + verb-ing."],
+        examples: [
+          "**Turn left** at the traffic lights. (not 'turn on the left')",
+          "**Go straight ahead** until you see the bank. (not 'go direct')",
+          "**Cross the road** at the crossing. (not 'pass the road')",
+          "**Keep going** until you reach the lights.",
+        ],
+      },
+      {
+        heading: "Fixed prepositions",
+        body: ["'on your left/right' (not 'in'); 'at the traffic lights/end of the road' (not 'in'); 'on the corner' (not 'in')."],
+        examples: [
+          "The bank is **on your left**. (not 'in your left')",
+          "The hotel is **at the end of** the road. (not 'on the end of')",
+          "The museum is **on the corner**. (not 'in the corner')",
+        ],
+      },
+      {
+        heading: "Asking about directions and distance",
+        body: ["'How do I get to...?' is the standard way to ask for directions.", "'Is it far from here?' asks about distance; 'you can't miss it' reassures someone it's easy to find."],
+        examples: [
+          "Excuse me, **how do I get to** the station? (not 'how do I go to')",
+          "**Is it far** from here? (not 'is it long')",
+          "**You can't miss it**! (not 'you can't miss that')",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ Turn on the left at the lights. → ✅ Turn left at the lights. (no 'on' before left/right)",
+      "❌ How do I go to the station? → ✅ How do I get to the station? (fixed phrase: 'get to')",
+      "❌ The bank is in your left. → ✅ The bank is on your left.",
+      "❌ Is it long from here? → ✅ Is it far from here? (distance uses 'far', not 'long')",
+    ],
+  },
 };
