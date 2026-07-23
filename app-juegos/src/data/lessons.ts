@@ -4,9 +4,14 @@
 // or after playing and it lines up with what they'll be asked to do. Keyed by the same topic
 // `value` used in TOPIC_OPTIONS/TOPIC_LIBRARY, so a lesson is trivial to look up from anywhere a
 // topic id is already in scope.
+//
+// Each section separates the RULE (body, short prose/bullets) from labelled EXAMPLE sentences
+// (examples, rendered in their own highlighted box) — the key form in each example is wrapped in
+// **double asterisks**, parsed as bold by LearnScreen.
 export type LessonSection = {
   heading: string;
   body: string[];
+  examples?: string[];
 };
 
 export type Lesson = {
@@ -24,27 +29,46 @@ export const LESSONS: Record<string, Lesson> = {
       {
         heading: "Form",
         body: [
-          "Regular verbs: add -ed → walk → walked, play → played",
-          "Negative: didn't + base verb → She didn't call. / They didn't arrive.",
-          "Question: Did + subject + base verb? → Did you call her? / Did they arrive on time?",
+          "Regular verbs: add -ed to the base form.",
+          "Negative: didn't + base verb.",
+          "Question: Did + subject + base verb?",
           "Many common verbs are irregular (go → went, eat → ate) — see the Irregular Verbs lesson.",
+        ],
+        examples: [
+          "She **didn't call**.",
+          "They **didn't arrive**.",
+          "**Did** you call her?",
+          "**Did** they arrive on time?",
         ],
       },
       {
         heading: "Spelling of regular -ed forms",
         body: [
-          "Most verbs: just add -ed → walk → walked, play → played",
-          "Verb ends in -e: add -d only → live → lived, dance → danced",
-          "Consonant + -y: change y → i, add -ed → study → studied, carry → carried",
-          "Short verb ending consonant-vowel-consonant: double the last letter → stop → stopped, plan → planned",
+          "Most verbs: just add -ed.",
+          "Verb ends in -e: add -d only.",
+          "Consonant + -y: change y to i, then add -ed.",
+          "Short verb ending consonant-vowel-consonant: double the last letter.",
+        ],
+        examples: [
+          "walk → **walked**, play → **played**",
+          "live → **lived**, dance → **danced**",
+          "study → **studied**, carry → **carried**",
+          "stop → **stopped**, plan → **planned**",
         ],
       },
       {
         heading: "Use",
         body: [
-          "A finished action at a specific time: I visited my grandmother last weekend. / We watched a film on Saturday.",
-          "A sequence of finished past events: He woke up, got dressed, and left.",
-          "A past habit or state that isn't true anymore: I lived in Rome for two years. / She played tennis every week as a child.",
+          "A finished action at a specific time.",
+          "A sequence of finished past events.",
+          "A past habit or state that isn't true anymore.",
+        ],
+        examples: [
+          "I **visited** my grandmother last weekend.",
+          "We **watched** a film on Saturday.",
+          "He **woke up**, **got dressed**, and **left**.",
+          "I **lived** in Rome for two years.",
+          "She **played** tennis every week as a child.",
         ],
       },
     ],
@@ -63,35 +87,53 @@ export const LESSONS: Record<string, Lesson> = {
       {
         heading: "Form",
         body: [
-          "Present simple: I/you/we/they + base verb; he/she/it + verb-s → She works, They work.",
-          "Spelling of -s: most verbs add -s (works); -ch/-sh/-ss/-x/-o add -es (watches, goes); consonant + -y changes to -ies (study → studies).",
-          "Present continuous: am/is/are + verb-ing → I'm working, She's working, They're working.",
+          "Present simple: I/you/we/they + base verb; he/she/it + verb-s.",
+          "Spelling of -s: most verbs add -s; -ch/-sh/-ss/-x/-o add -es; consonant + -y changes to -ies.",
+          "Present continuous: am/is/are + verb-ing.",
           "Negative/question: don't/doesn't + base verb; am/is/are + not + verb-ing.",
+        ],
+        examples: [
+          "She **works**. They **work**.",
+          "watch → **watches**, go → **goes**, study → **studies**",
+          "I'm **working**. She's **working**. They're **working**.",
         ],
       },
       {
         heading: "Use present simple for…",
         body: [
-          "Routines and habits: I get up at 7am every day. / She goes to the gym on Mondays.",
-          "Facts and general truths: Water boils at 100°C. / The sun rises in the east.",
-          "Schedules and timetables (even for future events): The train leaves at 6pm. / The film starts at 8.",
-          "Frequency adverbs (always, usually, often, sometimes, never) go before the main verb: I always check my email in the morning.",
+          "Routines and habits.",
+          "Facts and general truths.",
+          "Schedules and timetables (even for future events).",
+          "Frequency adverbs (always, usually, often, sometimes, never) go before the main verb.",
+        ],
+        examples: [
+          "I **get up** at 7am every day.",
+          "She **goes** to the gym on Mondays.",
+          "Water **boils** at 100°C.",
+          "The sun **rises** in the east.",
+          "The train **leaves** at 6pm.",
+          "I **always check** my email in the morning.",
         ],
       },
       {
         heading: "Use present continuous for…",
         body: [
-          "Something happening right now: She's reading a book (at this moment).",
-          "A temporary situation around now, not necessarily this exact second: I'm studying French this year.",
-          "A fixed future arrangement, already planned: We're meeting him on Friday.",
-          "A changing or developing situation: The climate is getting warmer.",
+          "Something happening right now.",
+          "A temporary situation around now, not necessarily this exact second.",
+          "A fixed future arrangement, already planned.",
+          "A changing or developing situation.",
+        ],
+        examples: [
+          "She's **reading** a book (at this moment).",
+          "I'm **studying** French this year.",
+          "We're **meeting** him on Friday.",
+          "The climate **is getting** warmer.",
         ],
       },
       {
         heading: "Watch out for",
-        body: [
-          "Stative verbs (about thoughts, feelings, and senses) aren't usually continuous: I want, I know, I like, I understand, I believe, I own (not 'I am wanting').",
-        ],
+        body: ["Stative verbs (about thoughts, feelings, and senses) aren't usually continuous."],
+        examples: ["I **want**, I **know**, I **like**, I **understand**, I **believe**, I **own** (not 'I am wanting')."],
       },
     ],
     commonMistakes: [
@@ -108,7 +150,8 @@ export const LESSONS: Record<string, Lesson> = {
     sections: [
       {
         heading: "Some very common ones",
-        body: [
+        body: ["Base — past simple — past participle:"],
+        examples: [
           "go → went → gone",
           "eat → ate → eaten",
           "see → saw → seen",
@@ -126,17 +169,25 @@ export const LESSONS: Record<string, Lesson> = {
       {
         heading: "Patterns that make them easier",
         body: [
-          "All three forms the same: put → put → put, cut → cut → cut, cost → cost → cost.",
-          "Past simple and past participle the same: buy → bought → bought, find → found → found, think → thought → thought.",
-          "All three forms different: go → went → gone, see → saw → seen, take → took → taken.",
+          "All three forms the same.",
+          "Past simple and past participle the same.",
+          "All three forms different.",
+        ],
+        examples: [
+          "put → put → put, cut → cut → cut, cost → cost → cost",
+          "buy → bought → bought, find → found → found, think → thought → thought",
+          "go → went → gone, see → saw → seen, take → took → taken",
         ],
       },
       {
         heading: "Where you'll meet them",
         body: [
-          "Past simple: Yesterday I went to the shops (not 'goed').",
-          "Present perfect: I have never seen that film (not 'seed' or 'saw').",
-          "The middle form (went, ate, saw...) is for past simple; the last form (gone, eaten, seen...) is for perfect tenses with have/has/had.",
+          "Past simple uses the middle form.",
+          "Present perfect uses the last form, with have/has/had.",
+        ],
+        examples: [
+          "Yesterday I **went** to the shops (not 'goed').",
+          "I have never **seen** that film (not 'seed' or 'saw').",
         ],
       },
     ],
@@ -155,24 +206,39 @@ export const LESSONS: Record<string, Lesson> = {
       {
         heading: "Form",
         body: [
-          "will + base verb → I'll help you. / She won't come. (short forms: 'll, won't)",
-          "am/is/are + going to + base verb → I'm going to help you. / They aren't going to come.",
+          "will + base verb (short forms: 'll, won't)",
+          "am/is/are + going to + base verb",
+        ],
+        examples: [
+          "I**'ll help** you. / She **won't come**.",
+          "I**'m going to help** you. / They **aren't going to come**.",
         ],
       },
       {
         heading: "Use 'will' for…",
         body: [
-          "A decision made at the moment of speaking: The phone's ringing — I'll get it!",
-          "A prediction with no real evidence, just an opinion: I think it'll be sunny tomorrow.",
-          "Promises and offers: I'll carry that for you. / I promise I'll call you.",
+          "A decision made at the moment of speaking.",
+          "A prediction with no real evidence, just an opinion.",
+          "Promises and offers.",
+        ],
+        examples: [
+          "The phone's ringing — I**'ll get** it!",
+          "I think it**'ll be** sunny tomorrow.",
+          "I**'ll carry** that for you.",
+          "I promise I**'ll call** you.",
         ],
       },
       {
         heading: "Use 'going to' for…",
         body: [
-          "A plan or intention decided before now: I'm going to visit my parents this weekend.",
-          "A prediction based on evidence you can see right now: Look at those clouds — it's going to rain.",
-          "Something already arranged, even without visible evidence: She's going to start a new job next month.",
+          "A plan or intention decided before now.",
+          "A prediction based on evidence you can see right now.",
+          "Something already arranged, even without visible evidence.",
+        ],
+        examples: [
+          "I**'m going to visit** my parents this weekend.",
+          "Look at those clouds — it**'s going to rain**.",
+          "She**'s going to start** a new job next month.",
         ],
       },
     ],
@@ -191,23 +257,36 @@ export const LESSONS: Record<string, Lesson> = {
       {
         heading: "Form",
         body: [
-          "If + present simple, + present simple → If you heat ice, it melts.",
-          "Either clause can come first, with no change in meaning: Ice melts if you heat it.",
-          "'When' can replace 'if' with no change in meaning here (unlike other conditionals): When you heat ice, it melts.",
+          "If + present simple, + present simple.",
+          "Either clause can come first, with no change in meaning.",
+          "'When' can replace 'if' with no change in meaning here (unlike other conditionals).",
+        ],
+        examples: [
+          "**If** you heat ice, it **melts**.",
+          "Ice **melts** if you heat it.",
+          "**When** you heat ice, it melts.",
         ],
       },
       {
         heading: "Use",
         body: [
-          "Scientific or general facts: If you mix red and blue, you get purple. / Plants die if they don't get water.",
-          "Things that are always/generally true: If it rains, the streets get wet.",
-          "Instructions and rules: If the alarm goes off, everyone leaves the building. / If you press this button, the machine starts.",
+          "Scientific or general facts.",
+          "Things that are always/generally true.",
+          "Instructions and rules.",
+        ],
+        examples: [
+          "If you mix red and blue, you **get** purple.",
+          "Plants **die** if they don't get water.",
+          "If it rains, the streets **get** wet.",
+          "If the alarm goes off, everyone **leaves** the building.",
         ],
       },
       {
         heading: "Zero vs first conditional",
-        body: [
-          "Zero conditional = always true, no exceptions (a rule or fact). First conditional = one likely situation in the future, with a result using 'will'. Compare: If you heat water to 100°C, it boils (always true) vs If you heat the soup, I'll eat it (one specific future situation).",
+        body: ["Zero conditional = always true, no exceptions (a rule or fact). First conditional = one likely situation in the future, with a result using 'will'."],
+        examples: [
+          "If you heat water to 100°C, it **boils** (always true).",
+          "If you heat the soup, I**'ll eat** it (one specific future situation).",
         ],
       },
     ],
@@ -225,24 +304,38 @@ export const LESSONS: Record<string, Lesson> = {
       {
         heading: "Form",
         body: [
-          "If + present simple, + will + base verb → If it rains, we'll cancel the trip.",
+          "If + present simple, + will + base verb.",
           "The if-clause NEVER uses 'will' — that's the #1 rule to remember.",
-          "The main clause can also use can, might, or should instead of 'will', for a less certain or different kind of result: If it rains, we might stay home. / If you're tired, you should rest.",
+          "The main clause can also use can, might, or should instead of 'will'.",
+        ],
+        examples: [
+          "**If** it rains, we**'ll cancel** the trip.",
+          "If it rains, we **might stay** home.",
+          "If you're tired, you **should rest**.",
         ],
       },
       {
         heading: "Other words instead of 'if'",
         body: [
-          "unless = if...not: Unless you hurry, you'll be late = If you don't hurry, you'll be late.",
-          "as long as / provided that = only if: You can go out as long as you finish your homework.",
+          "unless = if...not",
+          "as long as / provided that = only if",
+        ],
+        examples: [
+          "**Unless** you hurry, you'll be late. = If you don't hurry, you'll be late.",
+          "You can go out **as long as** you finish your homework.",
         ],
       },
       {
         heading: "Use",
         body: [
-          "A real possibility with a likely result: If she studies hard, she'll pass the exam.",
-          "Warnings: If you don't leave now, you'll miss the train.",
-          "Promises and offers: If you help me move, I'll buy you dinner.",
+          "A real possibility with a likely result.",
+          "Warnings.",
+          "Promises and offers.",
+        ],
+        examples: [
+          "If she **studies** hard, she**'ll pass** the exam.",
+          "If you don't leave now, you**'ll miss** the train.",
+          "If you help me move, I**'ll buy** you dinner.",
         ],
       },
     ],
@@ -261,23 +354,42 @@ export const LESSONS: Record<string, Lesson> = {
       {
         heading: "Yes/No questions",
         body: [
-          "Present: Do/Does + subject + base verb? → Does she live near the school? / Do you understand?",
-          "Past: Did + subject + base verb? → Did you go last weekend?",
+          "Present: Do/Does + subject + base verb?",
+          "Past: Did + subject + base verb?",
+        ],
+        examples: [
+          "**Does** she live near the school?",
+          "**Do** you understand?",
+          "**Did** you go last weekend?",
         ],
       },
       {
         heading: "Wh- questions",
         body: [
-          "Wh-word + do/does/did + subject + base verb? → Where does she work? What did you do?",
-          "What vs Which: 'what' is an open choice (What's your favourite colour?); 'which' is a limited choice (Which one do you want — red or blue?).",
-          "How many + countable noun (How many brothers do you have?); how much for uncountable/price (How much does it cost?); how often for frequency; how long for duration or distance.",
+          "Wh-word + do/does/did + subject + base verb?",
+          "What vs Which: 'what' is an open choice; 'which' is a limited choice.",
+          "How many + countable noun; how much for uncountable/price; how often for frequency; how long for duration.",
+        ],
+        examples: [
+          "**Where does** she work?",
+          "**What did** you do?",
+          "What's your favourite colour? (open)",
+          "**Which** one do you want — red or blue? (limited)",
+          "**How many** brothers do you have?",
+          "**How much** does it cost?",
         ],
       },
       {
         heading: "Subject vs object questions",
         body: [
-          "If the question word IS the subject, don't add do/does/did — just use the normal word order: Who called you? / What happened?",
-          "If the question word is the OBJECT, you need the auxiliary: Who did you call? / What did you see?",
+          "If the question word IS the subject, don't add do/does/did — just use the normal word order.",
+          "If the question word is the OBJECT, you need the auxiliary.",
+        ],
+        examples: [
+          "**Who called** you?",
+          "**What happened**?",
+          "**Who did** you call?",
+          "**What did** you see?",
         ],
       },
     ],
@@ -296,23 +408,36 @@ export const LESSONS: Record<string, Lesson> = {
       {
         heading: "Form",
         body: [
-          "Past simple: I visited, she went, they saw",
-          "Present perfect: have/has + past participle → I have visited, she has gone, they have seen",
+          "Past simple: subject + past simple verb.",
+          "Present perfect: have/has + past participle.",
+        ],
+        examples: [
+          "I **visited**, she **went**, they **saw**.",
+          "I **have visited**, she **has gone**, they **have seen**.",
         ],
       },
       {
         heading: "Use past simple when there's a specific time",
-        body: [
-          "yesterday, last night, last week, in 2022, when...?",
-          "I called my sister yesterday evening. / When did you start learning English?",
+        body: ["Signal words: yesterday, last night, last week, in 2022, when...?"],
+        examples: [
+          "I **called** my sister yesterday evening.",
+          "**When did** you start learning English?",
         ],
       },
       {
         heading: "Use present perfect when there's no specific time",
         body: [
-          "ever, never, just, already, yet — for experiences and recent/incomplete actions: Have you ever been to Spain? / She hasn't done her homework yet. / I've just finished.",
-          "since + a starting point in time, for + a length of time — for something that started in the past and continues now: I've lived here since 2019. / I've known him for ten years.",
-          "how long — asking about an ongoing situation: How long have you known her?",
+          "ever, never, just, already, yet — for experiences and recent/incomplete actions.",
+          "since + a starting point, for + a length of time — for something that started in the past and continues now.",
+          "how long — asking about an ongoing situation.",
+        ],
+        examples: [
+          "**Have** you **ever been** to Spain?",
+          "She **hasn't done** her homework **yet**.",
+          "I**'ve just finished**.",
+          "I**'ve lived** here **since** 2019.",
+          "I**'ve known** him **for** ten years.",
+          "**How long have** you **known** her?",
         ],
       },
     ],
@@ -331,25 +456,38 @@ export const LESSONS: Record<string, Lesson> = {
       {
         heading: "Short adjectives (1 syllable, or 2 ending in -y)",
         body: [
-          "Comparative: adjective + -er + than → tall → taller than",
-          "Superlative: the + adjective + -est → tall → the tallest",
-          "Spelling: happy → happier / happiest (y → i); big → bigger / biggest (double the final consonant); nice → nicer / nicest (just add -r/-st after silent -e)",
+          "Comparative: adjective + -er + than.",
+          "Superlative: the + adjective + -est.",
+          "Spelling: y → i; double the final consonant after a short vowel; just add -r/-st after silent -e.",
+        ],
+        examples: [
+          "tall → **taller** than",
+          "tall → **the tallest**",
+          "happy → **happier** / **happiest**",
+          "big → **bigger** / **biggest**",
+          "nice → **nicer** / **nicest**",
         ],
       },
       {
         heading: "Long adjectives (2+ syllables)",
         body: [
-          "Comparative: more + adjective + than → more interesting than",
-          "Superlative: the most + adjective → the most expensive",
-          "Adverbs work the same way as long adjectives: more clearly, more carefully",
+          "Comparative: more + adjective + than.",
+          "Superlative: the most + adjective.",
+          "Adverbs work the same way as long adjectives.",
+        ],
+        examples: [
+          "**more interesting** than",
+          "**the most expensive**",
+          "**more clearly**, **more carefully**",
         ],
       },
       {
         heading: "Irregular forms",
-        body: [
-          "good → better → the best",
-          "bad → worse → the worst",
-          "far → further/farther → the furthest/farthest",
+        body: ["A handful of common adjectives don't follow either pattern."],
+        examples: [
+          "good → **better** → **the best**",
+          "bad → **worse** → **the worst**",
+          "far → **further/farther** → **the furthest/farthest**",
         ],
       },
     ],
@@ -368,16 +506,19 @@ export const LESSONS: Record<string, Lesson> = {
       {
         heading: "The three-way rule",
         body: [
-          "too + adjective/adverb (no noun) → It's too hot. / He drives too fast. / This shirt is too small.",
-          "too much + uncountable noun → too much sugar, too much traffic, too much homework, too much time",
-          "too many + countable plural noun → too many people, too many mistakes, too many cars, too many apps",
+          "too + adjective/adverb (no noun)",
+          "too much + uncountable noun",
+          "too many + countable plural noun",
+        ],
+        examples: [
+          "It's **too hot**. He drives **too fast**. This shirt is **too small**.",
+          "**too much sugar**, **too much traffic**, **too much homework**",
+          "**too many people**, **too many mistakes**, **too many cars**",
         ],
       },
       {
         heading: "Quick check",
-        body: [
-          "Can you count it one by one (one car, two cars)? Use 'too many'. Can't count it (sugar, traffic, homework)? Use 'too much'. Is there no noun at all, just an adjective or adverb? Use 'too' alone.",
-        ],
+        body: ["Can you count it one by one? Use 'too many'. Can't count it? Use 'too much'. No noun at all, just an adjective or adverb? Use 'too' alone."],
       },
     ],
     commonMistakes: [
@@ -395,17 +536,27 @@ export const LESSONS: Record<string, Lesson> = {
       {
         heading: "The four meanings",
         body: [
-          "must / have to → it's necessary: Students must wear a uniform. / I have to finish this by Friday.",
-          "mustn't → it's forbidden: You mustn't smoke here. / You mustn't run in the corridor.",
-          "don't have to / doesn't have to → it's not necessary (but not forbidden either): You don't have to pay — it's free. / We don't have to hurry.",
+          "must / have to → it's necessary.",
+          "mustn't → it's forbidden.",
+          "don't have to / doesn't have to → it's not necessary (but not forbidden either).",
+        ],
+        examples: [
+          "Students **must wear** a uniform.",
+          "I **have to finish** this by Friday.",
+          "You **mustn't smoke** here.",
+          "You **don't have to pay** — it's free.",
         ],
       },
       {
         heading: "Must vs have to",
         body: [
-          "'Must' often feels like the speaker's own rule or a very official one; 'have to' often comes from someone/something else (a boss, a law, a situation).",
-          "Questions and third person almost always use 'have to'/'has to', not 'must': Do you have to book in advance? She has to leave early.",
-          "'Have to' changes with the subject like a normal verb (has to, doesn't have to); 'must'/'mustn't' never change and never need 'to' after them.",
+          "'Must' often feels like the speaker's own rule; 'have to' often comes from someone/something else.",
+          "Questions and third person almost always use 'have to'/'has to', not 'must'.",
+          "'Have to' changes with the subject like a normal verb; 'must'/'mustn't' never change and never need 'to' after them.",
+        ],
+        examples: [
+          "**Do** you **have to** book in advance?",
+          "She **has to** leave early.",
         ],
       },
     ],
@@ -424,17 +575,24 @@ export const LESSONS: Record<string, Lesson> = {
       {
         heading: "The scale",
         body: [
-          "might / could / may + base verb → a weak, uncertain possibility: It might rain later. / That could be John.",
-          "must + base verb → a strong, confident deduction based on evidence: He must be tired — he's been working all day.",
-          "can't + base verb → something is logically impossible given the evidence: She can't be at home — the lights are off and her car's gone.",
+          "might / could / may + base verb → a weak, uncertain possibility.",
+          "must + base verb → a strong, confident deduction based on evidence.",
+          "can't + base verb → something is logically impossible given the evidence.",
+        ],
+        examples: [
+          "It **might rain** later.",
+          "That **could be** John.",
+          "He **must be** tired — he's been working all day.",
+          "She **can't be** at home — the lights are off and her car's gone.",
         ],
       },
       {
         heading: "Remember",
         body: [
           "All of these are followed by the bare infinitive — never 'to', never -ing, never -s.",
-          "These are guesses about now, not facts — compare 'She's at work' (a fact) with 'She might be at work' (a guess).",
+          "These are guesses about now, not facts.",
         ],
+        examples: ["She's at work (a fact) vs. She **might be** at work (a guess)."],
       },
     ],
     commonMistakes: [
@@ -452,34 +610,53 @@ export const LESSONS: Record<string, Lesson> = {
       {
         heading: "Making an invitation",
         body: [
-          "Would you like to + base verb? → Would you like to come to my party?",
-          "Are you free + time? → Are you free on Saturday?",
-          "Do you fancy + -ing? → Do you fancy going to the cinema? ('fancy' is British informal)",
-          "How about / What about + -ing? → How about going bowling tonight?",
-          "Why don't you/we + base verb? / Shall we + base verb? → Why don't we try that new café? Shall we meet at six?",
+          "Would you like to + base verb?",
+          "Are you free + time?",
+          "Do you fancy + -ing? ('fancy' is British informal)",
+          "How about / What about + -ing?",
+          "Why don't you/we + base verb? / Shall we + base verb?",
+        ],
+        examples: [
+          "**Would you like to** come to my party?",
+          "**Are you free** on Saturday?",
+          "**Do you fancy** going to the cinema?",
+          "**How about** going bowling tonight?",
+          "**Why don't we** try that new café?",
+          "**Shall we** meet at six?",
         ],
       },
       {
         heading: "Accepting",
         body: [
-          "That sounds great/fun/wonderful! — enthusiastic yes",
-          "I'd love to! / Count me in! / I'm in! — informal enthusiastic yes",
-          "Sounds like a plan! — casual confirmation",
+          "Enthusiastic yes.",
+          "Informal enthusiastic yes.",
+          "Casual confirmation.",
+        ],
+        examples: [
+          "**That sounds great**!",
+          "**I'd love to**! / **Count me in**! / **I'm in**!",
+          "**Sounds like a plan**!",
         ],
       },
       {
         heading: "Declining politely",
         body: [
-          "I'm afraid I can't make it — I have other plans. ('make it' = attend)",
-          "I'd love to, but I already have plans that evening. (note the word order: 'already' before the verb)",
-          "Thanks for the invite, but… / Maybe another time? (softens the 'no' and leaves the door open)",
+          "'Make it' = attend.",
+          "Note the word order: 'already' before the verb.",
+          "Softens the 'no' and leaves the door open.",
+        ],
+        examples: [
+          "**I'm afraid I can't make it** — I have other plans.",
+          "I'd love to, but **I already have** plans that evening.",
+          "Thanks for the invite, but… / **Maybe another time**?",
         ],
       },
       {
         heading: "Formal vs informal",
-        body: [
-          "Formal: Would you like to join us for…? / We would be delighted if you could attend…",
-          "Informal: Do you fancy…? / How about…? / Are you up for it?",
+        body: ["Formal invitations sound official; informal ones sound relaxed and casual."],
+        examples: [
+          "**Would you like to** join us for…? / We **would be delighted** if you could attend…",
+          "**Do you fancy**…? / **How about**…? / **Are you up for it**?",
         ],
       },
     ],
@@ -499,33 +676,42 @@ export const LESSONS: Record<string, Lesson> = {
       {
         heading: "Starting a story",
         body: [
-          "One day / One night / One evening… → One day, I was walking home when something strange happened.",
+          "One day / One night / One evening…",
           "Once upon a time… (classic, storybook opener)",
-          "Set the scene with past continuous for background: I was cooking dinner when the smoke alarm went off.",
+          "Set the scene with past continuous for background.",
+        ],
+        examples: [
+          "**One day**, I was walking home when something strange happened.",
+          "I **was cooking** dinner when the smoke alarm went off.",
         ],
       },
       {
         heading: "Sequencing events",
         body: [
           "First, … Then, … Next, … After that, … Finally, …",
-          "Use past simple for the events themselves, in the order they happened: First we packed our bags. Then we called a taxi.",
+          "Use past simple for the events themselves, in the order they happened.",
         ],
+        examples: ["**First** we packed our bags. **Then** we called a taxi."],
       },
       {
         heading: "Adding drama",
         body: [
-          "Suddenly, … / All of a sudden, … — an unexpected event",
-          "Luckily, … / Unfortunately, … — a lucky or unlucky turn",
-          "Eventually, … / At last, … — something that took a long time to happen",
-          "To make things worse, … — adding a second problem",
-          "so + adjective + that / such a + adjective + noun + that → She was so tired that she fell asleep. / It was such a scary film that I couldn't sleep.",
+          "Suddenly, … / All of a sudden, … — an unexpected event.",
+          "Luckily, … / Unfortunately, … — a lucky or unlucky turn.",
+          "Eventually, … / At last, … — something that took a long time to happen.",
+          "To make things worse, … — adding a second problem.",
+          "so + adjective + that / such a + adjective + noun + that.",
+        ],
+        examples: [
+          "She was **so tired that** she fell asleep.",
+          "It was **such a scary film that** I couldn't sleep.",
         ],
       },
       {
         heading: "Ending a story",
         body: [
-          "In the end, … / Finally, … — introduces the outcome",
-          "As a result, … — introduces a consequence of what just happened",
+          "In the end, … / Finally, … — introduces the outcome.",
+          "As a result, … — introduces a consequence of what just happened.",
         ],
       },
     ],
@@ -545,18 +731,28 @@ export const LESSONS: Record<string, Lesson> = {
       {
         heading: "Symptoms and illness",
         body: [
-          "I have a headache / a sore throat / a fever / a cough / a stomachache.",
-          "I feel dizzy. / I've been feeling unwell / tired lately.",
-          "catch a cold — I caught a cold last week.",
-          "be allergic to + thing → I'm allergic to penicillin. / suffer from + illness → He is suffering from a bad cold.",
+          "Naming a symptom.",
+          "catch a cold",
+          "be allergic to + thing / suffer from + illness",
+        ],
+        examples: [
+          "I have **a headache** / **a sore throat** / **a fever** / **a cough**.",
+          "I **feel dizzy**. I've been **feeling unwell** lately.",
+          "I **caught a cold** last week.",
+          "I'm **allergic to** penicillin.",
+          "He is **suffering from** a bad cold.",
         ],
       },
       {
         heading: "Injuries",
         body: [
-          "sprain/twist + body part → She sprained her ankle playing tennis.",
-          "break + body part (past: broke, participle: broken) → He broke his arm. / He has broken his arm.",
-          "cut myself, a bruise, feel dizzy, be out of breath",
+          "sprain/twist + body part.",
+          "break + body part (past: broke, participle: broken).",
+        ],
+        examples: [
+          "She **sprained** her ankle playing tennis.",
+          "He **broke** his arm. / He **has broken** his arm.",
+          "**cut myself**, **a bruise**, **be out of breath**",
         ],
       },
       {
@@ -564,15 +760,23 @@ export const LESSONS: Record<string, Lesson> = {
         body: [
           "make an appointment (to see the doctor/dentist)",
           "The doctor examines you, then prescribes medicine.",
-          "Giving advice/instructions: You should rest. / You must rest. (no 'to' after should/must)",
-          "This medicine should be taken twice a day. (passive: modal + be + past participle)",
+          "Giving advice/instructions: should/must + base verb (no 'to').",
+          "Passive: modal + be + past participle.",
+        ],
+        examples: [
+          "You **should rest**. You **must rest**.",
+          "This medicine **should be taken** twice a day.",
         ],
       },
       {
         heading: "For vs since",
         body: [
-          "for + a length of time → I've had this cough for three days.",
-          "since + a starting point → My throat has been sore since Monday.",
+          "for + a length of time",
+          "since + a starting point",
+        ],
+        examples: [
+          "I've had this cough **for** three days.",
+          "My throat has been sore **since** Monday.",
         ],
       },
     ],
@@ -592,9 +796,13 @@ export const LESSONS: Record<string, Lesson> = {
       {
         heading: "Polite requests",
         body: [
-          "Could I have… ? / I'd like… / Can I get… ? — all common ways to order",
-          "I'll have the pasta, please. (more natural than 'I'll take' in a restaurant)",
-          "Waiter's questions: Are you ready to order? What would you like?",
+          "Could I have… ? / I'd like… / Can I get… ?",
+          "'I'll have' is more natural than 'I'll take' in a restaurant.",
+        ],
+        examples: [
+          "**Could I have** the pasta, please?",
+          "**I'll have** the pasta, please.",
+          "**Are you ready to order**? **What would you like**?",
         ],
       },
       {
@@ -602,22 +810,31 @@ export const LESSONS: Record<string, Lesson> = {
         body: [
           "starter → main course → dessert",
           "Does it come with…? — asking what's included",
-          "Could I swap the chips for a salad? ('swap X for Y')",
-          "Could I have it without onions, please?",
+          "swap X for Y",
+        ],
+        examples: [
+          "**Does it come with** rice?",
+          "**Could I swap** the chips **for** a salad?",
+          "**Could I have** it **without** onions, please?",
         ],
       },
       {
         heading: "Dietary needs",
-        body: [
-          "Is this dish vegetarian/vegan/gluten-free? / suitable for vegetarians?",
-          "I'm allergic to nuts, so could you check the ingredients?",
+        body: ["Asking whether a dish fits a dietary requirement."],
+        examples: [
+          "Is this dish **vegetarian**/**vegan**/**gluten-free**?",
+          "I'm **allergic to** nuts, so could you check the ingredients?",
         ],
       },
       {
         heading: "Finishing up",
         body: [
-          "Could we have the bill, please? / Could we have separate bills?",
-          "book a table (in advance) → I'd like to book a table for two.",
+          "Asking to pay.",
+          "book a table (in advance)",
+        ],
+        examples: [
+          "**Could we have the bill**, please?",
+          "I'd like to **book a table** for two.",
         ],
       },
     ],
@@ -637,31 +854,41 @@ export const LESSONS: Record<string, Lesson> = {
       {
         heading: "Common excuses",
         body: [
-          "I missed the bus. / I got stuck in traffic. / My alarm didn't go off. / I overslept.",
-          "Something came up (at the last minute). — a vague, general excuse",
-          "My phone died. / I completely forgot. / It slipped my mind. (= I forgot)",
-          "I had a family emergency / a prior commitment.",
+          "Fixed excuse phrases for lateness.",
+          "A vague, general excuse.",
+          "'It slipped my mind' = I forgot.",
+        ],
+        examples: [
+          "I **missed the bus**. I **got stuck in traffic**.",
+          "My alarm **didn't go off**. I **overslept**.",
+          "**Something came up** at the last minute.",
+          "My phone **died**. I **completely forgot**. It **slipped my mind**.",
+          "I had **a family emergency** / **a prior commitment**.",
         ],
       },
       {
         heading: "Joining the excuse to the result",
-        body: [
-          "…because + reason → I arrived late for work because I missed the bus.",
-          "Give the reason after 'because', in past simple: She missed the meeting because she had a family emergency.",
+        body: ["…because + reason, in past simple."],
+        examples: [
+          "I arrived late for work **because** I missed the bus.",
+          "She missed the meeting **because** she had a family emergency.",
         ],
       },
       {
         heading: "Admitting you were wrong",
         body: [
-          "should have + past participle → I should have called you earlier. I'm sorry.",
+          "should have + past participle",
           "This is a past regret — you didn't do it, and now you wish you had.",
         ],
+        examples: ["I **should have called** you earlier. I'm sorry."],
       },
       {
         heading: "Apologising formally",
-        body: [
-          "I apologise for being late. / Please accept my apologies.",
-          "Sorry for the inconvenience.",
+        body: ["Formal apology phrases."],
+        examples: [
+          "I **apologise for** being late.",
+          "Please **accept my apologies**.",
+          "**Sorry for** the inconvenience.",
         ],
       },
     ],
@@ -681,28 +908,44 @@ export const LESSONS: Record<string, Lesson> = {
       {
         heading: "Base verb, no 'to' — casual suggestions",
         body: [
-          "Let's + base verb → Let's take a break.",
-          "Shall we + base verb? → Shall we meet at six?",
-          "Why don't we/you + base verb? → Why don't we try that new café?",
-          "Why not + base verb (no subject)? → Why not take a taxi?",
+          "Let's + base verb",
+          "Shall we + base verb?",
+          "Why don't we/you + base verb?",
+          "Why not + base verb (no subject)?",
+        ],
+        examples: [
+          "**Let's** take a break.",
+          "**Shall we** meet at six?",
+          "**Why don't we** try that new café?",
+          "**Why not** take a taxi?",
         ],
       },
       {
         heading: "-ing form — 'about' suggestions and verbs like suggest/recommend",
         body: [
-          "How about / What about + -ing? → How about going for a walk?",
-          "I suggest / I recommend + -ing → I suggest postponing the meeting.",
-          "Have you considered / thought about + -ing? → Have you considered asking for help?",
-          "It might be worth + -ing → It might be worth checking the reviews.",
+          "How about / What about + -ing?",
+          "I suggest / I recommend + -ing",
+          "Have you considered / thought about + -ing?",
+          "It might be worth + -ing",
+        ],
+        examples: [
+          "**How about** going for a walk?",
+          "I **suggest postponing** the meeting.",
+          "**Have you considered asking** for help?",
+          "It **might be worth checking** the reviews.",
         ],
       },
       {
         heading: "Softer or more formal suggestions",
         body: [
-          "You should/could try… — 'should' is stronger, 'could' is gentler and optional",
-          "If I were you, I'd… — friendly advice using second conditional",
-          "What if + past simple? → What if we went camping this year?",
-          "May I suggest…? / I'd propose… — formal, often in meetings",
+          "You should/could try… — 'should' is stronger, 'could' is gentler and optional.",
+          "If I were you, I'd… — friendly advice using second conditional.",
+          "What if + past simple?",
+          "May I suggest…? / I'd propose… — formal, often in meetings.",
+        ],
+        examples: [
+          "**What if** we went camping this year?",
+          "**May I suggest**…? / **I'd propose**…",
         ],
       },
     ],
@@ -723,16 +966,24 @@ export const LESSONS: Record<string, Lesson> = {
         heading: "Describing a routine",
         body: [
           "wake up → get up → have breakfast → commute/go to work or school",
-          "do the housework/chores, relax/unwind, go to bed, fall asleep",
-          "Third person needs -s: She wakes up at seven. He catches the bus at 7:45.",
-          "Sequence with first, then, after that, finally: First I have a shower. Then I get dressed.",
+          "Third person needs -s.",
+          "Sequence with first, then, after that, finally.",
+        ],
+        examples: [
+          "**do** the housework/chores, **relax**/**unwind**, **go to bed**, **fall asleep**",
+          "She **wakes up** at seven. He **catches** the bus at 7:45.",
+          "**First** I have a shower. **Then** I get dressed.",
         ],
       },
       {
         heading: "Frequency and time",
         body: [
-          "always / usually / often / sometimes / never — goes before the main verb: I usually go to the gym. (but after 'be': I am usually tired.)",
+          "always / usually / often / sometimes / never — goes before the main verb, but after 'be'.",
           "free time / spare time — time that's yours, not work or school",
+        ],
+        examples: [
+          "I **usually go** to the gym.",
+          "I am **usually tired**.",
         ],
       },
     ],
@@ -753,16 +1004,22 @@ export const LESSONS: Record<string, Lesson> = {
         heading: "Talking about food and diet",
         body: [
           "vegetarian / vegan — don't eat meat/fish, or any animal products",
-          "be allergic to + food → She is allergic to nuts.",
-          "be on a diet, lose weight, eat out, cook/prepare food",
-          "Comparing food: this curry is spicier than that one (short adjective + -er)",
+          "be allergic to + food",
+          "Comparing food (short adjective + -er)",
+        ],
+        examples: [
+          "She is **allergic to** nuts.",
+          "**be on a diet**, **lose weight**, **eat out**",
+          "This curry is **spicier** than that one.",
         ],
       },
       {
         heading: "At a restaurant",
-        body: [
-          "menu, bill, waiter, portion, starter, main course, dessert",
-          "This dish is suitable for vegetarians. / Does it come with rice?",
+        body: ["Common restaurant vocabulary."],
+        examples: [
+          "**menu**, **bill**, **waiter**, **portion**, **starter**, **main course**, **dessert**",
+          "This dish is **suitable for vegetarians**.",
+          "**Does it come with** rice?",
         ],
       },
     ],
@@ -782,16 +1039,24 @@ export const LESSONS: Record<string, Lesson> = {
       {
         heading: "Talking about school",
         body: [
-          "subject, exam, homework, grade/mark, library, classmate, timetable",
-          "be good at + subject → She is good at maths. / revise for an exam",
-          "hand in homework, pass/fail an exam, take notes",
+          "Common school vocabulary.",
+          "be good at + subject",
+        ],
+        examples: [
+          "**subject**, **exam**, **homework**, **grade**/**mark**, **library**, **classmate**, **timetable**",
+          "She is **good at** maths.",
+          "**hand in** homework, **pass**/**fail** an exam, **take notes**",
         ],
       },
       {
         heading: "Obligation at school",
         body: [
-          "must/have to + base verb → Students must arrive on time. (no 'to' after 'must')",
-          "Passive with a modal: The essay must be handed in by Friday. (modal + be + past participle)",
+          "must/have to + base verb (no 'to' after 'must')",
+          "Passive with a modal: modal + be + past participle.",
+        ],
+        examples: [
+          "Students **must arrive** on time.",
+          "The essay **must be handed in** by Friday.",
         ],
       },
     ],
@@ -811,17 +1076,26 @@ export const LESSONS: Record<string, Lesson> = {
       {
         heading: "Talking about relationships",
         body: [
-          "get on/along with someone (= have a good relationship), take after someone (= look/act like them)",
-          "keep in touch, close-knit family, only child, rely on someone",
-          "We have been friends since primary school. (present perfect + since = started in the past, still true now)",
-          "who for people in relative clauses → My uncle, who lives in Canada, is visiting us.",
+          "get on/along with someone (= have a good relationship)",
+          "take after someone (= look/act like them)",
+          "Present perfect + since = started in the past, still true now.",
+          "who for people in relative clauses",
+        ],
+        examples: [
+          "**keep in touch**, **close-knit** family, **only child**, **rely on** someone",
+          "We **have been friends since** primary school.",
+          "My uncle, **who** lives in Canada, is visiting us.",
         ],
       },
       {
         heading: "Comparing people in a family",
         body: [
-          "Short adjectives: older/youngest (not 'more old' or 'more young')",
-          "She is the youngest child in the family. (superlative for 3+ people)",
+          "Short adjectives.",
+          "Superlative for 3+ people.",
+        ],
+        examples: [
+          "**older**/**youngest** (not 'more old' or 'more young')",
+          "She is **the youngest** child in the family.",
         ],
       },
     ],
@@ -841,18 +1115,23 @@ export const LESSONS: Record<string, Lesson> = {
       {
         heading: "Talking about hobbies",
         body: [
-          "in my free time, at weekends, once a week — time expressions for habits",
-          "enjoy/like + -ing → I enjoy cooking. (not 'enjoy to cook')",
-          "prefer X to Y → I prefer swimming to running.",
-          "would like to + infinitive → I would like to try surfing one day.",
-          "join a club, take up a hobby, take a class, practise a skill",
+          "Time expressions for habits.",
+          "enjoy/like + -ing",
+          "prefer X to Y",
+          "would like to + infinitive",
+        ],
+        examples: [
+          "**in my free time**, **at weekends**, **once a week**",
+          "I **enjoy cooking**. (not 'enjoy to cook')",
+          "I **prefer** swimming **to** running.",
+          "I **would like to try** surfing one day.",
+          "**join a club**, **take up** a hobby, **practise** a skill",
         ],
       },
       {
         heading: "Feelings about activities",
-        body: [
-          "-ed vs -ing adjectives: I am bored (how you feel) vs. The film is boring (what causes the feeling)",
-        ],
+        body: ["-ed vs -ing adjectives."],
+        examples: ["I am **bored** (how you feel) vs. The film is **boring** (what causes the feeling)."],
       },
     ],
     commonMistakes: [
@@ -871,17 +1150,22 @@ export const LESSONS: Record<string, Lesson> = {
       {
         heading: "Describing your town",
         body: [
-          "There is/are + noun → There are a lot of shops near my home. (plural noun needs 'are')",
-          "be famous for + noun → My town is famous for its old market.",
-          "which for places/things in relative clauses → The old town, which is very famous, attracts tourists.",
-          "Comparatives/superlatives: quieter than, busier than, the most beautiful",
+          "There is/are + noun",
+          "be famous for + noun",
+          "which for places/things in relative clauses",
+          "Comparatives/superlatives.",
+        ],
+        examples: [
+          "There **are** a lot of shops near my home.",
+          "My town is **famous for** its old market.",
+          "The old town, **which** is very famous, attracts tourists.",
+          "**quieter than**, **busier than**, **the most beautiful**",
         ],
       },
       {
         heading: "Talking about the past of a place",
-        body: [
-          "Passive voice for history: The cathedral was built hundreds of years ago. (was/were + past participle)",
-        ],
+        body: ["Passive voice for history: was/were + past participle."],
+        examples: ["The cathedral **was built** hundreds of years ago."],
       },
     ],
     commonMistakes: [
@@ -900,24 +1184,40 @@ export const LESSONS: Record<string, Lesson> = {
       {
         heading: "Recent actions",
         body: [
-          "just → very recently: She has just arrived.",
-          "already → sooner than expected, usually mid-sentence: I've already finished the report.",
-          "yet → in negatives and questions, usually at the end: I haven't finished yet. / Have you finished yet?",
+          "just → very recently",
+          "already → sooner than expected, usually mid-sentence",
+          "yet → in negatives and questions, usually at the end",
+        ],
+        examples: [
+          "She **has just arrived**.",
+          "I**'ve already finished** the report.",
+          "I **haven't finished yet**.",
+          "**Have** you **finished yet**?",
         ],
       },
       {
         heading: "Experience and duration",
         body: [
-          "ever/never for life experience: Have you ever tried sushi? / I have never been to Japan.",
-          "How long have you...? asks about a state that started in the past and continues now: How long have you known her?",
-          "Superlative + ever → present perfect: This is the best pizza I have ever eaten.",
+          "ever/never for life experience",
+          "How long have you...? asks about a state that started in the past and continues now.",
+          "Superlative + ever → present perfect.",
+        ],
+        examples: [
+          "**Have** you **ever tried** sushi?",
+          "I **have never been** to Japan.",
+          "**How long have you known** her?",
+          "This is the best pizza I **have ever eaten**.",
         ],
       },
       {
         heading: "Unfinished time periods",
         body: [
-          "this month/week/year, so far, up to now, recently — periods that haven't finished yet take present perfect: They have met three times this month.",
-          "A result affecting now: I have lost my keys! (I still can't find them)",
+          "this month/week/year, so far, up to now, recently — periods that haven't finished yet.",
+          "A result affecting now.",
+        ],
+        examples: [
+          "They **have met** three times **this month**.",
+          "I **have lost** my keys! (I still can't find them)",
         ],
       },
     ],
@@ -936,23 +1236,37 @@ export const LESSONS: Record<string, Lesson> = {
     sections: [
       {
         heading: "Common phrasal verbs",
-        body: [
-          "give up + gerund (quit) → He gave up smoking. / look after (care for) → She looks after her grandmother.",
-          "put up with (tolerate), run into (meet by chance), find out (discover), get over (recover from)",
-          "come up with (think of an idea), figure out/work out (solve, understand), carry out (perform/complete)",
+        body: ["A sample of common phrasal verbs and what they mean."],
+        examples: [
+          "He **gave up** smoking. (quit)",
+          "She **looks after** her grandmother. (cares for)",
+          "I can't **put up with** this noise. (tolerate)",
+          "I **ran into** an old friend. (met by chance)",
+          "It took weeks to **get over** the flu. (recover from)",
+          "He couldn't **come up with** an excuse. (think of an idea)",
+          "They **carried out** the experiment. (performed/completed)",
         ],
       },
       {
         heading: "Separable vs inseparable",
         body: [
-          "Separable (can split, and must split with a pronoun): pick up → pick me up (not 'pick up me'); hand in → hand it in",
-          "Inseparable (never split): look after, look into, put up with, get over, come across — 'look after my dog', never 'look after for my dog'",
+          "Separable: can split, and must split with a pronoun.",
+          "Inseparable: never split.",
+        ],
+        examples: [
+          "**Pick me up** (not 'pick up me').",
+          "**Hand it in**.",
+          "**Look after** my dog (never 'look after for my dog').",
         ],
       },
       {
         heading: "Fixed prepositions",
-        body: [
-          "cut down ON sugar, keep up WITH the news, fall out WITH a friend, get along WITH someone, come up WITH an idea",
+        body: ["Some phrasal verbs need a specific preposition."],
+        examples: [
+          "**cut down on** sugar",
+          "**keep up with** the news",
+          "**fall out with** a friend",
+          "**come up with** an idea",
         ],
       },
     ],
@@ -972,16 +1286,22 @@ export const LESSONS: Record<string, Lesson> = {
       {
         heading: "The pattern",
         body: [
-          "So + auxiliary + subject → agrees with a POSITIVE statement: \"I love pizza.\" \"So do I.\"",
-          "Neither/Nor + auxiliary + subject → agrees with a NEGATIVE statement: \"I don't like horror films.\" \"Neither do I.\"",
-          "Always invert: auxiliary comes before the subject — 'So am I', never 'So I am'.",
+          "So + auxiliary + subject → agrees with a POSITIVE statement.",
+          "Neither/Nor + auxiliary + subject → agrees with a NEGATIVE statement.",
+          "Always invert: auxiliary comes before the subject.",
+        ],
+        examples: [
+          "\"I love pizza.\" \"**So do I**.\"",
+          "\"I don't like horror films.\" \"**Neither do I**.\"",
         ],
       },
       {
         heading: "Matching the auxiliary",
-        body: [
-          "Match whatever auxiliary was in the original: be → am/is/are/was/were; have → have/has/had; modal → can/could/would/will, etc.",
-          "\"They've finished.\" → \"So have we.\" / \"He can't swim.\" → \"Neither can I.\" / \"I was confused.\" → \"So was he.\"",
+        body: ["Match whatever auxiliary was in the original."],
+        examples: [
+          "\"They've finished.\" \"**So have** we.\"",
+          "\"He can't swim.\" \"**Neither can** I.\"",
+          "\"I was confused.\" \"**So was** he.\"",
         ],
       },
     ],
@@ -1001,17 +1321,27 @@ export const LESSONS: Record<string, Lesson> = {
       {
         heading: "I'd rather",
         body: [
-          "I'd rather + bare infinitive (no 'to') → I'd rather stay home tonight.",
-          "I'd rather X than Y (both bare infinitives) → I'd rather walk than take the bus.",
-          "I'd rather + subject + past simple (a preference about someone else, present meaning) → I'd rather you called me first.",
+          "I'd rather + bare infinitive (no 'to')",
+          "I'd rather X than Y (both bare infinitives)",
+          "I'd rather + subject + past simple (a preference about someone else, present meaning)",
+        ],
+        examples: [
+          "I**'d rather stay** home tonight.",
+          "I**'d rather walk than** take the bus.",
+          "I**'d rather** you **called** me first.",
         ],
       },
       {
         heading: "I'd prefer",
         body: [
-          "I'd prefer to + infinitive → I'd prefer to relax at home.",
-          "I'd prefer + noun + to + noun → I'd prefer tea to coffee.",
-          "I'd prefer to X rather than Y → She'd prefer to walk rather than drive.",
+          "I'd prefer to + infinitive",
+          "I'd prefer + noun + to + noun",
+          "I'd prefer to X rather than Y",
+        ],
+        examples: [
+          "I**'d prefer to relax** at home.",
+          "I**'d prefer** tea **to** coffee.",
+          "She**'d prefer to walk rather than** drive.",
         ],
       },
     ],
@@ -1031,17 +1361,25 @@ export const LESSONS: Record<string, Lesson> = {
       {
         heading: "Form",
         body: [
-          "Present simple passive: am/is/are + past participle → English is spoken in over 50 countries.",
-          "Past simple passive: was/were + past participle → This bridge was built in 1950.",
-          "Future simple passive: will be + past participle → The results will be announced tomorrow.",
-          "Add the agent with 'by' if it's useful to say who did it: This song is sung by millions of fans.",
+          "Present simple passive: am/is/are + past participle",
+          "Past simple passive: was/were + past participle",
+          "Future simple passive: will be + past participle",
+          "Add the agent with 'by' if it's useful to say who did it.",
+        ],
+        examples: [
+          "English **is spoken** in over 50 countries.",
+          "This bridge **was built** in 1950.",
+          "The results **will be announced** tomorrow.",
+          "This song **is sung by** millions of fans.",
         ],
       },
       {
         heading: "Common uses",
-        body: [
-          "Facts, rules, and routines: Homework is checked every Monday.",
-          "History, manufacturing, and processes where the doer isn't the point: These shoes were made in Italy. / The telephone was invented in the 19th century.",
+        body: ["Facts, rules, routines, history, and manufacturing."],
+        examples: [
+          "Homework **is checked** every Monday.",
+          "These shoes **were made** in Italy.",
+          "The telephone **was invented** in the 19th century.",
         ],
       },
     ],
@@ -1061,16 +1399,19 @@ export const LESSONS: Record<string, Lesson> = {
       {
         heading: "The three forms",
         body: [
-          "used to + bare infinitive → a past habit that's now finished: I used to smoke, but I quit. (negative/question: didn't use to / did you use to — no 'd')",
-          "be used to + noun/-ing → something that is (or was) already familiar/normal: She is used to working under pressure.",
-          "get used to + noun/-ing → the process of becoming familiar with something over time: It took months, but I got used to the cold weather.",
+          "used to + bare infinitive → a past habit that's now finished (negative/question: no 'd' — didn't use to / did you use to).",
+          "be used to + noun/-ing → something that is (or was) already familiar/normal.",
+          "get used to + noun/-ing → the process of becoming familiar with something over time.",
+        ],
+        examples: [
+          "I **used to smoke**, but I quit.",
+          "She **is used to working** under pressure.",
+          "It took months, but I **got used to** the cold weather.",
         ],
       },
       {
         heading: "Telling them apart",
-        body: [
-          "'Used to' is about the past action itself repeating; 'be/get used to' is about how familiar something feels, and can be about present, past, or future (will get used to).",
-        ],
+        body: ["'Used to' is about the past action itself repeating; 'be/get used to' is about how familiar something feels, and can be present, past, or future."],
       },
     ],
     commonMistakes: [
@@ -1089,24 +1430,38 @@ export const LESSONS: Record<string, Lesson> = {
       {
         heading: "Backshifting tenses",
         body: [
-          "am/is/are → was/were: \"I am tired.\" → She said she was tired.",
-          "will → would; can → could; must → had to: \"I will call you.\" → He said he would call.",
-          "present perfect → past perfect: \"I have never been to Japan.\" → He said he had never been to Japan.",
-          "Time words shift too: tomorrow → the next day, today → that day, this → that",
+          "am/is/are → was/were",
+          "will → would; can → could; must → had to",
+          "present perfect → past perfect",
+          "Time words shift too.",
+        ],
+        examples: [
+          "\"I am tired.\" → She said she **was** tired.",
+          "\"I will call you.\" → He said he **would** call.",
+          "\"I have never been to Japan.\" → He said he **had** never **been** to Japan.",
+          "tomorrow → **the next day**, today → **that day**, this → **that**",
         ],
       },
       {
         heading: "Say vs tell",
-        body: [
-          "say (no object) → She said (that) she was hungry. / tell + object → She told me (that) she was hungry.",
+        body: ["say (no object) / tell + object"],
+        examples: [
+          "She **said** (that) she was hungry.",
+          "She **told me** (that) she was hungry.",
         ],
       },
       {
         heading: "Reported questions and requests",
         body: [
-          "Yes/no questions use if/whether, no inversion: She asked if I had eaten. (not 'had I eaten')",
-          "Wh-questions keep the wh-word but statement order: He asked where I lived. (not 'where did I live')",
-          "Commands/requests: told/asked + object + (not) to + infinitive: The teacher told us to open the window. / She told him not to touch her things.",
+          "Yes/no questions use if/whether, no inversion.",
+          "Wh-questions keep the wh-word but statement order.",
+          "Commands/requests: told/asked + object + (not) to + infinitive.",
+        ],
+        examples: [
+          "She **asked if** I **had eaten**. (not 'had I eaten')",
+          "He **asked where** I **lived**. (not 'where did I live')",
+          "The teacher **told us to open** the window.",
+          "She **told him not to touch** her things.",
         ],
       },
     ],
@@ -1126,17 +1481,28 @@ export const LESSONS: Record<string, Lesson> = {
       {
         heading: "The four groups",
         body: [
-          "some- → positive statements: Somebody left their umbrella here.",
-          "any- → questions and negatives: Is anybody home? / I didn't say anything.",
-          "no- → already negative, don't add another negative: Nobody wants to leave. (not 'Nobody doesn't want')",
-          "every- → always singular: Everyone was invited. / Everything is ready.",
+          "some- → positive statements",
+          "any- → questions and negatives",
+          "no- → already negative, don't add another negative",
+          "every- → always singular",
+        ],
+        examples: [
+          "**Somebody** left their umbrella here.",
+          "**Is anybody** home? I didn't say **anything**.",
+          "**Nobody wants** to leave. (not 'Nobody doesn't want')",
+          "**Everyone was** invited. **Everything is** ready.",
         ],
       },
       {
         heading: "Grammar to remember",
         body: [
-          "All indefinite pronouns take a singular verb: Everybody was invited. / Nothing was said.",
-          "whoever/whatever (= any person/thing who/that) also take a singular verb: Whoever calls, tell them I'm busy.",
+          "All indefinite pronouns take a singular verb.",
+          "whoever/whatever (= any person/thing who/that) also take a singular verb.",
+        ],
+        examples: [
+          "**Everybody was** invited.",
+          "**Nothing was** said.",
+          "**Whoever calls**, tell them I'm busy.",
         ],
       },
     ],
@@ -1156,26 +1522,37 @@ export const LESSONS: Record<string, Lesson> = {
       {
         heading: "Which pronoun for what",
         body: [
-          "who → people: The woman who called is my sister.",
-          "which/that → things: The car that/which I bought broke down.",
-          "whose → possession: The student whose bag was stolen reported it.",
-          "where → places: This is the café where we met.",
-          "when → time: 2005 was the year when everything changed.",
-          "why → after 'reason': The reason why she left is unclear.",
+          "who → people",
+          "which/that → things",
+          "whose → possession",
+          "where → places",
+          "when → time",
+          "why → after 'reason'",
+        ],
+        examples: [
+          "The woman **who** called is my sister.",
+          "The car **that/which** I bought broke down.",
+          "The student **whose** bag was stolen reported it.",
+          "This is the café **where** we met.",
+          "2005 was the year **when** everything changed.",
+          "The reason **why** she left is unclear.",
         ],
       },
       {
         heading: "Defining vs non-defining",
         body: [
-          "Defining (no commas, identifies which one): I have a friend who lives in Paris.",
-          "Non-defining (commas, extra info, can't use 'that'): My brother, who lives in Canada, is visiting us.",
+          "Defining (no commas, identifies which one)",
+          "Non-defining (commas, extra info, can't use 'that')",
+        ],
+        examples: [
+          "I have a friend **who lives in Paris**.",
+          "My brother, **who lives in Canada**, is visiting us.",
         ],
       },
       {
         heading: "Common trap",
-        body: [
-          "Never repeat the pronoun the relative clause already replaces: 'The book which I told you about' — not 'about it'.",
-        ],
+        body: ["Never repeat the pronoun the relative clause already replaces."],
+        examples: ["The book **which** I told you about (not 'about it')."],
       },
     ],
     commonMistakes: [
@@ -1194,17 +1571,27 @@ export const LESSONS: Record<string, Lesson> = {
       {
         heading: "Forming and using adverbs",
         body: [
-          "adjective + -ly → careful → carefully, quiet → quietly",
-          "Irregular: good → well (not 'goodly'); fast, hard, late stay the same as the adjective",
-          "Frequency adverbs (always/usually/often/never) go before the main verb, but after 'be': I always drink coffee. / She is always late.",
+          "adjective + -ly",
+          "Irregular: good → well (not 'goodly'); fast, hard, late stay the same as the adjective.",
+          "Frequency adverbs go before the main verb, but after 'be'.",
+        ],
+        examples: [
+          "careful → **carefully**, quiet → **quietly**",
+          "He plays the piano **well**.",
+          "I **always drink** coffee. She **is always late**.",
         ],
       },
       {
         heading: "Comparatives and degree",
         body: [
-          "Short adverbs: -er (harder); long adverbs: more + adverb (more carefully)",
-          "'Enough' comes AFTER the adjective: clever enough, not enough clever",
-          "After sense verbs (smell, taste, look, sound, feel), use an adjective, not an adverb: This soup tastes wonderful. (not 'wonderfully')",
+          "Short adverbs: -er; long adverbs: more + adverb",
+          "'Enough' comes AFTER the adjective.",
+          "After sense verbs (smell, taste, look, sound, feel), use an adjective, not an adverb.",
+        ],
+        examples: [
+          "**harder**, **more carefully**",
+          "**clever enough**, not 'enough clever'",
+          "This soup tastes **wonderful**. (not 'wonderfully')",
         ],
       },
     ],
@@ -1224,10 +1611,15 @@ export const LESSONS: Record<string, Lesson> = {
       {
         heading: "Form",
         body: [
-          "The + comparative, the + comparative → The harder you work, the better your results.",
-          "Short adjectives: the + adjective-er → The sooner, the better.",
-          "Long adjectives: the more + adjective → The more crowded the bus is, the more uncomfortable the ride.",
+          "The + comparative, the + comparative",
+          "Short adjectives: the + adjective-er",
+          "Long adjectives: the more + adjective",
           "Irregular: good → the better, bad → the worse, little → the less",
+        ],
+        examples: [
+          "**The harder** you work, **the better** your results.",
+          "**The sooner**, **the better**.",
+          "**The more crowded** the bus is, **the more uncomfortable** the ride.",
         ],
       },
     ],
@@ -1247,15 +1639,22 @@ export const LESSONS: Record<string, Lesson> = {
       {
         heading: "Form",
         body: [
-          "If + past simple, + would + base verb → If I had more money, I would travel the world.",
-          "Use 'were' for all subjects in the if-clause (not 'was'), especially in 'If I were you...': If she were here, she would know what to do.",
-          "Questions: Would + subject + base verb + if...? → What would you do if you won the lottery?",
+          "If + past simple, + would + base verb",
+          "Use 'were' for all subjects in the if-clause (not 'was'), especially in 'If I were you...'",
+          "Questions: Would + subject + base verb + if...?",
+        ],
+        examples: [
+          "If I **had** more money, I **would travel** the world.",
+          "If she **were** here, she would know what to do.",
+          "What **would you do if** you **won** the lottery?",
         ],
       },
       {
         heading: "Second vs first conditional",
-        body: [
-          "First conditional = a real, likely future situation (If it rains, I'll take an umbrella). Second conditional = hypothetical/unlikely, imagining now (If I won the lottery, I would buy a house — probably won't happen).",
+        body: ["First conditional = a real, likely future situation. Second conditional = hypothetical/unlikely, imagining now."],
+        examples: [
+          "If it rains, I'll take an umbrella. (first — likely)",
+          "If I won the lottery, I would buy a house. (second — hypothetical)",
         ],
       },
     ],
@@ -1275,24 +1674,38 @@ export const LESSONS: Record<string, Lesson> = {
       {
         heading: "Permission",
         body: [
-          "Can I...? (informal) → Can I use your phone?",
-          "Could I...? (more polite) → Could I borrow your pen?",
-          "May I...? (formal) → May I leave the room?",
+          "Can I...? (informal)",
+          "Could I...? (more polite)",
+          "May I...? (formal)",
+        ],
+        examples: [
+          "**Can I use** your phone?",
+          "**Could I borrow** your pen?",
+          "**May I leave** the room?",
         ],
       },
       {
         heading: "Advice",
         body: [
-          "should/ought to → You should see a doctor.",
-          "had better (a stronger warning, often about consequences) → You had better hurry up.",
+          "should/ought to",
+          "had better (a stronger warning, often about consequences)",
+        ],
+        examples: [
+          "You **should see** a doctor.",
+          "You **had better hurry up**.",
         ],
       },
       {
         heading: "Ability",
         body: [
-          "can → present ability: She can speak Spanish.",
-          "could → general ability in the past: I could climb trees when I was young.",
-          "was/were able to → one specific past achievement, not a general ability: After months of training, she was able to run a marathon.",
+          "can → present ability",
+          "could → general ability in the past",
+          "was/were able to → one specific past achievement, not a general ability",
+        ],
+        examples: [
+          "She **can speak** Spanish.",
+          "I **could climb** trees when I was young.",
+          "After months of training, she **was able to run** a marathon.",
         ],
       },
     ],
@@ -1312,16 +1725,25 @@ export const LESSONS: Record<string, Lesson> = {
       {
         heading: "Form",
         body: [
-          "was/were + verb-ing → I was watching TV at 8pm. / They were playing football.",
+          "was/were + verb-ing",
           "Negative/question: wasn't/weren't + -ing; Were you...ing?",
+        ],
+        examples: [
+          "I **was watching** TV at 8pm.",
+          "They **were playing** football.",
         ],
       },
       {
         heading: "Use",
         body: [
-          "Background action interrupted by a shorter one (past simple): I was cooking dinner when the phone rang.",
-          "Two actions happening at the same time, often with 'while': While I was studying, my sister was watching a film.",
-          "Setting the scene of a story: The sun was shining and the birds were singing.",
+          "Background action interrupted by a shorter one (past simple).",
+          "Two actions happening at the same time, often with 'while'.",
+          "Setting the scene of a story.",
+        ],
+        examples: [
+          "I **was cooking** dinner when the phone **rang**.",
+          "While I **was studying**, my sister **was watching** a film.",
+          "The sun **was shining** and the birds **were singing**.",
         ],
       },
     ],
@@ -1341,15 +1763,22 @@ export const LESSONS: Record<string, Lesson> = {
       {
         heading: "Form and use",
         body: [
-          "had + past participle → When I arrived, she had already left. (the leaving happened before the arriving)",
-          "Explains the cause of a later past event: She was tired because she had worked all night.",
-          "Often paired with 'by the time': By the time the teacher arrived, the students had finished the test.",
+          "had + past participle",
+          "Explains the cause of a later past event.",
+          "Often paired with 'by the time'.",
+        ],
+        examples: [
+          "When I arrived, she **had already left**.",
+          "She was tired because she **had worked** all night.",
+          "By the time the teacher arrived, the students **had finished** the test.",
         ],
       },
       {
         heading: "Signal words",
-        body: [
-          "already, just, never, ever, before — all commonly appear with past perfect: I had never seen snow before that winter. / She had just finished when her friend arrived.",
+        body: ["already, just, never, ever, before — all commonly appear with past perfect."],
+        examples: [
+          "I **had never seen** snow before that winter.",
+          "She **had just finished** when her friend arrived.",
         ],
       },
     ],
@@ -1369,19 +1798,31 @@ export const LESSONS: Record<string, Lesson> = {
       {
         heading: "The core rule",
         body: [
-          "Positive statement → negative tag: She's a doctor, isn't she?",
-          "Negative statement → positive tag: You don't like coffee, do you?",
-          "Match the auxiliary already there: 've/has → haven't/hasn't; can → can't; was → wasn't. If there's no auxiliary (present/past simple main verb), use do/does/did.",
+          "Positive statement → negative tag.",
+          "Negative statement → positive tag.",
+          "Match the auxiliary already there; if there's no auxiliary, use do/does/did.",
+        ],
+        examples: [
+          "She's a doctor, **isn't she**?",
+          "You don't like coffee, **do you**?",
         ],
       },
       {
         heading: "Irregulars to memorise",
         body: [
-          "I am → aren't I (not 'amn't I'): I'm right, aren't I?",
-          "Let's... → shall we: Let's have a break, shall we?",
-          "Imperatives → will you: Close the door, will you?",
-          "Have (possession, main verb) → do/does/did, not haven't: You have a car, don't you?",
-          "Never/nobody/nothing (hidden negatives) → positive tag: She never smiles, does she? / Nobody called, did they?",
+          "I am → aren't I",
+          "Let's... → shall we",
+          "Imperatives → will you",
+          "Have (possession, main verb) → do/does/did, not haven't",
+          "Never/nobody/nothing (hidden negatives) → positive tag",
+        ],
+        examples: [
+          "I'm right, **aren't I**?",
+          "Let's have a break, **shall we**?",
+          "Close the door, **will you**?",
+          "You have a car, **don't you**?",
+          "She never smiles, **does she**?",
+          "Nobody called, **did they**?",
         ],
       },
     ],
@@ -1401,9 +1842,13 @@ export const LESSONS: Record<string, Lesson> = {
       {
         heading: "The rule",
         body: [
-          "-ed describes how a PERSON feels: I'm interested in history. / I was bored during the meeting.",
-          "-ing describes the THING that causes the feeling: History is interesting. / The meeting was boring.",
-          "Common pairs: excited/exciting, exhausted/exhausting, confused/confusing, disappointed/disappointing, annoyed/annoying, amazed/amazing, satisfied/satisfying",
+          "-ed describes how a PERSON feels.",
+          "-ing describes the THING that causes the feeling.",
+        ],
+        examples: [
+          "I'm **interested** in history. I was **bored** during the meeting.",
+          "History is **interesting**. The meeting was **boring**.",
+          "excited/exciting, exhausted/exhausting, confused/confusing, disappointed/disappointing, annoyed/annoying, amazed/amazing, satisfied/satisfying",
         ],
       },
     ],
@@ -1423,17 +1868,27 @@ export const LESSONS: Record<string, Lesson> = {
       {
         heading: "Form",
         body: [
-          "will be + verb-ing → This time tomorrow, I'll be flying to Rome.",
-          "Question: Will + subject + be + verb-ing? → What will you be doing at 10am tomorrow?",
-          "Negative: won't be + verb-ing → I won't be answering my phone during the exam.",
+          "will be + verb-ing",
+          "Question: Will + subject + be + verb-ing?",
+          "Negative: won't be + verb-ing",
+        ],
+        examples: [
+          "This time tomorrow, I'**ll be flying** to Rome.",
+          "**What will you be doing** at 10am tomorrow?",
+          "I **won't be answering** my phone during the exam.",
         ],
       },
       {
         heading: "Use",
         body: [
-          "An action in progress at a stated future time: At 8pm tonight, we will be having dinner.",
-          "Explaining why you can't do something: I can't meet at 3pm — I'll be seeing a client then.",
-          "A polite assumption about someone's routine: He'll be working late tonight, so don't wait for him.",
+          "An action in progress at a stated future time.",
+          "Explaining why you can't do something.",
+          "A polite assumption about someone's routine.",
+        ],
+        examples: [
+          "At 8pm tonight, we **will be having** dinner.",
+          "I can't meet at 3pm — I**'ll be seeing** a client then.",
+          "He**'ll be working** late tonight, so don't wait for him.",
         ],
       },
     ],

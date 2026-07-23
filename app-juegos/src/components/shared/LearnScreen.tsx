@@ -17,6 +17,17 @@ const LEVEL_COLOR: Record<string, string> = {
 };
 const FOCUS_LABEL: Record<string, string> = { grammar: "Grammar", vocabulary: "Vocabulary", topic: "Topics" };
 
+// Lesson content marks the key form in each line with **double asterisks** — render those as bold
+// rather than asking every lesson to hand-roll its own <strong> markup.
+function renderBold(text: string) {
+  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+  return parts.map((part, i) =>
+    part.startsWith("**") && part.endsWith("**")
+      ? <strong key={i}>{part.slice(2, -2)}</strong>
+      : <span key={i}>{part}</span>
+  );
+}
+
 // Cross-reference LESSONS (the actual content) against TOPIC_OPTIONS (level/focus metadata) so
 // adding a new lesson later is a one-line addition to lessons.ts — this list rebuilds itself.
 const LESSON_TOPICS = Object.keys(LESSONS)
@@ -54,9 +65,19 @@ export function LearnScreen({ onBack, theme, filterTopicIds }: Props) {
                 <div style={{ fontWeight: "800", color: theme.accentSolid, fontSize: "14px", marginBottom: "8px", textTransform: "uppercase", letterSpacing: "0.04em" }}>{section.heading}</div>
                 <ul style={{ margin: 0, paddingLeft: "20px", color: "#374151" }}>
                   {section.body.map((line, j) => (
-                    <li key={j} style={{ marginBottom: "6px", lineHeight: 1.55, fontSize: "14px" }}>{line}</li>
+                    <li key={j} style={{ marginBottom: "6px", lineHeight: 1.55, fontSize: "14px" }}>{renderBold(line)}</li>
                   ))}
                 </ul>
+
+                {section.examples && section.examples.length > 0 && (
+                  <div style={{ background: hexToRgba(theme.accentSolid, 0.06), borderLeft: `3px solid ${theme.accentSolid}`, borderRadius: "0 8px 8px 0", padding: "10px 14px", marginTop: "10px" }}>
+                    {section.examples.map((ex, j) => (
+                      <div key={j} style={{ fontSize: "13.5px", fontStyle: "italic", color: "#374151", lineHeight: 1.6, marginBottom: j < section.examples!.length - 1 ? "5px" : 0 }}>
+                        {renderBold(ex)}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
 
