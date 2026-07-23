@@ -2757,4 +2757,373 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ They must to have missed the bus. → ✅ They must have missed the bus. (no 'to' — it's just 'must have')",
     ],
   },
+
+  describing_trends_data: {
+    title: "Describing Trends & Data",
+    intro: "Talking about graphs and statistics needs a specific set of verbs for change (rise vs raise), the right prepositions (by/to/from), and adjectives of degree.",
+    sections: [
+      {
+        heading: "Verbs of change",
+        body: [
+          "rise/fall (intransitive, no object) vs raise (transitive, needs an object).",
+          "Other verbs for change: increase, decrease, soar, plummet, fluctuate, recover, level off.",
+        ],
+        examples: [
+          "House prices **rose** sharply last year. (not 'raised')",
+          "The government **raised** taxes last year.",
+          "Stock prices **plummeted** after the scandal.",
+          "Sales grew fast, then **levelled off**.",
+        ],
+      },
+      {
+        heading: "Prepositions with numbers",
+        body: [
+          "increase/rise BY + amount of change",
+          "rise TO + the new figure",
+          "grow FROM X TO Y",
+        ],
+        examples: [
+          "Sales increased **by** 15% last quarter.",
+          "Prices rose **to** $50.",
+          "Revenue grew **from** $2 million **to** $5 million.",
+        ],
+      },
+      {
+        heading: "Describing the shape of a trend",
+        body: ["Adjectives/nouns for describing patterns."],
+        examples: ["**an upward/downward trend**, **a sharp increase/decline**, **a slight increase**, **remain stable**, **reach a peak**, **hit a record low**"],
+      },
+    ],
+    commonMistakes: [
+      "❌ Prices raised sharply last year. → ✅ Prices rose sharply last year. ('rise' is intransitive)",
+      "❌ The government rose taxes. → ✅ The government raised taxes. ('raise' needs an object)",
+      "❌ Sales increased of 10%. → ✅ Sales increased by 10%. ('increase by', not 'of')",
+      "❌ Prices have rose steadily. → ✅ Prices have risen steadily. (present perfect needs 'risen')",
+      "❌ The number of tourists have doubled. → ✅ The number of tourists has doubled. ('the number of' takes a singular verb)",
+    ],
+  },
+
+  workplace_professional_vocabulary: {
+    title: "Workplace & Professional Vocabulary",
+    intro: "Professional English runs on fixed collocations (hand in your notice, meet a deadline, pay rise) — getting the exact word pairing right matters more than the individual words.",
+    sections: [
+      {
+        heading: "Applying, starting, and leaving a job",
+        body: ["Fixed phrases for the stages of employment."],
+        examples: [
+          "**apply for** a promotion, a **job interview**, a **job offer**, a **probation period**",
+          "She **handed in her notice** after accepting a new job.",
+          "He decided to **resign** from his position.",
+        ],
+      },
+      {
+        heading: "Day-to-day work vocabulary",
+        body: ["Common collocations for describing your working life."],
+        examples: [
+          "**schedule a meeting**, **meet a deadline**, **work overtime**, **take sick leave**, **give feedback**, **workload**",
+          "You can always **count on** him — he's very **reliable**.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ I need to scheduling a meeting. → ✅ I need to schedule a meeting. (base verb after 'need to')",
+      "❌ She hand in her notice last week. → ✅ She handed in her notice last week. (past simple needs -ed)",
+      "❌ We meet the deadline last week. → ✅ We met the deadline last week. (irregular past simple 'met')",
+      "❌ She finally got a rise pay. → ✅ She finally got a pay rise. (fixed word order: 'pay rise')",
+      "❌ He received a job offer of the company. → ✅ He received a job offer from the company. ('offer from', not 'of')",
+    ],
+  },
+
+  advanced_idioms_expressions: {
+    title: "Advanced Idioms & Expressions",
+    intro: "These idioms are fixed phrases with their own exact wording and prepositions — the meaning is figurative, so you can't guess it from the individual words.",
+    sections: [
+      {
+        heading: "Starting, deciding, and finishing",
+        body: ["Idioms about beginning, agreeing, and stopping."],
+        examples: [
+          "Let's **get the ball rolling** on this project. (start something)",
+          "I think we're all **on the same page**. (in agreement)",
+          "After the failure, they went **back to the drawing board**. (start over)",
+          "It's 6pm — let's **call it a day**. (stop working)",
+        ],
+      },
+      {
+        heading: "Facing difficulty and taking risks",
+        body: ["Idioms about tough decisions and consequences."],
+        examples: [
+          "We need to **bite the bullet** and tell him the bad news. (face something difficult)",
+          "They **cut corners** to finish faster, and quality suffered. (do something badly to save time/money)",
+          "He's already **on thin ice** with his boss. (in a risky/precarious situation)",
+          "If you don't apply soon, you might **miss the boat**. (lose an opportunity)",
+        ],
+      },
+      {
+        heading: "Describing situations",
+        body: ["Idioms describing frequency, cost, and surprise."],
+        examples: [
+          "He visits his hometown **once in a blue moon**. (very rarely)",
+          "That holiday **cost an arm and a leg**! (very expensive)",
+          "The news came completely **out of the blue**. (unexpectedly)",
+          "Working from home gives her **the best of both worlds**.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ We need to bit the bullet. → ✅ We need to bite the bullet. (base verb after 'need to')",
+      "❌ He visits us once in the blue moon. → ✅ He visits us once in a blue moon. ('a', not 'the')",
+      "❌ I think we're in the same page. → ✅ I think we're on the same page. ('on', not 'in')",
+      "❌ They went back at the drawing board. → ✅ They went back to the drawing board. ('back to', not 'back at')",
+      "❌ Let's call it the day. → ✅ Let's call it a day. ('a day', not 'the day')",
+    ],
+  },
+
+  persuading_disagreeing_advanced: {
+    title: "Persuading & Disagreeing (Advanced)",
+    intro: "These are formal, essay- and debate-style phrases for arguing a point, conceding partially, and disagreeing politely — each is a fixed expression with its own exact wording.",
+    sections: [
+      {
+        heading: "Presenting an argument",
+        body: ["Formal ways to introduce an opinion or weigh two sides."],
+        examples: [
+          "**I'd argue that** remote work has made teams more productive.",
+          "**It could be argued that** the policy was rushed.",
+          "**On the one hand**, it saves money; **on the other hand**, it risks quality.",
+        ],
+      },
+      {
+        heading: "Conceding before disagreeing",
+        body: ["Acknowledge the other view first, then add a contrast with 'but'."],
+        examples: [
+          "**I take your point, but** I still think we should wait.",
+          "**That's a fair point, but** it doesn't account for long-term costs.",
+          "**I see where you're coming from**, but I still see it differently.",
+        ],
+      },
+      {
+        heading: "Polite and formal disagreement",
+        body: ["Softened or formal ways to say 'I disagree'."],
+        examples: [
+          "**I'm not entirely convinced** by that argument.",
+          "**I beg to differ** — the data suggests the opposite.",
+          "**With all due respect**, I think you're mistaken.",
+          "Let's just **agree to disagree** on this one.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ I'd argue what the policy has failed. → ✅ I'd argue that the policy has failed. ('argue that', not 'what')",
+      "❌ On the one hand...; in the other, it's slower. → ✅ ...on the other, it's slower. ('on the other', not 'in the other')",
+      "❌ I agree with a certain extent. → ✅ I agree to a certain extent. ('to a certain extent')",
+      "❌ I'm not entire convinced. → ✅ I'm not entirely convinced. (adverb 'entirely', not adjective 'entire')",
+      "❌ With all due respects... → ✅ With all due respect... (fixed singular 'respect')",
+    ],
+  },
+
+  education_systems: {
+    title: "Education Systems",
+    intro: "Education vocabulary comes with fixed collocations (focus on, responsible for) and present perfect for change over time — plus the recurring Spanish-L1 traps.",
+    sections: [
+      {
+        heading: "Talking about education systems",
+        body: ["Common education vocabulary."],
+        examples: [
+          "**compulsory** education, **curriculum**, **scholarship**, **tuition fees**, **vocational training**, **critical thinking**",
+          "The curriculum **focuses on** practical skills as well as theory.",
+        ],
+      },
+      {
+        heading: "Change over time",
+        body: ["Present perfect for change continuing to now."],
+        examples: [
+          "Tuition fees **have increased** sharply in the last decade.",
+          "Finland **has changed** its education system significantly over the past decade.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ During the lecture, students made questions. → ✅ ...students asked questions. (English 'asks' a question, never 'makes' one)",
+      "❌ Your grade depends of how well you do. → ✅ ...depends on how well you do. ('depend on', not 'depend of')",
+      "❌ My mother is teacher at a primary school. → ✅ My mother is a teacher... (article needed before a profession)",
+      "❌ Students should avoid to fail. → ✅ Students should avoid failing. ('avoid' + gerund)",
+      "❌ I have finished my degree in 2020. → ✅ I finished my degree in 2020. (specific past time → past simple)",
+    ],
+  },
+
+  work_life_balance: {
+    title: "Work-Life Balance",
+    intro: "This topic pairs workplace vocabulary with fixed phrasal verbs (switch off, set boundaries) — plus the recurring Spanish-L1 traps.",
+    sections: [
+      {
+        heading: "Talking about balance and burnout",
+        body: ["Common work-life balance vocabulary."],
+        examples: [
+          "**burnout**, **flexible hours**, **switch off**, **set boundaries**, **four-day working week**, **hustle culture**",
+          "It's important to **switch off** at the end of the day.",
+        ],
+      },
+      {
+        heading: "Advice and consequence",
+        body: ["should for advice; second conditional for a hypothetical improvement."],
+        examples: [
+          "You **should take** regular breaks to avoid burnout.",
+          "If companies offered more flexibility, employees **would feel** less stressed.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ She was embarrassed with her first child. → ✅ She was pregnant with her first child. ('embarrassed' ≠ 'pregnant' — a false friend)",
+      "❌ My boss is very sympathetic. → ✅ My boss is very friendly. ('sympathetic' means compassionate about a problem, not friendly)",
+      "❌ I always make a pause at midday. → ✅ I always take a break at midday. ('take a break', not 'make a pause')",
+      "❌ I am agree that companies should offer flexible hours. → ✅ I agree that... ('agree' is a verb, no 'am')",
+      "❌ I am working too much hours. → ✅ I am working too many hours. ('too many' with countable plural nouns)",
+    ],
+  },
+
+  success_motivation: {
+    title: "Success and Motivation",
+    intro: "Talking about goals and achievement uses present perfect for progress made so far, plus a set of fixed collocations (depend on, proud of) — and the recurring Spanish-L1 traps.",
+    sections: [
+      {
+        heading: "Talking about goals and mindset",
+        body: ["Common success/motivation vocabulary."],
+        examples: [
+          "**goals**, **role model**, **growth mindset**, **resilience**, **procrastination**, **stepping stone**",
+          "Success often **depends on** persistence rather than talent alone.",
+        ],
+      },
+      {
+        heading: "Progress so far",
+        body: ["Present perfect + for/since for ongoing effort."],
+        examples: [
+          "She **has worked** hard for this promotion **for** the last two years.",
+          "He **has stayed** motivated **since** he started his own company.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ My coach is very sensible about my feelings. → ✅ My coach is very sensitive about my feelings. ('sensible' means practical/wise; 'sensitive' is about emotions)",
+      "❌ After finishing his career, he got a job. → ✅ After finishing his degree, he got a job. ('career' ≠ 'degree' — false friend)",
+      "❌ Successful people don't avoid to fail. → ✅ ...don't avoid failing. ('avoid' + gerund)",
+      "❌ She is very interested on personal development. → ✅ ...interested in personal development. ('interested in', not 'on')",
+      "❌ I have achieved this goal last year. → ✅ I achieved this goal last year. (specific past time → past simple)",
+    ],
+  },
+
+  cultural_differences: {
+    title: "Cultural Differences",
+    intro: "Describing cultural differences uses fixed collocations (different from, aware of) and present perfect for lived experience — plus the recurring Spanish-L1 traps.",
+    sections: [
+      {
+        heading: "Talking about cultural differences",
+        body: ["Common vocabulary for discussing culture and customs."],
+        examples: [
+          "**culture shock**, **body language**, **etiquette**, **stereotypes**, **multicultural**, **adapt to**",
+          "Table manners in Japan are very **different from** table manners in Spain.",
+          "Travellers should be **aware of** local customs.",
+        ],
+      },
+      {
+        heading: "Talking about experience",
+        body: ["Present perfect for accumulated life experience."],
+        examples: ["She **has lived** in three different countries, so she understands cultural differences well."],
+      },
+    ],
+    commonMistakes: [
+      "❌ In my country, we make a big party. → ✅ ...we have a big party. ('have/throw a party', never 'make a party')",
+      "❌ Table manners are very different of Spain. → ✅ ...different from Spain. ('different from', not 'different of')",
+      "❌ My host family was very sympathetic. → ✅ My host family was very kind. ('sympathetic' means compassionate about a problem, not friendly)",
+      "❌ I look forward to visit different countries. → ✅ ...to visiting different countries. ('look forward to' + gerund)",
+      "❌ I have visited Japan last year. → ✅ I visited Japan last year. (specific past time → past simple)",
+    ],
+  },
+
+  climate_change: {
+    title: "Climate Change",
+    intro: "Climate change vocabulary comes with fixed prepositions (responsible for, protect from) and passive voice for large-scale processes — plus the recurring Spanish-L1 traps.",
+    sections: [
+      {
+        heading: "Talking about causes and effects",
+        body: ["Common climate vocabulary."],
+        examples: [
+          "**greenhouse gases**, **fossil fuels**, **renewable energy**, **carbon footprint**, **deforestation**, **rising sea levels**",
+          "Factories are **responsible for** a large percentage of emissions.",
+        ],
+      },
+      {
+        heading: "Passive voice for large-scale action",
+        body: ["Passive voice is common when describing what's being done, rather than who is doing it."],
+        examples: [
+          "Carbon emissions **can be reduced** through renewable energy investment.",
+          "Thousands of hectares of forest **have been destroyed** by wildfires this year.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ We should avoid to use single-use plastic. → ✅ ...avoid using single-use plastic. ('avoid' + gerund)",
+      "❌ Factories are responsible of emissions. → ✅ ...responsible for emissions. ('responsible for', not 'responsible of')",
+      "❌ Some governments don't do nothing. → ✅ ...don't do anything. (only one negative per clause)",
+      "❌ The pollution is destroying our planet. → ✅ Pollution is destroying our planet. (no article for general/abstract nouns)",
+      "❌ Scientists have discovered new evidence last month. → ✅ Scientists discovered new evidence last month. (specific past time → past simple)",
+    ],
+  },
+
+  fast_fashion: {
+    title: "Fast Fashion",
+    intro: "Fast fashion vocabulary comes with fixed collocations (criticised for, accused of, alternative to) — plus the recurring Spanish-L1 traps.",
+    sections: [
+      {
+        heading: "Talking about the fashion industry",
+        body: ["Common fast fashion vocabulary."],
+        examples: [
+          "**landfill**, **second-hand**, **sustainable**, **capsule wardrobe**, **conscious consumer**, **greenwashing**",
+          "Fast fashion has been **criticised for** exploiting workers.",
+          "The company was **accused of** exploiting workers.",
+        ],
+      },
+      {
+        heading: "Hypothetical improvement",
+        body: ["Second conditional for imagining a better outcome."],
+        examples: ["If people bought fewer clothes, the industry **would produce** less waste."],
+      },
+    ],
+    commonMistakes: [
+      "❌ Consumers try to avoid to buy unethical clothes. → ✅ ...avoid buying unethical clothes. ('avoid' + gerund)",
+      "❌ Young consumers are more interested on sustainable fashion. → ✅ ...interested in sustainable fashion. ('interested in', not 'on')",
+      "❌ My aunt works in factory. → ✅ My aunt works in a factory. (article needed before a singular countable noun)",
+      "❌ Brands own fabrics in countries where labour is cheap. → ✅ ...own factories... ('fabric' ≠ 'factory' — false friend)",
+      "❌ Fast fashion has become popular in the 1990s. → ✅ Fast fashion became popular in the 1990s. (specific past decade → past simple)",
+    ],
+  },
+
+  technology_daily_life: {
+    title: "Technology in Daily Life",
+    intro: "Technology vocabulary treats terms like 'artificial intelligence' as singular, and pairs with fixed prepositions (dependent on, protect from) — plus the recurring Spanish-L1 traps.",
+    sections: [
+      {
+        heading: "Talking about technology",
+        body: [
+          "'Artificial intelligence' and similar mass concepts take a singular verb.",
+          "Common technology vocabulary.",
+        ],
+        examples: [
+          "Artificial intelligence **has changed** many industries. (not 'have changed')",
+          "**digital natives**, **streaming**, **cybersecurity**, **digital divide**, **work remotely**",
+          "Cybersecurity protects computers **from** hackers.",
+        ],
+      },
+      {
+        heading: "Present perfect passive for big changes",
+        body: ["have/has been + past participle for changes affecting a whole industry."],
+        examples: ["Many factory jobs **have been replaced** by robots and automated machines."],
+      },
+    ],
+    commonMistakes: [
+      "❌ Actually, most people use their phone for social media. → ✅ Nowadays, most people use their phone... ('actually' means 'in fact', not 'nowadays'/'currently')",
+      "❌ My phone battery lasts a large time. → ✅ ...lasts a long time. ('large' = big in size; 'long' describes duration)",
+      "❌ I have this laptop since five years. → ✅ I have had this laptop for five years. ('for' + duration, and 'have had' not 'have')",
+      "❌ Many people listen music while they commute. → ✅ ...listen to music... ('listen to' + thing)",
+      "❌ She has downloaded that app last week. → ✅ She downloaded that app last week. (specific past time → past simple)",
+    ],
+  },
 };
