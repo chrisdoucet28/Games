@@ -2134,4 +2134,293 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ Now the ball is in your hands. → ✅ Now the ball is in your court. (fixed idiom: 'the ball is in your court')",
     ],
   },
+
+  working_from_home: {
+    title: "Working from Home",
+    intro: "Talking about remote work leans on present perfect for change over time ('has become popular') and a set of fixed collocations — plus the same Spanish-L1 traps seen in other topics.",
+    sections: [
+      {
+        heading: "Talking about remote work",
+        body: [
+          "Common remote-work vocabulary.",
+          "concentrate ON + noun",
+        ],
+        examples: [
+          "**commute**, **distraction**, **isolated**, **home office**, **hybrid working**, **log off**",
+          "It's hard to **concentrate on** your work when the kids are at home.",
+        ],
+      },
+      {
+        heading: "Describing change over time",
+        body: ["Present perfect for a change that started in the past and continues now, often with 'since'."],
+        examples: [
+          "Working from home **has become** popular since the pandemic began.",
+          "Many face-to-face meetings **have been replaced** by video calls.",
+        ],
+      },
+      {
+        heading: "Common trap: verbs + gerund",
+        body: ["enjoy/avoid + gerund, not infinitive."],
+        examples: [
+          "Many employees **enjoy working** from home.",
+          "Some managers **avoid trusting** their remote employees.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ I am agree that working from home saves time. → ✅ I agree that working from home saves time. ('agree' is a verb, no 'am')",
+      "❌ How productive you are depends of your self-discipline. → ✅ ...depends on your self-discipline. ('depend on', not 'depend of')",
+      "❌ Actually, I work from home three days a week. → ✅ Currently, I work from home three days a week. ('actually' means 'in fact', not 'currently')",
+      "❌ She is remote worker who manages her own schedule. → ✅ She is a remote worker... (article needed before a job noun)",
+      "❌ I have bought a new desk last week. → ✅ I bought a new desk last week. (specific past time → past simple)",
+    ],
+  },
+
+  learning_language: {
+    title: "Learning a Foreign Language",
+    intro: "This topic mixes learning-strategy vocabulary with present perfect for ongoing duration ('has learned...for six years') — plus the recurring Spanish-L1 traps.",
+    sections: [
+      {
+        heading: "Talking about learning strategies",
+        body: [
+          "Common phrases for learning a language.",
+          "practise WITH someone",
+        ],
+        examples: [
+          "**immerse yourself in** the language, **pick up** new words, **become fluent**, **mother tongue**",
+          "I try to **practise with** native speakers every week.",
+        ],
+      },
+      {
+        heading: "Duration and change",
+        body: ["Present perfect (continuous) for something that started in the past and continues."],
+        examples: [
+          "She **has learned** Spanish **for** six years and is now fluent.",
+          "She **has been studying** Korean **since** January.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ I assisted to an English class. → ✅ I attended an English class. ('assist' means to help; 'attend' means to go to')",
+      "❌ Don't be afraid to make questions. → ✅ Don't be afraid to ask questions. (English 'asks' a question, never 'makes' one)",
+      "❌ I improve my listening by listening music. → ✅ ...by listening to music. ('listen to' + thing)",
+      "❌ I am beginner. → ✅ I am a beginner. (article needed before a role/level noun)",
+      "❌ I have started learning English when I was eight. → ✅ I started learning English when I was eight. (specific past time point → past simple)",
+    ],
+  },
+
+  career_choices: {
+    title: "Career Choices",
+    intro: "Career vocabulary comes with a set of fixed prepositions (apply for, interested in, good at) plus present perfect for career history — and the same recurring Spanish-L1 traps.",
+    sections: [
+      {
+        heading: "Talking about careers",
+        body: ["Common career vocabulary and fixed prepositions."],
+        examples: [
+          "**apply for** a job, **interested in**, **good at**, **qualifications**, **internship**, **mentor**",
+          "She **has had** three different jobs **since** she graduated.",
+        ],
+      },
+      {
+        heading: "Verbs + gerund",
+        body: ["consider/avoid + gerund; 'thinking about' + gerund."],
+        examples: [
+          "He is **considering switching** to a different industry.",
+          "He **avoided talking** about his salary.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ I am agree that soft skills are important. → ✅ I agree that soft skills are important. ('agree' is a verb, no 'am')",
+      "❌ Your success depends of how hard you work. → ✅ ...depends on how hard you work. ('depend on', not 'depend of')",
+      "❌ I couldn't assist the job interview. → ✅ I couldn't attend the job interview. ('assist' means to help; 'attend' means to go to')",
+      "❌ My brother is engineer at a tech company. → ✅ My brother is an engineer... (article needed before a profession)",
+      "❌ I have started my new job last Monday. → ✅ I started my new job last Monday. (specific past time → past simple)",
+    ],
+  },
+
+  time_management: {
+    title: "Time Management",
+    intro: "Time-management vocabulary pairs naturally with modals of advice (should) and gerunds after avoid/depend — plus the recurring Spanish-L1 traps.",
+    sections: [
+      {
+        heading: "Talking about managing time",
+        body: ["Common time-management vocabulary and collocations."],
+        examples: [
+          "**prioritise**, **procrastination**, **deadline**, **delegate**, **to-do list**, **switch off**",
+          "You **should set** a timer to stay focused.",
+        ],
+      },
+      {
+        heading: "Verbs + gerund",
+        body: ["avoid + gerund; depend on + noun/gerund."],
+        examples: [
+          "Try to **avoid checking** your phone every five minutes.",
+          "How much you achieve **depends on** how well you plan your day.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ I have to assist a time-management workshop. → ✅ I have to attend a time-management workshop. ('assist' means to help; 'attend' means to go to')",
+      "❌ The team meeting has place every Monday. → ✅ The team meeting takes place every Monday. ('take place', not 'have place')",
+      "❌ I eventually check my emails two or three times. → ✅ I occasionally check my emails... ('eventually' means 'in the end'; Spanish 'eventualmente' means 'occasionally')",
+      "❌ Good time manager always makes a schedule. → ✅ A good time manager always makes a schedule. (article needed before a role noun)",
+      "❌ She has completed the report yesterday. → ✅ She completed the report yesterday. (specific past time → past simple)",
+    ],
+  },
+
+  free_time_hobbies: {
+    title: "Free Time and Hobbies",
+    intro: "This B1 hobbies topic builds on gerunds after enjoy/spend time, plus present perfect for how long you've had a hobby — and the same recurring Spanish-L1 traps.",
+    sections: [
+      {
+        heading: "Talking about hobbies and their benefits",
+        body: ["Common hobby vocabulary."],
+        examples: ["**unwind**, **acquire new skills**, **fulfilling**, **recharge**, **take up** a hobby, **passionate about**"],
+      },
+      {
+        heading: "Duration and gerunds",
+        body: [
+          "Present perfect (continuous) + for/since for how long.",
+          "enjoy/spend time/avoid + gerund; comparisons also use a gerund after 'than'.",
+        ],
+        examples: [
+          "She **has been collecting** stamps **since** she was a child.",
+          "I **enjoy reading** books in my free time.",
+          "Painting is **more relaxing than watching** TV.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ I realized a painting course last year. → ✅ I did a painting course last year. ('realize' means to become aware of, not to carry out)",
+      "❌ In my opinion I think that hiking is the best hobby. → ✅ In my opinion, hiking is the best hobby. (don't combine 'in my opinion' and 'I think')",
+      "❌ Whether I go hiking depends of the weather. → ✅ ...depends on the weather. ('depend on', not 'depend of')",
+      "❌ I am painter in my free time. → ✅ I am a painter in my free time. (article needed before a role noun)",
+      "❌ I have taken up painting three years ago. → ✅ I took up painting three years ago. (specific past time → past simple)",
+    ],
+  },
+
+  social_media: {
+    title: "Social Media",
+    intro: "'Social media' and 'people' are grammatically tricky (singular vs plural verb agreement), and this topic drills gerunds after 'addicted to' — plus the recurring Spanish-L1 traps.",
+    sections: [
+      {
+        heading: "Talking about social media",
+        body: [
+          "'Social media' takes a singular verb, even though it sounds plural.",
+          "'People' is always plural in English.",
+          "addicted to + gerund",
+        ],
+        examples: [
+          "Social media **has** changed how young people communicate.",
+          "**People are** worried about fake news. (not 'the people is')",
+          "My little brother is **addicted to checking** his phone.",
+        ],
+      },
+      {
+        heading: "Common vocabulary",
+        body: ["Fixed terms for describing online behaviour."],
+        examples: ["**goes viral**, **influencer**, **cyberbullying**, **social media detox**, **misinformation**"],
+      },
+    ],
+    commonMistakes: [
+      "❌ Social media have changed how businesses reach customers. → ✅ Social media has changed... ('social media' takes a singular verb)",
+      "❌ The people is worried about fake news. → ✅ People are worried about fake news. ('people' is plural in English)",
+      "❌ I am agree that social media can be dangerous. → ✅ I agree that social media can be dangerous. ('agree' is a verb, no 'am')",
+      "❌ Whether a post goes viral depends of the algorithm. → ✅ ...depends on the algorithm. ('depend on', not 'depend of')",
+      "❌ I have posted that photo yesterday. → ✅ I posted that photo yesterday. (specific past time → past simple)",
+    ],
+  },
+
+  reading: {
+    title: "Reading",
+    intro: "Talking about books uses fixed prepositions (interested in, based on) and present perfect for lifetime reading experience — plus the recurring Spanish-L1 traps.",
+    sections: [
+      {
+        heading: "Talking about books",
+        body: ["Common vocabulary for discussing books and reading habits."],
+        examples: [
+          "**protagonist**, **plot**, **genre**, **gripping**, **bookworm**, **bestseller**",
+          "This novel **is based on** a true story.",
+          "She **is interested in** historical fiction.",
+        ],
+      },
+      {
+        heading: "Present perfect for experience",
+        body: ["have/has + past participle for a lifetime experience or a count (e.g. how many times)."],
+        examples: [
+          "I **have read** that novel three times.",
+          "This classic **has been translated** into over forty languages.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ He has read that novel when he was at university. → ✅ He read that novel when he was at university. (specific past time → past simple)",
+      "❌ I am agree that this book deserves its awards. → ✅ I agree that this book deserves its awards. ('agree' is a verb, no 'am')",
+      "❌ Whether I like a book depends of the characters. → ✅ ...depends on the characters. ('depend on', not 'depend of')",
+      "❌ She is avid reader who finishes a book every week. → ✅ She is an avid reader... (article needed before a role noun)",
+      "❌ I bought this novel at the library. → ✅ I bought this novel at the bookshop. ('library' = borrow books; Spanish 'librería' is a false friend for bookshop)",
+    ],
+  },
+
+  city_vs_country: {
+    title: "City Life vs. Country Life",
+    intro: "Comparing city and country life relies on comparatives and fixed collocations (cost of living, sense of community) — plus the recurring Spanish-L1 traps.",
+    sections: [
+      {
+        heading: "Comparing city and country life",
+        body: ["Common vocabulary for describing each lifestyle."],
+        examples: [
+          "**cost of living**, **public transport**, **pollution**, **sense of community**, **peace and quiet**, **congestion**",
+          "City life is **busier than** life in a small village.",
+        ],
+      },
+      {
+        heading: "Singular vs plural agreement",
+        body: ["'City'/'countryside' are singular; 'people' and plural place-types take plural verbs."],
+        examples: [
+          "The **city has** more job opportunities.",
+          "**Rural areas have** a stronger sense of community.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ When you arrive to the countryside... → ✅ When you arrive in the countryside... ('arrive in/at', never 'arrive to')",
+      "❌ I live in countryside. → ✅ I live in the countryside. (needs 'the', unlike Spanish)",
+      "❌ The people in my village is very friendly. → ✅ The people in my village are very friendly. ('people' is plural in English)",
+      "❌ The commute is very large. → ✅ The commute is very long. ('large' = big in size; 'long' describes time/distance)",
+      "❌ I have moved to the city two years ago. → ✅ I moved to the city two years ago. (specific past time → past simple)",
+    ],
+  },
+
+  travel_and_holidays: {
+    title: "Travel & Holidays",
+    intro: "Travel vocabulary comes with fixed prepositions (arrive at, look forward to) and past simple for trip recounts — plus the recurring Spanish-L1 traps.",
+    sections: [
+      {
+        heading: "Talking about a trip",
+        body: ["Common travel vocabulary and fixed collocations."],
+        examples: [
+          "**pack**, **book in advance**, **take off**, **check in**, **boarding pass**, **jet lag**, **souvenir**",
+          "We **arrived at** the airport two hours early.",
+          "I'm **looking forward to seeing** the pyramids.",
+        ],
+      },
+      {
+        heading: "Talking about experiences",
+        body: ["Present perfect for lifetime experience ('has been to'); past simple for a specific trip."],
+        examples: [
+          "**Have** you ever **been** to South America?",
+          "We **went** to Spain last summer. (specific past time → past simple)",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ We arrived to the airport two hours early. → ✅ We arrived at the airport two hours early. ('arrive at' for small places)",
+      "❌ It was a large flight, almost twelve hours. → ✅ It was a long flight... ('large' = big in size; 'long' describes duration)",
+      "❌ I'm looking forward to visit the pyramids. → ✅ ...to visiting the pyramids. ('look forward to' + gerund)",
+      "❌ She is tour guide who knows the city well. → ✅ She is a tour guide... (article needed before a role noun)",
+      "❌ I have visited Rome last year. → ✅ I visited Rome last year. (specific past time → past simple)",
+    ],
+  },
 };
