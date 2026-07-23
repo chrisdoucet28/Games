@@ -3126,4 +3126,342 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ She has downloaded that app last week. → ✅ She downloaded that app last week. (specific past time → past simple)",
     ],
   },
+
+  present_simple: {
+    title: "Present Simple",
+    intro: "The foundation of present simple: add -s for he/she/it, and use do/does for negatives and questions — never both at once.",
+    sections: [
+      {
+        heading: "Positive form",
+        body: ["Add -s (or -es) to the verb for he/she/it; no ending for I/you/we/they."],
+        examples: [
+          "She **goes** to school every day.",
+          "He **studies** English on Mondays. (consonant + y → ies)",
+          "I **live** in Madrid. (no -s for 'I')",
+        ],
+      },
+      {
+        heading: "Negative and questions",
+        body: [
+          "Negative: don't/doesn't + base verb.",
+          "Question: Do/Does + subject + base verb?",
+        ],
+        examples: [
+          "He **doesn't like** coffee.",
+          "**Does** she **speak** English?",
+          "They **don't watch** TV in the morning.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ He don't like coffee. → ✅ He doesn't like coffee. (he/she/it needs 'doesn't')",
+      "❌ Do she like music? → ✅ Does she like music? (he/she/it needs 'does')",
+      "❌ She doesn't goes to the gym. → ✅ She doesn't go to the gym. (base verb after 'doesn't', no -s)",
+      "❌ I doesn't understand. → ✅ I don't understand. ('I' needs 'don't')",
+      "❌ She don't never eat meat. → ✅ She never eats meat. (only one negative — don't combine 'don't' and 'never')",
+    ],
+  },
+
+  there_is_are: {
+    title: "There is / There are",
+    intro: "Use 'there is/are' to say something exists — the choice between is/are depends on whether the noun after it is singular or plural.",
+    sections: [
+      {
+        heading: "Positive and negative",
+        body: [
+          "There is + singular/uncountable noun.",
+          "There are + plural noun.",
+          "Negative: there isn't / there aren't (+ any).",
+        ],
+        examples: [
+          "**There is** a cat in the garden.",
+          "**There are** many students in the class.",
+          "**There isn't** any bread left.",
+          "**There aren't** any shops in this village.",
+        ],
+      },
+      {
+        heading: "Questions",
+        body: ["Is there / Are there + noun?"],
+        examples: [
+          "**Is there** a bank near here?",
+          "**Are there** any apples on the table?",
+          "**How many rooms are there** in your house?",
+        ],
+      },
+      {
+        heading: "Past: there was/were",
+        body: ["was for singular, were for plural — same pattern as is/are."],
+        examples: [
+          "**There was** a queue outside the shop.",
+          "**There were** a lot of people at the concert.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ There are a big supermarket. → ✅ There is a big supermarket. (singular noun → 'there is')",
+      "❌ Is there some apples? → ✅ Are there any apples? (plural → 'are there', and 'any' in questions)",
+      "❌ There aren't no shops. → ✅ There aren't any shops. (only one negative)",
+      "❌ It is a nice park near the school. → ✅ There is a nice park near the school. (use 'there is/are' to say something exists, not 'it is')",
+      "❌ There was a lot of people. → ✅ There were a lot of people. ('people' is plural → 'were')",
+    ],
+  },
+
+  can_cant: {
+    title: "Can / Can't (Ability & Permission)",
+    intro: "'Can' never changes form and is always followed by the bare infinitive — no 's', no 'to', in any sentence.",
+    sections: [
+      {
+        heading: "Ability",
+        body: ["can/can't + base verb, for what someone is/isn't able to do."],
+        examples: [
+          "I **can speak** two languages.",
+          "She **can't drive** — she's only ten.",
+          "**Can** you **swim**?",
+        ],
+      },
+      {
+        heading: "Permission",
+        body: ["Can I/we...? to ask permission; can't for what's not allowed."],
+        examples: [
+          "**Can I** open the window?",
+          "You **can't park** here. It's not allowed.",
+        ],
+      },
+      {
+        heading: "Past: could/couldn't",
+        body: ["could/couldn't = the past form of can, for ability someone had (or didn't have) before."],
+        examples: [
+          "I **could** climb trees when I was young.",
+          "I **couldn't swim** when I was five.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ He can to play piano. → ✅ He can play piano. (no 'to' after 'can')",
+      "❌ I cans speak English. → ✅ I can speak English. ('can' never takes -s)",
+      "❌ She can sings very well. → ✅ She can sing very well. (base verb after 'can', no -s)",
+      "❌ Can he speaks French? → ✅ Can he speak French? (base verb, no -s, even in questions)",
+      "❌ She can't to drive. → ✅ She can't drive. (no 'to' after 'can't')",
+    ],
+  },
+
+  present_continuous_a1: {
+    title: "Present Continuous (What are you doing?)",
+    intro: "Use am/is/are + verb-ing for what's happening right now — the spelling of the -ing form has a few small rules worth knowing.",
+    sections: [
+      {
+        heading: "Form",
+        body: [
+          "I + am; he/she/it + is; you/we/they + are, + verb-ing.",
+          "Negative: am/is/are + not + verb-ing.",
+          "Question: Am/Is/Are + subject + verb-ing?",
+        ],
+        examples: [
+          "**I am writing** an email right now.",
+          "**She is reading** a book.",
+          "**They are not watching** TV.",
+          "**What are you doing?**",
+        ],
+      },
+      {
+        heading: "Spelling of -ing",
+        body: [
+          "Most verbs: just add -ing.",
+          "Short vowel + consonant: double the final consonant.",
+          "Verb ends in -e: drop the -e, add -ing.",
+          "Verb ends in -y: keep the y, just add -ing.",
+        ],
+        examples: [
+          "watch → **watching**",
+          "run → **running**, sit → **sitting**, swim → **swimming**",
+          "dance → **dancing**",
+          "cry → **crying**",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ I am watch TV. → ✅ I am watching TV. (need -ing on the main verb)",
+      "❌ He is sleeps. → ✅ He is sleeping. ('is' + verb-ing, not verb-s)",
+      "❌ They is playing in the garden. → ✅ They are playing in the garden. (plural subject needs 'are')",
+      "❌ She is runing. → ✅ She is running. (double the final consonant: run → running)",
+      "❌ What you are doing right now? → ✅ What are you doing right now? (question word order: 'are' before the subject)",
+    ],
+  },
+
+  possessive_s: {
+    title: "Possessive 's",
+    intro: "Add 's to a singular noun to show ownership; for a plural noun already ending in -s, just add the apostrophe — never double the s.",
+    sections: [
+      {
+        heading: "Singular possessive: 's",
+        body: ["Name/singular noun + 's + the thing owned."],
+        examples: [
+          "This is **my father's** car.",
+          "**Tom's** new house",
+          "the **teacher's** desk",
+        ],
+      },
+      {
+        heading: "Plural possessive: s'",
+        body: ["Plural noun already ending in -s + just an apostrophe."],
+        examples: [
+          "**my parents'** house",
+          "the **students'** notebooks",
+          "the **boys'** bikes",
+        ],
+      },
+      {
+        heading: "Irregular plurals: still 's",
+        body: ["A plural noun that doesn't end in -s (like 'children') takes 's, just like a singular noun."],
+        examples: ["the **children's** room"],
+      },
+    ],
+    commonMistakes: [
+      "❌ This is my sisters cat. → ✅ This is my sister's cat. (missing apostrophe for a singular possessive)",
+      "❌ This is my parents house. → ✅ This is my parents' house. (plural possessive needs an apostrophe after the s)",
+      "❌ The childrens room is upstairs. → ✅ The children's room is upstairs. ('children' is already plural — it takes 's, not s')",
+      "❌ This is my auntss house. → ✅ This is my aunt's house. (only ever add 's, never double s)",
+      "❌ This is the sister of Tom. → ✅ This is Tom's sister. (use possessive 's for people, not 'of')",
+    ],
+  },
+
+  days_dates_prepositions_time: {
+    title: "Days and Dates + Prepositions of Time",
+    intro: "Time prepositions follow a simple size pattern: 'at' for a precise point, 'on' for a day/date, 'in' for a longer period.",
+    sections: [
+      {
+        heading: "The three prepositions",
+        body: [
+          "at + a clock time (a precise point).",
+          "on + a day or a specific date.",
+          "in + a month, year, or part of the day.",
+        ],
+        examples: [
+          "The meeting is **at** 6 o'clock.",
+          "My class is **on** Monday. / The party is **on** May 10th.",
+          "My birthday is **in** July. / I study **in** the morning.",
+        ],
+      },
+      {
+        heading: "Exceptions to remember",
+        body: ["When a part of the day is tied to one specific day, 'on' wins over 'in'."],
+        examples: ["Her party is **on** Saturday morning. (not 'in Saturday morning')"],
+      },
+    ],
+    commonMistakes: [
+      "❌ I go to English class in Friday. → ✅ ...on Friday. ('on' with days)",
+      "❌ My birthday is on July. → ✅ My birthday is in July. ('in' with months)",
+      "❌ The lesson starts in 8 o'clock. → ✅ ...at 8 o'clock. ('at' with clock times)",
+      "❌ Christmas is in December 25th. → ✅ Christmas is on December 25th. ('on' with a specific date)",
+      "❌ We meet at the morning. → ✅ We meet in the morning. ('in' with parts of the day)",
+    ],
+  },
+
+  house_objects_rooms_there_is_are: {
+    title: "Objects and Rooms in the House",
+    intro: "Describing your home combines 'there is/are' with basic place prepositions (in, on, under) and the vocabulary for rooms and furniture.",
+    sections: [
+      {
+        heading: "Rooms and furniture",
+        body: ["Common house vocabulary."],
+        examples: [
+          "**kitchen**, **living room**, **bedroom**, **bathroom**",
+          "**sofa**, **table**, **lamp**, **bed**, **mirror**, **rug**, **chairs**",
+        ],
+      },
+      {
+        heading: "There is/are + in/on/under",
+        body: [
+          "There is + singular; there are + plural.",
+          "in = inside something; on = on a surface; under = below something.",
+        ],
+        examples: [
+          "**There is** a sofa in the living room.",
+          "**There are** two chairs in the kitchen.",
+          "The books are **in** the bag. The lamp is **on** the table. The rug is **under** the table.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ There are a table in the dining room. → ✅ There is a table in the dining room. (singular noun → 'there is')",
+      "❌ There is two bedrooms. → ✅ There are two bedrooms. (plural noun → 'there are')",
+      "❌ The lamp is in the table. → ✅ The lamp is on the table. ('on' for a surface)",
+      "❌ Are there a bathroom upstairs? → ✅ Is there a bathroom upstairs? (singular → 'is there')",
+      "❌ There aren't a sofa in the living room. → ✅ There isn't a sofa in the living room. (singular negative → 'isn't')",
+    ],
+  },
+
+  possessive_adjectives_pronouns: {
+    title: "Possessive Adjectives vs Possessive Pronouns",
+    intro: "Possessive adjectives (my, your, her) go before a noun; possessive pronouns (mine, yours, hers) stand completely alone, with no noun after them.",
+    sections: [
+      {
+        heading: "Before a noun: possessive adjectives",
+        body: ["my, your, his, her, its, our, their + noun"],
+        examples: [
+          "This is **my** book.",
+          "Is this **your** phone?",
+          "That is **her** jacket.",
+        ],
+      },
+      {
+        heading: "Alone: possessive pronouns",
+        body: ["mine, yours, his, hers, its, ours, theirs — no noun follows."],
+        examples: [
+          "This book is **mine**.",
+          "The phone is **yours**.",
+          "That jacket is **hers**.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ This is mine pen. → ✅ This is my pen. (use 'my' before a noun)",
+      "❌ That jacket is her. → ✅ That jacket is hers. (use 'hers' with no noun after it)",
+      "❌ It is your. → ✅ It is yours. (use 'yours' with no noun after it)",
+      "❌ This is theirs house. → ✅ This is their house. (use 'their' before a noun)",
+    ],
+  },
+
+  prepositions_place: {
+    title: "Prepositions of Place",
+    intro: "Prepositions of place describe exactly where something is — many are single words (under, behind, near), but a few are fixed multi-word phrases (next to, in front of, on top of) that always need their extra word.",
+    sections: [
+      {
+        heading: "Single-word prepositions",
+        body: ["under, on, in, above, near, behind, opposite"],
+        examples: [
+          "The cat is **under** the table.",
+          "My keys are **in** my bag.",
+          "There's a shelf **above** my desk.",
+          "The cinema is **opposite** the shopping centre.",
+        ],
+      },
+      {
+        heading: "Fixed multi-word phrases",
+        body: ["These always need their extra word — never drop it."],
+        examples: [
+          "The dog is sleeping **next to** the sofa. (not 'next the sofa')",
+          "She's standing **in front of** the door. (not 'in front the door')",
+          "I keep my keys **on top of** the fridge. (not 'on top the fridge')",
+        ],
+      },
+      {
+        heading: "Between vs next to vs near",
+        body: ["'Between' needs two things around it; 'next to' means right beside; 'near' means not far away, less exact."],
+        examples: [
+          "The bakery is **between** the bank and the pharmacy.",
+          "The board is **next to** the door.",
+          "My house is **near** the train station.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ The cat is in the table. → ✅ The cat is under the table. ('under' for something below, not 'in')",
+      "❌ The bank is next the supermarket. → ✅ ...next to the supermarket. ('next to' always needs 'to')",
+      "❌ There's a lamp on top the desk. → ✅ ...on top of the desk. ('on top of' always needs 'of')",
+      "❌ The car is parked behind of the house. → ✅ ...behind the house. ('behind' never needs 'of')",
+      "❌ Look in side the box. → ✅ Look inside the box. ('inside' is one word)",
+    ],
+  },
 };
