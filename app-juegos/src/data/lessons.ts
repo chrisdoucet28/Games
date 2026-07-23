@@ -892,4 +892,557 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ There isn't nothing interesting to do. → ✅ There isn't anything interesting to do. (only one negative per clause)",
     ],
   },
+
+  present_perfect: {
+    title: "Present Perfect: Just, Already, Yet & Unfinished Time",
+    intro: "You already know present perfect vs past simple with for/since — this builds on it with the time words that trigger present perfect and the 'unfinished period' idea.",
+    sections: [
+      {
+        heading: "Recent actions",
+        body: [
+          "just → very recently: She has just arrived.",
+          "already → sooner than expected, usually mid-sentence: I've already finished the report.",
+          "yet → in negatives and questions, usually at the end: I haven't finished yet. / Have you finished yet?",
+        ],
+      },
+      {
+        heading: "Experience and duration",
+        body: [
+          "ever/never for life experience: Have you ever tried sushi? / I have never been to Japan.",
+          "How long have you...? asks about a state that started in the past and continues now: How long have you known her?",
+          "Superlative + ever → present perfect: This is the best pizza I have ever eaten.",
+        ],
+      },
+      {
+        heading: "Unfinished time periods",
+        body: [
+          "this month/week/year, so far, up to now, recently — periods that haven't finished yet take present perfect: They have met three times this month.",
+          "A result affecting now: I have lost my keys! (I still can't find them)",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ Already I have finished my report. → ✅ I have already finished my report. ('already' goes between have and the past participle)",
+      "❌ How long you have known her? → ✅ How long have you known her? (need 'have' before the subject in questions)",
+      "❌ They didn't arrive yet. → ✅ They haven't arrived yet. ('yet' signals present perfect, not past simple)",
+      "❌ This is the most delicious cake I ever tasted. → ✅ This is the most delicious cake I have ever tasted. (superlative + ever needs present perfect)",
+      "❌ She just has arrived. → ✅ She has just arrived. ('just' goes between have/has and the past participle)",
+    ],
+  },
+
+  phrasal_verbs: {
+    title: "Phrasal Verbs",
+    intro: "Phrasal verbs (verb + particle) often change meaning completely from the base verb, and each one has its own fixed grammar — this is where most mistakes happen.",
+    sections: [
+      {
+        heading: "Common phrasal verbs",
+        body: [
+          "give up + gerund (quit) → He gave up smoking. / look after (care for) → She looks after her grandmother.",
+          "put up with (tolerate), run into (meet by chance), find out (discover), get over (recover from)",
+          "come up with (think of an idea), figure out/work out (solve, understand), carry out (perform/complete)",
+        ],
+      },
+      {
+        heading: "Separable vs inseparable",
+        body: [
+          "Separable (can split, and must split with a pronoun): pick up → pick me up (not 'pick up me'); hand in → hand it in",
+          "Inseparable (never split): look after, look into, put up with, get over, come across — 'look after my dog', never 'look after for my dog'",
+        ],
+      },
+      {
+        heading: "Fixed prepositions",
+        body: [
+          "cut down ON sugar, keep up WITH the news, fall out WITH a friend, get along WITH someone, come up WITH an idea",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ He gave up to smoking. → ✅ He gave up smoking. ('give up' + gerund, no 'to')",
+      "❌ Could you pick up me? → ✅ Could you pick me up? (pronoun splits a separable phrasal verb)",
+      "❌ Can you look after for my dog? → ✅ Can you look after my dog? ('look after' is inseparable — no 'for')",
+      "❌ We need to cut down of sugar. → ✅ We need to cut down on sugar. (fixed preposition 'on')",
+      "❌ He couldn't come up an excuse. → ✅ He couldn't come up with an excuse. ('come up with' needs 'with')",
+    ],
+  },
+
+  so_neither: {
+    title: "So do I / Neither do I",
+    intro: "Agreeing with someone in English needs an auxiliary verb and inverted word order — matching the right auxiliary is the whole challenge.",
+    sections: [
+      {
+        heading: "The pattern",
+        body: [
+          "So + auxiliary + subject → agrees with a POSITIVE statement: \"I love pizza.\" \"So do I.\"",
+          "Neither/Nor + auxiliary + subject → agrees with a NEGATIVE statement: \"I don't like horror films.\" \"Neither do I.\"",
+          "Always invert: auxiliary comes before the subject — 'So am I', never 'So I am'.",
+        ],
+      },
+      {
+        heading: "Matching the auxiliary",
+        body: [
+          "Match whatever auxiliary was in the original: be → am/is/are/was/were; have → have/has/had; modal → can/could/would/will, etc.",
+          "\"They've finished.\" → \"So have we.\" / \"He can't swim.\" → \"Neither can I.\" / \"I was confused.\" → \"So was he.\"",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ Neither do I don't. → ✅ Neither do I. (no double negative — 'neither' already makes it negative)",
+      "❌ Neither I am. → ✅ Neither am I. (invert: auxiliary before subject)",
+      "❌ So I do. → ✅ So do I. (invert: auxiliary before subject)",
+      "❌ Neither do he. → ✅ Neither does he. ('he' needs 'does', not 'do')",
+      "❌ Neither can't I. → ✅ Neither can I. ('neither' is already negative — don't add another negative)",
+    ],
+  },
+
+  prefer_rather: {
+    title: "I'd prefer vs I'd rather",
+    intro: "Both express a preference, but they need completely different grammar afterward — 'rather' never takes 'to', and 'prefer' usually does.",
+    sections: [
+      {
+        heading: "I'd rather",
+        body: [
+          "I'd rather + bare infinitive (no 'to') → I'd rather stay home tonight.",
+          "I'd rather X than Y (both bare infinitives) → I'd rather walk than take the bus.",
+          "I'd rather + subject + past simple (a preference about someone else, present meaning) → I'd rather you called me first.",
+        ],
+      },
+      {
+        heading: "I'd prefer",
+        body: [
+          "I'd prefer to + infinitive → I'd prefer to relax at home.",
+          "I'd prefer + noun + to + noun → I'd prefer tea to coffee.",
+          "I'd prefer to X rather than Y → She'd prefer to walk rather than drive.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ I'd rather to go by train. → ✅ I'd rather go by train. (no 'to' after 'would rather')",
+      "❌ I'd prefer go early. → ✅ I'd prefer to go early. ('prefer' needs 'to' before the infinitive)",
+      "❌ She'd prefer coffee than tea. → ✅ She'd prefer coffee to tea. ('prefer X to Y', not 'than')",
+      "❌ I'd rather you don't tell anyone. → ✅ I'd rather you didn't tell anyone. (past simple after 'would rather + subject' for a present request)",
+      "❌ We'd rather driving than flying. → ✅ We'd rather drive than fly. (bare infinitive, not '-ing')",
+    ],
+  },
+
+  passive_simple: {
+    title: "Passive Voice — Simple Tenses",
+    intro: "Use the passive when the action matters more than who did it — the object of the active sentence becomes the subject, and the verb becomes be + past participle.",
+    sections: [
+      {
+        heading: "Form",
+        body: [
+          "Present simple passive: am/is/are + past participle → English is spoken in over 50 countries.",
+          "Past simple passive: was/were + past participle → This bridge was built in 1950.",
+          "Future simple passive: will be + past participle → The results will be announced tomorrow.",
+          "Add the agent with 'by' if it's useful to say who did it: This song is sung by millions of fans.",
+        ],
+      },
+      {
+        heading: "Common uses",
+        body: [
+          "Facts, rules, and routines: Homework is checked every Monday.",
+          "History, manufacturing, and processes where the doer isn't the point: These shoes were made in Italy. / The telephone was invented in the 19th century.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ The cake was bake by my mother. → ✅ The cake was baked by my mother. (past participle needed after 'was')",
+      "❌ The results will announced tomorrow. → ✅ The results will be announced tomorrow. (future passive needs 'be')",
+      "❌ Mistakes were made from the team. → ✅ Mistakes were made by the team. (the agent follows 'by', not 'from')",
+      "❌ The documents was signed yesterday. → ✅ The documents were signed yesterday. (plural subject needs 'were')",
+      "❌ Homework are checked every Friday. → ✅ Homework is checked every Friday. ('homework' is uncountable and singular)",
+    ],
+  },
+
+  get_used_to: {
+    title: "Get Used To / Be Used To / Used To",
+    intro: "These three look similar but mean very different things: a past habit, a current familiarity, and the process of becoming familiar.",
+    sections: [
+      {
+        heading: "The three forms",
+        body: [
+          "used to + bare infinitive → a past habit that's now finished: I used to smoke, but I quit. (negative/question: didn't use to / did you use to — no 'd')",
+          "be used to + noun/-ing → something that is (or was) already familiar/normal: She is used to working under pressure.",
+          "get used to + noun/-ing → the process of becoming familiar with something over time: It took months, but I got used to the cold weather.",
+        ],
+      },
+      {
+        heading: "Telling them apart",
+        body: [
+          "'Used to' is about the past action itself repeating; 'be/get used to' is about how familiar something feels, and can be about present, past, or future (will get used to).",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ She is used to work late every night. → ✅ She is used to working late every night. ('be used to' + gerund)",
+      "❌ I didn't use to liked spicy food. → ✅ I didn't use to like spicy food. ('didn't use to' + bare infinitive)",
+      "❌ She use to be very shy. → ✅ She used to be very shy. ('used to' with 'd' in positive statements)",
+      "❌ Did you used to live in Spain? → ✅ Did you use to live in Spain? (after 'did', use 'use to' — no 'd')",
+      "❌ We used to living in a small flat. → ✅ We used to live in a small flat. ('used to' + bare infinitive, not '-ing')",
+    ],
+  },
+
+  reported_speech: {
+    title: "Direct & Reported Speech",
+    intro: "Reporting what someone said usually shifts the tense one step into the past ('backshifting') and always uses statement word order, even for questions.",
+    sections: [
+      {
+        heading: "Backshifting tenses",
+        body: [
+          "am/is/are → was/were: \"I am tired.\" → She said she was tired.",
+          "will → would; can → could; must → had to: \"I will call you.\" → He said he would call.",
+          "present perfect → past perfect: \"I have never been to Japan.\" → He said he had never been to Japan.",
+          "Time words shift too: tomorrow → the next day, today → that day, this → that",
+        ],
+      },
+      {
+        heading: "Say vs tell",
+        body: [
+          "say (no object) → She said (that) she was hungry. / tell + object → She told me (that) she was hungry.",
+        ],
+      },
+      {
+        heading: "Reported questions and requests",
+        body: [
+          "Yes/no questions use if/whether, no inversion: She asked if I had eaten. (not 'had I eaten')",
+          "Wh-questions keep the wh-word but statement order: He asked where I lived. (not 'where did I live')",
+          "Commands/requests: told/asked + object + (not) to + infinitive: The teacher told us to open the window. / She told him not to touch her things.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ She said me that she was hungry. → ✅ She told me that she was hungry. ('tell' needs an object; 'say' doesn't)",
+      "❌ She asked me where was the station. → ✅ She asked me where the station was. (statement word order, no inversion)",
+      "❌ He said he will finish tomorrow. → ✅ He said he would finish the next day. ('will' → 'would'; 'tomorrow' → 'the next day')",
+      "❌ They asked if did she agree. → ✅ They asked if she agreed. (no inversion after 'if')",
+      "❌ She told me to don't worry. → ✅ She told me not to worry. (negative imperative: 'told + object + not to')",
+    ],
+  },
+
+  indefinite_pronouns: {
+    title: "Indefinite Pronouns",
+    intro: "Some-/any-/no-/every- combine with -one, -body, -thing, and -where — the trick is knowing which prefix fits positive statements, negatives, and questions.",
+    sections: [
+      {
+        heading: "The four groups",
+        body: [
+          "some- → positive statements: Somebody left their umbrella here.",
+          "any- → questions and negatives: Is anybody home? / I didn't say anything.",
+          "no- → already negative, don't add another negative: Nobody wants to leave. (not 'Nobody doesn't want')",
+          "every- → always singular: Everyone was invited. / Everything is ready.",
+        ],
+      },
+      {
+        heading: "Grammar to remember",
+        body: [
+          "All indefinite pronouns take a singular verb: Everybody was invited. / Nothing was said.",
+          "whoever/whatever (= any person/thing who/that) also take a singular verb: Whoever calls, tell them I'm busy.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ Nobody doesn't want to leave. → ✅ Nobody wants to leave. (no double negative)",
+      "❌ There is anyone in the office. → ✅ There is someone in the office. ('anyone' is for questions/negatives, not positives)",
+      "❌ Everything are ready. → ✅ Everything is ready. (indefinite pronouns are always singular)",
+      "❌ I don't want nothing to eat. → ✅ I don't want anything to eat. (avoid double negatives)",
+      "❌ I can't find it nowhere. → ✅ I can't find it anywhere. ('anywhere' with a negative verb, not 'nowhere')",
+    ],
+  },
+
+  relative_clauses: {
+    title: "Relative Clauses",
+    intro: "Relative clauses add information about a noun using who, which, that, whose, where, when, or why — picking the right one, and never doubling the pronoun, is the key skill.",
+    sections: [
+      {
+        heading: "Which pronoun for what",
+        body: [
+          "who → people: The woman who called is my sister.",
+          "which/that → things: The car that/which I bought broke down.",
+          "whose → possession: The student whose bag was stolen reported it.",
+          "where → places: This is the café where we met.",
+          "when → time: 2005 was the year when everything changed.",
+          "why → after 'reason': The reason why she left is unclear.",
+        ],
+      },
+      {
+        heading: "Defining vs non-defining",
+        body: [
+          "Defining (no commas, identifies which one): I have a friend who lives in Paris.",
+          "Non-defining (commas, extra info, can't use 'that'): My brother, who lives in Canada, is visiting us.",
+        ],
+      },
+      {
+        heading: "Common trap",
+        body: [
+          "Never repeat the pronoun the relative clause already replaces: 'The book which I told you about' — not 'about it'.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ The doctor which treated me was kind. → ✅ The doctor who treated me was kind. ('who' for people)",
+      "❌ The book which I told you about it. → ✅ The book which I told you about. (don't repeat the pronoun)",
+      "❌ This is the park which we play football. → ✅ This is the park where we play football. ('where' for places)",
+      "❌ The concert, that starts at eight... → ✅ The concert, which starts at eight... (non-defining clauses use 'which', not 'that')",
+      "❌ She's the girl who's bag I found. → ✅ She's the girl whose bag I found. ('whose' = possession; 'who's' = 'who is')",
+    ],
+  },
+
+  adverbs: {
+    title: "Adverbs",
+    intro: "Most adverbs of manner are adjective + -ly, but a few common ones are irregular, and adverbs of frequency/degree have their own word order rules.",
+    sections: [
+      {
+        heading: "Forming and using adverbs",
+        body: [
+          "adjective + -ly → careful → carefully, quiet → quietly",
+          "Irregular: good → well (not 'goodly'); fast, hard, late stay the same as the adjective",
+          "Frequency adverbs (always/usually/often/never) go before the main verb, but after 'be': I always drink coffee. / She is always late.",
+        ],
+      },
+      {
+        heading: "Comparatives and degree",
+        body: [
+          "Short adverbs: -er (harder); long adverbs: more + adverb (more carefully)",
+          "'Enough' comes AFTER the adjective: clever enough, not enough clever",
+          "After sense verbs (smell, taste, look, sound, feel), use an adjective, not an adverb: This soup tastes wonderful. (not 'wonderfully')",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ She sings beautiful. → ✅ She sings beautifully. (adverbs modify verbs — add '-ly')",
+      "❌ He did good in the exam. → ✅ He did well in the exam. ('well' is the adverb form of 'good')",
+      "❌ She always is late. → ✅ She is always late. (frequency adverb goes after 'be')",
+      "❌ This soup tastes wonderfully. → ✅ This soup tastes wonderful. (adjective after sense verbs, not adverb)",
+      "❌ I am not enough strong. → ✅ I am not strong enough. ('enough' comes after the adjective)",
+    ],
+  },
+
+  double_comparatives: {
+    title: "Double Comparatives",
+    intro: "'The...the...' links two changes together — as one thing increases or decreases, so does another. Both halves need 'the' and a comparative form.",
+    sections: [
+      {
+        heading: "Form",
+        body: [
+          "The + comparative, the + comparative → The harder you work, the better your results.",
+          "Short adjectives: the + adjective-er → The sooner, the better.",
+          "Long adjectives: the more + adjective → The more crowded the bus is, the more uncomfortable the ride.",
+          "Irregular: good → the better, bad → the worse, little → the less",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ More you practice, the more fluent you become. → ✅ The more you practice, the more fluent you become. (both parts need 'the')",
+      "❌ The quicker you finish, the more quicker you can leave. → ✅ The quicker you finish, the quicker you can leave. (don't add 'more' before a short -er comparative)",
+      "❌ The more money you have, the gooder your life is. → ✅ The more money you have, the better your life is. ('good' is irregular: better)",
+      "❌ The more expensive is the hotel, the better the service. → ✅ The more expensive the hotel, the better the service. (no 'is' inside the clause)",
+      "❌ The higher we climbed, the more thin the air became. → ✅ The higher we climbed, the thinner the air became. (short adjectives take -er, not 'more')",
+    ],
+  },
+
+  second_conditional: {
+    title: "Second Conditional",
+    intro: "Use the second conditional for hypothetical or unlikely situations in the present/future — imagining a different reality, not a real possibility (that's first conditional).",
+    sections: [
+      {
+        heading: "Form",
+        body: [
+          "If + past simple, + would + base verb → If I had more money, I would travel the world.",
+          "Use 'were' for all subjects in the if-clause (not 'was'), especially in 'If I were you...': If she were here, she would know what to do.",
+          "Questions: Would + subject + base verb + if...? → What would you do if you won the lottery?",
+        ],
+      },
+      {
+        heading: "Second vs first conditional",
+        body: [
+          "First conditional = a real, likely future situation (If it rains, I'll take an umbrella). Second conditional = hypothetical/unlikely, imagining now (If I won the lottery, I would buy a house — probably won't happen).",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ If I would win the lottery, I would buy a house. → ✅ If I won the lottery, I would buy a house. (never 'would' in the if-clause)",
+      "❌ If I am you, I would apologise. → ✅ If I were you, I would apologise. (fixed phrase 'If I were you')",
+      "❌ If they was here, they would know. → ✅ If they were here, they would know. ('were' for all subjects in the if-clause)",
+      "❌ If we won the match, we would celebrating all night. → ✅ If we won the match, we would celebrate all night. (base verb after 'would')",
+      "❌ If it rains tomorrow, we would stay home. → ✅ If it rained tomorrow, we would stay home. (if-clause needs past simple to match 'would')",
+    ],
+  },
+
+  modal_verbs: {
+    title: "Modals: Permission, Advice & Ability",
+    intro: "Three different jobs, three families of modals: can/could/may for permission, should/ought to/had better for advice, and can/could/was able to for ability.",
+    sections: [
+      {
+        heading: "Permission",
+        body: [
+          "Can I...? (informal) → Can I use your phone?",
+          "Could I...? (more polite) → Could I borrow your pen?",
+          "May I...? (formal) → May I leave the room?",
+        ],
+      },
+      {
+        heading: "Advice",
+        body: [
+          "should/ought to → You should see a doctor.",
+          "had better (a stronger warning, often about consequences) → You had better hurry up.",
+        ],
+      },
+      {
+        heading: "Ability",
+        body: [
+          "can → present ability: She can speak Spanish.",
+          "could → general ability in the past: I could climb trees when I was young.",
+          "was/were able to → one specific past achievement, not a general ability: After months of training, she was able to run a marathon.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ She can to speak four languages. → ✅ She can speak four languages. (modals take a bare infinitive — no 'to')",
+      "❌ He should works harder. → ✅ He should work harder. ('should' + bare infinitive, no -s)",
+      "❌ She could speaked three languages. → ✅ She could speak three languages. (bare infinitive after 'could')",
+      "❌ He had better to hurry up. → ✅ He had better hurry up. (no 'to' after 'had better')",
+      "❌ She was able to speaked three languages. → ✅ She was able to speak three languages. ('was able to' + bare infinitive)",
+    ],
+  },
+
+  past_continuous: {
+    title: "Past Continuous",
+    intro: "Use the past continuous for an action already in progress at a specific past moment — often the background to a shorter interrupting event in past simple.",
+    sections: [
+      {
+        heading: "Form",
+        body: [
+          "was/were + verb-ing → I was watching TV at 8pm. / They were playing football.",
+          "Negative/question: wasn't/weren't + -ing; Were you...ing?",
+        ],
+      },
+      {
+        heading: "Use",
+        body: [
+          "Background action interrupted by a shorter one (past simple): I was cooking dinner when the phone rang.",
+          "Two actions happening at the same time, often with 'while': While I was studying, my sister was watching a film.",
+          "Setting the scene of a story: The sun was shining and the birds were singing.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ She were cooking when I arrived. → ✅ She was cooking when I arrived. (singular subject = 'was')",
+      "❌ They were dance at the party. → ✅ They were dancing at the party. ('were' + verb-ing)",
+      "❌ What you were doing at 7pm? → ✅ What were you doing at 7pm? (questions need 'were' before the subject)",
+      "❌ While she reading, I was watching TV. → ✅ While she was reading, I was watching TV. (the 'while' clause also needs was/were + -ing)",
+      "❌ I didn't was sleeping when you called. → ✅ I wasn't sleeping when you called. (negative is 'wasn't/weren't', not 'didn't was')",
+    ],
+  },
+
+  past_perfect: {
+    title: "Past Perfect (had + past participle)",
+    intro: "Use the past perfect for the earlier of two past events — it shows what had already happened before another past moment.",
+    sections: [
+      {
+        heading: "Form and use",
+        body: [
+          "had + past participle → When I arrived, she had already left. (the leaving happened before the arriving)",
+          "Explains the cause of a later past event: She was tired because she had worked all night.",
+          "Often paired with 'by the time': By the time the teacher arrived, the students had finished the test.",
+        ],
+      },
+      {
+        heading: "Signal words",
+        body: [
+          "already, just, never, ever, before — all commonly appear with past perfect: I had never seen snow before that winter. / She had just finished when her friend arrived.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ By the time I got there, they finished. → ✅ By the time I got there, they had finished. (the earlier action needs past perfect)",
+      "❌ She was sad because she has lost her necklace. → ✅ She was sad because she had lost her necklace. ('had', not 'has')",
+      "❌ I never had seen the ocean before that trip. → ✅ I had never seen the ocean before that trip. (word order: 'had never')",
+      "❌ They had ate dinner before we got there. → ✅ They had eaten dinner before we got there. (past participle 'eaten', not 'ate')",
+      "❌ He hadn't never travelled abroad. → ✅ He had never travelled abroad. (avoid double negatives)",
+    ],
+  },
+
+  question_tags: {
+    title: "Question Tags",
+    intro: "A question tag turns a statement into a quick check ('...isn't it?') — the two rules are: flip positive/negative, and match the auxiliary that's already in the sentence.",
+    sections: [
+      {
+        heading: "The core rule",
+        body: [
+          "Positive statement → negative tag: She's a doctor, isn't she?",
+          "Negative statement → positive tag: You don't like coffee, do you?",
+          "Match the auxiliary already there: 've/has → haven't/hasn't; can → can't; was → wasn't. If there's no auxiliary (present/past simple main verb), use do/does/did.",
+        ],
+      },
+      {
+        heading: "Irregulars to memorise",
+        body: [
+          "I am → aren't I (not 'amn't I'): I'm right, aren't I?",
+          "Let's... → shall we: Let's have a break, shall we?",
+          "Imperatives → will you: Close the door, will you?",
+          "Have (possession, main verb) → do/does/did, not haven't: You have a car, don't you?",
+          "Never/nobody/nothing (hidden negatives) → positive tag: She never smiles, does she? / Nobody called, did they?",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ She is tired, is she? → ✅ She is tired, isn't she? (positive statement needs negative tag)",
+      "❌ You don't smoke, don't you? → ✅ You don't smoke, do you? (negative statement needs positive tag)",
+      "❌ He's from Canada, doesn't he? → ✅ He's from Canada, isn't he? (match the auxiliary 'is', not 'does')",
+      "❌ You have a car, haven't you? → ✅ You have a car, don't you? ('have' as a main verb takes do/does, not haven't)",
+      "❌ She never eats meat, doesn't she? → ✅ She never eats meat, does she? ('never' is already negative, so the tag is positive)",
+    ],
+  },
+
+  ed_ing_adjectives: {
+    title: "-ed vs -ing Adjectives",
+    intro: "These adjective pairs (bored/boring, interested/interesting) look similar but describe two completely different things: how a person feels, versus what causes the feeling.",
+    sections: [
+      {
+        heading: "The rule",
+        body: [
+          "-ed describes how a PERSON feels: I'm interested in history. / I was bored during the meeting.",
+          "-ing describes the THING that causes the feeling: History is interesting. / The meeting was boring.",
+          "Common pairs: excited/exciting, exhausted/exhausting, confused/confusing, disappointed/disappointing, annoyed/annoying, amazed/amazing, satisfied/satisfying",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ I'm really interesting in this film. → ✅ I'm really interested in this film. (-ed for how you feel)",
+      "❌ The lecture was so bored. → ✅ The lecture was so boring. (-ing for the thing causing the feeling)",
+      "❌ She felt exciting about her results. → ✅ She felt excited about her results. (-ed for how she feels)",
+      "❌ These instructions are very confused. → ✅ These instructions are very confusing. (-ing for the instructions themselves)",
+      "❌ We were amazing by the tricks. → ✅ We were amazed by the tricks. (-ed for the audience's reaction)",
+    ],
+  },
+
+  future_continuous: {
+    title: "Future Continuous (will be + -ing)",
+    intro: "Use the future continuous for an action that will already be in progress at a specific future moment — not a simple future decision or fact (that's just 'will').",
+    sections: [
+      {
+        heading: "Form",
+        body: [
+          "will be + verb-ing → This time tomorrow, I'll be flying to Rome.",
+          "Question: Will + subject + be + verb-ing? → What will you be doing at 10am tomorrow?",
+          "Negative: won't be + verb-ing → I won't be answering my phone during the exam.",
+        ],
+      },
+      {
+        heading: "Use",
+        body: [
+          "An action in progress at a stated future time: At 8pm tonight, we will be having dinner.",
+          "Explaining why you can't do something: I can't meet at 3pm — I'll be seeing a client then.",
+          "A polite assumption about someone's routine: He'll be working late tonight, so don't wait for him.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ This time tomorrow, I will flying to Rome. → ✅ This time tomorrow, I will be flying to Rome. (need 'be' before the -ing verb)",
+      "❌ At 8pm, we will having dinner. → ✅ At 8pm, we will be having dinner. (missing 'be')",
+      "❌ Will you using the car tonight? → ✅ Will you be using the car tonight? (questions need 'be' after the subject)",
+      "❌ He will be work late tonight. → ✅ He will be working late tonight. (the verb after 'will be' needs -ing)",
+      "❌ The kids will probably sleeping by then. → ✅ The kids will probably be sleeping by then. ('probably' sits between 'will' and 'be', not instead of it)",
+    ],
+  },
 };
