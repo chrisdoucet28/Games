@@ -444,4 +444,274 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ It could to be true. → ✅ It could be true. (no 'to' after 'could')",
     ],
   },
+
+  invitations: {
+    title: "Invitations: Asking, Accepting, Rejecting",
+    intro: "Inviting someone, saying yes, and saying no politely each have their own set phrases — mixing up the grammar that follows them is the most common trap.",
+    sections: [
+      {
+        heading: "Making an invitation",
+        body: [
+          "Would you like to + base verb? → Would you like to come to my party?",
+          "Are you free + time? → Are you free on Saturday?",
+          "Do you fancy + -ing? → Do you fancy going to the cinema? ('fancy' is British informal)",
+          "How about / What about + -ing? → How about going bowling tonight?",
+          "Why don't you/we + base verb? / Shall we + base verb? → Why don't we try that new café? Shall we meet at six?",
+        ],
+      },
+      {
+        heading: "Accepting",
+        body: [
+          "That sounds great/fun/wonderful! — enthusiastic yes",
+          "I'd love to! / Count me in! / I'm in! — informal enthusiastic yes",
+          "Sounds like a plan! — casual confirmation",
+        ],
+      },
+      {
+        heading: "Declining politely",
+        body: [
+          "I'm afraid I can't make it — I have other plans. ('make it' = attend)",
+          "I'd love to, but I already have plans that evening. (note the word order: 'already' before the verb)",
+          "Thanks for the invite, but… / Maybe another time? (softens the 'no' and leaves the door open)",
+        ],
+      },
+      {
+        heading: "Formal vs informal",
+        body: [
+          "Formal: Would you like to join us for…? / We would be delighted if you could attend…",
+          "Informal: Do you fancy…? / How about…? / Are you up for it?",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ Would you like come to dinner? → ✅ Would you like to come to dinner? ('would like to' + infinitive)",
+      "❌ Do you fancy to go hiking? → ✅ Do you fancy going hiking? ('fancy' + gerund, not 'to')",
+      "❌ I'm afraid I can't to come. → ✅ I'm afraid I can't come. ('can't' is already a modal — no 'to')",
+      "❌ I'd love to, but I have already plans. → ✅ I'd love to, but I already have plans. ('already' goes before the verb)",
+      "❌ Why don't you to join us? → ✅ Why don't you join us? (base verb directly after 'why don't you')",
+    ],
+  },
+
+  telling_stories: {
+    title: "Telling a Story",
+    intro: "A good spoken story leans on a small set of scene-setting and linking words — get these right and the grammar (mostly past simple and past continuous) does the rest.",
+    sections: [
+      {
+        heading: "Starting a story",
+        body: [
+          "One day / One night / One evening… → One day, I was walking home when something strange happened.",
+          "Once upon a time… (classic, storybook opener)",
+          "Set the scene with past continuous for background: I was cooking dinner when the smoke alarm went off.",
+        ],
+      },
+      {
+        heading: "Sequencing events",
+        body: [
+          "First, … Then, … Next, … After that, … Finally, …",
+          "Use past simple for the events themselves, in the order they happened: First we packed our bags. Then we called a taxi.",
+        ],
+      },
+      {
+        heading: "Adding drama",
+        body: [
+          "Suddenly, … / All of a sudden, … — an unexpected event",
+          "Luckily, … / Unfortunately, … — a lucky or unlucky turn",
+          "Eventually, … / At last, … — something that took a long time to happen",
+          "To make things worse, … — adding a second problem",
+          "so + adjective + that / such a + adjective + noun + that → She was so tired that she fell asleep. / It was such a scary film that I couldn't sleep.",
+        ],
+      },
+      {
+        heading: "Ending a story",
+        body: [
+          "In the end, … / Finally, … — introduces the outcome",
+          "As a result, … — introduces a consequence of what just happened",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ One day, I am walking when I heard a noise. → ✅ One day, I was walking when I heard a noise. (background action = past continuous)",
+      "❌ All of sudden, the lights went off. → ✅ All of a sudden, the lights went off. (don't drop the 'a')",
+      "❌ To make things worst, the car broke down. → ✅ To make things worse, the car broke down. (comparative 'worse', not 'worst')",
+      "❌ Despite the rain was heavy, we continued. → ✅ Despite the heavy rain, we continued. ('despite' + noun phrase, not a clause)",
+      "❌ It was so a scary film. → ✅ It was such a scary film. ('such a' + adjective + noun, not 'so a')",
+    ],
+  },
+
+  health_and_body: {
+    title: "Health & the Body",
+    intro: "Talking about being ill or injured uses a small set of fixed phrases and collocations — most mistakes come from the wrong preposition or a missing 'to'.",
+    sections: [
+      {
+        heading: "Symptoms and illness",
+        body: [
+          "I have a headache / a sore throat / a fever / a cough / a stomachache.",
+          "I feel dizzy. / I've been feeling unwell / tired lately.",
+          "catch a cold — I caught a cold last week.",
+          "be allergic to + thing → I'm allergic to penicillin. / suffer from + illness → He is suffering from a bad cold.",
+        ],
+      },
+      {
+        heading: "Injuries",
+        body: [
+          "sprain/twist + body part → She sprained her ankle playing tennis.",
+          "break + body part (past: broke, participle: broken) → He broke his arm. / He has broken his arm.",
+          "cut myself, a bruise, feel dizzy, be out of breath",
+        ],
+      },
+      {
+        heading: "Seeing a doctor",
+        body: [
+          "make an appointment (to see the doctor/dentist)",
+          "The doctor examines you, then prescribes medicine.",
+          "Giving advice/instructions: You should rest. / You must rest. (no 'to' after should/must)",
+          "This medicine should be taken twice a day. (passive: modal + be + past participle)",
+        ],
+      },
+      {
+        heading: "For vs since",
+        body: [
+          "for + a length of time → I've had this cough for three days.",
+          "since + a starting point → My throat has been sore since Monday.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ He is allergic at penicillin. → ✅ He is allergic to penicillin. ('allergic to')",
+      "❌ He is suffering of a cold. → ✅ He is suffering from a cold. ('suffer from')",
+      "❌ I've had this cough since three days. → ✅ I've had this cough for three days. ('for' + duration)",
+      "❌ He should stopped smoking. → ✅ He should stop smoking. (modal + base verb, no '-ed')",
+      "❌ I have broke my arm. → ✅ I have broken my arm. (past participle 'broken', not 'broke')",
+    ],
+  },
+
+  ordering_food: {
+    title: "Ordering Food and Drink",
+    intro: "Restaurant English runs on a handful of polite fixed phrases — the tricky part is which preposition or verb form follows each one.",
+    sections: [
+      {
+        heading: "Polite requests",
+        body: [
+          "Could I have… ? / I'd like… / Can I get… ? — all common ways to order",
+          "I'll have the pasta, please. (more natural than 'I'll take' in a restaurant)",
+          "Waiter's questions: Are you ready to order? What would you like?",
+        ],
+      },
+      {
+        heading: "Talking about the meal",
+        body: [
+          "starter → main course → dessert",
+          "Does it come with…? — asking what's included",
+          "Could I swap the chips for a salad? ('swap X for Y')",
+          "Could I have it without onions, please?",
+        ],
+      },
+      {
+        heading: "Dietary needs",
+        body: [
+          "Is this dish vegetarian/vegan/gluten-free? / suitable for vegetarians?",
+          "I'm allergic to nuts, so could you check the ingredients?",
+        ],
+      },
+      {
+        heading: "Finishing up",
+        body: [
+          "Could we have the bill, please? / Could we have separate bills?",
+          "book a table (in advance) → I'd like to book a table for two.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ Could I have a water? → ✅ Could I have a glass of water? ('water' is uncountable)",
+      "❌ Can I having the menu? → ✅ Can I have the menu? (base verb after 'can')",
+      "❌ Does this soup contains nuts? → ✅ Does this soup contain nuts? (base verb after 'does')",
+      "❌ Is there some vegetarian options? → ✅ Are there any vegetarian options? (plural noun → 'are'/'any')",
+      "❌ There is a problem to my order. → ✅ There is a problem with my order. ('problem with')",
+    ],
+  },
+
+  making_excuses: {
+    title: "Making Excuses",
+    intro: "Explaining lateness or a missed plan leans on a set of fixed phrases for the excuse itself, plus 'should have' for admitting you were wrong.",
+    sections: [
+      {
+        heading: "Common excuses",
+        body: [
+          "I missed the bus. / I got stuck in traffic. / My alarm didn't go off. / I overslept.",
+          "Something came up (at the last minute). — a vague, general excuse",
+          "My phone died. / I completely forgot. / It slipped my mind. (= I forgot)",
+          "I had a family emergency / a prior commitment.",
+        ],
+      },
+      {
+        heading: "Joining the excuse to the result",
+        body: [
+          "…because + reason → I arrived late for work because I missed the bus.",
+          "Give the reason after 'because', in past simple: She missed the meeting because she had a family emergency.",
+        ],
+      },
+      {
+        heading: "Admitting you were wrong",
+        body: [
+          "should have + past participle → I should have called you earlier. I'm sorry.",
+          "This is a past regret — you didn't do it, and now you wish you had.",
+        ],
+      },
+      {
+        heading: "Apologising formally",
+        body: [
+          "I apologise for being late. / Please accept my apologies.",
+          "Sorry for the inconvenience.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ I had a traffic. → ✅ I was stuck in traffic / There was a lot of traffic. ('traffic' is uncountable, no article)",
+      "❌ I should have call you. → ✅ I should have called you. ('should have' + past participle)",
+      "❌ It slipped of my mind. → ✅ It slipped my mind. (no preposition — fixed phrase)",
+      "❌ I forget my phone at home. → ✅ I forgot my phone at home. (irregular past simple)",
+      "❌ My car wouldn't started. → ✅ My car wouldn't start. (modal + base verb, no '-ed')",
+    ],
+  },
+
+  making_suggestions: {
+    title: "Making Suggestions",
+    intro: "There are many ways to suggest something in English — the challenge is that each starter needs a different verb form after it.",
+    sections: [
+      {
+        heading: "Base verb, no 'to' — casual suggestions",
+        body: [
+          "Let's + base verb → Let's take a break.",
+          "Shall we + base verb? → Shall we meet at six?",
+          "Why don't we/you + base verb? → Why don't we try that new café?",
+          "Why not + base verb (no subject)? → Why not take a taxi?",
+        ],
+      },
+      {
+        heading: "-ing form — 'about' suggestions and verbs like suggest/recommend",
+        body: [
+          "How about / What about + -ing? → How about going for a walk?",
+          "I suggest / I recommend + -ing → I suggest postponing the meeting.",
+          "Have you considered / thought about + -ing? → Have you considered asking for help?",
+          "It might be worth + -ing → It might be worth checking the reviews.",
+        ],
+      },
+      {
+        heading: "Softer or more formal suggestions",
+        body: [
+          "You should/could try… — 'should' is stronger, 'could' is gentler and optional",
+          "If I were you, I'd… — friendly advice using second conditional",
+          "What if + past simple? → What if we went camping this year?",
+          "May I suggest…? / I'd propose… — formal, often in meetings",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ How about go to the beach? → ✅ How about going to the beach? ('how about' + gerund)",
+      "❌ I suggest to have the meeting on Monday. → ✅ I suggest having the meeting on Monday. ('suggest' + gerund)",
+      "❌ Let's to watch a film. → ✅ Let's watch a film. (no 'to' after 'let's')",
+      "❌ Why not we ask for a discount? → ✅ Why not ask for a discount? ('why not' + base verb, no subject)",
+      "❌ Shall we to meet at the station? → ✅ Shall we meet at the station? (no 'to' after 'shall we')",
+    ],
+  },
 };
