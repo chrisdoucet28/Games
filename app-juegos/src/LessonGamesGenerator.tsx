@@ -9,7 +9,7 @@ import { ScoreBoard } from "./components/shared/ScoreBoard";
 import { Confetti } from "./components/shared/Confetti";
 import { ClassesScreen } from "./components/shared/ClassesScreen";
 import { ProfileScreen } from "./components/shared/ProfileScreen";
-import { CloudField } from "./components/shared/CloudField";
+import { ThemeAmbience } from "./components/shared/ThemeAmbience";
 import { saveProgress, clearProgress, listClasses, createClass } from "./lib/classes";
 import { denseRank, medalForRank } from "./utils/ranking";
 import { AuctionGame } from "./components/games/AuctionGame";
@@ -476,7 +476,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange }: LessonGam
 
   if (screen === "welcome") return (
     <div ref={appRef} style={{ minHeight: "100vh", position: "relative", background: `linear-gradient(160deg,${theme.heroBg[0]} 0%,${theme.heroBg[1]} 45%,${theme.heroBg[2]} 100%)`, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "32px 20px 24px", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
-      {theme.id === "sky" && <CloudField />}
+      <ThemeAmbience themeId={theme.id} />
       <div style={{ maxWidth: "680px", width: "100%", textAlign: "center", flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", position: "relative", zIndex: 1 }}>
         <div style={{ marginBottom: "28px" }}>
           <div style={{ fontSize: "64px", marginBottom: "14px", filter: "drop-shadow(0 4px 16px rgba(0,0,0,0.4))" }}>🕹️</div>
@@ -778,8 +778,9 @@ export default function LessonGamesGenerator({ theme, onThemeChange }: LessonGam
     <div style={{ minHeight: "100vh", background: "#F0F9FF", padding: "20px", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
       <div style={{ maxWidth: "760px", margin: "0 auto" }}>
         
-        <div style={{ background: `linear-gradient(135deg,${theme.heroBg[0]},${theme.heroBg[2]})`, borderRadius: "20px", padding: "20px 24px", marginBottom: "20px", color: "white" }}>
-          <div style={{ textAlign: "center", marginBottom: "16px" }}>
+        <div style={{ background: `linear-gradient(135deg,${theme.heroBg[0]},${theme.heroBg[2]})`, borderRadius: "20px", padding: "20px 24px", marginBottom: "20px", color: "white", position: "relative", overflow: "hidden" }}>
+          <ThemeAmbience themeId={theme.id} variant="compact" />
+          <div style={{ textAlign: "center", marginBottom: "16px", position: "relative", zIndex: 1 }}>
             <div style={{ fontSize: "13px", fontWeight: "700", color: theme.accent[1], marginBottom: "4px", letterSpacing: "0.06em", textTransform: "uppercase" }}>Current Topic Mix</div>
             <div style={{ fontSize: "clamp(18px,4vw,26px)", fontWeight: "900", lineHeight: 1.2, fontFamily: theme.headingFont }}>
               {selectedTopics.length === 1 ? getTopicLabel(selectedTopics[0]) : `${selectedTopics.length} topics mixed`}
