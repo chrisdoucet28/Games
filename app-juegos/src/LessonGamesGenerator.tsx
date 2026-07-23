@@ -4,6 +4,7 @@ import { TEAM_COLORS, GAME_MODES, MASCOT_OPTIONS, LEVELS_META } from "./data/con
 // Asegúrate de que TOPIC_LIBRARY esté exportado desde tu archivo topics.ts junto con TOPIC_OPTIONS
 import { TOPIC_OPTIONS, TOPIC_LIBRARY } from "./data/topics";
 import { hexToRgba, type Theme } from "./data/themes";
+import { LESSONS } from "./data/lessons";
 
 import { ScoreBoard } from "./components/shared/ScoreBoard";
 import { Confetti } from "./components/shared/Confetti";
@@ -148,6 +149,9 @@ export default function LessonGamesGenerator({ theme, onThemeChange }: LessonGam
   const [level, setLevel] = useState("all");
   const [focus, setFocus] = useState("all");
   const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
+  // null = full Learn library (launched from welcome); an array = scoped to a game's chosen
+  // topics (launched from game-select) — also tells the Learn screen where "back" should go.
+  const [learnFilter, setLearnFilter] = useState<string[] | null>(null);
   const [topicSearch, setTopicSearch] = useState("");
 
   const [loadingGame, setLoadingGame] = useState(false);
@@ -511,7 +515,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange }: LessonGam
         <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
           <button onClick={() => { setActiveClassId(null); setScreen("setup"); }} style={{ background: `linear-gradient(135deg,${theme.cta[0]},${theme.cta[1]})`, color: "white", border: "none", borderRadius: "16px", padding: "18px 56px", fontSize: "20px", fontWeight: "900", cursor: "pointer", boxShadow: `0 8px 32px ${hexToRgba(theme.cta[1], 0.45)}`, letterSpacing: "0.01em", fontFamily: theme.headingFont }}>🚀 Start a Game</button>
           <button onClick={() => setScreen("classes")} style={{ background: "rgba(255,255,255,0.12)", border: "2px solid rgba(255,255,255,0.3)", color: "white", borderRadius: "16px", padding: "18px 40px", fontSize: "18px", fontWeight: "800", cursor: "pointer", fontFamily: theme.headingFont }}>📚 My Classes</button>
-          <button onClick={() => setScreen("learn")} style={{ background: "rgba(255,255,255,0.12)", border: "2px solid rgba(255,255,255,0.3)", color: "white", borderRadius: "16px", padding: "18px 40px", fontSize: "18px", fontWeight: "800", cursor: "pointer", fontFamily: theme.headingFont }}>🎓 Learn</button>
+          <button onClick={() => { setLearnFilter(null); setScreen("learn"); }} style={{ background: "rgba(255,255,255,0.12)", border: "2px solid rgba(255,255,255,0.3)", color: "white", borderRadius: "16px", padding: "18px 40px", fontSize: "18px", fontWeight: "800", cursor: "pointer", fontFamily: theme.headingFont }}>🎓 Learn</button>
           <button onClick={() => setScreen("profile")} style={{ background: "rgba(255,255,255,0.12)", border: "2px solid rgba(255,255,255,0.3)", color: "white", borderRadius: "16px", padding: "18px 40px", fontSize: "18px", fontWeight: "800", cursor: "pointer", fontFamily: theme.headingFont }}>👤 My Profile</button>
         </div>
       </div>
@@ -532,7 +536,11 @@ export default function LessonGamesGenerator({ theme, onThemeChange }: LessonGam
   );
 
   if (screen === "learn") return (
-    <LearnScreen onBack={() => setScreen("welcome")} theme={theme} />
+    <LearnScreen
+      onBack={() => setScreen(learnFilter ? "game-select" : "welcome")}
+      theme={theme}
+      filterTopicIds={learnFilter ?? undefined}
+    />
   );
 
   if (screen === "setup") {
@@ -795,6 +803,14 @@ export default function LessonGamesGenerator({ theme, onThemeChange }: LessonGam
               <div style={{ color: theme.accent[1], fontWeight: "700", fontSize: "13px", marginTop: "8px", lineHeight: 1.5 }}>
                 {selectedTopics.map(getTopicLabel).join(" + ")}
               </div>
+            )}
+            {selectedTopics.some(id => LESSONS[id]) && (
+              <button
+                onClick={() => { setLearnFilter(selectedTopics.filter(id => LESSONS[id])); setScreen("learn"); }}
+                style={{ background: "rgba(255,255,255,0.15)", border: "2px solid rgba(255,255,255,0.35)", color: "white", borderRadius: "12px", padding: "8px 18px", fontSize: "13px", fontWeight: "800", cursor: "pointer", marginTop: "14px", fontFamily: theme.headingFont }}
+              >
+                📖 Review the grammar
+              </button>
             )}
           </div>
         </div>

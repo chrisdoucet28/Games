@@ -6,6 +6,9 @@ import { hexToRgba, type Theme } from "../../data/themes";
 type Props = {
   onBack: () => void;
   theme: Theme;
+  // When set, only lessons for these topic ids are shown (used when launching Learn
+  // from the game-select screen, scoped to the topics chosen for that game).
+  filterTopicIds?: string[];
 };
 
 const LEVEL_ORDER = ["A1", "A2", "B1", "B2", "C1"];
@@ -20,15 +23,26 @@ const LESSON_TOPICS = Object.keys(LESSONS)
   .map(id => ({ id, lesson: LESSONS[id], meta: TOPIC_OPTIONS.find(o => o.value === id) }))
   .filter((t): t is { id: string; lesson: (typeof LESSONS)[string]; meta: NonNullable<typeof t.meta> } => Boolean(t.meta));
 
-export function LearnScreen({ onBack, theme }: Props) {
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const selected = selectedId ? LESSON_TOPICS.find(t => t.id === selectedId) : null;
+export function LearnScreen({ onBack, theme, filterTopicIds }: Props) {
+  const visibleTopics = filterTopicIds ? LESSON_TOPICS.filter(t => filterTopicIds.includes(t.id)) : LESSON_TOPICS;
+
+  // If exactly one of the chosen topics has a lesson, jump straight to it — no need to
+  // make the teacher pick from a list of one.
+  const [selectedId, setSelectedId] = useState<string | null>(() =>
+    filterTopicIds && visibleTopics.length === 1 ? visibleTopics[0].id : null
+  );
+  const selected = selectedId ? visibleTopics.find(t => t.id === selectedId) ?? LESSON_TOPICS.find(t => t.id === selectedId) : null;
 
   if (selected) {
     return (
       <div style={{ minHeight: "100vh", background: "#F0F9FF", padding: "20px", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
         <div style={{ maxWidth: "640px", margin: "0 auto" }}>
-          <button onClick={() => setSelectedId(null)} style={{ background: "none", border: `2px solid ${theme.accentSolid}`, color: theme.accentSolid, borderRadius: "10px", padding: "8px 16px", cursor: "pointer", fontWeight: "700", marginBottom: "20px", fontFamily: theme.headingFont }}>← Back to Learn</button>
+          <button
+            onClick={filterTopicIds && visibleTopics.length === 1 ? onBack : () => setSelectedId(null)}
+            style={{ background: "none", border: `2px solid ${theme.accentSolid}`, color: theme.accentSolid, borderRadius: "10px", padding: "8px 16px", cursor: "pointer", fontWeight: "700", marginBottom: "20px", fontFamily: theme.headingFont }}
+          >
+            {filterTopicIds && visibleTopics.length === 1 ? "← Back" : "← Back to Learn"}
+          </button>
 
           <div style={{ background: "white", border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, borderRadius: "16px", padding: "24px" }}>
             <span style={{ background: LEVEL_COLOR[selected.meta.level ?? "A2"], color: "white", borderRadius: "999px", padding: "3px 12px", fontSize: "12px", fontWeight: "800" }}>{selected.meta.level}</span>
@@ -61,7 +75,7 @@ export function LearnScreen({ onBack, theme }: Props) {
   }
 
   const byLevel = LEVEL_ORDER
-    .map(level => ({ level, topics: LESSON_TOPICS.filter(t => t.meta.level === level) }))
+    .map(level => ({ level, topics: visibleTopics.filter(t => t.meta.level === level) }))
     .filter(g => g.topics.length > 0);
 
   return (
@@ -70,11 +84,15 @@ export function LearnScreen({ onBack, theme }: Props) {
         <button onClick={onBack} style={{ background: "none", border: `2px solid ${theme.accentSolid}`, color: theme.accentSolid, borderRadius: "10px", padding: "8px 16px", cursor: "pointer", fontWeight: "700", marginBottom: "20px", fontFamily: theme.headingFont }}>← Back</button>
 
         <div style={{ textAlign: "center", marginBottom: "24px" }}>
-          <h2 style={{ fontSize: "30px", fontWeight: "900", color: theme.heroBg[0], margin: 0, fontFamily: theme.headingFont }}>🎓 Learn</h2>
-          <p style={{ color: "#6B7280", marginTop: "8px" }}>Quick, no-fluff grammar explanations — the same rules the games actually test.</p>
+          <h2 style={{ fontSize: "30px", fontWeight: "900", color: theme.heroBg[0], margin: 0, fontFamily: theme.headingFont }}>
+            {filterTopicIds ? "🎓 Learn: This Game's Topics" : "🎓 Learn"}
+          </h2>
+          <p style={{ color: "#6B7280", marginTop: "8px" }}>
+            {filterTopicIds ? "Grammar for the topics you picked for this game." : "Quick, no-fluff grammar explanations — the same rules the games actually test."}
+          </p>
         </div>
 
-        {LESSON_TOPICS.length === 0 ? (
+        {visibleTopics.length === 0 ? (
           <div style={{ textAlign: "center", color: "#6B7280", padding: "40px 0" }}>No lessons yet — check back soon.</div>
         ) : (
           byLevel.map(group => (
