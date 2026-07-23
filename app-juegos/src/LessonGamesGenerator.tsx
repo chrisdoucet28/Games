@@ -9,6 +9,7 @@ import { ScoreBoard } from "./components/shared/ScoreBoard";
 import { Confetti } from "./components/shared/Confetti";
 import { ClassesScreen } from "./components/shared/ClassesScreen";
 import { ProfileScreen } from "./components/shared/ProfileScreen";
+import { LearnScreen } from "./components/shared/LearnScreen";
 import { ThemeAmbience } from "./components/shared/ThemeAmbience";
 import { saveProgress, clearProgress, listClasses, createClass } from "./lib/classes";
 import { denseRank, medalForRank } from "./utils/ranking";
@@ -124,7 +125,7 @@ type LessonGamesGeneratorProps = {
 };
 
 export default function LessonGamesGenerator({ theme, onThemeChange }: LessonGamesGeneratorProps) {
-  const [screen, setScreen] = useState<"welcome" | "classes" | "profile" | "setup" | "game-select" | "game" | "results">("welcome");
+  const [screen, setScreen] = useState<"welcome" | "classes" | "profile" | "learn" | "setup" | "game-select" | "game" | "results">("welcome");
   // The class this session is tied to, if any. Games started via "Start a Game" (not through "My
   // Classes") leave this null — but "Save & Exit" is still available; clicking it with no class
   // linked opens showSavePicker so the teacher can pick/create one on the spot instead of losing
@@ -510,6 +511,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange }: LessonGam
         <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
           <button onClick={() => { setActiveClassId(null); setScreen("setup"); }} style={{ background: `linear-gradient(135deg,${theme.cta[0]},${theme.cta[1]})`, color: "white", border: "none", borderRadius: "16px", padding: "18px 56px", fontSize: "20px", fontWeight: "900", cursor: "pointer", boxShadow: `0 8px 32px ${hexToRgba(theme.cta[1], 0.45)}`, letterSpacing: "0.01em", fontFamily: theme.headingFont }}>🚀 Start a Game</button>
           <button onClick={() => setScreen("classes")} style={{ background: "rgba(255,255,255,0.12)", border: "2px solid rgba(255,255,255,0.3)", color: "white", borderRadius: "16px", padding: "18px 40px", fontSize: "18px", fontWeight: "800", cursor: "pointer", fontFamily: theme.headingFont }}>📚 My Classes</button>
+          <button onClick={() => setScreen("learn")} style={{ background: "rgba(255,255,255,0.12)", border: "2px solid rgba(255,255,255,0.3)", color: "white", borderRadius: "16px", padding: "18px 40px", fontSize: "18px", fontWeight: "800", cursor: "pointer", fontFamily: theme.headingFont }}>🎓 Learn</button>
           <button onClick={() => setScreen("profile")} style={{ background: "rgba(255,255,255,0.12)", border: "2px solid rgba(255,255,255,0.3)", color: "white", borderRadius: "16px", padding: "18px 40px", fontSize: "18px", fontWeight: "800", cursor: "pointer", fontFamily: theme.headingFont }}>👤 My Profile</button>
         </div>
       </div>
@@ -527,6 +529,10 @@ export default function LessonGamesGenerator({ theme, onThemeChange }: LessonGam
 
   if (screen === "profile") return (
     <ProfileScreen onBack={() => setScreen("welcome")} theme={theme} onThemeChange={onThemeChange} />
+  );
+
+  if (screen === "learn") return (
+    <LearnScreen onBack={() => setScreen("welcome")} theme={theme} />
   );
 
   if (screen === "setup") {
