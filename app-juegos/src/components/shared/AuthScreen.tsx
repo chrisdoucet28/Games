@@ -45,12 +45,12 @@ export function AuthScreen() {
   };
 
   return (
-    <div style={{ minHeight: "100vh", background: "linear-gradient(160deg,#1E1B4B 0%,#312E81 45%,#4C1D95 100%)", display: "flex", alignItems: "center", justifyContent: "center", padding: "32px 20px", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
+    <div style={{ minHeight: "100vh", background: "linear-gradient(160deg,#0C1E3D 0%,#0369A1 45%,#0EA5E9 100%)", display: "flex", alignItems: "center", justifyContent: "center", padding: "32px 20px", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
       <div style={{ maxWidth: "380px", width: "100%" }}>
         <div style={{ textAlign: "center", marginBottom: "24px" }}>
-          <div style={{ fontSize: "48px", marginBottom: "8px", filter: "drop-shadow(0 4px 16px rgba(0,0,0,0.4))" }}>🎮</div>
-          <h1 style={{ fontSize: "26px", fontWeight: "900", color: "white", margin: 0, letterSpacing: "-0.01em" }}>
-            Lesson Games<span style={{ color: "#FCD34D" }}> Generator</span>
+          <div style={{ fontSize: "48px", marginBottom: "8px", filter: "drop-shadow(0 4px 16px rgba(0,0,0,0.4))" }}>🕹️</div>
+          <h1 style={{ fontSize: "28px", fontWeight: "900", color: "white", margin: 0, letterSpacing: "-0.01em" }}>
+            Class<span style={{ color: "#FCD34D" }}>Cade</span>
           </h1>
         </div>
 
@@ -64,8 +64,8 @@ export function AuthScreen() {
                 style={{
                   flex: 1, padding: "10px", borderRadius: "9px", border: "none", cursor: "pointer",
                   fontWeight: "800", fontSize: "14px",
-                  background: mode === m ? "linear-gradient(135deg,#F59E0B,#EF4444)" : "transparent",
-                  color: mode === m ? "white" : "#C4B5FD",
+                  background: mode === m ? "linear-gradient(135deg,#FB923C,#F43F5E)" : "transparent",
+                  color: mode === m ? "white" : "#BAE6FD",
                 }}
               >
                 {m === "sign-in" ? "Log In" : "Sign Up"}
@@ -79,13 +79,13 @@ export function AuthScreen() {
             </div>
           ) : (
             <form onSubmit={submit}>
-              <label style={{ display: "block", color: "#C4B5FD", fontSize: "13px", fontWeight: "700", marginBottom: "6px" }}>Email</label>
+              <label style={{ display: "block", color: "#BAE6FD", fontSize: "13px", fontWeight: "700", marginBottom: "6px" }}>Email</label>
               <input
                 type="email" required value={email} onChange={e => setEmail(e.target.value)}
                 autoComplete="email"
                 style={{ width: "100%", boxSizing: "border-box", padding: "10px 12px", borderRadius: "10px", border: "1px solid rgba(255,255,255,0.2)", background: "rgba(0,0,0,0.25)", color: "white", fontSize: "14px", marginBottom: "14px" }}
               />
-              <label style={{ display: "block", color: "#C4B5FD", fontSize: "13px", fontWeight: "700", marginBottom: "6px" }}>Password</label>
+              <label style={{ display: "block", color: "#BAE6FD", fontSize: "13px", fontWeight: "700", marginBottom: "6px" }}>Password</label>
               <input
                 type="password" required minLength={6} value={password} onChange={e => setPassword(e.target.value)}
                 autoComplete={mode === "sign-in" ? "current-password" : "new-password"}
@@ -98,7 +98,7 @@ export function AuthScreen() {
 
               <button
                 type="submit" disabled={loading}
-                style={{ width: "100%", background: "linear-gradient(135deg,#F59E0B,#EF4444)", color: "white", border: "none", borderRadius: "12px", padding: "13px", fontSize: "15px", fontWeight: "900", cursor: loading ? "default" : "pointer", opacity: loading ? 0.7 : 1 }}
+                style={{ width: "100%", background: "linear-gradient(135deg,#FB923C,#F43F5E)", color: "white", border: "none", borderRadius: "12px", padding: "13px", fontSize: "15px", fontWeight: "900", cursor: loading ? "default" : "pointer", opacity: loading ? 0.7 : 1 }}
               >
                 {loading ? "Please wait…" : mode === "sign-in" ? "Log In" : "Create Account"}
               </button>
@@ -107,7 +107,7 @@ export function AuthScreen() {
 
           <div style={{ display: "flex", alignItems: "center", gap: "10px", margin: "18px 0" }}>
             <div style={{ flex: 1, height: "1px", background: "rgba(255,255,255,0.15)" }} />
-            <span style={{ color: "#8B85B8", fontSize: "12px" }}>or</span>
+            <span style={{ color: "#7DB8DB", fontSize: "12px" }}>or</span>
             <div style={{ flex: 1, height: "1px", background: "rgba(255,255,255,0.15)" }} />
           </div>
 

@@ -477,9 +477,9 @@ export default function LessonGamesGenerator({ theme, onThemeChange }: LessonGam
     <div ref={appRef} style={{ minHeight: "100vh", background: `linear-gradient(160deg,${theme.heroBg[0]} 0%,${theme.heroBg[1]} 45%,${theme.heroBg[2]} 100%)`, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "32px 20px 24px", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
       <div style={{ maxWidth: "680px", width: "100%", textAlign: "center", flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
         <div style={{ marginBottom: "28px" }}>
-          <div style={{ fontSize: "64px", marginBottom: "14px", filter: "drop-shadow(0 4px 16px rgba(0,0,0,0.4))" }}>🎮</div>
-          <h1 style={{ fontSize: "clamp(30px,5.5vw,52px)", fontWeight: "900", color: "white", margin: "0 0 10px", letterSpacing: "-0.02em", lineHeight: 1.1, textShadow: "0 2px 24px rgba(0,0,0,0.4)", fontFamily: theme.headingFont }}>
-            Lesson Games<br /><span style={{ color: "#FCD34D" }}>Generator</span>
+          <div style={{ fontSize: "64px", marginBottom: "14px", filter: "drop-shadow(0 4px 16px rgba(0,0,0,0.4))" }}>🕹️</div>
+          <h1 style={{ fontSize: "clamp(34px,6.5vw,60px)", fontWeight: "900", color: "white", margin: "0 0 10px", letterSpacing: "-0.02em", lineHeight: 1.1, textShadow: "0 2px 24px rgba(0,0,0,0.4)", fontFamily: theme.headingFont }}>
+            Class<span style={{ color: "#FCD34D" }}>Cade</span>
           </h1>
           <p style={{ color: theme.accent[1], fontSize: "clamp(15px,2.5vw,18px)", margin: "0", lineHeight: 1.7, maxWidth: "500px", marginLeft: "auto", marginRight: "auto" }}>
             50+ built-in topics from A1 to C1 across Grammar, Vocabulary & Speaking.<br />
@@ -539,7 +539,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange }: LessonGam
     ];
 
     return (
-      <div style={{ minHeight: "100vh", background: "#F8F7FF", padding: "20px", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
+      <div style={{ minHeight: "100vh", background: "#F0F9FF", padding: "20px", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
         <div style={{ maxWidth: "720px", margin: "0 auto" }}>
           <button onClick={() => { setActiveClassId(null); setScreen("welcome"); }} style={{ background: "none", border: `2px solid ${theme.accentSolid}`, color: theme.accentSolid, borderRadius: "10px", padding: "8px 16px", cursor: "pointer", fontWeight: "700", marginBottom: "20px", fontFamily: theme.headingFont }}>← Back</button>
 
@@ -654,7 +654,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange }: LessonGam
                     const levelColor = LEVELS_META.find(l => l.id === o.level)?.color || "#6366F1";
                     return (
                       <button key={o.value} onClick={() => toggleTopicSelection(o.value)} style={{
-                        background: isSelected ? levelColor : "#F8F7FF",
+                        background: isSelected ? levelColor : "#F0F9FF",
                         color: isSelected ? "white" : theme.heroBg[0],
                         border: `2px solid ${isSelected ? levelColor : hexToRgba(theme.accentSolid, 0.25)}`,
                         borderRadius: "10px", padding: "10px 14px",
@@ -773,7 +773,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange }: LessonGam
   }
 
   if (screen === "game-select") return (
-    <div style={{ minHeight: "100vh", background: "#F8F7FF", padding: "20px", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
+    <div style={{ minHeight: "100vh", background: "#F0F9FF", padding: "20px", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
       <div style={{ maxWidth: "760px", margin: "0 auto" }}>
         
         <div style={{ background: `linear-gradient(135deg,${theme.heroBg[0]},${theme.heroBg[2]})`, borderRadius: "20px", padding: "20px 24px", marginBottom: "20px", color: "white" }}>
@@ -834,7 +834,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange }: LessonGam
                   {pickerClasses.map(cls => (
                     <button
                       key={cls.id} onClick={() => handlePickClassForSave(cls)}
-                      style={{ textAlign: "left", background: "#F8F7FF", border: "2px solid #E5E7EB", borderRadius: "10px", padding: "10px 14px", cursor: "pointer", fontWeight: 700, color: theme.heroBg[0], fontSize: "14px" }}
+                      style={{ textAlign: "left", background: "#F0F9FF", border: "2px solid #E5E7EB", borderRadius: "10px", padding: "10px 14px", cursor: "pointer", fontWeight: 700, color: theme.heroBg[0], fontSize: "14px" }}
                     >
                       {cls.name}
                       {cls.in_progress && <span style={{ display: "block", fontWeight: 500, fontSize: "12px", color: "#B45309", marginTop: "2px" }}>⚠️ Has a game in progress — saving here will replace it</span>}

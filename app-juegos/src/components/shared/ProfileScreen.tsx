@@ -45,7 +45,7 @@ export function ProfileScreen({ onBack, theme, onThemeChange }: Props) {
   };
 
   return (
-    <div style={{ minHeight: "100vh", background: "#F8F7FF", padding: "20px", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
+    <div style={{ minHeight: "100vh", background: "#F0F9FF", padding: "20px", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
       <div style={{ maxWidth: "440px", margin: "0 auto" }}>
         <button onClick={onBack} style={{ background: "none", border: `2px solid ${theme.accentSolid}`, color: theme.accentSolid, borderRadius: "10px", padding: "8px 16px", cursor: "pointer", fontWeight: "700", marginBottom: "20px", fontFamily: theme.headingFont }}>← Back</button>
 
@@ -75,7 +75,7 @@ export function ProfileScreen({ onBack, theme, onThemeChange }: Props) {
                       title={t.name}
                       style={{
                         flex: "1 1 80px", display: "flex", flexDirection: "column", alignItems: "center", gap: "4px",
-                        background: isSelected ? `linear-gradient(135deg,${t.accent[0]},${t.accent[1]})` : "#F8F7FF",
+                        background: isSelected ? `linear-gradient(135deg,${t.accent[0]},${t.accent[1]})` : "#F0F9FF",
                         color: isSelected ? "white" : "#4B5563",
                         border: `2px solid ${isSelected ? t.accentSolid : "#E5E7EB"}`,
                         borderRadius: "12px", padding: "10px 6px", cursor: "pointer", fontWeight: "700", fontSize: "12px",
