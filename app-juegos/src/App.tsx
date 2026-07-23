@@ -30,11 +30,17 @@ function ConfigErrorScreen() {
 // regardless of which screen is showing.
 function StatusBadge({ children, action, onAction, theme }: { children: React.ReactNode; action: string; onAction: () => void; theme: Theme }) {
   return (
-    <div style={{
-      display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '8px',
-      background: theme.heroBg[0], padding: '6px 14px',
-      fontFamily: "'Segoe UI',system-ui,sans-serif",
-    }}>
+    <div
+      // "learn-no-print" is a global class defined in LearnScreen.tsx's injected print
+      // stylesheet — hides this bar (and anything else tagged with it) whenever a Learn
+      // lesson is printed, since it's chrome, not part of the handout.
+      className="learn-no-print"
+      style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '8px',
+        background: theme.heroBg[0], padding: '6px 14px',
+        fontFamily: "'Segoe UI',system-ui,sans-serif",
+      }}
+    >
       <span style={{ color: 'white', fontSize: '12px', fontWeight: 700, fontFamily: theme.headingFont }}>{children}</span>
       <button
         onClick={onAction}

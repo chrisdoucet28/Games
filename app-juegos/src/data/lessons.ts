@@ -32,7 +32,7 @@ export const LESSONS: Record<string, Lesson> = {
           "Regular verbs: add -ed to the base form.",
           "Negative: didn't + base verb.",
           "Question: Did + subject + base verb?",
-          "Many common verbs are irregular (go → went, eat → ate) — see the Irregular Verbs lesson.",
+          "Many common verbs are irregular and don't take -ed at all (go → went, eat → ate, see → saw).",
         ],
         examples: [
           "She **didn't call**.",
@@ -1179,7 +1179,7 @@ export const LESSONS: Record<string, Lesson> = {
 
   present_perfect: {
     title: "Present Perfect: Just, Already, Yet & Unfinished Time",
-    intro: "You already know present perfect vs past simple with for/since — this builds on it with the time words that trigger present perfect and the 'unfinished period' idea.",
+    intro: "Present perfect (have/has + past participle) links a past action to the present moment. This lesson covers the specific time words that trigger it — just, already, yet, ever, never, how long — plus the idea of an 'unfinished' time period like this week or so far.",
     sections: [
       {
         heading: "Recent actions",
