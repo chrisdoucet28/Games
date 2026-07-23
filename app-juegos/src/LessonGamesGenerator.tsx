@@ -9,6 +9,7 @@ import { ScoreBoard } from "./components/shared/ScoreBoard";
 import { Confetti } from "./components/shared/Confetti";
 import { ClassesScreen } from "./components/shared/ClassesScreen";
 import { ProfileScreen } from "./components/shared/ProfileScreen";
+import { CloudField } from "./components/shared/CloudField";
 import { saveProgress, clearProgress, listClasses, createClass } from "./lib/classes";
 import { denseRank, medalForRank } from "./utils/ranking";
 import { AuctionGame } from "./components/games/AuctionGame";
@@ -474,8 +475,9 @@ export default function LessonGamesGenerator({ theme, onThemeChange }: LessonGam
   const winners = finalRanking.filter(r => r.rank === 0).map(r => r.item);
 
   if (screen === "welcome") return (
-    <div ref={appRef} style={{ minHeight: "100vh", background: `linear-gradient(160deg,${theme.heroBg[0]} 0%,${theme.heroBg[1]} 45%,${theme.heroBg[2]} 100%)`, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "32px 20px 24px", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
-      <div style={{ maxWidth: "680px", width: "100%", textAlign: "center", flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+    <div ref={appRef} style={{ minHeight: "100vh", position: "relative", background: `linear-gradient(160deg,${theme.heroBg[0]} 0%,${theme.heroBg[1]} 45%,${theme.heroBg[2]} 100%)`, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "32px 20px 24px", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
+      {theme.id === "sky" && <CloudField />}
+      <div style={{ maxWidth: "680px", width: "100%", textAlign: "center", flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", position: "relative", zIndex: 1 }}>
         <div style={{ marginBottom: "28px" }}>
           <div style={{ fontSize: "64px", marginBottom: "14px", filter: "drop-shadow(0 4px 16px rgba(0,0,0,0.4))" }}>🕹️</div>
           <h1 style={{ fontSize: "clamp(34px,6.5vw,60px)", fontWeight: "900", color: "white", margin: "0 0 10px", letterSpacing: "-0.02em", lineHeight: 1.1, textShadow: "0 2px 24px rgba(0,0,0,0.4)", fontFamily: theme.headingFont }}>
@@ -501,7 +503,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange }: LessonGam
                 <span style={{ fontSize: "20px", flexShrink: 0 }}>{g.icon}</span>
                 <span style={{ color: "rgba(255,255,255,0.9)", fontWeight: "600", fontSize: "13px", textAlign: "left", lineHeight: 1.3, fontFamily: theme.headingFont }}>{g.name}</span>
               </div>
-              <span style={{ color: "rgba(255,255,255,0.55)", fontSize: "11px", textAlign: "left", lineHeight: 1.35 }}>{g.tag}</span>
+              <span style={{ color: "rgba(255,255,255,0.8)", fontSize: "11px", textAlign: "left", lineHeight: 1.35 }}>{g.tag}</span>
             </div>
           ))}
         </div>
