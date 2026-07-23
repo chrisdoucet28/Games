@@ -66,7 +66,7 @@ export function AuthScreen() {
                 style={{
                   flex: 1, padding: "10px", borderRadius: "9px", border: "none", cursor: "pointer",
                   fontWeight: "800", fontSize: "14px",
-                  background: mode === m ? "linear-gradient(135deg,#FB923C,#F43F5E)" : "transparent",
+                  background: mode === m ? "linear-gradient(135deg,#F59E0B,#D97706)" : "transparent",
                   color: mode === m ? "white" : "#BAE6FD",
                 }}
               >
@@ -100,7 +100,7 @@ export function AuthScreen() {
 
               <button
                 type="submit" disabled={loading}
-                style={{ width: "100%", background: "linear-gradient(135deg,#FB923C,#F43F5E)", color: "white", border: "none", borderRadius: "12px", padding: "13px", fontSize: "15px", fontWeight: "900", cursor: loading ? "default" : "pointer", opacity: loading ? 0.7 : 1 }}
+                style={{ width: "100%", background: "linear-gradient(135deg,#F59E0B,#D97706)", color: "white", border: "none", borderRadius: "12px", padding: "13px", fontSize: "15px", fontWeight: "900", cursor: loading ? "default" : "pointer", opacity: loading ? 0.7 : 1 }}
               >
                 {loading ? "Please wait…" : mode === "sign-in" ? "Log In" : "Create Account"}
               </button>

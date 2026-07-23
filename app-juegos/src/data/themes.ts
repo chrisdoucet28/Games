@@ -20,7 +20,7 @@ export const THEMES: Theme[] = [
   // The brand default — bright "game show stage" sky blue, first in the list so it's what every
   // new signup and the pre-auth screens see. cta uses a warm coral-to-pink "buzz in" pop against
   // the blue, same contrast logic a real game-show set uses (cool stage lighting, hot action button).
-  { id: "sky", name: "Sky", emoji: "☀️", heroBg: ["#0C1E3D", "#0369A1", "#0EA5E9"], cta: ["#FB923C", "#F43F5E"], accent: ["#38BDF8", "#7DD3FC"], accentSolid: "#0EA5E9", headingFont: "'Arial Rounded MT Bold', 'Century Gothic', 'Segoe UI', sans-serif" },
+  { id: "sky", name: "Sky", emoji: "☀️", heroBg: ["#0C1E3D", "#0369A1", "#0EA5E9"], cta: ["#F59E0B", "#D97706"], accent: ["#38BDF8", "#7DD3FC"], accentSolid: "#0EA5E9", headingFont: "'Arial Rounded MT Bold', 'Century Gothic', 'Segoe UI', sans-serif" },
   { id: "violet", name: "Violet",  emoji: "💜", heroBg: ["#1E1B4B", "#312E81", "#4C1D95"], cta: ["#F59E0B", "#EF4444"], accent: ["#6366F1", "#8B5CF6"], accentSolid: "#6366F1", headingFont: "'Segoe UI', system-ui, sans-serif" },
   { id: "sunset", name: "Sunset",  emoji: "🌅", heroBg: ["#7C2D12", "#9A3412", "#C2410C"], cta: ["#F43F5E", "#FB923C"], accent: ["#F97316", "#F59E0B"], accentSolid: "#F97316", headingFont: "'Trebuchet MS', 'Segoe UI', sans-serif" },
   { id: "ocean",  name: "Ocean",   emoji: "🌊", heroBg: ["#0C2340", "#0E4C6B", "#155E75"], cta: ["#06B6D4", "#3B82F6"], accent: ["#0891B2", "#0EA5E9"], accentSolid: "#0891B2", headingFont: "'Verdana', 'Tahoma', sans-serif" },
