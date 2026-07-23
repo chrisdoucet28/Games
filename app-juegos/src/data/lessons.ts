@@ -714,4 +714,182 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ Shall we to meet at the station? → ✅ Shall we meet at the station? (no 'to' after 'shall we')",
     ],
   },
+
+  daily_life_a2: {
+    title: "Daily Life & Routines",
+    intro: "Talking about your daily routine is mostly present simple with time expressions — but this topic also drills a set of classic mistakes Spanish speakers make when describing everyday life.",
+    sections: [
+      {
+        heading: "Describing a routine",
+        body: [
+          "wake up → get up → have breakfast → commute/go to work or school",
+          "do the housework/chores, relax/unwind, go to bed, fall asleep",
+          "Third person needs -s: She wakes up at seven. He catches the bus at 7:45.",
+          "Sequence with first, then, after that, finally: First I have a shower. Then I get dressed.",
+        ],
+      },
+      {
+        heading: "Frequency and time",
+        body: [
+          "always / usually / often / sometimes / never — goes before the main verb: I usually go to the gym. (but after 'be': I am usually tired.)",
+          "free time / spare time — time that's yours, not work or school",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ I have 20 years old. → ✅ I am 20 years old. ('to be' + age, not 'to have' — a direct Spanish translation trap)",
+      "❌ I am agree with my sister. → ✅ I agree with my sister. ('agree' is a verb on its own, no 'am')",
+      "❌ I like to listen music. → ✅ I like to listen to music. ('listen to' + thing)",
+      "❌ I have a house big with a garden. → ✅ I have a big house with a garden. (adjective before the noun in English)",
+      "❌ I don't do nothing on Sundays. → ✅ I don't do anything on Sundays. (only one negative per clause)",
+    ],
+  },
+
+  food_and_eating: {
+    title: "Food & Eating",
+    intro: "This topic mixes everyday food vocabulary with a set of classic mistakes Spanish speakers make when talking about meals, restaurants, and diet.",
+    sections: [
+      {
+        heading: "Talking about food and diet",
+        body: [
+          "vegetarian / vegan — don't eat meat/fish, or any animal products",
+          "be allergic to + food → She is allergic to nuts.",
+          "be on a diet, lose weight, eat out, cook/prepare food",
+          "Comparing food: this curry is spicier than that one (short adjective + -er)",
+        ],
+      },
+      {
+        heading: "At a restaurant",
+        body: [
+          "menu, bill, waiter, portion, starter, main course, dessert",
+          "This dish is suitable for vegetarians. / Does it come with rice?",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ I have 25 years. → ✅ I am 25 years old. ('to be' + age, not 'to have')",
+      "❌ We arrived to the restaurant late. → ✅ We arrived at the restaurant late. ('arrive at/in a place', never 'arrive to')",
+      "❌ The people in that restaurant is friendly. → ✅ The people in that restaurant are friendly. ('people' takes a plural verb)",
+      "❌ I have eaten paella yesterday. → ✅ I ate paella yesterday. (a finished time word like 'yesterday' needs past simple)",
+      "❌ The queue was so large. → ✅ The queue was so long. ('large' = big in size; 'long' describes a queue or line)",
+    ],
+  },
+
+  school_and_study: {
+    title: "School and Study",
+    intro: "School vocabulary comes with its own obligation grammar (must/have to) and a set of classic mistakes Spanish speakers make when talking about classes and studying.",
+    sections: [
+      {
+        heading: "Talking about school",
+        body: [
+          "subject, exam, homework, grade/mark, library, classmate, timetable",
+          "be good at + subject → She is good at maths. / revise for an exam",
+          "hand in homework, pass/fail an exam, take notes",
+        ],
+      },
+      {
+        heading: "Obligation at school",
+        body: [
+          "must/have to + base verb → Students must arrive on time. (no 'to' after 'must')",
+          "Passive with a modal: The essay must be handed in by Friday. (modal + be + past participle)",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ I have to assist my classes. → ✅ I have to attend my classes. ('assist' means to help; 'attend' means to go to')",
+      "❌ I have 15 years old. → ✅ I am 15 years old. ('to be' + age, not 'to have')",
+      "❌ I always avoid to talk in class. → ✅ I always avoid talking in class. ('avoid' + gerund, never 'to')",
+      "❌ We have to listen the teacher. → ✅ We have to listen to the teacher. ('listen to' + person/thing)",
+      "❌ I don't have no homework today. → ✅ I don't have any homework today. (only one negative per clause)",
+    ],
+  },
+
+  friends_and_family: {
+    title: "Friends and Family",
+    intro: "Describing relationships leans on present perfect ('have been friends since…') and a handful of fixed phrasal expressions — plus another set of classic Spanish-speaker mix-ups.",
+    sections: [
+      {
+        heading: "Talking about relationships",
+        body: [
+          "get on/along with someone (= have a good relationship), take after someone (= look/act like them)",
+          "keep in touch, close-knit family, only child, rely on someone",
+          "We have been friends since primary school. (present perfect + since = started in the past, still true now)",
+          "who for people in relative clauses → My uncle, who lives in Canada, is visiting us.",
+        ],
+      },
+      {
+        heading: "Comparing people in a family",
+        body: [
+          "Short adjectives: older/youngest (not 'more old' or 'more young')",
+          "She is the youngest child in the family. (superlative for 3+ people)",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ I have 24 years. → ✅ I am 24 years old. ('to be' + age, not 'to have')",
+      "❌ My cousin is married with a doctor. → ✅ My cousin is married to a doctor. ('married to', not 'married with')",
+      "❌ I assisted to my grandparents' party. → ✅ I attended my grandparents' party. ('assist' means to help; 'attend' means to go to')",
+      "❌ My aunt is very sympathetic. → ✅ My aunt is very friendly/likeable. ('sympathetic' means compassionate about a problem, not friendly)",
+      "❌ I know my best friend since we were children. → ✅ I have known my best friend since we were children. ('since' needs present perfect)",
+    ],
+  },
+
+  free_time_a2: {
+    title: "Free Time and Interests",
+    intro: "Talking about hobbies mostly needs 'enjoy'/'like' + gerund and 'prefer X to Y' — plus a few classic Spanish-speaker slips worth watching for.",
+    sections: [
+      {
+        heading: "Talking about hobbies",
+        body: [
+          "in my free time, at weekends, once a week — time expressions for habits",
+          "enjoy/like + -ing → I enjoy cooking. (not 'enjoy to cook')",
+          "prefer X to Y → I prefer swimming to running.",
+          "would like to + infinitive → I would like to try surfing one day.",
+          "join a club, take up a hobby, take a class, practise a skill",
+        ],
+      },
+      {
+        heading: "Feelings about activities",
+        body: [
+          "-ed vs -ing adjectives: I am bored (how you feel) vs. The film is boring (what causes the feeling)",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ I make sport every weekend. → ✅ I do sport every weekend. (English says 'do sport/exercise', never 'make sport')",
+      "❌ I like to listen music. → ✅ I like to listen to music. ('listen to' + thing)",
+      "❌ My brother has ten years. → ✅ My brother is ten years old. ('to be' + age, not 'to have')",
+      "❌ I am boring when I have nothing to do. → ✅ I am bored when I have nothing to do. (use the -ed form for how you feel)",
+      "❌ I assist to a dance class. → ✅ I attend a dance class. ('assist' means to help; 'attend' means to go to')",
+    ],
+  },
+
+  my_town_city: {
+    title: "My Town and City",
+    intro: "Describing a place uses 'there is/are', comparatives/superlatives, and passive voice for history ('was built') — plus a last round of classic Spanish-speaker slips.",
+    sections: [
+      {
+        heading: "Describing your town",
+        body: [
+          "There is/are + noun → There are a lot of shops near my home. (plural noun needs 'are')",
+          "be famous for + noun → My town is famous for its old market.",
+          "which for places/things in relative clauses → The old town, which is very famous, attracts tourists.",
+          "Comparatives/superlatives: quieter than, busier than, the most beautiful",
+        ],
+      },
+      {
+        heading: "Talking about the past of a place",
+        body: [
+          "Passive voice for history: The cathedral was built hundreds of years ago. (was/were + past participle)",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ I like to make photos of old buildings. → ✅ I like to take photos of old buildings. (English 'takes' a photo, never 'makes' one)",
+      "❌ Tourists arrive to my city by train. → ✅ Tourists arrive in my city by train. ('arrive in/at a place', never 'arrive to')",
+      "❌ My town has market in the centre. → ✅ My town has a market in the centre. (don't drop 'a' before a singular countable noun)",
+      "❌ There is a good library where you can buy books. → ✅ There is a good bookshop where you can buy books. ('library' = borrow books; 'librería' in Spanish is false friend for bookshop)",
+      "❌ There isn't nothing interesting to do. → ✅ There isn't anything interesting to do. (only one negative per clause)",
+    ],
+  },
 };
