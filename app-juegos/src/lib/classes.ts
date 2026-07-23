@@ -10,10 +10,10 @@ export async function listClasses(): Promise<SavedClass[]> {
   return data as SavedClass[];
 }
 
-export async function createClass(name: string, school: string | null): Promise<SavedClass> {
+export async function createClass(name: string, school: string | null, defaultLevel: string | null): Promise<SavedClass> {
   const { data, error } = await supabase
     .from("classes")
-    .insert({ name, school })
+    .insert({ name, school, default_level: defaultLevel })
     .select()
     .single();
   if (error) throw error;

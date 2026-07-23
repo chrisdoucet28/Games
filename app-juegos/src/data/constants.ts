@@ -20,6 +20,18 @@ export const MASCOT_OPTIONS: string[] = [
   "🍕", "⚡", "🌟", "🎃", "👻", "🥷",
 ];
 
+// Shared between the setup screen's level filter and anywhere a class's default level is picked
+// (My Classes' "+ New Class" form, the inline Save & Exit picker) — one source of truth so the
+// id/label/color set can't drift between the two pickers.
+export const LEVELS_META = [
+  { id: "all", desc: "All levels", color: "#6366F1" },
+  { id: "A1", desc: "Beginner", color: "#22C55E" },
+  { id: "A2", desc: "Elementary", color: "#84CC16" },
+  { id: "B1", desc: "Intermediate", color: "#F59E0B" },
+  { id: "B2", desc: "Upper-Int.", color: "#F97316" },
+  { id: "C1", desc: "Advanced", color: "#EF4444" },
+];
+
 export function teamsGridCols(n: number): string {
   if (n <= 3) return `repeat(${n},1fr)`;
   if (n === 4) return "repeat(2,1fr)";

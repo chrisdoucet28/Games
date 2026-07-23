@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type { SavedClass } from "../../types";
-import { TEAM_COLORS, GAME_MODES } from "../../data/constants";
+import { TEAM_COLORS, GAME_MODES, LEVELS_META } from "../../data/constants";
 import { listClasses, createClass, deleteClass } from "../../lib/classes";
 import { hexToRgba, type Theme } from "../../data/themes";
 
@@ -18,6 +18,7 @@ export function ClassesScreen({ onBack, onResumeClass, onStartWithClass, theme }
   const [error, setError] = useState<string | null>(null);
   const [newName, setNewName] = useState("");
   const [newSchool, setNewSchool] = useState("");
+  const [newLevel, setNewLevel] = useState("all");
   const [creating, setCreating] = useState(false);
 
   const refresh = () => {
@@ -34,9 +35,10 @@ export function ClassesScreen({ onBack, onResumeClass, onStartWithClass, theme }
     setCreating(true);
     setError(null);
     try {
-      const created = await createClass(newName.trim(), newSchool.trim() || null);
+      const created = await createClass(newName.trim(), newSchool.trim() || null, newLevel === "all" ? null : newLevel);
       setNewName("");
       setNewSchool("");
+      setNewLevel("all");
       setClasses(prev => (prev ? [created, ...prev] : [created]));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Couldn't create the class.");
@@ -74,6 +76,22 @@ export function ClassesScreen({ onBack, onResumeClass, onStartWithClass, theme }
             value={newSchool} onChange={e => setNewSchool(e.target.value)} placeholder="School (optional)"
             style={{ flex: "1 1 140px", padding: "12px 14px", borderRadius: "12px", border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, fontSize: "14px" }}
           />
+          <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap", width: "100%" }}>
+            <span style={{ fontSize: "12px", color: "#6B7280", fontWeight: "700", marginRight: "2px" }}>Level:</span>
+            {LEVELS_META.map(l => (
+              <button
+                key={l.id} type="button" onClick={() => setNewLevel(l.id)}
+                style={{
+                  background: newLevel === l.id ? l.color : "white",
+                  color: newLevel === l.id ? "white" : "#374151",
+                  border: `2px solid ${newLevel === l.id ? l.color : hexToRgba(theme.accentSolid, 0.25)}`,
+                  borderRadius: "8px", padding: "5px 10px", cursor: "pointer", fontWeight: "700", fontSize: "12px",
+                }}
+              >
+                {l.id === "all" ? "Any" : l.id}
+              </button>
+            ))}
+          </div>
           <button
             type="submit" disabled={creating || !newName.trim()}
             style={{ background: `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "12px", padding: "12px 20px", fontWeight: "800", cursor: creating ? "default" : "pointer", opacity: creating || !newName.trim() ? 0.6 : 1, whiteSpace: "nowrap", fontFamily: theme.headingFont }}
@@ -97,7 +115,13 @@ export function ClassesScreen({ onBack, onResumeClass, onStartWithClass, theme }
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "10px" }}>
                   <div>
                     <div style={{ fontWeight: "900", fontSize: "17px", color: "#1E1B4B", fontFamily: theme.headingFont }}>{cls.name}</div>
-                    {cls.school && <div style={{ fontSize: "12px", color: "#6B7280", fontWeight: "600", marginTop: "2px" }}>🏫 {cls.school}</div>}
+                    {(cls.school || cls.default_level) && (
+                      <div style={{ fontSize: "12px", color: "#6B7280", fontWeight: "600", marginTop: "2px" }}>
+                        {cls.school && <>🏫 {cls.school}</>}
+                        {cls.school && cls.default_level && " · "}
+                        {cls.default_level && <>📊 {cls.default_level}</>}
+                      </div>
+                    )}
                   </div>
                   <button
                     onClick={() => handleDelete(cls.id)} title="Delete class"

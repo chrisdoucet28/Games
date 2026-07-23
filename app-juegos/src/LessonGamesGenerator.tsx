@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import type { Team, GameMode, QuestionData, SavedClass } from "./types";
-import { TEAM_COLORS, GAME_MODES, MASCOT_OPTIONS } from "./data/constants";
+import { TEAM_COLORS, GAME_MODES, MASCOT_OPTIONS, LEVELS_META } from "./data/constants";
 // Asegúrate de que TOPIC_LIBRARY esté exportado desde tu archivo topics.ts junto con TOPIC_OPTIONS
 import { TOPIC_OPTIONS, TOPIC_LIBRARY } from "./data/topics";
 import { hexToRgba, type Theme } from "./data/themes";
@@ -133,6 +133,8 @@ export default function LessonGamesGenerator({ theme, onThemeChange }: LessonGam
   const [showSavePicker, setShowSavePicker] = useState(false);
   const [pickerClasses, setPickerClasses] = useState<SavedClass[] | null>(null);
   const [pickerNewName, setPickerNewName] = useState("");
+  const [pickerNewSchool, setPickerNewSchool] = useState("");
+  const [pickerNewLevel, setPickerNewLevel] = useState("all");
   const [pickerBusy, setPickerBusy] = useState(false);
   const [pickerError, setPickerError] = useState<string | null>(null);
   const [numTeams, setNumTeams] = useState(2);
@@ -178,6 +180,9 @@ export default function LessonGamesGenerator({ theme, onThemeChange }: LessonGam
   // normal setup flow, same as if the teacher had typed those names in themselves.
   const startWithClass = (cls: SavedClass) => {
     setActiveClassId(cls.id);
+    // Pre-selects step 1 of Game Setup with this class's own level, so a teacher who already told
+    // us "this is my B2 class" doesn't have to re-pick it every single time they start a game.
+    setLevel(cls.default_level ?? "all");
     if (cls.teams.length > 0) {
       setNumTeams(cls.teams.length);
       setTeamNames(prev => {
@@ -272,8 +277,10 @@ export default function LessonGamesGenerator({ theme, onThemeChange }: LessonGam
     setPickerBusy(true);
     setPickerError(null);
     try {
-      const created = await createClass(pickerNewName.trim(), null);
+      const created = await createClass(pickerNewName.trim(), pickerNewSchool.trim() || null, pickerNewLevel === "all" ? null : pickerNewLevel);
       setPickerNewName("");
+      setPickerNewSchool("");
+      setPickerNewLevel("all");
       setShowSavePicker(false);
       await saveToClass(created.id);
     } catch (err) {
@@ -524,14 +531,6 @@ export default function LessonGamesGenerator({ theme, onThemeChange }: LessonGam
     const filteredTopics = getFilteredTopicOptions(level, focus).filter(o => matchesTopicSearch(o.label, topicSearch));
     const selectedTopicOptions = selectedTopics.map(getTopicOption).filter((option): option is TopicOption => Boolean(option));
     const selectedTopicSummary = selectedTopicOptions.map(o => o.label).join(", ");
-    const LEVELS_META = [
-      { id: "all", desc: "All levels", color: "#6366F1" },
-      { id: "A1", desc: "Beginner", color: "#22C55E" },
-      { id: "A2", desc: "Elementary", color: "#84CC16" },
-      { id: "B1", desc: "Intermediate", color: "#F59E0B" },
-      { id: "B2", desc: "Upper-Int.", color: "#F97316" },
-      { id: "C1", desc: "Advanced", color: "#EF4444" },
-    ];
     const FOCUS_META = [
       { id: "all", icon: "*", label: "All", desc: "Grammar, words & themes" },
       { id: "grammar", icon: "G", label: "Grammar", desc: "Structures & rules" },
@@ -844,14 +843,34 @@ export default function LessonGamesGenerator({ theme, onThemeChange }: LessonGam
                 </div>
               ) : null}
 
-              <div style={{ display: "flex", gap: "8px" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                 <input
                   value={pickerNewName} onChange={e => setPickerNewName(e.target.value)} placeholder="e.g. Tuesday B2 Advanced"
-                  style={{ flex: 1, padding: "10px 12px", borderRadius: "10px", border: "2px solid #E5E7EB", fontSize: "14px" }}
+                  style={{ padding: "10px 12px", borderRadius: "10px", border: "2px solid #E5E7EB", fontSize: "14px" }}
                 />
+                <input
+                  value={pickerNewSchool} onChange={e => setPickerNewSchool(e.target.value)} placeholder="School (optional)"
+                  style={{ padding: "10px 12px", borderRadius: "10px", border: "2px solid #E5E7EB", fontSize: "14px" }}
+                />
+                <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
+                  <span style={{ fontSize: "12px", color: "#6B7280", fontWeight: "700", marginRight: "2px" }}>Level:</span>
+                  {LEVELS_META.map(l => (
+                    <button
+                      key={l.id} type="button" onClick={() => setPickerNewLevel(l.id)}
+                      style={{
+                        background: pickerNewLevel === l.id ? l.color : "white",
+                        color: pickerNewLevel === l.id ? "white" : "#374151",
+                        border: `2px solid ${pickerNewLevel === l.id ? l.color : "#E5E7EB"}`,
+                        borderRadius: "8px", padding: "5px 10px", cursor: "pointer", fontWeight: "700", fontSize: "12px",
+                      }}
+                    >
+                      {l.id === "all" ? "Any" : l.id}
+                    </button>
+                  ))}
+                </div>
                 <button
                   onClick={handleCreateClassForSave} disabled={pickerBusy || !pickerNewName.trim()}
-                  style={{ background: `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "10px", padding: "10px 16px", fontWeight: 800, cursor: pickerBusy ? "default" : "pointer", opacity: pickerBusy || !pickerNewName.trim() ? 0.6 : 1, whiteSpace: "nowrap", fontFamily: theme.headingFont }}
+                  style={{ background: `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "10px", padding: "10px 16px", fontWeight: 800, cursor: pickerBusy ? "default" : "pointer", opacity: pickerBusy || !pickerNewName.trim() ? 0.6 : 1, fontFamily: theme.headingFont }}
                 >
                   + New
                 </button>

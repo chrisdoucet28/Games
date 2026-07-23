@@ -107,6 +107,10 @@ export interface TeamColor {
     user_id: string;
     name: string;
     school: string | null;
+    // The class's own level, set once at creation and independent of `level` below (which is
+    // scoped to whatever game happens to be in progress and gets cleared when it ends) — this is
+    // what pre-selects step 1 of Game Setup whenever a game starts with this class.
+    default_level: string | null;
     teams: Team[];
     in_progress: boolean;
     selected_topics: string[] | null;
