@@ -15,6 +15,7 @@ const LEVEL_ORDER = ["A1", "A2", "B1", "B2", "C1"];
 const LEVEL_COLOR: Record<string, string> = {
   A1: "#22C55E", A2: "#84CC16", B1: "#F59E0B", B2: "#F97316", C1: "#EF4444",
 };
+const FOCUS_ORDER = ["grammar", "vocabulary", "topic"];
 const FOCUS_LABEL: Record<string, string> = { grammar: "Grammar", vocabulary: "Vocabulary", topic: "Topics" };
 
 // Lesson content marks the key form in each line with **double asterisks** — render those as bold
@@ -118,21 +119,25 @@ export function LearnScreen({ onBack, theme, filterTopicIds }: Props) {
         ) : (
           byLevel.map(group => (
             <div key={group.level} style={{ marginBottom: "24px" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "14px" }}>
                 <span style={{ background: LEVEL_COLOR[group.level], color: "white", borderRadius: "999px", padding: "3px 12px", fontSize: "13px", fontWeight: "800" }}>{group.level}</span>
                 <span style={{ color: "#9CA3AF", fontSize: "12px", fontWeight: "700" }}>{group.topics.length} lesson{group.topics.length === 1 ? "" : "s"}</span>
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(200px,1fr))", gap: "10px" }}>
-                {group.topics.map(t => (
-                  <button
-                    key={t.id} onClick={() => setSelectedId(t.id)}
-                    style={{ textAlign: "left", background: "white", border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, borderRadius: "12px", padding: "14px 16px", cursor: "pointer", fontFamily: "inherit" }}
-                  >
-                    <div style={{ fontWeight: "800", color: theme.heroBg[0], fontSize: "14px", marginBottom: "4px", fontFamily: theme.headingFont }}>{t.lesson.title}</div>
-                    <div style={{ color: "#9CA3AF", fontSize: "11px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.03em" }}>{FOCUS_LABEL[t.meta.focus ?? "grammar"]}</div>
-                  </button>
-                ))}
-              </div>
+              {FOCUS_ORDER.filter(focus => group.topics.some(t => (t.meta.focus ?? "grammar") === focus)).map(focus => (
+                <div key={focus} style={{ marginBottom: "16px" }}>
+                  <div style={{ color: "#6B7280", fontSize: "12px", fontWeight: "800", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: "8px" }}>{FOCUS_LABEL[focus]}</div>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(200px,1fr))", gap: "10px" }}>
+                    {group.topics.filter(t => (t.meta.focus ?? "grammar") === focus).map(t => (
+                      <button
+                        key={t.id} onClick={() => setSelectedId(t.id)}
+                        style={{ textAlign: "left", background: "white", border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, borderRadius: "12px", padding: "14px 16px", cursor: "pointer", fontFamily: "inherit" }}
+                      >
+                        <div style={{ fontWeight: "800", color: theme.heroBg[0], fontSize: "14px", fontFamily: theme.headingFont }}>{t.lesson.title}</div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
             </div>
           ))
         )}
