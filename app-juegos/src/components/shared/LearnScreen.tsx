@@ -18,9 +18,14 @@ const LEVEL_COLOR: Record<string, string> = {
 const FOCUS_ORDER = ["grammar", "vocabulary", "topic"];
 const FOCUS_LABEL: Record<string, string> = { grammar: "Grammar", vocabulary: "Vocabulary", topic: "Topics" };
 
-// Hides interactive chrome and reveals the ink-economical bulk-print block when the
-// browser's print dialog is triggered — see the "learn-print-only" block below.
+// Hides interactive chrome and reveals the ink-economical print block when the browser's
+// print dialog is triggered — see the "learn-print-only" block below. Shrinking the page
+// margins gives noticeably more usable space per sheet, which combined with PrintableLesson's
+// tighter type helps most single lessons fit on one printed page instead of spilling onto a second.
 const PRINT_CSS = `
+  @page {
+    margin: 12mm 15mm;
+  }
   @media print {
     .learn-no-print { display: none !important; }
     .learn-print-only { display: block !important; }
@@ -48,25 +53,27 @@ const LESSON_TOPICS = Object.keys(LESSONS)
 
 // Plain, ink-economical rendering of one lesson for the print handout — borders instead of
 // colored fills, no theme colors, so it reads well on any printer (color or black & white).
+// Sizes/spacing are deliberately tighter than the on-screen card (which has room to breathe)
+// so a typical lesson's title + intro + sections + common-mistakes fits on a single printed page.
 function PrintableLesson({ t }: { t: (typeof LESSON_TOPICS)[number] }) {
   return (
-    <div style={{ padding: "24px 4px 40px" }}>
-      <span style={{ background: LEVEL_COLOR[t.meta.level ?? "A2"], color: "white", borderRadius: "999px", padding: "3px 12px", fontSize: "12px", fontWeight: "800" }}>{t.meta.level}</span>
-      <h2 style={{ fontSize: "24px", fontWeight: "900", color: "#111827", margin: "10px 0 8px" }}>{t.lesson.title}</h2>
-      <p style={{ color: "#374151", fontSize: "14px", lineHeight: 1.6, margin: "0 0 18px" }}>{t.lesson.intro}</p>
+    <div>
+      <span style={{ background: LEVEL_COLOR[t.meta.level ?? "A2"], color: "white", borderRadius: "999px", padding: "2px 10px", fontSize: "10.5px", fontWeight: "800" }}>{t.meta.level}</span>
+      <h2 style={{ fontSize: "19px", fontWeight: "900", color: "#111827", margin: "6px 0 5px" }}>{t.lesson.title}</h2>
+      <p style={{ color: "#374151", fontSize: "12px", lineHeight: 1.4, margin: "0 0 10px" }}>{t.lesson.intro}</p>
 
       {t.lesson.sections.map((section, i) => (
-        <div key={i} style={{ marginBottom: "16px" }}>
-          <div style={{ fontWeight: "800", color: "#374151", fontSize: "13px", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.04em" }}>{section.heading}</div>
-          <ul style={{ margin: 0, paddingLeft: "20px", color: "#1F2937" }}>
+        <div key={i} style={{ marginBottom: "9px" }}>
+          <div style={{ fontWeight: "800", color: "#374151", fontSize: "11px", marginBottom: "3px", textTransform: "uppercase", letterSpacing: "0.03em" }}>{section.heading}</div>
+          <ul style={{ margin: 0, paddingLeft: "16px", color: "#1F2937" }}>
             {section.body.map((line, j) => (
-              <li key={j} style={{ marginBottom: "5px", lineHeight: 1.5, fontSize: "13px" }}>{renderBold(line)}</li>
+              <li key={j} style={{ marginBottom: "2px", lineHeight: 1.3, fontSize: "11.5px" }}>{renderBold(line)}</li>
             ))}
           </ul>
           {section.examples && section.examples.length > 0 && (
-            <div style={{ border: "1px solid #D1D5DB", borderRadius: "6px", padding: "8px 12px", marginTop: "8px" }}>
+            <div style={{ border: "1px solid #D1D5DB", borderRadius: "5px", padding: "5px 9px", marginTop: "5px" }}>
               {section.examples.map((ex, j) => (
-                <div key={j} style={{ fontSize: "12.5px", fontStyle: "italic", color: "#1F2937", lineHeight: 1.5, marginBottom: j < section.examples!.length - 1 ? "4px" : 0 }}>
+                <div key={j} style={{ fontSize: "11px", fontStyle: "italic", color: "#1F2937", lineHeight: 1.3, marginBottom: j < section.examples!.length - 1 ? "2px" : 0 }}>
                   {renderBold(ex)}
                 </div>
               ))}
@@ -76,10 +83,10 @@ function PrintableLesson({ t }: { t: (typeof LESSON_TOPICS)[number] }) {
       ))}
 
       {t.lesson.commonMistakes.length > 0 && (
-        <div style={{ border: "1px solid #9CA3AF", borderRadius: "6px", padding: "10px 12px", marginTop: "8px" }}>
-          <div style={{ fontWeight: "800", color: "#111827", fontSize: "12px", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.04em" }}>Common mistakes</div>
+        <div style={{ border: "1px solid #9CA3AF", borderRadius: "5px", padding: "7px 9px", marginTop: "5px" }}>
+          <div style={{ fontWeight: "800", color: "#111827", fontSize: "10.5px", marginBottom: "4px", textTransform: "uppercase", letterSpacing: "0.03em" }}>Common mistakes</div>
           {t.lesson.commonMistakes.map((m, i) => (
-            <div key={i} style={{ fontSize: "12px", color: "#1F2937", marginBottom: i < t.lesson.commonMistakes.length - 1 ? "5px" : 0, lineHeight: 1.4 }}>{m}</div>
+            <div key={i} style={{ fontSize: "10.5px", color: "#1F2937", marginBottom: i < t.lesson.commonMistakes.length - 1 ? "3px" : 0, lineHeight: 1.25 }}>{m}</div>
           ))}
         </div>
       )}
@@ -117,7 +124,7 @@ export function LearnScreen({ onBack, theme, filterTopicIds }: Props) {
             </button>
           </div>
 
-          <div style={{ background: "white", border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, borderRadius: "16px", padding: "24px" }}>
+          <div className="learn-no-print" style={{ background: "white", border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, borderRadius: "16px", padding: "24px" }}>
             <span style={{ background: LEVEL_COLOR[selected.meta.level ?? "A2"], color: "white", borderRadius: "999px", padding: "3px 12px", fontSize: "12px", fontWeight: "800" }}>{selected.meta.level}</span>
             <h2 style={{ fontSize: "26px", fontWeight: "900", color: theme.heroBg[0], margin: "10px 0 8px", fontFamily: theme.headingFont }}>{selected.lesson.title}</h2>
             <p style={{ color: "#4B5563", fontSize: "15px", lineHeight: 1.6, margin: "0 0 20px" }}>{selected.lesson.intro}</p>
@@ -151,6 +158,10 @@ export function LearnScreen({ onBack, theme, filterTopicIds }: Props) {
                 ))}
               </div>
             )}
+          </div>
+
+          <div className="learn-print-only">
+            <PrintableLesson t={selected} />
           </div>
         </div>
       </div>
