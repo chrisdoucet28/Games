@@ -1900,4 +1900,238 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ The kids will probably sleeping by then. → ✅ The kids will probably be sleeping by then. ('probably' sits between 'will' and 'be', not instead of it)",
     ],
   },
+
+  giving_opinions: {
+    title: "Giving Opinions",
+    intro: "Opinion-giving phrases each have their own fixed grammar — the classic trap is stacking two opinion openers together, like 'In my opinion, I think...'.",
+    sections: [
+      {
+        heading: "Introducing your opinion",
+        body: ["Common ways to introduce a personal opinion; 'I'm of the opinion that...' is a bit more formal."],
+        examples: [
+          "**In my opinion**, social media has both positive and negative effects.",
+          "**From my point of view**, governments should invest more in renewable energy.",
+          "**If you ask me**, fast food is convenient but not very healthy.",
+          "I**'m of the opinion that** technology will replace many jobs.",
+        ],
+      },
+      {
+        heading: "Softening or strengthening an opinion",
+        body: [
+          "Cautious/softened opinions.",
+          "Strong, confident opinions.",
+        ],
+        examples: [
+          "**I tend to think** that working from home is more productive.",
+          "**As far as I'm concerned**, honesty is the most important value.",
+          "**I strongly believe** that every child deserves a good education.",
+          "**To the best of my knowledge**, no one has raised this issue before.",
+        ],
+      },
+      {
+        heading: "Common trap: don't stack two openers",
+        body: ["Pick ONE opinion opener — don't combine 'in my opinion' with 'I think', or 'for me' with 'I think'."],
+        examples: ["**In my opinion**, we should ban plastic bags. (not 'In my opinion, I think we should...')"],
+      },
+    ],
+    commonMistakes: [
+      "❌ According to me, the film was brilliant. → ✅ In my opinion, the film was brilliant. ('according to' is for sources, not personal opinions)",
+      "❌ I am agree with you about this issue. → ✅ I agree with you about this issue. ('agree' is a verb, no 'am')",
+      "❌ In my point of view, the plan won't work. → ✅ From my point of view, the plan won't work. (fixed phrase is 'from my point of view')",
+      "❌ What is your opinion for the current situation? → ✅ What is your opinion on/about the current situation? ('opinion on/about', not 'for')",
+      "❌ In my opinion, I think we should ban plastic bags. → ✅ In my opinion, we should ban plastic bags. (don't combine 'in my opinion' and 'I think')",
+    ],
+  },
+
+  asking_for_clarification: {
+    title: "Asking for Clarification",
+    intro: "When you don't understand something, English has a set of polite fixed phrases for asking someone to repeat, explain, or confirm what they meant.",
+    sections: [
+      {
+        heading: "Asking someone to repeat or slow down",
+        body: ["Common phrases for not hearing or catching something."],
+        examples: [
+          "Sorry, **could you repeat** that, please?",
+          "Sorry, **I didn't quite catch** that — was the meeting at 3 or 4?",
+          "**Could you say** that **more slowly**, please?",
+          "**Pardon**? I didn't hear what you said.",
+        ],
+      },
+      {
+        heading: "Asking what something means",
+        body: [
+          "'Mean by' + the specific word or phrase.",
+          "'Explain'/'clarify' + detail.",
+        ],
+        examples: [
+          "**What do you mean by** 'flexible working hours'?",
+          "**Could you explain** that **a bit more**?",
+          "**Could you clarify** what you meant by 'immediate action'?",
+          "**Could you put** that **in simpler terms**?",
+        ],
+      },
+      {
+        heading: "Checking you understood correctly",
+        body: ["Rephrasing what you think someone meant, to confirm it."],
+        examples: [
+          "**Just to clarify**, are we meeting at nine or ten?",
+          "**Are you saying that** the flight has been cancelled completely?",
+          "**Let me get this straight** — you want the whole report by Monday?",
+          "**In other words**, you think we should cancel the trip?",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ What do you mean with that? → ✅ What do you mean by that? (fixed phrase: 'mean by')",
+      "❌ Could you give me an example for that? → ✅ Could you give me an example of that? ('example of', not 'for')",
+      "❌ Are you meaning that we have to start over? → ✅ Do you mean that we have to start over? ('mean' is a state verb — no continuous)",
+      "❌ Could you explain me the instructions again? → ✅ Could you explain the instructions to me again? ('explain' needs 'to' before the person)",
+      "❌ Would you mind to repeat the question? → ✅ Would you mind repeating the question? ('would you mind' + gerund)",
+    ],
+  },
+
+  agreeing_disagreeing: {
+    title: "Agreeing and Disagreeing",
+    intro: "Agreeing and disagreeing politely both lean on 'agree'/'disagree' as ordinary verbs (never with 'am/is/are'), plus a set of softening phrases for disagreement.",
+    sections: [
+      {
+        heading: "Agreeing",
+        body: [
+          "'Agree' is a normal verb — never 'I'm agree'.",
+          "Strong agreement.",
+        ],
+        examples: [
+          "I **completely agree** that we need more parks.",
+          "**I couldn't agree more** — working from home really does improve productivity.",
+          "**We're on the same page** about the new schedule.",
+          "**Absolutely**, I couldn't have said it better myself.",
+        ],
+      },
+      {
+        heading: "Disagreeing politely",
+        body: [
+          "Soften disagreement rather than saying 'you're wrong'.",
+          "Acknowledge first, then disagree with 'but'.",
+        ],
+        examples: [
+          "**I'm afraid I disagree** — I think the plan is too risky.",
+          "**I see your point**, but I still think we should wait.",
+          "**That's a fair point, but** I think the costs outweigh the benefits.",
+          "**I'm not entirely convinced** that this plan will work.",
+          "**I beg to differ** — the data actually shows the opposite trend.",
+        ],
+      },
+      {
+        heading: "Partial agreement",
+        body: ["Agreeing in part, not completely."],
+        examples: [
+          "**To some extent I agree**, but I don't think banning cars is realistic.",
+          "**That's generally true, but** there are exceptions.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ I'm agree that we need to change our approach. → ✅ I agree that we need to change our approach. ('agree' is a verb — not 'I'm agree')",
+      "❌ I'm afraid I disagree you on that. → ✅ I'm afraid I disagree with you on that. ('disagree with' someone)",
+      "❌ I can't agree more with your position. → ✅ I couldn't agree more with your position. ('couldn't agree more' — negative form for maximum agreement)",
+      "❌ I disagree on your interpretation. → ✅ I disagree with your interpretation. ('disagree with', not 'disagree on')",
+      "❌ With all do respect, I think you're mistaken. → ✅ With all due respect, I think you're mistaken. (fixed phrase is 'due respect')",
+    ],
+  },
+
+  describing_locations: {
+    title: "Describing Locations",
+    intro: "Describing a place uses a small set of adjectives and fixed collocations (situated in, known for, home to) — most mistakes come from the wrong preposition or verb form.",
+    sections: [
+      {
+        heading: "Where a place is",
+        body: [
+          "situated/located + in/on",
+          "surrounded by",
+          "within walking distance of / a short drive from",
+        ],
+        examples: [
+          "The village is **situated in** the mountains.",
+          "The old town is **surrounded by** a stone wall.",
+          "The hotel is **within walking distance of** the beach.",
+          "The airport is a **short drive from** the city centre.",
+        ],
+      },
+      {
+        heading: "What a place is known for",
+        body: [
+          "known for / famous for + noun",
+          "home to + noun",
+          "population of + number",
+        ],
+        examples: [
+          "The city is **known for** its beautiful architecture.",
+          "This region is **famous for** its vineyards.",
+          "The city is **home to** over twenty museums.",
+          "The town has a **population of** about 50,000.",
+        ],
+      },
+      {
+        heading: "Describing what a place feels like",
+        body: ["Common descriptive adjectives, positive and negative."],
+        examples: [
+          "**remote**, **cosmopolitan**, **historic**, **spacious**, **peaceful**, **picturesque**",
+          "**crowded**, **run-down**, **touristy**",
+          "**up-and-coming**, **off the beaten track**, **well-connected**",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ The village is situate in the mountains. → ✅ The village is situated in the mountains. ('situated' is the adjective form)",
+      "❌ The hotel is in walking distance of the beach. → ✅ The hotel is within walking distance of the beach. ('within', not 'in')",
+      "❌ This region is famous of its vineyards. → ✅ This region is famous for its vineyards. ('famous for', not 'famous of')",
+      "❌ The city is house to over twenty museums. → ✅ The city is home to over twenty museums. ('home to', not 'house to')",
+      "❌ The city is good connected by trains and buses. → ✅ The city is well connected by trains and buses. ('well' is the adverb, not 'good')",
+    ],
+  },
+
+  common_idioms: {
+    title: "Very Common Idioms",
+    intro: "These idioms are fixed phrases — you can't swap in a similar word, so the exact wording (and which noun goes with which verb) is what matters.",
+    sections: [
+      {
+        heading: "Easy, health, and cost",
+        body: ["Idioms for describing difficulty, health, and cost."],
+        examples: [
+          "The driving test was **a piece of cake** for me. (very easy)",
+          "I'm feeling a bit **under the weather** today. (slightly ill)",
+          "That designer bag **cost an arm and a leg**. (very expensive)",
+          "We only eat out **once in a blue moon** these days. (very rarely)",
+        ],
+      },
+      {
+        heading: "Talking, secrets, and social situations",
+        body: ["Idioms about revealing information or easing tension."],
+        examples: [
+          "He told a funny story to **break the ice** at the meeting.",
+          "My little sister always **spills the beans** about surprise gifts.",
+          "He **let the cat out of the bag** about the surprise party by mistake.",
+          "**Speak of the devil** — I was just telling everyone about your new job!",
+        ],
+      },
+      {
+        heading: "Decisions, effort, and outcomes",
+        body: ["Idioms about facing challenges, being efficient, or finishing up."],
+        examples: [
+          "I finally **bit the bullet** and booked the dentist appointment.",
+          "You **hit the nail on the head** when you said the problem was communication.",
+          "By walking to work, I **kill two birds with one stone**.",
+          "We've made great progress — **let's call it a day**.",
+          "Missing that flight was actually **a blessing in disguise**.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ Don't worry, the exam is a slice of cake. → ✅ Don't worry, the exam is a piece of cake. (fixed idiom: 'a piece of cake')",
+      "❌ He told a joke to hit the ice. → ✅ He told a joke to break the ice. (fixed idiom: 'break the ice')",
+      "❌ Don't pour the beans about the party! → ✅ Don't spill the beans about the party! (fixed idiom: 'spill the beans')",
+      "❌ It's time to eat the bullet. → ✅ It's time to bite the bullet. (fixed idiom: 'bite the bullet')",
+      "❌ Now the ball is in your hands. → ✅ Now the ball is in your court. (fixed idiom: 'the ball is in your court')",
+    ],
+  },
 };
