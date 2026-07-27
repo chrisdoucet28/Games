@@ -3567,7 +3567,7 @@ export const LESSONS: Record<string, Lesson> = {
 
   articles: {
     title: "Articles (a/an/the/no article)",
-    intro: "English articles cause different mistakes depending on your first language. Spanish uses 'el/la/los/las' even for general statements ('Los perros son leales'), which pulls Spanish speakers toward adding 'the' where English needs no article at all. Russian has no article system whatsoever, which pulls Russian speakers toward dropping 'a' and 'the' everywhere, even where English absolutely requires one. This lesson covers both directions.",
+    intro: "English articles trip learners up in two opposite directions: adding 'the' to a general statement where English needs no article at all, and dropping 'a/an' before a singular countable noun where English always needs one. This lesson covers both directions.",
     sections: [
       {
         heading: "'A/an' for new information, 'the' for known information",
@@ -3578,8 +3578,8 @@ export const LESSONS: Record<string, Lesson> = {
         ],
       },
       {
-        heading: "No article for general statements — even though Spanish uses 'el/la' here",
-        body: ["When you're talking about a whole category (not specific examples), English uses NO article at all — not even 'the'.", "This applies to plural nouns and to abstract/uncountable nouns used generally.", "This is the single most common Spanish-speaker mistake with articles, because Spanish would say 'Los perros' or 'El dinero' in the same sentence."],
+        heading: "No article for general statements",
+        body: ["When you're talking about a whole category (not specific examples), English uses NO article at all — not even 'the'.", "This applies to plural nouns and to abstract/uncountable nouns used generally.", "This is one of the most common article mistakes: adding 'the' to a general statement when it should have no article at all."],
         examples: [
           "**Dogs** are loyal animals. (not 'The dogs are loyal animals')",
           "**Money** can't buy happiness. (not 'The money can't buy happiness')",
@@ -3587,8 +3587,8 @@ export const LESSONS: Record<string, Lesson> = {
         ],
       },
       {
-        heading: "Never drop 'a/an' before a singular countable noun — even though Russian has no articles at all",
-        body: ["If your language has no article system (like Russian), the instinct is to skip 'a' and 'the' completely. But English always needs 'a/an' before a singular countable noun — professions, objects, first mentions — with no exceptions.", "'A/an' depends on the SOUND that follows, not the spelling: 'an hour' (silent h), but 'a university' (sounds like 'yoo-')."],
+        heading: "Never drop 'a/an' before a singular countable noun",
+        body: ["It can be tempting to skip 'a' and 'the' completely, but English always needs 'a/an' before a singular countable noun — professions, objects, first mentions — with no exceptions.", "'A/an' depends on the SOUND that follows, not the spelling: 'an hour' (silent h), but 'a university' (sounds like 'yoo-')."],
         examples: [
           "She is **a** teacher. (not 'She is teacher')",
           "I have **a** dog. (not 'I have dog')",
@@ -3615,7 +3615,7 @@ export const LESSONS: Record<string, Lesson> = {
       },
     ],
     commonMistakes: [
-      "❌ The dogs are loyal animals. → ✅ Dogs are loyal animals. (general statement = no article, even though Spanish uses 'los')",
+      "❌ The dogs are loyal animals. → ✅ Dogs are loyal animals. (a general statement about a whole category needs no article)",
       "❌ The money can't buy happiness. → ✅ Money can't buy happiness. (abstract noun in general = no article)",
       "❌ I have dog. / She is teacher. → ✅ I have a dog. / She is a teacher. (never drop 'a/an' before a singular countable noun)",
       "❌ It took hour to get there. → ✅ It took an hour to get there. ('hour' starts with a vowel sound)",
@@ -3628,11 +3628,11 @@ export const LESSONS: Record<string, Lesson> = {
 
   clauses_of_purpose: {
     title: "Clauses of Purpose",
-    intro: "A clause of purpose explains WHY someone does something — the goal or intention behind an action. In Spanish, 'para' covers both meanings of English 'to' (a specific action) and 'for' (a thing or general purpose), which is exactly why 'for' gets overused in English purpose clauses where 'to' is needed instead.",
+    intro: "A clause of purpose explains WHY someone does something — the goal or intention behind an action. English splits this idea across two different words, 'to' and 'for', depending on whether a verb or a noun follows — and mixing the two up is the most common mistake.",
     sections: [
       {
         heading: "To + verb — the standard way to express purpose",
-        body: ["'To' + base verb is the normal, neutral way to say why you did something specific.", "This is where Spanish speakers most often reach for 'for' instead, because Spanish 'para' works before both a verb and a noun — English 'for' only works before a noun."],
+        body: ["'To' + base verb is the normal, neutral way to say why you did something specific.", "'For' only works before a noun, never before a verb — this is where the two connectors are most often mixed up."],
         examples: [
           "I went to the store **to buy** milk. (not 'for buy milk')",
           "She's learning English **to get** a better job. (not 'for get')",
@@ -3740,7 +3740,7 @@ export const LESSONS: Record<string, Lesson> = {
       },
       {
         heading: "After any preposition — always a gerund, never a to-infinitive",
-        body: ["This is the single biggest source of mistakes here: after words like 'without', 'for', 'instead of', 'by', 'after', 'before' — always use the -ing form, never 'to + verb'.", "Many languages use an infinitive after a preposition (e.g. Spanish 'antes de salir' — literally 'before to leave'), which pulls learners toward the wrong English form."],
+        body: ["This is the single biggest source of mistakes here: after words like 'without', 'for', 'instead of', 'by', 'after', 'before' — always use the -ing form, never 'to + verb'.", "Many languages use an infinitive after a preposition, which can pull learners toward the wrong English form here."],
         examples: [
           "She left **without saying** goodbye. (not 'without to say')",
           "Thank you **for helping** me. (not 'for to help')",
@@ -3833,11 +3833,11 @@ export const LESSONS: Record<string, Lesson> = {
 
   basic_word_order: {
     title: "Basic Word Order",
-    intro: "English sentence order is stricter than many other languages. Spanish, Russian, and many other languages allow you to drop a subject or object pronoun when it's obvious from context, and allow the verb to come before the subject in certain statements. English allows almost none of that — the basic subject + verb + object order, with an explicit subject and object every time, is fixed.",
+    intro: "English sentence order is stricter than many other languages. Many languages allow you to drop a subject or object pronoun when it's obvious from context, and allow the verb to come before the subject in certain statements. English allows almost none of that — the basic subject + verb + object order, with an explicit subject and object every time, is fixed.",
     sections: [
       {
         heading: "Subject + verb + object — and never drop the subject",
-        body: ["English statements follow subject + verb + object order.", "Unlike Spanish ('Llueve' = just the verb) or Russian, English can never leave the subject out — even when there's no real 'thing' doing the action (weather, time, general statements), use the dummy subject 'it'."],
+        body: ["English statements follow subject + verb + object order.", "English can never leave the subject out — even when there's no real 'thing' doing the action (weather, time, general statements), use the dummy subject 'it'."],
         examples: [
           "She reads a book every night. (subject + verb + object)",
           "**It's raining.** (not just 'Is raining')",
@@ -3846,7 +3846,7 @@ export const LESSONS: Record<string, Lesson> = {
       },
       {
         heading: "Never drop the object pronoun either",
-        body: ["Many languages let you leave out an object pronoun that's obvious from context (Spanish 'Sí, me gusta' with no explicit 'it'). English can't — a transitive verb always needs its object stated, even in a short answer."],
+        body: ["Many languages let you leave out an object pronoun that's obvious from context. English can't — a transitive verb always needs its object stated, even in a short answer."],
         examples: [
           "\"Do you like coffee?\" \"Yes, I like **it**.\" (not just 'Yes, I like.')",
           "\"Have you seen my keys?\" \"No, I haven't seen **them**.\"",
@@ -3854,7 +3854,7 @@ export const LESSONS: Record<string, Lesson> = {
       },
       {
         heading: "No verb-before-subject inversion in statements — use 'there is/are' for existence",
-        body: ["Some languages put the verb before the subject to say something exists (Spanish 'Existe un problema'). English keeps subject-before-verb order in statements — inversion is reserved for questions only.", "To say something exists, use 'there is/are' instead of inverting the main verb."],
+        body: ["Some languages put the verb before the subject to say something exists. English keeps subject-before-verb order in statements — inversion is reserved for questions only.", "To say something exists, use 'there is/are' instead of inverting the main verb."],
         examples: [
           "**There is** a solution to this problem. (not 'Exists a solution')",
           "**There are** many reasons for this. (not 'Exist many reasons')",
