@@ -6,6 +6,7 @@ import { supabase, isSupabaseConfigured } from './lib/supabaseClient';
 import { getProfile } from './lib/profile';
 import { getSubscription, FREE_SUBSCRIPTION } from './lib/subscription';
 import { DEFAULT_THEME, getTheme, type Theme } from './data/themes';
+import { PlanIntroScreen } from './components/shared/PlanIntroScreen';
 
 function ConfigErrorScreen() {
   return (
@@ -71,6 +72,11 @@ function AuthenticatedApp() {
   // forever, for a teacher who's never subscribed), so every screen can read it immediately
   // without null-checking.
   const [subscription, setSubscription] = useState(FREE_SUBSCRIPTION);
+  // Optimistic default of "already seen" so returning teachers keep the app's instant-load feel
+  // (no blocking wait on the profile fetch below) — only a brand-new signup, whose real profile
+  // row was just created with the column's false default, ever flips this to false and sees
+  // PlanIntroScreen. One-time flash of the welcome screen for that case is an acceptable tradeoff.
+  const [planIntroSeen, setPlanIntroSeen] = useState(true);
   // Stripe's checkout success/cancel URLs redirect back to "/?checkout=success|cancel" — read
   // that once on load, then strip it from the URL so a refresh doesn't re-trigger it.
   const [checkoutRedirect] = useState<'success' | 'cancel' | null>(() => {
@@ -85,7 +91,10 @@ function AuthenticatedApp() {
 
   useEffect(() => {
     if (!session) return;
-    getProfile().then(p => setTheme(getTheme(p.theme_id))).catch(() => {});
+    getProfile().then(p => {
+      setTheme(getTheme(p.theme_id));
+      setPlanIntroSeen(p.has_completed_plan_intro);
+    }).catch(() => {});
     getSubscription().then(setSubscription).catch(() => {});
   }, [session]);
 
@@ -99,6 +108,17 @@ function AuthenticatedApp() {
 
   if (!session) {
     return <AuthScreen />;
+  }
+
+  if (!planIntroSeen) {
+    return (
+      <div>
+        <StatusBadge action="Log Out" onAction={() => supabase.auth.signOut()} theme={theme}>
+          🟢 Logged in as {session.user.email}
+        </StatusBadge>
+        <PlanIntroScreen theme={theme} onSubscriptionChange={setSubscription} onDismiss={() => setPlanIntroSeen(true)} />
+      </div>
+    );
   }
 
   return (

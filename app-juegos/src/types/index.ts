@@ -92,6 +92,10 @@ export interface TeamColor {
     // References data/themes.ts's Theme.id — a preset accent for the app's shared (non-game)
     // screens, not the individual games, which each keep their own fixed visual identity.
     theme_id: string;
+    // False only for brand-new signups — flips to true the moment they pick Free or Upgrade on
+    // PlanIntroScreen, so it's shown exactly once per account. Defaults to false for new rows and
+    // was backfilled to true for every account that existed before this field was added.
+    has_completed_plan_intro: boolean;
     created_at: string;
     updated_at: string;
   }
