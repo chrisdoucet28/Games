@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import type { Team, GameMode, QuestionData, SavedClass } from "./types";
-import { TEAM_COLORS, GAME_MODES, MASCOT_OPTIONS, LEVELS_META } from "./data/constants";
+import type { Team, GameMode, QuestionData, SavedClass, Subscription } from "./types";
+import { TEAM_COLORS, GAME_MODES, MASCOT_OPTIONS, LEVELS_META, FREE_PLAN_LIMITS } from "./data/constants";
 // Asegúrate de que TOPIC_LIBRARY esté exportado desde tu archivo topics.ts junto con TOPIC_OPTIONS
 import { TOPIC_OPTIONS, TOPIC_LIBRARY } from "./data/topics";
 import { hexToRgba, type Theme } from "./data/themes";
@@ -11,8 +11,10 @@ import { Confetti } from "./components/shared/Confetti";
 import { ClassesScreen } from "./components/shared/ClassesScreen";
 import { ProfileScreen } from "./components/shared/ProfileScreen";
 import { LearnScreen } from "./components/shared/LearnScreen";
+import { BillingScreen } from "./components/shared/BillingScreen";
 import { ThemeAmbience } from "./components/shared/ThemeAmbience";
 import { saveProgress, clearProgress, listClasses, createClass } from "./lib/classes";
+import { isPaidStatus } from "./lib/subscription";
 import { denseRank, medalForRank } from "./utils/ranking";
 import { AuctionGame } from "./components/games/AuctionGame";
 import { MinefieldGame } from "./components/games/MinefieldGame";
@@ -123,10 +125,17 @@ const buildMinefieldGrids = (entries: TopicLibraryEntry[]) =>
 type LessonGamesGeneratorProps = {
   theme: Theme;
   onThemeChange: (theme: Theme) => void;
+  subscription: Subscription;
+  onSubscriptionChange: (s: Subscription) => void;
+  // Set once, right after a Stripe checkout redirect lands back on the app — see App.tsx.
+  checkoutRedirect: "success" | "cancel" | null;
 };
 
-export default function LessonGamesGenerator({ theme, onThemeChange }: LessonGamesGeneratorProps) {
-  const [screen, setScreen] = useState<"welcome" | "classes" | "profile" | "learn" | "setup" | "game-select" | "game" | "results">("welcome");
+export default function LessonGamesGenerator({ theme, onThemeChange, subscription, onSubscriptionChange, checkoutRedirect }: LessonGamesGeneratorProps) {
+  const [screen, setScreen] = useState<"welcome" | "classes" | "profile" | "learn" | "billing" | "setup" | "game-select" | "game" | "results">(
+    checkoutRedirect ? "billing" : "welcome"
+  );
+  const isPaid = isPaidStatus(subscription.status);
   // The class this session is tied to, if any. Games started via "Start a Game" (not through "My
   // Classes") leave this null — but "Save & Exit" is still available; clicking it with no class
   // linked opens showSavePicker so the teacher can pick/create one on the spot instead of losing
@@ -517,6 +526,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange }: LessonGam
           <button onClick={() => setScreen("classes")} style={{ background: "rgba(255,255,255,0.12)", border: "2px solid rgba(255,255,255,0.3)", color: "white", borderRadius: "16px", padding: "18px 40px", fontSize: "18px", fontWeight: "800", cursor: "pointer", fontFamily: theme.headingFont }}>📚 My Classes</button>
           <button onClick={() => { setLearnFilter(null); setScreen("learn"); }} style={{ background: "rgba(255,255,255,0.12)", border: "2px solid rgba(255,255,255,0.3)", color: "white", borderRadius: "16px", padding: "18px 40px", fontSize: "18px", fontWeight: "800", cursor: "pointer", fontFamily: theme.headingFont }}>🎓 Learn</button>
           <button onClick={() => setScreen("profile")} style={{ background: "rgba(255,255,255,0.12)", border: "2px solid rgba(255,255,255,0.3)", color: "white", borderRadius: "16px", padding: "18px 40px", fontSize: "18px", fontWeight: "800", cursor: "pointer", fontFamily: theme.headingFont }}>👤 My Profile</button>
+          <button onClick={() => setScreen("billing")} style={{ background: "rgba(255,255,255,0.12)", border: "2px solid rgba(255,255,255,0.3)", color: "white", borderRadius: "16px", padding: "18px 40px", fontSize: "18px", fontWeight: "800", cursor: "pointer", fontFamily: theme.headingFont }}>{isPaid ? "💎 My Plan" : "💎 Upgrade"}</button>
         </div>
       </div>
     </div>
@@ -528,11 +538,23 @@ export default function LessonGamesGenerator({ theme, onThemeChange }: LessonGam
       onResumeClass={resumeClass}
       onStartWithClass={startWithClass}
       theme={theme}
+      isPaid={isPaid}
+      onUpgrade={() => setScreen("billing")}
     />
   );
 
   if (screen === "profile") return (
     <ProfileScreen onBack={() => setScreen("welcome")} theme={theme} onThemeChange={onThemeChange} />
+  );
+
+  if (screen === "billing") return (
+    <BillingScreen
+      onBack={() => setScreen("welcome")}
+      theme={theme}
+      subscription={subscription}
+      onSubscriptionChange={onSubscriptionChange}
+      justReturnedFrom={checkoutRedirect}
+    />
   );
 
   if (screen === "learn") return (
@@ -691,10 +713,23 @@ export default function LessonGamesGenerator({ theme, onThemeChange }: LessonGam
               <div style={{ background: theme.accentSolid, color: "white", borderRadius: "50%", width: "28px", height: "28px", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "900", fontSize: "14px", flexShrink: 0 }}>4</div>
               <div style={{ fontWeight: "800", color: theme.heroBg[0], fontSize: "16px", fontFamily: theme.headingFont }}>How many teams?</div>
             </div>
-            <div style={{ display: "flex", gap: "10px", marginBottom: "16px" }}>
-              {[2, 3, 4, 5].map(n => (
-                <button key={n} onClick={() => setNumTeams(n)} style={{ background: numTeams === n ? theme.accentSolid : "white", color: numTeams === n ? "white" : "#374151", border: `3px solid ${numTeams === n ? theme.accentSolid : "#D1D5DB"}`, borderRadius: "12px", padding: "10px 24px", fontSize: "18px", fontWeight: "800", cursor: "pointer" }}>{n}</button>
-              ))}
+            <div style={{ display: "flex", gap: "10px", marginBottom: "16px", flexWrap: "wrap", alignItems: "center" }}>
+              {[2, 3, 4, 5].map(n => {
+                const locked = !isPaid && n > FREE_PLAN_LIMITS.maxTeams;
+                return (
+                  <button
+                    key={n}
+                    onClick={() => locked ? setScreen("billing") : setNumTeams(n)}
+                    title={locked ? `Free plan is limited to ${FREE_PLAN_LIMITS.maxTeams} teams — upgrade to unlock more` : undefined}
+                    style={{ background: numTeams === n ? theme.accentSolid : "white", color: numTeams === n ? "white" : locked ? "#9CA3AF" : "#374151", border: `3px solid ${numTeams === n ? theme.accentSolid : "#D1D5DB"}`, borderRadius: "12px", padding: "10px 24px", fontSize: "18px", fontWeight: "800", cursor: "pointer", opacity: locked ? 0.6 : 1 }}
+                  >
+                    {locked ? "🔒 " : ""}{n}
+                  </button>
+                );
+              })}
+              {!isPaid && (
+                <span style={{ color: "#9CA3AF", fontSize: "12px", fontWeight: "700" }}>💎 Upgrade for up to 5 teams</span>
+              )}
             </div>
             <div style={{ display: "grid", gridTemplateColumns: `repeat(auto-fit,minmax(${numTeams > 3 ? "160px" : "180px"},1fr))`, gap: "12px" }}>
               {Array.from({ length: numTeams }).map((_, i) => {
@@ -868,38 +903,50 @@ export default function LessonGamesGenerator({ theme, onThemeChange }: LessonGam
                 </div>
               ) : null}
 
-              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                <input
-                  value={pickerNewName} onChange={e => setPickerNewName(e.target.value)} placeholder="e.g. Tuesday B2 Advanced"
-                  style={{ padding: "10px 12px", borderRadius: "10px", border: "2px solid #E5E7EB", fontSize: "14px" }}
-                />
-                <input
-                  value={pickerNewSchool} onChange={e => setPickerNewSchool(e.target.value)} placeholder="School (optional)"
-                  style={{ padding: "10px 12px", borderRadius: "10px", border: "2px solid #E5E7EB", fontSize: "14px" }}
-                />
-                <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
-                  <span style={{ fontSize: "12px", color: "#6B7280", fontWeight: "700", marginRight: "2px" }}>Level:</span>
-                  {LEVELS_META.map(l => (
-                    <button
-                      key={l.id} type="button" onClick={() => setPickerNewLevel(l.id)}
-                      style={{
-                        background: pickerNewLevel === l.id ? l.color : "white",
-                        color: pickerNewLevel === l.id ? "white" : "#374151",
-                        border: `2px solid ${pickerNewLevel === l.id ? l.color : "#E5E7EB"}`,
-                        borderRadius: "8px", padding: "5px 10px", cursor: "pointer", fontWeight: "700", fontSize: "12px",
-                      }}
-                    >
-                      {l.id === "all" ? "Any" : l.id}
-                    </button>
-                  ))}
+              {!isPaid && pickerClasses !== null && pickerClasses.length >= FREE_PLAN_LIMITS.maxClasses ? (
+                <div style={{ background: "#F0F9FF", border: "2px dashed #93C5FD", borderRadius: "10px", padding: "14px", textAlign: "center" }}>
+                  <div style={{ fontSize: "13px", color: "#374151", fontWeight: "700", marginBottom: "8px" }}>Free plan is limited to {FREE_PLAN_LIMITS.maxClasses} class. Upgrade for unlimited classes.</div>
+                  <button
+                    onClick={() => { setShowSavePicker(false); setScreen("billing"); }}
+                    style={{ background: `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "10px", padding: "8px 16px", fontWeight: 800, cursor: "pointer", fontFamily: theme.headingFont }}
+                  >
+                    💎 Upgrade
+                  </button>
                 </div>
-                <button
-                  onClick={handleCreateClassForSave} disabled={pickerBusy || !pickerNewName.trim()}
-                  style={{ background: `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "10px", padding: "10px 16px", fontWeight: 800, cursor: pickerBusy ? "default" : "pointer", opacity: pickerBusy || !pickerNewName.trim() ? 0.6 : 1, fontFamily: theme.headingFont }}
-                >
-                  + New
-                </button>
-              </div>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                  <input
+                    value={pickerNewName} onChange={e => setPickerNewName(e.target.value)} placeholder="e.g. Tuesday B2 Advanced"
+                    style={{ padding: "10px 12px", borderRadius: "10px", border: "2px solid #E5E7EB", fontSize: "14px" }}
+                  />
+                  <input
+                    value={pickerNewSchool} onChange={e => setPickerNewSchool(e.target.value)} placeholder="School (optional)"
+                    style={{ padding: "10px 12px", borderRadius: "10px", border: "2px solid #E5E7EB", fontSize: "14px" }}
+                  />
+                  <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
+                    <span style={{ fontSize: "12px", color: "#6B7280", fontWeight: "700", marginRight: "2px" }}>Level:</span>
+                    {LEVELS_META.map(l => (
+                      <button
+                        key={l.id} type="button" onClick={() => setPickerNewLevel(l.id)}
+                        style={{
+                          background: pickerNewLevel === l.id ? l.color : "white",
+                          color: pickerNewLevel === l.id ? "white" : "#374151",
+                          border: `2px solid ${pickerNewLevel === l.id ? l.color : "#E5E7EB"}`,
+                          borderRadius: "8px", padding: "5px 10px", cursor: "pointer", fontWeight: "700", fontSize: "12px",
+                        }}
+                      >
+                        {l.id === "all" ? "Any" : l.id}
+                      </button>
+                    ))}
+                  </div>
+                  <button
+                    onClick={handleCreateClassForSave} disabled={pickerBusy || !pickerNewName.trim()}
+                    style={{ background: `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "10px", padding: "10px 16px", fontWeight: 800, cursor: pickerBusy ? "default" : "pointer", opacity: pickerBusy || !pickerNewName.trim() ? 0.6 : 1, fontFamily: theme.headingFont }}
+                  >
+                    + New
+                  </button>
+                </div>
+              )}
 
               <button onClick={() => setShowSavePicker(false)} style={{ marginTop: "16px", background: "none", border: "none", color: "#9CA3AF", fontWeight: 700, cursor: "pointer" }}>Cancel</button>
             </div>

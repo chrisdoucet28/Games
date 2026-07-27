@@ -96,6 +96,17 @@ export interface TeamColor {
     updated_at: string;
   }
 
+  // The teacher's billing state — a separate table from Profile (not columns on it) so it can be
+  // locked down harder: the client can read its own row but can never write one directly, only
+  // the Stripe/promo-code Edge Functions (via the service-role key) can. `status` drives whether
+  // free-tier limits apply; `provider` distinguishes a real Stripe subscription from a promo grant
+  // (and future payment providers like Mercado Pago) without needing separate boolean flags.
+  export interface Subscription {
+    status: "free" | "active" | "trialing" | "past_due" | "canceled" | "unpaid";
+    plan: "monthly" | "annual" | "promo" | null;
+    currentPeriodEnd: string | null;
+  }
+
   // A persistent, named "class" a teacher returns to repeatedly (e.g. "Tuesday B2 Advanced").
   // Team scores accumulate across sessions; at most one unfinished game is tracked at a time
   // (in_progress + the fields after it) — no history of past finished games is kept.

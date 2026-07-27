@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type { SavedClass } from "../../types";
-import { TEAM_COLORS, GAME_MODES, LEVELS_META } from "../../data/constants";
+import { TEAM_COLORS, GAME_MODES, LEVELS_META, FREE_PLAN_LIMITS } from "../../data/constants";
 import { listClasses, createClass, deleteClass } from "../../lib/classes";
 import { hexToRgba, type Theme } from "../../data/themes";
 
@@ -9,11 +9,13 @@ type Props = {
   onResumeClass: (savedClass: SavedClass) => void;
   onStartWithClass: (savedClass: SavedClass) => void;
   theme: Theme;
+  isPaid: boolean;
+  onUpgrade: () => void;
 };
 
 const gameLabel = (gameId: string | null) => GAME_MODES.find(g => g.id === gameId)?.name ?? gameId ?? "a game";
 
-export function ClassesScreen({ onBack, onResumeClass, onStartWithClass, theme }: Props) {
+export function ClassesScreen({ onBack, onResumeClass, onStartWithClass, theme, isPaid, onUpgrade }: Props) {
   const [classes, setClasses] = useState<SavedClass[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [newName, setNewName] = useState("");
@@ -67,38 +69,50 @@ export function ClassesScreen({ onBack, onResumeClass, onStartWithClass, theme }
           <p style={{ color: "#6B7280", marginTop: "8px" }}>Team scores carry over each time you return to a class. Pick one up where you left off, or start a fresh game with the same roster.</p>
         </div>
 
-        <form onSubmit={handleCreate} style={{ display: "flex", gap: "8px", marginBottom: "20px", flexWrap: "wrap" }}>
-          <input
-            value={newName} onChange={e => setNewName(e.target.value)} placeholder="e.g. Tuesday B2 Advanced"
-            style={{ flex: "2 1 200px", padding: "12px 14px", borderRadius: "12px", border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, fontSize: "14px" }}
-          />
-          <input
-            value={newSchool} onChange={e => setNewSchool(e.target.value)} placeholder="School (optional)"
-            style={{ flex: "1 1 140px", padding: "12px 14px", borderRadius: "12px", border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, fontSize: "14px" }}
-          />
-          <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap", width: "100%" }}>
-            <span style={{ fontSize: "12px", color: "#6B7280", fontWeight: "700", marginRight: "2px" }}>Level:</span>
-            {LEVELS_META.map(l => (
-              <button
-                key={l.id} type="button" onClick={() => setNewLevel(l.id)}
-                style={{
-                  background: newLevel === l.id ? l.color : "white",
-                  color: newLevel === l.id ? "white" : "#374151",
-                  border: `2px solid ${newLevel === l.id ? l.color : hexToRgba(theme.accentSolid, 0.25)}`,
-                  borderRadius: "8px", padding: "5px 10px", cursor: "pointer", fontWeight: "700", fontSize: "12px",
-                }}
-              >
-                {l.id === "all" ? "Any" : l.id}
-              </button>
-            ))}
+        {!isPaid && classes !== null && classes.length >= FREE_PLAN_LIMITS.maxClasses ? (
+          <div style={{ background: "white", border: "2px dashed #93C5FD", borderRadius: "12px", padding: "16px", marginBottom: "20px", textAlign: "center" }}>
+            <div style={{ fontSize: "14px", color: "#374151", fontWeight: "700", marginBottom: "10px" }}>Free plan is limited to {FREE_PLAN_LIMITS.maxClasses} class. Upgrade for unlimited classes.</div>
+            <button
+              onClick={onUpgrade}
+              style={{ background: `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "12px", padding: "10px 20px", fontWeight: "800", cursor: "pointer", fontFamily: theme.headingFont }}
+            >
+              💎 Upgrade
+            </button>
           </div>
-          <button
-            type="submit" disabled={creating || !newName.trim()}
-            style={{ background: `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "12px", padding: "12px 20px", fontWeight: "800", cursor: creating ? "default" : "pointer", opacity: creating || !newName.trim() ? 0.6 : 1, whiteSpace: "nowrap", fontFamily: theme.headingFont }}
-          >
-            + New Class
-          </button>
-        </form>
+        ) : (
+          <form onSubmit={handleCreate} style={{ display: "flex", gap: "8px", marginBottom: "20px", flexWrap: "wrap" }}>
+            <input
+              value={newName} onChange={e => setNewName(e.target.value)} placeholder="e.g. Tuesday B2 Advanced"
+              style={{ flex: "2 1 200px", padding: "12px 14px", borderRadius: "12px", border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, fontSize: "14px" }}
+            />
+            <input
+              value={newSchool} onChange={e => setNewSchool(e.target.value)} placeholder="School (optional)"
+              style={{ flex: "1 1 140px", padding: "12px 14px", borderRadius: "12px", border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, fontSize: "14px" }}
+            />
+            <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap", width: "100%" }}>
+              <span style={{ fontSize: "12px", color: "#6B7280", fontWeight: "700", marginRight: "2px" }}>Level:</span>
+              {LEVELS_META.map(l => (
+                <button
+                  key={l.id} type="button" onClick={() => setNewLevel(l.id)}
+                  style={{
+                    background: newLevel === l.id ? l.color : "white",
+                    color: newLevel === l.id ? "white" : "#374151",
+                    border: `2px solid ${newLevel === l.id ? l.color : hexToRgba(theme.accentSolid, 0.25)}`,
+                    borderRadius: "8px", padding: "5px 10px", cursor: "pointer", fontWeight: "700", fontSize: "12px",
+                  }}
+                >
+                  {l.id === "all" ? "Any" : l.id}
+                </button>
+              ))}
+            </div>
+            <button
+              type="submit" disabled={creating || !newName.trim()}
+              style={{ background: `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "12px", padding: "12px 20px", fontWeight: "800", cursor: creating ? "default" : "pointer", opacity: creating || !newName.trim() ? 0.6 : 1, whiteSpace: "nowrap", fontFamily: theme.headingFont }}
+            >
+              + New Class
+            </button>
+          </form>
+        )}
 
         {error && (
           <div style={{ background: "#FEE2E2", color: "#991B1B", padding: "10px 14px", borderRadius: "10px", fontSize: "13px", marginBottom: "16px" }}>{error}</div>

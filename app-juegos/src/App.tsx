@@ -4,6 +4,7 @@ import { AuthScreen } from './components/shared/AuthScreen';
 import { useAuth } from './hooks/useAuth';
 import { supabase, isSupabaseConfigured } from './lib/supabaseClient';
 import { getProfile } from './lib/profile';
+import { getSubscription, FREE_SUBSCRIPTION } from './lib/subscription';
 import { DEFAULT_THEME, getTheme, type Theme } from './data/themes';
 
 function ConfigErrorScreen() {
@@ -66,10 +67,26 @@ function AuthenticatedApp() {
   // The single source of truth for the teacher's chosen accent theme — fetched here (not inside
   // LessonGamesGenerator) so the top status bar can use it too, not just the screens below it.
   const [theme, setTheme] = useState<Theme>(DEFAULT_THEME);
+  // Same pattern for billing state — defaults to the free tier until the real row loads (or
+  // forever, for a teacher who's never subscribed), so every screen can read it immediately
+  // without null-checking.
+  const [subscription, setSubscription] = useState(FREE_SUBSCRIPTION);
+  // Stripe's checkout success/cancel URLs redirect back to "/?checkout=success|cancel" — read
+  // that once on load, then strip it from the URL so a refresh doesn't re-trigger it.
+  const [checkoutRedirect] = useState<'success' | 'cancel' | null>(() => {
+    const params = new URLSearchParams(window.location.search);
+    const value = params.get('checkout');
+    if (value === 'success' || value === 'cancel') {
+      window.history.replaceState({}, '', window.location.pathname);
+      return value;
+    }
+    return null;
+  });
 
   useEffect(() => {
     if (!session) return;
     getProfile().then(p => setTheme(getTheme(p.theme_id))).catch(() => {});
+    getSubscription().then(setSubscription).catch(() => {});
   }, [session]);
 
   if (loading) {
@@ -89,7 +106,11 @@ function AuthenticatedApp() {
       <StatusBadge action="Log Out" onAction={() => supabase.auth.signOut()} theme={theme}>
         🟢 Logged in as {session.user.email}
       </StatusBadge>
-      <LessonGamesGenerator theme={theme} onThemeChange={setTheme} />
+      <LessonGamesGenerator
+        theme={theme} onThemeChange={setTheme}
+        subscription={subscription} onSubscriptionChange={setSubscription}
+        checkoutRedirect={checkoutRedirect}
+      />
     </div>
   );
 }

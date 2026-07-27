@@ -32,6 +32,11 @@ export const LEVELS_META = [
   { id: "C1", desc: "Advanced", color: "#EF4444" },
 ];
 
+// Free-tier caps — a paid subscription (or promo redemption) lifts both. The class limit is
+// enforced server-side too (a trigger on public.classes), since it's the real paywall; the team
+// limit is UI-only (see the plan notes on why teams have no clean server-side enforcement point).
+export const FREE_PLAN_LIMITS = { maxClasses: 1, maxTeams: 2 };
+
 export function teamsGridCols(n: number): string {
   if (n <= 3) return `repeat(${n},1fr)`;
   if (n === 4) return "repeat(2,1fr)";
