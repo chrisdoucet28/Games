@@ -3465,6 +3465,421 @@ export const LESSONS: Record<string, Lesson> = {
     ],
   },
 
+  dependent_prepositions: {
+    title: "Dependent Prepositions",
+    intro: "Many English adjectives and verbs are always followed by one particular preposition — not the one your own language might use, and not one you can choose freely. There's no shortcut rule for which preposition goes with which word; the pairs simply have to be learned together, as a single fixed phrase.",
+    sections: [
+      {
+        heading: "Adjective + preposition",
+        body: ["Certain adjectives always take the same preposition before the noun or -ing form that follows them.", "'in' → interested in", "'at' → good at, bad at", "'of' → afraid of, proud of, tired of, aware of", "'for' → famous for, responsible for", "'to' → married to, similar to", "'about' → worried about, excited about"],
+        examples: [
+          "I've always been **interested in** photography.",
+          "My brother is really **good at** chess.",
+          "My little sister is **afraid of** the dark.",
+          "She's been **married to** Anna for five years.",
+          "I'm **worried about** my exam results.",
+        ],
+      },
+      {
+        heading: "Verb + preposition",
+        body: ["Certain verbs always take the same preposition before their object — dropping it, or swapping it for another one, is a common learner mistake.", "'on' → depend on", "'to' → listen to", "'in' → believe in", "'for' → wait for, look for, apologize for", "'with' → agree with", "'about' → complain about"],
+        examples: [
+          "Our plans **depend on** the weather.",
+          "I always **listen to** music while I study.",
+          "She doesn't **believe in** ghosts.",
+          "We **waited for** the bus in the rain.",
+          "The neighbors **complained about** the noise.",
+        ],
+      },
+      {
+        heading: "'Different from', 'congratulate ... on', 'arrive at/in'",
+        body: ["'Different' is followed by 'from' in careful, standard English.", "'Congratulate' someone is followed by 'on' + the reason.", "'Arrive' has no single fixed preposition — use 'at' for a building or specific point, and 'in' for a city or country."],
+        examples: [
+          "Living abroad is very **different from** visiting on holiday.",
+          "We **congratulated** her **on** passing her exams.",
+          "We **arrived at** the airport two hours early.",
+          "They **arrived in** Japan on a Monday morning.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ I'm interested for learning Japanese. → ✅ ...interested in learning Japanese. ('interested' takes 'in')",
+      "❌ She's very good in maths. → ✅ ...good at maths. ('good' takes 'at' for a skill)",
+      "❌ This plan depends of the weather. → ✅ ...depends on the weather. ('depend' takes 'on')",
+      "❌ Please listen me carefully. → ✅ Please listen to me carefully. ('listen' always needs 'to')",
+      "❌ Who's responsible of this mess? → ✅ Who's responsible for this mess? ('responsible' takes 'for')",
+      "❌ She's been married with him for ten years. → ✅ ...married to him... ('married' takes 'to')",
+      "❌ Let's congratulate her for her new job. → ✅ ...congratulate her on her new job. ('congratulate' takes 'on')",
+      "❌ What time does the train arrive to the station? → ✅ ...arrive at the station. ('arrive' never takes 'to')",
+    ],
+  },
+
+  conjunctions: {
+    title: "Conjunctions",
+    intro: "Conjunctions join words, phrases, and clauses together. Coordinating conjunctions (and, but, or, so) join two equal ideas; subordinating conjunctions (although, because, when, if) attach a smaller clause to a main one — and each one has its own rules about position and punctuation.",
+    sections: [
+      {
+        heading: "Coordinating conjunctions: and, but, or, so",
+        body: ["'and' adds a similar idea; 'but' shows contrast; 'or' shows an alternative; 'so' shows a result.", "Use a comma before the conjunction when joining two full sentences (each with its own subject and verb)."],
+        examples: [
+          "She's smart **and** hardworking.",
+          "The film was long, **but** really enjoyable.",
+          "We can watch a film **or** go for a walk.",
+          "It was late, **so** we called a taxi.",
+        ],
+      },
+      {
+        heading: "Because vs so — reason and result point in opposite directions",
+        body: ["'Because' introduces the REASON (why something happened).", "'So' introduces the RESULT (what happened because of it).", "Don't mix them up — the clause after each one has to match its own direction."],
+        examples: [
+          "We stayed inside **because** it was raining. (reason)",
+          "It was raining, **so** we stayed inside. (result)",
+        ],
+      },
+      {
+        heading: "Although / though / even though / whereas — never with 'but'",
+        body: ["These all introduce a surprising or contrasting clause — but they already mean 'contrast', so never add 'but' as well in the same sentence.", "'Even though' is a stronger version of 'although'.", "'Whereas' is a more formal way to contrast two separate facts.", "'Though' can informally go at the very end of a sentence."],
+        examples: [
+          "**Although** it was raining, we went for a walk. (not '...raining, but we went...')",
+          "**Even though** he trained for months, he didn't win.",
+          "City life is fast-paced, **whereas** country life is calm.",
+          "The house is small. It's very cozy, **though**.",
+        ],
+      },
+      {
+        heading: "When / if + present tense for the future",
+        body: ["After 'when' and 'if', use the present tense even when the meaning is future — never 'will'."],
+        examples: [
+          "**When** you finish your homework, you can watch TV. (not 'When you will finish...')",
+          "**If** it rains tomorrow, we'll cancel the trip. (not 'If it will rain...')",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ Although it was raining, but we went for a walk. → ✅ Although it was raining, we went for a walk. (never 'although' + 'but' together)",
+      "❌ It was raining, because we stayed inside. → ✅ It was raining, so we stayed inside. ('so' for a result)",
+      "❌ We stayed inside so it was raining. → ✅ We stayed inside because it was raining. ('because' for a reason)",
+      "❌ When you will finish your homework... → ✅ When you finish your homework... (no 'will' after 'when')",
+      "❌ If it will rain tomorrow... → ✅ If it rains tomorrow... (no 'will' after 'if')",
+      "❌ She likes reading, write, and painting. → ✅ She likes reading, writing, and painting. (keep the same form in a list)",
+    ],
+  },
+
+  articles: {
+    title: "Articles (a/an/the/no article)",
+    intro: "English articles cause different mistakes depending on your first language. Spanish uses 'el/la/los/las' even for general statements ('Los perros son leales'), which pulls Spanish speakers toward adding 'the' where English needs no article at all. Russian has no article system whatsoever, which pulls Russian speakers toward dropping 'a' and 'the' everywhere, even where English absolutely requires one. This lesson covers both directions.",
+    sections: [
+      {
+        heading: "'A/an' for new information, 'the' for known information",
+        body: ["Use 'a/an' the first time you mention a singular countable noun.", "Use 'the' once both speakers know exactly which one you mean — including the second time you mention the same thing."],
+        examples: [
+          "I bought **a** new laptop yesterday. **The** laptop is amazing.",
+          "She works as **a** nurse.",
+        ],
+      },
+      {
+        heading: "No article for general statements — even though Spanish uses 'el/la' here",
+        body: ["When you're talking about a whole category (not specific examples), English uses NO article at all — not even 'the'.", "This applies to plural nouns and to abstract/uncountable nouns used generally.", "This is the single most common Spanish-speaker mistake with articles, because Spanish would say 'Los perros' or 'El dinero' in the same sentence."],
+        examples: [
+          "**Dogs** are loyal animals. (not 'The dogs are loyal animals')",
+          "**Money** can't buy happiness. (not 'The money can't buy happiness')",
+          "**France** is a beautiful country. (not 'The France')",
+        ],
+      },
+      {
+        heading: "Never drop 'a/an' before a singular countable noun — even though Russian has no articles at all",
+        body: ["If your language has no article system (like Russian), the instinct is to skip 'a' and 'the' completely. But English always needs 'a/an' before a singular countable noun — professions, objects, first mentions — with no exceptions.", "'A/an' depends on the SOUND that follows, not the spelling: 'an hour' (silent h), but 'a university' (sounds like 'yoo-')."],
+        examples: [
+          "She is **a** teacher. (not 'She is teacher')",
+          "I have **a** dog. (not 'I have dog')",
+          "It took **an** hour. / He's **a** university student.",
+        ],
+      },
+      {
+        heading: "Fixed no-article expressions",
+        body: ["No article for meals (have breakfast/lunch/dinner), for methods of transport after 'by' (by bus/car/train), and for institutions used in their general sense (go to bed/school/work/prison).", "Use 'the' when you mean the specific building instead of the institution's purpose."],
+        examples: [
+          "We have **dinner** at eight. I go to work **by train**.",
+          "I go to **bed** at eleven. (routine) vs. I sat on **the bed**. (the object)",
+          "His brother is in **prison**. (he's a convict) vs. I visited **the prison**. (the building)",
+        ],
+      },
+      {
+        heading: "'The' for unique things, superlatives, and plural-form countries",
+        body: ["'The' for things there's only one of (the sun, the internet, the moon).", "'The' after superlatives (the best, the worst, the tallest).", "'The' before country names that are plural or contain 'of' (the United States, the Netherlands, the Philippines) — most other countries take no article."],
+        examples: [
+          "**The** sun was setting over the mountains.",
+          "That was **the** best meal I've ever had.",
+          "**The** United States has fifty states, but Japan has none.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ The dogs are loyal animals. → ✅ Dogs are loyal animals. (general statement = no article, even though Spanish uses 'los')",
+      "❌ The money can't buy happiness. → ✅ Money can't buy happiness. (abstract noun in general = no article)",
+      "❌ I have dog. / She is teacher. → ✅ I have a dog. / She is a teacher. (never drop 'a/an' before a singular countable noun)",
+      "❌ It took hour to get there. → ✅ It took an hour to get there. ('hour' starts with a vowel sound)",
+      "❌ She's an university student. → ✅ She's a university student. ('university' starts with a consonant sound)",
+      "❌ The France is a beautiful country. → ✅ France is a beautiful country. (most country names take no article)",
+      "❌ We visited a United States. → ✅ We visited the United States. (plural-form country names need 'the')",
+      "❌ This is a best restaurant in town. → ✅ This is the best restaurant in town. (superlatives always need 'the')",
+    ],
+  },
+
+  clauses_of_purpose: {
+    title: "Clauses of Purpose",
+    intro: "A clause of purpose explains WHY someone does something — the goal or intention behind an action. In Spanish, 'para' covers both meanings of English 'to' (a specific action) and 'for' (a thing or general purpose), which is exactly why 'for' gets overused in English purpose clauses where 'to' is needed instead.",
+    sections: [
+      {
+        heading: "To + verb — the standard way to express purpose",
+        body: ["'To' + base verb is the normal, neutral way to say why you did something specific.", "This is where Spanish speakers most often reach for 'for' instead, because Spanish 'para' works before both a verb and a noun — English 'for' only works before a noun."],
+        examples: [
+          "I went to the store **to buy** milk. (not 'for buy milk')",
+          "She's learning English **to get** a better job. (not 'for get')",
+          "I'm calling **to book** a table. (not 'for book')",
+        ],
+      },
+      {
+        heading: "For + noun / for + -ing — never 'for' + base verb",
+        body: ["'For' + a noun states the thing you're getting or the beneficiary — no verb involved.", "'For' + -ing describes the general function of an object or product, not one specific action."],
+        examples: [
+          "I went to the bakery **for** some bread. (thing, no verb)",
+          "This knife is **for cutting** bread. (general function)",
+          "I used this knife **to cut** the bread just now. (one specific action — needs 'to')",
+        ],
+      },
+      {
+        heading: "In order to / so as to — more formal versions of 'to'",
+        body: ["Both mean the same as 'to', but sound more formal — common in writing.", "Negative purpose: 'in order not to' / 'so as not to' — never just 'to not'."],
+        examples: [
+          "We arrived early **in order to** get good seats.",
+          "She spoke slowly **so as to** be understood clearly.",
+          "He left quietly **in order not to** wake anyone.",
+        ],
+      },
+      {
+        heading: "So that + subject + verb — when the subject changes, or you need a modal",
+        body: ["'To' requires the SAME subject doing both actions. When the person benefiting is different, or you need a modal like can/could/would, use 'so that' + a full clause instead."],
+        examples: [
+          "I studied hard **to** pass the exam. (I studied, I pass — same subject)",
+          "She whispered **so that** no one would hear her. (she whispered, but 'no one' is a different subject)",
+          "I'm leaving early **so that** I can catch my flight.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ I went to the store for buy milk. → ✅ I went to the store to buy milk. (never 'for' + verb — use 'to' + verb)",
+      "❌ This knife is to cutting bread. → ✅ This knife is for cutting bread. (general function = 'for' + -ing)",
+      "❌ I turned off my phone for not to be disturbed. → ✅ ...in order not to be disturbed. (negative purpose = 'in order not to')",
+      "❌ He whispered to no one would hear him. → ✅ He whispered so that no one would hear him. ('so that' when the subject changes)",
+      "❌ I'm calling for book a table. → ✅ I'm calling to book a table. ('to' + verb for a specific action)",
+      "❌ This app is to tracking your expenses. → ✅ This app is for tracking your expenses. ('for' + -ing for a product's function)",
+    ],
+  },
+
+  clauses_of_reason: {
+    title: "Clauses of Reason",
+    intro: "A clause of reason explains WHY something happened — the cause. English has several ways to say this, and they split cleanly into two grammatical groups: some are followed by a full clause (subject + verb), others by just a noun. Mixing the two up is the most common mistake at this level.",
+    sections: [
+      {
+        heading: "Because + clause vs because of + noun",
+        body: ["'Because' is followed by a full clause — its own subject and verb.", "'Because of' is followed by a noun or -ing form — never a full clause.", "This is the single most common mistake: using 'because of' before a clause, or 'because' before just a noun."],
+        examples: [
+          "We stayed home **because** it was raining. (clause)",
+          "We stayed home **because of** the rain. (noun)",
+          "The trip was cancelled **because of** the airline going on strike. (-ing form)",
+        ],
+      },
+      {
+        heading: "Due to / owing to — formal versions of 'because of'",
+        body: ["Both mean the same as 'because of', but sound more formal — common in news reports and written announcements.", "Like 'because of', they're followed by a noun, not a full clause."],
+        examples: [
+          "The delay was **due to** a technical problem.",
+          "The event was postponed **owing to** bad weather.",
+        ],
+      },
+      {
+        heading: "As / since — a reason your listener already knows",
+        body: ["'As' and 'since' work like 'because', but they introduce a reason the listener probably already knows or expects — usually at the start of the sentence.", "Careful: 'since' also means 'from a point in time' — this is a different, unrelated meaning."],
+        examples: [
+          "**As** you're already here, let's start the meeting.",
+          "**Since** you're new here, let me show you around. (reason, not time)",
+          "I haven't seen her **since** Monday. (time, not reason)",
+        ],
+      },
+      {
+        heading: "Considering — and answering 'why?'",
+        body: ["'Considering' + noun/clause means 'taking this into account'.", "Whatever the situation, always answer a direct 'why' question with 'because' — never 'since' or 'as'."],
+        examples: [
+          "**Considering** the weather, the event went really well.",
+          "\"Why are you tired?\" \"**Because** I didn't sleep well.\" (not 'Since I didn't sleep well')",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ I was late because of I missed the bus. → ✅ I was late because I missed the bus. ('because' + clause, not 'because of' + clause)",
+      "❌ The match was cancelled because the rain. → ✅ ...because of the rain. ('because of' + noun, not 'because' + noun)",
+      "❌ Due to the traffic was heavy, we were late. → ✅ Due to the heavy traffic, we were late. ('due to' needs a noun phrase, not a full clause)",
+      "❌ \"Why were you late?\" \"Since I missed the bus.\" → ✅ ...\"Because I missed the bus.\" (always answer 'why' with 'because')",
+      "❌ Considering of the weather... / As of he was tired... → ✅ Considering the weather... / As he was tired... ('considering' and 'as' stand alone, no 'of')",
+    ],
+  },
+
+  gerunds: {
+    title: "Gerunds",
+    intro: "A gerund is the -ing form of a verb used as a noun. This lesson covers the situations where English always requires a gerund: as the subject of a sentence, and after a preposition — including fixed expressions where a small word ('to', 'for', 'of') that looks like part of an infinitive is actually a preposition in disguise.",
+    sections: [
+      {
+        heading: "Gerund as the subject or complement of a sentence",
+        body: ["A gerund (never the bare verb) can be the subject of a sentence.", "A gerund can also complete the verb 'be', describing what a hobby or activity is."],
+        examples: [
+          "**Learning** a new language takes time and patience. (not 'Learn a new language...')",
+          "**Exercising** every day keeps you healthy.",
+          "My favorite hobby is **painting**.",
+        ],
+      },
+      {
+        heading: "After any preposition — always a gerund, never a to-infinitive",
+        body: ["This is the single biggest source of mistakes here: after words like 'without', 'for', 'instead of', 'by', 'after', 'before' — always use the -ing form, never 'to + verb'.", "Many languages use an infinitive after a preposition (e.g. Spanish 'antes de salir' — literally 'before to leave'), which pulls learners toward the wrong English form."],
+        examples: [
+          "She left **without saying** goodbye. (not 'without to say')",
+          "Thank you **for helping** me. (not 'for to help')",
+          "**By practicing** every day, she became fluent.",
+          "**Instead of complaining**, try to find a solution.",
+        ],
+      },
+      {
+        heading: "'Look forward to' — 'to' here is a preposition, not part of an infinitive",
+        body: ["It looks exactly like an infinitive marker, but in 'look forward to', 'to' is a preposition — so the verb after it must be a gerund."],
+        examples: [
+          "I'm **looking forward to seeing** you next week. (not 'to see')",
+        ],
+      },
+      {
+        heading: "Fixed expressions that always take a gerund",
+        body: ["'It's no use', 'there's no point (in)', 'can't help', 'feel like', 'spend/waste time', and 'be busy' are always followed by a gerund — never a to-infinitive."],
+        examples: [
+          "**It's no use complaining** — nothing will change.",
+          "**There's no point in worrying** about things you can't control.",
+          "I **can't help laughing** every time I see that photo.",
+          "Do you **feel like going** for a walk?",
+        ],
+      },
+      {
+        heading: "Negative gerund",
+        body: ["Put 'not' directly before the gerund to make it negative."],
+        examples: [
+          "**Not smoking** indoors is the rule here.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ She left without to say goodbye. → ✅ She left without saying goodbye. (preposition + gerund, never infinitive)",
+      "❌ I'm looking forward to see you. → ✅ I'm looking forward to seeing you. ('to' here is a preposition)",
+      "❌ It's no use to complain. → ✅ It's no use complaining. (fixed expression + gerund)",
+      "❌ I can't help to cry. → ✅ I can't help crying. ('can't help' + gerund)",
+      "❌ Swim is my favorite way to relax. → ✅ Swimming is my favorite way to relax. (gerund, not the bare verb, as subject)",
+      "❌ By study hard, she passed. → ✅ By studying hard, she passed. ('by' + gerund)",
+    ],
+  },
+
+  present_perfect_continuous: {
+    title: "Present Perfect Continuous",
+    intro: "Present perfect continuous (have/has been + -ing) links a past action to now, just like present perfect simple — but it puts the focus on the ONGOING ACTIVITY and its duration, instead of on a finished result or a count. Choosing the wrong one is one of the most common mistakes at this level, especially with 'for' and 'since'.",
+    sections: [
+      {
+        heading: "Continuous = duration/activity, simple = result/count",
+        body: ["Present perfect continuous emphasizes HOW LONG something has been happening, or draws attention to the activity itself.", "Present perfect simple emphasizes the completed result, or counts how many times something happened."],
+        examples: [
+          "I**'ve been waiting** here for over an hour. (the activity, and how long)",
+          "I**'ve finished** the report. (the result)",
+          "She**'s written** three novels. (a count/total)",
+        ],
+      },
+      {
+        heading: "Stative verbs never take the continuous — even with 'for/since'",
+        body: ["Verbs like know, believe, want, love, understand, and belong describe a state, not an action — they never take the -ing form, in any tense.", "This means a dynamic verb ('work', 'study', 'live') naturally pairs with the continuous for duration, while a stative verb ('know', 'want') stays in the simple form for the exact same 'for/since' structure."],
+        examples: [
+          "I**'ve known** her for ten years. (not 'have been knowing')",
+          "He**'s been working** here since 2020. (dynamic verb — continuous is natural)",
+          "I**'ve wanted** to visit Japan for years. (not 'have been wanting')",
+        ],
+      },
+      {
+        heading: "Visible present evidence of a recent activity",
+        body: ["Use the continuous to explain a person's current state by pointing to something they were recently doing — even without mentioning an exact duration."],
+        examples: [
+          "You look exhausted — **have you been running**?",
+          "My hands are covered in paint — I**'ve been painting** the fence.",
+        ],
+      },
+      {
+        heading: "'How long...?' + continuous vs 'How many times...?' + simple",
+        body: ["'How long' naturally asks about an ongoing activity, so it pairs with the continuous (for a dynamic verb).", "'How many times' asks for a count, so it always pairs with the simple form."],
+        examples: [
+          "**How long have you been learning** English? (ongoing activity)",
+          "**How many times have you visited** Paris? (a count)",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ I have been knowing him for ten years. → ✅ I have known him for ten years. (stative verbs never take the continuous)",
+      "❌ He works here since 2020. → ✅ He has been working here since 2020. (an action continuing from the past needs present perfect, not present simple)",
+      "❌ How many books have you been reading this year? → ✅ How many books have you read this year? (a count needs the simple form)",
+      "❌ I have been losing my keys. → ✅ I have lost my keys. (a single completed event needs the simple form, not the continuous)",
+      "❌ She has been finishing her homework already. → ✅ She has finished her homework already. ('already' + a completed action = simple form)",
+    ],
+  },
+
+  basic_word_order: {
+    title: "Basic Word Order",
+    intro: "English sentence order is stricter than many other languages. Spanish, Russian, and many other languages allow you to drop a subject or object pronoun when it's obvious from context, and allow the verb to come before the subject in certain statements. English allows almost none of that — the basic subject + verb + object order, with an explicit subject and object every time, is fixed.",
+    sections: [
+      {
+        heading: "Subject + verb + object — and never drop the subject",
+        body: ["English statements follow subject + verb + object order.", "Unlike Spanish ('Llueve' = just the verb) or Russian, English can never leave the subject out — even when there's no real 'thing' doing the action (weather, time, general statements), use the dummy subject 'it'."],
+        examples: [
+          "She reads a book every night. (subject + verb + object)",
+          "**It's raining.** (not just 'Is raining')",
+          "**It's important to study every day.** (not just 'Is important...')",
+        ],
+      },
+      {
+        heading: "Never drop the object pronoun either",
+        body: ["Many languages let you leave out an object pronoun that's obvious from context (Spanish 'Sí, me gusta' with no explicit 'it'). English can't — a transitive verb always needs its object stated, even in a short answer."],
+        examples: [
+          "\"Do you like coffee?\" \"Yes, I like **it**.\" (not just 'Yes, I like.')",
+          "\"Have you seen my keys?\" \"No, I haven't seen **them**.\"",
+        ],
+      },
+      {
+        heading: "No verb-before-subject inversion in statements — use 'there is/are' for existence",
+        body: ["Some languages put the verb before the subject to say something exists (Spanish 'Existe un problema'). English keeps subject-before-verb order in statements — inversion is reserved for questions only.", "To say something exists, use 'there is/are' instead of inverting the main verb."],
+        examples: [
+          "**There is** a solution to this problem. (not 'Exists a solution')",
+          "**There are** many reasons for this. (not 'Exist many reasons')",
+          "A solution **exists**. (subject before verb — this order is also fine)",
+        ],
+      },
+      {
+        heading: "Never separate the verb and its object with an adverb",
+        body: ["Adverbs of frequency (always, often, never) go between the subject and the main verb — but after the verb 'be'.", "Other adverbs (manner, degree) go at the end of the sentence, after the object — never squeezed in between the verb and its object."],
+        examples: [
+          "She **often calls** her mother. / He **is always** on time.",
+          "I like chocolate **very much**. (not 'I like very much chocolate')",
+          "My father speaks three languages **fluently**. (not 'speaks fluently three languages')",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ Is raining today. → ✅ It is raining today. (English always needs an explicit subject)",
+      "❌ \"Do you like coffee?\" \"Yes, I like.\" → ✅ ...\"Yes, I like it.\" (never drop the object pronoun)",
+      "❌ Exists a solution to this problem. → ✅ There is a solution to this problem. (no verb-subject inversion in statements — use 'there is/are')",
+      "❌ I like very much chocolate. → ✅ I like chocolate very much. (never separate the verb and object with an adverb)",
+      "❌ She arrives often late. → ✅ She often arrives late. (adverbs of frequency go before the main verb)",
+    ],
+  },
+
   greetings_introductions: {
     title: "Greetings & Introductions",
     intro: "The first phrases you need for any conversation: saying hello, asking how someone is, and giving basic personal information.",
