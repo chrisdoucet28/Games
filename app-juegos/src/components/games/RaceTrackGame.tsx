@@ -35,7 +35,6 @@ const SPACE_DEFS: { id: SpaceId; icon: string; color: string; weight: number }[]
 ];
 
 const POWERUPS = [
-  { id: "turbo", label: "Turbo", icon: "🔥", desc: "+5 spaces on your next roll", cost: 15 },
   { id: "rocket", label: "Rocket", icon: "🚀", desc: "+6 spaces on your next roll", cost: 15 },
   { id: "swap", label: "Swap", icon: "🔄", desc: "Switch places with a random team", cost: 20 },
   { id: "shield", label: "Shield", icon: "🛡️", desc: "Blocks the next trap / mud / teleport", cost: 10 },
@@ -239,7 +238,13 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
 
   const landTeam = (teamId: string | number, total: number) => {
     const cur = raceTeamsRef.current[teamId];
-    const landed = Math.min(cur.pos + total, TOTAL);
+    const target = Math.min(cur.pos + total, TOTAL);
+    // A banana trap stops forward movement as soon as it's crossed — not just when a roll lands
+    // exactly on it — otherwise the odds of landing on that one exact tile make it nearly useless.
+    let landed = target;
+    for (let i = cur.pos + 1; i <= target; i++) {
+      if (trackRef.current[i]?.banana) { landed = i; break; }
+    }
     setRaceTeams(prev => ({ ...prev, [teamId]: { ...prev[teamId], pos: landed } }));
     setTimeout(() => {
       bumpFx(landed, "#F7C948", "");
@@ -337,7 +342,6 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
     const name = teamName(teamId);
     let bonus = 0;
     const powerups = [...team.powerups];
-    if (powerups.includes("turbo")) { powerups.splice(powerups.indexOf("turbo"), 1); bonus += 5; showToast(`🔥 Turbo! +5 bonus spaces for ${name}!`); }
     if (powerups.includes("rocket")) { powerups.splice(powerups.indexOf("rocket"), 1); bonus += 6; showToast(`🚀 Rocket! ${name} blasts forward 6 extra spaces!`); }
     setRaceTeams(prev => ({ ...prev, [teamId]: { ...prev[teamId], powerups } }));
     landTeam(teamId, total + bonus);
@@ -395,10 +399,10 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
       });
       showToast(`🔄 ${name} swaps places with ${tgt.name}!`);
     } else if (pid === "banana") {
-      const spaceIdx = Math.floor(Math.random() * (TOTAL - 1)) + 1;
+      const spaceIdx = Math.max(1, Math.min(TOTAL - 1, team.pos));
       setTrack(prev => prev.map((s, i) => (i === spaceIdx ? { ...s, banana: true } : s)));
       setRaceTeams(prev => { const powerups = [...prev[teamId].powerups]; powerups.splice(idx, 1); return { ...prev, [teamId]: { ...prev[teamId], powerups } }; });
-      showToast(`🍌 ${name} places a banana trap on space ${spaceIdx}!`);
+      showToast(`🍌 ${name} drops a banana trap right where they're standing!`);
     } else {
       showToast(`${pu.icon} ${name}'s ${pu.label} is armed and ready.`);
     }
@@ -591,8 +595,13 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
             {[15, 30, 45].map((boundary, bi) => {
               const nextZone = ZONES[bi + 1];
               const pos = TPOS[boundary];
-              const lx = pos.x + (pos.x < 400 ? -46 : 46);
-              const ly = pos.y + (pos.y < 240 ? -20 : 20);
+              const rawLx = pos.x + (pos.x < 400 ? -46 : 46);
+              const rawLy = pos.y + (pos.y < 240 ? -20 : 20);
+              // Clamp so the 64x20 label rect always stays inside the 800x480 viewBox —
+              // the raw offset alone can push labels near the right/bottom edges (like the
+              // Fill Blank boundary) past the canvas, clipping them off.
+              const lx = Math.min(Math.max(rawLx, 34), 766);
+              const ly = Math.min(Math.max(rawLy, 12), 468);
               return (
                 <g key={boundary}>
                   <circle cx={pos.x} cy={pos.y} r={14} fill="#0D1E36" stroke={nextZone.color} strokeWidth={2.5} />

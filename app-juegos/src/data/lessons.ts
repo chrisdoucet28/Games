@@ -1566,8 +1566,21 @@ export const LESSONS: Record<string, Lesson> = {
 
   adverbs: {
     title: "Adverbs",
-    intro: "Most adverbs of manner are adjective + -ly, but a few common ones are irregular, and adverbs of frequency/degree have their own word order rules.",
+    intro: "The most common mix-up is using an adjective where an adverb belongs, or the other way round — adjectives describe nouns, adverbs describe verbs (and adjectives/other adverbs).",
     sections: [
+      {
+        heading: "Adjective or adverb? The core rule",
+        body: [
+          "Use an **adjective** to describe a noun or pronoun — it usually sits before the noun, or after a linking verb like 'be', 'seem', or 'look' that describes the subject.",
+          "Use an **adverb** to describe a verb (how an action happens) — it usually sits after the verb, or before an adjective it strengthens.",
+          "The same idea word often has two forms: one for describing the noun, one for describing the action.",
+        ],
+        examples: [
+          "She is a **careful** driver. (adjective describes the noun 'driver')",
+          "She drives **carefully**. (adverb describes the verb 'drives')",
+          "He **looks happy**. (adjective after linking verb 'looks') / He **smiled happily**. (adverb after action verb 'smiled')",
+        ],
+      },
       {
         heading: "Forming and using adverbs",
         body: [
@@ -1596,6 +1609,9 @@ export const LESSONS: Record<string, Lesson> = {
       },
     ],
     commonMistakes: [
+      "❌ She is a carefully driver. → ✅ She is a careful driver. (adjectives, not adverbs, describe nouns)",
+      "❌ He drives careful. → ✅ He drives carefully. (adverbs, not adjectives, describe verbs)",
+      "❌ She looks happily today. → ✅ She looks happy today. ('look' is a linking verb — describe the subject with an adjective)",
       "❌ She sings beautiful. → ✅ She sings beautifully. (adverbs modify verbs — add '-ly')",
       "❌ He did good in the exam. → ✅ He did well in the exam. ('well' is the adverb form of 'good')",
       "❌ She always is late. → ✅ She is always late. (frequency adverb goes after 'be')",
@@ -2471,7 +2487,7 @@ export const LESSONS: Record<string, Lesson> = {
 
   causative_verbs: {
     title: "Causative Verbs (have/get/make/let)",
-    intro: "Have/get + something + done means you arrange for someone else to do it; make/let + someone + base verb is about forcing or permitting — each pattern has its own fixed grammar.",
+    intro: "Have/get + something + done means you arrange for someone else to do it; make/let + someone + base verb is about forcing or permitting — and this topic also drills a distinctive mistake where learners add an unnecessary 'that' clause after make/let.",
     sections: [
       {
         heading: "Arranging a service: have/get + object + past participle",
@@ -2500,13 +2516,25 @@ export const LESSONS: Record<string, Lesson> = {
           "Our boss **lets us work** from home on Fridays.",
         ],
       },
+      {
+        heading: "The 'that' trap: no clause after make/let",
+        body: [
+          "A very common mistake is treating 'make' and 'let' like reporting verbs (e.g. 'say that', 'think that') and adding a 'that' clause after them.",
+          "This produces a sentence with no equivalent in correct English grammar: make/let are NEVER followed by 'that'. Always use object + bare infinitive instead, with no separate subject and no 'that'.",
+        ],
+        examples: [
+          "❌ Our teacher made us that we had to finish our homework. → ✅ Our teacher **made us finish** our homework.",
+          "❌ My mother didn't let that I went to the party. → ✅ My mother **didn't let me go** to the party.",
+          "❌ The rain made that we stayed inside all day. → ✅ The rain **made us stay** inside all day.",
+        ],
+      },
     ],
     commonMistakes: [
+      "❌ Our teacher made us that we had to finish our homework. → ✅ Our teacher made us finish our homework. (no 'that + clause' after 'make' — use object + bare infinitive)",
+      "❌ My mother didn't let that I went to the party. → ✅ My mother didn't let me go to the party. (no 'that + clause' after 'let' — use object + bare infinitive)",
       "❌ The teacher made us to sit in silence. → ✅ The teacher made us sit in silence. ('make' + bare infinitive, no 'to')",
       "❌ She got the plumber fix the leak. → ✅ She got the plumber to fix the leak. ('get' + person + to-infinitive)",
-      "❌ My parents don't let me to stay out late. → ✅ ...don't let me stay out late. ('let' + bare infinitive, no 'to')",
       "❌ I need to have my shoes repair. → ✅ I need to have my shoes repaired. ('have' + object + past participle)",
-      "❌ He had the electrician to check the wiring. → ✅ He had the electrician check the wiring. ('have' + person + bare infinitive, no 'to')",
     ],
   },
 
@@ -2839,42 +2867,50 @@ export const LESSONS: Record<string, Lesson> = {
     intro: "These idioms are fixed phrases with their own exact wording and prepositions — the meaning is figurative, so you can't guess it from the individual words.",
     sections: [
       {
-        heading: "Starting, deciding, and finishing",
-        body: ["Idioms about beginning, agreeing, and stopping."],
+        heading: "Starting, restarting, and effort",
+        body: ["Idioms about beginning tasks, starting over, and working hard."],
         examples: [
           "Let's **get the ball rolling** on this project. (start something)",
-          "I think we're all **on the same page**. (in agreement)",
           "After the failure, they went **back to the drawing board**. (start over)",
-          "It's 6pm — let's **call it a day**. (stop working)",
+          "He **pulled an all-nighter** to finish the report. (stayed up all night working)",
+          "She always **goes the extra mile** for her clients. (makes more effort than expected)",
         ],
       },
       {
-        heading: "Facing difficulty and taking risks",
-        body: ["Idioms about tough decisions and consequences."],
+        heading: "Facing difficulty, risk, and giving up",
+        body: ["Idioms about tough decisions, risk, and quitting."],
         examples: [
-          "We need to **bite the bullet** and tell him the bad news. (face something difficult)",
           "They **cut corners** to finish faster, and quality suffered. (do something badly to save time/money)",
           "He's already **on thin ice** with his boss. (in a risky/precarious situation)",
           "If you don't apply soon, you might **miss the boat**. (lose an opportunity)",
+          "After months of trying, they finally **threw in the towel**. (gave up)",
+        ],
+      },
+      {
+        heading: "Communication and hidden meaning",
+        body: ["Idioms about how people talk to each other and what they really mean."],
+        examples: [
+          "I think we're all **on the same page**. (in agreement)",
+          "Stop **beating around the bush** and tell me. (avoiding saying something directly)",
+          "If you **read between the lines**, you'll see she isn't happy. (understand an unstated meaning)",
         ],
       },
       {
         heading: "Describing situations",
-        body: ["Idioms describing frequency, cost, and surprise."],
+        body: ["Idioms describing surprise, scale, and attention."],
         examples: [
-          "He visits his hometown **once in a blue moon**. (very rarely)",
-          "That holiday **cost an arm and a leg**! (very expensive)",
           "The news came completely **out of the blue**. (unexpectedly)",
-          "Working from home gives her **the best of both worlds**.",
+          "The company prefers to stay **under the radar**. (without attracting attention)",
+          "These complaints are just **the tip of the iceberg**. (a small part of a much bigger problem)",
         ],
       },
     ],
     commonMistakes: [
-      "❌ We need to bit the bullet. → ✅ We need to bite the bullet. (base verb after 'need to')",
-      "❌ He visits us once in the blue moon. → ✅ He visits us once in a blue moon. ('a', not 'the')",
+      "❌ We need to threw in the towel. → ✅ We need to throw in the towel. (base verb after 'need to')",
+      "❌ They prefer to stay on the radar. → ✅ They prefer to stay under the radar. ('under', not 'on')",
       "❌ I think we're in the same page. → ✅ I think we're on the same page. ('on', not 'in')",
       "❌ They went back at the drawing board. → ✅ They went back to the drawing board. ('back to', not 'back at')",
-      "❌ Let's call it the day. → ✅ Let's call it a day. ('a day', not 'the day')",
+      "❌ She always go the extra mile. → ✅ She always goes the extra mile. (third person singular needs -s)",
     ],
   },
 
@@ -3360,35 +3396,45 @@ export const LESSONS: Record<string, Lesson> = {
 
   house_objects_rooms_there_is_are: {
     title: "Objects and Rooms in the House",
-    intro: "Describing your home combines 'there is/are' with basic place prepositions (in, on, under) and the vocabulary for rooms and furniture.",
+    intro: "This topic is about the vocabulary for rooms and furniture — what each room is for and what objects belong in it — with 'there is/are' and basic place prepositions used only as supporting tools to describe them.",
     sections: [
       {
-        heading: "Rooms and furniture",
-        body: ["Common house vocabulary."],
+        heading: "Rooms and what they're for",
+        body: ["Each room in a house has its own name and its own purpose."],
         examples: [
-          "**kitchen**, **living room**, **bedroom**, **bathroom**",
-          "**sofa**, **table**, **lamp**, **bed**, **mirror**, **rug**, **chairs**",
+          "**kitchen** (cooking), **bedroom** (sleeping), **bathroom** (washing)",
+          "**living room** (relaxing), **dining room** (eating meals), **garage** (parking a car)",
+          "**hallway** (connects rooms), **garden** (outdoor area)",
         ],
       },
       {
-        heading: "There is/are + in/on/under",
+        heading: "Furniture and objects",
+        body: ["Common objects found around the house, grouped by what they're used for."],
+        examples: [
+          "**sofa**, **table**, **chair**, **bed** — furniture for sitting or sleeping",
+          "**fridge**, **sink**, **lamp**, **mirror** — everyday objects with a clear job",
+          "**wardrobe**, **shelf**, **curtains** — for storing or covering things",
+        ],
+      },
+      {
+        heading: "Describing where things are",
         body: [
-          "There is + singular; there are + plural.",
+          "'There is' + singular noun; 'there are' + plural noun, to say what a room contains.",
           "in = inside something; on = on a surface; under = below something.",
         ],
         examples: [
-          "**There is** a sofa in the living room.",
+          "**There is** a fridge in the kitchen.",
           "**There are** two chairs in the kitchen.",
-          "The books are **in** the bag. The lamp is **on** the table. The rug is **under** the table.",
+          "The lamp is **on** the table. The shoes are **under** the bed.",
         ],
       },
     ],
     commonMistakes: [
-      "❌ There are a table in the dining room. → ✅ There is a table in the dining room. (singular noun → 'there is')",
-      "❌ There is two bedrooms. → ✅ There are two bedrooms. (plural noun → 'there are')",
+      "❌ The fridge is on the kitchen. → ✅ The fridge is in the kitchen. (use 'in' for a room, not 'on')",
+      "❌ I keep my car in the bedroom. → ✅ I keep my car in the garage. (cars belong in the garage)",
+      "❌ You wash the dishes in the wardrobe. → ✅ You wash the dishes in the sink. (a wardrobe stores clothes, not dishes)",
       "❌ The lamp is in the table. → ✅ The lamp is on the table. ('on' for a surface)",
-      "❌ Are there a bathroom upstairs? → ✅ Is there a bathroom upstairs? (singular → 'is there')",
-      "❌ There aren't a sofa in the living room. → ✅ There isn't a sofa in the living room. (singular negative → 'isn't')",
+      "❌ There are a table in the dining room. → ✅ There is a table in the dining room. (singular noun → 'there is')",
     ],
   },
 
@@ -4107,39 +4153,40 @@ export const LESSONS: Record<string, Lesson> = {
 
   feelings: {
     title: "Feelings (Basic)",
-    intro: "Feelings use -ed adjectives to describe how a person feels, while -ing adjectives describe what causes that feeling — a classic mix-up.",
+    intro: "Talk about how you feel using 'be' or 'feel' plus a simple adjective — and remember the third-person -s for 'she/he feels'.",
     sections: [
       {
-        heading: "-ed for people, -ing for the cause",
-        body: ["Use the **-ed** adjective for how a person feels; use **-ing** for the thing that causes the feeling."],
+        heading: "Be / feel + adjective",
+        body: ["Use **am/is/are** or **feel/feels** followed by an adjective to say how someone feels.", "Third person singular (he/she/it) needs an -s: 'feels'."],
         examples: [
-          "I am **bored**. This film is **boring**. (not 'I am boring')",
-          "She is **interested** in the news. This topic is **interesting**.",
-          "This puzzle is **confusing**, so he is **confused**.",
+          "I **am** happy today.",
+          "She **feels** tired after school.",
+          "They **are** excited about the trip.",
         ],
       },
       {
-        heading: "How do you feel? / Look + adjective",
-        body: ["'How do you feel?' asks about feelings.", "'Look' + adjective describes how someone appears."],
+        heading: "How do you feel?",
+        body: ["Ask about feelings with 'How do you feel?' or 'How are you?'", "'Look' + adjective describes how someone appears."],
         examples: [
-          "**How do you feel?** I feel **tired**.",
-          "You **look** worried — is something wrong?",
+          "**How do you feel?** I feel hungry.",
+          "You **look** tired — are you okay?",
         ],
       },
       {
-        heading: "More feelings vocabulary",
-        body: ["embarrassed, relieved, jealous, overwhelmed, disgusted — all use the -ed form for the person."],
+        heading: "Common A1 feelings",
+        body: ["happy, sad, angry, tired, hungry, thirsty, excited, scared, bored, sick, hot, cold, worried, nervous — the most common feelings words."],
         examples: [
-          "I felt **embarrassed** when I made a mistake.",
-          "She felt **relieved** when the exam was over.",
+          "I am **hungry**. I want to eat.",
+          "He is **thirsty**. He wants some water.",
+          "She is **nervous** before the test.",
         ],
       },
     ],
     commonMistakes: [
-      "❌ I am boring. → ✅ I am bored. ('bored' = feeling; 'boring' = describes something dull)",
-      "❌ This film is very bored. → ✅ This film is very boring. (use '-ing' for what causes the feeling)",
-      "❌ She feel sick today. → ✅ She feels sick today. (third person singular needs -s)",
-      "❌ I am so relief that it's over. → ✅ I am so relieved that it's over. (use the adjective, not the noun)",
+      "❌ I are happy. → ✅ I am happy. ('I' takes 'am')",
+      "❌ She feel tired. → ✅ She feels tired. (third person singular needs -s)",
+      "❌ They is excited. → ✅ They are excited. ('they' takes 'are')",
+      "❌ I am hungry, I want drink water. → ✅ I am hungry. I want to drink water. (don't forget 'to' before the verb)",
     ],
   },
 
