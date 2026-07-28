@@ -1,9 +1,12 @@
 import { supabase } from "./supabaseClient";
 import type { Subscription } from "../types";
+import { TESTING_BYPASS_PAYWALL } from "../data/constants";
 
 export const FREE_SUBSCRIPTION: Subscription = { status: "free", plan: null, currentPeriodEnd: null };
 
 export function isPaidStatus(status: Subscription["status"]): boolean {
+  // See TESTING_BYPASS_PAYWALL's comment in data/constants.ts — temporary, pre-launch only.
+  if (TESTING_BYPASS_PAYWALL) return true;
   return status === "active" || status === "trialing";
 }
 
