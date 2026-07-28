@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import type { Team, GameMode, QuestionData, SavedClass, Subscription } from "./types";
-import { TEAM_COLORS, GAME_MODES, MASCOT_OPTIONS, LEVELS_META, FREE_PLAN_LIMITS } from "./data/constants";
+import { TEAM_COLORS, GAME_MODES, MASCOT_OPTIONS, LEVELS_META, FREE_PLAN_LIMITS, TESTING_BYPASS_PAYWALL } from "./data/constants";
 // Asegúrate de que TOPIC_LIBRARY esté exportado desde tu archivo topics.ts junto con TOPIC_OPTIONS
 import { TOPIC_OPTIONS, TOPIC_LIBRARY } from "./data/topics";
 import { hexToRgba, type Theme } from "./data/themes";
@@ -526,7 +526,13 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
           <button onClick={() => setScreen("classes")} style={{ background: "rgba(255,255,255,0.12)", border: "2px solid rgba(255,255,255,0.3)", color: "white", borderRadius: "16px", padding: "18px 40px", fontSize: "18px", fontWeight: "800", cursor: "pointer", fontFamily: theme.headingFont }}>📚 My Classes</button>
           <button onClick={() => { setLearnFilter(null); setScreen("learn"); }} style={{ background: "rgba(255,255,255,0.12)", border: "2px solid rgba(255,255,255,0.3)", color: "white", borderRadius: "16px", padding: "18px 40px", fontSize: "18px", fontWeight: "800", cursor: "pointer", fontFamily: theme.headingFont }}>🎓 Learn</button>
           <button onClick={() => setScreen("profile")} style={{ background: "rgba(255,255,255,0.12)", border: "2px solid rgba(255,255,255,0.3)", color: "white", borderRadius: "16px", padding: "18px 40px", fontSize: "18px", fontWeight: "800", cursor: "pointer", fontFamily: theme.headingFont }}>👤 My Profile</button>
-          <button onClick={() => setScreen("billing")} style={{ background: "rgba(255,255,255,0.12)", border: "2px solid rgba(255,255,255,0.3)", color: "white", borderRadius: "16px", padding: "18px 40px", fontSize: "18px", fontWeight: "800", cursor: "pointer", fontFamily: theme.headingFont }}>{isPaid ? "💎 My Plan" : "💎 Upgrade"}</button>
+          {/* Hidden while TESTING_BYPASS_PAYWALL is on — see data/constants.ts. Everyone already
+              has premium during testing, so there's nothing useful for this button to show (and
+              clicking into BillingScreen would render a confusing paid-but-no-real-subscription
+              state). Just delete this guard clause to bring it back once billing is re-enabled. */}
+          {!TESTING_BYPASS_PAYWALL && (
+            <button onClick={() => setScreen("billing")} style={{ background: "rgba(255,255,255,0.12)", border: "2px solid rgba(255,255,255,0.3)", color: "white", borderRadius: "16px", padding: "18px 40px", fontSize: "18px", fontWeight: "800", cursor: "pointer", fontFamily: theme.headingFont }}>{isPaid ? "💎 My Plan" : "💎 Upgrade"}</button>
+          )}
         </div>
       </div>
     </div>

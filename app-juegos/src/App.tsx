@@ -7,6 +7,7 @@ import { getProfile } from './lib/profile';
 import { getSubscription, FREE_SUBSCRIPTION } from './lib/subscription';
 import { DEFAULT_THEME, getTheme, type Theme } from './data/themes';
 import { PlanIntroScreen } from './components/shared/PlanIntroScreen';
+import { TESTING_BYPASS_PAYWALL } from './data/constants';
 
 function ConfigErrorScreen() {
   return (
@@ -110,7 +111,11 @@ function AuthenticatedApp() {
     return <AuthScreen />;
   }
 
-  if (!planIntroSeen) {
+  // See TESTING_BYPASS_PAYWALL's comment in data/constants.ts — skips the onboarding
+  // plan-choice screen entirely while pre-launch testing is underway. The underlying
+  // has_completed_plan_intro tracking is untouched, so real per-account behavior resumes
+  // exactly as designed the moment this flag is switched off.
+  if (!planIntroSeen && !TESTING_BYPASS_PAYWALL) {
     return (
       <div>
         <StatusBadge action="Log Out" onAction={() => supabase.auth.signOut()} theme={theme}>
