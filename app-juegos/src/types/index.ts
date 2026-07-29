@@ -51,6 +51,13 @@ export interface TeamColor {
     // can scope its guess options back down to "everything from this one topic" instead of the
     // whole mixed pool.
     spySourceTopic?: string;
+    // Same idea as spySourceTopic, but for VaultHeistGame's rewrite-sentence questions: which
+    // selected topic (by TOPIC_OPTIONS value/key) this question came from. Needed because generic
+    // transform tags like "negative"/"question" are shared across dozens of topics spanning many
+    // different tenses — when topics are mixed, a lock card just saying "NEGATIVE" doesn't tell a
+    // student which tense's negative form is required. VaultHeistGame uses this to scope those two
+    // generic tags to a per-topic category instead of pooling every topic's negatives together.
+    sourceTopic?: string;
   }
   
   export interface GameProps {

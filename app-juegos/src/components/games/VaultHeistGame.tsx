@@ -5,14 +5,25 @@ import { TurnTimerBar } from "../shared/TurnTimerBar";
 import { QuestionCard } from "../shared/QuestionCard";
 import { Confetti } from "../shared/Confetti";
 import { teamsGridCols } from "../../data/constants";
+import { TOPIC_OPTIONS } from "../../data/topics";
 import { makeSoloCpuTeam } from "../../lib/soloOpponent";
 
 // How long the CPU takes to attempt its own lock, and how long its result banner stays up
 // before it auto-advances — standing in for the fact it can't actually answer a real question.
-// Both pace and success chance get tougher on harder difficulty, same as the player's own timer.
+// Pace gets tougher on harder difficulty, same as the player's own timer.
 const CPU_ANSWER_MS_BY_DIFFICULTY: Record<Difficulty, number> = { easy: 2200, medium: 1600, hard: 1000 };
 const CPU_RESULT_MS = 1400;
-const CPU_SUCCESS_PROB: Record<Difficulty, number> = { easy: 0.6, medium: 0.75, hard: 0.9 };
+// Per-lock-index success chance (indexed the same way as DIFFICULTY_BY_LOCK_INDEX below) — locks
+// 3-5 need a stacked negative/question form on top of the base grammar, so the CPU gets less
+// reliable as it goes, same as a real student would. A flat per-game probability regardless of
+// lock difficulty made the CPU crack all 5 in an unbroken streak far too often (a flat 0.9 on
+// hard meant a ~59% chance of a flawless run) — these numbers put a flawless run at roughly
+// 1-8% depending on difficulty, occasional but not the norm.
+const CPU_SUCCESS_PROB_BY_DIFFICULTY: Record<Difficulty, number[]> = {
+  easy: [0.55, 0.5, 0.42, 0.36, 0.3],
+  medium: [0.65, 0.6, 0.5, 0.44, 0.36],
+  hard: [0.78, 0.72, 0.62, 0.54, 0.46],
+};
 
 const LOCK_COUNT = 5;
 // 25s was the only speed on offer, and felt too tight as a default — kept as the "hard" option,
@@ -89,6 +100,29 @@ function formatCategory(tag: string): string {
   return tag.replace(/-/g, " ").toUpperCase();
 }
 
+// "negative" and "question" are the only transform tags reused across dozens of unrelated topics
+// spanning many different tenses (past simple, present perfect, modals, "so do I"...). Every other
+// transform tag already bakes in its own tense/structure (e.g. "tense-past-simple"), so a lock
+// naming it is unambiguous regardless of which topic it came from. These two bare tags aren't —
+// "NEGATIVE" alone doesn't tell a student which tense's negative form is needed once topics are
+// mixed. Scoping just these two to their source topic (rather than every category) keeps genuinely
+// topic-specific categories reading exactly as they did before this existed.
+const AMBIGUOUS_TRANSFORMS = new Set(["negative", "question"]);
+function categoryKeyFor(q: QuestionData): string {
+  if (q.transform && AMBIGUOUS_TRANSFORMS.has(q.transform) && q.sourceTopic) {
+    return `${q.sourceTopic}::${q.transform}`;
+  }
+  return q.transform ?? "";
+}
+function displayCategory(categoryKey: string): string {
+  const sep = categoryKey.indexOf("::");
+  if (sep === -1) return formatCategory(categoryKey);
+  const topicValue = categoryKey.slice(0, sep);
+  const transformTag = categoryKey.slice(sep + 2);
+  const topicLabel = TOPIC_OPTIONS.find(o => o.value === topicValue)?.label ?? formatCategory(topicValue);
+  return `${topicLabel.toUpperCase()} — ${formatCategory(transformTag)}`;
+}
+
 // One independent shuffled question list per (team × category), so two teams never draw
 // identical questions in lockstep and a thin category still serves the whole game — the draw
 // index just wraps back to the start once a team has seen everything in that category. Mirrors
@@ -96,7 +130,7 @@ function formatCategory(tag: string): string {
 // rather than a hardcoded structure.
 function buildDrawPools(rewriteQs: QuestionData[], categories: string[], teamIds: (string | number)[]) {
   const byCategory: Record<string, QuestionData[]> = {};
-  categories.forEach(c => { byCategory[c] = rewriteQs.filter(q => q.transform === c); });
+  categories.forEach(c => { byCategory[c] = rewriteQs.filter(q => categoryKeyFor(q) === c); });
   const pools: Record<string | number, Record<string, QuestionData[]>> = {};
   teamIds.forEach(teamId => {
     pools[teamId] = {};
@@ -143,7 +177,7 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
   };
 
   const rewriteQs = useRef(questions.filter(q => q.type === "rewrite sentences")).current;
-  const categories = useRef([...new Set(rewriteQs.map(q => q.transform).filter((c): c is string => !!c))]).current;
+  const categories = useRef([...new Set(rewriteQs.map(categoryKeyFor).filter((c): c is string => !!c))]).current;
   const pools = useRef(buildDrawPools(rewriteQs, categories, teams.map(t => t.id))).current;
   const resumed = useRef(validateSnapshot(initialGameState, teams.length)).current;
 
@@ -414,11 +448,15 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
 
   // CPU can't actually answer a real question — auto-resolve its own lock attempt via a
   // difficulty-tuned random success roll, driving the exact same handleCorrect/handleWrong path
-  // a teacher's judgment would. Must stay above every early return below (Rules of Hooks).
+  // a teacher's judgment would. Success chance depends on which lock it's attempting (not just the
+  // game's overall difficulty setting), so it gets less reliable on the later, form-stacked locks.
+  // Must stay above every early return below (Rules of Hooks).
   useEffect(() => {
     if (!isSolo || phase !== "answer" || activeTeam.id !== cpuRef.current?.id) return;
+    const lockIndex = Math.min(vaultLocks[activeTeam.id] ?? 0, LOCK_COUNT - 1);
+    const successProb = CPU_SUCCESS_PROB_BY_DIFFICULTY[difficulty][lockIndex];
     const timer = setTimeout(() => {
-      if (Math.random() < CPU_SUCCESS_PROB[difficulty]) handleCorrect(); else handleWrong();
+      if (Math.random() < successProb) handleCorrect(); else handleWrong();
     }, CPU_ANSWER_MS_BY_DIFFICULTY[difficulty]);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -676,7 +714,7 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
             }}>
               <div style={{ fontSize: "30px", marginBottom: "4px" }}>{activeTeam.mascot ?? "🕵️"}</div>
               <div style={{ fontSize: "13px", fontWeight: "700", color: "#E8D8AE", marginBottom: "6px", letterSpacing: "0.05em" }}>🔧 THIS LOCK NEEDS</div>
-              <div style={{ fontSize: "24px", fontWeight: "900", color: "#FCD34D" }}>{formatCategory(currentCategory)}</div>
+              <div style={{ fontSize: "24px", fontWeight: "900", color: "#FCD34D" }}>{displayCategory(currentCategory)}</div>
               {currentQuestion?.form && (
                 <div style={{ marginTop: "10px", display: "inline-block", background: "#7F1D1D", border: "2px solid #FCA5A5", borderRadius: "10px", padding: "5px 14px" }}>
                   <span style={{ fontSize: "13px", fontWeight: "800", color: "#FCA5A5" }}>

@@ -474,8 +474,18 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
         // includes L1-interference-flavored mistakes for topic-focus content) with cardTasks,
         // rather than dropping grammar content entirely for topic-only selections.
         qs = mixByTopic(selectedEntries.map((entry, index) => [...(entry.questions ?? []), ...cardTaskBuckets[index]]));
-      } else if (mode.id === "castle" || mode.id === "racetrack" || mode.id === "whack" || mode.id === "rocket" || mode.id === "vault") {
+      } else if (mode.id === "castle" || mode.id === "racetrack" || mode.id === "whack" || mode.id === "rocket") {
         qs = mixByTopic(selectedEntries.map((entry, index) => [...(entry.questions ?? []), ...cardTaskBuckets[index]]));
+      } else if (mode.id === "vault") {
+        // Tagged with which selected topic each question came from (by TOPIC_OPTIONS value, looked
+        // up per-topic rather than zipped by index against selectedEntries — same reasoning as
+        // spy/zombie above). VaultHeistGame needs this because generic transform tags like
+        // "negative"/"question" are shared across dozens of topics spanning many different tenses;
+        // without knowing the source topic it can't scope a lock's category to one specific tense.
+        qs = mixByTopic(selectedTopics.map(value => {
+          const entry = TOPIC_LIBRARY[value as keyof typeof TOPIC_LIBRARY] as TopicLibraryEntry | undefined;
+          return [...(entry?.questions ?? []), ...cardTasksAsQuestions(entry?.cardTasks ?? [])].map(q => ({ ...q, sourceTopic: value }));
+        }));
       } else if (isTopicOnlySelection && allCardTasks.length > 0) {
         qs = mixByTopic(cardTaskBuckets);
       } else {
