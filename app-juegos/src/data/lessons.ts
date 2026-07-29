@@ -3275,7 +3275,7 @@ export const LESSONS: Record<string, Lesson> = {
     ],
     commonMistakes: [
       "❌ He can to play piano. → ✅ He can play piano. (no 'to' after 'can')",
-      "❌ I cans speak English. → ✅ I can speak English. ('can' never takes -s)",
+      "❌ She cans speak English. → ✅ She can speak English. ('can' never takes -s, even with 'she')",
       "❌ She can sings very well. → ✅ She can sing very well. (base verb after 'can', no -s)",
       "❌ Can he speaks French? → ✅ Can he speak French? (base verb, no -s, even in questions)",
       "❌ She can't to drive. → ✅ She can't drive. (no 'to' after 'can't')",
@@ -4377,7 +4377,7 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ I go always to bed at 11. → ✅ I always go to bed at 11. (adverb before the main verb)",
       "❌ I never am late. → ✅ I am never late. (with 'be', the adverb goes after it)",
       "❌ He wake up at 6 o'clock. → ✅ He wakes up at 6 o'clock. (third person needs -s)",
-      "❌ They goes home at 5. → ✅ They go home at 5. ('they' doesn't take -s)",
+      "❌ She go home at 5. → ✅ She goes home at 5. ('she' needs -s — this is the mistake students make far more than the reverse)",
     ],
   },
 
