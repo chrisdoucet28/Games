@@ -91,6 +91,8 @@ const buildBalancedMixedPool = <T,>(topicBuckets: T[][]) => {
   return mixed;
 };
 
+const DEFAULT_TEAM_NAMES = ["Team Red", "Team Blue", "Team Green", "Team Yellow", "Team Purple"];
+
 const uniqueValues = (values: string[]) => Array.from(new Set(values));
 
 const matchesTopicSearch = (label: string, search: string) => {
@@ -150,7 +152,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
   const [pickerBusy, setPickerBusy] = useState(false);
   const [pickerError, setPickerError] = useState<string | null>(null);
   const [numTeams, setNumTeams] = useState(2);
-  const [teamNames, setTeamNames] = useState(["Team Red", "Team Blue", "Team Green", "Team Yellow", "Team Purple"]);
+  const [teamNames, setTeamNames] = useState(DEFAULT_TEAM_NAMES);
   const [teamColors, setTeamColors] = useState([0, 1, 2, 3, 4]);
   const [teamMascots, setTeamMascots] = useState<(string | null)[]>([null, null, null, null, null]);
   const [teams, setTeams] = useState<Team[]>([]);
@@ -190,6 +192,59 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
   const updateScore = useCallback((teamId: string | number, delta: number) => {
     setTeams(ts => ts.map(t => t.id === teamId ? { ...t, score: Math.max(0, t.score + delta) } : t));
   }, []);
+
+  // Puts every team back to its untouched default: 0 points, no mascot, and the original
+  // index-based color/name pairing (Team Red = slot 0, Team Blue = slot 1, ...). Resets both the
+  // setup-screen editing state and the live `teams` array so it works from either screen.
+  const resetTeamsToNormal = () => {
+    setTeamNames(DEFAULT_TEAM_NAMES.slice());
+    setTeamColors([0, 1, 2, 3, 4]);
+    setTeamMascots([null, null, null, null, null]);
+    setTeams(ts => ts.map((t, i) => ({
+      ...t,
+      name: DEFAULT_TEAM_NAMES[i] ?? t.name,
+      color: TEAM_COLORS[i] ?? t.color,
+      mascot: null,
+      score: 0,
+    })));
+  };
+
+  // Index of the game card currently lit up mid-spin, or null when no spin is running.
+  const [randomSpinIndex, setRandomSpinIndex] = useState<number | null>(null);
+  const randomSpinTimeoutRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (randomSpinTimeoutRef.current !== null) window.clearTimeout(randomSpinTimeoutRef.current);
+    };
+  }, []);
+
+  // Wheel-style reveal: hops the highlight across the game cards, starting fast and easing to a
+  // stop on the randomly chosen game, then launches it — same picture as a spinning prize wheel.
+  const playRandomGame = () => {
+    if (loadingGame || randomSpinIndex !== null) return;
+
+    const targetIndex = Math.floor(Math.random() * GAME_MODES.length);
+    const totalSteps = GAME_MODES.length * 3 + targetIndex;
+
+    const runStep = (step: number) => {
+      setRandomSpinIndex(step % GAME_MODES.length);
+
+      if (step >= totalSteps) {
+        randomSpinTimeoutRef.current = window.setTimeout(() => {
+          setRandomSpinIndex(null);
+          startGame(GAME_MODES[targetIndex]);
+        }, 500);
+        return;
+      }
+
+      const progress = step / totalSteps;
+      const delay = 45 + progress * progress * 280;
+      randomSpinTimeoutRef.current = window.setTimeout(() => runStep(step + 1), delay);
+    };
+
+    runStep(0);
+  };
 
   // "Start New Game" from My Classes — brings the class's persistent roster/scores into the
   // normal setup flow, same as if the teacher had typed those names in themselves.
@@ -717,10 +772,11 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
           <div style={{ background: "white", border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, borderRadius: "16px", padding: "20px", marginBottom: "16px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px" }}>
               <div style={{ background: theme.accentSolid, color: "white", borderRadius: "50%", width: "28px", height: "28px", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "900", fontSize: "14px", flexShrink: 0 }}>4</div>
-              <div style={{ fontWeight: "800", color: theme.heroBg[0], fontSize: "16px", fontFamily: theme.headingFont }}>How many teams?</div>
+              <div style={{ fontWeight: "800", color: theme.heroBg[0], fontSize: "16px", fontFamily: theme.headingFont, flex: 1 }}>How many teams?</div>
+              <button onClick={() => resetTeamsToNormal()} title="0 points, no mascots, original colors and names" style={{ background: "none", border: "2px solid #D1D5DB", borderRadius: "20px", padding: "4px 14px", fontWeight: "700", fontSize: "12px", color: "#9CA3AF", cursor: "pointer", flexShrink: 0 }}>♻️ Reset teams to normal</button>
             </div>
             <div style={{ display: "flex", gap: "10px", marginBottom: "16px", flexWrap: "wrap", alignItems: "center" }}>
-              {[2, 3, 4, 5].map(n => {
+              {[1, 2, 3, 4, 5].map(n => {
                 const locked = !isPaid && n > FREE_PLAN_LIMITS.maxTeams;
                 return (
                   <button
@@ -859,20 +915,48 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
         <ScoreBoard teams={teams} headingFont={theme.headingFont} />
         <div style={{ textAlign: "center", marginTop: "10px", display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "20px" }}>
             <button onClick={() => setTeams(ts => ts.map(t => ({ ...t, score: 0 })))} style={{ background: "none", border: "2px solid #D1D5DB", borderRadius: "20px", padding: "4px 16px", fontWeight: "700", fontSize: "12px", color: "#9CA3AF", cursor: "pointer" }}>🔄 Reset all scores to 0</button>
+            <button onClick={() => resetTeamsToNormal()} title="0 points, no mascots, original colors and names" style={{ background: "none", border: "2px solid #D1D5DB", borderRadius: "20px", padding: "4px 16px", fontWeight: "700", fontSize: "12px", color: "#9CA3AF", cursor: "pointer" }}>♻️ Reset teams to normal</button>
             <button onClick={() => setScreen("setup")} style={{ background: "none", border: "2px solid #D1D5DB", borderRadius: "20px", padding: "4px 16px", fontWeight: "700", fontSize: "12px", color: "#9CA3AF", cursor: "pointer" }}>⚙️ Edit teams & settings</button>
         </div>
 
         {loadError && <div style={{ color: "red", fontWeight: "bold", textAlign: "center" }}>{loadError}</div>}
-        
+
+        <div style={{ textAlign: "center" }}>
+          <button
+            onClick={playRandomGame}
+            disabled={loadingGame || randomSpinIndex !== null}
+            title="Not sure which game to pick? Let us choose for you."
+            style={{ background: `linear-gradient(135deg,${theme.cta[0]},${theme.cta[1]})`, color: "white", border: "none", borderRadius: "14px", padding: "12px 28px", fontSize: "15px", fontWeight: "800", cursor: (loadingGame || randomSpinIndex !== null) ? "not-allowed" : "pointer", opacity: (loadingGame || randomSpinIndex !== null) ? 0.6 : 1, fontFamily: theme.headingFont, boxShadow: `0 6px 20px ${hexToRgba(theme.cta[1], 0.35)}` }}
+          >
+            {randomSpinIndex !== null ? "🎲 Picking..." : "🎲 Surprise Me! (Random Game)"}
+          </button>
+        </div>
+
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: "14px", marginTop: "20px" }}>
-          {GAME_MODES.map(g => (
-            <div key={g.id} onClick={() => !loadingGame && startGame(g)} style={{ background: "white", border: `3px solid ${g.color}`, borderRadius: "18px", padding: "20px", cursor: "pointer", transition: "all 0.2s" }}>
-              <div style={{ fontSize: "40px", marginBottom: "10px" }}>{g.icon}</div>
-              <div style={{ fontWeight: "900", fontSize: "17px", color: theme.heroBg[0], marginBottom: "4px", fontFamily: theme.headingFont }}>{g.name}</div>
-              <div style={{ fontSize: "13px", color: "#6B7280", marginBottom: "8px" }}>{g.desc}</div>
-              <div style={{ fontSize: "12px", color: g.color, fontWeight: "700", lineHeight: 1.4, borderTop: `1px solid ${g.color}33`, paddingTop: "8px" }}>🗣️ {g.tag}</div>
-            </div>
-          ))}
+          {GAME_MODES.map((g, i) => {
+            const isSpinLit = randomSpinIndex === i;
+            return (
+              <div
+                key={g.id}
+                onClick={() => !loadingGame && randomSpinIndex === null && startGame(g)}
+                style={{
+                  background: isSpinLit ? `${g.color}1A` : "white",
+                  border: `3px solid ${g.color}`,
+                  borderRadius: "18px",
+                  padding: "20px",
+                  cursor: randomSpinIndex === null ? "pointer" : "default",
+                  transition: "transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease",
+                  transform: isSpinLit ? "scale(1.06)" : "scale(1)",
+                  boxShadow: isSpinLit ? `0 0 0 4px ${g.color}55, 0 10px 24px ${g.color}55` : "none"
+                }}
+              >
+                <div style={{ fontSize: "40px", marginBottom: "10px" }}>{g.icon}</div>
+                <div style={{ fontWeight: "900", fontSize: "17px", color: theme.heroBg[0], marginBottom: "4px", fontFamily: theme.headingFont }}>{g.name}</div>
+                <div style={{ fontSize: "13px", color: "#6B7280", marginBottom: "8px" }}>{g.desc}</div>
+                <div style={{ fontSize: "12px", color: g.color, fontWeight: "700", lineHeight: 1.4, borderTop: `1px solid ${g.color}33`, paddingTop: "8px" }}>🗣️ {g.tag}</div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>

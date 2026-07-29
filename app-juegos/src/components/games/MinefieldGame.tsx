@@ -1,7 +1,8 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import type { GameProps } from "../../types";
 import { teamsGridCols } from "../../data/constants";
 import { denseRank, medalForRank } from "../../utils/ranking";
+import { makeSoloCpuTeam } from "../../lib/soloOpponent";
 
 type MinefieldGrid = {
   topic: string;
@@ -14,6 +15,15 @@ const ROWS = 5;
 const COLS = 5;
 const TOTAL = ROWS * COLS;
 const MINE_COUNT = 7;
+
+// Solo has no rival team to split mine risk with — the lone team would otherwise inevitably hit
+// every mine on the board by process of elimination. A CPU opponent shares that risk, taking real
+// turns on the same shared board exactly like a second human team would. It can't actually
+// produce or be judged on a sentence, so its turn is auto-resolved via a short "thinking" delay
+// and a tunable random success roll instead.
+const CPU_THINK_MS = 900;
+const CPU_JUDGE_MS = 900;
+const CPU_SUCCESS_CHANCE = 0.65;
 
 const createMines = () =>
   new Set([...Array(TOTAL)].map((_, index) => index).sort(() => Math.random() - 0.5).slice(0, MINE_COUNT));
@@ -46,8 +56,24 @@ function validateMinefieldSnapshot(raw: unknown, teamCount: number, gridCount: n
   };
 }
 
-export function MinefieldGame({ gridData, teams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState }: GameProps) {
+export function MinefieldGame({ gridData, teams: propTeams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState }: GameProps) {
   const grids = (Array.isArray(gridData) ? gridData : gridData ? [gridData] : []) as MinefieldGrid[];
+
+  const isSolo = propTeams.length === 1;
+  const cpuRef = useRef(isSolo ? makeSoloCpuTeam() : null);
+  const [cpuScore, setCpuScore] = useState(0);
+  // Memoized so `teams` is referentially stable across renders when nothing has actually
+  // changed — effects in this file depend on `teams`/`t` by reference, and a fresh array
+  // literal every render would make them re-fire (and re-setState) forever.
+  const teams = useMemo(
+    () => (isSolo ? [propTeams[0], { ...cpuRef.current!, score: cpuScore }] : propTeams),
+    [isSolo, propTeams, cpuScore]
+  );
+  const updateScore = (id: string | number, delta: number) => {
+    if (isSolo && id === cpuRef.current?.id) { setCpuScore(s => s + delta); }
+    else { onUpdateScore(id, delta); }
+  };
+
   const resumed = useRef(validateMinefieldSnapshot(initialGameState, teams.length, grids.length)).current;
 
   const [gridIndex, setGridIndex] = useState(() => resumed?.gridIndex ?? 0);
@@ -84,6 +110,36 @@ export function MinefieldGame({ gridData, teams, onUpdateScore, onEnd, forceFina
   const safeRevealed = [...revealed].filter(index => !mines.has(index)).length;
   const totalSafe = TOTAL - MINE_COUNT;
   const minesFound = [...revealed].filter(index => mines.has(index)).length;
+
+  // "Latest ref" indirection so these can be called from the CPU effects below, which (like
+  // every other hook) must sit above the data-loading early return further down — before
+  // pickTile/afterJudge are even defined. Each ref is repointed at the freshest closure right
+  // after its function is (re)defined every render, so the CPU never calls a stale one.
+  const pickTileRef = useRef<(idx: number) => void>(() => {});
+  const afterJudgeRef = useRef<(correct: boolean) => void>(() => {});
+
+  // CPU auto-picks a random unrevealed tile on its own turn, after a short "thinking" delay —
+  // reuses the exact same pickTile() path a human's click would take.
+  useEffect(() => {
+    if (!isSolo || phase !== "pick" || t?.id !== cpuRef.current?.id) return;
+    const unrevealed = Array.from({ length: TOTAL }, (_, i) => i).filter(i => !revealed.has(i));
+    if (unrevealed.length === 0) return;
+    const timer = setTimeout(() => {
+      pickTileRef.current(unrevealed[Math.floor(Math.random() * unrevealed.length)]);
+    }, CPU_THINK_MS);
+    return () => clearTimeout(timer);
+  }, [isSolo, phase, t, revealed]);
+
+  // Once the CPU has "picked" a tile, resolve it via a tunable random success chance instead of a
+  // real sentence and teacher judgment — drives the exact same afterJudge() path a teacher's
+  // Correct/Wrong click would.
+  useEffect(() => {
+    if (!isSolo || phase !== "speaking" || t?.id !== cpuRef.current?.id) return;
+    const timer = setTimeout(() => {
+      afterJudgeRef.current(Math.random() < CPU_SUCCESS_CHANCE);
+    }, CPU_JUDGE_MS);
+    return () => clearTimeout(timer);
+  }, [isSolo, phase, t]);
   const minesLeft = MINE_COUNT - minesFound;
 
   if (!currentGrid || !t) {
@@ -108,6 +164,7 @@ export function MinefieldGame({ gridData, teams, onUpdateScore, onEnd, forceFina
     setLastResult(null);
     setPhase("speaking");
   };
+  pickTileRef.current = pickTile;
 
   const advanceToNextTopic = () => {
     setGridIndex(index => (index + 1) % grids.length);
@@ -138,11 +195,11 @@ export function MinefieldGame({ gridData, teams, onUpdateScore, onEnd, forceFina
 
     if (isMine) {
       setBoom(true);
-      onUpdateScore(judgingTeam.id, -75);
+      updateScore(judgingTeam.id, -75);
       setMinesHitByTeam(prev => ({ ...prev, [judgingTeam.id]: (prev[judgingTeam.id] ?? 0) + 1 }));
       setTimeout(() => setBoom(false), 2200);
     } else if (correct) {
-      onUpdateScore(judgingTeam.id, 50);
+      updateScore(judgingTeam.id, 50);
       setCorrectByTeam(prev => ({ ...prev, [judgingTeam.id]: (prev[judgingTeam.id] ?? 0) + 1 }));
     }
 
@@ -163,6 +220,7 @@ export function MinefieldGame({ gridData, teams, onUpdateScore, onEnd, forceFina
     setActiveTeam(nextTeamIndex);
 
   };
+  afterJudgeRef.current = afterJudge;
 
   const TILE_H = 58;
   const GAP = 5;

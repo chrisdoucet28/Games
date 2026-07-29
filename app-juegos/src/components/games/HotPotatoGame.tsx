@@ -1,9 +1,14 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import type { GameProps } from "../../types";
 import { teamsGridCols } from "../../data/constants";
+import { makeSoloCpuTeam } from "../../lib/soloOpponent";
 
 const TURN_SECONDS_OPTIONS = [15, 20, 25, 30];
 const ROUND_SECONDS_MULT = 4;
+// How long the CPU realistically "holds" the potato before passing it back — standing in for
+// the fact it can't actually answer a real question out loud.
+const CPU_HOLD_MS_MIN = 1800;
+const CPU_HOLD_MS_MAX = 4500;
 
 const AMBIENT_BITS = Array.from({ length: 12 }, (_, i) => ({
   left: (i * 41) % 100,
@@ -48,7 +53,25 @@ function ChaosBackdrop() {
   );
 }
 
-export function HotPotatoGame({ questions, teams, onUpdateScore, onEnd, level, forceFinalRef }: GameProps) {
+export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEnd, level, forceFinalRef }: GameProps) {
+  // Solo play makes the CPU a real second holder — a genuine participant in the pass cycle, not
+  // a passive prop. It can't actually answer a real question, so it just holds the potato for a
+  // randomized, realistic stretch before passing it back (see the effect below).
+  const isSolo = propTeams.length === 1;
+  const cpuRef = useRef(isSolo ? makeSoloCpuTeam() : null);
+  const [cpuScore, setCpuScore] = useState(0);
+  // Memoized so `teams` is referentially stable across renders when nothing has actually
+  // changed — effects in this file depend on `teams` by reference, and a fresh array literal
+  // every render would make them re-fire (and re-setState) forever.
+  const teams = useMemo(
+    () => (isSolo ? [propTeams[0], { ...cpuRef.current!, score: cpuScore }] : propTeams),
+    [isSolo, propTeams, cpuScore]
+  );
+  const updateScore = (id: string | number, delta: number) => {
+    if (isSolo && id === cpuRef.current?.id) { setCpuScore(s => s + delta); }
+    else { onUpdateScore(id, delta); }
+  };
+
   const showSpanish = level === "A1" || level === "A2";
   const STARTING_BANK = 100;
   const TOTAL_ROUNDS = 5;
@@ -90,9 +113,24 @@ export function HotPotatoGame({ questions, teams, onUpdateScore, onEnd, level, f
   useEffect(() => {
     if (phase === "roundend" && penalizedRoundRef.current !== round) {
       penalizedRoundRef.current = round;
-      onUpdateScore(teams[holderIdxRef.current].id, -PENALTY_PTS);
+      updateScore(teams[holderIdxRef.current].id, -PENALTY_PTS);
     }
-  }, [phase, round, onUpdateScore, teams]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase, round, teams]);
+
+  // CPU can't actually answer a real question — it just holds the potato for a randomized,
+  // realistic stretch before passing it back, reusing the exact same confirmPass() a human's
+  // "Answered in time" click would trigger. Must stay above every early return below (Rules of
+  // Hooks).
+  useEffect(() => {
+    if (!isSolo || phase !== "play" || teams[holderIdx]?.id !== cpuRef.current?.id) return;
+    const holdMs = CPU_HOLD_MS_MIN + Math.random() * (CPU_HOLD_MS_MAX - CPU_HOLD_MS_MIN);
+    const timer = setTimeout(() => {
+      if (!roundEndedRef.current) confirmPass();
+    }, holdMs);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSolo, phase, holderIdx]);
 
   useEffect(() => {
     roundTimeRef.current = ROUND_SECONDS;
@@ -296,7 +334,7 @@ export function HotPotatoGame({ questions, teams, onUpdateScore, onEnd, level, f
 
         <button onClick={() => {
           if (!seededStartRef.current) {
-            teams.forEach(team => onUpdateScore(team.id, STARTING_BANK));
+            teams.forEach(team => updateScore(team.id, STARTING_BANK));
             seededStartRef.current = true;
           }
           setPhase("play");

@@ -1,10 +1,20 @@
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import type { GameProps, QuestionData } from "../../types";
 import { teamsGridCols } from "../../data/constants";
 import { useTurnTimer } from "../../hooks/useTurnTimer";
 import { TurnTimerBar } from "../shared/TurnTimerBar";
 import { QuestionCard } from "../shared/QuestionCard";
 import { denseRank, medalForRank } from "../../utils/ranking";
+import { makeSoloCpuTeam } from "../../lib/soloOpponent";
+
+// How long the CPU "thinks" before picking a target square, and before firing once a square is
+// picked — standing in for the fact it can't actually answer a real question.
+const CPU_THINK_MS = 900;
+const CPU_FIRE_MS = 900;
+// The CPU's chance of answering its own grammar question correctly, not the chance of hitting a
+// ship — a wrong answer always goes wide regardless of what's actually at that coordinate, so a
+// low value here reads as the CPU "missing ships it should've hit." Kept high so that rarely happens.
+const CPU_HIT_CHANCE = 0.9;
 
 type ColDef = { letter: string; label: string; emoji: string };
 
@@ -151,9 +161,27 @@ function validateBattleshipSnapshot(raw: unknown, teamIds: (string | number)[]):
   };
 }
 
-export function BattleshipGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState }: GameProps) {
+export function BattleshipGame({ questions, teams: propTeams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState }: GameProps) {
   const TURN_SECONDS = 25;
   const gameTitle = "Battleship";
+
+  // Solo play makes the CPU a real second fleet — a genuine alternating-turn participant that
+  // fires back on its own turn, not a passive target. This reuses the existing 2-team fast path
+  // (board size, skip target-picking) unchanged, since `teams` is now genuinely length 2.
+  const isSolo = propTeams.length === 1;
+  const cpuRef = useRef(isSolo ? makeSoloCpuTeam() : null);
+  const [cpuScore, setCpuScore] = useState(0);
+  // Memoized so `teams` is referentially stable across renders when nothing has actually
+  // changed — effects/callbacks in this file depend on `teams` by reference, and a fresh array
+  // literal every render would make them re-fire (and re-setState) forever.
+  const teams = useMemo(
+    () => (isSolo ? [propTeams[0], { ...cpuRef.current!, score: cpuScore }] : propTeams),
+    [isSolo, propTeams, cpuScore]
+  );
+  const updateScore = (id: string | number, delta: number) => {
+    if (isSolo && id === cpuRef.current?.id) { setCpuScore(s => s + delta); }
+    else { onUpdateScore(id, delta); }
+  };
 
   const COLS = teams.length === 2 ? BATTLESHIP_COLS_5 : BATTLESHIP_COLS_4;
   const ROWS = COLS.map((_, i) => i + 1);
@@ -290,12 +318,22 @@ export function BattleshipGame({ questions, teams, onUpdateScore, onEnd, forceFi
     const isShip = fleets[targetTeamId].includes(pendingCoord);
     let newHits = hits;
 
-    if (correct && isShip) {
+    if (isShip) {
+      // A real ship sits at this coordinate — the shot lands no matter what, because the board
+      // is a fixed layout, not a coin flip the grammar answer controls. Correctness still
+      // matters for points: full credit for a correct answer, half credit for a lucky hit on a
+      // wrong one, so getting the grammar right is still worth something without pretending a
+      // real ship wasn't there.
       newHits = { ...hits, [targetTeamId]: [...(hits[targetTeamId] || []), pendingCoord] };
       setHits(newHits);
       spawnCellFx(targetTeamId, pendingCoord, "hit");
-      onUpdateScore(activeTeam.id, 60);
-      showToast(`💥 ${activeTeam.name} HIT ${targetTeam.name}'s ship at ${pendingCoord}!`, "hit");
+      updateScore(activeTeam.id, correct ? 60 : 30);
+      showToast(
+        correct
+          ? `💥 ${activeTeam.name} HIT ${targetTeam.name}'s ship at ${pendingCoord}!`
+          : `💥 ${activeTeam.name} HIT ${targetTeam.name}'s ship at ${pendingCoord} — wrong answer, half credit!`,
+        "hit"
+      );
 
       const wasEliminated = isEliminated(targetTeamId);
       const justEliminated = !wasEliminated && isEliminated(targetTeamId, newHits);
@@ -311,10 +349,10 @@ export function BattleshipGame({ questions, teams, onUpdateScore, onEnd, forceFi
           return;
         }
       }
-    } else if (correct && !isShip) {
+    } else if (correct) {
       setMisses(m => ({ ...m, [targetTeamId]: [...(m[targetTeamId] || []), pendingCoord] }));
       spawnCellFx(targetTeamId, pendingCoord, "miss");
-      onUpdateScore(activeTeam.id, 15);
+      updateScore(activeTeam.id, 15);
       showToast(`🌊 ${activeTeam.name} fired at ${pendingCoord} — splash, no ship there!`, "water");
     } else {
       setMisses(m => ({ ...m, [targetTeamId]: [...(m[targetTeamId] || []), pendingCoord] }));
@@ -329,6 +367,33 @@ export function BattleshipGame({ questions, teams, onUpdateScore, onEnd, forceFi
     setMissile({ teamId: targetTeamId, coord: pendingCoord });
     setTimeout(() => { resolve(correct); setMissile(null); }, 550);
   };
+
+  // CPU's own turn: it can't actually answer a question, so it picks a random un-fired square
+  // on the student's board after a short "thinking" delay, reusing the exact same pickCoord path
+  // a human's click would take.
+  useEffect(() => {
+    if (!isSolo || phase !== "pick-coord" || activeTeam.id !== cpuRef.current?.id || targetTeamId === null) return;
+    const already = new Set([...(hits[targetTeamId] || []), ...(misses[targetTeamId] || [])]);
+    const available = COLS.flatMap(c => ROWS.map(r => c.letter + r)).filter(coord => !already.has(coord));
+    if (available.length === 0) return;
+    const timer = setTimeout(() => {
+      pickCoord(available[Math.floor(Math.random() * available.length)]);
+    }, CPU_THINK_MS);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSolo, phase, activeTeam.id, targetTeamId, hits, misses]);
+
+  // Once the CPU has "picked" a square, fire at a tunable random hit chance instead of showing
+  // it a real question — drives the exact same resolve()/launchMissile() path a human's
+  // Correct/Wrong click would.
+  useEffect(() => {
+    if (!isSolo || phase !== "answer" || activeTeam.id !== cpuRef.current?.id) return;
+    const timer = setTimeout(() => {
+      launchMissile(Math.random() < CPU_HIT_CHANCE);
+    }, CPU_FIRE_MS);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSolo, phase, activeTeam.id]);
 
   const isSpeakingTask = currentQ?.type === "speaking task";
   const colColor = (letter: string) => {
