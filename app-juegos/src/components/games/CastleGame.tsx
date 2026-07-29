@@ -1,10 +1,17 @@
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import type { GameProps } from "../../types";
 import { useTurnTimer } from "../../hooks/useTurnTimer";
 import { TurnTimerBar } from "../shared/TurnTimerBar";
 import { QuestionCard } from "../shared/QuestionCard";
 import { teamsGridCols } from "../../data/constants";
 import { denseRank, medalForRank } from "../../utils/ranking";
+import { makeSoloCpuTeam } from "../../lib/soloOpponent";
+
+// How long the CPU "thinks" before picking an action, and before its action resolves —
+// standing in for the fact it can't actually answer a real question.
+const CPU_THINK_MS = 900;
+const CPU_ANSWER_MS = 900;
+const CPU_SUCCESS_CHANCE = 0.75;
 
 // Levels are uncapped: each level needs more XP than the last (gap grows by XP_STEP per level),
 // and damage multiplier keeps climbing forever — there is no "max level".
@@ -203,8 +210,27 @@ function DiceRoller({ rolling, result }: { rolling: boolean, result: number | nu
   );
 }
 
-export function CastleGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState }: GameProps) {
+export function CastleGame({ questions, teams: propTeams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState }: GameProps) {
   const TURN_SECONDS = 25;
+
+  // Solo play makes the CPU a real second castle — a genuine alternating-turn participant that
+  // attacks back on its own turn, not a passive target. This reuses the existing 2-team fast
+  // path (skip target-picking) unchanged, since `teams` is now genuinely length 2.
+  const isSolo = propTeams.length === 1;
+  const cpuRef = useRef(isSolo ? makeSoloCpuTeam() : null);
+  const [cpuScore, setCpuScore] = useState(0);
+  // Memoized so `teams` is referentially stable across renders when nothing has actually
+  // changed — effects/callbacks in this file depend on `teams` by reference, and a fresh array
+  // literal every render would make them re-fire (and re-setState) forever.
+  const teams = useMemo(
+    () => (isSolo ? [propTeams[0], { ...cpuRef.current!, score: cpuScore }] : propTeams),
+    [isSolo, propTeams, cpuScore]
+  );
+  const updateScore = (id: string | number, delta: number) => {
+    if (isSolo && id === cpuRef.current?.id) { setCpuScore(s => s + delta); }
+    else { onUpdateScore(id, delta); }
+  };
+
   const resumed = useRef(validateCastleSnapshot(initialGameState, teams.length)).current;
 
   const [rpg, setRpg] = useState<Record<string | number, TeamRpg>>(() => resumed?.rpg ?? Object.fromEntries(
@@ -327,6 +353,34 @@ export function CastleGame({ questions, teams, onUpdateScore, onEnd, forceFinalR
   }, [activeTeamIdx, teams, rpg]);
 
   const { timeLeft } = useTurnTimer(TURN_SECONDS, phase === "pick-target" || phase === "select-action", () => advanceTurn(), activeTeamIdx);
+
+  // CPU's own turn: picks an action after a short "thinking" delay, weighted toward attacking
+  // and skipping magic if it can't afford the MP — reuses the exact same pickAction path a
+  // human's click would take. Must stay above the intro/gameover early returns below (Rules of
+  // Hooks — a hook can't be skipped on some renders and not others).
+  useEffect(() => {
+    if (!isSolo || phase !== "select-action" || activeTeam.id !== cpuRef.current?.id) return;
+    const timer = setTimeout(() => {
+      const mp = rpg[activeTeam.id]?.mp ?? 0;
+      const weights: Record<ActionId, number> = { sword: 45, magic: 20, defend: 20, focus: 15 };
+      const pool = ACTION_DEFS.filter(a => !a.cost || mp >= a.cost).flatMap(a => Array(weights[a.id]).fill(a.id));
+      pickAction(pool[Math.floor(Math.random() * pool.length)] as ActionId);
+    }, CPU_THINK_MS);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSolo, phase, activeTeam.id]);
+
+  // Once the CPU has "picked" an action, resolve it via a tunable random success roll instead
+  // of showing it a real question — drives the exact same handleCorrect/handleWrong path a
+  // teacher's judgment would.
+  useEffect(() => {
+    if (!isSolo || phase !== "answer" || activeTeam.id !== cpuRef.current?.id) return;
+    const timer = setTimeout(() => {
+      if (Math.random() < CPU_SUCCESS_CHANCE) handleCorrect(); else handleWrong();
+    }, CPU_ANSWER_MS);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSolo, phase, activeTeam.id]);
 
   const arenaStyle: React.CSSProperties = {
     margin: "-20px", padding: "20px", borderRadius: "20px", position: "relative", overflow: "hidden",
@@ -473,7 +527,7 @@ export function CastleGame({ questions, teams, onUpdateScore, onEnd, forceFinalR
 
   const resolveDefend = () => {
     setRpg(prev => ({ ...prev, [activeTeam.id]: { ...prev[activeTeam.id], shieldTurnsLeft: SHIELD_DURATION_TURNS, shieldFresh: true } }));
-    onUpdateScore(activeTeam.id, DEFEND_SCORE);
+    updateScore(activeTeam.id, DEFEND_SCORE);
     setLastEvent({ action: "defend" });
     setPhase("result");
     spawnImpact(activeTeam.id, "shield", ACTION_DEFS.find(a => a.id === "defend")!.character);
@@ -562,7 +616,7 @@ export function CastleGame({ questions, teams, onUpdateScore, onEnd, forceFinalR
     const newLevel = getLevelInfo(attackerRpg.xp + xpGained).level;
     const leveledUp = newLevel > oldLevel;
 
-    onUpdateScore(activeTeam.id, roll * 15);
+    updateScore(activeTeam.id, roll * 15);
     setLastEvent({ action: selectedAction as ActionId, damage: finalDamage, xpGained, apple: gotApple, targetId, leveledUp, roll, shieldConsumed: targetShielded });
     setPhase("result");
 

@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { GameProps, QuestionData, Team } from "../../types";
 import { teamsGridCols } from "../../data/constants";
 import { denseRank, medalForRank } from "../../utils/ranking";
+import { makeTeacherTeam } from "../../lib/soloOpponent";
 
 type Phase =
   | "intro"
@@ -78,6 +79,9 @@ type SpySnapshot = {
   timesWasSpy: Record<string | number, number>;
   spyWinsByTeam: Record<string | number, number>;
   crewWinsByTeam: Record<string | number, number>;
+  // Only meaningful in solo (teacher stand-in) sessions — undefined/absent in normal multi-team
+  // games, where there's no teacher participant to track a score for.
+  teacherScore?: number;
 };
 
 function validateSpySnapshot(raw: unknown, teamCount: number, roundCount: number): SpySnapshot | undefined {
@@ -87,14 +91,37 @@ function validateSpySnapshot(raw: unknown, teamCount: number, roundCount: number
   return {
     ri: s.ri, spyTeamIdx: s.spyTeamIdx,
     timesWasSpy: s.timesWasSpy ?? {}, spyWinsByTeam: s.spyWinsByTeam ?? {}, crewWinsByTeam: s.crewWinsByTeam ?? {},
+    teacherScore: typeof s.teacherScore === "number" ? s.teacherScore : undefined,
   };
 }
 
-export function SpyAmongUsGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState }: GameProps) {
+export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState }: GameProps) {
   const DISCUSS_SECONDS = 30;
+  // Solo play makes the teacher the second live participant — Spy Among Us already has a
+  // fully-built, fully-tested 2-player ruleset (isTwoPlayer below), so this just needs to make
+  // `teams` genuinely length 2. `effectiveTeamCount` is used (rather than `teams.length`) to
+  // validate a resumed snapshot before `teams` itself is constructed, since resuming needs to
+  // know the right bound before teacherScore/teams exist yet.
+  const isSolo = propTeams.length === 1;
+  const teacherTeamRef = useRef(isSolo ? makeTeacherTeam() : null);
+  const effectiveTeamCount = isSolo ? 2 : propTeams.length;
+  const resumed = useRef(validateSpySnapshot(initialGameState, effectiveTeamCount, questions.length)).current;
+  const [teacherScore, setTeacherScore] = useState(() => resumed?.teacherScore ?? 0);
+  // Memoized so `teams` is referentially stable across renders when nothing has actually
+  // changed — a fresh array literal every render would break any effect/callback that depends
+  // on `teams` by reference.
+  const teams = useMemo(
+    () => (isSolo ? [propTeams[0], { ...teacherTeamRef.current!, score: teacherScore }] : propTeams),
+    [isSolo, propTeams, teacherScore]
+  );
+  // The teacher's score is never real class data — it stays local here instead of reaching the
+  // parent's onUpdateScore/ScoreBoard/saved-class state.
+  const updateScore = (id: string | number, delta: number) => {
+    if (isSolo && id === teacherTeamRef.current?.id) { setTeacherScore(s => s + delta); }
+    else { onUpdateScore(id, delta); }
+  };
   const isTwoPlayer = teams.length === 2;
   const randomTeamIndex = () => Math.floor(Math.random() * Math.max(teams.length, 1));
-  const resumed = useRef(validateSpySnapshot(initialGameState, teams.length, questions.length)).current;
 
   const [ri, setRi] = useState(() => resumed?.ri ?? 0);
   const [spyTeamIdx, setSpyTeamIdx] = useState(() => resumed?.spyTeamIdx ?? randomTeamIndex());
@@ -115,9 +142,9 @@ export function SpyAmongUsGame({ questions, teams, onUpdateScore, onEnd, forceFi
 
   useEffect(() => {
     if (!serializeStateRef) return;
-    serializeStateRef.current = (): SpySnapshot => ({ ri, spyTeamIdx, timesWasSpy, spyWinsByTeam, crewWinsByTeam });
+    serializeStateRef.current = (): SpySnapshot => ({ ri, spyTeamIdx, timesWasSpy, spyWinsByTeam, crewWinsByTeam, teacherScore });
     return () => { if (serializeStateRef) serializeStateRef.current = null; };
-  }, [serializeStateRef, ri, spyTeamIdx, timesWasSpy, spyWinsByTeam, crewWinsByTeam]);
+  }, [serializeStateRef, ri, spyTeamIdx, timesWasSpy, spyWinsByTeam, crewWinsByTeam, teacherScore]);
   const [peekIdx, setPeekIdx] = useState(0);
   const [revealed, setRevealed] = useState(false);
   const [votes, setVotes] = useState<Record<string | number, string | number>>({});
@@ -299,14 +326,14 @@ export function SpyAmongUsGame({ questions, teams, onUpdateScore, onEnd, forceFi
     teams
       .filter((team) => !isSpy(team.id) && votes[team.id] === spyTeam.id)
       .forEach((team) => {
-        onUpdateScore(team.id, 60);
+        updateScore(team.id, 60);
         setCrewWinsByTeam((prev) => ({ ...prev, [team.id]: (prev[team.id] ?? 0) + 1 }));
       });
 
     if (spyCaught) {
       setPhase("spy-guess");
     } else {
-      onUpdateScore(spyTeam.id, 100);
+      updateScore(spyTeam.id, 100);
       setSpyWinsByTeam((prev) => ({ ...prev, [spyTeam.id]: (prev[spyTeam.id] ?? 0) + 1 }));
       setPhase("reveal");
     }
@@ -314,11 +341,11 @@ export function SpyAmongUsGame({ questions, teams, onUpdateScore, onEnd, forceFi
 
   const resolveSpyGuess = () => {
     if (spyGuess === round.crewmateTopic) {
-      onUpdateScore(spyTeam.id, 60);
+      updateScore(spyTeam.id, 60);
       setSpyWinsByTeam((prev) => ({ ...prev, [spyTeam.id]: (prev[spyTeam.id] ?? 0) + 1 }));
     } else {
       teams.filter((team) => !isSpy(team.id)).forEach((team) => {
-        onUpdateScore(team.id, 80);
+        updateScore(team.id, 80);
         setCrewWinsByTeam((prev) => ({ ...prev, [team.id]: (prev[team.id] ?? 0) + 1 }));
       });
     }
@@ -336,11 +363,11 @@ export function SpyAmongUsGame({ questions, teams, onUpdateScore, onEnd, forceFi
     const crewGuessedRight = tp2Guesses[crewPlayer.id] === round.spyTopic;
 
     if (spyGuessedRight) {
-      onUpdateScore(spyPlayer.id, 100);
+      updateScore(spyPlayer.id, 100);
       setSpyWinsByTeam((prev) => ({ ...prev, [spyPlayer.id]: (prev[spyPlayer.id] ?? 0) + 1 }));
     }
     if (crewGuessedRight) {
-      onUpdateScore(crewPlayer.id, 100);
+      updateScore(crewPlayer.id, 100);
       setCrewWinsByTeam((prev) => ({ ...prev, [crewPlayer.id]: (prev[crewPlayer.id] ?? 0) + 1 }));
     }
     setPhase("reveal-2p");

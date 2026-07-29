@@ -2,8 +2,14 @@ import { useState, useRef, useEffect } from "react";
 import type { GameProps, QuestionData } from "../../types";
 import { QuestionCard } from "../shared/QuestionCard";
 import { teamsGridCols } from "../../data/constants";
+import { useTurnTimer } from "../../hooks/useTurnTimer";
+import { TurnTimerBar } from "../shared/TurnTimerBar";
 
 const TOTAL = 60;
+// Solo play has no rival team to "beat to the answer," so a per-question countdown replaces
+// that tension — answer before it expires or the turn is skipped, same idea as every other
+// timed game in this codebase.
+const SOLO_TASK_SECONDS = 20;
 
 type ZoneDef = { id: string; label: string; short: string; emoji: string; color: string; end: number };
 const ZONES: ZoneDef[] = [
@@ -378,6 +384,16 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
   const skipTask = () => { bumpType(currentZone.id); setShowAns(false); };
   const newTask = () => { bumpType(currentZone.id); setShowAns(false); };
 
+  // Solo per-question countdown — starts as soon as a task is shown, resets on every new
+  // question, and skips the task (same as clicking "No one got it") if it runs out.
+  const isSolo = teams.length === 1;
+  const { timeLeft: soloTimeLeft } = useTurnTimer(
+    SOLO_TASK_SECONDS,
+    isSolo && phase === "task",
+    () => skipTask(),
+    `${currentZone.id}:${typeIdx[currentZone.id] ?? 0}`
+  );
+
   const activatePowerup = (teamId: string | number, idx: number) => {
     const team = raceTeams[teamId];
     const pid = team.powerups[idx];
@@ -679,6 +695,11 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
 
         {phase === "task" && (
           <>
+            {isSolo && (
+              <div style={{ display: "flex", justifyContent: "center", marginBottom: "10px" }}>
+                <TurnTimerBar timeLeft={soloTimeLeft} totalSeconds={SOLO_TASK_SECONDS} />
+              </div>
+            )}
             <QuestionCard question={currentQ} showAnswer={showAns} onReveal={() => setShowAns(true)} />
             {(showAns || currentQ?.type === "speaking task") && (
               <div style={{ marginTop: "14px" }}>

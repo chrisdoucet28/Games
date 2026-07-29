@@ -215,7 +215,9 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
             <div style={{ fontSize: "36px", marginBottom: "10px" }}>🌋</div>
             <div style={{ fontWeight: "900", fontSize: "20px", marginBottom: "10px", color: "#FDBA74" }}>Hot Seat</div>
             <div style={{ fontSize: "15px", lineHeight: 1.7, opacity: 0.95 }}>
-              One player on the team turns away from the screen — everyone else on their team gives clues.
+              {teams.length === 1
+                ? "The teacher will describe each word out loud for your team to guess."
+                : "One player on the team turns away from the screen — everyone else on their team gives clues."}
               <br />
               Guess as many words as you can in <strong style={{ color: "#FDBA74" }}>{TURN_SECONDS} seconds</strong>. Each correct word is worth <strong style={{ color: "#FDBA74" }}>{POINTS_PER_WORD} points</strong>.
               <br />
@@ -257,7 +259,9 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
               <div style={{ fontWeight: "900", fontSize: "clamp(24px,5vw,38px)" }}>{currentTeam.mascot ?? currentTeam.color.emoji} {currentTeam.name}</div>
             </div>
             <div style={{ fontSize: "14px", lineHeight: 1.6, marginTop: "16px", opacity: 0.9 }}>
-              One player faces away, teammates give clues — no spelling, no saying the word!
+              {teams.length === 1
+                ? "The teacher describes the words — no spelling, no saying the word itself!"
+                : "One player faces away, teammates give clues — no spelling, no saying the word!"}
             </div>
           </div>
 

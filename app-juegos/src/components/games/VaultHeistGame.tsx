@@ -1,10 +1,18 @@
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import type { GameProps, QuestionData } from "../../types";
 import { useTurnTimer } from "../../hooks/useTurnTimer";
 import { TurnTimerBar } from "../shared/TurnTimerBar";
 import { QuestionCard } from "../shared/QuestionCard";
 import { Confetti } from "../shared/Confetti";
 import { teamsGridCols } from "../../data/constants";
+import { makeSoloCpuTeam } from "../../lib/soloOpponent";
+
+// How long the CPU takes to attempt its own lock, and how long its result banner stays up
+// before it auto-advances — standing in for the fact it can't actually answer a real question.
+// Both pace and success chance get tougher on harder difficulty, same as the player's own timer.
+const CPU_ANSWER_MS_BY_DIFFICULTY: Record<Difficulty, number> = { easy: 2200, medium: 1600, hard: 1000 };
+const CPU_RESULT_MS = 1400;
+const CPU_SUCCESS_PROB: Record<Difficulty, number> = { easy: 0.6, medium: 0.75, hard: 0.9 };
 
 const LOCK_COUNT = 5;
 // 25s was the only speed on offer, and felt too tight as a default — kept as the "hard" option,
@@ -114,7 +122,26 @@ function LockRow({ cracked, total, justChanged }: { cracked: number; total: numb
   );
 }
 
-export function VaultHeistGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState }: GameProps) {
+export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState }: GameProps) {
+  // Solo play makes the CPU a real dice-rolled turn participant — "just another team, but it's
+  // a CPU" — cracking its own vault on its own turn in the same rolled order. The one thing it
+  // can't do is answer a real question, so its own turn auto-resolves via a difficulty-tuned
+  // random roll (see the two new effects below).
+  const isSolo = propTeams.length === 1;
+  const cpuRef = useRef(isSolo ? makeSoloCpuTeam() : null);
+  const [cpuScore, setCpuScore] = useState(0);
+  // Memoized so `teams` is referentially stable across renders when nothing has actually
+  // changed — effects/callbacks in this file depend on `teams` by reference, and a fresh array
+  // literal every render would make them re-fire (and re-setState) forever.
+  const teams = useMemo(
+    () => (isSolo ? [propTeams[0], { ...cpuRef.current!, score: cpuScore }] : propTeams),
+    [isSolo, propTeams, cpuScore]
+  );
+  const updateScore = (id: string | number, delta: number) => {
+    if (isSolo && id === cpuRef.current?.id) { setCpuScore(s => s + delta); }
+    else { onUpdateScore(id, delta); }
+  };
+
   const rewriteQs = useRef(questions.filter(q => q.type === "rewrite sentences")).current;
   const categories = useRef([...new Set(rewriteQs.map(q => q.transform).filter((c): c is string => !!c))]).current;
   const pools = useRef(buildDrawPools(rewriteQs, categories, teams.map(t => t.id))).current;
@@ -357,7 +384,7 @@ export function VaultHeistGame({ questions, teams, onUpdateScore, onEnd, forceFi
     if (!currentCategory) return;
     const newCount = Math.min(LOCK_COUNT, (vaultLocks[activeTeam.id] ?? 0) + 1);
     setVaultLocks(prev => ({ ...prev, [activeTeam.id]: newCount }));
-    onUpdateScore(activeTeam.id, CRACK_SCORE);
+    updateScore(activeTeam.id, CRACK_SCORE);
     setShowAns(false);
     setLastOutcome({ correct: true, category: currentCategory, locksNow: newCount });
     setPhase("result");
@@ -366,7 +393,7 @@ export function VaultHeistGame({ questions, teams, onUpdateScore, onEnd, forceFi
       finishOrderRef.current.push(activeTeam.id);
       const rank = finishOrderRef.current.length;
       const bonus = finishBonusForRank(rank);
-      onUpdateScore(activeTeam.id, bonus);
+      updateScore(activeTeam.id, bonus);
       if (rank === 1) setConfettiActive(true);
       showWin(activeTeam.name, activeTeam.color.bg, rank, bonus);
       if (finishOrderRef.current.length >= teams.length) {
@@ -384,6 +411,31 @@ export function VaultHeistGame({ questions, teams, onUpdateScore, onEnd, forceFi
     setLastOutcome({ correct: false, category: currentCategory, locksNow: regressed });
     setPhase("result");
   };
+
+  // CPU can't actually answer a real question — auto-resolve its own lock attempt via a
+  // difficulty-tuned random success roll, driving the exact same handleCorrect/handleWrong path
+  // a teacher's judgment would. Must stay above every early return below (Rules of Hooks).
+  useEffect(() => {
+    if (!isSolo || phase !== "answer" || activeTeam.id !== cpuRef.current?.id) return;
+    const timer = setTimeout(() => {
+      if (Math.random() < CPU_SUCCESS_PROB[difficulty]) handleCorrect(); else handleWrong();
+    }, CPU_ANSWER_MS_BY_DIFFICULTY[difficulty]);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSolo, phase, activeTeam.id, difficulty]);
+
+  // Once the CPU's result banner has had a moment to show, auto-advance — reuses the exact same
+  // keepGoing/advanceTurn a human clicking "Keep Going!"/"Next Team" would trigger.
+  useEffect(() => {
+    if (!isSolo || phase !== "result" || activeTeam.id !== cpuRef.current?.id || !lastOutcome) return;
+    if (finishOrderRef.current.length >= teams.length) return; // gameover already scheduled elsewhere
+    const justFinished = lastOutcome.correct && lastOutcome.locksNow >= LOCK_COUNT;
+    const timer = setTimeout(() => {
+      if (lastOutcome.correct && !justFinished) keepGoing(); else advanceTurn();
+    }, CPU_RESULT_MS);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSolo, phase, activeTeam.id, lastOutcome]);
 
   const arenaStyle: React.CSSProperties = {
     margin: "-20px", padding: "20px", borderRadius: "20px", position: "relative", overflow: "hidden",

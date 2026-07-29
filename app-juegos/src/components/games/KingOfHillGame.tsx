@@ -1,10 +1,19 @@
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import type { GameProps } from "../../types";
 import { useTurnTimer } from "../../hooks/useTurnTimer";
 import { TurnTimerBar } from "../shared/TurnTimerBar";
 import { QuestionCard } from "../shared/QuestionCard";
 import { teamsGridCols } from "../../data/constants";
 import { denseRank, medalForRank } from "../../utils/ranking";
+import { makeSoloCpuTeam } from "../../lib/soloOpponent";
+
+// How long the CPU "thinks" before picking a zone, and before its uncontested claim resolves.
+const CPU_THINK_MS = 1400;
+const CPU_ANSWER_MS = 1000;
+const CPU_CLAIM_SUCCESS_PROB = 0.8;
+// Countdown the student gets to defend/attack a contested zone against the CPU, replacing the
+// teacher's Attacker/Defender/Neither judgment in solo — same idea as Race Track's timer.
+const CONTEST_SECONDS = 20;
 
 type ZoneDef = { id: string; icon: string; pts: number; label?: string; prefix?: string };
 
@@ -88,8 +97,28 @@ function validateHillSnapshot(raw: unknown, teamCount: number): HillSnapshot | u
   return { owners: s.owners ?? {}, roundPoints: s.roundPoints ?? {}, round: s.round, turnOrder: s.turnOrder, activeTeamIdx: s.activeTeamIdx };
 }
 
-export function KingOfHillGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState }: GameProps) {
+export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState }: GameProps) {
   const TURN_SECONDS = 20;
+
+  // Solo play makes the CPU a real dice-rolled turn participant — "just another team, but it's
+  // a CPU" — gets a real turn slot, claims/attacks zones on its own turn. The one thing it can't
+  // do is answer a real question, so its own turn auto-resolves via a random roll, and a
+  // contested duel against it uses a timer instead of teacher judgment (see below).
+  const isSolo = propTeams.length === 1;
+  const cpuRef = useRef(isSolo ? makeSoloCpuTeam() : null);
+  const [cpuScore, setCpuScore] = useState(0);
+  // Memoized so `teams` is referentially stable across renders when nothing has actually
+  // changed — several existing effects/callbacks in this file depend on `teams` by reference,
+  // and a fresh array literal every render would make them re-fire (and re-setState) forever.
+  const teams = useMemo(
+    () => (isSolo ? [propTeams[0], { ...cpuRef.current!, score: cpuScore }] : propTeams),
+    [isSolo, propTeams, cpuScore]
+  );
+  const updateScore = (id: string | number, delta: number) => {
+    if (isSolo && id === cpuRef.current?.id) { setCpuScore(s => s + delta); }
+    else { onUpdateScore(id, delta); }
+  };
+
   const isTopicMode = questions.length > 0 && questions.every(q => q.type === "speaking task");
   const ZONES = isTopicMode ? HILL_ZONES_TOPIC : HILL_ZONES_GRAMMAR;
   const resumed = useRef(validateHillSnapshot(initialGameState, teams.length)).current;
@@ -133,6 +162,10 @@ export function KingOfHillGame({ questions, teams, onUpdateScore, onEnd, forceFi
   const [showAns, setShowAns] = useState(false);
   const [contest, setContest] = useState<any>(null);
   const [roundSummary, setRoundSummary] = useState<any[] | null>(null);
+  // Solo contest duels don't start their countdown the instant the duel begins — the student
+  // has to click "I'm Ready!" first, so they get a moment to see what's happening before the
+  // clock starts. Reset to false every time a fresh contest begins (see pickZone).
+  const [contestReady, setContestReady] = useState(false);
 
   const [diceValues, setDiceValues] = useState<(number | null)[]>(() => teams.map(() => null));
   const [rollDone, setRollDone] = useState(false);
@@ -222,7 +255,7 @@ export function KingOfHillGame({ questions, teams, onUpdateScore, onEnd, forceFi
       return { teamId: t.id, zonesOwned: owned, ptsEarned: pts };
     });
     summary.forEach(s => {
-      if (s.ptsEarned > 0) onUpdateScore(s.teamId, s.ptsEarned * 10);
+      if (s.ptsEarned > 0) updateScore(s.teamId, s.ptsEarned * 10);
     });
     setRoundPoints(prev => {
       const next = { ...prev };
@@ -231,7 +264,8 @@ export function KingOfHillGame({ questions, teams, onUpdateScore, onEnd, forceFi
     });
     setRoundSummary(summary);
     setPhase("round-end");
-  }, [owners, teams, onUpdateScore, ZONES]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [owners, teams, ZONES, cpuScore]);
 
   const nextTeamTurn = useCallback((_scored: boolean, ownersOverride?: Record<string, string | number>) => {
     const nextIdx = (activeTeamIdx + 1) % teams.length;
@@ -269,6 +303,7 @@ export function KingOfHillGame({ questions, teams, onUpdateScore, onEnd, forceFi
     if (currentOwner !== undefined && currentOwner !== activeTeam.id) {
       setContest({ attackerId: activeTeam.id, defenderId: currentOwner, zoneId, step: "simultaneous" });
       setShowAns(false);
+      setContestReady(false);
       setPhase("contested");
     } else {
       setPhase("answer");
@@ -289,10 +324,10 @@ export function KingOfHillGame({ questions, teams, onUpdateScore, onEnd, forceFi
     let reason;
     if (winnerId === contest.attackerId) {
       newOwners[contest.zoneId] = contest.attackerId;
-      onUpdateScore(contest.attackerId, 30);
+      updateScore(contest.attackerId, 30);
       reason = "attacker";
     } else if (winnerId === contest.defenderId) {
-      onUpdateScore(contest.defenderId, 20);
+      updateScore(contest.defenderId, 20);
       reason = "defender";
     } else {
       reason = "neither";
@@ -300,6 +335,48 @@ export function KingOfHillGame({ questions, teams, onUpdateScore, onEnd, forceFi
     setOwners(newOwners);
     setContest((c: any) => ({ ...c, step: "result", winner: winnerId, reason }));
   };
+
+  // CPU auto-picks a zone on its own turn: unclaimed if any exist, otherwise attacks a
+  // player-owned zone. Reuses pickZone's existing branch logic unchanged — must stay above the
+  // intro/final early returns below (Rules of Hooks).
+  useEffect(() => {
+    if (!isSolo || phase !== "pick" || activeTeam.id !== cpuRef.current?.id) return;
+    const cpuId = cpuRef.current!.id;
+    const zoneIds = ZONES.map(z => z.id);
+    const unclaimed = zoneIds.filter(id => owners[id] === undefined);
+    const attackable = zoneIds.filter(id => owners[id] !== undefined && owners[id] !== cpuId);
+    const pool = unclaimed.length > 0 ? unclaimed : attackable;
+    if (pool.length === 0) return;
+    const timer = setTimeout(() => {
+      pickZone(pool[Math.floor(Math.random() * pool.length)]);
+    }, CPU_THINK_MS);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSolo, phase, activeTeam.id, owners]);
+
+  // CPU can't actually answer a real question — auto-resolve its own uncontested zone claim via
+  // a tunable random success roll, driving the exact same resolveUncontested path a teacher's
+  // Correct/Wrong click would.
+  useEffect(() => {
+    if (!isSolo || phase !== "answer" || activeTeam.id !== cpuRef.current?.id) return;
+    const timer = setTimeout(() => {
+      resolveUncontested(Math.random() < CPU_CLAIM_SUCCESS_PROB);
+    }, CPU_ANSWER_MS);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSolo, phase, activeTeam.id]);
+
+  // Contested (head-to-head) duels against the CPU use a countdown instead of teacher judgment —
+  // the one spot the base game already frames as "whoever answers correctly first/better wins,"
+  // which doesn't work with a CPU that can't actually answer. The student defends/attacks by
+  // clicking "Got it!" before time runs out; letting it expire hands the zone to the CPU.
+  const contestIsSoloDuel = isSolo && phase === "contested" && contest?.step === "simultaneous";
+  const { timeLeft: contestTimeLeft, stop: stopContestTimer } = useTurnTimer(
+    CONTEST_SECONDS,
+    contestIsSoloDuel && contestReady,
+    () => { if (contest) resolveContest(cpuRef.current!.id); },
+    contest?.zoneId ?? "none"
+  );
 
   const arenaStyle: React.CSSProperties = {
     margin: "-20px", padding: "20px", borderRadius: "20px", position: "relative", overflow: "hidden",
@@ -517,25 +594,56 @@ export function KingOfHillGame({ questions, teams, onUpdateScore, onEnd, forceFi
                     <div style={{ fontSize: "11px", color: "#F3E8FF", opacity: 0.8 }}>Defender of {contest.zoneId}</div>
                   </div>
                 </div>
-                <QuestionCard question={q} showAnswer={showAns} onReveal={() => { stop(); setShowAns(true); }} />
-                <div style={{ textAlign: "center", fontWeight: "700", fontSize: "13px", color: "#F9A8D4", marginTop: "10px" }}>
-                  {isTopicMode || q?.type === "speaking task"
-                    ? "Teacher judges which team gave the better answer."
-                    : "Judge which team answered correctly first."}
-                </div>
-                {(showAns || q?.type === "speaking task") && (
-                  <div style={{ marginTop: "14px" }}>
-                    <div style={{ textAlign: "center", fontWeight: "700", fontSize: "13px", color: "#F9A8D4", marginBottom: "10px" }}>
-                      {isTopicMode || q?.type === "speaking task"
-                        ? "Teacher judges - whose answer was better?"
-                        : "Who answered correctly first?"}
+                {contestIsSoloDuel && !contestReady ? (
+                  <div style={{ textAlign: "center", marginTop: "4px" }}>
+                    <div style={{ fontWeight: "700", fontSize: "14px", color: "#F9A8D4", marginBottom: "14px" }}>
+                      Take a second to look at the board — the {CONTEST_SECONDS}s clock only starts once you're ready.
                     </div>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "8px" }}>
-                      <button onClick={() => resolveContest(contest.attackerId)} className="ko-btn" style={{ background: attacker?.color.bg, color: "white", border: "none", borderRadius: "12px", padding: "14px 10px", cursor: "pointer", fontWeight: "800", transition: "transform 0.15s ease" }}>⚔️ {attacker?.name}</button>
-                      <button onClick={() => resolveContest(contest.defenderId)} className="ko-btn" style={{ background: defender?.color.bg, color: "white", border: "none", borderRadius: "12px", padding: "14px 10px", cursor: "pointer", fontWeight: "800", transition: "transform 0.15s ease" }}>🛡️ {defender?.name}</button>
-                    </div>
-                    <button onClick={() => resolveContest(null)} className="ko-btn" style={{ marginTop: "10px", background: "rgba(255,255,255,0.1)", color: "#F9A8D4", cursor: "pointer", border: "1px solid #F9A8D455", padding: "8px 16px", borderRadius: "10px", transition: "transform 0.15s ease" }}>🤝 Neither</button>
+                    <button onClick={() => setContestReady(true)} className="ko-btn" style={{ background: "linear-gradient(135deg,#831843,#DB2777)", color: "white", border: "none", borderRadius: "12px", padding: "14px 28px", cursor: "pointer", fontWeight: "800", fontSize: "16px", transition: "transform 0.15s ease" }}>🚦 I'm Ready!</button>
                   </div>
+                ) : (
+                  <QuestionCard question={q} showAnswer={showAns} onReveal={() => { stop(); if (contestIsSoloDuel) stopContestTimer(); setShowAns(true); }} />
+                )}
+                {contestIsSoloDuel ? (
+                  contestReady && (
+                    <div style={{ textAlign: "center", marginTop: "14px" }}>
+                      <div style={{ display: "flex", justifyContent: "center", marginBottom: "10px" }}>
+                        <TurnTimerBar timeLeft={contestTimeLeft} totalSeconds={CONTEST_SECONDS} />
+                      </div>
+                      <div style={{ fontWeight: "700", fontSize: "13px", color: "#F9A8D4", marginBottom: "10px" }}>
+                        Answer correctly before time runs out to {contest.attackerId === propTeams[0].id ? "capture" : "defend"} the zone!
+                      </div>
+                      <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
+                        <button onClick={() => { stopContestTimer(); resolveContest(propTeams[0].id); }} className="ko-btn" style={{ background: "#22C55E", color: "white", border: "none", borderRadius: "12px", padding: "14px 28px", cursor: "pointer", fontWeight: "800", fontSize: "16px", transition: "transform 0.15s ease" }}>✅ Got it!</button>
+                        {/* Lets the student concede the instant they know they missed it, instead of
+                            being forced to sit out the rest of the countdown for the same CPU-wins
+                            outcome a timeout would give anyway. */}
+                        <button onClick={() => { stopContestTimer(); resolveContest(cpuRef.current!.id); }} className="ko-btn" style={{ background: "rgba(255,255,255,0.1)", color: "#F9A8D4", border: "1px solid #F9A8D455", borderRadius: "12px", padding: "14px 28px", cursor: "pointer", fontWeight: "800", fontSize: "16px", transition: "transform 0.15s ease" }}>❌ Wrong</button>
+                      </div>
+                    </div>
+                  )
+                ) : (
+                  <>
+                    <div style={{ textAlign: "center", fontWeight: "700", fontSize: "13px", color: "#F9A8D4", marginTop: "10px" }}>
+                      {isTopicMode || q?.type === "speaking task"
+                        ? "Teacher judges which team gave the better answer."
+                        : "Judge which team answered correctly first."}
+                    </div>
+                    {(showAns || q?.type === "speaking task") && (
+                      <div style={{ marginTop: "14px" }}>
+                        <div style={{ textAlign: "center", fontWeight: "700", fontSize: "13px", color: "#F9A8D4", marginBottom: "10px" }}>
+                          {isTopicMode || q?.type === "speaking task"
+                            ? "Teacher judges - whose answer was better?"
+                            : "Who answered correctly first?"}
+                        </div>
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "8px" }}>
+                          <button onClick={() => resolveContest(contest.attackerId)} className="ko-btn" style={{ background: attacker?.color.bg, color: "white", border: "none", borderRadius: "12px", padding: "14px 10px", cursor: "pointer", fontWeight: "800", transition: "transform 0.15s ease" }}>⚔️ {attacker?.name}</button>
+                          <button onClick={() => resolveContest(contest.defenderId)} className="ko-btn" style={{ background: defender?.color.bg, color: "white", border: "none", borderRadius: "12px", padding: "14px 10px", cursor: "pointer", fontWeight: "800", transition: "transform 0.15s ease" }}>🛡️ {defender?.name}</button>
+                        </div>
+                        <button onClick={() => resolveContest(null)} className="ko-btn" style={{ marginTop: "10px", background: "rgba(255,255,255,0.1)", color: "#F9A8D4", cursor: "pointer", border: "1px solid #F9A8D455", padding: "8px 16px", borderRadius: "10px", transition: "transform 0.15s ease" }}>🤝 Neither</button>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             )}
