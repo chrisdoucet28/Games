@@ -424,24 +424,23 @@ function SiegeQuestionCard({ question }: { question: QuestionData | null }) {
   if (!question) return null;
   return (
     <div style={{
-      background: "white", border: "2px solid #6366F1", borderRadius: "12px",
-      padding: "8px 10px", textAlign: "center", boxShadow: "0 4px 14px #6366F133",
+      background: "white", border: "3px solid #6366F1", borderRadius: "16px",
+      padding: "16px 20px", textAlign: "center", boxShadow: "0 6px 20px #6366F144",
     }}>
       <div style={{
         display: "inline-block", background: "#EEF2FF", color: "#4F46E5",
-        padding: "1px 8px", borderRadius: "20px", fontSize: "9px", fontWeight: "700", marginBottom: "4px",
+        padding: "3px 12px", borderRadius: "20px", fontSize: "12px", fontWeight: "700", marginBottom: "8px",
         textTransform: "uppercase", letterSpacing: "0.04em",
       }}>
         📖 add to the prompt
       </div>
       {question.crewmateTopic && (
-        <div style={{ fontSize: "15px", fontWeight: "900", color: "#1E1B4B", margin: "0 0 3px" }}>
+        <div style={{ fontSize: "22px", fontWeight: "900", color: "#1E1B4B", margin: "0 0 6px" }}>
           {question.crewmateTopic}
         </div>
       )}
       <p style={{
-        fontSize: "11px", fontWeight: "600", color: "#4B5563", margin: 0, lineHeight: 1.25,
-        display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden",
+        fontSize: "17px", fontWeight: "600", color: "#374151", margin: 0, lineHeight: 1.4,
       }}>
         {question.crewmatePrompt}
       </p>
@@ -773,7 +772,7 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
           {teams.map(t => <PersonChip key={t.id} team={t} person={siege.persons[t.id]} />)}
         </div>
 
-        <div style={{ maxWidth: "360px", margin: "0 auto" }}>
+        <div style={{ maxWidth: "640px", width: "100%", margin: "0 auto" }}>
           <SiegeQuestionCard question={currentQuestion} />
 
           {roundPhase === "reveal" ? (
