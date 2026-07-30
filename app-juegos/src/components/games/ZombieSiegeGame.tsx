@@ -448,8 +448,12 @@ function SiegeQuestionCard({ question }: { question: QuestionData | null }) {
   );
 }
 
-export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef }: GameProps) {
+export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef, paused, onTogglePause }: GameProps) {
   const [phase, setPhase] = useState<Phase>("intro");
+  // A ref (not just the `paused` prop) so the tick interval's closure always reads the latest
+  // value without needing to tear down and rebuild the interval every time pause is toggled.
+  const pausedRef = useRef(false);
+  useEffect(() => { pausedRef.current = !!paused; }, [paused]);
 
   useEffect(() => {
     if (!forceFinalRef) return;
@@ -546,6 +550,7 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
   useEffect(() => {
     if (phase !== "playing") return;
     const id = setInterval(() => {
+      if (pausedRef.current) return;
       const aliveTeamIds = teams.map(t => t.id);
       const prevRound = siegeRef.current.round;
       const { next, events } = advanceTick(siegeRef.current, aliveTeamIds, () => zombieIdRef.current++);
@@ -708,6 +713,18 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
     <div style={arenaStyle}>
       {fogLayer}
       {STYLE_TAG}
+      {paused && (
+        <div onClick={onTogglePause} style={{
+          position: "absolute", inset: 0, zIndex: 30, cursor: "pointer", borderRadius: "20px",
+          background: "rgba(5,10,5,0.82)", display: "flex", alignItems: "center", justifyContent: "center",
+        }}>
+          <div style={{ textAlign: "center", color: "white" }}>
+            <div style={{ fontSize: "44px", marginBottom: "8px" }}>⏸️</div>
+            <div style={{ fontWeight: "900", fontSize: "22px", color: "#BEF264" }}>Paused</div>
+            <div style={{ fontSize: "14px", color: "#D9F99D", marginTop: "6px", fontWeight: "700" }}>Tap to resume</div>
+          </div>
+        </div>
+      )}
       <div style={{ position: "absolute", top: "8px", right: "8px", zIndex: 15, display: "flex", flexDirection: "column", gap: "4px", alignItems: "flex-end", pointerEvents: "none" }}>
         {fx.map(f => {
           const shooter = f.teamId !== undefined ? teams.find(t => t.id === f.teamId) : undefined;
