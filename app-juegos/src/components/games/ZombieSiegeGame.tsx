@@ -338,7 +338,7 @@ const FOREST: { x: number; y: number; size: number }[] = Array.from({ length: 22
 function HouseScene({ siege, teams }: { siege: SiegeState; teams: Team[] }) {
   return (
     <div style={{
-      position: "relative", width: "100%", maxWidth: "230px", aspectRatio: "1 / 1", margin: "0 auto 5px",
+      position: "relative", width: "100%", maxWidth: "340px", aspectRatio: "4 / 3", margin: "0 auto 5px",
       borderRadius: "14px", overflow: "hidden", border: "2px solid #365314",
       background: "radial-gradient(circle at 50% 50%, #16240F 0%, #0A1408 70%, #050A05 100%)",
     }}>
@@ -772,7 +772,7 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
           {teams.map(t => <PersonChip key={t.id} team={t} person={siege.persons[t.id]} />)}
         </div>
 
-        <div style={{ maxWidth: "640px", width: "100%", margin: "0 auto" }}>
+        <div style={{ maxWidth: "480px", width: "100%", margin: "0 auto" }}>
           <SiegeQuestionCard question={currentQuestion} />
 
           {roundPhase === "reveal" ? (
