@@ -389,13 +389,15 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
   const newTask = () => { bumpType(currentZone.id); setShowAns(false); };
 
   // Solo per-question countdown — starts as soon as a task is shown, resets on every new
-  // question, and skips the task (same as clicking "No one got it") if it runs out.
+  // question, and skips the task (same as clicking "No one got it") if it runs out. Paused once
+  // "Reveal Answer" is clicked so it can't skip the task out from under the player mid-reveal.
   const isSolo = teams.length === 1;
   const { timeLeft: soloTimeLeft } = useTurnTimer(
     SOLO_TASK_SECONDS,
     isSolo && phase === "task",
     () => skipTask(),
-    `${currentZone.id}:${typeIdx[currentZone.id] ?? 0}`
+    `${currentZone.id}:${typeIdx[currentZone.id] ?? 0}`,
+    showAns
   );
 
   const activatePowerup = (teamId: string | number, idx: number) => {

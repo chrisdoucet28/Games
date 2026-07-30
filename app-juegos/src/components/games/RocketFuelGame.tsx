@@ -229,7 +229,9 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
 
   const endTurn = () => setPhase("team-end");
 
-  const { timeLeft } = useTurnTimer(TURN_SECONDS, phase === "team-turn", endTurn, teamIdx);
+  // Paused while an answer is being shown — a turn spans several prompts in a row, so revealing
+  // one shouldn't burn into the time budget for the rest of the turn while the teacher judges it.
+  const { timeLeft } = useTurnTimer(TURN_SECONDS, phase === "team-turn", endTurn, teamIdx, showAnswer);
 
   const startTeamTurn = (idx: number) => {
     setTeamIdx(idx);
