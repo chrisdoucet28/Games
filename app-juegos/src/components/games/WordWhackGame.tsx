@@ -221,6 +221,20 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
     background: "radial-gradient(ellipse at 50% -10%,#65A30D 0%,#365314 45%,#0F1A05 100%)",
   };
 
+  if (pool.length === 0) {
+    return (
+      <div style={{ ...arenaStyle, textAlign: "center" }}>
+        <AmbientBackdrop />
+        {STYLE_TAG}
+        <div style={{ position: "relative", zIndex: 1 }}>
+          <div style={{ fontSize: "40px", marginBottom: "10px" }}>🔨</div>
+          <div style={{ fontWeight: "800", fontSize: "18px", color: "white" }}>No multiple-choice content found for this topic selection.</div>
+          <button onClick={onEnd} className="ww-btn" style={{ marginTop: "16px", background: "linear-gradient(135deg,#3F6212,#84CC16)", color: "#0F1A05", border: "none", borderRadius: "14px", padding: "14px 32px", fontSize: "16px", fontWeight: "900", cursor: "pointer" }}>🏁 End Game</button>
+        </div>
+      </div>
+    );
+  }
+
   if (phase === "intro") return (
     <div style={{ ...arenaStyle, textAlign: "center" }}>
       <AmbientBackdrop />

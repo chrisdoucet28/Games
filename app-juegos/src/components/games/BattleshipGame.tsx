@@ -290,11 +290,38 @@ export function BattleshipGame({ questions, teams: propTeams, onUpdateScore, onE
     }
   }, [activeTeamIdx, teams, isEliminated]);
 
+  // A team that lets the pick-target/pick-coord timer run out gets exactly one free retry per
+  // game — same team, fresh full-length timer, no turn lost — before a second miss actually costs
+  // them the turn. Always shown explicitly (see the timeoutNotice screen below) so a turn never
+  // just vanishes with no warning.
+  const retryUsedRef = useRef<Set<string | number>>(new Set());
+  const [retryTick, setRetryTick] = useState(0);
+  const [timeoutNotice, setTimeoutNotice] = useState<{ teamId: string | number; retried: boolean } | null>(null);
+
+  const handleDecisionTimeout = useCallback(() => {
+    const team = teams[activeTeamIdx];
+    const alreadyUsed = retryUsedRef.current.has(team.id);
+    if (!alreadyUsed) retryUsedRef.current.add(team.id);
+    setTimeoutNotice({ teamId: team.id, retried: !alreadyUsed });
+  }, [teams, activeTeamIdx]);
+
+  const dismissTimeoutNotice = () => {
+    const retried = timeoutNotice?.retried;
+    setTimeoutNotice(null);
+    if (retried) {
+      setPendingCoord(null);
+      if (teams.length !== 2) { setTargetTeamId(null); setPhase("pick-target"); }
+      setRetryTick(t => t + 1);
+    } else {
+      advanceTurn();
+    }
+  };
+
   const { timeLeft, stop } = useTurnTimer(
     TURN_SECONDS,
-    phase === "pick-target" || phase === "pick-coord",
-    () => advanceTurn(),
-    activeTeamIdx
+    (phase === "pick-target" || phase === "pick-coord") && !timeoutNotice,
+    handleDecisionTimeout,
+    `${activeTeamIdx}-${retryTick}`
   );
 
   const pickTarget = (teamId: string | number) => {
@@ -508,6 +535,29 @@ export function BattleshipGame({ questions, teams: propTeams, onUpdateScore, onE
             ))}
           </div>
           <button onClick={onEnd} className="bship-btn" style={{ background: "linear-gradient(135deg,#1E3A8A,#2563EB)", color: "white", border: "none", borderRadius: "14px", padding: "14px 32px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(37,99,235,0.5)", transition: "transform 0.15s ease" }}>🏁 End Game</button>
+        </div>
+      </div>
+    );
+  }
+
+  if (timeoutNotice) {
+    const noticeTeam = teams.find(t => t.id === timeoutNotice.teamId)!;
+    return (
+      <div style={{ ...arenaStyle, textAlign: "center" }}>
+        <AmbientBackdrop />
+        <RadarBackdrop />
+        {STYLE_TAG}
+        <div style={{ position: "relative", zIndex: 1 }}>
+          <div style={{ background: "linear-gradient(160deg,#1E3A8A,#0C1B3A)", border: "2px solid #60A5FA55", borderRadius: "20px", padding: "28px 24px", marginBottom: "20px", color: "white", maxWidth: "480px", margin: "0 auto 20px" }}>
+            <div style={{ fontSize: "36px", marginBottom: "10px" }}>⏰</div>
+            <div style={{ fontWeight: "900", fontSize: "19px", marginBottom: "10px", color: "#93C5FD" }}>{noticeTeam.mascot ?? noticeTeam.color.emoji} {noticeTeam.name} ran out of time!</div>
+            <div style={{ fontSize: "15px", lineHeight: 1.6, opacity: 0.95 }}>
+              {timeoutNotice.retried ? "That's your one free retry for this game — watch the clock this time!" : "You've already used your free retry this game — the turn moves on."}
+            </div>
+          </div>
+          <button onClick={dismissTimeoutNotice} className="bship-btn" style={{ background: "linear-gradient(135deg,#1E3A8A,#2563EB)", color: "white", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(37,99,235,0.5)", transition: "transform 0.15s ease" }}>
+            {timeoutNotice.retried ? "🔄 Try Again!" : "➡️ Next Team"}
+          </button>
         </div>
       </div>
     );

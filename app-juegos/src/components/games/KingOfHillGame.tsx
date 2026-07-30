@@ -281,7 +281,40 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
     }
   }, [activeTeamIdx, teams.length, owners, doRoundPayout]);
 
-  const { timeLeft, stop } = useTurnTimer(TURN_SECONDS, phase === "pick", () => nextTeamTurn(false, owners), activeTeamIdx);
+  // A team that lets the zone-picking timer run out gets exactly one free retry per game — same
+  // team, fresh full-length timer, no turn lost — before a second miss actually costs them the
+  // turn. Deliberately does NOT call nextTeamTurn() on a retry (that can also trigger the whole
+  // round's payout if it happened to be the last team's turn) — a retry means the team hasn't
+  // actually finished their turn yet, they just get to pick again.
+  const retryUsedRef = useRef<Set<string | number>>(new Set());
+  const [retryTick, setRetryTick] = useState(0);
+  const [timeoutNotice, setTimeoutNotice] = useState<{ teamId: string | number; retried: boolean } | null>(null);
+
+  const handlePickTimeout = useCallback(() => {
+    const team = teams[activeTeamIdx];
+    const alreadyUsed = retryUsedRef.current.has(team.id);
+    if (!alreadyUsed) retryUsedRef.current.add(team.id);
+    setTimeoutNotice({ teamId: team.id, retried: !alreadyUsed });
+  }, [teams, activeTeamIdx]);
+
+  const dismissTimeoutNotice = () => {
+    const retried = timeoutNotice?.retried;
+    setTimeoutNotice(null);
+    if (retried) {
+      setChosenZone(null);
+      setPhase("pick");
+      setRetryTick(t => t + 1);
+    } else {
+      nextTeamTurn(false, owners);
+    }
+  };
+
+  const { timeLeft, stop } = useTurnTimer(
+    TURN_SECONDS,
+    phase === "pick" && !timeoutNotice,
+    handlePickTimeout,
+    `${activeTeamIdx}-${retryTick}`
+  );
 
   const startNextRound = () => {
     if (round >= TOTAL_ROUNDS) { setPhase("final"); return; }
@@ -422,6 +455,28 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
       </div>
     </div>
   );
+
+  if (timeoutNotice) {
+    const noticeTeam = teams.find(t => t.id === timeoutNotice.teamId)!;
+    return (
+      <div style={{ ...arenaStyle, textAlign: "center" }}>
+        <AmbientBackdrop />
+        {STYLE_TAG}
+        <div style={{ position: "relative", zIndex: 1 }}>
+          <div style={{ background: "linear-gradient(160deg,#831843,#4C0519)", border: "2px solid #F9A8D455", borderRadius: "20px", padding: "28px 24px", marginBottom: "20px", color: "white", maxWidth: "480px", margin: "0 auto 20px", boxShadow: "0 0 50px rgba(219,39,119,0.4)" }}>
+            <div style={{ fontSize: "36px", marginBottom: "10px" }}>⏰</div>
+            <div style={{ fontWeight: "900", fontSize: "19px", marginBottom: "10px", color: "#F9A8D4" }}>{noticeTeam.mascot ?? noticeTeam.color.emoji} {noticeTeam.name} ran out of time!</div>
+            <div style={{ fontSize: "15px", lineHeight: 1.6, opacity: 0.95 }}>
+              {timeoutNotice.retried ? "That's your one free retry for this game — watch the clock this time!" : "You've already used your free retry this game — the turn moves on."}
+            </div>
+          </div>
+          <button onClick={dismissTimeoutNotice} className="ko-btn" style={{ background: "linear-gradient(135deg,#831843,#DB2777)", color: "white", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(219,39,119,0.5)", transition: "transform 0.15s ease" }}>
+            {timeoutNotice.retried ? "🔄 Try Again!" : "➡️ Next Team"}
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (phase === "final") {
     // Dense rank on final score — two teams tied for the throne both wear the crown instead of
