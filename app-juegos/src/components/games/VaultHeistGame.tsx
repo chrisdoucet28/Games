@@ -102,11 +102,14 @@ function formatCategory(tag: string): string {
 
 // "negative" and "question" are the only transform tags reused across dozens of unrelated topics
 // spanning many different tenses (past simple, present perfect, modals, "so do I"...). Every other
-// transform tag already bakes in its own tense/structure (e.g. "tense-past-simple"), so a lock
+// transform tag already bakes in its own tense/structure (e.g. "tense-past-simple"), so a pool
 // naming it is unambiguous regardless of which topic it came from. These two bare tags aren't —
-// "NEGATIVE" alone doesn't tell a student which tense's negative form is needed once topics are
-// mixed. Scoping just these two to their source topic (rather than every category) keeps genuinely
-// topic-specific categories reading exactly as they did before this existed.
+// pooling every topic's "negative" content together would let a lock draw a form belonging to a
+// different tense than the rest of that question. Scoping just these two to their source topic
+// (rather than every category) keeps genuinely topic-specific pools exactly as they were before
+// this existed. This is purely a pooling/draw concern now — the lock card always shows its source
+// topic as its own permanent line (see the "reveal" phase JSX below) regardless of transform tag,
+// so unlike before, a new transform tag can never silently lose its topic label from the display.
 const AMBIGUOUS_TRANSFORMS = new Set(["negative", "question"]);
 function categoryKeyFor(q: QuestionData): string {
   if (q.transform && AMBIGUOUS_TRANSFORMS.has(q.transform) && q.sourceTopic) {
@@ -116,11 +119,8 @@ function categoryKeyFor(q: QuestionData): string {
 }
 function displayCategory(categoryKey: string): string {
   const sep = categoryKey.indexOf("::");
-  if (sep === -1) return formatCategory(categoryKey);
-  const topicValue = categoryKey.slice(0, sep);
-  const transformTag = categoryKey.slice(sep + 2);
-  const topicLabel = TOPIC_OPTIONS.find(o => o.value === topicValue)?.label ?? formatCategory(topicValue);
-  return `${topicLabel.toUpperCase()} — ${formatCategory(transformTag)}`;
+  const transformTag = sep === -1 ? categoryKey : categoryKey.slice(sep + 2);
+  return formatCategory(transformTag);
 }
 
 // One independent shuffled question list per (team × category), so two teams never draw
@@ -705,13 +705,20 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
           {phase === "answer" && <TurnTimerBar timeLeft={timeLeft} totalSeconds={turnSeconds} />}
         </div>
 
-        {phase === "reveal" && currentCategory && (
+        {phase === "reveal" && currentCategory && (() => {
+          const topicLabel = currentQuestion?.sourceTopic
+            ? TOPIC_OPTIONS.find(o => o.value === currentQuestion.sourceTopic)?.label
+            : undefined;
+          return (
           <div style={{ textAlign: "center" }}>
             <div style={{
               display: "inline-block", background: "linear-gradient(135deg,#3A2E12,#7A5C1E)", border: "3px solid #D4AF37",
               borderRadius: "16px", padding: "20px 32px", boxShadow: "0 8px 28px rgba(212,175,55,0.4)",
               animation: "toolFlip 0.5s ease-out",
             }}>
+              {topicLabel && (
+                <div style={{ fontSize: "12px", fontWeight: "800", color: "#B8A98A", marginBottom: "8px", letterSpacing: "0.05em", textTransform: "uppercase" }}>📚 {topicLabel}</div>
+              )}
               <div style={{ fontSize: "30px", marginBottom: "4px" }}>{activeTeam.mascot ?? "🕵️"}</div>
               <div style={{ fontSize: "13px", fontWeight: "700", color: "#E8D8AE", marginBottom: "6px", letterSpacing: "0.05em" }}>🔧 THIS LOCK NEEDS</div>
               <div style={{ fontSize: "24px", fontWeight: "900", color: "#FCD34D" }}>{displayCategory(currentCategory)}</div>
@@ -724,7 +731,8 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
               )}
             </div>
           </div>
-        )}
+          );
+        })()}
 
         {phase === "answer" && (
           <>
