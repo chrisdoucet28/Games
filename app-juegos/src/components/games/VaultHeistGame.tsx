@@ -655,6 +655,13 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
     return "";
   };
 
+  // Looked up once per render so both the big reveal card and the compact answer-phase reminder
+  // (which repeats it after the reveal card disappears, in case a team forgot what the lock asked
+  // for while they're heads-down writing) always agree on the same label.
+  const topicLabel = currentQuestion?.sourceTopic
+    ? TOPIC_OPTIONS.find(o => o.value === currentQuestion.sourceTopic)?.label
+    : undefined;
+
   return (
     <div style={arenaStyle}>
       {ambientLayer}
@@ -705,11 +712,7 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
           {phase === "answer" && <TurnTimerBar timeLeft={timeLeft} totalSeconds={turnSeconds} />}
         </div>
 
-        {phase === "reveal" && currentCategory && (() => {
-          const topicLabel = currentQuestion?.sourceTopic
-            ? TOPIC_OPTIONS.find(o => o.value === currentQuestion.sourceTopic)?.label
-            : undefined;
-          return (
+        {phase === "reveal" && currentCategory && (
           <div style={{ textAlign: "center" }}>
             <div style={{
               display: "inline-block", background: "linear-gradient(135deg,#3A2E12,#7A5C1E)", border: "3px solid #D4AF37",
@@ -731,11 +734,33 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
               )}
             </div>
           </div>
-          );
-        })()}
+        )}
 
         {phase === "answer" && (
           <>
+            {currentCategory && (
+              // The big gold reveal card is gone by this phase — this compact strip keeps the
+              // same info on screen the whole time a team is writing, so nobody has to remember
+              // (or ask again) what the lock needed once they're heads-down on the answer.
+              <div style={{ textAlign: "center", marginBottom: "10px" }}>
+                <div style={{
+                  display: "inline-flex", alignItems: "center", gap: "8px", flexWrap: "wrap", justifyContent: "center",
+                  background: "rgba(212,175,55,0.12)", border: "1px solid rgba(212,175,55,0.4)",
+                  borderRadius: "10px", padding: "6px 14px",
+                }}>
+                  {topicLabel && (
+                    <span style={{ fontSize: "11px", fontWeight: "800", color: "#B8A98A", letterSpacing: "0.04em", textTransform: "uppercase" }}>📚 {topicLabel}</span>
+                  )}
+                  {topicLabel && <span style={{ fontSize: "11px", color: "#6B5B3A" }}>•</span>}
+                  <span style={{ fontSize: "12px", fontWeight: "900", color: "#FCD34D" }}>🔧 {displayCategory(currentCategory)}</span>
+                  {currentQuestion?.form && (
+                    <span style={{ fontSize: "11px", fontWeight: "800", color: "#FCA5A5" }}>
+                      {currentQuestion.form === "question" ? "❓ + QUESTION" : "🚫 + NEGATIVE"}
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
             <QuestionCard question={currentQuestion} showAnswer={showAns} onReveal={handleReveal} />
             {currentQuestion && (showAns || currentQuestion?.type === "speaking task") && (
               <div style={{ display: "flex", gap: "10px", justifyContent: "center", marginTop: "12px" }}>
