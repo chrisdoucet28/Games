@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { GameProps } from "../../types";
 import { teamsGridCols } from "../../data/constants";
 import { denseRank, medalForRank } from "../../utils/ranking";
@@ -65,7 +65,6 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
   }, [forceFinalRef, phase]);
   const [roundIndex, setRoundIndex] = useState(0);
   const [teamIndex, setTeamIndex] = useState(0);
-  const [wordIndex, setWordIndex] = useState(0);
   const [turnCorrect, setTurnCorrect] = useState(0);
   const [lastTurnCorrect, setLastTurnCorrect] = useState(0);
   // Words guessed correctly per team, summed across every turn/round — turnCorrect itself resets
@@ -84,11 +83,35 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
       if (word) uniqueWords.set(word.toLowerCase(), word);
     });
 
-    return shuffle(Array.from(uniqueWords.values()));
+    return Array.from(uniqueWords.values());
   }, [questions]);
 
+  // A shuffled deck rather than a fixed shuffled list drawn via a plain modulo cursor — a small
+  // word pool gets cycled through more than once in a single game, and a modulo cursor would
+  // repeat the exact same order every lap. Reshuffling only once the deck is exhausted (not on
+  // every draw) keeps every word appearing exactly once per lap, same as before, just in a fresh
+  // order each time — and the one-item swap after reshuffling stops the last word of one lap from
+  // immediately reappearing as the first word of the next.
+  const deckRef = useRef<string[]>(shuffle(words));
+  const deckPosRef = useRef(0);
+  const lastWordRef = useRef<string | undefined>(undefined);
+  const drawWord = useCallback(() => {
+    if (deckPosRef.current >= deckRef.current.length) {
+      const next = shuffle(words);
+      if (next.length > 1 && next[0] === lastWordRef.current) {
+        [next[0], next[1]] = [next[1], next[0]];
+      }
+      deckRef.current = next;
+      deckPosRef.current = 0;
+    }
+    const word = deckRef.current[deckPosRef.current];
+    deckPosRef.current += 1;
+    lastWordRef.current = word;
+    return word;
+  }, [words]);
+  const [currentWord, setCurrentWord] = useState<string>(() => (words.length > 0 ? drawWord() : ""));
+
   const currentTeam = teams[teamIndex];
-  const currentWord = words.length > 0 ? words[wordIndex % words.length] : "";
   const turnNumber = roundIndex * teams.length + teamIndex + 1;
   const totalTurns = TOTAL_ROUNDS * teams.length;
   const isLastTurn = roundIndex === TOTAL_ROUNDS - 1 && teamIndex === teams.length - 1;
@@ -140,11 +163,11 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
     onUpdateScore(currentTeam.id, POINTS_PER_WORD);
     setTurnCorrect(score => score + 1);
     setTotalWordsByTeam(prev => ({ ...prev, [currentTeam.id]: (prev[currentTeam.id] ?? 0) + 1 }));
-    setWordIndex(index => index + 1);
+    setCurrentWord(drawWord());
   };
 
   const skipWord = () => {
-    setWordIndex(index => index + 1);
+    setCurrentWord(drawWord());
   };
 
   const goToNextTurn = () => {
