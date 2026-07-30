@@ -412,6 +412,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     // Every fresh game launch (as opposed to "Resume") starts cold — clears out any snapshot left
     // over from an earlier resume in this same session so it can never leak into an unrelated game.
     setResumeGameState(null);
+    setPaused(false);
 
     try {
       const selectedEntries = getSelectedTopicEntries(selectedTopics);
@@ -536,6 +537,10 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
   // cold. Cleared whenever a game is started fresh (see startGame) so a stale snapshot from an
   // earlier resume can never leak into an unrelated new game.
   const [resumeGameState, setResumeGameState] = useState<unknown>(null);
+  // Only meaningful for the two continuous-real-time games (Zombie Siege, Order Up) — see
+  // GameProps.paused. Every other game is turn-based and has nothing running that needs a pause,
+  // so the header button below only ever appears for those two.
+  const [paused, setPaused] = useState(false);
 
   const handleGameEnd = () => {
     // The class's running scores persist either way; a naturally-finished game just has nothing
@@ -1069,6 +1074,15 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
             >
               {saveStatus === "saving" ? "Saving…" : saveStatus === "saved" ? "✅ Saved!" : saveStatus === "error" ? "⚠️ Failed — try again" : "💾 Save & Exit"}
             </button>
+            {(selectedGame.id === "zombie" || selectedGame.id === "orderup") && (
+              <button
+                onClick={() => setPaused(p => !p)}
+                title="Freeze the clock so you can explain something to the class"
+                style={{ background: paused ? "#F59E0B" : "rgba(255,255,255,0.15)", color: "white", border: "none", borderRadius: "8px", padding: "6px 12px", cursor: "pointer", fontWeight: "700", fontFamily: theme.headingFont }}
+              >
+                {paused ? "▶️ Resume" : "⏸️ Pause"}
+              </button>
+            )}
             <button onClick={toggleFullscreen} style={{ background: "rgba(255,255,255,0.15)", color: "white", border: "none", borderRadius: "8px", padding: "6px 12px", cursor: "pointer", fontWeight: "700", fontFamily: theme.headingFont }}>⛶ Fullscreen</button>
             <button onClick={handleTopBarEndGame} style={{ background: "rgba(255,255,255,0.15)", color: "white", border: "none", borderRadius: "8px", padding: "6px 12px", cursor: "pointer", fontWeight: "700", fontFamily: theme.headingFont }}>🏁 End Game</button>
           </div>
@@ -1089,8 +1103,8 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
             {selectedGame.id === "racetrack" && <RaceTrackGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
             {selectedGame.id === "whack" && <WordWhackGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
             {selectedGame.id === "rocket" && <RocketFuelGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-            {selectedGame.id === "zombie" && <ZombieSiegeGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-            {selectedGame.id === "orderup" && <OrderUpGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} onUpdateScore={updateScore} onEnd={handleGameEnd} level={orderUpLevel} />}
+            {selectedGame.id === "zombie" && <ZombieSiegeGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} onUpdateScore={updateScore} onEnd={handleGameEnd} paused={paused} onTogglePause={() => setPaused(p => !p)} />}
+            {selectedGame.id === "orderup" && <OrderUpGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} onUpdateScore={updateScore} onEnd={handleGameEnd} level={orderUpLevel} paused={paused} onTogglePause={() => setPaused(p => !p)} />}
           </div>
         </div>
       </div>

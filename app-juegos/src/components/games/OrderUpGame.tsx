@@ -296,8 +296,12 @@ function TicketCard({ ticket, teams, judging, onClaim, onCorrect, onWrong }: {
 // A round-length countdown drives its own "final" phase (results + set-collection payout), but the
 // always-present top-bar "End Game" button in LessonGamesGenerator.tsx can still bail out early at
 // any time, same as every other game — this only adds a natural end, it doesn't remove the old one.
-export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, level, forceFinalRef }: GameProps) {
+export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, level, forceFinalRef, paused, onTogglePause }: GameProps) {
   const isBeginner = level === "A1" || level === "A2";
+  // A ref (not just the `paused` prop) so the per-ticket countdown interval's closure always reads
+  // the latest value without needing to tear down and rebuild the interval every time pause toggles.
+  const pausedRef = useRef(false);
+  useEffect(() => { pausedRef.current = !!paused; }, [paused]);
 
   const contentGrammarTags = useRef([
     ...new Set(questions.filter(q => q.type === "rewrite sentences" && q.transform).map(q => q.transform as string)),
@@ -342,7 +346,7 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, level, for
     return () => { if (forceFinalRef) forceFinalRef.current = null; };
   }, [forceFinalRef, phase, handleSessionEnd]);
 
-  const { timeLeft: sessionTimeLeft } = useTurnTimer(SESSION_SECONDS_BY_LENGTH[sessionLength], phase === "playing", handleSessionEnd);
+  const { timeLeft: sessionTimeLeft } = useTurnTimer(SESSION_SECONDS_BY_LENGTH[sessionLength], phase === "playing", handleSessionEnd, undefined, paused);
 
   // Tops the queue up to whatever the current ramp allows — fires on mount (spawning the first
   // customer) and again after every resolution (serve/expire), since removing a ticket changes
@@ -372,6 +376,7 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, level, for
   useEffect(() => {
     if (phase !== "playing") return;
     const id = setInterval(() => {
+      if (pausedRef.current) return;
       const survivors: Ticket[] = [];
       let expiredCount = 0;
       ticketsRef.current.forEach(t => {
@@ -553,6 +558,18 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, level, for
     <div style={arenaStyle}>
       {STYLE_TAG}
       {floorStrip}
+      {paused && (
+        <div onClick={onTogglePause} style={{
+          position: "absolute", inset: 0, zIndex: 30, cursor: "pointer", borderRadius: "20px",
+          background: "rgba(69,10,10,0.72)", display: "flex", alignItems: "center", justifyContent: "center",
+        }}>
+          <div style={{ textAlign: "center", color: "white" }}>
+            <div style={{ fontSize: "44px", marginBottom: "8px" }}>⏸️</div>
+            <div style={{ fontWeight: "900", fontSize: "22px", color: "#FDA4AF" }}>Paused</div>
+            <div style={{ fontSize: "14px", color: "#FECDD3", marginTop: "6px", fontWeight: "700" }}>Tap to resume</div>
+          </div>
+        </div>
+      )}
       {banner && (
         <div key={banner.key} style={{
           position: "absolute", top: "14px", left: "50%", zIndex: 20, whiteSpace: "nowrap",

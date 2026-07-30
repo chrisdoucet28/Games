@@ -88,6 +88,15 @@ export interface TeamColor {
     level?: string;
     isTopic?: boolean;
     gridData?: any; // Específico para el Minefield
+    // Only wired up for the two games driven by a continuous real-time clock that never stops on
+    // its own even between turns (Zombie Siege, Order Up) — every other game is turn-based, so its
+    // own timer already sits idle whenever nobody's clock is running, and the shared top-bar
+    // Pause button (rendered in LessonGamesGenerator.tsx, not here) only appears for those two.
+    // A game that accepts this prop should freeze whatever real-time thing it runs (zombies
+    // advancing, ticket countdowns) while true, and render its own "Paused" overlay — clicking the
+    // overlay should call onTogglePause to resume, matching the shared button.
+    paused?: boolean;
+    onTogglePause?: () => void;
   }
 
   // A teacher's own personalization — separate from auth.users, which only holds login info.
