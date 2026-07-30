@@ -3926,6 +3926,66 @@ export const LESSONS: Record<string, Lesson> = {
     ],
   },
 
+  prefixes_suffixes_adjectives: {
+    title: "Prefixes & Suffixes (Adjectives)",
+    intro: "A prefix is a group of letters added to the BEGINNING of a word to change its meaning; a suffix is a group of letters added to the END of a word to change its meaning or grammatical function. Together, they let you turn a plain verb or noun into a precise, professional-sounding adjective — and mixing up which one to use is the most common mistake.",
+    sections: [
+      {
+        heading: "Negative prefixes: un-, dis-, in-",
+        body: ["'Un-' and 'dis-' both mean 'not' or 'the opposite of' — which one a word takes has to be learned with the word itself.", "'In-' is the default 'not' prefix for most other adjectives that don't take 'un-' or 'dis-'."],
+        examples: [
+          "**un**fortunate, **un**equal, **un**usual",
+          "**dis**loyal, **dis**similar, **dis**honest",
+          "**in**convenient, **in**active, **in**expensive",
+        ],
+      },
+      {
+        heading: "in- changes shape: im-, ir-, il-",
+        body: ["'In-' changes its spelling to match the sound that follows it.", "Use 'im-' before a word starting with 'm' or 'p'.", "Use 'ir-' before a word starting with 'r'.", "Use 'il-' before a word starting with 'l'.", "Use 'in-' before most other words."],
+        examples: [
+          "mature → **im**mature / polite → **im**polite",
+          "rational → **ir**rational / regular → **ir**regular",
+          "legal → **il**legal / logical → **il**logical",
+          "convenient → **in**convenient / active → **in**active",
+        ],
+      },
+      {
+        heading: "Adjective-forming suffixes",
+        body: ["'-able' → able to (adaptable, comfortable)", "'-al' → relating to (inspirational, national)", "'-ent' → being in a specified state (persistent, excellent)", "'-ful' → full of (careful, beautiful)", "'-ive' → having the nature of / performing toward an action (innovative, effective)", "'-less' → without (careless, endless)", "'-ous' → possessing or characterized by (dangerous, famous)"],
+        examples: [
+          "adapt → adapt**able** — 'capable of adapting'",
+          "innovate → innovat**ive** — 'having the nature of innovation'",
+          "care → care**ful** vs. care**less** — the same root, opposite meanings",
+        ],
+      },
+      {
+        heading: "Combining a prefix and a suffix on the same root",
+        body: ["You can add a suffix to a noun or verb to form an adjective, then add a negative prefix to that adjective to flip its meaning."],
+        examples: [
+          "act → act**ive** → **in**active",
+          "comfort → comfort**able** → **un**comfortable",
+        ],
+      },
+      {
+        heading: "Bonus prefixes: self-, over-, non-",
+        body: ["'Self-' means 'oneself'.", "'Over-' (or 'overly' as an adverb) means 'too much'.", "'Non-' also means 'not', often written with a hyphen."],
+        examples: [
+          "She's very **self**-sufficient.",
+          "He can be **overly** meticulous at times.",
+          "The offer is **non**-negotiable.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ She's very inmature for her age. → ✅ She's very immature for her age. ('im-' before 'm')",
+      "❌ That's totally inlegal. → ✅ That's totally illegal. ('il-' before 'l')",
+      "❌ His argument was inrational. → ✅ His argument was irrational. ('ir-' before 'r')",
+      "❌ He gave a very inspirationful speech. → ✅ He gave a very inspirational speech. ('-al', not '-ful')",
+      "❌ She gave a very innovateful presentation. → ✅ She gave a very innovative presentation. ('-ive', not '-ful')",
+      "❌ He's extremely persistful about this project. → ✅ He's extremely persistent about this project. ('-ent', not '-ful')",
+    ],
+  },
+
   greetings_introductions: {
     title: "Greetings & Introductions",
     intro: "The first phrases you need for any conversation: saying hello, asking how someone is, and giving basic personal information.",
