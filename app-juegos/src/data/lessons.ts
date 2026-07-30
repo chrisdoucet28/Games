@@ -3970,8 +3970,8 @@ export const LESSONS: Record<string, Lesson> = {
         heading: "Bonus prefixes: self-, over-, non-",
         body: ["'Self-' means 'oneself'.", "'Over-' (or 'overly' as an adverb) means 'too much'.", "'Non-' also means 'not', often written with a hyphen."],
         examples: [
-          "She's very **self**-sufficient.",
-          "He can be **overly** meticulous at times.",
+          "She's very **self**-aware.",
+          "He can be **overly** critical of his own work.",
           "The offer is **non**-negotiable.",
         ],
       },

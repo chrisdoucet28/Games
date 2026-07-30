@@ -98,11 +98,23 @@ handout) with no guarantee they've seen any other specific lesson first.
 - **Sentence Auction content (`auctionSentences`)**: every sentence must be independently written.
   Never write a correct sentence immediately followed by the same sentence with one word swapped
   to make it wrong — students pattern-match "the second of each near-identical pair is the broken
-  one" almost instantly and stop reading. Also avoid a strictly alternating true/false/true/false
-  sequence across the whole array, even with independent sentences — vary the order. Run
+  one" almost instantly and stop reading. This is the one rule that actually matters here; a
+  strictly alternating true/false/true/false sequence with otherwise-independent sentences is not
+  a real problem and isn't worth fixing on its own. Run
   `node app-juegos/scripts/check-auction-sentences.js` after adding or editing any topic's
-  `auctionSentences` before committing; it flags both problems. See the comment on
-  `auctionSentences` in `LessonGamesGenerator.tsx` for the same rule inline.
+  `auctionSentences` before committing — it fails (non-zero exit) only on the near-duplicate
+  pattern; alternation is reported as an FYI-only warning, not something to act on. See the
+  comment on `auctionSentences` in `LessonGamesGenerator.tsx` for the same rule inline.
+- **Building a topic from a teacher-supplied reference document**: never assume a player has read
+  the source document — every game and lesson always assumes the player's only source of knowledge
+  is the Learn lesson page itself. Don't lift a specific example phrase or scenario line verbatim
+  from the source (e.g. a document's own illustrative dialogue), especially one built around an
+  uncommon word the source had to gloss/define for its own reader — that word is then untaught and
+  unexplained in ClassCade's own content, silently assuming the player saw the original document.
+  A word from the source is fine to reuse *only* if it's actually decomposed and explained through
+  the topic's own taught mechanism (e.g. an adjective built from a prefix/suffix the lesson
+  explicitly teaches) or if it's common enough that no learner needs it explained at all. When in
+  doubt, swap the word for a different, self-contained example rather than the source's own.
 - **Vault Heist rewrite-sentence `transform` tags**: give each `transform` tag its own precise
   meaning — Vault Heist shows the tag verbatim (kebab-case → "LIKE THIS") on the lock-reveal card
   *before* the student sees the actual question, promising what kind of transformation is coming.
