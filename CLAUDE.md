@@ -95,6 +95,22 @@ handout) with no guarantee they've seen any other specific lesson first.
   unlimited classes + up to 5 teams. `public.subscriptions` is Stripe-agnostic by design (a
   `provider` column) so a second payment provider (Mercado Pago is the planned one) can slot in
   without a schema rewrite.
+- **Sentence Auction content (`auctionSentences`)**: every sentence must be independently written.
+  Never write a correct sentence immediately followed by the same sentence with one word swapped
+  to make it wrong — students pattern-match "the second of each near-identical pair is the broken
+  one" almost instantly and stop reading. Also avoid a strictly alternating true/false/true/false
+  sequence across the whole array, even with independent sentences — vary the order. Run
+  `node app-juegos/scripts/check-auction-sentences.js` after adding or editing any topic's
+  `auctionSentences` before committing; it flags both problems. See the comment on
+  `auctionSentences` in `LessonGamesGenerator.tsx` for the same rule inline.
+- **Vault Heist rewrite-sentence `transform` tags**: give each `transform` tag its own precise
+  meaning — Vault Heist shows the tag verbatim (kebab-case → "LIKE THIS") on the lock-reveal card
+  *before* the student sees the actual question, promising what kind of transformation is coming.
+  If one topic's rewrite items actually test two or more distinguishable sub-skills (e.g. some
+  items are prefix-only, others suffix-only), give each its own tag rather than one blanket tag
+  covering both — a generic tag shown on every card regardless of which sub-skill that specific
+  item tests reads as mislabeled/wrong to a teacher mid-game, even though it's technically a
+  content-authoring gap rather than a game-logic bug.
 
 ## Git workflow (multiple concurrent focus areas)
 

@@ -47,6 +47,13 @@ type TopicLibraryEntry = {
     colLabels: string[];
     rowLabels: string[];
   };
+  // Sentence Auction content. CONTENT RULE (not enforced by this type — see
+  // scripts/check-auction-sentences.js): each sentence must be independently written, and
+  // isCorrect must NOT strictly alternate true/false/true/false. Never write a correct sentence
+  // immediately followed by the same sentence with one word swapped to make it wrong — students
+  // pattern-match "the second of each near-identical pair is the broken one" almost instantly and
+  // stop reading the actual content. Run the checker script after adding/editing any topic's
+  // auctionSentences before committing.
   auctionSentences?: QuestionData[];
   cardTasks?: { task: string }[];
   spyRounds?: QuestionData[];
