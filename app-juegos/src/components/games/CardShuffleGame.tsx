@@ -212,7 +212,34 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
     else { setAnsweringTeamIdx(nextIdx); setShowAns(false); }
   }, [answeringTeamIdx, teams.length]);
 
-  const { timeLeft, stop, reset: resetTimer } = useTurnTimer(TURN_SECONDS, phase === "picking", () => advanceAnsweringTeam(), answeringTeamIdx);
+  // A team that lets the pick-timer run out gets exactly one free retry per game — same team,
+  // fresh full-length timer, no turn lost — before a second miss actually costs them the turn.
+  // Always shown explicitly (see the timeoutNotice screen below) so a turn never just vanishes
+  // with no warning.
+  const retryUsedRef = useRef<Set<string | number>>(new Set());
+  const [retryTick, setRetryTick] = useState(0);
+  const [timeoutNotice, setTimeoutNotice] = useState<{ teamId: string | number; retried: boolean } | null>(null);
+
+  const handlePickTimeout = useCallback(() => {
+    const team = teams[answeringTeamIdx];
+    const alreadyUsed = retryUsedRef.current.has(team.id);
+    if (!alreadyUsed) retryUsedRef.current.add(team.id);
+    setTimeoutNotice({ teamId: team.id, retried: !alreadyUsed });
+  }, [teams, answeringTeamIdx]);
+
+  const dismissTimeoutNotice = () => {
+    const retried = timeoutNotice?.retried;
+    setTimeoutNotice(null);
+    if (retried) setRetryTick(t => t + 1);
+    else advanceAnsweringTeam();
+  };
+
+  const { timeLeft, stop, reset: resetTimer } = useTurnTimer(
+    TURN_SECONDS,
+    phase === "picking" && !timeoutNotice,
+    handlePickTimeout,
+    `${answeringTeamIdx}-${retryTick}`
+  );
 
   const pickSlot = (slot: number) => {
     const currentTeam = teams[answeringTeamIdx];
@@ -334,6 +361,29 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
             ))}
           </div>
           <button onClick={onEnd} className="cs-btn" style={{ background: "linear-gradient(135deg,#B91C1C,#FCD34D)", color: "#450A0A", border: "none", borderRadius: "14px", padding: "14px 32px", fontSize: "16px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 20px rgba(252,211,77,0.4)", transition: "transform 0.15s ease" }}>🏁 End Game</button>
+        </div>
+      </div>
+    );
+  }
+
+  if (timeoutNotice) {
+    const noticeTeam = teams.find(t => t.id === timeoutNotice.teamId)!;
+    return (
+      <div style={{ ...arenaStyle, textAlign: "center" }}>
+        <AmbientBackdrop />
+        <div style={TENT_STRIPES} />
+        {STYLE_TAG}
+        <div style={{ position: "relative", zIndex: 1 }}>
+          <div style={{ background: "linear-gradient(160deg,#991B1B,#450A0A)", border: "2px solid #FCD34D66", borderRadius: "20px", padding: "28px 24px", marginBottom: "20px", color: "white", maxWidth: "480px", margin: "0 auto 20px" }}>
+            <div style={{ fontSize: "36px", marginBottom: "10px" }}>⏰</div>
+            <div style={{ fontWeight: "900", fontSize: "19px", marginBottom: "10px", color: "#FCD34D" }}>{noticeTeam.mascot ?? noticeTeam.color.emoji} {noticeTeam.name} ran out of time!</div>
+            <div style={{ fontSize: "15px", lineHeight: 1.6, opacity: 0.95 }}>
+              {timeoutNotice.retried ? "That's your one free retry for this game — watch the clock this time!" : "You've already used your free retry this game — the turn moves on."}
+            </div>
+          </div>
+          <button onClick={dismissTimeoutNotice} className="cs-btn" style={{ background: "linear-gradient(135deg,#B91C1C,#FCD34D)", color: "#450A0A", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(252,211,77,0.4)", transition: "transform 0.15s ease" }}>
+            {timeoutNotice.retried ? "🔄 Try Again!" : "➡️ Next Team"}
+          </button>
         </div>
       </div>
     );
