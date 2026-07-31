@@ -3,18 +3,41 @@ import type { TutorialStep } from "../../types";
 
 export const ZOMBIE_TUTORIAL_STEPS: TutorialStep[] = [
   {
-    narration: "Everyone shares one house and one score. Each wave, a prompt appears — add a sentence to earn a barricade or a power-up, as many times as you like.",
+    narration: "All teams share ONE house and ONE score. Zombies attack the doors — everyone defends together, not separately.",
+    visual: (
+      <div style={{ textAlign: "center" }}>
+        <div style={{ fontSize: "26px" }}>🏠🧟</div>
+        <div style={{ fontSize: "11px", fontWeight: 700, color: "#365314", marginTop: "4px" }}>One shared house, one shared score</div>
+      </div>
+    ),
+  },
+  {
+    narration: "A sentence prompt appears. ANY team can add to it, as many times as they want — there is no turn order.",
     visual: (
       <div style={{ textAlign: "center" }}>
         <div style={{ background: "#F0FDF4", border: "2px solid #65A30D", borderRadius: "12px", padding: "12px 16px", fontWeight: 700, color: "#365314", fontSize: "14px" }}>
           "The zombies were slow, but there were..."
         </div>
-        <div style={{ fontSize: "12px", color: "#4D7C0F", fontWeight: 700, marginTop: "8px" }}>Add your sentence → 🧱 barricade earned!</div>
       </div>
     ),
   },
   {
-    narration: "Bullets recharge on their own and auto-shoot zombies at the door. No bullet ready? It breaks a barricade instead.",
+    narration: "Most correct sentences (about 3 out of 4) earn a barricade brick for a door. The rest give a random power-up instead — you can't choose which, it's random.",
+    visual: (
+      <div style={{ display: "flex", justifyContent: "center", gap: "16px" }}>
+        <div style={{ textAlign: "center" }}>
+          <div style={{ fontSize: "22px" }}>🧱</div>
+          <div style={{ fontSize: "10px", fontWeight: 800, color: "#4D7C0F" }}>~75% of the time</div>
+        </div>
+        <div style={{ textAlign: "center" }}>
+          <div style={{ fontSize: "22px" }}>⚡</div>
+          <div style={{ fontSize: "10px", fontWeight: 800, color: "#4D7C0F" }}>~25% of the time</div>
+        </div>
+      </div>
+    ),
+  },
+  {
+    narration: "Each team also has bullets that recharge on their own over time, up to a limit, and automatically shoot zombies at the door — you don't aim, it just happens.",
     visual: (
       <div style={{ display: "flex", justifyContent: "center", gap: "18px", alignItems: "center" }}>
         <div style={{ textAlign: "center" }}>
@@ -24,17 +47,34 @@ export const ZOMBIE_TUTORIAL_STEPS: TutorialStep[] = [
         <div style={{ fontSize: "20px" }}>→</div>
         <div style={{ textAlign: "center" }}>
           <div style={{ fontSize: "26px" }}>🧟💥</div>
-          <div style={{ fontSize: "11px", fontWeight: 700, color: "#4D7C0F" }}>Zombie down</div>
+          <div style={{ fontSize: "11px", fontWeight: 700, color: "#4D7C0F" }}>Zombie down, automatically</div>
         </div>
       </div>
     ),
   },
   {
-    narration: "2 axes per team are the last resort if a zombie breaks through. Clear the whole wave, and a bigger one begins.",
+    narration: "If no bullet is ready when a zombie attacks, a barricade brick breaks instead. Keep adding sentences to keep your barricades stocked!",
     visual: (
       <div style={{ textAlign: "center" }}>
-        <div style={{ fontSize: "26px" }}>🪓 🪓</div>
-        <div style={{ fontWeight: 900, color: "#365314", fontSize: "14px", marginTop: "6px" }}>Wave 1 cleared!</div>
+        <div style={{ fontSize: "22px" }}>🧱💥</div>
+        <div style={{ fontSize: "11px", fontWeight: 800, color: "#991B1B", marginTop: "4px" }}>No bullet ready — barricade takes the hit</div>
+      </div>
+    ),
+  },
+  {
+    narration: "Each team also has 2 axes — these are fixed and never come back once used. Save them for when a zombie actually breaks all the way through!",
+    visual: (
+      <div style={{ textAlign: "center" }}>
+        <div style={{ fontSize: "26px" }}>🪓🪓</div>
+        <div style={{ fontSize: "11px", fontWeight: 700, color: "#365314", marginTop: "4px" }}>Last resort — use wisely, they don't come back</div>
+      </div>
+    ),
+  },
+  {
+    narration: "Clear every zombie in the wave to move on. The next wave is always tougher — how many waves can your class survive?",
+    visual: (
+      <div style={{ textAlign: "center" }}>
+        <div style={{ fontWeight: 900, color: "#365314", fontSize: "14px" }}>Wave 1 cleared!</div>
         <div style={{ color: "#4D7C0F", fontWeight: 700, fontSize: "12px" }}>Wave 2 incoming — tougher!</div>
       </div>
     ),

@@ -3,31 +3,42 @@ import type { TutorialStep } from "../../types";
 
 export const HOTPOTATO_TUTORIAL_STEPS: TutorialStep[] = [
   {
-    narration: "One team holds the potato while the clock ticks. Answer within your time — the timer auto-reveals the answer when it runs out.",
+    narration: "Each team starts with 100 points. The game has 5 rounds. In every round, one team holds the hot potato 🥔 first.",
     visual: (
       <div style={{ textAlign: "center" }}>
-        <div style={{ fontSize: "36px", animation: "none" }}>🥔</div>
-        <div style={{ background: "#FFF7ED", border: "2px solid #F97316", borderRadius: "10px", padding: "6px 14px", display: "inline-block", fontWeight: 800, color: "#7C2D12", fontSize: "13px", marginTop: "6px" }}>⏱️ 12s left</div>
+        <div style={{ fontSize: "30px" }}>🥔</div>
+        <div style={{ fontWeight: 800, color: "#7C2D12", fontSize: "12px", marginTop: "4px" }}>Round 1/5 — Team Red is holding it!</div>
       </div>
     ),
   },
   {
-    narration: "Teacher judges: answered in time? Pass it on! Too slow or wrong? You keep holding it.",
+    narration: "The team holding the potato gets a short time to answer a question. If time runs out, the correct answer is shown automatically.",
     visual: (
-      <div style={{ display: "flex", justifyContent: "center", gap: "20px" }}>
-        <div style={{ textAlign: "center" }}>
-          <div style={{ fontSize: "22px" }}>✅</div>
-          <div style={{ fontSize: "11px", fontWeight: 800, color: "#166534" }}>Pass it on!</div>
-        </div>
-        <div style={{ textAlign: "center" }}>
-          <div style={{ fontSize: "22px" }}>❌</div>
-          <div style={{ fontSize: "11px", fontWeight: 800, color: "#991B1B" }}>Keep holding!</div>
-        </div>
+      <div style={{ textAlign: "center" }}>
+        <div style={{ background: "#FFF7ED", border: "2px solid #F97316", borderRadius: "10px", padding: "6px 14px", display: "inline-block", fontWeight: 800, color: "#7C2D12", fontSize: "13px" }}>⏱️ 12s left</div>
       </div>
     ),
   },
   {
-    narration: "Whoever's holding the potato when the round timer hits 0 loses points — pass fast!",
+    narration: "Answered correctly in time? Pass the potato to the NEXT team in order! Now it's their turn to answer.",
+    visual: (
+      <div style={{ textAlign: "center" }}>
+        <div style={{ fontSize: "22px" }}>✅ 🥔 ➡️</div>
+        <div style={{ fontSize: "11px", fontWeight: 800, color: "#166534", marginTop: "4px" }}>Pass it to Team Blue!</div>
+      </div>
+    ),
+  },
+  {
+    narration: "Answered wrong, or ran out of time? You keep holding the potato — a new question comes up, and you try again.",
+    visual: (
+      <div style={{ textAlign: "center" }}>
+        <div style={{ fontSize: "22px" }}>❌ 🥔</div>
+        <div style={{ fontSize: "11px", fontWeight: 800, color: "#991B1B", marginTop: "4px" }}>Still holding — try again!</div>
+      </div>
+    ),
+  },
+  {
+    narration: "Every round also has its own longer clock. Whoever is STILL holding the potato when that clock hits 0 loses 30 points!",
     visual: (
       <div style={{ textAlign: "center" }}>
         <div style={{ fontSize: "34px" }}>🥔💥</div>
@@ -36,7 +47,15 @@ export const HOTPOTATO_TUTORIAL_STEPS: TutorialStep[] = [
     ),
   },
   {
-    narration: "Each team starts with a bank of points for this game — you can preview every question up front to pre-teach anything unfamiliar.",
+    narration: "This repeats for all 5 rounds — the potato keeps passing around. Losing 30 points can happen again and again, so answer fast and pass it on!",
+    visual: (
+      <div style={{ textAlign: "center" }}>
+        <div style={{ fontSize: "12px", fontWeight: 800, color: "#7C2D12" }}>Round 3/5 — new round, new holder!</div>
+      </div>
+    ),
+  },
+  {
+    narration: "Before you start, you can preview every question and answer for this game — great for pre-teaching anything unfamiliar to your class.",
     visual: (
       <div style={{ textAlign: "center" }}>
         <div style={{ background: "white", border: "2px solid #FED7AA", borderRadius: "10px", padding: "10px 14px", fontSize: "12px", color: "#7C2D12", fontWeight: 700 }}>

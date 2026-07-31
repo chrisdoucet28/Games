@@ -3,7 +3,7 @@ import type { TutorialStep } from "../../types";
 
 export const ROCKET_TUTORIAL_STEPS: TutorialStep[] = [
   {
-    narration: "At mission control, a word appears — use it correctly in your own original sentence. Every correct one adds fuel!",
+    narration: "At mission control, a word appears, like 'already'. Use it correctly in your OWN original sentence, spoken out loud.",
     visual: (
       <div style={{ textAlign: "center" }}>
         <div style={{ background: "#EEF2FF", border: "2px solid #6366F1", borderRadius: "10px", padding: "10px 16px", display: "inline-block", fontWeight: 800, color: "#312E81", fontSize: "14px" }}>
@@ -14,7 +14,25 @@ export const ROCKET_TUTORIAL_STEPS: TutorialStep[] = [
     ),
   },
   {
-    narration: "Can't think of anything for a prompt? Skip it for a new one — no penalty. Nobody's fuel level is revealed until launch day, not even the scoreboard!",
+    narration: "Every correct sentence adds 1 fuel to your rocket, worth 20 points. You have 90 seconds on your turn to make as many correct sentences as you can.",
+    visual: (
+      <div style={{ textAlign: "center" }}>
+        <div style={{ fontSize: "20px" }}>⛽ +1 fuel</div>
+        <div style={{ fontSize: "11px", fontWeight: 800, color: "#4338CA", marginTop: "2px" }}>= +20 pts</div>
+      </div>
+    ),
+  },
+  {
+    narration: "Can't think of anything for a prompt? Skip it and a new word appears — no penalty for skipping.",
+    visual: (
+      <div style={{ textAlign: "center" }}>
+        <div style={{ fontSize: "20px" }}>⏭️</div>
+        <div style={{ fontSize: "11px", fontWeight: 700, color: "#4338CA" }}>Skip — no penalty, try a new word</div>
+      </div>
+    ),
+  },
+  {
+    narration: "Your fuel count stays secret the whole time — not even the scoreboard shows it. No one knows who is ahead until the very end!",
     visual: (
       <div style={{ textAlign: "center" }}>
         <div style={{ fontSize: "22px" }}>⛽ ???</div>
@@ -23,7 +41,16 @@ export const ROCKET_TUTORIAL_STEPS: TutorialStep[] = [
     ),
   },
   {
-    narration: "Once every team has fuelled up, all rockets launch together — whoever fuelled the most flies highest and scores the most!",
+    narration: "Once every team has had their turn, all rockets launch together! Points = fuel × 20, PLUS a bonus for how high you flew: 1st place +50, 2nd +30, 3rd +15, 4th +5.",
+    visual: (
+      <div style={{ display: "flex", flexDirection: "column", gap: "2px", alignItems: "center", fontSize: "11px", fontWeight: 800, color: "#312E81" }}>
+        <div>🥇 1st — fuel×20 + 50 bonus</div>
+        <div>🥈 2nd — fuel×20 + 30 bonus</div>
+      </div>
+    ),
+  },
+  {
+    narration: "The team that made the most correct sentences built the most fuel — and their rocket flies the highest!",
     visual: (
       <div style={{ textAlign: "center" }}>
         <div style={{ fontSize: "28px" }}>🚀✨</div>

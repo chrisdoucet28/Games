@@ -62,6 +62,24 @@ export const SPY_GROUP_STEPS: TutorialStep[] = [
     ),
   },
   {
+    narration: "After everyone peeks, you get 30 quiet seconds to think about what you will say. Do NOT say your topic out loud yet — just plan it in your head.",
+    visual: (
+      <div style={{ textAlign: "center" }}>
+        <div style={{ fontSize: "20px" }}>🤫⏱️</div>
+        <div style={{ fontSize: "11px", fontWeight: 700, color: "#374151", marginTop: "4px" }}>30 seconds to prepare, quietly</div>
+      </div>
+    ),
+  },
+  {
+    narration: "Next, everyone rolls a dice to decide the speaking order. The highest roll speaks first.",
+    visual: (
+      <div style={{ textAlign: "center" }}>
+        <div style={{ fontSize: "22px" }}>🎲</div>
+        <div style={{ fontSize: "11px", fontWeight: 700, color: "#374151", marginTop: "4px" }}>Team Red rolls 6 — speaks first!</div>
+      </div>
+    ),
+  },
+  {
     narration: "Each team takes a turn speaking about their topic — try to sound like you belong. Spy tip: you don't have to stick rigidly to your own prompt — straying toward what you think the real topic is can help you blend in!",
     visual: (
       <div style={{ textAlign: "center" }}>
