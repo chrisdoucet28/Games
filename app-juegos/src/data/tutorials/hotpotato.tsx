@@ -3,6 +3,15 @@ import type { TutorialStep } from "../../types";
 
 export const HOTPOTATO_TUTORIAL_STEPS: TutorialStep[] = [
   {
+    narration: "This game is like the classic party game Hot Potato: one team holds a pretend 'hot' potato, and passes it to the next team as fast as they can — nobody wants to be holding it when time runs out!",
+    visual: (
+      <div style={{ textAlign: "center" }}>
+        <div style={{ fontSize: "13px" }}>🔴🥔 ➡️ 🔵 ➡️ 🟢 ➡️ 🟡</div>
+        <div style={{ fontSize: "10px", fontWeight: 700, color: "#7C2D12", marginTop: "4px" }}>The potato passes around the teams</div>
+      </div>
+    ),
+  },
+  {
     narration: "Each team starts with 100 points. The game has 5 rounds. In every round, one team holds the hot potato 🥔 first.",
     visual: (
       <div style={{ textAlign: "center" }}>

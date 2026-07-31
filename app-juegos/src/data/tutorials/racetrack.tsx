@@ -47,11 +47,11 @@ export const RACETRACK_TUTORIAL_STEPS: TutorialStep[] = [
     ),
   },
   {
-    narration: "Whichever team answers correctly FIRST gets to roll the dice. If no team gets it right, tap 'No one got it' and the next question comes up — no one moves.",
+    narration: "Raise your hand fast! Whoever answers correctly FIRST rolls the dice. No one gets it right? Tap 'No one got it' — nobody moves.",
     visual: (
-      <div style={{ display: "flex", justifyContent: "center", gap: "8px" }}>
-        <span style={{ background: "#DC2626", color: "white", borderRadius: "8px", padding: "6px 12px", fontSize: "12px", fontWeight: 800 }}>✅ Team Red</span>
-        <span style={{ background: "#2563EB", color: "white", borderRadius: "8px", padding: "6px 12px", fontSize: "12px", fontWeight: 800 }}>✅ Team Blue</span>
+      <div style={{ textAlign: "center" }}>
+        <div style={{ fontSize: "22px" }}>🙋🙋‍♀️</div>
+        <div style={{ fontSize: "11px", fontWeight: 700, color: "#7F1D1D", marginTop: "4px" }}>First correct hand wins the roll!</div>
       </div>
     ),
   },

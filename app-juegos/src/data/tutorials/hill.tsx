@@ -23,35 +23,43 @@ const ZONES_TOPIC: ZoneDef[] = [
 ];
 
 // owners: zone id -> { name, color } for zones that are claimed. highlight: zone id to ring/scale
-// up, for "this is the one we're talking about" steps.
-function ZoneMap({ zones, owners = {}, highlight }: { zones: ZoneDef[]; owners?: Record<string, { name: string; color: string }>; highlight?: string }) {
+// up, for "this is the one we're talking about" steps. attacker: shows a small badge on one zone
+// for "another team is trying to take this" steps.
+function ZoneMap({ zones, owners = {}, highlight, attacker, small }: { zones: ZoneDef[]; owners?: Record<string, { name: string; color: string }>; highlight?: string; attacker?: { zoneId: string; name: string; color: string }; small?: boolean }) {
   const cell = (zId: string | null) => {
     if (!zId) return <div />;
     const z = zones.find(zz => zz.id === zId)!;
     const owner = owners[zId];
     const isHi = highlight === zId;
+    const isAttacked = attacker?.zoneId === zId;
     return (
       <div
         key={zId}
         style={{
+          position: "relative",
           background: owner ? owner.color : "#FCE7F3",
-          border: `2.5px solid ${isHi ? "#DB2777" : owner ? owner.color : "#F9A8D4"}`,
+          border: `2.5px solid ${isAttacked ? "#F59E0B" : isHi ? "#DB2777" : owner ? owner.color : "#F9A8D4"}`,
           borderRadius: "10px",
-          padding: "6px 4px",
+          padding: small ? "4px 2px" : "6px 4px",
           textAlign: "center",
-          transform: isHi ? "scale(1.08)" : "scale(1)",
-          boxShadow: isHi ? "0 0 0 3px #FBCFE8" : "none",
+          transform: isHi || isAttacked ? "scale(1.08)" : "scale(1)",
+          boxShadow: isAttacked ? "0 0 0 3px #FDE68A" : isHi ? "0 0 0 3px #FBCFE8" : "none",
         }}
       >
-        <div style={{ fontSize: "15px" }}>{z.icon}</div>
-        <div style={{ fontWeight: 900, fontSize: "9px", color: owner ? "white" : "#831843" }}>{z.label}</div>
+        {isAttacked && (
+          <div style={{ position: "absolute", top: "-10px", right: "-8px", background: attacker!.color, color: "white", borderRadius: "999px", padding: "1px 5px", fontSize: "8px", fontWeight: 900 }}>
+            ⚔️ {attacker!.name}
+          </div>
+        )}
+        <div style={{ fontSize: small ? "12px" : "15px" }}>{z.icon}</div>
+        {!small && <div style={{ fontWeight: 900, fontSize: "9px", color: owner ? "white" : "#831843" }}>{z.label}</div>}
         <div style={{ fontWeight: 800, fontSize: "9px", color: owner ? "white" : "#DB2777" }}>+{z.pts}/rnd</div>
-        <div style={{ fontSize: "8px", color: owner ? "white" : "#9D174D", marginTop: "1px" }}>{owner ? owner.name : "Free"}</div>
+        {!small && <div style={{ fontSize: "8px", color: owner ? "white" : "#9D174D", marginTop: "1px" }}>{owner ? owner.name : "Free"}</div>}
       </div>
     );
   };
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "6px", maxWidth: "220px", margin: "0 auto" }}>
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "6px", maxWidth: small ? "150px" : "220px", margin: "0 auto" }}>
       {cell(null)}{cell("North")}{cell(null)}
       {cell("West")}{cell("Center")}{cell("East")}
       {cell(null)}{cell("South")}{cell(null)}
@@ -90,20 +98,11 @@ const CLAIM_STEP_TOPIC: TutorialStep = {
 };
 
 const ATTACK_STEP_GRAMMAR: TutorialStep = {
-  narration: "If you pick a zone another team OWNS: this is an attack! Both teams get the exact same question. Whoever answers correctly first wins it. Attacker wins = takes the zone + 30 bonus points. Defender wins = keeps the zone + 20 bonus points.",
+  narration: "If you pick a zone another team OWNS: this is an attack! Both teams get the exact same question. First correct answer wins it. Attacker wins = takes the zone + 30 bonus points. Defender wins = keeps the zone + 20 bonus points.",
   visual: (
     <div style={{ textAlign: "center" }}>
-      <div style={{ display: "flex", justifyContent: "center", gap: "10px", marginBottom: "6px" }}>
-        <div style={{ textAlign: "center" }}>
-          <div style={{ fontSize: "20px" }}>⚔️</div>
-          <div style={{ fontSize: "10px", fontWeight: 800, color: "#DC2626" }}>Blue attacks</div>
-        </div>
-        <div style={{ textAlign: "center" }}>
-          <div style={{ fontSize: "20px" }}>🛡️</div>
-          <div style={{ fontSize: "10px", fontWeight: 800, color: "#B91C1C" }}>Red defends</div>
-        </div>
-      </div>
-      <div style={{ fontSize: "11px", color: "#831843", fontWeight: 700 }}>Same question for both — first correct answer wins!</div>
+      <ZoneMap zones={ZONES_GRAMMAR} owners={{ North: { name: "Red", color: "#DC2626" } }} attacker={{ zoneId: "North", name: "Blue", color: "#2563EB" }} />
+      <div style={{ fontSize: "10px", color: "#831843", fontWeight: 700, marginTop: "4px" }}>Blue is attacking Red's North zone!</div>
     </div>
   ),
 };
@@ -112,29 +111,37 @@ const ATTACK_STEP_TOPIC: TutorialStep = {
   narration: "If you pick a zone another team OWNS: this is an attack! Both teams speak on the same prompt. The teacher decides which answer was better. The winner takes the zone (attacker: +30 pts) or keeps it (defender: +20 pts).",
   visual: (
     <div style={{ textAlign: "center" }}>
-      <div style={{ display: "flex", justifyContent: "center", gap: "10px", marginBottom: "6px" }}>
-        <div style={{ textAlign: "center" }}>
-          <div style={{ fontSize: "20px" }}>⚔️</div>
-          <div style={{ fontSize: "10px", fontWeight: 800, color: "#DC2626" }}>Blue attacks</div>
-        </div>
-        <div style={{ textAlign: "center" }}>
-          <div style={{ fontSize: "20px" }}>🛡️</div>
-          <div style={{ fontSize: "10px", fontWeight: 800, color: "#B91C1C" }}>Red defends</div>
-        </div>
-      </div>
-      <div style={{ fontSize: "11px", color: "#831843", fontWeight: 700 }}>Teacher picks the stronger answer.</div>
+      <ZoneMap zones={ZONES_TOPIC} owners={{ North: { name: "Red", color: "#DC2626" } }} attacker={{ zoneId: "North", name: "Blue", color: "#2563EB" }} />
+      <div style={{ fontSize: "10px", color: "#831843", fontWeight: 700, marginTop: "4px" }}>Blue is attacking Red's Question zone!</div>
     </div>
   ),
 };
 
-const SCORING_STEP: TutorialStep = {
-  narration: "Every zone shows its own points, like +5/rnd. At the end of EVERY round, each team gets points for every zone they still own — again and again, round after round. Owning the Center zone (👑) the whole game is worth a lot!",
-  visual: (
-    <div style={{ textAlign: "center" }}>
-      <div style={{ fontSize: "12px", color: "#831843", fontWeight: 800 }}>Round 1 end: Red owns Center (+5) and North (+3) = +8 pts</div>
-      <div style={{ fontSize: "12px", color: "#831843", fontWeight: 800, marginTop: "4px" }}>Round 2 end: Red still owns them = +8 MORE pts</div>
+function ScoringVisual({ zones }: { zones: ZoneDef[] }) {
+  const owners = { North: { name: "Red", color: "#DC2626" }, Center: { name: "Red", color: "#DC2626" } };
+  return (
+    <div style={{ display: "flex", justifyContent: "center", gap: "18px", alignItems: "flex-end" }}>
+      <div style={{ textAlign: "center" }}>
+        <ZoneMap zones={zones} owners={owners} small />
+        <div style={{ fontSize: "10px", fontWeight: 800, color: "#166534", marginTop: "4px" }}>Round 1 end: Red +8 pts</div>
+      </div>
+      <div style={{ fontSize: "16px", alignSelf: "center" }}>→</div>
+      <div style={{ textAlign: "center" }}>
+        <ZoneMap zones={zones} owners={owners} small />
+        <div style={{ fontSize: "10px", fontWeight: 800, color: "#166534", marginTop: "4px" }}>Round 2 end: Red +8 MORE pts</div>
+      </div>
     </div>
-  ),
+  );
+}
+
+const SCORING_STEP_GRAMMAR: TutorialStep = {
+  narration: "Every zone shows its own points, like +5/rnd. At the end of EVERY round, each team gets points for every zone they still own — again and again, round after round. Keeping the Center zone (👑) the whole game is worth a lot!",
+  visual: <ScoringVisual zones={ZONES_GRAMMAR} />,
+};
+
+const SCORING_STEP_TOPIC: TutorialStep = {
+  narration: "Every zone shows its own points, like +5/rnd. At the end of EVERY round, each team gets points for every zone they still own — again and again, round after round. Keeping the Opinion zone (👑) the whole game is worth a lot!",
+  visual: <ScoringVisual zones={ZONES_TOPIC} />,
 };
 
 const FINAL_STEP: TutorialStep = {
@@ -159,7 +166,7 @@ export const HILL_TOPIC_STEPS: TutorialStep[] = [
   },
   CLAIM_STEP_TOPIC,
   ATTACK_STEP_TOPIC,
-  SCORING_STEP,
+  SCORING_STEP_TOPIC,
   FINAL_STEP,
 ];
 
@@ -175,6 +182,6 @@ export const HILL_GRAMMAR_STEPS: TutorialStep[] = [
   },
   CLAIM_STEP_GRAMMAR,
   ATTACK_STEP_GRAMMAR,
-  SCORING_STEP,
+  SCORING_STEP_GRAMMAR,
   FINAL_STEP,
 ];

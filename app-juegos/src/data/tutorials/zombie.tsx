@@ -3,10 +3,19 @@ import type { TutorialStep } from "../../types";
 
 export const ZOMBIE_TUTORIAL_STEPS: TutorialStep[] = [
   {
+    narration: "The goal: zombies are attacking your house! Work together with every team to defend the doors and survive as many waves as you can.",
+    visual: (
+      <div style={{ textAlign: "center" }}>
+        <div style={{ fontSize: "26px" }}>🏠🧟🧟</div>
+        <div style={{ fontSize: "11px", fontWeight: 700, color: "#365314", marginTop: "4px" }}>Defend the house!</div>
+      </div>
+    ),
+  },
+  {
     narration: "All teams share ONE house and ONE score. Zombies attack the doors — everyone defends together, not separately.",
     visual: (
       <div style={{ textAlign: "center" }}>
-        <div style={{ fontSize: "26px" }}>🏠🧟</div>
+        <div style={{ fontSize: "22px" }}>🏠</div>
         <div style={{ fontSize: "11px", fontWeight: 700, color: "#365314", marginTop: "4px" }}>One shared house, one shared score</div>
       </div>
     ),
@@ -22,11 +31,11 @@ export const ZOMBIE_TUTORIAL_STEPS: TutorialStep[] = [
     ),
   },
   {
-    narration: "Most correct sentences (about 3 out of 4) earn a barricade brick for a door. The rest give a random power-up instead — you can't choose which, it's random.",
+    narration: "Most correct sentences (about 3 out of 4) earn a chair to barricade a door. The rest give a random power-up instead — you can't choose which, it's random.",
     visual: (
       <div style={{ display: "flex", justifyContent: "center", gap: "16px" }}>
         <div style={{ textAlign: "center" }}>
-          <div style={{ fontSize: "22px" }}>🧱</div>
+          <div style={{ fontSize: "22px" }}>🪑</div>
           <div style={{ fontSize: "10px", fontWeight: 800, color: "#4D7C0F" }}>~75% of the time</div>
         </div>
         <div style={{ textAlign: "center" }}>
@@ -53,11 +62,11 @@ export const ZOMBIE_TUTORIAL_STEPS: TutorialStep[] = [
     ),
   },
   {
-    narration: "If no bullet is ready when a zombie attacks, a barricade brick breaks instead. Keep adding sentences to keep your barricades stocked!",
+    narration: "If no bullet is ready when a zombie attacks, a chair breaks instead. Keep adding sentences to keep your barricades stocked with new chairs!",
     visual: (
       <div style={{ textAlign: "center" }}>
-        <div style={{ fontSize: "22px" }}>🧱💥</div>
-        <div style={{ fontSize: "11px", fontWeight: 800, color: "#991B1B", marginTop: "4px" }}>No bullet ready — barricade takes the hit</div>
+        <div style={{ fontSize: "22px" }}>🪑💥</div>
+        <div style={{ fontSize: "11px", fontWeight: 800, color: "#991B1B", marginTop: "4px" }}>No bullet ready — a chair takes the hit</div>
       </div>
     ),
   },

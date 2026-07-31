@@ -3,11 +3,20 @@ import type { TutorialStep } from "../../types";
 
 export const ROCKET_TUTORIAL_STEPS: TutorialStep[] = [
   {
-    narration: "At mission control, a word appears, like 'already'. Use it correctly in your OWN original sentence, spoken out loud.",
+    narration: "The goal: build up fuel for your team's rocket by making correct sentences. The team with the most fuel launches the highest at the end!",
+    visual: (
+      <div style={{ textAlign: "center" }}>
+        <div style={{ fontSize: "26px" }}>🚀⛽</div>
+        <div style={{ fontSize: "11px", fontWeight: 700, color: "#312E81", marginTop: "4px" }}>More fuel = higher launch</div>
+      </div>
+    ),
+  },
+  {
+    narration: "At mission control, a word appears (this is just an example — every prompt is different). Use the word correctly in your OWN original sentence, spoken out loud.",
     visual: (
       <div style={{ textAlign: "center" }}>
         <div style={{ background: "#EEF2FF", border: "2px solid #6366F1", borderRadius: "10px", padding: "10px 16px", display: "inline-block", fontWeight: 800, color: "#312E81", fontSize: "14px" }}>
-          "already"
+          "already" <span style={{ fontWeight: 600, fontSize: "10px" }}>(example word)</span>
         </div>
         <div style={{ fontSize: "12px", color: "#4338CA", fontWeight: 700, marginTop: "6px" }}>"I have already finished my homework."</div>
       </div>

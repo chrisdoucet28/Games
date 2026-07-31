@@ -25,19 +25,11 @@ export const AUCTION_TUTORIAL_STEPS: TutorialStep[] = [
     narration: "Each team secretly picks Correct or Incorrect, and secretly bets points from their bank on it. Bet at least 25 points, or go All In for a bigger risk.",
     visual: (
       <div style={{ textAlign: "center" }}>
-        <div style={{ display: "flex", justifyContent: "center", gap: "10px", marginBottom: "8px" }}>
-          <span style={{ background: "#DCFCE7", color: "#14532D", borderRadius: "999px", padding: "6px 14px", fontWeight: 800, fontSize: "13px" }}>✅ Correct?</span>
-          <span style={{ background: "#FEE2E2", color: "#991B1B", borderRadius: "999px", padding: "6px 14px", fontWeight: 800, fontSize: "13px" }}>❌ Incorrect?</span>
+        <div style={{ display: "flex", justifyContent: "center", gap: "8px", marginBottom: "6px" }}>
+          <span style={{ background: "#DCFCE7", color: "#14532D", borderRadius: "999px", padding: "4px 10px", fontWeight: 800, fontSize: "11px" }}>🔴 Red: Incorrect, bet 50</span>
         </div>
-        <div style={{ display: "flex", justifyContent: "center", gap: "8px", flexWrap: "wrap" }}>
-          {["25", "50", "100", "All In"].map(v => (
-            <div key={v} style={{
-              background: v === "All In" ? "#FEF3C7" : "#EEF2FF",
-              color: v === "All In" ? "#92400E" : "#3730A3",
-              border: `2px solid ${v === "All In" ? "#F59E0B" : "#6366F1"}`,
-              borderRadius: "10px", padding: "6px 12px", fontWeight: 800, fontSize: "12px",
-            }}>{v}</div>
-          ))}
+        <div style={{ display: "flex", justifyContent: "center", gap: "8px" }}>
+          <span style={{ background: "#FEE2E2", color: "#991B1B", borderRadius: "999px", padding: "4px 10px", fontWeight: 800, fontSize: "11px" }}>🔵 Blue: Correct, bet 50</span>
         </div>
       </div>
     ),
@@ -47,21 +39,21 @@ export const AUCTION_TUTORIAL_STEPS: TutorialStep[] = [
     visual: (
       <div style={{ textAlign: "center" }}>
         <div style={{ fontSize: "22px" }}>🔔</div>
-        <div style={{ fontWeight: 800, color: "#3B0764", fontSize: "13px", marginTop: "4px" }}>Reveal! Everyone shows their bet.</div>
+        <div style={{ fontWeight: 800, color: "#3B0764", fontSize: "13px", marginTop: "4px" }}>Reveal! "She have three cats." is INCORRECT (should be "has").</div>
       </div>
     ),
   },
   {
-    narration: "Guessed right? You KEEP your bet — it stays in your bank. Guessed wrong? You LOSE your bet — it comes out of your bank.",
+    narration: "Guessed right? You KEEP your bet. Guessed wrong? You LOSE your bet. Here, Red said Incorrect (right!) and Blue said Correct (wrong!).",
     visual: (
       <div style={{ display: "flex", justifyContent: "center", gap: "16px" }}>
         <div style={{ textAlign: "center" }}>
           <div style={{ fontSize: "22px" }}>✅</div>
-          <div style={{ fontWeight: 800, color: "#166534", fontSize: "12px" }}>Right — keep +50</div>
+          <div style={{ fontWeight: 800, color: "#166534", fontSize: "12px" }}>🔴 Red: keep +50</div>
         </div>
         <div style={{ textAlign: "center" }}>
           <div style={{ fontSize: "22px" }}>❌</div>
-          <div style={{ fontWeight: 800, color: "#991B1B", fontSize: "12px" }}>Wrong — lose -50</div>
+          <div style={{ fontWeight: 800, color: "#991B1B", fontSize: "12px" }}>🔵 Blue: lose -50</div>
         </div>
       </div>
     ),

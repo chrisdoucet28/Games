@@ -3,7 +3,7 @@ import type { TutorialStep } from "../../types";
 
 export const VAULT_TUTORIAL_STEPS: TutorialStep[] = [
   {
-    narration: "Each team has their OWN vault with 5 locks. You are not attacking anyone — every team works on their own vault, side by side.",
+    narration: "The goal: crack open your team's vault by getting sentences right. Every team has their own vault with 5 locks, all locked at the start.",
     visual: (
       <div style={{ display: "flex", justifyContent: "center", gap: "6px" }}>
         {["🔒", "🔒", "🔒", "🔒", "🔒"].map((l, i) => (

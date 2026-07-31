@@ -37,6 +37,15 @@ const OceanGrid = ({ target, hit, miss }: { target?: string; hit?: string; miss?
 
 export const BATTLESHIP_TUTORIAL_STEPS: TutorialStep[] = [
   {
+    narration: "The goal: every team hides ships somewhere on their own ocean grid. You try to find and sink the OTHER teams' hidden ships before they sink yours.",
+    visual: (
+      <div style={{ textAlign: "center" }}>
+        <div style={{ fontSize: "26px" }}>🚢🌊🔍</div>
+        <div style={{ fontSize: "11px", fontWeight: 700, color: "#1E3A8A", marginTop: "4px" }}>Find the hidden ships!</div>
+      </div>
+    ),
+  },
+  {
     narration: "This is a team's ocean grid. Every square is labeled, like C3 (column C, row 3). Ships are hidden somewhere on this grid — you cannot see them.",
     visual: <OceanGrid />,
   },

@@ -35,6 +35,9 @@ export const ORDERUP_TUTORIAL_STEPS: TutorialStep[] = [
     narration: "Any team can claim ANY customer on the board — first come, first served. Write ONE sentence that satisfies EVERY requirement on that ticket at once.",
     visual: (
       <div style={{ textAlign: "center" }}>
+        <div style={{ background: "#FFE4E6", border: "2px solid #FBCFE8", borderRadius: "10px", padding: "6px 12px", display: "inline-block", fontSize: "11px", fontWeight: 700, color: "#BE185D", marginBottom: "6px" }}>
+          Ticket: Negative form + word "already"
+        </div>
         <div style={{ background: "#F0FDF4", border: "2px solid #22C55E", borderRadius: "10px", padding: "10px 14px", fontWeight: 700, color: "#14532D", fontSize: "13px" }}>
           "I haven't already finished my homework." ✅
         </div>
