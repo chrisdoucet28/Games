@@ -3,7 +3,11 @@ import type { GameProps, QuestionData } from "../../types";
 import { useTurnTimer } from "../../hooks/useTurnTimer";
 import { TurnTimerBar } from "../shared/TurnTimerBar";
 import { QuestionCard } from "../shared/QuestionCard";
-import { teamsGridCols } from "../../data/constants";
+import { teamsGridCols, GAME_MODES } from "../../data/constants";
+import { HowToPlayModal } from "../shared/HowToPlayModal";
+import { ROCKET_TUTORIAL_STEPS } from "../../data/tutorials/rocket";
+
+const GM = GAME_MODES.find(g => g.id === "rocket")!;
 
 const TURN_SECONDS = 90;
 const POINTS_PER_CORRECT = 20;
@@ -178,6 +182,7 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
   })()).current;
 
   const [phase, setPhase] = useState<"intro" | "team-turn" | "team-end" | "launchpad" | "igniting" | "launching" | "final">("intro");
+  const [showHowTo, setShowHowTo] = useState(false);
   const [teamIdx, setTeamIdx] = useState(0);
   const [currentQ, setCurrentQ] = useState<QuestionData | null>(null);
   const [showAnswer, setShowAnswer] = useState(false);
@@ -302,6 +307,7 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
     background: "radial-gradient(ellipse at 50% 110%,#1E1B4B 0%,#0B0B2E 55%,#030014 100%)",
   };
 
+  // Tutorial mockup: src/data/tutorials/rocket.tsx — update if this intro's rules text changes.
   if (phase === "intro") return (
     <div style={{ ...arenaStyle, textAlign: "center" }}>
       <Starfield />
@@ -324,6 +330,16 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
             </div>
           ))}
         </div>
+        <button onClick={() => setShowHowTo(true)} className="rf-btn" style={{ display: "block", margin: "0 auto 14px", background: "transparent", color: GM.color, border: `2px solid ${GM.color}88`, borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
+          ❓ How to Play
+        </button>
+        {showHowTo && (
+          <HowToPlayModal
+            gameName={GM.name} gameIcon={GM.icon} accentColor={GM.color}
+            steps={ROCKET_TUTORIAL_STEPS}
+            onClose={() => setShowHowTo(false)}
+          />
+        )}
         <button onClick={() => startTeamTurn(0)} className="rf-btn" style={{ background: "linear-gradient(135deg,#4338CA,#818CF8)", color: "white", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(99,102,241,0.5)", transition: "transform 0.15s ease" }}>
           🔥 Ignite Engines!
         </button>

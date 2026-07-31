@@ -3,9 +3,13 @@ import type { GameProps } from "../../types";
 import { useTurnTimer } from "../../hooks/useTurnTimer";
 import { TurnTimerBar } from "../shared/TurnTimerBar";
 import { QuestionCard } from "../shared/QuestionCard";
-import { teamsGridCols } from "../../data/constants";
+import { teamsGridCols, GAME_MODES } from "../../data/constants";
 import { denseRank, medalForRank } from "../../utils/ranking";
 import { makeSoloCpuTeam } from "../../lib/soloOpponent";
+import { HowToPlayModal } from "../shared/HowToPlayModal";
+import { HILL_TOPIC_STEPS, HILL_GRAMMAR_STEPS } from "../../data/tutorials/hill";
+
+const GM = GAME_MODES.find(g => g.id === "hill")!;
 
 // How long the CPU "thinks" before picking a zone, and before its uncontested claim resolves.
 const CPU_THINK_MS = 1400;
@@ -146,6 +150,7 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
   // A resumed match skips the intro and this round's dice roll — turn order is already known —
   // and drops straight into "pick" for whichever team was up.
   const [phase, setPhase] = useState<"intro" | "rolling" | "pick" | "answer" | "contested" | "round-end" | "final">(() => resumed ? "pick" : "intro");
+  const [showHowTo, setShowHowTo] = useState(false);
 
   useEffect(() => {
     if (!forceFinalRef) return;
@@ -416,6 +421,7 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
     background: "radial-gradient(ellipse at 50% -10%,#DB2777 0%,#831843 45%,#1F0A1F 100%)",
   };
 
+  // Tutorial mockup: src/data/tutorials/hill.tsx — update if this intro's rules text changes.
   if (phase === "intro") return (
     <div style={{ ...arenaStyle, textAlign: "center" }}>
       <AmbientBackdrop />
@@ -451,6 +457,16 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
             </div>
           ))}
         </div>
+        <button onClick={() => setShowHowTo(true)} className="ko-btn" style={{ display: "block", margin: "0 auto 14px", background: "transparent", color: GM.color, border: `2px solid ${GM.color}88`, borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
+          ❓ How to Play
+        </button>
+        {showHowTo && (
+          <HowToPlayModal
+            gameName={GM.name} gameIcon={GM.icon} accentColor={GM.color}
+            steps={isTopicMode ? HILL_TOPIC_STEPS : HILL_GRAMMAR_STEPS}
+            onClose={() => setShowHowTo(false)}
+          />
+        )}
         <button onClick={() => setPhase("rolling")} className="ko-btn" style={{ background: "linear-gradient(135deg,#831843,#DB2777)", color: "white", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(219,39,119,0.5)", transition: "transform 0.15s ease" }}>👑 Roll for Turn Order!</button>
       </div>
     </div>

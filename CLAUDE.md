@@ -31,6 +31,8 @@ app-juegos/               ← the real project root (npm install / npm run dev /
                                used in topics.ts — see "Learn/game parity" below
       constants.ts          ← TEAM_COLORS, MASCOT_OPTIONS, LEVELS_META, GAME_MODES, FREE_PLAN_LIMITS
       themes.ts             ← accent-color theme presets for shared (non-game) chrome
+      tutorials/             ← one file per game, scripted "How to Play" walkthrough steps — see
+                               "How to Play" tutorials below
     components/
       games/                ← one file per game (15 total): AuctionGame, BattleshipGame,
                                CardShuffleGame, CastleGame, HotPotatoGame, HotSeatGame,
@@ -39,7 +41,8 @@ app-juegos/               ← the real project root (npm install / npm run dev /
                                ZombieSiegeGame
       shared/               ← non-game screens: AuthScreen, ClassesScreen, ProfileScreen,
                                LearnScreen, BillingScreen, PlanIntroScreen, ScoreBoard,
-                               QuestionCard, ThemeAmbience, Timer/TurnTimerBar, Confetti
+                               QuestionCard, ThemeAmbience, Timer/TurnTimerBar, Confetti,
+                               HowToPlayModal
     lib/                    ← Supabase data-access layer: supabaseClient, classes, profile,
                                subscription (one file per table/concern, thin CRUD wrappers)
     types/index.ts          ← shared TypeScript interfaces (Team, GameProps, Profile,
@@ -123,6 +126,14 @@ handout) with no guarantee they've seen any other specific lesson first.
   covering both — a generic tag shown on every card regardless of which sub-skill that specific
   item tests reads as mislabeled/wrong to a teacher mid-game, even though it's technically a
   content-authoring gap rather than a game-logic bug.
+- **"How to Play" tutorials (`data/tutorials/*.tsx`)**: each game's intro screen has a How to
+  Play button opening a scripted walkthrough (`components/shared/HowToPlayModal.tsx`) — hand-authored
+  mockups, not driven by real game state, so nothing keeps them in sync with the actual game
+  automatically. Each tutorial file opens with a one-line comment naming the game file it
+  recreates, and each game's intro block has a matching comment pointing back. When you change a
+  game's core rules/scoring/phases, do a quick pass over its tutorial file and update anything now
+  stale. This is a reminder, not an enforced rule — much lower-stakes than the Learn/topics parity
+  rule above, since a stale tutorial mockup is a UX papercut, not wrong grammar content.
 
 ## Git workflow (multiple concurrent focus areas)
 

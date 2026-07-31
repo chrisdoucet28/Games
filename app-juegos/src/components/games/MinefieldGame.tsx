@@ -1,8 +1,12 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import type { GameProps } from "../../types";
-import { teamsGridCols } from "../../data/constants";
+import { teamsGridCols, GAME_MODES } from "../../data/constants";
 import { denseRank, medalForRank } from "../../utils/ranking";
 import { makeSoloCpuTeam } from "../../lib/soloOpponent";
+import { HowToPlayModal } from "../shared/HowToPlayModal";
+import { MINEFIELD_TUTORIAL_STEPS } from "../../data/tutorials/minefield";
+
+const GM = GAME_MODES.find(g => g.id === "minefield")!;
 
 type MinefieldGrid = {
   topic: string;
@@ -82,6 +86,7 @@ export function MinefieldGame({ gridData, teams: propTeams, onUpdateScore, onEnd
   const [activeTeam, setActiveTeam] = useState(() => resumed?.activeTeam ?? 0);
   // A resumed board skips the intro and drops straight into tile selection.
   const [phase, setPhase] = useState<"intro" | "pick" | "speaking" | "judging" | "topicComplete" | "final">(() => resumed ? "pick" : "intro");
+  const [showHowTo, setShowHowTo] = useState(false);
 
   useEffect(() => {
     if (!forceFinalRef) return;
@@ -226,6 +231,7 @@ export function MinefieldGame({ gridData, teams: propTeams, onUpdateScore, onEnd
   const GAP = 5;
   const selData = selectedTile !== null ? getSentence(selectedTile) : null;
 
+  // Tutorial mockup: src/data/tutorials/minefield.tsx — update if this intro's rules text changes.
   if (phase === "intro") {
     return (
       <div style={{ textAlign: "center" }}>
@@ -256,6 +262,16 @@ export function MinefieldGame({ gridData, teams: propTeams, onUpdateScore, onEnd
             <div key={team.id} style={{ background: team.color.light, border: `3px solid ${team.color.bg}`, borderRadius: "14px", padding: "10px 18px", fontWeight: "800", fontSize: "14px", color: team.color.dark }}>{team.color.emoji} {team.name}</div>
           ))}
         </div>
+        <button onClick={() => setShowHowTo(true)} style={{ display: "block", margin: "0 auto 14px", background: "transparent", color: GM.color, border: `2px solid ${GM.color}88`, borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
+          ❓ How to Play
+        </button>
+        {showHowTo && (
+          <HowToPlayModal
+            gameName={GM.name} gameIcon={GM.icon} accentColor={GM.color}
+            steps={MINEFIELD_TUTORIAL_STEPS}
+            onClose={() => setShowHowTo(false)}
+          />
+        )}
         <button onClick={() => setPhase("pick")} style={{ background: "linear-gradient(135deg,#4C1D95,#6D28D9)", color: "white", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(109,40,217,0.4)" }}>
           {topicRotation ? "Start This Topic" : "Enter the Minefield"}
         </button>

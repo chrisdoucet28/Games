@@ -1,7 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { GameProps } from "../../types";
-import { teamsGridCols } from "../../data/constants";
+import { teamsGridCols, GAME_MODES } from "../../data/constants";
 import { denseRank, medalForRank } from "../../utils/ranking";
+import { HowToPlayModal } from "../shared/HowToPlayModal";
+import { HOTSEAT_TUTORIAL_STEPS } from "../../data/tutorials/hotseat";
+
+const GM = GAME_MODES.find(g => g.id === "hotseat")!;
 
 const TOTAL_ROUNDS = 3;
 const TURN_SECONDS = 90;
@@ -57,6 +61,7 @@ const shuffle = <T,>(items: T[]) => {
 
 export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef }: GameProps) {
   const [phase, setPhase] = useState<"welcome" | "intro" | "play" | "turnend" | "final">("welcome");
+  const [showHowTo, setShowHowTo] = useState(false);
 
   useEffect(() => {
     if (!forceFinalRef) return;
@@ -227,6 +232,7 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
   // One-time explainer shown before the very first turn — every other game has an equivalent
   // "here's the whole picture" screen with a team roster. The old version skipped straight to
   // a per-turn "get ready" card and re-explained the full rules before every single turn instead.
+  // Tutorial mockup: src/data/tutorials/hotseat.tsx — update if this welcome screen's rules text changes.
   if (phase === "welcome") {
     return (
       <div style={{ ...arenaStyle, textAlign: "center" }}>
@@ -257,6 +263,16 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
             ))}
           </div>
           {wordListToggle}
+          <button onClick={() => setShowHowTo(true)} className="hs-btn" style={{ display: "block", margin: "0 auto 14px", background: "transparent", color: GM.color, border: `2px solid ${GM.color}88`, borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
+            ❓ How to Play
+          </button>
+          {showHowTo && (
+            <HowToPlayModal
+              gameName={GM.name} gameIcon={GM.icon} accentColor={GM.color}
+              steps={HOTSEAT_TUTORIAL_STEPS}
+              onClose={() => setShowHowTo(false)}
+            />
+          )}
           <button onClick={() => setPhase("intro")} className="hs-btn" style={{ background: "linear-gradient(135deg,#B91C1C,#F97316)", color: "white", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(249,115,22,0.5)", transition: "transform 0.15s ease" }}>
             🔥 Let's Play!
           </button>

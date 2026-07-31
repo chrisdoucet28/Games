@@ -4,9 +4,13 @@ import { useTurnTimer } from "../../hooks/useTurnTimer";
 import { TurnTimerBar } from "../shared/TurnTimerBar";
 import { QuestionCard } from "../shared/QuestionCard";
 import { Confetti } from "../shared/Confetti";
-import { teamsGridCols } from "../../data/constants";
+import { teamsGridCols, GAME_MODES } from "../../data/constants";
 import { TOPIC_OPTIONS } from "../../data/topics";
 import { makeSoloCpuTeam } from "../../lib/soloOpponent";
+import { HowToPlayModal } from "../shared/HowToPlayModal";
+import { VAULT_TUTORIAL_STEPS } from "../../data/tutorials/vault";
+
+const GM = GAME_MODES.find(g => g.id === "vault")!;
 
 // How long the CPU takes to attempt its own lock, and how long its result banner stays up
 // before it auto-advances — standing in for the fact it can't actually answer a real question.
@@ -198,6 +202,7 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
   // A resumed vault skips the intro/roll screens entirely and drops straight into "reveal" for
   // whichever team was up — bootstrapped once below, after finishOrderRef is seeded.
   const [phase, setPhase] = useState<Phase>(() => resumed ? "reveal" : "intro");
+  const [showHowTo, setShowHowTo] = useState(false);
   const [difficulty, setDifficulty] = useState<Difficulty>(() => resumed?.difficulty ?? "medium");
   const [currentCategory, setCurrentCategory] = useState<string | null>(null);
   const [currentQuestion, setCurrentQuestion] = useState<QuestionData | null>(null);
@@ -518,6 +523,7 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
     );
   }
 
+  // Tutorial mockup: src/data/tutorials/vault.tsx — update if this intro's rules text changes.
   if (phase === "intro") return (
     <div style={{ ...arenaStyle, textAlign: "center" }}>
       {ambientLayer}
@@ -560,6 +566,16 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
             })}
           </div>
         </div>
+        <button onClick={() => setShowHowTo(true)} className="vault-next-btn" style={{ display: "block", margin: "0 auto 14px", background: "transparent", color: GM.color, border: `2px solid ${GM.color}88`, borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
+          ❓ How to Play
+        </button>
+        {showHowTo && (
+          <HowToPlayModal
+            gameName={GM.name} gameIcon={GM.icon} accentColor={GM.color}
+            steps={VAULT_TUTORIAL_STEPS}
+            onClose={() => setShowHowTo(false)}
+          />
+        )}
         <button onClick={() => setPhase("rolling")} className="vault-next-btn" style={{ background: "linear-gradient(135deg,#7A5C1E,#D4AF37)", color: "#1F1608", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(212,175,55,0.5)", transition: "transform 0.15s ease" }}>🎲 Roll to Start!</button>
       </div>
     </div>

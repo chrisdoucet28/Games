@@ -2,8 +2,12 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import type { GameProps } from "../../types";
 import { useTurnTimer } from "../../hooks/useTurnTimer";
 import { TurnTimerBar } from "../shared/TurnTimerBar";
-import { teamsGridCols } from "../../data/constants";
+import { teamsGridCols, GAME_MODES } from "../../data/constants";
 import { denseRank, medalForRank } from "../../utils/ranking";
+import { HowToPlayModal } from "../shared/HowToPlayModal";
+import { CARDS_TUTORIAL_STEPS } from "../../data/tutorials/cards";
+
+const GM = GAME_MODES.find(g => g.id === "cards")!;
 
 const AMBIENT_BITS = Array.from({ length: 12 }, (_, i) => ({
   left: (i * 37) % 100,
@@ -99,6 +103,7 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
   const [cardPos, setCardPos] = useState(() => [0, 1, 2, 3].map(slotPos));
   // A resumed game skips the intro and drops straight into "preview" for a freshly-drawn round.
   const [phase, setPhase] = useState<"intro" | "preview" | "shuffling" | "picking" | "answering" | "reveal" | "final">(() => resumed ? "preview" : "intro");
+  const [showHowTo, setShowHowTo] = useState(false);
 
   useEffect(() => {
     if (!forceFinalRef) return;
@@ -307,6 +312,7 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
     background: "radial-gradient(ellipse at 50% -10%,#DC2626 0%,#7F1D1D 48%,#2A0505 100%)",
   };
 
+  // Tutorial mockup: src/data/tutorials/cards.tsx — update if this intro's rules text changes.
   if (phase === "intro") return (
     <div style={{ ...arenaStyle, textAlign: "center" }}>
       <AmbientBackdrop />
@@ -326,6 +332,16 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
         <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "24px" }}>
           {teams.map(t => (<div key={t.id} style={{ background: `linear-gradient(160deg,${t.color.dark}55,#450A0A)`, border: "3px solid " + t.color.bg, borderRadius: "14px", padding: "10px 18px", fontWeight: "800", fontSize: "14px", color: "white" }}>{t.color.emoji} {t.name}</div>))}
         </div>
+        <button onClick={() => setShowHowTo(true)} className="cs-btn" style={{ display: "block", margin: "0 auto 14px", background: "transparent", color: GM.color, border: `2px solid ${GM.color}88`, borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
+          ❓ How to Play
+        </button>
+        {showHowTo && (
+          <HowToPlayModal
+            gameName={GM.name} gameIcon={GM.icon} accentColor={GM.color}
+            steps={CARDS_TUTORIAL_STEPS}
+            onClose={() => setShowHowTo(false)}
+          />
+        )}
         <button onClick={() => setPhase("preview")} className="cs-btn" style={{ background: "linear-gradient(135deg,#B91C1C,#FCD34D)", color: "#450A0A", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(252,211,77,0.4)", transition: "transform 0.15s ease" }}>
           🎪 Step Right Up!
         </button>

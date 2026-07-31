@@ -3,9 +3,13 @@ import type { GameProps } from "../../types";
 import { useTurnTimer } from "../../hooks/useTurnTimer";
 import { TurnTimerBar } from "../shared/TurnTimerBar";
 import { QuestionCard } from "../shared/QuestionCard";
-import { teamsGridCols } from "../../data/constants";
+import { teamsGridCols, GAME_MODES } from "../../data/constants";
 import { denseRank, medalForRank } from "../../utils/ranking";
 import { makeSoloCpuTeam } from "../../lib/soloOpponent";
+import { HowToPlayModal } from "../shared/HowToPlayModal";
+import { CASTLE_TUTORIAL_STEPS } from "../../data/tutorials/castle";
+
+const GM = GAME_MODES.find(g => g.id === "castle")!;
 
 // How long the CPU "thinks" before picking an action, and before its action resolves —
 // standing in for the fact it can't actually answer a real question.
@@ -242,6 +246,7 @@ export function CastleGame({ questions, teams: propTeams, onUpdateScore, onEnd, 
   // A resumed battle skips the intro screen and drops straight into a fresh action choice for
   // whichever team was up.
   const [phase, setPhase] = useState<Phase>(() => resumed ? "select-action" : "intro");
+  const [showHowTo, setShowHowTo] = useState(false);
   const [diceRoll, setDiceRoll] = useState<number | null>(null);
   const [rolling, setRolling] = useState(false);
   const [lastEvent, setLastEvent] = useState<LastEvent | null>(null);
@@ -454,6 +459,7 @@ export function CastleGame({ questions, teams: propTeams, onUpdateScore, onEnd, 
     `}</style>
   );
 
+  // Tutorial mockup: src/data/tutorials/castle.tsx — update if this intro's rules text changes.
   if (phase === "intro") return (
     <div style={{ ...arenaStyle, textAlign: "center" }}>
       {ambientLayer}
@@ -472,6 +478,16 @@ export function CastleGame({ questions, teams: propTeams, onUpdateScore, onEnd, 
             Land a hit and you might turn up a <strong>🍎 healing apple</strong> for bonus HP! The last castle standing wins!
           </div>
         </div>
+        <button onClick={() => setShowHowTo(true)} className="castle-next-btn" style={{ display: "block", margin: "0 auto 14px", background: "transparent", color: GM.color, border: `2px solid ${GM.color}88`, borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
+          ❓ How to Play
+        </button>
+        {showHowTo && (
+          <HowToPlayModal
+            gameName={GM.name} gameIcon={GM.icon} accentColor={GM.color}
+            steps={CASTLE_TUTORIAL_STEPS}
+            onClose={() => setShowHowTo(false)}
+          />
+        )}
         <button onClick={() => setPhase("select-action")} className="castle-next-btn" style={{ background: "linear-gradient(135deg,#064E3B,#059669)", color: "white", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(5,150,105,0.5)", transition: "transform 0.15s ease" }}>🏰 Prepare for Battle!</button>
       </div>
     </div>

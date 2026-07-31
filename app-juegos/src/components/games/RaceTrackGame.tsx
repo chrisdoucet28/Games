@@ -1,9 +1,13 @@
 import { useState, useRef, useEffect } from "react";
 import type { GameProps, QuestionData } from "../../types";
 import { QuestionCard } from "../shared/QuestionCard";
-import { teamsGridCols } from "../../data/constants";
+import { teamsGridCols, GAME_MODES } from "../../data/constants";
 import { useTurnTimer } from "../../hooks/useTurnTimer";
 import { TurnTimerBar } from "../shared/TurnTimerBar";
+import { HowToPlayModal } from "../shared/HowToPlayModal";
+import { RACETRACK_TUTORIAL_STEPS } from "../../data/tutorials/racetrack";
+
+const GM = GAME_MODES.find(g => g.id === "racetrack")!;
 
 const TOTAL = 60;
 // Solo play has no rival team to "beat to the answer," so a per-question countdown replaces
@@ -160,6 +164,7 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
   const resumed = useRef(validateRaceSnapshot(initialGameState, teams.map(t => t.id))).current;
   // A resumed race skips the intro and drops straight into a fresh task for the group.
   const [phase, setPhase] = useState<Phase>(() => resumed ? "task" : "intro");
+  const [showHowTo, setShowHowTo] = useState(false);
   const [track, setTrack] = useState<TrackSpace[]>(() => resumed?.track ?? buildTrack());
   const [raceTeams, setRaceTeams] = useState<Record<string | number, RaceTeamState>>(() =>
     resumed?.raceTeams ?? Object.fromEntries(teams.map((t, i) => [t.id, { pos: 0, coins: 0, shields: 0, skip: false, powerups: [], car: t.mascot ?? CARS[i % CARS.length] }]))
@@ -490,6 +495,7 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
     background: "radial-gradient(ellipse at 40% 40%,#0E2040 0%,#060E1C 100%)",
   };
 
+  // Tutorial mockup: src/data/tutorials/racetrack.tsx — update if this intro's rules text changes.
   if (phase === "intro") return (
     <div style={{ ...arenaStyle, textAlign: "center", position: "relative" }}>
       {STYLE_TAG}
@@ -518,6 +524,16 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
           <div style={{ width: "14px", height: "14px", borderRadius: "50%", background: "#FBBF24", animation: "rtLightPulse 1.4s ease-in-out infinite 0.25s" }} />
           <div style={{ width: "14px", height: "14px", borderRadius: "50%", background: "#4ADE80", animation: "rtLightPulse 1.4s ease-in-out infinite 0.5s" }} />
         </div>
+        <button onClick={() => setShowHowTo(true)} className="rt-btn" style={{ display: "block", margin: "0 auto 14px", background: "transparent", color: GM.color, border: `2px solid ${GM.color}88`, borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
+          ❓ How to Play
+        </button>
+        {showHowTo && (
+          <HowToPlayModal
+            gameName={GM.name} gameIcon={GM.icon} accentColor={GM.color}
+            steps={RACETRACK_TUTORIAL_STEPS}
+            onClose={() => setShowHowTo(false)}
+          />
+        )}
         <button onClick={() => setPhase("task")} className="rt-btn" style={{ background: "linear-gradient(135deg,#B91C1C,#EF4444)", color: "white", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(239,68,68,0.5)", transition: "transform 0.15s ease" }}>🚦 Start Race!</button>
       </div>
     </div>

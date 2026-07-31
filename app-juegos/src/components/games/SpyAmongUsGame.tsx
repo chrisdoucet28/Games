@@ -1,8 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { GameProps, QuestionData, Team } from "../../types";
-import { teamsGridCols } from "../../data/constants";
+import { teamsGridCols, GAME_MODES } from "../../data/constants";
 import { denseRank, medalForRank } from "../../utils/ranking";
 import { makeTeacherTeam } from "../../lib/soloOpponent";
+import { HowToPlayModal } from "../shared/HowToPlayModal";
+import { SPY_TWOPLAYER_STEPS, SPY_GROUP_STEPS } from "../../data/tutorials/spy";
+
+const GM = GAME_MODES.find(g => g.id === "spy")!;
 
 type Phase =
   | "intro"
@@ -161,6 +165,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
   const [tp2Guesses, setTp2Guesses] = useState<Record<string | number, string>>({});
   const [tp2GuessIdx, setTp2GuessIdx] = useState(0);
   const [tp2SpeakOrder, setTp2SpeakOrder] = useState<Team[]>(() => [...teams]);
+  const [showHowTo, setShowHowTo] = useState(false);
 
   const round = questions[ri] as SpyRound | undefined;
   if (!round) {
@@ -407,6 +412,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
     background: "radial-gradient(ellipse at 50% -15%,#1E293B 0%,#0F172A 55%,#020617 100%)",
   };
 
+  // Tutorial mockup: src/data/tutorials/spy.tsx — update if this intro's rules text changes.
   if (phase === "intro") {
     return (
       <div style={{ ...arenaStyle, textAlign: "center" }}>
@@ -476,6 +482,25 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
               </div>
             ))}
           </div>
+          <button
+            onClick={() => setShowHowTo(true)}
+            className="sau-btn"
+            style={{
+              display: "block", margin: "0 auto 14px",
+              background: "transparent", color: GM.color, border: `2px solid ${GM.color}88`,
+              borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800",
+              cursor: "pointer",
+            }}
+          >
+            ❓ How to Play
+          </button>
+          {showHowTo && (
+            <HowToPlayModal
+              gameName={GM.name} gameIcon={GM.icon} accentColor={GM.color}
+              steps={isTwoPlayer ? SPY_TWOPLAYER_STEPS : SPY_GROUP_STEPS}
+              onClose={() => setShowHowTo(false)}
+            />
+          )}
           <button
             onClick={() => setPhase("peek")}
             className="sau-btn"

@@ -24,6 +24,13 @@ export interface TeamColor {
     color: string;
     tag: string;
   }
+
+  // One beat of a game's "How to Play" walkthrough (src/data/tutorials/*.tsx) — narration in the
+  // guide's speech bubble, plus a small hand-built mockup of that moment.
+  export interface TutorialStep {
+    narration: React.ReactNode;
+    visual: React.ReactNode;
+  }
   
   // Representa los distintos formatos de preguntas/tareas dependiendo del juego
   export interface QuestionData {

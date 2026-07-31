@@ -1,8 +1,12 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import type { GameProps } from "../../types";
 import { useTurnTimer } from "../../hooks/useTurnTimer";
-import { teamsGridCols } from "../../data/constants";
+import { teamsGridCols, GAME_MODES } from "../../data/constants";
 import { denseRank, medalForRank } from "../../utils/ranking";
+import { HowToPlayModal } from "../shared/HowToPlayModal";
+import { ORDERUP_TUTORIAL_STEPS } from "../../data/tutorials/orderup";
+
+const GM = GAME_MODES.find(g => g.id === "orderup")!;
 
 // The diner queue used to always sit at a fixed 3 customers regardless of class size — a 2-team
 // class found that overwhelming (2 people covering 3 orders) while a 5-team class found it too
@@ -310,6 +314,7 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, level, for
   const vocabWordPool = useRef([...new Set(questions.filter(q => q.word).map(q => q.word as string))]).current;
 
   const [phase, setPhase] = useState<Phase>("intro");
+  const [showHowTo, setShowHowTo] = useState(false);
   const [sessionLength, setSessionLength] = useState<string>("medium");
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [judging, setJudging] = useState<JudgingState>(null);
@@ -470,6 +475,7 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, level, for
     background: "radial-gradient(circle at 50% 0%, #FFF1F2 0%, #FFE4E6 55%, #FECDD3 100%)",
   };
 
+  // Tutorial mockup: src/data/tutorials/orderup.tsx — update if this intro's rules text changes.
   if (phase === "intro") return (
     <div style={{ ...arenaStyle, textAlign: "center" }}>
       {STYLE_TAG}
@@ -501,6 +507,16 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, level, for
             ))}
           </div>
         </div>
+        <button onClick={() => setShowHowTo(true)} className="ou-btn" style={{ display: "block", margin: "0 auto 14px", background: "transparent", color: GM.color, border: `2px solid ${GM.color}88`, borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
+          ❓ How to Play
+        </button>
+        {showHowTo && (
+          <HowToPlayModal
+            gameName={GM.name} gameIcon={GM.icon} accentColor={GM.color}
+            steps={ORDERUP_TUTORIAL_STEPS}
+            onClose={() => setShowHowTo(false)}
+          />
+        )}
         <button onClick={() => setPhase("playing")} className="ou-btn" style={{ background: "linear-gradient(135deg,#F43F5E,#FB7185)", color: "white", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(244,63,94,0.4)", transition: "transform 0.15s ease" }}>🔔 Open the Diner!</button>
       </div>
     </div>

@@ -1,7 +1,11 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import type { GameProps, QuestionData, Team } from "../../types";
 import { ScoreBoard } from "../shared/ScoreBoard";
-import { teamsGridCols } from "../../data/constants";
+import { teamsGridCols, GAME_MODES } from "../../data/constants";
+import { HowToPlayModal } from "../shared/HowToPlayModal";
+import { ZOMBIE_TUTORIAL_STEPS } from "../../data/tutorials/zombie";
+
+const GM = GAME_MODES.find(g => g.id === "zombie")!;
 
 const TICK_MS = 1000; // 1 tick == 1 elapsed second — every timing constant below is scaled against this.
 const APPROACH_TICKS = 14; // ticks a zombie spends visibly walking in before it reaches an entry point — long enough to see it coming and react
@@ -450,6 +454,7 @@ function SiegeQuestionCard({ question }: { question: QuestionData | null }) {
 
 export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef, paused, onTogglePause }: GameProps) {
   const [phase, setPhase] = useState<Phase>("intro");
+  const [showHowTo, setShowHowTo] = useState(false);
   // A ref (not just the `paused` prop) so the tick interval's closure always reads the latest
   // value without needing to tear down and rebuild the interval every time pause is toggled.
   const pausedRef = useRef(false);
@@ -653,6 +658,7 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
     </div>
   );
 
+  // Tutorial mockup: src/data/tutorials/zombie.tsx — update if this intro's rules text changes.
   if (phase === "intro") return (
     <div style={{ ...arenaStyle, textAlign: "center" }}>
       {fogLayer}
@@ -667,6 +673,16 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
             Clear the wave, and a bigger one begins.
           </div>
         </div>
+        <button onClick={() => setShowHowTo(true)} className="zs-btn" style={{ display: "block", margin: "0 auto 14px", background: "transparent", color: GM.color, border: `2px solid ${GM.color}88`, borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
+          ❓ How to Play
+        </button>
+        {showHowTo && (
+          <HowToPlayModal
+            gameName={GM.name} gameIcon={GM.icon} accentColor={GM.color}
+            steps={ZOMBIE_TUTORIAL_STEPS}
+            onClose={() => setShowHowTo(false)}
+          />
+        )}
         <button onClick={() => setPhase("playing")} className="zs-btn" style={{ background: "linear-gradient(135deg,#365314,#65A30D)", color: "#0D1A0D", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(101,163,13,0.5)", transition: "transform 0.15s ease" }}>🏠 Board Up the House!</button>
       </div>
     </div>

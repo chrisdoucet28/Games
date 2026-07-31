@@ -2,8 +2,12 @@ import { useState, useRef, useEffect } from "react";
 import type { GameProps, QuestionData } from "../../types";
 import { useTurnTimer } from "../../hooks/useTurnTimer";
 import { TurnTimerBar } from "../shared/TurnTimerBar";
-import { teamsGridCols } from "../../data/constants";
+import { teamsGridCols, GAME_MODES } from "../../data/constants";
 import { denseRank, medalForRank } from "../../utils/ranking";
+import { HowToPlayModal } from "../shared/HowToPlayModal";
+import { WHACK_TUTORIAL_STEPS } from "../../data/tutorials/whack";
+
+const GM = GAME_MODES.find(g => g.id === "whack")!;
 
 const TOTAL_HOLES = 6;
 const TURN_SECONDS = 90;
@@ -94,6 +98,7 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
   })()).current;
 
   const [phase, setPhase] = useState<"intro" | "countdown" | "playing" | "turn-end" | "final">("intro");
+  const [showHowTo, setShowHowTo] = useState(false);
 
   useEffect(() => {
     if (!forceFinalRef) return;
@@ -235,6 +240,7 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
     );
   }
 
+  // Tutorial mockup: src/data/tutorials/whack.tsx — update if this intro's rules text changes.
   if (phase === "intro") return (
     <div style={{ ...arenaStyle, textAlign: "center" }}>
       <AmbientBackdrop />
@@ -274,6 +280,16 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
             ))}
           </div>
         </div>
+        <button onClick={() => setShowHowTo(true)} className="ww-btn" style={{ display: "block", margin: "0 auto 14px", background: "transparent", color: GM.color, border: `2px solid ${GM.color}88`, borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
+          ❓ How to Play
+        </button>
+        {showHowTo && (
+          <HowToPlayModal
+            gameName={GM.name} gameIcon={GM.icon} accentColor={GM.color}
+            steps={WHACK_TUTORIAL_STEPS}
+            onClose={() => setShowHowTo(false)}
+          />
+        )}
         <button onClick={() => { setTeamIdx(0); startTeamTurn(); }} className="ww-btn" style={{ background: "linear-gradient(135deg,#3F6212,#84CC16)", color: "#0F1A05", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(132,204,22,0.5)", transition: "transform 0.15s ease" }}>
           🔨 Start Whacking!
         </button>

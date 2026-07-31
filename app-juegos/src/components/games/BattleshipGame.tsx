@@ -1,11 +1,15 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import type { GameProps, QuestionData } from "../../types";
-import { teamsGridCols } from "../../data/constants";
+import { teamsGridCols, GAME_MODES } from "../../data/constants";
 import { useTurnTimer } from "../../hooks/useTurnTimer";
 import { TurnTimerBar } from "../shared/TurnTimerBar";
 import { QuestionCard } from "../shared/QuestionCard";
 import { denseRank, medalForRank } from "../../utils/ranking";
 import { makeSoloCpuTeam } from "../../lib/soloOpponent";
+import { HowToPlayModal } from "../shared/HowToPlayModal";
+import { BATTLESHIP_TUTORIAL_STEPS } from "../../data/tutorials/battleship";
+
+const GM = GAME_MODES.find(g => g.id === "battleship")!;
 
 // How long the CPU "thinks" before picking a target square, and before firing once a square is
 // picked — standing in for the fact it can't actually answer a real question.
@@ -201,6 +205,7 @@ export function BattleshipGame({ questions, teams: propTeams, onUpdateScore, onE
     if (!resumed) return "intro";
     return teams.length === 2 ? "pick-coord" : "pick-target";
   });
+  const [showHowTo, setShowHowTo] = useState(false);
   const [targetTeamId, setTargetTeamId] = useState<string | number | null>(() => {
     if (!resumed || teams.length !== 2) return null;
     const activeId = teams[resumed.activeTeamIdx].id;
@@ -434,6 +439,7 @@ export function BattleshipGame({ questions, teams: propTeams, onUpdateScore, onE
     background: "radial-gradient(ellipse at 50% -10%,#1E40AF 0%,#0C1B3A 45%,#020617 100%)",
   };
 
+  // Tutorial mockup: src/data/tutorials/battleship.tsx — update if this intro's rules text changes.
   if (phase === "intro") return (
     <div style={{ ...arenaStyle, textAlign: "center" }}>
       <AmbientBackdrop />
@@ -454,6 +460,16 @@ export function BattleshipGame({ questions, teams: propTeams, onUpdateScore, onE
         <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "24px" }}>
           {teams.map(t => (<div key={t.id} style={{ background: `linear-gradient(160deg,${t.color.dark}55,#0C1B3A)`, border: "3px solid " + t.color.bg, borderRadius: "14px", padding: "10px 18px", fontWeight: "800", fontSize: "14px", color: "white" }}>{t.color.emoji} {t.name}</div>))}
         </div>
+        <button onClick={() => setShowHowTo(true)} className="bship-btn" style={{ display: "block", margin: "0 auto 14px", background: "transparent", color: GM.color, border: `2px solid ${GM.color}88`, borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
+          ❓ How to Play
+        </button>
+        {showHowTo && (
+          <HowToPlayModal
+            gameName={GM.name} gameIcon={GM.icon} accentColor={GM.color}
+            steps={BATTLESHIP_TUTORIAL_STEPS}
+            onClose={() => setShowHowTo(false)}
+          />
+        )}
         <button onClick={() => {
           if (teams.length === 2) {
             // Only one possible opponent in a 1v1 — skip the pointless "choose a team" step.

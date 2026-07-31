@@ -1,7 +1,11 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import type { GameProps } from "../../types";
-import { teamsGridCols } from "../../data/constants";
+import { teamsGridCols, GAME_MODES } from "../../data/constants";
 import { denseRank, medalForRank } from "../../utils/ranking";
+import { HowToPlayModal } from "../shared/HowToPlayModal";
+import { AUCTION_TUTORIAL_STEPS } from "../../data/tutorials/auction";
+
+const GM = GAME_MODES.find(g => g.id === "auction")!;
 
 interface Bet {
   amount?: number;
@@ -89,6 +93,7 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
 
   const [qi, setQi] = useState(0);
   const [phase, setPhase] = useState<"intro" | "betting" | "result" | "final">("intro");
+  const [showHowTo, setShowHowTo] = useState(false);
   const [bets, setBets] = useState<Record<string | number, Bet>>({});
   const [resultMsg, setResultMsg] = useState<ResultMsg[]>([]);
   const [satOutLastRound, setSatOutLastRound] = useState<Set<string | number>>(new Set());
@@ -203,6 +208,7 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
     background: "radial-gradient(ellipse at 50% -10%,#6D28D9 0%,#2E1065 45%,#0F0524 100%)",
   };
 
+  // Tutorial mockup: src/data/tutorials/auction.tsx — update if this intro's rules text changes.
   if (phase === "intro") return (
     <div style={{ ...arenaStyle, textAlign: "center" }}>
       <AmbientBackdrop />
@@ -230,6 +236,16 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
             </div>
           ))}
         </div>
+        <button onClick={() => setShowHowTo(true)} style={{ display: "block", margin: "0 auto 14px", background: "transparent", color: GM.color, border: `2px solid ${GM.color}88`, borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
+          ❓ How to Play
+        </button>
+        {showHowTo && (
+          <HowToPlayModal
+            gameName={GM.name} gameIcon={GM.icon} accentColor={GM.color}
+            steps={AUCTION_TUTORIAL_STEPS}
+            onClose={() => setShowHowTo(false)}
+          />
+        )}
         <button onClick={() => setPhase("betting")} className="auction-btn" style={{ background: "linear-gradient(135deg,#78350F,#F7C948)", color: "#150F00", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(247,201,72,0.4)", transition: "transform 0.15s ease" }}>
           🔨 Start the Auction!
         </button>

@@ -1,7 +1,11 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import type { GameProps } from "../../types";
-import { teamsGridCols } from "../../data/constants";
+import { teamsGridCols, GAME_MODES } from "../../data/constants";
 import { makeSoloCpuTeam } from "../../lib/soloOpponent";
+import { HowToPlayModal } from "../shared/HowToPlayModal";
+import { HOTPOTATO_TUTORIAL_STEPS } from "../../data/tutorials/hotpotato";
+
+const GM = GAME_MODES.find(g => g.id === "hotpotato")!;
 
 const TURN_SECONDS_OPTIONS = [15, 20, 25, 30];
 const ROUND_SECONDS_MULT = 4;
@@ -82,6 +86,7 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
   const ROUND_SECONDS = turnSeconds * ROUND_SECONDS_MULT;
 
   const [phase, setPhase] = useState<"intro" | "play" | "exploding" | "roundend" | "gameover">("intro");
+  const [showHowTo, setShowHowTo] = useState(false);
 
   useEffect(() => {
     if (!forceFinalRef) return;
@@ -246,6 +251,7 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
     background: "linear-gradient(160deg,#FED7AA 0%,#FB923C 45%,#EA580C 100%)",
   };
 
+  // Tutorial mockup: src/data/tutorials/hotpotato.tsx — update if this intro's rules text changes.
   if (phase === "intro") return (
     <div style={{ ...arenaStyle, textAlign: "center" }}>
       <ChaosBackdrop />
@@ -332,6 +338,16 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
           </div>
         </div>
 
+        <button onClick={() => setShowHowTo(true)} className="hp-btn" style={{ display: "block", margin: "0 auto 14px", background: "transparent", color: GM.color, border: `2px solid ${GM.color}88`, borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
+          ❓ How to Play
+        </button>
+        {showHowTo && (
+          <HowToPlayModal
+            gameName={GM.name} gameIcon={GM.icon} accentColor={GM.color}
+            steps={HOTPOTATO_TUTORIAL_STEPS}
+            onClose={() => setShowHowTo(false)}
+          />
+        )}
         <button onClick={() => {
           if (!seededStartRef.current) {
             teams.forEach(team => updateScore(team.id, STARTING_BANK));
