@@ -248,13 +248,13 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
   }, [categories]);
 
   // Picks one question at random from a (team × category) pool, preferring the lock's target
-  // difficulty but never repeating the exact sentence this team last saw in that category when
-  // any alternative exists. A plain `idx % pool.length` cursor broke down whenever the
-  // difficulty-filtered slice was down to a single item (very common with these small per-topic
-  // pools) — the modulo is always 0 against a length-1 array, so that one sentence kept coming
-  // back on every visit to that difficulty tier regardless of how many other questions existed
-  // in the category overall.
-  const lastQuestionRef = useRef<Record<string, string | undefined>>({});
+  // difficulty and never repeating a sentence this team has already seen in that category until
+  // every question in the pool has come up at least once — same "deck reshuffles only once
+  // exhausted" rule Hot Seat's word list uses, rather than the old "just not the literal last
+  // one" check, which let the same handful of difficulty/form-matched items resurface within a
+  // few turns even with a large topic selection, since the whole pool was rarely small enough to
+  // hit that narrow a repeat window on its own.
+  const seenRef = useRef<Record<string, Set<string>>>({});
   // Six-tier fallback: the first two tiers additionally prefer the lock's desired form (per
   // FORM_PREFERENCE_BY_LOCK_INDEX) on top of the existing difficulty preference; tiers 3-6 are
   // exactly the original four tiers, unchanged, so a topic with no form-tagged content anywhere
@@ -264,12 +264,18 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
     const teamPool = pools[teamId]?.[category] ?? [];
     if (!teamPool.length) return null;
     const key = `${teamId}:${category}`;
-    const last = lastQuestionRef.current[key];
+    const seen = seenRef.current[key] ?? (seenRef.current[key] = new Set());
+    // A full lap: every question in this team's category pool has already been shown once since
+    // the last reset. Clearing here (rather than never clearing) is what lets a category keep
+    // being playable turn after turn instead of running dry and falling back to the whole-pool
+    // "ignore freshness" tier for the rest of the game.
+    if (seen.size >= teamPool.length) seen.clear();
+    const isFresh = (q: QuestionData) => !seen.has(q.question ?? "");
     const matchesForm = (q: QuestionData) => desiredForms.includes(q.form);
-    const byDifficultyFormFresh = teamPool.filter(q => q.difficulty === desiredDifficulty && matchesForm(q) && q.question !== last);
-    const anyDifficultyFormFresh = teamPool.filter(q => matchesForm(q) && q.question !== last);
-    const byDifficultyFresh = teamPool.filter(q => q.difficulty === desiredDifficulty && q.question !== last);
-    const anyFresh = teamPool.filter(q => q.question !== last);
+    const byDifficultyFormFresh = teamPool.filter(q => q.difficulty === desiredDifficulty && matchesForm(q) && isFresh(q));
+    const anyDifficultyFormFresh = teamPool.filter(q => matchesForm(q) && isFresh(q));
+    const byDifficultyFresh = teamPool.filter(q => q.difficulty === desiredDifficulty && isFresh(q));
+    const anyFresh = teamPool.filter(q => isFresh(q));
     const byDifficultyAny = teamPool.filter(q => q.difficulty === desiredDifficulty);
     const source = byDifficultyFormFresh.length ? byDifficultyFormFresh
       : anyDifficultyFormFresh.length ? anyDifficultyFormFresh
@@ -278,7 +284,7 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
       : byDifficultyAny.length ? byDifficultyAny
       : teamPool;
     const chosen = source[Math.floor(Math.random() * source.length)];
-    lastQuestionRef.current[key] = chosen.question;
+    seen.add(chosen.question ?? "");
     return chosen;
   }, [pools]);
 
