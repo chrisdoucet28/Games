@@ -14,8 +14,13 @@ const GM = GAME_MODES.find(g => g.id === "orderup")!;
 // item-count difficulty — ramps up from a single customer rather than starting at max immediately.
 const MAX_QUEUE_SLOTS_CAP = 6;
 const SLOT_RAMP_INTERVAL = 4;
+// Floored at 2 (not 1) so solo play still ramps up to two customers waiting at once — the whole
+// point of the queue is "orders pile up if you're slow," and with a hard cap of 1 a solo player
+// could never actually experience that pressure, no matter how long the session ran. A 2-team
+// class already sits at exactly 2 from the plain team-count formula, so this floor doesn't change
+// anything for 2+ teams — it only fixes the 1-team case.
 function maxQueueSlots(teamCount: number): number {
-  return Math.max(1, Math.min(teamCount, MAX_QUEUE_SLOTS_CAP));
+  return Math.max(2, Math.min(teamCount, MAX_QUEUE_SLOTS_CAP));
 }
 // Every class used to start at exactly 1 customer no matter how many teams were playing, so a
 // 5-team class spent its first several resolutions with only one ticket to fight over. Bigger
@@ -72,10 +77,11 @@ const SIMPLE_FORM_LABELS: Record<string, string> = {
 // A sentence can't be both positive and negative at once — picking one on a ticket rules the
 // other out of that same ticket entirely (question can still combine with either).
 const MUTUALLY_EXCLUSIVE_FORMS: Record<string, string> = { positive: "negative", negative: "positive" };
-// Stacking three unrelated grammar structures into one sentence (e.g. "too much/too many" +
-// "past perfect" + "modal obligation") is close to unwritable even for strong students — cap
-// grammar items per ticket at 2, so a 3-item ticket always includes at least one vocab word.
-const MAX_GRAMMAR_ITEMS_PER_TICKET = 2;
+// Capped at exactly 1 — stacking two or more unrelated grammar structures into one sentence (e.g.
+// "too much/too many" + "past perfect", or even just "negative" + "third conditional") gets
+// unwritable fast and only gets worse as more transform tags are added to the content over time.
+// A multi-item ticket's other slot(s) always fall back to vocab words instead once this cap is hit.
+const MAX_GRAMMAR_ITEMS_PER_TICKET = 1;
 
 function autoLabel(tag: string): string {
   const cleaned = tag.replace(/^tense-/, "");
@@ -243,13 +249,14 @@ function ItemBadge({ item }: { item: TicketItem }) {
   );
 }
 
-function TicketCard({ ticket, teams, judging, onClaim, onCorrect, onWrong }: {
+function TicketCard({ ticket, teams, judging, onClaim, onCorrect, onWrong, onSkip }: {
   ticket: Ticket;
   teams: GameProps["teams"];
   judging: JudgingState;
   onClaim: (ticketId: number, teamId: string | number) => void;
   onCorrect: () => void;
   onWrong: () => void;
+  onSkip: (ticketId: number) => void;
 }) {
   const isJudging = judging?.ticketId === ticket.id;
   const judgingTeam = isJudging ? teams.find(t => t.id === judging!.teamId) : null;
@@ -284,13 +291,21 @@ function TicketCard({ ticket, teams, judging, onClaim, onCorrect, onWrong }: {
           </div>
         </div>
       ) : (
-        <div style={{ display: "flex", gap: "4px", justifyContent: "center", flexWrap: "wrap" }}>
-          {teams.map(t => (
-            <button key={t.id} onClick={() => onClaim(ticket.id, t.id)} className="ou-btn" style={{
-              background: t.color.bg, color: "white", border: "none", borderRadius: "8px",
-              padding: "5px 9px", fontSize: "11px", fontWeight: "800", cursor: "pointer", transition: "transform 0.15s ease",
-            }}>{t.mascot ?? t.color.emoji} {t.name}</button>
-          ))}
+        <div>
+          <div style={{ display: "flex", gap: "4px", justifyContent: "center", flexWrap: "wrap" }}>
+            {teams.map(t => (
+              <button key={t.id} onClick={() => onClaim(ticket.id, t.id)} className="ou-btn" style={{
+                background: t.color.bg, color: "white", border: "none", borderRadius: "8px",
+                padding: "5px 9px", fontSize: "11px", fontWeight: "800", cursor: "pointer", transition: "transform 0.15s ease",
+              }}>{t.mascot ?? t.color.emoji} {t.name}</button>
+            ))}
+          </div>
+          {/* No penalty and no stats impact, unlike an expired ticket — this is a deliberate "nobody
+              wants this one" call, not a failure, so it shouldn't cost the class anything. */}
+          <button onClick={() => onSkip(ticket.id)} className="ou-btn" style={{
+            marginTop: "6px", background: "none", color: "#9CA3AF", border: "1px solid #E5E7EB",
+            borderRadius: "8px", padding: "3px 10px", fontSize: "10px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease",
+          }}>⏭️ Skip — no one got it</button>
         </div>
       )}
     </div>
@@ -315,6 +330,7 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, level, for
 
   const [phase, setPhase] = useState<Phase>("intro");
   const [showHowTo, setShowHowTo] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
   const [sessionLength, setSessionLength] = useState<string>("medium");
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [judging, setJudging] = useState<JudgingState>(null);
@@ -470,6 +486,13 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, level, for
 
   const resolveWrong = () => setJudging(null);
 
+  // Removes an unclaimed ticket outright — no penalty, no resolvedCount bump, no dish/combo
+  // credit. Distinct from letting it expire (which costs every team UNHAPPY_PENALTY points and
+  // advances the difficulty ramp) — this is the teacher/class choosing to pass on an order nobody
+  // wants to attempt, not a failure. The top-up effect picks up the freed slot on its own once
+  // tickets.length changes, same as any other removal.
+  const skipTicket = (ticketId: number) => setTickets(prev => prev.filter(t => t.id !== ticketId));
+
   const arenaStyle: React.CSSProperties = {
     margin: "-20px", padding: "20px 20px 26px", borderRadius: "20px", position: "relative", overflow: "hidden",
     background: "radial-gradient(circle at 50% 0%, #FFF1F2 0%, #FFE4E6 55%, #FECDD3 100%)",
@@ -506,6 +529,38 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, level, for
               </button>
             ))}
           </div>
+        </div>
+        <div style={{ marginBottom: "18px" }}>
+          <button onClick={() => setShowPreview(v => !v)} className="ou-btn" style={{ background: showPreview ? "#BE185D" : "rgba(255,255,255,0.6)", color: showPreview ? "white" : "#9D174D", border: "2px solid #FBCFE8", borderRadius: "10px", padding: "8px 20px", fontWeight: "800", fontSize: "13px", cursor: "pointer", transition: "all 0.15s" }}>
+            {showPreview ? "Hide word & grammar list" : "👁️ Preview words & grammar points"}
+          </button>
+          {showPreview && (
+            <div style={{ background: "rgba(255,255,255,0.75)", border: "2px solid #FBCFE8", borderRadius: "14px", padding: "16px", marginTop: "12px", textAlign: "left", maxWidth: "560px", margin: "12px auto 0" }}>
+              {vocabWordPool.length > 0 && (
+                <div style={{ marginBottom: grammarPool.length > 0 ? "14px" : 0 }}>
+                  <div style={{ fontWeight: "800", fontSize: "12px", color: "#9D174D", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.04em" }}>Possible vocabulary words</div>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+                    {[...vocabWordPool].sort().map((word, i) => (
+                      <span key={`${word}-${i}`} style={{ background: "#FEF9C3", color: "#854D0E", border: "1px solid #FDE68A", borderRadius: "6px", padding: "4px 10px", fontSize: "12px", fontWeight: "700" }}>{word}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {grammarPool.length > 0 && (
+                <div>
+                  <div style={{ fontWeight: "800", fontSize: "12px", color: "#9D174D", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.04em" }}>Possible grammar points</div>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+                    {/* grammarPool itself isn't deduped against SIMPLE_FORMS (a topic's own content
+                        can legitimately use "negative"/"question" as transform tags too) — dedupe
+                        here so the preview never shows the same label twice. */}
+                    {[...new Set(grammarPool)].map(tag => (
+                      <span key={tag} style={{ background: "#FCE7F3", color: "#9D174D", border: "1px solid #FBCFE8", borderRadius: "6px", padding: "4px 10px", fontSize: "12px", fontWeight: "700" }}>{grammarLabel(tag)}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
         <button onClick={() => setShowHowTo(true)} className="ou-btn" style={{ display: "block", margin: "0 auto 14px", background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
           ❓ How to Play
@@ -624,7 +679,7 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, level, for
         )}
         <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
           {tickets.map(t => (
-            <TicketCard key={t.id} ticket={t} teams={teams} judging={judging} onClaim={claimTicket} onCorrect={resolveCorrect} onWrong={resolveWrong} />
+            <TicketCard key={t.id} ticket={t} teams={teams} judging={judging} onClaim={claimTicket} onCorrect={resolveCorrect} onWrong={resolveWrong} onSkip={skipTicket} />
           ))}
         </div>
       </div>
