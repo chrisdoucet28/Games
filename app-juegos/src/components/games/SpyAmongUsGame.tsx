@@ -100,7 +100,7 @@ function validateSpySnapshot(raw: unknown, teamCount: number, roundCount: number
 }
 
 export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState }: GameProps) {
-  const DISCUSS_SECONDS = 30;
+  const DISCUSS_SECONDS = 120;
   // Solo play makes the teacher the second live participant — Spy Among Us already has a
   // fully-built, fully-tested 2-player ruleset (isTwoPlayer below), so this just needs to make
   // `teams` genuinely length 2. `effectiveTeamCount` is used (rather than `teams.length`) to
