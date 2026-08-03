@@ -104,17 +104,18 @@ function formatCategory(tag: string): string {
   return tag.replace(/-/g, " ").toUpperCase();
 }
 
-// "negative" and "question" are the only transform tags reused across dozens of unrelated topics
-// spanning many different tenses (past simple, present perfect, modals, "so do I"...). Every other
-// transform tag already bakes in its own tense/structure (e.g. "tense-past-simple"), so a pool
-// naming it is unambiguous regardless of which topic it came from. These two bare tags aren't —
-// pooling every topic's "negative" content together would let a lock draw a form belonging to a
-// different tense than the rest of that question. Scoping just these two to their source topic
-// (rather than every category) keeps genuinely topic-specific pools exactly as they were before
-// this existed. This is purely a pooling/draw concern now — the lock card always shows its source
-// topic as its own permanent line (see the "reveal" phase JSX below) regardless of transform tag,
-// so unlike before, a new transform tag can never silently lose its topic label from the display.
-const AMBIGUOUS_TRANSFORMS = new Set(["negative", "question"]);
+// "negative", "question", and "affirmative" are the only transform tags reused across dozens of
+// unrelated topics spanning many different tenses (past simple, present perfect, modals, "so do
+// I"...). Every other transform tag already bakes in its own tense/structure (e.g.
+// "tense-past-simple"), so a pool naming it is unambiguous regardless of which topic it came from.
+// These three bare tags aren't — pooling every topic's "affirmative" content together would let a
+// lock draw a sentence belonging to a completely different topic than the rest of that question.
+// Scoping just these three to their source topic (rather than every category) keeps genuinely
+// topic-specific pools exactly as they were before this existed. This is purely a pooling/draw
+// concern now — the lock card always shows its source topic as its own permanent line (see the
+// "reveal" phase JSX below) regardless of transform tag, so unlike before, a new transform tag can
+// never silently lose its topic label from the display.
+const AMBIGUOUS_TRANSFORMS = new Set(["negative", "question", "affirmative"]);
 function categoryKeyFor(q: QuestionData): string {
   if (q.transform && AMBIGUOUS_TRANSFORMS.has(q.transform) && q.sourceTopic) {
     return `${q.sourceTopic}::${q.transform}`;

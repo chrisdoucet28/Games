@@ -125,7 +125,20 @@ handout) with no guarantee they've seen any other specific lesson first.
   items are prefix-only, others suffix-only), give each its own tag rather than one blanket tag
   covering both — a generic tag shown on every card regardless of which sub-skill that specific
   item tests reads as mislabeled/wrong to a teacher mid-game, even though it's technically a
-  content-authoring gap rather than a game-logic bug.
+  content-authoring gap rather than a game-logic bug. This applies just as much to the bare
+  `negative`/`question`/`affirmative` tags as to custom ones — those three are reused across many
+  topics precisely so unrelated topics' pools don't collide (see `AMBIGUOUS_TRANSFORMS` in
+  `VaultHeistGame.tsx`), but that scoping is per-*topic*, not per-tense. A single topic mixing,
+  say, present simple and past simple items under a bare `"negative"` tag has the same bug as a
+  blanket custom tag: use `transform:"tense-<name>"` + `form:"negative"|"question"` instead (see
+  `irregular_verbs` or `past_simple` for the established pattern) whenever one topic's rewrite
+  content actually spans more than one tense or structure.
+- **Vault Heist rewrite-sentence fragments must only show words that specific answer needs**: the
+  `question` field is a literal set of words the player is meant to build the answer from — never
+  show a word or clause there that the correct answer for that exact item doesn't use. When one
+  scenario's fragment is naturally shared across multiple transform variants that need different
+  subsets of it (e.g. an excuse's cause vs. cause+consequence), give each variant its own trimmed
+  `question` field rather than reusing the full fragment on every variant.
 - **"How to Play" tutorials (`data/tutorials/*.tsx`)**: each game's intro screen has a How to
   Play button opening a scripted walkthrough (`components/shared/HowToPlayModal.tsx`) — hand-authored
   mockups, not driven by real game state, so nothing keeps them in sync with the actual game
