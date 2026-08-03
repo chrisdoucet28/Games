@@ -22,17 +22,17 @@ export const VAULT_TUTORIAL_STEPS: TutorialStep[] = [
     ),
   },
   {
-    narration: "Before every question, a card shows the transform your lock needs, like NEGATIVE or QUESTION. This tells you exactly what kind of sentence to build.",
+    narration: "Before every question, a card shows the tense and the transform your lock needs — like PAST SIMPLE — NEGATIVE, or a plain QUESTION. This tells you exactly what tense and form to build.",
     visual: (
       <div style={{ textAlign: "center" }}>
         <div style={{ background: "linear-gradient(135deg,#7A5C1E,#D4AF37)", color: "#1F1608", borderRadius: "10px", padding: "8px 16px", display: "inline-block", fontWeight: 900, fontSize: "13px", letterSpacing: "0.04em" }}>
-          NEGATIVE
+          PAST SIMPLE — NEGATIVE
         </div>
       </div>
     ),
   },
   {
-    narration: "Now build the sentence to match that card. NEGATIVE example: 'he / work / on Saturday' becomes 'He didn't work on Saturday.'",
+    narration: "Now build the sentence to match that card. Past Simple Negative: 'he / work / on Saturday' becomes 'He didn't work on Saturday.'",
     visual: (
       <div style={{ textAlign: "center" }}>
         <div style={{ fontSize: "12px", color: "#7A5C1E", fontWeight: 700 }}>'he / work / on Saturday'</div>
