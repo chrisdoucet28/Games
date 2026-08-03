@@ -323,10 +323,8 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
           <div style={{ fontSize: "36px", marginBottom: "10px" }}>🎪</div>
           <div style={{ fontWeight: "900", fontSize: "20px", marginBottom: "10px", color: "#FCD34D" }}>Card Shuffle</div>
           <div style={{ fontSize: "15px", lineHeight: 1.7, opacity: 0.95 }}>
-            Roll up, roll up! Four cards take the stage — one hides a lucky <strong style={{ color: "#FCD34D" }}>⭐ star</strong>. Remember which one!<br />
-            The ringmaster <strong style={{ color: "#FCD34D" }}>shuffles fast</strong> — keep your eyes on the star card if you can!<br />
-            Each team picks a card and performs a <strong style={{ color: "#FCD34D" }}>speaking task</strong> for the crowd.<br />
-            Land on the star card = <strong style={{ color: "#FCD34D" }}>120 pts</strong>. Any other card = <strong>30 pts</strong>.
+            Roll up, roll up! Four cards take the stage — one hides a lucky <strong style={{ color: "#FCD34D" }}>⭐ star</strong>. Watch closely as the ringmaster shuffles fast!<br />
+            Each team picks a card and performs a speaking task for the crowd — land on the star for <strong style={{ color: "#FCD34D" }}>120 pts</strong>, any other card still scores <strong>30 pts</strong>.
           </div>
         </div>
         <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "24px" }}>

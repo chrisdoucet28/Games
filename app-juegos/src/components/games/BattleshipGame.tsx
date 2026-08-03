@@ -450,11 +450,8 @@ export function BattleshipGame({ questions, teams: propTeams, onUpdateScore, onE
           <div style={{ fontSize: "36px", marginBottom: "10px" }}>⚓</div>
           <div style={{ fontWeight: "900", fontSize: "20px", marginBottom: "10px", color: "#93C5FD" }}>{gameTitle}</div>
           <div style={{ fontSize: "15px", lineHeight: 1.7, opacity: 0.95 }}>
-            Each team has a hidden fleet of ships on their ocean grid.<br />
-            On your turn: <strong style={{ color: "#93C5FD" }}>pick an enemy team</strong>, then <strong style={{ color: "#93C5FD" }}>fire at a square</strong>.<br />
-            Every square is <strong style={{ color: "#93C5FD" }}>find-and-fix-the-mistake</strong> — answer correctly to fire!<br />
-            Hit a ship = <strong style={{ color: "#FCA5A5" }}>+60 pts</strong>. Hit water and answer = <strong style={{ color: "#FCD34D" }}>+15 pts</strong>.<br />
-            Sink all of a team's ships to eliminate them. Last fleet wins!
+            Each team has a hidden fleet on their ocean grid. Pick a target, fire at a square, and <strong style={{ color: "#93C5FD" }}>answer correctly to land the hit</strong>.<br />
+            Sink all of a team's ships to eliminate them — last fleet afloat wins!
           </div>
         </div>
         <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "24px" }}>

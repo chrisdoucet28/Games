@@ -219,10 +219,8 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
           <div style={{ position: "relative", fontSize: "36px", marginBottom: "10px" }}>🔨</div>
           <div style={{ position: "relative", fontWeight: "900", fontSize: "20px", marginBottom: "10px", color: "#FCD34D" }}>Sentence Auction</div>
           <div style={{ position: "relative", fontSize: "15px", lineHeight: 1.7, opacity: 0.95 }}>
-            A sentence goes up for auction — <strong style={{ color: "#FCD34D" }}>correct or incorrect?</strong><br />
-            Each team secretly picks their verdict and <strong style={{ color: "#FCD34D" }}>bets points</strong> on it.<br />
-            Win your bet and keep the points. Lose and they're gone!<br />
-            <strong style={{ color: "#FB923C" }}>All In</strong> for big risk — <strong>25pts minimum</strong> to stay safe.
+            A sentence goes up for auction — <strong style={{ color: "#FCD34D" }}>correct or incorrect?</strong> Secretly pick your verdict and <strong style={{ color: "#FCD34D" }}>bet points</strong> on it.<br />
+            Win and keep the points, lose and they're gone! Go <strong style={{ color: "#FB923C" }}>All In</strong> for big risk, or bet the <strong>25pt minimum</strong> to stay safe.
           </div>
         </div>
         <div style={{ marginTop: "24px", marginBottom: "20px", fontSize: "14px", color: "#C4B5FD", fontWeight: "600" }}>

@@ -533,11 +533,8 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
           <div style={{ fontSize: "36px", marginBottom: "10px" }}>🔐</div>
           <div style={{ fontWeight: "900", fontSize: "20px", marginBottom: "10px" }}>Vault Heist</div>
           <div style={{ fontSize: "15px", lineHeight: 1.7, opacity: 0.95 }}>
-            Each team has their own vault with {LOCK_COUNT} locks. Before every question, a card reveals
-            which transformation the lock needs — then you rewrite the sentence to match it.<br />
-            ✅ Correct → the lock cracks open and you keep going — same team, next lock.<br />
-            ❌ Wrong → your most recently cracked lock re-locks and the turn passes to the next team. No partial credit — accuracy is everything.<br />
-            Roll the dice to see who cracks first — finishing all {LOCK_COUNT} locks earns a bonus (1st place gets the most, 2nd gets half that, 3rd a third, and so on), but the vault stays open until every team finishes!
+            Crack open your team's vault, one lock at a time, by rewriting each sentence to match the card.<br />
+            ✅ Correct → the lock cracks and you keep going. ❌ Wrong → your last crack re-locks and the turn passes on. No partial credit — accuracy is everything.
           </div>
         </div>
         <div style={{ marginBottom: "20px" }}>

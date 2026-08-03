@@ -438,23 +438,13 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
             <div style={{ fontSize: "15px", lineHeight: 1.7, opacity: 0.95 }}>
               {isTwoPlayer ? (
                 <>
-                  You'll each secretly get a <strong style={{ color: "#38BDF8" }}>different topic</strong>.
-                  <br />
-                  Take turns speaking about your own topic — without giving it away — then each try to <strong style={{ color: "#38BDF8" }}>guess the other player's topic</strong>.
-                  <br />
-                  Guess right and you score <strong style={{ color: "#38BDF8" }}>+100 pts</strong>. You can both win, or neither!
+                  You'll each secretly get a <strong style={{ color: "#38BDF8" }}>different topic</strong>. Take turns speaking about your own without giving it away, then each try to <strong style={{ color: "#38BDF8" }}>guess the other player's topic</strong> — guess right to score, and you can both win, or neither!
                 </>
               ) : (
                 <>
-                  Each round, one team is secretly the <strong style={{ color: "#38BDF8" }}>Spy</strong> and gets a slightly different topic than everyone else.
+                  Each round, one team is secretly the <strong style={{ color: "#38BDF8" }}>Spy</strong> with a slightly different topic than everyone else. Take turns speaking about your topic, trying to sound like you belong.
                   <br />
-                  All teams <strong style={{ color: "#38BDF8" }}>peek their secret topic</strong>, then take turns speaking about it — try to sound like you belong!
-                  <br />
-                  After everyone speaks, every team <strong style={{ color: "#38BDF8" }}>votes for who they think the Spy is</strong>.
-                  <br />
-                  <strong style={{ color: "#FCA5A5" }}>🕵️ If you're the Spy:</strong> get caught (most votes on you) and you get one shot to guess the real topic — guess it and you still escape with <strong style={{ color: "#38BDF8" }}>+60 pts</strong>; guess wrong and every crewmate gets <strong style={{ color: "#38BDF8" }}>+80 pts</strong>. Not caught at all (votes split, no clear leader)? You escape clean with <strong style={{ color: "#38BDF8" }}>+100 pts</strong>.
-                  <br />
-                  <strong style={{ color: "#86EFAC" }}>👨‍🚀 If you're a crewmate:</strong> vote for the real Spy correctly and score <strong style={{ color: "#38BDF8" }}>+60 pts</strong>, whether or not the group ends up catching them.
+                  After everyone speaks, every team <strong style={{ color: "#38BDF8" }}>votes for who they think the Spy is</strong> — catch the Spy and crewmates score; the Spy escapes clean (or talks their way out) if the vote doesn't land on them!
                 </>
               )}
             </div>

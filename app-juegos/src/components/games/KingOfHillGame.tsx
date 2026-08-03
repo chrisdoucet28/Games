@@ -431,20 +431,16 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
           <div style={{ fontSize: "36px", marginBottom: "10px" }}>👑</div>
           <div style={{ fontWeight: "900", fontSize: "20px", marginBottom: "10px", color: "#F9A8D4" }}>King of the Hill</div>
           <div style={{ fontSize: "15px", lineHeight: 1.7 }}>
-            A map of <strong style={{ color: "#F9A8D4" }}>5 zones</strong> is up for grabs — each worth different points.<br />
-            Roll dice to set the <strong style={{ color: "#F9A8D4" }}>turn order</strong>, then answer to <strong style={{ color: "#F9A8D4" }}>claim zones</strong>.<br />
-            {isTopicMode ? (
-              <>Each zone is a different move in the conversation: <strong style={{ color: "#F9A8D4" }}>👑 Opinion, ❓ Question, 💭 Example, 🤝 Agree/Disagree, 💡 Alternative</strong> — claiming zones builds a full class conversation!<br /></>
-            ) : (
-              <>Every zone is a <strong style={{ color: "#F9A8D4" }}>quick grammar</strong> challenge — finish the sentence or fix the mistake.<br /></>
-            )}
-            Attack a claimed zone? <strong style={{ color: "#F9A8D4" }}>Both teams face the same question!</strong><br />
+            A map of <strong style={{ color: "#F9A8D4" }}>5 zones</strong> is up for grabs — answer to <strong style={{ color: "#F9A8D4" }}>claim one</strong>.{" "}
             {isTopicMode
-              ? <>Both teams respond, and <strong style={{ color: "#F9A8D4" }}>the teacher picks the stronger answer</strong> — defend well!</>
-              : <>Both teams see the exact same blank, and <strong style={{ color: "#F9A8D4" }}>the fastest correct answer wins</strong> — be quick!</>
-            }<br />
-            Score points for <strong style={{ color: "#F9A8D4" }}>every zone you own</strong> at the end of each round.<br />
-            Game lasts <strong style={{ color: "#F9A8D4" }}>{TOTAL_ROUNDS} rounds</strong> — highest score wins!
+              ? "Each zone is a different conversation move — claiming zones builds a full class discussion."
+              : "Every zone is a quick grammar challenge."}<br />
+            Attack a zone someone already owns and it's <strong style={{ color: "#F9A8D4" }}>head-to-head</strong> —{" "}
+            {isTopicMode
+              ? <>the teacher picks the stronger answer</>
+              : <>the fastest correct answer wins</>
+            }.<br />
+            Score for every zone you own each round — most points after <strong style={{ color: "#F9A8D4" }}>{TOTAL_ROUNDS} rounds</strong> wins!
           </div>
         </div>
         <div style={{ marginTop: "18px", marginBottom: "20px", fontSize: "14px", color: "#F9A8D4", fontWeight: "600" }}>

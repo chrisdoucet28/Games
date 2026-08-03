@@ -507,8 +507,7 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
           <div style={{ fontWeight: "900", fontSize: "20px", marginBottom: "10px", color: "#F87171", letterSpacing: "0.5px" }}>RACE TRACK</div>
           <div style={{ fontSize: "15px", lineHeight: 1.7 }}>
             Every team sees the same task at once — <strong style={{ color: "#93C5FD" }}>tap whichever team answers it first and correctly</strong>, and they roll the dice and race around the track!<br />
-            The task type gets harder as the leading team advances: <strong style={{ color: "#93C5FD" }}>🔍 Error Fix → 🔤 Multiple Choice → ✏️ Fill Blank → 🗣️ Speaking</strong> — so everyone faces the same challenge as the frontrunner.<br />
-            Land on special spaces for boosts, traps, coins and shields. Spend coins in the <strong style={{ color: "#93C5FD" }}>🛒 Shop</strong> on powerups. First to the finish line wins!
+            The challenge ramps up as the leading team advances. Land on special spaces for boosts, traps, coins and shields, and spend coins in the <strong style={{ color: "#93C5FD" }}>🛒 Shop</strong>. First to the finish line wins!
           </div>
         </div>
         <CheckeredStrip />

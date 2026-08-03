@@ -509,11 +509,8 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
           <div style={{ fontSize: "36px", marginBottom: "10px" }}>🍽️</div>
           <div style={{ fontWeight: "900", fontSize: "20px", marginBottom: "10px", color: "#BE185D" }}>Order Up Diner</div>
           <div style={{ fontSize: "15px", lineHeight: 1.7 }}>
-            Customers line up outside the diner — each little dish above their head is one English requirement:
-            a sentence <strong style={{ color: "#BE185D" }}>form</strong> (positive, negative, or a question), an <strong style={{ color: "#BE185D" }}>advanced grammar point</strong>, or a specific <strong style={{ color: "#BE185D" }}>vocabulary word</strong>.<br />
-            Any team can claim any customer. Write <strong style={{ color: "#BE185D" }}>one sentence</strong> that satisfies every dish at once — the teacher judges. Wait too long and the customer leaves unhappy for <strong style={{ color: "#BE185D" }}>everyone</strong>!<br />
-            Every served order also hands your team a dish matching each badge's icon — a bigger order can hand out several different dishes at once. Collect {DISH_SET_SIZE} of the same dish for an instant +{DISH_SET_BONUS} combo bonus, and it keeps paying out every {DISH_SET_SIZE} more.<br />
-            Bigger classes start with more customers on the board at once, and it all gets busier as orders get resolved.
+            Customers line up outside the diner — each little dish above their head is one English requirement: a sentence form, a grammar point, or a vocabulary word.<br />
+            Claim any customer and write <strong style={{ color: "#BE185D" }}>one sentence</strong> that satisfies every dish at once — wait too long and the customer leaves unhappy for <strong style={{ color: "#BE185D" }}>everyone</strong>!
           </div>
         </div>
         <div style={{ marginBottom: "22px" }}>

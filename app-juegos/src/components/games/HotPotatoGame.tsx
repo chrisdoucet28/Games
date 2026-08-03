@@ -261,12 +261,8 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
           <div style={{ fontSize: "40px", marginBottom: "10px", display: "inline-block", animation: "potatoWobbleCalm 1.8s ease-in-out infinite" }}>🥔</div>
           <div style={{ fontWeight: "900", fontSize: "20px", marginBottom: "10px" }}>Hot Potato</div>
           <div style={{ fontSize: "15px", lineHeight: 1.8, opacity: 0.95 }}>
-            Each team starts with <strong>{STARTING_BANK} pts</strong> for this game.<br />
-            <strong>{TOTAL_ROUNDS} rounds × {ROUND_SECONDS} seconds.</strong> One team holds the potato.<br />
-            Each team has <strong>{Q_SECONDS} seconds</strong> to answer — timer auto-reveals.<br />
-            Teacher judges: <strong>✅ Answered in time → Pass it on!</strong><br />
-            <strong>❌ Too slow or wrong → Keep the potato!</strong><br />
-            Whoever holds it at 0 <strong>loses {PENALTY_PTS} pts 🔥</strong>
+            One team holds the potato — answer in time to pass it on. <strong>✅ Answered in time → pass it on!</strong> <strong>❌ Too slow or wrong → keep the potato!</strong><br />
+            Whoever's holding it when the round ends <strong>loses {PENALTY_PTS} pts 🔥</strong>
           </div>
           <div style={{ position: "absolute", bottom: "-14px", left: "50%", transform: "translateX(-50%)", width: 0, height: 0, borderLeft: "14px solid transparent", borderRight: "14px solid transparent", borderTop: "14px solid #F97316" }} />
         </div>

@@ -317,10 +317,8 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
           <div style={{ fontSize: "36px", marginBottom: "10px" }}>🚀</div>
           <div style={{ fontWeight: "900", fontSize: "20px", marginBottom: "10px", color: "#A5B4FC" }}>Rocket Fuel</div>
           <div style={{ fontSize: "15px", lineHeight: 1.7 }}>
-            Each team gets <strong style={{ color: "#A5B4FC" }}>90 seconds</strong> at mission control.<br />
-            Use the given word in your own sentence — every correct one adds fuel. Keep going as many times as you can before the clock runs out!<br />
-            Can't think of anything for a prompt? Skip it for a new one — no penalty.<br />
-            Nobody's fuel level is revealed until launch day — not even the scoreboard! Once every team has fuelled up, all rockets <strong style={{ color: "#A5B4FC" }}>launch together</strong> and the points land as they fly — whoever fuelled the most flies the highest!
+            Each team gets <strong style={{ color: "#A5B4FC" }}>90 seconds</strong> at mission control — use the given word in your own sentence, and every correct one adds fuel. Stuck on a prompt? Skip it for a new one, no penalty.<br />
+            Nobody's fuel level is revealed until every team has fuelled up — then all rockets <strong style={{ color: "#A5B4FC" }}>launch together</strong>, and whoever fuelled the most flies the highest!
           </div>
         </div>
         <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "24px" }}>

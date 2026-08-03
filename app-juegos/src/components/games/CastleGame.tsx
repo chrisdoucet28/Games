@@ -469,12 +469,7 @@ export function CastleGame({ questions, teams: propTeams, onUpdateScore, onEnd, 
           <div style={{ fontSize: "36px", marginBottom: "10px" }}>🏰</div>
           <div style={{ fontWeight: "900", fontSize: "20px", marginBottom: "10px" }}>Castle Defense</div>
           <div style={{ fontSize: "15px", lineHeight: 1.7, opacity: 0.95 }}>
-            Each turn, answer a question to power one of four actions:<br />
-            🗡️ <strong>Sword</strong> — multiple choice, quick attack, no cost.<br />
-            ✨ <strong>Magic</strong> — open speaking task, costs MP, hits much harder.<br />
-            🛡️ <strong>Defend</strong> — fix the mistake, raise a shield that halves incoming damage.<br />
-            🔮 <strong>Focus</strong> — finish the sentence, skip attacking to recover MP.<br />
-            Answer right to pull it off — get it wrong and your turn ends with nothing.<br />
+            Each turn, choose to attack, cast a spell, raise a shield, or recover — then answer a question to pull it off. Get it right and it lands; get it wrong and your turn ends with nothing.<br />
             Land a hit and you might turn up a <strong>🍎 healing apple</strong> for bonus HP! The last castle standing wins!
           </div>
         </div>

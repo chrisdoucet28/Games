@@ -668,9 +668,8 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
           <div style={{ fontSize: "36px", marginBottom: "10px" }}>🧟</div>
           <div style={{ fontWeight: "900", fontSize: "20px", marginBottom: "10px", color: "#BEF264" }}>Zombie Siege</div>
           <div style={{ fontSize: "15px", lineHeight: 1.6, opacity: 0.95 }}>
-            One shared house, everyone's score. Each round is a <strong style={{ color: "#BEF264" }}>wave</strong> — read the prompt, then add a sentence to earn a barricade or a <strong style={{ color: "#BEF264" }}>power-up</strong>, as many times as you like.<br />
-            <strong style={{ color: "#BEF264" }}>Bullets recharge</strong> and auto-shoot zombies at the door. No bullet ready? It breaks your barricades instead. <strong style={{ color: "#BEF264" }}>2 axes</strong> per team are the last resort if one gets through.<br />
-            Clear the wave, and a bigger one begins.
+            One shared house, everyone's score. Add a sentence any time to earn a barricade or a <strong style={{ color: "#BEF264" }}>power-up</strong> — <strong style={{ color: "#BEF264" }}>bullets recharge</strong> and auto-shoot zombies at the door, and <strong style={{ color: "#BEF264" }}>2 axes</strong> per team are the last resort if one breaks through.<br />
+            Clear the wave, and a bigger one begins!
           </div>
         </div>
         <button onClick={() => setShowHowTo(true)} className="zs-btn" style={{ display: "block", margin: "0 auto 14px", background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>

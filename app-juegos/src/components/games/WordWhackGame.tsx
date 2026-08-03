@@ -250,11 +250,8 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
           <div style={{ fontSize: "36px", marginBottom: "10px" }}>🔨</div>
           <div style={{ fontWeight: "900", fontSize: "20px", marginBottom: "10px", color: "#BEF264" }}>Word Whack</div>
           <div style={{ fontSize: "15px", lineHeight: 1.7 }}>
-            One team plays at a time — everyone else watches the clock!<br />
-            You get <strong style={{ color: "#BEF264" }}>90 seconds</strong>. Moles pop up showing possible answers — whack the <strong style={{ color: "#BEF264" }}>correct one</strong> before it ducks!<br />
-            Hit right = points + the next one loads instantly. Hit wrong = that mole's gone, but the correct one's still up.<br />
-            Chain hits without a miss for a growing <strong style={{ color: "#BEF264" }}>combo bonus</strong>.<br />
-            Moles duck faster as your clock runs down — stay sharp to the end!
+            One team plays at a time, <strong style={{ color: "#BEF264" }}>90 seconds</strong> each — moles pop up with possible answers, whack the <strong style={{ color: "#BEF264" }}>correct one</strong> before it ducks!<br />
+            Hit right for points and a growing <strong style={{ color: "#BEF264" }}>combo bonus</strong>; hit wrong and that mole's gone, but the correct one's still up. Moles duck faster as your clock runs down!
           </div>
         </div>
         <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "20px" }}>

@@ -248,11 +248,9 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
                 ? "The teacher will describe each word out loud for your team to guess."
                 : "One player on the team turns away from the screen — everyone else on their team gives clues."}
               <br />
-              Guess as many words as you can in <strong style={{ color: "#FDBA74" }}>{TURN_SECONDS} seconds</strong>. Each correct word is worth <strong style={{ color: "#FDBA74" }}>{POINTS_PER_WORD} points</strong>.
+              Guess as many words as you can in <strong style={{ color: "#FDBA74" }}>{TURN_SECONDS} seconds</strong> — no spelling, and no saying the word itself!
               <br />
-              No spelling the word, and no saying the word itself!
-              <br />
-              Every team takes a turn each round, over <strong style={{ color: "#FDBA74" }}>{TOTAL_ROUNDS} rounds</strong> — most points when it's done wins.
+              Each correct word is worth <strong style={{ color: "#FDBA74" }}>{POINTS_PER_WORD} points</strong>, over <strong style={{ color: "#FDBA74" }}>{TOTAL_ROUNDS} rounds</strong> — most points wins.
             </div>
           </div>
           <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "24px" }}>

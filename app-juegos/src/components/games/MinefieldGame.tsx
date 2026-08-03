@@ -244,12 +244,10 @@ export function MinefieldGame({ gridData, teams: propTeams, onUpdateScore, onEnd
           )}
           <div style={{ fontWeight: "900", fontSize: "clamp(22px,4vw,30px)", marginBottom: "10px" }}>{topic}</div>
           <div style={{ fontSize: "15px", lineHeight: 1.7, opacity: 0.95 }}>
-            Each tile pairs up a <strong>column label</strong> with a <strong>row label</strong> — pick a tile, then speak one full sentence combining both.
+            Pick a tile, then speak one sentence combining its column and row label — but <strong>7 of the 25 tiles are hidden mines</strong>.
             <br />
-            <strong>7 of the 25 tiles are hidden mines</strong> — you won't know which until you pick one.
-            <br />
-            Correct = <strong>+50 pts</strong>. Hit a mine = <strong>-75 pts</strong>. Wrong answer on a safe tile = no points, but the square stays in play.
-            {topicRotation && <><br />It's one shared minefield all game — topics cycle through for variety, looping back around as needed, until every safe tile is found.</>}
+            Correct = <strong>+50 pts</strong>. Hit a mine = <strong>-75 pts</strong>. Wrong on a safe tile = no points, but it stays in play.
+            {topicRotation && <><br />It's one shared minefield all game — topics cycle through for variety until every safe tile is found.</>}
           </div>
         </div>
         <div style={{ marginTop: "24px", marginBottom: "20px", fontSize: "14px", color: "#6B7280", fontWeight: "600" }}>
