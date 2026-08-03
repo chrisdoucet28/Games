@@ -65,9 +65,12 @@ const ORDER_SCORE_BY_ITEM_COUNT: Record<number, number> = { 1: 10, 2: 25, 3: 45 
 // "Positive"/"negative"/"question" are sentence-FORM categories, not tense-specific content — the
 // counterpart to how "negative"/"question" already work as transform tags in the rest of this
 // app's content. They need no data lookup at all (there's no "positive" transform tag, nor should
-// there be — it just means "write a normal affirmative statement"), so they're always available at
-// every level. At A1/A2 they're the ONLY grammar items offered; every other transform tag pulled
-// from the topic content encodes real tense/structure knowledge and is withheld until B1+.
+// there be — it just means "write a normal affirmative statement"), so they're always available
+// alongside whatever specific transform tags the selected topics themselves contain. There used to
+// be an A1/A2-only gate here suppressing every other tag — but a topic's own level (e.g. "Future:
+// Will and Going To" and "Zero/First Conditional" are all A2) has nothing to do with whether its
+// specific grammar content is appropriate for Order Up: a teacher who explicitly picked that topic
+// wants exactly that structure tested, not silently downgraded to bare positive/negative/question.
 const SIMPLE_FORMS = ["positive", "negative", "question"] as const;
 const SIMPLE_FORM_LABELS: Record<string, string> = {
   positive: "Positive",
@@ -315,8 +318,7 @@ function TicketCard({ ticket, teams, judging, onClaim, onCorrect, onWrong, onSki
 // A round-length countdown drives its own "final" phase (results + set-collection payout), but the
 // always-present top-bar "End Game" button in LessonGamesGenerator.tsx can still bail out early at
 // any time, same as every other game — this only adds a natural end, it doesn't remove the old one.
-export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, level, forceFinalRef, paused, onTogglePause }: GameProps) {
-  const isBeginner = level === "A1" || level === "A2";
+export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef, paused, onTogglePause }: GameProps) {
   // A ref (not just the `paused` prop) so the per-ticket countdown interval's closure always reads
   // the latest value without needing to tear down and rebuild the interval every time pause toggles.
   const pausedRef = useRef(false);
@@ -325,7 +327,7 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, level, for
   const contentGrammarTags = useRef([
     ...new Set(questions.filter(q => q.type === "rewrite sentences" && q.transform).map(q => q.transform as string)),
   ]).current;
-  const grammarPool = useRef(isBeginner ? [...SIMPLE_FORMS] : [...SIMPLE_FORMS, ...contentGrammarTags]).current;
+  const grammarPool = useRef([...SIMPLE_FORMS, ...contentGrammarTags]).current;
   const vocabWordPool = useRef([...new Set(questions.filter(q => q.word).map(q => q.word as string))]).current;
 
   const [phase, setPhase] = useState<Phase>("intro");
