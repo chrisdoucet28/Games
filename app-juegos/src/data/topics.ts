@@ -13599,7 +13599,7 @@ export const TOPIC_LIBRARY = {
 
   can_cant: {
     label: "Can / Can't (Ability & Permission)",
-    level: "A1", focus: "grammar",
+    level: "A1", category: "grammar",
     questions: [
       { type:"choose correct grammar", question:"'___ you swim?' (Can/Do/Are)", answer:"Can", hint:"'Can' is used for ability", difficulty:"easy" },
       { type:"choose correct grammar", question:"'She ___ drive - she's only ten.' (can't/doesn't/isn't)", answer:"can't", hint:"'Can't' = not able to", difficulty:"easy" },
@@ -13786,7 +13786,7 @@ export const TOPIC_LIBRARY = {
 
   present_continuous_a1: {
     label: "Present Continuous (What are you doing?)",
-    level: "A1", focus: "grammar",
+    level: "A1", category: "grammar",
     questions: [
       { type:"choose correct grammar", question:"'She ___ (read) a book right now.' (is reading/reads/reading)", answer:"is reading", hint:"Present continuous = is/am/are + -ing", difficulty:"easy" },
       { type:"correct grammar mistakes", question:"'I am watch TV.'", answer:"I am watching TV.", hint:"Add -ing to the verb", difficulty:"easy" },
@@ -13981,7 +13981,7 @@ export const TOPIC_LIBRARY = {
 
   present_perfect_vs_past_simple: {
     label: "Present Perfect vs Past Simple",
-    level: "A2", focus: "grammar",
+    level: "A2", category: "grammar",
     questions: [
       { type:"choose correct grammar", question:"'I ___ to Paris three times.' (have been/went/was)", answer:"have been", hint:"'Have been' - life experience, no specific time", difficulty:"medium" },
       { type:"correct grammar mistakes", question:"'I have seen him yesterday.'", answer:"I saw him yesterday.", hint:"'Yesterday' = specific past time -> past simple", difficulty:"medium" },
@@ -14193,7 +14193,7 @@ export const TOPIC_LIBRARY = {
 
   comparatives_superlatives: {
     label: "Comparatives & Superlatives",
-    level: "A2", focus: "grammar",
+    level: "A2", category: "grammar",
     questions: [
       { type:"choose correct grammar", question:"'This book is ___ than that one.' (more interesting/most interesting/interestinger)", answer:"more interesting", hint:"Long adjectives: more + adjective + than", difficulty:"easy" },
       { type:"correct grammar mistakes", question:"'She is the most tall girl in the class.'", answer:"She is the tallest girl in the class.", hint:"Short adjectives: add -est", difficulty:"easy" },
@@ -14387,7 +14387,7 @@ export const TOPIC_LIBRARY = {
 
   school_and_study: {
     label: "School and Study",
-    level: "A2", focus: "topic",
+    level: "A2", category: "topic",
     questions: [
       { type:"finish the sentence", question:"My favourite ___ at school is English.", answer:"subject / lesson", hint:"A thing you study", difficulty:"easy" },
       { type:"finish the sentence", question:"I have a big ___ next week, so I need to study.", answer:"exam / test", hint:"A formal school check", difficulty:"easy" },
@@ -14608,7 +14608,7 @@ export const TOPIC_LIBRARY = {
 
   friends_and_family: {
     label: "Friends and Family",
-    level: "A2", focus: "topic",
+    level: "A2", category: "topic",
     questions: [
       { type:"finish the sentence", question:"My best friend and I ___ since primary school.", answer:"have been friends / have known each other", hint:"A long friendship", difficulty:"easy" },
       { type:"finish the sentence", question:"I get ___ with my sister very well.", answer:"on / along", hint:"To have a good relationship", difficulty:"easy" },
@@ -14796,7 +14796,7 @@ export const TOPIC_LIBRARY = {
 
   free_time_a2: {
     label: "Free Time and Interests",
-    level: "A2", focus: "topic",
+    level: "A2", category: "topic",
     questions: [
       { type:"finish the sentence", question:"In my free time, I usually ___ after work.", answer:"read / watch TV / go for a walk / play games", hint:"A leisure activity", difficulty:"easy" },
       { type:"finish the sentence", question:"My favourite hobby is ___ because it helps me relax.", answer:"reading / cooking / drawing / running", hint:"Something you enjoy doing", difficulty:"easy" },
@@ -14994,7 +14994,7 @@ export const TOPIC_LIBRARY = {
 
   my_town_city: {
     label: "My Town and City",
-    level: "A2", focus: "topic",
+    level: "A2", category: "topic",
     questions: [
       { type:"finish the sentence", question:"My town has a beautiful ___ in the centre.", answer:"park / square / market", hint:"A place in town", difficulty:"easy" },
       { type:"finish the sentence", question:"There are lots of ___ near my home.", answer:"shops / cafés / restaurants", hint:"Places you can visit", difficulty:"easy" },
@@ -15182,7 +15182,7 @@ export const TOPIC_LIBRARY = {
 
   past_continuous: {
     label: "Past Continuous",
-    level: "B1", focus: "grammar",
+    level: "B1", category: "grammar",
     questions: [
       { type:"choose correct grammar", question:"'At 8pm last night, I ___ TV.' (was watching/watched)", answer:"was watching", hint:"Past continuous for an action in progress", difficulty:"medium" },
       { type:"correct grammar mistakes", question:"'She were cooking when I arrived.'", answer:"She was cooking when I arrived.", hint:"Singular subject = was", difficulty:"medium" },
@@ -15377,7 +15377,7 @@ export const TOPIC_LIBRARY = {
 
   past_perfect: {
     label: "Past Perfect (had + past participle)",
-    level: "B1", focus: "grammar",
+    level: "B1", category: "grammar",
     questions: [
       { type:"choose correct grammar", question:"'When I arrived, she ___ already left.' (had/has)", answer:"had", hint:"Past perfect = had + past participle", difficulty:"medium" },
       { type:"correct grammar mistakes", question:"'By the time I got there, they finished.'", answer:"By the time I got there, they had finished.", hint:"Earlier past action needs past perfect", difficulty:"medium" },
@@ -15574,7 +15574,7 @@ export const TOPIC_LIBRARY = {
   family_members: {
     "label": "Family Members",
     "level": "A1",
-    "focus": "vocabulary",
+    "category": "vocabulary",
     "questions": [
       { "type": "finish the sentence", "question": "'My mother's sister is my ___.'", "answer": "aunt", "hint": "Female family member", "difficulty": "easy" },
       { "type": "finish the sentence", "question": "'My father's brother is my ___.'", "answer": "uncle", "hint": "Male family member", "difficulty": "easy" },
@@ -15773,7 +15773,7 @@ export const TOPIC_LIBRARY = {
   possessive_s: {
     "label": "Possessive 's",
     "level": "A1",
-    "focus": "grammar",
+    "category": "grammar",
     "questions": [
       { "type": "choose correct grammar", "question": "'This is ___ car.' (my father / my father's)", "answer": "my father's", "hint": "Use possessive 's for a person", "difficulty": "easy" },
       { "type": "choose correct grammar", "question": "'___ name is Ana.' (My cousin's / My cousins)", "answer": "My cousin's", "hint": "Possessive 's shows belonging", "difficulty": "easy" },
@@ -15981,7 +15981,7 @@ export const TOPIC_LIBRARY = {
   days_dates_prepositions_time: {
     "label": "Days and Dates + Prepositions of Time",
     "level": "A1",
-    "focus": "grammar",
+    "category": "grammar",
     "questions": [
       {
         "type": "choose correct grammar",
@@ -16845,7 +16845,7 @@ export const TOPIC_LIBRARY = {
   weather_temperature_seasons: {
     "label": "Weather, Temperature and Seasons",
     "level": "A1",
-    "focus": "vocabulary",
+    "category": "vocabulary",
     "questions": [
       {
         "type": "choose correct grammar",
@@ -17752,7 +17752,7 @@ export const TOPIC_LIBRARY = {
   daily_routines_frequency: {
     "label": "Daily Routines, Times and Frequency",
     "level": "A1",
-    "focus": "topic",
+    "category": "topic",
     "questions": [
       {
         "type": "choose correct grammar",
@@ -18666,7 +18666,7 @@ export const TOPIC_LIBRARY = {
   house_objects_rooms_there_is_are: {
     label: "Objects and Rooms in the House",
     level: "A1",
-    focus: "vocabulary",
+    category: "vocabulary",
     questions: [
       { type:"finish the sentence", question:"'You cook food in the ___.'", answer:"kitchen", hint:"Room vocabulary for cooking", difficulty:"easy" },
       { type:"finish the sentence", question:"'You sleep in the ___.'", answer:"bedroom", hint:"Room vocabulary for sleeping", difficulty:"easy" },
@@ -18791,7 +18791,7 @@ export const TOPIC_LIBRARY = {
   possessive_adjectives_pronouns: {
     "label": "Possessive Adjectives vs Possessive Pronouns",
     "level": "A1",
-    "focus": "grammar",
+    "category": "grammar",
     "questions": [
       {
         "type": "choose correct grammar",
@@ -20108,7 +20108,7 @@ export const TOPIC_LIBRARY = {
   future_perfect: {
     "label": "Future Perfect (will have + past participle)",
     "level": "B2",
-    "focus": "grammar",
+    "category": "grammar",
     "questions": [
       { "type": "choose correct grammar", "question": "'By June, she ___ finished the course.' (will have/has/will)", "answer": "will have", "hint": "Future perfect: will have + past participle for an action completed before a future point.", "difficulty": "easy" },
       { "type": "choose correct grammar", "question": "'By the time he turns 65, he ___ retired from teaching.' (will have/will/has)", "answer": "will have", "hint": "Use 'will have' before the past participle, not 'will' or 'has' alone.", "difficulty": "easy" },
@@ -20322,7 +20322,7 @@ export const TOPIC_LIBRARY = {
   question_tags: {
     "label": "Question Tags",
     "level": "B1",
-    "focus": "grammar",
+    "category": "grammar",
     "questions": [
       { "type": "choose correct grammar", "question": "'She's a doctor, ___?' (isn't she/doesn't she/isn't it)", "answer": "isn't she", "hint": "Positive statement with 'be' → negative tag matching 'she'.", "difficulty": "easy" },
       { "type": "choose correct grammar", "question": "'You don't like coffee, ___?' (do you/don't you/are you)", "answer": "do you", "hint": "Negative statement (do-support) → positive tag.", "difficulty": "easy" },
@@ -20529,7 +20529,7 @@ export const TOPIC_LIBRARY = {
   prepositions_place: {
     "label": "Prepositions of Place",
     "level": "A1",
-    "focus": "grammar",
+    "category": "grammar",
     "questions": [
       { "type": "choose correct grammar", "question": "'The cat is ___ the table.' (under/on/at)", "answer": "under", "hint": "Use 'under' for something below another thing.", "difficulty": "easy" },
       { "type": "choose correct grammar", "question": "'There's a picture ___ the wall.' (on/in/at)", "answer": "on", "hint": "Use 'on' for something attached to a surface.", "difficulty": "easy" },
@@ -20731,7 +20731,7 @@ export const TOPIC_LIBRARY = {
   dependent_prepositions: {
     label: "Dependent Prepositions",
     level: "B1",
-    focus: "grammar",
+    category: "grammar",
     questions: [
       { type:"choose correct grammar", question:"'I'm really interested ___ learning Japanese.' (in/at/for)", answer:"in", hint:"'Interested' is always followed by 'in'", difficulty:"easy" },
       { type:"choose correct grammar", question:"'She's very good ___ maths.' (in/at/on)", answer:"at", hint:"'Good' takes 'at' before a skill or subject", difficulty:"easy" },
@@ -20925,7 +20925,7 @@ export const TOPIC_LIBRARY = {
   conjunctions: {
     label: "Conjunctions",
     level: "A2",
-    focus: "grammar",
+    category: "grammar",
     questions: [
       { type:"choose correct grammar", question:"'I like both tea ___ coffee.' (and/or/so)", answer:"and", hint:"'And' adds similar ideas", difficulty:"easy" },
       { type:"choose correct grammar", question:"'Do you want tea ___ coffee?' (and/or/so)", answer:"or", hint:"'Or' presents a choice", difficulty:"easy" },
@@ -21106,7 +21106,7 @@ export const TOPIC_LIBRARY = {
   articles: {
     label: "Articles (a/an/the/no article)",
     level: "B1",
-    focus: "grammar",
+    category: "grammar",
     questions: [
       { type:"choose correct grammar", question:"'I saw ___ elephant at the zoo.' (a/an/the)", answer:"an", hint:"'Elephant' starts with a vowel sound", difficulty:"easy" },
       { type:"choose correct grammar", question:"'She works as ___ nurse.' (a/an/the)", answer:"a", hint:"Professions always need 'a/an'", difficulty:"easy" },
@@ -21291,7 +21291,7 @@ export const TOPIC_LIBRARY = {
   clauses_of_purpose: {
     label: "Clauses of Purpose",
     level: "B1",
-    focus: "grammar",
+    category: "grammar",
     questions: [
       { type:"choose correct grammar", question:"'I'm saving money ___ buy a new car.' (to/for/so as)", answer:"to", hint:"'To' + verb for a specific action", difficulty:"easy" },
       { type:"choose correct grammar", question:"'She wears glasses ___ see better.' (to/for/so that)", answer:"to", hint:"'To' + verb for a specific purpose", difficulty:"easy" },
@@ -21475,7 +21475,7 @@ export const TOPIC_LIBRARY = {
   clauses_of_reason: {
     label: "Clauses of Reason",
     level: "B1",
-    focus: "grammar",
+    category: "grammar",
     questions: [
       { type:"choose correct grammar", question:"'We didn't go out ___ it was raining heavily.' (because/because of/due)", answer:"because", hint:"'Because' + a full clause (subject + verb)", difficulty:"easy" },
       { type:"choose correct grammar", question:"'The match was cancelled ___ the heavy rain.' (because/because of/since)", answer:"because of", hint:"'Because of' + a noun", difficulty:"easy" },
@@ -21659,7 +21659,7 @@ export const TOPIC_LIBRARY = {
   gerunds: {
     label: "Gerunds",
     level: "B1",
-    focus: "grammar",
+    category: "grammar",
     questions: [
       { type:"choose correct grammar", question:"'___ is my favorite way to relax.' (Swim/Swimming/To swim)", answer:"Swimming", hint:"A gerund can be the subject of a sentence", difficulty:"easy" },
       { type:"choose correct grammar", question:"'She left without ___ goodbye.' (say/saying/to say)", answer:"saying", hint:"After a preposition, always use a gerund", difficulty:"easy" },
@@ -21843,7 +21843,7 @@ export const TOPIC_LIBRARY = {
   present_perfect_continuous: {
     label: "Present Perfect Continuous",
     level: "B2",
-    focus: "grammar",
+    category: "grammar",
     questions: [
       { type:"choose correct grammar", question:"'I ___ for an hour.' (have waited/have been waiting/waited)", answer:"have been waiting", hint:"Emphasizes the duration of the activity", difficulty:"medium" },
       { type:"choose correct grammar", question:"'She ___ three emails since breakfast.' (has been writing/has written/wrote)", answer:"has written", hint:"Counting a result, not duration", difficulty:"medium" },
@@ -22027,7 +22027,7 @@ export const TOPIC_LIBRARY = {
   basic_word_order: {
     label: "Basic Word Order",
     level: "A1",
-    focus: "grammar",
+    category: "grammar",
     questions: [
       { type:"choose correct grammar", question:"Which is correct? 'I like very much football.' / 'I like football very much.'", answer:"I like football very much.", hint:"The adverb goes after the object, not between verb and object", difficulty:"medium" },
       { type:"choose correct grammar", question:"Which is correct? 'Is raining today.' / 'It is raining today.'", answer:"It is raining today.", hint:"English always needs a subject — use 'it' for weather", difficulty:"easy" },
@@ -22211,7 +22211,7 @@ export const TOPIC_LIBRARY = {
   prefixes_suffixes_adjectives: {
     label: "Prefixes & Suffixes (Adjectives)",
     level: "B2",
-    focus: "vocabulary",
+    category: "vocabulary",
     questions: [
       { type:"choose correct grammar", question:"Add 'un-' to 'happy':' (unhappy/inhappy/dishappy)", answer:"unhappy", hint:"'Un-' means 'not' or 'opposite of'", difficulty:"easy" },
       { type:"choose correct grammar", question:"Add the correct prefix to 'mature': (inmature/immature/unmature)", answer:"immature", hint:"'Im-' replaces 'in-' before words starting with 'm' or 'p'", difficulty:"medium" },
@@ -22396,7 +22396,7 @@ export const TOPIC_LIBRARY = {
   giving_directions: {
     "label": "Giving Directions",
     "level": "A1",
-    "focus": "vocabulary",
+    "category": "vocabulary",
     "questions": [
       { "type": "choose correct grammar", "question": "'___ left at the traffic lights.' (Turn/Go/Walk)", "answer": "Turn", "hint": "'Turn left/right' changes your direction.", "difficulty": "easy" },
       { "type": "choose correct grammar", "question": "'Go ___ ahead until you see the bank.' (straight/direct/forward)", "answer": "straight", "hint": "'Go straight ahead' means don't turn.", "difficulty": "easy" },
@@ -22610,7 +22610,7 @@ export const TOPIC_LIBRARY = {
   ed_ing_adjectives: {
     "label": "-ed vs -ing Adjectives",
     "level": "B1",
-    "focus": "grammar",
+    "category": "grammar",
     "questions": [
       { "type": "choose correct grammar", "question": "'I'm really ___ in this film.' (interested/interesting/interest)", "answer": "interested", "hint": "-ed describes how a person feels.", "difficulty": "easy" },
       { "type": "choose correct grammar", "question": "'This documentary is very ___.' (interested/interesting/interest)", "answer": "interesting", "hint": "-ing describes the thing that causes the feeling.", "difficulty": "easy" },
@@ -22816,7 +22816,7 @@ export const TOPIC_LIBRARY = {
   future_continuous: {
     "label": "Future Continuous (will be + -ing)",
     "level": "B1",
-    "focus": "grammar",
+    "category": "grammar",
     "questions": [
       { "type": "choose correct grammar", "question": "'This time tomorrow, I ___ on a plane to Rome.' (will be flying/will fly/fly)", "answer": "will be flying", "hint": "An action in progress at a specific future time uses will be + -ing.", "difficulty": "easy" },
       { "type": "choose correct grammar", "question": "'At 8pm tonight, we ___ dinner.' (will be having/will have/have)", "answer": "will be having", "hint": "Use will be + -ing for an action in progress at a future time.", "difficulty": "easy" },
@@ -23027,7 +23027,7 @@ export const TOPIC_LIBRARY = {
   wish_if_only: {
     "label": "I wish / If only",
     "level": "B2",
-    "focus": "grammar",
+    "category": "grammar",
     "questions": [
       { "type": "choose correct grammar", "question": "'I wish I ___ more free time.' (had/have/will have)", "answer": "had", "hint": "Wish + past simple for a present regret.", "difficulty": "easy" },
       { "type": "choose correct grammar", "question": "'I wish I ___ harder for the exam last week.' (had studied/studied/have studied)", "answer": "had studied", "hint": "Wish + past perfect for a regret about the past.", "difficulty": "medium" },
@@ -23229,7 +23229,7 @@ export const TOPIC_LIBRARY = {
   describing_locations: {
     "label": "Describing Locations",
     "level": "B1",
-    "focus": "vocabulary",
+    "category": "vocabulary",
     "questions": [
       { "type": "choose correct grammar", "question": "'The village is ___ in the mountains — it feels very isolated.' (situated/situating/situate)", "answer": "situated", "hint": "'Situated in' describes a location.", "difficulty": "easy" },
       { "type": "choose correct grammar", "question": "'The city is ___ for its beautiful architecture.' (known/knowing/knows)", "answer": "known", "hint": "'Known for' describes what a place is famous for.", "difficulty": "easy" },
@@ -23433,7 +23433,7 @@ export const TOPIC_LIBRARY = {
   too_much_many: {
     "label": "Too vs Too much / Too many",
     "level": "A2",
-    "focus": "grammar",
+    "category": "grammar",
     "questions": [
       { "type": "choose correct grammar", "question": "'It's ___ hot to go outside today.' (too/too much/too many)", "answer": "too", "hint": "'Too' + adjective, no noun.", "difficulty": "easy" },
       { "type": "choose correct grammar", "question": "'There's ___ sugar in this coffee.' (too/too much/too many)", "answer": "too much", "hint": "'Too much' + uncountable noun.", "difficulty": "easy" },
@@ -23635,7 +23635,7 @@ export const TOPIC_LIBRARY = {
   gerunds_infinitives: {
     "label": "Gerunds vs Infinitives",
     "level": "B2",
-    "focus": "grammar",
+    "category": "grammar",
     "questions": [
       { "type": "choose correct grammar", "question": "'I enjoy ___ new places.' (visiting/to visit/visit)", "answer": "visiting", "hint": "'Enjoy' is always followed by a gerund.", "difficulty": "easy" },
       { "type": "choose correct grammar", "question": "'She decided ___ her job.' (to leave/leaving/leave)", "answer": "to leave", "hint": "'Decide' is always followed by an infinitive.", "difficulty": "easy" },
@@ -23839,7 +23839,7 @@ export const TOPIC_LIBRARY = {
   common_idioms: {
     "label": "Very Common Idioms",
     "level": "B1",
-    "focus": "vocabulary",
+    "category": "vocabulary",
     "questions": [
       { "type": "choose correct grammar", "question": "'Don't worry, the exam is a piece of ___.' (cake/bread/pie)", "answer": "cake", "hint": "'A piece of cake' means something very easy.", "difficulty": "easy" },
       { "type": "choose correct grammar", "question": "'He told a joke to ___ the ice at the meeting.' (break/hit/cut)", "answer": "break", "hint": "'Break the ice' means to start a conversation in an awkward situation.", "difficulty": "easy" },
