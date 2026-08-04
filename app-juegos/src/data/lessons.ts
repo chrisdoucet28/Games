@@ -4173,6 +4173,19 @@ export const LESSONS: Record<string, Lesson> = {
         ],
       },
       {
+        heading: "Play, do, or go?",
+        body: [
+          "**Play** + sports, games, and musical instruments (add 'the' before instruments).",
+          "**Do** + individual activities, exercise, and martial arts.",
+          "**Go** + outdoor or movement activities ending in -ing.",
+        ],
+        examples: [
+          "She **plays tennis**. He **plays chess**. I **play the guitar**.",
+          "We **do yoga**. He **does karate**.",
+          "They **go swimming**. She **goes cycling**.",
+        ],
+      },
+      {
         heading: "More natural expressions",
         body: ["'be really into' + gerund = love a hobby (informal).", "'in my spare/free time' introduces a hobby sentence."],
         examples: [
@@ -4186,6 +4199,9 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ His hobby are collecting stamps. → ✅ His hobby is collecting stamps. ('hobby' is singular)",
       "❌ I interested in learning languages. → ✅ I am interested in learning languages. (don't forget 'am')",
       "❌ What is your hobbies? → ✅ What are your hobbies? ('hobbies' is plural)",
+      "❌ She does tennis every weekend. → ✅ She plays tennis every weekend. (sports/games use 'play', not 'do')",
+      "❌ He plays karate on Tuesdays. → ✅ He does karate on Tuesdays. (martial arts use 'do', not 'play')",
+      "❌ They do cycling at the weekend. → ✅ They go cycling at the weekend. (outdoor -ing activities use 'go')",
     ],
   },
 
@@ -4218,12 +4234,27 @@ export const LESSONS: Record<string, Lesson> = {
           "He is **more patient than** his brother.",
         ],
       },
+      {
+        heading: "So vs such",
+        body: [
+          "Use **so** + adjective when there's no noun after it.",
+          "Use **such a/an** + adjective + singular noun, or **such** + adjective + plural noun (no article), when a noun follows.",
+        ],
+        examples: [
+          "He is **so kind**. (adjective alone — no noun)",
+          "She is **such a generous person**. (adjective + singular noun)",
+          "He is **such an honest person**. ('an' before a vowel sound)",
+          "My classmates are **such talkative people**. (adjective + plural noun — no article)",
+        ],
+      },
     ],
     commonMistakes: [
       "❌ What does she like? She is friendly. → ✅ What is she like? She is friendly.",
       "❌ He is a very kindly person. → ✅ He is a very kind person. ('kind' is the adjective)",
       "❌ She is more shyer than her brother. → ✅ She is shyer than her brother. (don't double the comparative)",
       "❌ They are very creative persons. → ✅ They are very creative people. (irregular plural)",
+      "❌ He is such kind. → ✅ He is so kind. ('such' needs a noun; use 'so' with just an adjective)",
+      "❌ She is so generous person. → ✅ She is such a generous person. ('such a' + adjective + noun)",
     ],
   },
 
@@ -4257,12 +4288,30 @@ export const LESSONS: Record<string, Lesson> = {
           "She is **nervous** before the test.",
         ],
       },
+      {
+        heading: "Feeling + preposition",
+        body: [
+          "Many feelings need a fixed preposition before the cause — the wrong one is a very common mistake.",
+          "afraid of / scared of + noun. interested in + noun. worried about / excited about + noun. proud of + noun. angry with + person. tired of + noun/gerund.",
+        ],
+        examples: [
+          "He is **afraid of** spiders.",
+          "They are **interested in** video games.",
+          "She is **worried about** the exam.",
+          "He is **proud of** his team.",
+          "She is **angry with** her brother. (not 'angry of')",
+          "I am **tired of** studying. (not 'tired to study')",
+        ],
+      },
     ],
     commonMistakes: [
       "❌ I are happy. → ✅ I am happy. ('I' takes 'am')",
       "❌ She feel tired. → ✅ She feels tired. (third person singular needs -s)",
       "❌ They is excited. → ✅ They are excited. ('they' takes 'are')",
       "❌ I am hungry, I want drink water. → ✅ I am hungry. I want to drink water. (don't forget 'to' before the verb)",
+      "❌ He is afraid from spiders. → ✅ He is afraid of spiders. ('afraid of', not 'afraid from')",
+      "❌ She is angry of her brother. → ✅ She is angry with her brother. ('angry with' a person)",
+      "❌ They are interested of video games. → ✅ They are interested in video games. ('interested in', not 'interested of')",
     ],
   },
 
