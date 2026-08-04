@@ -138,7 +138,14 @@ handout) with no guarantee they've seen any other specific lesson first.
   show a word or clause there that the correct answer for that exact item doesn't use. When one
   scenario's fragment is naturally shared across multiple transform variants that need different
   subsets of it (e.g. an excuse's cause vs. cause+consequence), give each variant its own trimmed
-  `question` field rather than reusing the full fragment on every variant.
+  `question` field rather than reusing the full fragment on every variant. The reverse gap matters
+  just as much: if a production lock's own topic has several different valid fixed phrasings for
+  the same function (e.g. `invitations`' `invitation-reject` locks in one specific polite-refusal
+  opener per item — "I'm afraid", "That's so kind, but", "Thanks for asking, but", etc. — out of
+  many equally correct options), the fragment must include that item's own specific fixed-phrase
+  words, not just the variable content (event/time/reason) — otherwise the player has no way to
+  know which of several correct phrasings the answer key actually expects, and a different, equally
+  valid response gets marked wrong purely because nothing ever cued which one to use.
 - **"How to Play" tutorials (`data/tutorials/*.tsx`)**: each game's intro screen has a How to
   Play button opening a scripted walkthrough (`components/shared/HowToPlayModal.tsx`) — hand-authored
   mockups, not driven by real game state, so nothing keeps them in sync with the actual game
