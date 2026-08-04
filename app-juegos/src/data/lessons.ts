@@ -726,7 +726,7 @@ export const LESSONS: Record<string, Lesson> = {
 
   health_and_body: {
     title: "Health & the Body",
-    intro: "Talking about being ill or injured uses a small set of fixed phrases and collocations — most mistakes come from the wrong preposition or a missing 'to'.",
+    intro: "Talking about being ill or injured uses a small set of fixed phrases and collocations — most mistakes come from the wrong preposition, a missing 'to', or mixing up 'have' with 'hurt/ache'.",
     sections: [
       {
         heading: "Symptoms and illness",
@@ -741,6 +741,20 @@ export const LESSONS: Record<string, Lesson> = {
           "I **caught a cold** last week.",
           "I'm **allergic to** penicillin.",
           "He is **suffering from** a bad cold.",
+        ],
+      },
+      {
+        heading: "'Have' a symptom vs a body part that hurts/aches",
+        body: [
+          "'have' + a symptom noun (a headache, a stomachache, a sore throat) names the problem.",
+          "a body part + 'hurts' or 'aches' says that part is in pain — the body part is the subject, and a plural body part (feet, eyes, ears) takes 'hurt'/'ache', not 'hurts'/'aches'.",
+          "Both describe the same kind of problem — pick whichever fits the sentence you're building.",
+        ],
+        examples: [
+          "I **have a headache**. = My **head hurts**. (same meaning, different structure)",
+          "My **back aches** after a long day. (singular body part — 'aches')",
+          "Her **feet hurt** from the new shoes. (plural body part — 'hurt', no -s)",
+          "His **stomach hurts**. (not 'His stomach have pain')",
         ],
       },
       {
@@ -786,6 +800,8 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ I've had this cough since three days. → ✅ I've had this cough for three days. ('for' + duration)",
       "❌ He should stopped smoking. → ✅ He should stop smoking. (modal + base verb, no '-ed')",
       "❌ I have broke my arm. → ✅ I have broken my arm. (past participle 'broken', not 'broke')",
+      "❌ My feet hurts. → ✅ My feet hurt. (plural body part, no -s on the verb)",
+      "❌ My stomach have pain. → ✅ My stomach hurts. ('hurt/ache' takes the body part as subject, not 'have')",
     ],
   },
 
@@ -4291,7 +4307,7 @@ export const LESSONS: Record<string, Lesson> = {
 
   clothes: {
     title: "I Am Wearing... (Clothes)",
-    intro: "Talking about what someone is wearing right now uses the present continuous — and several clothing words are always plural, with no article before them.",
+    intro: "Talking about clothes uses different tenses depending on when — present continuous for right now, present simple for habits, past simple for something already finished — and several clothing words are always plural, with no article before them.",
     sections: [
       {
         heading: "Present continuous for what you're wearing now",
@@ -4299,6 +4315,19 @@ export const LESSONS: Record<string, Lesson> = {
         examples: [
           "**What are you wearing?** I'm wearing jeans.",
           "She **is wearing** a red dress. (not 'She wear' or 'She wearing')",
+        ],
+      },
+      {
+        heading: "Present simple, continuous, or past?",
+        body: [
+          "Use present simple for a habit or routine — what someone usually wears.",
+          "Use present continuous for right now, in this moment.",
+          "Use past simple for a specific occasion that's already finished.",
+        ],
+        examples: [
+          "He **wears** a suit to the office every day. (habit — present simple)",
+          "He **is wearing** a suit right now, in this photo. (happening now — present continuous)",
+          "He **wore** a suit to the interview yesterday. (finished, in the past — past simple)",
         ],
       },
       {
@@ -4323,6 +4352,8 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ I am wearing a jeans. → ✅ I am wearing jeans. ('jeans' is always plural)",
       "❌ She is wear a coat. → ✅ She is wearing a coat. (don't forget 'is')",
       "❌ We are wearing shorts blue today. → ✅ We are wearing blue shorts today. (adjective before noun)",
+      "❌ Every day she is wearing a uniform. → ✅ Every day she wears a uniform. (a habit needs present simple, not continuous)",
+      "❌ She wear a black dress at the party last night. → ✅ She wore a black dress at the party last night. (a finished past event needs past simple)",
     ],
   },
 
