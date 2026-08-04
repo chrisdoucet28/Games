@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Analytics } from '@vercel/analytics/react';
 import LessonGamesGenerator from './LessonGamesGenerator';
 import { AuthScreen } from './components/shared/AuthScreen';
 import { useAuth } from './hooks/useAuth';
@@ -61,7 +62,12 @@ function StatusBadge({ children, action, onAction, theme }: { children: React.Re
 
 function App() {
   if (!isSupabaseConfigured) return <ConfigErrorScreen />;
-  return <AuthenticatedApp />;
+  return (
+    <>
+      <AuthenticatedApp />
+      <Analytics />
+    </>
+  );
 }
 
 function AuthenticatedApp() {
