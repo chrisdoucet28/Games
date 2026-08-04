@@ -2837,6 +2837,19 @@ export const LESSONS: Record<string, Lesson> = {
         body: ["Adjectives/nouns for describing patterns."],
         examples: ["**an upward/downward trend**, **a sharp increase/decline**, **a slight increase**, **remain stable**, **reach a peak**, **hit a record low**"],
       },
+      {
+        heading: "Turning a verb sentence into a noun sentence",
+        body: [
+          "'There was a/an + adjective + noun + in + X' rewrites a verb sentence as a noun sentence.",
+          "The adverb becomes the matching adjective (sharply → sharp, dramatically → dramatic, gradually → gradual, suddenly → sudden).",
+          "Most verbs share the same noun form (rise → rise, increase → increase, fall → fall, decline → decline, drop → drop, surge → surge); a few change (grow → growth, weaken → weakening).",
+        ],
+        examples: [
+          "Prices rose sharply. → **There was a sharp rise in prices.**",
+          "Sales increased by 10%. → **There was a 10% increase in sales.**",
+          "Profits grew steadily. → **There was steady growth in profits.**",
+        ],
+      },
     ],
     commonMistakes: [
       "❌ Prices raised sharply last year. → ✅ Prices rose sharply last year. ('rise' is intransitive)",
@@ -2844,6 +2857,8 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ Sales increased of 10%. → ✅ Sales increased by 10%. ('increase by', not 'of')",
       "❌ Prices have rose steadily. → ✅ Prices have risen steadily. (present perfect needs 'risen')",
       "❌ The number of tourists have doubled. → ✅ The number of tourists has doubled. ('the number of' takes a singular verb)",
+      "❌ There was a rise sharp in prices. → ✅ There was a sharp rise in prices. (adjective before the noun)",
+      "❌ There was a growth steady in profits. → ✅ There was steady growth in profits. ('growth' is uncountable — no article)",
     ],
   },
 
