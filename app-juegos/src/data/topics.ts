@@ -2,7 +2,7 @@ export const TOPIC_LIBRARY = {
   // ── GRAMMAR TOPICS ──────────────────────────────────────────────────────────
   irregular_verbs: {
     label: "Irregular Verbs",
-    category: "grammar",
+    level: "A2", category: "grammar",
     questions: [
       { type:"choose correct grammar", question:"'Yesterday she ___ to school late.' (goed/went/gone)", answer:"went", hint:"Past simple of 'go' is irregular", difficulty:"easy" },
       { type:"correct grammar mistakes", question:"'He breaked the window by accident.'", answer:"He broke the window by accident.", hint:"Past simple of 'break' is 'broke'", difficulty:"easy" },
@@ -210,7 +210,7 @@ export const TOPIC_LIBRARY = {
 
   present_perfect: {
     label: "Present Perfect",
-    category: "grammar",
+    level: "B1", category: "grammar",
     questions: [
       { type:"choose correct grammar", question:"'___ you ever tried sushi?' (Have/Did/Do)", answer:"Have", hint:"Present perfect questions use 'have/has'", difficulty:"easy" },
       { type:"correct grammar mistakes", question:"'I have went to Paris last summer.'", answer:"I went to Paris last summer.", hint:"Specific past time = past simple, not present perfect", difficulty:"easy" },
@@ -460,7 +460,7 @@ export const TOPIC_LIBRARY = {
 
   first_conditional: {
     label: "First Conditional",
-    category: "grammar",
+    level: "A2", category: "grammar",
     questions: [
       { type:"choose correct grammar", question:"'If it ___ tomorrow, we'll cancel the trip.' (rains/will rain/rained)", answer:"rains", hint:"If-clause uses present simple, not future", difficulty:"easy" },
       { type:"correct grammar mistakes", question:"'If you will study hard, you'll pass the exam.'", answer:"If you study hard, you'll pass the exam.", hint:"No 'will' in the if-clause", difficulty:"easy" },
@@ -686,7 +686,7 @@ export const TOPIC_LIBRARY = {
 
   phrasal_verbs: {
     label: "Phrasal Verbs",
-    category: "grammar",
+    level: "B1", category: "grammar",
     questions: [
       { type:"choose correct grammar", question:"'She ___ her coat before going outside.' (put on/put in/put up)", answer:"put on", hint:"'Put on' = to dress yourself in something", difficulty:"easy" },
       { type:"correct grammar mistakes", question:"'He gave up to smoking last year.'", answer:"He gave up smoking last year.", hint:"'Give up' + gerund (no 'to')", difficulty:"easy" },
@@ -887,7 +887,7 @@ export const TOPIC_LIBRARY = {
 
   past_simple: {
     label: "Past Simple",
-    category: "grammar",
+    level: "A2", category: "grammar",
     questions: [
       { type:"choose correct grammar", question:"'Yesterday she ___ to the cinema.' (go/went/gone)", answer:"went", hint:"Past simple of 'go' is 'went'", difficulty:"easy" },
       { type:"correct grammar mistakes", question:"'I buyed a new phone last week.'", answer:"I bought a new phone last week.", hint:"'Buy' is irregular — past simple is 'bought'", difficulty:"easy" },
@@ -1098,7 +1098,7 @@ export const TOPIC_LIBRARY = {
 
   present_simple_vs_continuous: {
     label: "Present Simple vs Continuous",
-    category: "grammar",
+    level: "A2", category: "grammar",
     questions: [
       { type:"choose correct grammar", question:"'Look! She ___ her hair.' (does/is doing/do)", answer:"is doing", hint:"Something happening right now → present continuous", difficulty:"easy" },
       { type:"correct grammar mistakes", question:"'I am always drink coffee in the morning.'", answer:"I always drink coffee in the morning.", hint:"Habits and routines use present simple, not continuous", difficulty:"easy" },
@@ -1327,7 +1327,7 @@ export const TOPIC_LIBRARY = {
 
   invitations: {
     label: "Invitations (Asking, Accepting, Rejecting)",
-    category: "vocabulary",
+    level: "A2", category: "vocabulary",
     questions: [
       { type:"choose correct grammar", question:"'___ you like to come to my party?' (Would/Do/Will)", answer:"Would", hint:"'Would you like to…?' is the polite invitation form", difficulty:"easy" },
       { type:"correct grammar mistakes", question:"'Would you like come to dinner with us?'", answer:"Would you like to come to dinner with us?", hint:"'Would you like + to + infinitive'", difficulty:"easy" },
@@ -1529,7 +1529,7 @@ export const TOPIC_LIBRARY = {
 
   telling_stories: {
     label: "Telling Stories",
-    category: "vocabulary",
+    level: "A2", category: "vocabulary",
     questions: [
       { type:"choose correct grammar", question:"'___ you listen, I'll tell you what happened.' (If/While/When)", answer:"If", hint:"'If you listen' introduces the condition for hearing the story", difficulty:"easy" },
       { type:"finish the sentence", question:"'___ evening, I was walking home when something strange happened.'", answer:"One", hint:"Stories often start with 'One day', 'One evening', 'One night'", difficulty:"easy" },
@@ -1731,7 +1731,7 @@ export const TOPIC_LIBRARY = {
 
   so_neither: {
     label: "So do I / Neither do I",
-    category: "grammar",
+    level: "B1", category: "grammar",
     questions: [
       { type:"choose correct grammar", question:"'I love pizza.' — 'So ___ I.' (do/am/have)", answer:"do", hint:"'So do I' agrees with a main verb", difficulty:"easy" },
       { type:"choose correct grammar", question:"'I'm tired.' — '___ am I.' (So/Neither/Nor)", answer:"So", hint:"'So am I' agrees with a positive statement", difficulty:"easy" },
@@ -1945,7 +1945,7 @@ export const TOPIC_LIBRARY = {
 
   prefer_rather: {
     label: "I'd prefer vs I'd rather",
-    category: "grammar",
+    level: "B1", category: "grammar",
     questions: [
       { type:"choose correct grammar", question:"'___ stay home tonight.' (I'd rather/I'd prefer to)", answer:"I'd rather", hint:"'Rather' is followed by bare infinitive", difficulty:"easy" },
       { type:"choose correct grammar", question:"'___ a coffee, please.' (I'd prefer/I'd rather)", answer:"I'd prefer", hint:"'Prefer' can be followed by a noun", difficulty:"easy" },
@@ -2163,7 +2163,7 @@ export const TOPIC_LIBRARY = {
 
   passive_simple: {
     label: "Passive Voice — Simple Tenses",
-    category: "grammar",
+    level: "B1", category: "grammar",
     questions: [
       { type:"correct grammar mistakes", question:"'The cake was bake by my mother.'", answer:"The cake was baked by my mother.", hint:"Past participle needed after 'was'", difficulty:"easy" },
       { type:"choose correct grammar", question:"'The windows ___ cleaned yesterday.' (were/was/are)", answer:"were", hint:"'Windows' is plural — use 'were'", difficulty:"easy" },
@@ -2378,7 +2378,7 @@ export const TOPIC_LIBRARY = {
 
   passive_complex: {
     label: "Passive Voice — Complex Tenses",
-    category: "grammar",
+    level: "B2", category: "grammar",
     questions: [
       { type:"correct grammar mistakes", question:"'The letters are been sent.'", answer:"The letters are being sent.", hint:"Present continuous passive: am/is/are + being + past participle", difficulty:"medium" },
       { type:"choose correct grammar", question:"'The suspect is ___ questioned by police.' (being/been/be)", answer:"being", hint:"Present continuous passive: is + being", difficulty:"easy" },
@@ -2589,7 +2589,7 @@ export const TOPIC_LIBRARY = {
 
   indefinite_pronouns: {
     label: "Indefinite Pronouns",
-    category: "grammar",
+    level: "B1", category: "grammar",
     questions: [
       { type:"choose correct grammar", question:"'Is ___ home?' (anybody/nowhere/nobody)", answer:"anybody", hint:"'Anybody' fits an open yes/no question — 'nowhere' isn't a person and doesn't fit here", difficulty:"easy" },
       { type:"correct grammar mistakes", question:"'Nobody doesn't want to leave.'", answer:"Nobody wants to leave.", hint:"'Nobody' already makes it negative — no double negative", difficulty:"easy" },
@@ -2789,7 +2789,7 @@ export const TOPIC_LIBRARY = {
 
   future_in_past: {
     label: "Future in the Past",
-    category: "grammar",
+    level: "B2", category: "grammar",
     questions: [
       { type:"correct grammar mistakes", question:"'She said she will call me.' (reported speech)", answer:"She said she would call me.", hint:"'Will' becomes 'would' in reported speech", difficulty:"easy" },
       { type:"choose correct grammar", question:"'He was going to ___ the project.' (finish/finishing/finished)", answer:"finish", hint:"'Was going to' + bare infinitive", difficulty:"easy" },
@@ -3011,7 +3011,7 @@ export const TOPIC_LIBRARY = {
 
   relative_clauses: {
     label: "Relative Clauses",
-    category: "grammar",
+    level: "B1", category: "grammar",
     questions: [
       { type:"choose correct grammar", question:"'The woman ___ called is my sister.' (who/which/whose)", answer:"who", hint:"'Who' for people", difficulty:"easy" },
       { type:"correct grammar mistakes", question:"'The book which I told you about it is amazing.'", answer:"The book which I told you about is amazing.", hint:"Remove 'it' — 'which' already replaces the object", difficulty:"medium" },
@@ -3226,7 +3226,7 @@ export const TOPIC_LIBRARY = {
 
   adverbs: {
     label: "Adverbs",
-    category: "grammar",
+    level: "B1", category: "grammar",
     questions: [
       { type:"correct grammar mistakes", question:"'She sings beautiful.'", answer:"She sings beautifully.", hint:"Adverbs modify verbs — add '-ly'", difficulty:"easy" },
       { type:"choose correct grammar", question:"'He works ___ hard.' (very/much/well)", answer:"very", hint:"'Very' intensifies adverbs and adjectives", difficulty:"easy" },
@@ -3441,7 +3441,7 @@ export const TOPIC_LIBRARY = {
 
   double_comparatives: {
     label: "Double Comparatives",
-    category: "grammar",
+    level: "B1", category: "grammar",
     questions: [
       { type:"finish the sentence", question:"'___ harder you work, ___ better your results.'", answer:"The...the", hint:"Double comparative uses 'the...the'", difficulty:"easy" },
       { type:"correct grammar mistakes", question:"'More you practice, the more fluent you become.'", answer:"The more you practice, the more fluent you become.", hint:"Both parts need 'the'", difficulty:"easy" },
@@ -3646,7 +3646,7 @@ export const TOPIC_LIBRARY = {
 
   third_conditional: {
     label: "Third Conditional",
-    category: "grammar",
+    level: "B2", category: "grammar",
     questions: [
       { type:"correct grammar mistakes", question:"'If she studied, she would passed.'", answer:"If she had studied, she would have passed.", hint:"Third conditional: If + past perfect, would + have + past participle", difficulty:"easy" },
       { type:"finish the sentence", question:"'If I had known, I ___ (tell) you.'", answer:"would have told", hint:"Would + have + past participle in the main clause", difficulty:"easy" },
@@ -3870,7 +3870,7 @@ export const TOPIC_LIBRARY = {
   // ── VOCABULARY TOPICS ────────────────────────────────────────────────────────
   giving_opinions: {
     label: "Giving Opinions",
-    category: "vocabulary",
+    level: "B1", category: "vocabulary",
     questions: [
       { type:"use vocabulary in a sentence", question:"'In my opinion' — your view on social media", answer:"In my opinion, social media has both positive and negative effects on society.", hint:"'In my opinion' + opinion statement", difficulty:"easy" },
       { type:"choose correct grammar", question:"'___ I see it, everyone deserves a second chance.' (As far as/The way/From where)", answer:"The way", hint:"'The way I see it' = in my view", difficulty:"easy" },
@@ -4078,7 +4078,7 @@ export const TOPIC_LIBRARY = {
 
   greetings_introductions: {
     label: "Greetings & Introductions",
-    category: "vocabulary",
+    level: "A1", category: "vocabulary",
     questions: [
       { type:"choose correct grammar", question:"'___ your name?' 'My name is Ana.' (What's/Who's/How's)", answer:"What's", hint:"'What's your name?' is the standard greeting question", difficulty:"easy" },
       { type:"finish the sentence", question:"'Hello! I ___ Maria. Nice to meet you!'", answer:"am / 'm", hint:"Use 'am' or the contraction 'm' with I", difficulty:"easy" },
@@ -4279,7 +4279,7 @@ export const TOPIC_LIBRARY = {
 
   introducing_others: {
     label: "Introducing Other People",
-    category: "vocabulary",
+    level: "A1", category: "vocabulary",
     questions: [
       { type:"finish the sentence", question:"'This is Ana. ___ name is Ana.'", answer:"Her", hint:"Ana is a woman — use 'her'", difficulty:"easy" },
       { type:"choose correct grammar", question:"'This is Tom. ___ is my friend.' (He/She/They)", answer:"He", hint:"Tom is male — use 'he'", difficulty:"easy" },
@@ -4480,7 +4480,7 @@ export const TOPIC_LIBRARY = {
 
   present_simple: {
     label: "Present Simple",
-    category: "grammar",
+    level: "A1", category: "grammar",
     questions: [
       { type:"choose correct grammar", question:"'She ___ to school every day.' (go/goes/going)", answer:"goes", hint:"Third person singular adds -s or -es", difficulty:"easy" },
       { type:"finish the sentence", question:"'I ___ (live) in Madrid.'", answer:"live", hint:"First person: no extra -s needed", difficulty:"easy" },
@@ -4695,7 +4695,7 @@ export const TOPIC_LIBRARY = {
 
   likes_dislikes: {
     label: "Likes & Dislikes",
-    category: "vocabulary",
+    level: "A1", category: "vocabulary",
     questions: [
       { type:"choose correct grammar", question:"'I like ___ music.' (listen/listening/to listening)", answer:"listening to", hint:"'Like' + gerund (-ing)", difficulty:"easy" },
       { type:"finish the sentence", question:"'She loves ___ (cook) for her family.'", answer:"cooking", hint:"'Love' is followed by -ing", difficulty:"easy" },
@@ -4898,7 +4898,7 @@ export const TOPIC_LIBRARY = {
 
   what_do_you_do: {
     label: "What do you do? + Professions",
-    category: "vocabulary",
+    level: "A1", category: "vocabulary",
     questions: [
       { type:"choose correct grammar", question:"'What ___ you do?' 'I'm a teacher.' (do/are/is)", answer:"do", hint:"'What do you do?' asks about someone's job", difficulty:"easy" },
       { type:"finish the sentence", question:"'She is ___ nurse. She works in a hospital.'", answer:"a", hint:"Use 'a' before a job that starts with a consonant sound", difficulty:"easy" },
@@ -5099,7 +5099,7 @@ export const TOPIC_LIBRARY = {
 
   hobbies: {
     label: "Hobbies",
-    category: "vocabulary",
+    level: "A1", category: "vocabulary",
     questions: [
       { type:"choose correct grammar", question:"'What ___ you do in your free time?' (do/are/does)", answer:"do", hint:"'What do you do in your free time?' asks about habits", difficulty:"easy" },
       { type:"finish the sentence", question:"'I love ___ (play) video games after school.'", answer:"playing", hint:"'Love' + gerund (-ing)", difficulty:"easy" },
@@ -5309,7 +5309,7 @@ export const TOPIC_LIBRARY = {
 
   personality: {
     label: "Personality Adjectives",
-    category: "vocabulary",
+    level: "A1", category: "vocabulary",
     questions: [
       { type:"choose correct grammar", question:"'What ___ she like?' 'She's very friendly.' (is/does/are)", answer:"is", hint:"'What is she like?' asks about personality", difficulty:"easy" },
       { type:"finish the sentence", question:"'He is very ___ — he always helps his friends.'", answer:"kind / generous / friendly", hint:"Positive personality adjective", difficulty:"easy" },
@@ -5510,7 +5510,7 @@ export const TOPIC_LIBRARY = {
 
   feelings: {
     label: "Feelings (Basic)",
-    category: "vocabulary",
+    level: "A1", category: "vocabulary",
     questions: [
       { type:"choose correct grammar", question:"'I ___ hungry. I want to eat.' (am/is/are)", answer:"am", hint:"'I' takes 'am'", difficulty:"easy" },
       { type:"finish the sentence", question:"'I am very ___. Can I have some water?'", answer:"thirsty", hint:"Feeling = need a drink", difficulty:"easy" },
@@ -5654,7 +5654,7 @@ export const TOPIC_LIBRARY = {
 
   appearance: {
     label: "What do you look like?",
-    category: "vocabulary",
+    level: "A1", category: "vocabulary",
     questions: [
       { type:"choose correct grammar", question:"'What ___ he look like?' 'He's tall and has dark hair.' (does/is/do)", answer:"does", hint:"'What does he look like?' asks about appearance", difficulty:"easy" },
       { type:"finish the sentence", question:"'She ___ tall and slim.'", answer:"is", hint:"Use 'be' for height, build, and general appearance", difficulty:"easy" },
@@ -5855,7 +5855,7 @@ export const TOPIC_LIBRARY = {
 
   clothes: {
     label: "I am wearing… (Clothes)",
-    category: "vocabulary",
+    level: "A1", category: "vocabulary",
     questions: [
       { type:"choose correct grammar", question:"'What ___ you wearing?' 'I'm wearing jeans.' (are/do/is)", answer:"are", hint:"'What are you wearing?' — present continuous", difficulty:"easy" },
       { type:"finish the sentence", question:"'She ___ wearing a red dress.'", answer:"is / 's", hint:"Third person singular present continuous: 'is wearing'", difficulty:"easy" },
@@ -6057,7 +6057,7 @@ export const TOPIC_LIBRARY = {
   // ── SPEAKING TOPICS ────────────────────────────────────────────────────────
   working_from_home: {
     label: "Working from Home",
-    category: "topic",
+    level: "B1", category: "topic",
     questions: [
       { type:"finish the sentence", question:"One advantage of working from home is saving time on ___.", answer:"commuting / travel", hint:"Getting to the office", difficulty:"easy" },
       { type:"finish the sentence", question:"Many people find it hard to ___ when working from home.", answer:"focus / concentrate", hint:"Staying on task", difficulty:"easy" },
@@ -6267,7 +6267,7 @@ export const TOPIC_LIBRARY = {
 
   learning_language: {
     label: "Learning a Foreign Language",
-    category: "topic",
+    level: "B1", category: "topic",
     questions: [
       { type:"finish the sentence", question:"Learning a language helps you ___ with more people around the world.", answer:"communicate / connect", hint:"The main purpose of language", difficulty:"easy" },
       { type:"finish the sentence", question:"One of the best ways to practise is to ___ with native speakers.", answer:"speak / talk", hint:"Using the language in real life", difficulty:"easy" },
@@ -6471,7 +6471,7 @@ export const TOPIC_LIBRARY = {
 
   education_systems: {
     label: "Education Systems",
-    category: "topic",
+    level: "B2", category: "topic",
     questions: [
       { type:"finish the sentence", question:"Education helps people develop skills and ___ for their future.", answer:"knowledge / opportunities", hint:"What education prepares you for", difficulty:"easy" },
       { type:"finish the sentence", question:"In many countries, education is ___ for children between certain ages.", answer:"compulsory / mandatory", hint:"You have no choice", difficulty:"medium" },
@@ -6691,7 +6691,7 @@ export const TOPIC_LIBRARY = {
 
   career_choices: {
     label: "Career Choices",
-    category: "topic",
+    level: "B1", category: "topic",
     questions: [
       { type:"finish the sentence", question:"When choosing a career, consider both your ___ and your interests.", answer:"skills / strengths", hint:"What you are good at", difficulty:"easy" },
       { type:"finish the sentence", question:"A job you are passionate about leads to greater ___ at work.", answer:"satisfaction / motivation", hint:"Feeling good about your work", difficulty:"easy" },
@@ -6892,7 +6892,7 @@ export const TOPIC_LIBRARY = {
 
   work_life_balance: {
     label: "Work-Life Balance",
-    category: "topic",
+    level: "B2", category: "topic",
     questions: [
       { type:"finish the sentence", question:"Work-life balance means finding a healthy ___ between your job and personal life.", answer:"balance / equilibrium", hint:"An equal split", difficulty:"easy" },
       { type:"finish the sentence", question:"Burnout happens when someone is too ___ with no time to rest.", answer:"stressed / overworked", hint:"Working too much", difficulty:"easy" },
@@ -7097,7 +7097,7 @@ export const TOPIC_LIBRARY = {
 
   success_motivation: {
     label: "Success and Motivation",
-    category: "topic",
+    level: "B2", category: "topic",
     questions: [
       { type:"finish the sentence", question:"Success means different things to different people — for some it's wealth, for others it's ___.", answer:"happiness / family / freedom", hint:"What else people value", difficulty:"easy" },
       { type:"finish the sentence", question:"Setting clear ___ helps you stay focused and measure your progress.", answer:"goals / targets", hint:"What you aim for", difficulty:"easy" },
@@ -7305,7 +7305,7 @@ export const TOPIC_LIBRARY = {
 
   time_management: {
     label: "Time Management",
-    category: "topic",
+    level: "B1", category: "topic",
     questions: [
       { type:"finish the sentence", question:"Time management means organising your time so you can ___ your tasks efficiently.", answer:"complete / finish / do", hint:"Getting things done", difficulty:"easy" },
       { type:"finish the sentence", question:"A to-do list helps you ___ which tasks need to be done first.", answer:"prioritise / decide", hint:"Putting the most important first", difficulty:"easy" },
@@ -7515,7 +7515,7 @@ export const TOPIC_LIBRARY = {
 
   free_time_hobbies: {
     label: "Free Time and Hobbies",
-    category: "topic",
+    level: "B1", category: "topic",
     questions: [
       { type:"finish the sentence", question:"Hobbies give people a way to ___ after a long day of work or study.", answer:"relax / unwind / switch off", hint:"What hobbies help you do", difficulty:"easy" },
       { type:"finish the sentence", question:"Creative hobbies like painting or writing help you ___ your feelings.", answer:"express", hint:"Show what is inside", difficulty:"easy" },
@@ -7725,7 +7725,7 @@ export const TOPIC_LIBRARY = {
 
   social_media: {
     label: "Social Media",
-    category: "topic",
+    level: "B1", category: "topic",
     questions: [
       { type:"finish the sentence", question:"Social media allows people to ___ with friends and family across the world.", answer:"connect / communicate", hint:"Keeping in contact", difficulty:"easy" },
       { type:"finish the sentence", question:"One major concern is the ___ of fake news and misinformation.", answer:"spread / sharing", hint:"Untrue information travelling fast", difficulty:"medium" },
@@ -7926,7 +7926,7 @@ export const TOPIC_LIBRARY = {
 
   causative_verbs: {
     label: "Causative Verbs (have/get/make/let)",
-    category: "grammar",
+    level: "B2", category: "grammar",
     questions: [
       { type:"finish the sentence", question:"I need to ___ my car repaired before the long drive.", answer:"have / get", hint:"'Have/get + object + past participle' = arrange for someone else to do it", difficulty:"easy" },
       { type:"choose correct grammar", question:"'She had her nails ___.' (do/doing/done)", answer:"done", hint:"Causative have/get: object + past participle", difficulty:"easy" },
@@ -8150,7 +8150,7 @@ export const TOPIC_LIBRARY = {
 
   get_used_to: {
     label: "Get Used To / Be Used To / Used To",
-    category: "grammar",
+    level: "B1", category: "grammar",
     questions: [
       { type:"choose correct grammar", question:"'I ___ getting up early when I was a student.' (used to/am used to/get used to)", answer:"used to", hint:"'Used to' describes a past habit that no longer exists", difficulty:"easy" },
       { type:"correct grammar mistakes", question:"'She is used to work late every night.'", answer:"She is used to working late every night.", hint:"'Be used to' + gerund (-ing form)", difficulty:"easy" },
@@ -8388,7 +8388,7 @@ export const TOPIC_LIBRARY = {
 
   reported_speech: {
     label: "Direct & Reported Speech",
-    category: "grammar",
+    level: "B1", category: "grammar",
     questions: [
       { type:"rewrite sentences", question:"'she / be tired' (she said: 'I am tired')", answer:"She said (that) she was tired.", hint:"Present simple → past simple in reported speech", difficulty:"easy", transform:"reported-speech" },
       { type:"rewrite sentences", question:"'he / call / me tomorrow' (he said: 'I will call you tomorrow')", answer:"He said (that) he would call me the next day.", hint:"'Will' → 'would'; 'tomorrow' → 'the next day'", difficulty:"easy", transform:"reported-speech" },
@@ -8613,7 +8613,7 @@ export const TOPIC_LIBRARY = {
 
   embedded_questions: {
     label: "Embedded Questions",
-    category: "grammar",
+    level: "B2", category: "grammar",
     questions: [
       { type:"rewrite sentences", question:"'Where is the post office?'", answer:"Could you tell me where the post office is?", hint:"Embedded question uses statement word order", difficulty:"easy", transform:"embedded-question" },
       { type:"correct grammar mistakes", question:"'Do you know where is the nearest bank?'", answer:"Do you know where the nearest bank is?", hint:"Embedded question = no inversion — subject before verb", difficulty:"easy" },
@@ -8798,7 +8798,7 @@ export const TOPIC_LIBRARY = {
 
   reading: {
     label: "Reading",
-    category: "topic",
+    level: "B1", category: "topic",
     questions: [
       { type:"finish the sentence", question:"Reading regularly helps to expand your ___ and improve your writing.", answer:"vocabulary", hint:"Words you know", difficulty:"easy" },
       { type:"finish the sentence", question:"Fiction allows readers to ___ into other people's lives and perspectives.", answer:"escape / step / gain insight", hint:"Seeing through another's eyes", difficulty:"easy" },
@@ -9003,7 +9003,7 @@ export const TOPIC_LIBRARY = {
 
   cultural_differences: {
     label: "Cultural Differences",
-    category: "topic",
+    level: "B2", category: "topic",
     questions: [
       { type:"finish the sentence", question:"Culture shock is the feeling of ___ and confusion people experience in a new culture.", answer:"disorientation / surprise / discomfort", hint:"Feeling lost in a new place", difficulty:"easy" },
       { type:"finish the sentence", question:"Body language and ___ can mean very different things in different cultures.", answer:"gestures", hint:"What your hands and body do", difficulty:"easy" },
@@ -9211,7 +9211,7 @@ export const TOPIC_LIBRARY = {
 
   climate_change: {
     label: "Climate Change",
-    category: "topic",
+    level: "B2", category: "topic",
     questions: [
       { type:"finish the sentence", question:"The ___ effect is the process by which certain gases trap heat in the Earth's atmosphere.", answer:"greenhouse", hint:"The main cause of global warming", difficulty:"easy" },
       { type:"finish the sentence", question:"Carbon dioxide and methane are both examples of ___ gases.", answer:"greenhouse", hint:"Gases that warm the planet", difficulty:"easy" },
@@ -9438,7 +9438,7 @@ export const TOPIC_LIBRARY = {
 
   city_vs_country: {
     label: "City Life vs. Country Life",
-    category: "topic",
+    level: "B1", category: "topic",
     questions: [
       { type:"finish the sentence", question:"City life offers greater access to jobs, culture, and ___ than rural areas.", answer:"entertainment / services / opportunities", hint:"Things cities have more of", difficulty:"easy" },
       { type:"finish the sentence", question:"Country life is often associated with cleaner air, more ___, and a slower pace.", answer:"space / nature / greenery / peace", hint:"What the countryside has", difficulty:"easy" },
@@ -9648,7 +9648,7 @@ export const TOPIC_LIBRARY = {
 
   fast_fashion: {
     label: "Fast Fashion",
-    category: "topic",
+    level: "B2", category: "topic",
     questions: [
       { type:"finish the sentence", question:"Fast fashion refers to the rapid production of ___ clothing sold at very low prices.", answer:"cheap / trendy / mass-produced", hint:"What fast fashion produces", difficulty:"easy" },
       { type:"finish the sentence", question:"The fashion industry is one of the world's biggest ___ of water and a major polluter.", answer:"consumers", hint:"Uses enormous amounts of water", difficulty:"medium" },
@@ -9847,7 +9847,7 @@ export const TOPIC_LIBRARY = {
 
   inversion: {
     label: "Inversion",
-    category: "grammar",
+    level: "C1", category: "grammar",
     questions: [
       { type:"correct grammar mistakes", question:"'Never I have seen such a beautiful view.'", answer:"Never have I seen such a beautiful view.", hint:"After negative adverbials, invert subject and auxiliary", difficulty:"easy" },
       { type:"rewrite sentences", question:"'I / rarely / feel so nervous' (in a long time)", answer:"Rarely have I felt so nervous.", hint:"'Rarely' triggers subject-auxiliary inversion", difficulty:"easy", transform:"inversion" },
@@ -10067,7 +10067,7 @@ export const TOPIC_LIBRARY = {
 
   mixed_conditionals: {
     label: "Mixed Conditionals",
-    category: "grammar",
+    level: "C1", category: "grammar",
     questions: [
       { type:"choose correct grammar", question:"'If she ___ harder at school, she would be in a better job now.' (had worked/worked/has worked)", answer:"had worked", hint:"Past-to-present mixed: if + past perfect, would + infinitive", difficulty:"easy" },
       { type:"correct grammar mistakes", question:"'If I would have taken that job, I would be in Paris now.'", answer:"If I had taken that job, I would be in Paris now.", hint:"No 'would' in the if-clause — use past perfect", difficulty:"easy" },
@@ -10285,7 +10285,7 @@ export const TOPIC_LIBRARY = {
 
   advanced_vocabulary: {
     label: "Advanced Vocabulary & Collocation",
-    category: "vocabulary",
+    level: "C1", category: "vocabulary",
     questions: [
       { type:"choose correct grammar", question:"'She made a ___ contribution to the research.' (invaluable/priceless/worthless)", answer:"invaluable", hint:"'Invaluable' = extremely valuable; a fixed collocation with 'contribution'", difficulty:"easy" },
       { type:"correct grammar mistakes", question:"'He did a strong impression on the committee.'", answer:"He made a strong impression on the committee.", hint:"Fixed collocation: 'make an impression', not 'do'", difficulty:"easy" },
@@ -10489,7 +10489,7 @@ export const TOPIC_LIBRARY = {
 
   globalisation: {
     label: "Globalisation",
-    category: "topic",
+    level: "C1", category: "topic",
     questions: [
       { type:"finish the sentence", question:"Globalisation refers to the increasing ___ of the world's economies, cultures, and populations.", answer:"interconnectedness / integration", hint:"How everything is linked together", difficulty:"easy" },
       { type:"finish the sentence", question:"Critics argue that globalisation primarily benefits ___ corporations at the expense of local businesses.", answer:"multinational / transnational", hint:"Companies operating across many countries", difficulty:"easy" },
@@ -10699,7 +10699,7 @@ export const TOPIC_LIBRARY = {
 
   technology_daily_life: {
     label: "Technology in Daily Life",
-    category: "topic",
+    level: "B2", category: "topic",
     questions: [
       { type:"finish the sentence", question:"Technology has made many everyday tasks ___ and more convenient.", answer:"easier / faster / simpler", hint:"Making life better", difficulty:"easy" },
       { type:"finish the sentence", question:"Smartphones allow people to access the internet, take photos, and ___ all in one device.", answer:"communicate / connect / message", hint:"Staying in touch", difficulty:"easy" },
@@ -10910,7 +10910,7 @@ export const TOPIC_LIBRARY = {
 
   making_questions: {
     label: "Making Questions",
-    category: "grammar",
+    level: "A2", category: "grammar",
     questions: [
       { type:"choose correct grammar", question:"'___ she live near the school?' (Does/Is/Do)", answer:"Does", hint:"Third person singular questions use 'does'", difficulty:"easy" },
       { type:"correct grammar mistakes", question:"'Where does she works?'", answer:"Where does she work?", hint:"After 'does', use the base form — no -s", difficulty:"easy" },
@@ -11128,7 +11128,7 @@ export const TOPIC_LIBRARY = {
 
   there_is_are: {
     label: "There is / There are",
-    category: "grammar",
+    level: "A1", category: "grammar",
     questions: [
       { type:"choose correct grammar", question:"'___ a cat in the garden.' (There is/There are/It is)", answer:"There is", hint:"Singular noun → 'There is'", difficulty:"easy" },
       { type:"correct grammar mistakes", question:"'There are a big supermarket near my house.'", answer:"There is a big supermarket near my house.", hint:"Singular noun → 'There is', not 'There are'", difficulty:"easy" },
@@ -11359,7 +11359,7 @@ export const TOPIC_LIBRARY = {
 
   daily_life_a2: {
     label: "Daily Life & Routines",
-    category: "topic",
+    level: "A2", category: "topic",
     questions: [
       { type:"finish the sentence", question:"Every morning I ___ up, have a shower, and eat breakfast.", answer:"wake / get", hint:"Start of the day", difficulty:"easy" },
       { type:"finish the sentence", question:"A ___ is a regular pattern of activities you do every day.", answer:"routine", hint:"The keyword for everyday habits", difficulty:"easy" },
@@ -11560,7 +11560,7 @@ export const TOPIC_LIBRARY = {
 
   food_and_eating: {
     label: "Food & Eating",
-    category: "topic",
+    level: "A2", category: "topic",
     questions: [
       { type:"finish the sentence", question:"In my country, the main ___ of the day is eaten in the evening.", answer:"meal", hint:"A time when you eat food", difficulty:"easy" },
       { type:"finish the sentence", question:"I am a ___ — I don't eat any meat or fish.", answer:"vegetarian", hint:"A person who doesn't eat meat", difficulty:"easy" },
@@ -11768,7 +11768,7 @@ export const TOPIC_LIBRARY = {
 
   second_conditional: {
     label: "Second Conditional",
-    category: "grammar",
+    level: "B1", category: "grammar",
     questions: [
       { type:"choose correct grammar", question:"'If I ___ more money, I would travel the world.' (had/have/would have)", answer:"had", hint:"Second conditional if-clause: past simple", difficulty:"easy" },
       { type:"correct grammar mistakes", question:"'If I would win the lottery, I would buy a house.'", answer:"If I won the lottery, I would buy a house.", hint:"No 'would' in the if-clause — use past simple", difficulty:"easy" },
@@ -11995,7 +11995,7 @@ export const TOPIC_LIBRARY = {
 
   modal_verbs: {
     label: "Modals: Permission, Advice & Ability",
-    category: "grammar",
+    level: "B1", category: "grammar",
     questions: [
       { type:"finish the sentence", question:"'You ___ see a doctor — that cough sounds serious.'", answer:"should / ought to", hint:"Giving strong advice", difficulty:"easy" },
       { type:"finish the sentence", question:"'___ you help me with this, please?'", answer:"Could / Can / Would", hint:"Polite request", difficulty:"easy" },
@@ -12173,7 +12173,7 @@ export const TOPIC_LIBRARY = {
 
   health_and_body: {
     label: "Health & the Body",
-    category: "vocabulary",
+    level: "A2", category: "vocabulary",
     questions: [
       { type:"finish the sentence", question:"I have a terrible ___ — my whole body hurts.", answer:"headache / cold / fever / flu", hint:"A common illness", difficulty:"easy" },
       { type:"finish the sentence", question:"She ___ her ankle during the football match.", answer:"twisted / sprained / hurt", hint:"An injury to the ankle", difficulty:"easy" },
@@ -12374,7 +12374,7 @@ export const TOPIC_LIBRARY = {
 
   travel_and_holidays: {
     label: "Travel & Holidays",
-    category: "topic",
+    level: "B1", category: "topic",
     questions: [
       { type:"finish the sentence", question:"We ___ our holiday six months in advance to get a better price.", answer:"booked / planned / reserved", hint:"Arranging a holiday early", difficulty:"easy" },
       { type:"finish the sentence", question:"I always ___ my bags the night before so I am not rushed.", answer:"pack", hint:"Putting things in a suitcase", difficulty:"easy" },
@@ -12576,7 +12576,7 @@ export const TOPIC_LIBRARY = {
 
   asking_for_clarification: {
     label: "Asking for Clarification",
-    category: "vocabulary",
+    level: "B1", category: "vocabulary",
     questions: [
       { type:"finish the sentence", question:"'Sorry, could you ___ that, please? I didn't quite catch it.'", answer:"repeat / say again / say", hint:"Asking someone to say it again", difficulty:"easy" },
       { type:"choose correct grammar", question:"'___ you mind speaking more slowly?' (Would/Do/Could)", answer:"Would", hint:"'Would you mind + -ing?' is the fixed polite idiom — 'Could you mind' is not standard English", difficulty:"easy" },
@@ -12780,7 +12780,7 @@ export const TOPIC_LIBRARY = {
 
   ordering_food: {
     label: "Ordering Food and Drink",
-    category: "vocabulary",
+    level: "A2", category: "vocabulary",
     questions: [
       { type:"finish the sentence", question:"'___ I have the pasta, please?'", answer:"Could / Can / May", hint:"Polite request for food in a restaurant", difficulty:"easy" },
       { type:"choose correct grammar", question:"'Are you ___ to order?' (ready/prepared/going)", answer:"ready", hint:"Waiter's question: 'Are you ready to order?'", difficulty:"easy" },
@@ -12982,7 +12982,7 @@ export const TOPIC_LIBRARY = {
 
   making_excuses: {
     label: "Making Excuses",
-    category: "vocabulary",
+    level: "A2", category: "vocabulary",
     questions: [
       { type:"finish the sentence", question:"'I'm so sorry I'm late — I ___ the bus.'", answer:"missed", hint:"You arrived at the stop too late", difficulty:"easy" },
       { type:"choose correct grammar", question:"'___ I to know the meeting was today?' (Was/Am/Were)", answer:"Was", hint:"'Was I to know…?' — rhetorical excuse", difficulty:"hard" },
@@ -13185,7 +13185,7 @@ export const TOPIC_LIBRARY = {
 
   making_suggestions: {
     label: "Making Suggestions",
-    category: "vocabulary",
+    level: "A2", category: "vocabulary",
     questions: [
       { type:"choose correct grammar", question:"'___ we go to the cinema tonight?' (Shall/Must/Will)", answer:"Shall", hint:"'Shall we…?' is a classic suggestion opener (not 'must', which implies obligation)", difficulty:"easy" },
       { type:"correct grammar mistakes", question:"'What about to try the new Thai restaurant?'", answer:"What about trying the new Thai restaurant?", hint:"'What about + verb-ing' — gerund, not infinitive", difficulty:"easy" },
@@ -13394,7 +13394,7 @@ export const TOPIC_LIBRARY = {
 
   agreeing_disagreeing: {
     label: "Agreeing and Disagreeing",
-    category: "vocabulary",
+    level: "B1", category: "vocabulary",
     questions: [
       { type:"choose correct grammar", question:"'I completely ___ with you on that point.' (agree/agreed/agreeing)", answer:"agree", hint:"Present simple: 'I agree with you'", difficulty:"easy" },
       { type:"correct grammar mistakes", question:"'I'm agree that we need to change our approach.'", answer:"I agree that we need to change our approach.", hint:"'Agree' is a verb — not 'I'm agree'", difficulty:"easy" },
@@ -19653,7 +19653,7 @@ export const TOPIC_LIBRARY = {
 
   future_will_going_to: {
     label: "Future: Will and Going To",
-    category: "grammar",
+    level: "A2", category: "grammar",
     questions: [
       { type:"choose correct grammar", question:"'Look at those clouds! It ___ rain.' (will/is going to)", answer:"is going to", hint:"Use going to for predictions based on present evidence", difficulty:"easy" },
       { type:"choose correct grammar", question:"'I think people ___ use more electric cars in the future.' (will/are going to)", answer:"will", hint:"Use will for general predictions and opinions about the future", difficulty:"easy" },
@@ -19879,7 +19879,7 @@ export const TOPIC_LIBRARY = {
 
   zero_conditional: {
     label: "Zero Conditional",
-    category: "grammar",
+    level: "A2", category: "grammar",
     questions: [
       { type:"choose correct grammar", question:"'If you ___ water to 100 degrees, it boils.' (heat/will heat/heated)", answer:"heat", hint:"Zero conditional uses present simple in both clauses", difficulty:"easy" },
       { type:"finish the sentence", question:"'If people don't drink water, they ___ thirsty.'", answer:"get / feel", hint:"General result: present simple", difficulty:"easy" },
@@ -24043,7 +24043,7 @@ export const TOPIC_LIBRARY = {
 
   describing_trends_data: {
     label: "Describing Trends & Data",
-    category: "vocabulary",
+    level: "B2", category: "vocabulary",
     questions: [
       { type:"finish the sentence", question:"'House prices ___ sharply last year.'", answer:"rose", hint:"Irregular past simple of 'rise' (intransitive — no object)", difficulty:"easy" },
       { type:"finish the sentence", question:"'Unemployment ___ steadily throughout the decade.'", answer:"increased / rose", hint:"Gradual, continuous change over a long period", difficulty:"easy" },
@@ -24224,7 +24224,7 @@ export const TOPIC_LIBRARY = {
 
   modals_obligation: {
     label: "Modals of Obligation",
-    category: "grammar",
+    level: "A2", category: "grammar",
     questions: [
       { type:"finish the sentence", question:"'Students ___ arrive on time — it's a school rule.'", answer:"must", hint:"Strong obligation / a rule", difficulty:"easy" },
       { type:"finish the sentence", question:"'You ___ smoke in here — it's forbidden.'", answer:"mustn't", hint:"Prohibition", difficulty:"easy" },
@@ -24381,7 +24381,7 @@ export const TOPIC_LIBRARY = {
 
   modals_possibility: {
     label: "Modals of Possibility",
-    category: "grammar",
+    level: "A2", category: "grammar",
     questions: [
       { type:"finish the sentence", question:"'It ___ rain later — the sky looks dark.'", answer:"might / could / may", hint:"Possibility, not certainty", difficulty:"easy" },
       { type:"finish the sentence", question:"'She ___ be at home — the lights are off and her car's gone.'", answer:"can't", hint:"Logical impossibility", difficulty:"medium" },
@@ -24541,7 +24541,7 @@ export const TOPIC_LIBRARY = {
 
   past_modals_deduction: {
     label: "Past Modals of Deduction",
-    category: "grammar",
+    level: "B2", category: "grammar",
     questions: [
       { type:"finish the sentence", question:"'The lights are off — she ___ (leave) already.'", answer:"must have left", hint:"Strong past deduction", difficulty:"medium" },
       { type:"finish the sentence", question:"'He wasn't at the party — he ___ (forget) about it.'", answer:"might have forgotten / could have forgotten", hint:"Uncertain past possibility", difficulty:"medium" },
@@ -24711,7 +24711,7 @@ export const TOPIC_LIBRARY = {
 
   cleft_sentences: {
     label: "Cleft Sentences",
-    category: "grammar",
+    level: "C1", category: "grammar",
     questions: [
       { type:"finish the sentence", question:"'It was Maria ___ solved the problem, not James.'", answer:"who", hint:"It-cleft emphasising a person as subject → 'who'", difficulty:"easy" },
       { type:"finish the sentence", question:"'It ___ the price that worries me, not the quality.'", answer:"'s / is", hint:"It-cleft: It + is + emphasised element", difficulty:"easy" },
@@ -24901,7 +24901,7 @@ export const TOPIC_LIBRARY = {
 
   business_professional_vocabulary: {
     label: "Business & Professional Vocabulary",
-    category: "vocabulary",
+    level: "C1", category: "vocabulary",
     questions: [
       { type:"finish the sentence", question:"'We need to ___ our processes to save time and cut costs.'", answer:"streamline", hint:"Make a process simpler and more efficient", difficulty:"easy" },
       { type:"finish the sentence", question:"'She decided to ___ the task to her assistant.'", answer:"delegate", hint:"Give a task or responsibility to someone else", difficulty:"easy" },
@@ -25094,7 +25094,7 @@ export const TOPIC_LIBRARY = {
 
   media_misinformation: {
     label: "Media & Misinformation",
-    category: "topic",
+    level: "C1", category: "topic",
     questions: [
       { type:"finish the sentence", question:"Social media algorithms often trap users inside a ___ bubble of similar opinions.", answer:"filter", hint:"Fixed phrase: 'filter bubble'", difficulty:"easy" },
       { type:"finish the sentence", question:"An ___ chamber occurs when people only hear opinions that match their own.", answer:"echo", hint:"Fixed phrase: 'echo chamber'", difficulty:"easy" },
@@ -25281,7 +25281,7 @@ export const TOPIC_LIBRARY = {
 
   workplace_professional_vocabulary: {
     label: "Workplace & Professional Vocabulary",
-    category: "vocabulary",
+    level: "B2", category: "vocabulary",
     questions: [
       { type:"finish the sentence", question:"'I need to ___ a meeting with my manager for next week.'", answer:"schedule", hint:"Arrange a time for something to happen", difficulty:"easy" },
       { type:"finish the sentence", question:"'She decided to ___ her notice after finding a new job.'", answer:"hand in", hint:"Fixed phrase: 'hand in your notice' = formally tell your employer you're leaving", difficulty:"medium" },
@@ -25474,7 +25474,7 @@ export const TOPIC_LIBRARY = {
 
   advanced_idioms_expressions: {
     label: "Advanced Idioms & Expressions",
-    category: "vocabulary",
+    level: "B2", category: "vocabulary",
     questions: [
       { type:"finish the sentence", question:"'After months of trying, they finally decided to ___ in the towel.'", answer:"throw", hint:"Fixed idiom: 'throw in the towel' = give up", difficulty:"medium" },
       { type:"finish the sentence", question:"'They ___ corners to finish the project faster, and the quality suffered.'", answer:"cut", hint:"Fixed idiom: 'cut corners' = do something badly to save time/money", difficulty:"medium" },
@@ -25667,7 +25667,7 @@ export const TOPIC_LIBRARY = {
 
   persuading_disagreeing_advanced: {
     label: "Persuading & Disagreeing (Advanced)",
-    category: "vocabulary",
+    level: "B2", category: "vocabulary",
     questions: [
       { type:"finish the sentence", question:"'___ argue that the policy has done more harm than good.'", answer:"I'd", hint:"Fixed phrase: 'I'd argue that…' introduces a strong opinion", difficulty:"medium" },
       { type:"finish the sentence", question:"'It could be ___ that the plan was doomed from the start.'", answer:"argued", hint:"Fixed phrase: 'it could be argued that…'", difficulty:"hard" },
