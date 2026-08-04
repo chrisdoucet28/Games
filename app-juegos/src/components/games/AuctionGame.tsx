@@ -3,6 +3,7 @@ import type { GameProps } from "../../types";
 import { teamsGridCols, GAME_MODES } from "../../data/constants";
 import { denseRank, medalForRank } from "../../utils/ranking";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
+import { FlagPromptButton } from "../shared/FlagPromptButton";
 import { AUCTION_TUTORIAL_STEPS } from "../../data/tutorials/auction";
 
 const GM = GAME_MODES.find(g => g.id === "auction")!;
@@ -432,6 +433,9 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
                 This sentence is {s.isCorrect ? "CORRECT" : "INCORRECT"}
               </div>
               <p style={{ color: s.isCorrect ? "#86EFAC" : "#FCA5A5", fontSize: "15px", margin: 0, lineHeight: 1.5 }}>{s.explanation}</p>
+              <div style={{ position: "absolute", top: "10px", right: "10px" }}>
+                <FlagPromptButton gameId="auction" questionData={s} />
+              </div>
             </div>
 
             <div style={{ display: "grid", gridTemplateColumns: teamsGridCols(teams.length), gap: "10px", marginBottom: "18px" }}>

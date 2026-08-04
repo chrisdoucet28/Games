@@ -726,7 +726,7 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
                 <TurnTimerBar timeLeft={soloTimeLeft} totalSeconds={SOLO_TASK_SECONDS} />
               </div>
             )}
-            <QuestionCard question={currentQ} showAnswer={showAns} onReveal={() => setShowAns(true)} />
+            <QuestionCard question={currentQ} showAnswer={showAns} onReveal={() => setShowAns(true)} gameId="racetrack" />
             {(showAns || currentQ?.type === "speaking task") && (
               <div style={{ marginTop: "14px" }}>
                 <p style={{ textAlign: "center", fontWeight: "700", color: "#DDE8FF", marginBottom: "10px", fontSize: "14px" }}>Which team got it right?</p>

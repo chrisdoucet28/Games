@@ -1,12 +1,14 @@
 import type { QuestionData } from "../../types";
+import { FlagPromptButton } from "./FlagPromptButton";
 
 interface QuestionCardProps {
   question: QuestionData | null;
   showAnswer: boolean;
   onReveal: () => void;
+  gameId: string;
 }
 
-export function QuestionCard({ question, showAnswer, onReveal }: QuestionCardProps) {
+export function QuestionCard({ question, showAnswer, onReveal, gameId }: QuestionCardProps) {
   if (!question) return null;
   const isSpeaking = question.type === "speaking task";
 
@@ -43,7 +45,10 @@ export function QuestionCard({ question, showAnswer, onReveal }: QuestionCardPro
           🎙️ Open response — teacher listens and judges
         </div>
       ) : showAnswer ? (
-        <div style={{ background: "#ECFDF5", border: "2px solid #22C55E", borderRadius: "12px", padding: "14px", marginTop: "12px" }}>
+        <div style={{ background: "#ECFDF5", border: "2px solid #22C55E", borderRadius: "12px", padding: "14px", marginTop: "12px", position: "relative" }}>
+          <div style={{ position: "absolute", top: "8px", right: "8px" }}>
+            <FlagPromptButton gameId={gameId} questionData={question} />
+          </div>
           <div style={{ fontWeight: "900", fontSize: "20px", color: "#14532D" }}>✅ {question.answer}</div>
           {question.hint && <div style={{ color: "#166534", fontSize: "14px", marginTop: "6px" }}>💡 {question.hint}</div>}
         </div>

@@ -4,6 +4,7 @@ import { teamsGridCols, GAME_MODES } from "../../data/constants";
 import { denseRank, medalForRank } from "../../utils/ranking";
 import { makeSoloCpuTeam } from "../../lib/soloOpponent";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
+import { FlagPromptButton } from "../shared/FlagPromptButton";
 import { MINEFIELD_TUTORIAL_STEPS } from "../../data/tutorials/minefield";
 
 const GM = GAME_MODES.find(g => g.id === "minefield")!;
@@ -391,7 +392,10 @@ export function MinefieldGame({ gridData, teams: propTeams, onUpdateScore, onEnd
       )}
 
       {phase === "judging" && selData && (
-        <div style={{ background: "#F8F7FF", border: "3px solid #6366F1", borderRadius: "16px", padding: "20px", marginBottom: "14px", textAlign: "center" }}>
+        <div style={{ position: "relative", background: "#F8F7FF", border: "3px solid #6366F1", borderRadius: "16px", padding: "20px", marginBottom: "14px", textAlign: "center" }}>
+          <div style={{ position: "absolute", top: "10px", right: "10px" }}>
+            <FlagPromptButton gameId="minefield" questionData={selData} />
+          </div>
           <div style={{ fontSize: "13px", fontWeight: "700", color: "#4338CA", marginBottom: "8px", textTransform: "uppercase", letterSpacing: "0.05em" }}>Teacher - Did the student use the target language correctly?</div>
           <div style={{ background: "#EEF2FF", borderRadius: "10px", padding: "10px 16px", marginBottom: "16px", fontStyle: "italic", color: "#3730A3", fontWeight: "700", fontSize: "15px" }}>"{selData.col} {selData.row} ..."</div>
           <div style={{ display: "flex", gap: "14px", justifyContent: "center", flexWrap: "wrap" }}>

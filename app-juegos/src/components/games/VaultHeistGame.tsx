@@ -781,7 +781,7 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
                 </div>
               </div>
             )}
-            <QuestionCard question={currentQuestion} showAnswer={showAns} onReveal={handleReveal} />
+            <QuestionCard question={currentQuestion} showAnswer={showAns} onReveal={handleReveal} gameId="vault" />
             {currentQuestion && (showAns || currentQuestion?.type === "speaking task") && (
               <div style={{ display: "flex", gap: "10px", justifyContent: "center", marginTop: "12px" }}>
                 <button onClick={handleCorrect} className="vault-next-btn" style={{ background: "#22C55E", color: "white", border: "none", borderRadius: "12px", padding: "12px 24px", fontSize: "16px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease" }}>✅ Correct — Crack it!</button>

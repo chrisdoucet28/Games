@@ -3,6 +3,7 @@ import type { GameProps } from "../../types";
 import { teamsGridCols, GAME_MODES } from "../../data/constants";
 import { denseRank, medalForRank } from "../../utils/ranking";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
+import { FlagPromptButton } from "../shared/FlagPromptButton";
 import { HOTSEAT_TUTORIAL_STEPS } from "../../data/tutorials/hotseat";
 
 const GM = GAME_MODES.find(g => g.id === "hotseat")!;
@@ -379,7 +380,10 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
 
         {phase === "play" && (
           <>
-            <div style={{ background: "linear-gradient(160deg,#1C0701,#2D0A00)", border: "4px solid #F97316", borderRadius: "22px", padding: "26px 18px", textAlign: "center", marginBottom: "16px", boxShadow: "0 0 30px rgba(249,115,22,0.35)" }}>
+            <div style={{ position: "relative", background: "linear-gradient(160deg,#1C0701,#2D0A00)", border: "4px solid #F97316", borderRadius: "22px", padding: "26px 18px", textAlign: "center", marginBottom: "16px", boxShadow: "0 0 30px rgba(249,115,22,0.35)" }}>
+              <div style={{ position: "absolute", top: "10px", right: "10px" }}>
+                <FlagPromptButton gameId="hotseat" questionData={{ raw: currentWord }} />
+              </div>
               <div style={{ color: "#FDBA74", fontWeight: "800", fontSize: "13px", textTransform: "uppercase", marginBottom: "10px" }}>Describe this word</div>
               <div style={{ background: "rgba(0,0,0,0.4)", borderRadius: "18px", border: "3px solid #F9731655", padding: "24px 12px", color: "#FFF7ED", fontWeight: "900", fontSize: "clamp(36px,9vw,72px)", lineHeight: 1.05, minHeight: "120px", display: "flex", alignItems: "center", justifyContent: "center", overflowWrap: "anywhere", textShadow: "0 0 18px rgba(249,115,22,0.6)" }}>
                 {currentWord}

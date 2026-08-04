@@ -13,6 +13,7 @@ import { ProfileScreen } from "./components/shared/ProfileScreen";
 import { LearnScreen } from "./components/shared/LearnScreen";
 import { BillingScreen } from "./components/shared/BillingScreen";
 import { ThemeAmbience } from "./components/shared/ThemeAmbience";
+import { FeedbackButton } from "./components/shared/FeedbackButton";
 import { saveProgress, clearProgress, listClasses, createClass } from "./lib/classes";
 import { isPaidStatus } from "./lib/subscription";
 import { denseRank, medalForRank } from "./utils/ranking";
@@ -613,40 +614,53 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
           )}
         </div>
       </div>
+      <FeedbackButton />
     </div>
   );
 
   if (screen === "classes") return (
-    <ClassesScreen
-      onBack={() => setScreen("welcome")}
-      onResumeClass={resumeClass}
-      onStartWithClass={startWithClass}
-      theme={theme}
-      isPaid={isPaid}
-      onUpgrade={() => setScreen("billing")}
-    />
+    <>
+      <ClassesScreen
+        onBack={() => setScreen("welcome")}
+        onResumeClass={resumeClass}
+        onStartWithClass={startWithClass}
+        theme={theme}
+        isPaid={isPaid}
+        onUpgrade={() => setScreen("billing")}
+      />
+      <FeedbackButton />
+    </>
   );
 
   if (screen === "profile") return (
-    <ProfileScreen onBack={() => setScreen("welcome")} theme={theme} onThemeChange={onThemeChange} />
+    <>
+      <ProfileScreen onBack={() => setScreen("welcome")} theme={theme} onThemeChange={onThemeChange} />
+      <FeedbackButton />
+    </>
   );
 
   if (screen === "billing") return (
-    <BillingScreen
-      onBack={() => setScreen("welcome")}
-      theme={theme}
-      subscription={subscription}
-      onSubscriptionChange={onSubscriptionChange}
-      justReturnedFrom={checkoutRedirect}
-    />
+    <>
+      <BillingScreen
+        onBack={() => setScreen("welcome")}
+        theme={theme}
+        subscription={subscription}
+        onSubscriptionChange={onSubscriptionChange}
+        justReturnedFrom={checkoutRedirect}
+      />
+      <FeedbackButton />
+    </>
   );
 
   if (screen === "learn") return (
-    <LearnScreen
-      onBack={() => setScreen(learnFilter ? "game-select" : "welcome")}
-      theme={theme}
-      filterTopicIds={learnFilter ?? undefined}
-    />
+    <>
+      <LearnScreen
+        onBack={() => setScreen(learnFilter ? "game-select" : "welcome")}
+        theme={theme}
+        filterTopicIds={learnFilter ?? undefined}
+      />
+      <FeedbackButton />
+    </>
   );
 
   if (screen === "setup") {
@@ -904,6 +918,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
             🎮 Choose a Game!
           </button>
         </div>
+        <FeedbackButton />
       </div>
     );
   }
@@ -982,6 +997,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
           })}
         </div>
       </div>
+      <FeedbackButton />
     </div>
   );
 
@@ -1135,6 +1151,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
           <button onClick={() => setScreen("game-select")} style={{ background: `linear-gradient(135deg,${theme.cta[0]},${theme.cta[1]})`, color: "white", border: "none", borderRadius: "14px", padding: "14px 28px", fontSize: "17px", fontWeight: "800", cursor: "pointer", fontFamily: theme.headingFont }}>🎮 Play Again</button>
           <button onClick={() => setScreen("setup")} style={{ background: `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "14px", padding: "14px 28px", fontSize: "17px", fontWeight: "800", cursor: "pointer", fontFamily: theme.headingFont }}>📚 New Lesson</button>
         </div>
+        <FeedbackButton />
       </div>
     );
   }

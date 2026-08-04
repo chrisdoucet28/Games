@@ -631,7 +631,7 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
 
             {phase === "answer" && (
               <>
-                <QuestionCard question={q} showAnswer={showAns} onReveal={() => { stop(); setShowAns(true); }} />
+                <QuestionCard question={q} showAnswer={showAns} onReveal={() => { stop(); setShowAns(true); }} gameId="hill" />
                 {(showAns || q?.type === "speaking task") && (
                   <div style={{ display: "flex", gap: "10px", justifyContent: "center", marginTop: "12px" }}>
                     <button onClick={() => resolveUncontested(true)} className="ko-btn" style={{ background: "#22C55E", color: "white", border: "none", borderRadius: "12px", padding: "12px 24px", fontSize: "16px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease" }}>✅ Correct! Claim!</button>
@@ -669,7 +669,7 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
                     <button onClick={() => setContestReady(true)} className="ko-btn" style={{ background: "linear-gradient(135deg,#831843,#DB2777)", color: "white", border: "none", borderRadius: "12px", padding: "14px 28px", cursor: "pointer", fontWeight: "800", fontSize: "16px", transition: "transform 0.15s ease" }}>🚦 I'm Ready!</button>
                   </div>
                 ) : (
-                  <QuestionCard question={q} showAnswer={showAns} onReveal={() => { stop(); if (contestIsSoloDuel) stopContestTimer(); setShowAns(true); }} />
+                  <QuestionCard question={q} showAnswer={showAns} onReveal={() => { stop(); if (contestIsSoloDuel) stopContestTimer(); setShowAns(true); }} gameId="hill" />
                 )}
                 {contestIsSoloDuel ? (
                   contestReady && (

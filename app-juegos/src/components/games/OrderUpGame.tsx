@@ -4,6 +4,7 @@ import { useTurnTimer } from "../../hooks/useTurnTimer";
 import { teamsGridCols, GAME_MODES } from "../../data/constants";
 import { denseRank, medalForRank } from "../../utils/ranking";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
+import { FlagPromptButton } from "../shared/FlagPromptButton";
 import { ORDERUP_TUTORIAL_STEPS } from "../../data/tutorials/orderup";
 
 const GM = GAME_MODES.find(g => g.id === "orderup")!;
@@ -268,10 +269,13 @@ function TicketCard({ ticket, teams, judging, onClaim, onCorrect, onWrong, onSki
 
   return (
     <div style={{
-      width: "230px", background: "linear-gradient(160deg,#FFFFFF,#FFF1F2)", border: `2px solid ${urgent ? "#EF4444" : "#FBCFE8"}`,
+      position: "relative", width: "230px", background: "linear-gradient(160deg,#FFFFFF,#FFF1F2)", border: `2px solid ${urgent ? "#EF4444" : "#FBCFE8"}`,
       borderRadius: "16px", padding: "12px", textAlign: "center", animation: "ouCustomerIn 0.4s ease-out",
       boxShadow: urgent ? "0 0 16px rgba(239,68,68,0.4)" : "0 4px 14px rgba(190,24,93,0.12)",
     }}>
+      <div style={{ position: "absolute", top: "6px", right: "6px" }}>
+        <FlagPromptButton gameId="orderup" questionData={ticket} />
+      </div>
       {/* Timer sits right above the customer's head, not buried under the order — a small clock,
           not a generic progress bar, so it visually reads as "their patience," not "loading." */}
       <div style={{ height: "6px", background: "#FBCFE8", borderRadius: "4px", overflow: "hidden", marginBottom: "6px" }}>
