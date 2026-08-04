@@ -3459,6 +3459,18 @@ export const LESSONS: Record<string, Lesson> = {
           "The lamp is **on** the table. The shoes are **under** the bed.",
         ],
       },
+      {
+        heading: "Some vs any",
+        body: [
+          "Use **some** in positive sentences with plural nouns.",
+          "Use **any** instead of 'some' in negatives and questions.",
+        ],
+        examples: [
+          "**There are some** books on the bookshelf.",
+          "**There aren't any** books on the bookshelf. (not 'there aren't some')",
+          "**Are there any** books on the bookshelf? (not 'are there some')",
+        ],
+      },
     ],
     commonMistakes: [
       "❌ The fridge is on the kitchen. → ✅ The fridge is in the kitchen. (use 'in' for a room, not 'on')",
@@ -3466,6 +3478,7 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ You wash the dishes in the wardrobe. → ✅ You wash the dishes in the sink. (a wardrobe stores clothes, not dishes)",
       "❌ The lamp is in the table. → ✅ The lamp is on the table. ('on' for a surface)",
       "❌ There are a table in the dining room. → ✅ There is a table in the dining room. (singular noun → 'there is')",
+      "❌ There aren't some books on the shelf. → ✅ There aren't any books on the shelf. ('some' becomes 'any' in negatives)",
     ],
   },
 
