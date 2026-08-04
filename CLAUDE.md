@@ -161,9 +161,14 @@ Work on this repo is split across parallel conversation threads by concern, each
 long-lived branch off `main`:
 
 - **`new-topics`** — adding new topics/question banks to `topics.ts` (+ matching Learn lessons).
-- **`game-lesson-changes`** — fixes/changes to the 15 existing games, or corrections to existing
-  Learn lessons/topics content.
+- **`game-lesson-changes`** — fixes/changes to the 14 other existing games, or corrections to
+  existing Learn lessons/topics content not specific to Vault Heist.
 - **`new-features`** — new functionality: new screens, new games, new backend architecture.
+- **`vault-heist`** — carved out of `game-lesson-changes` because Vault Heist alone generates a
+  disproportionate, recurring stream of content/bug work (see the `vault_heist_needs_work` and
+  `vault_heist_content_classification_standard` memory files for the full history) — any work
+  scoped to `VaultHeistGame.tsx` or its rewrite-sentences content/locks in `topics.ts` belongs here
+  instead of `game-lesson-changes`.
 
 Check out the branch matching the current conversation's focus before making changes, rather than
 committing to `main` directly. Merge back (PR or direct merge) when a batch of work is ready. If
