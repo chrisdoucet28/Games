@@ -4116,15 +4116,15 @@ export const LESSONS: Record<string, Lesson> = {
 
   likes_dislikes: {
     title: "Likes & Dislikes",
-    intro: "Verbs like 'like', 'love', 'hate', and 'enjoy' are always followed by the -ing form of the next verb, never 'to' + verb.",
+    intro: "'Like', 'love', and 'hate' can be followed by either the -ing form or 'to' + verb, with little difference in meaning — but 'enjoy' only ever takes the -ing form.",
     sections: [
       {
-        heading: "Like/love/hate/enjoy + gerund",
-        body: ["After like, love, hate, enjoy, use verb-**ing**, not the bare infinitive or 'to + verb'.", "Third person singular needs -s: likes, loves, hates, enjoys."],
+        heading: "Like/love/hate + gerund or infinitive; enjoy + gerund only",
+        body: ["'Like', 'love', and 'hate' can take either verb-**ing** or **to** + verb — both are correct.", "'Enjoy' is the exception: always verb-**ing**, never 'to' + verb.", "Third person singular needs -s: likes, loves, hates, enjoys.", "Never combine 'to' and '-ing' together on the same verb."],
         examples: [
-          "I **love playing** video games. (not 'love play' or 'love to playing')",
-          "She **enjoys swimming** in her free time.",
-          "He **hates waiting** in long queues.",
+          "I **love playing** video games. / I **love to play** video games. (both correct — not 'love to playing')",
+          "She **enjoys swimming** in her free time. (not 'enjoys to swim')",
+          "He **hates waiting** in long queues. / He **hates to wait** in long queues. (both correct)",
         ],
       },
       {
@@ -4148,7 +4148,8 @@ export const LESSONS: Record<string, Lesson> = {
       },
     ],
     commonMistakes: [
-      "❌ I like to swimming. → ✅ I like swimming. (don't combine 'to' with the gerund)",
+      "❌ I like to swimming. → ✅ I like swimming. / I like to swim. (don't combine 'to' and '-ing' together — pick one)",
+      "❌ I enjoy to swim. → ✅ I enjoy swimming. ('enjoy' only takes '-ing', never 'to' + verb)",
       "❌ She like cooking. → ✅ She likes cooking. (third person singular needs -s)",
       "❌ I prefer tea than coffee. → ✅ I prefer tea to coffee. ('prefer X to Y', not 'than')",
       "❌ I'm a big fan for this band. → ✅ I'm a big fan of this band.",
