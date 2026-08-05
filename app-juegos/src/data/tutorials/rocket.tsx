@@ -12,7 +12,7 @@ export const ROCKET_TUTORIAL_STEPS: TutorialStep[] = [
     ),
   },
   {
-    narration: "At mission control, a word appears (this is just an example — every prompt is different). Use the word correctly in your OWN original sentence, spoken out loud.",
+    narration: "At mission control, a word appears (this is just an example — every prompt is different). Use the word correctly in your OWN original sentence, spoken out loud. If a sample sentence shows on screen, it's just ONE example of a correct answer — any grammatically correct sentence using the word counts, it doesn't need to match!",
     visual: (
       <div style={{ textAlign: "center" }}>
         <div style={{ background: "#EEF2FF", border: "2px solid #6366F1", borderRadius: "10px", padding: "10px 16px", display: "inline-block", fontWeight: 800, color: "#312E81", fontSize: "14px" }}>

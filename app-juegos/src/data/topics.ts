@@ -16292,36 +16292,36 @@ export const TOPIC_LIBRARY = {
       {
         "type": "use vocabulary in a sentence",
         "question": "'Monday'",
-        "answer": "Open - teacher judges",
-        "hint": "Say a complete sentence",
+        "answer": "I go to the gym every Monday.",
+        "hint": "'Every' + day name for a routine, or 'on' + day for one specific occasion",
         "difficulty": "easy"
       },
       {
         "type": "use vocabulary in a sentence",
         "question": "'birthday'",
-        "answer": "Open - teacher judges",
-        "hint": "Say a complete sentence",
+        "answer": "My birthday is in December.",
+        "hint": "Use 'in' + month when saying when your birthday is",
         "difficulty": "easy"
       },
       {
         "type": "use vocabulary in a sentence",
         "question": "'in July'",
-        "answer": "Open - teacher judges",
-        "hint": "Say a complete sentence",
+        "answer": "We usually go on holiday in July.",
+        "hint": "'In' + month name",
         "difficulty": "easy"
       },
       {
         "type": "use vocabulary in a sentence",
         "question": "'on Friday'",
-        "answer": "Open - teacher judges",
-        "hint": "Say a complete sentence",
+        "answer": "I have a meeting on Friday.",
+        "hint": "'On' + day name",
         "difficulty": "easy"
       },
       {
         "type": "use vocabulary in a sentence",
         "question": "'at 7 o'clock'",
-        "answer": "Open - teacher judges",
-        "hint": "Say a complete sentence",
+        "answer": "The train leaves at 7 o'clock.",
+        "hint": "'At' + clock time",
         "difficulty": "easy"
       },
       {
@@ -16445,10 +16445,17 @@ export const TOPIC_LIBRARY = {
       },
       {
         "type": "finish the sentence",
-        "question": "'There are ___ days in a week.'",
-        "answer": "seven",
-        "hint": "Number of days in a week",
-        "difficulty": "easy"
+        "question": "'The meeting starts ___ half past two.'",
+        "answer": "at",
+        "hint": "Use 'at' with clock times, including 'half past' expressions",
+        "difficulty": "medium"
+      },
+      {
+        "type": "finish the sentence",
+        "question": "'The plane departs ___ a quarter to nine.'",
+        "answer": "at",
+        "hint": "Use 'at' with clock times, including 'quarter to/past' expressions",
+        "difficulty": "medium"
       },
       {
         "type": "finish the sentence",
@@ -16742,6 +16749,9 @@ export const TOPIC_LIBRARY = {
       { type:"finish the sentence", question:"'My English course starts ___ September.'", answer:"in", hint:"Use 'in' with months", difficulty:"easy" },
       { type:"finish the sentence", question:"'The bus leaves ___ 9:30.'", answer:"at", hint:"Use 'at' with clock times", difficulty:"easy" },
       { type:"finish the sentence", question:"'Her wedding is ___ April 3rd.'", answer:"on", hint:"Use 'on' with specific dates", difficulty:"easy" },
+      { type:"finish the sentence", question:"'The party is on May ___.' (5)", answer:"5th", hint:"Write the number as an ordinal: 5 -> 5th", difficulty:"easy" },
+      { type:"finish the sentence", question:"'Her birthday is on June ___.' (3)", answer:"3rd", hint:"3 is irregular: 3rd, not 3th", difficulty:"medium" },
+      { type:"finish the sentence", question:"'The exam is on October ___.' (21)", answer:"21st", hint:"21 follows the same irregular pattern as 1st: 21st", difficulty:"hard" },
       { type:"finish the sentence", question:"'I do my homework ___ the evening.'", answer:"in", hint:"Use 'in' with parts of the day", difficulty:"easy" },
       { type:"finish the sentence", question:"'We always stay home ___ New Year's Eve.'", answer:"on", hint:"Use 'on' with named holidays", difficulty:"medium" },
       { type:"finish the sentence", question:"'The shop closes ___ midnight.'", answer:"at", hint:"Use 'at' with midnight and noon", difficulty:"easy" },
@@ -16860,6 +16870,11 @@ export const TOPIC_LIBRARY = {
         "sentence": "Halloween is on October 31st.",
         "isCorrect": true,
         "explanation": "Use on with a date."
+      },
+      {
+        "sentence": "Christmas is on the December 25th.",
+        "isCorrect": false,
+        "explanation": "Don't use 'the' before a month + date — just 'on December 25th'."
       }
     ],
     "cardTasks": [

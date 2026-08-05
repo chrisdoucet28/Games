@@ -3415,6 +3415,18 @@ export const LESSONS: Record<string, Lesson> = {
         body: ["When a part of the day is tied to one specific day, 'on' wins over 'in'."],
         examples: ["Her party is **on** Saturday morning. (not 'in Saturday morning')"],
       },
+      {
+        heading: "Ordinal numbers in dates",
+        body: [
+          "Dates use ordinal numbers (1st, 2nd, 3rd, 4th...), not cardinal numbers (one, two, three).",
+          "Most ordinals just add -th to the number (four → fourth). 1st, 2nd, and 3rd are irregular, and that same irregular pattern repeats after 20 (21st, 22nd, 23rd), before going back to -th (24th).",
+        ],
+        examples: [
+          "My birthday is on May **1st** (the first).",
+          "The meeting is on June **3rd** (the third).",
+          "The exam is on October **21st** (the twenty-first) — not '21th'.",
+        ],
+      },
     ],
     commonMistakes: [
       "❌ I go to English class in Friday. → ✅ ...on Friday. ('on' with days)",
@@ -3422,6 +3434,8 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ The lesson starts in 8 o'clock. → ✅ ...at 8 o'clock. ('at' with clock times)",
       "❌ Christmas is in December 25th. → ✅ Christmas is on December 25th. ('on' with a specific date)",
       "❌ We meet at the morning. → ✅ We meet in the morning. ('in' with parts of the day)",
+      "❌ The party is on May 5. → ✅ The party is on May 5th. (dates need the ordinal ending, not the plain number)",
+      "❌ Her birthday is on June 3th. → ✅ ...June 3rd. ('3rd' is irregular, not '3th')",
     ],
   },
 
