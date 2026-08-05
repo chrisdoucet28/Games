@@ -4,6 +4,7 @@ import { teamsGridCols, GAME_MODES } from "../../data/constants";
 import { denseRank, medalForRank } from "../../utils/ranking";
 import { makeTeacherTeam } from "../../lib/soloOpponent";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
+import { FlagPromptButton } from "../shared/FlagPromptButton";
 import { SPY_TWOPLAYER_STEPS, SPY_GROUP_STEPS } from "../../data/tutorials/spy";
 
 const GM = GAME_MODES.find(g => g.id === "spy")!;
@@ -1136,7 +1137,10 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
               </div>
             </div>
 
-            <div style={{ background: "rgba(56,189,248,0.1)", border: "2px solid #38BDF8", borderRadius: "12px", padding: "12px", marginBottom: "14px" }}>
+            <div style={{ position: "relative", background: "rgba(56,189,248,0.1)", border: "2px solid #38BDF8", borderRadius: "12px", padding: "12px", marginBottom: "14px" }}>
+              <div style={{ position: "absolute", top: "8px", right: "8px" }}>
+                <FlagPromptButton gameId="spy" questionData={round} />
+              </div>
               <div style={{ fontWeight: "800", fontSize: "13px", color: "#7DD3FC", marginBottom: "4px" }}>The difference</div>
               <div style={{ color: "#E2E8F0", fontSize: "14px" }}>{round.explanation}</div>
             </div>
@@ -1375,7 +1379,10 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
             const crewGuessedRight = tp2Guesses[crewPlayer.id] === round.spyTopic;
 
             return (
-              <div>
+              <div style={{ position: "relative" }}>
+                <div style={{ position: "absolute", top: 0, right: 0 }}>
+                  <FlagPromptButton gameId="spy" questionData={round} />
+                </div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "14px" }}>
                   <div
                     style={{

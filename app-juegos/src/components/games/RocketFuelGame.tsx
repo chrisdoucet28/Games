@@ -375,7 +375,7 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
             </div>
 
             <div style={{ maxWidth: "520px", margin: "0 auto" }}>
-              <QuestionCard question={currentQ} showAnswer={showAnswer} onReveal={() => setShowAnswer(true)} />
+              <QuestionCard question={currentQ} showAnswer={showAnswer} onReveal={() => setShowAnswer(true)} gameId="rocket" />
               <div style={{ display: "flex", gap: "10px", justifyContent: "center", marginTop: "14px" }}>
                 {showAnswer ? (
                   <>

@@ -5,6 +5,7 @@ import { TurnTimerBar } from "../shared/TurnTimerBar";
 import { teamsGridCols, GAME_MODES } from "../../data/constants";
 import { denseRank, medalForRank } from "../../utils/ranking";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
+import { FlagPromptButton } from "../shared/FlagPromptButton";
 import { CARDS_TUTORIAL_STEPS } from "../../data/tutorials/cards";
 
 const GM = GAME_MODES.find(g => g.id === "cards")!;
@@ -498,7 +499,10 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
 
         {phase === "answering" && pickedCard && (
           <div style={{ marginTop: "8px" }}>
-            <div style={{ background: "linear-gradient(160deg,#FFFBEB,#FEF3C7)", border: "3px solid #F59E0B", borderRadius: "16px", padding: "20px", textAlign: "center", marginBottom: "14px" }}>
+            <div style={{ position: "relative", background: "linear-gradient(160deg,#FFFBEB,#FEF3C7)", border: "3px solid #F59E0B", borderRadius: "16px", padding: "20px", textAlign: "center", marginBottom: "14px" }}>
+              <div style={{ position: "absolute", top: "10px", right: "10px" }}>
+                <FlagPromptButton gameId="cards" questionData={pickedCard} />
+              </div>
               <div style={{ fontSize: "12px", fontWeight: "700", color: "#B45309", marginBottom: "8px", textTransform: "uppercase", letterSpacing: "0.05em" }}>🎤 {currentTeam.name}'s task</div>
               <div style={{ fontSize: "clamp(14px,2.5vw,18px)", fontWeight: "800", color: "#450A0A", lineHeight: 1.5 }}>{pickedCard.task}</div>
             </div>

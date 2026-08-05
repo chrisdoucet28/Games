@@ -837,7 +837,7 @@ export function CastleGame({ questions, teams: propTeams, onUpdateScore, onEnd, 
 
         {phase === "answer" && (
           <>
-            <QuestionCard question={q} showAnswer={showAns} onReveal={handleReveal} />
+            <QuestionCard question={q} showAnswer={showAns} onReveal={handleReveal} gameId="castle" />
             {q && (showAns || q?.type === "speaking task") && (
               <div style={{ display: "flex", gap: "10px", justifyContent: "center", marginTop: "12px" }}>
                 <button onClick={handleCorrect} className="castle-next-btn" style={{ background: "#22C55E", color: "white", border: "none", borderRadius: "12px", padding: "12px 24px", fontSize: "16px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease" }}>✅ Correct — {actionDef?.label}!</button>

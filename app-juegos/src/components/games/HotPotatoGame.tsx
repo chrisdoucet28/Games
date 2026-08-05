@@ -3,6 +3,7 @@ import type { GameProps } from "../../types";
 import { teamsGridCols, GAME_MODES } from "../../data/constants";
 import { makeSoloCpuTeam } from "../../lib/soloOpponent";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
+import { FlagPromptButton } from "../shared/FlagPromptButton";
 import { HOTPOTATO_TUTORIAL_STEPS } from "../../data/tutorials/hotpotato";
 
 const GM = GAME_MODES.find(g => g.id === "hotpotato")!;
@@ -572,7 +573,10 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
             </div>
           )}
           {showAnswer && (
-            <div style={{ background: "#F0F9FF", border: "2px solid #0EA5E9", borderRadius: "10px", padding: "10px 14px", marginTop: "4px", textAlign: "center" }}>
+            <div style={{ position: "relative", background: "#F0F9FF", border: "2px solid #0EA5E9", borderRadius: "10px", padding: "10px 14px", marginTop: "4px", textAlign: "center" }}>
+              <div style={{ position: "absolute", top: "8px", right: "8px" }}>
+                <FlagPromptButton gameId="hotpotato" questionData={q} />
+              </div>
               <div style={{ fontSize: "11px", fontWeight: "800", color: "#0369A1", marginBottom: "4px", textTransform: "uppercase", letterSpacing: "0.06em" }}>💡 Expected answer</div>
               <div style={{ fontWeight: "800", color: "#0C4A6E", fontSize: "16px" }}>{q?.answer}</div>
             </div>

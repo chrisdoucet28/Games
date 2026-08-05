@@ -5,6 +5,7 @@ import { TurnTimerBar } from "../shared/TurnTimerBar";
 import { teamsGridCols, GAME_MODES } from "../../data/constants";
 import { denseRank, medalForRank } from "../../utils/ranking";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
+import { FlagPromptButton } from "../shared/FlagPromptButton";
 import { WHACK_TUTORIAL_STEPS } from "../../data/tutorials/whack";
 
 const GM = GAME_MODES.find(g => g.id === "whack")!;
@@ -340,7 +341,10 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
               <div style={{ background: combo > 0 ? "linear-gradient(135deg,#CA8A04,#F59E0B)" : "rgba(255,255,255,0.1)", border: "1.5px solid #FCD34D66", borderRadius: "10px", padding: "6px 14px", fontSize: "13px", fontWeight: "800", color: combo > 0 ? "#1F1300" : "#FCD34D88", animation: combo > 2 ? "wwComboGlow 0.8s ease-in-out infinite" : "none" }}>🔥 Combo x{combo}</div>
             </div>
 
-            <div style={{ background: "rgba(255,255,255,0.08)", border: "2px solid #BEF26455", borderRadius: "14px", padding: "14px 18px", marginBottom: "14px", textAlign: "center" }}>
+            <div style={{ position: "relative", background: "rgba(255,255,255,0.08)", border: "2px solid #BEF26455", borderRadius: "14px", padding: "14px 18px", marginBottom: "14px", textAlign: "center" }}>
+              <div style={{ position: "absolute", top: "8px", right: "8px" }}>
+                <FlagPromptButton gameId="whack" questionData={{ raw: prompt }} />
+              </div>
               <div style={{ fontSize: "11px", fontWeight: "800", color: "#BEF264", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "4px" }}>Whack the correct answer</div>
               <div style={{ fontWeight: "800", fontSize: "clamp(15px,2.5vw,19px)", color: "white" }}>{prompt || "…"}</div>
             </div>

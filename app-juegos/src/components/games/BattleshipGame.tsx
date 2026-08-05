@@ -759,7 +759,7 @@ export function BattleshipGame({ questions, teams: propTeams, onUpdateScore, onE
               </div>
             ) : (
               <>
-                <QuestionCard question={currentQ} showAnswer={showAns} onReveal={() => setShowAns(true)} />
+                <QuestionCard question={currentQ} showAnswer={showAns} onReveal={() => setShowAns(true)} gameId="battleship" />
                 {showAns && (
                   <div style={{ display: "flex", gap: "10px", justifyContent: "center", marginTop: "12px" }}>
                     <button onClick={() => launchMissile(true)} className="bship-btn" style={{ background: "#22C55E", color: "white", border: "none", borderRadius: "12px", padding: "12px 24px", fontSize: "16px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease" }}>✅ Correct! FIRE!</button>

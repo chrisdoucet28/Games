@@ -3,6 +3,7 @@ import type { GameProps, QuestionData, Team } from "../../types";
 import { ScoreBoard } from "../shared/ScoreBoard";
 import { teamsGridCols, GAME_MODES } from "../../data/constants";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
+import { FlagPromptButton } from "../shared/FlagPromptButton";
 import { ZOMBIE_TUTORIAL_STEPS } from "../../data/tutorials/zombie";
 
 const GM = GAME_MODES.find(g => g.id === "zombie")!;
@@ -428,9 +429,12 @@ function SiegeQuestionCard({ question }: { question: QuestionData | null }) {
   if (!question) return null;
   return (
     <div style={{
-      background: "white", border: "3px solid #6366F1", borderRadius: "16px",
+      position: "relative", background: "white", border: "3px solid #6366F1", borderRadius: "16px",
       padding: "16px 20px", textAlign: "center", boxShadow: "0 6px 20px #6366F144",
     }}>
+      <div style={{ position: "absolute", top: "10px", right: "10px" }}>
+        <FlagPromptButton gameId="zombie" questionData={question} />
+      </div>
       <div style={{
         display: "inline-block", background: "#EEF2FF", color: "#4F46E5",
         padding: "3px 12px", borderRadius: "20px", fontSize: "12px", fontWeight: "700", marginBottom: "8px",
