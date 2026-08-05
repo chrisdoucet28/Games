@@ -39,6 +39,21 @@ const POWERUP_CHANCE = 0.25;
 // personal ones, per the user's own suggestion.
 type PowerUpKind = "maxAmmo" | "bulletCapUp" | "allDoorsChair" | "ammoAllTeamsPlus1" | "ammoAllTeamsPlus2" | "nuke";
 const POWERUP_KINDS: PowerUpKind[] = ["maxAmmo", "bulletCapUp", "allDoorsChair", "ammoAllTeamsPlus1", "ammoAllTeamsPlus2", "nuke"];
+// Nuke clears the whole screen for free, so it's weighted well below the other five (which share
+// weight 5 each) rather than landing at an equal 1-in-6 of the power-up roll — of all correct
+// answers this puts nuke at ~1% (POWERUP_CHANCE * 1/26) vs ~4.8% for every other power-up kind.
+const POWERUP_WEIGHT: Record<PowerUpKind, number> = {
+  maxAmmo: 5, bulletCapUp: 5, allDoorsChair: 5, ammoAllTeamsPlus1: 5, ammoAllTeamsPlus2: 5, nuke: 1,
+};
+const POWERUP_TOTAL_WEIGHT = POWERUP_KINDS.reduce((sum, k) => sum + POWERUP_WEIGHT[k], 0);
+function pickPowerUpKind(): PowerUpKind {
+  let roll = Math.random() * POWERUP_TOTAL_WEIGHT;
+  for (const kind of POWERUP_KINDS) {
+    roll -= POWERUP_WEIGHT[kind];
+    if (roll < 0) return kind;
+  }
+  return POWERUP_KINDS[POWERUP_KINDS.length - 1];
+}
 
 // Rounds are closed waves, not a clock — think Call of Duty Zombies. Each round has a fixed zombie
 // quota; they trickle in (not all at once) after a brief read pause, and the round doesn't end
@@ -676,7 +691,7 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
   const handleCorrectAnswer = (teamId: string | number) => {
     onUpdateScore(teamId, CORRECT_ANSWER_SCORE);
     if (Math.random() < POWERUP_CHANCE) {
-      const kind = POWERUP_KINDS[Math.floor(Math.random() * POWERUP_KINDS.length)];
+      const kind = pickPowerUpKind();
       if (kind === "nuke") bumpStat(teamId, "kills", siege.zombies.length);
       applyPowerUp(kind, teamId);
       if (kind === "allDoorsChair") bumpStat(teamId, "chairsPlaced", ENTRY_POINTS.length);
