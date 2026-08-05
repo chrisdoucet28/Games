@@ -17177,36 +17177,36 @@ export const TOPIC_LIBRARY = {
       {
         "type": "use vocabulary in a sentence",
         "question": "'sunny'",
-        "answer": "Open - teacher judges",
-        "hint": "Say a complete sentence",
+        "answer": "It's sunny today, so let's go to the beach.",
+        "hint": "'It's' + weather adjective",
         "difficulty": "easy"
       },
       {
         "type": "use vocabulary in a sentence",
         "question": "'rainy'",
-        "answer": "Open - teacher judges",
-        "hint": "Say a complete sentence",
+        "answer": "It's rainy outside, so take an umbrella.",
+        "hint": "'It's' + weather adjective",
         "difficulty": "easy"
       },
       {
         "type": "use vocabulary in a sentence",
         "question": "'cold'",
-        "answer": "Open - teacher judges",
-        "hint": "Say a complete sentence",
+        "answer": "It's very cold in winter.",
+        "hint": "'It's' + weather adjective",
         "difficulty": "easy"
       },
       {
         "type": "use vocabulary in a sentence",
         "question": "'summer'",
-        "answer": "Open - teacher judges",
-        "hint": "Say a complete sentence",
+        "answer": "I love going swimming in summer.",
+        "hint": "'In' + season",
         "difficulty": "easy"
       },
       {
         "type": "use vocabulary in a sentence",
         "question": "'winter'",
-        "answer": "Open - teacher judges",
-        "hint": "Say a complete sentence",
+        "answer": "It often snows in winter.",
+        "hint": "'In' + season",
         "difficulty": "easy"
       },
       {
@@ -18087,36 +18087,36 @@ export const TOPIC_LIBRARY = {
       {
         "type": "use vocabulary in a sentence",
         "question": "'wake up'",
-        "answer": "Open - teacher judges",
-        "hint": "Say a complete sentence",
+        "answer": "I wake up at seven o'clock every day.",
+        "hint": "Base verb for 'I'",
         "difficulty": "easy"
       },
       {
         "type": "use vocabulary in a sentence",
         "question": "'usually'",
-        "answer": "Open - teacher judges",
-        "hint": "Say a complete sentence",
+        "answer": "I usually have breakfast before school.",
+        "hint": "Frequency adverb goes before the main verb",
         "difficulty": "easy"
       },
       {
         "type": "use vocabulary in a sentence",
         "question": "'in the morning'",
-        "answer": "Open - teacher judges",
-        "hint": "Say a complete sentence",
+        "answer": "I do my homework in the morning.",
+        "hint": "'In' + part of the day",
         "difficulty": "easy"
       },
       {
         "type": "use vocabulary in a sentence",
         "question": "'go to bed'",
-        "answer": "Open - teacher judges",
-        "hint": "Say a complete sentence",
+        "answer": "I go to bed at ten o'clock.",
+        "hint": "Base verb for 'I'",
         "difficulty": "easy"
       },
       {
         "type": "use vocabulary in a sentence",
         "question": "'never'",
-        "answer": "Open - teacher judges",
-        "hint": "Say a complete sentence",
+        "answer": "I never skip breakfast.",
+        "hint": "Frequency adverb goes before the main verb",
         "difficulty": "easy"
       },
       {
@@ -19150,36 +19150,36 @@ export const TOPIC_LIBRARY = {
       {
         "type": "use vocabulary in a sentence",
         "question": "'my'",
-        "answer": "Open - teacher judges",
-        "hint": "Say a complete sentence",
+        "answer": "This is my bag.",
+        "hint": "Possessive adjective + noun",
         "difficulty": "easy"
       },
       {
         "type": "use vocabulary in a sentence",
         "question": "'mine'",
-        "answer": "Open - teacher judges",
-        "hint": "Say a complete sentence",
+        "answer": "This bag is mine.",
+        "hint": "Possessive pronoun stands alone, with no noun after it",
         "difficulty": "easy"
       },
       {
         "type": "use vocabulary in a sentence",
         "question": "'whose'",
-        "answer": "Open - teacher judges",
-        "hint": "Say a complete sentence",
+        "answer": "Whose phone is this?",
+        "hint": "'Whose' asks about possession",
         "difficulty": "easy"
       },
       {
         "type": "use vocabulary in a sentence",
         "question": "'hers'",
-        "answer": "Open - teacher judges",
-        "hint": "Say a complete sentence",
+        "answer": "That coat isn't mine, it's hers.",
+        "hint": "Possessive pronoun stands alone, with no noun after it",
         "difficulty": "easy"
       },
       {
         "type": "use vocabulary in a sentence",
         "question": "'their'",
-        "answer": "Open - teacher judges",
-        "hint": "Say a complete sentence",
+        "answer": "Their house is very big.",
+        "hint": "Possessive adjective + noun",
         "difficulty": "easy"
       },
       {
