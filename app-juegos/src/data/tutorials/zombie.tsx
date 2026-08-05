@@ -80,6 +80,30 @@ export const ZOMBIE_TUTORIAL_STEPS: TutorialStep[] = [
     ),
   },
   {
+    narration: "One power-up is a ☢️ NUKE — it instantly destroys every zombie on screen. Save the moment it drops for when things look really bad!",
+    visual: (
+      <div style={{ textAlign: "center" }}>
+        <div style={{ fontSize: "26px" }}>☢️🧟🧟🧟 → 💨</div>
+        <div style={{ fontSize: "11px", fontWeight: 800, color: "#991B1B", marginTop: "4px" }}>All zombies on screen destroyed at once</div>
+      </div>
+    ),
+  },
+  {
+    narration: "From wave 3 onward, two tougher zombie types can show up: a fast 🏃 runner that reaches the door quicker, and a big 🧌 brute that hits chairs harder. Watch for their look — they're easy to spot!",
+    visual: (
+      <div style={{ display: "flex", justifyContent: "center", gap: "18px" }}>
+        <div style={{ textAlign: "center" }}>
+          <div style={{ fontSize: "22px" }}>🏃</div>
+          <div style={{ fontSize: "10px", fontWeight: 800, color: "#0E7490" }}>Runner — arrives fast</div>
+        </div>
+        <div style={{ textAlign: "center" }}>
+          <div style={{ fontSize: "26px" }}>🧌</div>
+          <div style={{ fontSize: "10px", fontWeight: 800, color: "#991B1B" }}>Brute — hits harder</div>
+        </div>
+      </div>
+    ),
+  },
+  {
     narration: "Clear every zombie in the wave to move on. The next wave is always tougher — how many waves can your class survive?",
     visual: (
       <div style={{ textAlign: "center" }}>

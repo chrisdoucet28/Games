@@ -37,8 +37,8 @@ const POWERUP_CHANCE = 0.25;
 // ammoAllTeamsPlus1/2 are the only power-ups that help every team at once (the other three are
 // scoped to whichever team happened to answer) — a deliberate room-wide "gift" alongside the
 // personal ones, per the user's own suggestion.
-type PowerUpKind = "maxAmmo" | "bulletCapUp" | "allDoorsChair" | "ammoAllTeamsPlus1" | "ammoAllTeamsPlus2";
-const POWERUP_KINDS: PowerUpKind[] = ["maxAmmo", "bulletCapUp", "allDoorsChair", "ammoAllTeamsPlus1", "ammoAllTeamsPlus2"];
+type PowerUpKind = "maxAmmo" | "bulletCapUp" | "allDoorsChair" | "ammoAllTeamsPlus1" | "ammoAllTeamsPlus2" | "nuke";
+const POWERUP_KINDS: PowerUpKind[] = ["maxAmmo", "bulletCapUp", "allDoorsChair", "ammoAllTeamsPlus1", "ammoAllTeamsPlus2", "nuke"];
 
 // Rounds are closed waves, not a clock — think Call of Duty Zombies. Each round has a fixed zombie
 // quota; they trickle in (not all at once) after a brief read pause, and the round doesn't end
@@ -84,11 +84,38 @@ function weakestEntryPoint(barricades: Record<EntryPointId, BarricadeItem[]>): E
 
 type BarricadeItem = { id: number; hp: number };
 type ZombieStatus = "approaching" | "attacking";
+type ZombieKind = "normal" | "runner" | "brute";
 // `lane` is a fixed random offset (-1..1) assigned at spawn, used only for rendering — it spreads
 // simultaneous zombies at the same entry point across the approach path instead of stacking them
-// on one exact line.
-type Zombie = { id: number; entryPointId: EntryPointId; status: ZombieStatus; progress: number; lane: number };
+// on one exact line. `attackCooldown` counts down while attacking — a zombie only lands a hit on
+// the barricade when it reaches 0, not every tick (see ZOMBIE_ATTACK_INTERVAL_TICKS below).
+type Zombie = { id: number; entryPointId: EntryPointId; status: ZombieStatus; progress: number; lane: number; kind: ZombieKind; attackCooldown: number };
 type PersonState = { bullets: number; bulletCap: number; axes: number; alive: boolean };
+
+const ZOMBIE_ATTACK_INTERVAL_TICKS = 2; // a zombie now damages the barricade once every 2 ticks, not every tick — directly softens the "swarm insta-breaks the door" case, since N simultaneous attackers now deal roughly N/2 damage per tick instead of N
+
+// From round 3 on, two variants start appearing alongside the normal zombie — kept to just two so
+// a teacher can explain them at a glance: runner = faster, brute = hits harder.
+const APPROACH_TICKS_BY_KIND: Record<ZombieKind, number> = { normal: APPROACH_TICKS, runner: 8, brute: APPROACH_TICKS };
+const DAMAGE_BY_KIND: Record<ZombieKind, number> = { normal: ZOMBIE_DAMAGE_PER_TICK, runner: ZOMBIE_DAMAGE_PER_TICK, brute: 2 };
+const ZOMBIE_KIND_ICON: Record<ZombieKind, string> = { normal: "🧟", runner: "🏃", brute: "🧌" };
+// Size/glow treatment so a variant reads as different at a glance mid-game, not just on close
+// inspection of the icon — cyan glow + smaller reads "fast", red glow + bigger reads "dangerous".
+const ZOMBIE_KIND_STYLE: Record<ZombieKind, { fontSize: string; filter: string }> = {
+  normal: { fontSize: "17px", filter: "none" },
+  runner: { fontSize: "16px", filter: "drop-shadow(0 0 4px #22D3EE) hue-rotate(-15deg)" },
+  brute: { fontSize: "22px", filter: "drop-shadow(0 0 5px #DC2626) saturate(1.6)" },
+};
+
+// First-pass split, meant to be tuned live rather than calculated to a "correct" answer — matches
+// this file's own convention for other difficulty constants.
+function pickZombieKind(round: number): ZombieKind {
+  if (round < 3) return "normal";
+  const roll = Math.random();
+  if (roll < 0.2) return "brute";
+  if (roll < 0.45) return "runner";
+  return "normal";
+}
 
 type SiegeState = {
   barricades: Record<EntryPointId, BarricadeItem[]>; // index 0 = frontmost, attacked first, never repaired
@@ -129,6 +156,7 @@ const POWERUP_LABEL: Record<PowerUpKind, string> = {
   allDoorsChair: "🪑 Chair on Every Door!",
   ammoAllTeamsPlus1: "🔫 +1 Ammo for Everyone!",
   ammoAllTeamsPlus2: "🔫🔫 +2 Ammo for Everyone!",
+  nuke: "☢️ NUKE! All zombies destroyed!",
 };
 
 function emptyBarricades(): Record<EntryPointId, BarricadeItem[]> {
@@ -174,7 +202,7 @@ function advanceTick(
   const spawningAllowed = roundElapsedSeconds > ROUND_READ_PAUSE_SECONDS && zombiesSpawnedThisRound < quota;
   if (spawningAllowed && Math.random() < spawnChanceForRound(round)) {
     const ep = ENTRY_POINTS[Math.floor(Math.random() * ENTRY_POINTS.length)];
-    zombies.push({ id: nextZombieId(), entryPointId: ep.id, status: "approaching", progress: 0, lane: Math.random() * 2 - 1 });
+    zombies.push({ id: nextZombieId(), entryPointId: ep.id, status: "approaching", progress: 0, lane: Math.random() * 2 - 1, kind: pickZombieKind(round), attackCooldown: 0 });
     zombiesSpawnedThisRound += 1;
   }
 
@@ -185,9 +213,9 @@ function advanceTick(
   zombies = zombies.map(z => {
     if (z.status !== "approaching") return z;
     const progress = z.progress + 1;
-    if (progress >= APPROACH_TICKS) {
+    if (progress >= APPROACH_TICKS_BY_KIND[z.kind]) {
       justArrived.add(z.id);
-      return { ...z, status: "attacking" as const, progress };
+      return { ...z, status: "attacking" as const, progress, attackCooldown: 0 };
     }
     return { ...z, progress };
   });
@@ -219,16 +247,18 @@ function advanceTick(
   // 3. Attack — every attacking zombie that survived the auto-shoot damages whichever barricade
   // item is currently frontmost at its entry point. Barricades are never repaired, so this only
   // ever counts down.
-  zombies.forEach(z => {
-    if (z.status !== "attacking") return;
+  zombies = zombies.map(z => {
+    if (z.status !== "attacking") return z;
     const stack = barricades[z.entryPointId];
-    if (!stack.length) return; // stack already empty — this zombie is breach-eligible, handled next
+    if (!stack.length) return z; // stack already empty — this zombie is breach-eligible, handled next
+    if (z.attackCooldown > 0) return { ...z, attackCooldown: z.attackCooldown - 1 };
     const front = stack[0];
-    front.hp -= ZOMBIE_DAMAGE_PER_TICK;
+    front.hp -= DAMAGE_BY_KIND[z.kind];
     if (front.hp <= 0) {
       stack.shift();
       events.push({ kind: "barricadeDestroyed", entryPointId: z.entryPointId });
     }
+    return { ...z, attackCooldown: ZOMBIE_ATTACK_INTERVAL_TICKS - 1 };
   });
 
   // 4. Breach — resolved sequentially against a threaded working copy of `persons`, not the
@@ -322,7 +352,7 @@ const GEOMETRY: Record<EntryPointId, Geometry> = {
 function zombiePosition(z: Zombie): { x: number; y: number } {
   const g = GEOMETRY[z.entryPointId];
   const spawn = g.spawn(z.lane);
-  const t = Math.min(1, z.progress / APPROACH_TICKS);
+  const t = Math.min(1, z.progress / APPROACH_TICKS_BY_KIND[z.kind]);
   return { x: spawn.x + (g.targetX - spawn.x) * t, y: spawn.y + (g.targetY - spawn.y) * t };
 }
 
@@ -386,16 +416,17 @@ function HouseScene({ siege, teams }: { siege: SiegeState; teams: Team[] }) {
         return (
           <div key={z.id} style={{
             position: "absolute", left: `${pos.x}%`, top: `${pos.y}%`, transform: "translate(-50%,-50%)",
-            transition: `left ${TICK_MS}ms linear, top ${TICK_MS}ms linear`, fontSize: "17px", zIndex: 4,
+            transition: `left ${TICK_MS}ms linear, top ${TICK_MS}ms linear`, zIndex: 4,
+            fontSize: ZOMBIE_KIND_STYLE[z.kind].fontSize, filter: ZOMBIE_KIND_STYLE[z.kind].filter,
             animation: z.status === "attacking" ? "zsShake 0.3s ease-in-out infinite" : "zsBob 0.9s ease-in-out infinite",
-          }}>🧟</div>
+          }}>{ZOMBIE_KIND_ICON[z.kind]}</div>
         );
       })}
     </div>
   );
 }
 
-function PersonChip({ team, person }: { team: Team; person: PersonState }) {
+function PersonChip({ team, person, rechargeProgress }: { team: Team; person: PersonState; rechargeProgress: number }) {
   return (
     <div style={{
       background: person.alive ? `linear-gradient(160deg,${team.color.dark}55,#050805)` : "#1A1A1A88",
@@ -408,10 +439,21 @@ function PersonChip({ team, person }: { team: Team; person: PersonState }) {
         <div style={{ fontSize: "11px", lineHeight: 1.3, display: "flex", gap: "1px", justifyContent: "center", alignItems: "center", flexWrap: "wrap" }}>
           {/* Always shows bulletCap slots (not just current bullets) — a team with 1/3 bullets sees
               three guns, two of them greyed out, so the empty capacity is always visible, not just
-              inferred from a bare count. */}
-          {Array.from({ length: person.bulletCap }, (_, i) => (
-            <span key={i} style={{ opacity: i < person.bullets ? 1 : 0.28, filter: i < person.bullets ? "none" : "grayscale(1)" }}>🔫</span>
-          ))}
+              inferred from a bare count. The next slot due to recharge (i === person.bullets, while
+              still under cap) gets a small conic-gradient ring so the wait isn't a silent pop-in. */}
+          {Array.from({ length: person.bulletCap }, (_, i) => {
+            const gun = <span style={{ opacity: i < person.bullets ? 1 : 0.28, filter: i < person.bullets ? "none" : "grayscale(1)" }}>🔫</span>;
+            if (i !== person.bullets || person.bullets >= person.bulletCap) return <span key={i}>{gun}</span>;
+            const secsLeft = Math.round((1 - rechargeProgress) * BULLET_RECHARGE_SECONDS);
+            return (
+              <span key={i} title={`Recharges in ~${secsLeft}s`} style={{
+                display: "inline-flex", alignItems: "center", justifyContent: "center", width: "16px", height: "16px",
+                borderRadius: "50%", background: `conic-gradient(#4ADE80 ${rechargeProgress * 360}deg, #1F293766 0deg)`, padding: "1px",
+              }}>
+                <span style={{ display: "inline-flex", width: "100%", height: "100%", borderRadius: "50%", background: "#050805", alignItems: "center", justifyContent: "center" }}>{gun}</span>
+              </span>
+            );
+          })}
           {person.axes > 0 && <span style={{ marginLeft: "3px" }}>{"🪓".repeat(person.axes)}</span>}
         </div>
       ) : (
@@ -594,6 +636,7 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
     setSiege(prev => {
       let persons = prev.persons;
       let barricades = prev.barricades;
+      let zombies = prev.zombies;
       if (kind === "maxAmmo") {
         const person = persons[teamId];
         persons = { ...persons, [teamId]: { ...person, bullets: person.bulletCap } };
@@ -618,8 +661,10 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
           if (person.alive) next[id] = { ...person, bullets: Math.min(person.bulletCap, person.bullets + amount) };
         });
         persons = next;
+      } else if (kind === "nuke") {
+        zombies = [];
       }
-      return { ...prev, persons, barricades };
+      return { ...prev, persons, barricades, zombies };
     });
     const team = teams.find(t => t.id === teamId);
     showPowerUpBanner(`${team?.color.emoji ?? ""} ${team?.name ?? ""}: ${POWERUP_LABEL[kind]}`);
@@ -632,6 +677,7 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
     onUpdateScore(teamId, CORRECT_ANSWER_SCORE);
     if (Math.random() < POWERUP_CHANCE) {
       const kind = POWERUP_KINDS[Math.floor(Math.random() * POWERUP_KINDS.length)];
+      if (kind === "nuke") bumpStat(teamId, "kills", siege.zombies.length);
       applyPowerUp(kind, teamId);
       if (kind === "allDoorsChair") bumpStat(teamId, "chairsPlaced", ENTRY_POINTS.length);
     } else {
@@ -727,6 +773,9 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
   const round = siege.round;
   const roundQuota = roundZombieQuota(round);
   const roundDefeated = siege.zombiesSpawnedThisRound - siege.zombies.length;
+  // Bullets recharge on one shared global cadence for every team in lockstep (see step 0 of
+  // advanceTick), so a single derived fraction covers everyone's "next" slot ring.
+  const rechargeProgress = (siege.elapsedSeconds % BULLET_RECHARGE_SECONDS) / BULLET_RECHARGE_SECONDS;
 
   return (
     <div style={arenaStyle}>
@@ -805,7 +854,7 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
         <HouseScene siege={siege} teams={teams} />
 
         <div style={{ display: "flex", gap: "5px", justifyContent: "center", flexWrap: "wrap", marginBottom: "4px" }}>
-          {teams.map(t => <PersonChip key={t.id} team={t} person={siege.persons[t.id]} />)}
+          {teams.map(t => <PersonChip key={t.id} team={t} person={siege.persons[t.id]} rechargeProgress={rechargeProgress} />)}
         </div>
 
         <div style={{ maxWidth: "480px", width: "100%", margin: "0 auto" }}>
