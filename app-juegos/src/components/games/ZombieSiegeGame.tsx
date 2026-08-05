@@ -60,7 +60,7 @@ function pickPowerUpKind(): PowerUpKind {
 // until every zombie in the wave has been resolved (shot or breached — either way it's gone). Clear
 // a fast wave and the next, bigger one starts sooner; a slow class just holds at the same pressure
 // for longer. First-pass numbers, meant to be tuned live rather than calculated to a "correct" answer.
-const ROUND_READ_PAUSE_SECONDS = 3; // empty beat at the start of every round — time to read the new prompt before anything spawns
+const ROUND_READ_PAUSE_SECONDS = 8; // empty beat at the start of every round — time to read the new prompt before anything spawns; bumped from 3s after teacher feedback that the room felt too rushed to actually process each new prompt
 const ROUND_QUOTA_BASE = 4; // zombies in round 1's wave
 const ROUND_QUOTA_GROWTH = 2; // extra zombies added to the wave each subsequent round
 const SPAWN_CHANCE_BASE = 0.12; // per-tick chance the next queued zombie in this round's wave actually spawns
