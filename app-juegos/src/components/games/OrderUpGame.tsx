@@ -657,13 +657,27 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
       )}
       <div style={{ position: "relative", zIndex: 1 }}>
         <DinerFacade />
-        <div style={{
-          display: "inline-flex", alignItems: "center", gap: "6px", margin: "0 auto 10px", padding: "5px 14px",
-          background: sessionTimeLeft <= 30 ? "#FEE2E2" : "white", border: `2px solid ${sessionTimeLeft <= 30 ? "#EF4444" : "#FBCFE8"}`,
-          borderRadius: "999px", fontWeight: "900", fontSize: "13px", color: sessionTimeLeft <= 30 ? "#B91C1C" : "#BE185D",
-          animation: sessionTimeLeft <= 30 ? "ouUrgentPulse 0.8s ease-in-out infinite" : "none",
-        }}>
-          ⏱️ {formatClock(sessionTimeLeft)} left in the rush
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", margin: "0 auto 10px" }}>
+          <div style={{
+            display: "inline-flex", alignItems: "center", gap: "6px", padding: "5px 14px",
+            background: sessionTimeLeft <= 30 ? "#FEE2E2" : "white", border: `2px solid ${sessionTimeLeft <= 30 ? "#EF4444" : "#FBCFE8"}`,
+            borderRadius: "999px", fontWeight: "900", fontSize: "13px", color: sessionTimeLeft <= 30 ? "#B91C1C" : "#BE185D",
+            animation: sessionTimeLeft <= 30 ? "ouUrgentPulse 0.8s ease-in-out infinite" : "none",
+          }}>
+            ⏱️ {formatClock(sessionTimeLeft)} left in the rush
+          </div>
+          {/* Right next to the countdown a teacher is already watching, not just up in the generic
+              top bar, so it's actually noticed and used, not just present. */}
+          {onTogglePause && (
+            <button onClick={onTogglePause} className="ou-btn" title="Freeze the clock so you can explain something to the class" style={{
+              background: paused ? "#F59E0B" : "#D97706", color: "white",
+              border: paused ? "2px solid #FDE68A" : "2px solid rgba(255,255,255,0.6)",
+              borderRadius: "999px", padding: "5px 12px", fontSize: "13px", fontWeight: "800", cursor: "pointer",
+              boxShadow: paused ? "0 0 0 3px rgba(245,158,11,0.35)" : "0 2px 6px rgba(217,119,6,0.45)",
+            }}>
+              {paused ? "▶️ Resume" : "⏸️ Pause"}
+            </button>
+          )}
         </div>
         <div style={{ textAlign: "center", color: "#BE185D", fontWeight: "800", fontSize: "13px", marginBottom: "10px" }}>
           🍽️ Write one sentence that satisfies every dish to serve a customer!

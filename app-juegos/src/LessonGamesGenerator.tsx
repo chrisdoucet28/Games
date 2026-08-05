@@ -1091,25 +1091,6 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
             >
               {saveStatus === "saving" ? "Saving…" : saveStatus === "saved" ? "✅ Saved!" : saveStatus === "error" ? "⚠️ Failed — try again" : "💾 Save & Exit"}
             </button>
-            {(selectedGame.id === "zombie" || selectedGame.id === "orderup") && (
-              // Solid amber even when idle (not just once paused) — every other button in this bar
-              // is a translucent white pill, and a matching translucent Pause button was easy for a
-              // teacher to miss entirely among Save & Exit / Fullscreen / End Game. Only Zombie Siege
-              // and Order Up run a real-time clock worth freezing, so this stays a per-game conditional
-              // rather than a universal button.
-              <button
-                onClick={() => setPaused(p => !p)}
-                title="Freeze the clock so you can explain something to the class"
-                style={{
-                  background: paused ? "#F59E0B" : "#D97706", color: "white",
-                  border: paused ? "2px solid #FDE68A" : "2px solid rgba(255,255,255,0.6)",
-                  borderRadius: "8px", padding: "6px 14px", cursor: "pointer", fontWeight: "800", fontFamily: theme.headingFont,
-                  boxShadow: paused ? "0 0 0 3px rgba(245,158,11,0.35)" : "0 2px 6px rgba(217,119,6,0.45)",
-                }}
-              >
-                {paused ? "▶️ Resume" : "⏸️ Pause"}
-              </button>
-            )}
             <button onClick={toggleFullscreen} style={{ background: "rgba(255,255,255,0.15)", color: "white", border: "none", borderRadius: "8px", padding: "6px 12px", cursor: "pointer", fontWeight: "700", fontFamily: theme.headingFont }}>⛶ Fullscreen</button>
             <button onClick={handleTopBarEndGame} style={{ background: "rgba(255,255,255,0.15)", color: "white", border: "none", borderRadius: "8px", padding: "6px 12px", cursor: "pointer", fontWeight: "700", fontFamily: theme.headingFont }}>🏁 End Game</button>
           </div>

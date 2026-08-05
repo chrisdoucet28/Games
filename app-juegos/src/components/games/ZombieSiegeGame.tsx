@@ -863,7 +863,21 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
       <div style={{ position: "relative", zIndex: 1 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "6px", marginBottom: "4px" }}>
           <div style={{ fontWeight: "800", fontSize: "12px", color: "#BEF264" }}>⏱️ {formatClock(siege.elapsedSeconds)}</div>
-          <div style={{ fontWeight: "900", fontSize: "13px", color: "#F87171", animation: round >= 6 ? "zsPulse 1s ease-in-out infinite" : "none" }}>🌊 Round {round} · {roundDefeated}/{roundQuota}</div>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <div style={{ fontWeight: "900", fontSize: "13px", color: "#F87171", animation: round >= 6 ? "zsPulse 1s ease-in-out infinite" : "none" }}>🌊 Round {round} · {roundDefeated}/{roundQuota}</div>
+            {/* Right next to the round indicator — the thing a teacher's eyes are already on mid-siege —
+                not just up in the generic top bar, so it's actually noticed and used, not just present. */}
+            {onTogglePause && (
+              <button onClick={onTogglePause} className="zs-btn" title="Freeze the clock so you can explain something to the class" style={{
+                background: paused ? "#F59E0B" : "#D97706", color: "white",
+                border: paused ? "2px solid #FDE68A" : "2px solid rgba(255,255,255,0.6)",
+                borderRadius: "8px", padding: "3px 9px", fontSize: "11px", fontWeight: "800", cursor: "pointer",
+                boxShadow: paused ? "0 0 0 3px rgba(245,158,11,0.35)" : "0 2px 6px rgba(217,119,6,0.45)",
+              }}>
+                {paused ? "▶️ Resume" : "⏸️ Pause"}
+              </button>
+            )}
+          </div>
         </div>
 
         <HouseScene siege={siege} teams={teams} />
