@@ -64,11 +64,11 @@ export const SPY_GROUP_STEPS: TutorialStep[] = [
     visual: <TopicPairVisual />,
   },
   {
-    narration: "First, everyone privately looks at their own topic. After that, you get 30 quiet seconds to think about what you will say. Do NOT say your topic out loud yet — just plan it in your head.",
+    narration: "First, everyone privately looks at their own topic. After that, you get 2 quiet minutes to think about what you will say. Do NOT say your topic out loud yet — just plan it in your head.",
     visual: (
       <div style={{ textAlign: "center" }}>
         <div style={{ fontSize: "20px" }}>🤫⏱️</div>
-        <div style={{ fontSize: "11px", fontWeight: 700, color: "#374151", marginTop: "4px" }}>30 seconds to prepare, quietly</div>
+        <div style={{ fontSize: "11px", fontWeight: 700, color: "#374151", marginTop: "4px" }}>2 minutes to prepare, quietly</div>
       </div>
     ),
   },
