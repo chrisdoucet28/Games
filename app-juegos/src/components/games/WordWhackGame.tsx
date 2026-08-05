@@ -12,6 +12,9 @@ const GM = GAME_MODES.find(g => g.id === "whack")!;
 
 const TOTAL_HOLES = 6;
 const TURN_SECONDS = 90;
+// Every team gets this many 90s turns before final results — a single turn per team felt too
+// short on its own, per teacher feedback; 2 gives the full experience without dragging it out.
+const TOTAL_ROUNDS = 2;
 const BASE_HIT_PTS = 20;
 const COMBO_STEP = 5;
 const MAX_COMBO_BONUS = 40;
@@ -108,6 +111,7 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
   }, [forceFinalRef, phase]);
   const [difficulty, setDifficulty] = useState<Difficulty>("medium");
   const [teamIdx, setTeamIdx] = useState(0);
+  const [round, setRound] = useState(1);
   const [countdown, setCountdown] = useState(3);
   const [moles, setMoles] = useState<Mole[]>([]);
   const [prompt, setPrompt] = useState("");
@@ -132,7 +136,10 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
     setMoles([]);
     const finalTurnScore = turnScoreRef.current;
     if (finalTurnScore > 0) onUpdateScore(activeTeam.id, finalTurnScore);
-    setFinalScores(prev => ({ ...prev, [activeTeam.id]: finalTurnScore }));
+    // Accumulates across both of a team's rounds — this is "points scored in this Word Whack
+    // playthrough" for the game's own final ranking, separate from turnScore (this turn only,
+    // shown on the turn-end screen) and separate from the team's cross-game session score.
+    setFinalScores(prev => ({ ...prev, [activeTeam.id]: (prev[activeTeam.id] ?? 0) + finalTurnScore }));
     setPhase("turn-end");
   };
 
@@ -217,7 +224,13 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
 
   const nextTeam = () => {
     const next = teamIdx + 1;
-    if (next >= teams.length) { setPhase("final"); return; }
+    if (next >= teams.length) {
+      if (round >= TOTAL_ROUNDS) { setPhase("final"); return; }
+      setRound(r => r + 1);
+      setTeamIdx(0);
+      startTeamTurn();
+      return;
+    }
     setTeamIdx(next);
     startTeamTurn();
   };
@@ -251,7 +264,7 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
           <div style={{ fontSize: "36px", marginBottom: "10px" }}>🔨</div>
           <div style={{ fontWeight: "900", fontSize: "20px", marginBottom: "10px", color: "#BEF264" }}>Word Whack</div>
           <div style={{ fontSize: "15px", lineHeight: 1.7 }}>
-            One team plays at a time, <strong style={{ color: "#BEF264" }}>90 seconds</strong> each — moles pop up with possible answers, whack the <strong style={{ color: "#BEF264" }}>correct one</strong> before it ducks!<br />
+            One team plays at a time, <strong style={{ color: "#BEF264" }}>90 seconds</strong> each, for <strong style={{ color: "#BEF264" }}>{TOTAL_ROUNDS} rounds</strong> — moles pop up with possible answers, whack the <strong style={{ color: "#BEF264" }}>correct one</strong> before it ducks!<br />
             Hit right for points and a growing <strong style={{ color: "#BEF264" }}>combo bonus</strong>; hit wrong and that mole's gone, but the correct one's still up. Moles duck faster as your clock runs down!
           </div>
         </div>
@@ -330,7 +343,7 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
       {STYLE_TAG}
       <div style={{ position: "relative", zIndex: 1 }}>
         <div style={{ background: `linear-gradient(90deg,${activeTeam.color.dark},${activeTeam.color.bg})`, borderRadius: "14px", padding: "10px 16px", marginBottom: "14px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px", boxShadow: `0 4px 18px ${activeTeam.color.bg}55` }}>
-          <span style={{ color: "white", fontWeight: "900", fontSize: "16px", textShadow: "0 1px 3px rgba(0,0,0,0.4)" }}>🔨 {activeTeam.mascot ?? activeTeam.color.emoji} {activeTeam.name}'s turn — Team {teamIdx + 1} of {teams.length}</span>
+          <span style={{ color: "white", fontWeight: "900", fontSize: "16px", textShadow: "0 1px 3px rgba(0,0,0,0.4)" }}>🔨 {activeTeam.mascot ?? activeTeam.color.emoji} {activeTeam.name}'s turn — Round {round}/{TOTAL_ROUNDS}, Team {teamIdx + 1} of {teams.length}</span>
           {phase === "playing" && <TurnTimerBar timeLeft={turnTimeLeft} totalSeconds={TURN_SECONDS} />}
         </div>
 
@@ -409,11 +422,13 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
             <div style={{ background: "linear-gradient(160deg,#3F6212,#1A2E05)", border: "2px solid #BEF26466", borderRadius: "16px", padding: "20px", marginBottom: "16px" }}>
               <div style={{ fontSize: "34px", marginBottom: "6px" }}>🔨</div>
               <div style={{ fontWeight: "900", fontSize: "20px", color: "white", marginBottom: "8px" }}>{activeTeam.name}'s turn is over!</div>
-              <div style={{ fontWeight: "800", fontSize: "26px", color: "#BEF264" }}>+{finalScores[activeTeam.id] ?? 0} pts</div>
+              <div style={{ fontWeight: "800", fontSize: "26px", color: "#BEF264" }}>+{turnScore} pts</div>
               <div style={{ fontSize: "13px", color: "#D9F99D", marginTop: "6px" }}>Best combo this turn: 🔥 x{bestCombo}</div>
             </div>
             <button onClick={nextTeam} className="ww-btn" style={{ background: "linear-gradient(135deg,#3F6212,#84CC16)", color: "#0F1A05", border: "none", borderRadius: "14px", padding: "14px 36px", fontSize: "17px", fontWeight: "900", cursor: "pointer", transition: "transform 0.15s ease" }}>
-              {teamIdx + 1 >= teams.length ? "🏆 See Final Results" : "➡️ Next Team's Turn"}
+              {teamIdx + 1 >= teams.length
+                ? (round >= TOTAL_ROUNDS ? "🏆 See Final Results" : `➡️ Start Round ${round + 1}`)
+                : "➡️ Next Team's Turn"}
             </button>
           </div>
         )}

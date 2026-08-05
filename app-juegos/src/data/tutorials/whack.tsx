@@ -76,7 +76,7 @@ export const WHACK_TUTORIAL_STEPS: TutorialStep[] = [
     ),
   },
   {
-    narration: "Each team gets 90 seconds. Moles duck faster as time runs out! Whack as many correct answers as you can before the clock hits 0. Most points wins.",
+    narration: "Each team gets 2 rounds of 90 seconds. Moles duck faster as time runs out! Whack as many correct answers as you can before the clock hits 0. Most points wins.",
     visual: (
       <div style={{ textAlign: "center" }}>
         <div style={{ background: "#F3F4F6", borderRadius: "999px", height: "10px", width: "100%", overflow: "hidden" }}>

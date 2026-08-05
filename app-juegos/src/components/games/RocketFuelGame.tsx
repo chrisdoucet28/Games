@@ -10,6 +10,10 @@ import { ROCKET_TUTORIAL_STEPS } from "../../data/tutorials/rocket";
 const GM = GAME_MODES.find(g => g.id === "rocket")!;
 
 const TURN_SECONDS = 90;
+// Every team gets this many 90s turns (each building more secret fuel) before launch — a single
+// turn per team felt too short on its own, per teacher feedback; 2 gives the full experience
+// without dragging the game out.
+const TOTAL_ROUNDS = 2;
 const POINTS_PER_CORRECT = 20;
 const LAUNCH_BONUS_BY_RANK = [50, 30, 15, 5];
 const MAX_FLIGHT_PX = 460;
@@ -184,6 +188,7 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
   const [phase, setPhase] = useState<"intro" | "team-turn" | "team-end" | "launchpad" | "igniting" | "launching" | "final">("intro");
   const [showHowTo, setShowHowTo] = useState(false);
   const [teamIdx, setTeamIdx] = useState(0);
+  const [round, setRound] = useState(1);
   const [currentQ, setCurrentQ] = useState<QuestionData | null>(null);
   const [showAnswer, setShowAnswer] = useState(false);
   const [turnFuel, setTurnFuel] = useState(0);
@@ -260,7 +265,12 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
 
   const nextTeam = () => {
     const next = teamIdx + 1;
-    if (next >= teams.length) { setPhase("launchpad"); return; }
+    if (next >= teams.length) {
+      if (round >= TOTAL_ROUNDS) { setPhase("launchpad"); return; }
+      setRound(r => r + 1);
+      startTeamTurn(0);
+      return;
+    }
     startTeamTurn(next);
   };
 
@@ -317,7 +327,7 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
           <div style={{ fontSize: "36px", marginBottom: "10px" }}>🚀</div>
           <div style={{ fontWeight: "900", fontSize: "20px", marginBottom: "10px", color: "#A5B4FC" }}>Rocket Fuel</div>
           <div style={{ fontSize: "15px", lineHeight: 1.7 }}>
-            Each team gets <strong style={{ color: "#A5B4FC" }}>90 seconds</strong> at mission control — use the given word in your own sentence, and every correct one adds fuel. Stuck on a prompt? Skip it for a new one, no penalty.<br />
+            Each team gets <strong style={{ color: "#A5B4FC" }}>{TOTAL_ROUNDS} rounds of 90 seconds</strong> at mission control — use the given word in your own sentence, and every correct one adds fuel. Stuck on a prompt? Skip it for a new one, no penalty.<br />
             Nobody's fuel level is revealed until every team has fuelled up — then all rockets <strong style={{ color: "#A5B4FC" }}>launch together</strong>, and whoever fuelled the most flies the highest!
           </div>
         </div>
@@ -351,7 +361,7 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
       {STYLE_TAG}
       <div style={{ position: "relative", zIndex: 1 }}>
         <div style={{ background: `linear-gradient(90deg,${activeTeam.color.dark},${activeTeam.color.bg})`, borderRadius: "14px", padding: "10px 16px", marginBottom: "14px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px", boxShadow: `0 4px 18px ${activeTeam.color.bg}55` }}>
-          <span style={{ color: "white", fontWeight: "900", fontSize: "16px", textShadow: "0 1px 3px rgba(0,0,0,0.4)" }}>🚀 {activeTeam.name}'s turn — Team {teamIdx + 1} of {teams.length}</span>
+          <span style={{ color: "white", fontWeight: "900", fontSize: "16px", textShadow: "0 1px 3px rgba(0,0,0,0.4)" }}>🚀 {activeTeam.name}'s turn — Round {round}/{TOTAL_ROUNDS}, Team {teamIdx + 1} of {teams.length}</span>
           {phase === "team-turn" && (
             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
               <TurnTimerBar timeLeft={timeLeft} totalSeconds={TURN_SECONDS} />
@@ -398,7 +408,9 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
               <div style={{ fontSize: "14px", color: "#C7D2FE" }}>Nice work! Time for the next team.</div>
             </div>
             <button onClick={nextTeam} className="rf-btn" style={{ background: "linear-gradient(135deg,#4338CA,#818CF8)", color: "white", border: "none", borderRadius: "14px", padding: "14px 36px", fontSize: "17px", fontWeight: "900", cursor: "pointer", transition: "transform 0.15s ease" }}>
-              {teamIdx + 1 >= teams.length ? "🚀 Go to Launchpad" : "➡️ Next Team's Turn"}
+              {teamIdx + 1 >= teams.length
+                ? (round >= TOTAL_ROUNDS ? "🚀 Go to Launchpad" : `➡️ Start Round ${round + 1}`)
+                : "➡️ Next Team's Turn"}
             </button>
           </div>
         )}

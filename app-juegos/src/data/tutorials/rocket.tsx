@@ -23,7 +23,7 @@ export const ROCKET_TUTORIAL_STEPS: TutorialStep[] = [
     ),
   },
   {
-    narration: "Every correct sentence adds 1 fuel to your rocket, worth 20 points. You have 90 seconds on your turn to make as many correct sentences as you can.",
+    narration: "Every correct sentence adds 1 fuel to your rocket, worth 20 points. You get 2 rounds of 90 seconds each to make as many correct sentences as you can.",
     visual: (
       <div style={{ textAlign: "center" }}>
         <div style={{ fontSize: "20px" }}>⛽ +1 fuel</div>
@@ -50,7 +50,7 @@ export const ROCKET_TUTORIAL_STEPS: TutorialStep[] = [
     ),
   },
   {
-    narration: "Once every team has had their turn, all rockets launch together! Points = fuel × 20, PLUS a bonus for how high you flew: 1st place +50, 2nd +30, 3rd +15, 4th +5.",
+    narration: "Once every team has finished both rounds, all rockets launch together! Points = fuel × 20, PLUS a bonus for how high you flew: 1st place +50, 2nd +30, 3rd +15, 4th +5.",
     visual: (
       <div style={{ display: "flex", flexDirection: "column", gap: "2px", alignItems: "center", fontSize: "11px", fontWeight: 800, color: "#312E81" }}>
         <div>🥇 1st — fuel×20 + 50 bonus</div>
