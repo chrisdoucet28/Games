@@ -41,8 +41,14 @@ export function QuestionCard({ question, showAnswer, onReveal, gameId }: Questio
       </p>
 
       {isSpeaking ? (
-        <div style={{ background: "#FFFBEB", border: "2px solid #F59E0B", borderRadius: "12px", padding: "12px 16px", fontSize: "14px", color: "#92400E", fontWeight: "600" }}>
-          🎙️ Open response — teacher listens and judges
+        <div style={{ background: "#FFFBEB", border: "2px solid #F59E0B", borderRadius: "12px", padding: "12px 16px", fontSize: "14px", color: "#92400E", fontWeight: "600", position: "relative" }}>
+          {/* No separate reveal step for open-response prompts — the prompt itself is the whole
+              card, so the flag belongs here immediately rather than gated behind a Reveal Answer
+              click that doesn't exist for this question type. */}
+          <div style={{ position: "absolute", top: "8px", right: "8px" }}>
+            <FlagPromptButton gameId={gameId} questionData={question} />
+          </div>
+          <div style={{ paddingRight: "26px" }}>🎙️ Open response — teacher listens and judges</div>
         </div>
       ) : showAnswer ? (
         <div style={{ background: "#ECFDF5", border: "2px solid #22C55E", borderRadius: "12px", padding: "14px", marginTop: "12px", position: "relative" }}>
