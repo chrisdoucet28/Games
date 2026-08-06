@@ -3498,7 +3498,7 @@ export const LESSONS: Record<string, Lesson> = {
 
   possessive_adjectives_pronouns: {
     title: "Possessive Adjectives vs Possessive Pronouns",
-    intro: "Possessive adjectives (my, your, her) go before a noun; possessive pronouns (mine, yours, hers) stand completely alone, with no noun after them.",
+    intro: "Possessive adjectives (my, your, her) go before a noun; possessive pronouns (mine, yours, hers) stand completely alone, with no noun after them; 'whose' asks the question that a possessive pronoun answers.",
     sections: [
       {
         heading: "Before a noun: possessive adjectives",
@@ -3518,12 +3518,27 @@ export const LESSONS: Record<string, Lesson> = {
           "That jacket is **hers**.",
         ],
       },
+      {
+        heading: "Asking about ownership: whose?",
+        body: [
+          "'Whose' asks who something belongs to: **whose** + noun + is/are + this/that/these/those?",
+          "Answer a 'whose' question with a possessive pronoun, not a possessive adjective.",
+          "Don't confuse 'whose' (asks about ownership) with 'who's' (short for 'who is' or 'who has') — they sound identical but mean different things.",
+        ],
+        examples: [
+          "**Whose bag is this?** It's mine.",
+          "**Whose shoes are these?** They're hers.",
+          "**Whose** house is that? (not 'Who's house is that?')",
+        ],
+      },
     ],
     commonMistakes: [
       "❌ This is mine pen. → ✅ This is my pen. (use 'my' before a noun)",
       "❌ That jacket is her. → ✅ That jacket is hers. (use 'hers' with no noun after it)",
       "❌ It is your. → ✅ It is yours. (use 'yours' with no noun after it)",
       "❌ This is theirs house. → ✅ This is their house. (use 'their' before a noun)",
+      "❌ Who's bag is this? → ✅ Whose bag is this? ('whose' asks about ownership; 'who's' means 'who is')",
+      "❌ Whose bag is this? It's my. → ✅ It's mine. (answer a 'whose' question with a possessive pronoun)",
     ],
   },
 
