@@ -15,6 +15,16 @@ export interface TeamColor {
     mascot?: string | null;
     score: number;
   }
+
+  // A saved "preset" team belonging to a class's roster — not a live in-game Team (no score, no
+  // positional id). `id` is a stable identity independent of list position, needed since roster
+  // entries get toggled in/out and deleted by identity, not by array index.
+  export interface TeamRosterEntry {
+    id: string;
+    name: string;
+    color: TeamColor;
+    mascot: string | null;
+  }
   
   export interface GameMode {
     id: string;
@@ -150,6 +160,9 @@ export interface TeamColor {
     // what pre-selects step 1 of Game Setup whenever a game starts with this class.
     default_level: string | null;
     teams: Team[];
+    // Every team ever actually played under this class, accumulated automatically — a separate,
+    // persistent library `teams` above isn't: `teams` is just the live/current session's set.
+    team_roster: TeamRosterEntry[];
     in_progress: boolean;
     selected_topics: string[] | null;
     selected_game: string | null;

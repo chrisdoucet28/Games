@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import type { Team, GameMode, QuestionData, SavedClass, Subscription } from "./types";
+import type { Team, GameMode, QuestionData, SavedClass, Subscription, TeamRosterEntry } from "./types";
 import { TEAM_COLORS, GAME_MODES, MASCOT_OPTIONS, LEVELS_META, FREE_PLAN_LIMITS, TESTING_BYPASS_PAYWALL } from "./data/constants";
 // Asegúrate de que TOPIC_LIBRARY esté exportado desde tu archivo topics.ts junto con TOPIC_OPTIONS
 import { TOPIC_OPTIONS, TOPIC_LIBRARY } from "./data/topics";
@@ -14,7 +14,7 @@ import { LearnScreen } from "./components/shared/LearnScreen";
 import { BillingScreen } from "./components/shared/BillingScreen";
 import { ThemeAmbience } from "./components/shared/ThemeAmbience";
 import { FeedbackButton } from "./components/shared/FeedbackButton";
-import { saveProgress, clearProgress, listClasses, createClass } from "./lib/classes";
+import { saveProgress, clearProgress, listClasses, createClass, upsertTeamRoster, deleteFromTeamRoster } from "./lib/classes";
 import { isPaidStatus } from "./lib/subscription";
 import { denseRank, medalForRank } from "./utils/ranking";
 import { AuctionGame } from "./components/games/AuctionGame";
@@ -165,6 +165,9 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
   const [teamColors, setTeamColors] = useState([0, 1, 2, 3, 4]);
   const [teamMascots, setTeamMascots] = useState<(string | null)[]>([null, null, null, null, null]);
   const [teams, setTeams] = useState<Team[]>([]);
+  // Every team ever played under the active class, for the tap-to-toggle "saved teams" picker —
+  // empty (and the picker hidden) whenever no class is active or it has no roster yet.
+  const [teamRoster, setTeamRoster] = useState<TeamRosterEntry[]>([]);
   const [questions, setQuestions] = useState<QuestionData[]>([]);
   const [level, setLevel] = useState("all");
   const [focus, setFocus] = useState("all");
@@ -218,6 +221,66 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     })));
   };
 
+  // Saved-team picker: a roster card's "selected" state is derived from whether its name is
+  // currently among the active team slots, rather than tracked as separate state — toggling a
+  // card is just a quick-fill/quick-remove shortcut against the same teamNames/teamColors/
+  // teamMascots/numTeams state the manual editor below already uses, so nothing downstream
+  // (handleSetup, score-by-name continuity) needs to know or care where a team name came from.
+  const isRosterTeamActive = (entry: TeamRosterEntry) =>
+    teamNames.slice(0, numTeams).some(n => n.trim().toLowerCase() === entry.name.trim().toLowerCase());
+
+  // Mirrors the four team-slot pieces of state, updated synchronously (not just via useEffect)
+  // inside toggleRosterTeam itself — same idea as this codebase's existing pausedRef/
+  // turnCorrectRef pattern. Needed because two roster cards tapped in quick succession fire
+  // before React re-renders, so reading the plain state variables for index math in the second
+  // call would see stale, pre-first-toggle values and corrupt the result.
+  const teamSlotsRef = useRef({ names: teamNames, colors: teamColors, mascots: teamMascots, count: numTeams });
+  useEffect(() => {
+    teamSlotsRef.current = { names: teamNames, colors: teamColors, mascots: teamMascots, count: numTeams };
+  }, [teamNames, teamColors, teamMascots, numTeams]);
+
+  const toggleRosterTeam = (entry: TeamRosterEntry) => {
+    const cap = isPaid ? 5 : FREE_PLAN_LIMITS.maxTeams;
+    const { names, colors, mascots, count } = teamSlotsRef.current;
+    const key = entry.name.trim().toLowerCase();
+    const activeIdx = names.slice(0, count).findIndex(n => n.trim().toLowerCase() === key);
+
+    const nextNames = [...names];
+    const nextColors = [...colors];
+    const nextMascots = [...mascots];
+    let nextCount = count;
+
+    if (activeIdx !== -1) {
+      for (let i = activeIdx; i < count - 1; i++) {
+        nextNames[i] = nextNames[i + 1];
+        nextColors[i] = nextColors[i + 1];
+        nextMascots[i] = nextMascots[i + 1];
+      }
+      nextCount = count - 1;
+    } else {
+      if (count >= cap) return;
+      nextNames[count] = entry.name;
+      const idx = TEAM_COLORS.findIndex(c => c.name === entry.color.name);
+      nextColors[count] = idx === -1 ? count : idx;
+      nextMascots[count] = entry.mascot;
+      nextCount = count + 1;
+    }
+
+    teamSlotsRef.current = { names: nextNames, colors: nextColors, mascots: nextMascots, count: nextCount };
+    setTeamNames(nextNames);
+    setTeamColors(nextColors);
+    setTeamMascots(nextMascots);
+    setNumTeams(nextCount);
+  };
+
+  // Forgets a saved team preset for next time — deliberately leaves today's active lineup alone
+  // even if that name happens to be in play right now.
+  const removeFromRoster = (entry: TeamRosterEntry) => {
+    if (!activeClassId) return;
+    setTeamRoster(prev => prev.filter(r => r.id !== entry.id));
+    deleteFromTeamRoster(activeClassId, entry.id).catch(() => {});
+  };
+
   // Index of the game card currently lit up mid-spin, or null when no spin is running.
   const [randomSpinIndex, setRandomSpinIndex] = useState<number | null>(null);
   const randomSpinTimeoutRef = useRef<number | null>(null);
@@ -262,6 +325,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     // Pre-selects step 1 of Game Setup with this class's own level, so a teacher who already told
     // us "this is my B2 class" doesn't have to re-pick it every single time they start a game.
     setLevel(cls.default_level ?? "all");
+    setTeamRoster(cls.team_roster ?? []);
     if (cls.teams.length > 0) {
       setNumTeams(cls.teams.length);
       setTeamNames(prev => {
@@ -321,6 +385,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
         minefieldGridData,
         gameState: serializeStateRef.current?.() ?? null,
       });
+      upsertTeamRoster(classId, teams).then(setTeamRoster).catch(() => {});
       setSaveStatus("saved");
       setTimeout(() => { setSaveStatus("idle"); setScreen("classes"); }, 900);
     } catch {
@@ -383,6 +448,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
       score: existingScores[name] ?? 0,
     }));
     setTeams(builtTeams);
+    if (activeClassId) upsertTeamRoster(activeClassId, builtTeams).then(setTeamRoster).catch(() => {});
     setScreen("game-select");
   };
 
@@ -812,6 +878,44 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
               <div style={{ fontWeight: "800", color: theme.heroBg[0], fontSize: "16px", fontFamily: theme.headingFont, flex: 1 }}>How many teams?</div>
               <button onClick={() => resetTeamsToNormal()} title="0 points, no mascots, original colors and names" style={{ background: "none", border: "2px solid #D1D5DB", borderRadius: "20px", padding: "4px 14px", fontWeight: "700", fontSize: "12px", color: "#9CA3AF", cursor: "pointer", flexShrink: 0 }}>♻️ Reset teams to normal</button>
             </div>
+            {activeClassId && teamRoster.length > 0 && (
+              <div style={{ marginBottom: "14px" }}>
+                <div style={{ fontSize: "12px", fontWeight: "700", color: "#6B7280", marginBottom: "6px" }}>
+                  🗂️ Saved teams for this class — tap to bring in today
+                </div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+                  {teamRoster.map(entry => {
+                    const isActive = isRosterTeamActive(entry);
+                    const cap = isPaid ? 5 : FREE_PLAN_LIMITS.maxTeams;
+                    const locked = !isActive && numTeams >= cap;
+                    return (
+                      <div key={entry.id} style={{ position: "relative" }}>
+                        <button
+                          type="button"
+                          onClick={() => locked ? setScreen("billing") : toggleRosterTeam(entry)}
+                          title={locked ? `Free plan is limited to ${cap} teams — upgrade to unlock more` : undefined}
+                          style={{
+                            background: isActive ? entry.color.bg : "#F0F9FF",
+                            color: isActive ? "white" : "#374151",
+                            border: `2px solid ${isActive ? entry.color.bg : "#D1D5DB"}`,
+                            borderRadius: "999px", padding: "8px 16px 8px 12px", cursor: "pointer",
+                            fontWeight: isActive ? "800" : "700", fontSize: "13px", opacity: locked ? 0.5 : 1,
+                          }}
+                        >
+                          {entry.mascot ?? entry.color.emoji} {entry.name}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); removeFromRoster(entry); }}
+                          title="Remove from saved teams"
+                          style={{ position: "absolute", top: "-6px", right: "-6px", width: "18px", height: "18px", borderRadius: "50%", background: "#EF4444", color: "white", border: "2px solid white", fontSize: "10px", lineHeight: 1, cursor: "pointer" }}
+                        >✕</button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
             <div style={{ display: "flex", gap: "10px", marginBottom: "16px", flexWrap: "wrap", alignItems: "center" }}>
               {[1, 2, 3, 4, 5].map(n => {
                 const locked = !isPaid && n > FREE_PLAN_LIMITS.maxTeams;
