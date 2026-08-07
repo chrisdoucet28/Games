@@ -168,6 +168,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
   // Every team ever played under the active class, for the tap-to-toggle "saved teams" picker —
   // empty (and the picker hidden) whenever no class is active or it has no roster yet.
   const [teamRoster, setTeamRoster] = useState<TeamRosterEntry[]>([]);
+  const [rosterSaveStatus, setRosterSaveStatus] = useState<"idle" | "saving" | "saved">("idle");
   const [questions, setQuestions] = useState<QuestionData[]>([]);
   const [level, setLevel] = useState("all");
   const [focus, setFocus] = useState("all");
@@ -279,6 +280,25 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     if (!activeClassId) return;
     setTeamRoster(prev => prev.filter(r => r.id !== entry.id));
     deleteFromTeamRoster(activeClassId, entry.id).catch(() => {});
+  };
+
+  // Roster entries otherwise only get saved when leaving setup for game-select (handleSetup) or
+  // via Save & Exit mid-game — both require picking a topic and/or a game first. This lets a
+  // teacher just reorganize their saved teams (add/rename/recolor) and persist it immediately,
+  // without being forced through the rest of the setup flow.
+  const saveTeamsToRoster = () => {
+    if (!activeClassId) return;
+    const currentTeams = teamNames.slice(0, numTeams).map((name, i) => ({
+      id: i, name, color: TEAM_COLORS[teamColors[i] ?? i], mascot: teamMascots[i] ?? null, score: 0,
+    }));
+    setRosterSaveStatus("saving");
+    upsertTeamRoster(activeClassId, currentTeams)
+      .then(merged => {
+        setTeamRoster(merged);
+        setRosterSaveStatus("saved");
+        setTimeout(() => setRosterSaveStatus("idle"), 1400);
+      })
+      .catch(() => setRosterSaveStatus("idle"));
   };
 
   // Index of the game card currently lit up mid-spin, or null when no spin is running.
@@ -876,6 +896,21 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
             <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px" }}>
               <div style={{ background: theme.accentSolid, color: "white", borderRadius: "50%", width: "28px", height: "28px", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "900", fontSize: "14px", flexShrink: 0 }}>4</div>
               <div style={{ fontWeight: "800", color: theme.heroBg[0], fontSize: "16px", fontFamily: theme.headingFont, flex: 1 }}>How many teams?</div>
+              {activeClassId && (
+                <button
+                  onClick={saveTeamsToRoster} disabled={rosterSaveStatus === "saving"}
+                  title="Save these team names/colors/mascots to this class, without picking a topic or game"
+                  style={{
+                    background: rosterSaveStatus === "saved" ? "#DCFCE7" : "none",
+                    border: `2px solid ${rosterSaveStatus === "saved" ? "#22C55E" : "#D1D5DB"}`,
+                    borderRadius: "20px", padding: "4px 14px", fontWeight: "700", fontSize: "12px",
+                    color: rosterSaveStatus === "saved" ? "#166534" : "#9CA3AF",
+                    cursor: rosterSaveStatus === "saving" ? "default" : "pointer", flexShrink: 0,
+                  }}
+                >
+                  {rosterSaveStatus === "saving" ? "Saving…" : rosterSaveStatus === "saved" ? "✅ Saved!" : "💾 Save teams to class"}
+                </button>
+              )}
               <button onClick={() => resetTeamsToNormal()} title="0 points, no mascots, original colors and names" style={{ background: "none", border: "2px solid #D1D5DB", borderRadius: "20px", padding: "4px 14px", fontWeight: "700", fontSize: "12px", color: "#9CA3AF", cursor: "pointer", flexShrink: 0 }}>♻️ Reset teams to normal</button>
             </div>
             {activeClassId && teamRoster.length > 0 && (
@@ -908,7 +943,11 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
                           type="button"
                           onClick={(e) => { e.stopPropagation(); removeFromRoster(entry); }}
                           title="Remove from saved teams"
-                          style={{ position: "absolute", top: "-6px", right: "-6px", width: "18px", height: "18px", borderRadius: "50%", background: "#EF4444", color: "white", border: "2px solid white", fontSize: "10px", lineHeight: 1, cursor: "pointer" }}
+                          style={{
+                            position: "absolute", top: "-6px", right: "-6px", width: "18px", height: "18px", borderRadius: "50%",
+                            background: "#EF4444", color: "white", border: "2px solid white", fontSize: "10px", lineHeight: 1, cursor: "pointer",
+                            padding: 0, display: "flex", alignItems: "center", justifyContent: "center",
+                          }}
                         >✕</button>
                       </div>
                     );
