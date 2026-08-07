@@ -14,7 +14,7 @@ import { LearnScreen } from "./components/shared/LearnScreen";
 import { BillingScreen } from "./components/shared/BillingScreen";
 import { ThemeAmbience } from "./components/shared/ThemeAmbience";
 import { FeedbackButton } from "./components/shared/FeedbackButton";
-import { saveProgress, clearProgress, listClasses, createClass, upsertTeamRoster, deleteFromTeamRoster } from "./lib/classes";
+import { saveProgress, clearProgress, listClasses, createClass, upsertTeamRoster, deleteFromTeamRoster, saveTeams } from "./lib/classes";
 import { isPaidStatus } from "./lib/subscription";
 import { denseRank, medalForRank } from "./utils/ranking";
 import { AuctionGame } from "./components/games/AuctionGame";
@@ -169,6 +169,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
   // empty (and the picker hidden) whenever no class is active or it has no roster yet.
   const [teamRoster, setTeamRoster] = useState<TeamRosterEntry[]>([]);
   const [rosterSaveStatus, setRosterSaveStatus] = useState<"idle" | "saving" | "saved">("idle");
+  const [teamsSaveStatus, setTeamsSaveStatus] = useState<"idle" | "saving" | "saved">("idle");
   const [questions, setQuestions] = useState<QuestionData[]>([]);
   const [level, setLevel] = useState("all");
   const [focus, setFocus] = useState("all");
@@ -288,8 +289,12 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
   // without being forced through the rest of the setup flow.
   const saveTeamsToRoster = () => {
     if (!activeClassId) return;
+    // Matches handleSetup's own existing-score lookup — a team whose name didn't change keeps
+    // whatever score it already has, rather than this save action looking like it zeroes it out.
+    const existingScores = Object.fromEntries(teams.map(t => [t.name, t.score]));
     const currentTeams = teamNames.slice(0, numTeams).map((name, i) => ({
-      id: i, name, color: TEAM_COLORS[teamColors[i] ?? i], mascot: teamMascots[i] ?? null, score: 0,
+      id: i, name, color: TEAM_COLORS[teamColors[i] ?? i], mascot: teamMascots[i] ?? null,
+      score: existingScores[name] ?? 0,
     }));
     setRosterSaveStatus("saving");
     upsertTeamRoster(activeClassId, currentTeams)
@@ -299,6 +304,24 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
         setTimeout(() => setRosterSaveStatus("idle"), 1400);
       })
       .catch(() => setRosterSaveStatus("idle"));
+  };
+
+  // Game-select equivalent — here `teams` already IS the live, scored session (unlike setup,
+  // where scores are still keyed off the previous session by name until handleSetup runs), so
+  // this checkpoints those real scores to classes.teams as well as syncing the roster, with no
+  // in-progress-game bookkeeping touched (no specific game has been chosen yet on this screen).
+  const saveTeamsToClass = () => {
+    if (!activeClassId) return;
+    setTeamsSaveStatus("saving");
+    Promise.all([
+      saveTeams(activeClassId, teams),
+      upsertTeamRoster(activeClassId, teams).then(setTeamRoster),
+    ])
+      .then(() => {
+        setTeamsSaveStatus("saved");
+        setTimeout(() => setTeamsSaveStatus("idle"), 1400);
+      })
+      .catch(() => setTeamsSaveStatus("idle"));
   };
 
   // Index of the game card currently lit up mid-spin, or null when no spin is running.
@@ -1095,6 +1118,21 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
 
         <ScoreBoard teams={teams} headingFont={theme.headingFont} />
         <div style={{ textAlign: "center", marginTop: "10px", display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "20px" }}>
+            {activeClassId && (
+              <button
+                onClick={saveTeamsToClass} disabled={teamsSaveStatus === "saving"}
+                title="Save current scores and teams to this class, in case you stop before finishing another game"
+                style={{
+                  background: teamsSaveStatus === "saved" ? "#DCFCE7" : "none",
+                  border: `2px solid ${teamsSaveStatus === "saved" ? "#22C55E" : "#D1D5DB"}`,
+                  borderRadius: "20px", padding: "4px 16px", fontWeight: "700", fontSize: "12px",
+                  color: teamsSaveStatus === "saved" ? "#166534" : "#9CA3AF",
+                  cursor: teamsSaveStatus === "saving" ? "default" : "pointer",
+                }}
+              >
+                {teamsSaveStatus === "saving" ? "Saving…" : teamsSaveStatus === "saved" ? "✅ Saved!" : "💾 Save teams to class"}
+              </button>
+            )}
             <button onClick={() => setTeams(ts => ts.map(t => ({ ...t, score: 0 })))} style={{ background: "none", border: "2px solid #D1D5DB", borderRadius: "20px", padding: "4px 16px", fontWeight: "700", fontSize: "12px", color: "#9CA3AF", cursor: "pointer" }}>🔄 Reset all scores to 0</button>
             <button onClick={() => resetTeamsToNormal()} title="0 points, no mascots, original colors and names" style={{ background: "none", border: "2px solid #D1D5DB", borderRadius: "20px", padding: "4px 16px", fontWeight: "700", fontSize: "12px", color: "#9CA3AF", cursor: "pointer" }}>♻️ Reset teams to normal</button>
             <button onClick={() => setScreen("setup")} style={{ background: "none", border: "2px solid #D1D5DB", borderRadius: "20px", padding: "4px 16px", fontWeight: "700", fontSize: "12px", color: "#9CA3AF", cursor: "pointer" }}>⚙️ Edit teams & settings</button>

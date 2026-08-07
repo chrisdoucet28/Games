@@ -105,6 +105,15 @@ export async function upsertTeamRoster(classId: string, teams: Team[]): Promise<
   return merged;
 }
 
+// Checkpoints live team scores to the class without touching any in-progress-game bookkeeping
+// (selected_game/questions_snapshot/game_state/etc are left exactly as they are) — for the
+// game-select screen, where a teacher may want to save scores between games with no specific
+// game yet chosen to "resume" into.
+export async function saveTeams(classId: string, teams: Team[]): Promise<void> {
+  const { error } = await supabase.from("classes").update({ teams }).eq("id", classId);
+  if (error) throw error;
+}
+
 // Removes one saved team from a class's roster — deliberately doesn't touch the current session's
 // live teams even if that name is in play right now; it only forgets the preset for next time.
 export async function deleteFromTeamRoster(classId: string, rosterId: string): Promise<TeamRosterEntry[]> {
