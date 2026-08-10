@@ -1,5 +1,5 @@
 import { supabase } from "./supabaseClient";
-import type { SavedClass, Team, QuestionData } from "../types";
+import type { SavedClass, Team, QuestionData, TeamRosterEntry } from "../types";
 
 export async function listClasses(): Promise<SavedClass[]> {
   const { data, error } = await supabase
@@ -73,4 +73,61 @@ export async function clearProgress(classId: string, teams: Team[]): Promise<voi
     })
     .eq("id", classId);
   if (error) throw error;
+}
+
+// Auto-remembers every team actually played under this class — called whenever a class-linked
+// lineup gets finalized (setup completing, or a game only getting linked to a class later via
+// Save & Exit). Matches by name (trimmed, case-insensitive, same rule this app already uses for
+// score continuity in LessonGamesGenerator's handleSetup) so re-using a name updates that saved
+// team's color/mascot in place instead of piling up duplicates.
+export async function upsertTeamRoster(classId: string, teams: Team[]): Promise<TeamRosterEntry[]> {
+  const { data, error: fetchError } = await supabase
+    .from("classes")
+    .select("team_roster")
+    .eq("id", classId)
+    .single();
+  if (fetchError) throw fetchError;
+
+  const roster: TeamRosterEntry[] = (data?.team_roster as TeamRosterEntry[] | null) ?? [];
+  const merged = [...roster];
+  teams.forEach(t => {
+    const key = t.name.trim().toLowerCase();
+    const idx = merged.findIndex(r => r.name.trim().toLowerCase() === key);
+    if (idx !== -1) {
+      merged[idx] = { ...merged[idx], color: t.color, mascot: t.mascot ?? null };
+    } else {
+      merged.push({ id: crypto.randomUUID(), name: t.name, color: t.color, mascot: t.mascot ?? null });
+    }
+  });
+
+  const { error } = await supabase.from("classes").update({ team_roster: merged }).eq("id", classId);
+  if (error) throw error;
+  return merged;
+}
+
+// Checkpoints live team scores to the class without touching any in-progress-game bookkeeping
+// (selected_game/questions_snapshot/game_state/etc are left exactly as they are) — for the
+// game-select screen, where a teacher may want to save scores between games with no specific
+// game yet chosen to "resume" into.
+export async function saveTeams(classId: string, teams: Team[]): Promise<void> {
+  const { error } = await supabase.from("classes").update({ teams }).eq("id", classId);
+  if (error) throw error;
+}
+
+// Removes one saved team from a class's roster — deliberately doesn't touch the current session's
+// live teams even if that name is in play right now; it only forgets the preset for next time.
+export async function deleteFromTeamRoster(classId: string, rosterId: string): Promise<TeamRosterEntry[]> {
+  const { data, error: fetchError } = await supabase
+    .from("classes")
+    .select("team_roster")
+    .eq("id", classId)
+    .single();
+  if (fetchError) throw fetchError;
+
+  const roster: TeamRosterEntry[] = (data?.team_roster as TeamRosterEntry[] | null) ?? [];
+  const next = roster.filter(r => r.id !== rosterId);
+
+  const { error } = await supabase.from("classes").update({ team_roster: next }).eq("id", classId);
+  if (error) throw error;
+  return next;
 }
