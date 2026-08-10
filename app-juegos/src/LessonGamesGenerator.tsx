@@ -613,7 +613,17 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
           : mixByTopic(questionBuckets);
       }
 
-      if (qs.length === 0 && allCardTasks.length > 0) {
+      // Card-task ("speaking task") objects only render correctly for games using the shared
+      // QuestionCard component (vault, cards, battleship, castle/racetrack/whack/rocket, and the
+      // generic default branch above) or that already merge cardTasks into their own pool.
+      // Auction, Spy/Zombie, Hot Seat, Hot Potato, and Order Up each expect a completely different
+      // object shape (sentence/isCorrect, crewmateTopic/spyTopic, word, prompt/answer, ticket
+      // shape) - silently substituting cardTasks here for those games renders broken/empty content
+      // (e.g. Auction showing empty quotation marks, since `s.sentence` is undefined on a
+      // speaking-task object) instead of a clear "no content" message. Confirmed live: this exact
+      // bug hit Auction when a topic (comparatives_superlatives) had zero auctionSentences.
+      const CARDTASK_INCOMPATIBLE_MODES = new Set(["auction", "spy", "zombie", "hotseat", "hotpotato", "orderup"]);
+      if (qs.length === 0 && allCardTasks.length > 0 && !CARDTASK_INCOMPATIBLE_MODES.has(mode.id)) {
         qs = mixByTopic(cardTaskBuckets);
       }
 
