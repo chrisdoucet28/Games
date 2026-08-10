@@ -5729,6 +5729,11 @@ export const TOPIC_LIBRARY = {
       { task:"Make a sentence: 'I am hungry and I want to…'" },
       { task:"Say 'I am scared of…' — name three things that make you scared." },
       { task:"Use 'hot' and 'cold' to say how the weather makes you feel." },
+      { task:"Say how you feel when you meet new people." },
+      { task:"Describe how you feel at the end of a long week." },
+      { task:"Say 'I feel nervous when…' and give a real example." },
+      { task:"Ask your partner how they feel about starting something new." },
+      { task:"Say three feelings and mime one for your partner to guess." },
     ],
   },
 
@@ -8593,6 +8598,11 @@ export const TOPIC_LIBRARY = {
       { task:"Describe a daily routine you used to have at your old school or job." },
       { task:"Use 'we used to...' to describe something your family did together in the past." },
       { task:"Talk about a belief you used to have that has changed." },
+      { task:"Describe a game you used to play at recess or after school." },
+      { task:"Talk about a place you used to visit every summer." },
+      { task:"Use 'didn't use to' to describe a food you now love but used to avoid." },
+      { task:"Describe how technology has changed since you used to do things differently." },
+      { task:"Ask a partner what job they used to dream about as a child." },
     ],
     hotPotatoPrompts: [
       {prompt:"'I ___ play football every weekend.' (used to/use to)", answer:"used to", spanish:"Elige la forma correcta para una oración afirmativa sobre un hábito pasado."},
@@ -12466,6 +12476,8 @@ export const TOPIC_LIBRARY = {
       { task:"Give three pieces of advice using 'should' and 'shouldn't'." },
       { task:"Ask for permission to do five different things using 'Could I...?'" },
       { task:"Describe things you couldn't do as a child but can do now." },
+      { task:"Use 'had better' to give a friend an urgent warning." },
+      { task:"Give advice to someone starting a new job using 'should' and 'ought to'." },
     ],
   },
 
@@ -14415,6 +14427,11 @@ export const TOPIC_LIBRARY = {
       { task:"Use 'know' and 'understand' to describe your English level." },
       { task:"Describe a temporary change in your daily routine." },
       { task:"Say what you want right now, using a state verb correctly." },
+      { task:"Talk about a temporary project you're involved in this month." },
+      { task:"Use 'believe' or 'seem' to give your honest opinion about something." },
+      { task:"Describe a course or class you're taking this term." },
+      { task:"Talk about something you're saving up for at the moment." },
+      { task:"Use 'own' or 'belong' to talk about something valuable in your family." },
     ],
     hotPotatoPrompts: [
       {prompt:"'I ___ this song.' (like/am liking)", answer:"like", spanish:"Elige la forma correcta — los verbos de estado no usan -ing."},
@@ -14960,6 +14977,11 @@ export const TOPIC_LIBRARY = {
       { task:"Compare your weekday routine to your weekend routine." },
       { task:"Compare two types of weather you've experienced." },
       { task:"Compare online shopping and shopping in a store." },
+      { task:"Compare two teachers or bosses you've had." },
+      { task:"Compare two neighbourhoods or areas of your town." },
+      { task:"Compare your cooking now to your cooking a few years ago." },
+      { task:"Compare two social media platforms you use." },
+      { task:"Compare two pieces of technology from different decades." },
     ],
     hotPotatoPrompts: [
       {prompt:"Comparative of 'tall'?", answer:"taller", spanish:"¿Cuál es el comparativo de 'tall'?"},
@@ -15075,6 +15097,11 @@ export const TOPIC_LIBRARY = {
       { task:"Describe the fastest way to get to your school or work." },
       { task:"Talk about the biggest change in your life recently." },
       { task:"Describe the quietest place you know." },
+      { task:"Talk about the scariest film you've ever watched." },
+      { task:"Describe the most useful gadget you own." },
+      { task:"Talk about the longest journey you've ever taken." },
+      { task:"Describe the most delicious dish from your country." },
+      { task:"Talk about the proudest moment of your life so far." },
     ],
     hotPotatoPrompts: [
       {prompt:"Superlative of 'tall'?", answer:"the tallest", spanish:"¿Cuál es el superlativo de 'tall'?"},
@@ -15289,6 +15316,20 @@ export const TOPIC_LIBRARY = {
       { task:"Talk about a teacher you really liked or remember well." },
       { task:"Describe the best lesson you ever had." },
       { task:"Talk about a time you forgot your homework or school materials." },
+      { task:"Describe your school or university building and your favourite room in it." },
+      { task:"Talk about a time you studied with a group and how it went." },
+      { task:"Describe what you do the night before a big exam." },
+      { task:"Talk about a subject you found difficult and how you improved at it." },
+      { task:"Describe your ideal place to study." },
+      { task:"Talk about a school trip or excursion you remember well." },
+      { task:"Describe what a typical exam period is like for you." },
+      { task:"Talk about a school rule you liked or disliked." },
+      { task:"Describe how technology is used in your classes." },
+      { task:"Talk about a project or assignment you were proud of." },
+      { task:"Describe what motivates you to study." },
+      { task:"Talk about the best advice a teacher ever gave you." },
+      { task:"Describe how you take notes in class." },
+      { task:"Talk about a subject you wish you could study but don't." },
     ],
     hotPotatoPrompts: [
       {prompt:"Name three school subjects.", answer:"(free answer)", spanish:"Nombra tres asignaturas escolares."},
@@ -15477,6 +15518,20 @@ export const TOPIC_LIBRARY = {
       { task:"Talk about the qualities of a good friend." },
       { task:"Compare friendships and family relationships - how are they different?" },
       { task:"Describe someone you take after in your family." },
+      { task:"Talk about how you met your best friend." },
+      { task:"Describe a family celebration or reunion you remember well." },
+      { task:"Talk about a family member you'd like to be more like." },
+      { task:"Describe how your family spends time together on weekends." },
+      { task:"Talk about a disagreement you had with a friend and how you resolved it." },
+      { task:"Describe the oldest friendship you still have." },
+      { task:"Talk about a piece of advice a family member gave you." },
+      { task:"Describe what makes your family different from other families you know." },
+      { task:"Talk about a friend who has moved away and how you stay in touch." },
+      { task:"Describe a hobby or interest you share with a family member." },
+      { task:"Talk about how your friendships have changed as you've gotten older." },
+      { task:"Describe a time a friend helped you when you really needed it." },
+      { task:"Talk about a sibling or cousin you're particularly close to." },
+      { task:"Describe your family's typical Sunday or day off." },
     ],
     hotPotatoPrompts: [
       {prompt:"What does 'take after' mean?", answer:"to look or behave like a family member", spanish:"¿Qué significa 'take after'?"},
@@ -15675,6 +15730,20 @@ export const TOPIC_LIBRARY = {
       { task:"Compare two free-time activities and say which you prefer." },
       { task:"Talk about what helps you relax after a busy day." },
       { task:"Describe your perfect free day from morning to evening." },
+      { task:"Talk about a free-time activity you did as a child but don't do anymore." },
+      { task:"Describe a hobby a friend or family member introduced you to." },
+      { task:"Talk about how much free time you usually have during the week." },
+      { task:"Describe an activity you enjoy doing alone." },
+      { task:"Talk about an activity you prefer doing with other people." },
+      { task:"Describe the last time you tried a new hobby." },
+      { task:"Talk about a free-time activity that costs no money." },
+      { task:"Describe how the weather changes what you do in your free time." },
+      { task:"Talk about a hobby you'd recommend to a friend." },
+      { task:"Describe your favourite way to spend a rainy day." },
+      { task:"Talk about a free-time activity you do outdoors." },
+      { task:"Describe a hobby that takes a lot of practice to get good at." },
+      { task:"Talk about how your free-time activities change with the seasons." },
+      { task:"Describe what you would do with an extra free hour today." },
     ],
     hotPotatoPrompts: [
       {prompt:"Name one hobby.", answer:"(free answer)", spanish:"Nombra un pasatiempo."},
@@ -15863,6 +15932,20 @@ export const TOPIC_LIBRARY = {
       { task:"Compare city life and village life." },
       { task:"Explain where you would take a tourist in your town." },
       { task:"Describe your ideal place to live." },
+      { task:"Talk about how your town or city has changed over the years." },
+      { task:"Describe your favourite street or square in your town." },
+      { task:"Talk about a shop or restaurant in your town you'd recommend." },
+      { task:"Describe how you usually get around your town or city." },
+      { task:"Talk about something you wish your town had that it doesn't." },
+      { task:"Describe the atmosphere in your town on a weekend evening." },
+      { task:"Talk about a festival or event that happens in your town." },
+      { task:"Describe the area where you grew up." },
+      { task:"Talk about how safe you feel walking around your town at night." },
+      { task:"Describe your town's public transport." },
+      { task:"Talk about a nearby town or city you enjoy visiting." },
+      { task:"Describe the green spaces or parks in your town." },
+      { task:"Talk about what your town is famous for, if anything." },
+      { task:"Describe how your town looks different in each season." },
     ],
     hotPotatoPrompts: [
       {prompt:"Name one place in a town.", answer:"(free answer)", spanish:"Nombra un lugar en un pueblo."},
@@ -16276,6 +16359,20 @@ export const TOPIC_LIBRARY = {
       { task:"Tell a story using 'By the time I arrived...'" },
       { task:"Describe a moment when you realised you had forgotten something." },
       { task:"Explain the difference between 'I ate' and 'I had eaten' with an example." },
+      { task:"Use 'had already' to describe something finished before a trip started." },
+      { task:"Tell a partner about the last time you missed something because you were late." },
+      { task:"Describe what had happened before you found out some big news." },
+      { task:"Use 'By the time... it was too late' to tell a short story." },
+      { task:"Explain what you had done before your first day at a new school or job." },
+      { task:"Describe something you had hoped for before finding out the truth." },
+      { task:"Tell a partner what had changed by the time you next visited a place." },
+      { task:"Use 'had just' to describe something that finished right before an interruption." },
+      { task:"Describe a situation where you had already made up your mind before being asked." },
+      { task:"Tell a story about a surprise that happened after something had already been decided." },
+      { task:"Use 'had never seen/done/tried' to describe your first time doing something." },
+      { task:"Describe what had gone wrong before you finally fixed a problem." },
+      { task:"Tell a partner about a time everything had already ended before you got there." },
+      { task:"Use 'because she/he had...' to explain a decision someone made in the past." },
     ],
     hotPotatoPrompts: [
       {prompt:"'When I arrived, she ___ already left.'", answer:"had"},
@@ -16470,6 +16567,14 @@ export const TOPIC_LIBRARY = {
       { "task": "Talk about a family member you get along with really well." },
       { "task": "Explain what 'extended family' means with examples from your own life." },
       { "task": "Describe your position in your family: oldest, youngest, or in the middle." },
+      { "task": "Describe a family tradition that has been passed down for generations." },
+      { "task": "Talk about the age difference between you and your siblings or closest cousins." },
+      { "task": "Explain the difference between 'niece' and 'nephew' with examples." },
+      { "task": "Describe a family member who lives far away." },
+      { "task": "Talk about who you look most like in your family." },
+      { "task": "Ask your partner how many cousins they have on each side of their family." },
+      { "task": "Describe a memorable trip or holiday with your extended family." },
+      { "task": "Talk about a family member whose job you find interesting." },
     ],
     "hotPotatoPrompts": [
       { "prompt": "Your mother's sister is your...?", "answer": "aunt", "spanish": "¿La hermana de tu madre es tu...?" },
@@ -16676,6 +16781,14 @@ export const TOPIC_LIBRARY = {
       { "task": "Explain the difference between 'Tom's' and 'the boys''." },
       { "task": "Describe your best friend's house using possessive 's." },
       { "task": "Use possessive 's to talk about a neighbour's pet or garden." },
+      { "task": "Describe your boss's or manager's office using possessive 's." },
+      { "task": "Use possessive 's to talk about a celebrity's house or car." },
+      { "task": "Describe a country's most famous landmark using possessive 's." },
+      { "task": "Use plural possessive (s') to describe something belonging to your parents." },
+      { "task": "Describe your school's or workplace's rules using possessive 's." },
+      { "task": "Use possessive 's twice in one sentence, like 'my sister's friend's dog'." },
+      { "task": "Describe a shop's opening hours using possessive 's." },
+      { "task": "Use possessive 's to talk about your favourite author's or singer's work." },
     ],
     "hotPotatoPrompts": [
       { "prompt": "Fix: 'my brother phone'", "answer": "my brother's phone", "spanish": "Corrige el error en la frase usando el posesivo con 's." },
@@ -17457,6 +17570,30 @@ export const TOPIC_LIBRARY = {
       },
       {
         "task": "Compare your Monday schedule and Saturday schedule."
+      },
+      {
+        "task": "Say what date it is today and one important date coming up this month."
+      },
+      {
+        "task": "Talk about a holiday or celebration and the month it happens in."
+      },
+      {
+        "task": "Ask your partner what they usually do at the weekend."
+      },
+      {
+        "task": "Describe your daily routine using at least three time prepositions."
+      },
+      {
+        "task": "Say what you did on your last birthday."
+      },
+      {
+        "task": "Talk about your favourite season and the months in it."
+      },
+      {
+        "task": "Ask your partner what time they usually wake up and go to bed."
+      },
+      {
+        "task": "Plan an event and say the date, day, and time it will happen."
       }
     ],
     "hotPotatoPrompts": [
@@ -18327,6 +18464,30 @@ export const TOPIC_LIBRARY = {
       },
       {
         "task": "Talk about weather in your country."
+      },
+      {
+        "task": "Describe the worst weather you've ever experienced."
+      },
+      {
+        "task": "Talk about how the weather affects your mood."
+      },
+      {
+        "task": "Compare the weather in your country to another country you know."
+      },
+      {
+        "task": "Describe a time bad weather ruined your plans."
+      },
+      {
+        "task": "Talk about how the seasons change where you live."
+      },
+      {
+        "task": "Describe what you pack for a trip in each season."
+      },
+      {
+        "task": "Ask your partner what the weather was like yesterday."
+      },
+      {
+        "task": "Talk about a weather event you'll never forget, like a storm or heatwave."
       }
     ],
     "hotPotatoPrompts": [
@@ -19241,6 +19402,30 @@ export const TOPIC_LIBRARY = {
       },
       {
         "task": "Describe someone else's daily routine."
+      },
+      {
+        "task": "Talk about a habit you'd like to start doing every day."
+      },
+      {
+        "task": "Describe your evening routine before going to bed."
+      },
+      {
+        "task": "Talk about how your routine changes on holidays."
+      },
+      {
+        "task": "Say how often you do five different everyday activities."
+      },
+      {
+        "task": "Describe what you do first thing when you wake up."
+      },
+      {
+        "task": "Talk about a routine you had as a child that you don't have now."
+      },
+      {
+        "task": "Ask your partner how often they exercise or cook."
+      },
+      {
+        "task": "Describe your ideal daily routine if you could plan it freely."
       }
     ],
     "hotPotatoPrompts": [
@@ -19573,6 +19758,14 @@ export const TOPIC_LIBRARY = {
       { task:"Ask your partner what furniture they have in their living room." },
       { task:"Describe a messy room and the objects lying around." },
       { task:"Draw a simple house, label each room, and explain it." },
+      { task:"Describe what's on your desk or table right now." },
+      { task:"Talk about the objects in your favourite room of the house." },
+      { task:"Compare your bedroom now to your bedroom as a child." },
+      { task:"Describe an object in your house that's very old or special to you." },
+      { task:"Talk about which room in your house you spend the most time in." },
+      { task:"Describe a room you would love to redecorate." },
+      { task:"Ask your partner what's in their bathroom." },
+      { task:"Talk about an object you couldn't live without at home." },
     ],
   },
   possessive_adjectives_pronouns: {
@@ -20302,6 +20495,30 @@ export const TOPIC_LIBRARY = {
       },
       {
         "task": "Explain the difference between her and hers."
+      },
+      {
+        "task": "Ask your partner 'Whose is this?' about five items in the room."
+      },
+      {
+        "task": "Describe a shared object and say whose turn it is to use it."
+      },
+      {
+        "task": "Make a sentence comparing 'his' and 'her' belongings."
+      },
+      {
+        "task": "Play a game where you hide an object and ask 'Whose is it?'"
+      },
+      {
+        "task": "Describe your family's belongings using our and ours."
+      },
+      {
+        "task": "Ask and answer 'Is this yours?' with five classroom items."
+      },
+      {
+        "task": "Make a sentence using 'theirs' about a group's shared property."
+      },
+      {
+        "task": "Explain the difference between 'its' and 'it's' with an example."
       }
     ],
     "hotPotatoPrompts": [
@@ -21066,6 +21283,11 @@ export const TOPIC_LIBRARY = {
       { "task": "Talk about what humanity will have achieved in space exploration by the year 2100." },
       { "task": "Describe what you will have learned by the end of this course." },
       { "task": "Talk about how your relationship with a family member will have changed in ten years." },
+      { "task": "Describe what your town will have built or torn down by the next decade." },
+      { "task": "Talk about a language you will have learned by this time next year." },
+      { "task": "Describe how many books you will have read by the end of the year." },
+      { "task": "Talk about what you will have achieved by the end of today." },
+      { "task": "Describe how far you will have travelled by the time you're 60." },
     ],
     "hotPotatoPrompts": [
       { "prompt": "Future perfect of 'graduate'?", "answer": "will have graduated" },
@@ -21273,6 +21495,11 @@ export const TOPIC_LIBRARY = {
       { "task": "Talk about something that happened yesterday using a past simple statement and tag." },
       { "task": "Use 'Nobody...' plus a question tag to talk about something surprising." },
       { "task": "Make a statement about a past achievement using 'had' and its matching tag." },
+      { "task": "Make a statement about your job or studies and add the correct question tag." },
+      { "task": "Use 'You've never...' plus a question tag to guess something about a partner." },
+      { "task": "Talk about a plan for tomorrow using 'will' and its matching tag." },
+      { "task": "Make a statement with 'Everybody...' and add the correct question tag." },
+      { "task": "Check a fact about a film or book using a question tag." },
     ],
     "hotPotatoPrompts": [
       { "prompt": "Tag for 'She is tired'?", "answer": "isn't she?" },
@@ -21475,6 +21702,14 @@ export const TOPIC_LIBRARY = {
       { "task": "Describe a photo (real or imagined) using at least three prepositions of place." },
       { "task": "Use 'at the top of' and 'at the bottom of' to describe a building you know." },
       { "task": "Play a guessing game: describe an object's location and let your partner guess what it is." },
+      { "task": "Use 'above' and 'below' to describe two floors of a building." },
+      { "task": "Describe where your school or workplace is in relation to your house." },
+      { "task": "Use 'among' to describe finding one thing in a group of similar things." },
+      { "task": "Describe the layout of your kitchen using at least three prepositions." },
+      { "task": "Use 'along' to describe walking down a street or path you know." },
+      { "task": "Describe where you sit in class or at work in relation to others." },
+      { "task": "Use 'beside' and 'next to' interchangeably in two sentences." },
+      { "task": "Describe where a landmark is located in your town using prepositions." },
     ],
     "hotPotatoPrompts": [
       { "prompt": "Where's the cat? (under/on the table)", "answer": "under the table" },
@@ -23354,6 +23589,14 @@ export const TOPIC_LIBRARY = {
       { "task": "Draw a simple map and explain the directions to your partner." },
       { "task": "Give directions to the nearest bank using 'opposite' or 'next to'." },
       { "task": "Practise asking 'How do I get to...?' for three different places." },
+      { "task": "Give directions from the airport to the city centre in your town." },
+      { "task": "Explain what to do at each traffic light on a route you know well." },
+      { "task": "Give directions using landmarks instead of street names." },
+      { "task": "Explain the quickest way to get to your favourite restaurant." },
+      { "task": "Give directions to a friend visiting your city for the first time." },
+      { "task": "Use 'keep going until you see...' in a set of directions." },
+      { "task": "Practise giving directions by public transport, not on foot." },
+      { "task": "Give directions that include crossing a bridge or a park." },
     ],
     "hotPotatoPrompts": [
       { "prompt": "Say the phrase for changing direction to the left.", "answer": "turn left" },
@@ -23560,6 +23803,14 @@ export const TOPIC_LIBRARY = {
       { "task": "Describe something you find relaxing after a long day." },
       { "task": "Talk about a disappointing experience, using 'disappointed' and 'disappointing'." },
       { "task": "Explain the -ed/-ing rule to a partner in your own words, with an example." },
+      { "task": "Talk about a surprising piece of news, using 'surprised' and 'surprising'." },
+      { "task": "Describe a frightening experience, using 'frightened' and 'frightening'." },
+      { "task": "Use 'interested' and 'interesting' to talk about a hobby of yours." },
+      { "task": "Describe a shocking story you've heard recently." },
+      { "task": "Talk about something annoying that happened to you this week." },
+      { "task": "Use 'satisfied' and 'satisfying' to describe finishing a difficult task." },
+      { "task": "Describe a moment you felt overwhelmed, and what caused it." },
+      { "task": "Talk about an inspiring person you know or admire." },
     ],
     "hotPotatoPrompts": [
       { "prompt": "Bored or boring: 'I feel ___ .'", "answer": "bored" },
@@ -23771,6 +24022,14 @@ export const TOPIC_LIBRARY = {
       { "task": "Describe what students at your school will be doing during exam season." },
       { "task": "Use 'still' with future continuous to describe something continuing into the future." },
       { "task": "Ask a colleague a polite future continuous question about their plans." },
+      { "task": "Describe what your family will be doing this time next holiday season." },
+      { "task": "Use future continuous to explain what will be happening during a big event you're planning." },
+      { "task": "Talk about what you'll be doing at this exact time next year." },
+      { "task": "Use future continuous to guess what a friend is probably doing right now." },
+      { "task": "Describe what will be happening in the city during rush hour tomorrow." },
+      { "task": "Ask your partner what they'll be doing during their next day off." },
+      { "task": "Use future continuous to describe an ongoing project you'll still be working on next month." },
+      { "task": "Talk about what will be happening at school or work while you're on holiday." },
     ],
     "hotPotatoPrompts": [
       { "prompt": "Future continuous of 'fly' with 'I'?", "answer": "will be flying" },
@@ -23973,6 +24232,14 @@ export const TOPIC_LIBRARY = {
       { "task": "Talk about a childhood regret using 'I wish I had...' (past perfect)." },
       { "task": "Complain about your commute or daily routine using wish + past simple." },
       { "task": "Explain the difference between 'I wish I studied' and 'I wish I had studied' to a partner." },
+      { "task": "Use 'I wish I lived...' to talk about a different place you'd like to call home." },
+      { "task": "Complain about the traffic or public transport using 'I wish...'" },
+      { "task": "Use 'if only' to talk about a purchase you regret making." },
+      { "task": "Talk about a job you wish you had, using 'I wish I worked...'" },
+      { "task": "Use 'I wish [person] wouldn't...' to complain about an annoying habit." },
+      { "task": "Talk about a language you wish you could speak fluently." },
+      { "task": "Use 'if only' to describe a past mistake you can't stop thinking about." },
+      { "task": "Talk about your ideal body clock using 'I wish I woke up...'" },
     ],
     "hotPotatoPrompts": [
       { "prompt": "Complete: I wish I ___ more time. (have)", "answer": "had" },
@@ -24185,6 +24452,14 @@ export const TOPIC_LIBRARY = {
       { "task": "Describe a touristy place and explain why it attracts so many visitors." },
       { "task": "Describe the population and location of your hometown." },
       { "task": "Use 'surrounded by' to describe the natural setting of a place you know." },
+      { "task": "Describe a coastal or seaside place you've visited or would like to." },
+      { "task": "Use 'located in the heart of' to describe a famous landmark." },
+      { "task": "Compare an urban and a rural place you know well." },
+      { "task": "Describe a place that feels 'run-down' and explain why." },
+      { "task": "Use 'within walking distance of' to describe your home's location." },
+      { "task": "Describe a place known for its nightlife or restaurants." },
+      { "task": "Talk about a place that's changed a lot in recent years." },
+      { "task": "Use 'nestled in' or 'perched on' to describe a scenic location." },
     ],
     "hotPotatoPrompts": [
       { "prompt": "Word for a place with plenty of room?", "answer": "spacious" },
@@ -24387,6 +24662,14 @@ export const TOPIC_LIBRARY = {
       { "task": "Use 'too...to' to explain why you couldn't do something." },
       { "task": "Explain the difference between 'too much' and 'too many' to a partner, with examples." },
       { "task": "Describe your ideal amount of something — not too much, not too little." },
+      { "task": "Complain about the weather using 'too' + an adjective." },
+      { "task": "Describe a film or book that was too long or too short, using 'too'." },
+      { "task": "Talk about screen time using 'too much'." },
+      { "task": "Describe a job that has too many responsibilities." },
+      { "task": "Use 'too...to' to explain why a piece of clothing didn't work for you." },
+      { "task": "Complain about the price of something using 'too'." },
+      { "task": "Describe a room with too much furniture or too many decorations." },
+      { "task": "Talk about a meeting or class that had too much information to take in." },
     ],
     "hotPotatoPrompts": [
       { "prompt": "Too, too much, or too many: 'It's ___ cold.'", "answer": "too" },
@@ -24591,6 +24874,14 @@ export const TOPIC_LIBRARY = {
       { "task": "Talk about something you've admitted or denied doing." },
       { "task": "Make five sentences, each using a different gerund-taking verb." },
       { "task": "Make five sentences, each using a different infinitive-taking verb." },
+      { "task": "Talk about something you avoid doing, using 'avoid + gerund'." },
+      { "task": "Talk about a goal you hope to achieve, using 'hope + infinitive'." },
+      { "task": "Explain the difference between 'try doing' and 'try to do' with examples." },
+      { "task": "Describe something you've finished doing recently." },
+      { "task": "Talk about something you refuse to do, using 'refuse + infinitive'." },
+      { "task": "Describe something you miss doing since a change in your life." },
+      { "task": "Talk about something you've offered to do for a friend or family member." },
+      { "task": "Make a short story combining at least three gerund- or infinitive-taking verbs." },
     ],
     "hotPotatoPrompts": [
       { "prompt": "Enjoy + gerund or infinitive?", "answer": "gerund" },
@@ -24798,6 +25089,14 @@ export const TOPIC_LIBRARY = {
       { "task": "Use 'a blessing in disguise' to talk about something bad that turned out well." },
       { "task": "Use 'the ball is in your court' in a conversation about a decision." },
       { "task": "Try to use three idioms from this topic in a short story about your day." },
+      { "task": "Use 'hit the nail on the head' to describe someone guessing correctly." },
+      { "task": "Use 'call it a day' to describe stopping work after a long shift." },
+      { "task": "Describe someone who is always 'on the ball' at work or school." },
+      { "task": "Tell a short story where a secret is finally 'out of the bag'." },
+      { "task": "Use 'speak of the devil' when someone you were just talking about arrives." },
+      { "task": "Use 'the best of both worlds' to describe a situation with two advantages." },
+      { "task": "Use 'hit the sack' to describe going to bed after a tiring day." },
+      { "task": "Describe weather using 'raining cats and dogs'." },
     ],
     "hotPotatoPrompts": [
       { "prompt": "Idiom for something very easy?", "answer": "a piece of cake" },
@@ -25189,6 +25488,11 @@ export const TOPIC_LIBRARY = {
       { task:"Describe what visitors must and mustn't do at a museum." },
       { task:"Use 'don't have to' to describe a relaxed rule at a party." },
       { task:"Explain a rule from your country using modals of obligation." },
+      { task:"Describe hospital or clinic rules using 'must' and 'mustn't'." },
+      { task:"Use 'has to' to describe an obligation someone in your family has." },
+      { task:"Explain the safety rules for a sport or activity using obligation modals." },
+      { task:"Use 'don't have to' to describe something optional at your job or school." },
+      { task:"Describe the rules of a game using 'must' and 'mustn't'." },
     ],
   },
 
@@ -25349,6 +25653,10 @@ export const TOPIC_LIBRARY = {
       { task:"Use 'may' to describe a formal possibility about the future." },
       { task:"Compare 'must' and 'might' — which is more confident?" },
       { task:"Make a guess about a stranger's job or hobby using modals of possibility." },
+      { task:"Use 'must' to guess why a friend hasn't replied to your message." },
+      { task:"Use 'might' to guess what a classmate is doing right now." },
+      { task:"Make a guess about a locked door or box using modals of possibility." },
+      { task:"Use 'may' to talk about a possible change at your school or job." },
     ],
   },
 
@@ -25519,6 +25827,10 @@ export const TOPIC_LIBRARY = {
       { task:"Make a sentence with 'may have' about a formal, uncertain past event." },
       { task:"Talk about a mistake you made using 'should have' + past participle." },
       { task:"Use 'must have been' to describe how someone probably felt in the past." },
+      { task:"Use 'might have' to guess why a friend missed an event." },
+      { task:"Talk about a decision you regret using 'shouldn't have' + past participle." },
+      { task:"Use 'could have' to describe a missed opportunity from your past." },
+      { task:"Make a deduction about a historical mystery using past modals." },
     ],
   },
 
