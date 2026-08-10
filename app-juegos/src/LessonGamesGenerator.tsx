@@ -584,26 +584,37 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
         // its sentence-response prompts — short grammar-topic labels with a scenario/example-word
         // cue, not the fixed-answer drill format the other mixed-pool games use. Tagging follows
         // the same per-topic-lookup reasoning as the "spy" branch above.
-        // Also merges in halfSentences where a topic has it (prototype: sentence-starter items a
-        // team completes aloud, used to ease ZombieSiegeGame's first couple of rounds) — mapped
-        // onto the same crewmateTopic/crewmatePrompt shape so SiegeQuestionCard needs no changes,
-        // with type:"half sentence" as the only marker ZombieSiegeGame's own round-based picking
-        // logic reads. Topics without halfSentences content are unaffected — every round just
-        // draws from spyRounds, exactly as before this existed.
+        // Also merges in a three-tier easy on-ramp (per teacher request), mapped onto the same
+        // crewmateTopic/crewmatePrompt shape so SiegeQuestionCard needs no structural changes:
+        // - halfSentences where a topic has it (prototype: sentence-starter items a team completes
+        //   aloud), tagged type:"half sentence" — currently authored for conditional topics only.
+        // - every topic's own cardTasks (already guaranteed non-empty, see the Card Shuffle
+        //   round-shortfall fix), tagged type:"speaking task" — a single open task with no
+        //   crewmate/spy roleplay framing, so it reads as easier than the full spyRounds prompt
+        //   even though it's not grammar-scoped the way halfSentences is.
+        // ZombieSiegeGame's own round-based picking logic (pickNextQuestion) is what actually
+        // prefers one tier over another for a given round; topics missing a tier just fall through
+        // to the next one down, all the way to spyRounds exactly as before any of this existed.
         qs = mixByTopic(selectedTopics.map(value => {
           const entry = TOPIC_LIBRARY[value as keyof typeof TOPIC_LIBRARY] as TopicLibraryEntry | undefined;
           return [
             ...(entry?.spyRounds ?? []).map(r => ({ ...r, spySourceTopic: value })),
             ...(entry?.halfSentences ?? []).map(h => ({
-              // crewmateTopic is set to the starter itself (never displayed for this type — see
-              // SiegeQuestionCard) purely so pickNextQuestion's "don't immediately repeat the same
-              // crewmateTopic" dedup logic treats each starter as distinct, instead of every
-              // halfSentences item colliding under one shared label.
+              // crewmateTopic is set to the starter/task itself (never displayed for this type —
+              // see SiegeQuestionCard) purely so pickNextQuestion's "don't immediately repeat the
+              // same crewmateTopic" dedup logic treats each item as distinct, instead of every
+              // item in a tier colliding under one shared label.
               type: "half sentence" as const,
               crewmateTopic: h.starter,
               crewmatePrompt: h.starter,
               hint: h.hint,
               answer: h.exampleCompletion,
+              spySourceTopic: value,
+            })),
+            ...(entry?.cardTasks ?? []).map(ct => ({
+              type: "speaking task" as const,
+              crewmateTopic: ct.task,
+              crewmatePrompt: ct.task,
               spySourceTopic: value,
             })),
           ];

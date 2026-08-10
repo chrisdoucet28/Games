@@ -71,8 +71,10 @@ function roundReadPauseSeconds(round: number): number {
   return Math.max(ROUND_READ_PAUSE_FLOOR_SECONDS, ROUND_READ_PAUSE_START_SECONDS - (round - 1) * ROUND_READ_PAUSE_DECAY_SECONDS);
 }
 
-const ROUND_QUOTA_BASE = 4; // zombies in round 1's wave, at the 3-team baseline
-const ROUND_QUOTA_GROWTH = 2; // extra zombies added to the wave each subsequent round, at the 3-team baseline
+// Bumped from 4/2 — per teacher feedback that a wave could clear before a prompt change really
+// registered with the class; more zombies per wave means each prompt sticks around longer.
+const ROUND_QUOTA_BASE = 6; // zombies in round 1's wave, at the 3-team baseline
+const ROUND_QUOTA_GROWTH = 3; // extra zombies added to the wave each subsequent round, at the 3-team baseline
 const SPAWN_CHANCE_BASE = 0.12; // per-tick chance the next queued zombie in this round's wave actually spawns, at the 3-team baseline
 const SPAWN_CHANCE_PER_ROUND = 0.02; // spawns arrive a little more relentlessly each round
 const SPAWN_CHANCE_CAP = 0.6;
@@ -98,11 +100,16 @@ function spawnChanceForRound(round: number, teamCount: number): number {
   return Math.min(SPAWN_CHANCE_CAP, base * teamCountDifficultyScale(teamCount));
 }
 
-// Rounds at or under this number prefer halfSentences content (a sentence-starter a team
-// completes aloud) over the normal spyRounds-shaped open prompt, where the selected topic(s)
-// have any — prototype easy on-ramp, see the pool/pickNextQuestion comment below. Never applies
-// past this cutoff, so rounds 3+ are exactly as hard as before this existed.
-const EASY_ROUND_CUTOFF = 2;
+// A three-tier on-ramp, per teacher request: rounds 1-3 prefer halfSentences content (a
+// sentence-starter a team completes aloud — the easiest tier, currently authored for conditional
+// topics only), rounds 4-6 prefer speaking-task content (each topic's own cardTasks pool, mapped
+// onto the same crewmateTopic/crewmatePrompt shape — a single open task, no crewmate/spy roleplay
+// framing, universally available since every topic already has 20 cardTasks), and round 7+ uses
+// the normal spyRounds-shaped open prompt exactly as before any of this existed. A tier is only
+// used where the selected topic(s) actually have that content; otherwise pickNextQuestion falls
+// through to the next tier down, all the way to the normal pool.
+const HALF_SENTENCE_ROUND_CUTOFF = 3;
+const SPEAKING_TASK_ROUND_CUTOFF = 6;
 
 type EntryPointId = "frontDoor" | "backDoor" | "window1" | "window2";
 const ENTRY_POINTS: { id: EntryPointId; label: string; icon: string }[] = [
@@ -165,9 +172,15 @@ type SiegeState = {
   round: number;
   roundElapsedSeconds: number; // ticks since this round started — drives the read-pause before spawning begins
   zombiesSpawnedThisRound: number; // counts toward roundZombieQuota(round); round clears once this hits quota AND zombies is empty
+  // True once the current wave's quota is fully spawned and resolved — advanceTick freezes
+  // spawning (and everything downstream of it) while this is true, and `round` etc. stay pointed
+  // at the just-cleared wave, until the teacher explicitly confirms via the "Wave Complete!"
+  // screen (see confirmNextWave). Per teacher feedback that the old auto-advance-on-clear
+  // behavior was confusing for students with no clear "that wave is over" moment.
+  awaitingNextWave: boolean;
 };
 
-type TickEventKind = "barricadeDestroyed" | "zombieShot" | "axeUsed" | "personEliminated";
+type TickEventKind = "barricadeDestroyed" | "zombieShot" | "axeUsed" | "personEliminated" | "waveCleared";
 type TickEvent = { kind: TickEventKind; entryPointId?: EntryPointId; teamId?: string | number };
 
 // Fun-stats-only tallies for the gameover screen — none of these feed scoring or difficulty, they
@@ -187,7 +200,6 @@ function fxDurationMs(kind: FxKind): number {
   return kind === "zombieShot" ? 1700 : 600;
 }
 type ElimBanner = { teamName: string; color: string; key: number };
-type RoundBanner = { round: number; key: number };
 type PowerUpBanner = { text: string; key: number };
 
 const POWERUP_LABEL: Record<PowerUpKind, string> = {
@@ -222,8 +234,26 @@ function advanceTick(
   let zombies = state.zombies.map(z => ({ ...z }));
   let persons = { ...state.persons };
   const elapsedSeconds = state.elapsedSeconds + 1;
-  const roundElapsedSeconds = state.roundElapsedSeconds + 1;
   const round = state.round;
+
+  // Frozen between waves — the current wave already cleared and is waiting on the teacher to
+  // confirm via the "Wave Complete!" screen. Nothing zombie-related happens (no spawns, no round
+  // clock) until that happens; bullets still recharge so nobody's punished for how long the
+  // teacher takes to move on. barricades/zombies/round/roundElapsedSeconds/zombiesSpawnedThisRound
+  // all stay exactly as they were — still reflecting the just-cleared wave.
+  if (state.awaitingNextWave) {
+    if (elapsedSeconds % BULLET_RECHARGE_SECONDS === 0) {
+      aliveTeamIds.forEach(id => {
+        const person = persons[id];
+        if (person?.alive && person.bullets < person.bulletCap) {
+          persons = { ...persons, [id]: { ...person, bullets: person.bullets + 1 } };
+        }
+      });
+    }
+    return { next: { ...state, persons, elapsedSeconds }, events: [] };
+  }
+
+  const roundElapsedSeconds = state.roundElapsedSeconds + 1;
   let zombiesSpawnedThisRound = state.zombiesSpawnedThisRound;
 
   // 0. Recharge — a flat timer, completely independent of rounds or how the English tasks are
@@ -326,23 +356,22 @@ function advanceTick(
     // Zombie is resolved either way — it does not linger inside the house.
   });
 
-  // 5. Round clear — a closed wave, not a clock: the round only advances once every zombie
-  // promised for it has both spawned and been resolved (shot or breached). A fast class clears
-  // waves quickly and races into harder rounds sooner; a struggling class just holds at the same
-  // pressure for longer instead of the horde escalating out from under them regardless.
-  let nextRound = round;
-  let nextRoundElapsedSeconds = roundElapsedSeconds;
-  let nextZombiesSpawnedThisRound = zombiesSpawnedThisRound;
-  if (zombiesSpawnedThisRound >= quota && survivors.length === 0) {
-    nextRound = round + 1;
-    nextRoundElapsedSeconds = 0;
-    nextZombiesSpawnedThisRound = 0;
-  }
+  // 5. Wave clear — a closed wave, not a clock: it's only cleared once every zombie promised for
+  // it has both spawned and been resolved (shot or breached). A fast class clears waves quickly
+  // and gets to the "Wave Complete!" screen sooner; a struggling class just holds at the same
+  // pressure for longer instead of the horde escalating out from under them regardless. Doesn't
+  // auto-advance round/roundElapsedSeconds/zombiesSpawnedThisRound itself anymore — it only sets
+  // awaitingNextWave (freezing the wave-related tick logic above, see the top of this function)
+  // and fires one waveCleared event; the teacher's click on "Wave Complete!" (confirmNextWave in
+  // the component) is what actually resets those counters and moves to the next round.
+  const waveJustCleared = zombiesSpawnedThisRound >= quota && survivors.length === 0;
+  if (waveJustCleared) events.push({ kind: "waveCleared" });
 
   return {
     next: {
       barricades, zombies: survivors, persons, elapsedSeconds,
-      round: nextRound, roundElapsedSeconds: nextRoundElapsedSeconds, zombiesSpawnedThisRound: nextZombiesSpawnedThisRound,
+      round, roundElapsedSeconds, zombiesSpawnedThisRound,
+      awaitingNextWave: waveJustCleared,
     },
     events,
   };
@@ -510,10 +539,13 @@ function PersonChip({ team, person, rechargeProgress }: { team: Team; person: Pe
 // whole round and any team can throw a sentence at it, judged on the fly, same as an open response.
 function SiegeQuestionCard({ question }: { question: QuestionData | null }) {
   if (!question) return null;
-  // halfSentences items (see LessonGamesGenerator's "zombie" branch): crewmateTopic is only a
-  // dedup key for these, not real display content, so it's deliberately not rendered as a heading
-  // the way it is for normal spyRounds-shaped rounds.
+  // halfSentences/cardTasks items (see LessonGamesGenerator's "zombie" branch): crewmateTopic is
+  // only a dedup key for these, not real display content, so it's deliberately not rendered as a
+  // heading the way it is for normal spyRounds-shaped rounds.
   const isHalfSentence = question.type === "half sentence";
+  const isSpeakingTask = question.type === "speaking task";
+  const showCrewmateHeading = !isHalfSentence && !isSpeakingTask && !!question.crewmateTopic;
+  const badgeText = isHalfSentence ? "✍️ finish the sentence" : isSpeakingTask ? "🎤 speaking task" : "📖 add to the prompt";
   return (
     <div style={{
       position: "relative", background: "white", border: "3px solid #6366F1", borderRadius: "16px",
@@ -527,9 +559,9 @@ function SiegeQuestionCard({ question }: { question: QuestionData | null }) {
         padding: "3px 12px", borderRadius: "20px", fontSize: "12px", fontWeight: "700", marginBottom: "8px",
         textTransform: "uppercase", letterSpacing: "0.04em",
       }}>
-        {isHalfSentence ? "✍️ finish the sentence" : "📖 add to the prompt"}
+        {badgeText}
       </div>
-      {!isHalfSentence && question.crewmateTopic && (
+      {showCrewmateHeading && (
         <div style={{ fontSize: "22px", fontWeight: "900", color: "#1E1B4B", margin: "0 0 6px" }}>
           {question.crewmateTopic}
         </div>
@@ -585,6 +617,7 @@ function validateZombieSiegeSnapshot(raw: unknown, teams: { id: string | number 
       round: siege.round,
       roundElapsedSeconds: siege.roundElapsedSeconds ?? 0,
       zombiesSpawnedThisRound: siege.zombiesSpawnedThisRound ?? 0,
+      awaitingNextWave: siege.awaitingNextWave ?? false,
     },
     statsByTeam,
   };
@@ -613,12 +646,12 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
     round: 1,
     roundElapsedSeconds: 0,
     zombiesSpawnedThisRound: 0,
+    awaitingNextWave: false,
   }));
   const [currentQuestion, setCurrentQuestion] = useState<QuestionData | null>(null);
   const [roundPhase, setRoundPhase] = useState<RoundPhase>("reveal");
   const [fx, setFx] = useState<SiegeFx[]>([]);
   const [elimBanner, setElimBanner] = useState<ElimBanner | null>(null);
-  const [roundBanner, setRoundBanner] = useState<RoundBanner | null>(null);
   const [powerUpBanner, setPowerUpBanner] = useState<PowerUpBanner | null>(null);
   const [statsByTeam, setStatsByTeam] = useState<Record<string | number, TeamStats>>(() =>
     resumed?.statsByTeam ?? Object.fromEntries(teams.map(t => [t.id, { kills: 0, chairsPlaced: 0 }]))
@@ -657,12 +690,6 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
     setTimeout(() => setElimBanner(prev => (prev?.key === key ? null : prev)), 3200);
   }, []);
 
-  const showRoundBanner = useCallback((round: number) => {
-    const key = fxIdRef.current++;
-    setRoundBanner({ round, key });
-    setTimeout(() => setRoundBanner(prev => (prev?.key === key ? null : prev)), 2600);
-  }, []);
-
   const showPowerUpBanner = useCallback((text: string) => {
     const key = fxIdRef.current++;
     setPowerUpBanner({ text, key });
@@ -672,21 +699,27 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
   // Question pool: sourced from spyRounds (LessonGamesGenerator wires "zombie" alongside "spy"),
   // so `questions` here is already crewmateTopic/crewmatePrompt content, not the fixed-answer
   // grammar-drill pool the other mixed-pool games use. Shuffled once, one shared stream (no
-  // per-team/per-category split). Where a selected topic has halfSentences content, those items
-  // are mixed in too (same crewmateTopic/crewmatePrompt shape, tagged type:"half sentence") —
-  // picked preferentially for the first couple of rounds as an easier on-ramp, per teacher
-  // feedback that new classes found the game overwhelming from wave one. Never picked after that
-  // cutoff, so the difficulty curve past round 2 is unchanged from before this existed.
+  // per-team/per-category split). Where a selected topic has halfSentences and/or cardTasks
+  // content, those are mixed in too (same crewmateTopic/crewmatePrompt shape, tagged
+  // type:"half sentence" / type:"speaking task") — picked preferentially for early rounds per the
+  // three-tier on-ramp (see HALF_SENTENCE_ROUND_CUTOFF/SPEAKING_TASK_ROUND_CUTOFF above). Never
+  // picked past their cutoff, so the difficulty curve from round 7 on is unchanged from before any
+  // of this existed.
   const pool = useRef([...questions].sort(() => Math.random() - 0.5)).current;
   const lastTopicRef = useRef<string | undefined>(undefined);
   const pickNextQuestion = useCallback((roundNumber: number): QuestionData | null => {
     if (!pool.length) return null;
-    const isEasyRound = roundNumber <= EASY_ROUND_CUTOFF;
     const halfSentenceItems = pool.filter(q => q.type === "half sentence");
-    const normalItems = pool.filter(q => q.type !== "half sentence");
-    const candidates = isEasyRound && halfSentenceItems.length > 0
-      ? halfSentenceItems
-      : normalItems.length > 0 ? normalItems : pool;
+    const speakingTaskItems = pool.filter(q => q.type === "speaking task");
+    const normalItems = pool.filter(q => q.type !== "half sentence" && q.type !== "speaking task");
+    let candidates: QuestionData[];
+    if (roundNumber <= HALF_SENTENCE_ROUND_CUTOFF && halfSentenceItems.length > 0) {
+      candidates = halfSentenceItems;
+    } else if (roundNumber <= SPEAKING_TASK_ROUND_CUTOFF && speakingTaskItems.length > 0) {
+      candidates = speakingTaskItems;
+    } else {
+      candidates = normalItems.length > 0 ? normalItems : pool;
+    }
     const fresh = candidates.filter(q => q.crewmateTopic !== lastTopicRef.current);
     const source = fresh.length ? fresh : candidates;
     const chosen = source[Math.floor(Math.random() * source.length)];
@@ -708,18 +741,17 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
 
   useEffect(() => () => { if (breakTimeoutRef.current) clearTimeout(breakTimeoutRef.current); }, []);
 
+  // Advancing to the next wave is now a teacher-confirmed action (the "Wave Complete!" screen),
+  // not something this tick loop does automatically — it only reacts to "waveCleared" by leaving
+  // siege.awaitingNextWave true (already set by advanceTick), which the render below turns into
+  // that screen. See confirmNextWave for what actually happens when the teacher clicks through it.
   useEffect(() => {
     if (phase !== "playing") return;
     const id = setInterval(() => {
       if (pausedRef.current) return;
       const aliveTeamIds = teams.map(t => t.id);
-      const prevRound = siegeRef.current.round;
       const { next, events } = advanceTick(siegeRef.current, aliveTeamIds, teams.length, () => zombieIdRef.current++);
       setSiege(next);
-      if (next.round > prevRound) {
-        showRoundBanner(next.round);
-        startRound(pickNextQuestion(next.round), next.round);
-      }
       events.forEach(ev => {
         if (ev.kind === "barricadeDestroyed") pushFx("barricadeDestroyed");
         if (ev.kind === "zombieShot") {
@@ -736,11 +768,20 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
       if (!stillAlive) setPhase("gameover");
     }, TICK_MS);
     return () => clearInterval(id);
-  }, [phase, teams, pushFx, showElimination, showRoundBanner, startRound, pickNextQuestion, bumpStat]);
+  }, [phase, teams, pushFx, showElimination, bumpStat]);
 
   useEffect(() => {
     if (phase === "playing" && !currentQuestion) startRound(pickNextQuestion(siegeRef.current.round), siegeRef.current.round);
   }, [phase, currentQuestion, pickNextQuestion, startRound]);
+
+  // Fires when the teacher clicks through the "Wave Complete!" screen — this is the only place
+  // round/roundElapsedSeconds/zombiesSpawnedThisRound actually reset and awaitingNextWave clears,
+  // so nothing about the next wave (spawning, its prompt) starts until the teacher says so.
+  const confirmNextWave = useCallback(() => {
+    const newRound = siegeRef.current.round + 1;
+    setSiege(prev => ({ ...prev, round: newRound, roundElapsedSeconds: 0, zombiesSpawnedThisRound: 0, awaitingNextWave: false }));
+    startRound(pickNextQuestion(newRound), newRound);
+  }, [pickNextQuestion, startRound]);
 
   const applyPowerUp = useCallback((kind: PowerUpKind, teamId: string | number) => {
     setSiege(prev => {
@@ -903,6 +944,30 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
           </div>
         </div>
       )}
+      {/* Blocking gate, not a fleeting toast — per teacher feedback that auto-advancing straight
+          into the next wave left students unsure whether the last one had actually ended. Spawning
+          is already frozen (see advanceTick's awaitingNextWave branch); nothing about the next wave
+          starts until this button is clicked. Deliberately hidden behind the pause overlay if both
+          are somehow true at once, so "Paused" always wins visually. */}
+      {siege.awaitingNextWave && !paused && (
+        <div style={{
+          position: "absolute", inset: 0, zIndex: 25, borderRadius: "20px",
+          background: "rgba(5,10,5,0.88)", display: "flex", alignItems: "center", justifyContent: "center",
+        }}>
+          <div style={{ textAlign: "center", color: "white", padding: "20px" }}>
+            <div style={{ fontSize: "44px", marginBottom: "8px" }}>🌊</div>
+            <div style={{ fontWeight: "900", fontSize: "24px", color: "#BEF264" }}>Wave {round} Complete!</div>
+            <div style={{ fontSize: "14px", color: "#D9F99D", marginTop: "6px", fontWeight: "700", marginBottom: "18px" }}>
+              The house held! Get ready for wave {round + 1}.
+            </div>
+            <button onClick={confirmNextWave} className="zs-btn" style={{
+              background: "linear-gradient(135deg,#365314,#65A30D)", color: "#0D1A0D", border: "none",
+              borderRadius: "14px", padding: "14px 32px", fontSize: "17px", fontWeight: "900", cursor: "pointer",
+              boxShadow: "0 6px 24px rgba(101,163,13,0.5)", transition: "transform 0.15s ease",
+            }}>➡️ Start Wave {round + 1}</button>
+          </div>
+        </div>
+      )}
       <div style={{ position: "absolute", top: "8px", right: "8px", zIndex: 15, display: "flex", flexDirection: "column", gap: "4px", alignItems: "flex-end", pointerEvents: "none" }}>
         {fx.map(f => {
           const shooter = f.teamId !== undefined ? teams.find(t => t.id === f.teamId) : undefined;
@@ -928,18 +993,6 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
         }}>
           <span style={{ color: "white", fontWeight: "900", fontSize: "16px", textShadow: "0 1px 3px rgba(0,0,0,0.5)" }}>
             💀 {elimBanner.teamName} has been overrun!
-          </span>
-        </div>
-      )}
-      {roundBanner && (
-        <div key={roundBanner.key} style={{
-          position: "absolute", top: "60px", left: "50%", zIndex: 19, whiteSpace: "nowrap",
-          background: "linear-gradient(135deg,#365314,#65A30D)", border: "2px solid #BEF264",
-          borderRadius: "14px", padding: "10px 22px", boxShadow: "0 8px 28px rgba(0,0,0,0.5)",
-          animation: "zsBannerIn 2.6s ease-in-out forwards",
-        }}>
-          <span style={{ color: "white", fontWeight: "900", fontSize: "15px", textShadow: "0 1px 3px rgba(0,0,0,0.5)" }}>
-            🌊 Round {roundBanner.round} — it's getting worse!
           </span>
         </div>
       )}
