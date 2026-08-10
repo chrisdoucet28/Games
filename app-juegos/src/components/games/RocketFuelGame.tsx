@@ -178,17 +178,37 @@ function rankByFuel(teams: GameProps["teams"], fuelById: Record<string | number,
     .sort((a, b) => b.fuel - a.fuel);
 }
 
-export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef }: GameProps) {
+// What "Save & Exit" snapshots and "Resume" restores — the round/team turn cursor and each
+// team's secret fuel count (fuel lives in a ref, not React state, since it must stay hidden
+// until the final reveal — losing it on resume would silently erase real progress, not just
+// restart the round counter). Resuming skips straight to a fresh turn for the team who was up,
+// rather than replaying the intro screen or the exact prompt that was on screen when it was saved.
+type RocketFuelSnapshot = {
+  teamIdx: number;
+  round: number;
+  fuel: Record<string | number, number>;
+};
+
+function validateRocketFuelSnapshot(raw: unknown, teamCount: number): RocketFuelSnapshot | undefined {
+  const s = raw as Partial<RocketFuelSnapshot> | null | undefined;
+  if (!s || typeof s.teamIdx !== "number" || s.teamIdx < 0 || s.teamIdx >= teamCount) return undefined;
+  if (typeof s.round !== "number" || s.round < 1 || s.round > TOTAL_ROUNDS) return undefined;
+  return { teamIdx: s.teamIdx, round: s.round, fuel: s.fuel && typeof s.fuel === "object" ? s.fuel : {} };
+}
+
+export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState }: GameProps) {
+  const resumed = useRef(validateRocketFuelSnapshot(initialGameState, teams.length)).current;
+
   const pool = useRef((() => {
     const uvs = questions.filter(q => q.type === "use vocabulary in a sentence");
     const finalPool = uvs.length ? uvs : questions;
     return [...finalPool].sort(() => Math.random() - 0.5);
   })()).current;
 
-  const [phase, setPhase] = useState<"intro" | "team-turn" | "team-end" | "launchpad" | "igniting" | "launching" | "final">("intro");
+  const [phase, setPhase] = useState<"intro" | "team-turn" | "team-end" | "launchpad" | "igniting" | "launching" | "final">(resumed ? "team-turn" : "intro");
   const [showHowTo, setShowHowTo] = useState(false);
-  const [teamIdx, setTeamIdx] = useState(0);
-  const [round, setRound] = useState(1);
+  const [teamIdx, setTeamIdx] = useState(() => resumed?.teamIdx ?? 0);
+  const [round, setRound] = useState(() => resumed?.round ?? 1);
   const [currentQ, setCurrentQ] = useState<QuestionData | null>(null);
   const [showAnswer, setShowAnswer] = useState(false);
   const [turnFuel, setTurnFuel] = useState(0);
@@ -197,7 +217,13 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
   const [bonusAwarded, setBonusAwarded] = useState<Record<string | number, number>>({});
 
   const cursorRef = useRef(0);
-  const fuelRef = useRef<Record<string | number, number>>({});
+  const fuelRef = useRef<Record<string | number, number>>(resumed?.fuel ?? {});
+
+  useEffect(() => {
+    if (!serializeStateRef) return;
+    serializeStateRef.current = (): RocketFuelSnapshot => ({ teamIdx, round, fuel: fuelRef.current });
+    return () => { if (serializeStateRef) serializeStateRef.current = null; };
+  }, [serializeStateRef, teamIdx, round]);
   const turnFuelRef = useRef(0);
   // Guards against double-awarding points if the launch payout fires both from the natural
   // "landing" timeout and a forced early end racing each other.
@@ -236,6 +262,13 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
     setCurrentQ(pool[idx]);
     setShowAnswer(false);
   };
+
+  // Resuming drops straight into "team-turn" for the team who was up, skipping the intro screen —
+  // but unlike startTeamTurn(), it doesn't draw a first prompt, so do that once on mount.
+  useEffect(() => {
+    if (resumed) drawPrompt();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const endTurn = () => setPhase("team-end");
 

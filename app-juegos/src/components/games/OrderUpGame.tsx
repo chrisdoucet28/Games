@@ -322,7 +322,36 @@ function TicketCard({ ticket, teams, judging, onClaim, onCorrect, onWrong, onSki
 // A round-length countdown drives its own "final" phase (results + set-collection payout), but the
 // always-present top-bar "End Game" button in LessonGamesGenerator.tsx can still bail out early at
 // any time, same as every other game — this only adds a natural end, it doesn't remove the old one.
-export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef, paused, onTogglePause }: GameProps) {
+// What "Save & Exit" snapshots and "Resume" restores — the session length choice, seconds left on
+// the shared session clock, the difficulty ramp's resolved-order count, and each team's dish/combo
+// tally. Resuming skips straight to "playing" with a fresh (empty) ticket queue that immediately
+// tops back up via the existing capacity effect, rather than trying to restore the exact tickets
+// and per-ticket countdowns that were on screen when it was saved.
+type OrderUpSnapshot = {
+  sessionLength: string;
+  sessionSecondsLeft: number;
+  resolvedCount: number;
+  dishCounts: Record<string | number, DishCounts>;
+  comboBonusByTeam: Record<string | number, number>;
+};
+
+function validateOrderUpSnapshot(raw: unknown): OrderUpSnapshot | undefined {
+  const s = raw as Partial<OrderUpSnapshot> | null | undefined;
+  if (!s || !SESSION_SECONDS_BY_LENGTH[s.sessionLength ?? ""]) return undefined;
+  if (typeof s.sessionSecondsLeft !== "number" || s.sessionSecondsLeft <= 0) return undefined;
+  if (typeof s.resolvedCount !== "number" || s.resolvedCount < 0) return undefined;
+  return {
+    sessionLength: s.sessionLength!,
+    sessionSecondsLeft: s.sessionSecondsLeft,
+    resolvedCount: s.resolvedCount,
+    dishCounts: s.dishCounts ?? {},
+    comboBonusByTeam: s.comboBonusByTeam ?? {},
+  };
+}
+
+export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef, paused, onTogglePause, serializeStateRef, initialGameState }: GameProps) {
+  const resumed = useRef(validateOrderUpSnapshot(initialGameState)).current;
+
   // A ref (not just the `paused` prop) so the per-ticket countdown interval's closure always reads
   // the latest value without needing to tear down and rebuild the interval every time pause toggles.
   const pausedRef = useRef(false);
@@ -334,25 +363,25 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
   const grammarPool = useRef([...SIMPLE_FORMS, ...contentGrammarTags]).current;
   const vocabWordPool = useRef([...new Set(questions.filter(q => q.word).map(q => q.word as string))]).current;
 
-  const [phase, setPhase] = useState<Phase>("intro");
+  const [phase, setPhase] = useState<Phase>(resumed ? "playing" : "intro");
   const [showHowTo, setShowHowTo] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
-  const [sessionLength, setSessionLength] = useState<string>("medium");
+  const [sessionLength, setSessionLength] = useState<string>(resumed?.sessionLength ?? "medium");
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [judging, setJudging] = useState<JudgingState>(null);
   const [banner, setBanner] = useState<Banner | null>(null);
   // Per-team tally of collected dishes by emoji, e.g. { teamId: { "🍔": 2, "🍟": 1 } } — one dish is
   // added whenever that team serves a ticket. Combo bonuses fire live off this (see resolveCorrect)
   // the instant one dish type's count hits a multiple of DISH_SET_SIZE.
-  const [dishCounts, setDishCounts] = useState<Record<string | number, DishCounts>>({});
+  const [dishCounts, setDishCounts] = useState<Record<string | number, DishCounts>>(() => resumed?.dishCounts ?? {});
   // Running total of combo bonuses already paid out per team — purely for the final screen's
   // display (the actual points already landed live via onUpdateScore when each combo fired).
-  const [comboBonusByTeam, setComboBonusByTeam] = useState<Record<string | number, number>>({});
+  const [comboBonusByTeam, setComboBonusByTeam] = useState<Record<string | number, number>>(() => resumed?.comboBonusByTeam ?? {});
   const ticketIdRef = useRef(0);
   const bannerIdRef = useRef(0);
   // The session's difficulty "clock" — advances only as orders actually get resolved (served or
   // expired), not as tickets are merely generated, so the ramp tracks real class progress.
-  const resolvedCountRef = useRef(0);
+  const resolvedCountRef = useRef(resumed?.resolvedCount ?? 0);
 
   const pushBanner = useCallback((text: string, kind: Banner["kind"]) => {
     const key = bannerIdRef.current++;
@@ -373,7 +402,23 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
     return () => { if (forceFinalRef) forceFinalRef.current = null; };
   }, [forceFinalRef, phase, handleSessionEnd]);
 
-  const { timeLeft: sessionTimeLeft } = useTurnTimer(SESSION_SECONDS_BY_LENGTH[sessionLength], phase === "playing", handleSessionEnd, undefined, paused);
+  // On resume, seed the shared session clock from the exact seconds left when it was saved rather
+  // than handing back a full fresh session (`resumed` is stable for this mount, so this stays
+  // pinned to the resumed value rather than re-deriving on every sessionLength change).
+  const sessionSeconds = resumed ? resumed.sessionSecondsLeft : SESSION_SECONDS_BY_LENGTH[sessionLength];
+  const { timeLeft: sessionTimeLeft } = useTurnTimer(sessionSeconds, phase === "playing", handleSessionEnd, undefined, paused);
+
+  useEffect(() => {
+    if (!serializeStateRef) return;
+    serializeStateRef.current = (): OrderUpSnapshot => ({
+      sessionLength,
+      sessionSecondsLeft: sessionTimeLeft,
+      resolvedCount: resolvedCountRef.current,
+      dishCounts,
+      comboBonusByTeam,
+    });
+    return () => { if (serializeStateRef) serializeStateRef.current = null; };
+  }, [serializeStateRef, sessionLength, sessionTimeLeft, dishCounts, comboBonusByTeam]);
 
   // Tops the queue up to whatever the current ramp allows — fires on mount (spawning the first
   // customer) and again after every resolution (serve/expire), since removing a ticket changes

@@ -60,8 +60,28 @@ const shuffle = <T,>(items: T[]) => {
   return shuffled;
 };
 
-export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef }: GameProps) {
-  const [phase, setPhase] = useState<"welcome" | "intro" | "play" | "turnend" | "final">("welcome");
+// What "Save & Exit" snapshots and "Resume" restores — the round/team turn cursor and each team's
+// running word total. Resuming skips straight to the per-turn "pass the device" intro for the
+// team whose turn it was, rather than replaying the one-time welcome screen or the exact word/
+// timer that was on screen when it was saved.
+type HotSeatSnapshot = {
+  roundIndex: number;
+  teamIndex: number;
+  totalWordsByTeam: Record<string | number, number>;
+};
+
+function validateHotSeatSnapshot(raw: unknown, teamCount: number): HotSeatSnapshot | undefined {
+  const s = raw as Partial<HotSeatSnapshot> | null | undefined;
+  if (!s || typeof s.roundIndex !== "number" || s.roundIndex < 0) return undefined;
+  if (typeof s.teamIndex !== "number" || s.teamIndex < 0 || s.teamIndex >= teamCount) return undefined;
+  if (s.roundIndex >= TOTAL_ROUNDS) return undefined;
+  return { roundIndex: s.roundIndex, teamIndex: s.teamIndex, totalWordsByTeam: s.totalWordsByTeam ?? {} };
+}
+
+export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState }: GameProps) {
+  const resumed = useRef(validateHotSeatSnapshot(initialGameState, teams.length)).current;
+
+  const [phase, setPhase] = useState<"welcome" | "intro" | "play" | "turnend" | "final">(resumed ? "intro" : "welcome");
   const [showHowTo, setShowHowTo] = useState(false);
 
   useEffect(() => {
@@ -69,13 +89,19 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
     forceFinalRef.current = phase === "final" ? null : () => { setPhase("final"); return true; };
     return () => { if (forceFinalRef) forceFinalRef.current = null; };
   }, [forceFinalRef, phase]);
-  const [roundIndex, setRoundIndex] = useState(0);
-  const [teamIndex, setTeamIndex] = useState(0);
+  const [roundIndex, setRoundIndex] = useState(() => resumed?.roundIndex ?? 0);
+  const [teamIndex, setTeamIndex] = useState(() => resumed?.teamIndex ?? 0);
   const [turnCorrect, setTurnCorrect] = useState(0);
   const [lastTurnCorrect, setLastTurnCorrect] = useState(0);
   // Words guessed correctly per team, summed across every turn/round — turnCorrect itself resets
   // each turn, so this is the one thing that needs to survive to the final results screen.
-  const [totalWordsByTeam, setTotalWordsByTeam] = useState<Record<string | number, number>>({});
+  const [totalWordsByTeam, setTotalWordsByTeam] = useState<Record<string | number, number>>(() => resumed?.totalWordsByTeam ?? {});
+
+  useEffect(() => {
+    if (!serializeStateRef) return;
+    serializeStateRef.current = (): HotSeatSnapshot => ({ roundIndex, teamIndex, totalWordsByTeam });
+    return () => { if (serializeStateRef) serializeStateRef.current = null; };
+  }, [serializeStateRef, roundIndex, teamIndex, totalWordsByTeam]);
   const [timeLeft, setTimeLeft] = useState(TURN_SECONDS);
   const [showWordList, setShowWordList] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);

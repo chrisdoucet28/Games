@@ -10,6 +10,7 @@ const GM = GAME_MODES.find(g => g.id === "hotpotato")!;
 
 const TURN_SECONDS_OPTIONS = [15, 20, 25, 30];
 const ROUND_SECONDS_MULT = 4;
+const TOTAL_ROUNDS = 5;
 // How long the CPU realistically "holds" the potato before passing it back — standing in for
 // the fact it can't actually answer a real question out loud.
 const CPU_HOLD_MS_MIN = 1800;
@@ -58,7 +59,26 @@ function ChaosBackdrop() {
   );
 }
 
-export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEnd, level, forceFinalRef }: GameProps) {
+// What "Save & Exit" snapshots and "Resume" restores — the round number, who's holding the
+// potato, the round-loser history, and the chosen turn-length setting. Resuming skips straight
+// to "play" for that round with a fresh round timer, rather than replaying the intro screen or
+// the exact potato-holding moment that was on screen when it was saved.
+type HotPotatoSnapshot = {
+  round: number;
+  holderIdx: number;
+  history: { round: number; holderName: string; holderId: string | number }[];
+  turnSeconds: number;
+};
+
+function validateHotPotatoSnapshot(raw: unknown, teamCount: number): HotPotatoSnapshot | undefined {
+  const s = raw as Partial<HotPotatoSnapshot> | null | undefined;
+  if (!s || typeof s.round !== "number" || s.round < 1 || s.round > TOTAL_ROUNDS) return undefined;
+  if (typeof s.holderIdx !== "number" || s.holderIdx < 0 || s.holderIdx >= teamCount) return undefined;
+  if (typeof s.turnSeconds !== "number" || !TURN_SECONDS_OPTIONS.includes(s.turnSeconds)) return undefined;
+  return { round: s.round, holderIdx: s.holderIdx, history: Array.isArray(s.history) ? s.history : [], turnSeconds: s.turnSeconds };
+}
+
+export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEnd, level, forceFinalRef, serializeStateRef, initialGameState }: GameProps) {
   // Solo play makes the CPU a real second holder — a genuine participant in the pass cycle, not
   // a passive prop. It can't actually answer a real question, so it just holds the potato for a
   // randomized, realistic stretch before passing it back (see the effect below).
@@ -79,14 +99,15 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
 
   const showSpanish = level === "A1" || level === "A2";
   const STARTING_BANK = 100;
-  const TOTAL_ROUNDS = 5;
   const PENALTY_PTS = 30;
 
-  const [turnSeconds, setTurnSeconds] = useState(TURN_SECONDS_OPTIONS[0]);
+  const resumed = useRef(validateHotPotatoSnapshot(initialGameState, teams.length)).current;
+
+  const [turnSeconds, setTurnSeconds] = useState(resumed?.turnSeconds ?? TURN_SECONDS_OPTIONS[0]);
   const Q_SECONDS = turnSeconds;
   const ROUND_SECONDS = turnSeconds * ROUND_SECONDS_MULT;
 
-  const [phase, setPhase] = useState<"intro" | "play" | "exploding" | "roundend" | "gameover">("intro");
+  const [phase, setPhase] = useState<"intro" | "play" | "exploding" | "roundend" | "gameover">(resumed ? "play" : "intro");
   const [showHowTo, setShowHowTo] = useState(false);
 
   useEffect(() => {
@@ -94,16 +115,22 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
     forceFinalRef.current = phase === "gameover" ? null : () => { setPhase("gameover"); return true; };
     return () => { if (forceFinalRef) forceFinalRef.current = null; };
   }, [forceFinalRef, phase]);
-  const [round, setRound] = useState(1);
+  const [round, setRound] = useState(() => resumed?.round ?? 1);
   const [qi, setQi] = useState(0);
-  const [holderIdx, setHolderIdx] = useState(0);
+  const [holderIdx, setHolderIdx] = useState(() => resumed?.holderIdx ?? 0);
   const [roundTimeLeft, setRoundTimeLeft] = useState(ROUND_SECONDS);
   const [qTimeLeft, setQTimeLeft] = useState(Q_SECONDS);
   const [showAnswer, setShowAnswer] = useState(false);
   const [passing, setPassing] = useState(false);
   const [justCaught, setJustCaught] = useState(false);
   const [passId, setPassId] = useState(0);
-  const [history, setHistory] = useState<{ round: number, holderName: string, holderId: string | number }[]>([]);
+  const [history, setHistory] = useState<{ round: number, holderName: string, holderId: string | number }[]>(() => resumed?.history ?? []);
+
+  useEffect(() => {
+    if (!serializeStateRef) return;
+    serializeStateRef.current = (): HotPotatoSnapshot => ({ round, holderIdx, history, turnSeconds });
+    return () => { if (serializeStateRef) serializeStateRef.current = null; };
+  }, [serializeStateRef, round, holderIdx, history, turnSeconds]);
 
   const roundTimeRef = useRef(ROUND_SECONDS);
   const timerPaused = useRef(false);

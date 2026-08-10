@@ -513,8 +513,52 @@ function SiegeQuestionCard({ question }: { question: QuestionData | null }) {
   );
 }
 
-export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef, paused, onTogglePause }: GameProps) {
-  const [phase, setPhase] = useState<Phase>("intro");
+// What "Save & Exit" snapshots and "Resume" restores — the entire siege state (barricades,
+// zombies, per-team bullets/axes, round counters) plus the fun-stats tally, all of which is
+// plain data with no live refs/timers, so it round-trips exactly. Resuming skips straight to
+// "playing" with siege picking up mid-round; the next tick's existing "no current prompt yet"
+// effect naturally draws a fresh round prompt, so there's no need to also snapshot the
+// transient currentQuestion/roundPhase/fx/banner UI state.
+type ZombieSiegeSnapshot = {
+  siege: SiegeState;
+  statsByTeam: Record<string | number, TeamStats>;
+};
+
+function validateZombieSiegeSnapshot(raw: unknown, teams: { id: string | number }[]): ZombieSiegeSnapshot | undefined {
+  const s = raw as Partial<ZombieSiegeSnapshot> | null | undefined;
+  const siege = s?.siege as Partial<SiegeState> | undefined;
+  if (!siege || typeof siege.round !== "number" || siege.round < 1) return undefined;
+  if (!Array.isArray(siege.zombies) || !siege.barricades || !siege.persons) return undefined;
+
+  const persons = { ...siege.persons };
+  teams.forEach(t => {
+    if (!persons[t.id]) persons[t.id] = { bullets: BULLET_CAP_START, bulletCap: BULLET_CAP_START, axes: MAX_AXES, alive: true };
+  });
+  const barricades = { ...emptyBarricades(), ...siege.barricades };
+
+  const statsByTeam = { ...(s?.statsByTeam ?? {}) };
+  teams.forEach(t => {
+    if (!statsByTeam[t.id]) statsByTeam[t.id] = { kills: 0, chairsPlaced: 0 };
+  });
+
+  return {
+    siege: {
+      barricades,
+      zombies: siege.zombies,
+      persons,
+      elapsedSeconds: siege.elapsedSeconds ?? 0,
+      round: siege.round,
+      roundElapsedSeconds: siege.roundElapsedSeconds ?? 0,
+      zombiesSpawnedThisRound: siege.zombiesSpawnedThisRound ?? 0,
+    },
+    statsByTeam,
+  };
+}
+
+export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef, paused, onTogglePause, serializeStateRef, initialGameState }: GameProps) {
+  const resumed = useRef(validateZombieSiegeSnapshot(initialGameState, teams)).current;
+
+  const [phase, setPhase] = useState<Phase>(resumed ? "playing" : "intro");
   const [showHowTo, setShowHowTo] = useState(false);
   // A ref (not just the `paused` prop) so the tick interval's closure always reads the latest
   // value without needing to tear down and rebuild the interval every time pause is toggled.
@@ -526,7 +570,7 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
     forceFinalRef.current = phase === "gameover" ? null : () => { setPhase("gameover"); return true; };
     return () => { if (forceFinalRef) forceFinalRef.current = null; };
   }, [forceFinalRef, phase]);
-  const [siege, setSiege] = useState<SiegeState>(() => ({
+  const [siege, setSiege] = useState<SiegeState>(() => resumed?.siege ?? ({
     barricades: emptyBarricades(),
     zombies: [],
     persons: Object.fromEntries(teams.map(t => [t.id, { bullets: BULLET_CAP_START, bulletCap: BULLET_CAP_START, axes: MAX_AXES, alive: true }])),
@@ -542,9 +586,15 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
   const [roundBanner, setRoundBanner] = useState<RoundBanner | null>(null);
   const [powerUpBanner, setPowerUpBanner] = useState<PowerUpBanner | null>(null);
   const [statsByTeam, setStatsByTeam] = useState<Record<string | number, TeamStats>>(() =>
-    Object.fromEntries(teams.map(t => [t.id, { kills: 0, chairsPlaced: 0 }]))
+    resumed?.statsByTeam ?? Object.fromEntries(teams.map(t => [t.id, { kills: 0, chairsPlaced: 0 }]))
   );
   const breakTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (!serializeStateRef) return;
+    serializeStateRef.current = (): ZombieSiegeSnapshot => ({ siege, statsByTeam });
+    return () => { if (serializeStateRef) serializeStateRef.current = null; };
+  }, [serializeStateRef, siege, statsByTeam]);
 
   const bumpStat = useCallback((teamId: string | number, key: keyof TeamStats, amount = 1) => {
     setStatsByTeam(prev => ({

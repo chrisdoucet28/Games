@@ -88,23 +88,47 @@ function ChipStack({ amount, max = 200 }: { amount: number; max?: number }) {
   );
 }
 
-export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef }: GameProps) {
+// What "Save & Exit" snapshots and "Resume" restores — the current lot number and each team's
+// running bank/win count. Resuming skips straight to "betting" on that lot rather than replaying
+// the intro screen or whatever bets/result were on screen when it was saved.
+type AuctionSnapshot = {
+  qi: number;
+  auctionBank: Record<string | number, number>;
+  roundsWon: Record<string | number, number>;
+};
+
+function validateAuctionSnapshot(raw: unknown, questionCount: number): AuctionSnapshot | undefined {
+  const s = raw as Partial<AuctionSnapshot> | null | undefined;
+  if (!s || typeof s.qi !== "number" || s.qi < 0 || s.qi >= questionCount) return undefined;
+  if (!s.auctionBank || typeof s.auctionBank !== "object") return undefined;
+  return { qi: s.qi, auctionBank: s.auctionBank, roundsWon: s.roundsWon ?? {} };
+}
+
+export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState }: GameProps) {
   const AUCTION_START = 200;
   const BET_AMOUNTS = [25, 50, 100];
 
-  const [qi, setQi] = useState(0);
-  const [phase, setPhase] = useState<"intro" | "betting" | "result" | "final">("intro");
+  const resumed = useRef(validateAuctionSnapshot(initialGameState, questions.length)).current;
+
+  const [qi, setQi] = useState(() => resumed?.qi ?? 0);
+  const [phase, setPhase] = useState<"intro" | "betting" | "result" | "final">(resumed ? "betting" : "intro");
   const [showHowTo, setShowHowTo] = useState(false);
   const [bets, setBets] = useState<Record<string | number, Bet>>({});
   const [resultMsg, setResultMsg] = useState<ResultMsg[]>([]);
   const [satOutLastRound, setSatOutLastRound] = useState<Set<string | number>>(new Set());
   // Wins tracked per team across the whole auction — resultMsg itself resets every round, so this
   // is the one thing that needs to survive to the final results screen.
-  const [roundsWon, setRoundsWon] = useState<Record<string | number, number>>({});
+  const [roundsWon, setRoundsWon] = useState<Record<string | number, number>>(() => resumed?.roundsWon ?? {});
 
   const [auctionBank, setAuctionBank] = useState<Record<string | number, number>>(() =>
-    Object.fromEntries(teams.map(t => [t.id, AUCTION_START]))
+    resumed?.auctionBank ?? Object.fromEntries(teams.map(t => [t.id, AUCTION_START]))
   );
+
+  useEffect(() => {
+    if (!serializeStateRef) return;
+    serializeStateRef.current = (): AuctionSnapshot => ({ qi, auctionBank, roundsWon });
+    return () => { if (serializeStateRef) serializeStateRef.current = null; };
+  }, [serializeStateRef, qi, auctionBank, roundsWon]);
 
   const auctionBankRef = useRef(auctionBank);
   const hasFlushedBankRef = useRef(false);

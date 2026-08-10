@@ -91,7 +91,28 @@ function AmbientBackdrop() {
   );
 }
 
-export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef }: GameProps) {
+// What "Save & Exit" snapshots and "Resume" restores — the round/team turn cursor, chosen
+// difficulty, and each team's running final score. Resuming skips straight to the countdown for
+// the team whose turn it was, rather than replaying the difficulty-picker intro or the exact
+// mole/combo state that was on screen when it was saved.
+type WordWhackSnapshot = {
+  teamIdx: number;
+  round: number;
+  difficulty: Difficulty;
+  finalScores: Record<string | number, number>;
+};
+
+function validateWordWhackSnapshot(raw: unknown, teamCount: number): WordWhackSnapshot | undefined {
+  const s = raw as Partial<WordWhackSnapshot> | null | undefined;
+  if (!s || typeof s.teamIdx !== "number" || s.teamIdx < 0 || s.teamIdx >= teamCount) return undefined;
+  if (typeof s.round !== "number" || s.round < 1 || s.round > TOTAL_ROUNDS) return undefined;
+  if (s.difficulty !== "easy" && s.difficulty !== "medium" && s.difficulty !== "hard") return undefined;
+  return { teamIdx: s.teamIdx, round: s.round, difficulty: s.difficulty, finalScores: s.finalScores ?? {} };
+}
+
+export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState }: GameProps) {
+  const resumed = useRef(validateWordWhackSnapshot(initialGameState, teams.length)).current;
+
   const pool = useRef((() => {
     const mcqOnly = questions.filter(q => q.type === "choose correct grammar");
     const parsedMcq = mcqOnly.map(parseChoices).filter((p): p is ParsedMCQ => p !== null);
@@ -101,7 +122,7 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
     return [...finalPool].sort(() => Math.random() - 0.5);
   })()).current;
 
-  const [phase, setPhase] = useState<"intro" | "countdown" | "playing" | "turn-end" | "final">("intro");
+  const [phase, setPhase] = useState<"intro" | "countdown" | "playing" | "turn-end" | "final">(resumed ? "countdown" : "intro");
   const [showHowTo, setShowHowTo] = useState(false);
 
   useEffect(() => {
@@ -109,9 +130,9 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
     forceFinalRef.current = phase === "final" ? null : () => { setPhase("final"); return true; };
     return () => { if (forceFinalRef) forceFinalRef.current = null; };
   }, [forceFinalRef, phase]);
-  const [difficulty, setDifficulty] = useState<Difficulty>("medium");
-  const [teamIdx, setTeamIdx] = useState(0);
-  const [round, setRound] = useState(1);
+  const [difficulty, setDifficulty] = useState<Difficulty>(resumed?.difficulty ?? "medium");
+  const [teamIdx, setTeamIdx] = useState(() => resumed?.teamIdx ?? 0);
+  const [round, setRound] = useState(() => resumed?.round ?? 1);
   const [countdown, setCountdown] = useState(3);
   const [moles, setMoles] = useState<Mole[]>([]);
   const [prompt, setPrompt] = useState("");
@@ -119,7 +140,13 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
   const [bestCombo, setBestCombo] = useState(0);
   const [turnScore, setTurnScore] = useState(0);
   const [fx, setFx] = useState<Fx | null>(null);
-  const [finalScores, setFinalScores] = useState<Record<string | number, number>>({});
+  const [finalScores, setFinalScores] = useState<Record<string | number, number>>(() => resumed?.finalScores ?? {});
+
+  useEffect(() => {
+    if (!serializeStateRef) return;
+    serializeStateRef.current = (): WordWhackSnapshot => ({ teamIdx, round, difficulty, finalScores });
+    return () => { if (serializeStateRef) serializeStateRef.current = null; };
+  }, [serializeStateRef, teamIdx, round, difficulty, finalScores]);
 
   const fxIdRef = useRef(0);
   const roundTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
