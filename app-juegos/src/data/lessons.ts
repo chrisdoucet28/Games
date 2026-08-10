@@ -499,6 +499,109 @@ export const LESSONS: Record<string, Lesson> = {
     ],
   },
 
+  comparatives: {
+    title: "Comparatives",
+    intro: "Comparatives compare two things — the ending or word you add depends on how long the adjective is.",
+    sections: [
+      {
+        heading: "Short adjectives (1 syllable, or 2 ending in -y)",
+        body: [
+          "Adjective + -er + than.",
+          "Spelling: y → i; double the final consonant after a short vowel; just add -r after silent -e.",
+        ],
+        examples: [
+          "tall → **taller than**",
+          "happy → **happier than**",
+          "big → **bigger than**",
+          "nice → **nicer than**",
+        ],
+      },
+      {
+        heading: "Long adjectives (2+ syllables)",
+        body: ["More + adjective + than."],
+        examples: [
+          "**more interesting** than",
+          "**more expensive** than",
+          "**more difficult** than",
+        ],
+      },
+      {
+        heading: "Irregular forms",
+        body: ["A handful of common adjectives don't follow either pattern."],
+        examples: [
+          "good → **better**",
+          "bad → **worse**",
+          "far → **further/farther**",
+        ],
+      },
+      {
+        heading: "Equality: as...as",
+        body: ["To say two things are equal (or not), use 'as + adjective + as' instead of -er/more — it's a softer, non-ranking way to compare."],
+        examples: [
+          "She **is as tall as** her brother. (equal)",
+          "This book **isn't as interesting as** the film. (not equal)",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ more tall → ✅ taller (short adjectives use -er, not 'more')",
+      "❌ gooder / more good → ✅ better (irregular)",
+      "❌ This is more big than that one. → ✅ This is bigger than that one. (double the final consonant: big → bigger)",
+      "❌ My phone is fast than yours. → ✅ My phone is faster than yours. (short adjectives need -er, not just 'than')",
+      "❌ as tall than her brother → ✅ as tall as her brother ('as...as' for equality, not 'than')",
+    ],
+  },
+
+  superlatives: {
+    title: "Superlatives",
+    intro: "Superlatives pick out the number one in a group of three or more — the ending or word you add depends on how long the adjective is.",
+    sections: [
+      {
+        heading: "Short adjectives (1 syllable, or 2 ending in -y)",
+        body: [
+          "The + adjective + -est.",
+          "Spelling: y → i; double the final consonant after a short vowel; just add -st after silent -e.",
+        ],
+        examples: [
+          "tall → **the tallest**",
+          "happy → **the happiest**",
+          "big → **the biggest**",
+          "nice → **the nicest**",
+        ],
+      },
+      {
+        heading: "Long adjectives (2+ syllables)",
+        body: ["The most + adjective."],
+        examples: [
+          "**the most interesting**",
+          "**the most expensive**",
+          "**the most difficult**",
+        ],
+      },
+      {
+        heading: "Irregular forms",
+        body: ["The same adjectives that are irregular in the comparative are irregular here too."],
+        examples: [
+          "good → **the best**",
+          "bad → **the worst**",
+          "far → **the furthest/farthest**",
+        ],
+      },
+      {
+        heading: "\"One of the...\" + superlative",
+        body: ["A very common pattern: 'one of the' + superlative + a plural noun — it softens the claim from 'the single best' to 'among the best'."],
+        examples: ["This is **one of the best restaurants** in town."],
+      },
+    ],
+    commonMistakes: [
+      "❌ the most tall → ✅ the tallest (short adjectives use -est, not 'the most')",
+      "❌ the goodest / more good → ✅ the best (irregular)",
+      "❌ tallest building in the city → ✅ the tallest building in the city (superlatives always need 'the')",
+      "❌ This is the most big house. → ✅ This is the biggest house. (short adjectives use -est, not 'the most')",
+      "❌ This is one of the best restaurant in town. → ✅ This is one of the best restaurants in town. ('one of the' + superlative needs a plural noun)",
+    ],
+  },
+
   too_much_many: {
     title: "Too vs Too much / Too many",
     intro: "All three mean 'more than is good or wanted' — which one you use depends on what comes after it.",
@@ -1436,6 +1539,56 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ She use to be very shy. → ✅ She used to be very shy. ('used to' with 'd' in positive statements)",
       "❌ Did you used to live in Spain? → ✅ Did you use to live in Spain? (after 'did', use 'use to' — no 'd')",
       "❌ We used to living in a small flat. → ✅ We used to live in a small flat. ('used to' + bare infinitive, not '-ing')",
+    ],
+  },
+
+  used_to_past: {
+    title: "I Used To... (Past Habits)",
+    intro: "'Used to' + base verb describes a repeated action or state in the past that isn't true anymore — it always signals a contrast with the present.",
+    sections: [
+      {
+        heading: "Form",
+        body: [
+          "Affirmative: subject + used to + base verb.",
+          "Negative: subject + didn't use to + base verb (no -d on 'use').",
+          "Question: Did + subject + use to + base verb? (no -d on 'use').",
+        ],
+        examples: [
+          "I **used to play** the guitar.",
+          "She **didn't use to like** vegetables.",
+          "**Did you use to live** here?",
+        ],
+      },
+      {
+        heading: "Meaning: a finished past habit or state",
+        body: [
+          "'Used to' describes something that happened repeatedly, or was true, over a period in the past — and is now different.",
+          "It's not for a single, one-time past action — use past simple for that instead.",
+        ],
+        examples: [
+          "I **used to visit** my grandmother every summer. (repeated, now stopped)",
+          "I **visited** my grandmother last summer. (one specific visit — past simple)",
+          "This street **used to be** full of shops.",
+        ],
+      },
+      {
+        heading: "No present form",
+        body: [
+          "There's no present form of 'used to' — for a habit you have now, use present simple with a frequency adverb instead.",
+          "Don't confuse this with 'be used to' or 'get used to', which describe how familiar something feels (and can be present, past, or future) rather than a repeated past action.",
+        ],
+        examples: [
+          "❌ I use to play tennis every weekend. → ✅ I **play** tennis every weekend. (present habit)",
+          "I **am used to** waking up early now. (current familiarity — a different structure)",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ I didn't used to like coffee. → ✅ I didn't use to like coffee. (no -d after 'use' in the negative)",
+      "❌ Did you used to live here? → ✅ Did you use to live here? (no -d after 'use' in questions)",
+      "❌ I use to play tennis every weekend. → ✅ I used to play tennis every weekend. (positive statements need 'used to', with -d)",
+      "❌ I used to went to school by bus. → ✅ I used to go to school by bus. ('used to' + base verb, not the past form)",
+      "❌ He used to living in Berlin. → ✅ He used to live in Berlin. ('used to' + base verb, not -ing)",
     ],
   },
 
@@ -3353,6 +3506,52 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ They is playing in the garden. → ✅ They are playing in the garden. (plural subject needs 'are')",
       "❌ She is runing. → ✅ She is running. (double the final consonant: run → running)",
       "❌ What you are doing right now? → ✅ What are you doing right now? (question word order: 'are' before the subject)",
+    ],
+  },
+
+  present_continuous_a2: {
+    title: "Present Continuous (Temporary Situations)",
+    intro: "Present continuous isn't only for 'right now' — it also describes temporary situations happening around this period of time, and a small group of verbs almost never use it at all.",
+    sections: [
+      {
+        heading: "Temporary situations (not just this second)",
+        body: [
+          "Present continuous can describe something true for a limited period around now — this week, this month, these days — even if it's not happening at this exact second.",
+        ],
+        examples: [
+          "I'**m reading** a great book at the moment. (not literally reading right now)",
+          "She'**s staying** with her parents this month.",
+          "We'**re working** on a new project this week.",
+        ],
+      },
+      {
+        heading: "Present simple vs continuous: permanent vs temporary",
+        body: ["Present simple describes permanent facts and routines; present continuous describes a temporary situation, even a fairly long one."],
+        examples: [
+          "I **live** in Madrid. (permanent) vs I'**m living** with a friend until I find my own place. (temporary)",
+          "He **works** at a bank. (permanent job) vs He'**s working** from home this week. (temporary arrangement)",
+        ],
+      },
+      {
+        heading: "State verbs: verbs that don't normally take -ing",
+        body: [
+          "A small group of verbs describe states, not actions, and are almost never used in the continuous form — even when talking about now.",
+          "Common ones: like, love, hate, want, need, know, understand, believe, remember, belong, own, seem.",
+          "Note: 'have' can be continuous when it means an activity ('having lunch', 'having a shower'), but not when it means possession ('I have a car', not 'I am having a car').",
+        ],
+        examples: [
+          "❌ I am liking this song. → ✅ I **like** this song.",
+          "❌ She is knowing the answer. → ✅ She **knows** the answer.",
+          "I **understand** the question. (not 'I am understanding')",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ I am liking this song. → ✅ I like this song. (state verbs don't take -ing)",
+      "❌ She is knowing the answer. → ✅ She knows the answer. (state verb)",
+      "❌ I am wanting a coffee. → ✅ I want a coffee. (state verb)",
+      "❌ He is having a nice car. → ✅ He has a nice car. ('have' meaning possession is a state verb, unlike 'having lunch')",
+      "❌ This book is belonging to the library. → ✅ This book belongs to the library. (state verb)",
     ],
   },
 
