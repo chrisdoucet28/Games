@@ -60,23 +60,42 @@ function pickPowerUpKind(): PowerUpKind {
 // until every zombie in the wave has been resolved (shot or breached — either way it's gone). Clear
 // a fast wave and the next, bigger one starts sooner; a slow class just holds at the same pressure
 // for longer. First-pass numbers, meant to be tuned live rather than calculated to a "correct" answer.
-const ROUND_READ_PAUSE_SECONDS = 8; // empty beat at the start of every round — time to read the new prompt before anything spawns; bumped from 3s after teacher feedback that the room felt too rushed to actually process each new prompt
-const ROUND_QUOTA_BASE = 4; // zombies in round 1's wave
-const ROUND_QUOTA_GROWTH = 2; // extra zombies added to the wave each subsequent round
-const SPAWN_CHANCE_BASE = 0.12; // per-tick chance the next queued zombie in this round's wave actually spawns
+// The read-pause before zombies start spawning is longest on round 1 (time to learn the ropes)
+// and eases down round by round to a steady-state floor — per teacher feedback that new classes
+// found the game overwhelming from the very first wave, with no on-ramp. Numbers per that feedback:
+// round 1 ~60s, round 2 ~50s, round 3 ~40s, ... down to the 8s floor (the old flat value) by round 6.
+const ROUND_READ_PAUSE_FLOOR_SECONDS = 8;
+const ROUND_READ_PAUSE_START_SECONDS = 60;
+const ROUND_READ_PAUSE_DECAY_SECONDS = 10;
+function roundReadPauseSeconds(round: number): number {
+  return Math.max(ROUND_READ_PAUSE_FLOOR_SECONDS, ROUND_READ_PAUSE_START_SECONDS - (round - 1) * ROUND_READ_PAUSE_DECAY_SECONDS);
+}
+
+const ROUND_QUOTA_BASE = 4; // zombies in round 1's wave, at the 3-team baseline
+const ROUND_QUOTA_GROWTH = 2; // extra zombies added to the wave each subsequent round, at the 3-team baseline
+const SPAWN_CHANCE_BASE = 0.12; // per-tick chance the next queued zombie in this round's wave actually spawns, at the 3-team baseline
 const SPAWN_CHANCE_PER_ROUND = 0.02; // spawns arrive a little more relentlessly each round
 const SPAWN_CHANCE_CAP = 0.6;
 
-// One prompt per round, not per answer — everyone gets a beat to read it before the room opens up
-// into free-for-all sentence-throwing. ROUND_BREAK_MS is that reading pause; matches
-// ROUND_READ_PAUSE_SECONDS above so the credit buttons and the first zombie spawn unlock together.
-const ROUND_BREAK_MS = ROUND_READ_PAUSE_SECONDS * 1000;
-
-function roundZombieQuota(round: number): number {
-  return ROUND_QUOTA_BASE + (round - 1) * ROUND_QUOTA_GROWTH;
+// Wave size and spawn pressure both scale with team count, not just round number — the same
+// absolute zombie count hits a solo team far harder than three teams splitting the labor of
+// answering, building, and shooting, since each team defends with the same fixed bullets/axes
+// regardless of how many teams are in the room. Per teacher feedback that solo/duo games felt
+// punishingly hard next to 3+ team games. 3 teams is the original tuning baseline (1.0x); every
+// team below or above that shifts the wave by 20%.
+const TEAM_COUNT_DIFFICULTY_BASELINE = 3;
+const TEAM_COUNT_DIFFICULTY_STEP = 0.2;
+function teamCountDifficultyScale(teamCount: number): number {
+  return Math.max(0.5, 1 + (teamCount - TEAM_COUNT_DIFFICULTY_BASELINE) * TEAM_COUNT_DIFFICULTY_STEP);
 }
-function spawnChanceForRound(round: number): number {
-  return Math.min(SPAWN_CHANCE_CAP, SPAWN_CHANCE_BASE + (round - 1) * SPAWN_CHANCE_PER_ROUND);
+
+function roundZombieQuota(round: number, teamCount: number): number {
+  const base = ROUND_QUOTA_BASE + (round - 1) * ROUND_QUOTA_GROWTH;
+  return Math.max(2, Math.round(base * teamCountDifficultyScale(teamCount)));
+}
+function spawnChanceForRound(round: number, teamCount: number): number {
+  const base = SPAWN_CHANCE_BASE + (round - 1) * SPAWN_CHANCE_PER_ROUND;
+  return Math.min(SPAWN_CHANCE_CAP, base * teamCountDifficultyScale(teamCount));
 }
 
 type EntryPointId = "frontDoor" | "backDoor" | "window1" | "window2";
@@ -187,6 +206,7 @@ function emptyBarricades(): Record<EntryPointId, BarricadeItem[]> {
 function advanceTick(
   state: SiegeState,
   aliveTeamIds: (string | number)[],
+  teamCount: number,
   nextZombieId: () => number
 ): { next: SiegeState; events: TickEvent[] } {
   const events: TickEvent[] = [];
@@ -213,9 +233,9 @@ function advanceTick(
 
   // 1. Spawn — gated by the read pause (nothing spawns while the class is still reading the new
   // prompt) and capped by this round's wave quota. A random entry point, pure chance, no targeting.
-  const quota = roundZombieQuota(round);
-  const spawningAllowed = roundElapsedSeconds > ROUND_READ_PAUSE_SECONDS && zombiesSpawnedThisRound < quota;
-  if (spawningAllowed && Math.random() < spawnChanceForRound(round)) {
+  const quota = roundZombieQuota(round, teamCount);
+  const spawningAllowed = roundElapsedSeconds > roundReadPauseSeconds(round) && zombiesSpawnedThisRound < quota;
+  if (spawningAllowed && Math.random() < spawnChanceForRound(round, teamCount)) {
     const ep = ENTRY_POINTS[Math.floor(Math.random() * ENTRY_POINTS.length)];
     zombies.push({ id: nextZombieId(), entryPointId: ep.id, status: "approaching", progress: 0, lane: Math.random() * 2 - 1, kind: pickZombieKind(round), attackCooldown: 0 });
     zombiesSpawnedThisRound += 1;
@@ -649,16 +669,16 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
     return chosen;
   }, [pool]);
 
-  // A new prompt is drawn once per round, not once per answer — everyone gets ROUND_BREAK_MS to
-  // read it before the credit buttons unlock and the room opens up into free-for-all
-  // sentence-throwing. Any team can be credited any number of times against the same prompt —
-  // there's no per-team cap, since the horde only gets harder and the class needs to be able to
-  // keep pumping out barricades/power-ups at whatever pace it can manage.
-  const startRound = useCallback((question: QuestionData | null) => {
+  // A new prompt is drawn once per round, not once per answer — everyone gets
+  // roundReadPauseSeconds(roundNumber) to read it before the credit buttons unlock and the room
+  // opens up into free-for-all sentence-throwing. Any team can be credited any number of times
+  // against the same prompt — there's no per-team cap, since the horde only gets harder and the
+  // class needs to be able to keep pumping out barricades/power-ups at whatever pace it can manage.
+  const startRound = useCallback((question: QuestionData | null, roundNumber: number) => {
     setCurrentQuestion(question);
     setRoundPhase("reveal");
     if (breakTimeoutRef.current) clearTimeout(breakTimeoutRef.current);
-    breakTimeoutRef.current = setTimeout(() => setRoundPhase("active"), ROUND_BREAK_MS);
+    breakTimeoutRef.current = setTimeout(() => setRoundPhase("active"), roundReadPauseSeconds(roundNumber) * 1000);
   }, []);
 
   useEffect(() => () => { if (breakTimeoutRef.current) clearTimeout(breakTimeoutRef.current); }, []);
@@ -669,11 +689,11 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
       if (pausedRef.current) return;
       const aliveTeamIds = teams.map(t => t.id);
       const prevRound = siegeRef.current.round;
-      const { next, events } = advanceTick(siegeRef.current, aliveTeamIds, () => zombieIdRef.current++);
+      const { next, events } = advanceTick(siegeRef.current, aliveTeamIds, teams.length, () => zombieIdRef.current++);
       setSiege(next);
       if (next.round > prevRound) {
         showRoundBanner(next.round);
-        startRound(pickNextQuestion());
+        startRound(pickNextQuestion(), next.round);
       }
       events.forEach(ev => {
         if (ev.kind === "barricadeDestroyed") pushFx("barricadeDestroyed");
@@ -694,7 +714,7 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
   }, [phase, teams, pushFx, showElimination, showRoundBanner, startRound, pickNextQuestion, bumpStat]);
 
   useEffect(() => {
-    if (phase === "playing" && !currentQuestion) startRound(pickNextQuestion());
+    if (phase === "playing" && !currentQuestion) startRound(pickNextQuestion(), siegeRef.current.round);
   }, [phase, currentQuestion, pickNextQuestion, startRound]);
 
   const applyPowerUp = useCallback((kind: PowerUpKind, teamId: string | number) => {
@@ -836,7 +856,7 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
 
   const aliveTeams = teams.filter(t => siege.persons[t.id]?.alive);
   const round = siege.round;
-  const roundQuota = roundZombieQuota(round);
+  const roundQuota = roundZombieQuota(round, teams.length);
   const roundDefeated = siege.zombiesSpawnedThisRound - siege.zombies.length;
   // Bullets recharge on one shared global cadence for every team in lockstep (see step 0 of
   // advanceTick), so a single derived fraction covers everyone's "next" slot ring.
