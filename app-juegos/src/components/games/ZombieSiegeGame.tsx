@@ -98,6 +98,12 @@ function spawnChanceForRound(round: number, teamCount: number): number {
   return Math.min(SPAWN_CHANCE_CAP, base * teamCountDifficultyScale(teamCount));
 }
 
+// Rounds at or under this number prefer halfSentences content (a sentence-starter a team
+// completes aloud) over the normal spyRounds-shaped open prompt, where the selected topic(s)
+// have any — prototype easy on-ramp, see the pool/pickNextQuestion comment below. Never applies
+// past this cutoff, so rounds 3+ are exactly as hard as before this existed.
+const EASY_ROUND_CUTOFF = 2;
+
 type EntryPointId = "frontDoor" | "backDoor" | "window1" | "window2";
 const ENTRY_POINTS: { id: EntryPointId; label: string; icon: string }[] = [
   { id: "frontDoor", label: "Front Door", icon: "🚪" },
@@ -504,6 +510,10 @@ function PersonChip({ team, person, rechargeProgress }: { team: Team; person: Pe
 // whole round and any team can throw a sentence at it, judged on the fly, same as an open response.
 function SiegeQuestionCard({ question }: { question: QuestionData | null }) {
   if (!question) return null;
+  // halfSentences items (see LessonGamesGenerator's "zombie" branch): crewmateTopic is only a
+  // dedup key for these, not real display content, so it's deliberately not rendered as a heading
+  // the way it is for normal spyRounds-shaped rounds.
+  const isHalfSentence = question.type === "half sentence";
   return (
     <div style={{
       position: "relative", background: "white", border: "3px solid #6366F1", borderRadius: "16px",
@@ -517,9 +527,9 @@ function SiegeQuestionCard({ question }: { question: QuestionData | null }) {
         padding: "3px 12px", borderRadius: "20px", fontSize: "12px", fontWeight: "700", marginBottom: "8px",
         textTransform: "uppercase", letterSpacing: "0.04em",
       }}>
-        📖 add to the prompt
+        {isHalfSentence ? "✍️ finish the sentence" : "📖 add to the prompt"}
       </div>
-      {question.crewmateTopic && (
+      {!isHalfSentence && question.crewmateTopic && (
         <div style={{ fontSize: "22px", fontWeight: "900", color: "#1E1B4B", margin: "0 0 6px" }}>
           {question.crewmateTopic}
         </div>
@@ -529,6 +539,11 @@ function SiegeQuestionCard({ question }: { question: QuestionData | null }) {
       }}>
         {question.crewmatePrompt}
       </p>
+      {isHalfSentence && question.hint && (
+        <p style={{ fontSize: "12px", color: "#9CA3AF", fontStyle: "italic", margin: "8px 0 0" }}>
+          {question.hint}
+        </p>
+      )}
     </div>
   );
 }
@@ -657,13 +672,23 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
   // Question pool: sourced from spyRounds (LessonGamesGenerator wires "zombie" alongside "spy"),
   // so `questions` here is already crewmateTopic/crewmatePrompt content, not the fixed-answer
   // grammar-drill pool the other mixed-pool games use. Shuffled once, one shared stream (no
-  // per-team/per-category split).
+  // per-team/per-category split). Where a selected topic has halfSentences content, those items
+  // are mixed in too (same crewmateTopic/crewmatePrompt shape, tagged type:"half sentence") —
+  // picked preferentially for the first couple of rounds as an easier on-ramp, per teacher
+  // feedback that new classes found the game overwhelming from wave one. Never picked after that
+  // cutoff, so the difficulty curve past round 2 is unchanged from before this existed.
   const pool = useRef([...questions].sort(() => Math.random() - 0.5)).current;
   const lastTopicRef = useRef<string | undefined>(undefined);
-  const pickNextQuestion = useCallback((): QuestionData | null => {
+  const pickNextQuestion = useCallback((roundNumber: number): QuestionData | null => {
     if (!pool.length) return null;
-    const fresh = pool.filter(q => q.crewmateTopic !== lastTopicRef.current);
-    const source = fresh.length ? fresh : pool;
+    const isEasyRound = roundNumber <= EASY_ROUND_CUTOFF;
+    const halfSentenceItems = pool.filter(q => q.type === "half sentence");
+    const normalItems = pool.filter(q => q.type !== "half sentence");
+    const candidates = isEasyRound && halfSentenceItems.length > 0
+      ? halfSentenceItems
+      : normalItems.length > 0 ? normalItems : pool;
+    const fresh = candidates.filter(q => q.crewmateTopic !== lastTopicRef.current);
+    const source = fresh.length ? fresh : candidates;
     const chosen = source[Math.floor(Math.random() * source.length)];
     lastTopicRef.current = chosen.crewmateTopic;
     return chosen;
@@ -693,7 +718,7 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
       setSiege(next);
       if (next.round > prevRound) {
         showRoundBanner(next.round);
-        startRound(pickNextQuestion(), next.round);
+        startRound(pickNextQuestion(next.round), next.round);
       }
       events.forEach(ev => {
         if (ev.kind === "barricadeDestroyed") pushFx("barricadeDestroyed");
@@ -714,7 +739,7 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
   }, [phase, teams, pushFx, showElimination, showRoundBanner, startRound, pickNextQuestion, bumpStat]);
 
   useEffect(() => {
-    if (phase === "playing" && !currentQuestion) startRound(pickNextQuestion(), siegeRef.current.round);
+    if (phase === "playing" && !currentQuestion) startRound(pickNextQuestion(siegeRef.current.round), siegeRef.current.round);
   }, [phase, currentQuestion, pickNextQuestion, startRound]);
 
   const applyPowerUp = useCallback((kind: PowerUpKind, teamId: string | number) => {

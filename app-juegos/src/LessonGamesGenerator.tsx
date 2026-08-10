@@ -61,6 +61,13 @@ type TopicLibraryEntry = {
   spyRounds?: QuestionData[];
   hotSeatWords?: QuestionData[];
   hotPotatoPrompts?: QuestionData[];
+  // Zombie Siege's easier early-round content (prototype) — a sentence starter (the given half)
+  // that a team completes aloud with their own free ending, genuinely in between multiple choice
+  // (fully closed) and an open speaking prompt (fully open). Optional per topic; a topic without
+  // it just keeps using spyRounds-shaped content for every round, exactly like before this
+  // existed. exampleCompletion is a reference answer for the teacher judging it, not the only
+  // correct completion — same convention as every other open-response field in this codebase.
+  halfSentences?: { starter: string; hint?: string; exampleCompletion?: string }[];
 };
 
 type MinefieldGridData = NonNullable<TopicLibraryEntry["minefieldGrid"]>;
@@ -562,10 +569,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
         qs = mixByTopic(selectedEntries.map(entry => entry.auctionSentences ?? []));
       } else if (mode.id === "cards") {
         qs = mixByTopic(cardTaskBuckets);
-      } else if (mode.id === "spy" || mode.id === "zombie") {
-        // Zombie Siege reuses Spy Among Us's spyRounds content (crewmateTopic/crewmatePrompt) for
-        // its sentence-response prompts — short grammar-topic labels with a scenario/example-word
-        // cue, not the fixed-answer drill format the other mixed-pool games use.
+      } else if (mode.id === "spy") {
         // Tagged with which selected topic each round came from (by TOPIC_OPTIONS value, looked up
         // per-topic rather than zipped by index against selectedEntries, since that array silently
         // drops any topic value that doesn't resolve in TOPIC_LIBRARY and would misalign a zip) —
@@ -574,6 +578,35 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
         qs = mixByTopic(selectedTopics.map(value => {
           const entry = TOPIC_LIBRARY[value as keyof typeof TOPIC_LIBRARY] as TopicLibraryEntry | undefined;
           return (entry?.spyRounds ?? []).map(r => ({ ...r, spySourceTopic: value }));
+        }));
+      } else if (mode.id === "zombie") {
+        // Zombie Siege reuses Spy Among Us's spyRounds content (crewmateTopic/crewmatePrompt) for
+        // its sentence-response prompts — short grammar-topic labels with a scenario/example-word
+        // cue, not the fixed-answer drill format the other mixed-pool games use. Tagging follows
+        // the same per-topic-lookup reasoning as the "spy" branch above.
+        // Also merges in halfSentences where a topic has it (prototype: sentence-starter items a
+        // team completes aloud, used to ease ZombieSiegeGame's first couple of rounds) — mapped
+        // onto the same crewmateTopic/crewmatePrompt shape so SiegeQuestionCard needs no changes,
+        // with type:"half sentence" as the only marker ZombieSiegeGame's own round-based picking
+        // logic reads. Topics without halfSentences content are unaffected — every round just
+        // draws from spyRounds, exactly as before this existed.
+        qs = mixByTopic(selectedTopics.map(value => {
+          const entry = TOPIC_LIBRARY[value as keyof typeof TOPIC_LIBRARY] as TopicLibraryEntry | undefined;
+          return [
+            ...(entry?.spyRounds ?? []).map(r => ({ ...r, spySourceTopic: value })),
+            ...(entry?.halfSentences ?? []).map(h => ({
+              // crewmateTopic is set to the starter itself (never displayed for this type — see
+              // SiegeQuestionCard) purely so pickNextQuestion's "don't immediately repeat the same
+              // crewmateTopic" dedup logic treats each starter as distinct, instead of every
+              // halfSentences item colliding under one shared label.
+              type: "half sentence" as const,
+              crewmateTopic: h.starter,
+              crewmatePrompt: h.starter,
+              hint: h.hint,
+              answer: h.exampleCompletion,
+              spySourceTopic: value,
+            })),
+          ];
         }));
       } else if (mode.id === "hotseat") {
         qs = mixByTopic(selectedEntries.map(entry => entry.hotSeatWords ?? []));
