@@ -28,7 +28,9 @@ const CORRECT_ANSWER_SCORE = 20; // matches Rocket Fuel's per-sentence rate — 
 //   zombie actually breaches an empty barricade stack. Two breaches survived, the third eliminates.
 const BULLET_CAP_START = 3;
 const BULLET_CAP_CEILING = 5;
-const BULLET_RECHARGE_SECONDS = 90; // every team's bullet reserve gains +1 (up to its own cap) on this cadence, pure elapsed time
+const BULLET_RECHARGE_SECONDS = 90; // every team starts on this cadence — a team's own PersonState.rechargeSeconds can be lowered from here via the fasterReload power-up, so this is a starting value, not a shared global constant anymore
+const BULLET_RECHARGE_STEP_SECONDS = 10; // fasterReload shaves this much off a team's own cadence, every time it's picked up
+const BULLET_RECHARGE_FLOOR_SECONDS = 30; // fasterReload can't push a team's cadence below this
 const MAX_AXES = 2;
 
 // A correct answer normally drops a barricade item; POWERUP_CHANCE of the time it's a power-up
@@ -38,13 +40,13 @@ const POWERUP_CHANCE = 0.25;
 // ammoAllTeamsPlus1/2 are the only power-ups that help every team at once (the other three are
 // scoped to whichever team happened to answer) — a deliberate room-wide "gift" alongside the
 // personal ones, per the user's own suggestion.
-type PowerUpKind = "maxAmmo" | "bulletCapUp" | "allDoorsChair" | "ammoAllTeamsPlus1" | "ammoAllTeamsPlus2" | "nuke";
-const POWERUP_KINDS: PowerUpKind[] = ["maxAmmo", "bulletCapUp", "allDoorsChair", "ammoAllTeamsPlus1", "ammoAllTeamsPlus2", "nuke"];
-// Nuke clears the whole screen for free, so it's weighted well below the other five (which share
-// weight 5 each) rather than landing at an equal 1-in-6 of the power-up roll — of all correct
-// answers this puts nuke at ~1% (POWERUP_CHANCE * 1/26) vs ~4.8% for every other power-up kind.
+type PowerUpKind = "maxAmmo" | "bulletCapUp" | "allDoorsChair" | "ammoAllTeamsPlus1" | "ammoAllTeamsPlus2" | "nuke" | "fasterReload";
+const POWERUP_KINDS: PowerUpKind[] = ["maxAmmo", "bulletCapUp", "allDoorsChair", "ammoAllTeamsPlus1", "ammoAllTeamsPlus2", "nuke", "fasterReload"];
+// Nuke clears the whole screen for free, so it's weighted well below the rest (which share weight
+// 5 each) rather than landing at an equal 1-in-7 of the power-up roll — of all correct answers
+// this puts nuke at ~1% (POWERUP_CHANCE * 1/31) vs ~4% for every other power-up kind.
 const POWERUP_WEIGHT: Record<PowerUpKind, number> = {
-  maxAmmo: 5, bulletCapUp: 5, allDoorsChair: 5, ammoAllTeamsPlus1: 5, ammoAllTeamsPlus2: 5, nuke: 1,
+  maxAmmo: 5, bulletCapUp: 5, allDoorsChair: 5, ammoAllTeamsPlus1: 5, ammoAllTeamsPlus2: 5, nuke: 1, fasterReload: 5,
 };
 const POWERUP_TOTAL_WEIGHT = POWERUP_KINDS.reduce((sum, k) => sum + POWERUP_WEIGHT[k], 0);
 function pickPowerUpKind(): PowerUpKind {
@@ -138,7 +140,11 @@ type ZombieKind = "normal" | "runner" | "brute";
 // on one exact line. `attackCooldown` counts down while attacking — a zombie only lands a hit on
 // the barricade when it reaches 0, not every tick (see ZOMBIE_ATTACK_INTERVAL_TICKS below).
 type Zombie = { id: number; entryPointId: EntryPointId; status: ZombieStatus; progress: number; lane: number; kind: ZombieKind; attackCooldown: number };
-type PersonState = { bullets: number; bulletCap: number; axes: number; alive: boolean };
+type PersonState = {
+  bullets: number; bulletCap: number; axes: number; alive: boolean;
+  rechargeSeconds: number; // this team's own bullet-recharge cadence — starts at BULLET_RECHARGE_SECONDS, lowered by fasterReload
+  secondsSinceRecharge: number; // ticks toward rechargeSeconds; hits it -> +1 bullet (up to cap) and resets to 0
+};
 
 const ZOMBIE_ATTACK_INTERVAL_TICKS = 2; // a zombie now damages the barricade once every 2 ticks, not every tick — directly softens the "swarm insta-breaks the door" case, since N simultaneous attackers now deal roughly N/2 damage per tick instead of N
 
@@ -210,12 +216,33 @@ const POWERUP_LABEL: Record<PowerUpKind, string> = {
   ammoAllTeamsPlus1: "🔫 +1 Ammo for Everyone!",
   ammoAllTeamsPlus2: "🔫🔫 +2 Ammo for Everyone!",
   nuke: "☢️ NUKE! All zombies destroyed!",
+  fasterReload: "⚡ Faster Reload! (-10s cooldown)",
 };
 
 function emptyBarricades(): Record<EntryPointId, BarricadeItem[]> {
   const result = {} as Record<EntryPointId, BarricadeItem[]>;
   ENTRY_POINTS.forEach(ep => { result[ep.id] = []; });
   return result;
+}
+
+// Ticks every alive team's own bullet-recharge cadence forward by one second. Each team can now
+// have a different rechargeSeconds (see fasterReload), so this can no longer be a single shared
+// elapsedSeconds modulo check — every person tracks their own secondsSinceRecharge instead, and
+// this same helper is shared by the awaitingNextWave-frozen branch and the normal tick below so
+// the two can't drift out of sync with each other.
+function tickBulletRecharge(persons: Record<string | number, PersonState>, aliveTeamIds: (string | number)[]): Record<string | number, PersonState> {
+  let next = persons;
+  aliveTeamIds.forEach(id => {
+    const person = next[id];
+    if (!person?.alive) return;
+    const secondsSinceRecharge = person.secondsSinceRecharge + 1;
+    if (secondsSinceRecharge >= person.rechargeSeconds) {
+      next = { ...next, [id]: { ...person, bullets: Math.min(person.bulletCap, person.bullets + 1), secondsSinceRecharge: 0 } };
+    } else {
+      next = { ...next, [id]: { ...person, secondsSinceRecharge } };
+    }
+  });
+  return next;
 }
 
 // The one genuinely new pattern in this codebase: an open-ended real-time tick, rather than the
@@ -243,14 +270,7 @@ function advanceTick(
   // teacher takes to move on. barricades/zombies/round/roundElapsedSeconds/zombiesSpawnedThisRound
   // all stay exactly as they were — still reflecting the just-cleared wave.
   if (state.awaitingNextWave) {
-    if (elapsedSeconds % BULLET_RECHARGE_SECONDS === 0) {
-      aliveTeamIds.forEach(id => {
-        const person = persons[id];
-        if (person?.alive && person.bullets < person.bulletCap) {
-          persons = { ...persons, [id]: { ...person, bullets: person.bullets + 1 } };
-        }
-      });
-    }
+    persons = tickBulletRecharge(persons, aliveTeamIds);
     return { next: { ...state, persons, elapsedSeconds }, events: [] };
   }
 
@@ -258,15 +278,8 @@ function advanceTick(
   let zombiesSpawnedThisRound = state.zombiesSpawnedThisRound;
 
   // 0. Recharge — a flat timer, completely independent of rounds or how the English tasks are
-  // going. Axes never regenerate; only bullets do.
-  if (elapsedSeconds % BULLET_RECHARGE_SECONDS === 0) {
-    aliveTeamIds.forEach(id => {
-      const person = persons[id];
-      if (person?.alive && person.bullets < person.bulletCap) {
-        persons = { ...persons, [id]: { ...person, bullets: person.bullets + 1 } };
-      }
-    });
-  }
+  // going. Axes never regenerate; only bullets do. Each team ticks its own rechargeSeconds cadence.
+  persons = tickBulletRecharge(persons, aliveTeamIds);
 
   // 1. Spawn — gated by the read pause (nothing spawns while the class is still reading the new
   // prompt) and capped by this round's wave quota. A random entry point, pure chance, no targeting.
@@ -497,7 +510,10 @@ function HouseScene({ siege, teams }: { siege: SiegeState; teams: Team[] }) {
   );
 }
 
-function PersonChip({ team, person, rechargeProgress }: { team: Team; person: PersonState; rechargeProgress: number }) {
+function PersonChip({ team, person }: { team: Team; person: PersonState }) {
+  // Recharge cadence is per-team now (see fasterReload), so progress is derived from this
+  // person's own counters rather than a single shared fraction passed in from outside.
+  const rechargeProgress = person.secondsSinceRecharge / person.rechargeSeconds;
   return (
     <div style={{
       background: person.alive ? `linear-gradient(160deg,${team.color.dark}55,#050805)` : "#1A1A1A88",
@@ -515,7 +531,7 @@ function PersonChip({ team, person, rechargeProgress }: { team: Team; person: Pe
           {Array.from({ length: person.bulletCap }, (_, i) => {
             const gun = <span style={{ opacity: i < person.bullets ? 1 : 0.28, filter: i < person.bullets ? "none" : "grayscale(1)" }}>🔫</span>;
             if (i !== person.bullets || person.bullets >= person.bulletCap) return <span key={i}>{gun}</span>;
-            const secsLeft = Math.round((1 - rechargeProgress) * BULLET_RECHARGE_SECONDS);
+            const secsLeft = Math.round((1 - rechargeProgress) * person.rechargeSeconds);
             return (
               <span key={i} title={`Recharges in ~${secsLeft}s`} style={{
                 display: "inline-flex", alignItems: "center", justifyContent: "center", width: "16px", height: "16px",
@@ -598,9 +614,23 @@ function validateZombieSiegeSnapshot(raw: unknown, teams: { id: string | number 
   if (!siege || typeof siege.round !== "number" || siege.round < 1) return undefined;
   if (!Array.isArray(siege.zombies) || !siege.barricades || !siege.persons) return undefined;
 
-  const persons = { ...siege.persons };
+  // Backfills every existing person too (not just missing teams) so an older save from before
+  // fasterReload existed still resumes safely instead of leaving rechargeSeconds/secondsSinceRecharge
+  // undefined and corrupting the recharge tick's arithmetic.
+  const persons: Record<string | number, PersonState> = {};
+  Object.entries(siege.persons).forEach(([id, p]) => {
+    const person = p as Partial<PersonState>;
+    persons[id] = {
+      bullets: person.bullets ?? BULLET_CAP_START,
+      bulletCap: person.bulletCap ?? BULLET_CAP_START,
+      axes: person.axes ?? MAX_AXES,
+      alive: person.alive ?? true,
+      rechargeSeconds: person.rechargeSeconds ?? BULLET_RECHARGE_SECONDS,
+      secondsSinceRecharge: person.secondsSinceRecharge ?? 0,
+    };
+  });
   teams.forEach(t => {
-    if (!persons[t.id]) persons[t.id] = { bullets: BULLET_CAP_START, bulletCap: BULLET_CAP_START, axes: MAX_AXES, alive: true };
+    if (!persons[t.id]) persons[t.id] = { bullets: BULLET_CAP_START, bulletCap: BULLET_CAP_START, axes: MAX_AXES, alive: true, rechargeSeconds: BULLET_RECHARGE_SECONDS, secondsSinceRecharge: 0 };
   });
   const barricades = { ...emptyBarricades(), ...siege.barricades };
 
@@ -642,7 +672,7 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
   const [siege, setSiege] = useState<SiegeState>(() => resumed?.siege ?? ({
     barricades: emptyBarricades(),
     zombies: [],
-    persons: Object.fromEntries(teams.map(t => [t.id, { bullets: BULLET_CAP_START, bulletCap: BULLET_CAP_START, axes: MAX_AXES, alive: true }])),
+    persons: Object.fromEntries(teams.map(t => [t.id, { bullets: BULLET_CAP_START, bulletCap: BULLET_CAP_START, axes: MAX_AXES, alive: true, rechargeSeconds: BULLET_RECHARGE_SECONDS, secondsSinceRecharge: 0 }])),
     elapsedSeconds: 0,
     round: 1,
     roundElapsedSeconds: 0,
@@ -815,6 +845,10 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
         persons = next;
       } else if (kind === "nuke") {
         zombies = [];
+      } else if (kind === "fasterReload") {
+        const person = persons[teamId];
+        const rechargeSeconds = Math.max(BULLET_RECHARGE_FLOOR_SECONDS, person.rechargeSeconds - BULLET_RECHARGE_STEP_SECONDS);
+        persons = { ...persons, [teamId]: { ...person, rechargeSeconds } };
       }
       return { ...prev, persons, barricades, zombies };
     });
@@ -925,9 +959,6 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
   const round = siege.round;
   const roundQuota = roundZombieQuota(round, teams.length);
   const roundDefeated = siege.zombiesSpawnedThisRound - siege.zombies.length;
-  // Bullets recharge on one shared global cadence for every team in lockstep (see step 0 of
-  // advanceTick), so a single derived fraction covers everyone's "next" slot ring.
-  const rechargeProgress = (siege.elapsedSeconds % BULLET_RECHARGE_SECONDS) / BULLET_RECHARGE_SECONDS;
   // How long students still have to read/prepare before the round opens up — reuses the same
   // tick-driven roundElapsedSeconds clock advanceTick already gates zombie spawning against
   // (see spawningAllowed), so this bar and the actual "round truly starts" moment can't drift
@@ -1038,7 +1069,7 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
         <HouseScene siege={siege} teams={teams} />
 
         <div style={{ display: "flex", gap: "5px", justifyContent: "center", flexWrap: "wrap", marginBottom: "4px" }}>
-          {teams.map(t => <PersonChip key={t.id} team={t} person={siege.persons[t.id]} rechargeProgress={rechargeProgress} />)}
+          {teams.map(t => <PersonChip key={t.id} team={t} person={siege.persons[t.id]} />)}
         </div>
 
         <div style={{ maxWidth: "480px", width: "100%", margin: "0 auto" }}>
