@@ -71,7 +71,7 @@ const ACTION_DEFS: ActionDef[] = [
   { id: "sword",  type: "choose correct grammar",   label: "Sword Attack", emoji: "🗡️", character: "🤺", color: "#DC2626", glow: "#F87171", verb: "attack" },
   { id: "magic",  type: "speaking task",             label: "Magic Attack", emoji: "✨", character: "🧙", color: "#7C3AED", glow: "#C4B5FD", verb: "cast magic", cost: MAGIC_MP_COST },
   { id: "defend", type: "correct grammar mistakes",  label: "Defend",       emoji: "🛡️", character: "💂", color: "#0891B2", glow: "#67E8F9", verb: "defend" },
-  { id: "focus",  type: "finish the sentence",       label: "Focus",        emoji: "🔮", character: "🧘", color: "#D97706", glow: "#FCD34D", verb: "focus" },
+  { id: "focus",  type: "fill in the blank",         label: "Focus",        emoji: "🔮", character: "🧘", color: "#D97706", glow: "#FCD34D", verb: "focus" },
 ];
 
 type TeamRpg = { hp: number; xp: number; level: number; mp: number; maxMp: number; shieldTurnsLeft: number; shieldFresh: boolean };

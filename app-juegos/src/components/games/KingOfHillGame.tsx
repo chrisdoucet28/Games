@@ -21,7 +21,7 @@ const CONTEST_SECONDS = 20;
 
 type ZoneDef = { id: string; icon: string; pts: number; label?: string; prefix?: string };
 
-// Grammar-focus mode: King of the Hill's dominant flavor is "finish the sentence" — zones are
+// Grammar-focus mode: King of the Hill's dominant flavor is "fill in the blank" — zones are
 // plain territory, the linguistic identity comes entirely from the shared, simultaneous-answer
 // duel mechanic (both teams face the exact same blank when contesting a claimed zone).
 const HILL_ZONES_GRAMMAR: ZoneDef[] = [
@@ -128,13 +128,13 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
   const resumed = useRef(validateHillSnapshot(initialGameState, teams.length)).current;
 
   const pool = useRef((() => {
-    // Grammar mode is "finish the sentence" only — never "correct grammar mistakes", even as a
+    // Grammar mode is "fill in the blank" only — never "correct grammar mistakes", even as a
     // fallback. Every topic's content pool is kept deep enough (see topics.ts) that this never
     // needs a top-up.
     const base = isTopicMode
       ? questions
       : (() => {
-          const finish = questions.filter(q => q.type === "finish the sentence");
+          const finish = questions.filter(q => q.type === "fill in the blank");
           return finish.length ? finish : questions;
         })();
     return [...base].sort(() => Math.random() - 0.5);

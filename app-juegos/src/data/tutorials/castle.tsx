@@ -12,7 +12,7 @@ export const CASTLE_TUTORIAL_STEPS: TutorialStep[] = [
     ),
   },
   {
-    narration: "Every turn, pick ONE of four actions. Each action uses a different kind of question: Sword = multiple choice, Magic = speaking, Defend = fix the mistake, Focus = finish the sentence.",
+    narration: "Every turn, pick ONE of four actions. Each action uses a different kind of question: Sword = multiple choice, Magic = speaking, Defend = fix the mistake, Focus = fill in the blank.",
     visual: (
       <div style={{ display: "flex", justifyContent: "center", gap: "8px", flexWrap: "wrap" }}>
         {[["🗡️", "Sword"], ["✨", "Magic"], ["🛡️", "Defend"], ["🔮", "Focus"]].map(([icon, label]) => (

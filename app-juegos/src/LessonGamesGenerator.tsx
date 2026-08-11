@@ -586,8 +586,8 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
         // the same per-topic-lookup reasoning as the "spy" branch above.
         // Also merges in a three-tier easy on-ramp (per teacher request), mapped onto the same
         // crewmateTopic/crewmatePrompt shape so SiegeQuestionCard needs no structural changes:
-        // - halfSentences where a topic has it (prototype: sentence-starter items a team completes
-        //   aloud), tagged type:"half sentence" — currently authored for conditional topics only.
+        // - halfSentences where a topic has it (sentence-starter items a team completes aloud),
+        //   tagged type:"finish the sentence" — authored for every topic in the library.
         // - every topic's own cardTasks (already guaranteed non-empty, see the Card Shuffle
         //   round-shortfall fix), tagged type:"speaking task" — a single open task with no
         //   crewmate/spy roleplay framing, so it reads as easier than the full spyRounds prompt
@@ -604,7 +604,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
               // see SiegeQuestionCard) purely so pickNextQuestion's "don't immediately repeat the
               // same crewmateTopic" dedup logic treats each item as distinct, instead of every
               // item in a tier colliding under one shared label.
-              type: "half sentence" as const,
+              type: "finish the sentence" as const,
               crewmateTopic: h.starter,
               crewmatePrompt: h.starter,
               hint: h.hint,

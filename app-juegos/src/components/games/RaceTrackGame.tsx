@@ -19,7 +19,7 @@ type ZoneDef = { id: string; label: string; short: string; emoji: string; color:
 const ZONES: ZoneDef[] = [
   { id: "correct grammar mistakes", label: "Error Correction", short: "Error Fix", emoji: "🔍", color: "#60A5FA", end: 15 },
   { id: "choose correct grammar", label: "Multiple Choice", short: "Multi Choice", emoji: "🔤", color: "#4ADE80", end: 30 },
-  { id: "finish the sentence", label: "Fill the Blank", short: "Fill Blank", emoji: "✏️", color: "#F97316", end: 45 },
+  { id: "fill in the blank", label: "Fill the Blank", short: "Fill Blank", emoji: "✏️", color: "#F97316", end: 45 },
   { id: "speaking task", label: "Speaking", short: "Speaking", emoji: "🗣️", color: "#F7C948", end: 60 },
 ];
 function getZone(pos: number): ZoneDef {

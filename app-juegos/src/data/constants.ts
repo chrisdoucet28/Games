@@ -75,4 +75,4 @@ export const GAME_MODES: GameMode[] = [
   { id: "zombie",    name: "Zombie Siege", icon: "🧟",  desc: "Add sentences to a shared prompt to barricade the house — clear each wave of zombies before the next, bigger one arrives", color: "#65A30D", tag: "Free-for-all sentence-throwing · wave-based pressure" },
 ];
 
-export const TASK_TYPES: string[] = ["finish the sentence", "correct grammar mistakes", "use vocabulary in a sentence", "choose correct grammar", "rewrite sentences", "speaking task"];
+export const TASK_TYPES: string[] = ["fill in the blank", "correct grammar mistakes", "use vocabulary in a sentence", "choose correct grammar", "rewrite sentences", "speaking task"];

@@ -542,7 +542,7 @@ function SiegeQuestionCard({ question }: { question: QuestionData | null }) {
   // halfSentences/cardTasks items (see LessonGamesGenerator's "zombie" branch): crewmateTopic is
   // only a dedup key for these, not real display content, so it's deliberately not rendered as a
   // heading the way it is for normal spyRounds-shaped rounds.
-  const isHalfSentence = question.type === "half sentence";
+  const isHalfSentence = question.type === "finish the sentence";
   const isSpeakingTask = question.type === "speaking task";
   const showCrewmateHeading = !isHalfSentence && !isSpeakingTask && !!question.crewmateTopic;
   const badgeText = isHalfSentence ? "✍️ finish the sentence" : isSpeakingTask ? "🎤 speaking task" : "📖 add to the prompt";
@@ -701,7 +701,7 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
   // grammar-drill pool the other mixed-pool games use. Shuffled once, one shared stream (no
   // per-team/per-category split). Where a selected topic has halfSentences and/or cardTasks
   // content, those are mixed in too (same crewmateTopic/crewmatePrompt shape, tagged
-  // type:"half sentence" / type:"speaking task") — picked preferentially for early rounds per the
+  // type:"finish the sentence" / type:"speaking task") — picked preferentially for early rounds per the
   // three-tier on-ramp (see HALF_SENTENCE_ROUND_CUTOFF/SPEAKING_TASK_ROUND_CUTOFF above). Never
   // picked past their cutoff, so the difficulty curve from round 7 on is unchanged from before any
   // of this existed.
@@ -709,9 +709,9 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
   const lastTopicRef = useRef<string | undefined>(undefined);
   const pickNextQuestion = useCallback((roundNumber: number): QuestionData | null => {
     if (!pool.length) return null;
-    const halfSentenceItems = pool.filter(q => q.type === "half sentence");
+    const halfSentenceItems = pool.filter(q => q.type === "finish the sentence");
     const speakingTaskItems = pool.filter(q => q.type === "speaking task");
-    const normalItems = pool.filter(q => q.type !== "half sentence" && q.type !== "speaking task");
+    const normalItems = pool.filter(q => q.type !== "finish the sentence" && q.type !== "speaking task");
     let candidates: QuestionData[];
     if (roundNumber <= HALF_SENTENCE_ROUND_CUTOFF && halfSentenceItems.length > 0) {
       candidates = halfSentenceItems;

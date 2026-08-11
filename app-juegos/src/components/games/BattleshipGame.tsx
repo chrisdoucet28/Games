@@ -25,7 +25,7 @@ type ColDef = { letter: string; label: string; emoji: string };
 // Battleship's whole identity is error-hunting — every square on every board is a
 // "correct grammar mistakes" question. No other task type appears here; that variety
 // belongs to other games now (Word Whack = choose the correct answer, King of the Hill =
-// finish the sentence). Column letters just name board coordinates, they're not categories.
+// fill in the blank). Column letters just name board coordinates, they're not categories.
 const BATTLESHIP_COLS_5: ColDef[] = ["A", "B", "C", "D", "E"].map(letter => (
   { letter, label: "Fix the mistake", emoji: "✏️" }
 ));
