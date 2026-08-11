@@ -55,6 +55,11 @@ function SpotlightBackdrop() {
   );
 }
 
+// Slot index maps directly to a 2x2 grid quadrant (see slotPos below) — used to give each card a
+// callable position label ("TOP LEFT" etc.) so students can shout out which one they want without
+// pointing, even mid-shuffle since the label follows whichever card currently occupies that slot.
+const SLOT_LABELS = ["TOP LEFT", "TOP RIGHT", "BOTTOM LEFT", "BOTTOM RIGHT"];
+
 // Diagonal big-top canvas stripes — a subtle, low-opacity texture layer.
 const TENT_STRIPES: React.CSSProperties = {
   position: "absolute", inset: 0, pointerEvents: "none",
@@ -451,7 +456,12 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
                     <>{card.isStar ? <div style={{ fontSize: "36px", animation: "csStarPulse 1.1s ease-in-out infinite" }}>⭐</div> : <div style={{ fontSize: "30px", opacity: 0.35 }}>🎪</div>}</>
                   )}
                   {(phase === "shuffling" || phase === "picking" || phase === "answering") && (
-                    <div style={{ fontSize: "30px", opacity: 0.4 }}>🎪</div>
+                    <>
+                      <div style={{ fontSize: "30px", opacity: 0.4 }}>🎪</div>
+                      {phase !== "shuffling" && (
+                        <div style={{ position: "absolute", bottom: "8px", fontSize: "10px", fontWeight: "900", color: "#FCD34D", letterSpacing: "0.03em", textAlign: "center" }}>{SLOT_LABELS[slot]}</div>
+                      )}
+                    </>
                   )}
                   {revealed && (
                     <>
