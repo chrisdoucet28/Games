@@ -4,6 +4,7 @@ import { ScoreBoard } from "../shared/ScoreBoard";
 import { teamsGridCols, GAME_MODES } from "../../data/constants";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
+import { TurnTimerBar } from "../shared/TurnTimerBar";
 import { ZOMBIE_TUTORIAL_STEPS } from "../../data/tutorials/zombie";
 
 const GM = GAME_MODES.find(g => g.id === "zombie")!;
@@ -927,6 +928,12 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
   // Bullets recharge on one shared global cadence for every team in lockstep (see step 0 of
   // advanceTick), so a single derived fraction covers everyone's "next" slot ring.
   const rechargeProgress = (siege.elapsedSeconds % BULLET_RECHARGE_SECONDS) / BULLET_RECHARGE_SECONDS;
+  // How long students still have to read/prepare before the round opens up — reuses the same
+  // tick-driven roundElapsedSeconds clock advanceTick already gates zombie spawning against
+  // (see spawningAllowed), so this bar and the actual "round truly starts" moment can't drift
+  // out of sync with each other.
+  const prepSecondsTotal = roundReadPauseSeconds(round);
+  const prepSecondsLeft = Math.max(0, prepSecondsTotal - siege.roundElapsedSeconds);
 
   return (
     <div style={arenaStyle}>
@@ -1038,8 +1045,13 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
           <SiegeQuestionCard question={currentQuestion} />
 
           {roundPhase === "reveal" ? (
-            <div style={{ textAlign: "center", fontSize: "12px", color: "#A3B899", fontWeight: "700", marginTop: "8px" }}>
-              📖 Read the prompt... get ready!
+            <div style={{ textAlign: "center", marginTop: "8px" }}>
+              <div style={{ fontSize: "12px", color: "#A3B899", fontWeight: "700", marginBottom: "6px" }}>
+                📖 Read the prompt... get ready!
+              </div>
+              <div style={{ display: "flex", justifyContent: "center" }}>
+                <TurnTimerBar timeLeft={prepSecondsLeft} totalSeconds={prepSecondsTotal} />
+              </div>
             </div>
           ) : (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "5px", marginTop: "6px" }}>
