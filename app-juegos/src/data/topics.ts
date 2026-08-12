@@ -13457,6 +13457,12 @@ export const TOPIC_LIBRARY = {
       { type:"use vocabulary in a sentence", question:"'was able to' — overcoming a specific difficulty", answer:"Despite the strike, we were able to catch our flight.", hint:"'Was/were able to' describes a specific successful action, not general ability.", difficulty:"medium" },
       { type:"use vocabulary in a sentence", question:"'could' — asking permission more politely than can", answer:"Could I possibly leave a bit early today?", hint:"'Could' is a more polite way to ask permission than 'can'.", difficulty:"medium" },
       { type:"use vocabulary in a sentence", question:"'had better not' — a warning against something", answer:"You'd better not forget your passport.", hint:"'Had better not' warns against doing something.", difficulty:"hard" },
+      { type:"choose correct grammar", question:"'___ I leave a bit early today?' (Could/Must/Shall)", answer:"Could", hint:"'Could I…?' is a polite way to ask permission", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'You ___ save more money each month.' (ought to/must/can)", answer:"ought to", hint:"'Ought to' gives advice, similar to 'should'", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'Despite the strike, we ___ catch our flight.' (were able to/could/can)", answer:"were able to", hint:"A specific past achievement uses 'was/were able to'", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'You'd ___ not forget your passport.' (better/should/must)", answer:"better", hint:"'Had better not' warns against doing something", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'___ I carry that bag for you?' (Shall/Must/Should)", answer:"Shall", hint:"'Shall I…?' offers to help", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'He ___ juggle five balls — I saw him do it!' (can/should/must)", answer:"can", hint:"'Can' expresses an impressive ability", difficulty:"easy" },
 ],
     spyRounds: [
       { crewmateTopic:"Ability (can/could)", spyTopic:"Permission (can/may/could)", crewmatePrompt:"Talk about what you can and can't do — 'I can speak French.', 'I could swim when I was five.', 'Were you able to fix it?'", spyPrompt:"Talk about permission — 'Can I leave early?', 'You may not use your phone.', 'Could I borrow your pen?', 'We're not allowed to eat in class.'", explanation:"Crewmates use modals for ability. The spy uses the same modals for permission.", spyGuessOptions:["Ability (can/could)","Permission (can/may/could)","Advice (should)","Suggestions (shall)"] },
@@ -24148,6 +24154,8 @@ export const TOPIC_LIBRARY = {
           { type:"correct grammar mistakes", question:"'I need umbrella — it's starting to rain.'", answer:"I need an umbrella — it's starting to rain.", hint:"Singular countable nouns always need an article; 'umbrella' starts with a vowel sound", difficulty:"easy" },
       { type:"use vocabulary in a sentence", question:"'the' — ordinal numbers", answer:"This is the first time I've tried sushi.", hint:"Ordinal numbers like 'first', 'second' always take 'the'.", difficulty:"medium" },
       { type:"use vocabulary in a sentence", question:"no article — proper nouns like most cities", answer:"London is one of the biggest cities in Europe.", hint:"Most cities and personal names take no article.", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'This is ___ unusual name for a boy.' (a/an/the)", answer:"an", hint:"'Unusual' starts with a vowel sound", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'He plays ___ guitar every evening.' (a/an/the)", answer:"the", hint:"Musical instruments take 'the' after 'play'", difficulty:"medium" },
 ],
     spyRounds: [
       { crewmateTopic:"Articles — No Article for General Statements", spyTopic:"Articles — 'The' for Specific Things", crewmatePrompt:"Make general statements about whole categories with no article — 'Dogs are loyal', 'Money can't buy happiness'.", spyPrompt:"Talk about specific, already-known things using 'the' — 'The dog next door barks all night', 'The money on the table is mine'.", explanation:"Crewmates made general statements with no article. The spy talked about specific things with 'the'.", spyGuessOptions:["Articles — No Article for General Statements","Articles — 'The' for Specific Things","Articles — 'A/An' for First Mention","Dependent Prepositions"] },
@@ -24353,6 +24361,8 @@ export const TOPIC_LIBRARY = {
       { type:"correct grammar mistakes", question:"'This spray is to killing insects.'", answer:"This spray is for killing insects.", hint:"'For' + -ing for the general function of a product", difficulty:"medium" },
       { type:"use vocabulary in a sentence", question:"'to' — purpose clause with a negative main verb", answer:"I avoid caffeine at night to sleep better.", hint:"'To' + verb expresses the specific purpose behind an action.", difficulty:"medium" },
       { type:"use vocabulary in a sentence", question:"'for' + noun — the purpose of a tool", answer:"You need a hammer for this job.", hint:"'For' + noun, no verb involved.", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'I bought a hammer ___ fix the shelf.' (to/for/so as)", answer:"to", hint:"'To' + verb for a specific purpose", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'This spray is ___ killing insects.' (to/for/so as to)", answer:"for", hint:"'For' + -ing describes an object's general function", difficulty:"medium" },
 ],
     spyRounds: [
       { crewmateTopic:"Purpose with 'to' + verb", spyTopic:"Purpose with 'for' + noun", crewmatePrompt:"Explain why you did a specific action using 'to' + verb — 'I called to ask about the job.'", spyPrompt:"Explain what you went to get using 'for' + noun — 'I went to the shop for milk.'", explanation:"Crewmates used 'to' + verb for a specific action. The spy used 'for' + noun for a thing.", spyGuessOptions:["Purpose with 'to' + verb","Purpose with 'for' + noun","Clauses of Reason","Dependent Prepositions"] },
@@ -24558,6 +24568,8 @@ export const TOPIC_LIBRARY = {
       { type:"correct grammar mistakes", question:"'I stayed inside because the cold weather.'", answer:"I stayed inside because of the cold weather.", hint:"'Because of' + noun, not 'because' + noun", difficulty:"medium" },
       { type:"use vocabulary in a sentence", question:"'because of' + -ing — a reason involving someone's action", answer:"The meeting was delayed because of him arriving late.", hint:"'Because of' can be followed by a possessive/-ing form describing someone's action.", difficulty:"hard" },
       { type:"use vocabulary in a sentence", question:"'due to' — a reason in a news headline", answer:"Flights were grounded due to volcanic ash.", hint:"'Due to' + noun is common in news and formal reports.", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'The shop closed early ___ a staff shortage.' (because/because of/since)", answer:"because of", hint:"'Because of' + a noun", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'___ it's getting late, we should head home.' (Since/Because/Because of)", answer:"Since", hint:"'Since' introduces a background reason", difficulty:"medium" },
 ],
     spyRounds: [
       { crewmateTopic:"Reason with 'because' + clause", spyTopic:"Reason with 'because of' + noun", crewmatePrompt:"Explain reasons using 'because' + a full clause — 'I stayed home because it was raining.'", spyPrompt:"Explain reasons using 'because of' + a noun — 'I stayed home because of the rain.'", explanation:"Crewmates used 'because' before a clause. The spy used 'because of' before a noun.", spyGuessOptions:["Reason with 'because' + clause","Reason with 'because of' + noun","Clauses of Purpose","Conjunctions"] },
@@ -24763,6 +24775,8 @@ export const TOPIC_LIBRARY = {
       { type:"correct grammar mistakes", question:"'Before to leave, please turn off the lights.'", answer:"Before leaving, please turn off the lights.", hint:"'Before' as a preposition + gerund", difficulty:"medium" },
       { type:"use vocabulary in a sentence", question:"gerund after 'before' (preposition)", answer:"Before leaving the house, I always check the stove.", hint:"'Before' as a preposition is followed by a gerund.", difficulty:"medium" },
       { type:"use vocabulary in a sentence", question:"gerund after 'good at'", answer:"She's really good at solving puzzles.", hint:"'Good at' + gerund describes a skill.", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'I'm interested in ___ new skills.' (learn/learning/to learn)", answer:"learning", hint:"Preposition 'in' + gerund", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'Before ___, please turn off the lights.' (leave/leaving/to leave)", answer:"leaving", hint:"'Before' as a preposition + gerund", difficulty:"medium" },
 ],
     spyRounds: [
       { crewmateTopic:"Gerund After Prepositions", spyTopic:"Gerund as the Subject", crewmatePrompt:"Talk about things you do using gerund + preposition — 'before eating', 'without asking', 'instead of complaining'.", spyPrompt:"Make general statements starting with a gerund as the subject — 'Exercising every day...', 'Learning a language...'.", explanation:"Crewmates used gerunds after prepositions. The spy used a gerund as the subject of the sentence.", spyGuessOptions:["Gerund After Prepositions","Gerund as the Subject","Gerund as the Object","Gerunds vs Infinitives"] },
