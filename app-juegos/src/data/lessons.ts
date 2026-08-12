@@ -4811,30 +4811,55 @@ export const LESSONS: Record<string, Lesson> = {
     sections: [
       {
         heading: "Basic direction verbs",
-        body: ["turn left/right, go straight ahead, cross the road, go past, follow this road, keep going + verb-ing."],
+        body: ["turn left/right, go straight ahead, cross the road, go past, walk along, follow this road, keep going + verb-ing."],
         examples: [
           "**Turn left** at the traffic lights. (not 'turn on the left')",
           "**Go straight ahead** until you see the bank. (not 'go direct')",
           "**Cross the road** at the crossing. (not 'pass the road')",
+          "**Walk along** this street until you reach the square.",
           "**Keep going** until you reach the lights.",
         ],
       },
       {
-        heading: "Fixed prepositions",
-        body: ["'on your left/right' (not 'in'); 'at the traffic lights/end of the road' (not 'in'); 'on the corner' (not 'in')."],
+        heading: "Take the first/second street, and roundabouts",
+        body: ["Ordinal number + 'street' names a specific turn: 'the first street', 'the second street'.", "For a roundabout, use 'go round' + 'take the first/second/third exit'."],
+        examples: [
+          "**Take the second street** on your left.",
+          "**Go round** the roundabout and **take the third exit**.",
+        ],
+      },
+      {
+        heading: "Fixed prepositions and location phrases",
+        body: ["'on your left/right' (not 'in'); 'at the traffic lights/end of the road' (not 'in'); 'on the corner' (not 'in'); 'opposite' = directly across from; 'just around the corner' = very close."],
         examples: [
           "The bank is **on your left**. (not 'in your left')",
           "The hotel is **at the end of** the road. (not 'on the end of')",
           "The museum is **on the corner**. (not 'in the corner')",
+          "The park is **opposite** the supermarket.",
+          "The bus stop is **just around the corner**.",
         ],
       },
       {
         heading: "Asking about directions and distance",
-        body: ["'How do I get to...?' is the standard way to ask for directions.", "'Is it far from here?' asks about distance; 'you can't miss it' reassures someone it's easy to find."],
+        body: ["'How do I get to...?' is the standard way to ask for directions.", "'Is it far from here?' asks about distance; 'a five-minute walk' answers it; 'you can't miss it' reassures someone it's easy to find."],
         examples: [
           "Excuse me, **how do I get to** the station? (not 'how do I go to')",
           "**Is it far** from here? (not 'is it long')",
+          "It's about **a five-minute walk** from here.",
           "**You can't miss it**! (not 'you can't miss that')",
+        ],
+      },
+      {
+        heading: "Turning an instruction into a negative, a question, or a polite request",
+        body: [
+          "Negative imperative: Don't + base verb.",
+          "Present simple question (to confirm a direction): Do + subject + base verb?",
+          "Polite request: Could you + base verb ..., please?",
+        ],
+        examples: [
+          "**Don't cross** the road here.",
+          "**Do I turn** left at the lights?",
+          "**Could you turn** right at the corner, please?",
         ],
       },
     ],
@@ -4843,6 +4868,7 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ How do I go to the station? → ✅ How do I get to the station? (fixed phrase: 'get to')",
       "❌ The bank is in your left. → ✅ The bank is on your left.",
       "❌ Is it long from here? → ✅ Is it far from here? (distance uses 'far', not 'long')",
+      "❌ Could you to turn left, please? → ✅ Could you turn left, please? (base verb after 'could you', no 'to')",
     ],
   },
 
