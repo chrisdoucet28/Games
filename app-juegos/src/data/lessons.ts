@@ -4851,16 +4851,26 @@ export const LESSONS: Record<string, Lesson> = {
         ],
       },
       {
-        heading: "Turning an instruction into a negative, a question, or a polite request",
+        heading: "Turning an instruction into a negative or a question",
         body: [
           "Negative imperative: Don't + base verb.",
           "Present simple question (to confirm a direction): Do + subject + base verb?",
-          "Polite request: Could you + base verb ..., please?",
         ],
         examples: [
           "**Don't cross** the road here.",
           "**Do I turn** left at the lights?",
-          "**Could you turn** right at the corner, please?",
+        ],
+      },
+      {
+        heading: "Turning a description into an instruction",
+        body: [
+          "Someone else's description of where a place is tells you which instruction to give: 'on your left/right' → turn left/right; 'straight down this road' or 'still on this road' → go straight ahead.",
+          "Chain two steps together with 'then' when the description needs both.",
+        ],
+        examples: [
+          "'The café is on your left, right here.' → **Turn left** for the café.",
+          "'The church is straight down this road, no turning.' → **Go straight ahead** to the church.",
+          "'The pool is straight ahead first, then on your right after the roundabout.' → **Go straight ahead, then turn right** after the roundabout.",
         ],
       },
     ],
@@ -4869,7 +4879,6 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ How do I go to the station? → ✅ How do I get to the station? (fixed phrase: 'get to')",
       "❌ The bank is in your left. → ✅ The bank is on your left.",
       "❌ Is it long from here? → ✅ Is it far from here? (distance uses 'far', not 'long')",
-      "❌ Could you to turn left, please? → ✅ Could you turn left, please? (base verb after 'could you', no 'to')",
     ],
   },
 
