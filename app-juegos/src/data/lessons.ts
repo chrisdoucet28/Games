@@ -4811,13 +4811,14 @@ export const LESSONS: Record<string, Lesson> = {
     sections: [
       {
         heading: "Basic direction verbs",
-        body: ["turn left/right, go straight ahead, cross the road, go past, walk along, follow this road, keep going + verb-ing."],
+        body: ["turn left/right, go straight ahead, cross the road, go past, walk along, follow this road, keep going + verb-ing.", "You can chain two steps together with 'then': give the first instruction, then the second."],
         examples: [
           "**Turn left** at the traffic lights. (not 'turn on the left')",
           "**Go straight ahead** until you see the bank. (not 'go direct')",
           "**Cross the road** at the crossing. (not 'pass the road')",
           "**Walk along** this street until you reach the square.",
           "**Keep going** until you reach the lights.",
+          "**Go straight ahead, then turn left** for the station. (two steps, joined with 'then')",
         ],
       },
       {
