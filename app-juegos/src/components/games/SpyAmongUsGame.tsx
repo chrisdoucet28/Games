@@ -1380,7 +1380,10 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
 
             return (
               <div style={{ position: "relative" }}>
-                <div style={{ position: "absolute", top: 0, right: 0 }}>
+                {/* zIndex needed: the spy card below also sets position:relative, and without an
+                    explicit stacking order it paints after (on top of) this button in tree order,
+                    silently swallowing clicks even though the button is visually present. */}
+                <div style={{ position: "absolute", top: 0, right: 0, zIndex: 2 }}>
                   <FlagPromptButton gameId="spy" questionData={round} />
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "14px" }}>
