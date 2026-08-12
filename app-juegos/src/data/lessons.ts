@@ -1666,12 +1666,37 @@ export const LESSONS: Record<string, Lesson> = {
         heading: "Grammar to remember",
         body: [
           "All indefinite pronouns take a singular verb.",
-          "whoever/whatever (= any person/thing who/that) also take a singular verb.",
         ],
         examples: [
           "**Everybody was** invited.",
           "**Nothing was** said.",
+        ],
+      },
+      {
+        heading: "Whoever / whatever / wherever / whichever (open choice)",
+        body: [
+          "whoever = any person who",
+          "whatever = any thing that",
+          "wherever = any place that",
+          "whichever = any one, out of a limited set",
+          "All of these take a singular verb, just like the other indefinite pronouns above.",
+        ],
+        examples: [
           "**Whoever calls**, tell them I'm busy.",
+          "You can choose **whatever** topping you like.",
+          "**Wherever** we go, my dog wants to come too.",
+          "You can take **whichever** seat is free.",
+        ],
+      },
+      {
+        heading: "Neither (two people or things)",
+        body: [
+          "neither = not one and not the other, of two — always singular",
+          "Its positive opposite is both = the two together, always plural.",
+        ],
+        examples: [
+          "**Neither of us** wanted to cook, so we ordered takeout.",
+          "**Both of my parents** work in the same hospital.",
         ],
       },
     ],
@@ -1681,6 +1706,8 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ Everything are ready. → ✅ Everything is ready. (indefinite pronouns are always singular)",
       "❌ I don't want nothing to eat. → ✅ I don't want anything to eat. (avoid double negatives)",
       "❌ I can't find it nowhere. → ✅ I can't find it anywhere. ('anywhere' with a negative verb, not 'nowhere')",
+      "❌ Whoever call, tell them I'm in a meeting. → ✅ Whoever calls, tell them I'm in a meeting. ('whoever' takes a singular verb)",
+      "❌ Both of my parents works in the same hospital. → ✅ Both of my parents work in the same hospital. ('both' is plural, unlike 'neither')",
     ],
   },
 
