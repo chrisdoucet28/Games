@@ -24982,6 +24982,8 @@ export const TOPIC_LIBRARY = {
       { type:"correct grammar mistakes", question:"'He has been understand the topic for years.'", answer:"He has understood the topic for years.", hint:"'Understand' is stative — never takes the continuous", difficulty:"medium" },
       { type:"use vocabulary in a sentence", question:"present perfect continuous — a temporary project at work", answer:"I've been working on this presentation all week.", hint:"'Have/has been' + -ing emphasizes an ongoing, unfinished activity.", difficulty:"medium" },
       { type:"use vocabulary in a sentence", question:"present perfect simple — a lifetime achievement count", answer:"She's won three awards this year.", hint:"Achievements and totals use the simple form, focused on the result.", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'My eyes hurt — I ___ at the screen all day.' (have stared/have been staring/stared)", answer:"have been staring", hint:"Ongoing activity causing a present state", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'The company ___ since 1990.' (has existed/has been existing/existed)", answer:"has existed", hint:"'Exist' is stative — no continuous", difficulty:"medium" },
 ],
     spyRounds: [
       { crewmateTopic:"Present Perfect Continuous (Duration/Activity)", spyTopic:"Present Perfect Simple (Result/Completion)", crewmatePrompt:"Talk about how long an activity has been going on — 'I've been studying for three hours.'", spyPrompt:"Talk about the completed result or a count of an action — 'I've studied three chapters.'", explanation:"Crewmates emphasized the ongoing duration of an activity. The spy emphasized the finished result or a count.", spyGuessOptions:["Present Perfect Continuous (Duration)","Present Perfect Simple (Result)","Present Perfect: Just, Already, Yet","Past Continuous"] },
@@ -25380,6 +25382,8 @@ export const TOPIC_LIBRARY = {
       { type:"correct grammar mistakes", question:"'Her explanation was really understandful.'", answer:"Her explanation was really understandable.", hint:"Use '-able', not '-ful'", difficulty:"medium" },
       { type:"use vocabulary in a sentence", question:"'ir-' + 'responsible' (before r)", answer:"Leaving the stove on was completely irresponsible.", hint:"'Ir-' replaces 'in-' before words starting with 'r'.", difficulty:"medium" },
       { type:"use vocabulary in a sentence", question:"'-able' + 'understand'", answer:"His explanation was clear and understandable.", hint:"'-able' means 'capable of being done'.", difficulty:"easy" },
+      { type:"choose correct grammar", question:"Choose the correct prefix for 'responsible': (im-/in-/ir-)", answer:"ir-", hint:"'Responsible' starts with 'r' — use 'ir-'", difficulty:"medium" },
+      { type:"choose correct grammar", question:"Add the suffix meaning 'capable of being done' to 'understand': (understandful/understandable/understandive)", answer:"understandable", hint:"'-able' means 'capable of being done'", difficulty:"easy" },
 ],
     spyRounds: [
       { crewmateTopic:"Negative Prefixes (un-/in-/dis-)", spyTopic:"Positive Suffixes (-able/-al/-ive)", crewmatePrompt:"Describe things you dislike using negative prefixes — 'unfair', 'inconvenient', 'dishonest'.", spyPrompt:"Describe positive qualities using adjective suffixes — 'adaptable', 'inspirational', 'innovative'.", explanation:"Crewmates used negative prefixes. The spy used suffixes that form positive descriptive adjectives.", spyGuessOptions:["Negative Prefixes","Positive Suffixes","im-/il-/ir- Prefixes","Suffixes Meaning 'Without'"] },
@@ -27503,6 +27507,10 @@ export const TOPIC_LIBRARY = {
       { type:"correct grammar mistakes", question:"'Sales has increased steadily this year.'", answer:"Sales have increased steadily this year.", hint:"'Sales' is plural — use 'have'", difficulty:"medium" },
       { type:"correct grammar mistakes", question:"'The number of complaints were rising.'", answer:"The number of complaints was rising.", hint:"'The number of' + plural noun still takes a singular verb", difficulty:"hard" },
       { type:"correct grammar mistakes", question:"'Profits doubled since last year.'", answer:"Profits have doubled since last year.", hint:"'Since' + a point in time needs the present perfect", difficulty:"hard" },
+      { type:"choose correct grammar", question:"'Demand for the product ___ after the ad campaign.' (soared/soar/soaring)", answer:"soared", hint:"Past simple describing a very large, fast increase", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'The currency ___ overnight after the announcement.' (plummeted/plummet/plummeting)", answer:"plummeted", hint:"Past simple describing a very large, fast decrease", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'Tourist numbers ___ a peak in August.' (reached/reach/reaching)", answer:"reached", hint:"Past simple: 'reach a peak'", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'The company's revenue has ___ this year.' (tripled/triple/tripling)", answer:"tripled", hint:"Present perfect needs the past participle", difficulty:"medium" },
 ],
     spyRounds: [
       { crewmateTopic:"Rising Trends", spyTopic:"Falling Trends", crewmatePrompt:"Describe things that are going up — use words like 'rise', 'increase', 'soar', 'surge', 'grow': 'House prices have risen sharply', 'Sales soared last quarter'.", spyPrompt:"Describe things that are going down — use words like 'fall', 'decrease', 'plummet', 'decline', 'drop': 'Prices plummeted overnight', 'Demand has declined steadily'.", explanation:"Crewmates described upward trends. The spy described downward trends." },
@@ -28104,6 +28112,10 @@ export const TOPIC_LIBRARY = {
           { type:"correct grammar mistakes", question:"'She must have ran to catch the bus.'", answer:"She must have run to catch the bus.", hint:"Irregular past participle 'run', not 'ran'", difficulty:"medium" },
       { type:"correct grammar mistakes", question:"'They should have came earlier.'", answer:"They should have come earlier.", hint:"Irregular past participle 'come', not 'came'", difficulty:"medium" },
       { type:"correct grammar mistakes", question:"'He might have broke his phone.'", answer:"He might have broken his phone.", hint:"Irregular past participle 'broken', not 'broke'", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'She ___ have run to catch the bus.' (must/can't/might)", answer:"must", hint:"Strong deduction", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'They ___ have come earlier — the show already started.' (should/must/might)", answer:"should", hint:"A regret or criticism about a past action", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'He ___ have broken his phone — it won't turn on.' (must/can't/might)", answer:"must", hint:"Strong deduction from evidence", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'It ___ have been a mistake — anything is possible.' (could/must/can't)", answer:"could", hint:"'Could have' offers a plausible past explanation", difficulty:"easy" },
 ],
     spyRounds: [
       { crewmateTopic:"Past Deduction (must have)", spyTopic:"Past Possibility (might have)", crewmatePrompt:"Make confident guesses about the past — 'She must have left already.', 'He must have forgotten.'", spyPrompt:"Make uncertain guesses about the past — 'She might have left already.', 'He might have forgotten.'", explanation:"Crewmates used 'must have' for confident past deductions. The spy used 'might have' for uncertain guesses." },
@@ -28973,6 +28985,8 @@ export const TOPIC_LIBRARY = {
       { type:"correct grammar mistakes", question:"'New employees go through probation period.'", answer:"New employees go through a probation period.", hint:"Singular countable noun needs an article: 'a probation period'", difficulty:"medium" },
       { type:"use vocabulary in a sentence", question:"'annual leave' — planned vacation time from work", answer:"I'm taking two weeks of annual leave in August.", hint:"'Annual leave' is paid vacation time from work.", difficulty:"medium" },
       { type:"use vocabulary in a sentence", question:"'a team meeting' — a regular work gathering", answer:"We have a team meeting every Monday morning.", hint:"A recurring meeting where a team discusses work.", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'I'm taking two weeks of ___ leave in August.' (annual/annually/annualed)", answer:"annual", hint:"Fixed phrase: 'annual leave'", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'New employees go through ___ probation period.' (a/an/the)", answer:"a", hint:"Singular countable noun needs an article: 'a probation period'", difficulty:"easy" },
 ],
     spyRounds: [
       { crewmateTopic:"Job Applications & Promotions", spyTopic:"Everyday Achievements", crewmatePrompt:"Talk about career advancement using workplace vocabulary — 'apply for a promotion', 'get a pay rise', 'a job offer', 'be promoted': 'She was promoted after just a year.'", spyPrompt:"Talk about everyday personal achievements using general language — 'do well at something', 'get recognised', 'move forward': 'He did really well and got recognised for it.'", explanation:"Crewmates used specific career-advancement vocabulary. The spy described general personal achievement without workplace-specific terms.", spyGuessOptions:["Job applications & promotions","Everyday achievements","Workplace routines","Leaving a job"] },
@@ -29195,6 +29209,8 @@ export const TOPIC_LIBRARY = {
       { type:"correct grammar mistakes", question:"'They are jump on the bandwagon.'", answer:"They are jumping on the bandwagon.", hint:"Present continuous needs the '-ing' form after 'are'", difficulty:"easy" },
       { type:"use vocabulary in a sentence", question:"'cut corners' — a warning about safety", answer:"Don't cut corners when it comes to safety.", hint:"'Cut corners' means to do something in a cheaper, less careful way.", difficulty:"medium" },
       { type:"use vocabulary in a sentence", question:"'get the ball rolling' — an invitation to start", answer:"Why don't we get the ball rolling with introductions?", hint:"'Get the ball rolling' means to start a process.", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'She was ___ thin ice after arriving late again.' (on/in/at)", answer:"on", hint:"Fixed idiom: 'on thin ice'", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'The announcement came ___ of the blue.' (out/off/away)", answer:"out", hint:"Fixed idiom: 'out of the blue'", difficulty:"medium" },
 ],
     spyRounds: [
       { crewmateTopic:"Idioms about Starting & Effort", spyTopic:"Plain Verbs for Starting & Effort", crewmatePrompt:"Talk about starting tasks and putting in extra effort using idioms — 'get the ball rolling', 'pull an all-nighter', 'go the extra mile': 'Let's get the ball rolling on this.'", spyPrompt:"Talk about starting tasks and putting in extra effort, using plain verbs — 'start', 'stay up all night', 'try extra hard': 'Let's start working on this.'", explanation:"Crewmates used idioms about starting tasks and making an effort. The spy used plain verbs for the same meanings.", spyGuessOptions:["Starting/effort idioms","Plain verbs","Risk idioms","Secret idioms"] },
@@ -29423,6 +29439,8 @@ export const TOPIC_LIBRARY = {
       { type:"correct grammar mistakes", question:"'I'm inclined think this is a mistake.'", answer:"I'm inclined to think this is a mistake.", hint:"Fixed phrase: 'inclined to think' — don't drop 'to'", difficulty:"medium" },
       { type:"use vocabulary in a sentence", question:"'see eye to eye' — being in full agreement", answer:"My sister and I don't always see eye to eye on politics.", hint:"'See eye to eye' means to be in full agreement with someone.", difficulty:"medium" },
       { type:"use vocabulary in a sentence", question:"'have a point' — acknowledging someone is right", answer:"You have a point — I hadn't thought of it that way.", hint:"'You have a point' acknowledges that someone's argument is valid.", difficulty:"easy" },
+      { type:"choose correct grammar", question:"'We don't ___ eye to eye on this.' (see/look/watch)", answer:"see", hint:"Fixed idiom: 'see eye to eye'", difficulty:"medium" },
+      { type:"choose correct grammar", question:"'You ___ a point — I hadn't thought of that.' (have/has/having)", answer:"have", hint:"Fixed phrase: 'you have a point'", difficulty:"easy" },
 ],
     spyRounds: [
       { crewmateTopic:"Polite Disagreement (Advanced)", spyTopic:"Basic Disagreement", crewmatePrompt:"Disagree using hedged, advanced language — 'I take your point, but…', 'I'm not entirely convinced', 'I beg to differ': 'I see where you're coming from, but I disagree.'", spyPrompt:"Disagree bluntly using basic language — 'I disagree', 'that's wrong', 'I don't think so': 'No, I don't agree with that at all.'", explanation:"Crewmates used softened, advanced disagreement phrases. The spy disagreed bluntly using basic language.", spyGuessOptions:["Polite advanced disagreement","Basic disagreement","Conceding a point","Formal argument structures"] },
