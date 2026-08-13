@@ -3266,6 +3266,41 @@ export const LESSONS: Record<string, Lesson> = {
           "If companies offered more flexibility, employees **would feel** less stressed.",
         ],
       },
+      {
+        heading: "Present perfect continuous — a process building up over time",
+        body: ["Has/have been + -ing focuses on an ongoing process or its recent, still-felt effects, rather than a single completed result."],
+        examples: [
+          "She **has been feeling** exhausted since the new project started.",
+          "He **has been working** overtime every weekend this month.",
+          "More companies **have been offering** flexible hours since the pandemic.",
+        ],
+      },
+      {
+        heading: "Passive voice — perfect and future",
+        body: ["Has/have been + past participle emphasises a completed process whose result matters now; will be + past participle describes a future passive action."],
+        examples: [
+          "Mental health support **has been offered** by more employers recently.",
+          "A four-day week **will be introduced** by several companies next year.",
+        ],
+      },
+      {
+        heading: "Relative clauses — whose, who, that",
+        body: ["'Whose' shows possession; 'who'/'that' identify people or things directly. Defining clauses (no commas) narrow down which one; non-defining clauses (with commas) add extra detail."],
+        examples: [
+          "Employees **whose** boundaries are clear tend to feel less stressed. (possession)",
+          "Employees **who work remotely** still need clear boundaries. (defining)",
+          "Her manager, **who never takes a lunch break**, seems constantly stressed. (non-defining)",
+        ],
+      },
+      {
+        heading: "Embedded and reported questions",
+        body: ["Embed a question inside a polite phrase using statement word order — no 'do/does/did', no inverted subject and verb. Report someone's question with 'asked if/whether' the same way."],
+        examples: [
+          "**Do you know if** her company offers mental health support? (not 'does her company offer')",
+          "**Could you tell me why** he struggles to switch off? (not 'does he struggle')",
+          "She **asked whether** he had learned to set boundaries.",
+        ],
+      },
     ],
     commonMistakes: [
       "❌ She was embarrassed with her first child. → ✅ She was pregnant with her first child. ('embarrassed' ≠ 'pregnant' — a false friend)",
@@ -3273,6 +3308,8 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ I always make a pause at midday. → ✅ I always take a break at midday. ('take a break', not 'make a pause')",
       "❌ I am agree that companies should offer flexible hours. → ✅ I agree that... ('agree' is a verb, no 'am')",
       "❌ I am working too much hours. → ✅ I am working too many hours. ('too many' with countable plural nouns)",
+      "❌ Employees which boundaries are unclear feel overwhelmed. → ✅ Employees whose boundaries are unclear... ('whose' for possession, not 'which')",
+      "❌ Do you know does she work overtime? → ✅ Do you know if she works overtime? (statement word order, no second 'does')",
     ],
   },
 
