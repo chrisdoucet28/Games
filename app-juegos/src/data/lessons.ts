@@ -3404,6 +3404,47 @@ export const LESSONS: Record<string, Lesson> = {
         body: ["Present perfect for accumulated life experience."],
         examples: ["She **has lived** in three different countries, so she understands cultural differences well."],
       },
+      {
+        heading: "Relative clauses — adding extra information with 'which'",
+        body: ["'Which' adds a clause right after a thing, idea, or custom to describe or explain it further."],
+        examples: [
+          "Eye contact is a gesture **which is considered polite** in this culture.",
+          "This is a tradition **which puzzles foreign visitors**.",
+          "She has lived in three countries **which have very different customs**.",
+        ],
+      },
+      {
+        heading: "Present perfect continuous — an ongoing process of change",
+        body: ["Has/have been + -ing focuses on the process of adapting or learning over time, not just the result."],
+        examples: [
+          "She **has been adapting** to a new culture for months.",
+          "He **has been learning** local etiquette since his arrival.",
+        ],
+      },
+      {
+        heading: "Passive voice — perfect and future",
+        body: ["Has/have been + past participle for a completed process that matters now; will be + past participle for a future passive action."],
+        examples: [
+          "The tradition **has been passed down** for generations.",
+          "The festival **will be celebrated** by the whole community next month.",
+        ],
+      },
+      {
+        heading: "Second conditional — a hypothetical improvement",
+        body: ["If + past simple, ... would + base verb — an unreal or unlikely present situation and its imagined result."],
+        examples: [
+          "If she **understood** local etiquette, she **would avoid** embarrassing mistakes.",
+          "If tourists **researched** local customs first, they **would avoid** causing offence.",
+        ],
+      },
+      {
+        heading: "Embedded and reported questions",
+        body: ["Embed a question inside a polite phrase using statement word order — no 'do/does/did', no inverted subject and verb."],
+        examples: [
+          "**Do you know if** eye contact is considered polite here? (not 'is eye contact considered')",
+          "**Could you tell me why** people avoid eye contact here? (not 'do people avoid')",
+        ],
+      },
     ],
     commonMistakes: [
       "❌ In my country, we make a big party. → ✅ ...we have a big party. ('have/throw a party', never 'make a party')",
@@ -3411,6 +3452,7 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ My host family was very sympathetic. → ✅ My host family was very kind. ('sympathetic' means compassionate about a problem, not friendly)",
       "❌ I look forward to visit different countries. → ✅ ...to visiting different countries. ('look forward to' + gerund)",
       "❌ I have visited Japan last year. → ✅ I visited Japan last year. (specific past time → past simple)",
+      "❌ Do you know does she understand etiquette? → ✅ Do you know if she understands etiquette? (statement word order, no second 'does')",
     ],
   },
 
