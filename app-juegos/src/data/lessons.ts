@@ -3470,10 +3470,43 @@ export const LESSONS: Record<string, Lesson> = {
       },
       {
         heading: "Passive voice for large-scale action",
-        body: ["Passive voice is common when describing what's being done, rather than who is doing it."],
+        body: ["Passive voice is common when describing what's being done, rather than who is doing it. Has/have been + past participle for a completed process that matters now; will be + past participle for the future."],
         examples: [
           "Carbon emissions **can be reduced** through renewable energy investment.",
-          "Thousands of hectares of forest **have been destroyed** by wildfires this year.",
+          "Global temperatures **have been monitored** closely by scientists for years.",
+          "Stricter emissions targets **will be implemented** by experts by 2030.",
+        ],
+      },
+      {
+        heading: "Relative clauses — adding a consequence or extra fact with 'which'",
+        body: ["'Which' can add a defining or non-defining clause about a thing just mentioned — often used to state a consequence."],
+        examples: [
+          "Factories produce large amounts of carbon dioxide, **which traps heat** in the atmosphere.",
+          "Coral reefs, **which support thousands of marine species**, are dying.",
+        ],
+      },
+      {
+        heading: "Present perfect continuous — an ongoing trend",
+        body: ["Has/have been + -ing describes a process that has been happening over time and is often still continuing."],
+        examples: [
+          "Temperatures **have been rising** steadily for the last century.",
+          "Scientists **have been warning** about rising temperatures for decades.",
+        ],
+      },
+      {
+        heading: "Second conditional — an unreal or unlikely present solution",
+        body: ["If + past simple, ... would + base verb — a hypothetical action now and its imagined result."],
+        examples: [
+          "If governments **invested** more in renewable energy, emissions **would fall**.",
+          "If people **used** public transport more, air quality **would improve**.",
+        ],
+      },
+      {
+        heading: "Embedded and reported questions",
+        body: ["Embed a question inside a polite phrase using statement word order — no 'do/does/did', no inverted subject and verb."],
+        examples: [
+          "**Do you know if** renewable energy reduces emissions? (not 'does renewable energy reduce')",
+          "**Could you tell me why** deforestation causes biodiversity loss? (not 'does deforestation cause')",
         ],
       },
     ],
@@ -3483,6 +3516,7 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ Some governments don't do nothing. → ✅ ...don't do anything. (only one negative per clause)",
       "❌ The pollution is destroying our planet. → ✅ Pollution is destroying our planet. (no article for general/abstract nouns)",
       "❌ Scientists have discovered new evidence last month. → ✅ Scientists discovered new evidence last month. (specific past time → past simple)",
+      "❌ Do you know does renewable energy reduce emissions? → ✅ Do you know if renewable energy reduces emissions? (statement word order, no second 'does')",
     ],
   },
 
