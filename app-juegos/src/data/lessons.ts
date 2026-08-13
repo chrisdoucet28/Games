@@ -3333,6 +3333,47 @@ export const LESSONS: Record<string, Lesson> = {
           "He **has stayed** motivated **since** he started his own company.",
         ],
       },
+      {
+        heading: "Present perfect continuous — the ongoing effort itself",
+        body: ["Has/have been + -ing pictures the process of working toward something, not just the result — useful for describing sustained motivation or a habit you're building."],
+        examples: [
+          "She **has been working** toward her goal for two years.",
+          "He **has been trying** to build a successful business since he graduated.",
+        ],
+      },
+      {
+        heading: "Passive voice — perfect and future",
+        body: ["Has/have been + past participle for a completed process that matters now; will be + past participle for something planned or expected in the future."],
+        examples: [
+          "Her goal **has been achieved**.",
+          "The sales target **will be reached** by the end of the quarter.",
+        ],
+      },
+      {
+        heading: "Relative clauses — who, which, whose",
+        body: ["Add extra information right after the noun. Defining clauses (no commas) identify which one; non-defining clauses (with commas) add extra detail about something already identified."],
+        examples: [
+          "People **who have a growth mindset** embrace failure as a learning opportunity. (defining)",
+          "The entrepreneur, **who achieved her goal last year**, inspires many others. (non-defining)",
+          "People **whose persistence never fails** usually reach their goals. (possession)",
+        ],
+      },
+      {
+        heading: "Second conditional — an unreal or unlikely present situation",
+        body: ["If + past simple, ... would + base verb — a hypothetical present situation and its imagined result."],
+        examples: [
+          "If she **believed** in herself more, she **would achieve** more.",
+          "If he **had** a mentor, he **would develop** faster.",
+        ],
+      },
+      {
+        heading: "Embedded and reported questions",
+        body: ["Embed a question inside a polite phrase using statement word order — no 'do/does/did', no inverted subject and verb."],
+        examples: [
+          "**Do you know if** she believes in hard work? (not 'does she believe')",
+          "**Could you tell me how** he overcame his fear of failure? (not 'did he overcome')",
+        ],
+      },
     ],
     commonMistakes: [
       "❌ My coach is very sensible about my feelings. → ✅ My coach is very sensitive about my feelings. ('sensible' means practical/wise; 'sensitive' is about emotions)",
@@ -3340,6 +3381,8 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ Successful people don't avoid to fail. → ✅ ...don't avoid failing. ('avoid' + gerund)",
       "❌ She is very interested on personal development. → ✅ ...interested in personal development. ('interested in', not 'on')",
       "❌ I have achieved this goal last year. → ✅ I achieved this goal last year. (specific past time → past simple)",
+      "❌ People which have a growth mindset embrace failure. → ✅ People who have a growth mindset... ('who' for people, not 'which')",
+      "❌ Do you know does she believe in hard work? → ✅ Do you know if she believes in hard work? (statement word order, no second 'does')",
     ],
   },
 
