@@ -3602,6 +3602,38 @@ export const LESSONS: Record<string, Lesson> = {
         body: ["have/has been + past participle for changes affecting a whole industry."],
         examples: ["Many factory jobs **have been replaced** by robots and automated machines."],
       },
+      {
+        heading: "Present perfect continuous — a growing trend",
+        body: ["Has/have been + -ing focuses on a process that's been building over time."],
+        examples: [
+          "More people **have been using** smart home devices recently.",
+          "This app **has been growing** in popularity for months.",
+        ],
+      },
+      {
+        heading: "Relative clauses — a consequence with 'which'",
+        body: ["'Which' can add extra information or a consequence about something just mentioned."],
+        examples: [
+          "Smartphones make life easier, **which explains their popularity**.",
+          "Artificial intelligence, **which is developing fast**, is changing many industries.",
+        ],
+      },
+      {
+        heading: "Second conditional — an imagined improvement",
+        body: ["If + past simple, ... would + base verb — a hypothetical present situation and its imagined result."],
+        examples: [
+          "If companies **invested** more in cybersecurity, fewer people **would be hacked**.",
+          "If phones **were** less addictive, people **would sleep** better.",
+        ],
+      },
+      {
+        heading: "Embedded and reported questions",
+        body: ["Embed a question inside a polite phrase using statement word order — no 'do/does/did', no inverted subject and verb."],
+        examples: [
+          "**Do you know if** this app tracks your location? (not 'does this app track')",
+          "**Could you tell me why** the update failed? (not 'did the update fail')",
+        ],
+      },
     ],
     commonMistakes: [
       "❌ Actually, most people use their phone for social media. → ✅ Nowadays, most people use their phone... ('actually' means 'in fact', not 'nowadays'/'currently')",
@@ -3609,6 +3641,7 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ I have this laptop since five years. → ✅ I have had this laptop for five years. ('for' + duration, and 'have had' not 'have')",
       "❌ Many people listen music while they commute. → ✅ ...listen to music... ('listen to' + thing)",
       "❌ She has downloaded that app last week. → ✅ She downloaded that app last week. (specific past time → past simple)",
+      "❌ Do you know does this app track my location? → ✅ Do you know if this app tracks my location? (statement word order, no second 'does')",
     ],
   },
 
