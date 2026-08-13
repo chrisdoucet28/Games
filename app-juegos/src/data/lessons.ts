@@ -3187,6 +3187,52 @@ export const LESSONS: Record<string, Lesson> = {
           "Finland **has changed** its education system significantly over the past decade.",
         ],
       },
+      {
+        heading: "Present perfect continuous — an ongoing process, not just a result",
+        body: ["Has/have been + -ing emphasises that something has been happening over a period and is still going, or just stopped — the focus is on the duration or the process, not a finished result.", "Compare with the present perfect simple above: 'has changed' reports the change itself; 'has been changing' pictures the process happening over time."],
+        examples: [
+          "The government **has been reforming** the curriculum for the past three years.",
+          "Students **have been taking** more online courses since the pandemic.",
+          "The ministry **has been discussing** new funding since January.",
+        ],
+      },
+      {
+        heading: "Passive voice — present, past, perfect, and future",
+        body: ["Use the passive when the action matters more than who does it: am/is/are + past participle (present), was/were + past participle (past), has/have been + past participle (perfect), will be + past participle (future)."],
+        examples: [
+          "Extra classes **are offered** on Saturdays. (present)",
+          "The curriculum **was reformed** in 2015. (past)",
+          "The exam results **have been reviewed** by the committee. (perfect — a completed process, result matters now)",
+          "A new curriculum **will be introduced** next year. (future)",
+        ],
+      },
+      {
+        heading: "Relative clauses — adding extra information about a noun",
+        body: ["Who/which/that add a clause right after the noun they describe. Defining clauses (no commas) identify exactly which one; non-defining clauses (with commas) just add extra detail about something already identified."],
+        examples: [
+          "Students **who take national exams every year** feel a lot of pressure. (defining — specifies which students)",
+          "The ministry, **which introduced a new curriculum in 2015**, wants better results. (non-defining — the ministry is already identified by name)",
+          "The school **that offers extra classes on Saturdays** is very popular.",
+        ],
+      },
+      {
+        heading: "Second conditional — an unreal or unlikely present situation",
+        body: ["If + past simple, ... would + base verb — describes a hypothetical situation now and its imagined result, not something you expect to actually happen."],
+        examples: [
+          "If the school **offered** extra classes on Saturdays, more students **would attend**.",
+          "If this country **invested** more money in public schools, results **would improve**.",
+          "If private schools **charged** lower fees, more families **would enrol**.",
+        ],
+      },
+      {
+        heading: "Embedded and reported questions — asking more politely, or reporting a question",
+        body: ["Embed a question inside a polite phrase ('Do you know if...?', 'Could you tell me...?') using statement word order, not question word order — drop 'do/does/did' and don't invert the subject and verb.", "Report someone else's question the same way: 'asked if/whether' + statement word order."],
+        examples: [
+          "**Do you know if** the university offers scholarships to international students? (not 'does the university offer')",
+          "**Could you tell me** why the government reformed the curriculum? (not 'did the government reform')",
+          "She **asked whether** the school offered extra classes on Saturdays.",
+        ],
+      },
     ],
     commonMistakes: [
       "❌ During the lecture, students made questions. → ✅ ...students asked questions. (English 'asks' a question, never 'makes' one)",
@@ -3194,6 +3240,9 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ My mother is teacher at a primary school. → ✅ My mother is a teacher... (article needed before a profession)",
       "❌ Students should avoid to fail. → ✅ Students should avoid failing. ('avoid' + gerund)",
       "❌ I have finished my degree in 2020. → ✅ I finished my degree in 2020. (specific past time → past simple)",
+      "❌ The student which studies hardest usually succeeds. → ✅ The student who studies hardest... ('who' for people, not 'which')",
+      "❌ If the school offers more classes, more students would attend. → ✅ If the school offered more classes... (past simple in the if-clause, not present)",
+      "❌ Do you know does the university offer scholarships? → ✅ Do you know if the university offers scholarships? (statement word order, no second 'does')",
     ],
   },
 
