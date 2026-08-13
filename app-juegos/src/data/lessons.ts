@@ -3538,6 +3538,38 @@ export const LESSONS: Record<string, Lesson> = {
         body: ["Second conditional for imagining a better outcome."],
         examples: ["If people bought fewer clothes, the industry **would produce** less waste."],
       },
+      {
+        heading: "Present perfect continuous — a rising trend",
+        body: ["Has/have been + -ing describes a trend that's been building over time."],
+        examples: [
+          "More shoppers **have been choosing** second-hand clothes recently.",
+          "The brand **has been losing** customers for months.",
+        ],
+      },
+      {
+        heading: "Passive voice — perfect and future",
+        body: ["Has/have been + past participle for a completed process that matters now; will be + past participle for the future."],
+        examples: [
+          "Unsold stock **has been destroyed** by several major brands.",
+          "A new recycling scheme **will be launched** by the company next year.",
+        ],
+      },
+      {
+        heading: "Relative clauses — adding a consequence with 'which'",
+        body: ["'Which' can add extra information or a consequence about a thing just mentioned."],
+        examples: [
+          "The brand releases a new collection every month, **which creates** huge amounts of waste.",
+          "Fast fashion, **which relies on cheap labour**, has been widely criticised.",
+        ],
+      },
+      {
+        heading: "Embedded and reported questions",
+        body: ["Embed a question inside a polite phrase using statement word order — no 'do/does/did', no inverted subject and verb."],
+        examples: [
+          "**Do you know if** this brand uses sustainable materials? (not 'does this brand use')",
+          "**Could you tell me why** workers don't receive fair wages? (not 'don't workers receive')",
+        ],
+      },
     ],
     commonMistakes: [
       "❌ Consumers try to avoid to buy unethical clothes. → ✅ ...avoid buying unethical clothes. ('avoid' + gerund)",
@@ -3545,6 +3577,7 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ My aunt works in factory. → ✅ My aunt works in a factory. (article needed before a singular countable noun)",
       "❌ Brands own fabrics in countries where labour is cheap. → ✅ ...own factories... ('fabric' ≠ 'factory' — false friend)",
       "❌ Fast fashion has become popular in the 1990s. → ✅ Fast fashion became popular in the 1990s. (specific past decade → past simple)",
+      "❌ Do you know does this brand use sustainable materials? → ✅ Do you know if this brand uses sustainable materials? (statement word order, no second 'does')",
     ],
   },
 
