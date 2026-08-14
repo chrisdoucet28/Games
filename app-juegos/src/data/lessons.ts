@@ -2471,6 +2471,38 @@ export const LESSONS: Record<string, Lesson> = {
           "How much you achieve **depends on** how well you plan your day.",
         ],
       },
+      {
+        heading: "First conditional — a likely result of good (or bad) habits",
+        body: ["If + present simple, ... will + base verb — describes a realistic future result of an action."],
+        examples: [
+          "If she **plans** her day every morning, she**'ll get** more done.",
+          "If you **avoid** distractions, you**'ll finish** faster.",
+        ],
+      },
+      {
+        heading: "Present perfect — habits and progress up to now",
+        body: ["Has/have + past participle for something done (or not done) within an unfinished period like 'this week'."],
+        examples: [
+          "She **has planned** her day every morning this week.",
+          "He **has delegated** several tasks this quarter.",
+        ],
+      },
+      {
+        heading: "Passive voice — the process, not who does it",
+        body: ["am/is/are + past participle (present); was/were + past participle (past) — used when the task matters more than who did it."],
+        examples: [
+          "The meeting **is scheduled** by the manager.",
+          "A new time-tracking system **was introduced** by the company last year.",
+        ],
+      },
+      {
+        heading: "Comparatives — which method works better",
+        body: ["more/-er + adjective + than compares two approaches to managing time."],
+        examples: [
+          "A to-do list **is more effective than** a mental checklist.",
+          "Her time management **is better than** his.",
+        ],
+      },
     ],
     commonMistakes: [
       "❌ I have to assist a time-management workshop. → ✅ I have to attend a time-management workshop. ('assist' means to help; 'attend' means to go to')",
@@ -2478,6 +2510,7 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ I eventually check my emails two or three times. → ✅ I occasionally check my emails... ('eventually' means 'in the end'; Spanish 'eventualmente' means 'occasionally')",
       "❌ Good time manager always makes a schedule. → ✅ A good time manager always makes a schedule. (article needed before a role noun)",
       "❌ She has completed the report yesterday. → ✅ She completed the report yesterday. (specific past time → past simple)",
+      "❌ If she will plan her day, she'll get more done. → ✅ If she plans her day... (no 'will' in the if-clause of a first conditional)",
     ],
   },
 
