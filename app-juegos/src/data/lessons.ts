@@ -2628,6 +2628,38 @@ export const LESSONS: Record<string, Lesson> = {
           "**Rural areas have** a stronger sense of community.",
         ],
       },
+      {
+        heading: "The + comparative, the + comparative — two things changing together",
+        body: ["This double-comparative structure links two changes: as one increases or decreases, so does the other."],
+        examples: [
+          "**The bigger** the city gets, **the worse** the traffic gets.",
+          "**The further** you move from the city, **the cleaner** the air becomes.",
+        ],
+      },
+      {
+        heading: "First conditional — a likely result of a choice",
+        body: ["If + present simple, ... will + base verb — a realistic future result of choosing city or country life."],
+        examples: [
+          "If you **move** to the countryside, you**'ll find** more peace and quiet.",
+          "If rent **keeps** rising, fewer people **will afford** to live in the city.",
+        ],
+      },
+      {
+        heading: "Present perfect — recent change up to now",
+        body: ["Has/have + past participle for a change within an unfinished period like 'this year' or 'recently'."],
+        examples: [
+          "The city **has grown** rapidly in recent years.",
+          "Rent **has risen** sharply in the last five years.",
+        ],
+      },
+      {
+        heading: "Passive voice — who plans and builds",
+        body: ["am/is/are + past participle (present); was/were + past participle (past) — for describing planning and construction."],
+        examples: [
+          "New housing **is built** by the council.",
+          "The new suburb **was designed** by developers last year.",
+        ],
+      },
     ],
     commonMistakes: [
       "❌ When you arrive to the countryside... → ✅ When you arrive in the countryside... ('arrive in/at', never 'arrive to')",
@@ -2635,6 +2667,7 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ The people in my village is very friendly. → ✅ The people in my village are very friendly. ('people' is plural in English)",
       "❌ The commute is very large. → ✅ The commute is very long. ('large' = big in size; 'long' describes time/distance)",
       "❌ I have moved to the city two years ago. → ✅ I moved to the city two years ago. (specific past time → past simple)",
+      "❌ If rent will keep rising, fewer people will afford the city. → ✅ If rent keeps rising... (no 'will' in the if-clause)",
     ],
   },
 
