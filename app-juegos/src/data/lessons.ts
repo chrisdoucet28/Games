@@ -1292,6 +1292,33 @@ export const LESSONS: Record<string, Lesson> = {
           "She is **the youngest** child in the family.",
         ],
       },
+      {
+        heading: "Talking about family in the past",
+        body: ["Past simple: regular verbs add -ed; several family-related verbs are irregular (meet → met, send → sent, get → got)."],
+        examples: [
+          "My parents **met** in university.",
+          "My cousins **visited** us last Christmas.",
+          "His aunt **sent** him a birthday card last week.",
+        ],
+      },
+      {
+        heading: "What's happening right now",
+        body: ["Present continuous: am/is/are + verb-ing, for an action in progress at this exact moment."],
+        examples: [
+          "She **is calling** her grandmother right now.",
+          "Her parents **are arguing** right now.",
+          "His aunt **is visiting** us this week.",
+        ],
+      },
+      {
+        heading: "Obligation — what you have to do for family",
+        body: ["have to / must + base verb (obligation); should + base verb (advice); don't have to (no obligation, it's optional); mustn't / shouldn't (prohibition or strong advice against)."],
+        examples: [
+          "You **have to respect** your parents.",
+          "You **don't have to agree** with your siblings all the time.",
+          "You **mustn't forget** your grandmother's birthday.",
+        ],
+      },
     ],
     commonMistakes: [
       "❌ I have 24 years. → ✅ I am 24 years old. ('to be' + age, not 'to have')",
@@ -1299,6 +1326,7 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ I assisted to my grandparents' party. → ✅ I attended my grandparents' party. ('assist' means to help; 'attend' means to go to')",
       "❌ My aunt is very sympathetic. → ✅ My aunt is very friendly/likeable. ('sympathetic' means compassionate about a problem, not friendly)",
       "❌ I know my best friend since we were children. → ✅ I have known my best friend since we were children. ('since' needs present perfect)",
+      "❌ My parents meeted in university. → ✅ My parents met in university. ('meet' is irregular in the past simple)",
     ],
   },
 
