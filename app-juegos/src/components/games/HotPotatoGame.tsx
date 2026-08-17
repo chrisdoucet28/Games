@@ -12,9 +12,14 @@ const TURN_SECONDS_OPTIONS = [15, 20, 25, 30];
 const ROUND_SECONDS_MULT = 4;
 const TOTAL_ROUNDS = 5;
 // How long the CPU realistically "holds" the potato before passing it back — standing in for
-// the fact it can't actually answer a real question out loud.
-const CPU_HOLD_MS_MIN = 1800;
-const CPU_HOLD_MS_MAX = 4500;
+// the fact it can't actually answer a real question out loud. Most passes land in the normal
+// range below; occasionally the CPU "stumbles" and takes noticeably longer, giving the lone
+// player a real breather instead of the potato coming right back almost every single time.
+const CPU_HOLD_MS_MIN = 2000;
+const CPU_HOLD_MS_MAX = 6000;
+const CPU_STUMBLE_CHANCE = 0.2;
+const CPU_STUMBLE_MS_MIN = 7000;
+const CPU_STUMBLE_MS_MAX = 10000;
 
 const AMBIENT_BITS = Array.from({ length: 12 }, (_, i) => ({
   left: (i * 41) % 100,
@@ -157,7 +162,9 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
   // Hooks).
   useEffect(() => {
     if (!isSolo || phase !== "play" || teams[holderIdx]?.id !== cpuRef.current?.id) return;
-    const holdMs = CPU_HOLD_MS_MIN + Math.random() * (CPU_HOLD_MS_MAX - CPU_HOLD_MS_MIN);
+    const holdMs = Math.random() < CPU_STUMBLE_CHANCE
+      ? CPU_STUMBLE_MS_MIN + Math.random() * (CPU_STUMBLE_MS_MAX - CPU_STUMBLE_MS_MIN)
+      : CPU_HOLD_MS_MIN + Math.random() * (CPU_HOLD_MS_MAX - CPU_HOLD_MS_MIN);
     const timer = setTimeout(() => {
       if (!roundEndedRef.current) confirmPass();
     }, holdMs);
