@@ -169,10 +169,19 @@ function generateTicket(grammarPool: string[], vocabWordPool: string[], nextId: 
   const excludedGrammar = new Set<string>();
   const items: TicketItem[] = [];
   let grammarCount = 0;
+  // A 1-item ticket has nothing else on it to anchor a bare form against — "write a positive
+  // sentence" alone gives a student no concrete content to write about. Bare forms stay available
+  // as the (single, capped) grammar slot on 2-3 item tickets, where they're always paired with at
+  // least one vocab word already; a solo ticket's lone slot is restricted to vocab or a specific
+  // named structure instead.
+  const soloTicket = itemCount === 1;
   for (let i = 0; i < itemCount; i++) {
-    const grammarLeft = grammarCount >= MAX_GRAMMAR_ITEMS_PER_TICKET
+    const grammarCandidates = grammarCount >= MAX_GRAMMAR_ITEMS_PER_TICKET
       ? []
       : grammarPool.filter(t => !usedGrammar.has(t) && !excludedGrammar.has(t));
+    const grammarLeft = soloTicket
+      ? grammarCandidates.filter(t => !(SIMPLE_FORMS as readonly string[]).includes(t))
+      : grammarCandidates;
     const vocabLeft = vocabWordPool.filter(w => !usedVocab.has(w));
     if (!grammarLeft.length && !vocabLeft.length) break;
     const wantGrammar = Math.random() < 0.5;
