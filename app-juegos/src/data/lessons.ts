@@ -2667,6 +2667,39 @@ export const LESSONS: Record<string, Lesson> = {
         body: ["Fixed terms for describing online behaviour."],
         examples: ["**goes viral**, **influencer**, **cyberbullying**, **social media detox**, **misinformation**"],
       },
+      {
+        heading: "Present perfect — recent or ongoing online activity",
+        body: ["Has/have + past participle for something within an unfinished period ('today', 'since 2019') or an experience with no specific time given."],
+        examples: [
+          "He **has posted** a photo today.",
+          "She **has had** this account since 2019.",
+          "They **have never experienced** cyberbullying.",
+        ],
+      },
+      {
+        heading: "First conditional — a likely online consequence",
+        body: ["If + present simple, ... will + base verb — a realistic future result of an online choice."],
+        examples: [
+          "If you **spend** less time online, you**'ll feel** happier.",
+          "If she **shares** her location, strangers **will find** her.",
+        ],
+      },
+      {
+        heading: "Passive voice — who controls and decides",
+        body: ["am/is/are + past participle (present); was/were + past participle (past) — for describing how platforms and algorithms operate."],
+        examples: [
+          "The content **is decided** by the algorithm.",
+          "That product **was promoted** by influencers last month.",
+        ],
+      },
+      {
+        heading: "Comparatives — comparing platforms, content, and habits",
+        body: ["more + adjective + than (longer adjectives); adjective + -er + than (short adjectives); good → better is irregular."],
+        examples: [
+          "This platform **is more popular than** the old one.",
+          "Real friendships **are better than** online followers.",
+        ],
+      },
     ],
     commonMistakes: [
       "❌ Social media have changed how businesses reach customers. → ✅ Social media has changed... ('social media' takes a singular verb)",
@@ -2674,6 +2707,7 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ I am agree that social media can be dangerous. → ✅ I agree that social media can be dangerous. ('agree' is a verb, no 'am')",
       "❌ Whether a post goes viral depends of the algorithm. → ✅ ...depends on the algorithm. ('depend on', not 'depend of')",
       "❌ I have posted that photo yesterday. → ✅ I posted that photo yesterday. (specific past time → past simple)",
+      "❌ If you will spend less time online, you'll feel happier. → ✅ If you spend less time online... (no 'will' in the if-clause)",
     ],
   },
 
