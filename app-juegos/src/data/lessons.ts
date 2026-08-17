@@ -2732,6 +2732,30 @@ export const LESSONS: Record<string, Lesson> = {
           "This classic **has been translated** into over forty languages.",
         ],
       },
+      {
+        heading: "First conditional — a likely result of a reading habit",
+        body: ["If + present simple, ... will + base verb — a realistic future result of a reading choice."],
+        examples: [
+          "If you **read** every day, you**'ll improve** your vocabulary.",
+          "If she **joins** a book club, she**'ll meet** new people.",
+        ],
+      },
+      {
+        heading: "Passive voice — who writes, publishes, and sells books",
+        body: ["am/is/are + past participle (present); was/were + past participle (past) — for describing how books are made and sold."],
+        examples: [
+          "The novel **is published** by the publisher.",
+          "The class novel **was chosen** by the teacher.",
+        ],
+      },
+      {
+        heading: "Comparatives — comparing books and reading formats",
+        body: ["more + adjective + than (longer adjectives); adjective + -er + than (short adjectives); good → better is irregular."],
+        examples: [
+          "This novel **is more gripping than** the one I read last month.",
+          "The sequel **is better than** the first book.",
+        ],
+      },
     ],
     commonMistakes: [
       "❌ He has read that novel when he was at university. → ✅ He read that novel when he was at university. (specific past time → past simple)",
@@ -2739,6 +2763,7 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ Whether I like a book depends of the characters. → ✅ ...depends on the characters. ('depend on', not 'depend of')",
       "❌ She is avid reader who finishes a book every week. → ✅ She is an avid reader... (article needed before a role noun)",
       "❌ I bought this novel at the library. → ✅ I bought this novel at the bookshop. ('library' = borrow books; Spanish 'librería' is a false friend for bookshop)",
+      "❌ If you will read every day, you'll improve your vocabulary. → ✅ If you read every day... (no 'will' in the if-clause)",
     ],
   },
 
