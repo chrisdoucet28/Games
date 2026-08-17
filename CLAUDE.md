@@ -4,7 +4,7 @@
 
 ClassCade (formerly "Lesson Games Generator") is an ESL classroom game website built by a
 language teacher for their own classroom and shared with colleagues. A teacher picks a level
-(A1-C1), a focus (grammar / vocabulary / topics), and one or more topics, then plays one of 15
+(A1-C1), a focus (grammar / vocabulary / themes), and one or more topics, then plays one of 15
 competitive team-based games built entirely around that content. A companion "🎓 Learn" section
 gives concise study lessons that mirror exactly what the games test.
 

@@ -840,7 +840,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
       { id: "all", icon: "*", label: "All", desc: "Grammar, words & themes" },
       { id: "grammar", icon: "G", label: "Grammar", desc: "Structures & rules" },
       { id: "vocabulary", icon: "V", label: "Vocabulary", desc: "Words in context" },
-      { id: "topic", icon: "T", label: "Topics", desc: "Speaking themes" },
+      { id: "topic", icon: "T", label: "Themes", desc: "Real-world subjects" },
     ];
 
     return (
@@ -879,7 +879,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
             <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px" }}>
               <div style={{ background: theme.accentSolid, color: "white", borderRadius: "50%", width: "28px", height: "28px", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "900", fontSize: "14px", flexShrink: 0 }}>2</div>
               <div>
-                <div style={{ fontWeight: "800", color: theme.heroBg[0], fontSize: "16px", fontFamily: theme.headingFont }}>Grammar, Vocabulary, or Topics?</div>
+                <div style={{ fontWeight: "800", color: theme.heroBg[0], fontSize: "16px", fontFamily: theme.headingFont }}>Grammar, Vocabulary, or Themes?</div>
                 <div style={{ color: "#6B7280", fontSize: "12px", marginTop: "2px" }}>Filters the topic list below</div>
               </div>
             </div>

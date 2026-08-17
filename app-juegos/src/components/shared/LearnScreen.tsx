@@ -17,7 +17,7 @@ const LEVEL_COLOR: Record<string, string> = {
   A1: "#22C55E", A2: "#84CC16", B1: "#F59E0B", B2: "#F97316", C1: "#EF4444",
 };
 const FOCUS_ORDER = ["grammar", "vocabulary", "topic"];
-const FOCUS_LABEL: Record<string, string> = { grammar: "Grammar", vocabulary: "Vocabulary", topic: "Topics" };
+const FOCUS_LABEL: Record<string, string> = { grammar: "Grammar", vocabulary: "Vocabulary", topic: "Themes" };
 
 // Hides interactive chrome and reveals the ink-economical print block when the browser's
 // print dialog is triggered — see the "learn-print-only" block below. Shrinking the page
