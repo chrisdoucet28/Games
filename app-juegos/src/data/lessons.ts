@@ -2436,6 +2436,30 @@ export const LESSONS: Record<string, Lesson> = {
           "She **has been studying** Korean **since** January.",
         ],
       },
+      {
+        heading: "First conditional — a likely result of practice",
+        body: ["If + present simple, ... will + base verb — a realistic future result of a study habit."],
+        examples: [
+          "If you **practise** every day, you**'ll improve** faster.",
+          "If she **immerses** herself in the language, she**'ll learn** faster.",
+        ],
+      },
+      {
+        heading: "Passive voice — how material is taught and corrected",
+        body: ["am/is/are + past participle (present); was/were + past participle (past)."],
+        examples: [
+          "Grammar rules **are taught** by the teacher.",
+          "My pronunciation **was corrected** by the tutor.",
+        ],
+      },
+      {
+        heading: "Comparatives — which method works better",
+        body: ["more/-er + adjective + than compares two learning methods."],
+        examples: [
+          "Immersion **is more effective than** classroom learning.",
+          "Learning as a child **is easier than** learning as an adult.",
+        ],
+      },
     ],
     commonMistakes: [
       "❌ I assisted to an English class. → ✅ I attended an English class. ('assist' means to help; 'attend' means to go to')",
@@ -2443,6 +2467,7 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ I improve my listening by listening music. → ✅ ...by listening to music. ('listen to' + thing)",
       "❌ I am beginner. → ✅ I am a beginner. (article needed before a role/level noun)",
       "❌ I have started learning English when I was eight. → ✅ I started learning English when I was eight. (specific past time point → past simple)",
+      "❌ If you will practise every day, you'll improve. → ✅ If you practise every day... (no 'will' in the if-clause)",
     ],
   },
 
