@@ -1234,6 +1234,24 @@ export const LESSONS: Record<string, Lesson> = {
           "The essay **must be handed in** by Friday.",
         ],
       },
+      {
+        heading: "Talking about school in the past",
+        body: ["Past simple: regular verbs add -ed; several school-related verbs are irregular (bring → brought, do → did, take → took, buy → bought, be → were)."],
+        examples: [
+          "She **handed in** her essay yesterday.",
+          "He **brought** his textbook yesterday.",
+          "They **took** an exam at the end of last term.",
+        ],
+      },
+      {
+        heading: "What's happening right now",
+        body: ["Present continuous: am/is/are + verb-ing, for an action in progress at this exact moment."],
+        examples: [
+          "She **is handing in** her essay right now.",
+          "The students **are revising** for the exam at the moment.",
+          "We **are attending** the extra class right now.",
+        ],
+      },
     ],
     commonMistakes: [
       "❌ I have to assist my classes. → ✅ I have to attend my classes. ('assist' means to help; 'attend' means to go to')",
@@ -1241,6 +1259,7 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ I always avoid to talk in class. → ✅ I always avoid talking in class. ('avoid' + gerund, never 'to')",
       "❌ We have to listen the teacher. → ✅ We have to listen to the teacher. ('listen to' + person/thing)",
       "❌ I don't have no homework today. → ✅ I don't have any homework today. (only one negative per clause)",
+      "❌ He bringed his textbook yesterday. → ✅ He brought his textbook yesterday. ('bring' is irregular in the past simple)",
     ],
   },
 
