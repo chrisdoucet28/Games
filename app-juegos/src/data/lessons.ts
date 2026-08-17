@@ -1414,8 +1414,30 @@ export const LESSONS: Record<string, Lesson> = {
       },
       {
         heading: "Talking about the past of a place",
-        body: ["Passive voice for history: was/were + past participle."],
-        examples: ["The cathedral **was built** hundreds of years ago."],
+        body: ["Passive voice for history: was/were + past participle. Active past simple works too when the doer matters: regular verbs add -ed; 'build' and 'grow' are irregular (build → built, grow → grew)."],
+        examples: [
+          "The cathedral **was built** hundreds of years ago.",
+          "They **built** a new bridge last year.",
+          "The population **grew** quickly last decade.",
+        ],
+      },
+      {
+        heading: "What's happening right now",
+        body: ["Present continuous: am/is/are + verb-ing, for an action in progress at this exact moment."],
+        examples: [
+          "The city **is building** a new shopping centre right now.",
+          "The council **is building** a new bridge at the moment.",
+          "My town **is getting** more crowded these days.",
+        ],
+      },
+      {
+        heading: "Obligation — rules in a town or city",
+        body: ["have to / must + base verb (obligation); should + base verb (advice); don't have to (no obligation, it's optional); mustn't / shouldn't (prohibition or strong advice against)."],
+        examples: [
+          "You **have to pay** for parking in the city centre.",
+          "You **don't have to pay** to enter the park.",
+          "You **mustn't litter** in the park.",
+        ],
       },
     ],
     commonMistakes: [
@@ -1424,6 +1446,7 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ My town has market in the centre. → ✅ My town has a market in the centre. (don't drop 'a' before a singular countable noun)",
       "❌ There is a good library where you can buy books. → ✅ There is a good bookshop where you can buy books. ('library' = borrow books; 'librería' in Spanish is false friend for bookshop)",
       "❌ There isn't nothing interesting to do. → ✅ There isn't anything interesting to do. (only one negative per clause)",
+      "❌ They builded a new bridge last year. → ✅ They built a new bridge last year. ('build' is irregular in the past simple)",
     ],
   },
 
