@@ -1308,6 +1308,33 @@ export const LESSONS: Record<string, Lesson> = {
         body: ["-ed vs -ing adjectives."],
         examples: ["I am **bored** (how you feel) vs. The film is **boring** (what causes the feeling)."],
       },
+      {
+        heading: "Talking about free time in the past",
+        body: ["Past simple: regular verbs add -ed; several free-time verbs are irregular (go → went, meet → met, read → read)."],
+        examples: [
+          "I **watched** TV yesterday.",
+          "They **went** cycling last weekend.",
+          "We **met up** with friends last weekend.",
+        ],
+      },
+      {
+        heading: "What's happening right now",
+        body: ["Present continuous: am/is/are + verb-ing, for an action in progress at this exact moment."],
+        examples: [
+          "He **is playing** football at the moment.",
+          "She **is playing** video games right now.",
+          "We **are playing** board games right now.",
+        ],
+      },
+      {
+        heading: "Obligation — what you have to do",
+        body: ["have to / must + base verb (obligation); should + base verb (advice); don't have to (no obligation, it's optional); mustn't / shouldn't (prohibition or strong advice against)."],
+        examples: [
+          "You **have to practise** every day.",
+          "You **don't have to join** a sports club.",
+          "You **mustn't swim** without a lifeguard.",
+        ],
+      },
     ],
     commonMistakes: [
       "❌ I make sport every weekend. → ✅ I do sport every weekend. (English says 'do sport/exercise', never 'make sport')",
@@ -1315,6 +1342,7 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ My brother has ten years. → ✅ My brother is ten years old. ('to be' + age, not 'to have')",
       "❌ I am boring when I have nothing to do. → ✅ I am bored when I have nothing to do. (use the -ed form for how you feel)",
       "❌ I assist to a dance class. → ✅ I attend a dance class. ('assist' means to help; 'attend' means to go to')",
+      "❌ They goed cycling last weekend. → ✅ They went cycling last weekend. ('go' is irregular in the past simple)",
     ],
   },
 
