@@ -46,7 +46,7 @@ export const ZOMBIE_TUTORIAL_STEPS: TutorialStep[] = [
     ),
   },
   {
-    narration: "Each team also has bullets that recharge on their own over time, up to a limit, and automatically shoot zombies at the door — you don't aim, it just happens.",
+    narration: "How zombies get killed, part 1: your character has a gun that automatically shoots zombies for you. It recharges on its own over time — you don't aim, it just happens.",
     visual: (
       <div style={{ display: "flex", justifyContent: "center", gap: "18px", alignItems: "center" }}>
         <div style={{ textAlign: "center" }}>
@@ -62,11 +62,17 @@ export const ZOMBIE_TUTORIAL_STEPS: TutorialStep[] = [
     ),
   },
   {
-    narration: "If no bullet is ready when a zombie attacks, a chair breaks instead. Keep adding sentences to keep your barricades stocked with new chairs!",
+    narration: "How zombies get killed, part 2: if no bullet is ready, a zombie breaks a chair instead. About half the time, that chair explodes and takes the zombie down with it too!",
     visual: (
-      <div style={{ textAlign: "center" }}>
-        <div style={{ fontSize: "22px" }}>🪑💥</div>
-        <div style={{ fontSize: "11px", fontWeight: 800, color: "#991B1B", marginTop: "4px" }}>No bullet ready — a chair takes the hit</div>
+      <div style={{ display: "flex", justifyContent: "center", gap: "16px" }}>
+        <div style={{ textAlign: "center" }}>
+          <div style={{ fontSize: "22px" }}>🪑💥🧟</div>
+          <div style={{ fontSize: "10px", fontWeight: 800, color: "#4D7C0F" }}>~50% — chair explodes, zombie destroyed</div>
+        </div>
+        <div style={{ textAlign: "center" }}>
+          <div style={{ fontSize: "22px" }}>🪑💥</div>
+          <div style={{ fontSize: "10px", fontWeight: 800, color: "#991B1B" }}>~50% — chair just breaks, zombie keeps coming</div>
+        </div>
       </div>
     ),
   },

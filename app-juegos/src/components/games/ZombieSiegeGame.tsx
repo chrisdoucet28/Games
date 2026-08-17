@@ -12,6 +12,11 @@ const GM = GAME_MODES.find(g => g.id === "zombie")!;
 const TICK_MS = 1000; // 1 tick == 1 elapsed second — every timing constant below is scaled against this.
 const APPROACH_TICKS = 14; // ticks a zombie spends visibly walking in before it reaches an entry point — long enough to see it coming and react
 const BARRICADE_ITEM_HP = 4; // hits a single barricade item survives before breaking
+// A broken chair has a coin-flip chance of taking its zombie down too, instead of the zombie just
+// carrying on to the next barricade item — gives the barricade itself a real chance to finish a
+// kill, not just delay one. The other half of the time it's a plain break with no extra effect,
+// same as before this existed.
+const CHAIR_EXPLODE_CHANCE = 0.5;
 const ZOMBIE_DAMAGE_PER_TICK = 1;
 const CORRECT_ANSWER_SCORE = 20; // matches Rocket Fuel's per-sentence rate — the closest sibling game (open sentence production, prompt after prompt); 10 felt thin next to other games' totals
 // Two independent, deliberately decoupled-from-English-tasks defense resources:
@@ -187,7 +192,7 @@ type SiegeState = {
   awaitingNextWave: boolean;
 };
 
-type TickEventKind = "barricadeDestroyed" | "zombieShot" | "axeUsed" | "personEliminated" | "waveCleared";
+type TickEventKind = "barricadeDestroyed" | "chairExploded" | "zombieShot" | "axeUsed" | "personEliminated" | "waveCleared";
 type TickEvent = { kind: TickEventKind; entryPointId?: EntryPointId; teamId?: string | number };
 
 // Fun-stats-only tallies for the gameover screen — none of these feed scoring or difficulty, they
@@ -197,14 +202,14 @@ type TeamStats = { kills: number; chairsPlaced: number };
 
 type Phase = "intro" | "playing" | "gameover";
 type RoundPhase = "reveal" | "active";
-type FxKind = "barricadePlaced" | "barricadeDestroyed" | "zombieShot" | "axeUsed";
+type FxKind = "barricadePlaced" | "barricadeDestroyed" | "chairExploded" | "zombieShot" | "axeUsed";
 type SiegeFx = { id: number; kind: FxKind; key: number; teamId?: string | number };
 
-// "zombieShot" names the shooting team ("🔫 🔴 Team Red sniped a zombie!"), noticeably longer
-// than the other FX messages — 600ms was tuned for a 3-word flash and left the longer text
-// barely readable, so this one alone gets more time on screen.
+// "zombieShot" names the shooting team ("🔫 🔴 Team Red sniped a zombie!") and "chairExploded" is
+// a longer, higher-excitement message — both noticeably longer than the other FX messages, which
+// were tuned for a quick 3-word flash and leave longer text barely readable at 600ms.
 function fxDurationMs(kind: FxKind): number {
-  return kind === "zombieShot" ? 1700 : 600;
+  return kind === "zombieShot" || kind === "chairExploded" ? 1700 : 600;
 }
 type ElimBanner = { teamName: string; color: string; key: number };
 type PowerUpBanner = { text: string; key: number };
@@ -331,7 +336,10 @@ function advanceTick(
 
   // 3. Attack — every attacking zombie that survived the auto-shoot damages whichever barricade
   // item is currently frontmost at its entry point. Barricades are never repaired, so this only
-  // ever counts down.
+  // ever counts down. A chair that breaks has a CHAIR_EXPLODE_CHANCE shot at taking its zombie
+  // down too — tracked here and filtered out below (a .map() callback can't itself remove an
+  // entry) so the breach step never sees an exploded zombie as still attacking.
+  const explodedZombieIds = new Set<number>();
   zombies = zombies.map(z => {
     if (z.status !== "attacking") return z;
     const stack = barricades[z.entryPointId];
@@ -341,10 +349,16 @@ function advanceTick(
     front.hp -= DAMAGE_BY_KIND[z.kind];
     if (front.hp <= 0) {
       stack.shift();
-      events.push({ kind: "barricadeDestroyed", entryPointId: z.entryPointId });
+      if (Math.random() < CHAIR_EXPLODE_CHANCE) {
+        explodedZombieIds.add(z.id);
+        events.push({ kind: "chairExploded", entryPointId: z.entryPointId });
+      } else {
+        events.push({ kind: "barricadeDestroyed", entryPointId: z.entryPointId });
+      }
     }
     return { ...z, attackCooldown: ZOMBIE_ATTACK_INTERVAL_TICKS - 1 };
   });
+  zombies = zombies.filter(z => !explodedZombieIds.has(z.id));
 
   // 4. Breach — resolved sequentially against a threaded working copy of `persons`, not the
   // pre-tick snapshot. Two zombies breaching different entry points in the same tick must see
@@ -785,6 +799,7 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
       setSiege(next);
       events.forEach(ev => {
         if (ev.kind === "barricadeDestroyed") pushFx("barricadeDestroyed");
+        if (ev.kind === "chairExploded") pushFx("chairExploded");
         if (ev.kind === "zombieShot") {
           pushFx("zombieShot", ev.teamId);
           if (ev.teamId !== undefined) bumpStat(ev.teamId, "kills");
@@ -1016,6 +1031,7 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
             }}>
               {f.kind === "barricadePlaced" && "🪑 barricade placed"}
               {f.kind === "barricadeDestroyed" && "💥 barricade destroyed"}
+              {f.kind === "chairExploded" && "💥🧟 chair exploded — zombie destroyed!"}
               {f.kind === "zombieShot" && `🔫 ${shooter ? `${shooter.color.emoji} ${shooter.name} sniped` : "sniped"} a zombie!`}
               {f.kind === "axeUsed" && "🪓 axe used!"}
             </div>
