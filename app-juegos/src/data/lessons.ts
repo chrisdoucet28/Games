@@ -1169,6 +1169,33 @@ export const LESSONS: Record<string, Lesson> = {
           "**Does it come with** rice?",
         ],
       },
+      {
+        heading: "Talking about meals in the past",
+        body: ["Past simple: regular verbs add -ed; many food-related verbs are irregular (eat → ate, drink → drank, have → had)."],
+        examples: [
+          "I **ate** breakfast yesterday.",
+          "She **drank** coffee after dinner last night.",
+          "We **had** pasta for dinner last night.",
+        ],
+      },
+      {
+        heading: "What's happening right now",
+        body: ["Present continuous: am/is/are + verb-ing, for an action in progress at this exact moment."],
+        examples: [
+          "He **is cooking** dinner right now.",
+          "She **is drinking** coffee at the moment.",
+          "They **are eating out** tonight.",
+        ],
+      },
+      {
+        heading: "Obligation — what you have to do about food",
+        body: ["have to / must + base verb (obligation); should + base verb (advice); don't have to (no obligation, it's optional); mustn't / shouldn't (prohibition or strong advice against)."],
+        examples: [
+          "She **must drink** more water.",
+          "You **don't have to finish** your vegetables.",
+          "You **shouldn't skip** breakfast.",
+        ],
+      },
     ],
     commonMistakes: [
       "❌ I have 25 years. → ✅ I am 25 years old. ('to be' + age, not 'to have')",
@@ -1176,6 +1203,7 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ The people in that restaurant is friendly. → ✅ The people in that restaurant are friendly. ('people' takes a plural verb)",
       "❌ I have eaten paella yesterday. → ✅ I ate paella yesterday. (a finished time word like 'yesterday' needs past simple)",
       "❌ The queue was so large. → ✅ The queue was so long. ('large' = big in size; 'long' describes a queue or line)",
+      "❌ She eated meat yesterday. → ✅ She ate meat yesterday. ('eat' is irregular in the past simple)",
     ],
   },
 
