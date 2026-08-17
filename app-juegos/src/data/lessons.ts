@@ -1105,6 +1105,33 @@ export const LESSONS: Record<string, Lesson> = {
           "I am **usually tired**.",
         ],
       },
+      {
+        heading: "Talking about routines in the past",
+        body: ["Past simple: regular verbs add -ed; many everyday-routine verbs are irregular (go → went, get → got, have → had, wake → woke)."],
+        examples: [
+          "She **woke up** late yesterday.",
+          "They **cleaned** the house last weekend.",
+          "He **went** to the gym yesterday.",
+        ],
+      },
+      {
+        heading: "What's happening right now",
+        body: ["Present continuous: am/is/are + verb-ing, for an action in progress at this exact moment."],
+        examples: [
+          "She **is cooking** dinner right now.",
+          "They **are cleaning** the house at the moment.",
+          "I **am getting ready** for school right now.",
+        ],
+      },
+      {
+        heading: "Obligation — what you have to do",
+        body: ["have to / must + base verb (obligation); should + base verb (advice); don't have to (no obligation, it's optional); mustn't / shouldn't (prohibition or strong advice against)."],
+        examples: [
+          "She **has to wake up** early for school.",
+          "She **doesn't have to wake up** early on Saturdays.",
+          "You **shouldn't go to bed** late.",
+        ],
+      },
     ],
     commonMistakes: [
       "❌ I have 20 years old. → ✅ I am 20 years old. ('to be' + age, not 'to have' — a direct Spanish translation trap)",
@@ -1112,6 +1139,7 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ I like to listen music. → ✅ I like to listen to music. ('listen to' + thing)",
       "❌ I have a house big with a garden. → ✅ I have a big house with a garden. (adjective before the noun in English)",
       "❌ I don't do nothing on Sundays. → ✅ I don't do anything on Sundays. (only one negative per clause)",
+      "❌ She goed to the gym yesterday. → ✅ She went to the gym yesterday. ('go' is irregular in the past simple)",
     ],
   },
 
