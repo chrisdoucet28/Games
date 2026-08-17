@@ -2378,6 +2378,30 @@ export const LESSONS: Record<string, Lesson> = {
           "Some managers **avoid trusting** their remote employees.",
         ],
       },
+      {
+        heading: "Passive voice — who does the task doesn't matter",
+        body: ["am/is/are + past participle (present); was/were + past participle (past) — common for describing workplace processes."],
+        examples: [
+          "The weekly report **is sent** by her every Friday.",
+          "The meeting **was cancelled** because of a technical problem.",
+        ],
+      },
+      {
+        heading: "First conditional — a likely result of a work habit",
+        body: ["If + present simple, ... will + base verb — a realistic future result."],
+        examples: [
+          "If you **set** clear boundaries, you**'ll feel** less stressed.",
+          "If the team **communicates** well, projects **will run** more smoothly.",
+        ],
+      },
+      {
+        heading: "Comparatives — comparing office and remote work",
+        body: ["more/-er + adjective + than compares two working styles."],
+        examples: [
+          "Remote work **is more flexible than** office work.",
+          "A quiet home office **is better than** a noisy open-plan office.",
+        ],
+      },
     ],
     commonMistakes: [
       "❌ I am agree that working from home saves time. → ✅ I agree that working from home saves time. ('agree' is a verb, no 'am')",
@@ -2385,6 +2409,7 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ Actually, I work from home three days a week. → ✅ Currently, I work from home three days a week. ('actually' means 'in fact', not 'currently')",
       "❌ She is remote worker who manages her own schedule. → ✅ She is a remote worker... (article needed before a job noun)",
       "❌ I have bought a new desk last week. → ✅ I bought a new desk last week. (specific past time → past simple)",
+      "❌ If you will set clear boundaries, you'll feel less stressed. → ✅ If you set clear boundaries... (no 'will' in the if-clause)",
     ],
   },
 
