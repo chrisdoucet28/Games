@@ -5699,11 +5699,45 @@ export const LESSONS: Record<string, Lesson> = {
         ],
       },
       {
-        heading: "Advanced emphasis structures",
-        body: ["Inversion after 'not only' (was/did + subject); it-clefts ('It is often the most sensational headlines that...') use 'that', not 'which'."],
+        heading: "Advanced emphasis structures — inversion",
+        body: ["Rarely / Never before / Not only...but also / No sooner...than / Under no circumstances + auxiliary + subject + verb — fronting a negative adverbial inverts the normal subject-verb order, like in a question."],
         examples: [
           "**Not only was** the story false, but it was also misleading.",
-          "**It is often** the most sensational headlines **that** spread the fastest.",
+          "**Rarely does** a deepfake fool trained experts.",
+          "**Never before had** anyone seen such convincing propaganda.",
+        ],
+      },
+      {
+        heading: "Reported speech — backshifting tenses",
+        body: ["When reporting what someone said, tenses usually shift one step back: present simple → past simple, present perfect → past perfect, will → would, can → could."],
+        examples: [
+          "'This story is completely fake,' said the journalist. → The journalist said (that) the story **was** completely fake.",
+          "'We will fact-check every claim,' promised the editor. → The editor promised (that) they **would fact-check** every claim.",
+        ],
+      },
+      {
+        heading: "Third conditional — an unreal past result",
+        body: ["If + past perfect, ... would have + past participle — imagining a different outcome for something that already happened and can't be changed."],
+        examples: [
+          "If the source **had verified** the claim, the rumour **wouldn't have spread** so quickly.",
+          "If she **hadn't shared** the article, it **wouldn't have gone** viral.",
+        ],
+      },
+      {
+        heading: "Mixed conditional — a past cause, a present result",
+        body: ["If + past perfect, ... would + base verb — a past action or decision explains a situation that is still true now."],
+        examples: [
+          "If the platform **hadn't removed** fake accounts years ago, it **wouldn't be** so trusted today.",
+          "If he **hadn't fallen** for that fake news story, he **wouldn't be** so cautious online now.",
+        ],
+      },
+      {
+        heading: "Advanced passive — modal and modal perfect passive",
+        body: ["modal + be + past participle (present/future obligation or possibility); modal + have been + past participle (a judgement or guess about the past)."],
+        examples: [
+          "Fake accounts **must be removed** by platforms.",
+          "The spread of misinformation **could have been prevented** by the platform.",
+          "The outdated policy **needs reforming**.",
         ],
       },
     ],
@@ -5712,6 +5746,8 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ The platform have been criticised... → ✅ The platform has been criticised... (singular subject 'platform')",
       "❌ Not only the story was false... → ✅ Not only was the story false... ('not only' triggers inversion)",
       "❌ It is often the headlines which spread fastest. → ✅ ...headlines that spread fastest. (it-clefts use 'that')",
+      "❌ 'We will fact-check every claim,' promised the editor. → The editor promised they **will** fact-check every claim. → ✅ ...they **would** fact-check every claim. ('will' backshifts to 'would' in reported speech)",
+      "❌ If the source verified the claim, the rumour wouldn't have spread so quickly. → ✅ If the source **had verified** the claim... (third conditional needs past perfect in the if-clause)",
     ],
   },
 };
