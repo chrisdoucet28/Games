@@ -20,9 +20,9 @@ export function BrandBadge({ isPaid }: { isPaid: boolean }) {
       src={logoUrl} alt="School logo"
       style={{
         position: "fixed", right: "16px", bottom: "16px", zIndex: 1500,
-        maxHeight: "48px", maxWidth: "140px", objectFit: "contain",
-        borderRadius: "8px", background: "rgba(255,255,255,0.9)", padding: "4px 8px",
-        boxShadow: "0 2px 10px rgba(0,0,0,0.25)",
+        maxHeight: "88px", maxWidth: "260px", objectFit: "contain",
+        borderRadius: "10px", background: "rgba(255,255,255,0.95)", padding: "8px 14px",
+        boxShadow: "0 4px 16px rgba(0,0,0,0.3)",
       }}
     />
   );
