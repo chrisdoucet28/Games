@@ -146,7 +146,7 @@ export function ClassesScreen({ onBack, onResumeClass, onStartWithClass, theme, 
                 </div>
 
                 {cls.teams.length > 0 && (
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", margin: "10px 0" }}>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginTop: "10px" }}>
                     {cls.teams.map(t => (
                       <span key={t.id} style={{ background: t.color?.light ?? TEAM_COLORS[0].light, color: t.color?.dark ?? TEAM_COLORS[0].dark, borderRadius: "8px", padding: "4px 10px", fontSize: "12px", fontWeight: "700" }}>
                         {t.mascot ?? t.color?.emoji} {t.name}: {t.score}
@@ -154,6 +154,25 @@ export function ClassesScreen({ onBack, onResumeClass, onStartWithClass, theme, 
                     ))}
                   </div>
                 )}
+                {(() => {
+                  // team_roster accumulates every team ever played under this class; `teams` is
+                  // only whichever subset was active last session. A roster entry not in that
+                  // subset (e.g. sat out the last game) still belongs on this card — just without
+                  // a score to show, and visually muted so it doesn't read as part of that score.
+                  const activeNames = new Set(cls.teams.map(t => t.name));
+                  const benched = cls.team_roster.filter(r => !activeNames.has(r.name));
+                  if (benched.length === 0) return null;
+                  return (
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", alignItems: "center", marginTop: cls.teams.length > 0 ? "6px" : "10px" }}>
+                      <span style={{ fontSize: "11px", color: "#9CA3AF", fontWeight: "700" }}>Also saved:</span>
+                      {benched.map(r => (
+                        <span key={r.id} style={{ background: "#F9FAFB", color: "#9CA3AF", border: "1px dashed #D1D5DB", borderRadius: "8px", padding: "4px 10px", fontSize: "12px", fontWeight: "700" }}>
+                          {r.mascot ?? r.color?.emoji} {r.name}
+                        </span>
+                      ))}
+                    </div>
+                  );
+                })()}
 
                 <div style={{ display: "flex", gap: "8px", marginTop: "12px", flexWrap: "wrap" }}>
                   {cls.in_progress && (

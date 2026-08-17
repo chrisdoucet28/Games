@@ -1,14 +1,43 @@
 import { useEffect, useState } from "react";
-import { getProfile, updateProfile } from "../../lib/profile";
+import { getProfile, updateProfile, uploadAvatar, uploadOrgLogo, removeAvatar, removeOrgLogo } from "../../lib/profile";
 import { THEMES, hexToRgba, type Theme } from "../../data/themes";
 
 type Props = {
   onBack: () => void;
   theme: Theme;
   onThemeChange: (theme: Theme) => void;
+  isPaid: boolean;
+  onUpgrade: () => void;
 };
 
-export function ProfileScreen({ onBack, theme, onThemeChange }: Props) {
+type BrandingKind = "avatar" | "logo";
+
+// One upload slot (used for both the profile picture and the school logo) — preview, a file
+// input disguised as a button, and a remove link that only appears once something's uploaded.
+function BrandingSlot({ label, url, busy, onUpload, onRemove }: { label: string; url: string | null; busy: boolean; onUpload: (file: File) => void; onRemove: () => void }) {
+  return (
+    <div style={{ flex: "1 1 160px", textAlign: "center" }}>
+      <div style={{ width: "100%", aspectRatio: "1", maxWidth: "120px", margin: "0 auto 8px", borderRadius: "12px", border: "2px solid #E5E7EB", background: "#F9FAFB", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
+        {url ? <img src={url} alt={label} style={{ width: "100%", height: "100%", objectFit: "contain" }} /> : <span style={{ fontSize: "28px", color: "#D1D5DB" }}>🖼️</span>}
+      </div>
+      <div style={{ fontSize: "12px", color: "#6B7280", fontWeight: "700", marginBottom: "6px" }}>{label}</div>
+      <label style={{ display: "inline-block", background: "#F0F9FF", border: "2px solid #93C5FD", borderRadius: "8px", padding: "5px 12px", fontSize: "12px", fontWeight: "700", color: "#1D4ED8", cursor: busy ? "default" : "pointer", opacity: busy ? 0.6 : 1 }}>
+        {busy ? "…" : url ? "Replace" : "Upload"}
+        <input
+          type="file" accept="image/*" disabled={busy} style={{ display: "none" }}
+          onChange={e => { const f = e.target.files?.[0]; if (f) onUpload(f); e.target.value = ""; }}
+        />
+      </label>
+      {url && (
+        <button type="button" onClick={onRemove} disabled={busy} style={{ display: "block", margin: "6px auto 0", background: "none", border: "none", color: "#9CA3AF", fontSize: "11px", fontWeight: "700", cursor: busy ? "default" : "pointer" }}>
+          Remove
+        </button>
+      )}
+    </div>
+  );
+}
+
+export function ProfileScreen({ onBack, theme, onThemeChange, isPaid, onUpgrade }: Props) {
   const [displayName, setDisplayName] = useState("");
   const [selectedThemeId, setSelectedThemeId] = useState(theme.id);
   const [loading, setLoading] = useState(true);
@@ -16,15 +45,52 @@ export function ProfileScreen({ onBack, theme, onThemeChange }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
 
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [orgLogoUrl, setOrgLogoUrl] = useState<string | null>(null);
+  const [avatarBusy, setAvatarBusy] = useState(false);
+  const [logoBusy, setLogoBusy] = useState(false);
+  const [brandingError, setBrandingError] = useState<string | null>(null);
+
   useEffect(() => {
     getProfile()
       .then(p => {
         setDisplayName(p.display_name ?? "");
         setSelectedThemeId(p.theme_id);
+        setAvatarUrl(p.avatar_url);
+        setOrgLogoUrl(p.org_logo_url);
       })
       .catch(err => setError(err instanceof Error ? err.message : "Couldn't load your profile."))
       .finally(() => setLoading(false));
   }, []);
+
+  // Branding uploads/removals save immediately on interaction (unlike name/theme, which wait for
+  // the form's own Save button) — a file picker firing an instant upload is the expected pattern,
+  // and bundling it into a separate "Save" click would just be one more step for no benefit.
+  const handleBrandingUpload = async (kind: BrandingKind, file: File) => {
+    setBrandingError(null);
+    (kind === "avatar" ? setAvatarBusy : setLogoBusy)(true);
+    try {
+      const url = await (kind === "avatar" ? uploadAvatar(file) : uploadOrgLogo(file));
+      (kind === "avatar" ? setAvatarUrl : setOrgLogoUrl)(url);
+    } catch (err) {
+      setBrandingError(err instanceof Error ? err.message : "Couldn't upload that image.");
+    } finally {
+      (kind === "avatar" ? setAvatarBusy : setLogoBusy)(false);
+    }
+  };
+
+  const handleBrandingRemove = async (kind: BrandingKind) => {
+    setBrandingError(null);
+    (kind === "avatar" ? setAvatarBusy : setLogoBusy)(true);
+    try {
+      await (kind === "avatar" ? removeAvatar() : removeOrgLogo());
+      (kind === "avatar" ? setAvatarUrl : setOrgLogoUrl)(null);
+    } catch (err) {
+      setBrandingError(err instanceof Error ? err.message : "Couldn't remove that image.");
+    } finally {
+      (kind === "avatar" ? setAvatarBusy : setLogoBusy)(false);
+    }
+  };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,6 +154,30 @@ export function ProfileScreen({ onBack, theme, onThemeChange }: Props) {
                   );
                 })}
               </div>
+
+              <label style={{ display: "block", color: "#4B5563", fontSize: "13px", fontWeight: "700", marginBottom: "8px" }}>🎨 Branding</label>
+              {!isPaid ? (
+                <div style={{ background: "#F0F9FF", border: "2px dashed #93C5FD", borderRadius: "12px", padding: "14px", textAlign: "center", marginBottom: "20px" }}>
+                  <div style={{ fontSize: "13px", color: "#374151", fontWeight: "700", marginBottom: "8px" }}>Upload a profile picture and your school's logo on the paid plan.</div>
+                  <button
+                    type="button" onClick={onUpgrade}
+                    style={{ background: `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "10px", padding: "8px 16px", fontWeight: "800", cursor: "pointer", fontFamily: theme.headingFont }}
+                  >
+                    💎 Upgrade
+                  </button>
+                </div>
+              ) : (
+                <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginBottom: "8px" }}>
+                  <BrandingSlot label="Profile picture" url={avatarUrl} busy={avatarBusy} onUpload={f => handleBrandingUpload("avatar", f)} onRemove={() => handleBrandingRemove("avatar")} />
+                  <BrandingSlot label="School / org logo" url={orgLogoUrl} busy={logoBusy} onUpload={f => handleBrandingUpload("logo", f)} onRemove={() => handleBrandingRemove("logo")} />
+                </div>
+              )}
+              {brandingError && (
+                <div style={{ background: "#FEE2E2", color: "#991B1B", padding: "10px 14px", borderRadius: "10px", fontSize: "13px", marginBottom: "14px" }}>{brandingError}</div>
+              )}
+              {isPaid && (
+                <div style={{ fontSize: "11px", color: "#9CA3AF", marginBottom: "20px" }}>Your logo appears on printed handouts and in the corner while you're using ClassCade.</div>
+              )}
 
               {error && (
                 <div style={{ background: "#FEE2E2", color: "#991B1B", padding: "10px 14px", borderRadius: "10px", fontSize: "13px", marginBottom: "14px" }}>{error}</div>

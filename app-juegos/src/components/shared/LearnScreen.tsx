@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { LESSONS } from "../../data/lessons";
 import { TOPIC_OPTIONS } from "../../data/topics";
 import { hexToRgba, type Theme } from "../../data/themes";
+import { getProfile } from "../../lib/profile";
 
 type Props = {
   onBack: () => void;
@@ -55,9 +56,12 @@ const LESSON_TOPICS = Object.keys(LESSONS)
 // colored fills, no theme colors, so it reads well on any printer (color or black & white).
 // Sizes/spacing are deliberately tighter than the on-screen card (which has room to breathe)
 // so a typical lesson's title + intro + sections + common-mistakes fits on a single printed page.
-function PrintableLesson({ t }: { t: (typeof LESSON_TOPICS)[number] }) {
+function PrintableLesson({ t, logoUrl }: { t: (typeof LESSON_TOPICS)[number]; logoUrl?: string | null }) {
   return (
     <div>
+      {logoUrl && (
+        <img src={logoUrl} alt="" style={{ display: "block", maxHeight: "34px", maxWidth: "160px", objectFit: "contain", marginBottom: "8px" }} />
+      )}
       <span style={{ background: LEVEL_COLOR[t.meta.level ?? "A2"], color: "white", borderRadius: "999px", padding: "2px 10px", fontSize: "10.5px", fontWeight: "800" }}>{t.meta.level}</span>
       <h2 style={{ fontSize: "19px", fontWeight: "900", color: "#111827", margin: "6px 0 5px" }}>{t.lesson.title}</h2>
       <p style={{ color: "#374151", fontSize: "12px", lineHeight: 1.4, margin: "0 0 10px" }}>{t.lesson.intro}</p>
@@ -96,6 +100,14 @@ function PrintableLesson({ t }: { t: (typeof LESSON_TOPICS)[number] }) {
 
 export function LearnScreen({ onBack, theme, filterTopicIds }: Props) {
   const visibleTopics = filterTopicIds ? LESSON_TOPICS.filter(t => filterTopicIds.includes(t.id)) : LESSON_TOPICS;
+
+  // Paid-only branding perk (see ProfileScreen/BrandBadge) — org_logo_url is only ever set by a
+  // paid account uploading one, so no separate isPaid check is needed here to decide whether to
+  // print it.
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  useEffect(() => {
+    getProfile().then(p => setLogoUrl(p.org_logo_url)).catch(() => {});
+  }, []);
 
   // If exactly one of the chosen topics has a lesson, jump straight to it — no need to
   // make the teacher pick from a list of one.
@@ -161,7 +173,7 @@ export function LearnScreen({ onBack, theme, filterTopicIds }: Props) {
           </div>
 
           <div className="learn-print-only">
-            <PrintableLesson t={selected} />
+            <PrintableLesson t={selected} logoUrl={logoUrl} />
           </div>
         </div>
       </div>
@@ -228,7 +240,7 @@ export function LearnScreen({ onBack, theme, filterTopicIds }: Props) {
         <div className="learn-print-only" style={{ maxWidth: "720px", margin: "0 auto" }}>
           {visibleTopics.map((t, i) => (
             <div key={t.id} style={{ pageBreakBefore: i === 0 ? undefined : "always" }}>
-              <PrintableLesson t={t} />
+              <PrintableLesson t={t} logoUrl={logoUrl} />
             </div>
           ))}
         </div>

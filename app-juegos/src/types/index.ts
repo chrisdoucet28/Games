@@ -127,6 +127,11 @@ export interface TeamColor {
     // PlanIntroScreen, so it's shown exactly once per account. Defaults to false for new rows and
     // was backfilled to true for every account that existed before this field was added.
     has_completed_plan_intro: boolean;
+    // Paid-only branding (see BrandBadge and ProfileScreen's upload section) — public URLs into
+    // the "branding" storage bucket, null until a teacher uploads one. avatar_url is the
+    // teacher's own picture; org_logo_url is their school/organization's logo.
+    avatar_url: string | null;
+    org_logo_url: string | null;
     created_at: string;
     updated_at: string;
   }
