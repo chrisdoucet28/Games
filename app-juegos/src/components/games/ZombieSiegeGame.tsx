@@ -786,6 +786,18 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
 
   useEffect(() => () => { if (breakTimeoutRef.current) clearTimeout(breakTimeoutRef.current); }, []);
 
+  // Lets the teacher skip the read-pause early once the class has actually read the prompt —
+  // rarely needed (the countdown is there on purpose, to give slower readers time), but no reason
+  // to force the room to sit through it if everyone's already ready. Fast-forwards
+  // roundElapsedSeconds past the read-pause threshold too, not just the UI phase, so zombies start
+  // spawning right away instead of the horde still waiting out the skipped countdown in the
+  // background.
+  const skipReadPause = useCallback(() => {
+    if (breakTimeoutRef.current) clearTimeout(breakTimeoutRef.current);
+    setRoundPhase("active");
+    setSiege(prev => ({ ...prev, roundElapsedSeconds: roundReadPauseSeconds(prev.round) + 1 }));
+  }, []);
+
   // Advancing to the next wave is now a teacher-confirmed action (the "Wave Complete!" screen),
   // not something this tick loop does automatically — it only reacts to "waveCleared" by leaving
   // siege.awaitingNextWave true (already set by advanceTick), which the render below turns into
@@ -1099,6 +1111,10 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
               <div style={{ display: "flex", justifyContent: "center" }}>
                 <TurnTimerBar timeLeft={prepSecondsLeft} totalSeconds={prepSecondsTotal} />
               </div>
+              <button onClick={skipReadPause} className="zs-btn" style={{
+                marginTop: "8px", background: "none", border: "1px solid #4D7C0F", color: "#BEF264",
+                borderRadius: "8px", padding: "4px 14px", fontSize: "11px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease",
+              }}>✅ Ready — skip countdown</button>
             </div>
           ) : (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "5px", marginTop: "6px" }}>
