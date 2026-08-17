@@ -2610,6 +2610,30 @@ export const LESSONS: Record<string, Lesson> = {
           "Painting is **more relaxing than watching** TV.",
         ],
       },
+      {
+        heading: "First conditional — a likely benefit of a hobby",
+        body: ["If + present simple, ... will + base verb — a realistic future result of taking up or practising a hobby."],
+        examples: [
+          "If you **take up** a hobby, you**'ll feel** happier.",
+          "If she **practises** yoga regularly, she**'ll feel** more relaxed.",
+        ],
+      },
+      {
+        heading: "Passive voice — who organizes and runs activities",
+        body: ["am/is/are + past participle (present); was/were + past participle (past)."],
+        examples: [
+          "A hiking trip **is organized** by the club.",
+          "The yoga class **was led** by the teacher yesterday.",
+        ],
+      },
+      {
+        heading: "Comparatives — comparing hobbies",
+        body: ["more/-er + adjective + than compares two free-time activities."],
+        examples: [
+          "Yoga **is more calming than** running.",
+          "Hiking **is better than** staying indoors.",
+        ],
+      },
     ],
     commonMistakes: [
       "❌ I realized a painting course last year. → ✅ I did a painting course last year. ('realize' means to become aware of, not to carry out)",
@@ -2617,6 +2641,7 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ Whether I go hiking depends of the weather. → ✅ ...depends on the weather. ('depend on', not 'depend of')",
       "❌ I am painter in my free time. → ✅ I am a painter in my free time. (article needed before a role noun)",
       "❌ I have taken up painting three years ago. → ✅ I took up painting three years ago. (specific past time → past simple)",
+      "❌ If you will take up a hobby, you'll feel happier. → ✅ If you take up a hobby... (no 'will' in the if-clause)",
     ],
   },
 
