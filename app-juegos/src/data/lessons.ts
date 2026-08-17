@@ -5584,12 +5584,56 @@ export const LESSONS: Record<string, Lesson> = {
           "Globalisation **increased** trade a lot **in the 1990s**. (not 'has increased')",
         ],
       },
+      {
+        heading: "Reported speech — backshifting tenses",
+        body: ["When reporting what someone said, tenses usually shift one step back: present simple → past simple, present perfect → past perfect, will → would, can → could."],
+        examples: [
+          "'Globalisation has reduced poverty,' said the economist. → The economist said (that) globalisation **had reduced** poverty.",
+          "'We will protect local industries,' said the minister. → The minister said (that) they **would protect** local industries.",
+        ],
+      },
+      {
+        heading: "Inversion — fronting a negative adverb for emphasis",
+        body: ["Rarely / Never before / Not only...but also / No sooner...than / Under no circumstances + auxiliary + subject + verb — moving a negative adverbial to the front inverts the normal subject-verb order, like in a question."],
+        examples: [
+          "**Rarely does** globalisation benefit every country equally.",
+          "**Never before has** a country faced such economic interdependence.",
+          "**Not only do** multinational corporations create jobs, **but they also** increase inequality.",
+        ],
+      },
+      {
+        heading: "Third conditional — an unreal past result",
+        body: ["If + past perfect, ... would have + past participle — imagining a different outcome for something that already happened and can't be changed."],
+        examples: [
+          "If the WTO **hadn't existed**, trade disputes **would have escalated** more often.",
+          "If governments **had acted** sooner, the recession **would have hit** less hard.",
+        ],
+      },
+      {
+        heading: "Mixed conditional — a past cause, a present result",
+        body: ["If + past perfect, ... would + base verb — a past action or decision explains a situation that is still true now."],
+        examples: [
+          "If the country **hadn't opened** its borders decades ago, it **wouldn't be** so wealthy today.",
+          "If the company **hadn't outsourced** production years ago, it **wouldn't be** so profitable today.",
+        ],
+      },
+      {
+        heading: "Advanced passive — modal and modal perfect passive",
+        body: ["modal + be + past participle (present/future obligation or possibility); modal + have been + past participle (a judgement or guess about the past)."],
+        examples: [
+          "Multinational corporations **must be regulated** by governments.",
+          "The job losses **could have been prevented** by the government.",
+          "The outdated tariffs **need reforming**.",
+        ],
+      },
     ],
     commonMistakes: [
       "❌ Delegates assisted to the trade summit. → ✅ ...attended the trade summit. ('assist' means 'to help'; 'attend' for going to an event)",
       "❌ Companies depend of cheap labour. → ✅ ...depend on cheap labour. (preposition 'on', not 'of')",
       "❌ Globalisation has increased trade a lot in the 1990s. → ✅ Globalisation increased trade... (finished time needs past simple)",
       "❌ Critics say globalisation doesn't help nobody. → ✅ ...doesn't help anybody. (avoid double negatives)",
+      "❌ 'We will protect local industries,' said the minister. → The minister said they **will** protect local industries. → ✅ ...they **would** protect local industries. ('will' backshifts to 'would' in reported speech)",
+      "❌ Rarely globalisation benefits every country equally. → ✅ Rarely **does** globalisation benefit... (inversion needs the auxiliary before the subject)",
     ],
   },
 
