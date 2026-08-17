@@ -2491,6 +2491,30 @@ export const LESSONS: Record<string, Lesson> = {
           "He **avoided talking** about his salary.",
         ],
       },
+      {
+        heading: "First conditional — a likely career result",
+        body: ["If + present simple, ... will + base verb — a realistic future outcome of a career decision."],
+        examples: [
+          "If you **update** your CV, you**'ll have** a better chance.",
+          "If he **negotiates** his salary, he**'ll earn** more.",
+        ],
+      },
+      {
+        heading: "Passive voice — recruitment processes",
+        body: ["am/is/are + past participle (present); was/were + past participle (past)."],
+        examples: [
+          "All applications **are reviewed** by HR.",
+          "Two employees **were promoted** by the manager.",
+        ],
+      },
+      {
+        heading: "Comparatives — comparing jobs and career paths",
+        body: ["more/-er + adjective + than compares two jobs, offers, or working styles."],
+        examples: [
+          "Freelancing **is more flexible than** a full-time job.",
+          "Her new salary **is better than** her old one.",
+        ],
+      },
     ],
     commonMistakes: [
       "❌ I am agree that soft skills are important. → ✅ I agree that soft skills are important. ('agree' is a verb, no 'am')",
@@ -2498,6 +2522,7 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ I couldn't assist the job interview. → ✅ I couldn't attend the job interview. ('assist' means to help; 'attend' means to go to')",
       "❌ My brother is engineer at a tech company. → ✅ My brother is an engineer... (article needed before a profession)",
       "❌ I have started my new job last Monday. → ✅ I started my new job last Monday. (specific past time → past simple)",
+      "❌ If you will update your CV, you'll have a better chance. → ✅ If you update your CV... (no 'will' in the if-clause)",
     ],
   },
 
