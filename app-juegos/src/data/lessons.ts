@@ -2851,6 +2851,30 @@ export const LESSONS: Record<string, Lesson> = {
           "We **went** to Spain last summer. (specific past time → past simple)",
         ],
       },
+      {
+        heading: "First conditional — a likely result of a travel choice",
+        body: ["If + present simple, ... will + base verb — a realistic future result of a decision about a trip."],
+        examples: [
+          "If you **book** early, you**'ll save** money.",
+          "If he **loses** his passport, he**'ll need** a new one.",
+        ],
+      },
+      {
+        heading: "Passive voice — who organizes and provides travel services",
+        body: ["am/is/are + past participle (present); was/were + past participle (past) — for describing how trips are arranged and run."],
+        examples: [
+          "The trip **is organized** by the agency.",
+          "The flight **was delayed** by the airline.",
+        ],
+      },
+      {
+        heading: "Comparatives — comparing trips, hotels, and travel styles",
+        body: ["more + adjective + than (longer adjectives); adjective + -er + than (short adjectives); good → better is irregular."],
+        examples: [
+          "This hotel **is more expensive than** the one we stayed in last year.",
+          "The exchange rate **is better than** last year's rate.",
+        ],
+      },
     ],
     commonMistakes: [
       "❌ We arrived to the airport two hours early. → ✅ We arrived at the airport two hours early. ('arrive at' for small places)",
@@ -2858,6 +2882,7 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ I'm looking forward to visit the pyramids. → ✅ ...to visiting the pyramids. ('look forward to' + gerund)",
       "❌ She is tour guide who knows the city well. → ✅ She is a tour guide... (article needed before a role noun)",
       "❌ I have visited Rome last year. → ✅ I visited Rome last year. (specific past time → past simple)",
+      "❌ If you will book early, you'll save money. → ✅ If you book early... (no 'will' in the if-clause)",
     ],
   },
 
