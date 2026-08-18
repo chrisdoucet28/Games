@@ -9,9 +9,12 @@ type Props = {
 
 const BET_AMOUNTS = [25, 50, 100];
 
-// Deliberately no reveal/result phase here — the reveal stays a shared, whole-class moment on the
-// projector (see the plan's reasoning). This view's whole lifecycle is: pick a bet, get a "locked
-// in" confirmation, and wait for the next sentence to appear once the teacher advances the round.
+// The reveal itself stays a shared, whole-class moment on the projector — but each team also gets
+// its own win/lose overlay on their phone the moment the teacher hits "Reveal Answer", mirroring
+// the shared screen's own per-team result cards. It overlays the existing betting view rather than
+// replacing it (nothing to hide at this point — the bet's already locked in) and disappears on its
+// own once the teacher advances: `state.results` is only populated during "result"/"final" and
+// gets cleared the instant nextRound() resets it server-side, so there's nothing to dismiss here.
 export function PhoneAuctionView({ state, teamId, onBet }: Props) {
   const [vote, setVote] = useState<"true" | "false" | null>(null);
   const [amount, setAmount] = useState<number | null>(null);
@@ -25,6 +28,7 @@ export function PhoneAuctionView({ state, teamId, onBet }: Props) {
   const bank = state.banks[String(teamId)] ?? 0;
   const team = state.roster.find(t => t.id === teamId);
   const locked = vote !== null && amount !== null;
+  const myResult = state.results?.[String(teamId)];
 
   const pick = (nextVote: typeof vote, nextAmount: typeof amount) => {
     const finalVote = nextVote ?? vote;
@@ -88,6 +92,39 @@ export function PhoneAuctionView({ state, teamId, onBet }: Props) {
       {locked && (
         <div style={{ textAlign: "center", background: "rgba(34,197,94,0.15)", border: "2px solid #22C55E", borderRadius: "12px", padding: "12px", fontWeight: "800", fontSize: "14px", color: "#4ADE80" }}>
           🔒 Locked in — {amount}pts on {vote === "true" ? "TRUE" : "FALSE"}. Look at the screen!
+        </div>
+      )}
+
+      {myResult && (
+        <div style={{
+          position: "fixed", inset: 0, background: "rgba(5,3,15,0.82)", backdropFilter: "blur(2px)",
+          display: "flex", alignItems: "center", justifyContent: "center", padding: "20px", zIndex: 50,
+        }}>
+          <div style={{
+            width: "100%", maxWidth: "360px", textAlign: "center", borderRadius: "20px", padding: "26px 22px",
+            background: myResult.won ? "linear-gradient(160deg,#052E16,#1E1033)" : "linear-gradient(160deg,#450A0A,#1E1033)",
+            border: `3px solid ${myResult.won ? "#22C55E" : "#EF4444"}`,
+            boxShadow: `0 0 40px ${myResult.won ? "#22C55E55" : "#EF444455"}`,
+          }}>
+            <div style={{ fontSize: "40px", marginBottom: "6px" }}>🔨</div>
+            <div style={{
+              display: "inline-block", fontWeight: "900", fontSize: "20px", letterSpacing: "0.05em",
+              color: state.correct ? "#4ADE80" : "#F87171", border: `3px solid ${state.correct ? "#4ADE80" : "#F87171"}`,
+              borderRadius: "8px", padding: "3px 16px", marginBottom: "12px",
+            }}>
+              {state.correct ? "SOLD! ✔" : "REJECTED! ✘"}
+            </div>
+            <div style={{ fontSize: "13px", color: "#D1D5DB", marginBottom: "14px" }}>
+              You bet <strong>{myResult.amount}pts</strong> on <strong>{myResult.vote === "true" ? "TRUE ✅" : "FALSE ❌"}</strong> — the sentence was <strong>{state.correct ? "CORRECT" : "INCORRECT"}</strong>.
+            </div>
+            <div style={{ fontWeight: "900", fontSize: "32px", color: myResult.won ? "#4ADE80" : "#F87171", marginBottom: "4px" }}>
+              {myResult.won ? `+${myResult.delta}` : `${myResult.delta}`}
+            </div>
+            <div style={{ fontSize: "14px", fontWeight: "800", color: myResult.won ? "#86EFAC" : "#FCA5A5", marginBottom: "16px" }}>
+              {myResult.won ? "Correct!" : "Wrong!"}
+            </div>
+            <div style={{ fontSize: "13px", color: "#FCD34D", fontWeight: "700" }}>{bank}pts in the bank</div>
+          </div>
         </div>
       )}
     </div>

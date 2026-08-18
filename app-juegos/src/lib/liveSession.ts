@@ -29,6 +29,13 @@ export type AuctionPhase = "intro" | "betting" | "result" | "final";
 // lets a phone tell "hasn't started yet" from "round in progress" from "auction is over" without
 // needing separate one-shot events for each (though "ended" below still exists as an immediate
 // push, so a phone doesn't have to wait out a full interval to find out the game's done).
+//
+// `correct`/`results` are only populated once phase is "result" (or "final") — same "not a new
+// leak" reasoning as everything else broadcast on this channel: the shared screen already reveals
+// the answer and every team's outcome at that same moment, this just lets a phone show its own
+// team's outcome too. A team that sat out (broke) has no entry in `results` — nothing to reveal.
+export type AuctionResultInfo = { won: boolean; delta: number; vote: "true" | "false" | null; amount: number };
+
 export type AuctionStatePayload = {
   phase: AuctionPhase;
   qi: number;
@@ -37,6 +44,8 @@ export type AuctionStatePayload = {
   banks: Record<string, number>;
   connectedTeamIds: (string | number)[];
   ts: number;
+  correct?: boolean;
+  results?: Record<string, AuctionResultInfo>;
 };
 
 // Broadcast from a phone -> the teacher's screen. Sent on every local change and re-sent once on

@@ -9,7 +9,7 @@ import { FlagPromptButton } from "../shared/FlagPromptButton";
 import { AUCTION_TUTORIAL_STEPS } from "../../data/tutorials/auction";
 import {
   generateSessionCode, openAuctionChannel, closeChannel,
-  type AuctionStatePayload, type AuctionBetPayload,
+  type AuctionStatePayload, type AuctionBetPayload, type AuctionResultInfo,
 } from "../../lib/liveSession";
 
 const GM = GAME_MODES.find(g => g.id === "auction")!;
@@ -214,9 +214,18 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
   const qiRef = useRef(qi);
   const sentenceRef = useRef(questions[qi]?.sentence ?? "");
   const phaseRef = useRef(phase);
+  // resultMsg is what drives sendState()'s per-team win/lose overlay data — it's cleared back to
+  // [] at the top of nextRound() in the same tick phase flips off "result", so the overlay
+  // disappears on its own the instant the teacher advances, no extra bookkeeping needed.
+  const resultMsgRef = useRef(resultMsg);
   const connectedTeamIdsRef = useRef<Set<string | number>>(new Set());
   const sendStateRef = useRef<(() => void) | null>(null);
-  useEffect(() => { qiRef.current = qi; sentenceRef.current = questions[qi]?.sentence ?? ""; phaseRef.current = phase; }, [qi, questions, phase]);
+  useEffect(() => {
+    qiRef.current = qi;
+    sentenceRef.current = questions[qi]?.sentence ?? "";
+    phaseRef.current = phase;
+    resultMsgRef.current = resultMsg;
+  }, [qi, questions, phase, resultMsg]);
 
   // Opens/closes the realtime channel only when phone mode itself is toggled on/off — broadcasts
   // a fresh AuctionStatePayload on every presence change and on a standing interval (covers late
@@ -229,6 +238,11 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
     channelRef.current = channel;
 
     const sendState = () => {
+      const currentQuestion = questions[qiRef.current];
+      const results: Record<string, AuctionResultInfo> = {};
+      resultMsgRef.current.forEach(r => {
+        if (!r.satOut) results[String(r.teamId)] = { won: r.won, delta: r.delta, vote: r.vote as "true" | "false" | null, amount: r.amount };
+      });
       const payload: AuctionStatePayload = {
         phase: phaseRef.current,
         qi: qiRef.current,
@@ -237,6 +251,8 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
         banks: Object.fromEntries(teams.map(t => [String(t.id), auctionBankRef.current[t.id] ?? 0])),
         connectedTeamIds: Array.from(connectedTeamIdsRef.current),
         ts: Date.now(),
+        correct: Object.keys(results).length > 0 ? !!currentQuestion?.isCorrect : undefined,
+        results: Object.keys(results).length > 0 ? results : undefined,
       };
       channel.send({ type: "broadcast", event: "state", payload });
     };
