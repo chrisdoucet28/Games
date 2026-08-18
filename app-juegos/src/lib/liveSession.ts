@@ -68,7 +68,7 @@ export function closeChannel(channel: RealtimeChannel | null): void {
   if (channel) supabase.removeChannel(channel);
 }
 
-// --- Spy Among Us (group mode) ---
+// --- Spy Among Us (group mode + solo + 1v1) ---
 //
 // Unlike Auction, phones here are receive-only: no bet-equivalent broadcast comes back from a
 // phone, so there's no SpyActionPayload. Each round's `roles` map covers every team's private
@@ -76,10 +76,14 @@ export function closeChannel(channel: RealtimeChannel | null): void {
 // model Auction already uses; a phone only ever *displays* its own team's entry.
 export type SpyRosterEntry = { id: string | number; name: string; color: TeamColor; mascot?: string | null };
 
-// Mirrors SpyAmongUsGame.tsx's own Phase type, minus the phases phone mode never produces
-// ("intro"/"peek" both collapse to "lobby" — see mapPhase in SpyAmongUsGame.tsx) and minus the
-// 1v1-only phases (speak-2p/guess-2p/reveal-2p), since phone mode is group-only for now.
-export type SpyPhase = "lobby" | "discuss" | "order-roll" | "speak" | "vote" | "spy-guess" | "reveal" | "final";
+// Mirrors SpyAmongUsGame.tsx's own Phase type minus "intro" (collapses to "lobby" — see
+// mapPhase in SpyAmongUsGame.tsx). "peek" is a real, reachable phase here (unlike group mode,
+// where phone mode skips it entirely) whenever solo play's teacher stand-in still needs their own
+// on-screen reveal. "speak-2p"/"guess-2p"/"reveal-2p" are the 1v1 ruleset's counterparts to
+// "speak"/"spy-guess"/"reveal".
+export type SpyPhase =
+  | "lobby" | "peek" | "discuss" | "order-roll" | "speak" | "speak-2p"
+  | "vote" | "spy-guess" | "guess-2p" | "reveal-2p" | "reveal" | "final";
 
 export type SpyRoleInfo = { role: "spy" | "crew"; prompt: string };
 

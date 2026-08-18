@@ -12,10 +12,13 @@ export function PhoneSpyView({ state, teamId }: Props) {
   const team = state.roster.find(t => t.id === teamId);
   const role = state.roles[String(teamId)];
 
+  // "speak" (group mode) and "speak-2p" (solo/1v1) both track their own turn the same way —
+  // state.speakOrder/state.speakIdx already point at whichever ruleset's data sendState() chose.
+  const isSpeakPhase = state.phase === "speak" || state.phase === "speak-2p";
   const speakerIdx = state.speakOrder.indexOf(teamId);
-  const isMyTurn = state.phase === "speak" && state.speakOrder[state.speakIdx] === teamId;
-  const hasSpoken = state.phase === "speak" && speakerIdx !== -1 && speakerIdx < state.speakIdx;
-  const currentSpeaker = state.phase === "speak" ? state.roster.find(t => t.id === state.speakOrder[state.speakIdx]) : undefined;
+  const isMyTurn = isSpeakPhase && state.speakOrder[state.speakIdx] === teamId;
+  const hasSpoken = isSpeakPhase && speakerIdx !== -1 && speakerIdx < state.speakIdx;
+  const currentSpeaker = isSpeakPhase ? state.roster.find(t => t.id === state.speakOrder[state.speakIdx]) : undefined;
 
   // Once a team has had its turn, hide the role card — the ask was "keep the prompt up until
   // they finish speaking," which implies it's fine (and a nice fairness nudge against quietly
@@ -23,12 +26,17 @@ export function PhoneSpyView({ state, teamId }: Props) {
   const showRoleCard = !hasSpoken;
 
   let statusLine = "";
-  if (state.phase === "discuss") statusLine = "💬 Discuss as a group — look at your card, get ready to speak.";
+  if (state.phase === "peek") statusLine = "🧑‍🏫 Your teacher is looking at their own card — get ready!";
+  else if (state.phase === "discuss") statusLine = "💬 Discuss as a group — look at your card, get ready to speak.";
   else if (state.phase === "order-roll") statusLine = "🎲 Rolling for speaking order…";
   else if (isMyTurn) statusLine = "🎙️ Your turn — speak now!";
   else if (hasSpoken) statusLine = "✅ You've spoken — listening to the rest of the crew…";
-  else if (state.phase === "speak") statusLine = `⏳ Waiting your turn — ${currentSpeaker?.name ?? "another team"} is speaking now.`;
-  else if (state.phase === "vote" || state.phase === "spy-guess" || state.phase === "reveal") statusLine = "👀 Look at the big screen!";
+  // roster is filtered to exclude the teacher stand-in (solo play) — a speaker id with no match
+  // there can only be the teacher, never a real team.
+  else if (isSpeakPhase) statusLine = `⏳ Waiting your turn — ${currentSpeaker?.name ?? "your teacher"} is speaking now.`;
+  else if (state.phase === "vote" || state.phase === "spy-guess" || state.phase === "guess-2p" || state.phase === "reveal" || state.phase === "reveal-2p") {
+    statusLine = "👀 Look at the big screen!";
+  }
 
   const isSpy = role?.role === "spy";
 

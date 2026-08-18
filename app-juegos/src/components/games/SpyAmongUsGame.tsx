@@ -4,7 +4,7 @@ import { QRCodeSVG } from "qrcode.react";
 import type { GameProps, QuestionData, Team } from "../../types";
 import { teamsGridCols, GAME_MODES } from "../../data/constants";
 import { denseRank, medalForRank } from "../../utils/ranking";
-import { makeTeacherTeam } from "../../lib/soloOpponent";
+import { makeTeacherTeam, TEACHER_ID } from "../../lib/soloOpponent";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
 import { SPY_TWOPLAYER_STEPS, SPY_GROUP_STEPS } from "../../data/tutorials/spy";
@@ -174,9 +174,10 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
   const [tp2SpeakOrder, setTp2SpeakOrder] = useState<Team[]>(() => [...teams]);
   const [showHowTo, setShowHowTo] = useState(false);
 
-  // "Play on Phones" mode (group mode only — see the !isTwoPlayer guard on the intro toggle
-  // below). Always defaults to screen, even on Resume: a resumed mission skips the intro screen
-  // entirely (see `phase` init above), same intentional limitation as Auction's phone mode.
+  // "Play on Phones" mode — available in group mode, solo, and real 1v1 alike (see
+  // enterRoundStartPhase below for how each ruleset handles it). Always defaults to screen, even
+  // on Resume: a resumed mission skips the intro screen entirely (see `phase` init above), same
+  // intentional limitation as Auction's phone mode.
   const [inputMode, setInputMode] = useState<"screen" | "phone">("screen");
   const [introStep, setIntroStep] = useState<"setup" | "qr">("setup");
   const [sessionCode, setSessionCode] = useState<string | null>(null);
@@ -191,6 +192,10 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
   const phaseRef = useRef(phase);
   const speakOrderRef = useRef(speakOrder);
   const speakIdxRef = useRef(speakIdx);
+  // 1v1's own speaking-order/index — sendState() picks these instead of speakOrderRef/speakIdxRef
+  // whenever phase is "speak-2p".
+  const tp2SpeakOrderRef = useRef(tp2SpeakOrder);
+  const tp2SpeakIdxRef = useRef(tp2SpeakIdx);
   const connectedTeamIdsRef = useRef<Set<string | number>>(new Set());
   const sendStateRef = useRef<(() => void) | null>(null);
   useEffect(() => {
@@ -199,7 +204,9 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
     phaseRef.current = phase;
     speakOrderRef.current = speakOrder;
     speakIdxRef.current = speakIdx;
-  }, [ri, spyTeamIdx, phase, speakOrder, speakIdx]);
+    tp2SpeakOrderRef.current = tp2SpeakOrder;
+    tp2SpeakIdxRef.current = tp2SpeakIdx;
+  }, [ri, spyTeamIdx, phase, speakOrder, speakIdx, tp2SpeakOrder, tp2SpeakIdx]);
 
   // Opens/closes the realtime channel only when phone mode itself is toggled on/off. Unlike
   // Auction, phones here never send anything back — this channel only ever broadcasts `state`
@@ -220,18 +227,24 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
           ? { role: "spy", prompt: currentRound?.spyPrompt ?? "" }
           : { role: "crew", prompt: currentRound?.crewmatePrompt ?? "" };
       });
-      // "intro" (not started) and "peek" (skipped entirely in phone mode) both collapse to
-      // "lobby" — phone mode never actually produces "peek", but this keeps the mapping honest
-      // even during the one-tick window right as Start is pressed.
+      // Only "intro" (not started) collapses to "lobby" — "peek" is a real, reachable phase now
+      // (solo play's teacher stand-in still peeks on-screen while the one real team's phone
+      // already has its role), so it's reported as-is.
       const rawPhase = phaseRef.current;
-      const mappedPhase: SpyPhase = rawPhase === "intro" || rawPhase === "peek" ? "lobby" : (rawPhase as SpyPhase);
+      const mappedPhase: SpyPhase = rawPhase === "intro" ? "lobby" : (rawPhase as SpyPhase);
+      // 1v1's speak-2p tracks its own order/index (tp2SpeakOrder/tp2SpeakIdx) instead of the
+      // group-mode speakOrder/speakIdx state.
+      const usingTp2Order = rawPhase === "speak-2p";
+      // The teacher stand-in (solo play) never has a phone — never show it as a joinable/waiting
+      // team in the lobby.
+      const roster = teams.filter(t => t.id !== TEACHER_ID);
       const payload: SpyStatePayload = {
         phase: mappedPhase,
         ri: riRef.current,
-        roster: teams.map(t => ({ id: t.id, name: t.name, color: t.color, mascot: t.mascot })),
+        roster: roster.map(t => ({ id: t.id, name: t.name, color: t.color, mascot: t.mascot })),
         roles,
-        speakOrder: speakOrderRef.current.map(t => t.id),
-        speakIdx: speakIdxRef.current,
+        speakOrder: (usingTp2Order ? tp2SpeakOrderRef.current : speakOrderRef.current).map(t => t.id),
+        speakIdx: usingTp2Order ? tp2SpeakIdxRef.current : speakIdxRef.current,
         connectedTeamIds: Array.from(connectedTeamIdsRef.current),
         ts: Date.now(),
       };
@@ -289,6 +302,35 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
     setIntroStep("setup");
     setSessionCode(null);
     setConnectedTeamIds(new Set());
+  };
+
+  // Shared by the Start Mission button and nextRound() — decides which phase (and, for solo
+  // phone play, which peekIdx) a fresh round actually opens on:
+  //   - screen mode: always "peek" from the top, unchanged.
+  //   - group mode + phone: peek is skipped entirely (every real team already got its role via
+  //     phone) straight to "discuss", unchanged from the group-mode-only version of this feature.
+  //   - solo + phone: the one real team already has its role; only the teacher stand-in
+  //     (always teams[1] in solo play) still needs their on-screen reveal, so peek starts at
+  //     index 1 instead of 0 — the existing "Okay, I've read it" advance logic already falls
+  //     straight into the isTwoPlayer branch (speak-2p) once that single reveal is acknowledged,
+  //     no other change needed.
+  //   - real 2-team 1v1 + phone: both teams already have their role via phone, so peek is
+  //     skipped entirely too — this replicates the same tp2SpeakOrder/tp2SpeakIdx reset the peek
+  //     flow's own advance handler does when it reaches this same transition normally.
+  const enterRoundStartPhase = () => {
+    if (inputMode !== "phone") {
+      setPhase("peek");
+      setPeekIdx(0);
+    } else if (!isTwoPlayer) {
+      setPhase("discuss");
+    } else if (isSolo) {
+      setPhase("peek");
+      setPeekIdx(1);
+    } else {
+      setTp2SpeakOrder([...teams].sort(() => Math.random() - 0.5));
+      setTp2SpeakIdx(0);
+      setPhase("speak-2p");
+    }
   };
 
   const round = questions[ri] as SpyRound | undefined;
@@ -422,10 +464,10 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
     if (newSpyId !== undefined) {
       setTimesWasSpy((prev) => ({ ...prev, [newSpyId]: (prev[newSpyId] ?? 0) + 1 }));
     }
-    // Phone mode already pushed everyone's new role privately via the state broadcast — the peek
-    // ritual (and its "eyes down" turn-taking) is what phones replace, so skip straight to Discuss.
-    setPhase(inputMode === "phone" ? "discuss" : "peek");
-    setPeekIdx(0);
+    // Phone mode already pushed everyone's new role privately via the state broadcast where
+    // applicable — enterRoundStartPhase() picks the right phase (and peekIdx) for screen mode,
+    // group phone mode, solo phone mode, and real-2-team 1v1 phone mode alike.
+    enterRoundStartPhase();
     setRevealed(false);
     setVotes({});
     setSpyGuess(null);
@@ -598,7 +640,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
               </div>
             ))}
           </div>
-          {!isTwoPlayer && introStep === "setup" && (
+          {introStep === "setup" && (
             <div style={{ marginBottom: "20px" }}>
               <div style={{ fontSize: "13px", color: "#94A3B8", fontWeight: "700", marginBottom: "10px" }}>How will teams see their secret role?</div>
               <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
@@ -618,8 +660,11 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
             </div>
           )}
 
-          {!isTwoPlayer && introStep === "qr" && sessionCode && (() => {
+          {introStep === "qr" && sessionCode && (() => {
             const joinUrl = `${window.location.origin}${window.location.pathname}?join=${sessionCode}&game=spy`;
+            // The teacher stand-in (solo play) never has a phone — never list it as a joinable
+            // or "waiting to connect" team here.
+            const phoneEligibleTeams = teams.filter(t => t.id !== TEACHER_ID);
             return (
               <div style={{ background: "linear-gradient(160deg,#1E3A5F,#0F172A)", border: "2px solid #38BDF866", borderRadius: "20px", padding: "20px", marginBottom: "20px", maxWidth: "360px", marginLeft: "auto", marginRight: "auto" }}>
                 <div style={{ fontWeight: "800", fontSize: "14px", color: "#38BDF8", marginBottom: "12px" }}>📱 Scan to join, or go to the site and enter this code:</div>
@@ -628,7 +673,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
                 </div>
                 <div style={{ fontSize: "28px", fontWeight: "900", letterSpacing: "0.1em", color: "white", margin: "12px 0" }}>{sessionCode}</div>
                 <div style={{ display: "flex", flexDirection: "column", gap: "6px", marginBottom: "10px" }}>
-                  {teams.map(t => (
+                  {phoneEligibleTeams.map(t => (
                     <div key={t.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "rgba(255,255,255,0.06)", borderRadius: "8px", padding: "6px 10px", fontSize: "13px" }}>
                       <span>{t.mascot ?? t.color.emoji} {t.name}</span>
                       <span style={{ color: connectedTeamIds.has(t.id) ? "#4ADE80" : "#6B7280", fontWeight: "700" }}>
@@ -663,7 +708,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
             />
           )}
           <button
-            onClick={() => setPhase(inputMode === "phone" ? "discuss" : "peek")}
+            onClick={enterRoundStartPhase}
             className="sau-btn"
             style={{
               background: "linear-gradient(135deg,#0284C7,#38BDF8)",
