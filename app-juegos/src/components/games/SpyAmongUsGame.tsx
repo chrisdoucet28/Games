@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { RealtimeChannel } from "@supabase/supabase-js";
+import { QRCodeSVG } from "qrcode.react";
 import type { GameProps, QuestionData, Team } from "../../types";
 import { teamsGridCols, GAME_MODES } from "../../data/constants";
 import { denseRank, medalForRank } from "../../utils/ranking";
@@ -6,6 +8,10 @@ import { makeTeacherTeam } from "../../lib/soloOpponent";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
 import { SPY_TWOPLAYER_STEPS, SPY_GROUP_STEPS } from "../../data/tutorials/spy";
+import {
+  generateSessionCode, openSpyChannel, closeChannel,
+  type SpyStatePayload, type SpyPhase, type SpyRoleInfo,
+} from "../../lib/liveSession";
 
 const GM = GAME_MODES.find(g => g.id === "spy")!;
 
@@ -168,6 +174,123 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
   const [tp2SpeakOrder, setTp2SpeakOrder] = useState<Team[]>(() => [...teams]);
   const [showHowTo, setShowHowTo] = useState(false);
 
+  // "Play on Phones" mode (group mode only — see the !isTwoPlayer guard on the intro toggle
+  // below). Always defaults to screen, even on Resume: a resumed mission skips the intro screen
+  // entirely (see `phase` init above), same intentional limitation as Auction's phone mode.
+  const [inputMode, setInputMode] = useState<"screen" | "phone">("screen");
+  const [introStep, setIntroStep] = useState<"setup" | "qr">("setup");
+  const [sessionCode, setSessionCode] = useState<string | null>(null);
+  const [connectedTeamIds, setConnectedTeamIds] = useState<Set<string | number>>(new Set());
+  const channelRef = useRef<RealtimeChannel | null>(null);
+
+  // Refs the phone-mode broadcaster (below) reads from, so opening/closing the realtime channel
+  // only happens when phone mode itself toggles on/off, not on every round/phase/speaker change —
+  // same pattern as AuctionGame.tsx's qiRef/sentenceRef/phaseRef.
+  const riRef = useRef(ri);
+  const spyTeamIdxRef = useRef(spyTeamIdx);
+  const phaseRef = useRef(phase);
+  const speakOrderRef = useRef(speakOrder);
+  const speakIdxRef = useRef(speakIdx);
+  const connectedTeamIdsRef = useRef<Set<string | number>>(new Set());
+  const sendStateRef = useRef<(() => void) | null>(null);
+  useEffect(() => {
+    riRef.current = ri;
+    spyTeamIdxRef.current = spyTeamIdx;
+    phaseRef.current = phase;
+    speakOrderRef.current = speakOrder;
+    speakIdxRef.current = speakIdx;
+  }, [ri, spyTeamIdx, phase, speakOrder, speakIdx]);
+
+  // Opens/closes the realtime channel only when phone mode itself is toggled on/off. Unlike
+  // Auction, phones here never send anything back — this channel only ever broadcasts `state`
+  // (each round's private role+prompt for every team, plus who's currently speaking) and a
+  // one-shot `ended` event; there's no `.on("broadcast", ...)` listener for incoming phone data
+  // because there isn't any.
+  useEffect(() => {
+    if (inputMode !== "phone" || !sessionCode) return;
+    const channel = openSpyChannel(sessionCode);
+    channelRef.current = channel;
+
+    const sendState = () => {
+      const currentRound = questions[riRef.current] as SpyRound | undefined;
+      const spyId = teams[spyTeamIdxRef.current]?.id;
+      const roles: Record<string, SpyRoleInfo> = {};
+      teams.forEach(t => {
+        roles[String(t.id)] = t.id === spyId
+          ? { role: "spy", prompt: currentRound?.spyPrompt ?? "" }
+          : { role: "crew", prompt: currentRound?.crewmatePrompt ?? "" };
+      });
+      // "intro" (not started) and "peek" (skipped entirely in phone mode) both collapse to
+      // "lobby" — phone mode never actually produces "peek", but this keeps the mapping honest
+      // even during the one-tick window right as Start is pressed.
+      const rawPhase = phaseRef.current;
+      const mappedPhase: SpyPhase = rawPhase === "intro" || rawPhase === "peek" ? "lobby" : (rawPhase as SpyPhase);
+      const payload: SpyStatePayload = {
+        phase: mappedPhase,
+        ri: riRef.current,
+        roster: teams.map(t => ({ id: t.id, name: t.name, color: t.color, mascot: t.mascot })),
+        roles,
+        speakOrder: speakOrderRef.current.map(t => t.id),
+        speakIdx: speakIdxRef.current,
+        connectedTeamIds: Array.from(connectedTeamIdsRef.current),
+        ts: Date.now(),
+      };
+      channel.send({ type: "broadcast", event: "state", payload });
+    };
+    sendStateRef.current = sendState;
+
+    channel.on("presence", { event: "sync" }, () => {
+      const presenceState = channel.presenceState<{ teamId: string | number }>();
+      const ids = new Set<string | number>();
+      Object.values(presenceState).forEach(entries => entries.forEach(entry => ids.add(entry.teamId)));
+      connectedTeamIdsRef.current = ids;
+      setConnectedTeamIds(ids);
+      sendState(); // roster/connected list changed — push a fresh state right away, don't wait for the interval
+    });
+
+    channel.subscribe(status => {
+      if (status === "SUBSCRIBED") sendState();
+    });
+
+    const interval = setInterval(sendState, 4000);
+
+    return () => {
+      clearInterval(interval);
+      closeChannel(channel);
+      channelRef.current = null;
+      sendStateRef.current = null;
+    };
+  }, [inputMode, sessionCode, teams]);
+
+  // Pushes an immediate state update on round/phase/speaker transitions rather than waiting for
+  // the interval — speakIdx (unlike Auction, which only needed qi/phase) matters here too, since a
+  // phone's "is it my turn to speak" indicator must update the moment the teacher advances it.
+  useEffect(() => {
+    sendStateRef.current?.();
+  }, [phase, ri, speakIdx]);
+
+  // Tells every connected phone the mission is over the moment it actually ends, same reasoning
+  // as Auction's identical effect — without this, a closed channel looks identical to a dropped
+  // connection from the phone's side.
+  useEffect(() => {
+    if (phase === "final" && channelRef.current) {
+      channelRef.current.send({ type: "broadcast", event: "ended", payload: {} });
+    }
+  }, [phase]);
+
+  const handlePickPhoneMode = () => {
+    setInputMode("phone");
+    setSessionCode(generateSessionCode());
+    setIntroStep("qr");
+  };
+
+  const handlePickScreenMode = () => {
+    setInputMode("screen");
+    setIntroStep("setup");
+    setSessionCode(null);
+    setConnectedTeamIds(new Set());
+  };
+
   const round = questions[ri] as SpyRound | undefined;
   if (!round) {
     return (
@@ -299,7 +422,9 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
     if (newSpyId !== undefined) {
       setTimesWasSpy((prev) => ({ ...prev, [newSpyId]: (prev[newSpyId] ?? 0) + 1 }));
     }
-    setPhase("peek");
+    // Phone mode already pushed everyone's new role privately via the state broadcast — the peek
+    // ritual (and its "eyes down" turn-taking) is what phones replace, so skip straight to Discuss.
+    setPhase(inputMode === "phone" ? "discuss" : "peek");
     setPeekIdx(0);
     setRevealed(false);
     setVotes({});
@@ -473,6 +598,51 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
               </div>
             ))}
           </div>
+          {!isTwoPlayer && introStep === "setup" && (
+            <div style={{ marginBottom: "20px" }}>
+              <div style={{ fontSize: "13px", color: "#94A3B8", fontWeight: "700", marginBottom: "10px" }}>How will teams see their secret role?</div>
+              <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
+                <button onClick={handlePickScreenMode} style={{
+                  padding: "10px 20px", borderRadius: "12px", fontWeight: "800", fontSize: "14px", cursor: "pointer",
+                  border: `2px solid ${inputMode === "screen" ? "#38BDF8" : "rgba(255,255,255,0.2)"}`,
+                  background: inputMode === "screen" ? "rgba(56,189,248,0.15)" : "rgba(255,255,255,0.05)",
+                  color: inputMode === "screen" ? "#38BDF8" : "#94A3B8",
+                }}>🖥️ Play on Screen</button>
+                <button onClick={handlePickPhoneMode} style={{
+                  padding: "10px 20px", borderRadius: "12px", fontWeight: "800", fontSize: "14px", cursor: "pointer",
+                  border: `2px solid ${inputMode === "phone" ? "#38BDF8" : "rgba(255,255,255,0.2)"}`,
+                  background: inputMode === "phone" ? "rgba(56,189,248,0.15)" : "rgba(255,255,255,0.05)",
+                  color: inputMode === "phone" ? "#38BDF8" : "#94A3B8",
+                }}>📱 Play on Phones</button>
+              </div>
+            </div>
+          )}
+
+          {!isTwoPlayer && introStep === "qr" && sessionCode && (() => {
+            const joinUrl = `${window.location.origin}${window.location.pathname}?join=${sessionCode}&game=spy`;
+            return (
+              <div style={{ background: "linear-gradient(160deg,#1E3A5F,#0F172A)", border: "2px solid #38BDF866", borderRadius: "20px", padding: "20px", marginBottom: "20px", maxWidth: "360px", marginLeft: "auto", marginRight: "auto" }}>
+                <div style={{ fontWeight: "800", fontSize: "14px", color: "#38BDF8", marginBottom: "12px" }}>📱 Scan to join, or go to the site and enter this code:</div>
+                <div style={{ background: "white", borderRadius: "12px", padding: "12px", display: "inline-block" }}>
+                  <QRCodeSVG value={joinUrl} size={160} />
+                </div>
+                <div style={{ fontSize: "28px", fontWeight: "900", letterSpacing: "0.1em", color: "white", margin: "12px 0" }}>{sessionCode}</div>
+                <div style={{ display: "flex", flexDirection: "column", gap: "6px", marginBottom: "10px" }}>
+                  {teams.map(t => (
+                    <div key={t.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "rgba(255,255,255,0.06)", borderRadius: "8px", padding: "6px 10px", fontSize: "13px" }}>
+                      <span>{t.mascot ?? t.color.emoji} {t.name}</span>
+                      <span style={{ color: connectedTeamIds.has(t.id) ? "#4ADE80" : "#6B7280", fontWeight: "700" }}>
+                        {connectedTeamIds.has(t.id) ? "✅ Connected" : "⏳ Waiting…"}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                <button onClick={handlePickScreenMode} style={{ background: "none", border: "none", color: "#9CA3AF", fontSize: "12px", fontWeight: "700", cursor: "pointer", textDecoration: "underline" }}>
+                  Switch back to Play on Screen
+                </button>
+              </div>
+            );
+          })()}
           <button
             onClick={() => setShowHowTo(true)}
             className="sau-btn"
@@ -493,7 +663,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
             />
           )}
           <button
-            onClick={() => setPhase("peek")}
+            onClick={() => setPhase(inputMode === "phone" ? "discuss" : "peek")}
             className="sau-btn"
             style={{
               background: "linear-gradient(135deg,#0284C7,#38BDF8)",

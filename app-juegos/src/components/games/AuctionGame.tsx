@@ -8,7 +8,7 @@ import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
 import { AUCTION_TUTORIAL_STEPS } from "../../data/tutorials/auction";
 import {
-  generateSessionCode, openAuctionChannel, closeAuctionChannel,
+  generateSessionCode, openAuctionChannel, closeChannel,
   type AuctionStatePayload, type AuctionBetPayload,
 } from "../../lib/liveSession";
 
@@ -264,7 +264,7 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
 
     return () => {
       clearInterval(interval);
-      closeAuctionChannel(channel);
+      closeChannel(channel);
       channelRef.current = null;
       sendStateRef.current = null;
     };

@@ -62,6 +62,44 @@ export function openAuctionChannel(code: string): RealtimeChannel {
   });
 }
 
-export function closeAuctionChannel(channel: RealtimeChannel | null): void {
+// Shared by every game's phone-mode channel teardown — never had any Auction-specific logic, so
+// this is just the generic close, used by both Auction and Spy Among Us (and any future game).
+export function closeChannel(channel: RealtimeChannel | null): void {
   if (channel) supabase.removeChannel(channel);
+}
+
+// --- Spy Among Us (group mode) ---
+//
+// Unlike Auction, phones here are receive-only: no bet-equivalent broadcast comes back from a
+// phone, so there's no SpyActionPayload. Each round's `roles` map covers every team's private
+// role+prompt, broadcast to everyone on the channel — same "channel code is the trust boundary"
+// model Auction already uses; a phone only ever *displays* its own team's entry.
+export type SpyRosterEntry = { id: string | number; name: string; color: TeamColor; mascot?: string | null };
+
+// Mirrors SpyAmongUsGame.tsx's own Phase type, minus the phases phone mode never produces
+// ("intro"/"peek" both collapse to "lobby" — see mapPhase in SpyAmongUsGame.tsx) and minus the
+// 1v1-only phases (speak-2p/guess-2p/reveal-2p), since phone mode is group-only for now.
+export type SpyPhase = "lobby" | "discuss" | "order-roll" | "speak" | "vote" | "spy-guess" | "reveal" | "final";
+
+export type SpyRoleInfo = { role: "spy" | "crew"; prompt: string };
+
+export type SpyStatePayload = {
+  phase: SpyPhase;
+  ri: number;
+  roster: SpyRosterEntry[];
+  roles: Record<string, SpyRoleInfo>;
+  speakOrder: (string | number)[];
+  speakIdx: number;
+  connectedTeamIds: (string | number)[];
+  ts: number;
+};
+
+function spyChannelName(code: string): string {
+  return `spy-${code}`;
+}
+
+export function openSpyChannel(code: string): RealtimeChannel {
+  return supabase.channel(spyChannelName(code), {
+    config: { presence: { key: crypto.randomUUID() } },
+  });
 }

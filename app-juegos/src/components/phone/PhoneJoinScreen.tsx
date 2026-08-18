@@ -1,9 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import type { RealtimeChannel } from "@supabase/supabase-js";
-import { openAuctionChannel, closeAuctionChannel, type AuctionStatePayload, type AuctionBetPayload } from "../../lib/liveSession";
+import {
+  openAuctionChannel, openSpyChannel, closeChannel,
+  type AuctionStatePayload, type AuctionBetPayload, type SpyStatePayload,
+} from "../../lib/liveSession";
 import { PhoneAuctionView } from "./PhoneAuctionView";
+import { PhoneSpyView } from "./PhoneSpyView";
 
-type Props = { code: string };
+type Game = "auction" | "spy";
+type Props = { code: string; game: Game };
 
 // No state broadcast for this long means the teacher's tab is gone (refreshed, closed the game,
 // or this code was never valid) — same threshold used for "still waiting on the very first one"
@@ -13,6 +18,35 @@ const STATE_TIMEOUT_MS = 12000;
 const STORAGE_PREFIX = "classcade-phone-session:";
 
 type ClaimedSession = { code: string; teamId: string | number };
+
+// The bits that differ between games sharing this one join/claim/lobby shell — everything else
+// (claim grid, connection-lost timeout, localStorage rejoin) is identical in shape for both, since
+// every game's roster/connectedTeamIds payload fields are the same.
+const GAME_COPY: Record<Game, {
+  joinEmoji: string;
+  arenaBg: string;
+  startingBody: string;
+  endedEmoji: string;
+  endedTitle: string;
+  endedBody: string;
+}> = {
+  auction: {
+    joinEmoji: "🔨",
+    arenaBg: "radial-gradient(ellipse at 50% -10%,#6D28D9 0%,#2E1065 45%,#0F0524 100%)",
+    startingBody: "Get ready — waiting for your teacher to start the auction…",
+    endedEmoji: "🏆",
+    endedTitle: "The auction has ended!",
+    endedBody: "Thanks for playing — check the big screen for final results.",
+  },
+  spy: {
+    joinEmoji: "🛸",
+    arenaBg: "radial-gradient(ellipse at 50% -15%,#1E293B 0%,#0F172A 55%,#020617 100%)",
+    startingBody: "Get ready — waiting for your teacher to start the mission…",
+    endedEmoji: "🏆",
+    endedTitle: "The mission has ended!",
+    endedBody: "Thanks for playing — check the big screen for final results.",
+  },
+};
 
 function loadClaimedTeamId(code: string): string | number | null {
   try {
@@ -34,20 +68,21 @@ function saveClaimedTeamId(code: string, teamId: string | number) {
   }
 }
 
-const arenaStyle: React.CSSProperties = {
-  minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-  padding: "24px 20px", textAlign: "center", fontFamily: "'Segoe UI',system-ui,sans-serif",
-  background: "radial-gradient(ellipse at 50% -10%,#6D28D9 0%,#2E1065 45%,#0F0524 100%)", color: "white",
-};
+export function PhoneJoinScreen({ code, game }: Props) {
+  const copy = GAME_COPY[game];
+  const arenaStyle: React.CSSProperties = {
+    minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+    padding: "24px 20px", textAlign: "center", fontFamily: "'Segoe UI',system-ui,sans-serif",
+    background: copy.arenaBg, color: "white",
+  };
 
-export function PhoneJoinScreen({ code }: Props) {
   const channelRef = useRef<RealtimeChannel | null>(null);
   // A ref, not just the claimedTeamId state — the channel's subscribe callback fires again on
   // every reconnect and needs the *current* claim at that moment, not whatever it closed over
   // when the effect first ran.
   const claimedTeamIdRef = useRef<string | number | null>(loadClaimedTeamId(code));
   const [claimedTeamId, setClaimedTeamId] = useState<string | number | null>(claimedTeamIdRef.current);
-  const [state, setState] = useState<AuctionStatePayload | null>(null);
+  const [state, setState] = useState<AuctionStatePayload | SpyStatePayload | null>(null);
   const [lastStateAt, setLastStateAt] = useState<number | null>(null);
   // Once true, stays true regardless of what happens to the connection afterward — a phone that
   // learns the game is over shouldn't ever fall back to "lost connection" messaging just because
@@ -57,11 +92,11 @@ export function PhoneJoinScreen({ code }: Props) {
   const [nowTick, setNowTick] = useState(Date.now());
 
   useEffect(() => {
-    const channel = openAuctionChannel(code);
+    const channel = game === "spy" ? openSpyChannel(code) : openAuctionChannel(code);
     channelRef.current = channel;
 
     channel.on("broadcast", { event: "state" }, ({ payload }) => {
-      const statePayload = payload as AuctionStatePayload;
+      const statePayload = payload as AuctionStatePayload | SpyStatePayload;
       setState(statePayload);
       setLastStateAt(Date.now());
       // Covers a phone that only joins/reconnects after the game already ended — it'll never see
@@ -83,10 +118,10 @@ export function PhoneJoinScreen({ code }: Props) {
     });
 
     return () => {
-      closeAuctionChannel(channel);
+      closeChannel(channel);
       channelRef.current = null;
     };
-  }, [code]);
+  }, [code, game]);
 
   useEffect(() => {
     const interval = setInterval(() => setNowTick(Date.now()), 1000);
@@ -111,9 +146,9 @@ export function PhoneJoinScreen({ code }: Props) {
   if (gameEnded) {
     return (
       <div style={arenaStyle}>
-        <div style={{ fontSize: "44px", marginBottom: "12px" }}>🏆</div>
-        <div style={{ fontWeight: "900", fontSize: "18px", color: "#FCD34D", marginBottom: "8px" }}>The auction has ended!</div>
-        <div style={{ color: "#C4B5FD", fontSize: "14px", lineHeight: 1.6 }}>Thanks for playing — check the big screen for final results.</div>
+        <div style={{ fontSize: "44px", marginBottom: "12px" }}>{copy.endedEmoji}</div>
+        <div style={{ fontWeight: "900", fontSize: "18px", color: "#FCD34D", marginBottom: "8px" }}>{copy.endedTitle}</div>
+        <div style={{ color: "#C4B5FD", fontSize: "14px", lineHeight: 1.6 }}>{copy.endedBody}</div>
       </div>
     );
   }
@@ -136,7 +171,7 @@ export function PhoneJoinScreen({ code }: Props) {
   if (!state) {
     return (
       <div style={arenaStyle}>
-        <div style={{ fontSize: "40px", marginBottom: "12px" }}>🔨</div>
+        <div style={{ fontSize: "40px", marginBottom: "12px" }}>{copy.joinEmoji}</div>
         <div style={{ fontWeight: "900", fontSize: "18px", color: "#FCD34D" }}>Joining game {code}…</div>
         <div style={{ color: "#C4B5FD", fontSize: "14px", marginTop: "8px" }}>Waiting for your teacher's screen</div>
       </div>
@@ -146,7 +181,7 @@ export function PhoneJoinScreen({ code }: Props) {
   if (claimedTeamId === null) {
     return (
       <div style={arenaStyle}>
-        <div style={{ fontSize: "36px", marginBottom: "6px" }}>🔨</div>
+        <div style={{ fontSize: "36px", marginBottom: "6px" }}>{copy.joinEmoji}</div>
         <div style={{ fontWeight: "900", fontSize: "18px", color: "#FCD34D", marginBottom: "18px" }}>Tap your team</div>
         <div style={{ display: "flex", flexDirection: "column", gap: "10px", width: "100%", maxWidth: "360px" }}>
           {state.roster.map(t => {
@@ -175,18 +210,22 @@ export function PhoneJoinScreen({ code }: Props) {
     );
   }
 
-  // Claimed, but the teacher hasn't hit "Start the Auction!" yet — nobody should see the first
-  // sentence before the whole room does at once.
-  if (state.phase === "intro") {
+  // Claimed, but the teacher hasn't started the game yet ("intro" for Auction, "lobby" for Spy
+  // Among Us — both mean "nothing to show yet") — nobody should see anything private before the
+  // whole room starts at once.
+  if (state.phase === "intro" || state.phase === "lobby") {
     const team = state.roster.find(t => t.id === claimedTeamId);
     return (
       <div style={arenaStyle}>
-        <div style={{ fontSize: "36px", marginBottom: "6px" }}>{team?.mascot ?? team?.color.emoji ?? "🔨"}</div>
+        <div style={{ fontSize: "36px", marginBottom: "6px" }}>{team?.mascot ?? team?.color.emoji ?? copy.joinEmoji}</div>
         <div style={{ fontWeight: "900", fontSize: "18px", color: "#FCD34D", marginBottom: "8px" }}>You're in as {team?.name}!</div>
-        <div style={{ color: "#C4B5FD", fontSize: "14px", lineHeight: 1.6 }}>Get ready — waiting for your teacher to start the auction…</div>
+        <div style={{ color: "#C4B5FD", fontSize: "14px", lineHeight: 1.6 }}>{copy.startingBody}</div>
       </div>
     );
   }
 
-  return <PhoneAuctionView state={state} teamId={claimedTeamId} onBet={sendBet} />;
+  if (game === "spy") {
+    return <PhoneSpyView state={state as SpyStatePayload} teamId={claimedTeamId} />;
+  }
+  return <PhoneAuctionView state={state as AuctionStatePayload} teamId={claimedTeamId} onBet={sendBet} />;
 }
