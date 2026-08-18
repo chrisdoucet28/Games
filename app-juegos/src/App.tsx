@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Analytics } from '@vercel/analytics/react';
 import LessonGamesGenerator from './LessonGamesGenerator';
 import { AuthScreen } from './components/shared/AuthScreen';
+import { PhoneJoinScreen } from './components/phone/PhoneJoinScreen';
 import { useAuth } from './hooks/useAuth';
 import { supabase, isSupabaseConfigured } from './lib/supabaseClient';
 import { getProfile } from './lib/profile';
@@ -62,6 +63,20 @@ function StatusBadge({ children, action, onAction, theme }: { children: React.Re
 
 function App() {
   if (!isSupabaseConfigured) return <ConfigErrorScreen />;
+  // Students joining a phone-controlled game (see AuctionGame.tsx's "Play on Phones" mode) have
+  // no teacher account — this has to branch *before* AuthenticatedApp/useAuth ever runs, unlike
+  // the Stripe checkout-redirect param below (which intentionally runs inside the authenticated
+  // tree). Deliberately not scrubbed from the URL the way that one is: PhoneJoinScreen re-reads it
+  // on every mount, and it needs to survive a phone-side refresh to auto-rejoin.
+  const joinCode = new URLSearchParams(window.location.search).get('join');
+  if (joinCode) {
+    return (
+      <>
+        <PhoneJoinScreen code={joinCode} />
+        <Analytics />
+      </>
+    );
+  }
   return (
     <>
       <AuthenticatedApp />

@@ -1,10 +1,16 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import type { GameProps } from "../../types";
+import { QRCodeSVG } from "qrcode.react";
+import type { RealtimeChannel } from "@supabase/supabase-js";
+import type { GameProps, Team } from "../../types";
 import { teamsGridCols, GAME_MODES } from "../../data/constants";
 import { denseRank, medalForRank } from "../../utils/ranking";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
 import { AUCTION_TUTORIAL_STEPS } from "../../data/tutorials/auction";
+import {
+  generateSessionCode, openAuctionChannel, closeAuctionChannel,
+  type AuctionStatePayload, type AuctionBetPayload,
+} from "../../lib/liveSession";
 
 const GM = GAME_MODES.find(g => g.id === "auction")!;
 
@@ -88,6 +94,67 @@ function ChipStack({ amount, max = 200 }: { amount: number; max?: number }) {
   );
 }
 
+// Betting-phase replacement for the on-screen card grid when inputMode === "phone" — teams place
+// their actual bets privately on their own devices, so this deliberately shows status only
+// (locked in / not yet / not connected), never the vote or amount itself.
+function PhoneModeWaitingRoom({ teams, bets, connectedTeamIds, isBroke, allBetsPlaced, activeTeamsEmpty, onReveal }: {
+  teams: Team[];
+  bets: Record<string | number, Bet>;
+  connectedTeamIds: Set<string | number>;
+  isBroke: (t: Team) => boolean;
+  allBetsPlaced: boolean;
+  activeTeamsEmpty: boolean;
+  onReveal: () => void;
+}) {
+  return (
+    <div>
+      <p style={{ textAlign: "center", fontWeight: "800", color: "#DDD6FE", fontSize: "15px", marginBottom: "14px" }}>
+        📱 Teams are betting privately on their phones
+      </p>
+      <div style={{ display: "grid", gridTemplateColumns: teamsGridCols(teams.length), gap: "12px", marginBottom: "18px" }}>
+        {teams.map(t => {
+          const broke = isBroke(t);
+          const connected = connectedTeamIds.has(t.id);
+          const b = bets[t.id];
+          const locked = !!b?.vote && !!b?.amount;
+          let statusLabel = "⏳ Waiting…";
+          let statusColor = "#9CA3AF";
+          if (broke) { statusLabel = "💤 Sitting out"; statusColor = "#6B7280"; }
+          else if (!connected) { statusLabel = "💤 Not connected"; statusColor = "#6B7280"; }
+          else if (locked) { statusLabel = "🔒 Locked in"; statusColor = "#4ADE80"; }
+          return (
+            <div key={t.id} style={{ background: `linear-gradient(160deg,${t.color.dark}44,#150C28)`, border: `2px solid ${t.color.bg}`, borderRadius: "16px", padding: "14px", textAlign: "center" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", marginBottom: "8px" }}>
+                <MascotAvatar mascot={t.mascot ?? t.color.emoji} color={t.color.bg} />
+                <span style={{ fontWeight: "900", color: "white", fontSize: "15px" }}>{t.name}</span>
+              </div>
+              <div style={{ fontWeight: "800", fontSize: "13px", color: statusColor }}>{statusLabel}</div>
+            </div>
+          );
+        })}
+      </div>
+      <div style={{ textAlign: "center" }}>
+        {activeTeamsEmpty ? (
+          <button onClick={onReveal} className="auction-btn" style={{
+            background: "linear-gradient(135deg,#4C1D95,#7C3AED)", color: "white", border: "none", borderRadius: "14px",
+            padding: "14px 36px", fontSize: "17px", fontWeight: "900", cursor: "pointer", transition: "transform 0.15s ease"
+          }}>➡️ Skip to Revival Round</button>
+        ) : (
+          <>
+            <button onClick={onReveal} disabled={!allBetsPlaced} className="auction-btn" style={{
+              background: allBetsPlaced ? "linear-gradient(135deg,#78350F,#F7C948)" : "#4B5563",
+              color: allBetsPlaced ? "#150F00" : "#9CA3AF", border: "none", borderRadius: "14px",
+              padding: "14px 36px", fontSize: "17px", fontWeight: "900", transition: "transform 0.15s ease",
+              cursor: allBetsPlaced ? "pointer" : "not-allowed"
+            }}>🔨 Reveal Answer</button>
+            {!allBetsPlaced && <p style={{ color: "#9CA3AF", fontSize: "13px", marginTop: "8px" }}>Waiting for all connected teams to lock in their bet</p>}
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // What "Save & Exit" snapshots and "Resume" restores — the current lot number and each team's
 // running bank/win count. Resuming skips straight to "betting" on that lot rather than replaying
 // the intro screen or whatever bets/result were on screen when it was saved.
@@ -124,6 +191,14 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
     resumed?.auctionBank ?? Object.fromEntries(teams.map(t => [t.id, AUCTION_START]))
   );
 
+  // "Play on Phones" mode — always defaults to screen, even on Resume (see the note on the intro
+  // toggle below for why a resumed game intentionally never reopens a phone session).
+  const [inputMode, setInputMode] = useState<"screen" | "phone">("screen");
+  const [introStep, setIntroStep] = useState<"setup" | "qr">("setup");
+  const [sessionCode, setSessionCode] = useState<string | null>(null);
+  const [connectedTeamIds, setConnectedTeamIds] = useState<Set<string | number>>(new Set());
+  const channelRef = useRef<RealtimeChannel | null>(null);
+
   useEffect(() => {
     if (!serializeStateRef) return;
     serializeStateRef.current = (): AuctionSnapshot => ({ qi, auctionBank, roundsWon });
@@ -133,6 +208,71 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
   const auctionBankRef = useRef(auctionBank);
   const hasFlushedBankRef = useRef(false);
   useEffect(() => { auctionBankRef.current = auctionBank; }, [auctionBank]);
+
+  // Refs the phone-mode broadcaster (below) reads from, so opening/closing the realtime channel
+  // only happens when phone mode itself toggles on/off, not on every round/bank/presence change.
+  const qiRef = useRef(qi);
+  const sentenceRef = useRef(questions[qi]?.sentence ?? "");
+  const connectedTeamIdsRef = useRef<Set<string | number>>(new Set());
+  const sendStateRef = useRef<(() => void) | null>(null);
+  useEffect(() => { qiRef.current = qi; sentenceRef.current = questions[qi]?.sentence ?? ""; }, [qi, questions]);
+
+  // Opens/closes the realtime channel only when phone mode itself is toggled on/off — broadcasts
+  // a fresh AuctionStatePayload on every presence change and on a standing interval (covers late
+  // joiners and reconnects with no separate handshake needed), and folds incoming phone bets
+  // straight into the same `bets` state the on-screen cards already use, so resolveRound/
+  // nextRound/allBetsPlaced need zero changes to understand a phone-submitted bet.
+  useEffect(() => {
+    if (inputMode !== "phone" || !sessionCode) return;
+    const channel = openAuctionChannel(sessionCode);
+    channelRef.current = channel;
+
+    const sendState = () => {
+      const payload: AuctionStatePayload = {
+        qi: qiRef.current,
+        sentence: sentenceRef.current,
+        roster: teams.map(t => ({ id: t.id, name: t.name, color: t.color, mascot: t.mascot })),
+        banks: Object.fromEntries(teams.map(t => [String(t.id), auctionBankRef.current[t.id] ?? 0])),
+        connectedTeamIds: Array.from(connectedTeamIdsRef.current),
+        ts: Date.now(),
+      };
+      channel.send({ type: "broadcast", event: "state", payload });
+    };
+    sendStateRef.current = sendState;
+
+    channel.on("presence", { event: "sync" }, () => {
+      const presenceState = channel.presenceState<{ teamId: string | number }>();
+      const ids = new Set<string | number>();
+      Object.values(presenceState).forEach(entries => entries.forEach(entry => ids.add(entry.teamId)));
+      connectedTeamIdsRef.current = ids;
+      setConnectedTeamIds(ids);
+      sendState(); // roster/connected list changed — push a fresh state right away, don't wait for the interval
+    });
+
+    channel.on("broadcast", { event: "bet" }, ({ payload }) => {
+      const bet = payload as AuctionBetPayload;
+      setBets(b => ({ ...b, [bet.teamId]: { vote: bet.vote, amount: bet.amount } }));
+    });
+
+    channel.subscribe(status => {
+      if (status === "SUBSCRIBED") sendState();
+    });
+
+    const interval = setInterval(sendState, 4000);
+
+    return () => {
+      clearInterval(interval);
+      closeAuctionChannel(channel);
+      channelRef.current = null;
+      sendStateRef.current = null;
+    };
+  }, [inputMode, sessionCode, teams]);
+
+  // Pushes an immediate state update on round transitions rather than waiting for the interval,
+  // so a phone doesn't sit on the previous sentence for up to ~4s after the teacher advances.
+  useEffect(() => {
+    sendStateRef.current?.();
+  }, [qi]);
 
   const flushBankToScores = useCallback(() => {
     if (hasFlushedBankRef.current) return;
@@ -166,8 +306,23 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
     setBets(b => ({ ...b, [teamId]: { ...(b[teamId] || {}), [field]: value } }));
   };
 
+  const handlePickPhoneMode = () => {
+    setInputMode("phone");
+    setSessionCode(generateSessionCode());
+    setIntroStep("qr");
+  };
+
+  const handlePickScreenMode = () => {
+    setInputMode("screen");
+    setIntroStep("setup");
+    setSessionCode(null);
+    setConnectedTeamIds(new Set());
+  };
+
   const isBroke = (t: any) => (auctionBank[t.id] ?? 0) <= 0;
-  const activeTeams = teams.filter(t => !isBroke(t));
+  // In phone mode, a team with no phone connected (forgotten, dead battery) must not block
+  // resolveRound() forever — matches this app's general "teacher stays in control" posture.
+  const activeTeams = teams.filter(t => !isBroke(t) && (inputMode === "screen" || connectedTeamIds.has(t.id)));
 
   const allBetsPlaced = activeTeams.every(t => {
     const b = bets[t.id];
@@ -259,6 +414,53 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
             </div>
           ))}
         </div>
+        {/* Only offered with 2+ teams — no reason to hide anything from a lone team. */}
+        {teams.length > 1 && introStep === "setup" && (
+          <div style={{ marginBottom: "20px" }}>
+            <div style={{ fontSize: "13px", color: "#C4B5FD", fontWeight: "700", marginBottom: "10px" }}>How will teams place their bets?</div>
+            <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
+              <button onClick={handlePickScreenMode} style={{
+                padding: "10px 20px", borderRadius: "12px", fontWeight: "800", fontSize: "14px", cursor: "pointer",
+                border: `2px solid ${inputMode === "screen" ? "#FCD34D" : "rgba(255,255,255,0.2)"}`,
+                background: inputMode === "screen" ? "rgba(253,224,71,0.15)" : "rgba(255,255,255,0.05)",
+                color: inputMode === "screen" ? "#FCD34D" : "#C4B5FD",
+              }}>🖥️ Play on Screen</button>
+              <button onClick={handlePickPhoneMode} style={{
+                padding: "10px 20px", borderRadius: "12px", fontWeight: "800", fontSize: "14px", cursor: "pointer",
+                border: `2px solid ${inputMode === "phone" ? "#FCD34D" : "rgba(255,255,255,0.2)"}`,
+                background: inputMode === "phone" ? "rgba(253,224,71,0.15)" : "rgba(255,255,255,0.05)",
+                color: inputMode === "phone" ? "#FCD34D" : "#C4B5FD",
+              }}>📱 Play on Phones</button>
+            </div>
+          </div>
+        )}
+
+        {introStep === "qr" && sessionCode && (() => {
+          const joinUrl = `${window.location.origin}${window.location.pathname}?join=${sessionCode}`;
+          return (
+            <div style={{ background: "linear-gradient(160deg,#3B0764,#1E1033)", border: "2px solid #FCD34D66", borderRadius: "20px", padding: "20px", marginBottom: "20px", maxWidth: "360px", marginLeft: "auto", marginRight: "auto" }}>
+              <div style={{ fontWeight: "800", fontSize: "14px", color: "#FCD34D", marginBottom: "12px" }}>📱 Scan to join, or go to the site and enter this code:</div>
+              <div style={{ background: "white", borderRadius: "12px", padding: "12px", display: "inline-block" }}>
+                <QRCodeSVG value={joinUrl} size={160} />
+              </div>
+              <div style={{ fontSize: "28px", fontWeight: "900", letterSpacing: "0.1em", color: "white", margin: "12px 0" }}>{sessionCode}</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: "6px", marginBottom: "10px" }}>
+                {teams.map(t => (
+                  <div key={t.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "rgba(255,255,255,0.06)", borderRadius: "8px", padding: "6px 10px", fontSize: "13px" }}>
+                    <span>{t.mascot ?? t.color.emoji} {t.name}</span>
+                    <span style={{ color: connectedTeamIds.has(t.id) ? "#4ADE80" : "#6B7280", fontWeight: "700" }}>
+                      {connectedTeamIds.has(t.id) ? "✅ Connected" : "⏳ Waiting…"}
+                    </span>
+                  </div>
+                ))}
+              </div>
+              <button onClick={handlePickScreenMode} style={{ background: "none", border: "none", color: "#9CA3AF", fontSize: "12px", fontWeight: "700", cursor: "pointer", textDecoration: "underline" }}>
+                Switch back to Play on Screen
+              </button>
+            </div>
+          );
+        })()}
+
         <button onClick={() => setShowHowTo(true)} style={{ display: "block", margin: "0 auto 14px", background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
           ❓ How to Play
         </button>
@@ -334,7 +536,12 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
           </p>
         </div>
 
-        {phase === "betting" && (
+        {phase === "betting" && (inputMode === "phone" ? (
+          <PhoneModeWaitingRoom
+            teams={teams} bets={bets} connectedTeamIds={connectedTeamIds} isBroke={isBroke}
+            allBetsPlaced={allBetsPlaced} activeTeamsEmpty={activeTeams.length === 0} onReveal={resolveRound}
+          />
+        ) : (
           <div>
             <p style={{ textAlign: "center", fontWeight: "800", color: "#DDD6FE", fontSize: "15px", marginBottom: "14px" }}>Each team: choose TRUE or FALSE, then place your bet</p>
             <div style={{ display: "grid", gridTemplateColumns: teamsGridCols(teams.length), gap: "12px", marginBottom: "18px" }}>
@@ -431,7 +638,7 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
               )}
             </div>
           </div>
-        )}
+        ))}
 
         {phase === "result" && (
           <div key={qi}>
