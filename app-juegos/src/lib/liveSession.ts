@@ -17,12 +17,20 @@ export function generateSessionCode(): string {
 
 export type AuctionRosterEntry = { id: string | number; name: string; color: TeamColor; mascot?: string | null };
 
+// Mirrors AuctionGame.tsx's own local Phase type — kept as an independent literal union here
+// rather than importing it, matching this file's existing "self-contained payload types" pattern.
+export type AuctionPhase = "intro" | "betting" | "result" | "final";
+
 // Broadcast from the teacher's screen -> every phone. Sent on every relevant change AND on a
 // standing interval regardless — the interval resend is what lets a phone that subscribes mid-
 // game (a late scanner, or a reconnect after dropping wifi) get a fresh copy within one interval,
 // instead of needing a separate "hello, catch me up" handshake. `ts` doubles as a liveness check
-// on the phone side — no state broadcast for ~12-15s means the teacher's tab is gone.
+// on the phone side — no state broadcast for ~12-15s means the teacher's tab is gone. `phase`
+// lets a phone tell "hasn't started yet" from "round in progress" from "auction is over" without
+// needing separate one-shot events for each (though "ended" below still exists as an immediate
+// push, so a phone doesn't have to wait out a full interval to find out the game's done).
 export type AuctionStatePayload = {
+  phase: AuctionPhase;
   qi: number;
   sentence: string;
   roster: AuctionRosterEntry[];

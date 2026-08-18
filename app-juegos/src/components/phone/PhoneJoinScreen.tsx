@@ -49,6 +49,10 @@ export function PhoneJoinScreen({ code }: Props) {
   const [claimedTeamId, setClaimedTeamId] = useState<string | number | null>(claimedTeamIdRef.current);
   const [state, setState] = useState<AuctionStatePayload | null>(null);
   const [lastStateAt, setLastStateAt] = useState<number | null>(null);
+  // Once true, stays true regardless of what happens to the connection afterward — a phone that
+  // learns the game is over shouldn't ever fall back to "lost connection" messaging just because
+  // the teacher's tab (and its channel) closes for good a moment later.
+  const [gameEnded, setGameEnded] = useState(false);
   const mountTimeRef = useRef(Date.now());
   const [nowTick, setNowTick] = useState(Date.now());
 
@@ -57,8 +61,17 @@ export function PhoneJoinScreen({ code }: Props) {
     channelRef.current = channel;
 
     channel.on("broadcast", { event: "state" }, ({ payload }) => {
-      setState(payload as AuctionStatePayload);
+      const statePayload = payload as AuctionStatePayload;
+      setState(statePayload);
       setLastStateAt(Date.now());
+      // Covers a phone that only joins/reconnects after the game already ended — it'll never see
+      // the one-shot "ended" broadcast below, but every state broadcast from that point on
+      // reports phase: "final" too.
+      if (statePayload.phase === "final") setGameEnded(true);
+    });
+
+    channel.on("broadcast", { event: "ended" }, () => {
+      setGameEnded(true);
     });
 
     channel.subscribe(status => {
@@ -94,6 +107,16 @@ export function PhoneJoinScreen({ code }: Props) {
   const sendBet = (payload: AuctionBetPayload) => {
     channelRef.current?.send({ type: "broadcast", event: "bet", payload });
   };
+
+  if (gameEnded) {
+    return (
+      <div style={arenaStyle}>
+        <div style={{ fontSize: "44px", marginBottom: "12px" }}>🏆</div>
+        <div style={{ fontWeight: "900", fontSize: "18px", color: "#FCD34D", marginBottom: "8px" }}>The auction has ended!</div>
+        <div style={{ color: "#C4B5FD", fontSize: "14px", lineHeight: 1.6 }}>Thanks for playing — check the big screen for final results.</div>
+      </div>
+    );
+  }
 
   if (connectionLost) {
     return (
@@ -148,6 +171,19 @@ export function PhoneJoinScreen({ code }: Props) {
             );
           })}
         </div>
+      </div>
+    );
+  }
+
+  // Claimed, but the teacher hasn't hit "Start the Auction!" yet — nobody should see the first
+  // sentence before the whole room does at once.
+  if (state.phase === "intro") {
+    const team = state.roster.find(t => t.id === claimedTeamId);
+    return (
+      <div style={arenaStyle}>
+        <div style={{ fontSize: "36px", marginBottom: "6px" }}>{team?.mascot ?? team?.color.emoji ?? "🔨"}</div>
+        <div style={{ fontWeight: "900", fontSize: "18px", color: "#FCD34D", marginBottom: "8px" }}>You're in as {team?.name}!</div>
+        <div style={{ color: "#C4B5FD", fontSize: "14px", lineHeight: 1.6 }}>Get ready — waiting for your teacher to start the auction…</div>
       </div>
     );
   }

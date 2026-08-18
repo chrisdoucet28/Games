@@ -213,9 +213,10 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
   // only happens when phone mode itself toggles on/off, not on every round/bank/presence change.
   const qiRef = useRef(qi);
   const sentenceRef = useRef(questions[qi]?.sentence ?? "");
+  const phaseRef = useRef(phase);
   const connectedTeamIdsRef = useRef<Set<string | number>>(new Set());
   const sendStateRef = useRef<(() => void) | null>(null);
-  useEffect(() => { qiRef.current = qi; sentenceRef.current = questions[qi]?.sentence ?? ""; }, [qi, questions]);
+  useEffect(() => { qiRef.current = qi; sentenceRef.current = questions[qi]?.sentence ?? ""; phaseRef.current = phase; }, [qi, questions, phase]);
 
   // Opens/closes the realtime channel only when phone mode itself is toggled on/off — broadcasts
   // a fresh AuctionStatePayload on every presence change and on a standing interval (covers late
@@ -229,6 +230,7 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
 
     const sendState = () => {
       const payload: AuctionStatePayload = {
+        phase: phaseRef.current,
         qi: qiRef.current,
         sentence: sentenceRef.current,
         roster: teams.map(t => ({ id: t.id, name: t.name, color: t.color, mascot: t.mascot })),
@@ -268,11 +270,24 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
     };
   }, [inputMode, sessionCode, teams]);
 
-  // Pushes an immediate state update on round transitions rather than waiting for the interval,
-  // so a phone doesn't sit on the previous sentence for up to ~4s after the teacher advances.
+  // Pushes an immediate state update on round/phase transitions rather than waiting for the
+  // interval, so a phone doesn't sit on stale content (the previous sentence, or a waiting-room
+  // screen after the teacher's already hit Start) for up to ~4s.
   useEffect(() => {
     sendStateRef.current?.();
-  }, [qi]);
+  }, [qi, phase]);
+
+  // Tells every connected phone the auction is over the moment it actually ends, rather than
+  // leaving them to conclude that from silence — without this, closing the channel on unmount
+  // (once the teacher clicks through the final screen's own End Game button) looks identical to a
+  // dropped connection from the phone's side, and it'd sit on the "lost connection" message for no
+  // good reason. `state.phase === "final"` (sent from here on) covers a phone that only
+  // reconnects/joins after this point too, not just the phones already listening right now.
+  useEffect(() => {
+    if (phase === "final" && channelRef.current) {
+      channelRef.current.send({ type: "broadcast", event: "ended", payload: {} });
+    }
+  }, [phase]);
 
   const flushBankToScores = useCallback(() => {
     if (hasFlushedBankRef.current) return;
@@ -414,8 +429,7 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
             </div>
           ))}
         </div>
-        {/* Only offered with 2+ teams — no reason to hide anything from a lone team. */}
-        {teams.length > 1 && introStep === "setup" && (
+        {introStep === "setup" && (
           <div style={{ marginBottom: "20px" }}>
             <div style={{ fontSize: "13px", color: "#C4B5FD", fontWeight: "700", marginBottom: "10px" }}>How will teams place their bets?</div>
             <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
