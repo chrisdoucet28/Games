@@ -5342,6 +5342,22 @@ export const LESSONS: Record<string, Lesson> = {
           "I am **tired of** studying. (not 'tired to study')",
         ],
       },
+      {
+        heading: "More feeling + preposition pairs",
+        body: [
+          "The same fixed-preposition rule applies to many more feelings — learn each pair together, not the feeling word alone.",
+          "nervous about, confused about, upset about, curious about, embarrassed about, concerned about + noun. bored of, sick of, ashamed of, jealous of, terrified of, fed up with + noun. surprised at + noun. pleased with, satisfied with, disappointed with, delighted with, content with + noun. keen on + noun/gerund.",
+        ],
+        examples: [
+          "She is **nervous about** the interview.",
+          "He is **confused about** the instructions.",
+          "They are **bored of** the movie.",
+          "We are **surprised at** the result.",
+          "He is **pleased with** his grades.",
+          "I am **ashamed of** my mistake. She is **jealous of** her sister.",
+          "He is **fed up with** his job. She is **keen on** cooking.",
+        ],
+      },
     ],
     commonMistakes: [
       "❌ I are happy. → ✅ I am happy. ('I' takes 'am')",
@@ -5351,6 +5367,8 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ He is afraid from spiders. → ✅ He is afraid of spiders. ('afraid of', not 'afraid from')",
       "❌ She is angry of her brother. → ✅ She is angry with her brother. ('angry with' a person)",
       "❌ They are interested of video games. → ✅ They are interested in video games. ('interested in', not 'interested of')",
+      "❌ We are surprised of the result. → ✅ We are surprised at the result. ('surprised at', not 'surprised of')",
+      "❌ He is pleased of his grades. → ✅ He is pleased with his grades. ('pleased with', not 'pleased of')",
     ],
   },
 
