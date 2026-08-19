@@ -3,6 +3,7 @@ import { LESSONS } from "../../data/lessons";
 import { TOPIC_OPTIONS } from "../../data/topics";
 import { hexToRgba, type Theme } from "../../data/themes";
 import { getProfile } from "../../lib/profile";
+import { FlagLessonButton } from "./FlagLessonButton";
 
 type Props = {
   onBack: () => void;
@@ -121,7 +122,7 @@ export function LearnScreen({ onBack, theme, filterTopicIds }: Props) {
       <div className="learn-print-bg" style={{ minHeight: "100vh", background: "#F0F9FF", padding: "20px", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
         <style>{PRINT_CSS}</style>
         <div style={{ maxWidth: "640px", margin: "0 auto" }}>
-          <div className="learn-no-print" style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
+          <div className="learn-no-print" style={{ display: "flex", flexWrap: "wrap", gap: "10px", marginBottom: "20px" }}>
             <button
               onClick={filterTopicIds && visibleTopics.length === 1 ? onBack : () => setSelectedId(null)}
               style={{ background: "none", border: `2px solid ${theme.accentSolid}`, color: theme.accentSolid, borderRadius: "10px", padding: "8px 16px", cursor: "pointer", fontWeight: "700", fontFamily: theme.headingFont }}
@@ -134,6 +135,7 @@ export function LearnScreen({ onBack, theme, filterTopicIds }: Props) {
             >
               🖨️ Print
             </button>
+            <FlagLessonButton topicId={selected.id} topicTitle={selected.lesson.title} theme={theme} />
           </div>
 
           <div className="learn-no-print" style={{ background: "white", border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, borderRadius: "16px", padding: "24px" }}>
