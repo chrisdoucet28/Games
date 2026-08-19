@@ -2311,6 +2311,11 @@ export const LESSONS: Record<string, Lesson> = {
         body: ["Pick ONE opinion opener — don't combine 'in my opinion' with 'I think', or 'for me' with 'I think'."],
         examples: ["**In my opinion**, we should ban plastic bags. (not 'In my opinion, I think we should...')"],
       },
+      {
+        heading: "Asking for someone's opinion",
+        body: ["Do you think that + clause? is the natural way to ask someone for their opinion."],
+        examples: ["**Do you think that** homework is useless?"],
+      },
     ],
     commonMistakes: [
       "❌ According to me, the film was brilliant. → ✅ In my opinion, the film was brilliant. ('according to' is for sources, not personal opinions)",
