@@ -3573,6 +3573,23 @@ export const LESSONS: Record<string, Lesson> = {
           "Let's just **agree to disagree** on this one.",
         ],
       },
+      {
+        heading: "Other useful discourse openers",
+        body: ["Fixed comma-phrases that open a sentence, softening or framing the opinion that follows."],
+        examples: [
+          "**To a certain extent**, she has a good point.",
+          "**That said**, we should still consider other options.",
+          "**At the end of the day**, the cost is too high.",
+        ],
+      },
+      {
+        heading: "Reporting what someone argued",
+        body: ["Reported speech backshifts the tense when you report someone's opinion or position: present simple → past simple, present perfect → past perfect, will → would, can → could."],
+        examples: [
+          "'I agree with the proposal,' he said. → He said (that) he **agreed** with the proposal.",
+          "'We will consider the risks,' they said. → They said (that) they **would consider** the risks.",
+        ],
+      },
     ],
     commonMistakes: [
       "❌ I'd argue what the policy has failed. → ✅ I'd argue that the policy has failed. ('argue that', not 'what')",
@@ -3580,6 +3597,7 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ I agree with a certain extent. → ✅ I agree to a certain extent. ('to a certain extent')",
       "❌ I'm not entire convinced. → ✅ I'm not entirely convinced. (adverb 'entirely', not adjective 'entire')",
       "❌ With all due respects... → ✅ With all due respect... (fixed singular 'respect')",
+      "❌ 'We will consider the risks,' they said. → They said they will consider the risks. → ✅ ...they would consider the risks. ('will' backshifts to 'would' in reported speech)",
     ],
   },
 
