@@ -3468,14 +3468,30 @@ export const LESSONS: Record<string, Lesson> = {
       {
         heading: "Turning a verb sentence into a noun sentence",
         body: [
-          "'There was a/an + adjective + noun + in + X' rewrites a verb sentence as a noun sentence.",
-          "The adverb becomes the matching adjective (sharply → sharp, dramatically → dramatic, gradually → gradual, suddenly → sudden).",
-          "Most verbs share the same noun form (rise → rise, increase → increase, fall → fall, decline → decline, drop → drop, surge → surge); a few change (grow → growth, weaken → weakening).",
+          "'There was a/an + adjective + noun + in + X' rewrites a verb sentence as a noun sentence. Use 'There has been a/an...' instead when the change is still relevant now (present perfect).",
+          "The adverb becomes the matching adjective (sharply → sharp, dramatically → dramatic, gradually → gradual, suddenly → sudden, steadily → steady).",
+          "Most verbs share the same noun form (rise → rise, increase → increase, fall → fall, decline → decline, drop → drop, surge → surge); some change more (grow → growth, weaken → weakening, recover → recovery, double → a doubling of, stabilise → a stabilisation, lose → a loss of, plummet → a plunge).",
         ],
         examples: [
           "Prices rose sharply. → **There was a sharp rise in prices.**",
           "Sales increased by 10%. → **There was a 10% increase in sales.**",
           "Profits grew steadily. → **There was steady growth in profits.**",
+          "The economy has recovered quickly. → **There has been a quick recovery in the economy.**",
+          "The company has lost market share recently. → **There has been a loss of market share recently.**",
+        ],
+      },
+      {
+        heading: "Describing how data was produced",
+        body: [
+          "Reports, surveys, and figures are usually described with the passive voice, since who produced them matters less than the data itself.",
+          "was/were + past participle — often followed by 'by' to name the source (analysts, experts, researchers).",
+        ],
+        examples: [
+          "The survey **was conducted** among 1,000 people.",
+          "The report **was released** last week.",
+          "The drop **was predicted by** experts.",
+          "The data **was collected** over six months.",
+          "The results **were published** this morning.",
         ],
       },
     ],
@@ -3487,6 +3503,7 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ The number of tourists have doubled. → ✅ The number of tourists has doubled. ('the number of' takes a singular verb)",
       "❌ There was a rise sharp in prices. → ✅ There was a sharp rise in prices. (adjective before the noun)",
       "❌ There was a growth steady in profits. → ✅ There was steady growth in profits. ('growth' is uncountable — no article)",
+      "❌ The survey conducted among 1,000 people. → ✅ The survey was conducted among 1,000 people. (passive needs 'was/were')",
     ],
   },
 
