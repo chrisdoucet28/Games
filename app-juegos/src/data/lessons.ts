@@ -5173,12 +5173,25 @@ export const LESSONS: Record<string, Lesson> = {
           "**Have you met** my brother?",
         ],
       },
+      {
+        heading: "Two ways to say 'this is'",
+        body: [
+          "When you're just presenting one person to your listener, start straight with 'This is...' / 'These are...'.",
+          "When you're introducing two people to each other for the first time, name your listener first, then say 'this is'/'these are' — this makes clear who is meeting whom.",
+        ],
+        examples: [
+          "**This is** my colleague, David. (presenting David to whoever you're talking to)",
+          "**Sarah, this is** my colleague, David. (introducing Sarah and David to each other)",
+          "**Tom, these are** my cousins, Mia and Sam.",
+        ],
+      },
     ],
     commonMistakes: [
       "❌ He name is Marco. → ✅ His name is Marco. (possessive adjective before a noun, not subject pronoun)",
       "❌ His name are Marco and Leo. → ✅ Their names are Marco and Leo. (plural subject needs 'their'/'are')",
       "❌ This is my friends. → ✅ These are my friends. (plural people need 'these are')",
       "❌ She is a friend of me. → ✅ She is a friend of mine. ('a friend of' + possessive pronoun)",
+      "❌ This is Sarah, my colleague, David. → ✅ Sarah, this is my colleague, David. (name the listener first, before 'this is')",
     ],
   },
 
