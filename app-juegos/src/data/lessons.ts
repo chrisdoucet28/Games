@@ -5136,10 +5136,11 @@ export const LESSONS: Record<string, Lesson> = {
       },
       {
         heading: "Saying goodbye",
-        body: ["'Goodbye' or 'Bye' for leaving; 'See you later' for a casual, temporary goodbye."],
+        body: ["'Goodbye' or 'Bye' for leaving; 'See you later' for a casual, temporary goodbye.", "'Take care!' is another casual, friendly way to say goodbye."],
         examples: [
           "**Goodbye**! Have a nice day.",
           "**See you later**!",
+          "**Bye! Take care!**",
         ],
       },
     ],
