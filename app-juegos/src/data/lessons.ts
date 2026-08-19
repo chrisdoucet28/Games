@@ -2361,6 +2361,18 @@ export const LESSONS: Record<string, Lesson> = {
           "**Are you saying that** the flight has been cancelled completely?",
           "**Let me get this straight** — you want the whole report by Monday?",
           "**In other words**, you think we should cancel the trip?",
+          "**So what you're saying is** we need to redo the whole presentation?",
+        ],
+      },
+      {
+        heading: "More clarification phrases",
+        body: ["Other useful ways to ask for more detail, confirm you understood, or ask about spelling."],
+        examples: [
+          "**Could you be more specific** about what time you need the report?",
+          "**I'm not sure I follow** — could you go back to your first point?",
+          "**Could you spell that for me?** I've never heard that surname before.",
+          "**Could you give me an example of** that?",
+          "**Could you confirm** the time of the meeting?",
         ],
       },
     ],
