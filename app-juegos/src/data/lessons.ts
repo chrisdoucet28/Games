@@ -5304,6 +5304,14 @@ export const LESSONS: Record<string, Lesson> = {
           "My cousin **resembles** his father.",
         ],
       },
+      {
+        heading: "What someone is wearing",
+        body: ["For glasses and other accessories that can be on or off, use 'be' + wearing — not 'have' or 'be' + adjective."],
+        examples: [
+          "He **is wearing glasses**. (not 'he has wearing glasses')",
+          "Is she **wearing** a hat today?",
+        ],
+      },
     ],
     commonMistakes: [
       "❌ He have blue eyes. → ✅ He has blue eyes. (third person: 'has')",
