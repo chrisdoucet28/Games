@@ -956,6 +956,17 @@ export const LESSONS: Record<string, Lesson> = {
           "I'd like to **book a table** for two.",
         ],
       },
+      {
+        heading: "More polite requests",
+        body: ["Other useful ways to ask staff for information or a favour."],
+        examples: [
+          "**Do you have any** vegan options?",
+          "**Could you tell me if** the soup contains nuts?",
+          "**Would it be possible to** have separate bills?",
+          "**Could you ask** the chef what he recommends?",
+          "**Is it customary to** leave a tip here?",
+        ],
+      },
     ],
     commonMistakes: [
       "❌ Could I have a water? → ✅ Could I have a glass of water? ('water' is uncountable)",
@@ -987,10 +998,22 @@ export const LESSONS: Record<string, Lesson> = {
       },
       {
         heading: "Joining the excuse to the result",
-        body: ["…because + reason, in past simple."],
+        body: [
+          "result + because + cause, in past simple.",
+          "cause + so + result is the flip side — the cause comes first, and 'so' introduces the consequence.",
+        ],
         examples: [
           "I arrived late for work **because** I missed the bus.",
           "She missed the meeting **because** she had a family emergency.",
+          "I missed the bus, **so** I arrived late for work.",
+        ],
+      },
+      {
+        heading: "Asking for someone's excuse",
+        body: ["Why + did/couldn't + subject + base verb...? is how you ask someone to explain what happened."],
+        examples: [
+          "**Why did** she miss the meeting?",
+          "**Why couldn't** he call you back?",
         ],
       },
       {
@@ -2299,6 +2322,11 @@ export const LESSONS: Record<string, Lesson> = {
         body: ["Pick ONE opinion opener — don't combine 'in my opinion' with 'I think', or 'for me' with 'I think'."],
         examples: ["**In my opinion**, we should ban plastic bags. (not 'In my opinion, I think we should...')"],
       },
+      {
+        heading: "Asking for someone's opinion",
+        body: ["Do you think that + clause? is the natural way to ask someone for their opinion."],
+        examples: ["**Do you think that** homework is useless?"],
+      },
     ],
     commonMistakes: [
       "❌ According to me, the film was brilliant. → ✅ In my opinion, the film was brilliant. ('according to' is for sources, not personal opinions)",
@@ -2344,6 +2372,18 @@ export const LESSONS: Record<string, Lesson> = {
           "**Are you saying that** the flight has been cancelled completely?",
           "**Let me get this straight** — you want the whole report by Monday?",
           "**In other words**, you think we should cancel the trip?",
+          "**So what you're saying is** we need to redo the whole presentation?",
+        ],
+      },
+      {
+        heading: "More clarification phrases",
+        body: ["Other useful ways to ask for more detail, confirm you understood, or ask about spelling."],
+        examples: [
+          "**Could you be more specific** about what time you need the report?",
+          "**I'm not sure I follow** — could you go back to your first point?",
+          "**Could you spell that for me?** I've never heard that surname before.",
+          "**Could you give me an example of** that?",
+          "**Could you confirm** the time of the meeting?",
         ],
       },
     ],
@@ -2393,6 +2433,22 @@ export const LESSONS: Record<string, Lesson> = {
         examples: [
           "**To some extent I agree**, but I don't think banning cars is realistic.",
           "**That's generally true, but** there are exceptions.",
+          "**I agree with you up to a point**, but not completely.",
+        ],
+      },
+      {
+        heading: "More ways to agree or push back",
+        body: [
+          "Acknowledging without agreeing: 'I see where you're coming from', 'that's one way to look at it', 'you have a point there', 'I take your point, but...'.",
+          "Firmer but still polite disagreement: 'I'd actually argue that...', 'it's hard to argue with that', 'I'm not so sure about that', 'that's debatable'.",
+          "Casual acceptance: 'fair enough'. Strong certainty: 'there's no doubt about it'. Reluctant agreement: 'I can't deny that...'.",
+        ],
+        examples: [
+          "**I see where you're coming from**, but I still think we should wait.",
+          "**Fair enough**, let's do it your way.",
+          "**I'd actually argue that** the opposite is true.",
+          "**That's debatable** — not everyone would agree.",
+          "**I can't deny that** the results are impressive.",
         ],
       },
     ],
@@ -2402,6 +2458,8 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ I can't agree more with your position. → ✅ I couldn't agree more with your position. ('couldn't agree more' — negative form for maximum agreement)",
       "❌ I disagree on your interpretation. → ✅ I disagree with your interpretation. ('disagree with', not 'disagree on')",
       "❌ With all do respect, I think you're mistaken. → ✅ With all due respect, I think you're mistaken. (fixed phrase is 'due respect')",
+      "❌ I see from where you're coming. → ✅ I see where you're coming from. (fixed word order — 'from' goes at the end)",
+      "❌ I can't deny the results are impressive. → ✅ I can't deny that the results are impressive. (needs 'that' before the clause)",
     ],
   },
 
@@ -2414,13 +2472,17 @@ export const LESSONS: Record<string, Lesson> = {
         body: [
           "situated/located + in/on",
           "surrounded by",
-          "within walking distance of / a short drive from",
+          "within walking distance of / a short drive from / a short walk from",
+          "close to / connected to / in the heart of / on the outskirts of",
         ],
         examples: [
           "The village is **situated in** the mountains.",
           "The old town is **surrounded by** a stone wall.",
           "The hotel is **within walking distance of** the beach.",
           "The airport is a **short drive from** the city centre.",
+          "The village is **close to** the border.",
+          "The cathedral is **in the heart of** the old city.",
+          "The factory is **on the outskirts of** town.",
         ],
       },
       {
@@ -3424,14 +3486,30 @@ export const LESSONS: Record<string, Lesson> = {
       {
         heading: "Turning a verb sentence into a noun sentence",
         body: [
-          "'There was a/an + adjective + noun + in + X' rewrites a verb sentence as a noun sentence.",
-          "The adverb becomes the matching adjective (sharply → sharp, dramatically → dramatic, gradually → gradual, suddenly → sudden).",
-          "Most verbs share the same noun form (rise → rise, increase → increase, fall → fall, decline → decline, drop → drop, surge → surge); a few change (grow → growth, weaken → weakening).",
+          "'There was a/an + adjective + noun + in + X' rewrites a verb sentence as a noun sentence. Use 'There has been a/an...' instead when the change is still relevant now (present perfect).",
+          "The adverb becomes the matching adjective (sharply → sharp, dramatically → dramatic, gradually → gradual, suddenly → sudden, steadily → steady).",
+          "Most verbs share the same noun form (rise → rise, increase → increase, fall → fall, decline → decline, drop → drop, surge → surge); some change more (grow → growth, weaken → weakening, recover → recovery, double → a doubling of, stabilise → a stabilisation, lose → a loss of, plummet → a plunge).",
         ],
         examples: [
           "Prices rose sharply. → **There was a sharp rise in prices.**",
           "Sales increased by 10%. → **There was a 10% increase in sales.**",
           "Profits grew steadily. → **There was steady growth in profits.**",
+          "The economy has recovered quickly. → **There has been a quick recovery in the economy.**",
+          "The company has lost market share recently. → **There has been a loss of market share recently.**",
+        ],
+      },
+      {
+        heading: "Describing how data was produced",
+        body: [
+          "Reports, surveys, and figures are usually described with the passive voice, since who produced them matters less than the data itself.",
+          "was/were + past participle — often followed by 'by' to name the source (analysts, experts, researchers).",
+        ],
+        examples: [
+          "The survey **was conducted** among 1,000 people.",
+          "The report **was released** last week.",
+          "The drop **was predicted by** experts.",
+          "The data **was collected** over six months.",
+          "The results **were published** this morning.",
         ],
       },
     ],
@@ -3443,6 +3521,7 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ The number of tourists have doubled. → ✅ The number of tourists has doubled. ('the number of' takes a singular verb)",
       "❌ There was a rise sharp in prices. → ✅ There was a sharp rise in prices. (adjective before the noun)",
       "❌ There was a growth steady in profits. → ✅ There was steady growth in profits. ('growth' is uncountable — no article)",
+      "❌ The survey conducted among 1,000 people. → ✅ The survey was conducted among 1,000 people. (passive needs 'was/were')",
     ],
   },
 
@@ -3467,6 +3546,21 @@ export const LESSONS: Record<string, Lesson> = {
           "You can always **count on** him — he's very **reliable**.",
         ],
       },
+      {
+        heading: "More workplace collocations",
+        body: [
+          "hand over a task (give it to a colleague), call in sick, get promoted, make a good impression, build rapport (with someone), cover someone's shift.",
+          "sign off on something (approve), let someone go (fire), book annual leave, clock in, burn the midnight oil (work very late), pull your weight (do your fair share).",
+          "put someone on a warning, put in for a transfer, have a word with someone (a short serious talk), keep someone posted (keep them updated), take the lead on something, reach a compromise.",
+        ],
+        examples: [
+          "She **handed over a task** to a colleague before her holiday.",
+          "He **called in sick** and stayed home.",
+          "The whole team **burned the midnight oil** to finish the project.",
+          "Please **keep me posted** on how the project is going.",
+          "The two departments finally **reached a compromise**.",
+        ],
+      },
     ],
     commonMistakes: [
       "❌ I need to scheduling a meeting. → ✅ I need to schedule a meeting. (base verb after 'need to')",
@@ -3474,6 +3568,8 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ We meet the deadline last week. → ✅ We met the deadline last week. (irregular past simple 'met')",
       "❌ She finally got a rise pay. → ✅ She finally got a pay rise. (fixed word order: 'pay rise')",
       "❌ He received a job offer of the company. → ✅ He received a job offer from the company. ('offer from', not 'of')",
+      "❌ She signed off the new proposal. → ✅ She signed off on the new proposal. ('sign off on', not just 'sign off')",
+      "❌ He didn't pull his weight enough. → ✅ He didn't pull his weight. (fixed phrase — no 'enough' needed)",
     ],
   },
 
@@ -3519,6 +3615,41 @@ export const LESSONS: Record<string, Lesson> = {
           "These complaints are just **the tip of the iceberg**. (a small part of a much bigger problem)",
         ],
       },
+      {
+        heading: "Mistakes, secrets, and honesty",
+        body: ["Idioms about saying the wrong thing, revealing secrets, and being exactly right."],
+        examples: [
+          "He **put his foot in his mouth** at dinner. (said something embarrassing by accident)",
+          "She accidentally **spilled the beans** about the surprise. (revealed a secret)",
+          "He **let the cat out of the bag** before the announcement. (accidentally revealed a secret)",
+          "You **hit the nail on the head** with that answer. (were exactly right)",
+          "Take what he says **with a grain of salt**. (don't fully believe it)",
+        ],
+      },
+      {
+        heading: "Tough decisions and consequences",
+        body: ["Idioms about facing hard choices, making things worse, and failure."],
+        examples: [
+          "He finally **bit the bullet** and had the surgery. (faced something unpleasant with courage)",
+          "Many companies **jumped on the bandwagon** once the trend became popular. (joined something popular)",
+          "Criticizing her in public only **added fuel to the fire**. (made a bad situation worse)",
+          "Without funding, the plan **went down in flames**. (failed dramatically)",
+          "She **burned her bridges** when she quit angrily. (destroyed a relationship, especially by leaving badly)",
+        ],
+      },
+      {
+        heading: "Shared situations and timing",
+        body: ["Idioms about responsibility, rarity, and dealing with problems."],
+        examples: [
+          "The ball is in **your court** now — it's your decision. (it's your turn to act)",
+          "We're all **in the same boat** with this deadline. (facing the same difficult situation)",
+          "I only see her **once in a blue moon**. (very rarely)",
+          "Nobody wanted to mention **the elephant in the room**. (an obvious problem everyone avoids discussing)",
+          "We'll **cross that bridge when we come to it**. (deal with a problem only when it happens)",
+          "He told a joke to **break the ice**. (relieve tension, help people feel comfortable)",
+          "Losing that job was **a blessing in disguise**. (something that seemed bad but turned out good)",
+        ],
+      },
     ],
     commonMistakes: [
       "❌ We need to threw in the towel. → ✅ We need to throw in the towel. (base verb after 'need to')",
@@ -3526,6 +3657,9 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ I think we're in the same page. → ✅ I think we're on the same page. ('on', not 'in')",
       "❌ They went back at the drawing board. → ✅ They went back to the drawing board. ('back to', not 'back at')",
       "❌ She always go the extra mile. → ✅ She always goes the extra mile. (third person singular needs -s)",
+      "❌ He put his foot in the mouth. → ✅ He put his foot in his mouth. (possessive 'his', not 'the')",
+      "❌ The ball is on your court. → ✅ The ball is in your court. ('in', not 'on')",
+      "❌ She burned the bridges with her boss. → ✅ She burned her bridges with her boss. (possessive 'her', not 'the')",
     ],
   },
 
@@ -3561,6 +3695,23 @@ export const LESSONS: Record<string, Lesson> = {
           "Let's just **agree to disagree** on this one.",
         ],
       },
+      {
+        heading: "Other useful discourse openers",
+        body: ["Fixed comma-phrases that open a sentence, softening or framing the opinion that follows."],
+        examples: [
+          "**To a certain extent**, she has a good point.",
+          "**That said**, we should still consider other options.",
+          "**At the end of the day**, the cost is too high.",
+        ],
+      },
+      {
+        heading: "Reporting what someone argued",
+        body: ["Reported speech backshifts the tense when you report someone's opinion or position: present simple → past simple, present perfect → past perfect, will → would, can → could."],
+        examples: [
+          "'I agree with the proposal,' he said. → He said (that) he **agreed** with the proposal.",
+          "'We will consider the risks,' they said. → They said (that) they **would consider** the risks.",
+        ],
+      },
     ],
     commonMistakes: [
       "❌ I'd argue what the policy has failed. → ✅ I'd argue that the policy has failed. ('argue that', not 'what')",
@@ -3568,6 +3719,7 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ I agree with a certain extent. → ✅ I agree to a certain extent. ('to a certain extent')",
       "❌ I'm not entire convinced. → ✅ I'm not entirely convinced. (adverb 'entirely', not adjective 'entire')",
       "❌ With all due respects... → ✅ With all due respect... (fixed singular 'respect')",
+      "❌ 'We will consider the risks,' they said. → They said they will consider the risks. → ✅ ...they would consider the risks. ('will' backshifts to 'would' in reported speech)",
     ],
   },
 
@@ -4984,10 +5136,11 @@ export const LESSONS: Record<string, Lesson> = {
       },
       {
         heading: "Saying goodbye",
-        body: ["'Goodbye' or 'Bye' for leaving; 'See you later' for a casual, temporary goodbye."],
+        body: ["'Goodbye' or 'Bye' for leaving; 'See you later' for a casual, temporary goodbye.", "'Take care!' is another casual, friendly way to say goodbye."],
         examples: [
           "**Goodbye**! Have a nice day.",
           "**See you later**!",
+          "**Bye! Take care!**",
         ],
       },
     ],
@@ -5021,12 +5174,25 @@ export const LESSONS: Record<string, Lesson> = {
           "**Have you met** my brother?",
         ],
       },
+      {
+        heading: "Two ways to say 'this is'",
+        body: [
+          "When you're just presenting one person to your listener, start straight with 'This is...' / 'These are...'.",
+          "When you're introducing two people to each other for the first time, name your listener first, then say 'this is'/'these are' — this makes clear who is meeting whom.",
+        ],
+        examples: [
+          "**This is** my colleague, David. (presenting David to whoever you're talking to)",
+          "**Sarah, this is** my colleague, David. (introducing Sarah and David to each other)",
+          "**Tom, these are** my cousins, Mia and Sam.",
+        ],
+      },
     ],
     commonMistakes: [
       "❌ He name is Marco. → ✅ His name is Marco. (possessive adjective before a noun, not subject pronoun)",
       "❌ His name are Marco and Leo. → ✅ Their names are Marco and Leo. (plural subject needs 'their'/'are')",
       "❌ This is my friends. → ✅ These are my friends. (plural people need 'these are')",
       "❌ She is a friend of me. → ✅ She is a friend of mine. ('a friend of' + possessive pronoun)",
+      "❌ This is Sarah, my colleague, David. → ✅ Sarah, this is my colleague, David. (name the listener first, before 'this is')",
     ],
   },
 
@@ -5053,11 +5219,12 @@ export const LESSONS: Record<string, Lesson> = {
       },
       {
         heading: "More natural expressions",
-        body: ["'can't stand' + gerund = hate strongly.", "'not keen on' + noun/gerund = don't like.", "'be into' + gerund = like a lot (informal).", "'prefer X to Y' (not 'than').", "'be a big fan of' (not 'for')."],
+        body: ["'can't stand' + gerund = hate strongly.", "'not keen on' + noun/gerund = don't like.", "'be into' + gerund = like a lot (informal); 'not really into' negates it.", "'prefer X to Y' (not 'than').", "'be a big fan of' (not 'for')."],
         examples: [
           "I **can't stand waiting** in traffic.",
           "She's **not keen on** spicy food.",
           "He's really **into playing** the guitar.",
+          "He's **not really into** cooking.",
           "I **prefer tea to** coffee. (not 'prefer tea than coffee')",
           "I'm **a big fan of** this band. (not 'a big fan for')",
         ],
@@ -5262,6 +5429,22 @@ export const LESSONS: Record<string, Lesson> = {
           "I am **tired of** studying. (not 'tired to study')",
         ],
       },
+      {
+        heading: "More feeling + preposition pairs",
+        body: [
+          "The same fixed-preposition rule applies to many more feelings — learn each pair together, not the feeling word alone.",
+          "nervous about, confused about, upset about, curious about, embarrassed about, concerned about + noun. bored of, sick of, ashamed of, jealous of, terrified of, fed up with + noun. surprised at + noun. pleased with, satisfied with, disappointed with, delighted with, content with + noun. keen on + noun/gerund.",
+        ],
+        examples: [
+          "She is **nervous about** the interview.",
+          "He is **confused about** the instructions.",
+          "They are **bored of** the movie.",
+          "We are **surprised at** the result.",
+          "He is **pleased with** his grades.",
+          "I am **ashamed of** my mistake. She is **jealous of** her sister.",
+          "He is **fed up with** his job. She is **keen on** cooking.",
+        ],
+      },
     ],
     commonMistakes: [
       "❌ I are happy. → ✅ I am happy. ('I' takes 'am')",
@@ -5271,6 +5454,8 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ He is afraid from spiders. → ✅ He is afraid of spiders. ('afraid of', not 'afraid from')",
       "❌ She is angry of her brother. → ✅ She is angry with her brother. ('angry with' a person)",
       "❌ They are interested of video games. → ✅ They are interested in video games. ('interested in', not 'interested of')",
+      "❌ We are surprised of the result. → ✅ We are surprised at the result. ('surprised at', not 'surprised of')",
+      "❌ He is pleased of his grades. → ✅ He is pleased with his grades. ('pleased with', not 'pleased of')",
     ],
   },
 
@@ -5302,6 +5487,14 @@ export const LESSONS: Record<string, Lesson> = {
           "She **looks like** her mother. (not 'looks like as')",
           "He's **in his late twenties**.",
           "My cousin **resembles** his father.",
+        ],
+      },
+      {
+        heading: "What someone is wearing",
+        body: ["For glasses and other accessories that can be on or off, use 'be' + wearing — not 'have' or 'be' + adjective."],
+        examples: [
+          "He **is wearing glasses**. (not 'he has wearing glasses')",
+          "Is she **wearing** a hat today?",
         ],
       },
     ],
@@ -5388,10 +5581,15 @@ export const LESSONS: Record<string, Lesson> = {
       },
       {
         heading: "More family vocabulary",
-        body: ["'only child' (no siblings), 'sibling' (brother or sister), 'stepmother/stepfather', 'in-laws', 'take after' (resemble a relative)."],
+        body: [
+          "'only child' (no siblings), 'sibling' (brother or sister), 'stepmother/stepfather', 'in-laws', 'take after' (resemble a relative).",
+          "'grandson/granddaughter' (a child's son/daughter). Marriage relatives use '-in-law': 'sister-in-law', 'brother-in-law', 'mother-in-law', 'father-in-law', 'parents-in-law' — all plural family words (in-laws, parents-in-law) still take 'are'/'have'.",
+        ],
         examples: [
           "She is **an only child**.",
           "I **take after** my mother — we both love cooking.",
+          "My brother's wife is my **sister-in-law**.",
+          "My **in-laws are** very welcoming. (not 'is')",
         ],
       },
     ],
@@ -5400,6 +5598,7 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ My brother are tall. → ✅ My brother is tall. (singular subject needs 'is')",
       "❌ I am an only children. → ✅ I am an only child. ('child' is singular after 'an only')",
       "❌ My niece and nephew is twins. → ✅ My niece and nephew are twins. (compound subject is plural)",
+      "❌ My in-laws is very kind. → ✅ My in-laws are very kind. ('in-laws' is always plural)",
     ],
   },
 
@@ -5432,12 +5631,26 @@ export const LESSONS: Record<string, Lesson> = {
           "It usually **rains** a lot in April.",
         ],
       },
+      {
+        heading: "Choosing how to describe the weather",
+        body: [
+          "Static description right now (it/the weather/the sky + adjective): 'be' + adjective — sunny, cloudy, windy, cold.",
+          "An action happening right now: 'be' + verb-ing — raining, snowing, changing.",
+          "A general truth or habit about a place or season: present simple, not continuous — rains, snows, gets, wear.",
+        ],
+        examples: [
+          "**It is sunny** today. (description right now)",
+          "**It is raining** outside. (action happening right now)",
+          "**It rains** a lot in winter. (general truth about the season)",
+        ],
+      },
     ],
     commonMistakes: [
       "❌ Today is very heat. → ✅ Today is very hot. (use the adjective 'hot', not the noun 'heat')",
       "❌ It is rain today. → ✅ It is rainy today. / It is raining today.",
       "❌ The weather is sun. → ✅ The weather is sunny.",
       "❌ It is cloud today. → ✅ It is cloudy today.",
+      "❌ It is raining a lot in winter. → ✅ It rains a lot in winter. (a general truth about the season needs present simple, not continuous)",
     ],
   },
 
@@ -5546,6 +5759,14 @@ export const LESSONS: Record<string, Lesson> = {
           "'The café is on your left, right here.' → **Turn left** for the café.",
           "'The church is straight down this road, no turning.' → **Go straight ahead** to the church.",
           "'The pool is straight ahead first, then on your right after the roundabout.' → **Go straight ahead, then turn right** after the roundabout.",
+        ],
+      },
+      {
+        heading: "Correcting the wrong direction",
+        body: ["Rule out the wrong side or turn first with 'It isn't on your...' or 'It isn't around the corner', then give the correct instruction."],
+        examples: [
+          "**It isn't on your right** — turn left for the café.",
+          "**It isn't around the corner** — go straight ahead to the church.",
         ],
       },
     ],
@@ -5661,12 +5882,28 @@ export const LESSONS: Record<string, Lesson> = {
           "This has serious **implications for** future research. (not 'implications to')",
         ],
       },
+      {
+        heading: "Formal register: swapping everyday words for advanced ones",
+        body: [
+          "At C1, formal or academic writing avoids everyday verbs in favour of a more precise, formal synonym — the meaning stays the same, but the register goes up.",
+          "big→substantial, show→demonstrate, get→obtain, use→utilise, help→facilitate, start→commence, end→conclude, think about→contemplate, say→state, ask about→inquire about, tell→inform, buy→purchase, give→provide, change→modify, keep→retain, stop→cease, try→attempt, need→require, want→desire.",
+          "find out→ascertain, put off→postpone, go up→increase, go down→decrease, speed up→expedite, put together→compile, come up with→devise, deal with→address, point out→highlight, leave out→omit, look into→investigate, bring about→engender, get worse→deteriorate, take part in→participate in, talk about→discuss, cut down on→reduce, bring up→raise, go through→undergo, put up with→tolerate, carry out→conduct.",
+        ],
+        examples: [
+          "The team **utilised** new software for the project. (not 'used')",
+          "The board **postponed** the decision until next quarter. (not 'put off')",
+          "The researchers **conducted** a thorough investigation. (not 'carried out')",
+          "The region **underwent** a period of rapid change. (not 'went through')",
+        ],
+      },
     ],
     commonMistakes: [
       "❌ He did a strong impression on the committee. → ✅ He made a strong impression... ('make an impression', not 'do')",
       "❌ The company did a significant loss. → ✅ The company suffered/incurred a significant loss.",
       "❌ The report made several conclusions. → ✅ The report drew several conclusions. ('draw a conclusion')",
       "❌ The professor's argument was based in evidence. → ✅ ...based on evidence. (preposition 'on', not 'in')",
+      "❌ The workshop facilitates to communication. → ✅ The workshop facilitates communication. ('facilitate' takes a direct object, no 'to')",
+      "❌ The scientists attempt to a new approach. → ✅ The scientists attempted a new approach. ('attempt' + noun/verb, no 'to' before a noun)",
     ],
   },
 
@@ -5821,12 +6058,29 @@ export const LESSONS: Record<string, Lesson> = {
           "New hires **go through** a two-week **onboarding** programme.",
         ],
       },
+      {
+        heading: "More fixed business idioms",
+        body: [
+          "get the ball rolling (start something), go back to the drawing board (start over), cut corners (do something poorly to save time/money), hit the ground running (start quickly and effectively).",
+          "keep someone in the loop (keep informed), go the extra mile (put in more effort than required), raise the bar (increase standards), on the same page (in agreement), give the green light (approve), all hands on deck (everyone needs to help).",
+          "a ballpark figure (a rough estimate), get up to speed (become informed/updated), move the needle (make a meaningful difference), climb the corporate ladder (advance in one's career), take something off someone's plate (reduce their workload), put something on the back burner (deprioritise it), cut to the chase (get straight to the point), think outside the box (be creative).",
+        ],
+        examples: [
+          "Let's **get the ball rolling** on the new project.",
+          "The design failed testing, so it's **back to the drawing board**.",
+          "The whole team is finally **on the same page**.",
+          "The manager **took some tasks off** her assistant's **plate**.",
+          "Stop explaining and **cut to the chase**.",
+        ],
+      },
     ],
     commonMistakes: [
       "❌ She delegate the task to her assistant. → ✅ She delegated the task... (past simple needs -ed)",
       "❌ The company is streamline its processes. → ✅ ...is streamlining its processes. (present continuous needs -ing)",
       "❌ It all comes down to the bottom lines. → ✅ ...the bottom line. (fixed singular phrase)",
       "❌ Small businesses struggle of red tape. → ✅ ...struggle with red tape. (correct preposition is 'with')",
+      "❌ We are in the same page about the plan. → ✅ We are on the same page about the plan. (fixed phrase uses 'on', not 'in')",
+      "❌ The board gave the green light for the new project. → ✅ ...gave the green light to the new project. ('green light to', not 'for')",
     ],
   },
 
