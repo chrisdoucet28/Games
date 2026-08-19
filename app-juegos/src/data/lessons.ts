@@ -5882,12 +5882,28 @@ export const LESSONS: Record<string, Lesson> = {
           "This has serious **implications for** future research. (not 'implications to')",
         ],
       },
+      {
+        heading: "Formal register: swapping everyday words for advanced ones",
+        body: [
+          "At C1, formal or academic writing avoids everyday verbs in favour of a more precise, formal synonym — the meaning stays the same, but the register goes up.",
+          "big→substantial, show→demonstrate, get→obtain, use→utilise, help→facilitate, start→commence, end→conclude, think about→contemplate, say→state, ask about→inquire about, tell→inform, buy→purchase, give→provide, change→modify, keep→retain, stop→cease, try→attempt, need→require, want→desire.",
+          "find out→ascertain, put off→postpone, go up→increase, go down→decrease, speed up→expedite, put together→compile, come up with→devise, deal with→address, point out→highlight, leave out→omit, look into→investigate, bring about→engender, get worse→deteriorate, take part in→participate in, talk about→discuss, cut down on→reduce, bring up→raise, go through→undergo, put up with→tolerate, carry out→conduct.",
+        ],
+        examples: [
+          "The team **utilised** new software for the project. (not 'used')",
+          "The board **postponed** the decision until next quarter. (not 'put off')",
+          "The researchers **conducted** a thorough investigation. (not 'carried out')",
+          "The region **underwent** a period of rapid change. (not 'went through')",
+        ],
+      },
     ],
     commonMistakes: [
       "❌ He did a strong impression on the committee. → ✅ He made a strong impression... ('make an impression', not 'do')",
       "❌ The company did a significant loss. → ✅ The company suffered/incurred a significant loss.",
       "❌ The report made several conclusions. → ✅ The report drew several conclusions. ('draw a conclusion')",
       "❌ The professor's argument was based in evidence. → ✅ ...based on evidence. (preposition 'on', not 'in')",
+      "❌ The workshop facilitates to communication. → ✅ The workshop facilitates communication. ('facilitate' takes a direct object, no 'to')",
+      "❌ The scientists attempt to a new approach. → ✅ The scientists attempted a new approach. ('attempt' + noun/verb, no 'to' before a noun)",
     ],
   },
 
