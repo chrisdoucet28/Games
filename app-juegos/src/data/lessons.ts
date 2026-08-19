@@ -956,6 +956,17 @@ export const LESSONS: Record<string, Lesson> = {
           "I'd like to **book a table** for two.",
         ],
       },
+      {
+        heading: "More polite requests",
+        body: ["Other useful ways to ask staff for information or a favour."],
+        examples: [
+          "**Do you have any** vegan options?",
+          "**Could you tell me if** the soup contains nuts?",
+          "**Would it be possible to** have separate bills?",
+          "**Could you ask** the chef what he recommends?",
+          "**Is it customary to** leave a tip here?",
+        ],
+      },
     ],
     commonMistakes: [
       "❌ Could I have a water? → ✅ Could I have a glass of water? ('water' is uncountable)",
