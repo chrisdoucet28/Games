@@ -5088,11 +5088,12 @@ export const LESSONS: Record<string, Lesson> = {
       },
       {
         heading: "More natural expressions",
-        body: ["'can't stand' + gerund = hate strongly.", "'not keen on' + noun/gerund = don't like.", "'be into' + gerund = like a lot (informal).", "'prefer X to Y' (not 'than').", "'be a big fan of' (not 'for')."],
+        body: ["'can't stand' + gerund = hate strongly.", "'not keen on' + noun/gerund = don't like.", "'be into' + gerund = like a lot (informal); 'not really into' negates it.", "'prefer X to Y' (not 'than').", "'be a big fan of' (not 'for')."],
         examples: [
           "I **can't stand waiting** in traffic.",
           "She's **not keen on** spicy food.",
           "He's really **into playing** the guitar.",
+          "He's **not really into** cooking.",
           "I **prefer tea to** coffee. (not 'prefer tea than coffee')",
           "I'm **a big fan of** this band. (not 'a big fan for')",
         ],
