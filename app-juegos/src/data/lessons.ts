@@ -5581,10 +5581,15 @@ export const LESSONS: Record<string, Lesson> = {
       },
       {
         heading: "More family vocabulary",
-        body: ["'only child' (no siblings), 'sibling' (brother or sister), 'stepmother/stepfather', 'in-laws', 'take after' (resemble a relative)."],
+        body: [
+          "'only child' (no siblings), 'sibling' (brother or sister), 'stepmother/stepfather', 'in-laws', 'take after' (resemble a relative).",
+          "'grandson/granddaughter' (a child's son/daughter). Marriage relatives use '-in-law': 'sister-in-law', 'brother-in-law', 'mother-in-law', 'father-in-law', 'parents-in-law' — all plural family words (in-laws, parents-in-law) still take 'are'/'have'.",
+        ],
         examples: [
           "She is **an only child**.",
           "I **take after** my mother — we both love cooking.",
+          "My brother's wife is my **sister-in-law**.",
+          "My **in-laws are** very welcoming. (not 'is')",
         ],
       },
     ],
@@ -5593,6 +5598,7 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ My brother are tall. → ✅ My brother is tall. (singular subject needs 'is')",
       "❌ I am an only children. → ✅ I am an only child. ('child' is singular after 'an only')",
       "❌ My niece and nephew is twins. → ✅ My niece and nephew are twins. (compound subject is plural)",
+      "❌ My in-laws is very kind. → ✅ My in-laws are very kind. ('in-laws' is always plural)",
     ],
   },
 
