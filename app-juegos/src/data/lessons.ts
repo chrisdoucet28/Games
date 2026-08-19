@@ -5949,12 +5949,29 @@ export const LESSONS: Record<string, Lesson> = {
           "New hires **go through** a two-week **onboarding** programme.",
         ],
       },
+      {
+        heading: "More fixed business idioms",
+        body: [
+          "get the ball rolling (start something), go back to the drawing board (start over), cut corners (do something poorly to save time/money), hit the ground running (start quickly and effectively).",
+          "keep someone in the loop (keep informed), go the extra mile (put in more effort than required), raise the bar (increase standards), on the same page (in agreement), give the green light (approve), all hands on deck (everyone needs to help).",
+          "a ballpark figure (a rough estimate), get up to speed (become informed/updated), move the needle (make a meaningful difference), climb the corporate ladder (advance in one's career), take something off someone's plate (reduce their workload), put something on the back burner (deprioritise it), cut to the chase (get straight to the point), think outside the box (be creative).",
+        ],
+        examples: [
+          "Let's **get the ball rolling** on the new project.",
+          "The design failed testing, so it's **back to the drawing board**.",
+          "The whole team is finally **on the same page**.",
+          "The manager **took some tasks off** her assistant's **plate**.",
+          "Stop explaining and **cut to the chase**.",
+        ],
+      },
     ],
     commonMistakes: [
       "❌ She delegate the task to her assistant. → ✅ She delegated the task... (past simple needs -ed)",
       "❌ The company is streamline its processes. → ✅ ...is streamlining its processes. (present continuous needs -ing)",
       "❌ It all comes down to the bottom lines. → ✅ ...the bottom line. (fixed singular phrase)",
       "❌ Small businesses struggle of red tape. → ✅ ...struggle with red tape. (correct preposition is 'with')",
+      "❌ We are in the same page about the plan. → ✅ We are on the same page about the plan. (fixed phrase uses 'on', not 'in')",
+      "❌ The board gave the green light for the new project. → ✅ ...gave the green light to the new project. ('green light to', not 'for')",
     ],
   },
 
