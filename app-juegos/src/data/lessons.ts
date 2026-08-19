@@ -987,10 +987,22 @@ export const LESSONS: Record<string, Lesson> = {
       },
       {
         heading: "Joining the excuse to the result",
-        body: ["…because + reason, in past simple."],
+        body: [
+          "result + because + cause, in past simple.",
+          "cause + so + result is the flip side — the cause comes first, and 'so' introduces the consequence.",
+        ],
         examples: [
           "I arrived late for work **because** I missed the bus.",
           "She missed the meeting **because** she had a family emergency.",
+          "I missed the bus, **so** I arrived late for work.",
+        ],
+      },
+      {
+        heading: "Asking for someone's excuse",
+        body: ["Why + did/couldn't + subject + base verb...? is how you ask someone to explain what happened."],
+        examples: [
+          "**Why did** she miss the meeting?",
+          "**Why couldn't** he call you back?",
         ],
       },
       {
