@@ -2433,6 +2433,22 @@ export const LESSONS: Record<string, Lesson> = {
         examples: [
           "**To some extent I agree**, but I don't think banning cars is realistic.",
           "**That's generally true, but** there are exceptions.",
+          "**I agree with you up to a point**, but not completely.",
+        ],
+      },
+      {
+        heading: "More ways to agree or push back",
+        body: [
+          "Acknowledging without agreeing: 'I see where you're coming from', 'that's one way to look at it', 'you have a point there', 'I take your point, but...'.",
+          "Firmer but still polite disagreement: 'I'd actually argue that...', 'it's hard to argue with that', 'I'm not so sure about that', 'that's debatable'.",
+          "Casual acceptance: 'fair enough'. Strong certainty: 'there's no doubt about it'. Reluctant agreement: 'I can't deny that...'.",
+        ],
+        examples: [
+          "**I see where you're coming from**, but I still think we should wait.",
+          "**Fair enough**, let's do it your way.",
+          "**I'd actually argue that** the opposite is true.",
+          "**That's debatable** — not everyone would agree.",
+          "**I can't deny that** the results are impressive.",
         ],
       },
     ],
@@ -2442,6 +2458,8 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ I can't agree more with your position. → ✅ I couldn't agree more with your position. ('couldn't agree more' — negative form for maximum agreement)",
       "❌ I disagree on your interpretation. → ✅ I disagree with your interpretation. ('disagree with', not 'disagree on')",
       "❌ With all do respect, I think you're mistaken. → ✅ With all due respect, I think you're mistaken. (fixed phrase is 'due respect')",
+      "❌ I see from where you're coming. → ✅ I see where you're coming from. (fixed word order — 'from' goes at the end)",
+      "❌ I can't deny the results are impressive. → ✅ I can't deny that the results are impressive. (needs 'that' before the clause)",
     ],
   },
 
