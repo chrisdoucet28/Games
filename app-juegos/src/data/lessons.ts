@@ -2443,13 +2443,17 @@ export const LESSONS: Record<string, Lesson> = {
         body: [
           "situated/located + in/on",
           "surrounded by",
-          "within walking distance of / a short drive from",
+          "within walking distance of / a short drive from / a short walk from",
+          "close to / connected to / in the heart of / on the outskirts of",
         ],
         examples: [
           "The village is **situated in** the mountains.",
           "The old town is **surrounded by** a stone wall.",
           "The hotel is **within walking distance of** the beach.",
           "The airport is a **short drive from** the city centre.",
+          "The village is **close to** the border.",
+          "The cathedral is **in the heart of** the old city.",
+          "The factory is **on the outskirts of** town.",
         ],
       },
       {
