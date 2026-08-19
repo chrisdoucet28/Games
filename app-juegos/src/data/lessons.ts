@@ -3597,6 +3597,41 @@ export const LESSONS: Record<string, Lesson> = {
           "These complaints are just **the tip of the iceberg**. (a small part of a much bigger problem)",
         ],
       },
+      {
+        heading: "Mistakes, secrets, and honesty",
+        body: ["Idioms about saying the wrong thing, revealing secrets, and being exactly right."],
+        examples: [
+          "He **put his foot in his mouth** at dinner. (said something embarrassing by accident)",
+          "She accidentally **spilled the beans** about the surprise. (revealed a secret)",
+          "He **let the cat out of the bag** before the announcement. (accidentally revealed a secret)",
+          "You **hit the nail on the head** with that answer. (were exactly right)",
+          "Take what he says **with a grain of salt**. (don't fully believe it)",
+        ],
+      },
+      {
+        heading: "Tough decisions and consequences",
+        body: ["Idioms about facing hard choices, making things worse, and failure."],
+        examples: [
+          "He finally **bit the bullet** and had the surgery. (faced something unpleasant with courage)",
+          "Many companies **jumped on the bandwagon** once the trend became popular. (joined something popular)",
+          "Criticizing her in public only **added fuel to the fire**. (made a bad situation worse)",
+          "Without funding, the plan **went down in flames**. (failed dramatically)",
+          "She **burned her bridges** when she quit angrily. (destroyed a relationship, especially by leaving badly)",
+        ],
+      },
+      {
+        heading: "Shared situations and timing",
+        body: ["Idioms about responsibility, rarity, and dealing with problems."],
+        examples: [
+          "The ball is in **your court** now — it's your decision. (it's your turn to act)",
+          "We're all **in the same boat** with this deadline. (facing the same difficult situation)",
+          "I only see her **once in a blue moon**. (very rarely)",
+          "Nobody wanted to mention **the elephant in the room**. (an obvious problem everyone avoids discussing)",
+          "We'll **cross that bridge when we come to it**. (deal with a problem only when it happens)",
+          "He told a joke to **break the ice**. (relieve tension, help people feel comfortable)",
+          "Losing that job was **a blessing in disguise**. (something that seemed bad but turned out good)",
+        ],
+      },
     ],
     commonMistakes: [
       "❌ We need to threw in the towel. → ✅ We need to throw in the towel. (base verb after 'need to')",
@@ -3604,6 +3639,9 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ I think we're in the same page. → ✅ I think we're on the same page. ('on', not 'in')",
       "❌ They went back at the drawing board. → ✅ They went back to the drawing board. ('back to', not 'back at')",
       "❌ She always go the extra mile. → ✅ She always goes the extra mile. (third person singular needs -s)",
+      "❌ He put his foot in the mouth. → ✅ He put his foot in his mouth. (possessive 'his', not 'the')",
+      "❌ The ball is on your court. → ✅ The ball is in your court. ('in', not 'on')",
+      "❌ She burned the bridges with her boss. → ✅ She burned her bridges with her boss. (possessive 'her', not 'the')",
     ],
   },
 
