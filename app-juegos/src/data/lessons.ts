@@ -5432,12 +5432,26 @@ export const LESSONS: Record<string, Lesson> = {
           "It usually **rains** a lot in April.",
         ],
       },
+      {
+        heading: "Choosing how to describe the weather",
+        body: [
+          "Static description right now (it/the weather/the sky + adjective): 'be' + adjective — sunny, cloudy, windy, cold.",
+          "An action happening right now: 'be' + verb-ing — raining, snowing, changing.",
+          "A general truth or habit about a place or season: present simple, not continuous — rains, snows, gets, wear.",
+        ],
+        examples: [
+          "**It is sunny** today. (description right now)",
+          "**It is raining** outside. (action happening right now)",
+          "**It rains** a lot in winter. (general truth about the season)",
+        ],
+      },
     ],
     commonMistakes: [
       "❌ Today is very heat. → ✅ Today is very hot. (use the adjective 'hot', not the noun 'heat')",
       "❌ It is rain today. → ✅ It is rainy today. / It is raining today.",
       "❌ The weather is sun. → ✅ The weather is sunny.",
       "❌ It is cloud today. → ✅ It is cloudy today.",
+      "❌ It is raining a lot in winter. → ✅ It rains a lot in winter. (a general truth about the season needs present simple, not continuous)",
     ],
   },
 
