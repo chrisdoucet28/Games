@@ -5582,6 +5582,14 @@ export const LESSONS: Record<string, Lesson> = {
           "'The pool is straight ahead first, then on your right after the roundabout.' → **Go straight ahead, then turn right** after the roundabout.",
         ],
       },
+      {
+        heading: "Correcting the wrong direction",
+        body: ["Rule out the wrong side or turn first with 'It isn't on your...' or 'It isn't around the corner', then give the correct instruction."],
+        examples: [
+          "**It isn't on your right** — turn left for the café.",
+          "**It isn't around the corner** — go straight ahead to the church.",
+        ],
+      },
     ],
     commonMistakes: [
       "❌ Turn on the left at the lights. → ✅ Turn left at the lights. (no 'on' before left/right)",
