@@ -3528,6 +3528,21 @@ export const LESSONS: Record<string, Lesson> = {
           "You can always **count on** him — he's very **reliable**.",
         ],
       },
+      {
+        heading: "More workplace collocations",
+        body: [
+          "hand over a task (give it to a colleague), call in sick, get promoted, make a good impression, build rapport (with someone), cover someone's shift.",
+          "sign off on something (approve), let someone go (fire), book annual leave, clock in, burn the midnight oil (work very late), pull your weight (do your fair share).",
+          "put someone on a warning, put in for a transfer, have a word with someone (a short serious talk), keep someone posted (keep them updated), take the lead on something, reach a compromise.",
+        ],
+        examples: [
+          "She **handed over a task** to a colleague before her holiday.",
+          "He **called in sick** and stayed home.",
+          "The whole team **burned the midnight oil** to finish the project.",
+          "Please **keep me posted** on how the project is going.",
+          "The two departments finally **reached a compromise**.",
+        ],
+      },
     ],
     commonMistakes: [
       "❌ I need to scheduling a meeting. → ✅ I need to schedule a meeting. (base verb after 'need to')",
@@ -3535,6 +3550,8 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ We meet the deadline last week. → ✅ We met the deadline last week. (irregular past simple 'met')",
       "❌ She finally got a rise pay. → ✅ She finally got a pay rise. (fixed word order: 'pay rise')",
       "❌ He received a job offer of the company. → ✅ He received a job offer from the company. ('offer from', not 'of')",
+      "❌ She signed off the new proposal. → ✅ She signed off on the new proposal. ('sign off on', not just 'sign off')",
+      "❌ He didn't pull his weight enough. → ✅ He didn't pull his weight. (fixed phrase — no 'enough' needed)",
     ],
   },
 
