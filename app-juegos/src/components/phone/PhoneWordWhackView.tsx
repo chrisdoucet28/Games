@@ -24,11 +24,32 @@ export function PhoneWordWhackView({ state, teamId, onTurnReport }: Props) {
   const [reported, setReported] = useState(false);
   const [lastResult, setLastResult] = useState<{ score: number; combo: number } | null>(null);
 
+  // The 3-column mole grid has real breathing room in landscape that it doesn't in portrait —
+  // prompted once per turn, not just once ever, since a student might rotate back between turns.
+  // A student whose device doesn't fire orientation-change events (some in-app browsers) isn't
+  // stuck behind it — "Continue in portrait" always gets them straight into the game.
+  const [isPortrait, setIsPortrait] = useState(() => window.matchMedia("(orientation: portrait)").matches);
+  const [rotateDismissed, setRotateDismissed] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(orientation: portrait)");
+    const handler = () => setIsPortrait(mq.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+
   useEffect(() => {
     // A fresh turn for this team (new startRoundIdx) means the previous "reported" flag no longer
     // applies — without this a team's second turn (round 2) would never show its own mole grid.
     setReported(false);
+    setRotateDismissed(false);
   }, [state.startRoundIdx, state.activeTeamId]);
+
+  // Held off entirely while the rotate prompt is showing, so a team doesn't lose real seconds off
+  // their 90s just for fumbling to turn their phone — the clock only starts once they've rotated
+  // (or explicitly chosen to continue in portrait).
+  const showRotatePrompt = isMyTurn && !reported && isPortrait && !rotateDismissed;
+  const gameplayActive = isMyTurn && !reported && !showRotatePrompt;
 
   const turnTimeLeftRef = useRef(state.turnSeconds);
 
@@ -45,14 +66,14 @@ export function PhoneWordWhackView({ state, teamId, onTurnReport }: Props) {
     });
   };
 
-  const { timeLeft } = useTurnTimer(state.turnSeconds, isMyTurn && !reported, handleTurnEnd, state.startRoundIdx);
+  const { timeLeft } = useTurnTimer(state.turnSeconds, gameplayActive, handleTurnEnd, state.startRoundIdx);
   useEffect(() => { turnTimeLeftRef.current = timeLeft; }, [timeLeft]);
 
   const game = useMoleGame({
     pool: state.pool,
     difficulty: state.difficulty,
     startRoundIdx: state.startRoundIdx,
-    active: isMyTurn && !reported,
+    active: gameplayActive,
     resetKey: state.startRoundIdx,
     turnTimeLeftRef,
   });
@@ -94,6 +115,25 @@ export function PhoneWordWhackView({ state, teamId, onTurnReport }: Props) {
         <div style={{ fontWeight: "900", fontSize: "20px", color: "#BEF264", marginBottom: "6px" }}>Nice work!</div>
         <div style={{ fontWeight: "800", fontSize: "28px", marginBottom: "4px" }}>+{lastResult?.score ?? 0} pts</div>
         <div style={{ fontSize: "13px", color: "#D9F99D" }}>Best combo: 🔥 x{lastResult?.combo ?? 0}</div>
+      </div>
+    );
+  }
+
+  if (showRotatePrompt) {
+    return (
+      <div style={{ ...wrapStyle, textAlign: "center", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+        <style>{`@keyframes wwRotatePhone{0%,15%{transform:rotate(0deg)}45%,65%{transform:rotate(-90deg)}85%,100%{transform:rotate(-90deg)}}`}</style>
+        <div style={{ fontSize: "56px", marginBottom: "18px", display: "inline-block", animation: "wwRotatePhone 2.2s ease-in-out infinite" }}>📱</div>
+        <div style={{ fontWeight: "900", fontSize: "20px", color: "#BEF264", marginBottom: "8px" }}>Turn your phone sideways!</div>
+        <div style={{ fontSize: "14px", color: "#D9F99D", lineHeight: 1.6, marginBottom: "22px" }}>
+          The game looks best in landscape — rotate your phone to see the full mole grid before your turn starts.
+        </div>
+        <button
+          onClick={() => setRotateDismissed(true)}
+          style={{ background: "none", border: "none", color: "#9CA3AF", fontSize: "13px", fontWeight: "700", cursor: "pointer", textDecoration: "underline" }}
+        >
+          Continue in portrait
+        </button>
       </div>
     );
   }
