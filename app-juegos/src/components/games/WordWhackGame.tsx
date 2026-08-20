@@ -1,59 +1,30 @@
 import { useState, useRef, useEffect } from "react";
-import type { GameProps, QuestionData } from "../../types";
+import { QRCodeSVG } from "qrcode.react";
+import type { RealtimeChannel } from "@supabase/supabase-js";
+import type { GameProps } from "../../types";
 import { useTurnTimer } from "../../hooks/useTurnTimer";
 import { TurnTimerBar } from "../shared/TurnTimerBar";
+import {
+  useMoleGame, parseChoices, DIFFICULTY_OPTIONS, TOTAL_HOLES,
+  BASE_HIT_PTS, COMBO_STEP, MAX_COMBO_BONUS,
+  type Difficulty, type ParsedMCQ,
+} from "../../hooks/useMoleGame";
 import { teamsGridCols, GAME_MODES } from "../../data/constants";
 import { denseRank, medalForRank } from "../../utils/ranking";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
 import { WHACK_TUTORIAL_STEPS } from "../../data/tutorials/whack";
+import {
+  generateSessionCode, openWhackChannel, closeChannel,
+  type WhackPhase, type WhackStatePayload, type WhackTurnReportPayload,
+} from "../../lib/liveSession";
 
 const GM = GAME_MODES.find(g => g.id === "whack")!;
 
-const TOTAL_HOLES = 6;
 const TURN_SECONDS = 90;
 // Every team gets this many 90s turns before final results — a single turn per team felt too
 // short on its own, per teacher feedback; 2 gives the full experience without dragging it out.
 const TOTAL_ROUNDS = 2;
-const BASE_HIT_PTS = 20;
-const COMBO_STEP = 5;
-const MAX_COMBO_BONUS = 40;
-
-// Difficulty only changes how long each mole stays up before ducking — the 90s turn length
-// never changes. Each mode still ramps faster as the clock runs down (t>60/t>30/t>10/else),
-// just calibrated to a different overall pace. "Hard" is deliberately still a little gentler
-// than the original single-speed version this replaced.
-type Difficulty = "easy" | "medium" | "hard";
-const DIFFICULTY_OPTIONS: Difficulty[] = ["easy", "medium", "hard"];
-const DUCK_MS: Record<Difficulty, [number, number, number, number]> = {
-  easy: [5300, 4500, 3900, 3300],
-  medium: [4400, 3700, 3100, 2500],
-  hard: [4000, 3300, 2600, 2100],
-};
-
-type ParsedMCQ = { prompt: string; choices: string[]; correctIdx: number };
-
-// "choose correct grammar" content already embeds its options in the question text itself,
-// e.g. "'___ you ever tried sushi?' (Have/Did/Do)" — parsing that out means the entire existing
-// pool becomes mole content for free, no new authoring needed.
-function parseChoices(q: QuestionData): ParsedMCQ | null {
-  const text = q.question || "";
-  const m = /\(([^)]+)\)\s*$/.exec(text);
-  if (!m) return null;
-  const raw = m[1];
-  if (/\bor\b/i.test(raw)) return null; // skip compound multi-blank "X/Y or A/B" patterns — too messy for moles
-  const parts = raw.split("/").map(s => s.trim()).filter(Boolean);
-  if (parts.length < 2 || parts.length > 4) return null;
-  const ans = (q.answer || "").trim().toLowerCase();
-  const correctIdx = parts.findIndex(p => p.toLowerCase() === ans);
-  if (correctIdx === -1) return null;
-  const prompt = text.slice(0, m.index).trim();
-  if (!prompt) return null;
-  return { prompt, choices: parts, correctIdx };
-}
-
-type Mole = { holeIdx: number; text: string; isCorrect: boolean; key: number };
-type Fx = { holeIdx: number; kind: "hit" | "miss"; key: number };
 
 const AMBIENT_BITS = Array.from({ length: 10 }, (_, i) => ({
   left: (i * 41) % 100,
@@ -94,7 +65,10 @@ function AmbientBackdrop() {
 // What "Save & Exit" snapshots and "Resume" restores — the round/team turn cursor, chosen
 // difficulty, and each team's running final score. Resuming skips straight to the countdown for
 // the team whose turn it was, rather than replaying the difficulty-picker intro or the exact
-// mole/combo state that was on screen when it was saved.
+// mole/combo state that was on screen when it was saved. The pool cursor and review list aren't
+// snapshotted (same pre-existing gap as before this feature — a resumed game already couldn't
+// guarantee "never repeats" across a save/resume boundary; not introducing that, just not fixing
+// it here either) — a resumed game's review list simply starts fresh from the resume point.
 type WordWhackSnapshot = {
   teamIdx: number;
   round: number;
@@ -108,6 +82,20 @@ function validateWordWhackSnapshot(raw: unknown, teamCount: number): WordWhackSn
   if (typeof s.round !== "number" || s.round < 1 || s.round > TOTAL_ROUNDS) return undefined;
   if (s.difficulty !== "easy" && s.difficulty !== "medium" && s.difficulty !== "hard") return undefined;
   return { teamIdx: s.teamIdx, round: s.round, difficulty: s.difficulty, finalScores: s.finalScores ?? {} };
+}
+
+// Shown on the shared screen in place of the mole grid while the active team is playing on their
+// own phone — a live, tappable mirror isn't worth the sync/latency complexity for a game where a
+// mole is only up for 2-5 seconds (see the plan's reasoning), so this is deliberately just a
+// status card, not a spectacle. Everyone finds out the score the moment that team's phone reports it.
+function PhoneTurnSpectator({ activeTeam }: { activeTeam: { name: string; mascot?: string | null; color: { emoji: string; bg: string; dark: string } } }) {
+  return (
+    <div style={{ textAlign: "center", padding: "40px 20px", background: `linear-gradient(160deg,${activeTeam.color.dark}55,#1A2E05)`, border: `3px solid ${activeTeam.color.bg}`, borderRadius: "16px" }}>
+      <div style={{ fontSize: "40px", marginBottom: "10px" }}>{activeTeam.mascot ?? activeTeam.color.emoji}</div>
+      <div style={{ fontWeight: "900", fontSize: "18px", color: "white", marginBottom: "6px" }}>🔨 {activeTeam.name} is playing on their phone!</div>
+      <div style={{ fontSize: "13px", color: "#D9F99D" }}>Their score will show up here the moment their turn ends.</div>
+    </div>
+  );
 }
 
 export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState }: GameProps) {
@@ -134,13 +122,24 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
   const [teamIdx, setTeamIdx] = useState(() => resumed?.teamIdx ?? 0);
   const [round, setRound] = useState(() => resumed?.round ?? 1);
   const [countdown, setCountdown] = useState(3);
-  const [moles, setMoles] = useState<Mole[]>([]);
-  const [prompt, setPrompt] = useState("");
-  const [combo, setCombo] = useState(0);
-  const [bestCombo, setBestCombo] = useState(0);
-  const [turnScore, setTurnScore] = useState(0);
-  const [fx, setFx] = useState<Fx | null>(null);
   const [finalScores, setFinalScores] = useState<Record<string | number, number>>(() => resumed?.finalScores ?? {});
+  // What the turn-end screen shows — set from the hook's own values (screen-mode turns) or from a
+  // phone's turnReport (phone-mode turns), since the hook itself isn't running during the latter.
+  const [lastTurnScore, setLastTurnScore] = useState(0);
+  const [lastTurnBestCombo, setLastTurnBestCombo] = useState(0);
+  // Every question that's come up this whole game, across every team's every turn — the post-game
+  // review list. Never resets mid-game; only the pool's own "never repeats" cursor determines what
+  // shows up next.
+  const [playedRounds, setPlayedRounds] = useState<ParsedMCQ[]>([]);
+
+  // "Play on Phones" — available at any team count, no structural restriction (unlike Spy Among
+  // Us's 1v1 fork, Word Whack has one mechanic regardless of team count). Always defaults to
+  // screen, even on Resume, same intentional limitation as every other phone-mode game.
+  const [inputMode, setInputMode] = useState<"screen" | "phone">("screen");
+  const [introStep, setIntroStep] = useState<"setup" | "qr">("setup");
+  const [sessionCode, setSessionCode] = useState<string | null>(null);
+  const [connectedTeamIds, setConnectedTeamIds] = useState<Set<string | number>>(new Set());
+  const channelRef = useRef<RealtimeChannel | null>(null);
 
   useEffect(() => {
     if (!serializeStateRef) return;
@@ -148,65 +147,150 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
     return () => { if (serializeStateRef) serializeStateRef.current = null; };
   }, [serializeStateRef, teamIdx, round, difficulty, finalScores]);
 
-  const fxIdRef = useRef(0);
-  const roundTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const roundIdxRef = useRef(0);
-  const comboRef = useRef(0);
-  const bestComboRef = useRef(0);
-  const turnScoreRef = useRef(0);
   const turnTimeLeftRef = useRef(TURN_SECONDS);
+  // The pool cursor that actually persists across every turn, screen- or phone-driven alike —
+  // useMoleGame's own internal cursor resets every turn, this is what feeds it a fresh
+  // startRoundIdx each time and is what phone turnReports advance too.
+  const globalRoundIdxRef = useRef(0);
 
   const activeTeam = teams[teamIdx];
+  const activeTeamHasPhone = inputMode === "phone" && connectedTeamIds.has(activeTeam.id);
+  // The screen only runs the mole loop itself when this team isn't playing on their own phone —
+  // same condition gates both the hook and the turn timer below, so exactly one of "this screen"
+  // or "that phone" is ever the source of truth for a given turn.
+  const screenRunsThisTurn = phase === "playing" && !activeTeamHasPhone;
 
   const endTurn = () => {
-    if (roundTimerRef.current) clearTimeout(roundTimerRef.current);
-    setMoles([]);
-    const finalTurnScore = turnScoreRef.current;
+    const finalTurnScore = game.turnScore;
     if (finalTurnScore > 0) onUpdateScore(activeTeam.id, finalTurnScore);
     // Accumulates across both of a team's rounds — this is "points scored in this Word Whack
-    // playthrough" for the game's own final ranking, separate from turnScore (this turn only,
-    // shown on the turn-end screen) and separate from the team's cross-game session score.
+    // playthrough" for the game's own final ranking, separate from the team's cross-game score.
     setFinalScores(prev => ({ ...prev, [activeTeam.id]: (prev[activeTeam.id] ?? 0) + finalTurnScore }));
+    globalRoundIdxRef.current = game.roundIdxRef.current;
+    setPlayedRounds(prev => [...prev, ...game.playedRounds]);
+    setLastTurnScore(finalTurnScore);
+    setLastTurnBestCombo(game.bestCombo);
     setPhase("turn-end");
   };
 
-  const { timeLeft: turnTimeLeft } = useTurnTimer(TURN_SECONDS, phase === "playing", endTurn, teamIdx);
+  const { timeLeft: turnTimeLeft } = useTurnTimer(TURN_SECONDS, screenRunsThisTurn, endTurn, `${round}-${teamIdx}`);
   useEffect(() => { turnTimeLeftRef.current = turnTimeLeft; }, [turnTimeLeft]);
 
-  const spawnFx = (holeIdx: number, kind: "hit" | "miss") => {
-    const key = fxIdRef.current++;
-    setFx({ holeIdx, kind, key });
-    setTimeout(() => setFx(prev => (prev?.key === key ? null : prev)), 500);
-  };
+  const game = useMoleGame({
+    pool, difficulty, startRoundIdx: globalRoundIdxRef.current,
+    active: screenRunsThisTurn, resetKey: `${round}-${teamIdx}`, turnTimeLeftRef,
+  });
 
-  const spawnRound = () => {
-    if (roundTimerRef.current) clearTimeout(roundTimerRef.current);
-    if (!pool.length) return;
-    const idx = roundIdxRef.current % pool.length;
-    roundIdxRef.current += 1;
-    const item = pool[idx];
-    const holeIndices = Array.from({ length: TOTAL_HOLES }, (_, i) => i).sort(() => Math.random() - 0.5).slice(0, item.choices.length);
-    const newMoles: Mole[] = holeIndices.map((holeIdx, i) => ({ holeIdx, text: item.choices[i], isCorrect: i === item.correctIdx, key: fxIdRef.current++ }));
-    setMoles(newMoles);
-    setPrompt(item.prompt);
-
-    const t = turnTimeLeftRef.current;
-    const [calm, warm, brisk, frantic] = DUCK_MS[difficulty];
-    const duckMs = t > 60 ? calm : t > 30 ? warm : t > 10 ? brisk : frantic;
-    roundTimerRef.current = setTimeout(() => {
-      comboRef.current = 0;
-      setCombo(0);
-      setMoles([]);
-      spawnRound();
-    }, duckMs);
-  };
-
+  // Refs the phone-mode broadcaster (below) reads from, so opening/closing the realtime channel
+  // only happens when phone mode itself toggles on/off, not on every round/phase/score change —
+  // same pattern as every other phone-mode game.
+  const phaseRef = useRef(phase);
+  const teamIdxRef = useRef(teamIdx);
+  const finalScoresRef = useRef(finalScores);
+  const playedRoundsRef = useRef(playedRounds);
+  const connectedTeamIdsRef = useRef<Set<string | number>>(new Set());
+  const sendStateRef = useRef<(() => void) | null>(null);
   useEffect(() => {
-    if (phase !== "playing") { if (roundTimerRef.current) clearTimeout(roundTimerRef.current); return; }
-    spawnRound();
-    return () => { if (roundTimerRef.current) clearTimeout(roundTimerRef.current); };
+    phaseRef.current = phase;
+    teamIdxRef.current = teamIdx;
+    finalScoresRef.current = finalScores;
+    playedRoundsRef.current = playedRounds;
+  }, [phase, teamIdx, finalScores, playedRounds]);
+
+  // Opens/closes the realtime channel only when phone mode itself is toggled on/off. Bidirectional
+  // — unlike Spy Among Us, phones here talk back, but only once per turn (a `turnReport` when
+  // their local 90s timer runs out), never a stream of per-hit events.
+  useEffect(() => {
+    if (inputMode !== "phone" || !sessionCode) return;
+    const channel = openWhackChannel(sessionCode);
+    channelRef.current = channel;
+
+    const sendState = () => {
+      const rawPhase = phaseRef.current;
+      const mappedPhase: WhackPhase = rawPhase === "intro" ? "lobby" : rawPhase === "final" ? "final" : "turn";
+      // Only set once the countdown has actually finished — a phone stays on "waiting for your
+      // turn" through the 3-2-1 beat, same as the screen's own mole grid doesn't appear until then.
+      const activeTeamId = rawPhase === "playing" ? teams[teamIdxRef.current]?.id ?? null : null;
+      const payload: WhackStatePayload = {
+        phase: mappedPhase,
+        pool, difficulty, turnSeconds: TURN_SECONDS,
+        roster: teams.map(t => ({ id: t.id, name: t.name, color: t.color, mascot: t.mascot })),
+        activeTeamId,
+        startRoundIdx: globalRoundIdxRef.current,
+        scores: Object.fromEntries(teams.map(t => [String(t.id), finalScoresRef.current[t.id] ?? 0])),
+        connectedTeamIds: Array.from(connectedTeamIdsRef.current),
+        playedRounds: rawPhase === "final" ? playedRoundsRef.current : [],
+        ts: Date.now(),
+      };
+      channel.send({ type: "broadcast", event: "state", payload });
+    };
+    sendStateRef.current = sendState;
+
+    channel.on("presence", { event: "sync" }, () => {
+      const presenceState = channel.presenceState<{ teamId: string | number }>();
+      const ids = new Set<string | number>();
+      Object.values(presenceState).forEach(entries => entries.forEach(entry => ids.add(entry.teamId)));
+      connectedTeamIdsRef.current = ids;
+      setConnectedTeamIds(ids);
+      sendState();
+    });
+
+    channel.on("broadcast", { event: "turnReport" }, ({ payload }) => {
+      const report = payload as WhackTurnReportPayload;
+      if (report.finalScore > 0) onUpdateScore(report.teamId, report.finalScore);
+      setFinalScores(prev => ({ ...prev, [report.teamId]: (prev[report.teamId] ?? 0) + report.finalScore }));
+      globalRoundIdxRef.current = report.endRoundIdx;
+      setPlayedRounds(prev => [...prev, ...report.playedRounds]);
+      setLastTurnScore(report.finalScore);
+      setLastTurnBestCombo(report.bestCombo);
+      setPhase("turn-end");
+    });
+
+    channel.subscribe(status => {
+      if (status === "SUBSCRIBED") sendState();
+    });
+
+    const interval = setInterval(sendState, 4000);
+
+    return () => {
+      clearInterval(interval);
+      closeChannel(channel);
+      channelRef.current = null;
+      sendStateRef.current = null;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inputMode, sessionCode, teams]);
+
+  // Pushes an immediate state update on round/turn transitions rather than waiting for the
+  // interval, so a phone doesn't sit on stale content for up to ~4s.
+  useEffect(() => {
+    sendStateRef.current?.();
   }, [phase, teamIdx]);
+
+  // Tells every connected phone the warm-up is over the moment it actually ends.
+  useEffect(() => {
+    if (phase === "final" && channelRef.current) {
+      channelRef.current.send({ type: "broadcast", event: "ended", payload: {} });
+    }
+  }, [phase]);
+
+  const handlePickPhoneMode = () => {
+    setInputMode("phone");
+    setSessionCode(generateSessionCode());
+    setIntroStep("qr");
+  };
+
+  const handlePickScreenMode = () => {
+    setInputMode("screen");
+    setIntroStep("setup");
+    setSessionCode(null);
+    setConnectedTeamIds(new Set());
+  };
+
+  const startTeamTurn = () => {
+    setCountdown(3);
+    setPhase("countdown");
+  };
 
   useEffect(() => {
     if (phase !== "countdown") return;
@@ -214,40 +298,6 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
     const t = setTimeout(() => setCountdown(c => c - 1), 650);
     return () => clearTimeout(t);
   }, [phase, countdown]);
-
-  const hitMole = (mole: Mole) => {
-    if (phase !== "playing") return;
-    if (mole.isCorrect) {
-      if (roundTimerRef.current) clearTimeout(roundTimerRef.current);
-      const bonus = Math.min(MAX_COMBO_BONUS, comboRef.current * COMBO_STEP);
-      turnScoreRef.current += BASE_HIT_PTS + bonus;
-      setTurnScore(turnScoreRef.current);
-      comboRef.current += 1;
-      setCombo(comboRef.current);
-      if (comboRef.current > bestComboRef.current) { bestComboRef.current = comboRef.current; setBestCombo(bestComboRef.current); }
-      spawnFx(mole.holeIdx, "hit");
-      setMoles([]);
-      // A brief pause before the next mole pops up — long enough to see the +hit land
-      // and to stop a reflexive next click from landing mid pop-up on the new mole.
-      roundTimerRef.current = setTimeout(() => spawnRound(), 260);
-    } else {
-      comboRef.current = 0;
-      setCombo(0);
-      spawnFx(mole.holeIdx, "miss");
-      setMoles(prev => prev.filter(m => m.holeIdx !== mole.holeIdx));
-    }
-  };
-
-  const startTeamTurn = () => {
-    turnScoreRef.current = 0;
-    setTurnScore(0);
-    comboRef.current = 0;
-    setCombo(0);
-    bestComboRef.current = 0;
-    setBestCombo(0);
-    setCountdown(3);
-    setPhase("countdown");
-  };
 
   const nextTeam = () => {
     const next = teamIdx + 1;
@@ -318,6 +368,51 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
             ))}
           </div>
         </div>
+        {introStep === "setup" && (
+          <div style={{ marginBottom: "20px" }}>
+            <div style={{ fontSize: "13px", color: "#D9F99D", fontWeight: "700", marginBottom: "10px" }}>How will teams whack their moles?</div>
+            <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
+              <button onClick={handlePickScreenMode} style={{
+                padding: "10px 20px", borderRadius: "12px", fontWeight: "800", fontSize: "14px", cursor: "pointer",
+                border: `2px solid ${inputMode === "screen" ? "#BEF264" : "rgba(255,255,255,0.2)"}`,
+                background: inputMode === "screen" ? "rgba(190,242,100,0.15)" : "rgba(255,255,255,0.05)",
+                color: inputMode === "screen" ? "#BEF264" : "#D9F99D",
+              }}>🖥️ Play on Screen</button>
+              <button onClick={handlePickPhoneMode} style={{
+                padding: "10px 20px", borderRadius: "12px", fontWeight: "800", fontSize: "14px", cursor: "pointer",
+                border: `2px solid ${inputMode === "phone" ? "#BEF264" : "rgba(255,255,255,0.2)"}`,
+                background: inputMode === "phone" ? "rgba(190,242,100,0.15)" : "rgba(255,255,255,0.05)",
+                color: inputMode === "phone" ? "#BEF264" : "#D9F99D",
+              }}>📱 Play on Phones</button>
+            </div>
+          </div>
+        )}
+
+        {introStep === "qr" && sessionCode && (() => {
+          const joinUrl = `${window.location.origin}${window.location.pathname}?join=${sessionCode}&game=whack`;
+          return (
+            <div style={{ background: "linear-gradient(160deg,#3F6212,#1A2E05)", border: "2px solid #BEF26466", borderRadius: "20px", padding: "20px", marginBottom: "20px", maxWidth: "360px", marginLeft: "auto", marginRight: "auto" }}>
+              <div style={{ fontWeight: "800", fontSize: "14px", color: "#BEF264", marginBottom: "12px" }}>📱 Scan to join, or go to the site and enter this code:</div>
+              <div style={{ background: "white", borderRadius: "12px", padding: "12px", display: "inline-block" }}>
+                <QRCodeSVG value={joinUrl} size={160} />
+              </div>
+              <div style={{ fontSize: "28px", fontWeight: "900", letterSpacing: "0.1em", color: "white", margin: "12px 0" }}>{sessionCode}</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: "6px", marginBottom: "10px" }}>
+                {teams.map(t => (
+                  <div key={t.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "rgba(255,255,255,0.06)", borderRadius: "8px", padding: "6px 10px", fontSize: "13px" }}>
+                    <span>{t.mascot ?? t.color.emoji} {t.name}</span>
+                    <span style={{ color: connectedTeamIds.has(t.id) ? "#4ADE80" : "#6B7280", fontWeight: "700" }}>
+                      {connectedTeamIds.has(t.id) ? "✅ Connected" : "⏳ Waiting…"}
+                    </span>
+                  </div>
+                ))}
+              </div>
+              <button onClick={handlePickScreenMode} style={{ background: "none", border: "none", color: "#9CA3AF", fontSize: "12px", fontWeight: "700", cursor: "pointer", textDecoration: "underline" }}>
+                Switch back to Play on Screen
+              </button>
+            </div>
+          );
+        })()}
         <button onClick={() => setShowHowTo(true)} className="ww-btn" style={{ display: "block", margin: "0 auto 14px", background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
           ❓ How to Play
         </button>
@@ -359,6 +454,21 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
             </div>
           ))}
         </div>
+
+        {playedRounds.length > 0 && (
+          <div style={{ maxWidth: "700px", margin: "0 auto 20px", textAlign: "left" }}>
+            <div style={{ textAlign: "center", fontWeight: "900", fontSize: "16px", color: "#BEF264", marginBottom: "10px" }}>📋 Review the Questions</div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(260px,1fr))", gap: "8px" }}>
+              {playedRounds.map((r, i) => (
+                <div key={i} style={{ background: "rgba(255,255,255,0.06)", border: "1.5px solid #BEF26440", borderRadius: "10px", padding: "10px 12px" }}>
+                  <div style={{ fontSize: "13px", fontWeight: "700", color: "white", marginBottom: "4px" }}>{r.prompt}</div>
+                  <div style={{ fontSize: "12px", color: "#BEF264", fontWeight: "800" }}>✅ {r.choices[r.correctIdx]}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         <button onClick={onEnd} className="ww-btn" style={{ background: "linear-gradient(135deg,#3F6212,#84CC16)", color: "#0F1A05", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "800", cursor: "pointer", transition: "transform 0.15s ease" }}>🏁 End Game</button>
       </div>
     );
@@ -371,36 +481,39 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
       <div style={{ position: "relative", zIndex: 1 }}>
         <div style={{ background: `linear-gradient(90deg,${activeTeam.color.dark},${activeTeam.color.bg})`, borderRadius: "14px", padding: "10px 16px", marginBottom: "14px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px", boxShadow: `0 4px 18px ${activeTeam.color.bg}55` }}>
           <span style={{ color: "white", fontWeight: "900", fontSize: "16px", textShadow: "0 1px 3px rgba(0,0,0,0.4)" }}>🔨 {activeTeam.mascot ?? activeTeam.color.emoji} {activeTeam.name}'s turn — Round {round}/{TOTAL_ROUNDS}, Team {teamIdx + 1} of {teams.length}</span>
-          {phase === "playing" && <TurnTimerBar timeLeft={turnTimeLeft} totalSeconds={TURN_SECONDS} />}
+          {phase === "playing" && !activeTeamHasPhone && <TurnTimerBar timeLeft={turnTimeLeft} totalSeconds={TURN_SECONDS} />}
         </div>
 
         {(phase === "playing" || phase === "countdown") && (
+          activeTeamHasPhone ? (
+            <PhoneTurnSpectator activeTeam={activeTeam} />
+          ) : (
           <>
             <div style={{ display: "flex", gap: "8px", justifyContent: "center", marginBottom: "12px", flexWrap: "wrap" }}>
-              <div style={{ background: "rgba(255,255,255,0.1)", border: "1.5px solid #BEF26466", borderRadius: "10px", padding: "6px 14px", fontSize: "13px", fontWeight: "800", color: "#BEF264" }}>🪙 {turnScore} pts</div>
-              <div style={{ background: combo > 0 ? "linear-gradient(135deg,#CA8A04,#F59E0B)" : "rgba(255,255,255,0.1)", border: "1.5px solid #FCD34D66", borderRadius: "10px", padding: "6px 14px", fontSize: "13px", fontWeight: "800", color: combo > 0 ? "#1F1300" : "#FCD34D88", animation: combo > 2 ? "wwComboGlow 0.8s ease-in-out infinite" : "none" }}>🔥 Combo x{combo}</div>
+              <div style={{ background: "rgba(255,255,255,0.1)", border: "1.5px solid #BEF26466", borderRadius: "10px", padding: "6px 14px", fontSize: "13px", fontWeight: "800", color: "#BEF264" }}>🪙 {game.turnScore} pts</div>
+              <div style={{ background: game.combo > 0 ? "linear-gradient(135deg,#CA8A04,#F59E0B)" : "rgba(255,255,255,0.1)", border: "1.5px solid #FCD34D66", borderRadius: "10px", padding: "6px 14px", fontSize: "13px", fontWeight: "800", color: game.combo > 0 ? "#1F1300" : "#FCD34D88", animation: game.combo > 2 ? "wwComboGlow 0.8s ease-in-out infinite" : "none" }}>🔥 Combo x{game.combo}</div>
             </div>
 
             <div style={{ position: "relative", background: "rgba(255,255,255,0.08)", border: "2px solid #BEF26455", borderRadius: "14px", padding: "14px 18px", marginBottom: "14px", textAlign: "center" }}>
               <div style={{ position: "absolute", top: "8px", right: "8px" }}>
-                <FlagPromptButton gameId="whack" questionData={{ raw: prompt }} />
+                <FlagPromptButton gameId="whack" questionData={{ raw: game.prompt }} />
               </div>
               <div style={{ fontSize: "11px", fontWeight: "800", color: "#BEF264", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "4px" }}>Whack the correct answer</div>
-              <div style={{ fontWeight: "800", fontSize: "clamp(15px,2.5vw,19px)", color: "white" }}>{prompt || "…"}</div>
+              <div style={{ fontWeight: "800", fontSize: "clamp(15px,2.5vw,19px)", color: "white" }}>{game.prompt || "…"}</div>
             </div>
 
             <div style={{ position: "relative" }}>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "12px", maxWidth: "420px", margin: "0 auto" }}>
                 {Array.from({ length: TOTAL_HOLES }).map((_, holeIdx) => {
-                  const mole = moles.find(m => m.holeIdx === holeIdx);
-                  const holeFx = fx && fx.holeIdx === holeIdx ? fx : null;
+                  const mole = game.moles.find(m => m.holeIdx === holeIdx);
+                  const holeFx = game.fx && game.fx.holeIdx === holeIdx ? game.fx : null;
                   return (
                     <div key={holeIdx} style={{ position: "relative", height: "88px" }}>
                       <div style={{ position: "absolute", left: "50%", bottom: "6px", transform: "translateX(-50%)", width: "70px", height: "26px", borderRadius: "50%", background: "radial-gradient(ellipse,#1A2E05,#0F1A05)", boxShadow: "inset 0 4px 8px rgba(0,0,0,0.6)" }} />
                       {mole && (
                         <button
                           key={mole.key}
-                          onClick={() => hitMole(mole)}
+                          onClick={() => game.hitMole(mole)}
                           className="ww-mole"
                           style={{
                             // Centered via left/right/margin (not transform) so that no animation or
@@ -425,7 +538,7 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
                       {holeFx?.kind === "hit" && (
                         <div style={{ position: "absolute", left: "50%", bottom: "30px", transform: "translateX(-50%)", pointerEvents: "none" }}>
                           <div style={{ position: "absolute", width: "70px", height: "70px", left: "-35px", top: "-35px", borderRadius: "50%", background: "radial-gradient(circle,#BEF264AA,transparent 70%)", animation: "wwHitBurst 0.5s ease-out forwards" }} />
-                          <div style={{ fontWeight: "900", fontSize: "16px", color: "#BEF264", textShadow: "0 2px 4px rgba(0,0,0,0.6)" }}>+{BASE_HIT_PTS + Math.min(MAX_COMBO_BONUS, (comboRef.current - 1) * COMBO_STEP)}</div>
+                          <div style={{ fontWeight: "900", fontSize: "16px", color: "#BEF264", textShadow: "0 2px 4px rgba(0,0,0,0.6)" }}>+{BASE_HIT_PTS + Math.min(MAX_COMBO_BONUS, (game.combo - 1) * COMBO_STEP)}</div>
                         </div>
                       )}
                     </div>
@@ -442,6 +555,7 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
               )}
             </div>
           </>
+          )
         )}
 
         {phase === "turn-end" && (
@@ -449,8 +563,8 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
             <div style={{ background: "linear-gradient(160deg,#3F6212,#1A2E05)", border: "2px solid #BEF26466", borderRadius: "16px", padding: "20px", marginBottom: "16px" }}>
               <div style={{ fontSize: "34px", marginBottom: "6px" }}>🔨</div>
               <div style={{ fontWeight: "900", fontSize: "20px", color: "white", marginBottom: "8px" }}>{activeTeam.name}'s turn is over!</div>
-              <div style={{ fontWeight: "800", fontSize: "26px", color: "#BEF264" }}>+{turnScore} pts</div>
-              <div style={{ fontSize: "13px", color: "#D9F99D", marginTop: "6px" }}>Best combo this turn: 🔥 x{bestCombo}</div>
+              <div style={{ fontWeight: "800", fontSize: "26px", color: "#BEF264" }}>+{lastTurnScore} pts</div>
+              <div style={{ fontSize: "13px", color: "#D9F99D", marginTop: "6px" }}>Best combo this turn: 🔥 x{lastTurnBestCombo}</div>
             </div>
             <button onClick={nextTeam} className="ww-btn" style={{ background: "linear-gradient(135deg,#3F6212,#84CC16)", color: "#0F1A05", border: "none", borderRadius: "14px", padding: "14px 36px", fontSize: "17px", fontWeight: "900", cursor: "pointer", transition: "transform 0.15s ease" }}>
               {teamIdx + 1 >= teams.length

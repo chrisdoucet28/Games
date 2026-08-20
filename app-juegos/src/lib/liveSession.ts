@@ -1,6 +1,7 @@
 import { supabase } from "./supabaseClient";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 import type { TeamColor } from "../types";
+import type { ParsedMCQ, Difficulty } from "../hooks/useMoleGame";
 
 // Short, hand-typeable fallback code — excludes visually ambiguous characters (0/O, 1/I/l) since
 // a teacher might read it aloud, or a student might type it in manually if scanning fails.
@@ -113,6 +114,62 @@ function spyChannelName(code: string): string {
 
 export function openSpyChannel(code: string): RealtimeChannel {
   return supabase.channel(spyChannelName(code), {
+    config: { presence: { key: crypto.randomUUID() } },
+  });
+}
+
+// --- Word Whack ---
+//
+// Bidirectional, unlike Spy Among Us — but not per-tap. The active team's phone runs the whole
+// mole-spawn/duck/hit loop locally (via hooks/useMoleGame, the same hook the teacher's screen
+// uses in screen mode) so there's zero network latency on the actual tapping, which matters on a
+// game where a mole is only up for 2-5 seconds. The phone only ever sends one message per turn —
+// a final report once its local 90s timer runs out — not a stream of per-hit events.
+export type WhackRosterEntry = { id: string | number; name: string; color: TeamColor; mascot?: string | null };
+
+// "turn" covers both "waiting" and "it's your turn" — a single broadcast reaches every phone at
+// once, so which one applies is derived client-side per phone by comparing activeTeamId to that
+// phone's own teamId, not baked into this shared field.
+export type WhackPhase = "lobby" | "turn" | "review" | "final";
+
+// Broadcast teacher's screen -> every phone. `pool`/`difficulty` are sent as-is (not secret —
+// every phone gets the same question set a screen-mode player would see, same trust model as
+// every other phone-mode game on this channel type). `activeTeamId`/`startRoundIdx` tell the
+// active team's phone it's their turn and exactly which pool cursor to continue from, so the
+// "no question repeats this playthrough" guarantee holds globally across screen- and phone-driven
+// turns alike, not just within one team's turn.
+export type WhackStatePayload = {
+  phase: WhackPhase;
+  pool: ParsedMCQ[];
+  difficulty: Difficulty;
+  turnSeconds: number;
+  roster: WhackRosterEntry[];
+  activeTeamId: string | number | null;
+  startRoundIdx: number;
+  scores: Record<string, number>;
+  connectedTeamIds: (string | number)[];
+  // Only populated once phase is "review"/"final" — every question that came up this game, for
+  // the shared post-game review list (screen and phones show the identical list).
+  playedRounds: ParsedMCQ[];
+  ts: number;
+};
+
+// Broadcast phone -> teacher's screen, sent exactly once per phone-driven turn, when that phone's
+// own local turn timer actually expires.
+export type WhackTurnReportPayload = {
+  teamId: string | number;
+  finalScore: number;
+  bestCombo: number;
+  endRoundIdx: number;
+  playedRounds: ParsedMCQ[];
+};
+
+function whackChannelName(code: string): string {
+  return `whack-${code}`;
+}
+
+export function openWhackChannel(code: string): RealtimeChannel {
+  return supabase.channel(whackChannelName(code), {
     config: { presence: { key: crypto.randomUUID() } },
   });
 }

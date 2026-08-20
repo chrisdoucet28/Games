@@ -1,13 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 import {
-  openAuctionChannel, openSpyChannel, closeChannel,
+  openAuctionChannel, openSpyChannel, openWhackChannel, closeChannel,
   type AuctionStatePayload, type AuctionBetPayload, type SpyStatePayload,
+  type WhackStatePayload, type WhackTurnReportPayload,
 } from "../../lib/liveSession";
 import { PhoneAuctionView } from "./PhoneAuctionView";
 import { PhoneSpyView } from "./PhoneSpyView";
+import { PhoneWordWhackView } from "./PhoneWordWhackView";
 
-type Game = "auction" | "spy";
+type Game = "auction" | "spy" | "whack";
 type Props = { code: string; game: Game };
 
 // No state broadcast for this long means the teacher's tab is gone (refreshed, closed the game,
@@ -46,6 +48,14 @@ const GAME_COPY: Record<Game, {
     endedTitle: "The mission has ended!",
     endedBody: "Thanks for playing — check the big screen for final results.",
   },
+  whack: {
+    joinEmoji: "🔨",
+    arenaBg: "radial-gradient(ellipse at 50% -10%,#65A30D 0%,#365314 45%,#0F1A05 100%)",
+    startingBody: "Get ready — waiting for your teacher to start the warm-up…",
+    endedEmoji: "🏆",
+    endedTitle: "The warm-up has ended!",
+    endedBody: "Thanks for playing — check the big screen for final results.",
+  },
 };
 
 function loadClaimedTeamId(code: string): string | number | null {
@@ -82,7 +92,7 @@ export function PhoneJoinScreen({ code, game }: Props) {
   // when the effect first ran.
   const claimedTeamIdRef = useRef<string | number | null>(loadClaimedTeamId(code));
   const [claimedTeamId, setClaimedTeamId] = useState<string | number | null>(claimedTeamIdRef.current);
-  const [state, setState] = useState<AuctionStatePayload | SpyStatePayload | null>(null);
+  const [state, setState] = useState<AuctionStatePayload | SpyStatePayload | WhackStatePayload | null>(null);
   const [lastStateAt, setLastStateAt] = useState<number | null>(null);
   // Once true, stays true regardless of what happens to the connection afterward — a phone that
   // learns the game is over shouldn't ever fall back to "lost connection" messaging just because
@@ -92,11 +102,11 @@ export function PhoneJoinScreen({ code, game }: Props) {
   const [nowTick, setNowTick] = useState(Date.now());
 
   useEffect(() => {
-    const channel = game === "spy" ? openSpyChannel(code) : openAuctionChannel(code);
+    const channel = game === "spy" ? openSpyChannel(code) : game === "whack" ? openWhackChannel(code) : openAuctionChannel(code);
     channelRef.current = channel;
 
     channel.on("broadcast", { event: "state" }, ({ payload }) => {
-      const statePayload = payload as AuctionStatePayload | SpyStatePayload;
+      const statePayload = payload as AuctionStatePayload | SpyStatePayload | WhackStatePayload;
       setState(statePayload);
       setLastStateAt(Date.now());
       // Covers a phone that only joins/reconnects after the game already ended — it'll never see
@@ -141,6 +151,10 @@ export function PhoneJoinScreen({ code, game }: Props) {
 
   const sendBet = (payload: AuctionBetPayload) => {
     channelRef.current?.send({ type: "broadcast", event: "bet", payload });
+  };
+
+  const sendTurnReport = (payload: WhackTurnReportPayload) => {
+    channelRef.current?.send({ type: "broadcast", event: "turnReport", payload });
   };
 
   if (gameEnded) {
@@ -211,8 +225,8 @@ export function PhoneJoinScreen({ code, game }: Props) {
   }
 
   // Claimed, but the teacher hasn't started the game yet ("intro" for Auction, "lobby" for Spy
-  // Among Us — both mean "nothing to show yet") — nobody should see anything private before the
-  // whole room starts at once.
+  // Among Us and Word Whack — all mean "nothing to show yet") — nobody should see anything
+  // private before the whole room starts at once.
   if (state.phase === "intro" || state.phase === "lobby") {
     const team = state.roster.find(t => t.id === claimedTeamId);
     return (
@@ -226,6 +240,9 @@ export function PhoneJoinScreen({ code, game }: Props) {
 
   if (game === "spy") {
     return <PhoneSpyView state={state as SpyStatePayload} teamId={claimedTeamId} />;
+  }
+  if (game === "whack") {
+    return <PhoneWordWhackView state={state as WhackStatePayload} teamId={claimedTeamId} onTurnReport={sendTurnReport} />;
   }
   return <PhoneAuctionView state={state as AuctionStatePayload} teamId={claimedTeamId} onBet={sendBet} />;
 }
