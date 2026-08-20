@@ -5,7 +5,7 @@ import type { GameProps } from "../../types";
 import { useTurnTimer } from "../../hooks/useTurnTimer";
 import { TurnTimerBar } from "../shared/TurnTimerBar";
 import {
-  useMoleGame, parseChoices, DIFFICULTY_OPTIONS, TOTAL_HOLES,
+  useMoleGame, parseChoices, mergeUniqueRounds, DIFFICULTY_OPTIONS, TOTAL_HOLES,
   BASE_HIT_PTS, COMBO_STEP, MAX_COMBO_BONUS,
   type Difficulty, type ParsedMCQ,
 } from "../../hooks/useMoleGame";
@@ -174,7 +174,7 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
     // playthrough" for the game's own final ranking, separate from the team's cross-game score.
     setFinalScores(prev => ({ ...prev, [activeTeam.id]: (prev[activeTeam.id] ?? 0) + finalTurnScore }));
     globalRoundIdxRef.current = game.roundIdxRef.current;
-    setPlayedRounds(prev => [...prev, ...game.playedRounds]);
+    setPlayedRounds(prev => mergeUniqueRounds(prev, game.playedRounds));
     setLastTurnScore(finalTurnScore);
     setLastTurnBestCombo(game.bestCombo);
     setPhase("turn-end");
@@ -254,7 +254,7 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
       if (report.finalScore > 0) onUpdateScore(report.teamId, report.finalScore);
       setFinalScores(prev => ({ ...prev, [report.teamId]: (prev[report.teamId] ?? 0) + report.finalScore }));
       globalRoundIdxRef.current = report.endRoundIdx;
-      setPlayedRounds(prev => [...prev, ...report.playedRounds]);
+      setPlayedRounds(prev => mergeUniqueRounds(prev, report.playedRounds));
       setLastTurnScore(report.finalScore);
       setLastTurnBestCombo(report.bestCombo);
       setPhase("turn-end");
@@ -475,8 +475,19 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(260px,1fr))", gap: "8px" }}>
               {playedRounds.map((r, i) => (
                 <div key={i} style={{ background: "rgba(255,255,255,0.06)", border: "1.5px solid #BEF26440", borderRadius: "10px", padding: "10px 12px" }}>
-                  <div style={{ fontSize: "13px", fontWeight: "700", color: "white", marginBottom: "4px" }}>{r.prompt}</div>
-                  <div style={{ fontSize: "12px", color: "#BEF264", fontWeight: "800" }}>✅ {r.choices[r.correctIdx]}</div>
+                  <div style={{ fontSize: "13px", fontWeight: "700", color: "white", marginBottom: "6px" }}>{r.prompt}</div>
+                  <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
+                    {r.choices.map((c, ci) => (
+                      <span key={ci} style={{
+                        padding: "3px 10px", borderRadius: "999px", fontSize: "12px", fontWeight: "800",
+                        background: ci === r.correctIdx ? "rgba(190,242,100,0.18)" : "rgba(255,255,255,0.05)",
+                        border: `1.5px solid ${ci === r.correctIdx ? "#BEF264" : "rgba(255,255,255,0.18)"}`,
+                        color: ci === r.correctIdx ? "#BEF264" : "#9CA3AF",
+                      }}>
+                        {ci === r.correctIdx ? "✅ " : ""}{c}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               ))}
             </div>

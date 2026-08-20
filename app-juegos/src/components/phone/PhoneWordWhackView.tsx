@@ -93,8 +93,19 @@ export function PhoneWordWhackView({ state, teamId, onTurnReport }: Props) {
         <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
           {state.playedRounds.map((r, i) => (
             <div key={i} style={{ background: "rgba(255,255,255,0.08)", border: "1.5px solid #BEF26455", borderRadius: "10px", padding: "10px 12px" }}>
-              <div style={{ fontSize: "13px", fontWeight: "700", marginBottom: "4px" }}>{r.prompt}</div>
-              <div style={{ fontSize: "12px", color: "#BEF264", fontWeight: "800" }}>✅ {r.choices[r.correctIdx]}</div>
+              <div style={{ fontSize: "13px", fontWeight: "700", marginBottom: "6px" }}>{r.prompt}</div>
+              <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
+                {r.choices.map((c, ci) => (
+                  <span key={ci} style={{
+                    padding: "3px 10px", borderRadius: "999px", fontSize: "12px", fontWeight: "800",
+                    background: ci === r.correctIdx ? "rgba(190,242,100,0.18)" : "rgba(255,255,255,0.05)",
+                    border: `1.5px solid ${ci === r.correctIdx ? "#BEF264" : "rgba(255,255,255,0.18)"}`,
+                    color: ci === r.correctIdx ? "#BEF264" : "#9CA3AF",
+                  }}>
+                    {ci === r.correctIdx ? "✅ " : ""}{c}
+                  </span>
+                ))}
+              </div>
             </div>
           ))}
         </div>
