@@ -87,13 +87,20 @@ function validateWordWhackSnapshot(raw: unknown, teamCount: number): WordWhackSn
 // Shown on the shared screen in place of the mole grid while the active team is playing on their
 // own phone — a live, tappable mirror isn't worth the sync/latency complexity for a game where a
 // mole is only up for 2-5 seconds (see the plan's reasoning), so this is deliberately just a
-// status card, not a spectacle. Everyone finds out the score the moment that team's phone reports it.
-function PhoneTurnSpectator({ activeTeam }: { activeTeam: { name: string; mascot?: string | null; color: { emoji: string; bg: string; dark: string } } }) {
+// status card, not a spectacle. Everyone finds out the score the moment that team's phone reports
+// it — but the countdown itself is worth showing big, so the rest of the class watching from
+// across the room can still see how much of that team's turn is left.
+function PhoneTurnSpectator({ activeTeam, timeLeft, totalSeconds }: {
+  activeTeam: { name: string; mascot?: string | null; color: { emoji: string; bg: string; dark: string } };
+  timeLeft: number; totalSeconds: number;
+}) {
+  const timeColor = timeLeft > totalSeconds * 0.5 ? "#BEF264" : timeLeft > totalSeconds * 0.25 ? "#F59E0B" : "#EF4444";
   return (
     <div style={{ textAlign: "center", padding: "40px 20px", background: `linear-gradient(160deg,${activeTeam.color.dark}55,#1A2E05)`, border: `3px solid ${activeTeam.color.bg}`, borderRadius: "16px" }}>
       <div style={{ fontSize: "40px", marginBottom: "10px" }}>{activeTeam.mascot ?? activeTeam.color.emoji}</div>
-      <div style={{ fontWeight: "900", fontSize: "18px", color: "white", marginBottom: "6px" }}>🔨 {activeTeam.name} is playing on their phone!</div>
-      <div style={{ fontSize: "13px", color: "#D9F99D" }}>Their score will show up here the moment their turn ends.</div>
+      <div style={{ fontWeight: "900", fontSize: "18px", color: "white", marginBottom: "14px" }}>🔨 {activeTeam.name} is playing on their phone!</div>
+      <div style={{ fontWeight: "900", fontSize: "56px", color: timeColor, fontVariantNumeric: "tabular-nums", lineHeight: 1 }}>{timeLeft}s</div>
+      <div style={{ fontSize: "13px", color: "#D9F99D", marginTop: "14px" }}>Their score will show up here the moment their turn ends.</div>
     </div>
   );
 }
@@ -175,6 +182,13 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
 
   const { timeLeft: turnTimeLeft } = useTurnTimer(TURN_SECONDS, screenRunsThisTurn, endTurn, `${round}-${teamIdx}`);
   useEffect(() => { turnTimeLeftRef.current = turnTimeLeft; }, [turnTimeLeft]);
+
+  // A second, purely cosmetic countdown for when the active team is playing on their own phone —
+  // the phone is what actually ends the turn (via its turnReport), this one's onExpire is a no-op.
+  // Starts at the same moment the phone's own local timer does (both keyed off the same
+  // phase === "playing" transition), so the two stay close enough in sync for a shared-screen
+  // display with nobody's actual gameplay depending on it down to the second.
+  const { timeLeft: spectatorTimeLeft } = useTurnTimer(TURN_SECONDS, phase === "playing" && activeTeamHasPhone, () => {}, `${round}-${teamIdx}`);
 
   const game = useMoleGame({
     pool, difficulty, startRoundIdx: globalRoundIdxRef.current,
@@ -481,12 +495,12 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
       <div style={{ position: "relative", zIndex: 1 }}>
         <div style={{ background: `linear-gradient(90deg,${activeTeam.color.dark},${activeTeam.color.bg})`, borderRadius: "14px", padding: "10px 16px", marginBottom: "14px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px", boxShadow: `0 4px 18px ${activeTeam.color.bg}55` }}>
           <span style={{ color: "white", fontWeight: "900", fontSize: "16px", textShadow: "0 1px 3px rgba(0,0,0,0.4)" }}>🔨 {activeTeam.mascot ?? activeTeam.color.emoji} {activeTeam.name}'s turn — Round {round}/{TOTAL_ROUNDS}, Team {teamIdx + 1} of {teams.length}</span>
-          {phase === "playing" && !activeTeamHasPhone && <TurnTimerBar timeLeft={turnTimeLeft} totalSeconds={TURN_SECONDS} />}
+          {phase === "playing" && <TurnTimerBar timeLeft={activeTeamHasPhone ? spectatorTimeLeft : turnTimeLeft} totalSeconds={TURN_SECONDS} />}
         </div>
 
         {(phase === "playing" || phase === "countdown") && (
           activeTeamHasPhone ? (
-            <PhoneTurnSpectator activeTeam={activeTeam} />
+            <PhoneTurnSpectator activeTeam={activeTeam} timeLeft={spectatorTimeLeft} totalSeconds={TURN_SECONDS} />
           ) : (
           <>
             <div style={{ display: "flex", gap: "8px", justifyContent: "center", marginBottom: "12px", flexWrap: "wrap" }}>
