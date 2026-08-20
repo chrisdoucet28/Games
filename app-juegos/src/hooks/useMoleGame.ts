@@ -42,6 +42,26 @@ export function parseChoices(q: QuestionData): ParsedMCQ | null {
   return { prompt, choices: parts, correctIdx };
 }
 
+// The pool is almost always smaller than what 2 rounds × several teams × 90 seconds each draws
+// through, so spawnRound's modulo wrap (by design — see there) means the same question genuinely
+// gets drawn more than once over a full game. That's fine for gameplay, but the post-game review
+// list should show each distinct question once, not once per time it happened to come up —
+// filters out duplicates both against what's already accumulated and within the same batch being
+// merged in (a single turn can itself wrap the pool on a thin topic).
+export function mergeUniqueRounds(prev: ParsedMCQ[], additions: ParsedMCQ[]): ParsedMCQ[] {
+  const key = (r: ParsedMCQ) => `${r.prompt}|${r.choices.join(",")}`;
+  const seen = new Set(prev.map(key));
+  const result = [...prev];
+  for (const r of additions) {
+    const k = key(r);
+    if (!seen.has(k)) {
+      seen.add(k);
+      result.push(r);
+    }
+  }
+  return result;
+}
+
 export type Mole = { holeIdx: number; text: string; isCorrect: boolean; key: number };
 export type Fx = { holeIdx: number; kind: "hit" | "miss"; key: number };
 
