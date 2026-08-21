@@ -37,18 +37,22 @@ export const LEVELS_META = [
 // limit is UI-only (see the plan notes on why teams have no clean server-side enforcement point).
 export const FREE_PLAN_LIMITS = { maxClasses: 1, maxTeams: 2 };
 
-// 🚧 TEMPORARY TESTING OVERRIDE — while ClassCade is still being tested (pre-launch), every
-// account gets full premium access and skips the onboarding plan-choice screen, so testers/
-// colleagues don't hit paywall friction while trying things out. This does NOT remove or replace
-// the real billing system (Stripe checkout, promo codes, the subscriptions table, the DB-level
-// class-limit trigger all still work exactly as built) — it's a single switch read by
-// `isPaidStatus()` (src/lib/subscription.ts) and App.tsx's onboarding gate.
+// 🚀 FREE LAUNCH PHASE — a deliberate go-to-market choice, not leftover test code: every account
+// gets full premium access and skips the onboarding plan-choice screen, so early users hit zero
+// paywall friction while the product is still building an audience. The plan is to flip this off
+// and start charging once there's real traction — until then this is the intended production
+// behavior, not a bypass to "remember to remove." It does NOT remove or replace the real billing
+// system (Stripe checkout, promo codes, the subscriptions table all still work exactly as built)
+// — it's a single switch read by `isPaidStatus()` (src/lib/subscription.ts) and App.tsx's
+// onboarding gate.
 //
-// The class-limit trigger (`enforce_free_class_limit` in Postgres) has its own matching bypass
-// flag set directly in the function body — flip both back to false (or delete this constant and
-// its two call sites, and the trigger's early-return block) together when ready to actually
-// enforce the free tier for real users.
-export const TESTING_BYPASS_PAYWALL = false;
+// This does NOT mean unlimited: `enforce_free_class_limit` in Postgres still caps every account
+// (paid-labeled or not) at a generous 20 classes, and a size check on saved game-state blobs
+// still applies — both purely to bound scripted abuse, not to gate real teachers. Flip this back
+// to false (and restore the real subscription-based 1-class limit in the trigger — see git
+// history for `enforce_free_class_limit` before the free-launch-phase migration) when it's time
+// to actually charge.
+export const FREE_LAUNCH_ALL_PREMIUM = true;
 
 export function teamsGridCols(n: number): string {
   if (n <= 3) return `repeat(${n},1fr)`;
