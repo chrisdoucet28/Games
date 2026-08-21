@@ -48,7 +48,7 @@ export const FREE_PLAN_LIMITS = { maxClasses: 1, maxTeams: 2 };
 // flag set directly in the function body — flip both back to false (or delete this constant and
 // its two call sites, and the trigger's early-return block) together when ready to actually
 // enforce the free tier for real users.
-export const TESTING_BYPASS_PAYWALL = true;
+export const TESTING_BYPASS_PAYWALL = false;
 
 export function teamsGridCols(n: number): string {
   if (n <= 3) return `repeat(${n},1fr)`;
