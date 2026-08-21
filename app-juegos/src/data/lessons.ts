@@ -1496,12 +1496,13 @@ export const LESSONS: Record<string, Lesson> = {
         body: [
           "ever/never for life experience",
           "How long have you...? asks about a state that started in the past and continues now.",
+          "Answer 'How long' with 'for' + a length of time, or 'since' + a starting point in time.",
           "Superlative + ever → present perfect.",
         ],
         examples: [
           "**Have** you **ever tried** sushi?",
           "I **have never been** to Japan.",
-          "**How long have you known** her?",
+          "**How long have you known** her? I've known her **for** ten years. / I've known her **since** 2015.",
           "This is the best pizza I **have ever eaten**.",
         ],
       },
@@ -1523,6 +1524,7 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ They didn't arrive yet. → ✅ They haven't arrived yet. ('yet' signals present perfect, not past simple)",
       "❌ This is the most delicious cake I ever tasted. → ✅ This is the most delicious cake I have ever tasted. (superlative + ever needs present perfect)",
       "❌ She just has arrived. → ✅ She has just arrived. ('just' goes between have/has and the past participle)",
+      "❌ I have lived here since ten years. → ✅ I have lived here for ten years. ('for' + a length of time; 'since' + a starting point)",
     ],
   },
 
@@ -4207,9 +4209,13 @@ export const LESSONS: Record<string, Lesson> = {
     sections: [
       {
         heading: "Positive form",
-        body: ["Add -s (or -es) to the verb for he/she/it; no ending for I/you/we/they."],
+        body: [
+          "Add -s (or -es) to the verb for he/she/it; no ending for I/you/we/they.",
+          "Verbs ending in -o, -ch, -sh, -ss, -x, or -z add -es instead of just -s.",
+        ],
         examples: [
-          "She **goes** to school every day.",
+          "She **goes** to school every day. (verb ends in -o → add -es)",
+          "He **watches** TV after dinner. (verb ends in -ch → add -es)",
           "He **studies** English on Mondays. (consonant + y → ies)",
           "I **live** in Madrid. (no -s for 'I')",
         ],
@@ -5118,10 +5124,15 @@ export const LESSONS: Record<string, Lesson> = {
     sections: [
       {
         heading: "Saying hello and asking how someone is",
-        body: ["Use 'Good morning/afternoon/evening' depending on the time of day.", "'How are you?' is answered with 'I'm fine, thank you' — don't forget the comma before 'thank you'."],
+        body: [
+          "Use 'Good morning/afternoon/evening' depending on the time of day.",
+          "'How are you?' is answered with 'I'm fine, thank you' — don't forget the comma before 'thank you'.",
+          "In everyday conversation people also answer with 'I'm good', 'Not bad', 'Pretty good', or 'So-so' (meaning average — neither good nor bad).",
+        ],
         examples: [
           "**Good morning**! How are you?",
           "I'm **fine, thank you**. And you?",
+          "I'm **good**, thanks! / **Not bad**, thanks! / **So-so** — a bit tired today.",
           "**Nice to meet you**! (not 'Nice meet you')",
         ],
       },
@@ -5265,6 +5276,17 @@ export const LESSONS: Record<string, Lesson> = {
         examples: [
           "I **want to be** a pilot. (not 'want to being')",
           "She **works as a** vet.",
+        ],
+      },
+      {
+        heading: "Common job titles",
+        body: [
+          "A wide range of everyday jobs: teacher, doctor, nurse, dentist, waiter, chef, cook, lawyer, pilot, manager, firefighter, farmer, and police officer.",
+          "A few common jobs start with a vowel sound and take 'an' instead of 'a': engineer, actor, artist, electrician.",
+        ],
+        examples: [
+          "I'm **a** nurse. My sister is **a** lawyer. My uncle is **a** farmer.",
+          "He's **an** engineer. She's **an** artist. My cousin is **an** electrician.",
         ],
       },
     ],
