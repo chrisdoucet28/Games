@@ -120,6 +120,7 @@ const GRAMMAR_LABEL_OVERRIDES: Record<string, string> = {
   "invitation-make": "Make an Invitation",
   "invitation-reject": "Reject an Invitation",
   "future-will-instant": "Future (will — instant decision)",
+  "weather-description-select": "Describe the Weather (right now or in general)",
 };
 
 function grammarLabel(tag: string): string {
