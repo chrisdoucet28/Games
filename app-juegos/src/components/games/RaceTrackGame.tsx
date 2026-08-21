@@ -13,7 +13,7 @@ const TOTAL = 60;
 // Solo play has no rival team to "beat to the answer," so a per-question countdown replaces
 // that tension — answer before it expires or the turn is skipped, same idea as every other
 // timed game in this codebase.
-const SOLO_TASK_SECONDS = 20;
+const SOLO_TASK_SECONDS = 30;
 
 type ZoneDef = { id: string; label: string; short: string; emoji: string; color: string; end: number };
 const ZONES: ZoneDef[] = [
@@ -394,13 +394,16 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
   const newTask = () => { bumpType(currentZone.id); setShowAns(false); };
 
   // Solo per-question countdown — starts as soon as a task is shown, resets on every new
-  // question, and skips the task (same as clicking "No one got it") if it runs out. Paused once
-  // "Reveal Answer" is clicked so it can't skip the task out from under the player mid-reveal.
+  // question, and reveals the answer (same as clicking "Reveal Answer") if it runs out, rather
+  // than silently skipping straight to a new question — a solo player has no rival to see the
+  // answer from, so running out of time shouldn't cost them the chance to learn what it was.
+  // Revealing also pauses the timer (see the `showAns` paused-arg below), so the player reviews
+  // at their own pace and then explicitly clicks "No one got it" to move on.
   const isSolo = teams.length === 1;
   const { timeLeft: soloTimeLeft } = useTurnTimer(
     SOLO_TASK_SECONDS,
     isSolo && phase === "task",
-    () => skipTask(),
+    () => setShowAns(true),
     `${currentZone.id}:${typeIdx[currentZone.id] ?? 0}`,
     showAns
   );
