@@ -1,10 +1,16 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { QRCodeSVG } from "qrcode.react";
+import type { RealtimeChannel } from "@supabase/supabase-js";
 import type { GameProps } from "../../types";
 import { teamsGridCols, GAME_MODES } from "../../data/constants";
 import { denseRank, medalForRank } from "../../utils/ranking";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
 import { HOTSEAT_TUTORIAL_STEPS } from "../../data/tutorials/hotseat";
+import {
+  generateSessionCode, openHotSeatChannel, closeChannel,
+  type HotSeatPhase, type HotSeatStatePayload, type HotSeatActionPayload,
+} from "../../lib/liveSession";
 
 const GM = GAME_MODES.find(g => g.id === "hotseat")!;
 
@@ -84,6 +90,20 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
   const [phase, setPhase] = useState<"welcome" | "intro" | "play" | "turnend" | "final">(resumed ? "intro" : "welcome");
   const [showHowTo, setShowHowTo] = useState(false);
 
+  // "Play on Phones" mode — available whenever there's more than one team (gated below); true
+  // 1-team solo play has the teacher personally describing for the one real team, so there's no
+  // within-team secrecy problem phones would solve there. Always defaults to screen, even on
+  // Resume: a resumed game skips the welcome screen entirely, same as the other phone-mode games.
+  const [inputMode, setInputMode] = useState<"screen" | "phone">("screen");
+  const [introStep, setIntroStep] = useState<"setup" | "qr">("setup");
+  const [sessionCode, setSessionCode] = useState<string | null>(null);
+  const [connectedTeamIds, setConnectedTeamIds] = useState<Set<string | number>>(new Set());
+  // "groups": the active team's own phone shows the word (teammates describe, matching the
+  // in-person rule). "solo": every *other* connected team's phone shows it instead, since a
+  // 1-person "team" has no teammate of its own to describe for it — see PhoneHotSeatView.tsx.
+  const [teamStructure, setTeamStructure] = useState<"groups" | "solo">("groups");
+  const channelRef = useRef<RealtimeChannel | null>(null);
+
   useEffect(() => {
     if (!forceFinalRef) return;
     forceFinalRef.current = phase === "final" ? null : () => { setPhase("final"); return true; };
@@ -149,6 +169,12 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
   const isLastTurn = roundIndex === TOTAL_ROUNDS - 1 && teamIndex === teams.length - 1;
   const timerPct = (timeLeft / TURN_SECONDS) * 100;
   const timerColor = timeLeft > 45 ? "#22C55E" : timeLeft > 20 ? "#F59E0B" : "#EF4444";
+
+  // Whether anyone is actually covering the describing role on their phone this turn — depends on
+  // team structure, since who "describes on their phone" flips between the two (see the plan).
+  const describersOnPhone = inputMode !== "phone" || !currentTeam ? false
+    : teamStructure === "groups" ? connectedTeamIds.has(currentTeam.id)
+    : teams.some(t => t.id !== currentTeam.id && connectedTeamIds.has(t.id));
 
   const endTurn = () => {
     if (timerRef.current) clearInterval(timerRef.current);
@@ -222,6 +248,143 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
     setPhase("intro");
   };
 
+  // Refs the phone-mode broadcaster (below) reads from, so opening/closing the realtime channel
+  // only happens when phone mode itself toggles on/off, not on every tick/turn/round change — same
+  // pattern as AuctionGame.tsx/SpyAmongUsGame.tsx. markCorrect/skipWord/endTurn are refreshed every
+  // render (no dependency array) so an incoming phone action always calls the latest closure,
+  // never a stale one captured back when the channel effect itself last ran.
+  const phaseRef = useRef(phase);
+  const currentWordRef = useRef(currentWord);
+  const timeLeftRef = useRef(timeLeft);
+  const teamIndexRef = useRef(teamIndex);
+  const totalWordsByTeamRef = useRef(totalWordsByTeam);
+  const teamStructureRef = useRef(teamStructure);
+  const connectedTeamIdsRef = useRef<Set<string | number>>(new Set());
+  const sendStateRef = useRef<(() => void) | null>(null);
+  const markCorrectRef = useRef(markCorrect);
+  const skipWordRef = useRef(skipWord);
+  const endTurnRef = useRef(endTurn);
+  const lastActionAtRef = useRef(0);
+  useEffect(() => {
+    phaseRef.current = phase;
+    currentWordRef.current = currentWord;
+    timeLeftRef.current = timeLeft;
+    teamIndexRef.current = teamIndex;
+    totalWordsByTeamRef.current = totalWordsByTeam;
+    teamStructureRef.current = teamStructure;
+    markCorrectRef.current = markCorrect;
+    skipWordRef.current = skipWord;
+    endTurnRef.current = endTurn;
+  });
+
+  // Opens/closes the realtime channel only when phone mode itself is toggled on/off. Screen-
+  // authoritative like Auction's bets, not Word Whack's relocated game loop — markCorrect/
+  // skipWord/endTurn stay exactly as they are, unchanged, just also reachable from an incoming
+  // phone broadcast below.
+  useEffect(() => {
+    if (inputMode !== "phone" || !sessionCode) return;
+    const channel = openHotSeatChannel(sessionCode);
+    channelRef.current = channel;
+
+    const sendState = () => {
+      const rawPhase = phaseRef.current;
+      const mappedPhase: HotSeatPhase = rawPhase === "welcome" || rawPhase === "intro" ? "lobby" : rawPhase === "final" ? "final" : "turn";
+      const activeTeam = teams[teamIndexRef.current];
+      const scores: Record<string, number> = {};
+      teams.forEach(t => { scores[String(t.id)] = totalWordsByTeamRef.current[t.id] ?? 0; });
+      const payload: HotSeatStatePayload = {
+        phase: mappedPhase,
+        teamStructure: teamStructureRef.current,
+        roster: teams.map(t => ({ id: t.id, name: t.name, color: t.color, mascot: t.mascot })),
+        // Only populated while a word is actually live (phase "play") — during the brief
+        // "turnend" transition and before the game starts, no team is "on the hot seat" yet.
+        activeTeamId: rawPhase === "play" ? (activeTeam?.id ?? null) : null,
+        currentWord: currentWordRef.current,
+        timeLeft: timeLeftRef.current,
+        turnSeconds: TURN_SECONDS,
+        turnCorrect: turnCorrectRef.current,
+        scores,
+        connectedTeamIds: Array.from(connectedTeamIdsRef.current),
+        ts: Date.now(),
+      };
+      channel.send({ type: "broadcast", event: "state", payload });
+    };
+    sendStateRef.current = sendState;
+
+    channel.on("presence", { event: "sync" }, () => {
+      const presenceState = channel.presenceState<{ teamId: string | number }>();
+      const ids = new Set<string | number>();
+      Object.values(presenceState).forEach(entries => entries.forEach(entry => ids.add(entry.teamId)));
+      connectedTeamIdsRef.current = ids;
+      setConnectedTeamIds(ids);
+      sendState(); // roster/connected list changed — push a fresh state right away, don't wait for the interval
+    });
+
+    // The only place phone input actually touches game logic — validates who's allowed to act
+    // right now (differs by teamStructure), debounces near-simultaneous double-taps (matters most
+    // in solo mode, where several phones can act on the same word), then calls the exact same
+    // functions a screen-mode button click would.
+    channel.on("broadcast", { event: "action" }, ({ payload }) => {
+      const action = payload as HotSeatActionPayload;
+      if (phaseRef.current !== "play") return;
+      const activeTeamId = teams[teamIndexRef.current]?.id;
+      const isActiveTeam = action.teamId === activeTeamId;
+      const allowed = teamStructureRef.current === "groups"
+        ? isActiveTeam
+        : !isActiveTeam && connectedTeamIdsRef.current.has(action.teamId);
+      if (!allowed) return;
+      const now = Date.now();
+      if (now - lastActionAtRef.current < 500) return;
+      lastActionAtRef.current = now;
+      if (action.action === "correct") markCorrectRef.current();
+      else if (action.action === "skip") skipWordRef.current();
+      else if (action.action === "endTurn") endTurnRef.current();
+    });
+
+    channel.subscribe(status => {
+      if (status === "SUBSCRIBED") sendState();
+    });
+
+    const interval = setInterval(sendState, 4000);
+
+    return () => {
+      clearInterval(interval);
+      closeChannel(channel);
+      channelRef.current = null;
+      sendStateRef.current = null;
+    };
+  }, [inputMode, sessionCode, teams]);
+
+  // Pushes an immediate state update on turn/phase transitions rather than waiting for the
+  // interval, and piggybacks on the existing per-second timer tick while a turn is live — timeLeft
+  // changing every second is what keeps a describing phone's countdown in sync with the screen's,
+  // with no second parallel timer needed (unlike Word Whack).
+  useEffect(() => {
+    sendStateRef.current?.();
+  }, [phase, timeLeft, teamIndex, roundIndex]);
+
+  // Tells every connected phone the game is over the moment it actually ends, same reasoning as
+  // Auction/Spy Among Us's identical effect — without this, a closed channel looks identical to a
+  // dropped connection from the phone's side.
+  useEffect(() => {
+    if (phase === "final" && channelRef.current) {
+      channelRef.current.send({ type: "broadcast", event: "ended", payload: {} });
+    }
+  }, [phase]);
+
+  const handlePickPhoneMode = () => {
+    setInputMode("phone");
+    setSessionCode(generateSessionCode());
+    setIntroStep("qr");
+  };
+
+  const handlePickScreenMode = () => {
+    setInputMode("screen");
+    setIntroStep("setup");
+    setSessionCode(null);
+    setConnectedTeamIds(new Set());
+  };
+
   const arenaStyle: React.CSSProperties = {
     margin: "-20px", padding: "20px", borderRadius: "20px", position: "relative", overflow: "hidden",
     background: "radial-gradient(ellipse at 50% 105%,#9A3412 0%,#431407 45%,#0A0300 100%)",
@@ -287,6 +450,79 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
               </div>
             ))}
           </div>
+
+          {teams.length > 1 && (
+            <>
+              {introStep === "setup" && (
+                <div style={{ marginBottom: "20px" }}>
+                  <div style={{ fontSize: "13px", color: "#FED7AA", fontWeight: "700", marginBottom: "10px" }}>How will the hot seat word be shown?</div>
+                  <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
+                    <button onClick={handlePickScreenMode} className="hs-btn" style={{
+                      padding: "10px 20px", borderRadius: "12px", fontWeight: "800", fontSize: "14px", cursor: "pointer",
+                      border: `2px solid ${inputMode === "screen" ? "#F97316" : "rgba(255,255,255,0.2)"}`,
+                      background: inputMode === "screen" ? "rgba(249,115,22,0.15)" : "rgba(255,255,255,0.05)",
+                      color: inputMode === "screen" ? "#FDBA74" : "#94A3B8",
+                    }}>🖥️ Play on Screen</button>
+                    <button onClick={handlePickPhoneMode} className="hs-btn" style={{
+                      padding: "10px 20px", borderRadius: "12px", fontWeight: "800", fontSize: "14px", cursor: "pointer",
+                      border: `2px solid ${inputMode === "phone" ? "#F97316" : "rgba(255,255,255,0.2)"}`,
+                      background: inputMode === "phone" ? "rgba(249,115,22,0.15)" : "rgba(255,255,255,0.05)",
+                      color: inputMode === "phone" ? "#FDBA74" : "#94A3B8",
+                    }}>📱 Play on Phones</button>
+                  </div>
+                </div>
+              )}
+
+              {introStep === "qr" && sessionCode && (() => {
+                const joinUrl = `${window.location.origin}${window.location.pathname}?join=${sessionCode}&game=hotseat`;
+                return (
+                  <div style={{ background: "linear-gradient(160deg,#7C2D12,#1C0701)", border: "2px solid #F9731666", borderRadius: "20px", padding: "20px", marginBottom: "20px", maxWidth: "360px", marginLeft: "auto", marginRight: "auto" }}>
+                    <div style={{ fontWeight: "800", fontSize: "14px", color: "#FDBA74", marginBottom: "12px" }}>📱 Scan to join, or go to the site and enter this code:</div>
+                    <div style={{ background: "white", borderRadius: "12px", padding: "12px", display: "inline-block" }}>
+                      <QRCodeSVG value={joinUrl} size={160} />
+                    </div>
+                    <div style={{ fontSize: "28px", fontWeight: "900", letterSpacing: "0.1em", color: "white", margin: "12px 0" }}>{sessionCode}</div>
+
+                    <div style={{ marginBottom: "14px" }}>
+                      <div style={{ fontSize: "12px", color: "#FED7AA", fontWeight: "700", marginBottom: "8px" }}>Are your teams groups or solo players?</div>
+                      <div style={{ display: "flex", gap: "8px", justifyContent: "center" }}>
+                        <button onClick={() => setTeamStructure("groups")} className="hs-btn" style={{
+                          padding: "6px 14px", borderRadius: "10px", fontWeight: "800", fontSize: "12px", cursor: "pointer",
+                          border: `2px solid ${teamStructure === "groups" ? "#F97316" : "rgba(255,255,255,0.2)"}`,
+                          background: teamStructure === "groups" ? "rgba(249,115,22,0.2)" : "rgba(255,255,255,0.05)",
+                          color: teamStructure === "groups" ? "#FDBA74" : "#94A3B8",
+                        }}>👥 Groups</button>
+                        <button onClick={() => setTeamStructure("solo")} className="hs-btn" style={{
+                          padding: "6px 14px", borderRadius: "10px", fontWeight: "800", fontSize: "12px", cursor: "pointer",
+                          border: `2px solid ${teamStructure === "solo" ? "#F97316" : "rgba(255,255,255,0.2)"}`,
+                          background: teamStructure === "solo" ? "rgba(249,115,22,0.2)" : "rgba(255,255,255,0.05)",
+                          color: teamStructure === "solo" ? "#FDBA74" : "#94A3B8",
+                        }}>🧑 Solo</button>
+                      </div>
+                      <div style={{ fontSize: "11px", color: "#FED7AA99", marginTop: "6px" }}>
+                        {teamStructure === "groups" ? "Each team's own phone shows the word to their describers." : "Every other team's phone shows the word — they describe for whoever's up."}
+                      </div>
+                    </div>
+
+                    <div style={{ display: "flex", flexDirection: "column", gap: "6px", marginBottom: "10px" }}>
+                      {teams.map(t => (
+                        <div key={t.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "rgba(255,255,255,0.06)", borderRadius: "8px", padding: "6px 10px", fontSize: "13px" }}>
+                          <span>{t.mascot ?? t.color.emoji} {t.name}</span>
+                          <span style={{ color: connectedTeamIds.has(t.id) ? "#4ADE80" : "#6B7280", fontWeight: "700" }}>
+                            {connectedTeamIds.has(t.id) ? "✅ Connected" : "⏳ Waiting…"}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                    <button onClick={handlePickScreenMode} style={{ background: "none", border: "none", color: "#FED7AA99", fontSize: "12px", fontWeight: "700", cursor: "pointer", textDecoration: "underline" }}>
+                      Switch back to Play on Screen
+                    </button>
+                  </div>
+                );
+              })()}
+            </>
+          )}
+
           {wordListToggle}
           <button onClick={() => setShowHowTo(true)} className="hs-btn" style={{ display: "block", margin: "0 auto 14px", background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
             ❓ How to Play
@@ -404,7 +640,19 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
           </div>
         </div>
 
-        {phase === "play" && (
+        {phase === "play" && describersOnPhone && (
+          <div style={{ background: "linear-gradient(160deg,#1C0701,#2D0A00)", border: "3px dashed #F9731688", borderRadius: "22px", padding: "34px 18px", textAlign: "center" }}>
+            <div style={{ fontSize: "34px", marginBottom: "10px" }}>📱</div>
+            <div style={{ fontWeight: "900", fontSize: "17px", color: "#FDBA74", marginBottom: "6px" }}>
+              {teamStructure === "groups"
+                ? `${currentTeam.name} is describing on their phone!`
+                : "Everyone else is describing on their phones!"}
+            </div>
+            <div style={{ color: "#FED7AA", fontSize: "13px", fontWeight: "600" }}>The word is hidden here so {currentTeam.name} can't see it.</div>
+          </div>
+        )}
+
+        {phase === "play" && !describersOnPhone && (
           <>
             <div style={{ position: "relative", background: "linear-gradient(160deg,#1C0701,#2D0A00)", border: "4px solid #F97316", borderRadius: "22px", padding: "26px 18px", textAlign: "center", marginBottom: "16px", boxShadow: "0 0 30px rgba(249,115,22,0.35)" }}>
               <div style={{ position: "absolute", top: "10px", right: "10px" }}>
