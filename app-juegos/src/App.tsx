@@ -64,16 +64,16 @@ function StatusBadge({ children, action, onAction, theme }: { children: React.Re
 function App() {
   if (!isSupabaseConfigured) return <ConfigErrorScreen />;
   // Students joining a phone-controlled game (see AuctionGame.tsx / SpyAmongUsGame.tsx /
-  // WordWhackGame.tsx's "Play on Phones" mode) have no teacher account — this has to branch
-  // *before* AuthenticatedApp/useAuth ever runs, unlike the Stripe checkout-redirect param below
-  // (which intentionally runs inside the authenticated tree). Deliberately not scrubbed from the
-  // URL the way that one is: PhoneJoinScreen re-reads it on every mount, and it needs to survive a
-  // phone-side refresh to auto-rejoin. `game` defaults to 'auction' so existing/already-shared
-  // Auction join links (from before this param existed) keep working unchanged.
+  // WordWhackGame.tsx / HotSeatGame.tsx's "Play on Phones" mode) have no teacher account — this
+  // has to branch *before* AuthenticatedApp/useAuth ever runs, unlike the Stripe checkout-redirect
+  // param below (which intentionally runs inside the authenticated tree). Deliberately not
+  // scrubbed from the URL the way that one is: PhoneJoinScreen re-reads it on every mount, and it
+  // needs to survive a phone-side refresh to auto-rejoin. `game` defaults to 'auction' so existing/
+  // already-shared Auction join links (from before this param existed) keep working unchanged.
   const searchParams = new URLSearchParams(window.location.search);
   const joinCode = searchParams.get('join');
   const gameParam = searchParams.get('game');
-  const joinGame = gameParam === 'spy' ? 'spy' : gameParam === 'whack' ? 'whack' : 'auction';
+  const joinGame = gameParam === 'spy' ? 'spy' : gameParam === 'whack' ? 'whack' : gameParam === 'hotseat' ? 'hotseat' : 'auction';
   if (joinCode) {
     return (
       <>

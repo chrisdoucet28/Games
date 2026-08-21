@@ -173,3 +173,48 @@ export function openWhackChannel(code: string): RealtimeChannel {
     config: { presence: { key: crypto.randomUUID() } },
   });
 }
+
+// --- Hot Seat ---
+//
+// Screen-authoritative, unlike Word Whack — no strict per-word timing pressure here (marking a
+// word "Correct" a few hundred ms late is imperceptible), so the screen keeps running the exact
+// same word-deck/timer/scoring logic it always has; a phone-driven turn is just that same state
+// broadcast out, and phone taps folded back in as if they were local button clicks. See
+// HotSeatGame.tsx for exactly where.
+export type HotSeatRosterEntry = { id: string | number; name: string; color: TeamColor; mascot?: string | null };
+
+// Which specific card a phone shows during "turn" is derived client-side from activeTeamId +
+// teamStructure (see PhoneHotSeatView.tsx) — a single broadcast phase can't itself be "describing"
+// for one team and "guessing" for another at the same time.
+export type HotSeatPhase = "lobby" | "turn" | "final";
+
+export type HotSeatStatePayload = {
+  phase: HotSeatPhase;
+  // "groups": the active team's own phone describes (teammates give clues, matches the in-person
+  // rule). "solo": every *other* connected team's phone describes instead, since a 1-person "team"
+  // has no teammates of its own to hide the word from — see the plan's reasoning.
+  teamStructure: "groups" | "solo";
+  roster: HotSeatRosterEntry[];
+  activeTeamId: string | number | null;
+  currentWord: string;
+  timeLeft: number;
+  turnSeconds: number;
+  turnCorrect: number;
+  scores: Record<string, number>;
+  connectedTeamIds: (string | number)[];
+  ts: number;
+};
+
+// Broadcast phone -> screen. teamId is validated against who's actually allowed to act right now —
+// the active team in "groups" mode, anyone but the active team in "solo" mode (see HotSeatGame.tsx).
+export type HotSeatActionPayload = { teamId: string | number; action: "correct" | "skip" | "endTurn" };
+
+function hotSeatChannelName(code: string): string {
+  return `hotseat-${code}`;
+}
+
+export function openHotSeatChannel(code: string): RealtimeChannel {
+  return supabase.channel(hotSeatChannelName(code), {
+    config: { presence: { key: crypto.randomUUID() } },
+  });
+}
