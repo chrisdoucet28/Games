@@ -4903,6 +4903,56 @@ export const LESSONS: Record<string, Lesson> = {
     ],
   },
 
+  clauses_of_contrast: {
+    title: "Clauses of Contrast",
+    intro: "A clause of contrast connects two surprising or opposite ideas — a fact and a result you might not expect from it. English has several ways to do this, and they split into two grammatical groups: some join two ideas inside ONE sentence, others start a brand new sentence. Mixing the two up is the most common mistake at this level.",
+    sections: [
+      {
+        heading: "Although / even though / though — a full clause, inside one sentence",
+        body: ["'Although' and 'even though' are followed by a full clause (subject + verb) and join it to the main sentence.", "'Even though' is a stronger version of 'although'.", "'Though' means the same thing and can even go at the very end of a sentence, informally."],
+        examples: [
+          "**Although** it was raining, we went for a walk.",
+          "**Even though** he apologized, she was still upset.",
+          "The house is old. It's very charming, **though**.",
+        ],
+      },
+      {
+        heading: "Despite / in spite of — a noun or gerund, never a clause",
+        body: ["'Despite' and 'in spite of' mean the same as 'although', but they're followed by a noun or a gerund (-ing) — never a full clause directly.", "'In spite of' always needs 'of' right after it; 'despite' never takes 'of' at all.", "To use 'despite'/'in spite of' with a full clause, add the bridge phrase 'the fact that'."],
+        examples: [
+          "**Despite** the heavy traffic, we arrived on time. (not 'despite it was heavy traffic')",
+          "**In spite of** losing the final, the team celebrated.",
+          "**Despite the fact that** she was tired, she finished the project.",
+        ],
+      },
+      {
+        heading: "However / nevertheless / nonetheless — a brand new sentence",
+        body: ["These all mean a similar thing to 'although', but they don't join a clause the way 'although'/'despite' do — they start a completely new sentence, usually followed by a comma.", "A comma alone before 'however' is not enough to join two clauses — that's a common mistake called a comma splice."],
+        examples: [
+          "The film was boring. **However**, the soundtrack was excellent.",
+          "The traffic was terrible. **Nevertheless**, we made it on time.",
+          "The odds were against her. **Nonetheless**, she won.",
+        ],
+      },
+      {
+        heading: "Yet — a coordinating contrast word, like 'but'",
+        body: ["'Yet' can join two contrasting clauses in one sentence, working just like 'but' — with a comma before it, not a full stop."],
+        examples: [
+          "She's brilliant, **yet** she's incredibly humble.",
+          "He looks intimidating, **yet** he's the gentlest person I know.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ Despite it was raining, we went out. → ✅ Despite the rain, we went out. ('despite' + noun/gerund, never a clause)",
+      "❌ In spite the traffic, we arrived early. → ✅ In spite of the traffic, we arrived early. ('in spite of' — never 'in spite' alone)",
+      "❌ Despite of his apology, she stayed angry. → ✅ Despite his apology, she stayed angry. ('despite' never takes 'of')",
+      "❌ She passed the exam, however she didn't study much. → ✅ She passed the exam. However, she didn't study much. ('however' starts a new sentence, not a comma splice)",
+      "❌ Although he was tired, but he kept working. → ✅ Although he was tired, he kept working. (never combine 'although' with 'but')",
+      "❌ Despite the fact she was scared, she spoke up. → ✅ Despite the fact THAT she was scared... ('despite the fact that' needs 'that')",
+    ],
+  },
+
   gerunds: {
     title: "Gerunds",
     intro: "A gerund is the -ing form of a verb used as a noun. This lesson covers the situations where English always requires a gerund: as the subject of a sentence, and after a preposition — including fixed expressions where a small word ('to', 'for', 'of') that looks like part of an infinitive is actually a preposition in disguise.",
