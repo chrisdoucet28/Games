@@ -3149,6 +3149,56 @@ export const LESSONS: Record<string, Lesson> = {
     ],
   },
 
+  passive_reporting_structures: {
+    title: "Passive Reporting Structures",
+    intro: "News reports and academic writing often need to state a claim without saying exactly who made it — 'people say', 'experts believe', 'sources report'. English has two fixed passive structures for this, both built from a reporting verb like say/believe/think/report/know/understand/estimate/claim in its passive form.",
+    sections: [
+      {
+        heading: "Impersonal: It is + reporting verb + that + clause",
+        body: ["Start with 'It', the passive form of the reporting verb, then 'that' + a full clause.", "This is the most common and flexible pattern — it works for almost any claim."],
+        examples: [
+          "**It is said that** the company will merge with a rival.",
+          "**It is believed that** the fire started accidentally.",
+          "**It is estimated that** the project will cost millions.",
+        ],
+      },
+      {
+        heading: "Personal, present: Subject + is + reporting verb + to + base verb",
+        body: ["The subject of the claim moves to the front of the sentence instead of using 'it'.", "For a PRESENT state or habit, use 'to' + the base form of the verb."],
+        examples: [
+          "**The area is believed to contain** oil reserves.",
+          "**He is known to dislike** interviews.",
+          "**The virus is thought to spread** through contact.",
+        ],
+      },
+      {
+        heading: "Personal, past: Subject + is + reporting verb + to have + past participle",
+        body: ["For a COMPLETED past action or state, use 'to have' + the past participle instead of the base verb.", "If the subject didn't do the action itself (a passive event), add 'been': 'to have been' + past participle."],
+        examples: [
+          "**He is believed to have fled** the country.",
+          "**The suspect is said to have confessed.**",
+          "**The painting is thought to have been stolen** decades ago.",
+        ],
+      },
+      {
+        heading: "Shifting the whole report into the past",
+        body: ["Change 'is'/'are' to 'was'/'were' to show that the report itself was made in the past, not now.", "The clause after 'that' often needs the past perfect too, since the reported event happened even earlier."],
+        examples: [
+          "**It was said that** the castle was haunted.",
+          "**It was reported that** hundreds had been injured.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ It is say that the company will merge. → ✅ It is said that... ('said', the past participle, not 'say')",
+      "❌ The suspect is said have fled the country. → ✅ ...is said TO have fled... (never drop 'to')",
+      "❌ He is known to has strong opinions. → ✅ ...to have strong opinions. ('to have', not 'to has' — the infinitive never conjugates)",
+      "❌ It were said that the castle was haunted. → ✅ It was said... ('it' always takes 'was', never 'were')",
+      "❌ She is said to resigned from her position. → ✅ ...is said to HAVE resigned... (a completed past action needs 'to have' + past participle)",
+      "❌ The building is reported being unsafe. → ✅ ...is reported TO BE unsafe. ('reported to be', not 'reported being')",
+    ],
+  },
+
   causative_verbs: {
     title: "Causative Verbs (have/get/make/let)",
     intro: "Have/get + something + done means you arrange for someone else to do it; make/let + someone + base verb is about forcing or permitting — and this topic also drills a distinctive mistake where learners add an unnecessary 'that' clause after make/let.",
