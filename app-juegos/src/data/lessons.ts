@@ -4498,6 +4498,64 @@ export const LESSONS: Record<string, Lesson> = {
     ],
   },
 
+  what_time_is_it: {
+    title: "What Time is It?",
+    intro: "English tells clock time using fixed phrases built around the hour — 'o'clock', 'half past', 'quarter past/to', and minutes 'past' or 'to'. Once you know the pattern for each type, you can say any time on the clock.",
+    sections: [
+      {
+        heading: "Asking and answering",
+        body: ["'What time is it?' and 'What's the time?' mean exactly the same thing.", "Always start your answer with 'It's'."],
+        examples: [
+          "**What time is it?** It's three o'clock.",
+          "**What's the time?** It's half past six.",
+        ],
+      },
+      {
+        heading: "O'clock — exact hours",
+        body: ["Use 'o'clock' only when the time is an exact hour, with no minutes."],
+        examples: [
+          "It's **six o'clock**. (6:00)",
+          "The film starts at **eight o'clock**. (8:00)",
+        ],
+      },
+      {
+        heading: "Half past, quarter past, quarter to",
+        body: ["'Half past' + the hour = 30 minutes after it.", "'Quarter past' + the hour = 15 minutes after it.", "'Quarter to' + the NEXT hour = 15 minutes before it — the hour number jumps forward."],
+        examples: [
+          "It's **half past three**. (3:30)",
+          "It's **quarter past four**. (4:15)",
+          "It's **quarter to five**. (4:45 — 15 minutes before FIVE, not four)",
+        ],
+      },
+      {
+        heading: "Minutes past and minutes to",
+        body: ["For minutes 1-29 after the hour, say the number, then 'past', then the hour.", "For minutes 31-59, count forward to the NEXT hour instead, using 'to'.", "The switch happens exactly at the half hour (30 minutes)."],
+        examples: [
+          "It's **ten past two**. (2:10)",
+          "It's **twenty past two**. (2:20)",
+          "It's **ten to three**. (2:50 — 10 minutes before THREE)",
+        ],
+      },
+      {
+        heading: "Midday, midnight, and the parts of the day",
+        body: ["'Midday' and 'noon' both mean 12:00 in the daytime; 'midnight' means 12:00 at night — both are used alone, with no 'o'clock'.", "Add 'in the morning/afternoon/evening' or 'at night' after a time to make it clear which part of the day you mean.", "Always use 'at' before a clock time."],
+        examples: [
+          "We're meeting for lunch at **midday**.",
+          "The party finished at **midnight**.",
+          "I wake up **at seven in the morning**.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ It's three and a half. → ✅ It's half past three. (never 'and a half' for time)",
+      "❌ What hour is it? → ✅ What time is it? (we ask 'what time', not 'what hour')",
+      "❌ It's ten to past six. → ✅ It's ten past six. (never combine 'to' and 'past')",
+      "❌ It's o'clock eight. → ✅ It's eight o'clock. (the number always comes before 'o'clock')",
+      "❌ It's quarter to nine o'clock. → ✅ It's quarter to nine. (don't add 'o'clock' after 'past'/'to' times)",
+      "❌ My class starts on nine o'clock. → ✅ ...at nine o'clock. (clock times always use 'at')",
+    ],
+  },
+
   house_objects_rooms_there_is_are: {
     title: "Objects and Rooms in the House",
     intro: "This topic is about the vocabulary for rooms and furniture — what each room is for and what objects belong in it — with 'there is/are' and basic place prepositions used only as supporting tools to describe them.",
