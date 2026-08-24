@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import { ThemeAmbience } from "./ThemeAmbience";
 
@@ -11,6 +11,10 @@ export function AuthScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [confirmSent, setConfirmSent] = useState(false);
+
+  useEffect(() => {
+    document.title = mode === "sign-in" ? "Log In - ClassCade" : "Sign Up - ClassCade";
+  }, [mode]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();

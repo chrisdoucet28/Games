@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { Subscription } from "../../types";
 import { getSubscription, startCheckout, redeemPromoCode } from "../../lib/subscription";
 import { updateProfile } from "../../lib/profile";
@@ -32,6 +32,10 @@ export function PlanIntroScreen({ theme, onSubscriptionChange, onDismiss }: Prop
   const [error, setError] = useState<string | null>(null);
   const [promoCode, setPromoCode] = useState("");
   const [promoBusy, setPromoBusy] = useState(false);
+
+  useEffect(() => {
+    document.title = "Choose Your Plan - ClassCade";
+  }, []);
 
   // Marks the intro as seen regardless of which path the teacher takes, so it never shows again —
   // best-effort: a failure here shouldn't trap anyone on this screen forever.

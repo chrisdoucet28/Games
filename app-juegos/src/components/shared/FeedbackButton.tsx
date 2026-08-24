@@ -34,6 +34,7 @@ export function FeedbackButton() {
     <>
       <button
         onClick={() => setOpen(true)}
+        className="learn-no-print"
         style={{
           position: "fixed", left: "16px", bottom: "16px", zIndex: 1500,
           background: "rgba(30,30,40,0.72)", color: "#E5E7EB", border: "1px solid rgba(255,255,255,0.15)",
@@ -45,7 +46,7 @@ export function FeedbackButton() {
       </button>
 
       {open && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 2000, padding: "20px" }}>
+        <div className="learn-no-print" style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 2000, padding: "20px" }}>
           <div style={{ background: "white", borderRadius: "20px", padding: "24px", maxWidth: "440px", width: "100%", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "14px" }}>
               <h3 style={{ margin: 0, fontSize: "17px", fontWeight: 900, color: "#1F2937" }}>💬 Send Feedback</h3>

@@ -88,8 +88,19 @@ function saveClaimedTeamId(code: string, teamId: string | number) {
   }
 }
 
+const GAME_TITLES: Record<Game, string> = {
+  auction: "Sentence Auction",
+  spy: "Spy Among Us",
+  whack: "Word Whack",
+  hotseat: "Hot Seat",
+};
+
 export function PhoneJoinScreen({ code, game }: Props) {
   const copy = GAME_COPY[game];
+
+  useEffect(() => {
+    document.title = `Join ${GAME_TITLES[game]} - ClassCade`;
+  }, [game]);
   const arenaStyle: React.CSSProperties = {
     minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
     padding: "24px 20px", textAlign: "center", fontFamily: "'Segoe UI',system-ui,sans-serif",
