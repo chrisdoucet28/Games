@@ -206,6 +206,25 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     return () => document.removeEventListener("fullscreenchange", onFsChange);
   }, []);
 
+  // Gives every screen its own browser tab title instead of a static "ClassCade" everywhere —
+  // matters for a teacher who keeps several tabs open (e.g. one mid-game, one browsing Learn).
+  // "game" is the one screen that needs a runtime value (which game is actually being played)
+  // rather than a fixed per-screen label.
+  useEffect(() => {
+    const titles: Record<typeof screen, string> = {
+      welcome: "ClassCade",
+      setup: "Game Setup - ClassCade",
+      "game-select": "Choose a Game - ClassCade",
+      game: selectedGame ? `${selectedGame.name} - ClassCade` : "ClassCade",
+      results: "Results - ClassCade",
+      classes: "My Classes - ClassCade",
+      profile: "My Profile - ClassCade",
+      learn: "Learn - ClassCade",
+      billing: "Billing - ClassCade",
+    };
+    document.title = titles[screen];
+  }, [screen, selectedGame]);
+
 
 
   const toggleFullscreen = () => {
