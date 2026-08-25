@@ -5590,27 +5590,12 @@ export const LESSONS: Record<string, Lesson> = {
           "He is **more patient than** his brother.",
         ],
       },
-      {
-        heading: "So vs such",
-        body: [
-          "Use **so** + adjective when there's no noun after it.",
-          "Use **such a/an** + adjective + singular noun, or **such** + adjective + plural noun (no article), when a noun follows.",
-        ],
-        examples: [
-          "He is **so kind**. (adjective alone — no noun)",
-          "She is **such a generous person**. (adjective + singular noun)",
-          "He is **such an honest person**. ('an' before a vowel sound)",
-          "My classmates are **such talkative people**. (adjective + plural noun — no article)",
-        ],
-      },
     ],
     commonMistakes: [
       "❌ What does she like? She is friendly. → ✅ What is she like? She is friendly.",
       "❌ He is a very kindly person. → ✅ He is a very kind person. ('kind' is the adjective)",
       "❌ She is more shyer than her brother. → ✅ She is shyer than her brother. (don't double the comparative)",
       "❌ They are very creative persons. → ✅ They are very creative people. (irregular plural)",
-      "❌ He is such kind. → ✅ He is so kind. ('such' needs a noun; use 'so' with just an adjective)",
-      "❌ She is so generous person. → ✅ She is such a generous person. ('such a' + adjective + noun)",
     ],
   },
 
