@@ -1995,6 +1995,56 @@ export const LESSONS: Record<string, Lesson> = {
     ],
   },
 
+  intensifiers_so_such_enough: {
+    title: "Intensifiers (So, Such & Enough)",
+    intro: "So, such, and enough all make a quality stronger or describe whether there's the right amount of it — but each one follows its own fixed word order, and mixing them up is the most common mistake.",
+    sections: [
+      {
+        heading: "So vs such — the basic rule",
+        body: ["'So' goes directly before an adjective or adverb, with no noun at all.", "'Such (a/an)' goes before an adjective + a noun — use 'such a/an' with a singular countable noun, and 'such' (no article) with a plural or uncountable noun."],
+        examples: [
+          "The traffic was **so** bad this morning. (no noun)",
+          "It was **such an** amazing concert. (singular noun)",
+          "They are **such** generous people. (plural noun)",
+        ],
+      },
+      {
+        heading: "So...that / such...that — result clauses",
+        body: ["Add 'that' + a clause after 'so'/'such' to explain the RESULT of an extreme quality.", "The 'so' or 'such' rule from above still applies — it just depends on whether a noun follows."],
+        examples: [
+          "The exam was **so difficult that** nobody finished on time.",
+          "It was **such a difficult exam that** nobody finished on time.",
+          "He drove **so fast that** he got a speeding ticket.",
+        ],
+      },
+      {
+        heading: "So much / so many",
+        body: ["'So much' intensifies an uncountable noun; 'so many' intensifies a countable plural noun — same countable/uncountable rule as elsewhere in English."],
+        examples: [
+          "She has **so much** energy in the mornings.",
+          "He has **so many** friends that he can't remember all their names.",
+        ],
+      },
+      {
+        heading: "Enough — a fixed word order that never changes",
+        body: ["'Enough' means 'a sufficient amount' — a different idea from 'so'/'such', which just intensify.", "Before a noun: 'enough' + noun.", "After an adjective or adverb: adjective/adverb + 'enough'.", "Add 'to' + a verb to say exactly what the amount is (or isn't) sufficient for."],
+        examples: [
+          "We don't have **enough chairs** for everyone. (before the noun)",
+          "She's not tall **enough** to reach the shelf. (after the adjective)",
+          "He's old **enough to vote** now. (adjective + enough + to)",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ It was so boring film. → ✅ It was such a boring film. ('such a' + adjective + singular noun, not 'so')",
+      "❌ She's such talented. → ✅ She's so talented. ('so' + adjective, no noun)",
+      "❌ I don't have money enough. → ✅ I don't have enough money. ('enough' goes BEFORE a noun)",
+      "❌ She isn't enough old to drive. → ✅ She isn't old enough to drive. ('enough' goes AFTER an adjective)",
+      "❌ He has such many friends. → ✅ He has so many friends. ('so many/so much', never 'such many')",
+      "❌ It was a such cold day. → ✅ It was such a cold day. ('such a', never 'a such')",
+    ],
+  },
+
   double_comparatives: {
     title: "Double Comparatives",
     intro: "'The...the...' links two changes together — as one thing increases or decreases, so does another. Both halves need 'the' and a comparative form.",
