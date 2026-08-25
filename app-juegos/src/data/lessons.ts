@@ -5574,6 +5574,25 @@ export const LESSONS: Record<string, Lesson> = {
         ],
       },
       {
+        heading: "A wide range of personality adjectives",
+        body: [
+          "Positive: kind, generous, friendly, funny, honest, patient, hardworking, ambitious, creative, confident, cheerful, caring, outgoing, calm, polite, brave, reliable, fair.",
+          "Negative: lazy, impatient, stubborn, selfish, boring, rude, moody.",
+          "Neutral — can be positive or negative depending on the situation: shy, quiet, serious, talkative, strict, curious, flexible, easy-going.",
+        ],
+        examples: [
+          "He's always **polite** to strangers.",
+          "It's **rude** to interrupt someone.",
+          "She was **brave** enough to speak in front of the whole class.",
+          "You can always count on him — he's very **reliable**.",
+          "She's a bit **moody** in the mornings.",
+          "Our new teacher is quite **strict**, but she's fair.",
+          "My little brother is endlessly **curious** about everything.",
+          "He's very **easy-going** — nothing ever bothers him.",
+          "She's **flexible** about changing plans at the last minute.",
+        ],
+      },
+      {
         heading: "Adjective, not adverb or noun",
         body: ["After 'be', use the plain adjective — not the '-ly' adverb form or the noun form."],
         examples: [
