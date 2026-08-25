@@ -148,11 +148,14 @@ type LessonGamesGeneratorProps = {
   onSubscriptionChange: (s: Subscription) => void;
   // Set once, right after a Stripe checkout redirect lands back on the app — see App.tsx.
   checkoutRedirect: "success" | "cancel" | null;
+  // Set once, when the first-login welcome screen's "Explore Learn" button was used instead of
+  // the plain "Let's go!" — see App.tsx and WelcomeIntroScreen.tsx.
+  initialScreen?: "learn" | null;
 };
 
-export default function LessonGamesGenerator({ theme, onThemeChange, subscription, onSubscriptionChange, checkoutRedirect }: LessonGamesGeneratorProps) {
+export default function LessonGamesGenerator({ theme, onThemeChange, subscription, onSubscriptionChange, checkoutRedirect, initialScreen }: LessonGamesGeneratorProps) {
   const [screen, setScreen] = useState<"welcome" | "classes" | "profile" | "learn" | "billing" | "setup" | "game-select" | "game" | "results">(
-    checkoutRedirect ? "billing" : "welcome"
+    checkoutRedirect ? "billing" : initialScreen ?? "welcome"
   );
   const isPaid = isPaidStatus(subscription.status);
   // The class this session is tied to, if any. Games started via "Start a Game" (not through "My
