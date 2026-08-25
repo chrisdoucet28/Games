@@ -66,6 +66,7 @@ export function FeedbackButton() {
                   value={message}
                   onChange={e => setMessage(e.target.value)}
                   rows={5}
+                  maxLength={2000}
                   placeholder="Type your feedback here..."
                   style={{ width: "100%", boxSizing: "border-box", border: "2px solid #E5E7EB", borderRadius: "12px", padding: "10px 12px", fontSize: "14px", fontFamily: "inherit", resize: "vertical" }}
                 />
