@@ -9,6 +9,7 @@ import { getProfile } from './lib/profile';
 import { getSubscription, FREE_SUBSCRIPTION } from './lib/subscription';
 import { DEFAULT_THEME, getTheme, type Theme } from './data/themes';
 import { PlanIntroScreen } from './components/shared/PlanIntroScreen';
+import { WelcomeIntroScreen } from './components/shared/WelcomeIntroScreen';
 import { FREE_LAUNCH_ALL_PREMIUM } from './data/constants';
 
 function ConfigErrorScreen() {
@@ -104,6 +105,10 @@ function AuthenticatedApp() {
   // row was just created with the column's false default, ever flips this to false and sees
   // PlanIntroScreen. One-time flash of the welcome screen for that case is an acceptable tradeoff.
   const [planIntroSeen, setPlanIntroSeen] = useState(true);
+  // Set only when the welcome screen's "Explore Learn" button is used — passed through to
+  // LessonGamesGenerator as a one-time initial-screen override, same idea as checkoutRedirect
+  // below (both only ever matter on the very first render after this gate clears).
+  const [initialScreen, setInitialScreen] = useState<'learn' | null>(null);
   // Stripe's checkout success/cancel URLs redirect back to "/?checkout=success|cancel" — read
   // that once on load, then strip it from the URL so a refresh doesn't re-trigger it.
   const [checkoutRedirect] = useState<'success' | 'cancel' | null>(() => {
@@ -137,17 +142,21 @@ function AuthenticatedApp() {
     return <AuthScreen />;
   }
 
-  // See FREE_LAUNCH_ALL_PREMIUM's comment in data/constants.ts — skips the onboarding
-  // plan-choice screen entirely during the free-launch phase. The underlying
-  // has_completed_plan_intro tracking is untouched, so real per-account behavior resumes
-  // exactly as designed the moment this flag is switched off.
-  if (!planIntroSeen && !FREE_LAUNCH_ALL_PREMIUM) {
+  // See FREE_LAUNCH_ALL_PREMIUM's comment in data/constants.ts — while it's on, this same
+  // has_completed_plan_intro gate shows a lightweight "how this works" welcome screen instead of
+  // the real plan-choice screen, since there's no billing decision to make right now. Swaps back
+  // to PlanIntroScreen automatically once billing is turned on — no change needed here then.
+  if (!planIntroSeen) {
     return (
       <div>
         <StatusBadge action="Log Out" onAction={() => supabase.auth.signOut()} theme={theme}>
           🟢 Logged in as {session.user.email}
         </StatusBadge>
-        <PlanIntroScreen theme={theme} onSubscriptionChange={setSubscription} onDismiss={() => setPlanIntroSeen(true)} />
+        {FREE_LAUNCH_ALL_PREMIUM ? (
+          <WelcomeIntroScreen theme={theme} onDismiss={goTo => { setInitialScreen(goTo ?? null); setPlanIntroSeen(true); }} />
+        ) : (
+          <PlanIntroScreen theme={theme} onSubscriptionChange={setSubscription} onDismiss={() => setPlanIntroSeen(true)} />
+        )}
       </div>
     );
   }
@@ -161,6 +170,7 @@ function AuthenticatedApp() {
         theme={theme} onThemeChange={setTheme}
         subscription={subscription} onSubscriptionChange={setSubscription}
         checkoutRedirect={checkoutRedirect}
+        initialScreen={initialScreen}
       />
     </div>
   );
