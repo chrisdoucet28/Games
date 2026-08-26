@@ -1,8 +1,16 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import { ThemeAmbience } from "./ThemeAmbience";
+import { TOPIC_OPTIONS } from "../../data/topics";
+import { GAME_MODES } from "../../data/constants";
 
 type Mode = "sign-in" | "sign-up";
+
+// Same "exclude the AI-generated placeholder" filter LessonGamesGenerator.tsx uses for its own
+// topic-count copy — kept independent here (not exported/shared) since this is the one and only
+// other place a topic count is shown, and duplicating a one-line filter is cheaper than threading
+// a shared export through a component that otherwise has zero dependency on the authenticated app.
+const realTopicCount = TOPIC_OPTIONS.filter(o => o.value !== "ai").length;
 
 export function AuthScreen() {
   const [mode, setMode] = useState<Mode>("sign-in");
@@ -58,6 +66,12 @@ export function AuthScreen() {
           <h1 style={{ fontSize: "28px", fontWeight: "900", color: "white", margin: 0, letterSpacing: "-0.01em" }}>
             Class<span style={{ color: "#FCD34D" }}>Cade</span>
           </h1>
+          <p style={{ color: "#BAE6FD", fontSize: "14px", lineHeight: 1.6, margin: "10px 0 0" }}>
+            A classroom game website built for English teachers. Pick a level and topic, then play
+            one of {GAME_MODES.length} competitive team games — every one built around{" "}
+            {realTopicCount}+ grammar, vocabulary, and theme topics, from A1 to C1. No prep, ready
+            in seconds, with matching Learn lessons for every topic.
+          </p>
         </div>
 
         <div style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: "20px", padding: "28px 24px", backdropFilter: "blur(8px)" }}>
