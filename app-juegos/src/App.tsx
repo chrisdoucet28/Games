@@ -10,6 +10,8 @@ import { getSubscription, FREE_SUBSCRIPTION } from './lib/subscription';
 import { DEFAULT_THEME, getTheme, type Theme } from './data/themes';
 import { PlanIntroScreen } from './components/shared/PlanIntroScreen';
 import { WelcomeIntroScreen } from './components/shared/WelcomeIntroScreen';
+import { PrivacyPolicyScreen } from './components/shared/PrivacyPolicyScreen';
+import { TermsOfServiceScreen } from './components/shared/TermsOfServiceScreen';
 import { FREE_LAUNCH_ALL_PREMIUM } from './data/constants';
 
 function ConfigErrorScreen() {
@@ -63,6 +65,14 @@ function StatusBadge({ children, action, onAction, theme }: { children: React.Re
 }
 
 function App() {
+  // Public, static, no-auth-required legal pages — linked from the Google OAuth consent screen
+  // (and generally required for a public app to have). No client-side router exists in this app
+  // (every other screen is state-driven, not URL-driven), so this is a plain pathname check ahead
+  // of everything else, same spirit as the ?join= check below but for a real path instead of a
+  // query param. Vercel's vercel.json rewrites every path to "/", so these two components are what
+  // actually make "/privacy" and "/terms" resolve to real content rather than the app shell.
+  if (window.location.pathname === '/privacy') return <PrivacyPolicyScreen />;
+  if (window.location.pathname === '/terms') return <TermsOfServiceScreen />;
   if (!isSupabaseConfigured) return <ConfigErrorScreen />;
   // Students joining a phone-controlled game (see AuctionGame.tsx / SpyAmongUsGame.tsx /
   // WordWhackGame.tsx / HotSeatGame.tsx's "Play on Phones" mode) have no teacher account — this
