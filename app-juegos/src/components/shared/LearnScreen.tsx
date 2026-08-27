@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
-import { LESSONS } from "../../data/lessons";
-import { TOPIC_OPTIONS } from "../../data/topics";
 import { hexToRgba, type Theme } from "../../data/themes";
 import { getProfile } from "../../lib/profile";
 import { FlagLessonButton } from "./FlagLessonButton";
+import { LESSON_TOPICS, LEVEL_ORDER, LEVEL_COLOR, FOCUS_ORDER, FOCUS_LABEL, renderBold } from "../../data/learnTopics";
 
 type Props = {
   onBack: () => void;
@@ -12,13 +11,6 @@ type Props = {
   // from the game-select screen, scoped to the topics chosen for that game).
   filterTopicIds?: string[];
 };
-
-const LEVEL_ORDER = ["A1", "A2", "B1", "B2", "C1"];
-const LEVEL_COLOR: Record<string, string> = {
-  A1: "#22C55E", A2: "#84CC16", B1: "#F59E0B", B2: "#F97316", C1: "#EF4444",
-};
-const FOCUS_ORDER = ["grammar", "vocabulary", "topic"];
-const FOCUS_LABEL: Record<string, string> = { grammar: "Grammar", vocabulary: "Vocabulary", topic: "Themes" };
 
 // Hides interactive chrome and reveals the ink-economical print block when the browser's
 // print dialog is triggered — see the "learn-print-only" block below. Shrinking the page
@@ -35,23 +27,6 @@ const PRINT_CSS = `
   }
   .learn-print-only { display: none; }
 `;
-
-// Lesson content marks the key form in each line with **double asterisks** — render those as bold
-// rather than asking every lesson to hand-roll its own <strong> markup.
-function renderBold(text: string) {
-  const parts = text.split(/(\*\*[^*]+\*\*)/g);
-  return parts.map((part, i) =>
-    part.startsWith("**") && part.endsWith("**")
-      ? <strong key={i}>{part.slice(2, -2)}</strong>
-      : <span key={i}>{part}</span>
-  );
-}
-
-// Cross-reference LESSONS (the actual content) against TOPIC_OPTIONS (level/focus metadata) so
-// adding a new lesson later is a one-line addition to lessons.ts — this list rebuilds itself.
-const LESSON_TOPICS = Object.keys(LESSONS)
-  .map(id => ({ id, lesson: LESSONS[id], meta: TOPIC_OPTIONS.find(o => o.value === id) }))
-  .filter((t): t is { id: string; lesson: (typeof LESSONS)[string]; meta: NonNullable<typeof t.meta> } => Boolean(t.meta));
 
 // Plain, ink-economical rendering of one lesson for the print handout — borders instead of
 // colored fills, no theme colors, so it reads well on any printer (color or black & white).

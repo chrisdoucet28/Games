@@ -1,19 +1,13 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import { ThemeAmbience } from "./ThemeAmbience";
-import { TOPIC_OPTIONS } from "../../data/topics";
-import { GAME_MODES } from "../../data/constants";
+import { MarketingLanding } from "./MarketingLanding";
 
 type Mode = "sign-in" | "sign-up";
 
-// Same "exclude the AI-generated placeholder" filter LessonGamesGenerator.tsx uses for its own
-// topic-count copy — kept independent here (not exported/shared) since this is the one and only
-// other place a topic count is shown, and duplicating a one-line filter is cheaper than threading
-// a shared export through a component that otherwise has zero dependency on the authenticated app.
-const realTopicCount = TOPIC_OPTIONS.filter(o => o.value !== "ai").length;
-
 const FOOTER_LINKS = (
-  <div style={{ display: "flex", gap: "16px", justifyContent: "center", marginTop: "20px" }}>
+  <div style={{ display: "flex", gap: "16px", justifyContent: "center", flexWrap: "wrap", marginTop: "20px" }}>
+    <a href="/learn" style={{ color: "#7DB8DB", fontSize: "12px", textDecoration: "none" }}>Learn Lessons</a>
     <a href="/privacy" style={{ color: "#7DB8DB", fontSize: "12px", textDecoration: "none" }}>Privacy Policy</a>
     <a href="/terms" style={{ color: "#7DB8DB", fontSize: "12px", textDecoration: "none" }}>Terms of Service</a>
   </div>
@@ -78,43 +72,19 @@ export function AuthScreen() {
   };
 
   return (
-    <div style={{ minHeight: "100vh", position: "relative", background: "linear-gradient(160deg,#0C1E3D 0%,#0369A1 45%,#0EA5E9 100%)", display: "flex", alignItems: "center", justifyContent: "center", padding: "32px 20px", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
+    <div style={{ minHeight: "100vh", position: "relative", background: "linear-gradient(160deg,#0C1E3D 0%,#0369A1 45%,#0EA5E9 100%)", display: "flex", justifyContent: "center", padding: "32px 20px", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
       <ThemeAmbience themeId="sky" />
-      <div style={{ maxWidth: "420px", width: "100%", position: "relative", zIndex: 1 }}>
-        <div style={{ textAlign: "center", marginBottom: "24px" }}>
-          <div style={{ fontSize: "48px", marginBottom: "8px", filter: "drop-shadow(0 4px 16px rgba(0,0,0,0.4))" }}>🕹️</div>
-          <h1 style={{ fontSize: "28px", fontWeight: "900", color: "white", margin: 0, letterSpacing: "-0.01em" }}>
-            Class<span style={{ color: "#FCD34D" }}>Cade</span>
-          </h1>
-          <p style={{ color: "#BAE6FD", fontSize: "14px", lineHeight: 1.6, margin: "10px 0 0" }}>
-            A classroom game website built for English teachers. Pick a level and topic, then play
-            one of {GAME_MODES.length} competitive team games — every one built around{" "}
-            {realTopicCount}+ grammar, vocabulary, and theme topics, from A1 to C1. No prep, ready
-            in seconds, with matching Learn lessons for every topic.
-          </p>
-        </div>
-
+      <div style={{ maxWidth: showForm ? "420px" : "980px", width: "100%", position: "relative", zIndex: 1 }}>
         {!showForm ? (
-          <div style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: "20px", padding: "28px 24px", backdropFilter: "blur(8px)", textAlign: "center" }}>
-            <div style={{ color: "#BAE6FD", fontSize: "13px", fontWeight: "700", marginBottom: "16px" }}>
-              ClassCade uses a free account (email or Google) so your classes, teams, and scores are saved between lessons.
-            </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-              <button
-                type="button" onClick={() => openForm("sign-up")}
-                style={{ width: "100%", background: "linear-gradient(135deg,#F59E0B,#D97706)", color: "white", border: "none", borderRadius: "12px", padding: "13px", fontSize: "15px", fontWeight: "900", cursor: "pointer" }}
-              >
-                Sign Up Free
-              </button>
-              <button
-                type="button" onClick={() => openForm("sign-in")}
-                style={{ width: "100%", background: "rgba(255,255,255,0.1)", color: "white", border: "1px solid rgba(255,255,255,0.25)", borderRadius: "12px", padding: "13px", fontSize: "15px", fontWeight: "800", cursor: "pointer" }}
-              >
-                Log In
-              </button>
-            </div>
-          </div>
+          <MarketingLanding onSignUp={() => openForm("sign-up")} onLogIn={() => openForm("sign-in")} />
         ) : (
+          <>
+          <div style={{ textAlign: "center", marginBottom: "24px" }}>
+            <div style={{ fontSize: "48px", marginBottom: "8px", filter: "drop-shadow(0 4px 16px rgba(0,0,0,0.4))" }}>🕹️</div>
+            <h1 style={{ fontSize: "28px", fontWeight: "900", color: "white", margin: 0, letterSpacing: "-0.01em" }}>
+              Class<span style={{ color: "#FCD34D" }}>Cade</span>
+            </h1>
+          </div>
           <div style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: "20px", padding: "28px 24px", backdropFilter: "blur(8px)" }}>
             <button
               type="button" onClick={() => setShowForm(false)}
@@ -186,6 +156,7 @@ export function AuthScreen() {
               <span aria-hidden="true">🔵</span> Continue with Google
             </button>
           </div>
+          </>
         )}
 
         {FOOTER_LINKS}
