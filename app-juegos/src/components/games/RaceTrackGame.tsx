@@ -1,11 +1,24 @@
 import { useState, useRef, useEffect } from "react";
+import type { RealtimeChannel } from "@supabase/supabase-js";
 import type { GameProps, QuestionData } from "../../types";
 import { QuestionCard } from "../shared/QuestionCard";
 import { teamsGridCols, GAME_MODES } from "../../data/constants";
 import { useTurnTimer } from "../../hooks/useTurnTimer";
 import { TurnTimerBar } from "../shared/TurnTimerBar";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
+import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
+import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
 import { RACETRACK_TUTORIAL_STEPS } from "../../data/tutorials/racetrack";
+import {
+  generateSessionCode, openRaceTrackChannel, closeChannel,
+  type RaceTrackPhase, type RaceTrackStatePayload, type RaceTrackActionPayload,
+} from "../../lib/liveSession";
+
+// How long the screen waits after the first buzz of a round before resolving a winner — long
+// enough to absorb ordinary same-room wifi jitter between phones (so "first" reflects who actually
+// tapped first, not whoever's connection happened to reach the server first), short enough that the
+// room never feels a lag. See the buzzer plan for the full reasoning.
+const BUZZ_WINDOW_MS = 200;
 
 const GM = GAME_MODES.find(g => g.id === "racetrack")!;
 
@@ -179,6 +192,22 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
   const [shopOpen, setShopOpen] = useState(false);
   const [shopTeamId, setShopTeamId] = useState<string | number>(teams[0]?.id);
   const [finalRanking, setFinalRanking] = useState<RankRow[]>([]);
+
+  // "Play on Phones" — lets a team buzz in from their seat instead of the teacher guessing who
+  // answered first by ear. Gated to teams.length > 1 below: with only one team there's no "who's
+  // first" question to resolve, so unlike Order Up's typing mode this one has no standalone value
+  // for solo play. Always defaults to screen, even on Resume, same as every other phone-mode game.
+  const [inputMode, setInputMode] = useState<"screen" | "phone">("screen");
+  const [introStep, setIntroStep] = useState<"setup" | "qr">("setup");
+  const [sessionCode, setSessionCode] = useState<string | null>(null);
+  const [connectedTeamIds, setConnectedTeamIds] = useState<Set<string | number>>(new Set());
+  // This round's resolved buzz winner, or null while the buzzer is open.
+  const [buzzedTeamId, setBuzzedTeamId] = useState<string | number | null>(null);
+  // Teams marked "wrong" on the CURRENT question — excluded from re-buzzing until the question
+  // itself changes, even though the buzzer reopens for everyone else once a team's marked wrong.
+  const [rejectedTeamIds, setRejectedTeamIds] = useState<Set<string | number>>(new Set());
+  const channelRef = useRef<RealtimeChannel | null>(null);
+
   const fxIdRef = useRef(0);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   // The roll → glide → effect sequence spans several chained setTimeouts (~2-3s). The shop and
@@ -213,6 +242,56 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
   const currentZone = getZone(leadPos);
   const pool = qByType.current?.[currentZone.id] ?? [];
   const currentQ = pool.length ? pool[(typeIdx[currentZone.id] ?? 0) % pool.length] : null;
+  // Identifies "this exact question" — a new value means a new question. Reused as-is below for
+  // the solo countdown's resetKey (unchanged) and now also for the buzzer's round-reset effect.
+  const taskKey = `${currentZone.id}:${typeIdx[currentZone.id] ?? 0}`;
+
+  // Refs the phone-mode broadcaster reads synchronously — same reasoning as raceTeamsRef/trackRef
+  // just above (chained setTimeouts and the channel's own closures need current values, not
+  // whatever a stale closure captured).
+  const phaseRef = useRef(phase);
+  const taskKeyRef = useRef(taskKey);
+  const buzzedTeamIdRef = useRef(buzzedTeamId);
+  const rejectedTeamIdsRef = useRef(rejectedTeamIds);
+  const connectedTeamIdsRef = useRef<Set<string | number>>(new Set());
+  const sendStateRef = useRef<(() => void) | null>(null);
+  useEffect(() => { phaseRef.current = phase; }, [phase]);
+  useEffect(() => { taskKeyRef.current = taskKey; }, [taskKey]);
+  useEffect(() => { buzzedTeamIdRef.current = buzzedTeamId; }, [buzzedTeamId]);
+  useEffect(() => { rejectedTeamIdsRef.current = rejectedTeamIds; }, [rejectedTeamIds]);
+
+  // Buffers buzzes for the current round (a "round" resets on a new question OR on markBuzzWrong,
+  // see resetBuzzRound below) so the screen can pick whichever buzz has the earliest client
+  // timestamp once the collection window closes, rather than whichever broadcast physically
+  // arrives first — see the buzzer plan for why that distinction matters.
+  const pendingBuzzesRef = useRef<{ teamId: string | number; ts: number }[]>([]);
+  const buzzWindowTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const resetBuzzRound = () => {
+    if (buzzWindowTimerRef.current) clearTimeout(buzzWindowTimerRef.current);
+    buzzWindowTimerRef.current = null;
+    pendingBuzzesRef.current = [];
+    setBuzzedTeamId(null);
+  };
+
+  // A genuinely new question clears everything, including which teams already had a wrong guess —
+  // that only applies within one question.
+  useEffect(() => {
+    resetBuzzRound();
+    setRejectedTeamIds(new Set());
+    return resetBuzzRound;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [taskKey]);
+
+  // Teacher-only, screen-side: the buzzed-in team didn't actually have it — excludes them from
+  // re-buzzing this same question and reopens the buzzer to everyone else still eligible. Only
+  // meaningful before the answer's revealed; once showAns is true the race is over and the existing
+  // pick-any-team / No one got it row is what resolves things from there.
+  const markBuzzWrong = () => {
+    if (buzzedTeamId === null) return;
+    setRejectedTeamIds(prev => new Set(prev).add(buzzedTeamId));
+    resetBuzzRound();
+  };
 
   const showToast = (msg: string) => {
     setToastMsg(msg);
@@ -401,7 +480,7 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
     SOLO_TASK_SECONDS,
     isSolo && phase === "task",
     () => skipTask(),
-    `${currentZone.id}:${typeIdx[currentZone.id] ?? 0}`,
+    taskKey,
     showAns
   );
 
@@ -490,6 +569,115 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
     return () => { if (serializeStateRef) serializeStateRef.current = null; };
   }, [serializeStateRef, raceTeams, track]);
 
+  const handlePickPhoneMode = () => {
+    setInputMode("phone");
+    setSessionCode(generateSessionCode());
+    setIntroStep("qr");
+  };
+
+  const handlePickScreenMode = () => {
+    setInputMode("screen");
+    setIntroStep("setup");
+    setSessionCode(null);
+    setConnectedTeamIds(new Set());
+  };
+
+  // Opens/closes the realtime channel only when phone mode itself is toggled on/off. Screen-
+  // authoritative like every other phone-mode game — a phone's buzz is purely an input-timing
+  // signal the screen resolves (see resetBuzzRound/BUZZ_WINDOW_MS above); nothing about scoring,
+  // the dice roll, or chooseWinner/skipTask ever runs on a phone.
+  useEffect(() => {
+    if (inputMode !== "phone" || !sessionCode) return;
+    const channel = openRaceTrackChannel(sessionCode);
+    channelRef.current = channel;
+
+    const sendState = () => {
+      const rawPhase = phaseRef.current;
+      const mappedPhase: RaceTrackPhase = rawPhase === "intro" ? "lobby"
+        : rawPhase === "gameover" ? "final"
+        : rawPhase === "task" ? "task"
+        : "interlude";
+      const positions: Record<string, number> = {};
+      teams.forEach(t => { positions[String(t.id)] = raceTeamsRef.current[t.id]?.pos ?? 0; });
+      const payload: RaceTrackStatePayload = {
+        phase: mappedPhase,
+        roster: teams.map(t => ({ id: t.id, name: t.name, color: t.color, mascot: t.mascot })),
+        connectedTeamIds: Array.from(connectedTeamIdsRef.current),
+        taskKey: taskKeyRef.current,
+        buzzedTeamId: buzzedTeamIdRef.current,
+        rejectedTeamIds: Array.from(rejectedTeamIdsRef.current),
+        positions,
+        ts: Date.now(),
+      };
+      channel.send({ type: "broadcast", event: "state", payload });
+    };
+    sendStateRef.current = sendState;
+
+    channel.on("presence", { event: "sync" }, () => {
+      const presenceState = channel.presenceState<{ teamId: string | number }>();
+      const ids = new Set<string | number>();
+      Object.values(presenceState).forEach(entries => entries.forEach(entry => ids.add(entry.teamId)));
+      connectedTeamIdsRef.current = ids;
+      setConnectedTeamIds(ids);
+      sendState();
+    });
+
+    // The only place phone input touches game logic — collects buzzes for the current round into a
+    // buffer and resolves the earliest client timestamp once BUZZ_WINDOW_MS has passed, rather than
+    // trusting arrival order (see the buzzer plan for why).
+    channel.on("broadcast", { event: "action" }, ({ payload }) => {
+      const action = payload as RaceTrackActionPayload;
+      if (action.action !== "buzz") return;
+      if (phaseRef.current !== "task") return;
+      if (rejectedTeamIdsRef.current.has(action.teamId)) return;
+      // This round already has a winner (window already closed) — a straggling buzz doesn't get to
+      // reopen anything; only markBuzzWrong (or a new question) does that.
+      if (buzzedTeamIdRef.current !== null) return;
+      const roundKey = taskKeyRef.current;
+      if (buzzWindowTimerRef.current === null && pendingBuzzesRef.current.length === 0) {
+        // First buzz of this round — open the collection window.
+        pendingBuzzesRef.current = [{ teamId: action.teamId, ts: action.ts }];
+        buzzWindowTimerRef.current = setTimeout(() => {
+          buzzWindowTimerRef.current = null;
+          // A new question (or a markBuzzWrong reopen) since this timer was armed already cleared
+          // the buffer via resetBuzzRound — only resolve if this round is still the live one.
+          if (taskKeyRef.current !== roundKey || pendingBuzzesRef.current.length === 0) return;
+          const winner = [...pendingBuzzesRef.current].sort((a, b) => a.ts - b.ts)[0];
+          pendingBuzzesRef.current = [];
+          setBuzzedTeamId(winner.teamId);
+        }, BUZZ_WINDOW_MS);
+      } else {
+        pendingBuzzesRef.current.push({ teamId: action.teamId, ts: action.ts });
+      }
+    });
+
+    channel.subscribe(status => {
+      if (status === "SUBSCRIBED") sendState();
+    });
+
+    const interval = setInterval(sendState, 4000);
+
+    return () => {
+      clearInterval(interval);
+      closeChannel(channel);
+      channelRef.current = null;
+      sendStateRef.current = null;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inputMode, sessionCode, teams]);
+
+  // Pushes an immediate state update on transitions rather than waiting for the standing interval.
+  useEffect(() => {
+    sendStateRef.current?.();
+  }, [phase, taskKey, buzzedTeamId, rejectedTeamIds]);
+
+  // Tells every connected phone the race is over the moment it actually ends.
+  useEffect(() => {
+    if (phase === "gameover" && channelRef.current) {
+      channelRef.current.send({ type: "broadcast", event: "ended", payload: {} });
+    }
+  }, [phase]);
+
   const arenaStyle: React.CSSProperties = {
     margin: "-20px", padding: "20px", borderRadius: "20px", position: "relative", overflow: "hidden",
     background: "radial-gradient(ellipse at 40% 40%,#0E2040 0%,#060E1C 100%)",
@@ -523,6 +711,44 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
           <div style={{ width: "14px", height: "14px", borderRadius: "50%", background: "#FBBF24", animation: "rtLightPulse 1.4s ease-in-out infinite 0.25s" }} />
           <div style={{ width: "14px", height: "14px", borderRadius: "50%", background: "#4ADE80", animation: "rtLightPulse 1.4s ease-in-out infinite 0.5s" }} />
         </div>
+        {teams.length > 1 && (
+          <>
+            {introStep === "setup" && (
+              <div style={{ marginBottom: "20px" }}>
+                <div style={{ fontSize: "13px", color: "#93C5FD", fontWeight: "700", marginBottom: "10px" }}>How will teams buzz in?</div>
+                <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
+                  <button onClick={handlePickScreenMode} className="rt-btn" style={{
+                    padding: "10px 20px", borderRadius: "12px", fontWeight: "800", fontSize: "14px", cursor: "pointer",
+                    border: `2px solid ${inputMode === "screen" ? "#EF4444" : "rgba(255,255,255,0.2)"}`,
+                    background: inputMode === "screen" ? "rgba(239,68,68,0.15)" : "rgba(255,255,255,0.05)",
+                    color: inputMode === "screen" ? "#F87171" : "#93C5FD",
+                  }}>🖥️ Play on Screen</button>
+                  <button onClick={handlePickPhoneMode} className="rt-btn" style={{
+                    padding: "10px 20px", borderRadius: "12px", fontWeight: "800", fontSize: "14px", cursor: "pointer",
+                    border: `2px solid ${inputMode === "phone" ? "#EF4444" : "rgba(255,255,255,0.2)"}`,
+                    background: inputMode === "phone" ? "rgba(239,68,68,0.15)" : "rgba(255,255,255,0.05)",
+                    color: inputMode === "phone" ? "#F87171" : "#93C5FD",
+                  }}>📱 Play on Phones</button>
+                </div>
+              </div>
+            )}
+
+            {introStep === "qr" && sessionCode && (() => {
+              const joinUrl = `${window.location.origin}${window.location.pathname}?join=${sessionCode}&game=racetrack`;
+              return (
+                <PhoneJoinPanel
+                  sessionCode={sessionCode} joinUrl={joinUrl} teams={teams} connectedTeamIds={connectedTeamIds}
+                  accent="#F87171" panelBg="linear-gradient(160deg,#1E293B,#0B0F17)" borderColor="#EF444466"
+                  footer={
+                    <button onClick={handlePickScreenMode} style={{ background: "none", border: "none", color: "#5A7399", fontSize: "12px", fontWeight: "700", cursor: "pointer", textDecoration: "underline" }}>
+                      Switch back to Play on Screen
+                    </button>
+                  }
+                />
+              );
+            })()}
+          </>
+        )}
         <button onClick={() => setShowHowTo(true)} className="rt-btn" style={{ display: "block", margin: "0 auto 14px", background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
           ❓ How to Play
         </button>
@@ -566,6 +792,13 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
   return (
     <div style={arenaStyle}>
       {STYLE_TAG}
+      {inputMode === "phone" && sessionCode && (
+        <PhoneReconnectBadge
+          sessionCode={sessionCode} joinUrl={`${window.location.origin}${window.location.pathname}?join=${sessionCode}&game=racetrack`}
+          teams={teams} connectedTeamIds={connectedTeamIds}
+          accent="#F87171" panelBg="linear-gradient(160deg,#1E293B,#0B0F17)" borderColor="#EF444466"
+        />
+      )}
       <div style={{ position: "relative", zIndex: 1 }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "10px", marginBottom: "12px", flexWrap: "wrap" }}>
           <div style={{ background: currentZone.color, color: "#0B0F17", borderRadius: "10px", padding: "6px 14px", fontWeight: "800", fontSize: "13px" }}>
@@ -727,12 +960,27 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
               </div>
             )}
             <QuestionCard question={currentQ} showAnswer={showAns} onReveal={() => setShowAns(true)} gameId="racetrack" />
+            {buzzedTeamId !== null && (() => {
+              const buzzedTeam = teams.find(t => t.id === buzzedTeamId);
+              return (
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "12px", flexWrap: "wrap", background: "#172438", border: `1.5px solid ${buzzedTeam?.color.bg ?? "#F7C948"}`, borderRadius: "12px", padding: "10px 16px", marginTop: "12px" }}>
+                  <span style={{ fontWeight: "800", fontSize: "14px", color: "#F7C948" }}>⚡ {buzzedTeam?.mascot ?? buzzedTeam?.color.emoji} {buzzedTeam?.name} buzzed in first!</span>
+                  {!showAns && (
+                    <button onClick={markBuzzWrong} className="rt-btn" style={{ background: "#374151", color: "#FCA5A5", border: "1px solid #7F1D1D", borderRadius: "8px", padding: "5px 12px", fontWeight: "700", fontSize: "12px", cursor: "pointer" }}>❌ Wrong — reopen buzzer</button>
+                  )}
+                </div>
+              );
+            })()}
             {(showAns || currentQ?.type === "speaking task") && (
               <div style={{ marginTop: "14px" }}>
                 <p style={{ textAlign: "center", fontWeight: "700", color: "#DDE8FF", marginBottom: "10px", fontSize: "14px" }}>Which team got it right?</p>
                 <div style={{ display: "grid", gridTemplateColumns: teamsGridCols(teams.length), gap: "8px", marginBottom: "10px" }}>
                   {teams.map(t => (
-                    <button key={t.id} onClick={() => chooseWinner(t.id)} className="rt-btn" style={{ background: t.color.bg, color: "white", border: "none", borderRadius: "10px", padding: "10px 8px", fontWeight: "800", fontSize: "14px", cursor: "pointer", transition: "transform 0.15s ease" }}>✅ {t.name}</button>
+                    <button key={t.id} onClick={() => chooseWinner(t.id)} className="rt-btn" style={{
+                      background: t.color.bg, color: "white", border: t.id === buzzedTeamId ? "3px solid #F7C948" : "none",
+                      borderRadius: "10px", padding: "10px 8px", fontWeight: "800", fontSize: "14px", cursor: "pointer", transition: "transform 0.15s ease",
+                      opacity: rejectedTeamIds.has(t.id) ? 0.6 : 1,
+                    }}>{rejectedTeamIds.has(t.id) ? "❌" : "✅"} {t.name}</button>
                   ))}
                 </div>
                 <div style={{ textAlign: "center" }}>
