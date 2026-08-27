@@ -245,6 +245,8 @@ export type OrderUpTicketInfo = {
   totalSeconds: number;
   secondsLeft: number;
   claimedBy?: string | number;
+  // Only meaningful once answerMode is "typing" — undefined in "spoken" the whole game through.
+  submittedSentence?: string;
 };
 
 export type OrderUpStatePayload = {
@@ -254,13 +256,22 @@ export type OrderUpStatePayload = {
   sessionTimeLeft: number;
   scores: Record<string, number>;
   connectedTeamIds: (string | number)[];
+  // Whole-session choice (picked once alongside phone mode itself, like Hot Seat's teamStructure)
+  // — never varies per team or per ticket.
+  answerMode: "spoken" | "typing";
+  // Mirrors the screen's own judging?.ticketId ?? null — lets a phone tell "still mine to edit"
+  // from "the teacher is looking at this right now," so a typed answer can't change out from under
+  // an in-progress judgment.
+  judgingTicketId: number | null;
   ts: number;
 };
 
 // Named claimTicket, not bare "claim" — PhoneJoinScreen.tsx already has its own unrelated
 // team-identity "claim" (handleClaim/claimedTeamId) for joining the session in the first place;
 // keeping the field name distinct avoids confusing the two concepts when skimming this file later.
-export type OrderUpActionPayload = { teamId: string | number; action: "claimTicket"; ticketId: number };
+export type OrderUpActionPayload =
+  | { teamId: string | number; action: "claimTicket"; ticketId: number }
+  | { teamId: string | number; action: "submitSentence"; ticketId: number; sentence: string };
 
 function orderUpChannelName(code: string): string {
   return `orderup-${code}`;
