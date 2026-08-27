@@ -32,14 +32,17 @@ export const PPP_TIERS: PPPTier[] = [
     label: "Production",
     blurb: "Full sentences, prompted — students build language, not just pick it.",
     color: "#F59E0B",
-    gameIds: ["minefield", "rocket", "orderup", "cards"],
+    gameIds: ["minefield", "rocket", "orderup"],
   },
   {
     id: "free-production",
     label: "Free Production",
+    // Card Shuffle's own desc is "an open speaking or writing task" — an unscripted, open-ended
+    // prompt (can run to a full monologue/story), a step up from the fixed-sentence-construction
+    // games in Production above. That puts it with Hot Seat/Spy/Zombie Siege, not with them.
     blurb: "Sustained, unscripted talking — full fluency practice.",
     color: "#EF4444",
-    gameIds: ["hotseat", "spy", "zombie"],
+    gameIds: ["cards", "hotseat", "spy", "zombie"],
   },
 ];
 
