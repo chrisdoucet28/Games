@@ -73,8 +73,8 @@ export const GAME_MODES: GameMode[] = [
   { id: "minefield", name: "Minefield", icon: "💣",  desc: "Combine sentence fragments to speak — and dodge the mines", color: "#EF4444", tag: "Full sentences, spoken aloud" },
   { id: "rocket",    name: "Rocket Fuel", icon: "🚀",  desc: "Use the given word in a sentence to fuel your team's rocket", color: "#6366F1", tag: "Original sentences, prompt after prompt" },
   { id: "orderup",   name: "Order Up", icon: "🍽️",  desc: "Customers order food tied to grammar or vocabulary targets — write one sentence that satisfies every item on the ticket before their patience runs out", color: "#F43F5E", tag: "Full sentences, written — not spoken · shared floor" },
-  { id: "cards",     name: "Card Shuffle", icon: "🃏",  desc: "Pick a card and complete an open speaking or writing task", color: "#F59E0B", tag: "One open speaking prompt" },
   { id: "hotseat",   name: "Hot Seat", icon: "🔥",  desc: "Describe words to your teammate — no spelling allowed", color: "#EF4444", tag: "Nonstop improvised talking" },
+  { id: "cards",     name: "Card Shuffle", icon: "🃏",  desc: "Pick a card and complete an open speaking or writing task", color: "#F59E0B", tag: "One open speaking prompt" },
   { id: "spy",       name: "Spy Among Us", icon: "🕵️",  desc: "Speak freely, listen carefully, find who has a different topic", color: "#374151", tag: "Sustained free conversation" },
   { id: "zombie",    name: "Zombie Siege", icon: "🧟",  desc: "Add sentences to a shared prompt to barricade the house — clear each wave of zombies before the next, bigger one arrives", color: "#65A30D", tag: "Free-for-all sentence-throwing · wave-based pressure" },
 ];
