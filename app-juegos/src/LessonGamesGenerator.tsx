@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { TeamIcon, MASCOT_ICON_BY_EMOJI } from "./components/shared/TeamIcon";
 import type { Team, GameMode, QuestionData, SavedClass, Subscription, TeamRosterEntry } from "./types";
-import { TEAM_COLORS, GAME_MODES, MASCOT_OPTIONS, LEVELS_META, FREE_PLAN_LIMITS, FREE_LAUNCH_ALL_PREMIUM } from "./data/constants";
+import { TEAM_COLORS, GAME_MODES, GAME_ICONS, MASCOT_OPTIONS, LEVELS_META, FREE_PLAN_LIMITS, FREE_LAUNCH_ALL_PREMIUM } from "./data/constants";
 import { getGameTier } from "./data/pppTiers";
 import { PPPDiagram } from "./components/shared/PPPDiagram";
 // Asegúrate de que TOPIC_LIBRARY esté exportado desde tu archivo topics.ts junto con TOPIC_OPTIONS
@@ -17,6 +18,8 @@ import { BillingScreen } from "./components/shared/BillingScreen";
 import { ThemeAmbience } from "./components/shared/ThemeAmbience";
 import { FeedbackButton } from "./components/shared/FeedbackButton";
 import { BrandBadge } from "./components/shared/BrandBadge";
+import { Icon, type IconName } from "./components/shared/Icon";
+import { IconBadge } from "./components/shared/IconBadge";
 import { saveProgress, clearProgress, listClasses, createClass, upsertTeamRoster, deleteFromTeamRoster, saveTeams } from "./lib/classes";
 import { isPaidStatus } from "./lib/subscription";
 import { denseRank, medalForRank } from "./utils/ranking";
@@ -578,7 +581,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
                   style={{ textAlign: "left", background: "#F0F9FF", border: "2px solid #E5E7EB", borderRadius: "10px", padding: "10px 14px", cursor: "pointer", fontWeight: 700, color: theme.heroBg[0], fontSize: "14px" }}
                 >
                   {cls.name}
-                  {cls.in_progress && <span style={{ display: "block", fontWeight: 500, fontSize: "12px", color: "#B45309", marginTop: "2px" }}>⚠️ Has a game in progress — saving here will replace it</span>}
+                  {cls.in_progress && <span style={{ display: "flex", alignItems: "center", gap: "4px", fontWeight: 500, fontSize: "12px", color: "#B45309", marginTop: "2px" }}><Icon name="warning" size={11} /> Has a game in progress — saving here will replace it</span>}
                 </button>
               ))}
             </div>
@@ -589,9 +592,9 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
               <div style={{ fontSize: "13px", color: "#374151", fontWeight: "700", marginBottom: "8px" }}>Free plan is limited to {FREE_PLAN_LIMITS.maxClasses} class. Upgrade for unlimited classes.</div>
               <button
                 onClick={() => { setShowSavePicker(false); setScreen("billing"); }}
-                style={{ background: `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "10px", padding: "8px 16px", fontWeight: 800, cursor: "pointer", fontFamily: theme.headingFont }}
+                style={{ background: `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "10px", padding: "8px 16px", fontWeight: 800, cursor: "pointer", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px" }}
               >
-                💎 Upgrade
+                <Icon name="gem" size={14} /> Upgrade
               </button>
             </div>
           ) : (
@@ -886,7 +889,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
       <ThemeAmbience themeId={theme.id} />
       <div style={{ maxWidth: "680px", width: "100%", textAlign: "center", flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", position: "relative", zIndex: 1 }}>
         <div style={{ marginBottom: "28px" }}>
-          <div style={{ fontSize: "64px", marginBottom: "14px", filter: "drop-shadow(0 4px 16px rgba(0,0,0,0.4))" }}>🕹️</div>
+          <Icon name="joystick" size={64} color="#FCD34D" style={{ marginBottom: "14px", filter: "drop-shadow(0 4px 16px rgba(0,0,0,0.4))" }} />
           <h1 style={{ fontSize: "clamp(34px,6.5vw,60px)", fontWeight: "900", color: "white", margin: "0 0 10px", letterSpacing: "-0.02em", lineHeight: 1.1, textShadow: "0 2px 24px rgba(0,0,0,0.4)", fontFamily: theme.headingFont }}>
             Class<span style={{ color: "#FCD34D" }}>Cade</span>
           </h1>
@@ -896,9 +899,9 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
           </p>
         </div>
         <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "28px" }}>
-          {[{ icon: "🎯", label: `${GAME_MODES.length} Game Modes` }, { icon: "📚", label: `${realTopicOptions.length}+ Built-in Topics` }, { icon: "🏆", label: "Up to 5 Teams" }, { icon: "⚡", label: "Instant Play" }].map(s => (
+          {([{ icon: "target", label: `${GAME_MODES.length} Game Modes` }, { icon: "books", label: `${realTopicOptions.length}+ Built-in Topics` }, { icon: "trophy", label: "Up to 5 Teams" }, { icon: "bolt", label: "Instant Play" }] as { icon: IconName; label: string }[]).map(s => (
             <div key={s.label} style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: "20px", padding: "8px 16px", backdropFilter: "blur(8px)", display: "flex", alignItems: "center", gap: "7px" }}>
-              <span style={{ fontSize: "16px" }}>{s.icon}</span>
+              <Icon name={s.icon} size={16} color="white" />
               <span style={{ color: "white", fontWeight: "700", fontSize: "13px" }}>{s.label}</span>
             </div>
           ))}
@@ -907,7 +910,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
           {GAME_MODES.map(g => (
             <div key={g.id} style={{ background: "rgba(255,255,255,0.08)", borderRadius: "12px", padding: "10px 12px", border: "1px solid rgba(255,255,255,0.15)", display: "flex", flexDirection: "column", gap: "4px", backdropFilter: "blur(6px)" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "9px" }}>
-                <span style={{ fontSize: "20px", flexShrink: 0 }}>{g.icon}</span>
+                <Icon name={GAME_ICONS[g.id]} size={20} color={g.color} />
                 <span style={{ color: "rgba(255,255,255,0.9)", fontWeight: "600", fontSize: "13px", textAlign: "left", lineHeight: 1.3, fontFamily: theme.headingFont }}>{g.name}</span>
               </div>
               <span style={{ color: "rgba(255,255,255,0.8)", fontSize: "11px", textAlign: "left", lineHeight: 1.35 }}>{g.tag}</span>
@@ -915,16 +918,16 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
           ))}
         </div>
         <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
-          <button onClick={() => { setActiveClassId(null); setScreen("setup"); }} style={{ background: `linear-gradient(135deg,${theme.cta[0]},${theme.cta[1]})`, color: "white", border: "none", borderRadius: "16px", padding: "18px 56px", fontSize: "20px", fontWeight: "900", cursor: "pointer", boxShadow: `0 8px 32px ${hexToRgba(theme.cta[1], 0.45)}`, letterSpacing: "0.01em", fontFamily: theme.headingFont }}>🚀 Start a Game</button>
-          <button onClick={() => setScreen("classes")} style={{ background: "rgba(255,255,255,0.12)", border: "2px solid rgba(255,255,255,0.3)", color: "white", borderRadius: "16px", padding: "18px 40px", fontSize: "18px", fontWeight: "800", cursor: "pointer", fontFamily: theme.headingFont }}>📚 My Classes</button>
-          <button onClick={() => { setLearnFilter(null); setScreen("learn"); }} style={{ background: "rgba(255,255,255,0.12)", border: "2px solid rgba(255,255,255,0.3)", color: "white", borderRadius: "16px", padding: "18px 40px", fontSize: "18px", fontWeight: "800", cursor: "pointer", fontFamily: theme.headingFont }}>🎓 Learn</button>
-          <button onClick={() => setScreen("profile")} style={{ background: "rgba(255,255,255,0.12)", border: "2px solid rgba(255,255,255,0.3)", color: "white", borderRadius: "16px", padding: "18px 40px", fontSize: "18px", fontWeight: "800", cursor: "pointer", fontFamily: theme.headingFont }}>👤 My Profile</button>
+          <button onClick={() => { setActiveClassId(null); setScreen("setup"); }} style={{ background: `linear-gradient(135deg,${theme.cta[0]},${theme.cta[1]})`, color: "white", border: "none", borderRadius: "16px", padding: "18px 56px", fontSize: "20px", fontWeight: "900", cursor: "pointer", boxShadow: `0 8px 32px ${hexToRgba(theme.cta[1], 0.45)}`, letterSpacing: "0.01em", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "8px" }}><Icon name="rocket" size={20} /> Start a Game</button>
+          <button onClick={() => setScreen("classes")} style={{ background: "rgba(255,255,255,0.12)", border: "2px solid rgba(255,255,255,0.3)", color: "white", borderRadius: "16px", padding: "18px 40px", fontSize: "18px", fontWeight: "800", cursor: "pointer", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "8px" }}><Icon name="books" size={18} /> My Classes</button>
+          <button onClick={() => { setLearnFilter(null); setScreen("learn"); }} style={{ background: "rgba(255,255,255,0.12)", border: "2px solid rgba(255,255,255,0.3)", color: "white", borderRadius: "16px", padding: "18px 40px", fontSize: "18px", fontWeight: "800", cursor: "pointer", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "8px" }}><Icon name="learn" size={18} /> Learn</button>
+          <button onClick={() => setScreen("profile")} style={{ background: "rgba(255,255,255,0.12)", border: "2px solid rgba(255,255,255,0.3)", color: "white", borderRadius: "16px", padding: "18px 40px", fontSize: "18px", fontWeight: "800", cursor: "pointer", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "8px" }}><Icon name="person" size={18} /> My Profile</button>
           {/* Hidden during the free-launch phase — see FREE_LAUNCH_ALL_PREMIUM in data/constants.ts.
               Everyone already has premium, so there's nothing useful for this button to show (and
               clicking into BillingScreen would render a confusing paid-but-no-real-subscription
               state). Just delete this guard clause to bring it back once billing is re-enabled. */}
           {!FREE_LAUNCH_ALL_PREMIUM && (
-            <button onClick={() => setScreen("billing")} style={{ background: "rgba(255,255,255,0.12)", border: "2px solid rgba(255,255,255,0.3)", color: "white", borderRadius: "16px", padding: "18px 40px", fontSize: "18px", fontWeight: "800", cursor: "pointer", fontFamily: theme.headingFont }}>{isPaid ? "💎 My Plan" : "💎 Upgrade"}</button>
+            <button onClick={() => setScreen("billing")} style={{ background: "rgba(255,255,255,0.12)", border: "2px solid rgba(255,255,255,0.3)", color: "white", borderRadius: "16px", padding: "18px 40px", fontSize: "18px", fontWeight: "800", cursor: "pointer", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "8px" }}><Icon name="gem" size={18} /> {isPaid ? "My Plan" : "Upgrade"}</button>
           )}
         </div>
       </div>
@@ -997,10 +1000,10 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
       <div style={{ minHeight: "100vh", background: "#F0F9FF", padding: "20px", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
         {renderSavePicker()}
         <div style={{ maxWidth: "720px", margin: "0 auto" }}>
-          <button onClick={() => { setActiveClassId(null); setScreen("welcome"); }} style={{ background: "none", border: `2px solid ${theme.accentSolid}`, color: theme.accentSolid, borderRadius: "10px", padding: "8px 16px", cursor: "pointer", fontWeight: "700", marginBottom: "20px", fontFamily: theme.headingFont }}>← Back</button>
+          <button onClick={() => { setActiveClassId(null); setScreen("welcome"); }} style={{ background: "none", border: `2px solid ${theme.accentSolid}`, color: theme.accentSolid, borderRadius: "10px", padding: "8px 16px", cursor: "pointer", fontWeight: "700", marginBottom: "20px", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px" }}><Icon name="back" size={13} /> Back</button>
 
           <div style={{ textAlign: "center", marginBottom: "28px" }}>
-            <h2 style={{ fontSize: "32px", fontWeight: "900", color: theme.heroBg[0], margin: 0, fontFamily: theme.headingFont }}>⚙️ Game Setup</h2>
+            <h2 style={{ fontSize: "32px", fontWeight: "900", color: theme.heroBg[0], margin: 0, fontFamily: theme.headingFont, display: "flex", alignItems: "center", justifyContent: "center", gap: "10px" }}><Icon name="gear" size={28} /> Game Setup</h2>
             <p style={{ color: "#6B7280", marginTop: "8px" }}>Set up your class, then pick one or more topics and a game</p>
           </div>
 
@@ -1066,7 +1069,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
             </div>
 
             <div style={{ position: "relative", marginBottom: "14px" }}>
-              <span style={{ position: "absolute", left: "14px", top: "50%", transform: "translateY(-50%)", fontSize: "15px", color: "#9CA3AF", pointerEvents: "none" }}>🔍</span>
+              <Icon name="search" size={15} color="#9CA3AF" style={{ position: "absolute", left: "14px", top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
               <input
                 type="text"
                 value={topicSearch}
@@ -1083,9 +1086,9 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
                   type="button"
                   onClick={() => setTopicSearch("")}
                   aria-label="Clear search"
-                  style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", background: hexToRgba(theme.accentSolid, 0.12), border: "none", borderRadius: "50%", width: "22px", height: "22px", color: theme.accentSolid, fontWeight: "800", fontSize: "12px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
+                  style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", background: hexToRgba(theme.accentSolid, 0.12), border: "none", borderRadius: "50%", width: "22px", height: "22px", color: theme.accentSolid, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
                 >
-                  ✕
+                  <Icon name="close" size={10} />
                 </button>
               )}
             </div>
@@ -1139,16 +1142,17 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
                   borderRadius: "20px", padding: "4px 14px", fontWeight: "700", fontSize: "12px",
                   color: rosterSaveStatus === "saved" ? "#166534" : "#9CA3AF",
                   cursor: rosterSaveStatus === "saving" ? "default" : "pointer", flexShrink: 0,
+                  display: "inline-flex", alignItems: "center", gap: "5px",
                 }}
               >
-                {rosterSaveStatus === "saving" ? "Saving…" : rosterSaveStatus === "saved" ? "✅ Saved!" : "💾 Save teams to class"}
+                {rosterSaveStatus === "saving" ? "Saving…" : rosterSaveStatus === "saved" ? <><Icon name="check" size={12} /> Saved!</> : <><Icon name="save" size={12} /> Save teams to class</>}
               </button>
-              <button onClick={() => resetTeamsToNormal()} title="0 points, no mascots, original colors and names" style={{ background: "none", border: "2px solid #D1D5DB", borderRadius: "20px", padding: "4px 14px", fontWeight: "700", fontSize: "12px", color: "#9CA3AF", cursor: "pointer", flexShrink: 0 }}>♻️ Reset teams to normal</button>
+              <button onClick={() => resetTeamsToNormal()} title="0 points, no mascots, original colors and names" style={{ background: "none", border: "2px solid #D1D5DB", borderRadius: "20px", padding: "4px 14px", fontWeight: "700", fontSize: "12px", color: "#9CA3AF", cursor: "pointer", flexShrink: 0, display: "inline-flex", alignItems: "center", gap: "5px" }}><Icon name="refresh" size={12} /> Reset teams to normal</button>
             </div>
             {activeClassId && teamRoster.length > 0 && (
               <div style={{ marginBottom: "14px" }}>
-                <div style={{ fontSize: "12px", fontWeight: "700", color: "#6B7280", marginBottom: "6px" }}>
-                  🗂️ Saved teams for this class — tap to bring in today
+                <div style={{ fontSize: "12px", fontWeight: "700", color: "#6B7280", marginBottom: "6px", display: "flex", alignItems: "center", gap: "5px" }}>
+                  <Icon name="folder" size={13} /> Saved teams for this class — tap to bring in today
                 </div>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
                   {teamRoster.map(entry => {
@@ -1169,7 +1173,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
                             fontWeight: isActive ? "800" : "700", fontSize: "13px", opacity: locked ? 0.5 : 1,
                           }}
                         >
-                          {entry.mascot ?? entry.color.emoji} {entry.name}
+                          <TeamIcon team={entry} color={isActive ? "white" : undefined} /> {entry.name}
                         </button>
                         <button
                           type="button"
@@ -1180,7 +1184,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
                             background: "#EF4444", color: "white", border: "2px solid white", fontSize: "10px", lineHeight: 1, cursor: "pointer",
                             padding: 0, display: "flex", alignItems: "center", justifyContent: "center",
                           }}
-                        >✕</button>
+                        ><Icon name="close" size={9} /></button>
                       </div>
                     );
                   })}
@@ -1195,14 +1199,14 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
                     key={n}
                     onClick={() => locked ? setScreen("billing") : setNumTeams(n)}
                     title={locked ? `Free plan is limited to ${FREE_PLAN_LIMITS.maxTeams} teams — upgrade to unlock more` : undefined}
-                    style={{ background: numTeams === n ? theme.accentSolid : "white", color: numTeams === n ? "white" : locked ? "#9CA3AF" : "#374151", border: `3px solid ${numTeams === n ? theme.accentSolid : "#D1D5DB"}`, borderRadius: "12px", padding: "10px 24px", fontSize: "18px", fontWeight: "800", cursor: "pointer", opacity: locked ? 0.6 : 1 }}
+                    style={{ background: numTeams === n ? theme.accentSolid : "white", color: numTeams === n ? "white" : locked ? "#9CA3AF" : "#374151", border: `3px solid ${numTeams === n ? theme.accentSolid : "#D1D5DB"}`, borderRadius: "12px", padding: "10px 24px", fontSize: "18px", fontWeight: "800", cursor: "pointer", opacity: locked ? 0.6 : 1, display: "inline-flex", alignItems: "center", gap: "5px" }}
                   >
-                    {locked ? "🔒 " : ""}{n}
+                    {locked && <Icon name="lock" size={13} />}{n}
                   </button>
                 );
               })}
               {!isPaid && (
-                <span style={{ color: "#9CA3AF", fontSize: "12px", fontWeight: "700" }}>💎 Upgrade for up to 5 teams</span>
+                <span style={{ color: "#9CA3AF", fontSize: "12px", fontWeight: "700", display: "inline-flex", alignItems: "center", gap: "5px" }}><Icon name="gem" size={13} /> Upgrade for up to 5 teams</span>
               )}
             </div>
             <div style={{ display: "grid", gridTemplateColumns: `repeat(auto-fit,minmax(${numTeams > 3 ? "160px" : "180px"},1fr))`, gap: "12px" }}>
@@ -1212,7 +1216,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
                 return (
                   <div key={i} style={{ border: `3px solid ${color.bg}`, borderRadius: "14px", overflow: "hidden", background: "white" }}>
                     <div style={{ background: color.bg, padding: "8px 10px", display: "flex", alignItems: "center", gap: "6px" }}>
-                      <span style={{ fontSize: "16px" }}>{teamMascots[i] ?? color.emoji}</span>
+                      <TeamIcon team={{ mascot: teamMascots[i], color }} size={16} color="white" />
                       <span style={{ color: "white", fontWeight: "800", fontSize: "13px" }}>{color.name}</span>
                     </div>
                     <input
@@ -1267,18 +1271,19 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
                       <button
                         type="button" title="No mascot"
                         onClick={() => { const next = [...teamMascots]; next[i] = null; setTeamMascots(next); }}
-                        style={{ width: "22px", height: "22px", borderRadius: "6px", fontSize: "11px", color: "#9CA3AF", background: teamMascots[i] == null ? "#F3F4F6" : "transparent", border: teamMascots[i] == null ? `2px solid ${color.bg}` : "1px solid #E5E7EB", cursor: "pointer", flexShrink: 0 }}
-                      >✕</button>
+                        style={{ width: "22px", height: "22px", borderRadius: "6px", color: "#9CA3AF", background: teamMascots[i] == null ? "#F3F4F6" : "transparent", border: teamMascots[i] == null ? `2px solid ${color.bg}` : "1px solid #E5E7EB", cursor: "pointer", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}
+                      ><Icon name="close" size={11} /></button>
                       {MASCOT_OPTIONS.map(m => (
                         <button
                           key={m} type="button" title={m}
                           onClick={() => { const next = [...teamMascots]; next[i] = m; setTeamMascots(next); }}
                           style={{
-                            width: "22px", height: "22px", borderRadius: "6px", fontSize: "13px", cursor: "pointer", flexShrink: 0,
+                            width: "22px", height: "22px", borderRadius: "6px", cursor: "pointer", flexShrink: 0,
                             background: teamMascots[i] === m ? color.light : "transparent",
                             border: teamMascots[i] === m ? `2px solid ${color.bg}` : "1px solid transparent",
+                            display: "flex", alignItems: "center", justifyContent: "center", color: color.dark,
                           }}
-                        >{m}</button>
+                        ><Icon name={MASCOT_ICON_BY_EMOJI[m]} size={14} /></button>
                       ))}
                     </div>
                   </div>
@@ -1289,8 +1294,8 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
 
           {loadError && <div style={{ color: "#DC2626", fontWeight: "800", textAlign: "center", marginBottom: "12px" }}>{loadError}</div>}
 
-          <button onClick={handleSetup} disabled={selectedTopics.length === 0} style={{ width: "100%", background: selectedTopics.length === 0 ? "#CBD5E1" : `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "16px", padding: "18px", fontSize: "20px", fontWeight: "900", cursor: selectedTopics.length === 0 ? "not-allowed" : "pointer", fontFamily: theme.headingFont }}>
-            🎮 Choose a Game!
+          <button onClick={handleSetup} disabled={selectedTopics.length === 0} style={{ width: "100%", background: selectedTopics.length === 0 ? "#CBD5E1" : `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "16px", padding: "18px", fontSize: "20px", fontWeight: "900", cursor: selectedTopics.length === 0 ? "not-allowed" : "pointer", fontFamily: theme.headingFont, display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+            <Icon name="controller" size={20} /> Choose a Game!
           </button>
         </div>
         <FeedbackButton />
@@ -1319,9 +1324,9 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
             {selectedTopics.some(id => LESSONS[id]) && (
               <button
                 onClick={() => { setLearnFilter(selectedTopics.filter(id => LESSONS[id])); setScreen("learn"); }}
-                style={{ background: "rgba(255,255,255,0.15)", border: "2px solid rgba(255,255,255,0.35)", color: "white", borderRadius: "12px", padding: "8px 18px", fontSize: "13px", fontWeight: "800", cursor: "pointer", marginTop: "14px", fontFamily: theme.headingFont }}
+                style={{ background: "rgba(255,255,255,0.15)", border: "2px solid rgba(255,255,255,0.35)", color: "white", borderRadius: "12px", padding: "8px 18px", fontSize: "13px", fontWeight: "800", cursor: "pointer", marginTop: "14px", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px" }}
               >
-                📖 Review these topics
+                <Icon name="bookOpen" size={14} /> Review these topics
               </button>
             )}
           </div>
@@ -1338,13 +1343,14 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
                 borderRadius: "20px", padding: "4px 16px", fontWeight: "700", fontSize: "12px",
                 color: teamsSaveStatus === "saved" ? "#166534" : "#9CA3AF",
                 cursor: teamsSaveStatus === "saving" ? "default" : "pointer",
+                display: "inline-flex", alignItems: "center", gap: "5px",
               }}
             >
-              {teamsSaveStatus === "saving" ? "Saving…" : teamsSaveStatus === "saved" ? "✅ Saved!" : "💾 Save teams to class"}
+              {teamsSaveStatus === "saving" ? "Saving…" : teamsSaveStatus === "saved" ? <><Icon name="check" size={12} /> Saved!</> : <><Icon name="save" size={12} /> Save teams to class</>}
             </button>
-            <button onClick={() => setTeams(ts => ts.map(t => ({ ...t, score: 0 })))} style={{ background: "none", border: "2px solid #D1D5DB", borderRadius: "20px", padding: "4px 16px", fontWeight: "700", fontSize: "12px", color: "#9CA3AF", cursor: "pointer" }}>🔄 Reset all scores to 0</button>
-            <button onClick={() => resetTeamsToNormal()} title="0 points, no mascots, original colors and names" style={{ background: "none", border: "2px solid #D1D5DB", borderRadius: "20px", padding: "4px 16px", fontWeight: "700", fontSize: "12px", color: "#9CA3AF", cursor: "pointer" }}>♻️ Reset teams to normal</button>
-            <button onClick={() => setScreen("setup")} style={{ background: "none", border: "2px solid #D1D5DB", borderRadius: "20px", padding: "4px 16px", fontWeight: "700", fontSize: "12px", color: "#9CA3AF", cursor: "pointer" }}>⚙️ Edit teams & settings</button>
+            <button onClick={() => setTeams(ts => ts.map(t => ({ ...t, score: 0 })))} style={{ background: "none", border: "2px solid #D1D5DB", borderRadius: "20px", padding: "4px 16px", fontWeight: "700", fontSize: "12px", color: "#9CA3AF", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "5px" }}><Icon name="refresh" size={12} /> Reset all scores to 0</button>
+            <button onClick={() => resetTeamsToNormal()} title="0 points, no mascots, original colors and names" style={{ background: "none", border: "2px solid #D1D5DB", borderRadius: "20px", padding: "4px 16px", fontWeight: "700", fontSize: "12px", color: "#9CA3AF", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "5px" }}><Icon name="refresh" size={12} /> Reset teams to normal</button>
+            <button onClick={() => setScreen("setup")} style={{ background: "none", border: "2px solid #D1D5DB", borderRadius: "20px", padding: "4px 16px", fontWeight: "700", fontSize: "12px", color: "#9CA3AF", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "5px" }}><Icon name="gear" size={12} /> Edit teams & settings</button>
         </div>
 
         {loadError && <div style={{ color: "red", fontWeight: "bold", textAlign: "center" }}>{loadError}</div>}
@@ -1354,9 +1360,9 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
             onClick={playRandomGame}
             disabled={loadingGame || randomSpinIndex !== null}
             title="Not sure which game to pick? Let us choose for you."
-            style={{ background: `linear-gradient(135deg,${theme.cta[0]},${theme.cta[1]})`, color: "white", border: "none", borderRadius: "14px", padding: "12px 28px", fontSize: "15px", fontWeight: "800", cursor: (loadingGame || randomSpinIndex !== null) ? "not-allowed" : "pointer", opacity: (loadingGame || randomSpinIndex !== null) ? 0.6 : 1, fontFamily: theme.headingFont, boxShadow: `0 6px 20px ${hexToRgba(theme.cta[1], 0.35)}` }}
+            style={{ background: `linear-gradient(135deg,${theme.cta[0]},${theme.cta[1]})`, color: "white", border: "none", borderRadius: "14px", padding: "12px 28px", fontSize: "15px", fontWeight: "800", cursor: (loadingGame || randomSpinIndex !== null) ? "not-allowed" : "pointer", opacity: (loadingGame || randomSpinIndex !== null) ? 0.6 : 1, fontFamily: theme.headingFont, boxShadow: `0 6px 20px ${hexToRgba(theme.cta[1], 0.35)}`, display: "inline-flex", alignItems: "center", gap: "6px" }}
           >
-            {randomSpinIndex !== null ? "🎲 Picking..." : "🎲 Surprise Me! (Random Game)"}
+            <Icon name="dice" size={15} /> {randomSpinIndex !== null ? "Picking..." : "Surprise Me! (Random Game)"}
           </button>
         </div>
 
@@ -1379,12 +1385,12 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
                   boxShadow: isSpinLit ? `0 0 0 4px ${g.color}55, 0 10px 24px ${g.color}55` : "none"
                 }}
               >
-                <div style={{ fontSize: "40px", marginBottom: "10px" }}>{g.icon}</div>
+                <div style={{ marginBottom: "10px" }}><IconBadge icon={GAME_ICONS[g.id]} color={g.color} size={52} /></div>
                 <div style={{ fontWeight: "900", fontSize: "17px", color: theme.heroBg[0], marginBottom: "4px", fontFamily: theme.headingFont }}>{g.name}</div>
                 <div style={{ fontSize: "13px", color: "#6B7280", marginBottom: "8px" }}>{g.desc}</div>
                 <div style={{ fontSize: "12px", color: g.color, fontWeight: "700", lineHeight: 1.4, borderTop: `1px solid ${g.color}33`, paddingTop: "8px", display: "flex", alignItems: "center", gap: "6px" }}>
                   {tier && <span title={tier.label} style={{ width: "8px", height: "8px", borderRadius: "50%", background: tier.color, flexShrink: 0 }} />}
-                  🗣️ {g.tag}
+                  <Icon name="mic" size={13} /> {g.tag}
                 </div>
               </div>
             );
@@ -1407,7 +1413,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
       <div ref={appRef} style={{ minHeight: "100vh", background: "#0F0A2E", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
         {renderSavePicker()}
         <div style={{ background: `linear-gradient(90deg,${theme.accent[0]},${theme.accent[1]})`, padding: "12px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <h2 style={{ color: "white", margin: 0, fontSize: "20px", fontFamily: theme.headingFont }}>{selectedGame.icon} {selectedGame.name}</h2>
+          <h2 style={{ color: "white", margin: 0, fontSize: "20px", fontFamily: theme.headingFont, display: "flex", alignItems: "center", gap: "8px" }}><Icon name={GAME_ICONS[selectedGame.id]} size={20} color="white" /> {selectedGame.name}</h2>
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
             <button
               onClick={handleSaveAndExit} disabled={saveStatus === "saving"}

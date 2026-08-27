@@ -1,6 +1,7 @@
-import { GAME_MODES } from "../../data/constants";
+import { GAME_MODES, GAME_ICONS } from "../../data/constants";
 import { LESSON_TOPICS } from "../../data/learnTopics";
 import { PPPDiagram } from "./PPPDiagram";
+import { Icon, type IconName } from "./Icon";
 
 type Props = { onSignUp: () => void; onLogIn: () => void };
 
@@ -39,7 +40,7 @@ function GameSelectMockup() {
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "8px" }}>
         {preview.map(g => (
           <div key={g.id} style={{ background: "white", border: `2px solid ${g.color}`, borderRadius: "10px", padding: "10px 6px", textAlign: "center" }}>
-            <div style={{ fontSize: "20px" }}>{g.icon}</div>
+            <div><Icon name={GAME_ICONS[g.id]} size={20} color={g.color} /></div>
             <div style={{ fontSize: "9px", fontWeight: "800", color: "#111827", marginTop: "2px" }}>{g.name}</div>
           </div>
         ))}
@@ -70,7 +71,7 @@ function ScoreboardMockup() {
   ];
   return (
     <div style={{ padding: "18px", fontFamily: "'Segoe UI',system-ui,sans-serif", textAlign: "center" }}>
-      <div style={{ fontSize: "13px", fontWeight: "900", color: "#0C1E3D", marginBottom: "10px" }}>🏆 Final Scores</div>
+      <div style={{ fontSize: "13px", fontWeight: "900", color: "#0C1E3D", marginBottom: "10px", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}><Icon name="trophy" size={16} /> Final Scores</div>
       {rows.map(r => (
         <div key={r.name} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "white", border: `2px solid ${r.color}`, borderRadius: "8px", padding: "6px 10px", marginBottom: "6px" }}>
           <span style={{ fontSize: "11px", fontWeight: "800", color: r.color }}>{r.name}</span>
@@ -81,20 +82,20 @@ function ScoreboardMockup() {
   );
 }
 
-const HOW_IT_WORKS = [
-  { n: 1, icon: "📊", title: "Pick a level & topic", body: "Filter by A1–C1 and grammar, vocabulary, or theme, then choose one or more topics for the class." },
-  { n: 2, icon: "🎓", title: "Pre-teach with a Learn lesson", body: "Open the matching Learn lesson to introduce the language first — no separate prep, it's built from the exact same content." },
-  { n: 3, icon: "🎮", title: "Play games left to right", body: "Start with low-pressure, no-speech games and move toward full spoken production as students get comfortable." },
-  { n: 4, icon: "🏆", title: "Track scores & progress", body: "Save classes and teams so scores carry over between lessons — no setup lost between sessions." },
+const HOW_IT_WORKS: { n: number; icon: IconName; title: string; body: string }[] = [
+  { n: 1, icon: "chart", title: "Pick a level & topic", body: "Filter by A1–C1 and grammar, vocabulary, or theme, then choose one or more topics for the class." },
+  { n: 2, icon: "learn", title: "Pre-teach with a Learn lesson", body: "Open the matching Learn lesson to introduce the language first — no separate prep, it's built from the exact same content." },
+  { n: 3, icon: "controller", title: "Play games left to right", body: "Start with low-pressure, no-speech games and move toward full spoken production as students get comfortable." },
+  { n: 4, icon: "trophy", title: "Track scores & progress", body: "Save classes and teams so scores carry over between lessons — no setup lost between sessions." },
 ];
 
-const FEATURES = [
-  { icon: "🎮", title: "15 competitive games", body: `From silent judgment calls to full free conversation — ${GAME_MODES.length} team-based formats.` },
-  { icon: "🎓", title: "A matching Learn lesson for every topic", body: `${realTopicCount}+ lessons, one for every game topic, free to browse without an account.` },
-  { icon: "📚", title: "Classes & teams that save", body: "Set up a class once — teams, mascots, and scores carry over between lessons." },
-  { icon: "📱", title: "Phone-controlled play modes", body: "Students buzz in, type answers, or claim tickets from their own phones for select games." },
-  { icon: "🎨", title: "Accent themes", body: "Give the shared screen a look that fits your classroom, without touching any game's own identity." },
-  { icon: "⚡", title: "Zero prep, ready in seconds", body: "No slides to build — pick a topic and a game, and you're playing." },
+const FEATURES: { icon: IconName; title: string; body: string }[] = [
+  { icon: "controller", title: "15 competitive games", body: `From silent judgment calls to full free conversation — ${GAME_MODES.length} team-based formats.` },
+  { icon: "learn", title: "A matching Learn lesson for every topic", body: `${realTopicCount}+ lessons, one for every game topic, free to browse without an account.` },
+  { icon: "books", title: "Classes & teams that save", body: "Set up a class once — teams, mascots, and scores carry over between lessons." },
+  { icon: "phone", title: "Phone-controlled play modes", body: "Students buzz in, type answers, or claim tickets from their own phones for select games." },
+  { icon: "palette", title: "Accent themes", body: "Give the shared screen a look that fits your classroom, without touching any game's own identity." },
+  { icon: "bolt", title: "Zero prep, ready in seconds", body: "No slides to build — pick a topic and a game, and you're playing." },
 ];
 
 export function MarketingLanding({ onSignUp, onLogIn }: Props) {
@@ -102,7 +103,7 @@ export function MarketingLanding({ onSignUp, onLogIn }: Props) {
     <div>
       {/* Hero */}
       <div style={{ textAlign: "center", marginBottom: "24px" }}>
-        <div style={{ fontSize: "48px", marginBottom: "8px", filter: "drop-shadow(0 4px 16px rgba(0,0,0,0.4))" }}>🕹️</div>
+        <Icon name="joystick" size={48} color="#FCD34D" style={{ marginBottom: "8px", filter: "drop-shadow(0 4px 16px rgba(0,0,0,0.4))" }} />
         <h1 style={{ fontSize: "28px", fontWeight: "900", color: "white", margin: 0, letterSpacing: "-0.01em" }}>
           Class<span style={{ color: "#FCD34D" }}>Cade</span>
         </h1>
@@ -147,7 +148,7 @@ export function MarketingLanding({ onSignUp, onLogIn }: Props) {
             <div key={s.n} style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: "14px", padding: "16px 14px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
                 <div style={{ width: "24px", height: "24px", borderRadius: "50%", background: "#F59E0B", color: "white", fontSize: "12px", fontWeight: "900", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{s.n}</div>
-                <div style={{ fontSize: "18px" }}>{s.icon}</div>
+                <Icon name={s.icon} size={18} color="white" />
               </div>
               <div style={{ color: "white", fontWeight: "800", fontSize: "14px", marginBottom: "4px" }}>{s.title}</div>
               <div style={{ color: "#BAE6FD", fontSize: "12px", lineHeight: 1.5 }}>{s.body}</div>
@@ -166,7 +167,7 @@ export function MarketingLanding({ onSignUp, onLogIn }: Props) {
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: "14px" }}>
           {FEATURES.map(f => (
             <div key={f.title} style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: "14px", padding: "16px 14px" }}>
-              <div style={{ fontSize: "22px", marginBottom: "8px" }}>{f.icon}</div>
+              <div style={{ marginBottom: "8px" }}><Icon name={f.icon} size={22} color="#FCD34D" /></div>
               <div style={{ color: "white", fontWeight: "800", fontSize: "14px", marginBottom: "4px" }}>{f.title}</div>
               <div style={{ color: "#BAE6FD", fontSize: "12px", lineHeight: 1.5 }}>{f.body}</div>
             </div>
@@ -183,7 +184,7 @@ export function MarketingLanding({ onSignUp, onLogIn }: Props) {
       </Section>
 
       {/* Learn preview */}
-      <Section title="🎓 Free Learn lessons" subtitle="No account needed to browse.">
+      <Section title={<><Icon name="learn" size={18} color="white" /> Free Learn lessons</>} subtitle="No account needed to browse.">
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))", gap: "10px", marginBottom: "16px" }}>
           {LESSON_TOPICS.slice(0, 6).map(t => (
             <a key={t.id} href={`/learn/${t.id}`} style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: "12px", padding: "12px 14px", textDecoration: "none", display: "block" }}>
@@ -193,7 +194,7 @@ export function MarketingLanding({ onSignUp, onLogIn }: Props) {
           ))}
         </div>
         <div style={{ textAlign: "center" }}>
-          <a href="/learn" style={{ color: "#FCD34D", fontWeight: "800", fontSize: "13px", textDecoration: "none" }}>Browse all free lessons →</a>
+          <a href="/learn" style={{ color: "#FCD34D", fontWeight: "800", fontSize: "13px", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "4px" }}>Browse all free lessons <Icon name="next" size={12} /></a>
         </div>
       </Section>
 
@@ -211,7 +212,7 @@ export function MarketingLanding({ onSignUp, onLogIn }: Props) {
   );
 }
 
-function Section({ title, subtitle, children }: { title: string; subtitle?: string; children: React.ReactNode }) {
+function Section({ title, subtitle, children }: { title: React.ReactNode; subtitle?: string; children: React.ReactNode }) {
   return (
     <div style={{ marginTop: "40px" }}>
       <div style={{ textAlign: "center", marginBottom: "20px" }}>

@@ -1,12 +1,14 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 import type { GameProps, Team } from "../../types";
-import { teamsGridCols, GAME_MODES } from "../../data/constants";
+import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
 import { denseRank, medalForRank } from "../../utils/ranking";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
 import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
 import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
+import { Icon } from "../shared/Icon";
+import { MASCOT_ICON_BY_EMOJI } from "../shared/TeamIcon";
 import { AUCTION_TUTORIAL_STEPS } from "../../data/tutorials/auction";
 import {
   generateSessionCode, openAuctionChannel, closeChannel,
@@ -67,15 +69,16 @@ function AmbientBackdrop() {
   );
 }
 
-function MascotAvatar({ mascot, color, size = 30 }: { mascot?: string; color: string; size?: number }) {
+function MascotAvatar({ mascot, color, size = 30 }: { mascot?: string | null; color: string; size?: number }) {
+  const iconName = mascot ? MASCOT_ICON_BY_EMOJI[mascot] : undefined;
   return (
     <span style={{
       display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
       width: `${size}px`, height: `${size}px`, borderRadius: "50%",
       background: `radial-gradient(circle at 35% 30%, ${color}66, #1E1033)`,
-      border: `2px solid ${color}`, fontSize: `${size * 0.55}px`,
+      border: `2px solid ${color}`,
       boxShadow: `0 0 8px ${color}77`,
-    }}>{mascot}</span>
+    }}>{iconName && <Icon name={iconName} size={Math.round(size * 0.55)} color="white" />}</span>
   );
 }
 
@@ -126,7 +129,7 @@ function PhoneModeWaitingRoom({ teams, bets, connectedTeamIds, isBroke, allBetsP
           return (
             <div key={t.id} style={{ background: `linear-gradient(160deg,${t.color.dark}44,#150C28)`, border: `2px solid ${t.color.bg}`, borderRadius: "16px", padding: "14px", textAlign: "center" }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", marginBottom: "8px" }}>
-                <MascotAvatar mascot={t.mascot ?? t.color.emoji} color={t.color.bg} />
+                <MascotAvatar mascot={t.mascot} color={t.color.bg} />
                 <span style={{ fontWeight: "900", color: "white", fontSize: "15px" }}>{t.name}</span>
               </div>
               <div style={{ fontWeight: "800", fontSize: "13px", color: statusColor }}>{statusLabel}</div>
@@ -441,7 +444,7 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
         <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "24px" }}>
           {teams.map(t => (
             <div key={t.id} style={{ display: "flex", alignItems: "center", gap: "8px", background: `linear-gradient(160deg,${t.color.dark}55,#1E1033)`, border: `2px solid ${t.color.bg}`, borderRadius: "14px", padding: "8px 18px 8px 10px", fontWeight: "800", fontSize: "14px", color: "white" }}>
-              <MascotAvatar mascot={t.mascot ?? t.color.emoji} color={t.color.bg} />
+              <MascotAvatar mascot={t.mascot} color={t.color.bg} />
               {t.name}
             </div>
           ))}
@@ -486,7 +489,7 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
         </button>
         {showHowTo && (
           <HowToPlayModal
-            gameName={GM.name} gameIcon={GM.icon} accentColor={GM.color}
+            gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color}
             steps={AUCTION_TUTORIAL_STEPS}
             onClose={() => setShowHowTo(false)}
           />
@@ -519,7 +522,7 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
               <div key={t.id} style={{ background: `linear-gradient(160deg,${t.color.dark}55,#1E1033)`, border: `2px solid ${t.color.bg}`, borderRadius: "14px", padding: "12px" }}>
                 <div style={{ fontSize: "22px" }}>{medalForRank(rank)}</div>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", marginTop: "4px" }}>
-                  <MascotAvatar mascot={t.mascot ?? t.color.emoji} color={t.color.bg} size={24} />
+                  <MascotAvatar mascot={t.mascot} color={t.color.bg} size={24} />
                   <span style={{ fontWeight: "800", color: "white", fontSize: "14px" }}>{t.name}</span>
                 </div>
                 <div style={{ color: "#FCD34D", fontWeight: "900", fontSize: "16px", marginTop: "4px" }}>{value} pts</div>
@@ -581,7 +584,7 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
                     <div key={t.id} style={{ position: "relative", background: "linear-gradient(160deg,#1F1B2E,#120E1E)", border: "3px solid #4B5563", borderRadius: "16px", padding: "14px", opacity: 0.85, textAlign: "center", overflow: "hidden" }}>
                       <div style={{ position: "absolute", top: "12px", right: "-32px", background: "#DC2626", color: "white", fontWeight: "900", fontSize: "10px", letterSpacing: "0.05em", padding: "3px 36px", transform: "rotate(35deg)", boxShadow: "0 2px 6px rgba(0,0,0,0.5)", animation: "ribbonPop 0.4s ease-out" }}>BANKRUPT</div>
                       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", marginBottom: "8px" }}>
-                        <MascotAvatar mascot={t.mascot ?? t.color.emoji} color="#6B7280" />
+                        <MascotAvatar mascot={t.mascot} color="#6B7280" />
                         <span style={{ fontWeight: "900", color: "#D1D5DB", fontSize: "15px" }}>{t.name}</span>
                       </div>
                       <div style={{ fontSize: "28px", marginBottom: "6px" }}>💸</div>
@@ -595,7 +598,7 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
                   <div key={t.id} style={{ background: `linear-gradient(160deg,${t.color.dark}44,#150C28)`, border: `2px solid ${t.color.bg}`, borderRadius: "16px", padding: "14px", animation: "cardIn 0.3s ease-out", boxShadow: `0 0 14px ${t.color.bg}33` }}>
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "10px" }}>
                       <span style={{ display: "flex", alignItems: "center", gap: "8px", fontWeight: "900", color: "white", fontSize: "15px" }}>
-                        <MascotAvatar mascot={t.mascot ?? t.color.emoji} color={t.color.bg} />
+                        <MascotAvatar mascot={t.mascot} color={t.color.bg} />
                         {t.name}
                       </span>
                       <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
@@ -705,7 +708,7 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
                   return (
                     <div key={r.teamId} style={{ background: "linear-gradient(160deg,#1F1B2E,#120E1E)", border: "3px solid #4B5563", borderRadius: "14px", padding: "12px", textAlign: "center", opacity: 0.85 }}>
                       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", marginBottom: "6px" }}>
-                        <MascotAvatar mascot={t.mascot ?? t.color.emoji} color="#6B7280" size={24} />
+                        <MascotAvatar mascot={t.mascot} color="#6B7280" size={24} />
                         <span style={{ fontWeight: "900", fontSize: "15px", color: "#D1D5DB" }}>{t.name}</span>
                       </div>
                       <div style={{ fontSize: "22px", marginBottom: "4px" }}>💸</div>
@@ -726,7 +729,7 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
                       <div key={i} style={{ position: "absolute", top: "6px", left: `${14 + i * 18}%`, fontSize: "13px", animation: `coinFall 0.9s ease-in ${i * 0.08}s both` }}>🪙</div>
                     ))}
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", marginBottom: "6px" }}>
-                      <MascotAvatar mascot={t.mascot ?? t.color.emoji} color={t.color.bg} size={24} />
+                      <MascotAvatar mascot={t.mascot} color={t.color.bg} size={24} />
                       <span style={{ fontWeight: "900", fontSize: "15px", color: "white" }}>{t.name}</span>
                     </div>
                     <div style={{ fontSize: "13px", marginBottom: "6px", color: "#D1D5DB" }}>

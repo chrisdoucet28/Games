@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { TeamIcon } from "../shared/TeamIcon";
 import type { OrderUpStatePayload, OrderUpActionPayload, OrderUpTicketItem } from "../../lib/liveSession";
 
 type Props = {
@@ -51,7 +52,7 @@ export function PhoneOrderUpView({ state, teamId, onAction }: Props) {
   if (state.phase === "lobby") {
     return (
       <div style={{ ...wrapStyle, textAlign: "center", display: "flex", flexDirection: "column", justifyContent: "center" }}>
-        <div style={{ fontSize: "36px", marginBottom: "6px" }}>{team?.mascot ?? team?.color.emoji}</div>
+        <div style={{ fontSize: "36px", marginBottom: "6px" }}><TeamIcon team={team} size={36} /></div>
         <div style={{ fontWeight: "900", fontSize: "18px", color: "#BE185D", marginBottom: "8px" }}>You're in as {team?.name}!</div>
         <div style={{ color: "#9D174D", fontSize: "14px", lineHeight: 1.6 }}>Get ready — waiting for your teacher to open the diner…</div>
       </div>
@@ -64,7 +65,7 @@ export function PhoneOrderUpView({ state, teamId, onAction }: Props) {
   return (
     <div style={wrapStyle}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "14px" }}>
-        <span style={{ fontWeight: "900", fontSize: "15px" }}>{team?.mascot ?? team?.color.emoji} {team?.name}</span>
+        <span style={{ fontWeight: "900", fontSize: "15px" }}><TeamIcon team={team} /> {team?.name}</span>
         <span style={{ fontSize: "13px", fontWeight: "800", color: "#BE185D" }}>{state.scores[String(teamId)] ?? 0} pts</span>
       </div>
 

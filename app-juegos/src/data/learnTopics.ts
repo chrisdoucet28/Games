@@ -7,6 +7,12 @@ export type LearnTopic = { id: string; lesson: Lesson; meta: (typeof TOPIC_OPTIO
 // adding a new lesson later is a one-line addition to lessons.ts — this list rebuilds itself.
 // Shared by the authenticated LearnScreen and the public /learn pages so all three can never drift
 // out of sync with each other (see CLAUDE.md's Learn/topics parity rule).
+//
+// Deliberately plain data (no JSX, no component imports) — the sitemap generator script
+// (scripts/generate-sitemap.ts) imports LESSON_TOPICS through a standalone Node/tsx run, not
+// through Vite, so anything this file pulls in transitively must be JSX-free. The render-time
+// helpers that DO need <Icon>/JSX (renderBold, renderMistake) live in ./learnTopicsRender.tsx
+// instead, kept out of this file's import graph on purpose.
 export const LESSON_TOPICS: LearnTopic[] = Object.keys(LESSONS)
   .map(id => ({ id, lesson: LESSONS[id], meta: TOPIC_OPTIONS.find(o => o.value === id) }))
   .filter((t): t is LearnTopic => Boolean(t.meta));
@@ -17,14 +23,3 @@ export const LEVEL_COLOR: Record<string, string> = {
 };
 export const FOCUS_ORDER = ["grammar", "vocabulary", "topic"];
 export const FOCUS_LABEL: Record<string, string> = { grammar: "Grammar", vocabulary: "Vocabulary", topic: "Themes" };
-
-// Lesson content marks the key form in each line with **double asterisks** — render those as bold
-// rather than asking every lesson to hand-roll its own <strong> markup.
-export function renderBold(text: string) {
-  const parts = text.split(/(\*\*[^*]+\*\*)/g);
-  return parts.map((part, i) =>
-    part.startsWith("**") && part.endsWith("**")
-      ? <strong key={i}>{part.slice(2, -2)}</strong>
-      : <span key={i}>{part}</span>
-  );
-}

@@ -15,12 +15,13 @@ import { TermsOfServiceScreen } from './components/shared/TermsOfServiceScreen';
 import { PublicLearnIndexScreen } from './components/shared/PublicLearnIndexScreen';
 import { PublicLearnLessonScreen } from './components/shared/PublicLearnLessonScreen';
 import { FREE_LAUNCH_ALL_PREMIUM } from './data/constants';
+import { Icon } from './components/shared/Icon';
 
 function ConfigErrorScreen() {
   return (
     <div style={{ minHeight: '100vh', background: '#1E1B4B', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '32px 20px', fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
       <div style={{ maxWidth: '440px', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '20px', padding: '28px 24px', color: 'white' }}>
-        <div style={{ fontSize: '32px', marginBottom: '10px' }}>⚠️</div>
+        <Icon name="warning" size={32} color="#FCD34D" style={{ marginBottom: '10px' }} />
         <h2 style={{ margin: '0 0 10px', fontSize: '18px', fontWeight: 900 }}>Missing configuration</h2>
         <p style={{ fontSize: '14px', lineHeight: 1.6, color: '#C4B5FD', margin: 0 }}>
           This deployment is missing <code style={{ background: 'rgba(0,0,0,0.3)', padding: '2px 5px', borderRadius: '4px' }}>VITE_SUPABASE_URL</code> and/or{' '}
@@ -171,7 +172,8 @@ function AuthenticatedApp() {
     return (
       <div>
         <StatusBadge action="Log Out" onAction={() => supabase.auth.signOut()} theme={theme}>
-          🟢 Logged in as {session.user.email}
+          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#22C55E', display: 'inline-block', marginRight: '6px' }} />
+          Logged in as {session.user.email}
         </StatusBadge>
         {FREE_LAUNCH_ALL_PREMIUM ? (
           <WelcomeIntroScreen theme={theme} onDismiss={goTo => { setInitialScreen(goTo ?? null); setPlanIntroSeen(true); }} />
@@ -185,7 +187,8 @@ function AuthenticatedApp() {
   return (
     <div>
       <StatusBadge action="Log Out" onAction={() => supabase.auth.signOut()} theme={theme}>
-        🟢 Logged in as {session.user.email}
+        <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#22C55E', display: 'inline-block', marginRight: '6px' }} />
+        Logged in as {session.user.email}
       </StatusBadge>
       <LessonGamesGenerator
         theme={theme} onThemeChange={setTheme}

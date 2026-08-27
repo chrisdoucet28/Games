@@ -1,10 +1,11 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from "react";
+import { TeamIcon } from "../shared/TeamIcon";
 import type { GameProps, QuestionData } from "../../types";
 import { useTurnTimer } from "../../hooks/useTurnTimer";
 import { TurnTimerBar } from "../shared/TurnTimerBar";
 import { QuestionCard } from "../shared/QuestionCard";
 import { Confetti } from "../shared/Confetti";
-import { teamsGridCols, GAME_MODES } from "../../data/constants";
+import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
 import { TOPIC_OPTIONS } from "../../data/topics";
 import { makeSoloCpuTeam } from "../../lib/soloOpponent";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
@@ -575,7 +576,7 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
         </button>
         {showHowTo && (
           <HowToPlayModal
-            gameName={GM.name} gameIcon={GM.icon} accentColor={GM.color}
+            gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color}
             steps={VAULT_TUTORIAL_STEPS}
             onClose={() => setShowHowTo(false)}
           />
@@ -656,7 +657,7 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
                   opacity: isFirst ? 1 : 0.9,
                 }}>
                   <span style={{ fontSize: isFirst ? "24px" : "20px" }}>{medalFor(rank)}</span>
-                  <span style={{ flex: 1, textAlign: "left", fontWeight: isFirst ? "900" : "800", color: isFirst ? "white" : "#D6C9AE", fontSize: isFirst ? "16px" : "15px" }}>{t.mascot ?? t.color.emoji} {t.name}</span>
+                  <span style={{ flex: 1, textAlign: "left", fontWeight: isFirst ? "900" : "800", color: isFirst ? "white" : "#D6C9AE", fontSize: isFirst ? "16px" : "15px" }}><TeamIcon team={t} /> {t.name}</span>
                   <span style={{ fontWeight: "800", color: isFirst ? "#FCD34D" : "#9C8B6A", fontSize: "13px" }}>{ordinal(rank)} · +{finishBonusForRank(rank)} pts</span>
                 </div>
               );
@@ -728,7 +729,7 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
         </div>
 
         <div style={{ background: `linear-gradient(90deg, ${activeTeam.color.bg}, ${activeTeam.color.dark})`, borderRadius: "14px", padding: "10px 16px", marginBottom: "12px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px", boxShadow: `0 4px 18px ${activeTeam.color.bg}55` }}>
-          <span style={{ color: "white", fontWeight: "900", fontSize: "16px", textShadow: "0 1px 3px rgba(0,0,0,0.4)" }}>🔐 {activeTeam.mascot ?? activeTeam.color.emoji} {activeTeam.name} — {phaseHeaderText()}</span>
+          <span style={{ color: "white", fontWeight: "900", fontSize: "16px", textShadow: "0 1px 3px rgba(0,0,0,0.4)" }}>🔐 <TeamIcon team={activeTeam} /> {activeTeam.name} — {phaseHeaderText()}</span>
           {phase === "answer" && <TurnTimerBar timeLeft={timeLeft} totalSeconds={turnSeconds} />}
         </div>
 

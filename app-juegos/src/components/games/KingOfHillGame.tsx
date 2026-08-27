@@ -1,10 +1,11 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from "react";
+import { TeamIcon } from "../shared/TeamIcon";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 import type { GameProps } from "../../types";
 import { useTurnTimer } from "../../hooks/useTurnTimer";
 import { TurnTimerBar } from "../shared/TurnTimerBar";
 import { QuestionCard } from "../shared/QuestionCard";
-import { teamsGridCols, GAME_MODES } from "../../data/constants";
+import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
 import { denseRank, medalForRank } from "../../utils/ranking";
 import { makeSoloCpuTeam } from "../../lib/soloOpponent";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
@@ -662,7 +663,7 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
         </button>
         {showHowTo && (
           <HowToPlayModal
-            gameName={GM.name} gameIcon={GM.icon} accentColor={GM.color}
+            gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color}
             steps={isTopicMode ? HILL_TOPIC_STEPS : HILL_GRAMMAR_STEPS}
             onClose={() => setShowHowTo(false)}
           />
@@ -681,7 +682,7 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
         <div style={{ position: "relative", zIndex: 1 }}>
           <div style={{ background: "linear-gradient(160deg,#831843,#4C0519)", border: "2px solid #F9A8D455", borderRadius: "20px", padding: "28px 24px", marginBottom: "20px", color: "white", maxWidth: "480px", margin: "0 auto 20px", boxShadow: "0 0 50px rgba(219,39,119,0.4)" }}>
             <div style={{ fontSize: "36px", marginBottom: "10px" }}>⏰</div>
-            <div style={{ fontWeight: "900", fontSize: "19px", marginBottom: "10px", color: "#F9A8D4" }}>{noticeTeam.mascot ?? noticeTeam.color.emoji} {noticeTeam.name} ran out of time!</div>
+            <div style={{ fontWeight: "900", fontSize: "19px", marginBottom: "10px", color: "#F9A8D4" }}><TeamIcon team={noticeTeam} /> {noticeTeam.name} ran out of time!</div>
             <div style={{ fontSize: "15px", lineHeight: 1.6, opacity: 0.95 }}>
               {timeoutNotice.retried ? "That's your one free retry for this game — watch the clock this time!" : "You've already used your free retry this game — the turn moves on."}
             </div>
@@ -714,7 +715,7 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
             {ranking.map(({ item: t, rank, value }) => (
               <div key={t.id} style={{ background: `linear-gradient(160deg,${t.color.dark}55,#1F0A1F)`, border: `2px solid ${t.color.bg}`, borderRadius: "14px", padding: "12px" }}>
                 <div style={{ fontSize: "22px" }}>{medalForRank(rank)}</div>
-                <div style={{ fontWeight: "800", color: "white", fontSize: "14px", marginTop: "4px" }}>{t.mascot ?? t.color.emoji} {t.name}</div>
+                <div style={{ fontWeight: "800", color: "white", fontSize: "14px", marginTop: "4px" }}><TeamIcon team={t} /> {t.name}</div>
                 <div style={{ color: "#FCD34D", fontWeight: "900", fontSize: "16px", marginTop: "4px" }}>{value} pts</div>
                 <div style={{ fontSize: "11px", color: "#F9A8D4", fontWeight: "700", marginTop: "4px" }}>{roundPoints[t.id] ?? 0} total control pts</div>
               </div>
@@ -911,7 +912,7 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
                       const buzzedTeam = teams.find(t => t.id === buzzedTeamId);
                       return (
                         <div style={{ textAlign: "center", marginTop: "10px", background: "#172438", border: `1.5px solid ${buzzedTeam?.color.bg ?? "#F7C948"}`, borderRadius: "12px", padding: "8px 14px" }}>
-                          <span style={{ fontWeight: "800", fontSize: "13px", color: "#FCD34D" }}>⚡ {buzzedTeam?.mascot ?? buzzedTeam?.color.emoji} {buzzedTeam?.name} buzzed in first!</span>
+                          <span style={{ fontWeight: "800", fontSize: "13px", color: "#FCD34D" }}>⚡ <TeamIcon team={buzzedTeam} /> {buzzedTeam?.name} buzzed in first!</span>
                         </div>
                       );
                     })()}

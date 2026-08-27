@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { TeamIcon } from "../shared/TeamIcon";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 import type { GameProps } from "../../types";
 import { useTurnTimer } from "../../hooks/useTurnTimer";
@@ -8,7 +9,7 @@ import {
   BASE_HIT_PTS, COMBO_STEP, MAX_COMBO_BONUS,
   type Difficulty, type ParsedMCQ,
 } from "../../hooks/useMoleGame";
-import { teamsGridCols, GAME_MODES } from "../../data/constants";
+import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
 import { denseRank, medalForRank } from "../../utils/ranking";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
@@ -103,7 +104,7 @@ function PhoneTurnSpectator({ activeTeam, timeLeft, totalSeconds }: {
   const timeColor = timeLeft > totalSeconds * 0.5 ? "#BEF264" : timeLeft > totalSeconds * 0.25 ? "#F59E0B" : "#EF4444";
   return (
     <div style={{ textAlign: "center", padding: "40px 20px", background: `linear-gradient(160deg,${activeTeam.color.dark}55,#1A2E05)`, border: `3px solid ${activeTeam.color.bg}`, borderRadius: "16px" }}>
-      <div style={{ fontSize: "40px", marginBottom: "10px" }}>{activeTeam.mascot ?? activeTeam.color.emoji}</div>
+      <div style={{ fontSize: "40px", marginBottom: "10px" }}><TeamIcon team={activeTeam} size={40} /></div>
       <div style={{ fontWeight: "900", fontSize: "18px", color: "white", marginBottom: "14px" }}>🔨 {activeTeam.name} is playing on their phone!</div>
       <div style={{ fontWeight: "900", fontSize: "56px", color: timeColor, fontVariantNumeric: "tabular-nums", lineHeight: 1 }}>{timeLeft}s</div>
       <div style={{ fontSize: "13px", color: "#D9F99D", marginTop: "14px" }}>Their score will show up here the moment their turn ends.</div>
@@ -120,7 +121,7 @@ function DisconnectedTurnOverride({ activeTeam, onSkip }: {
 }) {
   return (
     <div style={{ textAlign: "center", padding: "40px 20px", background: "linear-gradient(160deg,#7C2D1255,#1A2E05)", border: "3px solid #F59E0B", borderRadius: "16px" }}>
-      <div style={{ fontSize: "40px", marginBottom: "10px" }}>{activeTeam.mascot ?? activeTeam.color.emoji}</div>
+      <div style={{ fontSize: "40px", marginBottom: "10px" }}><TeamIcon team={activeTeam} size={40} /></div>
       <div style={{ fontWeight: "900", fontSize: "18px", color: "#FCD34D", marginBottom: "8px" }}>⚠️ {activeTeam.name} lost connection</div>
       <div style={{ fontSize: "13px", color: "#FDE68A", marginBottom: "18px" }}>Waiting to see if they reconnect — use "📱 Reconnect a phone" below if they need the code again.</div>
       <button onClick={onSkip} className="ww-btn" style={{ background: "linear-gradient(135deg,#B45309,#F59E0B)", color: "#1F1300", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "15px", fontWeight: "900", cursor: "pointer" }}>
@@ -483,7 +484,7 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
         </button>
         {showHowTo && (
           <HowToPlayModal
-            gameName={GM.name} gameIcon={GM.icon} accentColor={GM.color}
+            gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color}
             steps={WHACK_TUTORIAL_STEPS}
             onClose={() => setShowHowTo(false)}
           />
@@ -514,7 +515,7 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
           {ranking.map(({ item: t, rank, value }) => (
             <div key={t.id} style={{ background: `linear-gradient(160deg,${t.color.dark}55,#1A2E05)`, border: `2px solid ${t.color.bg}`, borderRadius: "14px", padding: "12px" }}>
               <div style={{ fontSize: "22px" }}>{medalForRank(rank)}</div>
-              <div style={{ fontWeight: "800", color: "white", fontSize: "14px", marginTop: "4px" }}>{t.mascot ?? t.color.emoji} {t.name}</div>
+              <div style={{ fontWeight: "800", color: "white", fontSize: "14px", marginTop: "4px" }}><TeamIcon team={t} /> {t.name}</div>
               <div style={{ color: "#BEF264", fontWeight: "800", fontSize: "15px", marginTop: "4px" }}>{value} pts</div>
             </div>
           ))}
@@ -563,7 +564,7 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
       )}
       <div style={{ position: "relative", zIndex: 1 }}>
         <div style={{ background: `linear-gradient(90deg,${activeTeam.color.dark},${activeTeam.color.bg})`, borderRadius: "14px", padding: "10px 16px", marginBottom: "14px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px", boxShadow: `0 4px 18px ${activeTeam.color.bg}55` }}>
-          <span style={{ color: "white", fontWeight: "900", fontSize: "16px", textShadow: "0 1px 3px rgba(0,0,0,0.4)" }}>🔨 {activeTeam.mascot ?? activeTeam.color.emoji} {activeTeam.name}'s turn — Round {round}/{TOTAL_ROUNDS}, Team {teamIdx + 1} of {teams.length}</span>
+          <span style={{ color: "white", fontWeight: "900", fontSize: "16px", textShadow: "0 1px 3px rgba(0,0,0,0.4)" }}>🔨 <TeamIcon team={activeTeam} /> {activeTeam.name}'s turn — Round {round}/{TOTAL_ROUNDS}, Team {teamIdx + 1} of {teams.length}</span>
           {phase === "playing" && <TurnTimerBar timeLeft={turnOwnedByPhoneRef.current ? spectatorTimeLeft : turnTimeLeft} totalSeconds={TURN_SECONDS} />}
         </div>
 

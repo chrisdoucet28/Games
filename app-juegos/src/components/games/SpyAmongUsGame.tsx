@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { TeamIcon } from "../shared/TeamIcon";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 import type { GameProps, QuestionData, Team } from "../../types";
-import { teamsGridCols, GAME_MODES } from "../../data/constants";
+import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
 import { denseRank, medalForRank } from "../../utils/ranking";
 import { makeTeacherTeam, TEACHER_ID } from "../../lib/soloOpponent";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
@@ -692,7 +693,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
           </button>
           {showHowTo && (
             <HowToPlayModal
-              gameName={GM.name} gameIcon={GM.icon} accentColor={GM.color}
+              gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color}
               steps={isTwoPlayer ? SPY_TWOPLAYER_STEPS : SPY_GROUP_STEPS}
               onClose={() => setShowHowTo(false)}
             />
@@ -744,7 +745,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
               return (
                 <div key={team.id} style={{ background: `linear-gradient(160deg,${team.color.dark}55,#0F172A)`, border: `2px solid ${team.color.bg}`, borderRadius: "14px", padding: "12px" }}>
                   <div style={{ fontSize: "22px" }}>{medalForRank(rank)}</div>
-                  <div style={{ fontWeight: "800", color: "white", fontSize: "14px", marginTop: "4px" }}>{team.mascot ?? team.color.emoji} {team.name}</div>
+                  <div style={{ fontWeight: "800", color: "white", fontSize: "14px", marginTop: "4px" }}><TeamIcon team={team} /> {team.name}</div>
                   <div style={{ color: "#38BDF8", fontWeight: "900", fontSize: "16px", marginTop: "4px" }}>{value} pts</div>
                   <div style={{ fontSize: "11px", color: "#94A3B8", fontWeight: "700", marginTop: "4px" }}>
                     🕵️ spy {spyCount}× (escaped {spyWins}×) · 👨‍🚀 caught/guessed right {crewWins}×
@@ -841,7 +842,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
               }}
             >
               <div style={{ fontWeight: "900", fontSize: "22px", color: "white", marginBottom: "12px" }}>
-                {peekTeam.mascot ?? peekTeam.color.emoji} {peekTeam.name} - your turn to look!
+                <TeamIcon team={peekTeam} /> {peekTeam.name} - your turn to look!
               </div>
               <div style={{ fontSize: "14px", color: "#94A3B8", marginBottom: "16px" }}>Everyone else: eyes down!</div>
 
@@ -1127,7 +1128,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
               }}
             >
               <div style={{ fontWeight: "900", fontSize: "20px", color: "white", marginBottom: "8px" }}>
-                🎙️ {speakTeam.mascot ?? speakTeam.color.emoji} {speakTeam.name} - speak now!
+                🎙️ <TeamIcon team={speakTeam} /> {speakTeam.name} - speak now!
               </div>
               <div style={{ fontSize: "14px", color: "#94A3B8", marginBottom: "14px" }}>
                 Answer your prompt. Other teams: listen carefully for anything that seems off.
@@ -1211,7 +1212,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
                   }}
                 >
                   <div style={{ fontWeight: "800", color: "white", fontSize: "14px", marginBottom: "8px" }}>
-                    {voter.mascot ?? voter.color.emoji} {voter.name} suspects:
+                    <TeamIcon team={voter} /> {voter.name} suspects:
                   </div>
                   <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
                     {teams
@@ -1435,7 +1436,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
                   }}
                 >
                   <div style={{ fontWeight: "900", fontSize: "20px", color: "white", marginBottom: "8px" }}>
-                    🎙️ {speaker.mascot ?? speaker.color.emoji} {speaker.name} - speak now!
+                    🎙️ <TeamIcon team={speaker} /> {speaker.name} - speak now!
                   </div>
                   <div style={{ fontSize: "14px", color: "#94A3B8", marginBottom: "16px" }}>
                     Talk about your topic. Do not say what your role is - your opponent is listening carefully.

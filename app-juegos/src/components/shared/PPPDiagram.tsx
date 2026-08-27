@@ -1,5 +1,6 @@
-import { GAME_MODES } from "../../data/constants";
+import { GAME_MODES, GAME_ICONS } from "../../data/constants";
 import { PPP_TIERS } from "../../data/pppTiers";
+import { Icon } from "./Icon";
 
 type Props = { variant: "full" | "compact" };
 
@@ -17,7 +18,7 @@ const DIAGRAM_CSS = `
   }
 `;
 
-const PRETEACH_NODE = { icon: "🎓", label: "Pre-teach", caption: "Start with a Learn lesson" };
+const PRETEACH_NODE = { label: "Pre-teach", caption: "Start with a Learn lesson" };
 
 export function PPPDiagram({ variant }: Props) {
   if (variant === "compact") {
@@ -25,15 +26,15 @@ export function PPPDiagram({ variant }: Props) {
     // quick "here's the order, here's why" reminder that sits quietly wherever it's placed.
     return (
       <div style={{ maxWidth: "700px", margin: "10px auto 50px", display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "center", gap: "5px", fontSize: "11.5px", color: "#6B7280", lineHeight: 1.4 }}>
-        <span style={{ fontWeight: "700", whiteSpace: "nowrap" }}>{PRETEACH_NODE.icon} {PRETEACH_NODE.label}</span>
-        <span style={{ color: "#CBD5E1" }}>→</span>
+        <span style={{ display: "inline-flex", alignItems: "center", gap: "4px", fontWeight: "700", whiteSpace: "nowrap" }}><Icon name="learn" size={13} /> {PRETEACH_NODE.label}</span>
+        <Icon name="next" size={11} color="#CBD5E1" />
         {PPP_TIERS.map((tier, i) => (
           <span key={tier.id} style={{ display: "inline-flex", alignItems: "center", gap: "5px", whiteSpace: "nowrap" }}>
             <span style={{ display: "inline-flex", alignItems: "center", gap: "4px", fontWeight: "700" }}>
               <span style={{ width: "7px", height: "7px", borderRadius: "50%", background: tier.color, flexShrink: 0 }} />
               {tier.label}
             </span>
-            {i < PPP_TIERS.length - 1 && <span style={{ color: "#CBD5E1" }}>→</span>}
+            {i < PPP_TIERS.length - 1 && <Icon name="next" size={11} color="#CBD5E1" />}
           </span>
         ))}
         <span style={{ color: "#9CA3AF" }}>— least to most speaking</span>
@@ -49,7 +50,7 @@ export function PPPDiagram({ variant }: Props) {
           background: "rgba(255,255,255,0.06)", border: "1px dashed rgba(255,255,255,0.35)", borderRadius: "16px",
           padding: "18px 16px", minWidth: "140px", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", textAlign: "center", gap: "6px",
         }}>
-          <div style={{ fontSize: "28px" }}>{PRETEACH_NODE.icon}</div>
+          <Icon name="learn" size={28} color="white" />
           <div style={{ color: "white", fontWeight: "900", fontSize: "14px" }}>{PRETEACH_NODE.label}</div>
           <div style={{ color: "#BAE6FD", fontSize: "12px", lineHeight: 1.4 }}>{PRETEACH_NODE.caption}</div>
         </div>
@@ -70,8 +71,8 @@ export function PPPDiagram({ variant }: Props) {
                 <div style={{ color: "#BAE6FD", fontSize: "12px", lineHeight: 1.4 }}>{tier.blurb}</div>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginTop: "auto" }}>
                   {games.map(g => (
-                    <span key={g.id} style={{ background: "rgba(255,255,255,0.1)", color: "white", borderRadius: "8px", padding: "3px 8px", fontSize: "11px", fontWeight: "700", whiteSpace: "nowrap" }}>
-                      {g.icon} {g.name}
+                    <span key={g.id} style={{ background: "rgba(255,255,255,0.1)", color: "white", borderRadius: "8px", padding: "3px 8px", fontSize: "11px", fontWeight: "700", whiteSpace: "nowrap", display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                      <Icon name={GAME_ICONS[g.id]} size={11} /> {g.name}
                     </span>
                   ))}
                 </div>

@@ -1,4 +1,5 @@
 import type { RaceTrackStatePayload, RaceTrackActionPayload } from "../../lib/liveSession";
+import { TeamIcon } from "../shared/TeamIcon";
 
 type Props = {
   state: RaceTrackStatePayload;
@@ -32,7 +33,7 @@ export function PhoneRaceTrackView({ state, teamId, onAction }: Props) {
   if (state.phase === "lobby") {
     return (
       <div style={wrapStyle}>
-        <div style={{ fontSize: "36px", marginBottom: "6px" }}>{team?.mascot ?? team?.color.emoji}</div>
+        <div style={{ fontSize: "36px", marginBottom: "6px" }}><TeamIcon team={team} size={36} /></div>
         <div style={{ fontWeight: "900", fontSize: "18px", color: "#F87171", marginBottom: "8px" }}>You're in as {team?.name}!</div>
         <div style={{ color: "#93C5FD", fontSize: "14px", lineHeight: 1.6 }}>Get ready — waiting for your teacher to start the race…</div>
       </div>
@@ -65,7 +66,7 @@ export function PhoneRaceTrackView({ state, teamId, onAction }: Props) {
     return (
       <div style={wrapStyle}>
         <div style={{ fontSize: "36px", marginBottom: "10px" }}>😔</div>
-        <div style={{ fontWeight: "800", fontSize: "16px", color: "#93C5FD" }}>{winner?.mascot ?? winner?.color.emoji} {winner?.name} buzzed in first.</div>
+        <div style={{ fontWeight: "800", fontSize: "16px", color: "#93C5FD" }}><TeamIcon team={winner} /> {winner?.name} buzzed in first.</div>
         <div style={{ color: "#5A7399", fontSize: "13px", marginTop: "8px" }}>Wait for the next question.</div>
       </div>
     );
@@ -94,7 +95,7 @@ export function PhoneRaceTrackView({ state, teamId, onAction }: Props) {
       >
         🔔<br />BUZZ!
       </button>
-      <div style={{ color: "#93C5FD", fontSize: "13px", marginTop: "18px" }}>{team?.mascot ?? team?.color.emoji} {team?.name}</div>
+      <div style={{ color: "#93C5FD", fontSize: "13px", marginTop: "18px" }}><TeamIcon team={team} /> {team?.name}</div>
     </div>
   );
 }

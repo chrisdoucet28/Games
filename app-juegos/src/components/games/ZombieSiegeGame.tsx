@@ -1,7 +1,8 @@
 import { useState, useRef, useCallback, useEffect } from "react";
+import { TeamIcon } from "../shared/TeamIcon";
 import type { GameProps, QuestionData, Team } from "../../types";
 import { ScoreBoard } from "../shared/ScoreBoard";
-import { teamsGridCols, GAME_MODES } from "../../data/constants";
+import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
 import { TurnTimerBar } from "../shared/TurnTimerBar";
@@ -940,7 +941,7 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
         </button>
         {showHowTo && (
           <HowToPlayModal
-            gameName={GM.name} gameIcon={GM.icon} accentColor={GM.color}
+            gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color}
             steps={ZOMBIE_TUTORIAL_STEPS}
             onClose={() => setShowHowTo(false)}
           />
@@ -967,7 +968,7 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
               const stats = statsByTeam[t.id] ?? { kills: 0, chairsPlaced: 0 };
               return (
                 <div key={t.id} style={{ background: "linear-gradient(160deg,#14210F,#0D1A0D)", border: `2px solid ${t.color.bg}`, borderRadius: "14px", padding: "10px" }}>
-                  <div style={{ fontWeight: "800", color: "#BEF264", fontSize: "13px", marginBottom: "6px" }}>{t.mascot ?? t.color.emoji} {t.name}</div>
+                  <div style={{ fontWeight: "800", color: "#BEF264", fontSize: "13px", marginBottom: "6px" }}><TeamIcon team={t} /> {t.name}</div>
                   <div style={{ fontSize: "12px", color: "#DCFCE7", lineHeight: 1.7 }}>
                     <div>🧟 {stats.kills} zombie{stats.kills === 1 ? "" : "s"} shot</div>
                     <div>🪑 {stats.chairsPlaced} chair{stats.chairsPlaced === 1 ? "" : "s"} placed</div>

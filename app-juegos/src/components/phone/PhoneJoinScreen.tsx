@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { TeamIcon } from "../shared/TeamIcon";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 import {
   openAuctionChannel, openSpyChannel, openWhackChannel, openHotSeatChannel, openOrderUpChannel, openRaceTrackChannel, openHillChannel, closeChannel,
@@ -292,7 +293,7 @@ export function PhoneJoinScreen({ code, game }: Props) {
                   opacity: takenByOther ? 0.5 : 1,
                 }}
               >
-                <span style={{ fontSize: "24px" }}>{t.mascot ?? t.color.emoji}</span>
+                <span style={{ fontSize: "24px" }}><TeamIcon team={t} size={24} /></span>
                 <span style={{ flex: 1, textAlign: "left" }}>{t.name}</span>
                 {takenByOther && <span style={{ fontSize: "12px", color: "#9CA3AF", fontWeight: "700" }}>Already joined</span>}
               </button>
@@ -310,7 +311,7 @@ export function PhoneJoinScreen({ code, game }: Props) {
     const team = state.roster.find(t => t.id === claimedTeamId);
     return (
       <div style={arenaStyle}>
-        <div style={{ fontSize: "36px", marginBottom: "6px" }}>{team?.mascot ?? team?.color.emoji ?? copy.joinEmoji}</div>
+        <div style={{ fontSize: "36px", marginBottom: "6px" }}>{team ? <TeamIcon team={team} size={36} /> : copy.joinEmoji}</div>
         <div style={{ fontWeight: "900", fontSize: "18px", color: "#FCD34D", marginBottom: "8px" }}>You're in as {team?.name}!</div>
         <div style={{ color: "#C4B5FD", fontSize: "14px", lineHeight: 1.6 }}>{copy.startingBody}</div>
       </div>

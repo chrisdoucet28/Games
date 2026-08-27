@@ -1,8 +1,9 @@
 import { useState, useRef, useCallback, useEffect } from "react";
+import { TeamIcon } from "../shared/TeamIcon";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 import type { GameProps } from "../../types";
 import { useTurnTimer } from "../../hooks/useTurnTimer";
-import { teamsGridCols, GAME_MODES } from "../../data/constants";
+import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
 import { denseRank, medalForRank } from "../../utils/ranking";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
@@ -320,7 +321,7 @@ function TicketCard({ ticket, teams, judging, isPhoneMode, answerMode, onClaim, 
             </div>
           ) : (
             <div style={{ fontSize: "12px", fontWeight: "800", color: "#9D174D", marginBottom: "6px" }}>
-              {judgingTeam?.mascot ?? judgingTeam?.color.emoji} {judgingTeam?.name} — one sentence, every dish above.
+              <TeamIcon team={judgingTeam} /> {judgingTeam?.name} — one sentence, every dish above.
             </div>
           )}
           <div style={{ display: "flex", gap: "6px", justifyContent: "center" }}>
@@ -331,7 +332,7 @@ function TicketCard({ ticket, teams, judging, isPhoneMode, answerMode, onClaim, 
       ) : claimedTeam ? (
         <div>
           <div style={{ fontSize: "12px", fontWeight: "800", color: claimedTeam.color.dark, marginBottom: "8px" }}>
-            {claimedTeam.mascot ?? claimedTeam.color.emoji} Claimed by {claimedTeam.name}
+            <TeamIcon team={claimedTeam} /> Claimed by {claimedTeam.name}
           </div>
           {answerMode === "typing" && ticket.submittedSentence && (
             <div style={{ background: "white", border: "1px solid #FBCFE8", borderRadius: "8px", padding: "6px 10px", margin: "0 0 8px", fontSize: "13px", fontWeight: "700", color: "#831843" }}>
@@ -370,7 +371,7 @@ function TicketCard({ ticket, teams, judging, isPhoneMode, answerMode, onClaim, 
                 <button key={t.id} onClick={() => onClaim(ticket.id, t.id)} className="ou-btn" style={{
                   background: t.color.bg, color: "white", border: "none", borderRadius: "8px",
                   padding: "5px 9px", fontSize: "11px", fontWeight: "800", cursor: "pointer", transition: "transform 0.15s ease",
-                }}>{t.mascot ?? t.color.emoji} {t.name}</button>
+                }}><TeamIcon team={t} color="white" /> {t.name}</button>
               ))}
             </div>
           )}
@@ -938,7 +939,7 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
         </button>
         {showHowTo && (
           <HowToPlayModal
-            gameName={GM.name} gameIcon={GM.icon} accentColor={GM.color}
+            gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color}
             steps={ORDERUP_TUTORIAL_STEPS}
             onClose={() => setShowHowTo(false)}
           />
@@ -973,7 +974,7 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
               return (
                 <div key={t.id} style={{ background: "linear-gradient(160deg,#FFFFFF,#FFF1F2)", border: `2px solid ${t.color.bg}`, borderRadius: "14px", padding: "12px" }}>
                   <div style={{ fontSize: "20px" }}>{medalForRank(rank)}</div>
-                  <div style={{ fontWeight: "800", color: "#831843", fontSize: "14px", marginTop: "4px" }}>{t.mascot ?? t.color.emoji} {t.name}</div>
+                  <div style={{ fontWeight: "800", color: "#831843", fontSize: "14px", marginTop: "4px" }}><TeamIcon team={t} /> {t.name}</div>
                   <div style={{ color: "#BE185D", fontWeight: "900", fontSize: "16px", marginTop: "4px" }}>{value} pts</div>
                   <div style={{ fontSize: "11px", color: "#9D174D", marginTop: "4px" }}>{served} order{served === 1 ? "" : "s"} served</div>
                   {dishEntries.length > 0 && (
@@ -1061,7 +1062,7 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
           <div style={{ display: "flex", gap: "8px", justifyContent: "center", flexWrap: "wrap", marginBottom: "14px" }}>
             {teams.filter(t => totalDishes(dishCounts[t.id]) > 0).map(t => (
               <div key={t.id} style={{ display: "flex", alignItems: "center", gap: "5px", background: "white", border: `1.5px solid ${t.color.bg}`, borderRadius: "999px", padding: "3px 10px" }}>
-                <span style={{ fontWeight: "800", fontSize: "11px", color: t.color.dark }}>{t.mascot ?? t.color.emoji} {t.name}:</span>
+                <span style={{ fontWeight: "800", fontSize: "11px", color: t.color.dark }}><TeamIcon team={t} /> {t.name}:</span>
                 {Object.entries(dishCounts[t.id] ?? {}).map(([emoji, count]) => (
                   <span key={emoji} style={{ fontSize: "11px", fontWeight: "700", color: "#854D0E" }}>{emoji}×{count}</span>
                 ))}

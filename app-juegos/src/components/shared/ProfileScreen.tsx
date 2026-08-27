@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { getProfile, updateProfile, uploadAvatar, uploadOrgLogo, removeAvatar, removeOrgLogo } from "../../lib/profile";
 import { THEMES, hexToRgba, type Theme } from "../../data/themes";
+import { Icon } from "./Icon";
 
 type Props = {
   onBack: () => void;
@@ -18,7 +19,7 @@ function BrandingSlot({ label, url, busy, onUpload, onRemove }: { label: string;
   return (
     <div style={{ flex: "1 1 160px", textAlign: "center" }}>
       <div style={{ width: "100%", aspectRatio: "1", maxWidth: "120px", margin: "0 auto 8px", borderRadius: "12px", border: "2px solid #E5E7EB", background: "#F9FAFB", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
-        {url ? <img src={url} alt={label} style={{ width: "100%", height: "100%", objectFit: "contain" }} /> : <span style={{ fontSize: "28px", color: "#D1D5DB" }}>🖼️</span>}
+        {url ? <img src={url} alt={label} style={{ width: "100%", height: "100%", objectFit: "contain" }} /> : <Icon name="image" size={28} color="#D1D5DB" />}
       </div>
       <div style={{ fontSize: "12px", color: "#6B7280", fontWeight: "700", marginBottom: "6px" }}>{label}</div>
       <label style={{ display: "inline-block", background: "#F0F9FF", border: "2px solid #93C5FD", borderRadius: "8px", padding: "5px 12px", fontSize: "12px", fontWeight: "700", color: "#1D4ED8", cursor: busy ? "default" : "pointer", opacity: busy ? 0.6 : 1 }}>
@@ -113,10 +114,10 @@ export function ProfileScreen({ onBack, theme, onThemeChange, isPaid, onUpgrade 
   return (
     <div style={{ minHeight: "100vh", background: "#F0F9FF", padding: "20px", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
       <div style={{ maxWidth: "440px", margin: "0 auto" }}>
-        <button onClick={onBack} style={{ background: "none", border: `2px solid ${theme.accentSolid}`, color: theme.accentSolid, borderRadius: "10px", padding: "8px 16px", cursor: "pointer", fontWeight: "700", marginBottom: "20px", fontFamily: theme.headingFont }}>← Back</button>
+        <button onClick={onBack} style={{ background: "none", border: `2px solid ${theme.accentSolid}`, color: theme.accentSolid, borderRadius: "10px", padding: "8px 16px", cursor: "pointer", fontWeight: "700", marginBottom: "20px", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px" }}><Icon name="back" size={13} /> Back</button>
 
         <div style={{ textAlign: "center", marginBottom: "24px" }}>
-          <h2 style={{ fontSize: "30px", fontWeight: "900", color: theme.heroBg[0], margin: 0, fontFamily: theme.headingFont }}>👤 My Profile</h2>
+          <h2 style={{ fontSize: "30px", fontWeight: "900", color: theme.heroBg[0], margin: 0, fontFamily: theme.headingFont, display: "flex", alignItems: "center", justifyContent: "center", gap: "10px" }}><Icon name="person" size={26} /> My Profile</h2>
           <p style={{ color: "#6B7280", marginTop: "8px" }}>Just the basics for now — more personalization is on the way.</p>
         </div>
 
@@ -155,15 +156,15 @@ export function ProfileScreen({ onBack, theme, onThemeChange, isPaid, onUpgrade 
                 })}
               </div>
 
-              <label style={{ display: "block", color: "#4B5563", fontSize: "13px", fontWeight: "700", marginBottom: "8px" }}>🎨 Branding</label>
+              <label style={{ display: "flex", alignItems: "center", gap: "6px", color: "#4B5563", fontSize: "13px", fontWeight: "700", marginBottom: "8px" }}><Icon name="palette" size={14} /> Branding</label>
               {!isPaid ? (
                 <div style={{ background: "#F0F9FF", border: "2px dashed #93C5FD", borderRadius: "12px", padding: "14px", textAlign: "center", marginBottom: "20px" }}>
                   <div style={{ fontSize: "13px", color: "#374151", fontWeight: "700", marginBottom: "8px" }}>Upload a profile picture and your school's logo on the paid plan.</div>
                   <button
                     type="button" onClick={onUpgrade}
-                    style={{ background: `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "10px", padding: "8px 16px", fontWeight: "800", cursor: "pointer", fontFamily: theme.headingFont }}
+                    style={{ background: `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "10px", padding: "8px 16px", fontWeight: "800", cursor: "pointer", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px" }}
                   >
-                    💎 Upgrade
+                    <Icon name="gem" size={14} /> Upgrade
                   </button>
                 </div>
               ) : (
@@ -185,9 +186,9 @@ export function ProfileScreen({ onBack, theme, onThemeChange, isPaid, onUpgrade 
 
               <button
                 type="submit" disabled={saving}
-                style={{ width: "100%", background: saved ? "#22C55E" : `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "12px", padding: "12px", fontSize: "15px", fontWeight: "800", cursor: saving ? "default" : "pointer", opacity: saving ? 0.7 : 1, fontFamily: theme.headingFont }}
+                style={{ width: "100%", background: saved ? "#22C55E" : `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "12px", padding: "12px", fontSize: "15px", fontWeight: "800", cursor: saving ? "default" : "pointer", opacity: saving ? 0.7 : 1, fontFamily: theme.headingFont, display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}
               >
-                {saving ? "Saving…" : saved ? "✅ Saved!" : "Save"}
+                {saving ? "Saving…" : saved ? <><Icon name="check" size={15} /> Saved!</> : "Save"}
               </button>
             </form>
           )}

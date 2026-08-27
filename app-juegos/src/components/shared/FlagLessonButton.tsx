@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { submitFlag } from "../../lib/feedback";
 import type { Theme } from "../../data/themes";
+import { Icon } from "./Icon";
 
 // Same submit path as FlagPromptButton (gameId "learn" is just a marker for filtering during
 // review, not a real game) but sized and worded for a full lesson page rather than a compact
@@ -42,8 +43,8 @@ export function FlagLessonButton({ topicId, topicTitle, theme }: FlagLessonButto
 
   if (status === "sent") {
     return (
-      <span style={{ fontWeight: "800", color: "#166534", fontFamily: "'Segoe UI',system-ui,sans-serif", fontSize: "14px", alignSelf: "center" }}>
-        🚩 Sent — thanks!
+      <span style={{ fontWeight: "800", color: "#166534", fontFamily: "'Segoe UI',system-ui,sans-serif", fontSize: "14px", alignSelf: "center", display: "inline-flex", alignItems: "center", gap: "6px" }}>
+        <Icon name="flag" size={14} /> Sent — thanks!
       </span>
     );
   }
@@ -56,10 +57,10 @@ export function FlagLessonButton({ topicId, topicTitle, theme }: FlagLessonButto
         style={{
           background: "none", border: `2px solid ${theme.accentSolid}`, color: theme.accentSolid,
           borderRadius: "10px", padding: "8px 16px", cursor: "pointer", fontWeight: "700",
-          fontFamily: theme.headingFont,
+          fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px",
         }}
       >
-        🚩 Flag / Suggest a Change
+        <Icon name="flag" size={14} /> Flag / Suggest a Change
       </button>
     );
   }
@@ -93,9 +94,10 @@ export function FlagLessonButton({ topicId, topicTitle, theme }: FlagLessonButto
           style={{
             background: message.trim() ? theme.accentSolid : "#D1D5DB", color: "white", border: "none",
             borderRadius: "8px", padding: "6px 14px", fontWeight: 800, cursor: message.trim() ? "pointer" : "not-allowed", fontSize: "12px",
+            display: "inline-flex", alignItems: "center", gap: "5px",
           }}
         >
-          {status === "sending" ? "..." : "🚩 Send"}
+          {status === "sending" ? "..." : <><Icon name="flag" size={12} /> Send</>}
         </button>
       </div>
     </div>
