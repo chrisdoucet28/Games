@@ -218,3 +218,56 @@ export function openHotSeatChannel(code: string): RealtimeChannel {
     config: { presence: { key: crypto.randomUUID() } },
   });
 }
+
+// --- Order Up ---
+//
+// Screen-authoritative, like Hot Seat — the shared floor's ticket queue, timers, and claim/expiry
+// logic all keep running exactly as they do in screen mode; a phone-driven claim is just an
+// "action" broadcast folded straight into the same claimTicket() screen-mode buttons already call.
+// Unlike every other phone-mode game, several teams can be independently "active" at once here
+// (each holding their own claimed ticket(s)) rather than one team having the floor at a time — the
+// state broadcast just carries the whole live ticket board so every phone can render its own
+// "claimed by me" vs. "still open" view off the same shared data.
+export type OrderUpRosterEntry = { id: string | number; name: string; color: TeamColor; mascot?: string | null };
+
+export type OrderUpPhase = "lobby" | "playing" | "final";
+
+// Duplicated from OrderUpGame.tsx's own TicketItem rather than imported — matches this file's
+// existing self-contained-payload-types convention (see AuctionPhase/SpyPhase above).
+export type OrderUpTicketItem =
+  | { kind: "grammar"; transform: string; label: string; foodEmoji: string }
+  | { kind: "vocab"; word: string; foodEmoji: string };
+
+export type OrderUpTicketInfo = {
+  id: number;
+  items: OrderUpTicketItem[];
+  customerEmoji: string;
+  totalSeconds: number;
+  secondsLeft: number;
+  claimedBy?: string | number;
+};
+
+export type OrderUpStatePayload = {
+  phase: OrderUpPhase;
+  roster: OrderUpRosterEntry[];
+  tickets: OrderUpTicketInfo[];
+  sessionTimeLeft: number;
+  scores: Record<string, number>;
+  connectedTeamIds: (string | number)[];
+  ts: number;
+};
+
+// Named claimTicket, not bare "claim" — PhoneJoinScreen.tsx already has its own unrelated
+// team-identity "claim" (handleClaim/claimedTeamId) for joining the session in the first place;
+// keeping the field name distinct avoids confusing the two concepts when skimming this file later.
+export type OrderUpActionPayload = { teamId: string | number; action: "claimTicket"; ticketId: number };
+
+function orderUpChannelName(code: string): string {
+  return `orderup-${code}`;
+}
+
+export function openOrderUpChannel(code: string): RealtimeChannel {
+  return supabase.channel(orderUpChannelName(code), {
+    config: { presence: { key: crypto.randomUUID() } },
+  });
+}

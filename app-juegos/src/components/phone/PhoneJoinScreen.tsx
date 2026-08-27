@@ -1,17 +1,19 @@
 import { useEffect, useRef, useState } from "react";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 import {
-  openAuctionChannel, openSpyChannel, openWhackChannel, openHotSeatChannel, closeChannel,
+  openAuctionChannel, openSpyChannel, openWhackChannel, openHotSeatChannel, openOrderUpChannel, closeChannel,
   type AuctionStatePayload, type AuctionBetPayload, type SpyStatePayload,
   type WhackStatePayload, type WhackTurnReportPayload,
   type HotSeatStatePayload, type HotSeatActionPayload,
+  type OrderUpStatePayload, type OrderUpActionPayload,
 } from "../../lib/liveSession";
 import { PhoneAuctionView } from "./PhoneAuctionView";
 import { PhoneSpyView } from "./PhoneSpyView";
 import { PhoneWordWhackView } from "./PhoneWordWhackView";
 import { PhoneHotSeatView } from "./PhoneHotSeatView";
+import { PhoneOrderUpView } from "./PhoneOrderUpView";
 
-type Game = "auction" | "spy" | "whack" | "hotseat";
+type Game = "auction" | "spy" | "whack" | "hotseat" | "orderup";
 type Props = { code: string; game: Game };
 
 // No state broadcast for this long means the teacher's tab is gone (refreshed, closed the game,
@@ -66,6 +68,17 @@ const GAME_COPY: Record<Game, {
     endedTitle: "The game has ended!",
     endedBody: "Thanks for playing — check the big screen for final results.",
   },
+  orderup: {
+    joinEmoji: "🍽️",
+    // Dark, unlike PhoneOrderUpView's own light in-game background — this shell's arenaStyle
+    // hardcodes white text (see below), so every game's join/lobby/ended screen here needs a dark
+    // arenaBg regardless of that game's actual in-game palette.
+    arenaBg: "radial-gradient(ellipse at 50% -10%,#9D174D 0%,#4A044E 55%,#1A0313 100%)",
+    startingBody: "Get ready — waiting for your teacher to open the diner…",
+    endedEmoji: "🔔",
+    endedTitle: "Kitchen's closed!",
+    endedBody: "Thanks for playing — check the big screen for final results.",
+  },
 };
 
 function loadClaimedTeamId(code: string): string | number | null {
@@ -93,6 +106,7 @@ const GAME_TITLES: Record<Game, string> = {
   spy: "Spy Among Us",
   whack: "Word Whack",
   hotseat: "Hot Seat",
+  orderup: "Order Up",
 };
 
 export function PhoneJoinScreen({ code, game }: Props) {
@@ -113,7 +127,7 @@ export function PhoneJoinScreen({ code, game }: Props) {
   // when the effect first ran.
   const claimedTeamIdRef = useRef<string | number | null>(loadClaimedTeamId(code));
   const [claimedTeamId, setClaimedTeamId] = useState<string | number | null>(claimedTeamIdRef.current);
-  const [state, setState] = useState<AuctionStatePayload | SpyStatePayload | WhackStatePayload | HotSeatStatePayload | null>(null);
+  const [state, setState] = useState<AuctionStatePayload | SpyStatePayload | WhackStatePayload | HotSeatStatePayload | OrderUpStatePayload | null>(null);
   const [lastStateAt, setLastStateAt] = useState<number | null>(null);
   // Once true, stays true regardless of what happens to the connection afterward — a phone that
   // learns the game is over shouldn't ever fall back to "lost connection" messaging just because
@@ -126,11 +140,12 @@ export function PhoneJoinScreen({ code, game }: Props) {
     const channel = game === "spy" ? openSpyChannel(code)
       : game === "whack" ? openWhackChannel(code)
       : game === "hotseat" ? openHotSeatChannel(code)
+      : game === "orderup" ? openOrderUpChannel(code)
       : openAuctionChannel(code);
     channelRef.current = channel;
 
     channel.on("broadcast", { event: "state" }, ({ payload }) => {
-      const statePayload = payload as AuctionStatePayload | SpyStatePayload | WhackStatePayload | HotSeatStatePayload;
+      const statePayload = payload as AuctionStatePayload | SpyStatePayload | WhackStatePayload | HotSeatStatePayload | OrderUpStatePayload;
       setState(statePayload);
       setLastStateAt(Date.now());
       // Covers a phone that only joins/reconnects after the game already ended — it'll never see
@@ -182,6 +197,10 @@ export function PhoneJoinScreen({ code, game }: Props) {
   };
 
   const sendHotSeatAction = (payload: HotSeatActionPayload) => {
+    channelRef.current?.send({ type: "broadcast", event: "action", payload });
+  };
+
+  const sendOrderUpAction = (payload: OrderUpActionPayload) => {
     channelRef.current?.send({ type: "broadcast", event: "action", payload });
   };
 
@@ -274,6 +293,9 @@ export function PhoneJoinScreen({ code, game }: Props) {
   }
   if (game === "hotseat") {
     return <PhoneHotSeatView state={state as HotSeatStatePayload} teamId={claimedTeamId} onAction={sendHotSeatAction} />;
+  }
+  if (game === "orderup") {
+    return <PhoneOrderUpView state={state as OrderUpStatePayload} teamId={claimedTeamId} onAction={sendOrderUpAction} />;
   }
   return <PhoneAuctionView state={state as AuctionStatePayload} teamId={claimedTeamId} onBet={sendBet} />;
 }
