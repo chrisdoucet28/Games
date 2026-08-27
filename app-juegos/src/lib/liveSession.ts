@@ -331,3 +331,44 @@ export function openRaceTrackChannel(code: string): RealtimeChannel {
     config: { presence: { key: crypto.randomUUID() } },
   });
 }
+
+// --- King of the Hill ---
+//
+// Unlike Race Track's buzzer, this one is a pure informational overlay, not a turn-taking gate.
+// King of the Hill is turn-based — most of a turn has exactly one eligible team, nothing to race
+// for. The one exception is a contested duel (a 2-team head-to-head over a zone someone already
+// owns), where in grammar-mode content "the fastest correct answer wins." Both teams already
+// answer out loud regardless of buzz order, so buzzing here just tells the teacher who hit their
+// button first — they still make the same single Attacker/Defender/Neither judgment click they
+// always have. Topic-mode content and solo (CPU) play don't get this at all — see KingOfHillGame.tsx.
+export type HillRosterEntry = { id: string | number; name: string; color: TeamColor; mascot?: string | null };
+
+// "idle" covers everything that isn't a live grammar-mode duel — rolling (fires at the start of
+// every round, not just the game's opening one), pick, answer, a resolved contest awaiting "Next
+// Turn," round-end. A phone has nothing to do in any of those beyond "watch the shared screen."
+export type HillPhase = "lobby" | "idle" | "duel" | "final";
+
+export type HillStatePayload = {
+  phase: HillPhase;
+  roster: HillRosterEntry[];
+  connectedTeamIds: (string | number)[];
+  // Only meaningful during "duel" — exactly which two teams are in the ring right now.
+  attackerId: string | number | null;
+  defenderId: string | number | null;
+  // A new value means a genuinely new duel instance — resets buzzedTeamId on every connected phone.
+  contestKey: string;
+  buzzedTeamId: string | number | null;
+  ts: number;
+};
+
+export type HillActionPayload = { teamId: string | number; action: "buzz"; ts: number };
+
+function hillChannelName(code: string): string {
+  return `hill-${code}`;
+}
+
+export function openHillChannel(code: string): RealtimeChannel {
+  return supabase.channel(hillChannelName(code), {
+    config: { presence: { key: crypto.randomUUID() } },
+  });
+}

@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from "react";
+import type { RealtimeChannel } from "@supabase/supabase-js";
 import type { GameProps } from "../../types";
 import { useTurnTimer } from "../../hooks/useTurnTimer";
 import { TurnTimerBar } from "../shared/TurnTimerBar";
@@ -7,7 +8,18 @@ import { teamsGridCols, GAME_MODES } from "../../data/constants";
 import { denseRank, medalForRank } from "../../utils/ranking";
 import { makeSoloCpuTeam } from "../../lib/soloOpponent";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
+import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
+import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
 import { HILL_TOPIC_STEPS, HILL_GRAMMAR_STEPS } from "../../data/tutorials/hill";
+import {
+  generateSessionCode, openHillChannel, closeChannel,
+  type HillPhase, type HillStatePayload, type HillActionPayload,
+} from "../../lib/liveSession";
+
+// How long the screen waits after the first buzz of a duel before resolving a winner — same
+// reasoning as Race Track's buzzer: long enough to absorb ordinary same-room wifi jitter between
+// the attacker's and defender's phones, short enough the room never feels a lag.
+const BUZZ_WINDOW_MS = 200;
 
 const GM = GAME_MODES.find(g => g.id === "hill")!;
 
@@ -152,6 +164,21 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
   const [phase, setPhase] = useState<"intro" | "rolling" | "pick" | "answer" | "contested" | "round-end" | "final">(() => resumed ? "pick" : "intro");
   const [showHowTo, setShowHowTo] = useState(false);
 
+  // "Play on Phones" — lets the attacker/defender in a contested duel buzz in from their seats
+  // instead of the teacher guessing who answered first by ear. Gated to propTeams.length > 1 (not
+  // teams.length — teams always includes a synthetic CPU teammate in solo play, see the useMemo
+  // above) and !isTopicMode below: topic-mode duels are "teacher picks the stronger answer," an
+  // explicit quality judgment with no "who's first" to resolve, so a buzzer has nothing to do
+  // there. Always defaults to screen, even on Resume, same as every other phone-mode game.
+  const [inputMode, setInputMode] = useState<"screen" | "phone">("screen");
+  const [introStep, setIntroStep] = useState<"setup" | "qr">("setup");
+  const [sessionCode, setSessionCode] = useState<string | null>(null);
+  const [connectedTeamIds, setConnectedTeamIds] = useState<Set<string | number>>(new Set());
+  // This duel's resolved buzz winner, or null while the buzzer is open. Purely informational — it
+  // never gates resolveContest, which still takes the teacher's own Attacker/Defender/Neither click.
+  const [buzzedTeamId, setBuzzedTeamId] = useState<string | number | null>(null);
+  const channelRef = useRef<RealtimeChannel | null>(null);
+
   useEffect(() => {
     if (!forceFinalRef) return;
     forceFinalRef.current = phase === "final" ? null : () => { setPhase("final"); return true; };
@@ -244,6 +271,34 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
 
   const activeTeamRealIdx = turnOrder[activeTeamIdx];
   const activeTeam = teams[activeTeamRealIdx];
+
+  // Refs the phone-mode broadcaster reads synchronously, so opening/closing the realtime channel
+  // only happens when phone mode itself toggles on/off, not on every phase/contest change — same
+  // pattern as every other phone-mode game.
+  const phaseRef = useRef(phase);
+  const contestRef = useRef(contest);
+  const buzzedTeamIdRef = useRef(buzzedTeamId);
+  const connectedTeamIdsRef = useRef<Set<string | number>>(new Set());
+  const sendStateRef = useRef<(() => void) | null>(null);
+  useEffect(() => { phaseRef.current = phase; }, [phase]);
+  useEffect(() => { contestRef.current = contest; }, [contest]);
+  useEffect(() => { buzzedTeamIdRef.current = buzzedTeamId; }, [buzzedTeamId]);
+
+  // Buffers buzzes for the current duel so the screen can pick whichever buzz has the earliest
+  // client timestamp once the collection window closes, rather than whichever broadcast physically
+  // arrives first — same reasoning as Race Track's buzzer.
+  const pendingBuzzesRef = useRef<{ teamId: string | number; ts: number }[]>([]);
+  const buzzWindowTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // A genuinely new duel (contest.key changes) clears the previous one's buzz state. contest is
+  // null between turns, so this only actually resets anything once a new key shows up.
+  useEffect(() => {
+    if (buzzWindowTimerRef.current) clearTimeout(buzzWindowTimerRef.current);
+    buzzWindowTimerRef.current = null;
+    pendingBuzzesRef.current = [];
+    setBuzzedTeamId(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [contest?.key]);
 
   const activeZoneId = phase === "contested" ? contest?.zoneId : chosenZone;
   const activeZoneDef = ZONES.find(z => z.id === activeZoneId);
@@ -339,7 +394,11 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
     setChosenZone(zoneId);
     const currentOwner = owners[zoneId];
     if (currentOwner !== undefined && currentOwner !== activeTeam.id) {
-      setContest({ attackerId: activeTeam.id, defenderId: currentOwner, zoneId, step: "simultaneous" });
+      // key uniquely identifies this one duel instance — a team gets exactly one turn per round,
+      // so (round, activeTeamIdx) alone already pins down the one contest that can exist during
+      // it; zoneId is redundant for uniqueness but kept for readability. Drives the buzz-reset
+      // effect above.
+      setContest({ attackerId: activeTeam.id, defenderId: currentOwner, zoneId, step: "simultaneous", key: `${round}-${activeTeamIdx}-${zoneId}` });
       setShowAns(false);
       setContestReady(false);
       setPhase("contested");
@@ -416,6 +475,110 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
     contest?.zoneId ?? "none"
   );
 
+  const handlePickPhoneMode = () => {
+    setInputMode("phone");
+    setSessionCode(generateSessionCode());
+    setIntroStep("qr");
+  };
+
+  const handlePickScreenMode = () => {
+    setInputMode("screen");
+    setIntroStep("setup");
+    setSessionCode(null);
+    setConnectedTeamIds(new Set());
+  };
+
+  // Opens/closes the realtime channel only when phone mode itself is toggled on/off. Screen-
+  // authoritative like every other phone-mode game — a phone's buzz is purely an informational
+  // signal the screen displays alongside the existing Attacker/Defender/Neither buttons; nothing
+  // about resolveContest, scoring, or the dice-roll turn order ever runs on a phone.
+  useEffect(() => {
+    if (inputMode !== "phone" || !sessionCode) return;
+    const channel = openHillChannel(sessionCode);
+    channelRef.current = channel;
+
+    const sendState = () => {
+      const rawPhase = phaseRef.current;
+      const c = contestRef.current;
+      const mappedPhase: HillPhase = rawPhase === "intro" ? "lobby"
+        : rawPhase === "final" ? "final"
+        : (rawPhase === "contested" && c?.step === "simultaneous") ? "duel"
+        : "idle";
+      const payload: HillStatePayload = {
+        phase: mappedPhase,
+        roster: teams.map(t => ({ id: t.id, name: t.name, color: t.color, mascot: t.mascot })),
+        connectedTeamIds: Array.from(connectedTeamIdsRef.current),
+        attackerId: mappedPhase === "duel" ? c.attackerId : null,
+        defenderId: mappedPhase === "duel" ? c.defenderId : null,
+        contestKey: c?.key ?? "",
+        buzzedTeamId: buzzedTeamIdRef.current,
+        ts: Date.now(),
+      };
+      channel.send({ type: "broadcast", event: "state", payload });
+    };
+    sendStateRef.current = sendState;
+
+    channel.on("presence", { event: "sync" }, () => {
+      const presenceState = channel.presenceState<{ teamId: string | number }>();
+      const ids = new Set<string | number>();
+      Object.values(presenceState).forEach(entries => entries.forEach(entry => ids.add(entry.teamId)));
+      connectedTeamIdsRef.current = ids;
+      setConnectedTeamIds(ids);
+      sendState();
+    });
+
+    // The only place phone input touches game logic — validates a duel is actually live and the
+    // buzzing team is one of the two participants, then buffers it for the fairness window exactly
+    // like Race Track's buzzer.
+    channel.on("broadcast", { event: "action" }, ({ payload }) => {
+      const action = payload as HillActionPayload;
+      if (action.action !== "buzz") return;
+      const c = contestRef.current;
+      if (phaseRef.current !== "contested" || c?.step !== "simultaneous") return;
+      if (action.teamId !== c.attackerId && action.teamId !== c.defenderId) return;
+      if (buzzedTeamIdRef.current !== null) return;
+      const roundKey = c.key;
+      if (buzzWindowTimerRef.current === null && pendingBuzzesRef.current.length === 0) {
+        pendingBuzzesRef.current = [{ teamId: action.teamId, ts: action.ts }];
+        buzzWindowTimerRef.current = setTimeout(() => {
+          buzzWindowTimerRef.current = null;
+          if (contestRef.current?.key !== roundKey || pendingBuzzesRef.current.length === 0) return;
+          const winner = [...pendingBuzzesRef.current].sort((a, b) => a.ts - b.ts)[0];
+          pendingBuzzesRef.current = [];
+          setBuzzedTeamId(winner.teamId);
+        }, BUZZ_WINDOW_MS);
+      } else {
+        pendingBuzzesRef.current.push({ teamId: action.teamId, ts: action.ts });
+      }
+    });
+
+    channel.subscribe(status => {
+      if (status === "SUBSCRIBED") sendState();
+    });
+
+    const interval = setInterval(sendState, 4000);
+
+    return () => {
+      clearInterval(interval);
+      closeChannel(channel);
+      channelRef.current = null;
+      sendStateRef.current = null;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inputMode, sessionCode, teams]);
+
+  // Pushes an immediate state update on transitions rather than waiting for the standing interval.
+  useEffect(() => {
+    sendStateRef.current?.();
+  }, [phase, contest, buzzedTeamId, connectedTeamIds]);
+
+  // Tells every connected phone the game is over the moment it actually ends.
+  useEffect(() => {
+    if (phase === "final" && channelRef.current) {
+      channelRef.current.send({ type: "broadcast", event: "ended", payload: {} });
+    }
+  }, [phase]);
+
   const arenaStyle: React.CSSProperties = {
     margin: "-20px", padding: "20px", borderRadius: "20px", position: "relative", overflow: "hidden",
     background: "radial-gradient(ellipse at 50% -10%,#DB2777 0%,#831843 45%,#1F0A1F 100%)",
@@ -453,6 +616,47 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
             </div>
           ))}
         </div>
+        {propTeams.length > 1 && !isTopicMode && (
+          <>
+            {introStep === "setup" && (
+              <div style={{ marginBottom: "20px" }}>
+                <div style={{ fontSize: "13px", color: "#F9A8D4", fontWeight: "700", marginBottom: "10px" }}>How will duels buzz in?</div>
+                <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
+                  <button onClick={handlePickScreenMode} className="ko-btn" style={{
+                    padding: "10px 20px", borderRadius: "12px", fontWeight: "800", fontSize: "14px", cursor: "pointer",
+                    border: `2px solid ${inputMode === "screen" ? "#DB2777" : "rgba(255,255,255,0.2)"}`,
+                    background: inputMode === "screen" ? "rgba(219,39,119,0.15)" : "rgba(255,255,255,0.05)",
+                    color: inputMode === "screen" ? "#F9A8D4" : "#F9A8D488",
+                  }}>🖥️ Play on Screen</button>
+                  <button onClick={handlePickPhoneMode} className="ko-btn" style={{
+                    padding: "10px 20px", borderRadius: "12px", fontWeight: "800", fontSize: "14px", cursor: "pointer",
+                    border: `2px solid ${inputMode === "phone" ? "#DB2777" : "rgba(255,255,255,0.2)"}`,
+                    background: inputMode === "phone" ? "rgba(219,39,119,0.15)" : "rgba(255,255,255,0.05)",
+                    color: inputMode === "phone" ? "#F9A8D4" : "#F9A8D488",
+                  }}>📱 Play on Phones</button>
+                </div>
+                <div style={{ fontSize: "11px", color: "#F9A8D488", marginTop: "6px" }}>
+                  Only matters during a contested duel — everything else stays on the shared screen.
+                </div>
+              </div>
+            )}
+
+            {introStep === "qr" && sessionCode && (() => {
+              const joinUrl = `${window.location.origin}${window.location.pathname}?join=${sessionCode}&game=hill`;
+              return (
+                <PhoneJoinPanel
+                  sessionCode={sessionCode} joinUrl={joinUrl} teams={propTeams} connectedTeamIds={connectedTeamIds}
+                  accent="#F9A8D4" panelBg="linear-gradient(160deg,#831843,#4C0519)" borderColor="#F9A8D455"
+                  footer={
+                    <button onClick={handlePickScreenMode} style={{ background: "none", border: "none", color: "#9CA3AF", fontSize: "12px", fontWeight: "700", cursor: "pointer", textDecoration: "underline" }}>
+                      Switch back to Play on Screen
+                    </button>
+                  }
+                />
+              );
+            })()}
+          </>
+        )}
         <button onClick={() => setShowHowTo(true)} className="ko-btn" style={{ display: "block", margin: "0 auto 14px", background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
           ❓ How to Play
         </button>
@@ -557,6 +761,13 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
     <div style={arenaStyle}>
       <AmbientBackdrop />
       {STYLE_TAG}
+      {inputMode === "phone" && sessionCode && (
+        <PhoneReconnectBadge
+          sessionCode={sessionCode} joinUrl={`${window.location.origin}${window.location.pathname}?join=${sessionCode}&game=hill`}
+          teams={propTeams} connectedTeamIds={connectedTeamIds}
+          accent="#F9A8D4" panelBg="linear-gradient(160deg,#831843,#4C0519)" borderColor="#F9A8D455"
+        />
+      )}
       <div style={{ position: "relative", zIndex: 1 }}>
         {phase === "rolling" && (
           <div style={{ textAlign: "center", padding: "16px 0" }}>
@@ -696,6 +907,14 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
                         ? "Teacher judges which team gave the better answer."
                         : "Judge which team answered correctly first."}
                     </div>
+                    {buzzedTeamId !== null && (() => {
+                      const buzzedTeam = teams.find(t => t.id === buzzedTeamId);
+                      return (
+                        <div style={{ textAlign: "center", marginTop: "10px", background: "#172438", border: `1.5px solid ${buzzedTeam?.color.bg ?? "#F7C948"}`, borderRadius: "12px", padding: "8px 14px" }}>
+                          <span style={{ fontWeight: "800", fontSize: "13px", color: "#FCD34D" }}>⚡ {buzzedTeam?.mascot ?? buzzedTeam?.color.emoji} {buzzedTeam?.name} buzzed in first!</span>
+                        </div>
+                      );
+                    })()}
                     {(showAns || q?.type === "speaking task") && (
                       <div style={{ marginTop: "14px" }}>
                         <div style={{ textAlign: "center", fontWeight: "700", fontSize: "13px", color: "#F9A8D4", marginBottom: "10px" }}>
@@ -704,8 +923,8 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
                             : "Who answered correctly first?"}
                         </div>
                         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "8px" }}>
-                          <button onClick={() => resolveContest(contest.attackerId)} className="ko-btn" style={{ background: attacker?.color.bg, color: "white", border: "none", borderRadius: "12px", padding: "14px 10px", cursor: "pointer", fontWeight: "800", transition: "transform 0.15s ease" }}>⚔️ {attacker?.name}</button>
-                          <button onClick={() => resolveContest(contest.defenderId)} className="ko-btn" style={{ background: defender?.color.bg, color: "white", border: "none", borderRadius: "12px", padding: "14px 10px", cursor: "pointer", fontWeight: "800", transition: "transform 0.15s ease" }}>🛡️ {defender?.name}</button>
+                          <button onClick={() => resolveContest(contest.attackerId)} className="ko-btn" style={{ background: attacker?.color.bg, color: "white", border: contest.attackerId === buzzedTeamId ? "3px solid #F7C948" : "none", borderRadius: "12px", padding: "14px 10px", cursor: "pointer", fontWeight: "800", transition: "transform 0.15s ease" }}>⚔️ {attacker?.name}</button>
+                          <button onClick={() => resolveContest(contest.defenderId)} className="ko-btn" style={{ background: defender?.color.bg, color: "white", border: contest.defenderId === buzzedTeamId ? "3px solid #F7C948" : "none", borderRadius: "12px", padding: "14px 10px", cursor: "pointer", fontWeight: "800", transition: "transform 0.15s ease" }}>🛡️ {defender?.name}</button>
                         </div>
                         <button onClick={() => resolveContest(null)} className="ko-btn" style={{ marginTop: "10px", background: "rgba(255,255,255,0.1)", color: "#F9A8D4", cursor: "pointer", border: "1px solid #F9A8D455", padding: "8px 16px", borderRadius: "10px", transition: "transform 0.15s ease" }}>🤝 Neither</button>
                       </div>
