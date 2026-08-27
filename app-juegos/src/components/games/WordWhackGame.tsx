@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from "react";
-import { QRCodeSVG } from "qrcode.react";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 import type { GameProps } from "../../types";
 import { useTurnTimer } from "../../hooks/useTurnTimer";
@@ -13,6 +12,8 @@ import { teamsGridCols, GAME_MODES } from "../../data/constants";
 import { denseRank, medalForRank } from "../../utils/ranking";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
+import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
+import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
 import { WHACK_TUTORIAL_STEPS } from "../../data/tutorials/whack";
 import {
   generateSessionCode, openWhackChannel, closeChannel,
@@ -25,6 +26,11 @@ const TURN_SECONDS = 90;
 // Every team gets this many 90s turns before final results — a single turn per team felt too
 // short on its own, per teacher feedback; 2 gives the full experience without dragging it out.
 const TOTAL_ROUNDS = 2;
+// How long a phone-driven turn's team can be missing from `connectedTeamIds` before the teacher
+// gets a manual "Skip Their Turn" option — comfortably longer than a normal reconnect (a wifi
+// blip or a quick tab reopen), short enough the class isn't stuck waiting on a genuinely-gone
+// phone. See the "stop the silent takeover" fix below.
+const DISCONNECT_GRACE_MS = 8000;
 
 const AMBIENT_BITS = Array.from({ length: 10 }, (_, i) => ({
   left: (i * 41) % 100,
@@ -105,6 +111,25 @@ function PhoneTurnSpectator({ activeTeam, timeLeft, totalSeconds }: {
   );
 }
 
+// Replaces PhoneTurnSpectator once a phone-driven turn's team has been missing past the grace
+// period (see DISCONNECT_GRACE_MS) — the teacher's manual "give up waiting" override, rather than
+// silently handing the turn to the shared screen the moment a connection drops.
+function DisconnectedTurnOverride({ activeTeam, onSkip }: {
+  activeTeam: { name: string; mascot?: string | null; color: { emoji: string; bg: string; dark: string } };
+  onSkip: () => void;
+}) {
+  return (
+    <div style={{ textAlign: "center", padding: "40px 20px", background: "linear-gradient(160deg,#7C2D1255,#1A2E05)", border: "3px solid #F59E0B", borderRadius: "16px" }}>
+      <div style={{ fontSize: "40px", marginBottom: "10px" }}>{activeTeam.mascot ?? activeTeam.color.emoji}</div>
+      <div style={{ fontWeight: "900", fontSize: "18px", color: "#FCD34D", marginBottom: "8px" }}>⚠️ {activeTeam.name} lost connection</div>
+      <div style={{ fontSize: "13px", color: "#FDE68A", marginBottom: "18px" }}>Waiting to see if they reconnect — use "📱 Reconnect a phone" below if they need the code again.</div>
+      <button onClick={onSkip} className="ww-btn" style={{ background: "linear-gradient(135deg,#B45309,#F59E0B)", color: "#1F1300", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "15px", fontWeight: "900", cursor: "pointer" }}>
+        Skip Their Turn →
+      </button>
+    </div>
+  );
+}
+
 export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState }: GameProps) {
   const resumed = useRef(validateWordWhackSnapshot(initialGameState, teams.length)).current;
 
@@ -162,10 +187,37 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
 
   const activeTeam = teams[teamIdx];
   const activeTeamHasPhone = inputMode === "phone" && connectedTeamIds.has(activeTeam.id);
-  // The screen only runs the mole loop itself when this team isn't playing on their own phone —
-  // same condition gates both the hook and the turn timer below, so exactly one of "this screen"
-  // or "that phone" is ever the source of truth for a given turn.
-  const screenRunsThisTurn = phase === "playing" && !activeTeamHasPhone;
+
+  // Snapshot once, at the moment a turn starts — deliberately NOT recomputed live off
+  // connectedTeamIds every render. Once a turn is handed to a phone, it stays that phone's turn,
+  // even if it drops, until the teacher explicitly skips it below (see phoneMissingMidTurn /
+  // skipDisconnectedTurn) — without this, a mid-turn disconnect would silently hand the mole grid
+  // to the whole shared screen the instant connectedTeamIds updates, since useTurnTimer/useMoleGame
+  // both restart fresh whenever their `active` flag flips false->true.
+  const turnOwnedByPhoneRef = useRef(false);
+  useEffect(() => {
+    if (phase === "playing") turnOwnedByPhoneRef.current = activeTeamHasPhone;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase, round, teamIdx]);
+
+  // True once the team a phone-driven turn belongs to has actually dropped off the channel mid-turn
+  // — feeds the disconnect-grace timer below, which is what decides when to offer the teacher a
+  // manual skip.
+  const phoneMissingMidTurn = turnOwnedByPhoneRef.current && phase === "playing" && !connectedTeamIds.has(activeTeam.id);
+
+  // Gives a normal reconnect (wifi blip, or the student just reopening the join link — see
+  // PhoneReconnectBadge) a real chance to resolve silently before surfacing anything to the
+  // teacher. Resets the moment the team is connected again, from either side of the timeout.
+  const [pastDisconnectGrace, setPastDisconnectGrace] = useState(false);
+  useEffect(() => {
+    if (!phoneMissingMidTurn) { setPastDisconnectGrace(false); return; }
+    const t = setTimeout(() => setPastDisconnectGrace(true), DISCONNECT_GRACE_MS);
+    return () => clearTimeout(t);
+  }, [phoneMissingMidTurn]);
+
+  // The screen only runs the mole loop itself when this turn was never handed to a phone in the
+  // first place — a mid-turn disconnect no longer flips this (see turnOwnedByPhoneRef above).
+  const screenRunsThisTurn = phase === "playing" && !turnOwnedByPhoneRef.current;
 
   const endTurn = () => {
     const finalTurnScore = game.turnScore;
@@ -180,6 +232,16 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
     setPhase("turn-end");
   };
 
+  // Teacher's manual override once a phone-driven turn's team has been gone past the grace period.
+  // 0 points, since Word Whack never streams live in-progress score from a phone mid-turn — same
+  // "0 is the only honest number" reasoning as a team that never connects at all. No
+  // globalRoundIdxRef advance: no questions were actually consumed this stalled turn.
+  const skipDisconnectedTurn = () => {
+    setLastTurnScore(0);
+    setLastTurnBestCombo(0);
+    setPhase("turn-end");
+  };
+
   const { timeLeft: turnTimeLeft } = useTurnTimer(TURN_SECONDS, screenRunsThisTurn, endTurn, `${round}-${teamIdx}`);
   useEffect(() => { turnTimeLeftRef.current = turnTimeLeft; }, [turnTimeLeft]);
 
@@ -188,7 +250,7 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
   // Starts at the same moment the phone's own local timer does (both keyed off the same
   // phase === "playing" transition), so the two stay close enough in sync for a shared-screen
   // display with nobody's actual gameplay depending on it down to the second.
-  const { timeLeft: spectatorTimeLeft } = useTurnTimer(TURN_SECONDS, phase === "playing" && activeTeamHasPhone, () => {}, `${round}-${teamIdx}`);
+  const { timeLeft: spectatorTimeLeft } = useTurnTimer(TURN_SECONDS, phase === "playing" && turnOwnedByPhoneRef.current, () => {}, `${round}-${teamIdx}`);
 
   const game = useMoleGame({
     pool, difficulty, startRoundIdx: globalRoundIdxRef.current,
@@ -405,26 +467,15 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
         {introStep === "qr" && sessionCode && (() => {
           const joinUrl = `${window.location.origin}${window.location.pathname}?join=${sessionCode}&game=whack`;
           return (
-            <div style={{ background: "linear-gradient(160deg,#3F6212,#1A2E05)", border: "2px solid #BEF26466", borderRadius: "20px", padding: "20px", marginBottom: "20px", maxWidth: "360px", marginLeft: "auto", marginRight: "auto" }}>
-              <div style={{ fontWeight: "800", fontSize: "14px", color: "#BEF264", marginBottom: "12px" }}>📱 Scan to join, or go to the site and enter this code:</div>
-              <div style={{ background: "white", borderRadius: "12px", padding: "12px", display: "inline-block" }}>
-                <QRCodeSVG value={joinUrl} size={160} />
-              </div>
-              <div style={{ fontSize: "28px", fontWeight: "900", letterSpacing: "0.1em", color: "white", margin: "12px 0" }}>{sessionCode}</div>
-              <div style={{ display: "flex", flexDirection: "column", gap: "6px", marginBottom: "10px" }}>
-                {teams.map(t => (
-                  <div key={t.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "rgba(255,255,255,0.06)", borderRadius: "8px", padding: "6px 10px", fontSize: "13px" }}>
-                    <span>{t.mascot ?? t.color.emoji} {t.name}</span>
-                    <span style={{ color: connectedTeamIds.has(t.id) ? "#4ADE80" : "#6B7280", fontWeight: "700" }}>
-                      {connectedTeamIds.has(t.id) ? "✅ Connected" : "⏳ Waiting…"}
-                    </span>
-                  </div>
-                ))}
-              </div>
-              <button onClick={handlePickScreenMode} style={{ background: "none", border: "none", color: "#9CA3AF", fontSize: "12px", fontWeight: "700", cursor: "pointer", textDecoration: "underline" }}>
-                Switch back to Play on Screen
-              </button>
-            </div>
+            <PhoneJoinPanel
+              sessionCode={sessionCode} joinUrl={joinUrl} teams={teams} connectedTeamIds={connectedTeamIds}
+              accent="#BEF264" panelBg="linear-gradient(160deg,#3F6212,#1A2E05)" borderColor="#BEF26466"
+              footer={
+                <button onClick={handlePickScreenMode} style={{ background: "none", border: "none", color: "#9CA3AF", fontSize: "12px", fontWeight: "700", cursor: "pointer", textDecoration: "underline" }}>
+                  Switch back to Play on Screen
+                </button>
+              }
+            />
           );
         })()}
         <button onClick={() => setShowHowTo(true)} className="ww-btn" style={{ display: "block", margin: "0 auto 14px", background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
@@ -503,15 +554,29 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
     <div style={arenaStyle}>
       <AmbientBackdrop />
       {STYLE_TAG}
+      {inputMode === "phone" && sessionCode && (
+        <PhoneReconnectBadge
+          sessionCode={sessionCode} joinUrl={`${window.location.origin}${window.location.pathname}?join=${sessionCode}&game=whack`}
+          teams={teams} connectedTeamIds={connectedTeamIds}
+          accent="#BEF264" panelBg="linear-gradient(160deg,#3F6212,#1A2E05)" borderColor="#BEF26466"
+        />
+      )}
       <div style={{ position: "relative", zIndex: 1 }}>
         <div style={{ background: `linear-gradient(90deg,${activeTeam.color.dark},${activeTeam.color.bg})`, borderRadius: "14px", padding: "10px 16px", marginBottom: "14px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px", boxShadow: `0 4px 18px ${activeTeam.color.bg}55` }}>
           <span style={{ color: "white", fontWeight: "900", fontSize: "16px", textShadow: "0 1px 3px rgba(0,0,0,0.4)" }}>🔨 {activeTeam.mascot ?? activeTeam.color.emoji} {activeTeam.name}'s turn — Round {round}/{TOTAL_ROUNDS}, Team {teamIdx + 1} of {teams.length}</span>
-          {phase === "playing" && <TurnTimerBar timeLeft={activeTeamHasPhone ? spectatorTimeLeft : turnTimeLeft} totalSeconds={TURN_SECONDS} />}
+          {phase === "playing" && <TurnTimerBar timeLeft={turnOwnedByPhoneRef.current ? spectatorTimeLeft : turnTimeLeft} totalSeconds={TURN_SECONDS} />}
         </div>
 
         {(phase === "playing" || phase === "countdown") && (
-          activeTeamHasPhone ? (
-            <PhoneTurnSpectator activeTeam={activeTeam} timeLeft={spectatorTimeLeft} totalSeconds={TURN_SECONDS} />
+          // During "countdown" turnOwnedByPhoneRef hasn't been set for the upcoming team yet (it
+          // only updates once "playing" actually starts), so fall back to the live value there —
+          // purely cosmetic pre-turn UI, no real game hook depends on it during countdown.
+          (phase === "countdown" ? activeTeamHasPhone : turnOwnedByPhoneRef.current) ? (
+            pastDisconnectGrace && phoneMissingMidTurn ? (
+              <DisconnectedTurnOverride activeTeam={activeTeam} onSkip={skipDisconnectedTurn} />
+            ) : (
+              <PhoneTurnSpectator activeTeam={activeTeam} timeLeft={spectatorTimeLeft} totalSeconds={TURN_SECONDS} />
+            )
           ) : (
           <>
             <div style={{ display: "flex", gap: "8px", justifyContent: "center", marginBottom: "12px", flexWrap: "wrap" }}>

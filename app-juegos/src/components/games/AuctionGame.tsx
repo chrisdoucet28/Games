@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { QRCodeSVG } from "qrcode.react";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 import type { GameProps, Team } from "../../types";
 import { teamsGridCols, GAME_MODES } from "../../data/constants";
 import { denseRank, medalForRank } from "../../utils/ranking";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
+import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
+import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
 import { AUCTION_TUTORIAL_STEPS } from "../../data/tutorials/auction";
 import {
   generateSessionCode, openAuctionChannel, closeChannel,
@@ -468,26 +469,15 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
         {introStep === "qr" && sessionCode && (() => {
           const joinUrl = `${window.location.origin}${window.location.pathname}?join=${sessionCode}`;
           return (
-            <div style={{ background: "linear-gradient(160deg,#3B0764,#1E1033)", border: "2px solid #FCD34D66", borderRadius: "20px", padding: "20px", marginBottom: "20px", maxWidth: "360px", marginLeft: "auto", marginRight: "auto" }}>
-              <div style={{ fontWeight: "800", fontSize: "14px", color: "#FCD34D", marginBottom: "12px" }}>📱 Scan to join, or go to the site and enter this code:</div>
-              <div style={{ background: "white", borderRadius: "12px", padding: "12px", display: "inline-block" }}>
-                <QRCodeSVG value={joinUrl} size={160} />
-              </div>
-              <div style={{ fontSize: "28px", fontWeight: "900", letterSpacing: "0.1em", color: "white", margin: "12px 0" }}>{sessionCode}</div>
-              <div style={{ display: "flex", flexDirection: "column", gap: "6px", marginBottom: "10px" }}>
-                {teams.map(t => (
-                  <div key={t.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "rgba(255,255,255,0.06)", borderRadius: "8px", padding: "6px 10px", fontSize: "13px" }}>
-                    <span>{t.mascot ?? t.color.emoji} {t.name}</span>
-                    <span style={{ color: connectedTeamIds.has(t.id) ? "#4ADE80" : "#6B7280", fontWeight: "700" }}>
-                      {connectedTeamIds.has(t.id) ? "✅ Connected" : "⏳ Waiting…"}
-                    </span>
-                  </div>
-                ))}
-              </div>
-              <button onClick={handlePickScreenMode} style={{ background: "none", border: "none", color: "#9CA3AF", fontSize: "12px", fontWeight: "700", cursor: "pointer", textDecoration: "underline" }}>
-                Switch back to Play on Screen
-              </button>
-            </div>
+            <PhoneJoinPanel
+              sessionCode={sessionCode} joinUrl={joinUrl} teams={teams} connectedTeamIds={connectedTeamIds}
+              accent="#FCD34D" panelBg="linear-gradient(160deg,#3B0764,#1E1033)" borderColor="#FCD34D66"
+              footer={
+                <button onClick={handlePickScreenMode} style={{ background: "none", border: "none", color: "#9CA3AF", fontSize: "12px", fontWeight: "700", cursor: "pointer", textDecoration: "underline" }}>
+                  Switch back to Play on Screen
+                </button>
+              }
+            />
           );
         })()}
 
@@ -551,6 +541,13 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
     <div style={arenaStyle}>
       <AmbientBackdrop />
       {STYLE_TAG}
+      {inputMode === "phone" && sessionCode && (
+        <PhoneReconnectBadge
+          sessionCode={sessionCode} joinUrl={`${window.location.origin}${window.location.pathname}?join=${sessionCode}`}
+          teams={teams} connectedTeamIds={connectedTeamIds}
+          accent="#FCD34D" panelBg="linear-gradient(160deg,#3B0764,#1E1033)" borderColor="#FCD34D66"
+        />
+      )}
       <div style={{ position: "relative", zIndex: 1 }}>
         <div style={{ position: "relative", background: "linear-gradient(160deg,#3B0764,#1E1033)", border: "2px solid #FCD34D55", borderRadius: "18px", padding: "22px 24px", marginBottom: "18px", textAlign: "center", boxShadow: "0 0 40px rgba(124,58,237,0.35)", overflow: "hidden" }}>
           <div style={{ position: "absolute", top: "-60px", left: "50%", transform: "translateX(-50%)", width: "260px", height: "200px", background: "radial-gradient(ellipse at 50% 0%,rgba(253,224,71,0.22),transparent 70%)", animation: "spotlightPulse 3s ease-in-out infinite" }} />

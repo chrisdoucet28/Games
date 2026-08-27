@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { RealtimeChannel } from "@supabase/supabase-js";
-import { QRCodeSVG } from "qrcode.react";
 import type { GameProps, QuestionData, Team } from "../../types";
 import { teamsGridCols, GAME_MODES } from "../../data/constants";
 import { denseRank, medalForRank } from "../../utils/ranking";
 import { makeTeacherTeam, TEACHER_ID } from "../../lib/soloOpponent";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
+import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
+import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
 import { SPY_TWOPLAYER_STEPS, SPY_GROUP_STEPS } from "../../data/tutorials/spy";
 import {
   generateSessionCode, openSpyChannel, closeChannel,
@@ -666,26 +667,15 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
             // or "waiting to connect" team here.
             const phoneEligibleTeams = teams.filter(t => t.id !== TEACHER_ID);
             return (
-              <div style={{ background: "linear-gradient(160deg,#1E3A5F,#0F172A)", border: "2px solid #38BDF866", borderRadius: "20px", padding: "20px", marginBottom: "20px", maxWidth: "360px", marginLeft: "auto", marginRight: "auto" }}>
-                <div style={{ fontWeight: "800", fontSize: "14px", color: "#38BDF8", marginBottom: "12px" }}>📱 Scan to join, or go to the site and enter this code:</div>
-                <div style={{ background: "white", borderRadius: "12px", padding: "12px", display: "inline-block" }}>
-                  <QRCodeSVG value={joinUrl} size={160} />
-                </div>
-                <div style={{ fontSize: "28px", fontWeight: "900", letterSpacing: "0.1em", color: "white", margin: "12px 0" }}>{sessionCode}</div>
-                <div style={{ display: "flex", flexDirection: "column", gap: "6px", marginBottom: "10px" }}>
-                  {phoneEligibleTeams.map(t => (
-                    <div key={t.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "rgba(255,255,255,0.06)", borderRadius: "8px", padding: "6px 10px", fontSize: "13px" }}>
-                      <span>{t.mascot ?? t.color.emoji} {t.name}</span>
-                      <span style={{ color: connectedTeamIds.has(t.id) ? "#4ADE80" : "#6B7280", fontWeight: "700" }}>
-                        {connectedTeamIds.has(t.id) ? "✅ Connected" : "⏳ Waiting…"}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-                <button onClick={handlePickScreenMode} style={{ background: "none", border: "none", color: "#9CA3AF", fontSize: "12px", fontWeight: "700", cursor: "pointer", textDecoration: "underline" }}>
-                  Switch back to Play on Screen
-                </button>
-              </div>
+              <PhoneJoinPanel
+                sessionCode={sessionCode} joinUrl={joinUrl} teams={phoneEligibleTeams} connectedTeamIds={connectedTeamIds}
+                accent="#38BDF8" panelBg="linear-gradient(160deg,#1E3A5F,#0F172A)" borderColor="#38BDF866"
+                footer={
+                  <button onClick={handlePickScreenMode} style={{ background: "none", border: "none", color: "#9CA3AF", fontSize: "12px", fontWeight: "700", cursor: "pointer", textDecoration: "underline" }}>
+                    Switch back to Play on Screen
+                  </button>
+                }
+              />
             );
           })()}
           <button
@@ -779,6 +769,13 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
     <div style={arenaStyle}>
       <Starfield />
       {STYLE_TAG}
+      {inputMode === "phone" && sessionCode && (
+        <PhoneReconnectBadge
+          sessionCode={sessionCode} joinUrl={`${window.location.origin}${window.location.pathname}?join=${sessionCode}&game=spy`}
+          teams={teams.filter(t => t.id !== TEACHER_ID)} connectedTeamIds={connectedTeamIds}
+          accent="#38BDF8" panelBg="linear-gradient(160deg,#1E3A5F,#0F172A)" borderColor="#38BDF866"
+        />
+      )}
       <div style={{ position: "relative", zIndex: 1 }}>
         <div
           style={{
