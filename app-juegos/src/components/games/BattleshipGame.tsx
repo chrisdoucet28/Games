@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from "react";
-import { TeamIcon } from "../shared/TeamIcon";
+import { TeamIcon, MascotSprite } from "../shared/TeamIcon";
 import type { GameProps, QuestionData } from "../../types";
 import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
 import { useTurnTimer } from "../../hooks/useTurnTimer";
@@ -704,7 +704,9 @@ export function BattleshipGame({ questions, teams: propTeams, onUpdateScore, onE
                               {isMissileHere && (
                                 <span style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
                                   <span style={{ position: "absolute", top: "-6px", fontSize: "9px", animation: "missileTrail 0.4s ease-out infinite" }}>💨</span>
-                                  <span style={{ fontSize: "18px", display: "inline-block", animation: "missileDrop 0.55s cubic-bezier(.3,.6,.4,1)" }}>{activeTeam.mascot ?? "🚀"}</span>
+                                  <span style={{ fontSize: "18px", display: "inline-block", animation: "missileDrop 0.55s cubic-bezier(.3,.6,.4,1)" }}>
+                                    <MascotSprite mascot={activeTeam.mascot} fallback="🚀" size={18} color={activeTeam.color.bg} />
+                                  </span>
                                 </span>
                               )}
                               {fx?.kind === "hit" && (
@@ -745,7 +747,9 @@ export function BattleshipGame({ questions, teams: propTeams, onUpdateScore, onE
 
             {missile ? (
               <div style={{ textAlign: "center", padding: "20px 0" }}>
-                <div style={{ fontSize: "40px", animation: "explodeShake 0.3s ease-in-out infinite" }}>{activeTeam.mascot ?? "🚀"}</div>
+                <div style={{ fontSize: "40px", animation: "explodeShake 0.3s ease-in-out infinite" }}>
+                  <MascotSprite mascot={activeTeam.mascot} fallback="🚀" size={40} color={activeTeam.color.bg} />
+                </div>
                 <div style={{ fontWeight: "900", color: "#FCD34D", fontSize: "16px", marginTop: "6px" }}>Incoming!</div>
               </div>
             ) : isSpeakingTask ? (

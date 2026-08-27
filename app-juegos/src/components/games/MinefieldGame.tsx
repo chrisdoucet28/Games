@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from "react";
-import { TeamIcon } from "../shared/TeamIcon";
+import { TeamIcon, MascotSprite } from "../shared/TeamIcon";
 import type { GameProps } from "../../types";
 import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
 import { denseRank, medalForRank } from "../../utils/ranking";
@@ -430,7 +430,7 @@ export function MinefieldGame({ gridData, teams: propTeams, onUpdateScore, onEnd
                   const isSel = selectedTile === idx;
                   const disabled = isRev || phase !== "pick";
                   let bg;
-                  let label;
+                  let label: React.ReactNode;
                   let cursor;
 
                   if (isRev) {
@@ -439,7 +439,7 @@ export function MinefieldGame({ gridData, teams: propTeams, onUpdateScore, onEnd
                     cursor = "default";
                   } else if (isSel) {
                     bg = "linear-gradient(135deg,#FCD34D,#F59E0B)";
-                    label = t.mascot ?? "?";
+                    label = <MascotSprite mascot={t.mascot} fallback="?" size={16} color="#78350F" />;
                     cursor = "default";
                   } else {
                     bg = phase !== "pick" ? "linear-gradient(135deg,#818CF8,#6366F1)" : "linear-gradient(135deg,#6366F1,#4338CA)";
