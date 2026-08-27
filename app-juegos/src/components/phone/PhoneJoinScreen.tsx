@@ -1,19 +1,21 @@
 import { useEffect, useRef, useState } from "react";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 import {
-  openAuctionChannel, openSpyChannel, openWhackChannel, openHotSeatChannel, openOrderUpChannel, closeChannel,
+  openAuctionChannel, openSpyChannel, openWhackChannel, openHotSeatChannel, openOrderUpChannel, openRaceTrackChannel, closeChannel,
   type AuctionStatePayload, type AuctionBetPayload, type SpyStatePayload,
   type WhackStatePayload, type WhackTurnReportPayload,
   type HotSeatStatePayload, type HotSeatActionPayload,
   type OrderUpStatePayload, type OrderUpActionPayload,
+  type RaceTrackStatePayload, type RaceTrackActionPayload,
 } from "../../lib/liveSession";
 import { PhoneAuctionView } from "./PhoneAuctionView";
 import { PhoneSpyView } from "./PhoneSpyView";
 import { PhoneWordWhackView } from "./PhoneWordWhackView";
 import { PhoneHotSeatView } from "./PhoneHotSeatView";
 import { PhoneOrderUpView } from "./PhoneOrderUpView";
+import { PhoneRaceTrackView } from "./PhoneRaceTrackView";
 
-type Game = "auction" | "spy" | "whack" | "hotseat" | "orderup";
+type Game = "auction" | "spy" | "whack" | "hotseat" | "orderup" | "racetrack";
 type Props = { code: string; game: Game };
 
 // No state broadcast for this long means the teacher's tab is gone (refreshed, closed the game,
@@ -79,6 +81,14 @@ const GAME_COPY: Record<Game, {
     endedTitle: "Kitchen's closed!",
     endedBody: "Thanks for playing — check the big screen for final results.",
   },
+  racetrack: {
+    joinEmoji: "🔔",
+    arenaBg: "radial-gradient(ellipse at 40% 40%,#0E2040 0%,#060E1C 100%)",
+    startingBody: "Get ready — waiting for your teacher to start the race…",
+    endedEmoji: "🏁",
+    endedTitle: "The race is over!",
+    endedBody: "Thanks for playing — check the big screen for final results.",
+  },
 };
 
 function loadClaimedTeamId(code: string): string | number | null {
@@ -107,6 +117,7 @@ const GAME_TITLES: Record<Game, string> = {
   whack: "Word Whack",
   hotseat: "Hot Seat",
   orderup: "Order Up",
+  racetrack: "Race Track",
 };
 
 export function PhoneJoinScreen({ code, game }: Props) {
@@ -127,7 +138,7 @@ export function PhoneJoinScreen({ code, game }: Props) {
   // when the effect first ran.
   const claimedTeamIdRef = useRef<string | number | null>(loadClaimedTeamId(code));
   const [claimedTeamId, setClaimedTeamId] = useState<string | number | null>(claimedTeamIdRef.current);
-  const [state, setState] = useState<AuctionStatePayload | SpyStatePayload | WhackStatePayload | HotSeatStatePayload | OrderUpStatePayload | null>(null);
+  const [state, setState] = useState<AuctionStatePayload | SpyStatePayload | WhackStatePayload | HotSeatStatePayload | OrderUpStatePayload | RaceTrackStatePayload | null>(null);
   const [lastStateAt, setLastStateAt] = useState<number | null>(null);
   // Once true, stays true regardless of what happens to the connection afterward — a phone that
   // learns the game is over shouldn't ever fall back to "lost connection" messaging just because
@@ -141,11 +152,12 @@ export function PhoneJoinScreen({ code, game }: Props) {
       : game === "whack" ? openWhackChannel(code)
       : game === "hotseat" ? openHotSeatChannel(code)
       : game === "orderup" ? openOrderUpChannel(code)
+      : game === "racetrack" ? openRaceTrackChannel(code)
       : openAuctionChannel(code);
     channelRef.current = channel;
 
     channel.on("broadcast", { event: "state" }, ({ payload }) => {
-      const statePayload = payload as AuctionStatePayload | SpyStatePayload | WhackStatePayload | HotSeatStatePayload | OrderUpStatePayload;
+      const statePayload = payload as AuctionStatePayload | SpyStatePayload | WhackStatePayload | HotSeatStatePayload | OrderUpStatePayload | RaceTrackStatePayload;
       setState(statePayload);
       setLastStateAt(Date.now());
       // Covers a phone that only joins/reconnects after the game already ended — it'll never see
@@ -201,6 +213,10 @@ export function PhoneJoinScreen({ code, game }: Props) {
   };
 
   const sendOrderUpAction = (payload: OrderUpActionPayload) => {
+    channelRef.current?.send({ type: "broadcast", event: "action", payload });
+  };
+
+  const sendRaceTrackAction = (payload: RaceTrackActionPayload) => {
     channelRef.current?.send({ type: "broadcast", event: "action", payload });
   };
 
@@ -296,6 +312,9 @@ export function PhoneJoinScreen({ code, game }: Props) {
   }
   if (game === "orderup") {
     return <PhoneOrderUpView state={state as OrderUpStatePayload} teamId={claimedTeamId} onAction={sendOrderUpAction} />;
+  }
+  if (game === "racetrack") {
+    return <PhoneRaceTrackView state={state as RaceTrackStatePayload} teamId={claimedTeamId} onAction={sendRaceTrackAction} />;
   }
   return <PhoneAuctionView state={state as AuctionStatePayload} teamId={claimedTeamId} onBet={sendBet} />;
 }

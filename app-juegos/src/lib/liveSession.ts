@@ -282,3 +282,52 @@ export function openOrderUpChannel(code: string): RealtimeChannel {
     config: { presence: { key: crypto.randomUUID() } },
   });
 }
+
+// --- Race Track ---
+//
+// The simplest phone-mode game yet: one shared question goes up for the whole class at once (no
+// ticket queue, no per-team content, nothing to type), so a phone's only job is to be a personal
+// "BUZZ!" button. Screen-authoritative like every other game here — the screen alone decides who
+// gets credited (buzzing is purely an input-timing signal feeding into the teacher's existing
+// judgment, never a substitute for it).
+export type RaceTrackRosterEntry = { id: string | number; name: string; color: TeamColor; mascot?: string | null };
+
+// "interlude" covers the dice-roll/effect-reveal chain (RaceTrackGame.tsx's "rolling"/"effect"
+// phases) — without a distinct value for that ~2-3s stretch, it would have to map to "lobby", which
+// PhoneJoinScreen.tsx's shared pre-game gate reads as "hasn't started yet," wrongly telling a phone
+// mid-race to go back to waiting.
+export type RaceTrackPhase = "lobby" | "task" | "interlude" | "final";
+
+export type RaceTrackStatePayload = {
+  phase: RaceTrackPhase;
+  roster: RaceTrackRosterEntry[];
+  connectedTeamIds: (string | number)[];
+  // `${zone.id}:${typeIdx}` — mirrors the screen's own question-identity key. A new value means a
+  // genuinely new question; every phone clears its buzzed-or-not display when this changes.
+  taskKey: string;
+  // This round's resolved buzz winner, or null while the buzzer is open. "Round" isn't always the
+  // same as "question" — see rejectedTeamIds below.
+  buzzedTeamId: string | number | null;
+  // Teams marked "wrong" on the CURRENT question — excluded from re-buzzing until taskKey changes,
+  // even though the buzzer itself reopens for everyone else once a team's marked wrong.
+  rejectedTeamIds: (string | number)[];
+  // Each team's current track position — a light phone-side context strip, not load-bearing.
+  positions: Record<string, number>;
+  ts: number;
+};
+
+// The only phone-originated action. Marking a buzz "wrong" and reopening the round is teacher-only,
+// screen-side (RaceTrackGame.tsx's own markBuzzWrong) — never broadcast by a phone; phones just
+// react to buzzedTeamId/rejectedTeamIds changing in the next state push, the same way they react to
+// a new taskKey.
+export type RaceTrackActionPayload = { teamId: string | number; action: "buzz"; ts: number };
+
+function raceTrackChannelName(code: string): string {
+  return `racetrack-${code}`;
+}
+
+export function openRaceTrackChannel(code: string): RealtimeChannel {
+  return supabase.channel(raceTrackChannelName(code), {
+    config: { presence: { key: crypto.randomUUID() } },
+  });
+}
