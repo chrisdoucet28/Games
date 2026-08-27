@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { TeamIcon } from "../shared/TeamIcon";
+import { TeamIcon, MascotSprite } from "../shared/TeamIcon";
 import type { WhackStatePayload, WhackTurnReportPayload } from "../../lib/liveSession";
 import { useMoleGame, TOTAL_HOLES } from "../../hooks/useMoleGame";
 import { useTurnTimer } from "../../hooks/useTurnTimer";
@@ -210,7 +210,7 @@ export function PhoneWordWhackView({ state, teamId, onTurnReport }: Props) {
                     display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center",
                   }}
                 >
-                  {team?.mascot ?? "🦫"} {mole.text}
+                  <MascotSprite mascot={team?.mascot} fallback="🦫" size={10} color="#FEF3C7" /> {mole.text}
                 </button>
               )}
               {holeFx?.kind === "hit" && (

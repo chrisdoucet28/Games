@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { TeamIcon } from "../shared/TeamIcon";
+import { TeamIcon, MascotSprite } from "../shared/TeamIcon";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 import type { GameProps } from "../../types";
 import { useTurnTimer } from "../../hooks/useTurnTimer";
@@ -623,7 +623,7 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
                             animation: holeFx?.kind === "miss" ? "wwBonk 0.35s ease-in-out" : "wwPopUp 0.3s ease-out",
                           }}
                         >
-                          {activeTeam.mascot ?? "🦫"} {mole.text}
+                          <MascotSprite mascot={activeTeam.mascot} fallback="🦫" size={12} color="#FEF3C7" /> {mole.text}
                         </button>
                       )}
                       {holeFx?.kind === "hit" && (

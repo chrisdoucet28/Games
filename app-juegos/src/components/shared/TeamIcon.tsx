@@ -40,3 +40,15 @@ export function TeamIcon({ team, size = 16, color }: Props) {
     />
   );
 }
+
+// The in-game-sprite sibling of TeamIcon — some games render a team's mascot as an actual game
+// piece (Word Whack's mole, Battleship's missile, Vault Heist's active-turn portrait, a Zombie
+// Siege defender, a Race Track car, ...), each with its own genre-appropriate placeholder
+// (a beaver, a rocket, a generic person) for a team that hasn't picked a mascot — that
+// placeholder is intentionally NOT the team-color dot TeamIcon falls back to, so it stays a
+// distinct component rather than a variant of TeamIcon.
+export function MascotSprite({ mascot, fallback, size = 24, color }: { mascot?: string | null; fallback: React.ReactNode; size?: number; color?: string }) {
+  const iconName = mascot ? MASCOT_ICON_BY_EMOJI[mascot] : undefined;
+  if (iconName) return <Icon name={iconName} size={size} color={color} />;
+  return <>{fallback}</>;
+}

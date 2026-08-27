@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from "react";
-import { TeamIcon } from "../shared/TeamIcon";
+import { TeamIcon, MascotSprite } from "../shared/TeamIcon";
 import type { GameProps } from "../../types";
 import { useTurnTimer } from "../../hooks/useTurnTimer";
 import { TurnTimerBar } from "../shared/TurnTimerBar";
@@ -90,7 +90,7 @@ type LastEvent = {
   mpGained?: number;
 };
 type ImpactKind = "hit" | "heal" | "shield" | "focus";
-type Impact = { id: number; teamId: string | number; kind: ImpactKind; character?: string };
+type Impact = { id: number; teamId: string | number; kind: ImpactKind; character?: React.ReactNode };
 type FloatText = { id: number; teamId: string | number; text: string; color: string };
 
 // What "Save & Exit" snapshots and "Resume" restores — the RPG stats board plus whose turn it is
@@ -263,7 +263,7 @@ export function CastleGame({ questions, teams: propTeams, onUpdateScore, onEnd, 
   // first one.
   const [interrupted, setInterrupted] = useState(false);
 
-  const spawnImpact = (teamId: string | number, kind: ImpactKind, character?: string, duration = 650) => {
+  const spawnImpact = (teamId: string | number, kind: ImpactKind, character?: React.ReactNode, duration = 650) => {
     const id = fxId.current++;
     setImpacts(prev => [...prev, { id, teamId, kind, character }]);
     setTimeout(() => setImpacts(prev => prev.filter(i => i.id !== id)), duration);
@@ -687,7 +687,7 @@ export function CastleGame({ questions, teams: propTeams, onUpdateScore, onEnd, 
     setLastEvent({ action: selectedAction as ActionId, damage: finalDamage, xpGained, apple: gotApple, targetId, leveledUp, roll, shieldConsumed: targetShielded });
     setPhase("result");
 
-    spawnImpact(targetId, "hit", activeTeam.mascot ?? ACTION_DEFS.find(a => a.id === selectedAction)!.character);
+    spawnImpact(targetId, "hit", <MascotSprite mascot={activeTeam.mascot} fallback={ACTION_DEFS.find(a => a.id === selectedAction)!.character} size={46} color={activeTeam.color.bg} />);
     spawnFloat(targetId, `-${finalDamage}`, "#FCA5A5");
     if (gotApple) {
       spawnImpact(activeTeam.id, "heal");
@@ -865,7 +865,7 @@ export function CastleGame({ questions, teams: propTeams, onUpdateScore, onEnd, 
           <div style={{ textAlign: "center" }}>
             {actionDef && (
               <div style={{ fontSize: "40px", display: "inline-block", filter: `drop-shadow(0 0 12px ${actionDef.glow})`, animation: rolling ? "attackerWindup 0.5s ease-in-out infinite" : "none" }}>
-                {activeTeam.mascot ?? actionDef.character}
+                <MascotSprite mascot={activeTeam.mascot} fallback={actionDef.character} size={40} color={activeTeam.color.bg} />
               </div>
             )}
             <DiceRoller rolling={rolling} result={diceRoll} />
