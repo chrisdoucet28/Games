@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { QRCodeSVG } from "qrcode.react";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 import type { GameProps } from "../../types";
 import { teamsGridCols, GAME_MODES } from "../../data/constants";
 import { denseRank, medalForRank } from "../../utils/ranking";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
+import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
+import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
 import { HOTSEAT_TUTORIAL_STEPS } from "../../data/tutorials/hotseat";
 import {
   generateSessionCode, openHotSeatChannel, closeChannel,
@@ -476,13 +477,15 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
               {introStep === "qr" && sessionCode && (() => {
                 const joinUrl = `${window.location.origin}${window.location.pathname}?join=${sessionCode}&game=hotseat`;
                 return (
-                  <div style={{ background: "linear-gradient(160deg,#7C2D12,#1C0701)", border: "2px solid #F9731666", borderRadius: "20px", padding: "20px", marginBottom: "20px", maxWidth: "360px", marginLeft: "auto", marginRight: "auto" }}>
-                    <div style={{ fontWeight: "800", fontSize: "14px", color: "#FDBA74", marginBottom: "12px" }}>📱 Scan to join, or go to the site and enter this code:</div>
-                    <div style={{ background: "white", borderRadius: "12px", padding: "12px", display: "inline-block" }}>
-                      <QRCodeSVG value={joinUrl} size={160} />
-                    </div>
-                    <div style={{ fontSize: "28px", fontWeight: "900", letterSpacing: "0.1em", color: "white", margin: "12px 0" }}>{sessionCode}</div>
-
+                  <PhoneJoinPanel
+                    sessionCode={sessionCode} joinUrl={joinUrl} teams={teams} connectedTeamIds={connectedTeamIds}
+                    accent="#FDBA74" panelBg="linear-gradient(160deg,#7C2D12,#1C0701)" borderColor="#F9731666"
+                    footer={
+                      <button onClick={handlePickScreenMode} style={{ background: "none", border: "none", color: "#FED7AA99", fontSize: "12px", fontWeight: "700", cursor: "pointer", textDecoration: "underline" }}>
+                        Switch back to Play on Screen
+                      </button>
+                    }
+                  >
                     <div style={{ marginBottom: "14px" }}>
                       <div style={{ fontSize: "12px", color: "#FED7AA", fontWeight: "700", marginBottom: "8px" }}>Are your teams groups or solo players?</div>
                       <div style={{ display: "flex", gap: "8px", justifyContent: "center" }}>
@@ -503,21 +506,7 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
                         {teamStructure === "groups" ? "Each team's own phone shows the word to their describers." : "Every other team's phone shows the word — they describe for whoever's up."}
                       </div>
                     </div>
-
-                    <div style={{ display: "flex", flexDirection: "column", gap: "6px", marginBottom: "10px" }}>
-                      {teams.map(t => (
-                        <div key={t.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "rgba(255,255,255,0.06)", borderRadius: "8px", padding: "6px 10px", fontSize: "13px" }}>
-                          <span>{t.mascot ?? t.color.emoji} {t.name}</span>
-                          <span style={{ color: connectedTeamIds.has(t.id) ? "#4ADE80" : "#6B7280", fontWeight: "700" }}>
-                            {connectedTeamIds.has(t.id) ? "✅ Connected" : "⏳ Waiting…"}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                    <button onClick={handlePickScreenMode} style={{ background: "none", border: "none", color: "#FED7AA99", fontSize: "12px", fontWeight: "700", cursor: "pointer", textDecoration: "underline" }}>
-                      Switch back to Play on Screen
-                    </button>
-                  </div>
+                  </PhoneJoinPanel>
                 );
               })()}
             </>
@@ -615,6 +604,13 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
       <EmberField />
       <LavaGlow />
       {STYLE_TAG}
+      {inputMode === "phone" && sessionCode && (
+        <PhoneReconnectBadge
+          sessionCode={sessionCode} joinUrl={`${window.location.origin}${window.location.pathname}?join=${sessionCode}&game=hotseat`}
+          teams={teams} connectedTeamIds={connectedTeamIds}
+          accent="#FDBA74" panelBg="linear-gradient(160deg,#7C2D12,#1C0701)" borderColor="#F9731666"
+        />
+      )}
       <div style={{ position: "relative", zIndex: 1 }}>
         <div style={{ background: "linear-gradient(90deg,#7C2D12,#9A3412)", border: "1.5px solid #FDBA7455", borderRadius: "14px", padding: "14px 16px", marginBottom: "16px", textAlign: "center", color: "white", boxShadow: "0 4px 18px rgba(154,52,18,0.5)" }}>
           <div style={{ fontWeight: "900", fontSize: "18px" }}>Round {roundIndex + 1} of {TOTAL_ROUNDS} - {currentTeam.name}</div>
