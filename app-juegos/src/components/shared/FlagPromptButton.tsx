@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { submitFlag } from "../../lib/feedback";
+import { Icon } from "./Icon";
 
 // Tiny, low-weight control dropped next to a game's answer/result reveal — lets a teacher flag
 // that specific prompt as weird/wrong without ever leaving the game or opening a full modal.
@@ -36,8 +37,8 @@ export function FlagPromptButton({ gameId, questionData }: FlagPromptButtonProps
 
   if (status === "sent") {
     return (
-      <span style={{ fontSize: "11px", fontWeight: 800, color: "#166534", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
-        🚩 Sent
+      <span style={{ fontSize: "11px", fontWeight: 800, color: "#166534", fontFamily: "'Segoe UI',system-ui,sans-serif", display: "inline-flex", alignItems: "center", gap: "4px" }}>
+        <Icon name="flag" size={11} /> Sent
       </span>
     );
   }
@@ -50,10 +51,10 @@ export function FlagPromptButton({ gameId, questionData }: FlagPromptButtonProps
         style={{
           background: "rgba(120,120,130,0.12)", color: "#6B7280", border: "1px solid rgba(120,120,130,0.25)",
           borderRadius: "8px", padding: "3px 7px", fontSize: "11px", cursor: "pointer",
-          fontFamily: "'Segoe UI',system-ui,sans-serif", lineHeight: 1,
+          fontFamily: "'Segoe UI',system-ui,sans-serif", lineHeight: 1, display: "inline-flex", alignItems: "center",
         }}
       >
-        🚩
+        <Icon name="flag" size={12} />
       </button>
     );
   }
@@ -81,9 +82,9 @@ export function FlagPromptButton({ gameId, questionData }: FlagPromptButtonProps
         <button
           onClick={submit}
           disabled={status === "sending"}
-          style={{ background: "#DC2626", color: "white", border: "none", borderRadius: "6px", padding: "4px 10px", fontWeight: 800, cursor: "pointer", fontSize: "10px" }}
+          style={{ background: "#DC2626", color: "white", border: "none", borderRadius: "6px", padding: "4px 10px", fontWeight: 800, cursor: "pointer", fontSize: "10px", display: "inline-flex", alignItems: "center", gap: "4px" }}
         >
-          {status === "sending" ? "..." : "🚩 Send"}
+          {status === "sending" ? "..." : <><Icon name="flag" size={10} /> Send</>}
         </button>
       </div>
     </div>

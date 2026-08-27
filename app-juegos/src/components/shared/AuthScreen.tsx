@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import { ThemeAmbience } from "./ThemeAmbience";
 import { MarketingLanding } from "./MarketingLanding";
+import { Icon } from "./Icon";
 
 type Mode = "sign-in" | "sign-up";
 
@@ -80,7 +81,7 @@ export function AuthScreen() {
         ) : (
           <>
           <div style={{ textAlign: "center", marginBottom: "24px" }}>
-            <div style={{ fontSize: "48px", marginBottom: "8px", filter: "drop-shadow(0 4px 16px rgba(0,0,0,0.4))" }}>🕹️</div>
+            <Icon name="joystick" size={48} color="#FCD34D" style={{ marginBottom: "8px", filter: "drop-shadow(0 4px 16px rgba(0,0,0,0.4))" }} />
             <h1 style={{ fontSize: "28px", fontWeight: "900", color: "white", margin: 0, letterSpacing: "-0.01em" }}>
               Class<span style={{ color: "#FCD34D" }}>Cade</span>
             </h1>
@@ -88,9 +89,9 @@ export function AuthScreen() {
           <div style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: "20px", padding: "28px 24px", backdropFilter: "blur(8px)" }}>
             <button
               type="button" onClick={() => setShowForm(false)}
-              style={{ background: "none", border: "none", color: "#7DB8DB", fontSize: "12px", fontWeight: "700", cursor: "pointer", padding: 0, marginBottom: "16px" }}
+              style={{ background: "none", border: "none", color: "#7DB8DB", fontSize: "12px", fontWeight: "700", cursor: "pointer", padding: 0, marginBottom: "16px", display: "flex", alignItems: "center", gap: "4px" }}
             >
-              ← Back
+              <Icon name="back" size={12} /> Back
             </button>
 
             <div style={{ display: "flex", gap: "8px", marginBottom: "20px", background: "rgba(0,0,0,0.2)", borderRadius: "12px", padding: "4px" }}>
@@ -112,8 +113,8 @@ export function AuthScreen() {
             </div>
 
             {confirmSent ? (
-              <div style={{ color: "#BEF264", fontSize: "14px", lineHeight: 1.6, textAlign: "center", padding: "12px 0" }}>
-                ✅ Check your email to confirm your account, then log in.
+              <div style={{ color: "#BEF264", fontSize: "14px", lineHeight: 1.6, textAlign: "center", padding: "12px 0", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}>
+                <Icon name="check" size={16} /> Check your email to confirm your account, then log in.
               </div>
             ) : (
               <form onSubmit={submit}>
@@ -153,7 +154,7 @@ export function AuthScreen() {
               type="button" onClick={signInWithGoogle}
               style={{ width: "100%", background: "white", color: "#1F2937", border: "none", borderRadius: "12px", padding: "12px", fontSize: "14px", fontWeight: "700", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}
             >
-              <span aria-hidden="true">🔵</span> Continue with Google
+              <span aria-hidden="true" style={{ width: "10px", height: "10px", borderRadius: "50%", background: "#4285F4", display: "inline-block" }} /> Continue with Google
             </button>
           </div>
           </>

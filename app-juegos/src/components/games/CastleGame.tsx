@@ -1,9 +1,10 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from "react";
+import { TeamIcon } from "../shared/TeamIcon";
 import type { GameProps } from "../../types";
 import { useTurnTimer } from "../../hooks/useTurnTimer";
 import { TurnTimerBar } from "../shared/TurnTimerBar";
 import { QuestionCard } from "../shared/QuestionCard";
-import { teamsGridCols, GAME_MODES } from "../../data/constants";
+import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
 import { denseRank, medalForRank } from "../../utils/ranking";
 import { makeSoloCpuTeam } from "../../lib/soloOpponent";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
@@ -478,7 +479,7 @@ export function CastleGame({ questions, teams: propTeams, onUpdateScore, onEnd, 
         </button>
         {showHowTo && (
           <HowToPlayModal
-            gameName={GM.name} gameIcon={GM.icon} accentColor={GM.color}
+            gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color}
             steps={CASTLE_TUTORIAL_STEPS}
             onClose={() => setShowHowTo(false)}
           />
@@ -513,7 +514,7 @@ export function CastleGame({ questions, teams: propTeams, onUpdateScore, onEnd, 
                   opacity: rank === 0 ? 1 : 0.85,
                 }}>
                   <span style={{ fontSize: rank === 0 ? "24px" : "20px" }}>{medalForRank(rank)}</span>
-                  <span style={{ flex: 1, textAlign: "left", fontWeight: rank === 0 ? "900" : "800", color: rank === 0 ? "white" : "#D1D5DB", fontSize: rank === 0 ? "16px" : "15px" }}>{t.mascot ?? t.color.emoji} {t.name}</span>
+                  <span style={{ flex: 1, textAlign: "left", fontWeight: rank === 0 ? "900" : "800", color: rank === 0 ? "white" : "#D1D5DB", fontSize: rank === 0 ? "16px" : "15px" }}><TeamIcon team={t} /> {t.name}</span>
                   <span style={{ fontWeight: "800", color: rank === 0 ? "#6EE7B7" : "#6B7280", fontSize: "13px" }}>{value}/{MAX_HP} HP left</span>
                 </div>
               ))}
@@ -540,13 +541,13 @@ export function CastleGame({ questions, teams: propTeams, onUpdateScore, onEnd, 
           <div style={{ display: "flex", flexDirection: "column", gap: "8px", maxWidth: "420px", margin: "0 auto 24px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "12px", background: `linear-gradient(160deg,${winnerTeam.color.dark}66,#0B0B1F)`, border: `2px solid ${winnerTeam.color.bg}`, borderRadius: "14px", padding: "12px 16px" }}>
               <span style={{ fontSize: "24px" }}>🥇</span>
-              <span style={{ flex: 1, textAlign: "left", fontWeight: "900", color: "white", fontSize: "16px" }}>{winnerTeam.mascot ?? winnerTeam.color.emoji} {winnerTeam.name}</span>
+              <span style={{ flex: 1, textAlign: "left", fontWeight: "900", color: "white", fontSize: "16px" }}><TeamIcon team={winnerTeam} /> {winnerTeam.name}</span>
               <span style={{ fontWeight: "800", color: "#6EE7B7", fontSize: "13px" }}>STOOD STRONG</span>
             </div>
             {rankedLosers.map((t, i) => (
               <div key={t.id} style={{ display: "flex", alignItems: "center", gap: "12px", background: "linear-gradient(160deg,#1F2937,#0B0F17)", border: "2px solid #4B5563", borderRadius: "14px", padding: "10px 16px", opacity: 0.85 }}>
                 <span style={{ fontSize: "20px" }}>{i === 0 ? "💀" : "🏚️"}</span>
-                <span style={{ flex: 1, textAlign: "left", fontWeight: "800", color: "#D1D5DB", fontSize: "15px" }}>{t.mascot ?? t.color.emoji} {t.name}</span>
+                <span style={{ flex: 1, textAlign: "left", fontWeight: "800", color: "#D1D5DB", fontSize: "15px" }}><TeamIcon team={t} /> {t.name}</span>
                 <span style={{ fontWeight: "700", color: "#6B7280", fontSize: "12px" }}>FELL</span>
               </div>
             ))}
@@ -566,7 +567,7 @@ export function CastleGame({ questions, teams: propTeams, onUpdateScore, onEnd, 
         <div style={{ position: "relative", zIndex: 1 }}>
           <div style={{ background: "linear-gradient(135deg,#064E3B,#059669)", borderRadius: "20px", padding: "28px 24px", marginBottom: "20px", color: "white", maxWidth: "480px", margin: "0 auto 20px", boxShadow: "0 0 40px #05966955" }}>
             <div style={{ fontSize: "36px", marginBottom: "10px" }}>⏰</div>
-            <div style={{ fontWeight: "900", fontSize: "19px", marginBottom: "10px" }}>{noticeTeam.mascot ?? noticeTeam.color.emoji} {noticeTeam.name} ran out of time!</div>
+            <div style={{ fontWeight: "900", fontSize: "19px", marginBottom: "10px" }}><TeamIcon team={noticeTeam} /> {noticeTeam.name} ran out of time!</div>
             <div style={{ fontSize: "15px", lineHeight: 1.6, opacity: 0.95 }}>
               {timeoutNotice.retried ? "That's your one free retry for this game — watch the clock this time!" : "You've already used your free retry this game — the turn moves on."}
             </div>

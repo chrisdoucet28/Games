@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { TeamIcon } from "./TeamIcon";
 import { QRCodeSVG } from "qrcode.react";
 import type { Team } from "../../types";
 
@@ -33,7 +34,7 @@ export function PhoneJoinPanel({ sessionCode, joinUrl, teams, connectedTeamIds, 
       <div style={{ display: "flex", flexDirection: "column", gap: "6px", marginBottom: "10px" }}>
         {teams.map(t => (
           <div key={t.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "rgba(255,255,255,0.06)", borderRadius: "8px", padding: "6px 10px", fontSize: "13px" }}>
-            <span>{t.mascot ?? t.color.emoji} {t.name}</span>
+            <span><TeamIcon team={t} /> {t.name}</span>
             <span style={{ color: connectedTeamIds.has(t.id) ? "#4ADE80" : "#6B7280", fontWeight: "700" }}>
               {connectedTeamIds.has(t.id) ? "✅ Connected" : "⏳ Waiting…"}
             </span>

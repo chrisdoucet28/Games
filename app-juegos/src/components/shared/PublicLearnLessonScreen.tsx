@@ -1,6 +1,8 @@
 import { useEffect } from "react";
-import { LESSON_TOPICS, FOCUS_LABEL, LEVEL_COLOR, renderBold } from "../../data/learnTopics";
+import { LESSON_TOPICS, FOCUS_LABEL, LEVEL_COLOR } from "../../data/learnTopics";
+import { renderBold, renderMistake } from "../../data/learnTopicsRender";
 import { setMetaDescription } from "../../lib/pageMeta";
+import { Icon } from "./Icon";
 
 type Props = { topicId: string };
 
@@ -27,14 +29,14 @@ export function PublicLearnLessonScreen({ topicId }: Props) {
     return (
       <div style={{ minHeight: "100vh", background: "#F0F9FF", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
         <div style={{ background: "linear-gradient(160deg,#0C1E3D 0%,#0369A1 45%,#0EA5E9 100%)", padding: "40px 20px", textAlign: "center" }}>
-          <div style={{ fontSize: "40px", marginBottom: "8px" }}>🕹️</div>
+          <Icon name="joystick" size={40} color="#FCD34D" style={{ marginBottom: "8px" }} />
           <h1 style={{ color: "white", fontSize: "22px", fontWeight: "900", margin: 0 }}>Lesson Not Found</h1>
         </div>
         <div style={{ maxWidth: "560px", margin: "0 auto", padding: "32px 20px 60px", textAlign: "center" }}>
           <p style={{ color: "#4B5563", fontSize: "15px", lineHeight: 1.6 }}>
             We couldn't find that lesson. Browse the full library instead.
           </p>
-          <a href="/learn" style={{ display: "inline-block", marginTop: "12px", color: "#0369A1", fontWeight: "700", textDecoration: "none" }}>← Back to Learn</a>
+          <a href="/learn" style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginTop: "12px", color: "#0369A1", fontWeight: "700", textDecoration: "none" }}><Icon name="back" size={13} /> Back to Learn</a>
         </div>
       </div>
     );
@@ -43,8 +45,8 @@ export function PublicLearnLessonScreen({ topicId }: Props) {
   return (
     <div style={{ minHeight: "100vh", background: "#F0F9FF", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
       <div style={{ background: "linear-gradient(160deg,#0C1E3D 0%,#0369A1 45%,#0EA5E9 100%)", padding: "32px 20px", textAlign: "center" }}>
-        <a href="/learn" style={{ color: "#BAE6FD", fontSize: "12px", fontWeight: "700", textDecoration: "none" }}>← All Learn lessons</a>
-        <div style={{ fontSize: "32px", margin: "10px 0 4px" }}>🕹️</div>
+        <a href="/learn" style={{ display: "inline-flex", alignItems: "center", gap: "6px", color: "#BAE6FD", fontSize: "12px", fontWeight: "700", textDecoration: "none" }}><Icon name="back" size={11} /> All Learn lessons</a>
+        <Icon name="joystick" size={32} color="#FCD34D" style={{ margin: "10px 0 4px" }} />
         <div style={{ color: "#7DB8DB", fontSize: "13px", fontWeight: "700" }}>Class<span style={{ color: "#FCD34D" }}>Cade</span> Learn</div>
       </div>
 
@@ -79,7 +81,7 @@ export function PublicLearnLessonScreen({ topicId }: Props) {
             <div style={{ background: "#FFF7ED", border: "2px solid #FDBA74", borderRadius: "12px", padding: "14px 16px", marginTop: "8px" }}>
               <div style={{ fontWeight: "800", color: "#9A3412", fontSize: "13px", marginBottom: "8px", textTransform: "uppercase", letterSpacing: "0.04em" }}>Common mistakes</div>
               {topic.lesson.commonMistakes.map((m, i) => (
-                <div key={i} style={{ fontSize: "13px", color: "#7C2D12", marginBottom: i < topic.lesson.commonMistakes.length - 1 ? "6px" : 0, lineHeight: 1.5 }}>{m}</div>
+                <div key={i} style={{ fontSize: "13px", color: "#7C2D12", marginBottom: i < topic.lesson.commonMistakes.length - 1 ? "6px" : 0, lineHeight: 1.5 }}>{renderMistake(m)}</div>
               ))}
             </div>
           )}

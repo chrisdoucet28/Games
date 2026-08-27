@@ -4,7 +4,7 @@
 import { writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
-import { LESSON_TOPICS } from "../src/data/learnTopics.tsx";
+import { LESSON_TOPICS } from "../src/data/learnTopics.ts";
 
 const SITE = "https://playclasscade.com";
 

@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
+import { TeamIcon } from "../shared/TeamIcon";
 import type { GameProps, QuestionData } from "../../types";
 import { useTurnTimer } from "../../hooks/useTurnTimer";
 import { TurnTimerBar } from "../shared/TurnTimerBar";
 import { QuestionCard } from "../shared/QuestionCard";
-import { teamsGridCols, GAME_MODES } from "../../data/constants";
+import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { ROCKET_TUTORIAL_STEPS } from "../../data/tutorials/rocket";
 
@@ -376,7 +377,7 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
         </button>
         {showHowTo && (
           <HowToPlayModal
-            gameName={GM.name} gameIcon={GM.icon} accentColor={GM.color}
+            gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color}
             steps={ROCKET_TUTORIAL_STEPS}
             onClose={() => setShowHowTo(false)}
           />
@@ -648,7 +649,7 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
             return (
               <div key={t.id} style={{ background: `linear-gradient(160deg,${t.color.dark}55,#0B0B2E)`, border: `2px solid ${t.color.bg}`, borderRadius: "14px", padding: "12px" }}>
                 <div style={{ fontSize: "22px" }}>{rank === 0 ? "🥇" : rank === 1 ? "🥈" : rank === 2 ? "🥉" : "🚀"}</div>
-                <div style={{ fontWeight: "800", color: "white", fontSize: "14px", marginTop: "4px" }}>{t.mascot ?? t.color.emoji} {t.name}</div>
+                <div style={{ fontWeight: "800", color: "white", fontSize: "14px", marginTop: "4px" }}><TeamIcon team={t} /> {t.name}</div>
                 <div style={{ color: "#FDBA74", fontWeight: "800", fontSize: "13px", marginTop: "2px" }}>⛽ {fuelCount} fuelled · {basePts} pts</div>
                 {bonusAwarded[t.id] > 0 && <div style={{ color: "#86EFAC", fontWeight: "700", fontSize: "12px", marginTop: "2px" }}>+{bonusAwarded[t.id]} launch bonus</div>}
               </div>

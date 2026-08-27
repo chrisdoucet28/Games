@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from "react";
+import { TeamIcon } from "../shared/TeamIcon";
 import type { GameProps } from "../../types";
-import { teamsGridCols, GAME_MODES } from "../../data/constants";
+import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
 import { denseRank, medalForRank } from "../../utils/ranking";
 import { makeSoloCpuTeam } from "../../lib/soloOpponent";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
@@ -266,7 +267,7 @@ export function MinefieldGame({ gridData, teams: propTeams, onUpdateScore, onEnd
         </button>
         {showHowTo && (
           <HowToPlayModal
-            gameName={GM.name} gameIcon={GM.icon} accentColor={GM.color}
+            gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color}
             steps={MINEFIELD_TUTORIAL_STEPS}
             onClose={() => setShowHowTo(false)}
           />
@@ -295,7 +296,7 @@ export function MinefieldGame({ gridData, teams: propTeams, onUpdateScore, onEnd
           {ranking.map(({ item: tm, rank, value }) => (
             <div key={tm.id} style={{ background: tm.color.light, border: `2px solid ${tm.color.bg}`, borderRadius: "14px", padding: "12px" }}>
               <div style={{ fontSize: "20px" }}>{medalForRank(rank)}</div>
-              <div style={{ fontWeight: "800", color: tm.color.dark, fontSize: "14px", marginTop: "4px" }}>{tm.mascot ?? tm.color.emoji} {tm.name}</div>
+              <div style={{ fontWeight: "800", color: tm.color.dark, fontSize: "14px", marginTop: "4px" }}><TeamIcon team={tm} /> {tm.name}</div>
               <div style={{ color: tm.color.dark, fontWeight: "900", fontSize: "16px", marginTop: "4px" }}>{value} pts</div>
               <div style={{ fontSize: "11px", color: "#4B5563", fontWeight: "700", marginTop: "4px" }}>{correctByTeam[tm.id] ?? 0} correct · {minesHitByTeam[tm.id] ?? 0} mine{(minesHitByTeam[tm.id] ?? 0) === 1 ? "" : "s"} hit</div>
             </div>
@@ -317,8 +318,8 @@ export function MinefieldGame({ gridData, teams: propTeams, onUpdateScore, onEnd
 
       <div style={{ background: t.color.bg, borderRadius: "14px", padding: "10px 18px", marginBottom: "14px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px" }}>
         <span style={{ color: "white", fontWeight: "900", fontSize: "17px" }}>
-          {phase === "pick" && `${t.mascot ?? t.color.emoji} ${t.name} - Pick a square!`}
-          {phase === "speaking" && `${t.mascot ?? t.color.emoji} ${t.name} - Say the sentence!`}
+          {phase === "pick" && <><TeamIcon team={t} color="white" /> {t.name} - Pick a square!</>}
+          {phase === "speaking" && <><TeamIcon team={t} color="white" /> {t.name} - Say the sentence!</>}
           {phase === "judging" && "Teacher - Judge the sentence"}
           {phase === "topicComplete" && "Topic complete!"}
         </span>

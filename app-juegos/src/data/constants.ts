@@ -1,5 +1,6 @@
 // Antes: import { TeamColor, GameMode } from "../types";
 import type { TeamColor, GameMode } from "../types";
+import type { IconName } from "../components/shared/Icon";
 
 export const TEAM_COLORS: TeamColor[] = [
   { name: "Red",    bg: "#EF4444", light: "#FEE2E2", dark: "#991B1B", emoji: "🔴" },
@@ -78,5 +79,27 @@ export const GAME_MODES: GameMode[] = [
   { id: "spy",       name: "Spy Among Us", icon: "🕵️",  desc: "Speak freely, listen carefully, find who has a different topic", color: "#374151", tag: "Sustained free conversation" },
   { id: "zombie",    name: "Zombie Siege", icon: "🧟",  desc: "Add sentences to a shared prompt to barricade the house — clear each wave of zombies before the next, bigger one arrives", color: "#65A30D", tag: "Free-for-all sentence-throwing · wave-based pressure" },
 ];
+
+// GAME_MODES.icon stays the original raw emoji (kept for reference — nothing besides the mapping
+// below reads it anymore) since changing that field's meaning would ripple through 15 game files'
+// GM.icon reads. This is the actual custom-icon lookup used by every render site instead — one
+// Record<> so a missing/misspelled id fails to typecheck rather than silently rendering nothing.
+export const GAME_ICONS: Record<string, IconName> = {
+  whack: "hammer",
+  auction: "gavel",
+  battleship: "anchor",
+  vault: "safe",
+  hill: "crown",
+  hotpotato: "potato",
+  castle: "castle",
+  racetrack: "checkeredFlag",
+  minefield: "mine",
+  rocket: "rocket",
+  orderup: "plate",
+  hotseat: "flame",
+  cards: "cardTilt",
+  spy: "search",
+  zombie: "skull",
+};
 
 export const TASK_TYPES: string[] = ["fill in the blank", "correct grammar mistakes", "use vocabulary in a sentence", "choose correct grammar", "rewrite sentences", "speaking task"];

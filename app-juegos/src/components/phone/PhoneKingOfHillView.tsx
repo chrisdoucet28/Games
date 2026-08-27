@@ -1,4 +1,5 @@
 import type { HillStatePayload, HillActionPayload } from "../../lib/liveSession";
+import { TeamIcon } from "../shared/TeamIcon";
 
 type Props = {
   state: HillStatePayload;
@@ -31,7 +32,7 @@ export function PhoneKingOfHillView({ state, teamId, onAction }: Props) {
 
   const waitingCard = (
     <div style={wrapStyle}>
-      <div style={{ fontSize: "36px", marginBottom: "6px" }}>{team?.mascot ?? team?.color.emoji}</div>
+      <div style={{ fontSize: "36px", marginBottom: "6px" }}><TeamIcon team={team} size={36} /></div>
       <div style={{ fontWeight: "900", fontSize: "18px", color: "#F9A8D4", marginBottom: "8px" }}>{team?.name}</div>
       <div style={{ color: "#F9A8D488", fontSize: "14px", lineHeight: 1.6 }}>👑 Watching the board — wait for the next duel!</div>
     </div>
@@ -57,14 +58,14 @@ export function PhoneKingOfHillView({ state, teamId, onAction }: Props) {
     return (
       <div style={wrapStyle}>
         <div style={{ fontSize: "36px", marginBottom: "10px" }}>😔</div>
-        <div style={{ fontWeight: "800", fontSize: "16px", color: "#F9A8D4" }}>{winner?.mascot ?? winner?.color.emoji} {winner?.name} buzzed in first.</div>
+        <div style={{ fontWeight: "800", fontSize: "16px", color: "#F9A8D4" }}><TeamIcon team={winner} /> {winner?.name} buzzed in first.</div>
       </div>
     );
   }
 
   return (
     <div style={wrapStyle}>
-      <div style={{ fontWeight: "800", fontSize: "15px", color: "#F9A8D4", marginBottom: "18px" }}>⚔️ Duel! {team?.mascot ?? team?.color.emoji} {team?.name}</div>
+      <div style={{ fontWeight: "800", fontSize: "15px", color: "#F9A8D4", marginBottom: "18px" }}>⚔️ Duel! <TeamIcon team={team} /> {team?.name}</div>
       <button
         onClick={() => onAction({ teamId, action: "buzz", ts: Date.now() })}
         style={{

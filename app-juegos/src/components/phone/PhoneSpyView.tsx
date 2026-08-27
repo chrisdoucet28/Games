@@ -1,4 +1,5 @@
 import type { SpyStatePayload } from "../../lib/liveSession";
+import { TeamIcon } from "../shared/TeamIcon";
 
 type Props = {
   state: SpyStatePayload;
@@ -46,7 +47,7 @@ export function PhoneSpyView({ state, teamId }: Props) {
       background: "radial-gradient(ellipse at 50% -15%,#1E293B 0%,#0F172A 55%,#020617 100%)",
     }}>
       <div style={{ display: "flex", alignItems: "center", gap: "8px", fontWeight: "900", fontSize: "16px", marginBottom: "16px" }}>
-        <span style={{ fontSize: "22px" }}>{team?.mascot ?? team?.color.emoji}</span>
+        <span style={{ fontSize: "22px" }}><TeamIcon team={team} size={22} /></span>
         {team?.name}
       </div>
 

@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from "react";
+import { TeamIcon } from "../shared/TeamIcon";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 import type { GameProps, QuestionData } from "../../types";
 import { QuestionCard } from "../shared/QuestionCard";
-import { teamsGridCols, GAME_MODES } from "../../data/constants";
+import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
 import { useTurnTimer } from "../../hooks/useTurnTimer";
 import { TurnTimerBar } from "../shared/TurnTimerBar";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
@@ -757,7 +758,7 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
         </button>
         {showHowTo && (
           <HowToPlayModal
-            gameName={GM.name} gameIcon={GM.icon} accentColor={GM.color}
+            gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color}
             steps={RACETRACK_TUTORIAL_STEPS}
             onClose={() => setShowHowTo(false)}
           />
@@ -779,7 +780,7 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
           return (
             <div key={r.id} style={{ background: `linear-gradient(160deg, ${t.color.dark}55, #0A0A18)`, border: `2px solid ${t.color.bg}`, borderRadius: "14px", padding: "12px" }}>
               <div style={{ fontSize: "22px" }}>{medal}</div>
-              <div style={{ fontWeight: "800", color: "#F3F4F6", fontSize: "14px", marginTop: "4px" }}>{t.mascot ?? t.color.emoji} {r.name}</div>
+              <div style={{ fontWeight: "800", color: "#F3F4F6", fontSize: "14px", marginTop: "4px" }}><TeamIcon team={t} /> {r.name}</div>
               <div style={{ color: "#9CA3AF", fontSize: "12px", marginTop: "2px" }}>Space {r.pos}/{TOTAL}</div>
               <div style={{ color: "#F7C948", fontWeight: "800", fontSize: "13px", marginTop: "4px" }}>+{r.points} pts</div>
             </div>
@@ -967,7 +968,7 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
               const buzzedTeam = teams.find(t => t.id === buzzedTeamId);
               return (
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "12px", flexWrap: "wrap", background: "#172438", border: `1.5px solid ${buzzedTeam?.color.bg ?? "#F7C948"}`, borderRadius: "12px", padding: "10px 16px", marginTop: "12px" }}>
-                  <span style={{ fontWeight: "800", fontSize: "14px", color: "#F7C948" }}>⚡ {buzzedTeam?.mascot ?? buzzedTeam?.color.emoji} {buzzedTeam?.name} buzzed in first!</span>
+                  <span style={{ fontWeight: "800", fontSize: "14px", color: "#F7C948" }}>⚡ <TeamIcon team={buzzedTeam} /> {buzzedTeam?.name} buzzed in first!</span>
                   {!showAns && (
                     <button onClick={markBuzzWrong} className="rt-btn" style={{ background: "#374151", color: "#FCA5A5", border: "1px solid #7F1D1D", borderRadius: "8px", padding: "5px 12px", fontWeight: "700", fontSize: "12px", cursor: "pointer" }}>❌ Wrong — reopen buzzer</button>
                   )}

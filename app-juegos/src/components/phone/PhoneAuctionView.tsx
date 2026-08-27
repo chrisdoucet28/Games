@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { TeamIcon } from "../shared/TeamIcon";
 import type { AuctionStatePayload, AuctionBetPayload } from "../../lib/liveSession";
 
 type Props = {
@@ -47,7 +48,7 @@ export function PhoneAuctionView({ state, teamId, onBet }: Props) {
     }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
         <span style={{ display: "flex", alignItems: "center", gap: "8px", fontWeight: "900", fontSize: "16px" }}>
-          <span style={{ fontSize: "22px" }}>{team?.mascot ?? team?.color.emoji}</span>
+          <span style={{ fontSize: "22px" }}><TeamIcon team={team} size={22} /></span>
           {team?.name}
         </span>
         <span style={{ background: "rgba(253,224,71,0.15)", border: "1px solid #FCD34D55", color: "#FCD34D", padding: "4px 12px", borderRadius: "20px", fontSize: "13px", fontWeight: "800" }}>

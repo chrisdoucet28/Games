@@ -1,8 +1,10 @@
 import { useState, useRef, useCallback, useEffect } from "react";
+import { TeamIcon, MASCOT_ICON_BY_EMOJI } from "../shared/TeamIcon";
+import { Icon } from "../shared/Icon";
 import type { GameProps } from "../../types";
 import { useTurnTimer } from "../../hooks/useTurnTimer";
 import { TurnTimerBar } from "../shared/TurnTimerBar";
-import { teamsGridCols, GAME_MODES } from "../../data/constants";
+import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
 import { denseRank, medalForRank } from "../../utils/ranking";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
@@ -341,7 +343,7 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
         </button>
         {showHowTo && (
           <HowToPlayModal
-            gameName={GM.name} gameIcon={GM.icon} accentColor={GM.color}
+            gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color}
             steps={CARDS_TUTORIAL_STEPS}
             onClose={() => setShowHowTo(false)}
           />
@@ -374,7 +376,7 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
             {ranking.map(({ item: t, rank, value }) => (
               <div key={t.id} style={{ background: `linear-gradient(160deg,${t.color.dark}55,#450A0A)`, border: `2px solid ${t.color.bg}`, borderRadius: "14px", padding: "12px" }}>
                 <div style={{ fontSize: "22px" }}>{medalForRank(rank)}</div>
-                <div style={{ fontWeight: "800", color: "white", fontSize: "14px", marginTop: "4px" }}>{t.mascot ?? t.color.emoji} {t.name}</div>
+                <div style={{ fontWeight: "800", color: "white", fontSize: "14px", marginTop: "4px" }}><TeamIcon team={t} /> {t.name}</div>
                 <div style={{ color: "#FCD34D", fontWeight: "900", fontSize: "16px", marginTop: "4px" }}>{value} pts</div>
                 <div style={{ fontSize: "11px", color: "#FEF3C7", fontWeight: "700", marginTop: "4px" }}>{correctByTeam[t.id] ?? 0} correct · ⭐ {starHitsByTeam[t.id] ?? 0} star{(starHitsByTeam[t.id] ?? 0) === 1 ? "" : "s"}</div>
               </div>
@@ -396,7 +398,7 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
         <div style={{ position: "relative", zIndex: 1 }}>
           <div style={{ background: "linear-gradient(160deg,#991B1B,#450A0A)", border: "2px solid #FCD34D66", borderRadius: "20px", padding: "28px 24px", marginBottom: "20px", color: "white", maxWidth: "480px", margin: "0 auto 20px" }}>
             <div style={{ fontSize: "36px", marginBottom: "10px" }}>⏰</div>
-            <div style={{ fontWeight: "900", fontSize: "19px", marginBottom: "10px", color: "#FCD34D" }}>{noticeTeam.mascot ?? noticeTeam.color.emoji} {noticeTeam.name} ran out of time!</div>
+            <div style={{ fontWeight: "900", fontSize: "19px", marginBottom: "10px", color: "#FCD34D" }}><TeamIcon team={noticeTeam} /> {noticeTeam.name} ran out of time!</div>
             <div style={{ fontSize: "15px", lineHeight: 1.6, opacity: 0.95 }}>
               {timeoutNotice.retried ? "That's your one free retry for this game — watch the clock this time!" : "You've already used your free retry this game — the turn moves on."}
             </div>
@@ -421,8 +423,8 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
             🎪 Round {roundCount + 1}/{maxRounds} —{" "}
             {phase === "preview" && "⭐ Remember which card is the star — then we shuffle!"}
             {phase === "shuffling" && "👀 Watch carefully — track the star!"}
-            {phase === "picking" && `${currentTeam.mascot ?? currentTeam.color.emoji} ${currentTeam.name} — step right up and pick a card!`}
-            {phase === "answering" && `${currentTeam.mascot ?? currentTeam.color.emoji} ${currentTeam.name} — the crowd awaits your performance!`}
+            {phase === "picking" && <><TeamIcon team={currentTeam} /> {currentTeam.name} — step right up and pick a card!</>}
+            {phase === "answering" && <><TeamIcon team={currentTeam} /> {currentTeam.name} — the crowd awaits your performance!</>}
             {phase === "reveal" && "🥁 Ta-da! Time for the big reveal!"}
           </span>
           {phase === "picking" && <TurnTimerBar timeLeft={timeLeft} totalSeconds={TURN_SECONDS} />}
@@ -469,7 +471,14 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
                       <div style={{ fontSize: "10px", fontWeight: "800", color: card.isStar ? "#450A0A" : "#78350F", textAlign: "center", lineHeight: 1.4, padding: "0 4px" }}>{card.task}</div>
                       {pickerTeams.length > 0 && (
                         <div style={{ position: "absolute", top: "-10px", right: "-10px", display: "flex", flexDirection: "column", gap: "2px" }}>
-                          {pickerTeams.map(t => (<div key={t.id} style={{ width: "20px", height: "20px", borderRadius: "50%", background: t.color.bg, border: "2px solid white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: t.mascot ? "12px" : "10px", fontWeight: "900", color: "white" }}>{t.mascot ?? t.name[0]}</div>))}
+                          {pickerTeams.map(t => {
+                            const iconName = t.mascot ? MASCOT_ICON_BY_EMOJI[t.mascot] : undefined;
+                            return (
+                              <div key={t.id} style={{ width: "20px", height: "20px", borderRadius: "50%", background: t.color.bg, border: "2px solid white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: iconName ? undefined : "10px", fontWeight: "900", color: "white" }}>
+                                {iconName ? <Icon name={iconName} size={12} color="white" /> : t.name[0]}
+                              </div>
+                            );
+                          })}
                         </div>
                       )}
                     </>

@@ -4,6 +4,7 @@ import { getSubscription, startCheckout, redeemPromoCode } from "../../lib/subsc
 import { updateProfile } from "../../lib/profile";
 import { FREE_PLAN_LIMITS } from "../../data/constants";
 import { hexToRgba, type Theme } from "../../data/themes";
+import { Icon } from "./Icon";
 
 type Props = {
   theme: Theme;
@@ -81,7 +82,7 @@ export function PlanIntroScreen({ theme, onSubscriptionChange, onDismiss }: Prop
     <div style={{ minHeight: "100vh", background: "#F0F9FF", padding: "32px 20px", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
       <div style={{ maxWidth: "720px", margin: "0 auto" }}>
         <div style={{ textAlign: "center", marginBottom: "28px" }}>
-          <h2 style={{ fontSize: "32px", fontWeight: "900", color: theme.heroBg[0], margin: 0, fontFamily: theme.headingFont }}>🎉 Welcome to ClassCade!</h2>
+          <h2 style={{ fontSize: "32px", fontWeight: "900", color: theme.heroBg[0], margin: 0, fontFamily: theme.headingFont, display: "flex", alignItems: "center", justifyContent: "center", gap: "10px" }}><Icon name="party" size={26} /> Welcome to ClassCade!</h2>
           <p style={{ color: "#6B7280", marginTop: "10px", fontSize: "15px" }}>Choose how you'd like to get started — you can always change this later.</p>
         </div>
 
@@ -96,7 +97,7 @@ export function PlanIntroScreen({ theme, onSubscriptionChange, onDismiss }: Prop
             <ul style={{ margin: "0 0 22px", padding: 0, listStyle: "none" }}>
               {FREE_FEATURES.map(f => (
                 <li key={f} style={{ display: "flex", gap: "8px", fontSize: "14px", color: "#374151", marginBottom: "10px" }}>
-                  <span>✅</span> {f}
+                  <Icon name="check" size={15} color="#22C55E" /> {f}
                 </li>
               ))}
             </ul>
@@ -115,7 +116,7 @@ export function PlanIntroScreen({ theme, onSubscriptionChange, onDismiss }: Prop
             <ul style={{ margin: "0 0 18px", padding: 0, listStyle: "none" }}>
               {PRO_FEATURES.map(f => (
                 <li key={f} style={{ display: "flex", gap: "8px", fontSize: "14px", color: "#374151", marginBottom: "10px" }}>
-                  <span>💎</span> {f}
+                  <Icon name="gem" size={15} color="#8B5CF6" /> {f}
                 </li>
               ))}
             </ul>
@@ -135,9 +136,9 @@ export function PlanIntroScreen({ theme, onSubscriptionChange, onDismiss }: Prop
             </div>
             <button
               onClick={handleUpgrade} disabled={busy}
-              style={{ width: "100%", background: `linear-gradient(135deg,${theme.cta[0]},${theme.cta[1]})`, color: "white", border: "none", borderRadius: "12px", padding: "12px", fontSize: "15px", fontWeight: "800", cursor: busy ? "default" : "pointer", opacity: busy ? 0.7 : 1, fontFamily: theme.headingFont, boxShadow: `0 6px 20px ${hexToRgba(theme.cta[1], 0.35)}` }}
+              style={{ width: "100%", background: `linear-gradient(135deg,${theme.cta[0]},${theme.cta[1]})`, color: "white", border: "none", borderRadius: "12px", padding: "12px", fontSize: "15px", fontWeight: "800", cursor: busy ? "default" : "pointer", opacity: busy ? 0.7 : 1, fontFamily: theme.headingFont, boxShadow: `0 6px 20px ${hexToRgba(theme.cta[1], 0.35)}`, display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}
             >
-              {busy ? "Redirecting…" : "💎 Upgrade"}
+              {busy ? "Redirecting…" : <><Icon name="gem" size={15} /> Upgrade</>}
             </button>
           </div>
         </div>

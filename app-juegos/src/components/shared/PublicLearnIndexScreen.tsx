@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { LESSON_TOPICS, LEVEL_ORDER, LEVEL_COLOR, FOCUS_ORDER, FOCUS_LABEL } from "../../data/learnTopics";
 import { setMetaDescription } from "../../lib/pageMeta";
+import { Icon } from "./Icon";
 
 // Public, no-login-required index of every Learn lesson — reachable at /learn, linked from the
 // homepage and crawlable by Google (each card is a real <a href>, not a click handler, since
@@ -20,7 +21,7 @@ export function PublicLearnIndexScreen() {
   return (
     <div style={{ minHeight: "100vh", background: "#F0F9FF", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
       <div style={{ background: "linear-gradient(160deg,#0C1E3D 0%,#0369A1 45%,#0EA5E9 100%)", padding: "48px 20px 40px", textAlign: "center" }}>
-        <div style={{ fontSize: "40px", marginBottom: "8px" }}>🎓</div>
+        <Icon name="learn" size={40} color="white" style={{ marginBottom: "8px" }} />
         <h1 style={{ color: "white", fontSize: "28px", fontWeight: "900", margin: 0 }}>Learn English — Free Lessons</h1>
         <p style={{ color: "#BAE6FD", fontSize: "14px", maxWidth: "520px", margin: "10px auto 0", lineHeight: 1.6 }}>
           Quick, no-fluff explanations covering grammar, vocabulary, and themes from A1 to C1 — the
@@ -68,7 +69,7 @@ export function PublicLearnIndexScreen() {
           </a>
         </div>
 
-        <a href="/" style={{ display: "inline-block", marginTop: "24px", color: "#0369A1", fontWeight: "700", textDecoration: "none" }}>← Back to ClassCade</a>
+        <a href="/" style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginTop: "24px", color: "#0369A1", fontWeight: "700", textDecoration: "none" }}><Icon name="back" size={13} /> Back to ClassCade</a>
       </div>
     </div>
   );
