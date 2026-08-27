@@ -889,12 +889,12 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
             Class<span style={{ color: "#FCD34D" }}>Cade</span>
           </h1>
           <p style={{ color: theme.accent[1], fontSize: "clamp(15px,2.5vw,18px)", margin: "0", lineHeight: 1.7, maxWidth: "500px", marginLeft: "auto", marginRight: "auto" }}>
-            50+ built-in topics from A1 to C1 across Grammar, Vocabulary & Speaking.<br />
+            {realTopicOptions.length}+ built-in topics from A1 to C1 across Grammar, Vocabulary & Speaking.<br />
             {GAME_MODES.length} competitive game modes. Zero prep. Ready in seconds.
           </p>
         </div>
         <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "28px" }}>
-          {[{ icon: "🎯", label: `${GAME_MODES.length} Game Modes` }, { icon: "📚", label: "50+ Built-in Topics" }, { icon: "🏆", label: "Up to 5 Teams" }, { icon: "⚡", label: "Instant Play" }].map(s => (
+          {[{ icon: "🎯", label: `${GAME_MODES.length} Game Modes` }, { icon: "📚", label: `${realTopicOptions.length}+ Built-in Topics` }, { icon: "🏆", label: "Up to 5 Teams" }, { icon: "⚡", label: "Instant Play" }].map(s => (
             <div key={s.label} style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: "20px", padding: "8px 16px", backdropFilter: "blur(8px)", display: "flex", alignItems: "center", gap: "7px" }}>
               <span style={{ fontSize: "16px" }}>{s.icon}</span>
               <span style={{ color: "white", fontWeight: "700", fontSize: "13px" }}>{s.label}</span>

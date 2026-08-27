@@ -78,6 +78,7 @@ export function FlagLessonButton({ topicId, topicTitle, theme }: FlagLessonButto
         value={message}
         onChange={e => setMessage(e.target.value)}
         rows={3}
+        maxLength={2000}
         placeholder="Your note..."
         style={{ width: "100%", boxSizing: "border-box", border: "1px solid #E5E7EB", borderRadius: "8px", padding: "8px 10px", fontSize: "13px", fontFamily: "inherit", resize: "vertical" }}
       />

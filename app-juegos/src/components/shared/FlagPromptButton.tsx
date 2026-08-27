@@ -69,6 +69,7 @@ export function FlagPromptButton({ gameId, questionData }: FlagPromptButtonProps
         value={message}
         onChange={e => setMessage(e.target.value)}
         rows={2}
+        maxLength={2000}
         placeholder="What's wrong with this prompt? (optional)"
         style={{ width: "100%", boxSizing: "border-box", border: "1px solid #E5E7EB", borderRadius: "6px", padding: "5px 7px", fontSize: "11px", fontFamily: "inherit", resize: "vertical" }}
       />
