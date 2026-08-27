@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import type { Team, GameMode, QuestionData, SavedClass, Subscription, TeamRosterEntry } from "./types";
 import { TEAM_COLORS, GAME_MODES, MASCOT_OPTIONS, LEVELS_META, FREE_PLAN_LIMITS, FREE_LAUNCH_ALL_PREMIUM } from "./data/constants";
+import { getGameTier } from "./data/pppTiers";
+import { PPPDiagram } from "./components/shared/PPPDiagram";
 // Asegúrate de que TOPIC_LIBRARY esté exportado desde tu archivo topics.ts junto con TOPIC_OPTIONS
 import { TOPIC_OPTIONS, TOPIC_LIBRARY } from "./data/topics";
 import { hexToRgba, type Theme } from "./data/themes";
@@ -1361,6 +1363,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: "14px", marginTop: "20px" }}>
           {GAME_MODES.map((g, i) => {
             const isSpinLit = randomSpinIndex === i;
+            const tier = getGameTier(g.id);
             return (
               <div
                 key={g.id}
@@ -1379,11 +1382,16 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
                 <div style={{ fontSize: "40px", marginBottom: "10px" }}>{g.icon}</div>
                 <div style={{ fontWeight: "900", fontSize: "17px", color: theme.heroBg[0], marginBottom: "4px", fontFamily: theme.headingFont }}>{g.name}</div>
                 <div style={{ fontSize: "13px", color: "#6B7280", marginBottom: "8px" }}>{g.desc}</div>
-                <div style={{ fontSize: "12px", color: g.color, fontWeight: "700", lineHeight: 1.4, borderTop: `1px solid ${g.color}33`, paddingTop: "8px" }}>🗣️ {g.tag}</div>
+                <div style={{ fontSize: "12px", color: g.color, fontWeight: "700", lineHeight: 1.4, borderTop: `1px solid ${g.color}33`, paddingTop: "8px", display: "flex", alignItems: "center", gap: "6px" }}>
+                  {tier && <span title={tier.label} style={{ width: "8px", height: "8px", borderRadius: "50%", background: tier.color, flexShrink: 0 }} />}
+                  🗣️ {g.tag}
+                </div>
               </div>
             );
           })}
         </div>
+
+        <PPPDiagram variant="compact" />
       </div>
       <FeedbackButton />
       <BrandBadge isPaid={isPaid} />
