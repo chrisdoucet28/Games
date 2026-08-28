@@ -743,7 +743,7 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
         transform: isChosen || isContested ? "scale(1.06)" : "scale(1)", transition: "all 0.2s",
         animation: isContested ? "koZoneGlow 1.2s ease-in-out infinite" : "none",
       }}>
-        <div key={owner?.id ?? "free"} style={{ fontSize: "18px", animation: owner ? "koFlagPlant 0.4s ease-out" : "none" }}>{owner ? <MascotSprite mascot={owner.mascot} fallback={z.icon} size={18} color={owner.color.bg} /> : z.icon}</div>
+        <div key={owner?.id ?? "free"} style={{ fontSize: "18px", animation: owner ? "koFlagPlant 0.4s ease-out" : "none" }}>{owner ? <MascotSprite mascot={owner.mascot} fallback={z.icon} size={20} /> : z.icon}</div>
         <div style={{ fontWeight: "900", fontSize: "12px", color: owner ? "white" : "#F9A8D4" }}>{z.label ?? zId}</div>
         <div style={{ fontWeight: "800", fontSize: "11px", color: "#FCD34D" }}>+{z.pts}/rnd</div>
         <div style={{ fontSize: "10px", color: owner ? "#F3E8FF" : "#F9A8D488", marginTop: "2px" }}>

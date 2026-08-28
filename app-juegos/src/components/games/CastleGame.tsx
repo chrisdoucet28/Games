@@ -687,7 +687,7 @@ export function CastleGame({ questions, teams: propTeams, onUpdateScore, onEnd, 
     setLastEvent({ action: selectedAction as ActionId, damage: finalDamage, xpGained, apple: gotApple, targetId, leveledUp, roll, shieldConsumed: targetShielded });
     setPhase("result");
 
-    spawnImpact(targetId, "hit", <MascotSprite mascot={activeTeam.mascot} fallback={ACTION_DEFS.find(a => a.id === selectedAction)!.character} size={46} color={activeTeam.color.bg} />);
+    spawnImpact(targetId, "hit", <MascotSprite mascot={activeTeam.mascot} fallback={ACTION_DEFS.find(a => a.id === selectedAction)!.character} size={48} />);
     spawnFloat(targetId, `-${finalDamage}`, "#FCA5A5");
     if (gotApple) {
       spawnImpact(activeTeam.id, "heal");
@@ -865,7 +865,7 @@ export function CastleGame({ questions, teams: propTeams, onUpdateScore, onEnd, 
           <div style={{ textAlign: "center" }}>
             {actionDef && (
               <div style={{ fontSize: "40px", display: "inline-block", filter: `drop-shadow(0 0 12px ${actionDef.glow})`, animation: rolling ? "attackerWindup 0.5s ease-in-out infinite" : "none" }}>
-                <MascotSprite mascot={activeTeam.mascot} fallback={actionDef.character} size={40} color={activeTeam.color.bg} />
+                <MascotSprite mascot={activeTeam.mascot} fallback={actionDef.character} size={42} />
               </div>
             )}
             <DiceRoller rolling={rolling} result={diceRoll} />

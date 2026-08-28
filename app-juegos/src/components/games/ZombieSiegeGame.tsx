@@ -507,7 +507,7 @@ function HouseScene({ siege, teams }: { siege: SiegeState; teams: Team[] }) {
           <div key={t.id} title={t.name} style={{
             position: "absolute", left: `${pos.x}%`, top: `${pos.y}%`, transform: "translate(-50%,-50%)",
             fontSize: "15px", zIndex: 3, opacity: person.alive ? 1 : 0.45, filter: person.alive ? "none" : "grayscale(1)",
-          }}>{person.alive ? <MascotSprite mascot={t.mascot} fallback="🧑" size={15} color={t.color.bg} /> : "💀"}</div>
+          }}>{person.alive ? <MascotSprite mascot={t.mascot} fallback="🧑" size={17} /> : "💀"}</div>
         );
       })}
       {siege.zombies.map(z => {
@@ -535,7 +535,7 @@ function PersonChip({ team, person }: { team: Team; person: PersonState }) {
       border: `2px solid ${person.alive ? team.color.bg : "#4B5563"}`,
       borderRadius: "12px", padding: "5px 9px", textAlign: "center", opacity: person.alive ? 1 : 0.55, minWidth: "78px",
     }}>
-      <div style={{ fontSize: "16px", lineHeight: 1.1 }}>{person.alive ? <MascotSprite mascot={team.mascot} fallback="🧑" size={16} color={team.color.bg} /> : "💀"}</div>
+      <div style={{ fontSize: "16px", lineHeight: 1.1 }}>{person.alive ? <MascotSprite mascot={team.mascot} fallback="🧑" size={18} /> : "💀"}</div>
       <div style={{ fontWeight: "800", fontSize: "11px", color: person.alive ? "white" : "#9CA3AF" }}>{team.name}</div>
       {person.alive ? (
         <div style={{ fontSize: "11px", lineHeight: 1.3, display: "flex", gap: "1px", justifyContent: "center", alignItems: "center", flexWrap: "wrap" }}>

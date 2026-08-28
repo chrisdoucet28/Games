@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { TeamIcon, MASCOT_ICON_BY_EMOJI } from "../shared/TeamIcon";
-import { Icon } from "../shared/Icon";
+import { MascotIcon } from "../shared/MascotArt";
 import type { GameProps } from "../../types";
 import { useTurnTimer } from "../../hooks/useTurnTimer";
 import { TurnTimerBar } from "../shared/TurnTimerBar";
@@ -475,7 +475,7 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
                             const iconName = t.mascot ? MASCOT_ICON_BY_EMOJI[t.mascot] : undefined;
                             return (
                               <div key={t.id} style={{ width: "20px", height: "20px", borderRadius: "50%", background: t.color.bg, border: "2px solid white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: iconName ? undefined : "10px", fontWeight: "900", color: "white" }}>
-                                {iconName ? <Icon name={iconName} size={12} color="white" /> : t.name[0]}
+                                {iconName ? <MascotIcon name={iconName} size={16} /> : t.name[0]}
                               </div>
                             );
                           })}

@@ -623,7 +623,7 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
                             animation: holeFx?.kind === "miss" ? "wwBonk 0.35s ease-in-out" : "wwPopUp 0.3s ease-out",
                           }}
                         >
-                          <MascotSprite mascot={activeTeam.mascot} fallback="🦫" size={12} color="#FEF3C7" /> {mole.text}
+                          <MascotSprite mascot={activeTeam.mascot} fallback="🦫" size={15} /> {mole.text}
                         </button>
                       )}
                       {holeFx?.kind === "hit" && (

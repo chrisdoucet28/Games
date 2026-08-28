@@ -18,7 +18,7 @@ export const TEAM_COLORS: TeamColor[] = [
 export const MASCOT_OPTIONS: string[] = [
   "🐉", "🦄", "🤖", "🦊", "🐸", "🦁", "🐧", "🦖",
   "🐝", "🦋", "🐙", "🦅", "🐢", "🐺", "🦉", "🐯",
-  "🍕", "⚡", "🌟", "🎃", "👻", "🥷",
+  "🍕", "👻", "🥷", "👽", "🐼", "🦈", "🐶", "🐱",
 ];
 
 // Shared between the setup screen's level filter and anywhere a class's default level is picked
