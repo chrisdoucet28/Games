@@ -23,7 +23,8 @@ import { IconBadge } from "./components/shared/IconBadge";
 import { MascotIcon } from "./components/shared/MascotArt";
 import { saveProgress, clearProgress, listClasses, createClass, upsertTeamRoster, deleteFromTeamRoster, saveTeams } from "./lib/classes";
 import { isPaidStatus } from "./lib/subscription";
-import { denseRank, medalForRank } from "./utils/ranking";
+import { denseRank } from "./utils/ranking";
+import { RankBadge } from "./components/shared/RankBadge";
 import { AuctionGame } from "./components/games/AuctionGame";
 import { MinefieldGame } from "./components/games/MinefieldGame";
 import { HotSeatGame } from "./components/games/HotSeatGame";
@@ -1463,7 +1464,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
         <div style={{ background: "rgba(255,255,255,0.08)", borderRadius: "20px", padding: "24px", maxWidth: "600px", margin: "0 auto 24px" }}>
           {finalRanking.map(({ item: t, rank, value }, i) => (
             <div key={t.id} style={{ display: "flex", alignItems: "center", gap: "16px", padding: "12px 0", borderBottom: i < finalRanking.length - 1 ? "1px solid rgba(255,255,255,0.1)" : "none" }}>
-              <div style={{ fontSize: "32px" }}>{medalForRank(rank)}</div>
+              <div><RankBadge rank={rank} size={32} /></div>
               <div style={{ flex: 1, textAlign: "left", fontWeight: "900", fontSize: "20px", fontFamily: theme.headingFont }}>{t.name}</div>
               <div style={{ fontWeight: "900", fontSize: "28px", color: t.color.bg }}>{value}</div>
             </div>

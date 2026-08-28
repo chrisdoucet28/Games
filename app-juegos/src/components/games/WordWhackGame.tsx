@@ -11,7 +11,8 @@ import {
   type Difficulty, type ParsedMCQ,
 } from "../../hooks/useMoleGame";
 import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
-import { denseRank, medalForRank } from "../../utils/ranking";
+import { denseRank } from "../../utils/ranking";
+import { RankBadge } from "../shared/RankBadge";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
 import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
@@ -517,7 +518,7 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
         <div style={{ display: "grid", gridTemplateColumns: teamsGridCols(teams.length), gap: "10px", margin: "0 auto 20px", maxWidth: "700px" }}>
           {ranking.map(({ item: t, rank, value }) => (
             <div key={t.id} style={{ background: `linear-gradient(160deg,${t.color.dark}55,#1A2E05)`, border: `2px solid ${t.color.bg}`, borderRadius: "14px", padding: "12px" }}>
-              <div style={{ fontSize: "22px" }}>{medalForRank(rank)}</div>
+              <div><RankBadge rank={rank} size={22} /></div>
               <div style={{ fontWeight: "800", color: "white", fontSize: "14px", marginTop: "4px" }}><TeamIcon team={t} /> {t.name}</div>
               <div style={{ color: "#BEF264", fontWeight: "800", fontSize: "15px", marginTop: "4px" }}>{value} pts</div>
             </div>

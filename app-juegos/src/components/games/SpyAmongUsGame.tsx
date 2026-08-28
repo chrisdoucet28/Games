@@ -3,7 +3,8 @@ import { TeamIcon } from "../shared/TeamIcon";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 import type { GameProps, QuestionData, Team } from "../../types";
 import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
-import { denseRank, medalForRank } from "../../utils/ranking";
+import { denseRank } from "../../utils/ranking";
+import { RankBadge } from "../shared/RankBadge";
 import { makeTeacherTeam, TEACHER_ID } from "../../lib/soloOpponent";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
@@ -744,7 +745,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
               const crewWins = crewWinsByTeam[team.id] ?? 0;
               return (
                 <div key={team.id} style={{ background: `linear-gradient(160deg,${team.color.dark}55,#0F172A)`, border: `2px solid ${team.color.bg}`, borderRadius: "14px", padding: "12px" }}>
-                  <div style={{ fontSize: "22px" }}>{medalForRank(rank)}</div>
+                  <div><RankBadge rank={rank} size={22} /></div>
                   <div style={{ fontWeight: "800", color: "white", fontSize: "14px", marginTop: "4px" }}><TeamIcon team={team} /> {team.name}</div>
                   <div style={{ color: "#38BDF8", fontWeight: "900", fontSize: "16px", marginTop: "4px" }}>{value} pts</div>
                   <div style={{ fontSize: "11px", color: "#94A3B8", fontWeight: "700", marginTop: "4px" }}>
