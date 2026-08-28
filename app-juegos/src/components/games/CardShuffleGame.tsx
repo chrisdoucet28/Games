@@ -5,7 +5,8 @@ import type { GameProps } from "../../types";
 import { useTurnTimer } from "../../hooks/useTurnTimer";
 import { TurnTimerBar } from "../shared/TurnTimerBar";
 import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
-import { denseRank, medalForRank } from "../../utils/ranking";
+import { denseRank } from "../../utils/ranking";
+import { RankBadge } from "../shared/RankBadge";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
 import { CARDS_TUTORIAL_STEPS } from "../../data/tutorials/cards";
@@ -375,7 +376,7 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
           <div style={{ display: "grid", gridTemplateColumns: teamsGridCols(teams.length), gap: "10px", margin: "0 auto 20px", maxWidth: "760px" }}>
             {ranking.map(({ item: t, rank, value }) => (
               <div key={t.id} style={{ background: `linear-gradient(160deg,${t.color.dark}55,#450A0A)`, border: `2px solid ${t.color.bg}`, borderRadius: "14px", padding: "12px" }}>
-                <div style={{ fontSize: "22px" }}>{medalForRank(rank)}</div>
+                <div><RankBadge rank={rank} size={22} /></div>
                 <div style={{ fontWeight: "800", color: "white", fontSize: "14px", marginTop: "4px" }}><TeamIcon team={t} /> {t.name}</div>
                 <div style={{ color: "#FCD34D", fontWeight: "900", fontSize: "16px", marginTop: "4px" }}>{value} pts</div>
                 <div style={{ fontSize: "11px", color: "#FEF3C7", fontWeight: "700", marginTop: "4px" }}>{correctByTeam[t.id] ?? 0} correct · ⭐ {starHitsByTeam[t.id] ?? 0} star{(starHitsByTeam[t.id] ?? 0) === 1 ? "" : "s"}</div>

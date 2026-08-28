@@ -6,7 +6,8 @@ import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
 import { useTurnTimer } from "../../hooks/useTurnTimer";
 import { TurnTimerBar } from "../shared/TurnTimerBar";
 import { QuestionCard } from "../shared/QuestionCard";
-import { denseRank, medalForRank } from "../../utils/ranking";
+import { denseRank } from "../../utils/ranking";
+import { RankBadge } from "../shared/RankBadge";
 import { makeSoloCpuTeam } from "../../lib/soloOpponent";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { BATTLESHIP_TUTORIAL_STEPS } from "../../data/tutorials/battleship";
@@ -512,7 +513,7 @@ export function BattleshipGame({ questions, teams: propTeams, onUpdateScore, onE
                   border: `2px solid ${rank === 0 ? t.color.bg : "#4B5563"}`, borderRadius: "14px", padding: rank === 0 ? "12px 16px" : "10px 16px",
                   opacity: rank === 0 ? 1 : 0.85,
                 }}>
-                  <span style={{ fontSize: rank === 0 ? "24px" : "20px" }}>{medalForRank(rank)}</span>
+                  <span><RankBadge rank={rank} size={rank === 0 ? 24 : 20} /></span>
                   <span style={{ flex: 1, textAlign: "left", fontWeight: rank === 0 ? "900" : "800", color: rank === 0 ? "white" : "#D1D5DB", fontSize: rank === 0 ? "16px" : "15px" }}><TeamIcon team={t} /> {t.name}</span>
                   <span style={{ fontWeight: "800", color: rank === 0 ? "#93C5FD" : "#6B7280", fontSize: "13px" }}>{value}/{fleets[t.id].length} ships left</span>
                 </div>

@@ -1,6 +1,7 @@
 import type { Team } from "../../types";
 import { TeamIcon } from "./TeamIcon";
-import { denseRank, medalForRank } from "../../utils/ranking";
+import { denseRank } from "../../utils/ranking";
+import { RankBadge } from "./RankBadge";
 
 interface ScoreBoardProps {
   teams: Team[];
@@ -28,8 +29,8 @@ export function ScoreBoard({ teams, highlight, headingFont }: ScoreBoardProps) {
           transition: "all 0.3s",
           boxShadow: highlight === t.id ? `0 0 20px ${t.color.bg}80` : "none"
         }}>
-          <div style={{ fontSize: "24px" }}>
-            {medalForRank(rank)}
+          <div>
+            <RankBadge rank={rank} size={24} />
           </div>
           <div style={{ fontWeight: "800", fontSize: "15px", color: highlight === t.id ? "white" : t.color.dark, fontFamily: headingFont }}>
             <TeamIcon team={t} /> {t.name}

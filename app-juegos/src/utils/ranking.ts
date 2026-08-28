@@ -8,7 +8,3 @@ export function denseRank<T>(items: T[], valueOf: (item: T) => number, order: "d
   const distinct = [...new Set(withValue.map(x => x.value))].sort((a, b) => (order === "desc" ? b - a : a - b));
   return withValue.map(x => ({ ...x, rank: distinct.indexOf(x.value) }));
 }
-
-export function medalForRank(rank: number): string {
-  return rank === 0 ? "🥇" : rank === 1 ? "🥈" : rank === 2 ? "🥉" : "🎖️";
-}

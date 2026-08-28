@@ -4,7 +4,8 @@ import type { RealtimeChannel } from "@supabase/supabase-js";
 import type { GameProps } from "../../types";
 import { useTurnTimer } from "../../hooks/useTurnTimer";
 import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
-import { denseRank, medalForRank } from "../../utils/ranking";
+import { denseRank } from "../../utils/ranking";
+import { RankBadge } from "../shared/RankBadge";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
 import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
@@ -973,7 +974,7 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
               const dishEntries = Object.entries(counts ?? {});
               return (
                 <div key={t.id} style={{ background: "linear-gradient(160deg,#FFFFFF,#FFF1F2)", border: `2px solid ${t.color.bg}`, borderRadius: "14px", padding: "12px" }}>
-                  <div style={{ fontSize: "20px" }}>{medalForRank(rank)}</div>
+                  <div><RankBadge rank={rank} size={20} /></div>
                   <div style={{ fontWeight: "800", color: "#831843", fontSize: "14px", marginTop: "4px" }}><TeamIcon team={t} /> {t.name}</div>
                   <div style={{ color: "#BE185D", fontWeight: "900", fontSize: "16px", marginTop: "4px" }}>{value} pts</div>
                   <div style={{ fontSize: "11px", color: "#9D174D", marginTop: "4px" }}>{served} order{served === 1 ? "" : "s"} served</div>
