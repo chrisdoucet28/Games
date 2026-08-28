@@ -30,6 +30,7 @@ export type IconName =
   | "door" | "window" | "zombie" | "gun" | "axe" | "tree" | "megaphone" | "house" | "chair"
   | "handshake" | "idea" | "sword" | "heart" | "crystalBall" | "apple"
   | "wind" | "eyeOff" | "unlocked" | "wrench" | "forbidden"
+  | "options" | "mud" | "vortex" | "clover" | "banana" | "cart"
   // Phase 4 — ThemeAmbience's decorative floating background glyphs (one drift + one twinkle
   // per accent theme). Rendered at low opacity/small scale, so simpler silhouettes than the
   // functional icons above are fine here.
@@ -177,6 +178,35 @@ const ICONS: Record<IconName, React.ReactNode> = {
     <>
       <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" strokeWidth="2.2" />
       <line x1="5.5" y1="18.5" x2="18.5" y2="5.5" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+    </>
+  ),
+  options: (
+    <>
+      <circle cx="4.5" cy="6" r="2.2" fill="currentColor" />
+      <rect x="9" y="4.8" width="12" height="2.4" rx="1.2" fill="currentColor" opacity="0.9" />
+      <circle cx="4.5" cy="12" r="2.2" fill="none" stroke="currentColor" strokeWidth="1.8" />
+      <rect x="9" y="10.8" width="12" height="2.4" rx="1.2" fill="currentColor" opacity="0.5" />
+      <circle cx="4.5" cy="18" r="2.2" fill="none" stroke="currentColor" strokeWidth="1.8" />
+      <rect x="9" y="16.8" width="12" height="2.4" rx="1.2" fill="currentColor" opacity="0.5" />
+    </>
+  ),
+  mud: <path d="M3,15 C2,11 5,7 9,8 C10,5 15,4 17,7 C21,7 22,12 19,15 C21,17 19,20 16,19 C14,21 9,21 7,19 C3,20 1,17 3,15 Z" fill="currentColor" />,
+  vortex: <path d="M12,12 C12,10 13.5,9 15,10 C17,11 17,14 14,15 C10,16.5 6,13 8,9 C10,4.5 17,4 20,9 C23,14.5 17,21 10,19 C3,17 1,9 6,4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />,
+  clover: (
+    <>
+      <circle cx="9" cy="9" r="4.2" fill="currentColor" />
+      <circle cx="15" cy="9" r="4.2" fill="currentColor" />
+      <circle cx="9" cy="15" r="4.2" fill="currentColor" />
+      <circle cx="15" cy="15" r="4.2" fill="currentColor" />
+      <path d="M12,15 L10,22" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" fill="none" />
+    </>
+  ),
+  banana: <path d="M6,20 C4,17 4,12 7,7 C8.5,4.5 11,3 13,3 C13.6,3 14,3.6 13.6,4.2 C12,6.5 11,9 11,12 C11,15.5 13,18 17,19 C18,19.3 18,20.5 16.8,20.6 C11,21.2 7.5,21.5 6,20 Z" fill="currentColor" />,
+  cart: (
+    <>
+      <path d="M2,3 H4.5 L7,15 H19 L21,6 H6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="9" cy="20" r="1.8" fill="currentColor" />
+      <circle cx="18" cy="20" r="1.8" fill="currentColor" />
     </>
   ),
   dice: (
