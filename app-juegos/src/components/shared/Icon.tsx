@@ -30,7 +30,7 @@ export type IconName =
   | "door" | "window" | "zombie" | "gun" | "axe" | "tree" | "megaphone" | "house" | "chair"
   | "handshake" | "idea" | "sword" | "heart" | "crystalBall" | "apple"
   | "wind" | "eyeOff" | "unlocked" | "wrench" | "forbidden"
-  | "options" | "mud" | "vortex" | "clover" | "banana" | "cart"
+  | "options" | "mud" | "vortex" | "clover" | "banana" | "cart" | "fullscreen"
   // Phase 4 — ThemeAmbience's decorative floating background glyphs (one drift + one twinkle
   // per accent theme). Rendered at low opacity/small scale, so simpler silhouettes than the
   // functional icons above are fine here.
@@ -208,6 +208,9 @@ const ICONS: Record<IconName, React.ReactNode> = {
       <circle cx="9" cy="20" r="1.8" fill="currentColor" />
       <circle cx="18" cy="20" r="1.8" fill="currentColor" />
     </>
+  ),
+  fullscreen: (
+    <path d="M4,9 V4 H9 M15,4 H20 V9 M20,15 V20 H15 M9,20 H4 V15" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
   ),
   dice: (
     <>
