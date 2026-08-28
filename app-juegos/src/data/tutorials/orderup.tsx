@@ -72,7 +72,7 @@ export const ORDERUP_TUTORIAL_STEPS: TutorialStep[] = [
     ),
   },
   {
-    narration: "The whole game runs on one shared clock (5, 8, or 12 minutes, picked at the start). Serve as many customers as you can before time runs out — most points wins!",
+    narration: "The whole game runs on one shared clock (8, 12, or 18 minutes, picked at the start). Serve as many customers as you can before time runs out — most points wins!",
     visual: (
       <div style={{ textAlign: "center" }}>
         <div style={{ fontSize: "20px" }}>⏱️</div>
