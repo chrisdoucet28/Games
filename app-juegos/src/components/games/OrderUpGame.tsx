@@ -20,24 +20,24 @@ const GM = GAME_MODES.find(g => g.id === "orderup")!;
 
 // The diner queue used to always sit at a fixed 3 customers regardless of class size — a 2-team
 // class found that overwhelming (2 people covering 3 orders) while a 5-team class found it too
-// quiet (5 teams idling over the same 3). Capacity now scales with team count, and — like the
-// item-count difficulty — ramps up from a single customer rather than starting at max immediately.
+// quiet (5 teams idling over the same 3). Capacity now scales with team count, and ramps up a
+// little further from there as the session goes on.
 const MAX_QUEUE_SLOTS_CAP = 6;
 const SLOT_RAMP_INTERVAL = 4;
-// Floored at 2 (not 1) so solo play still ramps up to two customers waiting at once — the whole
-// point of the queue is "orders pile up if you're slow," and with a hard cap of 1 a solo player
-// could never actually experience that pressure, no matter how long the session ran. A 2-team
-// class already sits at exactly 2 from the plain team-count formula, so this floor doesn't change
-// anything for 2+ teams — it only fixes the 1-team case.
+// At least team count + 2 (capped) — every team needs at least one order of its own available at
+// all times just to have something to claim (see initialQueueSlots below, which starts the queue
+// at exactly team count), so the max has to sit strictly above that floor or there'd be no room
+// left to ramp up into. The +2 headroom is what actually grows over the session.
 function maxQueueSlots(teamCount: number): number {
-  return Math.max(2, Math.min(teamCount, MAX_QUEUE_SLOTS_CAP));
+  return Math.max(2, Math.min(teamCount + 2, MAX_QUEUE_SLOTS_CAP));
 }
-// Every class used to start at exactly 1 customer no matter how many teams were playing, so a
-// 5-team class spent its first several resolutions with only one ticket to fight over. Bigger
-// classes now open with more choice on the board from the very first customer, still ramping up
-// to the full cap from there rather than starting at max immediately.
+// Never fewer than one order per team — a 2-team class used to open with only 1 ticket on the
+// board (half of team count, rounded up), which meant one team had nothing to claim until the
+// other team's order resolved. The whole point of team count as the floor is that every team can
+// always claim something immediately; the queue only grows from here as SLOT_RAMP_INTERVAL orders
+// get resolved, up to maxQueueSlots.
 function initialQueueSlots(teamCount: number): number {
-  return Math.max(1, Math.ceil(teamCount / 2));
+  return teamCount;
 }
 function currentQueueCapacity(resolvedCount: number, maxSlots: number, initialSlots: number): number {
   return Math.min(maxSlots, initialSlots + Math.floor(resolvedCount / SLOT_RAMP_INTERVAL));
@@ -45,7 +45,9 @@ function currentQueueCapacity(resolvedCount: number, maxSlots: number, initialSl
 // A shared round timer, rather than the old fully open-ended "End Game whenever" model — gives the
 // class a race-against-the-clock target ("how many can we serve before time's up?") instead of just
 // grinding until the teacher stops it. Picked on the intro screen like Vault Heist's timer speed.
-const SESSION_SECONDS_BY_LENGTH: Record<string, number> = { short: 300, medium: 480, long: 720 };
+// 8/12/18 min (not 5/8/12) — 5 minutes turned out to barely cover a couple of orders once claiming,
+// writing, and judging are all factored in.
+const SESSION_SECONDS_BY_LENGTH: Record<string, number> = { short: 480, medium: 720, long: 1080 };
 // Every served ticket hands the serving team a dish matching that ticket's food icon — every time
 // a team's running count of ONE dish type hits a multiple of DISH_SET_SIZE, they get an instant
 // DISH_SET_BONUS combo payout on top of normal per-ticket points (paid immediately, not saved up
@@ -841,7 +843,7 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
                 borderRadius: "12px", padding: "10px 18px", cursor: "pointer",
                 fontWeight: "800", fontSize: "14px", transition: "all 0.15s",
               }}>
-                {len === "short" ? "Short · 5 min" : len === "medium" ? "Medium · 8 min" : "Long · 12 min"}
+                {len === "short" ? "Short · 8 min" : len === "medium" ? "Medium · 12 min" : "Long · 18 min"}
               </button>
             ))}
           </div>
