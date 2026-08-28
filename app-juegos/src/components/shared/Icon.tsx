@@ -28,7 +28,7 @@ export type IconName =
   | "keyboard" | "bell" | "pause" | "hourglass" | "sleep" | "column" | "wallet"
   | "planet" | "stop" | "satellite" | "fuel" | "ufo" | "astronaut"
   | "door" | "window" | "zombie" | "gun" | "axe" | "tree" | "megaphone" | "house" | "chair"
-  | "handshake" | "idea" | "sword"
+  | "handshake" | "idea" | "sword" | "heart" | "crystalBall" | "apple"
   // Phase 4 — ThemeAmbience's decorative floating background glyphs (one drift + one twinkle
   // per accent theme). Rendered at low opacity/small scale, so simpler silhouettes than the
   // functional icons above are fine here.
@@ -676,6 +676,21 @@ const ICONS: Record<IconName, React.ReactNode> = {
       <rect x="7" y="14" width="10" height="2.4" rx="1" fill="currentColor" />
       <rect x="10.5" y="16" width="3" height="6" rx="1" fill="currentColor" />
     </g>
+  ),
+  heart: <path d="M12,21 C12,21 3,14.5 3,8.5 C3,5.5 5.5,3 8.5,3 C10.5,3 12,4.5 12,4.5 C12,4.5 13.5,3 15.5,3 C18.5,3 21,5.5 21,8.5 C21,14.5 12,21 12,21 Z" fill="currentColor" />,
+  crystalBall: (
+    <>
+      <circle cx="12" cy="10" r="7" fill="currentColor" />
+      <circle cx="9.3" cy="7.3" r="1.8" fill="white" fillOpacity="0.4" />
+      <path d="M6,20 H18 L16.3,17.3 H7.7 Z" fill="currentColor" />
+    </>
+  ),
+  apple: (
+    <>
+      <path d="M12,9 C9.2,9 7,11.7 7,15 C7,18.3 9,21.5 11.3,21.5 C11.7,21.5 11.8,21.4 12,21.4 C12.2,21.4 12.3,21.5 12.7,21.5 C15,21.5 17,18.3 17,15 C17,11.7 14.8,9 12,9 Z" fill="currentColor" />
+      <path d="M12,9 C12,6.8 13,5 15,4" stroke="currentColor" strokeWidth="1.6" fill="none" strokeLinecap="round" />
+      <ellipse cx="15.5" cy="5.5" rx="2" ry="1.2" fill="currentColor" transform="rotate(-30 15.5 5.5)" />
+    </>
   ),
   cloud: (
     <>
