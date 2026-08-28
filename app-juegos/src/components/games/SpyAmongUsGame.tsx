@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { TeamIcon } from "../shared/TeamIcon";
+import { Icon } from "../shared/Icon";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 import type { GameProps, QuestionData, Team } from "../../types";
 import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
@@ -69,6 +70,32 @@ const STYLE_TAG = (
     .sau-btn:active:not(:disabled){transform:translateY(0) scale(0.97)}
   `}</style>
 );
+
+// The order-roll's animated dice need the actual rolled value's pip layout, not just a generic
+// "here's a die" glyph — Icon.tsx's own "dice" icon is a fixed 5-pip decoration, unrelated to any
+// specific value. Reuses the same mask-punch technique Icon.tsx's own dice glyph uses, just with a
+// pip layout chosen per value instead of a fixed one.
+const DICE_PIPS: Record<number, [number, number][]> = {
+  1: [[12, 12]],
+  2: [[8, 8], [16, 16]],
+  3: [[8, 8], [12, 12], [16, 16]],
+  4: [[8, 8], [16, 8], [8, 16], [16, 16]],
+  5: [[8, 8], [16, 8], [12, 12], [8, 16], [16, 16]],
+  6: [[8, 8], [16, 8], [8, 12], [16, 12], [8, 16], [16, 16]],
+};
+function DiceFace({ value, size = 40 }: { value: number | null; size?: number }) {
+  if (value === null) return <Icon name="dice" size={size} />;
+  const maskId = `spy-dice-${value}`;
+  return (
+    <svg viewBox="0 0 24 24" width={size} height={size} aria-hidden="true" style={{ display: "inline-block" }}>
+      <mask id={maskId}>
+        <rect width="24" height="24" fill="white" />
+        {DICE_PIPS[value].map(([x, y], i) => <circle key={i} cx={x} cy={y} r="1.6" fill="black" />)}
+      </mask>
+      <rect x="3" y="3" width="18" height="18" rx="5" fill="currentColor" mask={`url(#${maskId})`} />
+    </svg>
+  );
+}
 
 function Starfield() {
   return (
@@ -604,7 +631,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
               boxShadow: "0 0 50px rgba(56,189,248,0.25)",
             }}
           >
-            <div style={{ fontSize: "36px", marginBottom: "10px", animation: "sauFloat 3s ease-in-out infinite" }}>🛸</div>
+            <div style={{ marginBottom: "10px", animation: "sauFloat 3s ease-in-out infinite" }}><Icon name="ufo" size={36} /></div>
             <div style={{ fontWeight: "900", fontSize: "20px", marginBottom: "10px", color: "#38BDF8" }}>Spy Among Us</div>
             <div style={{ fontSize: "15px", lineHeight: 1.7, opacity: 0.95 }}>
               {isTwoPlayer ? (
@@ -639,7 +666,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
                   color: "white",
                 }}
               >
-                {team.color.emoji} {team.name}
+<TeamIcon team={team} /> {team.name}
               </div>
             ))}
           </div>
@@ -652,13 +679,15 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
                   border: `2px solid ${inputMode === "screen" ? "#38BDF8" : "rgba(255,255,255,0.2)"}`,
                   background: inputMode === "screen" ? "rgba(56,189,248,0.15)" : "rgba(255,255,255,0.05)",
                   color: inputMode === "screen" ? "#38BDF8" : "#94A3B8",
-                }}>🖥️ Play on Screen</button>
+                  display: "inline-flex", alignItems: "center", gap: "6px",
+                }}><Icon name="screen" size={14} /> Play on Screen</button>
                 <button onClick={handlePickPhoneMode} style={{
                   padding: "10px 20px", borderRadius: "12px", fontWeight: "800", fontSize: "14px", cursor: "pointer",
                   border: `2px solid ${inputMode === "phone" ? "#38BDF8" : "rgba(255,255,255,0.2)"}`,
                   background: inputMode === "phone" ? "rgba(56,189,248,0.15)" : "rgba(255,255,255,0.05)",
                   color: inputMode === "phone" ? "#38BDF8" : "#94A3B8",
-                }}>📱 Play on Phones</button>
+                  display: "inline-flex", alignItems: "center", gap: "6px",
+                }}><Icon name="phone" size={14} /> Play on Phones</button>
               </div>
             </div>
           )}
@@ -684,13 +713,13 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
             onClick={() => setShowHowTo(true)}
             className="sau-btn"
             style={{
-              display: "block", margin: "0 auto 14px",
+              display: "inline-flex", alignItems: "center", gap: "6px", marginBottom: "14px",
               background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)",
               borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800",
               cursor: "pointer",
             }}
           >
-            ❓ How to Play
+            <Icon name="help" size={15} /> How to Play
           </button>
           {showHowTo && (
             <HowToPlayModal
@@ -703,6 +732,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
             onClick={enterRoundStartPhase}
             className="sau-btn"
             style={{
+              display: "inline-flex", alignItems: "center", gap: "8px",
               background: "linear-gradient(135deg,#0284C7,#38BDF8)",
               color: "#0C1B2E",
               border: "none",
@@ -715,7 +745,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
               transition: "transform 0.15s ease",
             }}
           >
-            🛸 Start Mission!
+            <Icon name="ufo" size={20} /> Start Mission!
           </button>
         </div>
       </div>
@@ -736,7 +766,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
         <Starfield />
         {STYLE_TAG}
         <div style={{ position: "relative", zIndex: 1 }}>
-          <div style={{ fontSize: "44px", marginBottom: "6px" }}>🛸</div>
+          <div style={{ marginBottom: "6px" }}><Icon name="ufo" size={44} color="#38BDF8" /></div>
           <div style={{ fontWeight: "900", fontSize: "22px", color: "#38BDF8", marginBottom: "16px" }}>{headline}</div>
           <div style={{ display: "grid", gridTemplateColumns: teamsGridCols(teams.length), gap: "10px", margin: "0 auto 20px", maxWidth: "760px" }}>
             {ranking.map(({ item: team, rank, value }) => {
@@ -748,8 +778,8 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
                   <div><RankBadge rank={rank} size={22} /></div>
                   <div style={{ fontWeight: "800", color: "white", fontSize: "14px", marginTop: "4px" }}><TeamIcon team={team} /> {team.name}</div>
                   <div style={{ color: "#38BDF8", fontWeight: "900", fontSize: "16px", marginTop: "4px" }}>{value} pts</div>
-                  <div style={{ fontSize: "11px", color: "#94A3B8", fontWeight: "700", marginTop: "4px" }}>
-                    🕵️ spy {spyCount}× (escaped {spyWins}×) · 👨‍🚀 caught/guessed right {crewWins}×
+                  <div style={{ fontSize: "11px", color: "#94A3B8", fontWeight: "700", marginTop: "4px", display: "flex", alignItems: "center", justifyContent: "center", gap: "4px", flexWrap: "wrap" }}>
+                    <Icon name="search" size={10} /> spy {spyCount}× (escaped {spyWins}×) · <Icon name="astronaut" size={10} /> caught/guessed right {crewWins}×
                   </div>
                 </div>
               );
@@ -758,9 +788,9 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
           <button
             onClick={onEnd}
             className="sau-btn"
-            style={{ background: "linear-gradient(135deg,#0284C7,#38BDF8)", color: "#0C1B2E", border: "none", borderRadius: "14px", padding: "14px 36px", fontSize: "17px", fontWeight: "900", cursor: "pointer", transition: "transform 0.15s ease" }}
+            style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg,#0284C7,#38BDF8)", color: "#0C1B2E", border: "none", borderRadius: "14px", padding: "14px 36px", fontSize: "17px", fontWeight: "900", cursor: "pointer", transition: "transform 0.15s ease" }}
           >
-            🏁 End Game
+            <Icon name="checkeredFlag" size={18} /> End Game
           </button>
         </div>
       </div>
@@ -793,8 +823,8 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
             gap: "8px",
           }}
         >
-          <span style={{ color: "white", fontWeight: "900", fontSize: "16px" }}>
-            🛸 Spy Among Us{isTwoPlayer ? " - 1v1" : ""} - Round {ri + 1}/{questions.length}
+          <span style={{ color: "white", fontWeight: "900", fontSize: "16px", display: "inline-flex", alignItems: "center", gap: "6px" }}>
+            <Icon name="ufo" size={15} /> Spy Among Us{isTwoPlayer ? " - 1v1" : ""} - Round {ri + 1}/{questions.length}
           </span>
           <span
             style={{
@@ -824,7 +854,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
               lineHeight: 1.6,
             }}
           >
-            <div style={{ fontWeight: "900", fontSize: "14px", marginBottom: "4px" }}>🛸 1v1 Mode</div>
+            <div style={{ fontWeight: "900", fontSize: "14px", marginBottom: "4px", display: "flex", alignItems: "center", gap: "5px" }}><Icon name="ufo" size={13} /> 1v1 Mode</div>
             Both players peek their secret card, then each speaks about their topic. Afterwards, each player tries to
             guess what the other topic was.
           </div>
@@ -862,9 +892,10 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
                     cursor: "pointer",
                     boxShadow: `0 4px 20px ${peekTeam.color.bg}60`,
                     transition: "transform 0.15s ease",
+                    display: "inline-flex", alignItems: "center", gap: "8px",
                   }}
                 >
-                  📡 Reveal my role
+                  <Icon name="satellite" size={16} /> Reveal my role
                 </button>
               ) : (
                 <div>
@@ -882,7 +913,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
                       animation: "sauPopIn 0.35s ease-out",
                     }}
                   >
-                    <div style={{ fontSize: "36px", marginBottom: "8px" }}>{isSpy(peekTeam.id) ? "🕵️" : "👨‍🚀"}</div>
+                    <div style={{ marginBottom: "8px" }}><Icon name={isSpy(peekTeam.id) ? "search" : "astronaut"} size={36} /></div>
                     <div style={{ fontWeight: "900", fontSize: "20px", marginBottom: "6px" }}>
                       {isSpy(peekTeam.id) ? "You are the SPY!" : "You are a CREWMATE"}
                     </div>
@@ -967,8 +998,8 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
                 textAlign: "center",
               }}
             >
-              <div style={{ fontWeight: "900", fontSize: "17px", color: "#7DD3FC", marginBottom: "6px" }}>
-                📡 Prepare your answer!
+              <div style={{ fontWeight: "900", fontSize: "17px", color: "#7DD3FC", marginBottom: "6px", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}>
+                <Icon name="satellite" size={15} /> Prepare your answer!
               </div>
               <p style={{ color: "#CBD5E1", fontSize: "14px", margin: "0 0 14px" }}>
                 Each team thinks about what they will say. Discuss quietly with your team and do not say your topic out
@@ -1044,8 +1075,8 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
                   <div style={{ fontWeight: "800", fontSize: "13px", color: "white", marginBottom: "4px" }}>
                     {team.name}
                   </div>
-                  <div style={{ fontSize: "40px", lineHeight: 1, minHeight: "44px" }}>
-                    {rollDice[index] != null ? ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"][rollDice[index]! - 1] : "🎲"}
+                  <div style={{ lineHeight: 1, minHeight: "44px" }}>
+                    <DiceFace value={rollDice[index]} size={40} />
                   </div>
                   {rollDone && rollDice[index] != null && (
                     <div style={{ fontWeight: "900", fontSize: "13px", color: "white", marginTop: "4px" }}>
@@ -1128,8 +1159,8 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
                 marginBottom: "14px",
               }}
             >
-              <div style={{ fontWeight: "900", fontSize: "20px", color: "white", marginBottom: "8px" }}>
-                🎙️ <TeamIcon team={speakTeam} /> {speakTeam.name} - speak now!
+              <div style={{ fontWeight: "900", fontSize: "20px", color: "white", marginBottom: "8px", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}>
+                <Icon name="mic" size={17} /> <TeamIcon team={speakTeam} /> {speakTeam.name} - speak now!
               </div>
               <div style={{ fontSize: "14px", color: "#94A3B8", marginBottom: "14px" }}>
                 Answer your prompt. Other teams: listen carefully for anything that seems off.
@@ -1176,7 +1207,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
                     color: index < speakIdx ? "#86EFAC" : "white",
                   }}
                 >
-                  {index < speakIdx ? "✓" : index === speakIdx ? "🗣️" : "⏳"} {team.name}
+                  <Icon name={index < speakIdx ? "check" : index === speakIdx ? "mic" : "hourglass"} size={11} /> {team.name}
                 </div>
               ))}
             </div>
@@ -1195,7 +1226,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
                 animation: "sauAlarmFlash 1.1s ease-in-out infinite, sauAlarmGlow 1.1s ease-in-out infinite",
               }}
             >
-              <div style={{ fontSize: "26px", marginBottom: "4px" }}>🚨</div>
+              <div style={{ marginBottom: "4px" }}><Icon name="warning" size={26} color="#FCA5A5" /></div>
               <div style={{ fontWeight: "900", fontSize: "17px", color: "#FCA5A5" }}>SOUND THE ALARM</div>
               <p style={{ color: "#E2E8F0", fontWeight: "700", fontSize: "14px", margin: "6px 0 0" }}>
                 Who do you think is the spy? Each team votes.
@@ -1235,7 +1266,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
                             transition: "transform 0.15s ease",
                           }}
                         >
-                          ⚠️ {suspect.name}
+                          <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}><Icon name="warning" size={12} /> {suspect.name}</span>
                           {voteCounts[suspect.id] > 0 && ` (${voteCounts[suspect.id]})`}
                         </button>
                       ))}
@@ -1258,9 +1289,10 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
                   fontWeight: "800",
                   cursor: allVoted ? "pointer" : "not-allowed",
                   transition: "transform 0.15s ease",
+                  display: "inline-flex", alignItems: "center", gap: "8px",
                 }}
               >
-                🚨 Count the votes!
+                <Icon name="warning" size={16} /> Count the votes!
               </button>
               {!allVoted && <p style={{ color: "#64748B", fontSize: "13px", marginTop: "6px" }}>Waiting for all teams to vote</p>}
             </div>
@@ -1280,7 +1312,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
                 boxShadow: "0 0 30px rgba(239,68,68,0.35)",
               }}
             >
-              <div style={{ fontSize: "36px", marginBottom: "10px" }}>🕵️</div>
+              <div style={{ marginBottom: "10px" }}><Icon name="search" size={36} /></div>
               <div style={{ fontWeight: "900", fontSize: "20px", marginBottom: "8px" }}>{spyTeam.name} - you've been caught!</div>
               <div style={{ fontSize: "14px", opacity: 0.85, marginBottom: "16px" }}>
                 But you can still win. Guess the real topic the other teams were using.
@@ -1332,9 +1364,9 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
         {phase === "reveal" && (
           <div>
             <div style={{ textAlign: "center", marginBottom: "14px", position: "relative", minHeight: "60px" }}>
-              <div key={ri} style={{ fontSize: "40px", marginBottom: "8px", display: "inline-block", animation: "sauEject 1.4s ease-in forwards" }}>🕵️</div>
-              <div style={{ fontWeight: "900", fontSize: "20px", color: "#FCA5A5" }}>
-                ❌ {spyTeam.name} was the Spy!
+              <div key={ri} style={{ marginBottom: "8px", display: "inline-block", animation: "sauEject 1.4s ease-in forwards" }}><Icon name="search" size={40} /></div>
+              <div style={{ fontWeight: "900", fontSize: "20px", color: "#FCA5A5", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}>
+                <Icon name="close" size={17} /> {spyTeam.name} was the Spy!
               </div>
             </div>
 
@@ -1371,12 +1403,12 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
                 }}
               >
                 {spyGuess === round.crewmateTopic ? (
-                  <div style={{ fontWeight: "900", color: "#FCA5A5" }}>
-                    🕵️ {spyTeam.name} guessed "{spyGuess}" - correct! Spy earns +60 pts.
+                  <div style={{ fontWeight: "900", color: "#FCA5A5", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}>
+                    <Icon name="search" size={15} /> {spyTeam.name} guessed "{spyGuess}" - correct! Spy earns +60 pts.
                   </div>
                 ) : (
-                  <div style={{ fontWeight: "900", color: "#86EFAC" }}>
-                    👨‍🚀 {spyTeam.name} guessed "{spyGuess}" - wrong! Crewmates win +80 pts each.
+                  <div style={{ fontWeight: "900", color: "#86EFAC", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}>
+                    <Icon name="astronaut" size={15} /> {spyTeam.name} guessed "{spyGuess}" - wrong! Crewmates win +80 pts each.
                   </div>
                 )}
               </div>
@@ -1390,8 +1422,8 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
                 return (
                   <div key={team.id} style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px", fontSize: "13px" }}>
                     <span style={{ fontWeight: "700", color: "white" }}>{team.name}:</span>
-                    <span style={{ color: correct ? "#4ADE80" : "#F87171", fontWeight: "700" }}>
-                      {correct ? "✓" : "✗"} voted {accused?.name}
+                    <span style={{ color: correct ? "#4ADE80" : "#F87171", fontWeight: "700", display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                      <Icon name={correct ? "check" : "close"} size={11} /> voted {accused?.name}
                     </span>
                   </div>
                 );
@@ -1412,9 +1444,10 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
                   fontWeight: "800",
                   cursor: "pointer",
                   transition: "transform 0.15s ease",
+                  display: "inline-flex", alignItems: "center", gap: "8px",
                 }}
               >
-                {ri + 1 >= questions.length ? "🏆 See Final Results" : "Next Round"}
+                {ri + 1 >= questions.length ? <><Icon name="trophy" size={17} /> See Final Results</> : "Next Round"}
               </button>
             </div>
           </div>
@@ -1436,8 +1469,8 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
                     marginBottom: "14px",
                   }}
                 >
-                  <div style={{ fontWeight: "900", fontSize: "20px", color: "white", marginBottom: "8px" }}>
-                    🎙️ <TeamIcon team={speaker} /> {speaker.name} - speak now!
+                  <div style={{ fontWeight: "900", fontSize: "20px", color: "white", marginBottom: "8px", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}>
+                    <Icon name="mic" size={17} /> <TeamIcon team={speaker} /> {speaker.name} - speak now!
                   </div>
                   <div style={{ fontSize: "14px", color: "#94A3B8", marginBottom: "16px" }}>
                     Talk about your topic. Do not say what your role is - your opponent is listening carefully.
@@ -1522,7 +1555,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
                     textAlign: "center",
                   }}
                 >
-                  <div style={{ fontSize: "32px", marginBottom: "10px" }}>{isSpyGuessing ? "🕵️" : "👨‍🚀"}</div>
+                  <div style={{ marginBottom: "10px" }}><Icon name={isSpyGuessing ? "search" : "astronaut"} size={32} /></div>
                   <div style={{ fontWeight: "900", fontSize: "18px", marginBottom: "6px" }}>{guesser.name}</div>
                   <div style={{ fontSize: "14px", opacity: 0.85, marginBottom: "18px" }}>
                     {isSpyGuessing
@@ -1610,7 +1643,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
                       textAlign: "center",
                     }}
                   >
-                    <div style={{ fontSize: "28px", marginBottom: "4px" }}>👨‍🚀</div>
+                    <div style={{ marginBottom: "4px" }}><Icon name="astronaut" size={28} /></div>
                     <div style={{ fontWeight: "900", fontSize: "14px", color: "white" }}>{crewPlayer.name}</div>
                     <div style={{ fontSize: "12px", color: "#94A3B8", marginBottom: "8px" }}>
                       was the Crewmate
@@ -1639,7 +1672,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
                       position: "relative",
                     }}
                   >
-                    <div style={{ fontSize: "28px", marginBottom: "4px", display: "inline-block", animation: "sauEject 1.4s ease-in forwards" }}>🕵️</div>
+                    <div style={{ marginBottom: "4px", display: "inline-block", animation: "sauEject 1.4s ease-in forwards" }}><Icon name="search" size={28} /></div>
                     <div style={{ fontWeight: "900", fontSize: "14px", color: "white" }}>{spyPlayer.name}</div>
                     <div style={{ fontSize: "12px", color: "#FCA5A5", marginBottom: "8px" }}>was the Spy</div>
                     <div
@@ -1667,7 +1700,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
                     }}
                   >
                     <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
-                      <span style={{ fontSize: "20px" }}>{spyGuessedRight ? "✓" : "✗"}</span>
+                      <Icon name={spyGuessedRight ? "check" : "close"} size={18} />
                       <span style={{ fontWeight: "900", fontSize: "14px", color: spyGuessedRight ? "#86EFAC" : "#FCA5A5" }}>
                         {spyPlayer.name} (Spy) guessed the crewmate topic:
                       </span>
@@ -1694,7 +1727,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
                     }}
                   >
                     <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
-                      <span style={{ fontSize: "20px" }}>{crewGuessedRight ? "✓" : "✗"}</span>
+                      <Icon name={crewGuessedRight ? "check" : "close"} size={18} />
                       <span style={{ fontWeight: "900", fontSize: "14px", color: crewGuessedRight ? "#86EFAC" : "#FCA5A5" }}>
                         {crewPlayer.name} (Crewmate) guessed the spy topic:
                       </span>
@@ -1732,9 +1765,10 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
                       fontWeight: "800",
                       cursor: "pointer",
                       transition: "transform 0.15s ease",
+                      display: "inline-flex", alignItems: "center", gap: "8px",
                     }}
                   >
-                    {ri + 1 >= questions.length ? "🏆 See Final Results" : "Next Round"}
+                    {ri + 1 >= questions.length ? <><Icon name="trophy" size={17} /> See Final Results</> : "Next Round"}
                   </button>
                 </div>
               </div>
