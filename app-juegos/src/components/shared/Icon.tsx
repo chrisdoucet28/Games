@@ -29,6 +29,7 @@ export type IconName =
   | "planet" | "stop" | "satellite" | "fuel" | "ufo" | "astronaut"
   | "door" | "window" | "zombie" | "gun" | "axe" | "tree" | "megaphone" | "house" | "chair"
   | "handshake" | "idea" | "sword" | "heart" | "crystalBall" | "apple"
+  | "wind" | "eyeOff"
   // Phase 4 — ThemeAmbience's decorative floating background glyphs (one drift + one twinkle
   // per accent theme). Rendered at low opacity/small scale, so simpler silhouettes than the
   // functional icons above are fine here.
@@ -690,6 +691,19 @@ const ICONS: Record<IconName, React.ReactNode> = {
       <path d="M12,9 C9.2,9 7,11.7 7,15 C7,18.3 9,21.5 11.3,21.5 C11.7,21.5 11.8,21.4 12,21.4 C12.2,21.4 12.3,21.5 12.7,21.5 C15,21.5 17,18.3 17,15 C17,11.7 14.8,9 12,9 Z" fill="currentColor" />
       <path d="M12,9 C12,6.8 13,5 15,4" stroke="currentColor" strokeWidth="1.6" fill="none" strokeLinecap="round" />
       <ellipse cx="15.5" cy="5.5" rx="2" ry="1.2" fill="currentColor" transform="rotate(-30 15.5 5.5)" />
+    </>
+  ),
+  wind: (
+    <path d="M3,8 H15 A3,3 0 1 0 12,5 M3,13 H18 A3,3 0 1 1 15,17 M3,17.5 H10" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+  ),
+  eyeOff: (
+    <>
+      <mask id="icon-eyeoff-pupil">
+        <rect width="24" height="24" fill="white" />
+        <circle cx="12" cy="12" r="3.4" fill="black" />
+      </mask>
+      <path d="M2,12 C5,6 9,3.5 12,3.5 C15,3.5 19,6 22,12 C19,18 15,20.5 12,20.5 C9,20.5 5,18 2,12 Z" fill="currentColor" mask="url(#icon-eyeoff-pupil)" opacity="0.55" />
+      <line x1="3" y1="3" x2="21" y2="21" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
     </>
   ),
   cloud: (
