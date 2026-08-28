@@ -23,7 +23,8 @@ export type IconName =
   // per-game. The rest are added as each game's sweep needs them, reused across games where a
   // later one needs the same concept.
   | "help" | "pencil" | "clock" | "ship" | "shield" | "explosion" | "wave" | "medal"
-  | "screen" | "clipboard" | "coin"
+  | "screen" | "clipboard" | "coin" | "volcano" | "people"
+  | "tent" | "balloon" | "popcorn" | "eye" | "shuffle" | "hand"
   // Phase 4 — ThemeAmbience's decorative floating background glyphs (one drift + one twinkle
   // per accent theme). Rendered at low opacity/small scale, so simpler silhouettes than the
   // functional icons above are fine here.
@@ -413,6 +414,75 @@ const ICONS: Record<IconName, React.ReactNode> = {
         <circle cx="12" cy="12" r="7" fill="none" stroke="black" strokeWidth="1.3" />
       </mask>
       <circle cx="12" cy="12" r="10" fill="currentColor" mask="url(#icon-coin-ring)" />
+    </>
+  ),
+  volcano: (
+    <>
+      <mask id="icon-volcano-crater">
+        <rect width="24" height="24" fill="white" />
+        <polygon points="12,5 14.5,8 9.5,8" fill="black" />
+      </mask>
+      <polygon points="12,3 20,21 4,21" fill="currentColor" mask="url(#icon-volcano-crater)" />
+      <circle cx="12" cy="4.5" r="1.1" fill="currentColor" />
+    </>
+  ),
+  people: (
+    <>
+      <circle cx="8" cy="8" r="3.2" fill="currentColor" />
+      <circle cx="17" cy="9" r="2.6" fill="currentColor" opacity="0.75" />
+      <path d="M2,20 a6,6 0 0 1 12,0 Z" fill="currentColor" />
+      <path d="M14,20 a5,5 0 0 1 9,0 Z" fill="currentColor" opacity="0.75" />
+    </>
+  ),
+  tent: (
+    <>
+      <line x1="12" y1="1" x2="12" y2="4" stroke="currentColor" strokeWidth="1.6" />
+      <polygon points="12,2 12.8,4.2 11.2,4.2" fill="currentColor" />
+      <polygon points="12,4 22,19 16,19 12,10 8,19 2,19" fill="currentColor" />
+    </>
+  ),
+  balloon: (
+    <>
+      <path d="M12,2 C17,2 19,6.5 17.5,10.5 C16.5,13 14,14.5 14,16.5 V17.5 H10 V16.5 C10,14.5 7.5,13 6.5,10.5 C5,6.5 7,2 12,2 Z" fill="currentColor" />
+      <polygon points="10.5,17.5 13.5,17.5 12,19.5" fill="currentColor" />
+      <line x1="12" y1="19.5" x2="12" y2="23" stroke="currentColor" strokeWidth="1.2" />
+    </>
+  ),
+  popcorn: (
+    <>
+      <path d="M6,10 L7.5,22 H16.5 L18,10 Z" fill="currentColor" />
+      <circle cx="8" cy="7" r="2.6" fill="currentColor" />
+      <circle cx="12" cy="5.5" r="2.8" fill="currentColor" />
+      <circle cx="16" cy="7" r="2.6" fill="currentColor" />
+    </>
+  ),
+  eye: (
+    <>
+      <mask id="icon-eye-pupil">
+        <rect width="24" height="24" fill="white" />
+        <circle cx="12" cy="12" r="3.4" fill="black" />
+      </mask>
+      <path d="M2,12 C5,6 9,3.5 12,3.5 C15,3.5 19,6 22,12 C19,18 15,20.5 12,20.5 C9,20.5 5,18 2,12 Z" fill="currentColor" mask="url(#icon-eye-pupil)" />
+      <circle cx="12" cy="12" r="1.6" fill="currentColor" />
+    </>
+  ),
+  shuffle: (
+    <>
+      <path d="M3,7 H8 L19,17 H21" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <polygon points="21,17 17.5,17.3 19.3,20.5" fill="currentColor" />
+      <path d="M3,17 H8 L12.5,12.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <path d="M15.5,9.5 L19,7 H21" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <polygon points="21,7 17.5,6.7 19.3,3.5" fill="currentColor" />
+    </>
+  ),
+  hand: (
+    <>
+      <rect x="6" y="11" width="12" height="10" rx="4" fill="currentColor" />
+      <rect x="6.5" y="2" width="3" height="11" rx="1.5" fill="currentColor" />
+      <rect x="10.2" y="1" width="3" height="12" rx="1.5" fill="currentColor" />
+      <rect x="13.9" y="2" width="3" height="11" rx="1.5" fill="currentColor" />
+      <rect x="17.5" y="5" width="3" height="9" rx="1.5" fill="currentColor" />
+      <rect x="2" y="10" width="5" height="7" rx="2.5" fill="currentColor" />
     </>
   ),
   cloud: (
