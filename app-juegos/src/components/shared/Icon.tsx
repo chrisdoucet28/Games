@@ -25,7 +25,8 @@ export type IconName =
   | "help" | "pencil" | "clock" | "ship" | "shield" | "explosion" | "wave" | "medal"
   | "screen" | "clipboard" | "coin" | "volcano" | "people"
   | "tent" | "balloon" | "popcorn" | "eye" | "shuffle" | "hand"
-  | "keyboard" | "bell" | "pause"
+  | "keyboard" | "bell" | "pause" | "hourglass" | "sleep" | "column" | "wallet"
+  | "planet" | "stop" | "satellite" | "fuel" | "ufo" | "astronaut"
   // Phase 4 — ThemeAmbience's decorative floating background glyphs (one drift + one twinkle
   // per accent theme). Rendered at low opacity/small scale, so simpler silhouettes than the
   // functional icons above are fine here.
@@ -515,6 +516,78 @@ const ICONS: Record<IconName, React.ReactNode> = {
     <>
       <rect x="6" y="4" width="4" height="16" rx="1.2" fill="currentColor" />
       <rect x="14" y="4" width="4" height="16" rx="1.2" fill="currentColor" />
+    </>
+  ),
+  hourglass: (
+    <>
+      <path d="M6,3 H18 V7 L13,12 L18,17 V21 H6 V17 L11,12 L6,7 Z" fill="currentColor" />
+      <rect x="5" y="2" width="14" height="2" rx="1" fill="currentColor" />
+      <rect x="5" y="20" width="14" height="2" rx="1" fill="currentColor" />
+    </>
+  ),
+  sleep: (
+    <path d="M5,7 H15 L5,15 H15 M9,13 H19 L9,21 H19" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+  ),
+  column: (
+    <>
+      <rect x="4" y="2" width="16" height="2.5" rx="0.5" fill="currentColor" />
+      <rect x="4" y="19.5" width="16" height="2.5" rx="0.5" fill="currentColor" />
+      <rect x="6" y="5" width="2.5" height="14" fill="currentColor" />
+      <rect x="10.75" y="5" width="2.5" height="14" fill="currentColor" />
+      <rect x="15.5" y="5" width="2.5" height="14" fill="currentColor" />
+    </>
+  ),
+  wallet: (
+    <>
+      <mask id="icon-wallet-clasp">
+        <rect width="24" height="24" fill="white" />
+        <circle cx="17" cy="13" r="1.6" fill="black" />
+      </mask>
+      <path d="M3,7 A2,2 0 0 1 5,5 H17 A2,2 0 0 1 19,7 V9 H4 A1,1 0 0 0 3,10 Z" fill="currentColor" />
+      <rect x="3" y="9" width="18" height="10" rx="2" fill="currentColor" mask="url(#icon-wallet-clasp)" />
+    </>
+  ),
+  planet: (
+    <>
+      <circle cx="12" cy="12" r="6" fill="currentColor" />
+      <ellipse cx="12" cy="12" rx="10" ry="3" fill="none" stroke="currentColor" strokeWidth="1.8" transform="rotate(-18 12 12)" />
+    </>
+  ),
+  stop: <rect x="5" y="5" width="14" height="14" rx="2" fill="currentColor" />,
+  satellite: (
+    <>
+      <rect x="3" y="2" width="5" height="8" rx="0.6" fill="currentColor" transform="rotate(-45 5.5 6)" />
+      <rect x="16" y="14" width="5" height="8" rx="0.6" fill="currentColor" transform="rotate(-45 18.5 18)" />
+      <rect x="9.5" y="9.5" width="5" height="5" rx="1" fill="currentColor" transform="rotate(-45 12 12)" />
+      <line x1="15" y1="9" x2="19" y2="5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      <circle cx="20" cy="4" r="1.2" fill="currentColor" />
+    </>
+  ),
+  fuel: (
+    <>
+      <rect x="9" y="3" width="6" height="4" rx="1" fill="currentColor" />
+      <mask id="icon-fuel-drop">
+        <rect width="24" height="24" fill="white" />
+        <path d="M12,10.5 C13.3,12.3 14,13.6 14,14.7 C14,16.1 13.1,17 12,17 C10.9,17 10,16.1 10,14.7 C10,13.6 10.7,12.3 12,10.5 Z" fill="black" />
+      </mask>
+      <rect x="5" y="7" width="14" height="14" rx="2" fill="currentColor" mask="url(#icon-fuel-drop)" />
+    </>
+  ),
+  ufo: (
+    <>
+      <ellipse cx="12" cy="10.5" rx="11" ry="3.2" fill="currentColor" />
+      <path d="M8,8 C8,4.7 9.8,2.5 12,2.5 C14.2,2.5 16,4.7 16,8 Z" fill="currentColor" opacity="0.85" />
+      <ellipse cx="12" cy="14" rx="6" ry="2" fill="currentColor" opacity="0.6" />
+    </>
+  ),
+  astronaut: (
+    <>
+      <mask id="icon-astronaut-visor">
+        <rect width="24" height="24" fill="white" />
+        <ellipse cx="12" cy="12.5" rx="6.5" ry="7.5" fill="black" />
+      </mask>
+      <circle cx="12" cy="12" r="10" fill="currentColor" mask="url(#icon-astronaut-visor)" />
+      <ellipse cx="9.5" cy="10.5" rx="2.3" ry="2.8" fill="currentColor" opacity="0.35" />
     </>
   ),
   cloud: (
