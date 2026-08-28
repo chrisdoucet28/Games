@@ -29,7 +29,7 @@ export type IconName =
   | "planet" | "stop" | "satellite" | "fuel" | "ufo" | "astronaut"
   | "door" | "window" | "zombie" | "gun" | "axe" | "tree" | "megaphone" | "house" | "chair"
   | "handshake" | "idea" | "sword" | "heart" | "crystalBall" | "apple"
-  | "wind" | "eyeOff"
+  | "wind" | "eyeOff" | "unlocked" | "wrench" | "forbidden"
   // Phase 4 — ThemeAmbience's decorative floating background glyphs (one drift + one twinkle
   // per accent theme). Rendered at low opacity/small scale, so simpler silhouettes than the
   // functional icons above are fine here.
@@ -164,6 +164,19 @@ const ICONS: Record<IconName, React.ReactNode> = {
     <>
       <path d="M7,10 V8 A5,5 0 0 1 17,8 V10" fill="none" stroke="currentColor" strokeWidth="2.2" />
       <rect x="5" y="10" width="14" height="11" rx="2" fill="currentColor" />
+    </>
+  ),
+  unlocked: (
+    <>
+      <path d="M7,10 V8 A5,5 0 0 1 17,8" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+      <rect x="5" y="10" width="14" height="11" rx="2" fill="currentColor" />
+    </>
+  ),
+  wrench: <path d="M22.7,19 L13.6,9.9 C14.5,7.6 14,4.9 12.1,3 C10.1,1 7.1,0.6 4.7,1.7 L9,6 L6,9 L1.6,4.7 C0.4,7.1 0.9,10.1 2.9,12.1 C4.8,14 7.5,14.5 9.8,13.6 L18.9,22.7 C19.3,23.1 19.9,23.1 20.3,22.7 L22.6,20.4 C23.1,20 23.1,19.3 22.7,19 Z" fill="currentColor" />,
+  forbidden: (
+    <>
+      <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" strokeWidth="2.2" />
+      <line x1="5.5" y1="18.5" x2="18.5" y2="5.5" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
     </>
   ),
   dice: (
