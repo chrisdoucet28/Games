@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { TeamIcon } from "../shared/TeamIcon";
+import { Icon } from "../shared/Icon";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 import type { GameProps } from "../../types";
 import { useTurnTimer } from "../../hooks/useTurnTimer";
@@ -157,7 +158,7 @@ type TicketItem =
 type Ticket = { id: number; items: TicketItem[]; customerEmoji: string; totalSeconds: number; secondsLeft: number; claimedBy?: string | number; submittedSentence?: string };
 type JudgingState = { ticketId: number; teamId: string | number } | null;
 type Phase = "intro" | "playing" | "final";
-type Banner = { text: string; kind: "success" | "expired"; key: number };
+type Banner = { text: React.ReactNode; kind: "success" | "expired"; key: number };
 type DishCounts = Record<string, number>;
 
 function pickItemCount(resolvedCount: number): number {
@@ -248,7 +249,7 @@ function DinerFacade() {
     <div style={{ maxWidth: "700px", margin: "0 auto 16px", borderRadius: "16px 16px 6px 6px", overflow: "hidden", boxShadow: "0 6px 18px rgba(190,24,93,0.18)" }}>
       <div style={{ height: "30px", background: "repeating-linear-gradient(45deg,#F43F5E 0 16px,#FFF1F2 16px 32px)" }} />
       <div style={{ background: "linear-gradient(180deg,#FFE4E6,#FFF1F2)", padding: "8px 16px", textAlign: "center" }}>
-        <span style={{ fontWeight: "900", fontSize: "14px", color: "#9D174D", letterSpacing: "0.03em" }}>🍽️ ORDER UP DINER</span>
+        <span style={{ fontWeight: "900", fontSize: "14px", color: "#9D174D", letterSpacing: "0.03em", display: "inline-flex", alignItems: "center", gap: "6px" }}><Icon name="plate" size={14} /> ORDER UP DINER</span>
       </div>
     </div>
   );
@@ -328,8 +329,8 @@ function TicketCard({ ticket, teams, judging, isPhoneMode, answerMode, onClaim, 
             </div>
           )}
           <div style={{ display: "flex", gap: "6px", justifyContent: "center" }}>
-            <button onClick={onCorrect} className="ou-btn" style={{ background: "#22C55E", color: "white", border: "none", borderRadius: "10px", padding: "8px 12px", fontSize: "13px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease" }}>✅ Serve it!</button>
-            <button onClick={onWrong} className="ou-btn" style={{ background: "#EF4444", color: "white", border: "none", borderRadius: "10px", padding: "8px 12px", fontSize: "13px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease" }}>❌ Wrong</button>
+            <button onClick={onCorrect} className="ou-btn" style={{ display: "inline-flex", alignItems: "center", gap: "5px", background: "#22C55E", color: "white", border: "none", borderRadius: "10px", padding: "8px 12px", fontSize: "13px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease" }}><Icon name="check" size={13} /> Serve it!</button>
+            <button onClick={onWrong} className="ou-btn" style={{ display: "inline-flex", alignItems: "center", gap: "5px", background: "#EF4444", color: "white", border: "none", borderRadius: "10px", padding: "8px 12px", fontSize: "13px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease" }}><Icon name="close" size={12} /> Wrong</button>
           </div>
         </div>
       ) : claimedTeam ? (
@@ -344,7 +345,7 @@ function TicketCard({ ticket, teams, judging, isPhoneMode, answerMode, onClaim, 
           )}
           <div style={{ display: "flex", gap: "6px", justifyContent: "center", flexWrap: "wrap" }}>
             {answerMode === "typing" && !ticket.submittedSentence ? (
-              <div style={{ fontSize: "11px", fontWeight: "700", color: "#9D174D", padding: "8px 0" }}>✍️ {claimedTeam.name} is typing…</div>
+              <div style={{ fontSize: "11px", fontWeight: "700", color: "#9D174D", padding: "8px 0", display: "inline-flex", alignItems: "center", gap: "4px" }}><Icon name="pencil" size={11} /> {claimedTeam.name} is typing…</div>
             ) : (
               <button
                 onClick={() => onOpenJudging(ticket.id)}
@@ -354,9 +355,10 @@ function TicketCard({ ticket, teams, judging, isPhoneMode, answerMode, onClaim, 
                 style={{
                   background: judgingBlocked ? "#D1D5DB" : "linear-gradient(135deg,#BE185D,#F43F5E)", color: "white", border: "none",
                   borderRadius: "10px", padding: "8px 12px", fontSize: "13px", fontWeight: "700",
+                  display: "inline-flex", alignItems: "center", gap: "5px",
                   cursor: judgingBlocked ? "not-allowed" : "pointer", transition: "transform 0.15s ease",
                 }}
-              >{answerMode === "typing" ? "✅ Judge it" : "🙋 Ready to judge"}</button>
+              >{answerMode === "typing" ? <><Icon name="check" size={13} /> Judge it</> : <><Icon name="hand" size={13} /> Ready to judge</>}</button>
             )}
             <button onClick={() => onRelease(ticket.id)} className="ou-btn" style={{
               background: "none", color: "#9CA3AF", border: "1px solid #E5E7EB", borderRadius: "10px",
@@ -367,7 +369,7 @@ function TicketCard({ ticket, teams, judging, isPhoneMode, answerMode, onClaim, 
       ) : (
         <div>
           {isPhoneMode ? (
-            <div style={{ fontSize: "11px", fontWeight: "700", color: "#9D174D", padding: "6px 0" }}>📱 Waiting for a team to claim on their phone…</div>
+            <div style={{ fontSize: "11px", fontWeight: "700", color: "#9D174D", padding: "6px 0", display: "inline-flex", alignItems: "center", gap: "4px" }}><Icon name="phone" size={11} /> Waiting for a team to claim on their phone…</div>
           ) : (
             <div style={{ display: "flex", gap: "4px", justifyContent: "center", flexWrap: "wrap" }}>
               {teams.map(t => (
@@ -384,7 +386,8 @@ function TicketCard({ ticket, teams, judging, isPhoneMode, answerMode, onClaim, 
           <button onClick={() => onSkip(ticket.id)} className="ou-btn" style={{
             marginTop: "6px", background: "none", color: "#9CA3AF", border: "1px solid #E5E7EB",
             borderRadius: "8px", padding: "3px 10px", fontSize: "10px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease",
-          }}>⏭️ Skip — no one got it</button>
+            display: "inline-flex", alignItems: "center", gap: "4px",
+          }}><Icon name="next" size={10} /> Skip — no one got it</button>
         </div>
       )}
     </div>
@@ -474,7 +477,7 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
   // expired), not as tickets are merely generated, so the ramp tracks real class progress.
   const resolvedCountRef = useRef(resumed?.resolvedCount ?? 0);
 
-  const pushBanner = useCallback((text: string, kind: Banner["kind"]) => {
+  const pushBanner = useCallback((text: React.ReactNode, kind: Banner["kind"]) => {
     const key = bannerIdRef.current++;
     setBanner({ text, kind, key });
     setTimeout(() => setBanner(prev => (prev?.key === key ? null : prev)), 2400);
@@ -571,13 +574,13 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
         }
         if (claimedExpired.length === 1 && unclaimedCount === 0) {
           const team = teams.find(t => t.id === claimedExpired[0].claimedBy);
-          pushBanner(`😤 ${team?.mascot ?? team?.color.emoji ?? ""} ${team?.name ?? "A team"}'s customer left unhappy! -${UNHAPPY_PENALTY}pts`, "expired");
+          pushBanner(<><Icon name="warning" size={14} /> <TeamIcon team={team} color="white" /> {team?.name ?? "A team"}'s customer left unhappy! -{UNHAPPY_PENALTY}pts</>, "expired");
         } else if (claimedExpired.length > 0) {
           const totalPenalty = claimedExpired.length * UNHAPPY_PENALTY;
           const extra = unclaimedCount > 0 ? ` (+${unclaimedCount} unclaimed, no penalty)` : "";
-          pushBanner(`😤 ${claimedExpired.length} claimed customer${claimedExpired.length > 1 ? "s" : ""} left unhappy! -${totalPenalty}pts total${extra}`, "expired");
+          pushBanner(<><Icon name="warning" size={14} /> {claimedExpired.length} claimed customer{claimedExpired.length > 1 ? "s" : ""} left unhappy! -{totalPenalty}pts total{extra}</>, "expired");
         } else {
-          pushBanner(unclaimedCount > 1 ? `😤 ${unclaimedCount} customers left — nobody had claimed them.` : "😤 A customer left — nobody had claimed them.", "expired");
+          pushBanner(<><Icon name="warning" size={14} /> {unclaimedCount > 1 ? `${unclaimedCount} customers left — nobody had claimed them.` : "A customer left — nobody had claimed them."}</>, "expired");
         }
       }
     }, 1000);
@@ -674,9 +677,9 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
     // top-up effect to spawn a new customer if the current ramp capacity allows it.
     setTickets(prev => prev.filter(t => t.id !== ticket.id));
     pushBanner(
-      comboBonusEarned > 0
-        ? `✅ Order served! +${score} pts · ${comboParts.join(" · ")}! +${comboBonusEarned} pts`
-        : `✅ Order served! +${score} pts`,
+      <>
+        <Icon name="check" size={14} /> Order served! +{score} pts{comboBonusEarned > 0 && <> · {comboParts.join(" · ")}! +{comboBonusEarned} pts</>}
+      </>,
       "success",
     );
     setJudging(null);
@@ -825,7 +828,7 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
       {STYLE_TAG}
       <div style={{ position: "relative", zIndex: 1 }}>
         <div style={{ background: "linear-gradient(135deg,#FFFFFF,#FFE4E6)", border: "2px solid #FBCFE8", borderRadius: "20px", padding: "28px 24px", marginBottom: "10px", color: "#831843", maxWidth: "560px", margin: "0 auto 10px", boxShadow: "0 6px 24px rgba(190,24,93,0.18)" }}>
-          <div style={{ fontSize: "36px", marginBottom: "10px" }}>🍽️</div>
+          <div style={{ marginBottom: "10px" }}><Icon name="plate" size={36} /></div>
           <div style={{ fontWeight: "900", fontSize: "20px", marginBottom: "10px", color: "#BE185D" }}>Order Up Diner</div>
           <div style={{ fontSize: "15px", lineHeight: 1.7 }}>
             Customers line up outside the diner — each little dish above their head is one English requirement: a sentence form, a grammar point, or a vocabulary word.<br />
@@ -833,7 +836,7 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
           </div>
         </div>
         <div style={{ marginBottom: "22px" }}>
-          <div style={{ fontSize: "13px", fontWeight: "700", color: "#9D174D", marginBottom: "8px" }}>⏱️ How long is the dinner rush?</div>
+          <div style={{ fontSize: "13px", fontWeight: "700", color: "#9D174D", marginBottom: "8px", display: "inline-flex", alignItems: "center", gap: "5px" }}><Icon name="clock" size={13} /> How long is the dinner rush?</div>
           <div style={{ display: "flex", gap: "8px", justifyContent: "center", flexWrap: "wrap" }}>
             {(["short", "medium", "long"] as const).map(len => (
               <button key={len} onClick={() => setSessionLength(len)} className="ou-btn" style={{
@@ -849,8 +852,8 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
           </div>
         </div>
         <div style={{ marginBottom: "18px" }}>
-          <button onClick={() => setShowPreview(v => !v)} className="ou-btn" style={{ background: showPreview ? "#BE185D" : "rgba(255,255,255,0.6)", color: showPreview ? "white" : "#9D174D", border: "2px solid #FBCFE8", borderRadius: "10px", padding: "8px 20px", fontWeight: "800", fontSize: "13px", cursor: "pointer", transition: "all 0.15s" }}>
-            {showPreview ? "Hide word & grammar list" : "👁️ Preview words & grammar points"}
+          <button onClick={() => setShowPreview(v => !v)} className="ou-btn" style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: showPreview ? "#BE185D" : "rgba(255,255,255,0.6)", color: showPreview ? "white" : "#9D174D", border: "2px solid #FBCFE8", borderRadius: "10px", padding: "8px 20px", fontWeight: "800", fontSize: "13px", cursor: "pointer", transition: "all 0.15s" }}>
+            {showPreview ? "Hide word & grammar list" : <><Icon name="eye" size={13} /> Preview words & grammar points</>}
           </button>
           {showPreview && (
             <div style={{ background: "rgba(255,255,255,0.75)", border: "2px solid #FBCFE8", borderRadius: "14px", padding: "16px", marginTop: "12px", textAlign: "left", maxWidth: "560px", margin: "12px auto 0" }}>
@@ -890,13 +893,15 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
                   border: `2px solid ${inputMode === "screen" ? "#BE185D" : "rgba(0,0,0,0.1)"}`,
                   background: inputMode === "screen" ? "rgba(190,24,93,0.1)" : "rgba(255,255,255,0.6)",
                   color: inputMode === "screen" ? "#BE185D" : "#9D174D",
-                }}>🖥️ Play on Screen</button>
+                  display: "inline-flex", alignItems: "center", gap: "6px",
+                }}><Icon name="screen" size={14} /> Play on Screen</button>
                 <button onClick={handlePickPhoneMode} className="ou-btn" style={{
                   padding: "10px 20px", borderRadius: "12px", fontWeight: "800", fontSize: "14px", cursor: "pointer",
                   border: `2px solid ${inputMode === "phone" ? "#BE185D" : "rgba(0,0,0,0.1)"}`,
                   background: inputMode === "phone" ? "rgba(190,24,93,0.1)" : "rgba(255,255,255,0.6)",
                   color: inputMode === "phone" ? "#BE185D" : "#9D174D",
-                }}>📱 Play on Phones</button>
+                  display: "inline-flex", alignItems: "center", gap: "6px",
+                }}><Icon name="phone" size={14} /> Play on Phones</button>
               </div>
             </div>
           )}
@@ -921,13 +926,15 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
                       border: `2px solid ${answerMode === "spoken" ? "#BE185D" : "rgba(0,0,0,0.1)"}`,
                       background: answerMode === "spoken" ? "rgba(190,24,93,0.15)" : "rgba(255,255,255,0.6)",
                       color: answerMode === "spoken" ? "#BE185D" : "#9D174D",
-                    }}>🙋 Show your teacher</button>
+                      display: "inline-flex", alignItems: "center", gap: "5px",
+                    }}><Icon name="hand" size={12} /> Show your teacher</button>
                     <button onClick={() => setAnswerMode("typing")} className="ou-btn" style={{
                       padding: "6px 14px", borderRadius: "10px", fontWeight: "800", fontSize: "12px", cursor: "pointer",
                       border: `2px solid ${answerMode === "typing" ? "#BE185D" : "rgba(0,0,0,0.1)"}`,
                       background: answerMode === "typing" ? "rgba(190,24,93,0.15)" : "rgba(255,255,255,0.6)",
                       color: answerMode === "typing" ? "#BE185D" : "#9D174D",
-                    }}>⌨️ Type it on your phone</button>
+                      display: "inline-flex", alignItems: "center", gap: "5px",
+                    }}><Icon name="keyboard" size={12} /> Type it on your phone</button>
                   </div>
                   <div style={{ fontSize: "11px", color: "#9D174D99", marginTop: "6px" }}>
                     {answerMode === "spoken" ? "A team writes their sentence and shows it to you directly; you decide when to judge it." : "A team types their sentence on their phone — it shows up here for you to judge."}
@@ -937,8 +944,8 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
             );
           })()}
         </>
-        <button onClick={() => setShowHowTo(true)} className="ou-btn" style={{ display: "block", margin: "0 auto 14px", background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
-          ❓ How to Play
+        <button onClick={() => setShowHowTo(true)} className="ou-btn" style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginBottom: "14px", background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
+          <Icon name="help" size={15} /> How to Play
         </button>
         {showHowTo && (
           <HowToPlayModal
@@ -947,7 +954,7 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
             onClose={() => setShowHowTo(false)}
           />
         )}
-        <button onClick={() => setPhase("playing")} className="ou-btn" style={{ background: "linear-gradient(135deg,#F43F5E,#FB7185)", color: "white", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(244,63,94,0.4)", transition: "transform 0.15s ease" }}>🔔 Open the Diner!</button>
+        <button onClick={() => setPhase("playing")} className="ou-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg,#F43F5E,#FB7185)", color: "white", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(244,63,94,0.4)", transition: "transform 0.15s ease" }}><Icon name="bell" size={20} /> Open the Diner!</button>
       </div>
     </div>
   );
@@ -965,7 +972,7 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
       <div style={{ ...arenaStyle, textAlign: "center" }}>
         {STYLE_TAG}
         <div style={{ position: "relative", zIndex: 1 }}>
-          <div style={{ fontSize: "44px", marginBottom: "6px" }}>🔔</div>
+          <div style={{ marginBottom: "6px" }}><Icon name="bell" size={44} color="#BE185D" /></div>
           <div style={{ fontWeight: "900", fontSize: "22px", color: "#BE185D", marginBottom: "4px" }}>Kitchen's closed!</div>
           <div style={{ fontSize: "13px", color: "#9D174D", marginBottom: "16px" }}>{headline}</div>
           <div style={{ display: "grid", gridTemplateColumns: teamsGridCols(teams.length), gap: "10px", margin: "0 auto 20px", maxWidth: "760px" }}>
@@ -988,13 +995,13 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
                     </div>
                   )}
                   {bonus > 0 && (
-                    <div style={{ fontSize: "11px", fontWeight: "800", color: "#15803D", marginTop: "6px" }}>+{bonus} from combos 🎉</div>
+                    <div style={{ fontSize: "11px", fontWeight: "800", color: "#15803D", marginTop: "6px", display: "flex", alignItems: "center", justifyContent: "center", gap: "4px" }}>+{bonus} from combos <Icon name="party" size={11} /></div>
                   )}
                 </div>
               );
             })}
           </div>
-          <button onClick={onEnd} className="ou-btn" style={{ background: "linear-gradient(135deg,#BE185D,#F43F5E)", color: "white", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "800", cursor: "pointer", transition: "transform 0.15s ease" }}>🏁 End Game</button>
+          <button onClick={onEnd} className="ou-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg,#BE185D,#F43F5E)", color: "white", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "800", cursor: "pointer", transition: "transform 0.15s ease" }}><Icon name="checkeredFlag" size={16} /> End Game</button>
         </div>
       </div>
     );
@@ -1017,7 +1024,7 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
           background: "rgba(69,10,10,0.72)", display: "flex", alignItems: "center", justifyContent: "center",
         }}>
           <div style={{ textAlign: "center", color: "white" }}>
-            <div style={{ fontSize: "44px", marginBottom: "8px" }}>⏸️</div>
+            <div style={{ marginBottom: "8px" }}><Icon name="pause" size={44} color="#FDA4AF" /></div>
             <div style={{ fontWeight: "900", fontSize: "22px", color: "#FDA4AF" }}>Paused</div>
             <div style={{ fontSize: "14px", color: "#FECDD3", marginTop: "6px", fontWeight: "700" }}>Tap to resume</div>
           </div>
@@ -1031,7 +1038,7 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
           borderRadius: "14px", padding: "10px 22px", boxShadow: "0 8px 28px rgba(0,0,0,0.25)",
           animation: "ouBannerIn 2.4s ease-in-out forwards",
         }}>
-          <span style={{ color: "white", fontWeight: "900", fontSize: "15px", textShadow: "0 1px 3px rgba(0,0,0,0.3)" }}>{banner.text}</span>
+          <span style={{ color: "white", fontWeight: "900", fontSize: "15px", textShadow: "0 1px 3px rgba(0,0,0,0.3)", display: "inline-flex", alignItems: "center", gap: "6px" }}>{banner.text}</span>
         </div>
       )}
       <div style={{ position: "relative", zIndex: 1 }}>
@@ -1043,7 +1050,7 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
             borderRadius: "999px", fontWeight: "900", fontSize: "13px", color: sessionTimeLeft <= 30 ? "#B91C1C" : "#BE185D",
             animation: sessionTimeLeft <= 30 ? "ouUrgentPulse 0.8s ease-in-out infinite" : "none",
           }}>
-            ⏱️ {formatClock(sessionTimeLeft)} left in the rush
+            <Icon name="clock" size={13} /> {formatClock(sessionTimeLeft)} left in the rush
           </div>
           {/* Right next to the countdown a teacher is already watching, not just up in the generic
               top bar, so it's actually noticed and used, not just present. */}
@@ -1052,14 +1059,15 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
               background: paused ? "#F59E0B" : "#D97706", color: "white",
               border: paused ? "2px solid #FDE68A" : "2px solid rgba(255,255,255,0.6)",
               borderRadius: "999px", padding: "5px 12px", fontSize: "13px", fontWeight: "800", cursor: "pointer",
+              display: "inline-flex", alignItems: "center", gap: "5px",
               boxShadow: paused ? "0 0 0 3px rgba(245,158,11,0.35)" : "0 2px 6px rgba(217,119,6,0.45)",
             }}>
-              {paused ? "▶️ Resume" : "⏸️ Pause"}
+              {paused ? <><Icon name="play" size={13} /> Resume</> : <><Icon name="pause" size={13} /> Pause</>}
             </button>
           )}
         </div>
-        <div style={{ textAlign: "center", color: "#BE185D", fontWeight: "800", fontSize: "13px", marginBottom: "10px" }}>
-          🍽️ Write one sentence that satisfies every dish to serve a customer!
+        <div style={{ textAlign: "center", color: "#BE185D", fontWeight: "800", fontSize: "13px", marginBottom: "10px", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}>
+          <Icon name="plate" size={14} /> Write one sentence that satisfies every dish to serve a customer!
         </div>
         {Object.keys(dishCounts).length > 0 && (
           <div style={{ display: "flex", gap: "8px", justifyContent: "center", flexWrap: "wrap", marginBottom: "14px" }}>

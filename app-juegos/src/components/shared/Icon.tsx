@@ -25,6 +25,7 @@ export type IconName =
   | "help" | "pencil" | "clock" | "ship" | "shield" | "explosion" | "wave" | "medal"
   | "screen" | "clipboard" | "coin" | "volcano" | "people"
   | "tent" | "balloon" | "popcorn" | "eye" | "shuffle" | "hand"
+  | "keyboard" | "bell" | "pause"
   // Phase 4 — ThemeAmbience's decorative floating background glyphs (one drift + one twinkle
   // per accent theme). Rendered at low opacity/small scale, so simpler silhouettes than the
   // functional icons above are fine here.
@@ -483,6 +484,37 @@ const ICONS: Record<IconName, React.ReactNode> = {
       <rect x="13.9" y="2" width="3" height="11" rx="1.5" fill="currentColor" />
       <rect x="17.5" y="5" width="3" height="9" rx="1.5" fill="currentColor" />
       <rect x="2" y="10" width="5" height="7" rx="2.5" fill="currentColor" />
+    </>
+  ),
+  keyboard: (
+    <>
+      <mask id="icon-keyboard-keys">
+        <rect width="24" height="24" fill="white" />
+        <rect x="4" y="8" width="2.5" height="2.5" fill="black" />
+        <rect x="7.5" y="8" width="2.5" height="2.5" fill="black" />
+        <rect x="11" y="8" width="2.5" height="2.5" fill="black" />
+        <rect x="14.5" y="8" width="2.5" height="2.5" fill="black" />
+        <rect x="18" y="8" width="2.5" height="2.5" fill="black" />
+        <rect x="4" y="11.5" width="2.5" height="2.5" fill="black" />
+        <rect x="7.5" y="11.5" width="2.5" height="2.5" fill="black" />
+        <rect x="11" y="11.5" width="2.5" height="2.5" fill="black" />
+        <rect x="14.5" y="11.5" width="2.5" height="2.5" fill="black" />
+        <rect x="18" y="11.5" width="2.5" height="2.5" fill="black" />
+        <rect x="6" y="15" width="12" height="2.2" fill="black" />
+      </mask>
+      <rect x="2" y="5.5" width="20" height="13" rx="2.5" fill="currentColor" mask="url(#icon-keyboard-keys)" />
+    </>
+  ),
+  bell: (
+    <>
+      <path d="M12,2 C13,2 13.5,2.8 13.4,3.6 C16.5,4.5 18,7 18,10.5 V14 L20,17 H4 L6,14 V10.5 C6,7 7.5,4.5 10.6,3.6 C10.5,2.8 11,2 12,2 Z" fill="currentColor" />
+      <path d="M9,18.5 C9,20 10.3,21.5 12,21.5 C13.7,21.5 15,20 15,18.5 Z" fill="currentColor" />
+    </>
+  ),
+  pause: (
+    <>
+      <rect x="6" y="4" width="4" height="16" rx="1.2" fill="currentColor" />
+      <rect x="14" y="4" width="4" height="16" rx="1.2" fill="currentColor" />
     </>
   ),
   cloud: (
