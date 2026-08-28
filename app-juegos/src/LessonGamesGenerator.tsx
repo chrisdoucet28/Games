@@ -1422,10 +1422,10 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
               title="Save exactly where you are and come back to it next class"
               style={{ background: saveStatus === "saved" ? "#22C55E" : saveStatus === "error" ? "#EF4444" : "rgba(255,255,255,0.15)", color: "white", border: "none", borderRadius: "8px", padding: "6px 12px", cursor: saveStatus === "saving" ? "default" : "pointer", fontWeight: "700", fontFamily: theme.headingFont }}
             >
-              {saveStatus === "saving" ? "Saving…" : saveStatus === "saved" ? "✅ Saved!" : saveStatus === "error" ? "⚠️ Failed — try again" : "💾 Save & Exit"}
+              {saveStatus === "saving" ? "Saving…" : saveStatus === "saved" ? <><Icon name="check" size={13} /> Saved!</> : saveStatus === "error" ? <><Icon name="warning" size={13} /> Failed — try again</> : <><Icon name="save" size={13} /> Save & Exit</>}
             </button>
-            <button onClick={toggleFullscreen} style={{ background: "rgba(255,255,255,0.15)", color: "white", border: "none", borderRadius: "8px", padding: "6px 12px", cursor: "pointer", fontWeight: "700", fontFamily: theme.headingFont }}>⛶ Fullscreen</button>
-            <button onClick={handleTopBarEndGame} style={{ background: "rgba(255,255,255,0.15)", color: "white", border: "none", borderRadius: "8px", padding: "6px 12px", cursor: "pointer", fontWeight: "700", fontFamily: theme.headingFont }}>🏁 End Game</button>
+            <button onClick={toggleFullscreen} style={{ background: "rgba(255,255,255,0.15)", color: "white", border: "none", borderRadius: "8px", padding: "6px 12px", cursor: "pointer", fontWeight: "700", fontFamily: theme.headingFont }}><Icon name="fullscreen" size={13} /> Fullscreen</button>
+            <button onClick={handleTopBarEndGame} style={{ background: "rgba(255,255,255,0.15)", color: "white", border: "none", borderRadius: "8px", padding: "6px 12px", cursor: "pointer", fontWeight: "700", fontFamily: theme.headingFont }}><Icon name="checkeredFlag" size={13} /> End Game</button>
           </div>
         </div>
         <div style={{ padding: "16px", maxWidth: "900px", margin: "0 auto" }}>
