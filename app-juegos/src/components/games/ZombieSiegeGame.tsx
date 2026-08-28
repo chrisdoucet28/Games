@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { TeamIcon, MascotSprite } from "../shared/TeamIcon";
+import { Icon, type IconName } from "../shared/Icon";
 import type { GameProps, QuestionData, Team } from "../../types";
 import { ScoreBoard } from "../shared/ScoreBoard";
 import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
@@ -121,11 +122,11 @@ const HALF_SENTENCE_ROUND_CUTOFF = 3;
 const SPEAKING_TASK_ROUND_CUTOFF = 6;
 
 type EntryPointId = "frontDoor" | "backDoor" | "window1" | "window2";
-const ENTRY_POINTS: { id: EntryPointId; label: string; icon: string }[] = [
-  { id: "frontDoor", label: "Front Door", icon: "🚪" },
-  { id: "backDoor", label: "Back Door", icon: "🚪" },
-  { id: "window1", label: "Window", icon: "🪟" },
-  { id: "window2", label: "Window", icon: "🪟" },
+const ENTRY_POINTS: { id: EntryPointId; label: string; icon: IconName }[] = [
+  { id: "frontDoor", label: "Front Door", icon: "door" },
+  { id: "backDoor", label: "Back Door", icon: "door" },
+  { id: "window1", label: "Window", icon: "window" },
+  { id: "window2", label: "Window", icon: "window" },
 ];
 
 // A new barricade always goes to whichever entry point currently has the fewest items (ties broken
@@ -158,7 +159,10 @@ const ZOMBIE_ATTACK_INTERVAL_TICKS = 2; // a zombie now damages the barricade on
 // a teacher can explain them at a glance: runner = faster, brute = hits harder.
 const APPROACH_TICKS_BY_KIND: Record<ZombieKind, number> = { normal: APPROACH_TICKS, runner: 8, brute: APPROACH_TICKS };
 const DAMAGE_BY_KIND: Record<ZombieKind, number> = { normal: ZOMBIE_DAMAGE_PER_TICK, runner: ZOMBIE_DAMAGE_PER_TICK, brute: 2 };
-const ZOMBIE_KIND_ICON: Record<ZombieKind, string> = { normal: "🧟", runner: "🏃", brute: "🧌" };
+// All three kinds share the one "zombie" glyph — the size/glow treatment below (not the icon
+// shape itself) is what already carries "reads different at a glance," so a distinct icon per
+// kind would be redundant with that existing signal, not additive.
+const ZOMBIE_KIND_ICON: Record<ZombieKind, IconName> = { normal: "zombie", runner: "zombie", brute: "zombie" };
 // Size/glow treatment so a variant reads as different at a glance mid-game, not just on close
 // inspection of the icon — cyan glow + smaller reads "fast", red glow + bigger reads "dangerous".
 const ZOMBIE_KIND_STYLE: Record<ZombieKind, { fontSize: string; filter: string }> = {
@@ -213,16 +217,16 @@ function fxDurationMs(kind: FxKind): number {
   return kind === "zombieShot" || kind === "chairExploded" ? 1700 : 600;
 }
 type ElimBanner = { teamName: string; color: string; key: number };
-type PowerUpBanner = { text: string; key: number };
+type PowerUpBanner = { text: React.ReactNode; key: number };
 
-const POWERUP_LABEL: Record<PowerUpKind, string> = {
-  maxAmmo: "🔫 Max Ammo!",
-  bulletCapUp: "🔫 Ammo Cap +1!",
-  allDoorsChair: "🪑 Chair on Every Door!",
-  ammoAllTeamsPlus1: "🔫 +1 Ammo for Everyone!",
-  ammoAllTeamsPlus2: "🔫🔫 +2 Ammo for Everyone!",
-  nuke: "☢️ NUKE! All zombies destroyed!",
-  fasterReload: "⚡ Faster Reload! (-10s cooldown)",
+const POWERUP_LABEL: Record<PowerUpKind, React.ReactNode> = {
+  maxAmmo: <><Icon name="gun" size={13} /> Max Ammo!</>,
+  bulletCapUp: <><Icon name="gun" size={13} /> Ammo Cap +1!</>,
+  allDoorsChair: <><Icon name="chair" size={13} /> Chair on Every Door!</>,
+  ammoAllTeamsPlus1: <><Icon name="gun" size={13} /> +1 Ammo for Everyone!</>,
+  ammoAllTeamsPlus2: <><Icon name="gun" size={13} /><Icon name="gun" size={13} /> +2 Ammo for Everyone!</>,
+  nuke: <><Icon name="explosion" size={13} /> NUKE! All zombies destroyed!</>,
+  fasterReload: <><Icon name="bolt" size={13} /> Faster Reload! (-10s cooldown)</>,
 };
 
 function emptyBarricades(): Record<EntryPointId, BarricadeItem[]> {
@@ -477,7 +481,7 @@ function HouseScene({ siege, teams }: { siege: SiegeState; teams: Team[] }) {
       background: "radial-gradient(circle at 50% 50%, #16240F 0%, #0A1408 70%, #050A05 100%)",
     }}>
       {FOREST.map((t, i) => (
-        <span key={i} style={{ position: "absolute", left: `${t.x}%`, top: `${t.y}%`, fontSize: `${t.size}px`, opacity: 0.55, transform: "translate(-50%,-50%)" }}>🌲</span>
+        <span key={i} style={{ position: "absolute", left: `${t.x}%`, top: `${t.y}%`, opacity: 0.55, color: "#4D7C0F", transform: "translate(-50%,-50%)" }}><Icon name="tree" size={t.size} /></span>
       ))}
       <div style={{ position: "absolute", left: "18%", top: "18%", width: "64%", height: "64%", borderRadius: "12%", background: "radial-gradient(circle,#1A2E10CC,transparent 70%)" }} />
       <div style={{ position: "absolute", left: "27%", top: "27%", width: "46%", height: "46%", background: "linear-gradient(160deg,#5C4429,#3B2A18)", border: "2px solid #2A1D10", borderRadius: "6px", boxShadow: "0 0 24px rgba(0,0,0,0.6)" }}>
@@ -488,13 +492,13 @@ function HouseScene({ siege, teams }: { siege: SiegeState; teams: Team[] }) {
         const stack = siege.barricades[ep.id];
         return (
           <div key={ep.id}>
-            <div title={ep.label} style={{ position: "absolute", left: `${g.doorX}%`, top: `${g.doorY}%`, transform: "translate(-50%,-50%)", fontSize: "15px", zIndex: 2 }}>{ep.icon}</div>
+            <div title={ep.label} style={{ position: "absolute", left: `${g.doorX}%`, top: `${g.doorY}%`, transform: "translate(-50%,-50%)", color: "#D2B48C", zIndex: 2 }}><Icon name={ep.icon} size={15} /></div>
             <div style={{ position: "absolute", left: `${g.barricadeX}%`, top: `${g.barricadeY}%`, transform: "translate(-50%,-50%)", display: "flex", gap: "1px", zIndex: 2 }}>
               {stack.slice(0, 4).map((b, i) => (
                 <span key={b.id} title={`${b.hp}/${BARRICADE_ITEM_HP} hp`} style={{
-                  fontSize: "13px", opacity: 0.4 + 0.6 * (b.hp / BARRICADE_ITEM_HP),
+                  opacity: 0.4 + 0.6 * (b.hp / BARRICADE_ITEM_HP), color: "#A16207",
                   filter: i === 0 ? "drop-shadow(0 0 3px #BEF26499)" : "none",
-                }}>🪑</span>
+                }}><Icon name="chair" size={13} /></span>
               ))}
             </div>
           </div>
@@ -507,7 +511,7 @@ function HouseScene({ siege, teams }: { siege: SiegeState; teams: Team[] }) {
           <div key={t.id} title={t.name} style={{
             position: "absolute", left: `${pos.x}%`, top: `${pos.y}%`, transform: "translate(-50%,-50%)",
             fontSize: "15px", zIndex: 3, opacity: person.alive ? 1 : 0.45, filter: person.alive ? "none" : "grayscale(1)",
-          }}>{person.alive ? <MascotSprite mascot={t.mascot} fallback="🧑" size={17} /> : "💀"}</div>
+          }}>{person.alive ? <MascotSprite mascot={t.mascot} fallback="🧑" size={17} /> : <Icon name="skull" size={16} />}</div>
         );
       })}
       {siege.zombies.map(z => {
@@ -516,9 +520,9 @@ function HouseScene({ siege, teams }: { siege: SiegeState; teams: Team[] }) {
           <div key={z.id} style={{
             position: "absolute", left: `${pos.x}%`, top: `${pos.y}%`, transform: "translate(-50%,-50%)",
             transition: `left ${TICK_MS}ms linear, top ${TICK_MS}ms linear`, zIndex: 4,
-            fontSize: ZOMBIE_KIND_STYLE[z.kind].fontSize, filter: ZOMBIE_KIND_STYLE[z.kind].filter,
+            color: "#4ADE80", filter: ZOMBIE_KIND_STYLE[z.kind].filter,
             animation: z.status === "attacking" ? "zsShake 0.3s ease-in-out infinite" : "zsBob 0.9s ease-in-out infinite",
-          }}>{ZOMBIE_KIND_ICON[z.kind]}</div>
+          }}><Icon name={ZOMBIE_KIND_ICON[z.kind]} size={Number(ZOMBIE_KIND_STYLE[z.kind].fontSize.replace("px", ""))} /></div>
         );
       })}
     </div>
@@ -535,7 +539,7 @@ function PersonChip({ team, person }: { team: Team; person: PersonState }) {
       border: `2px solid ${person.alive ? team.color.bg : "#4B5563"}`,
       borderRadius: "12px", padding: "5px 9px", textAlign: "center", opacity: person.alive ? 1 : 0.55, minWidth: "78px",
     }}>
-      <div style={{ fontSize: "16px", lineHeight: 1.1 }}>{person.alive ? <MascotSprite mascot={team.mascot} fallback="🧑" size={18} /> : "💀"}</div>
+      <div style={{ fontSize: "16px", lineHeight: 1.1 }}>{person.alive ? <MascotSprite mascot={team.mascot} fallback="🧑" size={18} /> : <Icon name="skull" size={17} />}</div>
       <div style={{ fontWeight: "800", fontSize: "11px", color: person.alive ? "white" : "#9CA3AF" }}>{team.name}</div>
       {person.alive ? (
         <div style={{ fontSize: "11px", lineHeight: 1.3, display: "flex", gap: "1px", justifyContent: "center", alignItems: "center", flexWrap: "wrap" }}>
@@ -544,7 +548,7 @@ function PersonChip({ team, person }: { team: Team; person: PersonState }) {
               inferred from a bare count. The next slot due to recharge (i === person.bullets, while
               still under cap) gets a small conic-gradient ring so the wait isn't a silent pop-in. */}
           {Array.from({ length: person.bulletCap }, (_, i) => {
-            const gun = <span style={{ opacity: i < person.bullets ? 1 : 0.28, filter: i < person.bullets ? "none" : "grayscale(1)" }}>🔫</span>;
+            const gun = <span style={{ opacity: i < person.bullets ? 1 : 0.28, filter: i < person.bullets ? "none" : "grayscale(1)" }}><Icon name="gun" size={12} /></span>;
             if (i !== person.bullets || person.bullets >= person.bulletCap) return <span key={i}>{gun}</span>;
             const secsLeft = Math.round((1 - rechargeProgress) * person.rechargeSeconds);
             return (
@@ -556,10 +560,14 @@ function PersonChip({ team, person }: { team: Team; person: PersonState }) {
               </span>
             );
           })}
-          {person.axes > 0 && <span style={{ marginLeft: "3px" }}>{"🪓".repeat(person.axes)}</span>}
+          {person.axes > 0 && (
+            <span style={{ marginLeft: "3px", display: "inline-flex", gap: "1px" }}>
+              {Array.from({ length: person.axes }, (_, i) => <Icon key={i} name="axe" size={12} />)}
+            </span>
+          )}
         </div>
       ) : (
-        <div style={{ fontSize: "9px", color: "#9CA3AF", fontWeight: "700" }}>📣 cheering</div>
+        <div style={{ fontSize: "9px", color: "#9CA3AF", fontWeight: "700", display: "flex", alignItems: "center", justifyContent: "center", gap: "3px" }}><Icon name="megaphone" size={10} /> cheering</div>
       )}
     </div>
   );
@@ -577,7 +585,7 @@ function SiegeQuestionCard({ question }: { question: QuestionData | null }) {
   const isHalfSentence = question.type === "finish the sentence";
   const isSpeakingTask = question.type === "speaking task";
   const showCrewmateHeading = !isHalfSentence && !isSpeakingTask && !!question.crewmateTopic;
-  const badgeText = isHalfSentence ? "✍️ finish the sentence" : isSpeakingTask ? "🎤 speaking task" : "📖 add to the prompt";
+  const badgeText = isHalfSentence ? <><Icon name="pencil" size={11} /> finish the sentence</> : isSpeakingTask ? <><Icon name="mic" size={11} /> speaking task</> : <><Icon name="bookOpen" size={11} /> add to the prompt</>;
   return (
     <div style={{
       position: "relative", background: "white", border: "3px solid #6366F1", borderRadius: "16px",
@@ -587,7 +595,7 @@ function SiegeQuestionCard({ question }: { question: QuestionData | null }) {
         <FlagPromptButton gameId="zombie" questionData={question} />
       </div>
       <div style={{
-        display: "inline-block", background: "#EEF2FF", color: "#4F46E5",
+        display: "inline-flex", alignItems: "center", gap: "5px", background: "#EEF2FF", color: "#4F46E5",
         padding: "3px 12px", borderRadius: "20px", fontSize: "12px", fontWeight: "700", marginBottom: "8px",
         textTransform: "uppercase", letterSpacing: "0.04em",
       }}>
@@ -736,7 +744,7 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
     setTimeout(() => setElimBanner(prev => (prev?.key === key ? null : prev)), 3200);
   }, []);
 
-  const showPowerUpBanner = useCallback((text: string) => {
+  const showPowerUpBanner = useCallback((text: React.ReactNode) => {
     const key = fxIdRef.current++;
     setPowerUpBanner({ text, key });
     setTimeout(() => setPowerUpBanner(prev => (prev?.key === key ? null : prev)), 2600);
@@ -929,7 +937,7 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
       {STYLE_TAG}
       <div style={{ position: "relative", zIndex: 1 }}>
         <div style={{ background: "linear-gradient(135deg,#14210F,#365314)", border: "2px solid #65A30D55", borderRadius: "20px", padding: "28px 24px", marginBottom: "10px", color: "white", maxWidth: "560px", margin: "0 auto 10px", boxShadow: "0 0 40px #65A30D33" }}>
-          <div style={{ fontSize: "36px", marginBottom: "10px" }}>🧟</div>
+          <div style={{ marginBottom: "10px" }}><Icon name="zombie" size={36} /></div>
           <div style={{ fontWeight: "900", fontSize: "20px", marginBottom: "10px", color: "#BEF264" }}>Zombie Siege</div>
           <div style={{ fontSize: "15px", lineHeight: 1.6, opacity: 0.95 }}>
             One shared house, everyone's score. Add a sentence any time to earn a barricade or a <strong style={{ color: "#BEF264" }}>power-up</strong> — <strong style={{ color: "#BEF264" }}>bullets recharge</strong> and auto-shoot zombies at the door, and <strong style={{ color: "#BEF264" }}>2 axes</strong> per team are the last resort if one breaks through.<br />
@@ -937,7 +945,7 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
           </div>
         </div>
         <button onClick={() => setShowHowTo(true)} className="zs-btn" style={{ display: "block", margin: "0 auto 14px", background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
-          ❓ How to Play
+          <Icon name="help" size={14} /> How to Play
         </button>
         {showHowTo && (
           <HowToPlayModal
@@ -946,7 +954,7 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
             onClose={() => setShowHowTo(false)}
           />
         )}
-        <button onClick={() => setPhase("playing")} className="zs-btn" style={{ background: "linear-gradient(135deg,#365314,#65A30D)", color: "#0D1A0D", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(101,163,13,0.5)", transition: "transform 0.15s ease" }}>🏠 Board Up the House!</button>
+        <button onClick={() => setPhase("playing")} className="zs-btn" style={{ background: "linear-gradient(135deg,#365314,#65A30D)", color: "#0D1A0D", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(101,163,13,0.5)", transition: "transform 0.15s ease" }}><Icon name="house" size={17} /> Board Up the House!</button>
       </div>
     </div>
   );
@@ -957,7 +965,7 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
         {fogLayer}
         {STYLE_TAG}
         <div style={{ position: "relative", zIndex: 1 }}>
-          <div style={{ fontSize: "48px", marginBottom: "6px" }}>💀</div>
+          <div style={{ marginBottom: "6px" }}><Icon name="skull" size={48} /></div>
           <div style={{ fontWeight: "900", fontSize: "24px", color: "#BEF264", marginBottom: "4px" }}>The house has fallen</div>
           <div style={{ color: "#A3B899", fontSize: "14px", marginBottom: "20px" }}>You held out for {formatClock(siege.elapsedSeconds)}. Final scores:</div>
           <div style={{ marginBottom: "20px" }}>
@@ -970,14 +978,14 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
                 <div key={t.id} style={{ background: "linear-gradient(160deg,#14210F,#0D1A0D)", border: `2px solid ${t.color.bg}`, borderRadius: "14px", padding: "10px" }}>
                   <div style={{ fontWeight: "800", color: "#BEF264", fontSize: "13px", marginBottom: "6px" }}><TeamIcon team={t} /> {t.name}</div>
                   <div style={{ fontSize: "12px", color: "#DCFCE7", lineHeight: 1.7 }}>
-                    <div>🧟 {stats.kills} zombie{stats.kills === 1 ? "" : "s"} shot</div>
-                    <div>🪑 {stats.chairsPlaced} chair{stats.chairsPlaced === 1 ? "" : "s"} placed</div>
+                    <div><Icon name="zombie" size={12} /> {stats.kills} zombie{stats.kills === 1 ? "" : "s"} shot</div>
+                    <div><Icon name="chair" size={12} /> {stats.chairsPlaced} chair{stats.chairsPlaced === 1 ? "" : "s"} placed</div>
                   </div>
                 </div>
               );
             })}
           </div>
-          <button onClick={onEnd} className="zs-btn" style={{ background: "linear-gradient(135deg,#365314,#65A30D)", color: "#0D1A0D", border: "none", borderRadius: "14px", padding: "14px 32px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(101,163,13,0.5)", transition: "transform 0.15s ease" }}>🏁 End Game</button>
+          <button onClick={onEnd} className="zs-btn" style={{ background: "linear-gradient(135deg,#365314,#65A30D)", color: "#0D1A0D", border: "none", borderRadius: "14px", padding: "14px 32px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(101,163,13,0.5)", transition: "transform 0.15s ease" }}><Icon name="checkeredFlag" size={17} /> End Game</button>
         </div>
       </div>
     );
@@ -1004,7 +1012,7 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
           background: "rgba(5,10,5,0.82)", display: "flex", alignItems: "center", justifyContent: "center",
         }}>
           <div style={{ textAlign: "center", color: "white" }}>
-            <div style={{ fontSize: "44px", marginBottom: "8px" }}>⏸️</div>
+            <div style={{ marginBottom: "8px" }}><Icon name="pause" size={44} /></div>
             <div style={{ fontWeight: "900", fontSize: "22px", color: "#BEF264" }}>Paused</div>
             <div style={{ fontSize: "14px", color: "#D9F99D", marginTop: "6px", fontWeight: "700" }}>Tap to resume</div>
           </div>
@@ -1021,7 +1029,7 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
           background: "rgba(5,10,5,0.88)", display: "flex", alignItems: "center", justifyContent: "center",
         }}>
           <div style={{ textAlign: "center", color: "white", padding: "20px" }}>
-            <div style={{ fontSize: "44px", marginBottom: "8px" }}>🌊</div>
+            <div style={{ marginBottom: "8px" }}><Icon name="wave" size={44} /></div>
             <div style={{ fontWeight: "900", fontSize: "24px", color: "#BEF264" }}>Wave {round} Complete!</div>
             <div style={{ fontSize: "14px", color: "#D9F99D", marginTop: "6px", fontWeight: "700", marginBottom: "18px" }}>
               The house held! Get ready for wave {round + 1}.
@@ -1030,7 +1038,7 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
               background: "linear-gradient(135deg,#365314,#65A30D)", color: "#0D1A0D", border: "none",
               borderRadius: "14px", padding: "14px 32px", fontSize: "17px", fontWeight: "900", cursor: "pointer",
               boxShadow: "0 6px 24px rgba(101,163,13,0.5)", transition: "transform 0.15s ease",
-            }}>➡️ Start Wave {round + 1}</button>
+            }}><Icon name="next" size={15} /> Start Wave {round + 1}</button>
           </div>
         </div>
       )}
@@ -1041,12 +1049,13 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
             <div key={f.id} style={{
               background: "#0A140AE0", border: "1px solid #65A30D", borderRadius: "8px", padding: "4px 10px",
               fontSize: "12px", color: "#BEF264", fontWeight: 700, animation: `zsFxIn ${fxDurationMs(f.kind)}ms ease-out`,
+              display: "inline-flex", alignItems: "center", gap: "5px",
             }}>
-              {f.kind === "barricadePlaced" && "🪑 barricade placed"}
-              {f.kind === "barricadeDestroyed" && "💥 barricade destroyed"}
-              {f.kind === "chairExploded" && "💥🧟 chair exploded — zombie destroyed!"}
-              {f.kind === "zombieShot" && `🔫 ${shooter ? `${shooter.color.emoji} ${shooter.name} sniped` : "sniped"} a zombie!`}
-              {f.kind === "axeUsed" && "🪓 axe used!"}
+              {f.kind === "barricadePlaced" && <><Icon name="chair" size={12} /> barricade placed</>}
+              {f.kind === "barricadeDestroyed" && <><Icon name="explosion" size={12} /> barricade destroyed</>}
+              {f.kind === "chairExploded" && <><Icon name="explosion" size={12} /><Icon name="zombie" size={12} /> chair exploded — zombie destroyed!</>}
+              {f.kind === "zombieShot" && <><Icon name="gun" size={12} /> {shooter ? <><TeamIcon team={shooter} /> {shooter.name} sniped</> : "sniped"} a zombie!</>}
+              {f.kind === "axeUsed" && <><Icon name="axe" size={12} /> axe used!</>}
             </div>
           );
         })}
@@ -1058,8 +1067,8 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
           borderRadius: "14px", padding: "12px 24px", boxShadow: "0 8px 28px rgba(0,0,0,0.5)",
           animation: "zsBannerIn 3.2s ease-in-out forwards",
         }}>
-          <span style={{ color: "white", fontWeight: "900", fontSize: "16px", textShadow: "0 1px 3px rgba(0,0,0,0.5)" }}>
-            💀 {elimBanner.teamName} has been overrun!
+          <span style={{ color: "white", fontWeight: "900", fontSize: "16px", textShadow: "0 1px 3px rgba(0,0,0,0.5)", display: "inline-flex", alignItems: "center", gap: "6px" }}>
+            <Icon name="skull" size={16} /> {elimBanner.teamName} has been overrun!
           </span>
         </div>
       )}
@@ -1070,16 +1079,16 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
           borderRadius: "14px", padding: "10px 22px", boxShadow: "0 8px 28px rgba(0,0,0,0.5)",
           animation: "zsBannerIn 2.6s ease-in-out forwards",
         }}>
-          <span style={{ color: "white", fontWeight: "900", fontSize: "15px", textShadow: "0 1px 3px rgba(0,0,0,0.5)" }}>
-            🎁 {powerUpBanner.text}
+          <span style={{ color: "white", fontWeight: "900", fontSize: "15px", textShadow: "0 1px 3px rgba(0,0,0,0.5)", display: "inline-flex", alignItems: "center", gap: "6px" }}>
+            <Icon name="gift" size={15} /> {powerUpBanner.text}
           </span>
         </div>
       )}
       <div style={{ position: "relative", zIndex: 1 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "6px", marginBottom: "4px" }}>
-          <div style={{ fontWeight: "800", fontSize: "12px", color: "#BEF264" }}>⏱️ {formatClock(siege.elapsedSeconds)}</div>
+          <div style={{ fontWeight: "800", fontSize: "12px", color: "#BEF264", display: "inline-flex", alignItems: "center", gap: "4px" }}><Icon name="clock" size={12} /> {formatClock(siege.elapsedSeconds)}</div>
           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <div style={{ fontWeight: "900", fontSize: "13px", color: "#F87171", animation: round >= 6 ? "zsPulse 1s ease-in-out infinite" : "none" }}>🌊 Round {round} · {roundDefeated}/{roundQuota}</div>
+            <div style={{ fontWeight: "900", fontSize: "13px", color: "#F87171", animation: round >= 6 ? "zsPulse 1s ease-in-out infinite" : "none", display: "inline-flex", alignItems: "center", gap: "4px" }}><Icon name="wave" size={13} /> Round {round} · {roundDefeated}/{roundQuota}</div>
             {/* Right next to the round indicator — the thing a teacher's eyes are already on mid-siege —
                 not just up in the generic top bar, so it's actually noticed and used, not just present. */}
             {onTogglePause && (
@@ -1088,8 +1097,9 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
                 border: paused ? "2px solid #FDE68A" : "2px solid rgba(255,255,255,0.6)",
                 borderRadius: "8px", padding: "3px 9px", fontSize: "11px", fontWeight: "800", cursor: "pointer",
                 boxShadow: paused ? "0 0 0 3px rgba(245,158,11,0.35)" : "0 2px 6px rgba(217,119,6,0.45)",
+                display: "inline-flex", alignItems: "center", gap: "4px",
               }}>
-                {paused ? "▶️ Resume" : "⏸️ Pause"}
+                {paused ? <><Icon name="play" size={11} /> Resume</> : <><Icon name="pause" size={11} /> Pause</>}
               </button>
             )}
           </div>
@@ -1106,8 +1116,8 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
 
           {roundPhase === "reveal" ? (
             <div style={{ textAlign: "center", marginTop: "8px" }}>
-              <div style={{ fontSize: "12px", color: "#A3B899", fontWeight: "700", marginBottom: "6px" }}>
-                📖 Read the prompt... get ready!
+              <div style={{ fontSize: "12px", color: "#A3B899", fontWeight: "700", marginBottom: "6px", display: "inline-flex", alignItems: "center", gap: "5px" }}>
+                <Icon name="bookOpen" size={12} /> Read the prompt... get ready!
               </div>
               <div style={{ display: "flex", justifyContent: "center" }}>
                 <TurnTimerBar timeLeft={prepSecondsLeft} totalSeconds={prepSecondsTotal} />
@@ -1115,7 +1125,7 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
               <button onClick={skipReadPause} className="zs-btn" style={{
                 marginTop: "8px", background: "none", border: "1px solid #4D7C0F", color: "#BEF264",
                 borderRadius: "8px", padding: "4px 14px", fontSize: "11px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease",
-              }}>✅ Ready — skip countdown</button>
+              }}><Icon name="check" size={11} /> Ready — skip countdown</button>
             </div>
           ) : (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "5px", marginTop: "6px" }}>
@@ -1123,7 +1133,8 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
                 <button key={t.id} onClick={() => handleCorrectAnswer(t.id)} className="zs-btn" style={{
                   background: t.color.bg, color: "white", border: "none", borderRadius: "10px",
                   padding: "6px 8px", fontSize: "11px", fontWeight: "800", cursor: "pointer", transition: "transform 0.15s ease",
-                }}>➕ {t.color.emoji} {t.name} added to it!</button>
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: "4px",
+                }}><Icon name="plus" size={11} /> <TeamIcon team={t} color="white" /> {t.name} added to it!</button>
               ))}
             </div>
           )}
