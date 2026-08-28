@@ -27,6 +27,7 @@ export type IconName =
   | "tent" | "balloon" | "popcorn" | "eye" | "shuffle" | "hand"
   | "keyboard" | "bell" | "pause" | "hourglass" | "sleep" | "column" | "wallet"
   | "planet" | "stop" | "satellite" | "fuel" | "ufo" | "astronaut"
+  | "door" | "window" | "zombie" | "gun" | "axe" | "tree" | "megaphone" | "house" | "chair"
   // Phase 4 — ThemeAmbience's decorative floating background glyphs (one drift + one twinkle
   // per accent theme). Rendered at low opacity/small scale, so simpler silhouettes than the
   // functional icons above are fine here.
@@ -588,6 +589,71 @@ const ICONS: Record<IconName, React.ReactNode> = {
       </mask>
       <circle cx="12" cy="12" r="10" fill="currentColor" mask="url(#icon-astronaut-visor)" />
       <ellipse cx="9.5" cy="10.5" rx="2.3" ry="2.8" fill="currentColor" opacity="0.35" />
+    </>
+  ),
+  door: (
+    <>
+      <mask id="icon-door-knob">
+        <rect width="24" height="24" fill="white" />
+        <circle cx="15" cy="12" r="1.2" fill="black" />
+      </mask>
+      <rect x="5" y="2" width="14" height="20" rx="1" fill="currentColor" mask="url(#icon-door-knob)" />
+    </>
+  ),
+  window: (
+    <>
+      <rect x="3" y="3" width="18" height="18" rx="1.5" fill="none" stroke="currentColor" strokeWidth="2" />
+      <line x1="12" y1="3" x2="12" y2="21" stroke="currentColor" strokeWidth="2" />
+      <line x1="3" y1="12" x2="21" y2="12" stroke="currentColor" strokeWidth="2" />
+    </>
+  ),
+  zombie: (
+    <>
+      <mask id="icon-zombie-face">
+        <rect width="24" height="24" fill="white" />
+        <path d="M6.5,9 L9.5,12 M9.5,9 L6.5,12" stroke="black" strokeWidth="1.6" strokeLinecap="round" />
+        <path d="M14.5,9 L17.5,12 M17.5,9 L14.5,12" stroke="black" strokeWidth="1.6" strokeLinecap="round" />
+        <path d="M8,17 Q12,15 16,17 Q12,19.5 8,17 Z" fill="black" />
+      </mask>
+      <circle cx="12" cy="13" r="9" fill="currentColor" mask="url(#icon-zombie-face)" />
+    </>
+  ),
+  gun: <path d="M3,13 H15 V10 H21 V15 H17 V19 H13 V15 H7 L5,19 H2 Z" fill="currentColor" />,
+  axe: (
+    <>
+      <rect x="10.5" y="6" width="2" height="16" rx="1" fill="currentColor" transform="rotate(20 11.5 14)" />
+      <path d="M11,2 C15,2 18,5 18,8 C18,9.5 16.5,10.5 14,10 L9,7.5 C8.5,5 8.5,2 11,2 Z" fill="currentColor" />
+    </>
+  ),
+  tree: (
+    <>
+      <polygon points="12,2 18,11 6,11" fill="currentColor" />
+      <polygon points="12,7 19,16 5,16" fill="currentColor" />
+      <rect x="10.5" y="16" width="3" height="6" fill="currentColor" />
+    </>
+  ),
+  megaphone: (
+    <>
+      <path d="M3,11 L11,7 V17 L3,13 Z" fill="currentColor" />
+      <path d="M11,7 L20,3 V21 L11,17 Z" fill="currentColor" opacity="0.85" />
+      <rect x="2" y="10.5" width="2.5" height="3" rx="1" fill="currentColor" />
+    </>
+  ),
+  house: (
+    <>
+      <mask id="icon-house-door">
+        <rect width="24" height="24" fill="white" />
+        <rect x="10" y="14" width="4" height="7" fill="black" />
+      </mask>
+      <polygon points="12,2 22,10 19,10 19,21 5,21 5,10 2,10" fill="currentColor" mask="url(#icon-house-door)" />
+    </>
+  ),
+  chair: (
+    <>
+      <rect x="6" y="3" width="12" height="9" rx="1.5" fill="currentColor" />
+      <rect x="6" y="12" width="2.5" height="9" rx="1" fill="currentColor" />
+      <rect x="15.5" y="12" width="2.5" height="9" rx="1" fill="currentColor" />
+      <rect x="6" y="15" width="12" height="2" fill="currentColor" />
     </>
   ),
   cloud: (
