@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { TeamIcon, MascotSprite } from "../shared/TeamIcon";
+import { Icon } from "../shared/Icon";
 import type { GameProps } from "../../types";
 import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
 import { denseRank } from "../../utils/ranking";
@@ -260,11 +261,11 @@ export function MinefieldGame({ gridData, teams: propTeams, onUpdateScore, onEnd
         </div>
         <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "24px" }}>
           {teams.map(team => (
-            <div key={team.id} style={{ background: team.color.light, border: `3px solid ${team.color.bg}`, borderRadius: "14px", padding: "10px 18px", fontWeight: "800", fontSize: "14px", color: team.color.dark }}>{team.color.emoji} {team.name}</div>
+            <div key={team.id} style={{ background: team.color.light, border: `3px solid ${team.color.bg}`, borderRadius: "14px", padding: "10px 18px", fontWeight: "800", fontSize: "14px", color: team.color.dark, display: "flex", alignItems: "center", gap: "6px" }}><TeamIcon team={team} /> {team.name}</div>
           ))}
         </div>
-        <button onClick={() => setShowHowTo(true)} style={{ display: "block", margin: "0 auto 14px", background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
-          ❓ How to Play
+        <button onClick={() => setShowHowTo(true)} style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginBottom: "14px", background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
+          <Icon name="help" size={15} /> How to Play
         </button>
         {showHowTo && (
           <HowToPlayModal
@@ -291,7 +292,7 @@ export function MinefieldGame({ gridData, teams: propTeams, onUpdateScore, onEnd
       : `${winners[0]?.item.name} cleared the field!`;
     return (
       <div style={{ textAlign: "center" }}>
-        <div style={{ fontSize: "44px", marginBottom: "6px" }}>💣</div>
+        <div style={{ marginBottom: "6px" }}><Icon name="mine" size={44} color="#4C1D95" /></div>
         <div style={{ fontWeight: "900", fontSize: "22px", color: "#4C1D95", marginBottom: "16px" }}>{headline}</div>
         <div style={{ display: "grid", gridTemplateColumns: teamsGridCols(teams.length), gap: "10px", margin: "0 auto 20px", maxWidth: "760px" }}>
           {ranking.map(({ item: tm, rank, value }) => (
@@ -303,7 +304,7 @@ export function MinefieldGame({ gridData, teams: propTeams, onUpdateScore, onEnd
             </div>
           ))}
         </div>
-        <button onClick={onEnd} style={{ background: "linear-gradient(135deg,#4C1D95,#6D28D9)", color: "white", border: "none", borderRadius: "14px", padding: "14px 36px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(109,40,217,0.4)" }}>🏁 End Game</button>
+        <button onClick={onEnd} style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg,#4C1D95,#6D28D9)", color: "white", border: "none", borderRadius: "14px", padding: "14px 36px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(109,40,217,0.4)" }}><Icon name="checkeredFlag" size={18} /> End Game</button>
       </div>
     );
   }
@@ -335,14 +336,13 @@ export function MinefieldGame({ gridData, teams: propTeams, onUpdateScore, onEnd
           <span
             key={i}
             style={{
-              fontSize: "18px",
               filter: i < minesFound ? "grayscale(1) opacity(0.35)" : "none",
               transform: i < minesFound ? "scale(0.85)" : "scale(1)",
               transition: "all 0.3s ease",
               display: "inline-block",
             }}
           >
-            {i < minesFound ? "💥" : "💣"}
+            <Icon name={i < minesFound ? "explosion" : "mine"} size={18} />
           </span>
         ))}
       </div>
