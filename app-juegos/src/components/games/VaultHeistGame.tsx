@@ -743,7 +743,7 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
               {topicLabel && (
                 <div style={{ fontSize: "12px", fontWeight: "800", color: "#B8A98A", marginBottom: "8px", letterSpacing: "0.05em", textTransform: "uppercase" }}>📚 {topicLabel}</div>
               )}
-              <div style={{ fontSize: "30px", marginBottom: "4px" }}><MascotSprite mascot={activeTeam.mascot} fallback="🕵️" size={30} color={activeTeam.color.bg} /></div>
+              <div style={{ fontSize: "30px", marginBottom: "4px" }}><MascotSprite mascot={activeTeam.mascot} fallback="🕵️" size={34} /></div>
               <div style={{ fontSize: "13px", fontWeight: "700", color: "#E8D8AE", marginBottom: "6px", letterSpacing: "0.05em" }}>🔧 THIS LOCK NEEDS</div>
               <div style={{ fontSize: "24px", fontWeight: "900", color: "#FCD34D" }}>{displayCategory(currentCategory)}</div>
               {currentQuestion?.form && (

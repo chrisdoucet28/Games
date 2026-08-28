@@ -439,7 +439,7 @@ export function MinefieldGame({ gridData, teams: propTeams, onUpdateScore, onEnd
                     cursor = "default";
                   } else if (isSel) {
                     bg = "linear-gradient(135deg,#FCD34D,#F59E0B)";
-                    label = <MascotSprite mascot={t.mascot} fallback="?" size={16} color="#78350F" />;
+                    label = <MascotSprite mascot={t.mascot} fallback="?" size={18} />;
                     cursor = "default";
                   } else {
                     bg = phase !== "pick" ? "linear-gradient(135deg,#818CF8,#6366F1)" : "linear-gradient(135deg,#6366F1,#4338CA)";

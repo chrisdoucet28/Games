@@ -20,6 +20,7 @@ import { FeedbackButton } from "./components/shared/FeedbackButton";
 import { BrandBadge } from "./components/shared/BrandBadge";
 import { Icon, type IconName } from "./components/shared/Icon";
 import { IconBadge } from "./components/shared/IconBadge";
+import { MascotIcon } from "./components/shared/MascotArt";
 import { saveProgress, clearProgress, listClasses, createClass, upsertTeamRoster, deleteFromTeamRoster, saveTeams } from "./lib/classes";
 import { isPaidStatus } from "./lib/subscription";
 import { denseRank, medalForRank } from "./utils/ranking";
@@ -1271,19 +1272,19 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
                       <button
                         type="button" title="No mascot"
                         onClick={() => { const next = [...teamMascots]; next[i] = null; setTeamMascots(next); }}
-                        style={{ width: "22px", height: "22px", borderRadius: "6px", color: "#9CA3AF", background: teamMascots[i] == null ? "#F3F4F6" : "transparent", border: teamMascots[i] == null ? `2px solid ${color.bg}` : "1px solid #E5E7EB", cursor: "pointer", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}
-                      ><Icon name="close" size={11} /></button>
+                        style={{ width: "28px", height: "28px", borderRadius: "8px", color: "#9CA3AF", background: teamMascots[i] == null ? "#F3F4F6" : "transparent", border: teamMascots[i] == null ? `2px solid ${color.bg}` : "1px solid #E5E7EB", cursor: "pointer", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}
+                      ><Icon name="close" size={12} /></button>
                       {MASCOT_OPTIONS.map(m => (
                         <button
                           key={m} type="button" title={m}
                           onClick={() => { const next = [...teamMascots]; next[i] = m; setTeamMascots(next); }}
                           style={{
-                            width: "22px", height: "22px", borderRadius: "6px", cursor: "pointer", flexShrink: 0,
+                            width: "28px", height: "28px", borderRadius: "8px", cursor: "pointer", flexShrink: 0,
                             background: teamMascots[i] === m ? color.light : "transparent",
                             border: teamMascots[i] === m ? `2px solid ${color.bg}` : "1px solid transparent",
-                            display: "flex", alignItems: "center", justifyContent: "center", color: color.dark,
+                            display: "flex", alignItems: "center", justifyContent: "center",
                           }}
-                        ><Icon name={MASCOT_ICON_BY_EMOJI[m]} size={14} /></button>
+                        ><MascotIcon name={MASCOT_ICON_BY_EMOJI[m]} size={20} /></button>
                       ))}
                     </div>
                   </div>

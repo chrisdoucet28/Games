@@ -7,8 +7,8 @@ import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
 import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
 import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
-import { Icon } from "../shared/Icon";
 import { MASCOT_ICON_BY_EMOJI } from "../shared/TeamIcon";
+import { MascotIcon } from "../shared/MascotArt";
 import { AUCTION_TUTORIAL_STEPS } from "../../data/tutorials/auction";
 import {
   generateSessionCode, openAuctionChannel, closeChannel,
@@ -78,7 +78,7 @@ function MascotAvatar({ mascot, color, size = 30 }: { mascot?: string | null; co
       background: `radial-gradient(circle at 35% 30%, ${color}66, #1E1033)`,
       border: `2px solid ${color}`,
       boxShadow: `0 0 8px ${color}77`,
-    }}>{iconName && <Icon name={iconName} size={Math.round(size * 0.55)} color="white" />}</span>
+    }}>{iconName && <MascotIcon name={iconName} size={Math.round(size * 0.8)} />}</span>
   );
 }
 

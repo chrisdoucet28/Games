@@ -210,7 +210,7 @@ export function PhoneWordWhackView({ state, teamId, onTurnReport }: Props) {
                     display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center",
                   }}
                 >
-                  <MascotSprite mascot={team?.mascot} fallback="🦫" size={10} color="#FEF3C7" /> {mole.text}
+                  <MascotSprite mascot={team?.mascot} fallback="🦫" size={13} /> {mole.text}
                 </button>
               )}
               {holeFx?.kind === "hit" && (
