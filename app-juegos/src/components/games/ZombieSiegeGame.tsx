@@ -542,7 +542,7 @@ function PersonChip({ team, person }: { team: Team; person: PersonState }) {
       <div style={{ fontSize: "16px", lineHeight: 1.1 }}>{person.alive ? <MascotSprite mascot={team.mascot} fallback="🧑" size={18} /> : <Icon name="skull" size={17} />}</div>
       <div style={{ fontWeight: "800", fontSize: "11px", color: person.alive ? "white" : "#9CA3AF" }}>{team.name}</div>
       {person.alive ? (
-        <div style={{ fontSize: "11px", lineHeight: 1.3, display: "flex", gap: "1px", justifyContent: "center", alignItems: "center", flexWrap: "wrap" }}>
+        <div style={{ fontSize: "11px", lineHeight: 1.3, display: "flex", gap: "1px", justifyContent: "center", alignItems: "center", flexWrap: "wrap", color: "#E5E7EB" }}>
           {/* Always shows bulletCap slots (not just current bullets) — a team with 1/3 bullets sees
               three guns, two of them greyed out, so the empty capacity is always visible, not just
               inferred from a bare count. The next slot due to recharge (i === person.bullets, while
