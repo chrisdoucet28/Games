@@ -18,6 +18,11 @@ export type IconName =
   // near-duplicate glyph when an existing one already fits.
   | "hammer" | "gavel" | "anchor" | "safe" | "crown" | "potato" | "castle" | "checkeredFlag"
   | "mine" | "plate" | "cardTilt" | "flame" | "skull"
+  // Phase 6 — per-game emoji sweep (games' own internal UI, not shared chrome). "help" is used
+  // identically by all 15 games' "How to Play" button, so it's defined once here rather than
+  // per-game. The rest are added as each game's sweep needs them, reused across games where a
+  // later one needs the same concept.
+  | "help" | "pencil" | "clock" | "ship" | "shield" | "explosion" | "wave" | "medal"
   // Phase 4 — ThemeAmbience's decorative floating background glyphs (one drift + one twinkle
   // per accent theme). Rendered at low opacity/small scale, so simpler silhouettes than the
   // functional icons above are fine here.
@@ -331,6 +336,54 @@ const ICONS: Record<IconName, React.ReactNode> = {
         <circle cx="15" cy="11" r="2" fill="black" />
       </mask>
       <path d="M12,3 C17,3 20,7 20,11 C20,14 18,16.5 16,18 V21 L14,19 L12,21 L10,19 L8,21 V18 C6,16.5 4,14 4,11 C4,7 7,3 12,3 Z" fill="currentColor" mask="url(#icon-skull-eyes)" />
+    </>
+  ),
+  help: (
+    <>
+      <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" strokeWidth="2" />
+      <path d="M9.5,9.3 C9.5,7.2 11,6 12.4,6.3 C13.7,6.6 14.6,7.9 14,9.1 C13.6,10 12.5,10.4 12,11.3 C11.7,11.8 11.6,12.3 11.6,13" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <circle cx="11.6" cy="16.3" r="1.3" fill="currentColor" />
+    </>
+  ),
+  pencil: (
+    <g transform="rotate(45 12 12)">
+      <rect x="10.5" y="3" width="3" height="14" rx="1" fill="currentColor" />
+      <polygon points="10.5,17 13.5,17 12,21" fill="currentColor" />
+      <rect x="10" y="1.3" width="4" height="2.4" rx="1" fill="currentColor" />
+    </g>
+  ),
+  clock: (
+    <>
+      <circle cx="12" cy="12" r="9.5" fill="none" stroke="currentColor" strokeWidth="2" />
+      <line x1="12" y1="12" x2="12" y2="6.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <line x1="12" y1="12" x2="16" y2="14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </>
+  ),
+  ship: (
+    <>
+      <path d="M4,14 L20,14 L17.5,20 H6.5 Z" fill="currentColor" />
+      <rect x="11" y="4" width="2" height="10" fill="currentColor" />
+      <path d="M13,5 L19,8 L13,10.5 Z" fill="currentColor" />
+    </>
+  ),
+  shield: (
+    <path d="M12,2 L20,5 V11 C20,16.5 16.5,20.5 12,22 C7.5,20.5 4,16.5 4,11 V5 Z" fill="currentColor" />
+  ),
+  explosion: (
+    <polygon points="12,2 14,9 20,6 15.5,11 22,12 15.5,13 20,18 14,15 12,22 10,15 4,18 8.5,13 2,12 8.5,11 4,6 10,9" fill="currentColor" />
+  ),
+  wave: (
+    <path d="M2,13 C4,10 6,10 8,13 C10,16 12,16 14,13 C16,10 18,10 20,13 C21,14.4 21.5,14.7 22,15 M2,18.5 C4,15.5 6,15.5 8,18.5 C10,21.5 12,21.5 14,18.5 C16,15.5 18,15.5 20,18.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+  ),
+  medal: (
+    <>
+      <path d="M7,2 L3,10 L8,9 Z" fill="currentColor" />
+      <path d="M17,2 L21,10 L16,9 Z" fill="currentColor" />
+      <mask id="icon-medal-star">
+        <rect width="24" height="24" fill="white" />
+        <polygon points="12,11.5 12.9,13.8 15.3,13.9 13.4,15.4 14.1,17.7 12,16.3 9.9,17.7 10.6,15.4 8.7,13.9 11.1,13.8" fill="black" />
+      </mask>
+      <circle cx="12" cy="15" r="7" fill="currentColor" mask="url(#icon-medal-star)" />
     </>
   ),
   cloud: (
