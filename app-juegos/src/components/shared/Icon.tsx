@@ -23,6 +23,7 @@ export type IconName =
   // per-game. The rest are added as each game's sweep needs them, reused across games where a
   // later one needs the same concept.
   | "help" | "pencil" | "clock" | "ship" | "shield" | "explosion" | "wave" | "medal"
+  | "screen" | "clipboard" | "coin"
   // Phase 4 — ThemeAmbience's decorative floating background glyphs (one drift + one twinkle
   // per accent theme). Rendered at low opacity/small scale, so simpler silhouettes than the
   // functional icons above are fine here.
@@ -384,6 +385,34 @@ const ICONS: Record<IconName, React.ReactNode> = {
         <polygon points="12,11.5 12.9,13.8 15.3,13.9 13.4,15.4 14.1,17.7 12,16.3 9.9,17.7 10.6,15.4 8.7,13.9 11.1,13.8" fill="black" />
       </mask>
       <circle cx="12" cy="15" r="7" fill="currentColor" mask="url(#icon-medal-star)" />
+    </>
+  ),
+  screen: (
+    <>
+      <rect x="2" y="4" width="20" height="13" rx="2" fill="none" stroke="currentColor" strokeWidth="2" />
+      <line x1="8" y1="21" x2="16" y2="21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <line x1="12" y1="17" x2="12" y2="21" stroke="currentColor" strokeWidth="2" />
+    </>
+  ),
+  clipboard: (
+    <>
+      <mask id="icon-clipboard-lines">
+        <rect width="24" height="24" fill="white" />
+        <rect x="7.5" y="10" width="9" height="1.6" fill="black" />
+        <rect x="7.5" y="13.5" width="9" height="1.6" fill="black" />
+        <rect x="7.5" y="17" width="6" height="1.6" fill="black" />
+      </mask>
+      <rect x="5" y="4" width="14" height="18" rx="2" fill="currentColor" mask="url(#icon-clipboard-lines)" />
+      <rect x="8" y="2" width="8" height="4" rx="1.5" fill="currentColor" />
+    </>
+  ),
+  coin: (
+    <>
+      <mask id="icon-coin-ring">
+        <rect width="24" height="24" fill="white" />
+        <circle cx="12" cy="12" r="7" fill="none" stroke="black" strokeWidth="1.3" />
+      </mask>
+      <circle cx="12" cy="12" r="10" fill="currentColor" mask="url(#icon-coin-ring)" />
     </>
   ),
   cloud: (
