@@ -28,6 +28,7 @@ export type IconName =
   | "keyboard" | "bell" | "pause" | "hourglass" | "sleep" | "column" | "wallet"
   | "planet" | "stop" | "satellite" | "fuel" | "ufo" | "astronaut"
   | "door" | "window" | "zombie" | "gun" | "axe" | "tree" | "megaphone" | "house" | "chair"
+  | "handshake" | "idea" | "sword"
   // Phase 4 — ThemeAmbience's decorative floating background glyphs (one drift + one twinkle
   // per accent theme). Rendered at low opacity/small scale, so simpler silhouettes than the
   // functional icons above are fine here.
@@ -655,6 +656,26 @@ const ICONS: Record<IconName, React.ReactNode> = {
       <rect x="15.5" y="12" width="2.5" height="9" rx="1" fill="currentColor" />
       <rect x="6" y="15" width="12" height="2" fill="currentColor" />
     </>
+  ),
+  handshake: (
+    <>
+      <path d="M2,10 L8,10 L12,14 L9,17 L2,17 Z" fill="currentColor" />
+      <path d="M22,10 L16,10 L12,14 L15,17 L22,17 Z" fill="currentColor" />
+    </>
+  ),
+  idea: (
+    <>
+      <path d="M12,2 C8,2 5,5 5,9 C5,11.5 6.3,13.3 8,14.6 V17 H16 V14.6 C17.7,13.3 19,11.5 19,9 C19,5 16,2 12,2 Z" fill="currentColor" />
+      <rect x="9" y="19" width="6" height="1.8" rx="0.9" fill="currentColor" />
+      <rect x="9.5" y="21.3" width="5" height="1.6" rx="0.8" fill="currentColor" />
+    </>
+  ),
+  sword: (
+    <g transform="rotate(45 12 12)">
+      <rect x="10.5" y="2" width="3" height="13" rx="1" fill="currentColor" />
+      <rect x="7" y="14" width="10" height="2.4" rx="1" fill="currentColor" />
+      <rect x="10.5" y="16" width="3" height="6" rx="1" fill="currentColor" />
+    </g>
   ),
   cloud: (
     <>
