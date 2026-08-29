@@ -4404,6 +4404,64 @@ export const LESSONS: Record<string, Lesson> = {
     ],
   },
 
+  auxiliary_verbs_be_do: {
+    title: "Auxiliary Verbs (Be vs Do)",
+    intro: "English has two different 'helper' patterns for negatives and questions, and beginners often mix them up. The trick is simple: look at what comes after the subject. An adjective, a job, or a place needs 'be' (am/is/are). An action verb needs 'do/does'.",
+    sections: [
+      {
+        heading: "Use 'be' for adjectives, jobs, and places",
+        body: [
+          "If the sentence describes a feeling, a job/role, or where someone is, the main verb is already 'be' — use am/is/are directly, don't add 'do/does' as well.",
+        ],
+        examples: [
+          "**Are** you happy?",
+          "**Is** she a teacher?",
+          "**Are** they at home?",
+        ],
+      },
+      {
+        heading: "Use 'do/does' for action verbs",
+        body: [
+          "If the sentence has an action verb (like, live, work, study, play...), that verb needs 'do/does' for questions and negatives — never 'be'.",
+        ],
+        examples: [
+          "**Do** you like pizza?",
+          "**Does** she work here?",
+          "**Do** they play football?",
+        ],
+      },
+      {
+        heading: "Negatives",
+        body: [
+          "'Be' negative: am not / isn't / aren't.",
+          "Action verb negative: don't / doesn't + base verb.",
+        ],
+        examples: [
+          "I **am not** tired.",
+          "He **isn't** hungry.",
+          "I **don't** like loud music.",
+          "He **doesn't** eat meat.",
+        ],
+      },
+      {
+        heading: "Never combine the two",
+        body: [
+          "A sentence never needs both 'be' and 'do/does' together — pick the one that matches the main verb.",
+        ],
+        examples: [
+          "❌ She is has a car. → ✅ She has a car.",
+          "❌ He don't is tired. → ✅ He isn't tired.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ Do you happy? → ✅ Are you happy? ('happy' is an adjective — use 'be', not 'do')",
+      "❌ Is she like music? → ✅ Does she like music? ('like' is an action verb — use 'does', not 'is')",
+      "❌ Are you speak English? → ✅ Do you speak English? ('speak' is an action verb — use 'do', not 'are')",
+      "❌ Does she a nurse? → ✅ Is she a nurse? (a profession uses 'be', not 'does')",
+    ],
+  },
+
   there_is_are: {
     title: "There is / There are",
     intro: "Use 'there is/are' to say something exists — the choice between is/are depends on whether the noun after it is singular or plural.",
