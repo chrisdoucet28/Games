@@ -379,25 +379,87 @@ export const LESSONS: Record<string, Lesson> = {
           "**How much** does it cost?",
         ],
       },
-      {
-        heading: "Subject vs object questions",
-        body: [
-          "If the question word IS the subject, don't add do/does/did — just use the normal word order.",
-          "If the question word is the OBJECT, you need the auxiliary.",
-        ],
-        examples: [
-          "**Who called** you?",
-          "**What happened**?",
-          "**Who did** you call?",
-          "**What did** you see?",
-        ],
-      },
     ],
     commonMistakes: [
       "❌ Where does she works? → ✅ Where does she work? (base verb after 'does')",
       "❌ What you did yesterday? → ✅ What did you do yesterday?",
-      "❌ Who did called you? → ✅ Who called you? ('who' as subject needs no 'did')",
       "❌ How long does it takes? → ✅ How long does it take? (base verb after 'does')",
+      "❌ Where you are going on holiday? → ✅ Where are you going on holiday? (auxiliary before the subject)",
+    ],
+  },
+
+  subject_object_questions: {
+    title: "Subject vs Object Questions",
+    intro: "Every sentence has a subject (who or what does the action) and often an object (who or what receives the action). When you turn a sentence into a question about the SUBJECT, you don't add do/does/did. When you ask about the OBJECT, you do.",
+    sections: [
+      {
+        heading: "The rule",
+        body: [
+          "Statement: SUBJECT + verb + OBJECT.",
+          "Subject question: ask about the subject → question word + verb (+ object). No do/does/did.",
+          "Object question: ask about the object → question word + do/does/did + subject + base verb.",
+        ],
+        examples: [
+          "Someone broke the window. → **Who broke** the window? (subject question)",
+          "You broke something. → **What did you break**? (object question)",
+        ],
+      },
+      {
+        heading: "Subject questions — present simple",
+        body: [
+          "The question word takes the place of the subject, so the verb still needs its normal present-simple ending (-s for he/she/it).",
+        ],
+        examples: [
+          "**Who owns** this house?",
+          "**What makes** you happy?",
+          "**Which team wins** most matches?",
+        ],
+      },
+      {
+        heading: "Subject questions — other tenses",
+        body: [
+          "Past simple: question word + past verb (no 'did').",
+          "Present perfect: question word + has/have + past participle (no 'did').",
+          "Modals and 'will': question word + modal/will + base verb (nothing extra).",
+        ],
+        examples: [
+          "**Who called** you last night?",
+          "**Who has visited** the most countries?",
+          "**Who will win** the election?",
+          "**What can go** wrong?",
+        ],
+      },
+      {
+        heading: "Object questions — every tense needs the auxiliary",
+        body: [
+          "Present simple: question word + do/does + subject + base verb.",
+          "Past simple: question word + did + subject + base verb.",
+          "Present perfect: question word + have/has + subject + past participle.",
+          "Modals and 'will': question word + modal/will + subject + base verb.",
+        ],
+        examples: [
+          "**Who do** you see every day?",
+          "**Who did** you call at the party?",
+          "**Who have** you met that's famous?",
+          "**Who will** you vote for?",
+        ],
+      },
+      {
+        heading: "'Which' can be a subject or an object question",
+        body: [
+          "'Which' is usually followed by a noun ('which team', 'which book'). That noun stays in the question either way — only the auxiliary changes.",
+        ],
+        examples: [
+          "**Which team won** the championship? (subject — no auxiliary)",
+          "**Which book did** she recommend? (object — needs 'did')",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ Who did break the window? → ✅ Who broke the window? (subject question — no 'did')",
+      "❌ What happens does at the end? → ✅ What happens at the end? (subject question — don't add 'does' as well as the -s)",
+      "❌ Who you called last night? → ✅ Who did you call last night? (object question — needs 'did' before the subject)",
+      "❌ Which book she recommended? → ✅ Which book did she recommend? (object question — needs 'did' before the subject)",
     ],
   },
 
