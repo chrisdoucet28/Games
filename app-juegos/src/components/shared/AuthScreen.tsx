@@ -6,6 +6,16 @@ import { Icon } from "./Icon";
 
 type Mode = "sign-in" | "sign-up";
 
+// Facebook/Instagram's in-app Android browser injects a script that crashes when Supabase's
+// OAuth redirect (window.location.assign) fires mid-navigation — the injected script's own
+// postMessage to its native WebView bridge throws once the page starts navigating away. Detecting
+// it lets the Google button be swapped for a plain "open in your browser" nudge instead of a
+// button that reliably breaks for anyone arriving from a shared Facebook/Instagram link. Email/
+// password sign-in has no redirect step, so it's unaffected and stays as-is either way.
+function isInAppBrowser(): boolean {
+  return /FBAN|FBAV|Instagram/i.test(navigator.userAgent || "");
+}
+
 const FOOTER_LINKS = (
   <div style={{ display: "flex", gap: "16px", justifyContent: "center", flexWrap: "wrap", marginTop: "20px" }}>
     <a href="/learn" style={{ color: "#7DB8DB", fontSize: "12px", textDecoration: "none" }}>Learn Lessons</a>
@@ -27,6 +37,7 @@ export function AuthScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [confirmSent, setConfirmSent] = useState(false);
+  const [inAppBrowser] = useState(() => isInAppBrowser());
 
   useEffect(() => {
     document.title = !showForm ? "ClassCade" : mode === "sign-in" ? "Log In - ClassCade" : "Sign Up - ClassCade";
@@ -150,12 +161,19 @@ export function AuthScreen() {
               <div style={{ flex: 1, height: "1px", background: "rgba(255,255,255,0.15)" }} />
             </div>
 
-            <button
-              type="button" onClick={signInWithGoogle}
-              style={{ width: "100%", background: "white", color: "#1F2937", border: "none", borderRadius: "12px", padding: "12px", fontSize: "14px", fontWeight: "700", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}
-            >
-              <span aria-hidden="true" style={{ width: "10px", height: "10px", borderRadius: "50%", background: "#4285F4", display: "inline-block" }} /> Continue with Google
-            </button>
+            {inAppBrowser ? (
+              <div style={{ background: "rgba(252,165,165,0.12)", border: "1px solid rgba(252,165,165,0.35)", borderRadius: "12px", padding: "12px", color: "#FCA5A5", fontSize: "12.5px", lineHeight: 1.5, textAlign: "center", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}>
+                <Icon name="warning" size={14} style={{ flexShrink: 0 }} />
+                <span>Google sign-in doesn't work in Facebook/Instagram's built-in browser. Tap the ••• menu and choose "Open in Browser" first.</span>
+              </div>
+            ) : (
+              <button
+                type="button" onClick={signInWithGoogle}
+                style={{ width: "100%", background: "white", color: "#1F2937", border: "none", borderRadius: "12px", padding: "12px", fontSize: "14px", fontWeight: "700", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}
+              >
+                <span aria-hidden="true" style={{ width: "10px", height: "10px", borderRadius: "50%", background: "#4285F4", display: "inline-block" }} /> Continue with Google
+              </button>
+            )}
           </div>
           </>
         )}
