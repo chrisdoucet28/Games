@@ -889,7 +889,7 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
       return { ...prev, persons, barricades, zombies };
     });
     const team = teams.find(t => t.id === teamId);
-    showPowerUpBanner(`${team?.color.emoji ?? ""} ${team?.name ?? ""}: ${POWERUP_LABEL[kind]}`);
+    showPowerUpBanner(<><TeamIcon team={team} color="white" /> {team?.name ?? ""}: {POWERUP_LABEL[kind]}</>);
   }, [teams, showPowerUpBanner]);
 
   // The prompt persists for the whole round — any team can throw a sentence at it as many times
