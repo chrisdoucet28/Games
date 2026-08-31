@@ -105,6 +105,14 @@ export function MinefieldGame({ gridData, teams: propTeams, onUpdateScore, onEnd
   const [correctByTeam, setCorrectByTeam] = useState<Record<string | number, number>>(() => resumed?.correctByTeam ?? {});
   const [minesHitByTeam, setMinesHitByTeam] = useState<Record<string | number, number>>(() => resumed?.minesHitByTeam ?? {});
 
+  // The 5-col grid is wider than a phone screen and scrolls horizontally (see the overflowX:auto
+  // wrapper below) — desktop rarely needs it since it's plenty wide, but on mobile there was no
+  // visual cue that more columns existed off-screen, just a grid that looked cut off. This tracks
+  // whether the scroll container actually overflows so the edge-fade hint below only ever renders
+  // when there's really more to scroll to — a no-op on desktop, where it naturally never fires.
+  const gridScrollRef = useRef<HTMLDivElement>(null);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
   useEffect(() => {
     if (!serializeStateRef) return;
     serializeStateRef.current = (): MinefieldSnapshot => ({
@@ -149,6 +157,16 @@ export function MinefieldGame({ gridData, teams: propTeams, onUpdateScore, onEnd
     }, CPU_JUDGE_MS);
     return () => clearTimeout(timer);
   }, [isSolo, phase, t]);
+
+  useEffect(() => {
+    const el = gridScrollRef.current;
+    if (!el) return;
+    const update = () => setCanScrollRight(el.scrollWidth - el.clientWidth - el.scrollLeft > 4);
+    update();
+    el.addEventListener("scroll", update);
+    window.addEventListener("resize", update);
+    return () => { el.removeEventListener("scroll", update); window.removeEventListener("resize", update); };
+  }, [gridIndex, phase]);
   const minesLeft = MINE_COUNT - minesFound;
 
   if (!currentGrid || !t) {
@@ -410,7 +428,8 @@ export function MinefieldGame({ gridData, teams: propTeams, onUpdateScore, onEnd
 
       {phase !== "topicComplete" && (
       <>
-      <div style={{ overflowX: "auto", marginBottom: "8px" }}>
+      <div style={{ position: "relative", marginBottom: "8px" }}>
+        <div ref={gridScrollRef} style={{ overflowX: "auto" }}>
         <table style={{ borderCollapse: "separate", borderSpacing: `${GAP}px`, margin: "0 auto" }}>
           <thead>
             <tr>
@@ -460,6 +479,12 @@ export function MinefieldGame({ gridData, teams: propTeams, onUpdateScore, onEnd
             ))}
           </tbody>
         </table>
+        </div>
+        {canScrollRight && (
+          <div style={{ position: "absolute", top: 0, right: 0, bottom: 0, width: "36px", background: "linear-gradient(90deg,transparent,white 70%)", display: "flex", alignItems: "center", justifyContent: "flex-end", pointerEvents: "none" }}>
+            <Icon name="next" size={16} color="#7C3AED" />
+          </div>
+        )}
       </div>
       <div style={{ textAlign: "center", fontSize: "12px", color: "#9CA3AF", fontWeight: "600", marginTop: "6px" }}>
         {minesLeft} mine{minesLeft === 1 ? "" : "s"} still hidden - click a square, say the sentence, then the teacher judges
