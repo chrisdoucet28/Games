@@ -3538,7 +3538,7 @@ export const LESSONS: Record<string, Lesson> = {
     sections: [
       {
         heading: "Always gerund",
-        body: ["enjoy, finish, suggest, avoid, consider, admit, keep + -ing"],
+        body: ["enjoy, finish, suggest, avoid, consider, admit, keep, deny + -ing"],
         examples: [
           "I **enjoy visiting** new places.",
           "I **finished doing** my homework.",
@@ -3547,11 +3547,22 @@ export const LESSONS: Record<string, Lesson> = {
       },
       {
         heading: "Always infinitive",
-        body: ["decide, agree, hope, promise, manage, refuse, afford + to + base verb"],
+        body: ["decide, agree, hope, promise, manage, refuse, afford, offer + to + base verb"],
         examples: [
           "She **decided to leave** her job.",
           "They **agreed to accept** the plan.",
           "We **managed to meet** the deadline.",
+        ],
+      },
+      {
+        heading: "Verbs that can take either, with no real difference",
+        body: [
+          "like, love, hate, prefer + -ing OR + to + base verb — both forms are correct, with little or no difference in meaning.",
+        ],
+        examples: [
+          "I **like reading** before bed. / I **like to read** before bed. (both correct)",
+          "She **loves cooking** for her family. / She **loves to cook** for her family.",
+          "He **hates waiting** in long queues. / He **hates to wait** in long queues.",
         ],
       },
       {
@@ -6022,12 +6033,35 @@ export const LESSONS: Record<string, Lesson> = {
         ],
       },
       {
+        heading: "The frequency scale, and asking 'how often'",
+        body: [
+          "From 100% of the time to 0% of the time, in order: **always** → **usually** → **often** → **sometimes** → **rarely** → **never**.",
+          "To ask about frequency, use **'How often...?'** + do/does + subject + base verb.",
+        ],
+        examples: [
+          "I **always** eat breakfast, but I **rarely** eat a big lunch.",
+          "She **usually** walks to work, and she **sometimes** takes the bus.",
+          "**How often** do you exercise? I exercise **often** — about four times a week.",
+        ],
+      },
+      {
         heading: "Present simple third person",
         body: ["He/she/it takes the -s form of the verb: goes, has, wakes, gets."],
         examples: [
           "He **goes** to work at 8. (not 'go')",
           "She **has** breakfast at 7.",
           "She **wakes** up at seven every morning.",
+        ],
+      },
+      {
+        heading: "Common daily routine verbs",
+        body: [
+          "Everyday routine actions, roughly in order: wake up, get up, get dressed, brush your teeth, take a shower, have breakfast/lunch/dinner, go to school, go to work, go home, go to bed.",
+        ],
+        examples: [
+          "I **wake up**, **get dressed**, and **have breakfast** before I **go to school**.",
+          "He **takes a shower** in the morning and **goes to work** at 8.",
+          "She **goes home** at 5 and **goes to bed** at 11.",
         ],
       },
       {
