@@ -33,9 +33,19 @@ export function FeedbackButton() {
 
   return (
     <>
+      {/* Below ~480px the pill shrinks to an icon-only circle — a full "Feedback" pill is wide
+          enough to sit on top of real content (button labels, card text) while scrolling on a
+          phone; the smaller circle cuts that footprint by more than half. */}
+      <style>{`
+        @media (max-width: 480px) {
+          .cc-feedback-fab { width: 40px; height: 40px; padding: 0 !important; border-radius: 50% !important; justify-content: center; }
+          .cc-feedback-fab .cc-feedback-label { display: none; }
+        }
+      `}</style>
       <button
         onClick={() => setOpen(true)}
-        className="learn-no-print"
+        className="learn-no-print cc-feedback-fab"
+        aria-label="Feedback"
         style={{
           position: "fixed", left: "16px", bottom: "16px", zIndex: 1500,
           background: "rgba(30,30,40,0.72)", color: "#E5E7EB", border: "1px solid rgba(255,255,255,0.15)",
@@ -44,7 +54,7 @@ export function FeedbackButton() {
           display: "flex", alignItems: "center", gap: "6px",
         }}
       >
-        <Icon name="chat" size={14} /> Feedback
+        <Icon name="chat" size={14} /> <span className="cc-feedback-label">Feedback</span>
       </button>
 
       {open && (
