@@ -201,6 +201,12 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
   // topics (launched from game-select) — also tells the Learn screen where "back" should go.
   const [learnFilter, setLearnFilter] = useState<string[] | null>(null);
   const [topicSearch, setTopicSearch] = useState("");
+  // The unfiltered topic list runs to 120+ entries — on a narrow screen that's an enormous
+  // amount of scrolling before reaching team setup, so it starts capped with a "Show all" expand.
+  const [showAllTopics, setShowAllTopics] = useState(false);
+  // Accordion, not a per-team Set — only one team's mascot grid open at a time keeps the (already
+  // tall, up to 5x) teams section compact by default instead of showing all ~24 icons per team.
+  const [expandedMascotTeam, setExpandedMascotTeam] = useState<number | null>(null);
 
   const [loadingGame, setLoadingGame] = useState(false);
   const [loadError, setLoadError] = useState("");
@@ -989,6 +995,10 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
 
   if (screen === "setup") {
     const filteredTopics = getFilteredTopicOptions(level, focus).filter(o => matchesTopicSearch(o.label, topicSearch));
+    const TOPIC_DEFAULT_CAP = 30;
+    const isSearchingTopics = topicSearch.trim() !== "";
+    const topicsAreCapped = !isSearchingTopics && !showAllTopics && filteredTopics.length > TOPIC_DEFAULT_CAP;
+    const visibleTopics = topicsAreCapped ? filteredTopics.slice(0, TOPIC_DEFAULT_CAP) : filteredTopics;
     const selectedTopicOptions = selectedTopics.map(getTopicOption).filter((option): option is TopicOption => Boolean(option));
     const selectedTopicSummary = selectedTopicOptions.map(o => o.label).join(", ");
     const FOCUS_META = [
@@ -999,7 +1009,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     ];
 
     return (
-      <div style={{ minHeight: "100vh", background: "#F0F9FF", padding: "20px", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
+      <div style={{ minHeight: "100vh", background: "#F0F9FF", padding: "clamp(10px,4vw,20px)", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
         {renderSavePicker()}
         <div style={{ maxWidth: "720px", margin: "0 auto" }}>
           <button onClick={() => { setActiveClassId(null); setScreen("welcome"); }} style={{ background: "none", border: `2px solid ${theme.accentSolid}`, color: theme.accentSolid, borderRadius: "10px", padding: "8px 16px", cursor: "pointer", fontWeight: "700", marginBottom: "20px", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px" }}><Icon name="back" size={13} /> Back</button>
@@ -1009,7 +1019,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
             <p style={{ color: "#6B7280", marginTop: "8px" }}>Set up your class, then pick one or more topics and a game</p>
           </div>
 
-          <div style={{ background: "white", border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, borderRadius: "16px", padding: "20px", marginBottom: "16px" }}>
+          <div style={{ background: "white", border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, borderRadius: "16px", padding: "clamp(14px,4vw,20px)", marginBottom: "16px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px" }}>
               <div style={{ background: theme.accentSolid, color: "white", borderRadius: "50%", width: "28px", height: "28px", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "900", fontSize: "14px", flexShrink: 0 }}>1</div>
               <div>
@@ -1055,14 +1065,16 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
             </div>
           </div>
 
-          <div style={{ background: "white", border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, borderRadius: "16px", padding: "20px", marginBottom: "16px" }}>
+          <div style={{ background: "white", border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, borderRadius: "16px", padding: "clamp(14px,4vw,20px)", marginBottom: "16px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px" }}>
               <div style={{ background: theme.accentSolid, color: "white", borderRadius: "50%", width: "28px", height: "28px", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "900", fontSize: "14px", flexShrink: 0 }}>3</div>
               <div>
                 <div style={{ fontWeight: "800", color: theme.heroBg[0], fontSize: "16px", fontFamily: theme.headingFont }}>Choose topic mix</div>
                 <div style={{ color: "#6B7280", fontSize: "12px", marginTop: "2px" }}>
                   {filteredTopics.length > 0
-                    ? `${filteredTopics.length} topic${filteredTopics.length !== 1 ? "s" : ""} shown - ${selectedTopics.length} selected`
+                    ? topicsAreCapped
+                      ? `Showing ${visibleTopics.length} of ${filteredTopics.length} topics - ${selectedTopics.length} selected`
+                      : `${filteredTopics.length} topic${filteredTopics.length !== 1 ? "s" : ""} shown - ${selectedTopics.length} selected`
                     : topicSearch.trim() !== ""
                       ? `No topics match "${topicSearch.trim()}"`
                       : "No built-in topics match these filters"}
@@ -1106,11 +1118,11 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
                     Deselect all
                   </button>
                   <button type="button" onClick={selectAllVisibleTopics} style={{ background: "white", border: `2px solid ${hexToRgba(theme.accentSolid, 0.4)}`, color: theme.accentSolid, borderRadius: "999px", padding: "6px 14px", fontWeight: "800", fontSize: "12px", cursor: "pointer" }}>
-                    Select all shown
+                    Select all {filteredTopics.length}
                   </button>
                 </div>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(190px,1fr))", gap: "8px" }}>
-                  {filteredTopics.map(o => {
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(130px,1fr))", gap: "8px" }}>
+                  {visibleTopics.map(o => {
                     const isSelected = selectedTopics.includes(o.value);
                     const levelColor = LEVELS_META.find(l => l.id === o.level)?.color || "#6366F1";
                     return (
@@ -1127,14 +1139,24 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
                     );
                   })}
                 </div>
+                {topicsAreCapped && (
+                  <button type="button" onClick={() => setShowAllTopics(true)} style={{ width: "100%", marginTop: "10px", background: "#F0F9FF", border: `2px dashed ${hexToRgba(theme.accentSolid, 0.4)}`, color: theme.accentSolid, borderRadius: "10px", padding: "10px", fontWeight: "800", fontSize: "13px", cursor: "pointer" }}>
+                    Show all {filteredTopics.length} topics
+                  </button>
+                )}
+                {!topicsAreCapped && !isSearchingTopics && filteredTopics.length > TOPIC_DEFAULT_CAP && (
+                  <button type="button" onClick={() => setShowAllTopics(false)} style={{ width: "100%", marginTop: "10px", background: "none", border: "none", color: "#6B7280", borderRadius: "10px", padding: "8px", fontWeight: "700", fontSize: "12px", cursor: "pointer" }}>
+                    Show fewer topics
+                  </button>
+                )}
               </>
             )}
           </div>
 
-          <div style={{ background: "white", border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, borderRadius: "16px", padding: "20px", marginBottom: "16px" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px" }}>
+          <div style={{ background: "white", border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, borderRadius: "16px", padding: "clamp(14px,4vw,20px)", marginBottom: "16px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px", flexWrap: "wrap" }}>
               <div style={{ background: theme.accentSolid, color: "white", borderRadius: "50%", width: "28px", height: "28px", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "900", fontSize: "14px", flexShrink: 0 }}>4</div>
-              <div style={{ fontWeight: "800", color: theme.heroBg[0], fontSize: "16px", fontFamily: theme.headingFont, flex: 1 }}>How many teams?</div>
+              <div style={{ fontWeight: "800", color: theme.heroBg[0], fontSize: "16px", fontFamily: theme.headingFont, flex: 1, minWidth: "140px" }}>How many teams?</div>
               <button
                 onClick={handleSaveTeamsToRoster} disabled={rosterSaveStatus === "saving"}
                 title={activeClassId ? "Save these team names/colors/mascots to this class, without picking a topic or game" : "Pick or create a class to save these teams to"}
@@ -1269,25 +1291,44 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
                         />
                       ))}
                     </div>
-                    <div style={{ background: "white", padding: "8px 10px", display: "flex", flexWrap: "wrap", gap: "4px", borderTop: `1px solid ${color.bg}20` }}>
+                    {expandedMascotTeam === i ? (
+                      <div style={{ background: "white", padding: "8px 10px", borderTop: `1px solid ${color.bg}20` }}>
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: "4px", marginBottom: "6px" }}>
+                          <button
+                            type="button" title="No mascot"
+                            onClick={() => { const next = [...teamMascots]; next[i] = null; setTeamMascots(next); setExpandedMascotTeam(null); }}
+                            style={{ width: "28px", height: "28px", borderRadius: "8px", color: "#9CA3AF", background: teamMascots[i] == null ? "#F3F4F6" : "transparent", border: teamMascots[i] == null ? `2px solid ${color.bg}` : "1px solid #E5E7EB", cursor: "pointer", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}
+                          ><Icon name="close" size={12} /></button>
+                          {MASCOT_OPTIONS.map(m => (
+                            <button
+                              key={m} type="button" title={m}
+                              onClick={() => { const next = [...teamMascots]; next[i] = m; setTeamMascots(next); setExpandedMascotTeam(null); }}
+                              style={{
+                                width: "28px", height: "28px", borderRadius: "8px", cursor: "pointer", flexShrink: 0,
+                                background: teamMascots[i] === m ? color.light : "transparent",
+                                border: teamMascots[i] === m ? `2px solid ${color.bg}` : "1px solid transparent",
+                                display: "flex", alignItems: "center", justifyContent: "center",
+                              }}
+                            ><MascotIcon name={MASCOT_ICON_BY_EMOJI[m]} size={20} /></button>
+                          ))}
+                        </div>
+                        <button type="button" onClick={() => setExpandedMascotTeam(null)} style={{ background: "none", border: "none", color: "#6B7280", fontWeight: "700", fontSize: "12px", cursor: "pointer", padding: "2px 0" }}>
+                          Done
+                        </button>
+                      </div>
+                    ) : (
                       <button
-                        type="button" title="No mascot"
-                        onClick={() => { const next = [...teamMascots]; next[i] = null; setTeamMascots(next); }}
-                        style={{ width: "28px", height: "28px", borderRadius: "8px", color: "#9CA3AF", background: teamMascots[i] == null ? "#F3F4F6" : "transparent", border: teamMascots[i] == null ? `2px solid ${color.bg}` : "1px solid #E5E7EB", cursor: "pointer", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}
-                      ><Icon name="close" size={12} /></button>
-                      {MASCOT_OPTIONS.map(m => (
-                        <button
-                          key={m} type="button" title={m}
-                          onClick={() => { const next = [...teamMascots]; next[i] = m; setTeamMascots(next); }}
-                          style={{
-                            width: "28px", height: "28px", borderRadius: "8px", cursor: "pointer", flexShrink: 0,
-                            background: teamMascots[i] === m ? color.light : "transparent",
-                            border: teamMascots[i] === m ? `2px solid ${color.bg}` : "1px solid transparent",
-                            display: "flex", alignItems: "center", justifyContent: "center",
-                          }}
-                        ><MascotIcon name={MASCOT_ICON_BY_EMOJI[m]} size={20} /></button>
-                      ))}
-                    </div>
+                        type="button"
+                        onClick={() => setExpandedMascotTeam(i)}
+                        style={{ width: "100%", boxSizing: "border-box", background: "white", padding: "8px 10px", borderTop: `1px solid ${color.bg}20`, borderLeft: "none", borderRight: "none", borderBottom: "none", display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", textAlign: "left" }}
+                      >
+                        {teamMascots[i] ? <MascotIcon name={MASCOT_ICON_BY_EMOJI[teamMascots[i]!]} size={20} /> : <Icon name="close" size={14} color="#9CA3AF" />}
+                        <span style={{ fontSize: "12px", fontWeight: "700", color: "#374151", flex: 1 }}>
+                          {teamMascots[i] ? MASCOT_ICON_BY_EMOJI[teamMascots[i]!].replace(/^./, c => c.toUpperCase()) : "No mascot"}
+                        </span>
+                        <span style={{ fontSize: "12px", fontWeight: "800", color: color.bg }}>Change</span>
+                      </button>
+                    )}
                   </div>
                 );
               })}
@@ -1335,7 +1376,17 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
         </div>
 
         <ScoreBoard teams={teams} headingFont={theme.headingFont} />
-        <div style={{ textAlign: "center", marginTop: "10px", display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "20px" }}>
+        {/* Below ~480px these 4 utility buttons pack into a fixed 2x2 grid instead of each
+            wrapping onto its own full-width line — the flex-wrap layout above works fine on
+            desktop since 2-3 fit per row naturally, but on a phone every button's text is wide
+            enough to fill the row alone. */}
+        <style>{`
+          @media (max-width: 480px) {
+            .cc-team-actions-row { display: grid !important; grid-template-columns: repeat(2,1fr) !important; }
+            .cc-team-actions-row button { width: 100%; box-sizing: border-box; justify-content: center; }
+          }
+        `}</style>
+        <div className="cc-team-actions-row" style={{ textAlign: "center", marginTop: "10px", display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "20px" }}>
             <button
               onClick={handleSaveTeamsToClass} disabled={teamsSaveStatus === "saving"}
               title={activeClassId ? "Save current scores and teams to this class, in case you stop before finishing another game" : "Pick or create a class to save these teams to"}
