@@ -643,7 +643,15 @@ export function BattleshipGame({ questions, teams: propTeams, onUpdateScore, onE
           </div>
         )}
 
-        <div style={{ display: "grid", gridTemplateColumns: teamsGridCols(teams.length), gap: "12px", marginBottom: "14px" }}>
+        {/* Each board's grid has fixed-px cells (see below) that can't shrink to fit a squeezed
+            column — at 2+ boards per row that silently clips the last column on a phone instead
+            of wrapping, so boards stack to full-width one-per-row below ~480px instead. */}
+        <style>{`
+          @media (max-width: 480px) {
+            .cc-bship-boards { grid-template-columns: 1fr !important; }
+          }
+        `}</style>
+        <div className="cc-bship-boards" style={{ display: "grid", gridTemplateColumns: teamsGridCols(teams.length), gap: "12px", marginBottom: "14px" }}>
           {teams.map(team => {
             const teamHits = hits[team.id] || [];
             const teamMisses = misses[team.id] || [];
