@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { LESSONS } from "../../data/lessons";
-import { TOPIC_OPTIONS } from "../../data/topics";
 import { hexToRgba, type Theme } from "../../data/themes";
 import { getProfile } from "../../lib/profile";
 import { FlagLessonButton } from "./FlagLessonButton";
+import { LESSON_TOPICS, LEVEL_ORDER, LEVEL_COLOR, FOCUS_ORDER, FOCUS_LABEL } from "../../data/learnTopics";
+import { renderBold, renderMistake } from "../../data/learnTopicsRender";
+import { Icon } from "./Icon";
 
 type Props = {
   onBack: () => void;
@@ -12,13 +13,6 @@ type Props = {
   // from the game-select screen, scoped to the topics chosen for that game).
   filterTopicIds?: string[];
 };
-
-const LEVEL_ORDER = ["A1", "A2", "B1", "B2", "C1"];
-const LEVEL_COLOR: Record<string, string> = {
-  A1: "#22C55E", A2: "#84CC16", B1: "#F59E0B", B2: "#F97316", C1: "#EF4444",
-};
-const FOCUS_ORDER = ["grammar", "vocabulary", "topic"];
-const FOCUS_LABEL: Record<string, string> = { grammar: "Grammar", vocabulary: "Vocabulary", topic: "Themes" };
 
 // Hides interactive chrome and reveals the ink-economical print block when the browser's
 // print dialog is triggered — see the "learn-print-only" block below. Shrinking the page
@@ -35,23 +29,6 @@ const PRINT_CSS = `
   }
   .learn-print-only { display: none; }
 `;
-
-// Lesson content marks the key form in each line with **double asterisks** — render those as bold
-// rather than asking every lesson to hand-roll its own <strong> markup.
-function renderBold(text: string) {
-  const parts = text.split(/(\*\*[^*]+\*\*)/g);
-  return parts.map((part, i) =>
-    part.startsWith("**") && part.endsWith("**")
-      ? <strong key={i}>{part.slice(2, -2)}</strong>
-      : <span key={i}>{part}</span>
-  );
-}
-
-// Cross-reference LESSONS (the actual content) against TOPIC_OPTIONS (level/focus metadata) so
-// adding a new lesson later is a one-line addition to lessons.ts — this list rebuilds itself.
-const LESSON_TOPICS = Object.keys(LESSONS)
-  .map(id => ({ id, lesson: LESSONS[id], meta: TOPIC_OPTIONS.find(o => o.value === id) }))
-  .filter((t): t is { id: string; lesson: (typeof LESSONS)[string]; meta: NonNullable<typeof t.meta> } => Boolean(t.meta));
 
 // Plain, ink-economical rendering of one lesson for the print handout — borders instead of
 // colored fills, no theme colors, so it reads well on any printer (color or black & white).
@@ -91,7 +68,7 @@ function PrintableLesson({ t, logoUrl }: { t: (typeof LESSON_TOPICS)[number]; lo
         <div style={{ border: "1px solid #9CA3AF", borderRadius: "5px", padding: "7px 9px", marginTop: "5px" }}>
           <div style={{ fontWeight: "800", color: "#111827", fontSize: "10.5px", marginBottom: "4px", textTransform: "uppercase", letterSpacing: "0.03em" }}>Common mistakes</div>
           {t.lesson.commonMistakes.map((m, i) => (
-            <div key={i} style={{ fontSize: "10.5px", color: "#1F2937", marginBottom: i < t.lesson.commonMistakes.length - 1 ? "3px" : 0, lineHeight: 1.25 }}>{m}</div>
+            <div key={i} style={{ fontSize: "10.5px", color: "#1F2937", marginBottom: i < t.lesson.commonMistakes.length - 1 ? "3px" : 0, lineHeight: 1.25 }}>{renderMistake(m, "print")}</div>
           ))}
         </div>
       )}
@@ -125,15 +102,15 @@ export function LearnScreen({ onBack, theme, filterTopicIds }: Props) {
           <div className="learn-no-print" style={{ display: "flex", flexWrap: "wrap", gap: "10px", marginBottom: "20px" }}>
             <button
               onClick={filterTopicIds && visibleTopics.length === 1 ? onBack : () => setSelectedId(null)}
-              style={{ background: "none", border: `2px solid ${theme.accentSolid}`, color: theme.accentSolid, borderRadius: "10px", padding: "8px 16px", cursor: "pointer", fontWeight: "700", fontFamily: theme.headingFont }}
+              style={{ background: "none", border: `2px solid ${theme.accentSolid}`, color: theme.accentSolid, borderRadius: "10px", padding: "8px 16px", cursor: "pointer", fontWeight: "700", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px" }}
             >
-              {filterTopicIds && visibleTopics.length === 1 ? "← Back" : "← Back to Learn"}
+              <Icon name="back" size={13} /> {filterTopicIds && visibleTopics.length === 1 ? "Back" : "Back to Learn"}
             </button>
             <button
               onClick={() => window.print()}
-              style={{ background: theme.accentSolid, border: "none", color: "white", borderRadius: "10px", padding: "8px 16px", cursor: "pointer", fontWeight: "700", fontFamily: theme.headingFont }}
+              style={{ background: theme.accentSolid, border: "none", color: "white", borderRadius: "10px", padding: "8px 16px", cursor: "pointer", fontWeight: "700", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px" }}
             >
-              🖨️ Print
+              <Icon name="printer" size={14} /> Print
             </button>
             <FlagLessonButton topicId={selected.id} topicTitle={selected.lesson.title} theme={theme} />
           </div>
@@ -168,7 +145,7 @@ export function LearnScreen({ onBack, theme, filterTopicIds }: Props) {
               <div style={{ background: "#FFF7ED", border: "2px solid #FDBA74", borderRadius: "12px", padding: "14px 16px", marginTop: "8px" }}>
                 <div style={{ fontWeight: "800", color: "#9A3412", fontSize: "13px", marginBottom: "8px", textTransform: "uppercase", letterSpacing: "0.04em" }}>Common mistakes</div>
                 {selected.lesson.commonMistakes.map((m, i) => (
-                  <div key={i} style={{ fontSize: "13px", color: "#7C2D12", marginBottom: i < selected.lesson.commonMistakes.length - 1 ? "6px" : 0, lineHeight: 1.5 }}>{m}</div>
+                  <div key={i} style={{ fontSize: "13px", color: "#7C2D12", marginBottom: i < selected.lesson.commonMistakes.length - 1 ? "6px" : 0, lineHeight: 1.5 }}>{renderMistake(m)}</div>
                 ))}
               </div>
             )}
@@ -190,11 +167,11 @@ export function LearnScreen({ onBack, theme, filterTopicIds }: Props) {
     <div className="learn-print-bg" style={{ minHeight: "100vh", background: "#F0F9FF", padding: "20px", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
       <style>{PRINT_CSS}</style>
       <div className={filterTopicIds ? "learn-no-print" : undefined} style={{ maxWidth: "720px", margin: "0 auto" }}>
-        <button onClick={onBack} style={{ background: "none", border: `2px solid ${theme.accentSolid}`, color: theme.accentSolid, borderRadius: "10px", padding: "8px 16px", cursor: "pointer", fontWeight: "700", marginBottom: "20px", fontFamily: theme.headingFont }}>← Back</button>
+        <button onClick={onBack} style={{ background: "none", border: `2px solid ${theme.accentSolid}`, color: theme.accentSolid, borderRadius: "10px", padding: "8px 16px", cursor: "pointer", fontWeight: "700", marginBottom: "20px", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px" }}><Icon name="back" size={13} /> Back</button>
 
         <div style={{ textAlign: "center", marginBottom: "24px" }}>
-          <h2 style={{ fontSize: "30px", fontWeight: "900", color: theme.heroBg[0], margin: 0, fontFamily: theme.headingFont }}>
-            {filterTopicIds ? "🎓 Learn: This Game's Topics" : "🎓 Learn"}
+          <h2 style={{ fontSize: "30px", fontWeight: "900", color: theme.heroBg[0], margin: 0, fontFamily: theme.headingFont, display: "flex", alignItems: "center", justifyContent: "center", gap: "10px" }}>
+            <Icon name="learn" size={26} /> {filterTopicIds ? "Learn: This Game's Topics" : "Learn"}
           </h2>
           <p style={{ color: "#6B7280", marginTop: "8px" }}>
             {filterTopicIds ? "A quick refresher on the topics you picked for this game." : "Quick, no-fluff explanations — the same things the games actually test."}
@@ -202,9 +179,9 @@ export function LearnScreen({ onBack, theme, filterTopicIds }: Props) {
           {filterTopicIds && visibleTopics.length > 0 && (
             <button
               onClick={() => window.print()}
-              style={{ background: theme.accentSolid, border: "none", color: "white", borderRadius: "10px", padding: "8px 16px", cursor: "pointer", fontWeight: "700", fontFamily: theme.headingFont, marginTop: "14px" }}
+              style={{ background: theme.accentSolid, border: "none", color: "white", borderRadius: "10px", padding: "8px 16px", cursor: "pointer", fontWeight: "700", fontFamily: theme.headingFont, marginTop: "14px", display: "inline-flex", alignItems: "center", gap: "6px" }}
             >
-              🖨️ Print handouts ({visibleTopics.length})
+              <Icon name="printer" size={14} /> Print handouts ({visibleTopics.length})
             </button>
           )}
         </div>

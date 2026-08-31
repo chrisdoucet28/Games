@@ -1,17 +1,24 @@
 import { useEffect, useRef, useState } from "react";
+import { TeamIcon } from "../shared/TeamIcon";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 import {
-  openAuctionChannel, openSpyChannel, openWhackChannel, openHotSeatChannel, closeChannel,
+  openAuctionChannel, openSpyChannel, openWhackChannel, openHotSeatChannel, openOrderUpChannel, openRaceTrackChannel, openHillChannel, closeChannel,
   type AuctionStatePayload, type AuctionBetPayload, type SpyStatePayload,
   type WhackStatePayload, type WhackTurnReportPayload,
   type HotSeatStatePayload, type HotSeatActionPayload,
+  type OrderUpStatePayload, type OrderUpActionPayload,
+  type RaceTrackStatePayload, type RaceTrackActionPayload,
+  type HillStatePayload, type HillActionPayload,
 } from "../../lib/liveSession";
 import { PhoneAuctionView } from "./PhoneAuctionView";
 import { PhoneSpyView } from "./PhoneSpyView";
 import { PhoneWordWhackView } from "./PhoneWordWhackView";
 import { PhoneHotSeatView } from "./PhoneHotSeatView";
+import { PhoneOrderUpView } from "./PhoneOrderUpView";
+import { PhoneRaceTrackView } from "./PhoneRaceTrackView";
+import { PhoneKingOfHillView } from "./PhoneKingOfHillView";
 
-type Game = "auction" | "spy" | "whack" | "hotseat";
+type Game = "auction" | "spy" | "whack" | "hotseat" | "orderup" | "racetrack" | "hill";
 type Props = { code: string; game: Game };
 
 // No state broadcast for this long means the teacher's tab is gone (refreshed, closed the game,
@@ -66,6 +73,33 @@ const GAME_COPY: Record<Game, {
     endedTitle: "The game has ended!",
     endedBody: "Thanks for playing — check the big screen for final results.",
   },
+  orderup: {
+    joinEmoji: "🍽️",
+    // Dark, unlike PhoneOrderUpView's own light in-game background — this shell's arenaStyle
+    // hardcodes white text (see below), so every game's join/lobby/ended screen here needs a dark
+    // arenaBg regardless of that game's actual in-game palette.
+    arenaBg: "radial-gradient(ellipse at 50% -10%,#9D174D 0%,#4A044E 55%,#1A0313 100%)",
+    startingBody: "Get ready — waiting for your teacher to open the diner…",
+    endedEmoji: "🔔",
+    endedTitle: "Kitchen's closed!",
+    endedBody: "Thanks for playing — check the big screen for final results.",
+  },
+  racetrack: {
+    joinEmoji: "🔔",
+    arenaBg: "radial-gradient(ellipse at 40% 40%,#0E2040 0%,#060E1C 100%)",
+    startingBody: "Get ready — waiting for your teacher to start the race…",
+    endedEmoji: "🏁",
+    endedTitle: "The race is over!",
+    endedBody: "Thanks for playing — check the big screen for final results.",
+  },
+  hill: {
+    joinEmoji: "👑",
+    arenaBg: "radial-gradient(ellipse at 50% -10%,#DB2777 0%,#831843 45%,#1F0A1F 100%)",
+    startingBody: "Get ready — waiting for your teacher to start the game…",
+    endedEmoji: "👑",
+    endedTitle: "The game is over!",
+    endedBody: "Thanks for playing — check the big screen for final results.",
+  },
 };
 
 function loadClaimedTeamId(code: string): string | number | null {
@@ -88,8 +122,22 @@ function saveClaimedTeamId(code: string, teamId: string | number) {
   }
 }
 
+const GAME_TITLES: Record<Game, string> = {
+  auction: "Sentence Auction",
+  spy: "Spy Among Us",
+  whack: "Word Whack",
+  hotseat: "Hot Seat",
+  orderup: "Order Up",
+  racetrack: "Race Track",
+  hill: "King of the Hill",
+};
+
 export function PhoneJoinScreen({ code, game }: Props) {
   const copy = GAME_COPY[game];
+
+  useEffect(() => {
+    document.title = `Join ${GAME_TITLES[game]} - ClassCade`;
+  }, [game]);
   const arenaStyle: React.CSSProperties = {
     minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
     padding: "24px 20px", textAlign: "center", fontFamily: "'Segoe UI',system-ui,sans-serif",
@@ -102,7 +150,7 @@ export function PhoneJoinScreen({ code, game }: Props) {
   // when the effect first ran.
   const claimedTeamIdRef = useRef<string | number | null>(loadClaimedTeamId(code));
   const [claimedTeamId, setClaimedTeamId] = useState<string | number | null>(claimedTeamIdRef.current);
-  const [state, setState] = useState<AuctionStatePayload | SpyStatePayload | WhackStatePayload | HotSeatStatePayload | null>(null);
+  const [state, setState] = useState<AuctionStatePayload | SpyStatePayload | WhackStatePayload | HotSeatStatePayload | OrderUpStatePayload | RaceTrackStatePayload | HillStatePayload | null>(null);
   const [lastStateAt, setLastStateAt] = useState<number | null>(null);
   // Once true, stays true regardless of what happens to the connection afterward — a phone that
   // learns the game is over shouldn't ever fall back to "lost connection" messaging just because
@@ -115,11 +163,14 @@ export function PhoneJoinScreen({ code, game }: Props) {
     const channel = game === "spy" ? openSpyChannel(code)
       : game === "whack" ? openWhackChannel(code)
       : game === "hotseat" ? openHotSeatChannel(code)
+      : game === "orderup" ? openOrderUpChannel(code)
+      : game === "racetrack" ? openRaceTrackChannel(code)
+      : game === "hill" ? openHillChannel(code)
       : openAuctionChannel(code);
     channelRef.current = channel;
 
     channel.on("broadcast", { event: "state" }, ({ payload }) => {
-      const statePayload = payload as AuctionStatePayload | SpyStatePayload | WhackStatePayload | HotSeatStatePayload;
+      const statePayload = payload as AuctionStatePayload | SpyStatePayload | WhackStatePayload | HotSeatStatePayload | OrderUpStatePayload | RaceTrackStatePayload | HillStatePayload;
       setState(statePayload);
       setLastStateAt(Date.now());
       // Covers a phone that only joins/reconnects after the game already ended — it'll never see
@@ -171,6 +222,18 @@ export function PhoneJoinScreen({ code, game }: Props) {
   };
 
   const sendHotSeatAction = (payload: HotSeatActionPayload) => {
+    channelRef.current?.send({ type: "broadcast", event: "action", payload });
+  };
+
+  const sendOrderUpAction = (payload: OrderUpActionPayload) => {
+    channelRef.current?.send({ type: "broadcast", event: "action", payload });
+  };
+
+  const sendRaceTrackAction = (payload: RaceTrackActionPayload) => {
+    channelRef.current?.send({ type: "broadcast", event: "action", payload });
+  };
+
+  const sendHillAction = (payload: HillActionPayload) => {
     channelRef.current?.send({ type: "broadcast", event: "action", payload });
   };
 
@@ -230,7 +293,7 @@ export function PhoneJoinScreen({ code, game }: Props) {
                   opacity: takenByOther ? 0.5 : 1,
                 }}
               >
-                <span style={{ fontSize: "24px" }}>{t.mascot ?? t.color.emoji}</span>
+                <span style={{ fontSize: "24px" }}><TeamIcon team={t} size={24} /></span>
                 <span style={{ flex: 1, textAlign: "left" }}>{t.name}</span>
                 {takenByOther && <span style={{ fontSize: "12px", color: "#9CA3AF", fontWeight: "700" }}>Already joined</span>}
               </button>
@@ -248,7 +311,7 @@ export function PhoneJoinScreen({ code, game }: Props) {
     const team = state.roster.find(t => t.id === claimedTeamId);
     return (
       <div style={arenaStyle}>
-        <div style={{ fontSize: "36px", marginBottom: "6px" }}>{team?.mascot ?? team?.color.emoji ?? copy.joinEmoji}</div>
+        <div style={{ fontSize: "36px", marginBottom: "6px" }}>{team ? <TeamIcon team={team} size={36} /> : copy.joinEmoji}</div>
         <div style={{ fontWeight: "900", fontSize: "18px", color: "#FCD34D", marginBottom: "8px" }}>You're in as {team?.name}!</div>
         <div style={{ color: "#C4B5FD", fontSize: "14px", lineHeight: 1.6 }}>{copy.startingBody}</div>
       </div>
@@ -263,6 +326,15 @@ export function PhoneJoinScreen({ code, game }: Props) {
   }
   if (game === "hotseat") {
     return <PhoneHotSeatView state={state as HotSeatStatePayload} teamId={claimedTeamId} onAction={sendHotSeatAction} />;
+  }
+  if (game === "orderup") {
+    return <PhoneOrderUpView state={state as OrderUpStatePayload} teamId={claimedTeamId} onAction={sendOrderUpAction} />;
+  }
+  if (game === "racetrack") {
+    return <PhoneRaceTrackView state={state as RaceTrackStatePayload} teamId={claimedTeamId} onAction={sendRaceTrackAction} />;
+  }
+  if (game === "hill") {
+    return <PhoneKingOfHillView state={state as HillStatePayload} teamId={claimedTeamId} onAction={sendHillAction} />;
   }
   return <PhoneAuctionView state={state as AuctionStatePayload} teamId={claimedTeamId} onBet={sendBet} />;
 }

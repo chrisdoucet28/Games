@@ -1,11 +1,16 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { QRCodeSVG } from "qrcode.react";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 import type { GameProps, Team } from "../../types";
-import { teamsGridCols, GAME_MODES } from "../../data/constants";
-import { denseRank, medalForRank } from "../../utils/ranking";
+import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
+import { denseRank } from "../../utils/ranking";
+import { RankBadge } from "../shared/RankBadge";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
+import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
+import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
+import { MASCOT_ICON_BY_EMOJI } from "../shared/TeamIcon";
+import { MascotIcon } from "../shared/MascotArt";
+import { Icon, type IconName } from "../shared/Icon";
 import { AUCTION_TUTORIAL_STEPS } from "../../data/tutorials/auction";
 import {
   generateSessionCode, openAuctionChannel, closeChannel,
@@ -34,7 +39,7 @@ const AMBIENT_BITS = Array.from({ length: 14 }, (_, i) => ({
   size: 10 + (i % 3) * 5,
   dur: 5 + (i % 5),
   delay: (i % 6) * 0.6,
-  emoji: ["✨", "🪙", "💰", "⭐"][i % 4],
+  iconName: (["sparkle", "coin", "wallet", "star"] as const satisfies readonly IconName[])[i % 4],
 }));
 
 const STYLE_TAG = (
@@ -58,23 +63,24 @@ function AmbientBackdrop() {
     <div style={{ position: "absolute", inset: 0, pointerEvents: "none", overflow: "hidden" }}>
       {AMBIENT_BITS.map((b, i) => (
         <div key={i} style={{
-          position: "absolute", left: `${b.left}%`, top: `${b.top}%`, fontSize: `${b.size}px`,
+          position: "absolute", left: `${b.left}%`, top: `${b.top}%`, color: "#FCD34D", opacity: 0.55,
           animation: `auctionDrift ${b.dur}s ease-in-out infinite ${b.delay}s`,
-        }}>{b.emoji}</div>
+        }}><Icon name={b.iconName} size={b.size} /></div>
       ))}
     </div>
   );
 }
 
-function MascotAvatar({ mascot, color, size = 30 }: { mascot?: string; color: string; size?: number }) {
+function MascotAvatar({ mascot, color, size = 30 }: { mascot?: string | null; color: string; size?: number }) {
+  const iconName = mascot ? MASCOT_ICON_BY_EMOJI[mascot] : undefined;
   return (
     <span style={{
       display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
       width: `${size}px`, height: `${size}px`, borderRadius: "50%",
       background: `radial-gradient(circle at 35% 30%, ${color}66, #1E1033)`,
-      border: `2px solid ${color}`, fontSize: `${size * 0.55}px`,
+      border: `2px solid ${color}`,
       boxShadow: `0 0 8px ${color}77`,
-    }}>{mascot}</span>
+    }}>{iconName && <MascotIcon name={iconName} size={Math.round(size * 0.8)} />}</span>
   );
 }
 
@@ -108,8 +114,8 @@ function PhoneModeWaitingRoom({ teams, bets, connectedTeamIds, isBroke, allBetsP
 }) {
   return (
     <div>
-      <p style={{ textAlign: "center", fontWeight: "800", color: "#DDD6FE", fontSize: "15px", marginBottom: "14px" }}>
-        📱 Teams are betting privately on their phones
+      <p style={{ textAlign: "center", fontWeight: "800", color: "#DDD6FE", fontSize: "15px", marginBottom: "14px", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}>
+        <Icon name="phone" size={14} /> Teams are betting privately on their phones
       </p>
       <div style={{ display: "grid", gridTemplateColumns: teamsGridCols(teams.length), gap: "12px", marginBottom: "18px" }}>
         {teams.map(t => {
@@ -117,18 +123,18 @@ function PhoneModeWaitingRoom({ teams, bets, connectedTeamIds, isBroke, allBetsP
           const connected = connectedTeamIds.has(t.id);
           const b = bets[t.id];
           const locked = !!b?.vote && !!b?.amount;
-          let statusLabel = "⏳ Waiting…";
+          let statusLabel: React.ReactNode = <><Icon name="hourglass" size={12} /> Waiting…</>;
           let statusColor = "#9CA3AF";
-          if (broke) { statusLabel = "💤 Sitting out"; statusColor = "#6B7280"; }
-          else if (!connected) { statusLabel = "💤 Not connected"; statusColor = "#6B7280"; }
-          else if (locked) { statusLabel = "🔒 Locked in"; statusColor = "#4ADE80"; }
+          if (broke) { statusLabel = <><Icon name="sleep" size={12} /> Sitting out</>; statusColor = "#6B7280"; }
+          else if (!connected) { statusLabel = <><Icon name="sleep" size={12} /> Not connected</>; statusColor = "#6B7280"; }
+          else if (locked) { statusLabel = <><Icon name="lock" size={12} /> Locked in</>; statusColor = "#4ADE80"; }
           return (
             <div key={t.id} style={{ background: `linear-gradient(160deg,${t.color.dark}44,#150C28)`, border: `2px solid ${t.color.bg}`, borderRadius: "16px", padding: "14px", textAlign: "center" }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", marginBottom: "8px" }}>
-                <MascotAvatar mascot={t.mascot ?? t.color.emoji} color={t.color.bg} />
+                <MascotAvatar mascot={t.mascot} color={t.color.bg} />
                 <span style={{ fontWeight: "900", color: "white", fontSize: "15px" }}>{t.name}</span>
               </div>
-              <div style={{ fontWeight: "800", fontSize: "13px", color: statusColor }}>{statusLabel}</div>
+              <div style={{ fontWeight: "800", fontSize: "13px", color: statusColor, display: "flex", alignItems: "center", justifyContent: "center", gap: "4px" }}>{statusLabel}</div>
             </div>
           );
         })}
@@ -136,17 +142,19 @@ function PhoneModeWaitingRoom({ teams, bets, connectedTeamIds, isBroke, allBetsP
       <div style={{ textAlign: "center" }}>
         {activeTeamsEmpty ? (
           <button onClick={onReveal} className="auction-btn" style={{
+            display: "inline-flex", alignItems: "center", gap: "8px",
             background: "linear-gradient(135deg,#4C1D95,#7C3AED)", color: "white", border: "none", borderRadius: "14px",
             padding: "14px 36px", fontSize: "17px", fontWeight: "900", cursor: "pointer", transition: "transform 0.15s ease"
-          }}>➡️ Skip to Revival Round</button>
+          }}><Icon name="next" size={18} /> Skip to Revival Round</button>
         ) : (
           <>
             <button onClick={onReveal} disabled={!allBetsPlaced} className="auction-btn" style={{
+              display: "inline-flex", alignItems: "center", gap: "8px",
               background: allBetsPlaced ? "linear-gradient(135deg,#78350F,#F7C948)" : "#4B5563",
               color: allBetsPlaced ? "#150F00" : "#9CA3AF", border: "none", borderRadius: "14px",
               padding: "14px 36px", fontSize: "17px", fontWeight: "900", transition: "transform 0.15s ease",
               cursor: allBetsPlaced ? "pointer" : "not-allowed"
-            }}>🔨 Reveal Answer</button>
+            }}><Icon name="hammer" size={18} /> Reveal Answer</button>
             {!allBetsPlaced && <p style={{ color: "#9CA3AF", fontSize: "13px", marginTop: "8px" }}>Waiting for all connected teams to lock in their bet</p>}
           </>
         )}
@@ -427,7 +435,7 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
       <div style={{ position: "relative", zIndex: 1 }}>
         <div style={{ position: "relative", background: "linear-gradient(160deg,#3B0764,#1E1033)", border: "2px solid #FCD34D66", borderRadius: "20px", padding: "28px 24px", marginBottom: "10px", color: "white", maxWidth: "520px", margin: "0 auto 10px", boxShadow: "0 0 50px rgba(124,58,237,0.45)", overflow: "hidden" }}>
           <div style={{ position: "absolute", top: "-70px", left: "50%", transform: "translateX(-50%)", width: "280px", height: "220px", background: "radial-gradient(ellipse at 50% 0%,rgba(253,224,71,0.28),transparent 70%)", animation: "spotlightPulse 3s ease-in-out infinite" }} />
-          <div style={{ position: "relative", fontSize: "36px", marginBottom: "10px" }}>🔨</div>
+          <div style={{ position: "relative", marginBottom: "10px" }}><Icon name="hammer" size={36} /></div>
           <div style={{ position: "relative", fontWeight: "900", fontSize: "20px", marginBottom: "10px", color: "#FCD34D" }}>Sentence Auction</div>
           <div style={{ position: "relative", fontSize: "15px", lineHeight: 1.7, opacity: 0.95 }}>
             A sentence goes up for auction — <strong style={{ color: "#FCD34D" }}>correct or incorrect?</strong> Secretly pick your verdict and <strong style={{ color: "#FCD34D" }}>bet points</strong> on it.<br />
@@ -440,7 +448,7 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
         <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "24px" }}>
           {teams.map(t => (
             <div key={t.id} style={{ display: "flex", alignItems: "center", gap: "8px", background: `linear-gradient(160deg,${t.color.dark}55,#1E1033)`, border: `2px solid ${t.color.bg}`, borderRadius: "14px", padding: "8px 18px 8px 10px", fontWeight: "800", fontSize: "14px", color: "white" }}>
-              <MascotAvatar mascot={t.mascot ?? t.color.emoji} color={t.color.bg} />
+              <MascotAvatar mascot={t.mascot} color={t.color.bg} />
               {t.name}
             </div>
           ))}
@@ -454,13 +462,15 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
                 border: `2px solid ${inputMode === "screen" ? "#FCD34D" : "rgba(255,255,255,0.2)"}`,
                 background: inputMode === "screen" ? "rgba(253,224,71,0.15)" : "rgba(255,255,255,0.05)",
                 color: inputMode === "screen" ? "#FCD34D" : "#C4B5FD",
-              }}>🖥️ Play on Screen</button>
+                display: "inline-flex", alignItems: "center", gap: "6px",
+              }}><Icon name="screen" size={14} /> Play on Screen</button>
               <button onClick={handlePickPhoneMode} style={{
                 padding: "10px 20px", borderRadius: "12px", fontWeight: "800", fontSize: "14px", cursor: "pointer",
                 border: `2px solid ${inputMode === "phone" ? "#FCD34D" : "rgba(255,255,255,0.2)"}`,
                 background: inputMode === "phone" ? "rgba(253,224,71,0.15)" : "rgba(255,255,255,0.05)",
                 color: inputMode === "phone" ? "#FCD34D" : "#C4B5FD",
-              }}>📱 Play on Phones</button>
+                display: "inline-flex", alignItems: "center", gap: "6px",
+              }}><Icon name="phone" size={14} /> Play on Phones</button>
             </div>
           </div>
         )}
@@ -468,41 +478,30 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
         {introStep === "qr" && sessionCode && (() => {
           const joinUrl = `${window.location.origin}${window.location.pathname}?join=${sessionCode}`;
           return (
-            <div style={{ background: "linear-gradient(160deg,#3B0764,#1E1033)", border: "2px solid #FCD34D66", borderRadius: "20px", padding: "20px", marginBottom: "20px", maxWidth: "360px", marginLeft: "auto", marginRight: "auto" }}>
-              <div style={{ fontWeight: "800", fontSize: "14px", color: "#FCD34D", marginBottom: "12px" }}>📱 Scan to join, or go to the site and enter this code:</div>
-              <div style={{ background: "white", borderRadius: "12px", padding: "12px", display: "inline-block" }}>
-                <QRCodeSVG value={joinUrl} size={160} />
-              </div>
-              <div style={{ fontSize: "28px", fontWeight: "900", letterSpacing: "0.1em", color: "white", margin: "12px 0" }}>{sessionCode}</div>
-              <div style={{ display: "flex", flexDirection: "column", gap: "6px", marginBottom: "10px" }}>
-                {teams.map(t => (
-                  <div key={t.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "rgba(255,255,255,0.06)", borderRadius: "8px", padding: "6px 10px", fontSize: "13px" }}>
-                    <span>{t.mascot ?? t.color.emoji} {t.name}</span>
-                    <span style={{ color: connectedTeamIds.has(t.id) ? "#4ADE80" : "#6B7280", fontWeight: "700" }}>
-                      {connectedTeamIds.has(t.id) ? "✅ Connected" : "⏳ Waiting…"}
-                    </span>
-                  </div>
-                ))}
-              </div>
-              <button onClick={handlePickScreenMode} style={{ background: "none", border: "none", color: "#9CA3AF", fontSize: "12px", fontWeight: "700", cursor: "pointer", textDecoration: "underline" }}>
-                Switch back to Play on Screen
-              </button>
-            </div>
+            <PhoneJoinPanel
+              sessionCode={sessionCode} joinUrl={joinUrl} teams={teams} connectedTeamIds={connectedTeamIds}
+              accent="#FCD34D" panelBg="linear-gradient(160deg,#3B0764,#1E1033)" borderColor="#FCD34D66"
+              footer={
+                <button onClick={handlePickScreenMode} style={{ background: "none", border: "none", color: "#9CA3AF", fontSize: "12px", fontWeight: "700", cursor: "pointer", textDecoration: "underline" }}>
+                  Switch back to Play on Screen
+                </button>
+              }
+            />
           );
         })()}
 
-        <button onClick={() => setShowHowTo(true)} style={{ display: "block", margin: "0 auto 14px", background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
-          ❓ How to Play
+        <button onClick={() => setShowHowTo(true)} style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginBottom: "14px", background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
+          <Icon name="help" size={15} /> How to Play
         </button>
         {showHowTo && (
           <HowToPlayModal
-            gameName={GM.name} gameIcon={GM.icon} accentColor={GM.color}
+            gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color}
             steps={AUCTION_TUTORIAL_STEPS}
             onClose={() => setShowHowTo(false)}
           />
         )}
-        <button onClick={() => setPhase("betting")} className="auction-btn" style={{ background: "linear-gradient(135deg,#78350F,#F7C948)", color: "#150F00", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(247,201,72,0.4)", transition: "transform 0.15s ease" }}>
-          🔨 Start the Auction!
+        <button onClick={() => setPhase("betting")} className="auction-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg,#78350F,#F7C948)", color: "#150F00", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(247,201,72,0.4)", transition: "transform 0.15s ease" }}>
+          <Icon name="hammer" size={20} /> Start the Auction!
         </button>
       </div>
     </div>
@@ -522,14 +521,14 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
         <AmbientBackdrop />
         {STYLE_TAG}
         <div style={{ position: "relative", zIndex: 1 }}>
-          <div style={{ fontSize: "44px", marginBottom: "6px" }}>🔨</div>
+          <div style={{ marginBottom: "6px" }}><Icon name="hammer" size={44} color="#FCD34D" /></div>
           <div style={{ fontWeight: "900", fontSize: "22px", color: "#FCD34D", marginBottom: "16px" }}>{headline}</div>
           <div style={{ display: "grid", gridTemplateColumns: teamsGridCols(teams.length), gap: "10px", margin: "0 auto 20px", maxWidth: "760px" }}>
             {ranking.map(({ item: t, rank, value }) => (
               <div key={t.id} style={{ background: `linear-gradient(160deg,${t.color.dark}55,#1E1033)`, border: `2px solid ${t.color.bg}`, borderRadius: "14px", padding: "12px" }}>
-                <div style={{ fontSize: "22px" }}>{medalForRank(rank)}</div>
+                <div><RankBadge rank={rank} size={22} /></div>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", marginTop: "4px" }}>
-                  <MascotAvatar mascot={t.mascot ?? t.color.emoji} color={t.color.bg} size={24} />
+                  <MascotAvatar mascot={t.mascot} color={t.color.bg} size={24} />
                   <span style={{ fontWeight: "800", color: "white", fontSize: "14px" }}>{t.name}</span>
                 </div>
                 <div style={{ color: "#FCD34D", fontWeight: "900", fontSize: "16px", marginTop: "4px" }}>{value} pts</div>
@@ -541,7 +540,7 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
               </div>
             ))}
           </div>
-          <button onClick={flushAndEnd} className="auction-btn" style={{ background: "linear-gradient(135deg,#78350F,#F7C948)", color: "#150F00", border: "none", borderRadius: "14px", padding: "14px 36px", fontSize: "17px", fontWeight: "900", cursor: "pointer", transition: "transform 0.15s ease" }}>🏁 End Game</button>
+          <button onClick={flushAndEnd} className="auction-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg,#78350F,#F7C948)", color: "#150F00", border: "none", borderRadius: "14px", padding: "14px 36px", fontSize: "17px", fontWeight: "900", cursor: "pointer", transition: "transform 0.15s ease" }}><Icon name="checkeredFlag" size={18} /> End Game</button>
         </div>
       </div>
     );
@@ -551,12 +550,19 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
     <div style={arenaStyle}>
       <AmbientBackdrop />
       {STYLE_TAG}
+      {inputMode === "phone" && sessionCode && (
+        <PhoneReconnectBadge
+          sessionCode={sessionCode} joinUrl={`${window.location.origin}${window.location.pathname}?join=${sessionCode}`}
+          teams={teams} connectedTeamIds={connectedTeamIds}
+          accent="#FCD34D" panelBg="linear-gradient(160deg,#3B0764,#1E1033)" borderColor="#FCD34D66"
+        />
+      )}
       <div style={{ position: "relative", zIndex: 1 }}>
         <div style={{ position: "relative", background: "linear-gradient(160deg,#3B0764,#1E1033)", border: "2px solid #FCD34D55", borderRadius: "18px", padding: "22px 24px", marginBottom: "18px", textAlign: "center", boxShadow: "0 0 40px rgba(124,58,237,0.35)", overflow: "hidden" }}>
           <div style={{ position: "absolute", top: "-60px", left: "50%", transform: "translateX(-50%)", width: "260px", height: "200px", background: "radial-gradient(ellipse at 50% 0%,rgba(253,224,71,0.22),transparent 70%)", animation: "spotlightPulse 3s ease-in-out infinite" }} />
           <div style={{ position: "relative", display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
-            <span style={{ background: "rgba(253,224,71,0.15)", border: "1px solid #FCD34D55", color: "#FCD34D", padding: "3px 12px", borderRadius: "20px", fontSize: "12px", fontWeight: "700" }}>🔨 Lot №{qi + 1} of {questions.length}</span>
-            <span style={{ background: "rgba(255,255,255,0.12)", color: "white", padding: "3px 12px", borderRadius: "20px", fontSize: "12px", fontWeight: "700" }}>🏛️ Sentence Auction</span>
+            <span style={{ background: "rgba(253,224,71,0.15)", border: "1px solid #FCD34D55", color: "#FCD34D", padding: "3px 12px", borderRadius: "20px", fontSize: "12px", fontWeight: "700", display: "inline-flex", alignItems: "center", gap: "5px" }}><Icon name="hammer" size={12} /> Lot №{qi + 1} of {questions.length}</span>
+            <span style={{ background: "rgba(255,255,255,0.12)", color: "white", padding: "3px 12px", borderRadius: "20px", fontSize: "12px", fontWeight: "700", display: "inline-flex", alignItems: "center", gap: "5px" }}><Icon name="column" size={12} /> Sentence Auction</span>
           </div>
           <p style={{ position: "relative", fontSize: "clamp(16px,3vw,22px)", fontWeight: "800", color: "white", lineHeight: 1.5, margin: "0 0 8px", fontStyle: "italic" }}>
             "{s.sentence}"
@@ -584,10 +590,10 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
                     <div key={t.id} style={{ position: "relative", background: "linear-gradient(160deg,#1F1B2E,#120E1E)", border: "3px solid #4B5563", borderRadius: "16px", padding: "14px", opacity: 0.85, textAlign: "center", overflow: "hidden" }}>
                       <div style={{ position: "absolute", top: "12px", right: "-32px", background: "#DC2626", color: "white", fontWeight: "900", fontSize: "10px", letterSpacing: "0.05em", padding: "3px 36px", transform: "rotate(35deg)", boxShadow: "0 2px 6px rgba(0,0,0,0.5)", animation: "ribbonPop 0.4s ease-out" }}>BANKRUPT</div>
                       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", marginBottom: "8px" }}>
-                        <MascotAvatar mascot={t.mascot ?? t.color.emoji} color="#6B7280" />
+                        <MascotAvatar mascot={t.mascot} color="#6B7280" />
                         <span style={{ fontWeight: "900", color: "#D1D5DB", fontSize: "15px" }}>{t.name}</span>
                       </div>
-                      <div style={{ fontSize: "28px", marginBottom: "6px" }}>💸</div>
+                      <div style={{ marginBottom: "6px" }}><Icon name="wallet" size={28} color="#6B7280" /></div>
                       <div style={{ fontWeight: "800", color: "#9CA3AF", fontSize: "13px", marginBottom: "4px" }}>Sitting out this round</div>
                       <div style={{ fontWeight: "700", color: "#4ADE80", fontSize: "12px" }}>+25 pts revival next round!</div>
                     </div>
@@ -598,7 +604,7 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
                   <div key={t.id} style={{ background: `linear-gradient(160deg,${t.color.dark}44,#150C28)`, border: `2px solid ${t.color.bg}`, borderRadius: "16px", padding: "14px", animation: "cardIn 0.3s ease-out", boxShadow: `0 0 14px ${t.color.bg}33` }}>
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "10px" }}>
                       <span style={{ display: "flex", alignItems: "center", gap: "8px", fontWeight: "900", color: "white", fontSize: "15px" }}>
-                        <MascotAvatar mascot={t.mascot ?? t.color.emoji} color={t.color.bg} />
+                        <MascotAvatar mascot={t.mascot} color={t.color.bg} />
                         {t.name}
                       </span>
                       <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
@@ -611,13 +617,15 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
                       <button onClick={() => setBetField(t.id, "vote", "true")} className="auction-btn" style={{
                         flex: 1, padding: "8px 4px", fontWeight: "800", fontSize: "14px", border: `2px solid ${t.color.bg}`, borderRadius: "10px", cursor: "pointer", transition: "transform 0.15s ease",
                         background: b.vote === "true" ? "#22C55E" : "rgba(255,255,255,0.06)",
-                        color: b.vote === "true" ? "white" : "#E5E7EB"
-                      }}>✅ TRUE</button>
+                        color: b.vote === "true" ? "white" : "#E5E7EB",
+                        display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "5px",
+                      }}><Icon name="check" size={13} /> TRUE</button>
                       <button onClick={() => setBetField(t.id, "vote", "false")} className="auction-btn" style={{
                         flex: 1, padding: "8px 4px", fontWeight: "800", fontSize: "14px", border: `2px solid ${t.color.bg}`, borderRadius: "10px", cursor: "pointer", transition: "transform 0.15s ease",
                         background: b.vote === "false" ? "#EF4444" : "rgba(255,255,255,0.06)",
-                        color: b.vote === "false" ? "white" : "#E5E7EB"
-                      }}>❌ FALSE</button>
+                        color: b.vote === "false" ? "white" : "#E5E7EB",
+                        display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "5px",
+                      }}><Icon name="close" size={12} /> FALSE</button>
                     </div>
 
                     <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
@@ -633,13 +641,14 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
                         padding: "5px 10px", fontWeight: "800", fontSize: "12px", transition: "transform 0.15s ease, box-shadow 0.15s ease",
                         border: `2px solid #FB923C`, borderRadius: "8px", cursor: "pointer",
                         background: b.amount === (auctionBank[t.id] ?? 0) ? "linear-gradient(135deg,#C2410C,#FB923C)" : "rgba(251,146,60,0.12)",
-                        color: b.amount === (auctionBank[t.id] ?? 0) ? "white" : "#FDBA74"
-                      }}>🔥 ALL IN</button>
+                        color: b.amount === (auctionBank[t.id] ?? 0) ? "white" : "#FDBA74",
+                        display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "4px",
+                      }}><Icon name="flame" size={12} /> ALL IN</button>
                     </div>
 
                     {b.vote && b.amount && b.amount > 0 && (
-                      <div style={{ marginTop: "8px", fontSize: "12px", fontWeight: "700", color: "#FCD34D", background: "rgba(0,0,0,0.25)", borderRadius: "8px", padding: "5px 8px" }}>
-                        Betting {b.amount}pts on {b.vote === "true" ? "TRUE ✅" : "FALSE ❌"}
+                      <div style={{ marginTop: "8px", fontSize: "12px", fontWeight: "700", color: "#FCD34D", background: "rgba(0,0,0,0.25)", borderRadius: "8px", padding: "5px 8px", display: "flex", alignItems: "center", justifyContent: "center", gap: "4px" }}>
+                        Betting {b.amount}pts on {b.vote === "true" ? <>TRUE <Icon name="check" size={11} /></> : <>FALSE <Icon name="close" size={10} /></>}
                       </div>
                     )}
                   </div>
@@ -651,18 +660,20 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
                 <>
                   <p style={{ color: "#C4B5FD", fontSize: "13px", marginBottom: "8px" }}>All teams are out — proceed to next round!</p>
                   <button onClick={resolveRound} className="auction-btn" style={{
+                    display: "inline-flex", alignItems: "center", gap: "8px",
                     background: "linear-gradient(135deg,#4C1D95,#7C3AED)", color: "white", border: "none", borderRadius: "14px",
                     padding: "14px 36px", fontSize: "17px", fontWeight: "900", cursor: "pointer", transition: "transform 0.15s ease"
-                  }}>➡️ Skip to Revival Round</button>
+                  }}><Icon name="next" size={18} /> Skip to Revival Round</button>
                 </>
               ) : (
                 <>
                   <button onClick={resolveRound} disabled={!allBetsPlaced} className="auction-btn" style={{
+                    display: "inline-flex", alignItems: "center", gap: "8px",
                     background: allBetsPlaced ? "linear-gradient(135deg,#78350F,#F7C948)" : "#4B5563",
                     color: allBetsPlaced ? "#150F00" : "#9CA3AF", border: "none", borderRadius: "14px",
                     padding: "14px 36px", fontSize: "17px", fontWeight: "900", transition: "transform 0.15s ease",
                     cursor: allBetsPlaced ? "pointer" : "not-allowed"
-                  }}>🔨 Reveal Answer</button>
+                  }}><Icon name="hammer" size={18} /> Reveal Answer</button>
                   {!allBetsPlaced && <p style={{ color: "#9CA3AF", fontSize: "13px", marginTop: "8px" }}>All active teams must pick TRUE/FALSE and a bet amount</p>}
                 </>
               )}
@@ -678,7 +689,7 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
               borderRadius: "18px", padding: "18px 20px", textAlign: "center", marginBottom: "16px", overflow: "hidden",
               boxShadow: `0 0 30px ${s.isCorrect ? "#22C55E33" : "#EF444433"}`,
             }}>
-              <div style={{ fontSize: "40px", display: "inline-block", transformOrigin: "80% 90%", animation: "gavelSwing 0.6s ease-out" }}>🔨</div>
+              <div style={{ display: "inline-block", transformOrigin: "80% 90%", animation: "gavelSwing 0.6s ease-out" }}><Icon name="hammer" size={40} /></div>
               <div>
                 <span style={{
                   display: "inline-block", fontWeight: "900", fontSize: "24px", letterSpacing: "0.06em",
@@ -708,10 +719,10 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
                   return (
                     <div key={r.teamId} style={{ background: "linear-gradient(160deg,#1F1B2E,#120E1E)", border: "3px solid #4B5563", borderRadius: "14px", padding: "12px", textAlign: "center", opacity: 0.85 }}>
                       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", marginBottom: "6px" }}>
-                        <MascotAvatar mascot={t.mascot ?? t.color.emoji} color="#6B7280" size={24} />
+                        <MascotAvatar mascot={t.mascot} color="#6B7280" size={24} />
                         <span style={{ fontWeight: "900", fontSize: "15px", color: "#D1D5DB" }}>{t.name}</span>
                       </div>
-                      <div style={{ fontSize: "22px", marginBottom: "4px" }}>💸</div>
+                      <div style={{ marginBottom: "4px" }}><Icon name="wallet" size={22} color="#6B7280" /></div>
                       <div style={{ fontSize: "13px", color: "#9CA3AF", fontWeight: "700" }}>Sat out</div>
                       <div style={{ fontSize: "12px", color: "#4ADE80", fontWeight: "700", marginTop: "4px" }}>+25 pts next round!</div>
                     </div>
@@ -726,14 +737,14 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
                     borderRadius: "14px", padding: "12px", textAlign: "center",
                   }}>
                     {r.won && Array.from({ length: 5 }).map((_, i) => (
-                      <div key={i} style={{ position: "absolute", top: "6px", left: `${14 + i * 18}%`, fontSize: "13px", animation: `coinFall 0.9s ease-in ${i * 0.08}s both` }}>🪙</div>
+                      <div key={i} style={{ position: "absolute", top: "6px", left: `${14 + i * 18}%`, animation: `coinFall 0.9s ease-in ${i * 0.08}s both` }}><Icon name="coin" size={13} color="#FCD34D" /></div>
                     ))}
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", marginBottom: "6px" }}>
-                      <MascotAvatar mascot={t.mascot ?? t.color.emoji} color={t.color.bg} size={24} />
+                      <MascotAvatar mascot={t.mascot} color={t.color.bg} size={24} />
                       <span style={{ fontWeight: "900", fontSize: "15px", color: "white" }}>{t.name}</span>
                     </div>
                     <div style={{ fontSize: "13px", marginBottom: "6px", color: "#D1D5DB" }}>
-                      Voted: <strong>{r.vote === "true" ? "TRUE ✅" : "FALSE ❌"}</strong> · Bet: <strong>{r.amount}pts</strong>
+                      Voted: <strong style={{ display: "inline-flex", alignItems: "center", gap: "3px" }}>{r.vote === "true" ? <>TRUE <Icon name="check" size={11} /></> : <>FALSE <Icon name="close" size={10} /></>}</strong> · Bet: <strong>{r.amount}pts</strong>
                     </div>
                     <div style={{ fontWeight: "900", fontSize: "22px", color: r.won ? "#4ADE80" : "#F87171" }}>
                       {r.won ? `+${r.delta}` : `${r.delta}`}
@@ -750,9 +761,10 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
 
             <div style={{ textAlign: "center" }}>
               <button onClick={nextRound} className="auction-btn" style={{
+                display: "inline-flex", alignItems: "center", gap: "8px",
                 background: "linear-gradient(135deg,#78350F,#F7C948)", color: "#150F00", border: "none",
                 borderRadius: "14px", padding: "14px 36px", fontSize: "17px", fontWeight: "900", cursor: "pointer", transition: "transform 0.15s ease"
-              }}>{qi + 1 >= questions.length ? "🏆 See Final Results" : "➡️ Next Sentence"}</button>
+              }}>{qi + 1 >= questions.length ? <><Icon name="trophy" size={18} /> See Final Results</> : <><Icon name="next" size={18} /> Next Sentence</>}</button>
             </div>
           </div>
         )}

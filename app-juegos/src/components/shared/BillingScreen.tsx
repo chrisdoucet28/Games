@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import type { Subscription } from "../../types";
 import { getSubscription, isPaidStatus, startCheckout, openBillingPortal, redeemPromoCode } from "../../lib/subscription";
 import { hexToRgba, type Theme } from "../../data/themes";
+import { Icon } from "./Icon";
 
 type Props = {
   onBack: () => void;
@@ -73,10 +74,10 @@ export function BillingScreen({ onBack, theme, subscription, onSubscriptionChang
   return (
     <div style={{ minHeight: "100vh", background: "#F0F9FF", padding: "20px", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
       <div style={{ maxWidth: "480px", margin: "0 auto" }}>
-        <button onClick={onBack} style={{ background: "none", border: `2px solid ${theme.accentSolid}`, color: theme.accentSolid, borderRadius: "10px", padding: "8px 16px", cursor: "pointer", fontWeight: "700", marginBottom: "20px", fontFamily: theme.headingFont }}>← Back</button>
+        <button onClick={onBack} style={{ background: "none", border: `2px solid ${theme.accentSolid}`, color: theme.accentSolid, borderRadius: "10px", padding: "8px 16px", cursor: "pointer", fontWeight: "700", marginBottom: "20px", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px" }}><Icon name="back" size={13} /> Back</button>
 
         <div style={{ textAlign: "center", marginBottom: "24px" }}>
-          <h2 style={{ fontSize: "30px", fontWeight: "900", color: theme.heroBg[0], margin: 0, fontFamily: theme.headingFont }}>💎 My Plan</h2>
+          <h2 style={{ fontSize: "30px", fontWeight: "900", color: theme.heroBg[0], margin: 0, fontFamily: theme.headingFont, display: "flex", alignItems: "center", justifyContent: "center", gap: "10px" }}><Icon name="gem" size={26} /> My Plan</h2>
           <p style={{ color: "#6B7280", marginTop: "8px" }}>
             {paid ? "You have full access — unlimited classes and up to 5 teams." : "Free plan: 1 class, up to 2 teams per game."}
           </p>
@@ -84,7 +85,7 @@ export function BillingScreen({ onBack, theme, subscription, onSubscriptionChang
 
         {justReturnedFrom === "success" && (
           <div style={{ background: "#DCFCE7", color: "#14532D", padding: "12px 16px", borderRadius: "12px", fontSize: "14px", marginBottom: "16px", fontWeight: "700", textAlign: "center" }}>
-            {paid ? "🎉 You're upgraded! Thanks for supporting ClassCade." : "Payment received — confirming your upgrade, this can take a few seconds. Refresh if it doesn't update shortly."}
+            {paid ? <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}><Icon name="party" size={15} /> You're upgraded! Thanks for supporting ClassCade.</span> : "Payment received — confirming your upgrade, this can take a few seconds. Refresh if it doesn't update shortly."}
           </div>
         )}
         {justReturnedFrom === "cancel" && (
@@ -101,7 +102,7 @@ export function BillingScreen({ onBack, theme, subscription, onSubscriptionChang
           {paid ? (
             <>
               <div style={{ fontWeight: "800", fontSize: "16px", color: theme.heroBg[0], marginBottom: "6px" }}>
-                {subscription.plan === "promo" ? "🎁 Promo access" : subscription.plan === "annual" ? "Annual plan" : "Monthly plan"}
+                {subscription.plan === "promo" ? <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}><Icon name="gift" size={15} /> Promo access</span> : subscription.plan === "annual" ? "Annual plan" : "Monthly plan"}
               </div>
               {subscription.currentPeriodEnd && (
                 <div style={{ color: "#6B7280", fontSize: "13px", marginBottom: "16px" }}>
@@ -135,9 +136,9 @@ export function BillingScreen({ onBack, theme, subscription, onSubscriptionChang
               </div>
               <button
                 onClick={handleUpgrade} disabled={busy}
-                style={{ width: "100%", background: `linear-gradient(135deg,${theme.cta[0]},${theme.cta[1]})`, color: "white", border: "none", borderRadius: "12px", padding: "12px", fontSize: "15px", fontWeight: "800", cursor: busy ? "default" : "pointer", opacity: busy ? 0.7 : 1, fontFamily: theme.headingFont }}
+                style={{ width: "100%", background: `linear-gradient(135deg,${theme.cta[0]},${theme.cta[1]})`, color: "white", border: "none", borderRadius: "12px", padding: "12px", fontSize: "15px", fontWeight: "800", cursor: busy ? "default" : "pointer", opacity: busy ? 0.7 : 1, fontFamily: theme.headingFont, display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}
               >
-                {busy ? "Redirecting…" : "💎 Upgrade"}
+                {busy ? "Redirecting…" : <><Icon name="gem" size={15} /> Upgrade</>}
               </button>
             </>
           )}
@@ -158,7 +159,7 @@ export function BillingScreen({ onBack, theme, subscription, onSubscriptionChang
                 {promoBusy ? "…" : "Redeem"}
               </button>
             </form>
-            {promoSuccess && <div style={{ color: "#166534", fontSize: "13px", fontWeight: "700", marginTop: "8px" }}>✅ Code redeemed — you're upgraded!</div>}
+            {promoSuccess && <div style={{ color: "#166534", fontSize: "13px", fontWeight: "700", marginTop: "8px", display: "flex", alignItems: "center", gap: "6px" }}><Icon name="check" size={14} /> Code redeemed — you're upgraded!</div>}
           </div>
         )}
       </div>

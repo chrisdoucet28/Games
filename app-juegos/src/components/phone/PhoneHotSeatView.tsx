@@ -1,4 +1,5 @@
 import type { HotSeatStatePayload, HotSeatActionPayload } from "../../lib/liveSession";
+import { TeamIcon } from "../shared/TeamIcon";
 
 type Props = {
   state: HotSeatStatePayload;
@@ -36,7 +37,7 @@ export function PhoneHotSeatView({ state, teamId, onAction }: Props) {
   if (state.teamStructure === "solo" && amActive) {
     return (
       <div style={{ ...wrapStyle, textAlign: "center" }}>
-        <div style={{ fontSize: "22px", marginBottom: "4px" }}>{team?.mascot ?? team?.color.emoji}</div>
+        <div style={{ fontSize: "22px", marginBottom: "4px" }}><TeamIcon team={team} size={22} /></div>
         <div style={{ fontWeight: "900", fontSize: "16px", marginBottom: "18px" }}>{team?.name}</div>
         <div style={{ fontSize: "40px", marginBottom: "10px" }}>🔥</div>
         <div style={{ fontWeight: "900", fontSize: "18px", color: "#FDBA74", marginBottom: "10px" }}>You're up — listen for clues!</div>
@@ -51,7 +52,7 @@ export function PhoneHotSeatView({ state, teamId, onAction }: Props) {
     const activeTeam = state.roster.find(t => t.id === state.activeTeamId);
     return (
       <div style={{ ...wrapStyle, textAlign: "center" }}>
-        <div style={{ fontSize: "22px", marginBottom: "4px" }}>{team?.mascot ?? team?.color.emoji}</div>
+        <div style={{ fontSize: "22px", marginBottom: "4px" }}><TeamIcon team={team} size={22} /></div>
         <div style={{ fontWeight: "900", fontSize: "16px", marginBottom: "18px" }}>{team?.name}</div>
         <div style={{ fontSize: "36px", marginBottom: "8px" }}>🔥</div>
         <div style={{ fontWeight: "800", fontSize: "16px", color: "#FDBA74", marginBottom: "18px" }}>
@@ -60,7 +61,7 @@ export function PhoneHotSeatView({ state, teamId, onAction }: Props) {
         <div style={{ display: "flex", flexDirection: "column", gap: "6px", maxWidth: "300px", margin: "0 auto" }}>
           {state.roster.map(t => (
             <div key={t.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: t.id === state.activeTeamId ? "rgba(253,186,116,0.15)" : "rgba(255,255,255,0.06)", border: `1.5px solid ${t.id === state.activeTeamId ? "#FDBA74" : "rgba(255,255,255,0.15)"}`, borderRadius: "10px", padding: "8px 12px" }}>
-              <span style={{ fontSize: "13px", fontWeight: "700" }}>{t.mascot ?? t.color.emoji} {t.name}</span>
+              <span style={{ fontSize: "13px", fontWeight: "700" }}><TeamIcon team={t} /> {t.name}</span>
               <span style={{ fontSize: "13px", fontWeight: "800", color: "#FDBA74" }}>{state.scores[String(t.id)] ?? 0} words</span>
             </div>
           ))}
@@ -75,7 +76,7 @@ export function PhoneHotSeatView({ state, teamId, onAction }: Props) {
     <div style={wrapStyle}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px" }}>
         <span style={{ fontWeight: "900", fontSize: "15px" }}>
-          {state.teamStructure === "groups" ? `${team?.mascot ?? team?.color.emoji} ${team?.name}` : "🔥 Describing"}
+          {state.teamStructure === "groups" ? <><TeamIcon team={team} /> {team?.name}</> : "🔥 Describing"}
         </span>
         <span style={{ fontSize: "13px", fontWeight: "800", color: "#FDBA74" }}>⏱️ {state.timeLeft}s</span>
       </div>

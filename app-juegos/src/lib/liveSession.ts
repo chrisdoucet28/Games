@@ -218,3 +218,157 @@ export function openHotSeatChannel(code: string): RealtimeChannel {
     config: { presence: { key: crypto.randomUUID() } },
   });
 }
+
+// --- Order Up ---
+//
+// Screen-authoritative, like Hot Seat — the shared floor's ticket queue, timers, and claim/expiry
+// logic all keep running exactly as they do in screen mode; a phone-driven claim is just an
+// "action" broadcast folded straight into the same claimTicket() screen-mode buttons already call.
+// Unlike every other phone-mode game, several teams can be independently "active" at once here
+// (each holding their own claimed ticket(s)) rather than one team having the floor at a time — the
+// state broadcast just carries the whole live ticket board so every phone can render its own
+// "claimed by me" vs. "still open" view off the same shared data.
+export type OrderUpRosterEntry = { id: string | number; name: string; color: TeamColor; mascot?: string | null };
+
+export type OrderUpPhase = "lobby" | "playing" | "final";
+
+// Duplicated from OrderUpGame.tsx's own TicketItem rather than imported — matches this file's
+// existing self-contained-payload-types convention (see AuctionPhase/SpyPhase above).
+export type OrderUpTicketItem =
+  | { kind: "grammar"; transform: string; label: string; foodEmoji: string }
+  | { kind: "vocab"; word: string; foodEmoji: string };
+
+export type OrderUpTicketInfo = {
+  id: number;
+  items: OrderUpTicketItem[];
+  customerEmoji: string;
+  totalSeconds: number;
+  secondsLeft: number;
+  claimedBy?: string | number;
+  // Only meaningful once answerMode is "typing" — undefined in "spoken" the whole game through.
+  submittedSentence?: string;
+};
+
+export type OrderUpStatePayload = {
+  phase: OrderUpPhase;
+  roster: OrderUpRosterEntry[];
+  tickets: OrderUpTicketInfo[];
+  sessionTimeLeft: number;
+  scores: Record<string, number>;
+  connectedTeamIds: (string | number)[];
+  // Whole-session choice (picked once alongside phone mode itself, like Hot Seat's teamStructure)
+  // — never varies per team or per ticket.
+  answerMode: "spoken" | "typing";
+  // Mirrors the screen's own judging?.ticketId ?? null — lets a phone tell "still mine to edit"
+  // from "the teacher is looking at this right now," so a typed answer can't change out from under
+  // an in-progress judgment.
+  judgingTicketId: number | null;
+  ts: number;
+};
+
+// Named claimTicket, not bare "claim" — PhoneJoinScreen.tsx already has its own unrelated
+// team-identity "claim" (handleClaim/claimedTeamId) for joining the session in the first place;
+// keeping the field name distinct avoids confusing the two concepts when skimming this file later.
+export type OrderUpActionPayload =
+  | { teamId: string | number; action: "claimTicket"; ticketId: number }
+  | { teamId: string | number; action: "submitSentence"; ticketId: number; sentence: string };
+
+function orderUpChannelName(code: string): string {
+  return `orderup-${code}`;
+}
+
+export function openOrderUpChannel(code: string): RealtimeChannel {
+  return supabase.channel(orderUpChannelName(code), {
+    config: { presence: { key: crypto.randomUUID() } },
+  });
+}
+
+// --- Race Track ---
+//
+// The simplest phone-mode game yet: one shared question goes up for the whole class at once (no
+// ticket queue, no per-team content, nothing to type), so a phone's only job is to be a personal
+// "BUZZ!" button. Screen-authoritative like every other game here — the screen alone decides who
+// gets credited (buzzing is purely an input-timing signal feeding into the teacher's existing
+// judgment, never a substitute for it).
+export type RaceTrackRosterEntry = { id: string | number; name: string; color: TeamColor; mascot?: string | null };
+
+// "interlude" covers the dice-roll/effect-reveal chain (RaceTrackGame.tsx's "rolling"/"effect"
+// phases) — without a distinct value for that ~2-3s stretch, it would have to map to "lobby", which
+// PhoneJoinScreen.tsx's shared pre-game gate reads as "hasn't started yet," wrongly telling a phone
+// mid-race to go back to waiting.
+export type RaceTrackPhase = "lobby" | "task" | "interlude" | "final";
+
+export type RaceTrackStatePayload = {
+  phase: RaceTrackPhase;
+  roster: RaceTrackRosterEntry[];
+  connectedTeamIds: (string | number)[];
+  // `${zone.id}:${typeIdx}` — mirrors the screen's own question-identity key. A new value means a
+  // genuinely new question; every phone clears its buzzed-or-not display when this changes.
+  taskKey: string;
+  // This round's resolved buzz winner, or null while the buzzer is open. "Round" isn't always the
+  // same as "question" — see rejectedTeamIds below.
+  buzzedTeamId: string | number | null;
+  // Teams marked "wrong" on the CURRENT question — excluded from re-buzzing until taskKey changes,
+  // even though the buzzer itself reopens for everyone else once a team's marked wrong.
+  rejectedTeamIds: (string | number)[];
+  // Each team's current track position — a light phone-side context strip, not load-bearing.
+  positions: Record<string, number>;
+  ts: number;
+};
+
+// The only phone-originated action. Marking a buzz "wrong" and reopening the round is teacher-only,
+// screen-side (RaceTrackGame.tsx's own markBuzzWrong) — never broadcast by a phone; phones just
+// react to buzzedTeamId/rejectedTeamIds changing in the next state push, the same way they react to
+// a new taskKey.
+export type RaceTrackActionPayload = { teamId: string | number; action: "buzz"; ts: number };
+
+function raceTrackChannelName(code: string): string {
+  return `racetrack-${code}`;
+}
+
+export function openRaceTrackChannel(code: string): RealtimeChannel {
+  return supabase.channel(raceTrackChannelName(code), {
+    config: { presence: { key: crypto.randomUUID() } },
+  });
+}
+
+// --- King of the Hill ---
+//
+// Unlike Race Track's buzzer, this one is a pure informational overlay, not a turn-taking gate.
+// King of the Hill is turn-based — most of a turn has exactly one eligible team, nothing to race
+// for. The one exception is a contested duel (a 2-team head-to-head over a zone someone already
+// owns), where in grammar-mode content "the fastest correct answer wins." Both teams already
+// answer out loud regardless of buzz order, so buzzing here just tells the teacher who hit their
+// button first — they still make the same single Attacker/Defender/Neither judgment click they
+// always have. Topic-mode content and solo (CPU) play don't get this at all — see KingOfHillGame.tsx.
+export type HillRosterEntry = { id: string | number; name: string; color: TeamColor; mascot?: string | null };
+
+// "idle" covers everything that isn't a live grammar-mode duel — rolling (fires at the start of
+// every round, not just the game's opening one), pick, answer, a resolved contest awaiting "Next
+// Turn," round-end. A phone has nothing to do in any of those beyond "watch the shared screen."
+export type HillPhase = "lobby" | "idle" | "duel" | "final";
+
+export type HillStatePayload = {
+  phase: HillPhase;
+  roster: HillRosterEntry[];
+  connectedTeamIds: (string | number)[];
+  // Only meaningful during "duel" — exactly which two teams are in the ring right now.
+  attackerId: string | number | null;
+  defenderId: string | number | null;
+  // A new value means a genuinely new duel instance — resets buzzedTeamId on every connected phone.
+  contestKey: string;
+  buzzedTeamId: string | number | null;
+  ts: number;
+};
+
+export type HillActionPayload = { teamId: string | number; action: "buzz"; ts: number };
+
+function hillChannelName(code: string): string {
+  return `hill-${code}`;
+}
+
+export function openHillChannel(code: string): RealtimeChannel {
+  return supabase.channel(hillChannelName(code), {
+    config: { presence: { key: crypto.randomUUID() } },
+  });
+}

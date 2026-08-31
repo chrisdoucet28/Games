@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef, useMemo } from "react";
+import { TeamIcon } from "../shared/TeamIcon";
+import { Icon, type IconName } from "../shared/Icon";
 import type { GameProps } from "../../types";
-import { teamsGridCols, GAME_MODES } from "../../data/constants";
+import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
 import { makeSoloCpuTeam } from "../../lib/soloOpponent";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
@@ -27,7 +29,7 @@ const AMBIENT_BITS = Array.from({ length: 12 }, (_, i) => ({
   size: 16 + (i % 3) * 6,
   delay: (i % 6) * 0.5,
   dur: 3 + (i % 4) * 0.8,
-  emoji: i % 5 === 0 ? "✨" : i % 4 === 0 ? "💨" : "🥔",
+  icon: (i % 5 === 0 ? "sparkle" : i % 4 === 0 ? "wind" : "potato") as IconName,
 }));
 
 const STYLE_TAG = (
@@ -56,9 +58,9 @@ function ChaosBackdrop() {
     <div style={{ position: "absolute", inset: 0, pointerEvents: "none", overflow: "hidden" }}>
       {AMBIENT_BITS.map((b, i) => (
         <div key={i} style={{
-          position: "absolute", left: `${b.left}%`, top: `${b.top}%`, fontSize: `${b.size}px`,
+          position: "absolute", left: `${b.left}%`, top: `${b.top}%`,
           animation: `drift ${b.dur}s ease-in-out infinite ${b.delay}s`,
-        }}>{b.emoji}</div>
+        }}><Icon name={b.icon} size={b.size} /></div>
       ))}
     </div>
   );
@@ -293,11 +295,11 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
       {STYLE_TAG}
       <div style={{ position: "relative", zIndex: 1 }}>
         <div style={{ background: "linear-gradient(135deg,#EA580C,#F97316)", borderRadius: "20px", padding: "28px 24px", marginBottom: "10px", position: "relative", color: "white", maxWidth: "520px", margin: "0 auto 10px", boxShadow: "0 8px 30px rgba(124,45,18,0.35)" }}>
-          <div style={{ fontSize: "40px", marginBottom: "10px", display: "inline-block", animation: "potatoWobbleCalm 1.8s ease-in-out infinite" }}>🥔</div>
+          <div style={{ marginBottom: "10px", display: "inline-block", animation: "potatoWobbleCalm 1.8s ease-in-out infinite" }}><Icon name="potato" size={40} /></div>
           <div style={{ fontWeight: "900", fontSize: "20px", marginBottom: "10px" }}>Hot Potato</div>
           <div style={{ fontSize: "15px", lineHeight: 1.8, opacity: 0.95 }}>
-            One team holds the potato — answer in time to pass it on. <strong>✅ Answered in time → pass it on!</strong> <strong>❌ Too slow or wrong → keep the potato!</strong><br />
-            Whoever's holding it when the round ends <strong>loses {PENALTY_PTS} pts 🔥</strong>
+            One team holds the potato — answer in time to pass it on. <strong style={{ display: "inline-flex", alignItems: "center", gap: "3px" }}><Icon name="check" size={13} /> Answered in time → pass it on!</strong> <strong style={{ display: "inline-flex", alignItems: "center", gap: "3px" }}><Icon name="close" size={11} /> Too slow or wrong → keep the potato!</strong><br />
+            Whoever's holding it when the round ends <strong style={{ display: "inline-flex", alignItems: "center", gap: "3px" }}>loses {PENALTY_PTS} pts <Icon name="flame" size={13} /></strong>
           </div>
           <div style={{ position: "absolute", bottom: "-14px", left: "50%", transform: "translateX(-50%)", width: 0, height: 0, borderLeft: "14px solid transparent", borderRight: "14px solid transparent", borderTop: "14px solid #F97316" }} />
         </div>
@@ -318,7 +320,7 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
               transition: "all 0.15s"
             }}
           >
-            {showQPreview ? "🙈 Hide question list" : "👁️ Preview all questions & answers"}
+            {showQPreview ? <><Icon name="eyeOff" size={14} /> Hide question list</> : <><Icon name="eye" size={14} /> Preview all questions & answers</>}
           </button>
 
           {showQPreview && (
@@ -327,8 +329,8 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
               borderRadius: "14px", padding: "16px", marginTop: "12px",
               textAlign: "left", maxHeight: "340px", overflowY: "auto"
             }}>
-              <div style={{ fontWeight: "800", color: "#7C2D12", fontSize: "13px", marginBottom: "12px" }}>
-                📋 All questions in this game ({questions.length} total) — pre-teach anything unfamiliar!
+              <div style={{ fontWeight: "800", color: "#7C2D12", fontSize: "13px", marginBottom: "12px", display: "flex", alignItems: "center", gap: "5px" }}>
+                <Icon name="clipboard" size={13} /> All questions in this game ({questions.length} total) — pre-teach anything unfamiliar!
               </div>
               {questions.map((q, i) => (
                 <div key={i} style={{
@@ -338,8 +340,8 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
                   <div style={{ fontWeight: "700", color: "#1C1917", fontSize: "13px", marginBottom: "3px" }}>
                     {i + 1}. {q.prompt}
                   </div>
-                  <div style={{ fontWeight: "600", color: "#EA580C", fontSize: "12px" }}>
-                    ✅ {q.answer}
+                  <div style={{ fontWeight: "600", color: "#EA580C", fontSize: "12px", display: "flex", alignItems: "center", gap: "4px" }}>
+                    <Icon name="check" size={11} /> {q.answer}
                   </div>
                 </div>
               ))}
@@ -348,11 +350,11 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
         </div>
 
         <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "24px" }}>
-          {teams.map(t => (<div key={t.id} style={{ background: t.color.light, border: `3px solid ${t.color.bg}`, borderRadius: "14px", padding: "10px 18px", fontWeight: "800", fontSize: "14px", color: t.color.dark }}>{t.color.emoji} {t.name}</div>))}
+          {teams.map(t => (<div key={t.id} style={{ background: t.color.light, border: `3px solid ${t.color.bg}`, borderRadius: "14px", padding: "10px 18px", fontWeight: "800", fontSize: "14px", color: t.color.dark, display: "inline-flex", alignItems: "center", gap: "6px" }}><TeamIcon team={t} /> {t.name}</div>))}
         </div>
 
         <div style={{ marginBottom: "24px" }}>
-          <div style={{ fontSize: "13px", fontWeight: "700", color: "#7C2D12", marginBottom: "8px" }}>⏱️ Answer time per turn (round time is always {ROUND_SECONDS_MULT}×):</div>
+          <div style={{ fontSize: "13px", fontWeight: "700", color: "#7C2D12", marginBottom: "8px", display: "flex", alignItems: "center", justifyContent: "center", gap: "5px" }}><Icon name="clock" size={13} /> Answer time per turn (round time is always {ROUND_SECONDS_MULT}×):</div>
           <div style={{ display: "flex", gap: "8px", justifyContent: "center", flexWrap: "wrap" }}>
             {TURN_SECONDS_OPTIONS.map(secs => (
               <button key={secs} onClick={() => setTurnSeconds(secs)} className="hp-btn" style={{
@@ -370,11 +372,11 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
         </div>
 
         <button onClick={() => setShowHowTo(true)} className="hp-btn" style={{ display: "block", margin: "0 auto 14px", background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
-          ❓ How to Play
+          <Icon name="help" size={14} /> How to Play
         </button>
         {showHowTo && (
           <HowToPlayModal
-            gameName={GM.name} gameIcon={GM.icon} accentColor={GM.color}
+            gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color}
             steps={HOTPOTATO_TUTORIAL_STEPS}
             onClose={() => setShowHowTo(false)}
           />
@@ -386,7 +388,7 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
           }
           setPhase("play");
         }} className="hp-btn" style={{ background: "linear-gradient(135deg,#EA580C,#F97316)", color: "white", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(249,115,22,0.4)", transition: "transform 0.15s ease" }}>
-          🥔 Start Round 1!
+          <Icon name="potato" size={18} /> Start Round 1!
         </button>
       </div>
     </div>
@@ -399,11 +401,11 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
         <ChaosBackdrop />
         {STYLE_TAG}
         <div style={{ position: "relative", zIndex: 1 }}>
-          <div style={{ fontSize: "52px", marginBottom: "8px" }}>💥</div>
+          <div style={{ marginBottom: "8px" }}><Icon name="explosion" size={52} /></div>
           <div style={{ fontWeight: "900", fontSize: "22px", color: "white", textShadow: "0 2px 6px rgba(124,45,18,0.5)", marginBottom: "6px" }}>Round {round} Over!</div>
           <div style={{ background: "white", border: "3px solid #EF4444", borderRadius: "16px", padding: "16px", marginBottom: "16px", boxShadow: "0 6px 20px rgba(0,0,0,0.15)" }}>
-            <div style={{ fontWeight: "800", fontSize: "16px", color: "#991B1B", marginBottom: "4px" }}>
-              🥔 {lastEntry?.holderName} was holding the potato!
+            <div style={{ fontWeight: "800", fontSize: "16px", color: "#991B1B", marginBottom: "4px", display: "flex", alignItems: "center", justifyContent: "center", gap: "5px" }}>
+              <Icon name="potato" size={15} /> {lastEntry?.holderName} was holding the potato!
             </div>
             <div style={{ fontWeight: "900", fontSize: "24px", color: "#DC2626" }}>−{PENALTY_PTS} pts</div>
           </div>
@@ -415,7 +417,7 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
                 return (
                   <div key={i} style={{ display: "flex", justifyContent: "space-between", marginBottom: "4px", fontSize: "13px" }}>
                     <span style={{ color: "#78350F", fontWeight: "600" }}>Round {h.round}</span>
-                    <span style={{ fontWeight: "800", color: t?.color.dark ?? "#374151" }}>🥔 {h.holderName} −{PENALTY_PTS}pts</span>
+                    <span style={{ fontWeight: "800", color: t?.color.dark ?? "#374151", display: "inline-flex", alignItems: "center", gap: "4px" }}><Icon name="potato" size={12} /> {h.holderName} −{PENALTY_PTS}pts</span>
                   </div>
                 );
               })}
@@ -423,11 +425,11 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
           )}
           {round < TOTAL_ROUNDS ? (
             <button onClick={startNextRound} className="hp-btn" style={{ background: "white", color: "#EA580C", border: "none", borderRadius: "16px", padding: "14px 40px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 20px rgba(0,0,0,0.2)", transition: "transform 0.15s ease" }}>
-              ▶️ Start Round {round + 1}
+              <Icon name="play" size={16} /> Start Round {round + 1}
             </button>
           ) : (
             <button onClick={() => setPhase("gameover")} className="hp-btn" style={{ background: "#1E1B4B", color: "white", border: "none", borderRadius: "16px", padding: "14px 40px", fontSize: "17px", fontWeight: "900", cursor: "pointer", transition: "transform 0.15s ease" }}>
-              🏁 See Final Results
+              <Icon name="checkeredFlag" size={16} /> See Final Results
             </button>
           )}
         </div>
@@ -445,7 +447,7 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
         <ChaosBackdrop />
         {STYLE_TAG}
         <div style={{ position: "relative", zIndex: 1 }}>
-          <div style={{ fontSize: "52px", marginBottom: "8px" }}>🥔</div>
+          <div style={{ marginBottom: "8px" }}><Icon name="potato" size={52} /></div>
           <div style={{ fontWeight: "900", fontSize: "24px", color: "white", textShadow: "0 2px 6px rgba(124,45,18,0.5)", marginBottom: "16px" }}>Game Over!</div>
           <div style={{ display: "grid", gridTemplateColumns: teamsGridCols(teams.length), gap: "10px", marginBottom: "20px" }}>
             {sorted.map(t => {
@@ -453,8 +455,8 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
               const isWorst = count === Math.max(...Object.values(penaltyCounts));
               return (
                 <div key={t.id} style={{ background: isWorst ? "linear-gradient(135deg,#FEF2F2,#FEE2E2)" : "white", border: `3px solid ${isWorst ? "#EF4444" : t.color.bg}`, borderRadius: "16px", padding: "14px", textAlign: "center", boxShadow: "0 4px 14px rgba(0,0,0,0.12)" }}>
-                  <div style={{ fontSize: "28px", marginBottom: "4px" }}>{count === 0 ? "🏆" : isWorst ? "🥔" : "😬"}</div>
-                  <div style={{ fontWeight: "800", color: isWorst ? "#991B1B" : t.color.dark, fontSize: "14px", marginBottom: "4px" }}>{t.mascot ?? t.color.emoji} {t.name}</div>
+                  <div style={{ marginBottom: "4px", color: count === 0 ? "#F59E0B" : isWorst ? "#92400E" : "#EA580C" }}>{count === 0 ? <Icon name="trophy" size={26} /> : isWorst ? <Icon name="potato" size={26} /> : <Icon name="warning" size={24} />}</div>
+                  <div style={{ fontWeight: "800", color: isWorst ? "#991B1B" : t.color.dark, fontSize: "14px", marginBottom: "4px" }}><TeamIcon team={t} /> {t.name}</div>
                   <div style={{ fontSize: "12px", fontWeight: "700", color: "#6B7280" }}>Held potato {count}×</div>
                   <div style={{ fontWeight: "900", color: isWorst ? "#DC2626" : "#374151", fontSize: "15px", marginTop: "4px" }}>−{count * PENALTY_PTS} pts</div>
                 </div>
@@ -468,12 +470,12 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
               return (
                 <div key={i} style={{ display: "flex", justifyContent: "space-between", marginBottom: "4px", fontSize: "13px" }}>
                   <span style={{ color: "#78350F", fontWeight: "600" }}>Round {h.round}</span>
-                  <span style={{ fontWeight: "800", color: t?.color.dark ?? "#374151" }}>🥔 {h.holderName} −{PENALTY_PTS}pts</span>
+                  <span style={{ fontWeight: "800", color: t?.color.dark ?? "#374151", display: "inline-flex", alignItems: "center", gap: "4px" }}><Icon name="potato" size={12} /> {h.holderName} −{PENALTY_PTS}pts</span>
                 </div>
               );
             })}
           </div>
-          <button onClick={onEnd} className="hp-btn" style={{ background: "white", color: "#EA580C", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "18px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(0,0,0,0.2)", transition: "transform 0.15s ease" }}>🏁 End Game</button>
+          <button onClick={onEnd} className="hp-btn" style={{ background: "white", color: "#EA580C", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "18px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(0,0,0,0.2)", transition: "transform 0.15s ease" }}><Icon name="checkeredFlag" size={17} /> End Game</button>
         </div>
       </div>
     );
@@ -493,7 +495,7 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
         }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px" }}>
             <div style={{ color: "white" }}>
-              <div style={{ fontWeight: "900", fontSize: "16px" }}>🥔 Round {round} / {TOTAL_ROUNDS}</div>
+              <div style={{ fontWeight: "900", fontSize: "16px", display: "flex", alignItems: "center", gap: "5px" }}><Icon name="potato" size={15} /> Round {round} / {TOTAL_ROUNDS}</div>
               <div style={{ fontSize: "12px", opacity: 0.85 }}>Pass it before time runs out!</div>
             </div>
             <div style={{
@@ -503,7 +505,7 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
               boxShadow: roundCritical ? "0 0 0 2px rgba(255,255,255,0.5)" : "none",
               animation: !isExploding && roundCritical ? "roundPulse 0.6s ease-in-out infinite" : "none",
             }}>
-              <span style={{ fontSize: "18px" }}>⏳</span>
+              <span style={{ display: "inline-flex", color: "white" }}><Icon name="hourglass" size={17} /></span>
               <span style={{ color: "white", fontWeight: "900", fontSize: "22px", fontVariantNumeric: "tabular-nums", letterSpacing: "0.02em" }}>{roundTimeLabel}</span>
             </div>
           </div>
@@ -535,7 +537,10 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
                   <text x={pos.x} y={pos.y - (isHolder ? 5 : 3)} textAnchor="middle" dominantBaseline="middle"
                     fontSize={isHolder ? "13" : "11"} fontWeight="800" fill={isHolder ? "white" : t.color.dark}
                     style={{ userSelect: "none", pointerEvents: "none" }}>
-                    {t.name.length > 7 ? t.name.slice(0, 6) + "…" : t.name}
+                    {/* Cutoff is per-circle-size, not just a flat guess — the default "Team Red"/
+                        "Team Blue" names (8-9 chars) are exactly what was getting clipped to
+                        "Team R…" before, on every device, not just narrow screens. */}
+                    {(() => { const max = isHolder ? 9 : 7; return t.name.length > max ? t.name.slice(0, max - 1).trimEnd() + "…" : t.name; })()}
                   </text>
                   {isHolder && <text x={pos.x} y={pos.y + 10} textAnchor="middle" fontSize="8" fill="rgba(255,255,255,0.85)" fontWeight="700" style={{ userSelect: "none" }}>HOLDING</text>}
                   {/* little figure below each position */}
@@ -558,7 +563,9 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
                   transformBox: "fill-box", transformOrigin: "center",
                   animation: passing ? "potatoTumble 0.65s linear" : potatoWobble,
                 }}>
-                  <text x="0" y="1" textAnchor="middle" dominantBaseline="middle" fontSize="26" style={{ userSelect: "none", filter: passing ? "drop-shadow(0 0 8px #F97316)" : "none" }}>🥔</text>
+                  <g transform="translate(-13,-13)" style={{ filter: passing ? "drop-shadow(0 0 8px #F97316)" : "none" }}>
+                    <Icon name="potato" size={26} style={{ color: "#B45309" }} />
+                  </g>
                   {!passing && qTimeLeft <= 3 && <text x="15" y="-12" fontSize="13" style={{ animation: "sweatDrop 0.9s ease-in-out infinite" }}>💦</text>}
                 </g>
               </g>
@@ -591,8 +598,10 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
                 <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "900", fontSize: "15px", color: qColor }}>{qTimeLeft}</div>
               </div>
               <div style={{ flex: 1, fontWeight: "700", color: "#374151", fontSize: "13px" }}>
-                {holder.mascot ?? holder.color.emoji} <strong>{holder.name}</strong> — answer now!<br />
-                <span style={{ color: qColor, fontSize: "12px" }}>{qTimeLeft > 6 ? "⏱️ Take your time…" : qTimeLeft > 3 ? "⚡ Hurry!" : "🔴 Last seconds!"}</span>
+                <TeamIcon team={holder} /> <strong>{holder.name}</strong> — answer now!<br />
+                <span style={{ color: qColor, fontSize: "12px", display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                  {qTimeLeft > 6 ? <><Icon name="clock" size={11} /> Take your time…</> : qTimeLeft > 3 ? <><Icon name="bolt" size={11} /> Hurry!</> : <><span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#EF4444", display: "inline-block" }} /> Last seconds!</>}
+                </span>
               </div>
             </div>
           )}
@@ -611,7 +620,7 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
               <div style={{ position: "absolute", top: "8px", right: "8px" }}>
                 <FlagPromptButton gameId="hotpotato" questionData={q} />
               </div>
-              <div style={{ fontSize: "11px", fontWeight: "800", color: "#0369A1", marginBottom: "4px", textTransform: "uppercase", letterSpacing: "0.06em" }}>💡 Expected answer</div>
+              <div style={{ fontSize: "11px", fontWeight: "800", color: "#0369A1", marginBottom: "4px", textTransform: "uppercase", letterSpacing: "0.06em", display: "flex", alignItems: "center", justifyContent: "center", gap: "4px" }}><Icon name="idea" size={11} /> Expected answer</div>
               <div style={{ fontWeight: "800", color: "#0C4A6E", fontSize: "16px" }}>{q?.answer}</div>
             </div>
           )}
@@ -619,15 +628,15 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
 
         {!showAnswer ? (
           <button onClick={revealAnswer} className="hp-btn" style={{ width: "100%", background: "white", color: "#4338CA", border: "2px solid #C4B5FD", borderRadius: "12px", padding: "13px", fontSize: "15px", fontWeight: "800", cursor: "pointer", transition: "transform 0.15s ease" }}>
-            👁️ Reveal answer early
+            <Icon name="eye" size={14} /> Reveal answer early
           </button>
         ) : (
           <div style={{ display: "flex", gap: "10px" }}>
             <button onClick={confirmPass} className="hp-btn" style={{ flex: 1, background: "linear-gradient(135deg,#16A34A,#22C55E)", color: "white", border: "none", borderRadius: "12px", padding: "14px 8px", fontSize: "14px", fontWeight: "900", cursor: "pointer", boxShadow: "0 4px 14px #22C55E40", transition: "transform 0.15s ease" }}>
-              ✅ Answered in time<br /><span style={{ fontSize: "12px", opacity: 0.85 }}>Pass potato →</span>
+              <Icon name="check" size={13} /> Answered in time<br /><span style={{ fontSize: "12px", opacity: 0.85, display: "inline-flex", alignItems: "center", gap: "3px" }}>Pass potato <Icon name="next" size={11} /></span>
             </button>
             <button onClick={confirmKeep} className="hp-btn" style={{ flex: 1, background: "linear-gradient(135deg,#DC2626,#EF4444)", color: "white", border: "none", borderRadius: "12px", padding: "14px 8px", fontSize: "14px", fontWeight: "900", cursor: "pointer", boxShadow: "0 4px 14px #EF444440", transition: "transform 0.15s ease" }}>
-              ❌ Too slow / wrong<br /><span style={{ fontSize: "12px", opacity: 0.85 }}>Keep potato 🥔</span>
+              <Icon name="close" size={12} /> Too slow / wrong<br /><span style={{ fontSize: "12px", opacity: 0.85, display: "inline-flex", alignItems: "center", gap: "3px" }}>Keep potato <Icon name="potato" size={12} /></span>
             </button>
           </div>
         )}

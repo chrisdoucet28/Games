@@ -1,9 +1,12 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
+import { TeamIcon, MascotSprite } from "../shared/TeamIcon";
+import { Icon, type IconName } from "../shared/Icon";
+import { RankBadge } from "../shared/RankBadge";
 import type { GameProps, QuestionData } from "../../types";
 import { useTurnTimer } from "../../hooks/useTurnTimer";
 import { TurnTimerBar } from "../shared/TurnTimerBar";
 import { QuestionCard } from "../shared/QuestionCard";
-import { teamsGridCols, GAME_MODES } from "../../data/constants";
+import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { ROCKET_TUTORIAL_STEPS } from "../../data/tutorials/rocket";
 
@@ -46,15 +49,15 @@ const groundOffsetPx = (frameH: number) => frameH / 2 - 70;
 // stages layer in on top of earlier ones as the rocket climbs higher, exactly like passing
 // through progressively higher altitude bands.
 const FLYBY_STAGES = [
-  { from: 0, emojis: ["☁️", "☁️", "🌫️"] },
-  { from: 0.3, emojis: ["✨", "⭐"] },
-  { from: 0.62, emojis: ["🌕"] },
-  { from: 0.82, emojis: ["🪐", "✨"] },
+  { from: 0, icons: ["cloud", "cloud"] as IconName[] },
+  { from: 0.3, icons: ["sparkle", "star"] as IconName[] },
+  { from: 0.62, icons: ["moon"] as IconName[] },
+  { from: 0.82, icons: ["planet", "sparkle"] as IconName[] },
 ] as const;
 
 type FlybyParticle = {
   id: number;
-  emoji: string;
+  iconName: IconName;
   delayMs: number;
   durMs: number;
   xPct: number;
@@ -81,11 +84,11 @@ function buildFlybyParticles(flightMs: number, count: number): FlybyParticle[] {
   for (let i = 0; i < count; i++) {
     const startFrac = timeOrder[i] * timeSlotWidth + Math.random() * timeSlotWidth * 0.7;
     const stage = [...FLYBY_STAGES].reverse().find(s => startFrac >= s.from) ?? FLYBY_STAGES[0];
-    const emoji = stage.emojis[Math.floor(Math.random() * stage.emojis.length)];
-    const big = emoji === "🌕" || emoji === "🪐";
+    const iconName = stage.icons[Math.floor(Math.random() * stage.icons.length)];
+    const big = iconName === "moon" || iconName === "planet";
     particles.push({
       id: i,
-      emoji,
+      iconName,
       delayMs: LIFTOFF_MS + startFrac * flightMs,
       durMs: big ? 3200 + Math.random() * 900 : 1800 + Math.random() * 1000,
       xPct: 4 + laneOrder[i] * laneWidth + Math.random() * laneWidth * 0.6,
@@ -155,11 +158,10 @@ function Flyby({ flightMs, count, frameH, keyPrefix }: { flightMs: number; count
       <style>{css}</style>
       {particles.map(p => (
         <div key={p.id} style={{
-          position: "absolute", left: `${p.xPct}%`, top: 0,
-          fontSize: `${p.sizePx.toFixed(0)}px`,
+          position: "absolute", left: `${p.xPct}%`, top: 0, color: "white",
           animation: `rfFly_${keyPrefix}_${p.id} ${p.durMs}ms linear ${p.delayMs}ms 1 both`,
         }}>
-          {p.emoji}
+          <Icon name={p.iconName} size={p.sizePx} />
         </div>
       ))}
     </div>
@@ -357,7 +359,7 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
       {STYLE_TAG}
       <div style={{ position: "relative", zIndex: 1 }}>
         <div style={{ background: "linear-gradient(160deg,#312E81,#0B0B2E)", border: "2px solid #A5B4FC55", borderRadius: "20px", padding: "28px 24px", marginBottom: "10px", color: "white", maxWidth: "560px", margin: "0 auto 10px", boxShadow: "0 0 50px rgba(99,102,241,0.4)" }}>
-          <div style={{ fontSize: "36px", marginBottom: "10px" }}>🚀</div>
+          <div style={{ marginBottom: "10px" }}><Icon name="rocket" size={36} /></div>
           <div style={{ fontWeight: "900", fontSize: "20px", marginBottom: "10px", color: "#A5B4FC" }}>Rocket Fuel</div>
           <div style={{ fontSize: "15px", lineHeight: 1.7 }}>
             Each team gets <strong style={{ color: "#A5B4FC" }}>{TOTAL_ROUNDS} rounds of 90 seconds</strong> at mission control — use the given word in your own sentence, and every correct one adds fuel. Stuck on a prompt? Skip it for a new one, no penalty.<br />
@@ -366,23 +368,23 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
         </div>
         <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "24px" }}>
           {teams.map((t, i) => (
-            <div key={t.id} style={{ background: `linear-gradient(160deg,${t.color.dark}55,#0B0B2E)`, border: `3px solid ${t.color.bg}`, borderRadius: "14px", padding: "10px 18px", fontWeight: "800", fontSize: "14px", color: "white" }}>
-              {i + 1}. {t.color.emoji} {t.name}
+            <div key={t.id} style={{ background: `linear-gradient(160deg,${t.color.dark}55,#0B0B2E)`, border: `3px solid ${t.color.bg}`, borderRadius: "14px", padding: "10px 18px", fontWeight: "800", fontSize: "14px", color: "white", display: "flex", alignItems: "center", gap: "6px" }}>
+              {i + 1}. <TeamIcon team={t} color="white" /> {t.name}
             </div>
           ))}
         </div>
-        <button onClick={() => setShowHowTo(true)} className="rf-btn" style={{ display: "block", margin: "0 auto 14px", background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
-          ❓ How to Play
+        <button onClick={() => setShowHowTo(true)} className="rf-btn" style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginBottom: "14px", background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
+          <Icon name="help" size={15} /> How to Play
         </button>
         {showHowTo && (
           <HowToPlayModal
-            gameName={GM.name} gameIcon={GM.icon} accentColor={GM.color}
+            gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color}
             steps={ROCKET_TUTORIAL_STEPS}
             onClose={() => setShowHowTo(false)}
           />
         )}
-        <button onClick={() => startTeamTurn(0)} className="rf-btn" style={{ background: "linear-gradient(135deg,#4338CA,#818CF8)", color: "white", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(99,102,241,0.5)", transition: "transform 0.15s ease" }}>
-          🔥 Ignite Engines!
+        <button onClick={() => startTeamTurn(0)} className="rf-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg,#4338CA,#818CF8)", color: "white", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(99,102,241,0.5)", transition: "transform 0.15s ease" }}>
+          <Icon name="flame" size={20} /> Ignite Engines!
         </button>
       </div>
     </div>
@@ -394,11 +396,11 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
       {STYLE_TAG}
       <div style={{ position: "relative", zIndex: 1 }}>
         <div style={{ background: `linear-gradient(90deg,${activeTeam.color.dark},${activeTeam.color.bg})`, borderRadius: "14px", padding: "10px 16px", marginBottom: "14px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px", boxShadow: `0 4px 18px ${activeTeam.color.bg}55` }}>
-          <span style={{ color: "white", fontWeight: "900", fontSize: "16px", textShadow: "0 1px 3px rgba(0,0,0,0.4)" }}>🚀 {activeTeam.name}'s turn — Round {round}/{TOTAL_ROUNDS}, Team {teamIdx + 1} of {teams.length}</span>
+          <span style={{ color: "white", fontWeight: "900", fontSize: "16px", textShadow: "0 1px 3px rgba(0,0,0,0.4)", display: "inline-flex", alignItems: "center", gap: "6px" }}><Icon name="rocket" size={15} /> {activeTeam.name}'s turn — Round {round}/{TOTAL_ROUNDS}, Team {teamIdx + 1} of {teams.length}</span>
           {phase === "team-turn" && (
             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
               <TurnTimerBar timeLeft={timeLeft} totalSeconds={TURN_SECONDS} />
-              <button onClick={endTurn} className="rf-btn" style={{ background: "rgba(0,0,0,0.25)", color: "white", border: "1.5px solid rgba(255,255,255,0.4)", borderRadius: "10px", padding: "6px 14px", fontSize: "12px", fontWeight: "800", cursor: "pointer", whiteSpace: "nowrap", transition: "transform 0.15s ease" }}>🛑 End Turn</button>
+              <button onClick={endTurn} className="rf-btn" style={{ display: "inline-flex", alignItems: "center", gap: "5px", background: "rgba(0,0,0,0.25)", color: "white", border: "1.5px solid rgba(255,255,255,0.4)", borderRadius: "10px", padding: "6px 14px", fontSize: "12px", fontWeight: "800", cursor: "pointer", whiteSpace: "nowrap", transition: "transform 0.15s ease" }}><Icon name="stop" size={11} /> End Turn</button>
             </div>
           )}
         </div>
@@ -409,11 +411,11 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
                 A correct answer just makes the rocket visibly gulp down a bit of fuel. */}
             <div style={{ textAlign: "center", marginBottom: "10px", position: "relative", height: "70px" }}>
               <div key={`shake-${turnFuel}`} style={{ display: "inline-flex", alignItems: "flex-end", gap: "4px", filter: `drop-shadow(0 0 10px ${activeTeam.color.bg})`, animation: turnFuel > 0 ? "rfMiniShake 0.45s ease-in-out" : "none" }}>
-                {activeTeam.mascot && <span style={{ fontSize: "26px" }}>{activeTeam.mascot}</span>}
-                <span style={{ fontSize: "44px" }}>🚀</span>
+                <MascotSprite mascot={activeTeam.mascot} fallback={null} size={26} />
+                <Icon name="rocket" size={44} />
               </div>
               {turnFuel > 0 && (
-                <div key={`burst-${turnFuel}`} style={{ position: "absolute", left: "50%", bottom: "0", fontSize: "20px", animation: "rfFuelRise 0.6s ease-out forwards" }}>⛽</div>
+                <div key={`burst-${turnFuel}`} style={{ position: "absolute", left: "50%", bottom: "0", animation: "rfFuelRise 0.6s ease-out forwards" }}><Icon name="fuel" size={20} color="#FDBA74" /></div>
               )}
             </div>
 
@@ -422,11 +424,11 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
               <div style={{ display: "flex", gap: "10px", justifyContent: "center", marginTop: "14px" }}>
                 {showAnswer ? (
                   <>
-                    <button onClick={() => judge(true)} className="rf-btn" style={{ background: "linear-gradient(135deg,#15803D,#22C55E)", color: "white", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "15px", fontWeight: "800", cursor: "pointer", transition: "transform 0.15s ease" }}>✅ Fuelled it!</button>
-                    <button onClick={() => judge(false)} className="rf-btn" style={{ background: "linear-gradient(135deg,#B91C1C,#EF4444)", color: "white", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "15px", fontWeight: "800", cursor: "pointer", transition: "transform 0.15s ease" }}>❌ No fuel</button>
+                    <button onClick={() => judge(true)} className="rf-btn" style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "linear-gradient(135deg,#15803D,#22C55E)", color: "white", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "15px", fontWeight: "800", cursor: "pointer", transition: "transform 0.15s ease" }}><Icon name="check" size={14} /> Fuelled it!</button>
+                    <button onClick={() => judge(false)} className="rf-btn" style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "linear-gradient(135deg,#B91C1C,#EF4444)", color: "white", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "15px", fontWeight: "800", cursor: "pointer", transition: "transform 0.15s ease" }}><Icon name="close" size={13} /> No fuel</button>
                   </>
                 ) : (
-                  <button onClick={drawPrompt} className="rf-btn" style={{ background: "rgba(255,255,255,0.1)", color: "#C7D2FE", border: "2px solid #A5B4FC55", borderRadius: "12px", padding: "10px 22px", fontSize: "14px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease" }}>⏭ Skip — try a different one</button>
+                  <button onClick={drawPrompt} className="rf-btn" style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "rgba(255,255,255,0.1)", color: "#C7D2FE", border: "2px solid #A5B4FC55", borderRadius: "12px", padding: "10px 22px", fontSize: "14px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease" }}><Icon name="next" size={13} /> Skip — try a different one</button>
                 )}
               </div>
             </div>
@@ -436,14 +438,14 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
         {phase === "team-end" && (
           <div style={{ textAlign: "center" }}>
             <div style={{ background: "linear-gradient(160deg,#312E81,#0B0B2E)", border: "2px solid #A5B4FC66", borderRadius: "16px", padding: "20px", marginBottom: "16px" }}>
-              <div style={{ fontSize: "34px", marginBottom: "6px" }}>🚀</div>
+              <div style={{ marginBottom: "6px" }}><Icon name="rocket" size={34} /></div>
               <div style={{ fontWeight: "900", fontSize: "20px", color: "white", marginBottom: "8px" }}>{activeTeam.name}'s tank is sealed!</div>
               <div style={{ fontSize: "14px", color: "#C7D2FE" }}>Nice work! Time for the next team.</div>
             </div>
-            <button onClick={nextTeam} className="rf-btn" style={{ background: "linear-gradient(135deg,#4338CA,#818CF8)", color: "white", border: "none", borderRadius: "14px", padding: "14px 36px", fontSize: "17px", fontWeight: "900", cursor: "pointer", transition: "transform 0.15s ease" }}>
+            <button onClick={nextTeam} className="rf-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg,#4338CA,#818CF8)", color: "white", border: "none", borderRadius: "14px", padding: "14px 36px", fontSize: "17px", fontWeight: "900", cursor: "pointer", transition: "transform 0.15s ease" }}>
               {teamIdx + 1 >= teams.length
-                ? (round >= TOTAL_ROUNDS ? "🚀 Go to Launchpad" : `➡️ Start Round ${round + 1}`)
-                : "➡️ Next Team's Turn"}
+                ? (round >= TOTAL_ROUNDS ? <><Icon name="rocket" size={18} /> Go to Launchpad</> : <><Icon name="next" size={18} /> Start Round {round + 1}</>)
+                : <><Icon name="next" size={18} /> Next Team's Turn</>}
             </button>
           </div>
         )}
@@ -466,8 +468,8 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
           <Starfield />
           {STYLE_TAG}
           <div style={{ position: "relative", zIndex: 1 }}>
-            <div style={{ fontWeight: "900", fontSize: "20px", color: "#A5B4FC", marginBottom: "18px" }}>
-              {phase === "launchpad" ? "🛰️ All engines fuelled. Prepare for launch!" : phase === "igniting" ? "🔥 IGNITION..." : "🚀 LAUNCH!"}
+            <div style={{ fontWeight: "900", fontSize: "20px", color: "#A5B4FC", marginBottom: "18px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+              {phase === "launchpad" ? <><Icon name="satellite" size={18} /> All engines fuelled. Prepare for launch!</> : phase === "igniting" ? <><Icon name="flame" size={18} /> IGNITION...</> : <><Icon name="rocket" size={18} /> LAUNCH!</>}
             </div>
             <div style={{ position: "relative", height: `${frameH}px`, borderRadius: "18px", overflow: "hidden", background: "radial-gradient(ellipse at 50% 40%,#1E1B4B 0%,#030014 75%)" }}>
               {/* Ground drops away below on liftoff, in step with the rocket rising off it —
@@ -495,17 +497,17 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
                 transition: `transform ${LIFTOFF_MS}ms ease-out`,
               }}>
                 {(phase === "igniting" || (phase === "launching" && launched)) && (
-                  <div style={{ position: "absolute", left: "50%", bottom: "-18px", transform: "translateX(-50%)", fontSize: "26px", animation: "rfFlameFlicker 0.15s ease-in-out infinite" }}>🔥</div>
+                  <div style={{ position: "absolute", left: "50%", bottom: "-18px", transform: "translateX(-50%)", animation: "rfFlameFlicker 0.15s ease-in-out infinite" }}><Icon name="flame" size={26} color="#F97316" /></div>
                 )}
-                {t.mascot && (
-                  <div style={{ position: "absolute", left: "-10px", top: "6px", fontSize: "20px", filter: `drop-shadow(0 0 4px ${t.color.bg})` }}>{t.mascot}</div>
-                )}
-                <div style={{ fontSize: "48px", filter: `drop-shadow(0 0 10px ${t.color.bg})`, animation: phase === "launchpad" ? "none" : "rfShake 0.1s linear infinite" }}>🚀</div>
+                <div style={{ position: "absolute", left: "-10px", top: "6px", filter: `drop-shadow(0 0 4px ${t.color.bg})` }}>
+                  <MascotSprite mascot={t.mascot} fallback={null} size={20} />
+                </div>
+                <div style={{ filter: `drop-shadow(0 0 10px ${t.color.bg})`, animation: phase === "launchpad" ? "none" : "rfShake 0.1s linear infinite" }}><Icon name="rocket" size={48} /></div>
               </div>
 
               <div style={{ position: "absolute", bottom: "14px", left: "50%", transform: "translateX(-50%)", maxWidth: "140px", background: `linear-gradient(180deg,${t.color.dark}88,#0B0B2E)`, border: `2px solid ${t.color.bg}`, borderRadius: "10px", padding: "6px 10px", fontSize: "12px", fontWeight: "800", color: "white", textAlign: "center", zIndex: 1 }}>
-                {t.color.emoji} {t.name}<br />
-                <span style={{ color: "#FDBA74" }}>⛽ ???</span>
+                <TeamIcon team={t} color="white" /> {t.name}<br />
+                <span style={{ color: "#FDBA74", display: "inline-flex", alignItems: "center", gap: "3px" }}><Icon name="fuel" size={11} /> ???</span>
               </div>
             </div>
             {phase === "launchpad" && (
@@ -546,8 +548,8 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
         <Starfield />
         {STYLE_TAG}
         <div style={{ position: "relative", zIndex: 1 }}>
-          <div style={{ fontWeight: "900", fontSize: "20px", color: "#A5B4FC", marginBottom: "18px" }}>
-            {phase === "launchpad" ? "🛰️ All engines fuelled. Prepare for launch!" : phase === "igniting" ? "🔥 IGNITION..." : "🚀 LAUNCH!"}
+          <div style={{ fontWeight: "900", fontSize: "20px", color: "#A5B4FC", marginBottom: "18px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+            {phase === "launchpad" ? <><Icon name="satellite" size={18} /> All engines fuelled. Prepare for launch!</> : phase === "igniting" ? <><Icon name="flame" size={18} /> IGNITION...</> : <><Icon name="rocket" size={18} /> LAUNCH!</>}
           </div>
           <div style={{ display: "flex", justifyContent: "center", alignItems: "flex-end", gap: "28px", height: `${frameH}px`, position: "relative", overflow: "hidden", borderRadius: "18px" }}>
             {/* Ground drops away below on liftoff, the same beat as solo — the camera stays
@@ -601,19 +603,19 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
                     animation: launched ? `${keyframeName} ${ASCENT_MS}ms cubic-bezier(0.4,0,0.2,1) forwards` : "none",
                   }}>
                     {(phase === "igniting" || (phase === "launching" && launched)) && (
-                      <div style={{ position: "absolute", left: "50%", bottom: "-18px", transform: "translateX(-50%)", fontSize: "22px", animation: "rfFlameFlicker 0.15s ease-in-out infinite" }}>🔥</div>
+                      <div style={{ position: "absolute", left: "50%", bottom: "-18px", transform: "translateX(-50%)", animation: "rfFlameFlicker 0.15s ease-in-out infinite" }}><Icon name="flame" size={22} color="#F97316" /></div>
                     )}
-                    {t.mascot && (
-                      <div style={{ position: "absolute", left: "-8px", top: "6px", fontSize: "18px", filter: `drop-shadow(0 0 4px ${t.color.bg})` }}>{t.mascot}</div>
-                    )}
-                    <div style={{ fontSize: "40px", filter: `drop-shadow(0 0 8px ${t.color.bg})`, animation: phase === "launchpad" ? "none" : "rfShake 0.1s linear infinite" }}>🚀</div>
+                    <div style={{ position: "absolute", left: "-8px", top: "6px", filter: `drop-shadow(0 0 4px ${t.color.bg})` }}>
+                      <MascotSprite mascot={t.mascot} fallback={null} size={18} />
+                    </div>
+                    <div style={{ filter: `drop-shadow(0 0 8px ${t.color.bg})`, animation: phase === "launchpad" ? "none" : "rfShake 0.1s linear infinite" }}><Icon name="rocket" size={40} /></div>
                   </div>
                   {/* Centered explicitly (not just via the flex parent's static position) and
                       capped with maxWidth so a long custom team name wraps onto another line
                       instead of growing wide enough to overlap the neighbouring rocket's bubble. */}
                   <div style={{ position: "absolute", bottom: "0", left: "50%", transform: "translateX(-50%)", maxWidth: "94px", background: `linear-gradient(180deg,${t.color.dark}88,#0B0B2E)`, border: `2px solid ${t.color.bg}`, borderRadius: "10px", padding: "6px 10px", fontSize: "12px", fontWeight: "800", color: "white", textAlign: "center" }}>
-                    {t.color.emoji} {t.name}<br />
-                    <span style={{ color: "#FDBA74" }}>⛽ ???</span>
+                    <TeamIcon team={t} color="white" /> {t.name}<br />
+                    <span style={{ color: "#FDBA74", display: "inline-flex", alignItems: "center", gap: "3px" }}><Icon name="fuel" size={11} /> ???</span>
                   </div>
                 </div>
               );
@@ -640,22 +642,22 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
       <Starfield />
       {STYLE_TAG}
       <div style={{ position: "relative", zIndex: 1 }}>
-        <div style={{ fontSize: "48px", marginBottom: "6px" }}>🏆</div>
+        <div style={{ marginBottom: "6px" }}><Icon name="trophy" size={48} color="#A5B4FC" /></div>
         <div style={{ fontWeight: "900", fontSize: "24px", color: "#A5B4FC", marginBottom: "16px" }}>{headline}</div>
         <div style={{ display: "grid", gridTemplateColumns: teamsGridCols(teams.length), gap: "10px", margin: "0 auto 20px", maxWidth: "700px" }}>
           {ranked.map(({ team: t, fuel: fuelCount, rank }) => {
             const basePts = fuelCount * POINTS_PER_CORRECT;
             return (
               <div key={t.id} style={{ background: `linear-gradient(160deg,${t.color.dark}55,#0B0B2E)`, border: `2px solid ${t.color.bg}`, borderRadius: "14px", padding: "12px" }}>
-                <div style={{ fontSize: "22px" }}>{rank === 0 ? "🥇" : rank === 1 ? "🥈" : rank === 2 ? "🥉" : "🚀"}</div>
-                <div style={{ fontWeight: "800", color: "white", fontSize: "14px", marginTop: "4px" }}>{t.mascot ?? t.color.emoji} {t.name}</div>
-                <div style={{ color: "#FDBA74", fontWeight: "800", fontSize: "13px", marginTop: "2px" }}>⛽ {fuelCount} fuelled · {basePts} pts</div>
+                <div><RankBadge rank={rank} size={22} /></div>
+                <div style={{ fontWeight: "800", color: "white", fontSize: "14px", marginTop: "4px" }}><TeamIcon team={t} /> {t.name}</div>
+                <div style={{ color: "#FDBA74", fontWeight: "800", fontSize: "13px", marginTop: "2px", display: "flex", alignItems: "center", justifyContent: "center", gap: "4px" }}><Icon name="fuel" size={12} /> {fuelCount} fuelled · {basePts} pts</div>
                 {bonusAwarded[t.id] > 0 && <div style={{ color: "#86EFAC", fontWeight: "700", fontSize: "12px", marginTop: "2px" }}>+{bonusAwarded[t.id]} launch bonus</div>}
               </div>
             );
           })}
         </div>
-        <button onClick={onEnd} className="rf-btn" style={{ background: "linear-gradient(135deg,#4338CA,#818CF8)", color: "white", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "800", cursor: "pointer", transition: "transform 0.15s ease" }}>🏁 End Game</button>
+        <button onClick={onEnd} className="rf-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg,#4338CA,#818CF8)", color: "white", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "800", cursor: "pointer", transition: "transform 0.15s ease" }}><Icon name="checkeredFlag" size={16} /> End Game</button>
       </div>
     </div>
   );

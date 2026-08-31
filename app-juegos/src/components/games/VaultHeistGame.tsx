@@ -1,10 +1,13 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from "react";
+import { TeamIcon, MascotSprite } from "../shared/TeamIcon";
+import { Icon } from "../shared/Icon";
+import { RankBadge } from "../shared/RankBadge";
 import type { GameProps, QuestionData } from "../../types";
 import { useTurnTimer } from "../../hooks/useTurnTimer";
 import { TurnTimerBar } from "../shared/TurnTimerBar";
 import { QuestionCard } from "../shared/QuestionCard";
 import { Confetti } from "../shared/Confetti";
-import { teamsGridCols, GAME_MODES } from "../../data/constants";
+import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
 import { TOPIC_OPTIONS } from "../../data/topics";
 import { makeSoloCpuTeam } from "../../lib/soloOpponent";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
@@ -48,9 +51,6 @@ function ordinal(n: number): string {
   const v = n % 100;
   return n + (s[(v - 20) % 10] || s[v] || s[0]);
 }
-function medalFor(rank: number): string {
-  return rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : "🏅";
-}
 // Same "let the banner actually be seen" fix pattern as Castle Defense (3400ms) / Battleship (1700ms).
 const GAMEOVER_DELAY_MS = 2400;
 const DIFFICULTY_BY_LOCK_INDEX = ["easy", "easy", "medium", "medium", "hard"];
@@ -67,7 +67,30 @@ const FORM_PREFERENCE_BY_LOCK_INDEX: (QuestionData["form"] | undefined)[][] = [
   ["negative", "question"],
   ["negative", "question"],
 ];
-const DICE_FACES = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"];
+// Same local pip-mask pattern as Spy Among Us's/King of the Hill's/Castle Defense's DiceFace —
+// kept file-local since each game's dice roll is its own independent turn mechanic.
+const DICE_PIPS: Record<number, [number, number][]> = {
+  1: [[12, 12]],
+  2: [[8, 8], [16, 16]],
+  3: [[8, 8], [12, 12], [16, 16]],
+  4: [[8, 8], [16, 8], [8, 16], [16, 16]],
+  5: [[8, 8], [16, 8], [12, 12], [8, 16], [16, 16]],
+  6: [[8, 8], [16, 8], [8, 12], [16, 12], [8, 16], [16, 16]],
+};
+function DiceFace({ value, size = 44, spinning = false }: { value: number | null; size?: number; spinning?: boolean }) {
+  if (value === null) return <Icon name="dice" size={size} />;
+  const maskId = `vault-dice-${value}`;
+  return (
+    <svg viewBox="0 0 24 24" width={size} height={size} aria-hidden="true"
+      style={{ display: "inline-block", animation: spinning ? "vaultDiceSpin 0.3s linear infinite" : "none" }}>
+      <mask id={maskId}>
+        <rect width="24" height="24" fill="white" />
+        {DICE_PIPS[value].map(([x, y], i) => <circle key={i} cx={x} cy={y} r="1.6" fill="black" />)}
+      </mask>
+      <rect x="3" y="3" width="18" height="18" rx="5" fill="currentColor" mask={`url(#${maskId})`} />
+    </svg>
+  );
+}
 
 type Phase = "intro" | "rolling" | "reveal" | "answer" | "result" | "gameover";
 type Outcome = { correct: boolean; category: string; locksNow: number; timedOut?: boolean };
@@ -149,12 +172,12 @@ function LockRow({ cracked, total, justChanged }: { cracked: number; total: numb
     <div style={{ display: "flex", gap: "4px", justifyContent: "center" }}>
       {Array.from({ length: total }).map((_, i) => (
         <span key={i} style={{
-          fontSize: "22px",
+          color: "#FCD34D",
           opacity: i < cracked ? 1 : 0.32,
           filter: i < cracked ? "drop-shadow(0 0 4px #FCD34D88)" : "none",
           animation: justChanged && i === Math.max(0, cracked - 1) ? "dialSpin 0.6s ease-out" : "none",
         }}>
-          {i < cracked ? "🔓" : "🔒"}
+          <Icon name={i < cracked ? "unlocked" : "lock"} size={22} />
         </span>
       ))}
     </div>
@@ -523,9 +546,9 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
     return (
       <div style={{ ...arenaStyle, textAlign: "center", color: "white" }}>
         {styleTag}
-        <div style={{ fontSize: "40px", marginBottom: "10px" }}>🔐</div>
+        <div style={{ marginBottom: "10px" }}><Icon name="lock" size={40} /></div>
         <div style={{ fontWeight: "800", fontSize: "18px" }}>No rewrite-sentence content found for this topic selection.</div>
-        <button onClick={onEnd} className="vault-next-btn" style={{ marginTop: "16px", background: "#D4AF37", color: "#1F1608", border: "none", borderRadius: "14px", padding: "14px 32px", fontSize: "16px", fontWeight: "900", cursor: "pointer" }}>🏁 End Game</button>
+        <button onClick={onEnd} className="vault-next-btn" style={{ marginTop: "16px", background: "#D4AF37", color: "#1F1608", border: "none", borderRadius: "14px", padding: "14px 32px", fontSize: "16px", fontWeight: "900", cursor: "pointer" }}><Icon name="checkeredFlag" size={15} /> End Game</button>
       </div>
     );
   }
@@ -537,19 +560,19 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
       {styleTag}
       <div style={{ position: "relative", zIndex: 1 }}>
         <div style={{ background: "linear-gradient(135deg,#3A2E12,#7A5C1E)", borderRadius: "20px", padding: "28px 24px", marginBottom: "10px", position: "relative", color: "white", maxWidth: "540px", margin: "0 auto 10px", boxShadow: "0 0 40px #D4AF3755" }}>
-          <div style={{ fontSize: "36px", marginBottom: "10px" }}>🔐</div>
+          <div style={{ marginBottom: "10px" }}><Icon name="lock" size={36} /></div>
           <div style={{ fontWeight: "900", fontSize: "20px", marginBottom: "10px" }}>Vault Heist</div>
           <div style={{ fontSize: "15px", lineHeight: 1.7, opacity: 0.95 }}>
             Crack open your team's vault, one lock at a time, by rewriting each sentence to match the card.<br />
-            ✅ Correct → the lock cracks and you keep going. ❌ Wrong → your last crack re-locks and the turn passes on. No partial credit — accuracy is everything.
+            <span style={{ display: "inline-flex", alignItems: "center", gap: "3px" }}><Icon name="check" size={13} /> Correct → the lock cracks and you keep going.</span> <span style={{ display: "inline-flex", alignItems: "center", gap: "3px" }}><Icon name="close" size={11} /> Wrong → your last crack re-locks and the turn passes on.</span> No partial credit — accuracy is everything.
           </div>
         </div>
         <div style={{ marginBottom: "20px" }}>
-          <div style={{ color: "#D6C9AE", fontWeight: "800", fontSize: "13px", marginBottom: "10px", letterSpacing: "0.04em", textTransform: "uppercase" }}>⏱️ Choose a timer speed</div>
+          <div style={{ color: "#D6C9AE", fontWeight: "800", fontSize: "13px", marginBottom: "10px", letterSpacing: "0.04em", textTransform: "uppercase", display: "flex", alignItems: "center", justifyContent: "center", gap: "5px" }}><Icon name="clock" size={13} /> Choose a timer speed</div>
           <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap" }}>
             {(["easy", "medium", "hard"] as const).map(d => {
               const selected = difficulty === d;
-              const emoji = d === "easy" ? "🟢" : d === "medium" ? "🟡" : "🔴";
+              const dotColor = d === "easy" ? "#22C55E" : d === "medium" ? "#EAB308" : "#EF4444";
               const label = d[0].toUpperCase() + d.slice(1);
               return (
                 <button
@@ -562,25 +585,26 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
                     border: `2px solid ${selected ? "#D4AF37" : "#6B5B3A"}`,
                     borderRadius: "12px", padding: "10px 20px", fontWeight: "800", fontSize: "14px",
                     cursor: "pointer", transition: "transform 0.15s ease",
+                    display: "inline-flex", alignItems: "center", gap: "6px",
                   }}
                 >
-                  {emoji} {label} · {TURN_SECONDS_BY_DIFFICULTY[d]}s
+                  <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: dotColor, display: "inline-block" }} /> {label} · {TURN_SECONDS_BY_DIFFICULTY[d]}s
                 </button>
               );
             })}
           </div>
         </div>
         <button onClick={() => setShowHowTo(true)} className="vault-next-btn" style={{ display: "block", margin: "0 auto 14px", background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
-          ❓ How to Play
+          <Icon name="help" size={14} /> How to Play
         </button>
         {showHowTo && (
           <HowToPlayModal
-            gameName={GM.name} gameIcon={GM.icon} accentColor={GM.color}
+            gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color}
             steps={VAULT_TUTORIAL_STEPS}
             onClose={() => setShowHowTo(false)}
           />
         )}
-        <button onClick={() => setPhase("rolling")} className="vault-next-btn" style={{ background: "linear-gradient(135deg,#7A5C1E,#D4AF37)", color: "#1F1608", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(212,175,55,0.5)", transition: "transform 0.15s ease" }}>🎲 Roll to Start!</button>
+        <button onClick={() => setPhase("rolling")} className="vault-next-btn" style={{ background: "linear-gradient(135deg,#7A5C1E,#D4AF37)", color: "#1F1608", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(212,175,55,0.5)", transition: "transform 0.15s ease" }}><Icon name="dice" size={18} /> Roll to Start!</button>
       </div>
     </div>
   );
@@ -590,12 +614,12 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
       {ambientLayer}
       {styleTag}
       <div style={{ position: "relative", zIndex: 1 }}>
-        <div style={{ fontWeight: "900", fontSize: "17px", marginBottom: "16px", color: "white" }}>🎲 Rolling to see who cracks first!</div>
+        <div style={{ fontWeight: "900", fontSize: "17px", marginBottom: "16px", color: "white", display: "inline-flex", alignItems: "center", gap: "6px" }}><Icon name="dice" size={16} /> Rolling to see who cracks first!</div>
         <div style={{ display: "flex", gap: "16px", justifyContent: "center", flexWrap: "wrap", marginBottom: "16px" }}>
           {teams.map((t, i) => (
             <div key={t.id} style={{ background: `linear-gradient(160deg,${t.color.dark}55,#0F0B05)`, border: `3px solid ${t.color.bg}`, borderRadius: "16px", padding: "14px 20px", textAlign: "center" }}>
               <div style={{ fontWeight: "800", fontSize: "13px", color: "white" }}>{t.name}</div>
-              <div style={{ fontSize: "44px", lineHeight: 1, animation: diceValues[i] != null && !rollDone ? "vaultDiceSpin 0.3s linear infinite" : "none" }}>{diceValues[i] != null ? DICE_FACES[diceValues[i]! - 1] : "🎲"}</div>
+              <div style={{ color: "#FCD34D", lineHeight: 1, marginTop: "4px" }}><DiceFace value={diceValues[i]} size={44} spinning={diceValues[i] != null && !rollDone} /></div>
               {rollDone && diceValues[i] != null && (
                 <div style={{ fontWeight: "900", fontSize: "13px", color: "#FCD34D", marginTop: "4px" }}>{diceValues[i]}</div>
               )}
@@ -620,7 +644,7 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
               </div>
             </div>
             <div>
-              <button onClick={() => beginReveal(0)} className="vault-next-btn" style={{ background: "linear-gradient(135deg,#7A5C1E,#D4AF37)", color: "#1F1608", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "800", cursor: "pointer", transition: "transform 0.15s ease" }}>▶️ Begin the Heist!</button>
+              <button onClick={() => beginReveal(0)} className="vault-next-btn" style={{ background: "linear-gradient(135deg,#7A5C1E,#D4AF37)", color: "#1F1608", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "800", cursor: "pointer", transition: "transform 0.15s ease" }}><Icon name="play" size={15} /> Begin the Heist!</button>
             </div>
           </div>
         )}
@@ -639,9 +663,9 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
         {styleTag}
         <Confetti active={confettiActive} />
         <div style={{ position: "relative", zIndex: 1 }}>
-          <div style={{ fontSize: "48px", marginBottom: "6px" }}>🏆</div>
-          <div style={{ fontWeight: "900", fontSize: "24px", color: "#FCD34D", marginBottom: "4px", textShadow: "0 0 24px rgba(212,175,55,0.6)" }}>
-            🔓 {winnerTeam.name} cracked the vault first!
+          <div style={{ marginBottom: "6px" }}><Icon name="trophy" size={48} /></div>
+          <div style={{ fontWeight: "900", fontSize: "24px", color: "#FCD34D", marginBottom: "4px", textShadow: "0 0 24px rgba(212,175,55,0.6)", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+            <Icon name="unlocked" size={22} /> {winnerTeam.name} cracked the vault first!
           </div>
           <div style={{ color: "#B8A98A", fontSize: "14px", marginBottom: "20px" }}>Every team cracked all {LOCK_COUNT} locks — heist complete. Final standings:</div>
           <div style={{ display: "flex", flexDirection: "column", gap: "8px", maxWidth: "420px", margin: "0 auto 24px" }}>
@@ -655,14 +679,14 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
                   border: `2px solid ${isFirst ? t.color.bg : "#6B5B3A"}`, borderRadius: "14px", padding: isFirst ? "12px 16px" : "10px 16px",
                   opacity: isFirst ? 1 : 0.9,
                 }}>
-                  <span style={{ fontSize: isFirst ? "24px" : "20px" }}>{medalFor(rank)}</span>
-                  <span style={{ flex: 1, textAlign: "left", fontWeight: isFirst ? "900" : "800", color: isFirst ? "white" : "#D6C9AE", fontSize: isFirst ? "16px" : "15px" }}>{t.mascot ?? t.color.emoji} {t.name}</span>
+                  <span><RankBadge rank={rank - 1} size={isFirst ? 24 : 20} /></span>
+                  <span style={{ flex: 1, textAlign: "left", fontWeight: isFirst ? "900" : "800", color: isFirst ? "white" : "#D6C9AE", fontSize: isFirst ? "16px" : "15px" }}><TeamIcon team={t} /> {t.name}</span>
                   <span style={{ fontWeight: "800", color: isFirst ? "#FCD34D" : "#9C8B6A", fontSize: "13px" }}>{ordinal(rank)} · +{finishBonusForRank(rank)} pts</span>
                 </div>
               );
             })}
           </div>
-          <button onClick={onEnd} className="vault-next-btn" style={{ background: "linear-gradient(135deg,#7A5C1E,#D4AF37)", color: "#1F1608", border: "none", borderRadius: "14px", padding: "14px 32px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(212,175,55,0.5)", transition: "transform 0.15s ease" }}>🏁 End Game</button>
+          <button onClick={onEnd} className="vault-next-btn" style={{ background: "linear-gradient(135deg,#7A5C1E,#D4AF37)", color: "#1F1608", border: "none", borderRadius: "14px", padding: "14px 32px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(212,175,55,0.5)", transition: "transform 0.15s ease" }}><Icon name="checkeredFlag" size={16} /> End Game</button>
         </div>
       </div>
     );
@@ -694,8 +718,8 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
           borderRadius: "14px", padding: "12px 24px", boxShadow: "0 8px 28px rgba(0,0,0,0.5)",
           animation: "vaultBannerIn 3.2s ease-in-out forwards",
         }}>
-          <span style={{ color: "white", fontWeight: "900", fontSize: "16px", textShadow: "0 1px 3px rgba(0,0,0,0.5)" }}>
-            {medalFor(winBanner.rank)} {winBanner.teamName} finished {ordinal(winBanner.rank)}! +{winBanner.bonus} pts
+          <span style={{ color: "white", fontWeight: "900", fontSize: "16px", textShadow: "0 1px 3px rgba(0,0,0,0.5)", display: "inline-flex", alignItems: "center", gap: "6px" }}>
+            <RankBadge rank={winBanner.rank - 1} size={18} /> {winBanner.teamName} finished {ordinal(winBanner.rank)}! +{winBanner.bonus} pts
           </span>
         </div>
       )}
@@ -718,7 +742,7 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px" }}>
                   <div style={{ fontWeight: "900", fontSize: "13px", color: "#F3F4F6", textShadow: "0 1px 3px rgba(0,0,0,0.6)" }}>{tm.name}</div>
                   {finished && (
-                    <div style={{ fontSize: "11px", fontWeight: "800", color: "#FCD34D" }}>{medalFor(finishRank + 1)} {ordinal(finishRank + 1)}</div>
+                    <div style={{ fontSize: "11px", fontWeight: "800", color: "#FCD34D", display: "flex", alignItems: "center", gap: "4px" }}><RankBadge rank={finishRank} size={16} /> {ordinal(finishRank + 1)}</div>
                   )}
                 </div>
                 <LockRow cracked={cracked} total={LOCK_COUNT} justChanged={justChanged} />
@@ -728,7 +752,7 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
         </div>
 
         <div style={{ background: `linear-gradient(90deg, ${activeTeam.color.bg}, ${activeTeam.color.dark})`, borderRadius: "14px", padding: "10px 16px", marginBottom: "12px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px", boxShadow: `0 4px 18px ${activeTeam.color.bg}55` }}>
-          <span style={{ color: "white", fontWeight: "900", fontSize: "16px", textShadow: "0 1px 3px rgba(0,0,0,0.4)" }}>🔐 {activeTeam.mascot ?? activeTeam.color.emoji} {activeTeam.name} — {phaseHeaderText()}</span>
+          <span style={{ color: "white", fontWeight: "900", fontSize: "16px", textShadow: "0 1px 3px rgba(0,0,0,0.4)", display: "inline-flex", alignItems: "center", gap: "6px" }}><Icon name="lock" size={15} /> <TeamIcon team={activeTeam} /> {activeTeam.name} — {phaseHeaderText()}</span>
           {phase === "answer" && <TurnTimerBar timeLeft={timeLeft} totalSeconds={turnSeconds} />}
         </div>
 
@@ -740,15 +764,15 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
               animation: "toolFlip 0.5s ease-out",
             }}>
               {topicLabel && (
-                <div style={{ fontSize: "12px", fontWeight: "800", color: "#B8A98A", marginBottom: "8px", letterSpacing: "0.05em", textTransform: "uppercase" }}>📚 {topicLabel}</div>
+                <div style={{ fontSize: "12px", fontWeight: "800", color: "#B8A98A", marginBottom: "8px", letterSpacing: "0.05em", textTransform: "uppercase", display: "flex", alignItems: "center", justifyContent: "center", gap: "5px" }}><Icon name="books" size={12} /> {topicLabel}</div>
               )}
-              <div style={{ fontSize: "30px", marginBottom: "4px" }}>{activeTeam.mascot ?? "🕵️"}</div>
-              <div style={{ fontSize: "13px", fontWeight: "700", color: "#E8D8AE", marginBottom: "6px", letterSpacing: "0.05em" }}>🔧 THIS LOCK NEEDS</div>
+              <div style={{ fontSize: "30px", marginBottom: "4px" }}><MascotSprite mascot={activeTeam.mascot} fallback="🕵️" size={34} /></div>
+              <div style={{ fontSize: "13px", fontWeight: "700", color: "#E8D8AE", marginBottom: "6px", letterSpacing: "0.05em", display: "flex", alignItems: "center", justifyContent: "center", gap: "5px" }}><Icon name="wrench" size={13} /> THIS LOCK NEEDS</div>
               <div style={{ fontSize: "24px", fontWeight: "900", color: "#FCD34D" }}>{displayCategory(currentCategory)}</div>
               {currentQuestion?.form && (
                 <div style={{ marginTop: "10px", display: "inline-block", background: "#7F1D1D", border: "2px solid #FCA5A5", borderRadius: "10px", padding: "5px 14px" }}>
-                  <span style={{ fontSize: "13px", fontWeight: "800", color: "#FCA5A5" }}>
-                    {currentQuestion.form === "question" ? "❓ ALSO NEEDS: A QUESTION" : "🚫 ALSO NEEDS: NEGATIVE"}
+                  <span style={{ fontSize: "13px", fontWeight: "800", color: "#FCA5A5", display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                    {currentQuestion.form === "question" ? <><Icon name="help" size={13} /> ALSO NEEDS: A QUESTION</> : <><Icon name="forbidden" size={13} /> ALSO NEEDS: NEGATIVE</>}
                   </span>
                 </div>
               )}
@@ -769,13 +793,13 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
                   borderRadius: "10px", padding: "6px 14px",
                 }}>
                   {topicLabel && (
-                    <span style={{ fontSize: "11px", fontWeight: "800", color: "#B8A98A", letterSpacing: "0.04em", textTransform: "uppercase" }}>📚 {topicLabel}</span>
+                    <span style={{ fontSize: "11px", fontWeight: "800", color: "#B8A98A", letterSpacing: "0.04em", textTransform: "uppercase", display: "inline-flex", alignItems: "center", gap: "4px" }}><Icon name="books" size={11} /> {topicLabel}</span>
                   )}
                   {topicLabel && <span style={{ fontSize: "11px", color: "#6B5B3A" }}>•</span>}
-                  <span style={{ fontSize: "12px", fontWeight: "900", color: "#FCD34D" }}>🔧 {displayCategory(currentCategory)}</span>
+                  <span style={{ fontSize: "12px", fontWeight: "900", color: "#FCD34D", display: "inline-flex", alignItems: "center", gap: "4px" }}><Icon name="wrench" size={11} /> {displayCategory(currentCategory)}</span>
                   {currentQuestion?.form && (
-                    <span style={{ fontSize: "11px", fontWeight: "800", color: "#FCA5A5" }}>
-                      {currentQuestion.form === "question" ? "❓ + QUESTION" : "🚫 + NEGATIVE"}
+                    <span style={{ fontSize: "11px", fontWeight: "800", color: "#FCA5A5", display: "inline-flex", alignItems: "center", gap: "3px" }}>
+                      {currentQuestion.form === "question" ? <><Icon name="help" size={11} /> + QUESTION</> : <><Icon name="forbidden" size={11} /> + NEGATIVE</>}
                     </span>
                   )}
                 </div>
@@ -784,8 +808,8 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
             <QuestionCard question={currentQuestion} showAnswer={showAns} onReveal={handleReveal} gameId="vault" />
             {currentQuestion && (showAns || currentQuestion?.type === "speaking task") && (
               <div style={{ display: "flex", gap: "10px", justifyContent: "center", marginTop: "12px" }}>
-                <button onClick={handleCorrect} className="vault-next-btn" style={{ background: "#22C55E", color: "white", border: "none", borderRadius: "12px", padding: "12px 24px", fontSize: "16px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease" }}>✅ Correct — Crack it!</button>
-                <button onClick={handleWrong} className="vault-next-btn" style={{ background: "#EF4444", color: "white", border: "none", borderRadius: "12px", padding: "12px 24px", fontSize: "16px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease" }}>❌ Wrong</button>
+                <button onClick={handleCorrect} className="vault-next-btn" style={{ background: "#22C55E", color: "white", border: "none", borderRadius: "12px", padding: "12px 24px", fontSize: "16px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease" }}><Icon name="check" size={15} /> Correct — Crack it!</button>
+                <button onClick={handleWrong} className="vault-next-btn" style={{ background: "#EF4444", color: "white", border: "none", borderRadius: "12px", padding: "12px 24px", fontSize: "16px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease" }}><Icon name="close" size={13} /> Wrong</button>
               </div>
             )}
           </>
@@ -798,35 +822,35 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
             <div style={{ marginTop: "4px", textAlign: "center" }}>
               {lastOutcome.timedOut ? (
                 <div style={{ background: "rgba(120,53,15,0.35)", border: "2px solid #F59E0B", borderRadius: "14px", padding: "14px", marginBottom: "10px", backdropFilter: "blur(4px)" }}>
-                  <div style={{ fontWeight: "900", fontSize: "17px", color: "#FCD34D" }}>⏰ Time's up for {activeTeam.name}!</div>
+                  <div style={{ fontWeight: "900", fontSize: "17px", color: "#FCD34D", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}><Icon name="hourglass" size={16} /> Time's up for {activeTeam.name}!</div>
                   <div style={{ color: "#E8D8AE", fontWeight: "700", fontSize: "13px", marginTop: "4px" }}>
                     Still at {lastOutcome.locksNow}/{LOCK_COUNT} locks — no penalty, but here's what they were going for:
                   </div>
                   {currentQuestion && (
                     <div style={{ background: "rgba(0,0,0,0.25)", borderRadius: "10px", padding: "10px 12px", marginTop: "10px", textAlign: "left" }}>
-                      <div style={{ fontWeight: "900", fontSize: "16px", color: "#86EFAC" }}>✅ {currentQuestion.answer}</div>
-                      {currentQuestion.hint && <div style={{ color: "#FDE68A", fontSize: "12px", marginTop: "6px" }}>💡 {currentQuestion.hint}</div>}
+                      <div style={{ fontWeight: "900", fontSize: "16px", color: "#86EFAC", display: "flex", alignItems: "center", gap: "5px" }}><Icon name="check" size={14} /> {currentQuestion.answer}</div>
+                      {currentQuestion.hint && <div style={{ color: "#FDE68A", fontSize: "12px", marginTop: "6px", display: "flex", alignItems: "center", gap: "4px" }}><Icon name="idea" size={11} /> {currentQuestion.hint}</div>}
                     </div>
                   )}
                 </div>
               ) : lastOutcome.correct ? (
                 <div style={{ background: "rgba(120,53,15,0.35)", border: "2px solid #D4AF37", borderRadius: "14px", padding: "14px", marginBottom: "10px", backdropFilter: "blur(4px)" }}>
-                  <div style={{ fontWeight: "900", fontSize: "17px", color: "#FCD34D" }}>🔓 {activeTeam.name} cracked lock {lastOutcome.locksNow}/{LOCK_COUNT}!</div>
+                  <div style={{ fontWeight: "900", fontSize: "17px", color: "#FCD34D", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}><Icon name="unlocked" size={16} /> {activeTeam.name} cracked lock {lastOutcome.locksNow}/{LOCK_COUNT}!</div>
                   <div style={{ color: "#E8D8AE", fontWeight: "700", fontSize: "13px", marginTop: "4px" }}>
                     {justFinished ? "Vault fully cracked!" : `+${CRACK_SCORE} pts — same team, next lock!`}
                   </div>
                 </div>
               ) : (
                 <div style={{ background: "rgba(127,29,29,0.35)", border: "2px solid #EF4444", borderRadius: "14px", padding: "14px", marginBottom: "10px", backdropFilter: "blur(4px)", animation: "alarmFlash 0.9s ease-in-out" }}>
-                  <div style={{ fontWeight: "900", fontSize: "17px", color: "#FCA5A5" }}>🚨 Alarm! {activeTeam.name}'s last crack re-locked.</div>
+                  <div style={{ fontWeight: "900", fontSize: "17px", color: "#FCA5A5", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}><Icon name="warning" size={16} /> Alarm! {activeTeam.name}'s last crack re-locked.</div>
                   <div style={{ color: "#FCA5A5", fontWeight: "700", fontSize: "13px", marginTop: "4px" }}>Now at {lastOutcome.locksNow}/{LOCK_COUNT} locks — turn passes.</div>
                 </div>
               )}
               {!allFinished && (
                 lastOutcome.correct && !justFinished ? (
-                  <button onClick={keepGoing} className="vault-next-btn" style={{ background: "#D4AF37", color: "#1F1608", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "800", cursor: "pointer", boxShadow: "0 4px 16px rgba(212,175,55,0.5)", transition: "transform 0.15s ease" }}>🔓 Keep Going!</button>
+                  <button onClick={keepGoing} className="vault-next-btn" style={{ background: "#D4AF37", color: "#1F1608", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "800", cursor: "pointer", boxShadow: "0 4px 16px rgba(212,175,55,0.5)", transition: "transform 0.15s ease" }}><Icon name="unlocked" size={15} /> Keep Going!</button>
                 ) : (
-                  <button onClick={advanceTurn} className="vault-next-btn" style={{ background: "#6366F1", color: "white", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "800", cursor: "pointer", boxShadow: "0 4px 16px rgba(99,102,241,0.5)", transition: "transform 0.15s ease" }}>➡️ Next Team</button>
+                  <button onClick={advanceTurn} className="vault-next-btn" style={{ background: "#6366F1", color: "white", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "800", cursor: "pointer", boxShadow: "0 4px 16px rgba(99,102,241,0.5)", transition: "transform 0.15s ease" }}><Icon name="next" size={15} /> Next Team</button>
                 )
               )}
             </div>

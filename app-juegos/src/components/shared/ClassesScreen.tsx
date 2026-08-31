@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
+import { TeamIcon } from "./TeamIcon";
 import type { SavedClass } from "../../types";
 import { TEAM_COLORS, GAME_MODES, LEVELS_META, FREE_PLAN_LIMITS } from "../../data/constants";
 import { listClasses, createClass, deleteClass } from "../../lib/classes";
 import { hexToRgba, type Theme } from "../../data/themes";
+import { Icon } from "./Icon";
 
 type Props = {
   onBack: () => void;
@@ -62,10 +64,10 @@ export function ClassesScreen({ onBack, onResumeClass, onStartWithClass, theme, 
   return (
     <div style={{ minHeight: "100vh", background: "#F0F9FF", padding: "20px", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
       <div style={{ maxWidth: "640px", margin: "0 auto" }}>
-        <button onClick={onBack} style={{ background: "none", border: `2px solid ${theme.accentSolid}`, color: theme.accentSolid, borderRadius: "10px", padding: "8px 16px", cursor: "pointer", fontWeight: "700", marginBottom: "20px", fontFamily: theme.headingFont }}>← Back</button>
+        <button onClick={onBack} style={{ background: "none", border: `2px solid ${theme.accentSolid}`, color: theme.accentSolid, borderRadius: "10px", padding: "8px 16px", cursor: "pointer", fontWeight: "700", marginBottom: "20px", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px" }}><Icon name="back" size={13} /> Back</button>
 
         <div style={{ textAlign: "center", marginBottom: "24px" }}>
-          <h2 style={{ fontSize: "30px", fontWeight: "900", color: theme.heroBg[0], margin: 0, fontFamily: theme.headingFont }}>📚 My Classes</h2>
+          <h2 style={{ fontSize: "30px", fontWeight: "900", color: theme.heroBg[0], margin: 0, fontFamily: theme.headingFont, display: "flex", alignItems: "center", justifyContent: "center", gap: "10px" }}><Icon name="books" size={26} /> My Classes</h2>
           <p style={{ color: "#6B7280", marginTop: "8px" }}>Team scores carry over each time you return to a class. Pick one up where you left off, or start a fresh game with the same roster.</p>
         </div>
 
@@ -74,9 +76,9 @@ export function ClassesScreen({ onBack, onResumeClass, onStartWithClass, theme, 
             <div style={{ fontSize: "14px", color: "#374151", fontWeight: "700", marginBottom: "10px" }}>Free plan is limited to {FREE_PLAN_LIMITS.maxClasses} class. Upgrade for unlimited classes.</div>
             <button
               onClick={onUpgrade}
-              style={{ background: `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "12px", padding: "10px 20px", fontWeight: "800", cursor: "pointer", fontFamily: theme.headingFont }}
+              style={{ background: `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "12px", padding: "10px 20px", fontWeight: "800", cursor: "pointer", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px" }}
             >
-              💎 Upgrade
+              <Icon name="gem" size={14} /> Upgrade
             </button>
           </div>
         ) : (
@@ -131,17 +133,17 @@ export function ClassesScreen({ onBack, onResumeClass, onStartWithClass, theme, 
                     <div style={{ fontWeight: "900", fontSize: "17px", color: "#1E1B4B", fontFamily: theme.headingFont }}>{cls.name}</div>
                     {(cls.school || cls.default_level) && (
                       <div style={{ fontSize: "12px", color: "#6B7280", fontWeight: "600", marginTop: "2px" }}>
-                        {cls.school && <>🏫 {cls.school}</>}
+                        {cls.school && <><Icon name="school" size={12} /> {cls.school}</>}
                         {cls.school && cls.default_level && " · "}
-                        {cls.default_level && <>📊 {cls.default_level}</>}
+                        {cls.default_level && <><Icon name="chart" size={12} /> {cls.default_level}</>}
                       </div>
                     )}
                   </div>
                   <button
                     onClick={() => handleDelete(cls.id)} title="Delete class"
-                    style={{ background: "none", border: "none", color: "#9CA3AF", cursor: "pointer", fontSize: "14px", padding: "2px 4px" }}
+                    style={{ background: "none", border: "none", color: "#9CA3AF", cursor: "pointer", padding: "2px 4px", display: "inline-flex" }}
                   >
-                    🗑️
+                    <Icon name="trash" size={15} />
                   </button>
                 </div>
 
@@ -149,7 +151,7 @@ export function ClassesScreen({ onBack, onResumeClass, onStartWithClass, theme, 
                   <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginTop: "10px" }}>
                     {cls.teams.map(t => (
                       <span key={t.id} style={{ background: t.color?.light ?? TEAM_COLORS[0].light, color: t.color?.dark ?? TEAM_COLORS[0].dark, borderRadius: "8px", padding: "4px 10px", fontSize: "12px", fontWeight: "700" }}>
-                        {t.mascot ?? t.color?.emoji} {t.name}: {t.score}
+                        <TeamIcon team={t} /> {t.name}: {t.score}
                       </span>
                     ))}
                   </div>
@@ -167,7 +169,7 @@ export function ClassesScreen({ onBack, onResumeClass, onStartWithClass, theme, 
                       <span style={{ fontSize: "11px", color: "#9CA3AF", fontWeight: "700" }}>Also saved:</span>
                       {benched.map(r => (
                         <span key={r.id} style={{ background: "#F9FAFB", color: "#9CA3AF", border: "1px dashed #D1D5DB", borderRadius: "8px", padding: "4px 10px", fontSize: "12px", fontWeight: "700" }}>
-                          {r.mascot ?? r.color?.emoji} {r.name}
+                          <TeamIcon team={r} /> {r.name}
                         </span>
                       ))}
                     </div>
@@ -178,16 +180,16 @@ export function ClassesScreen({ onBack, onResumeClass, onStartWithClass, theme, 
                   {cls.in_progress && (
                     <button
                       onClick={() => onResumeClass(cls)}
-                      style={{ background: `linear-gradient(135deg,${theme.cta[0]},${theme.cta[1]})`, color: "white", border: "none", borderRadius: "10px", padding: "10px 16px", fontWeight: "800", fontSize: "13px", cursor: "pointer", fontFamily: theme.headingFont }}
+                      style={{ background: `linear-gradient(135deg,${theme.cta[0]},${theme.cta[1]})`, color: "white", border: "none", borderRadius: "10px", padding: "10px 16px", fontWeight: "800", fontSize: "13px", cursor: "pointer", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px" }}
                     >
-                      ▶️ Resume {gameLabel(cls.selected_game)}
+                      <Icon name="play" size={13} /> Resume {gameLabel(cls.selected_game)}
                     </button>
                   )}
                   <button
                     onClick={() => onStartWithClass(cls)}
-                    style={{ background: cls.in_progress ? hexToRgba(theme.accentSolid, 0.12) : `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: cls.in_progress ? theme.accentSolid : "white", border: cls.in_progress ? `2px solid ${hexToRgba(theme.accentSolid, 0.4)}` : "none", borderRadius: "10px", padding: "10px 16px", fontWeight: "800", fontSize: "13px", cursor: "pointer", fontFamily: theme.headingFont }}
+                    style={{ background: cls.in_progress ? hexToRgba(theme.accentSolid, 0.12) : `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: cls.in_progress ? theme.accentSolid : "white", border: cls.in_progress ? `2px solid ${hexToRgba(theme.accentSolid, 0.4)}` : "none", borderRadius: "10px", padding: "10px 16px", fontWeight: "800", fontSize: "13px", cursor: "pointer", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px" }}
                   >
-                    🆕 Start New Game
+                    <Icon name="plus" size={12} /> Start New Game
                   </button>
                 </div>
               </div>

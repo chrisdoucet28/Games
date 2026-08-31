@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { TeamIcon, MascotSprite } from "../shared/TeamIcon";
 import type { WhackStatePayload, WhackTurnReportPayload } from "../../lib/liveSession";
 import { useMoleGame, TOTAL_HOLES } from "../../hooks/useMoleGame";
 import { useTurnTimer } from "../../hooks/useTurnTimer";
@@ -153,7 +154,7 @@ export function PhoneWordWhackView({ state, teamId, onTurnReport }: Props) {
     const activeTeam = state.roster.find(t => t.id === state.activeTeamId);
     return (
       <div style={{ ...wrapStyle, textAlign: "center" }}>
-        <div style={{ fontSize: "22px", marginBottom: "4px" }}>{team?.mascot ?? team?.color.emoji}</div>
+        <div style={{ fontSize: "22px", marginBottom: "4px" }}><TeamIcon team={team} size={22} /></div>
         <div style={{ fontWeight: "900", fontSize: "16px", marginBottom: "16px" }}>{team?.name}</div>
         <div style={{ fontSize: "36px", marginBottom: "8px" }}>🔨</div>
         <div style={{ fontWeight: "800", fontSize: "16px", color: "#BEF264", marginBottom: "18px" }}>
@@ -162,7 +163,7 @@ export function PhoneWordWhackView({ state, teamId, onTurnReport }: Props) {
         <div style={{ display: "flex", flexDirection: "column", gap: "6px", maxWidth: "300px", margin: "0 auto" }}>
           {state.roster.map(t => (
             <div key={t.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: t.id === state.activeTeamId ? "rgba(190,242,100,0.15)" : "rgba(255,255,255,0.06)", border: `1.5px solid ${t.id === state.activeTeamId ? "#BEF264" : "rgba(255,255,255,0.15)"}`, borderRadius: "10px", padding: "8px 12px" }}>
-              <span style={{ fontSize: "13px", fontWeight: "700" }}>{t.mascot ?? t.color.emoji} {t.name}</span>
+              <span style={{ fontSize: "13px", fontWeight: "700" }}><TeamIcon team={t} /> {t.name}</span>
               <span style={{ fontSize: "13px", fontWeight: "800", color: "#BEF264" }}>{state.scores[String(t.id)] ?? 0} pts</span>
             </div>
           ))}
@@ -174,7 +175,7 @@ export function PhoneWordWhackView({ state, teamId, onTurnReport }: Props) {
   return (
     <div style={wrapStyle}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "10px" }}>
-        <span style={{ fontWeight: "900", fontSize: "15px" }}>{team?.mascot ?? team?.color.emoji} {team?.name}</span>
+        <span style={{ fontWeight: "900", fontSize: "15px" }}><TeamIcon team={team} /> {team?.name}</span>
         <span style={{ fontSize: "13px", fontWeight: "800", color: "#BEF264" }}>⏱️ {timeLeft}s</span>
       </div>
 
@@ -209,7 +210,7 @@ export function PhoneWordWhackView({ state, teamId, onTurnReport }: Props) {
                     display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center",
                   }}
                 >
-                  {team?.mascot ?? "🦫"} {mole.text}
+                  <MascotSprite mascot={team?.mascot} fallback="🦫" size={13} /> {mole.text}
                 </button>
               )}
               {holeFx?.kind === "hit" && (

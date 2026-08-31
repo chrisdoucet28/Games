@@ -1,34 +1,44 @@
 import { useState, useRef, useCallback, useEffect } from "react";
+import { TeamIcon } from "../shared/TeamIcon";
+import { Icon } from "../shared/Icon";
+import type { RealtimeChannel } from "@supabase/supabase-js";
 import type { GameProps } from "../../types";
 import { useTurnTimer } from "../../hooks/useTurnTimer";
-import { teamsGridCols, GAME_MODES } from "../../data/constants";
-import { denseRank, medalForRank } from "../../utils/ranking";
+import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
+import { denseRank } from "../../utils/ranking";
+import { RankBadge } from "../shared/RankBadge";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
+import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
+import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
 import { ORDERUP_TUTORIAL_STEPS } from "../../data/tutorials/orderup";
+import {
+  generateSessionCode, openOrderUpChannel, closeChannel,
+  type OrderUpPhase, type OrderUpStatePayload, type OrderUpActionPayload, type OrderUpTicketInfo,
+} from "../../lib/liveSession";
 
 const GM = GAME_MODES.find(g => g.id === "orderup")!;
 
 // The diner queue used to always sit at a fixed 3 customers regardless of class size — a 2-team
 // class found that overwhelming (2 people covering 3 orders) while a 5-team class found it too
-// quiet (5 teams idling over the same 3). Capacity now scales with team count, and — like the
-// item-count difficulty — ramps up from a single customer rather than starting at max immediately.
+// quiet (5 teams idling over the same 3). Capacity now scales with team count, and ramps up a
+// little further from there as the session goes on.
 const MAX_QUEUE_SLOTS_CAP = 6;
 const SLOT_RAMP_INTERVAL = 4;
-// Floored at 2 (not 1) so solo play still ramps up to two customers waiting at once — the whole
-// point of the queue is "orders pile up if you're slow," and with a hard cap of 1 a solo player
-// could never actually experience that pressure, no matter how long the session ran. A 2-team
-// class already sits at exactly 2 from the plain team-count formula, so this floor doesn't change
-// anything for 2+ teams — it only fixes the 1-team case.
+// At least team count + 2 (capped) — every team needs at least one order of its own available at
+// all times just to have something to claim (see initialQueueSlots below, which starts the queue
+// at exactly team count), so the max has to sit strictly above that floor or there'd be no room
+// left to ramp up into. The +2 headroom is what actually grows over the session.
 function maxQueueSlots(teamCount: number): number {
-  return Math.max(2, Math.min(teamCount, MAX_QUEUE_SLOTS_CAP));
+  return Math.max(2, Math.min(teamCount + 2, MAX_QUEUE_SLOTS_CAP));
 }
-// Every class used to start at exactly 1 customer no matter how many teams were playing, so a
-// 5-team class spent its first several resolutions with only one ticket to fight over. Bigger
-// classes now open with more choice on the board from the very first customer, still ramping up
-// to the full cap from there rather than starting at max immediately.
+// Never fewer than one order per team — a 2-team class used to open with only 1 ticket on the
+// board (half of team count, rounded up), which meant one team had nothing to claim until the
+// other team's order resolved. The whole point of team count as the floor is that every team can
+// always claim something immediately; the queue only grows from here as SLOT_RAMP_INTERVAL orders
+// get resolved, up to maxQueueSlots.
 function initialQueueSlots(teamCount: number): number {
-  return Math.max(1, Math.ceil(teamCount / 2));
+  return teamCount;
 }
 function currentQueueCapacity(resolvedCount: number, maxSlots: number, initialSlots: number): number {
   return Math.min(maxSlots, initialSlots + Math.floor(resolvedCount / SLOT_RAMP_INTERVAL));
@@ -36,7 +46,9 @@ function currentQueueCapacity(resolvedCount: number, maxSlots: number, initialSl
 // A shared round timer, rather than the old fully open-ended "End Game whenever" model — gives the
 // class a race-against-the-clock target ("how many can we serve before time's up?") instead of just
 // grinding until the teacher stops it. Picked on the intro screen like Vault Heist's timer speed.
-const SESSION_SECONDS_BY_LENGTH: Record<string, number> = { short: 300, medium: 480, long: 720 };
+// 8/12/18 min (not 5/8/12) — 5 minutes turned out to barely cover a couple of orders once claiming,
+// writing, and judging are all factored in.
+const SESSION_SECONDS_BY_LENGTH: Record<string, number> = { short: 480, medium: 720, long: 1080 };
 // Every served ticket hands the serving team a dish matching that ticket's food icon — every time
 // a team's running count of ONE dish type hits a multiple of DISH_SET_SIZE, they get an instant
 // DISH_SET_BONUS combo payout on top of normal per-ticket points (paid immediately, not saved up
@@ -44,9 +56,9 @@ const SESSION_SECONDS_BY_LENGTH: Record<string, number> = { short: 300, medium: 
 // calculation). Keeps paying out every DISH_SET_SIZE more of the same dish, no cap.
 const DISH_SET_SIZE = 3;
 const DISH_SET_BONUS = 30;
-// A shared-floor game means an expired ticket is everyone's failure, not just whoever almost
-// claimed it — a small collective penalty (not zero, not harsh) keeps the whole room invested in
-// not letting customers walk, rather than only the team who happened to be mid-sentence caring.
+// Only charged against a ticket's claiming team when it expires — an unclaimed ticket expiring
+// costs nobody (see the expiry interval below). Claiming is a real commitment now, not just "tap
+// to open judging": once claimed, that team alone is on the hook if they don't finish in time.
 const UNHAPPY_PENALTY = 5;
 // Difficulty ramps over the course of the session rather than staying at a flat 50/40/10 the
 // whole time — the first RAMP_TO_TWO_ITEM tickets resolved (served or expired) are 1-item only,
@@ -143,10 +155,10 @@ function randomFrom<T>(arr: readonly T[]): T {
 type TicketItem =
   | { kind: "grammar"; transform: string; label: string; foodEmoji: string }
   | { kind: "vocab"; word: string; foodEmoji: string };
-type Ticket = { id: number; items: TicketItem[]; customerEmoji: string; totalSeconds: number; secondsLeft: number };
+type Ticket = { id: number; items: TicketItem[]; customerEmoji: string; totalSeconds: number; secondsLeft: number; claimedBy?: string | number; submittedSentence?: string };
 type JudgingState = { ticketId: number; teamId: string | number } | null;
 type Phase = "intro" | "playing" | "final";
-type Banner = { text: string; kind: "success" | "expired"; key: number };
+type Banner = { text: React.ReactNode; kind: "success" | "expired"; key: number };
 type DishCounts = Record<string, number>;
 
 function pickItemCount(resolvedCount: number): number {
@@ -237,7 +249,7 @@ function DinerFacade() {
     <div style={{ maxWidth: "700px", margin: "0 auto 16px", borderRadius: "16px 16px 6px 6px", overflow: "hidden", boxShadow: "0 6px 18px rgba(190,24,93,0.18)" }}>
       <div style={{ height: "30px", background: "repeating-linear-gradient(45deg,#F43F5E 0 16px,#FFF1F2 16px 32px)" }} />
       <div style={{ background: "linear-gradient(180deg,#FFE4E6,#FFF1F2)", padding: "8px 16px", textAlign: "center" }}>
-        <span style={{ fontWeight: "900", fontSize: "14px", color: "#9D174D", letterSpacing: "0.03em" }}>🍽️ ORDER UP DINER</span>
+        <span style={{ fontWeight: "900", fontSize: "14px", color: "#9D174D", letterSpacing: "0.03em", display: "inline-flex", alignItems: "center", gap: "6px" }}><Icon name="plate" size={14} /> ORDER UP DINER</span>
       </div>
     </div>
   );
@@ -263,17 +275,25 @@ function ItemBadge({ item }: { item: TicketItem }) {
   );
 }
 
-function TicketCard({ ticket, teams, judging, onClaim, onCorrect, onWrong, onSkip }: {
+function TicketCard({ ticket, teams, judging, isPhoneMode, answerMode, onClaim, onOpenJudging, onRelease, onCorrect, onWrong, onSkip }: {
   ticket: Ticket;
   teams: GameProps["teams"];
   judging: JudgingState;
+  isPhoneMode: boolean;
+  answerMode: "spoken" | "typing";
   onClaim: (ticketId: number, teamId: string | number) => void;
+  onOpenJudging: (ticketId: number) => void;
+  onRelease: (ticketId: number) => void;
   onCorrect: () => void;
   onWrong: () => void;
   onSkip: (ticketId: number) => void;
 }) {
   const isJudging = judging?.ticketId === ticket.id;
   const judgingTeam = isJudging ? teams.find(t => t.id === judging!.teamId) : null;
+  const claimedTeam = ticket.claimedBy !== undefined ? teams.find(t => t.id === ticket.claimedBy) : null;
+  // Another ticket is already being judged — the "Ready to judge" tap on this one would no-op, so
+  // show it dimmed rather than let a teacher tap it and wonder why nothing happened.
+  const judgingBlocked = judging !== null && !isJudging;
   const pct = Math.max(0, (ticket.secondsLeft / ticket.totalSeconds) * 100);
   const urgent = pct < 25;
 
@@ -299,30 +319,75 @@ function TicketCard({ ticket, teams, judging, onClaim, onCorrect, onWrong, onSki
 
       {isJudging ? (
         <div>
-          <div style={{ fontSize: "12px", fontWeight: "800", color: "#9D174D", marginBottom: "6px" }}>
-            {judgingTeam?.mascot ?? judgingTeam?.color.emoji} {judgingTeam?.name} — one sentence, every dish above.
-          </div>
+          {answerMode === "typing" && ticket.submittedSentence ? (
+            <div style={{ background: "white", border: "1px solid #FBCFE8", borderRadius: "8px", padding: "6px 10px", margin: "0 0 8px", fontSize: "13px", fontWeight: "700", color: "#831843" }}>
+              “{ticket.submittedSentence}”
+            </div>
+          ) : (
+            <div style={{ fontSize: "12px", fontWeight: "800", color: "#9D174D", marginBottom: "6px" }}>
+              <TeamIcon team={judgingTeam} /> {judgingTeam?.name} — one sentence, every dish above.
+            </div>
+          )}
           <div style={{ display: "flex", gap: "6px", justifyContent: "center" }}>
-            <button onClick={onCorrect} className="ou-btn" style={{ background: "#22C55E", color: "white", border: "none", borderRadius: "10px", padding: "8px 12px", fontSize: "13px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease" }}>✅ Serve it!</button>
-            <button onClick={onWrong} className="ou-btn" style={{ background: "#EF4444", color: "white", border: "none", borderRadius: "10px", padding: "8px 12px", fontSize: "13px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease" }}>❌ Wrong</button>
+            <button onClick={onCorrect} className="ou-btn" style={{ display: "inline-flex", alignItems: "center", gap: "5px", background: "#22C55E", color: "white", border: "none", borderRadius: "10px", padding: "8px 12px", fontSize: "13px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease" }}><Icon name="check" size={13} /> Serve it!</button>
+            <button onClick={onWrong} className="ou-btn" style={{ display: "inline-flex", alignItems: "center", gap: "5px", background: "#EF4444", color: "white", border: "none", borderRadius: "10px", padding: "8px 12px", fontSize: "13px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease" }}><Icon name="close" size={12} /> Wrong</button>
+          </div>
+        </div>
+      ) : claimedTeam ? (
+        <div>
+          <div style={{ fontSize: "12px", fontWeight: "800", color: claimedTeam.color.dark, marginBottom: "8px" }}>
+            <TeamIcon team={claimedTeam} /> Claimed by {claimedTeam.name}
+          </div>
+          {answerMode === "typing" && ticket.submittedSentence && (
+            <div style={{ background: "white", border: "1px solid #FBCFE8", borderRadius: "8px", padding: "6px 10px", margin: "0 0 8px", fontSize: "13px", fontWeight: "700", color: "#831843" }}>
+              “{ticket.submittedSentence}”
+            </div>
+          )}
+          <div style={{ display: "flex", gap: "6px", justifyContent: "center", flexWrap: "wrap" }}>
+            {answerMode === "typing" && !ticket.submittedSentence ? (
+              <div style={{ fontSize: "11px", fontWeight: "700", color: "#9D174D", padding: "8px 0", display: "inline-flex", alignItems: "center", gap: "4px" }}><Icon name="pencil" size={11} /> {claimedTeam.name} is typing…</div>
+            ) : (
+              <button
+                onClick={() => onOpenJudging(ticket.id)}
+                disabled={judgingBlocked}
+                className="ou-btn"
+                title={judgingBlocked ? "Finish judging the current order first" : undefined}
+                style={{
+                  background: judgingBlocked ? "#D1D5DB" : "linear-gradient(135deg,#BE185D,#F43F5E)", color: "white", border: "none",
+                  borderRadius: "10px", padding: "8px 12px", fontSize: "13px", fontWeight: "700",
+                  display: "inline-flex", alignItems: "center", gap: "5px",
+                  cursor: judgingBlocked ? "not-allowed" : "pointer", transition: "transform 0.15s ease",
+                }}
+              >{answerMode === "typing" ? <><Icon name="check" size={13} /> Judge it</> : <><Icon name="hand" size={13} /> Ready to judge</>}</button>
+            )}
+            <button onClick={() => onRelease(ticket.id)} className="ou-btn" style={{
+              background: "none", color: "#9CA3AF", border: "1px solid #E5E7EB", borderRadius: "10px",
+              padding: "8px 10px", fontSize: "12px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease",
+            }}>Release claim</button>
           </div>
         </div>
       ) : (
         <div>
-          <div style={{ display: "flex", gap: "4px", justifyContent: "center", flexWrap: "wrap" }}>
-            {teams.map(t => (
-              <button key={t.id} onClick={() => onClaim(ticket.id, t.id)} className="ou-btn" style={{
-                background: t.color.bg, color: "white", border: "none", borderRadius: "8px",
-                padding: "5px 9px", fontSize: "11px", fontWeight: "800", cursor: "pointer", transition: "transform 0.15s ease",
-              }}>{t.mascot ?? t.color.emoji} {t.name}</button>
-            ))}
-          </div>
+          {isPhoneMode ? (
+            <div style={{ fontSize: "11px", fontWeight: "700", color: "#9D174D", padding: "6px 0", display: "inline-flex", alignItems: "center", gap: "4px" }}><Icon name="phone" size={11} /> Waiting for a team to claim on their phone…</div>
+          ) : (
+            <div style={{ display: "flex", gap: "4px", justifyContent: "center", flexWrap: "wrap" }}>
+              {teams.map(t => (
+                <button key={t.id} onClick={() => onClaim(ticket.id, t.id)} className="ou-btn" style={{
+                  background: t.color.bg, color: "white", border: "none", borderRadius: "8px",
+                  padding: "5px 9px", fontSize: "11px", fontWeight: "800", cursor: "pointer", transition: "transform 0.15s ease",
+                }}><TeamIcon team={t} color="white" /> {t.name}</button>
+              ))}
+            </div>
+          )}
           {/* No penalty and no stats impact, unlike an expired ticket — this is a deliberate "nobody
-              wants this one" call, not a failure, so it shouldn't cost the class anything. */}
+              wants this one" call, not a failure, so it shouldn't cost the class anything. Stays a
+              teacher/class call regardless of input mode, so it never moves to phones. */}
           <button onClick={() => onSkip(ticket.id)} className="ou-btn" style={{
             marginTop: "6px", background: "none", color: "#9CA3AF", border: "1px solid #E5E7EB",
             borderRadius: "8px", padding: "3px 10px", fontSize: "10px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease",
-          }}>⏭️ Skip — no one got it</button>
+            display: "inline-flex", alignItems: "center", gap: "4px",
+          }}><Icon name="next" size={10} /> Skip — no one got it</button>
         </div>
       )}
     </div>
@@ -387,13 +452,32 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
   // Running total of combo bonuses already paid out per team — purely for the final screen's
   // display (the actual points already landed live via onUpdateScore when each combo fired).
   const [comboBonusByTeam, setComboBonusByTeam] = useState<Record<string | number, number>>(() => resumed?.comboBonusByTeam ?? {});
+
+  // "Play on Phones" — lets a team claim from their seat instead of walking up to the shared
+  // screen. Available at any team count, including true solo — every ticket is auto-claimed for
+  // the sole team the instant it's generated (see the top-up effect below), so solo play still
+  // gets everything phone mode offers except an actual claiming step, since there's nobody else to
+  // claim against. Always defaults to screen, even on Resume, same as every other phone-mode game.
+  const [inputMode, setInputMode] = useState<"screen" | "phone">("screen");
+  const [introStep, setIntroStep] = useState<"setup" | "qr">("setup");
+  const [sessionCode, setSessionCode] = useState<string | null>(null);
+  const [connectedTeamIds, setConnectedTeamIds] = useState<Set<string | number>>(new Set());
+  // "spoken": however a team wants to show the teacher their sentence in person (written down,
+  // said aloud, whatever) — teacher taps "Ready to judge" once they've seen/heard it (today's only
+  // mode). "typing": type it on the claimed phone instead, submit, and the shared screen shows the
+  // actual text for the teacher to judge remotely, no need to physically show anyone anything.
+  // Whole-session choice, same shape as Hot Seat's teamStructure toggle — never varies per team or
+  // per ticket.
+  const [answerMode, setAnswerMode] = useState<"spoken" | "typing">("spoken");
+  const channelRef = useRef<RealtimeChannel | null>(null);
+
   const ticketIdRef = useRef(0);
   const bannerIdRef = useRef(0);
   // The session's difficulty "clock" — advances only as orders actually get resolved (served or
   // expired), not as tickets are merely generated, so the ramp tracks real class progress.
   const resolvedCountRef = useRef(resumed?.resolvedCount ?? 0);
 
-  const pushBanner = useCallback((text: string, kind: Banner["kind"]) => {
+  const pushBanner = useCallback((text: React.ReactNode, kind: Banner["kind"]) => {
     const key = bannerIdRef.current++;
     setBanner({ text, kind, key });
     setTimeout(() => setBanner(prev => (prev?.key === key ? null : prev)), 2400);
@@ -442,9 +526,14 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
     if (tickets.length < capacity) {
       const needed = capacity - tickets.length;
       const newTickets = Array.from({ length: needed }, () => generateTicket(grammarPool, vocabWordPool, () => ticketIdRef.current++, resolvedCountRef.current));
+      // Solo play has nobody else to claim against, so there's no "tap to claim" step at all —
+      // every ticket is simply already claimed by the one team that exists, the moment it appears.
+      // Everything downstream (the claimed-not-judging card, typing mode, judging, expiry penalty)
+      // then just works unchanged, with zero teams.length === 1 special-casing anywhere else.
+      if (teams.length === 1) newTickets.forEach(t => { t.claimedBy = teams[0].id; });
       setTickets(prev => [...prev, ...newTickets]);
     }
-  }, [phase, tickets.length, grammarPool, vocabWordPool, maxSlots, initialSlots]);
+  }, [phase, tickets.length, grammarPool, vocabWordPool, maxSlots, initialSlots, teams]);
 
   // Mirrors `tickets` for the interval below to read synchronously — the interval callback needs
   // to call onUpdateScore/pushBanner as plain statements, not from inside setTickets' own updater
@@ -460,25 +549,39 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
     const id = setInterval(() => {
       if (pausedRef.current) return;
       const survivors: Ticket[] = [];
-      let expiredCount = 0;
+      const expiredTickets: Ticket[] = [];
       ticketsRef.current.forEach(t => {
         const secondsLeft = t.secondsLeft - 1;
-        if (secondsLeft <= 0) expiredCount += 1;
+        if (secondsLeft <= 0) expiredTickets.push(t);
         else survivors.push({ ...t, secondsLeft });
       });
       // No inline replacement here — the top-up effect above handles spawning new customers once
       // tickets.length changes, so capacity growth from the ramp is picked up naturally.
       setTickets(survivors);
-      if (expiredCount > 0) {
-        resolvedCountRef.current += expiredCount;
-        const penalty = UNHAPPY_PENALTY * expiredCount;
-        teams.forEach(t => onUpdateScore(t.id, -penalty));
-        pushBanner(
-          expiredCount > 1
-            ? `😤 ${expiredCount} customers left unhappy! Everyone -${penalty}pts`
-            : `😤 A customer left unhappy! Everyone -${penalty}pts`,
-          "expired",
-        );
+      if (expiredTickets.length > 0) {
+        resolvedCountRef.current += expiredTickets.length;
+        // Only a ticket's claiming team is on the hook when it expires — an unclaimed ticket
+        // expiring costs nobody, since no one ever committed to it.
+        const claimedExpired = expiredTickets.filter(t => t.claimedBy !== undefined);
+        const unclaimedCount = expiredTickets.length - claimedExpired.length;
+        if (claimedExpired.length > 0) {
+          const penaltyByTeam = new Map<string | number, number>();
+          claimedExpired.forEach(t => {
+            const teamId = t.claimedBy!;
+            penaltyByTeam.set(teamId, (penaltyByTeam.get(teamId) ?? 0) + UNHAPPY_PENALTY);
+          });
+          penaltyByTeam.forEach((amount, teamId) => onUpdateScore(teamId, -amount));
+        }
+        if (claimedExpired.length === 1 && unclaimedCount === 0) {
+          const team = teams.find(t => t.id === claimedExpired[0].claimedBy);
+          pushBanner(<><Icon name="warning" size={14} /> <TeamIcon team={team} color="white" /> {team?.name ?? "A team"}'s customer left unhappy! -{UNHAPPY_PENALTY}pts</>, "expired");
+        } else if (claimedExpired.length > 0) {
+          const totalPenalty = claimedExpired.length * UNHAPPY_PENALTY;
+          const extra = unclaimedCount > 0 ? ` (+${unclaimedCount} unclaimed, no penalty)` : "";
+          pushBanner(<><Icon name="warning" size={14} /> {claimedExpired.length} claimed customer{claimedExpired.length > 1 ? "s" : ""} left unhappy! -{totalPenalty}pts total{extra}</>, "expired");
+        } else {
+          pushBanner(<><Icon name="warning" size={14} /> {unclaimedCount > 1 ? `${unclaimedCount} customers left — nobody had claimed them.` : "A customer left — nobody had claimed them."}</>, "expired");
+        }
       }
     }, 1000);
     return () => clearInterval(id);
@@ -490,7 +593,44 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
     if (judging && !tickets.some(t => t.id === judging.ticketId)) setJudging(null);
   }, [tickets, judging]);
 
-  const claimTicket = (ticketId: number, teamId: string | number) => setJudging({ ticketId, teamId });
+  // A team commitment, not "open judging" — claiming just marks the ticket theirs (checked inside
+  // the functional updater, not via a separate read beforehand, so two near-simultaneous claims on
+  // the same ticket — a screen tap racing a phone broadcast, say — can't both succeed). Judging is
+  // now a distinct, later step (see openJudging).
+  const claimTicket = (ticketId: number, teamId: string | number) => {
+    setTickets(prev => prev.map(t => (t.id === ticketId && t.claimedBy === undefined ? { ...t, claimedBy: teamId } : t)));
+  };
+
+  // Teacher-only, screen-side: brings up Serve/Wrong for an already-claimed ticket. No-ops if
+  // another ticket is already being judged — the teacher can only listen to one team at a time, and
+  // this stops a second "ready to judge" tap from silently stealing the judging slot out from under
+  // whichever team is already up, the exact bug the old single-slot claim design had.
+  const openJudging = (ticketId: number) => {
+    if (judging) return;
+    const ticket = tickets.find(t => t.id === ticketId);
+    if (ticket?.claimedBy === undefined) return;
+    setJudging({ ticketId, teamId: ticket.claimedBy });
+  };
+
+  // No-penalty bail-out for a team that claimed something they realize they can't finish — the
+  // per-ticket counterpart to the existing no-penalty "Skip" a class can already use on an
+  // unclaimed ticket nobody wants to attempt. Clears any typed draft too, so the next team to claim
+  // this ticket (same team retrying, or a different one) doesn't inherit a stale sentence.
+  const releaseClaim = (ticketId: number) => {
+    setTickets(prev => prev.map(t => (t.id === ticketId ? { ...t, claimedBy: undefined, submittedSentence: undefined } : t)));
+  };
+
+  // Typing mode only — records a team's current sentence for a ticket they hold. Checking
+  // `t.claimedBy === teamId` inside the functional updater (not a separate read beforehand) closes
+  // the same race claimTicket already guards against: a submission delayed just long enough to
+  // arrive after this ticket was marked Wrong (which clears claimedBy) and reclaimed by someone
+  // else shouldn't attach a stale sentence to the new claimant's ticket. Stays freely editable —
+  // there's no "final" submit here, just whatever the team's phone last sent; it only locks once
+  // the teacher actually opens judging on it (enforced client-side in PhoneOrderUpView.tsx via
+  // judgingTicketId, not here — this function itself never needs to know about judging).
+  const submitSentence = (ticketId: number, teamId: string | number, sentence: string) => {
+    setTickets(prev => prev.map(t => (t.id === ticketId && t.claimedBy === teamId ? { ...t, submittedSentence: sentence } : t)));
+  };
 
   const resolveCorrect = () => {
     if (!judging) return;
@@ -537,15 +677,23 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
     // top-up effect to spawn a new customer if the current ramp capacity allows it.
     setTickets(prev => prev.filter(t => t.id !== ticket.id));
     pushBanner(
-      comboBonusEarned > 0
-        ? `✅ Order served! +${score} pts · ${comboParts.join(" · ")}! +${comboBonusEarned} pts`
-        : `✅ Order served! +${score} pts`,
+      <>
+        <Icon name="check" size={14} /> Order served! +{score} pts{comboBonusEarned > 0 && <> · {comboParts.join(" · ")}! +{comboBonusEarned} pts</>}
+      </>,
       "success",
     );
     setJudging(null);
   };
 
-  const resolveWrong = () => setJudging(null);
+  // Wrong doesn't cost the ticket itself — it just goes back to the open pool (claimedBy cleared),
+  // same team or a different one can reclaim and try again.
+  const resolveWrong = () => {
+    if (judging) {
+      const ticketId = judging.ticketId;
+      setTickets(prev => prev.map(t => (t.id === ticketId ? { ...t, claimedBy: undefined, submittedSentence: undefined } : t)));
+    }
+    setJudging(null);
+  };
 
   // Removes an unclaimed ticket outright — no penalty, no resolvedCount bump, no dish/combo
   // credit. Distinct from letting it expire (which costs every team UNHAPPY_PENALTY points and
@@ -553,6 +701,121 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
   // wants to attempt, not a failure. The top-up effect picks up the freed slot on its own once
   // tickets.length changes, same as any other removal.
   const skipTicket = (ticketId: number) => setTickets(prev => prev.filter(t => t.id !== ticketId));
+
+  const handlePickPhoneMode = () => {
+    setInputMode("phone");
+    setSessionCode(generateSessionCode());
+    setIntroStep("qr");
+  };
+
+  const handlePickScreenMode = () => {
+    setInputMode("screen");
+    setIntroStep("setup");
+    setSessionCode(null);
+    setConnectedTeamIds(new Set());
+  };
+
+  // Refs the phone-mode broadcaster reads synchronously, so opening/closing the realtime channel
+  // only happens when phone mode itself toggles on/off, not on every tickets/phase/timer change —
+  // same pattern as every other phone-mode game.
+  const phaseRef = useRef(phase);
+  const sessionTimeLeftRef = useRef(sessionTimeLeft);
+  const connectedTeamIdsRef = useRef<Set<string | number>>(new Set());
+  const answerModeRef = useRef(answerMode);
+  const judgingRef = useRef(judging);
+  const sendStateRef = useRef<(() => void) | null>(null);
+  useEffect(() => { phaseRef.current = phase; }, [phase]);
+  useEffect(() => { sessionTimeLeftRef.current = sessionTimeLeft; }, [sessionTimeLeft]);
+  useEffect(() => { answerModeRef.current = answerMode; }, [answerMode]);
+  useEffect(() => { judgingRef.current = judging; }, [judging]);
+
+  // Opens/closes the realtime channel only when phone mode itself is toggled on/off. Screen-
+  // authoritative like Hot Seat — the ticket queue, timers, and claim/expiry logic all keep running
+  // exactly as they do in screen mode; a phone's claim tap is just folded into the exact same
+  // claimTicket() function the screen's own buttons call.
+  useEffect(() => {
+    if (inputMode !== "phone" || !sessionCode) return;
+    const channel = openOrderUpChannel(sessionCode);
+    channelRef.current = channel;
+
+    const sendState = () => {
+      const rawPhase = phaseRef.current;
+      const mappedPhase: OrderUpPhase = rawPhase === "intro" ? "lobby" : rawPhase === "final" ? "final" : "playing";
+      const broadcastTickets: OrderUpTicketInfo[] = ticketsRef.current.map(t => ({
+        id: t.id, items: t.items, customerEmoji: t.customerEmoji,
+        totalSeconds: t.totalSeconds, secondsLeft: t.secondsLeft, claimedBy: t.claimedBy,
+        submittedSentence: t.submittedSentence,
+      }));
+      const scores: Record<string, number> = {};
+      teams.forEach(t => { scores[String(t.id)] = t.score; });
+      const payload: OrderUpStatePayload = {
+        phase: mappedPhase,
+        roster: teams.map(t => ({ id: t.id, name: t.name, color: t.color, mascot: t.mascot })),
+        tickets: broadcastTickets,
+        sessionTimeLeft: sessionTimeLeftRef.current,
+        scores,
+        connectedTeamIds: Array.from(connectedTeamIdsRef.current),
+        answerMode: answerModeRef.current,
+        judgingTicketId: judgingRef.current?.ticketId ?? null,
+        ts: Date.now(),
+      };
+      channel.send({ type: "broadcast", event: "state", payload });
+    };
+    sendStateRef.current = sendState;
+
+    channel.on("presence", { event: "sync" }, () => {
+      const presenceState = channel.presenceState<{ teamId: string | number }>();
+      const ids = new Set<string | number>();
+      Object.values(presenceState).forEach(entries => entries.forEach(entry => ids.add(entry.teamId)));
+      connectedTeamIdsRef.current = ids;
+      setConnectedTeamIds(ids);
+      sendState();
+    });
+
+    // The only place phone input actually touches game logic — validates each action against the
+    // live ticket state, then calls the exact same function a screen-mode click would.
+    channel.on("broadcast", { event: "action" }, ({ payload }) => {
+      const action = payload as OrderUpActionPayload;
+      if (phaseRef.current !== "playing") return;
+      const ticket = ticketsRef.current.find(t => t.id === action.ticketId);
+      if (action.action === "claimTicket") {
+        if (!ticket || ticket.claimedBy !== undefined) return;
+        claimTicket(action.ticketId, action.teamId);
+      } else if (action.action === "submitSentence") {
+        if (!ticket || ticket.claimedBy !== action.teamId) return;
+        submitSentence(action.ticketId, action.teamId, action.sentence);
+      }
+    });
+
+    channel.subscribe(status => {
+      if (status === "SUBSCRIBED") sendState();
+    });
+
+    const interval = setInterval(sendState, 4000);
+
+    return () => {
+      clearInterval(interval);
+      closeChannel(channel);
+      channelRef.current = null;
+      sendStateRef.current = null;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inputMode, sessionCode, teams]);
+
+  // Piggybacks on the existing per-second expiry tick (tickets changes every second while playing)
+  // instead of a second parallel timer — same trick Hot Seat's timeLeft-keyed effect uses. Also
+  // fires immediately on a claim/release/judge resolution, so a phone's own board never sits stale
+  // for up to 4s waiting on the standing interval above.
+  useEffect(() => {
+    sendStateRef.current?.();
+  }, [phase, tickets, sessionTimeLeft]);
+
+  // Tells every connected phone the session is over the moment it actually ends.
+  useEffect(() => {
+    if (phase === "final" && channelRef.current) {
+      channelRef.current.send({ type: "broadcast", event: "ended", payload: {} });
+    }
+  }, [phase]);
 
   const arenaStyle: React.CSSProperties = {
     margin: "-20px", padding: "20px 20px 26px", borderRadius: "20px", position: "relative", overflow: "hidden",
@@ -565,15 +828,15 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
       {STYLE_TAG}
       <div style={{ position: "relative", zIndex: 1 }}>
         <div style={{ background: "linear-gradient(135deg,#FFFFFF,#FFE4E6)", border: "2px solid #FBCFE8", borderRadius: "20px", padding: "28px 24px", marginBottom: "10px", color: "#831843", maxWidth: "560px", margin: "0 auto 10px", boxShadow: "0 6px 24px rgba(190,24,93,0.18)" }}>
-          <div style={{ fontSize: "36px", marginBottom: "10px" }}>🍽️</div>
+          <div style={{ marginBottom: "10px" }}><Icon name="plate" size={36} /></div>
           <div style={{ fontWeight: "900", fontSize: "20px", marginBottom: "10px", color: "#BE185D" }}>Order Up Diner</div>
           <div style={{ fontSize: "15px", lineHeight: 1.7 }}>
             Customers line up outside the diner — each little dish above their head is one English requirement: a sentence form, a grammar point, or a vocabulary word.<br />
-            Claim any customer and write <strong style={{ color: "#BE185D" }}>one sentence</strong> that satisfies every dish at once — wait too long and the customer leaves unhappy for <strong style={{ color: "#BE185D" }}>everyone</strong>!
+            Claim any customer and write <strong style={{ color: "#BE185D" }}>one sentence</strong> that satisfies every dish at once — wait too long once you've claimed one and <strong style={{ color: "#BE185D" }}>your team</strong> loses points!
           </div>
         </div>
         <div style={{ marginBottom: "22px" }}>
-          <div style={{ fontSize: "13px", fontWeight: "700", color: "#9D174D", marginBottom: "8px" }}>⏱️ How long is the dinner rush?</div>
+          <div style={{ fontSize: "13px", fontWeight: "700", color: "#9D174D", marginBottom: "8px", display: "inline-flex", alignItems: "center", gap: "5px" }}><Icon name="clock" size={13} /> How long is the dinner rush?</div>
           <div style={{ display: "flex", gap: "8px", justifyContent: "center", flexWrap: "wrap" }}>
             {(["short", "medium", "long"] as const).map(len => (
               <button key={len} onClick={() => setSessionLength(len)} className="ou-btn" style={{
@@ -583,14 +846,14 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
                 borderRadius: "12px", padding: "10px 18px", cursor: "pointer",
                 fontWeight: "800", fontSize: "14px", transition: "all 0.15s",
               }}>
-                {len === "short" ? "Short · 5 min" : len === "medium" ? "Medium · 8 min" : "Long · 12 min"}
+                {len === "short" ? "Short · 8 min" : len === "medium" ? "Medium · 12 min" : "Long · 18 min"}
               </button>
             ))}
           </div>
         </div>
         <div style={{ marginBottom: "18px" }}>
-          <button onClick={() => setShowPreview(v => !v)} className="ou-btn" style={{ background: showPreview ? "#BE185D" : "rgba(255,255,255,0.6)", color: showPreview ? "white" : "#9D174D", border: "2px solid #FBCFE8", borderRadius: "10px", padding: "8px 20px", fontWeight: "800", fontSize: "13px", cursor: "pointer", transition: "all 0.15s" }}>
-            {showPreview ? "Hide word & grammar list" : "👁️ Preview words & grammar points"}
+          <button onClick={() => setShowPreview(v => !v)} className="ou-btn" style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: showPreview ? "#BE185D" : "rgba(255,255,255,0.6)", color: showPreview ? "white" : "#9D174D", border: "2px solid #FBCFE8", borderRadius: "10px", padding: "8px 20px", fontWeight: "800", fontSize: "13px", cursor: "pointer", transition: "all 0.15s" }}>
+            {showPreview ? "Hide word & grammar list" : <><Icon name="eye" size={13} /> Preview words & grammar points</>}
           </button>
           {showPreview && (
             <div style={{ background: "rgba(255,255,255,0.75)", border: "2px solid #FBCFE8", borderRadius: "14px", padding: "16px", marginTop: "12px", textAlign: "left", maxWidth: "560px", margin: "12px auto 0" }}>
@@ -620,17 +883,78 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
             </div>
           )}
         </div>
-        <button onClick={() => setShowHowTo(true)} className="ou-btn" style={{ display: "block", margin: "0 auto 14px", background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
-          ❓ How to Play
+        <>
+          {introStep === "setup" && (
+            <div style={{ marginBottom: "20px" }}>
+              <div style={{ fontSize: "13px", color: "#9D174D", fontWeight: "700", marginBottom: "10px" }}>How will orders get answered?</div>
+              <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
+                <button onClick={handlePickScreenMode} className="ou-btn" style={{
+                  padding: "10px 20px", borderRadius: "12px", fontWeight: "800", fontSize: "14px", cursor: "pointer",
+                  border: `2px solid ${inputMode === "screen" ? "#BE185D" : "rgba(0,0,0,0.1)"}`,
+                  background: inputMode === "screen" ? "rgba(190,24,93,0.1)" : "rgba(255,255,255,0.6)",
+                  color: inputMode === "screen" ? "#BE185D" : "#9D174D",
+                  display: "inline-flex", alignItems: "center", gap: "6px",
+                }}><Icon name="screen" size={14} /> Play on Screen</button>
+                <button onClick={handlePickPhoneMode} className="ou-btn" style={{
+                  padding: "10px 20px", borderRadius: "12px", fontWeight: "800", fontSize: "14px", cursor: "pointer",
+                  border: `2px solid ${inputMode === "phone" ? "#BE185D" : "rgba(0,0,0,0.1)"}`,
+                  background: inputMode === "phone" ? "rgba(190,24,93,0.1)" : "rgba(255,255,255,0.6)",
+                  color: inputMode === "phone" ? "#BE185D" : "#9D174D",
+                  display: "inline-flex", alignItems: "center", gap: "6px",
+                }}><Icon name="phone" size={14} /> Play on Phones</button>
+              </div>
+            </div>
+          )}
+
+          {introStep === "qr" && sessionCode && (() => {
+            const joinUrl = `${window.location.origin}${window.location.pathname}?join=${sessionCode}&game=orderup`;
+            return (
+              <PhoneJoinPanel
+                sessionCode={sessionCode} joinUrl={joinUrl} teams={teams} connectedTeamIds={connectedTeamIds}
+                accent="#BE185D" panelBg="linear-gradient(160deg,#FFFFFF,#FFE4E6)" borderColor="#FBCFE8"
+                footer={
+                  <button onClick={handlePickScreenMode} style={{ background: "none", border: "none", color: "#9CA3AF", fontSize: "12px", fontWeight: "700", cursor: "pointer", textDecoration: "underline" }}>
+                    Switch back to Play on Screen
+                  </button>
+                }
+              >
+                <div style={{ marginBottom: "14px" }}>
+                  <div style={{ fontSize: "12px", color: "#9D174D", fontWeight: "700", marginBottom: "8px" }}>How will orders be answered?</div>
+                  <div style={{ display: "flex", gap: "8px", justifyContent: "center" }}>
+                    <button onClick={() => setAnswerMode("spoken")} className="ou-btn" style={{
+                      padding: "6px 14px", borderRadius: "10px", fontWeight: "800", fontSize: "12px", cursor: "pointer",
+                      border: `2px solid ${answerMode === "spoken" ? "#BE185D" : "rgba(0,0,0,0.1)"}`,
+                      background: answerMode === "spoken" ? "rgba(190,24,93,0.15)" : "rgba(255,255,255,0.6)",
+                      color: answerMode === "spoken" ? "#BE185D" : "#9D174D",
+                      display: "inline-flex", alignItems: "center", gap: "5px",
+                    }}><Icon name="hand" size={12} /> Show your teacher</button>
+                    <button onClick={() => setAnswerMode("typing")} className="ou-btn" style={{
+                      padding: "6px 14px", borderRadius: "10px", fontWeight: "800", fontSize: "12px", cursor: "pointer",
+                      border: `2px solid ${answerMode === "typing" ? "#BE185D" : "rgba(0,0,0,0.1)"}`,
+                      background: answerMode === "typing" ? "rgba(190,24,93,0.15)" : "rgba(255,255,255,0.6)",
+                      color: answerMode === "typing" ? "#BE185D" : "#9D174D",
+                      display: "inline-flex", alignItems: "center", gap: "5px",
+                    }}><Icon name="keyboard" size={12} /> Type it on your phone</button>
+                  </div>
+                  <div style={{ fontSize: "11px", color: "#9D174D99", marginTop: "6px" }}>
+                    {answerMode === "spoken" ? "A team writes their sentence and shows it to you directly; you decide when to judge it." : "A team types their sentence on their phone — it shows up here for you to judge."}
+                  </div>
+                </div>
+              </PhoneJoinPanel>
+            );
+          })()}
+        </>
+        <button onClick={() => setShowHowTo(true)} className="ou-btn" style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginBottom: "14px", background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
+          <Icon name="help" size={15} /> How to Play
         </button>
         {showHowTo && (
           <HowToPlayModal
-            gameName={GM.name} gameIcon={GM.icon} accentColor={GM.color}
+            gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color}
             steps={ORDERUP_TUTORIAL_STEPS}
             onClose={() => setShowHowTo(false)}
           />
         )}
-        <button onClick={() => setPhase("playing")} className="ou-btn" style={{ background: "linear-gradient(135deg,#F43F5E,#FB7185)", color: "white", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(244,63,94,0.4)", transition: "transform 0.15s ease" }}>🔔 Open the Diner!</button>
+        <button onClick={() => setPhase("playing")} className="ou-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg,#F43F5E,#FB7185)", color: "white", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(244,63,94,0.4)", transition: "transform 0.15s ease" }}><Icon name="bell" size={20} /> Open the Diner!</button>
       </div>
     </div>
   );
@@ -648,7 +972,7 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
       <div style={{ ...arenaStyle, textAlign: "center" }}>
         {STYLE_TAG}
         <div style={{ position: "relative", zIndex: 1 }}>
-          <div style={{ fontSize: "44px", marginBottom: "6px" }}>🔔</div>
+          <div style={{ marginBottom: "6px" }}><Icon name="bell" size={44} color="#BE185D" /></div>
           <div style={{ fontWeight: "900", fontSize: "22px", color: "#BE185D", marginBottom: "4px" }}>Kitchen's closed!</div>
           <div style={{ fontSize: "13px", color: "#9D174D", marginBottom: "16px" }}>{headline}</div>
           <div style={{ display: "grid", gridTemplateColumns: teamsGridCols(teams.length), gap: "10px", margin: "0 auto 20px", maxWidth: "760px" }}>
@@ -659,8 +983,8 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
               const dishEntries = Object.entries(counts ?? {});
               return (
                 <div key={t.id} style={{ background: "linear-gradient(160deg,#FFFFFF,#FFF1F2)", border: `2px solid ${t.color.bg}`, borderRadius: "14px", padding: "12px" }}>
-                  <div style={{ fontSize: "20px" }}>{medalForRank(rank)}</div>
-                  <div style={{ fontWeight: "800", color: "#831843", fontSize: "14px", marginTop: "4px" }}>{t.mascot ?? t.color.emoji} {t.name}</div>
+                  <div><RankBadge rank={rank} size={20} /></div>
+                  <div style={{ fontWeight: "800", color: "#831843", fontSize: "14px", marginTop: "4px" }}><TeamIcon team={t} /> {t.name}</div>
                   <div style={{ color: "#BE185D", fontWeight: "900", fontSize: "16px", marginTop: "4px" }}>{value} pts</div>
                   <div style={{ fontSize: "11px", color: "#9D174D", marginTop: "4px" }}>{served} order{served === 1 ? "" : "s"} served</div>
                   {dishEntries.length > 0 && (
@@ -671,13 +995,13 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
                     </div>
                   )}
                   {bonus > 0 && (
-                    <div style={{ fontSize: "11px", fontWeight: "800", color: "#15803D", marginTop: "6px" }}>+{bonus} from combos 🎉</div>
+                    <div style={{ fontSize: "11px", fontWeight: "800", color: "#15803D", marginTop: "6px", display: "flex", alignItems: "center", justifyContent: "center", gap: "4px" }}>+{bonus} from combos <Icon name="party" size={11} /></div>
                   )}
                 </div>
               );
             })}
           </div>
-          <button onClick={onEnd} className="ou-btn" style={{ background: "linear-gradient(135deg,#BE185D,#F43F5E)", color: "white", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "800", cursor: "pointer", transition: "transform 0.15s ease" }}>🏁 End Game</button>
+          <button onClick={onEnd} className="ou-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg,#BE185D,#F43F5E)", color: "white", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "800", cursor: "pointer", transition: "transform 0.15s ease" }}><Icon name="checkeredFlag" size={16} /> End Game</button>
         </div>
       </div>
     );
@@ -687,13 +1011,20 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
     <div style={arenaStyle}>
       {STYLE_TAG}
       {floorStrip}
+      {inputMode === "phone" && sessionCode && (
+        <PhoneReconnectBadge
+          sessionCode={sessionCode} joinUrl={`${window.location.origin}${window.location.pathname}?join=${sessionCode}&game=orderup`}
+          teams={teams} connectedTeamIds={connectedTeamIds}
+          accent="#BE185D" panelBg="linear-gradient(160deg,#FFFFFF,#FFE4E6)" borderColor="#FBCFE8"
+        />
+      )}
       {paused && (
         <div onClick={onTogglePause} style={{
           position: "absolute", inset: 0, zIndex: 30, cursor: "pointer", borderRadius: "20px",
           background: "rgba(69,10,10,0.72)", display: "flex", alignItems: "center", justifyContent: "center",
         }}>
           <div style={{ textAlign: "center", color: "white" }}>
-            <div style={{ fontSize: "44px", marginBottom: "8px" }}>⏸️</div>
+            <div style={{ marginBottom: "8px" }}><Icon name="pause" size={44} color="#FDA4AF" /></div>
             <div style={{ fontWeight: "900", fontSize: "22px", color: "#FDA4AF" }}>Paused</div>
             <div style={{ fontSize: "14px", color: "#FECDD3", marginTop: "6px", fontWeight: "700" }}>Tap to resume</div>
           </div>
@@ -707,7 +1038,7 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
           borderRadius: "14px", padding: "10px 22px", boxShadow: "0 8px 28px rgba(0,0,0,0.25)",
           animation: "ouBannerIn 2.4s ease-in-out forwards",
         }}>
-          <span style={{ color: "white", fontWeight: "900", fontSize: "15px", textShadow: "0 1px 3px rgba(0,0,0,0.3)" }}>{banner.text}</span>
+          <span style={{ color: "white", fontWeight: "900", fontSize: "15px", textShadow: "0 1px 3px rgba(0,0,0,0.3)", display: "inline-flex", alignItems: "center", gap: "6px" }}>{banner.text}</span>
         </div>
       )}
       <div style={{ position: "relative", zIndex: 1 }}>
@@ -719,7 +1050,7 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
             borderRadius: "999px", fontWeight: "900", fontSize: "13px", color: sessionTimeLeft <= 30 ? "#B91C1C" : "#BE185D",
             animation: sessionTimeLeft <= 30 ? "ouUrgentPulse 0.8s ease-in-out infinite" : "none",
           }}>
-            ⏱️ {formatClock(sessionTimeLeft)} left in the rush
+            <Icon name="clock" size={13} /> {formatClock(sessionTimeLeft)} left in the rush
           </div>
           {/* Right next to the countdown a teacher is already watching, not just up in the generic
               top bar, so it's actually noticed and used, not just present. */}
@@ -728,20 +1059,21 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
               background: paused ? "#F59E0B" : "#D97706", color: "white",
               border: paused ? "2px solid #FDE68A" : "2px solid rgba(255,255,255,0.6)",
               borderRadius: "999px", padding: "5px 12px", fontSize: "13px", fontWeight: "800", cursor: "pointer",
+              display: "inline-flex", alignItems: "center", gap: "5px",
               boxShadow: paused ? "0 0 0 3px rgba(245,158,11,0.35)" : "0 2px 6px rgba(217,119,6,0.45)",
             }}>
-              {paused ? "▶️ Resume" : "⏸️ Pause"}
+              {paused ? <><Icon name="play" size={13} /> Resume</> : <><Icon name="pause" size={13} /> Pause</>}
             </button>
           )}
         </div>
-        <div style={{ textAlign: "center", color: "#BE185D", fontWeight: "800", fontSize: "13px", marginBottom: "10px" }}>
-          🍽️ Write one sentence that satisfies every dish to serve a customer!
+        <div style={{ textAlign: "center", color: "#BE185D", fontWeight: "800", fontSize: "13px", marginBottom: "10px", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}>
+          <Icon name="plate" size={14} /> Write one sentence that satisfies every dish to serve a customer!
         </div>
         {Object.keys(dishCounts).length > 0 && (
           <div style={{ display: "flex", gap: "8px", justifyContent: "center", flexWrap: "wrap", marginBottom: "14px" }}>
             {teams.filter(t => totalDishes(dishCounts[t.id]) > 0).map(t => (
               <div key={t.id} style={{ display: "flex", alignItems: "center", gap: "5px", background: "white", border: `1.5px solid ${t.color.bg}`, borderRadius: "999px", padding: "3px 10px" }}>
-                <span style={{ fontWeight: "800", fontSize: "11px", color: t.color.dark }}>{t.mascot ?? t.color.emoji} {t.name}:</span>
+                <span style={{ fontWeight: "800", fontSize: "11px", color: t.color.dark }}><TeamIcon team={t} /> {t.name}:</span>
                 {Object.entries(dishCounts[t.id] ?? {}).map(([emoji, count]) => (
                   <span key={emoji} style={{ fontSize: "11px", fontWeight: "700", color: "#854D0E" }}>{emoji}×{count}</span>
                 ))}
@@ -751,7 +1083,11 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
         )}
         <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
           {tickets.map(t => (
-            <TicketCard key={t.id} ticket={t} teams={teams} judging={judging} onClaim={claimTicket} onCorrect={resolveCorrect} onWrong={resolveWrong} onSkip={skipTicket} />
+            <TicketCard
+              key={t.id} ticket={t} teams={teams} judging={judging} isPhoneMode={inputMode === "phone"} answerMode={answerMode}
+              onClaim={claimTicket} onOpenJudging={openJudging} onRelease={releaseClaim}
+              onCorrect={resolveCorrect} onWrong={resolveWrong} onSkip={skipTicket}
+            />
           ))}
         </div>
       </div>
