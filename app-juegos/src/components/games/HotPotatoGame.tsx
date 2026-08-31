@@ -537,7 +537,10 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
                   <text x={pos.x} y={pos.y - (isHolder ? 5 : 3)} textAnchor="middle" dominantBaseline="middle"
                     fontSize={isHolder ? "13" : "11"} fontWeight="800" fill={isHolder ? "white" : t.color.dark}
                     style={{ userSelect: "none", pointerEvents: "none" }}>
-                    {t.name.length > 7 ? t.name.slice(0, 6) + "…" : t.name}
+                    {/* Cutoff is per-circle-size, not just a flat guess — the default "Team Red"/
+                        "Team Blue" names (8-9 chars) are exactly what was getting clipped to
+                        "Team R…" before, on every device, not just narrow screens. */}
+                    {(() => { const max = isHolder ? 9 : 7; return t.name.length > max ? t.name.slice(0, max - 1).trimEnd() + "…" : t.name; })()}
                   </text>
                   {isHolder && <text x={pos.x} y={pos.y + 10} textAnchor="middle" fontSize="8" fill="rgba(255,255,255,0.85)" fontWeight="700" style={{ userSelect: "none" }}>HOLDING</text>}
                   {/* little figure below each position */}
