@@ -1,9 +1,13 @@
 import { useState, useRef, useCallback, useEffect } from "react";
+import { TeamIcon, MASCOT_ICON_BY_EMOJI } from "../shared/TeamIcon";
+import { MascotIcon } from "../shared/MascotArt";
+import { Icon, type IconName } from "../shared/Icon";
 import type { GameProps } from "../../types";
 import { useTurnTimer } from "../../hooks/useTurnTimer";
 import { TurnTimerBar } from "../shared/TurnTimerBar";
-import { teamsGridCols, GAME_MODES } from "../../data/constants";
-import { denseRank, medalForRank } from "../../utils/ranking";
+import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
+import { denseRank } from "../../utils/ranking";
+import { RankBadge } from "../shared/RankBadge";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
 import { CARDS_TUTORIAL_STEPS } from "../../data/tutorials/cards";
@@ -16,7 +20,7 @@ const AMBIENT_BITS = Array.from({ length: 12 }, (_, i) => ({
   size: 14 + (i % 4) * 4,
   dur: 5 + (i % 5),
   delay: (i % 6) * 0.5,
-  emoji: ["🎈", "🎪", "🎟️", "🍿", "✨", "🎊"][i % 6],
+  iconName: (["balloon", "tent", "sparkle", "popcorn", "sparkle", "party"] as const satisfies readonly IconName[])[i % 6],
 }));
 
 const STYLE_TAG = (
@@ -36,7 +40,7 @@ function AmbientBackdrop() {
   return (
     <div style={{ position: "absolute", inset: 0, pointerEvents: "none", overflow: "hidden" }}>
       {AMBIENT_BITS.map((b, i) => (
-        <div key={i} style={{ position: "absolute", left: `${b.left}%`, top: `${b.top}%`, fontSize: `${b.size}px`, animation: `csDrift ${b.dur}s ease-in-out infinite ${b.delay}s` }}>{b.emoji}</div>
+        <div key={i} style={{ position: "absolute", left: `${b.left}%`, top: `${b.top}%`, color: "#FCD34D", opacity: 0.6, animation: `csDrift ${b.dur}s ease-in-out infinite ${b.delay}s` }}><Icon name={b.iconName} size={b.size} /></div>
       ))}
     </div>
   );
@@ -326,28 +330,28 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
       {STYLE_TAG}
       <div style={{ position: "relative", zIndex: 1 }}>
         <div style={{ background: "linear-gradient(160deg,#991B1B,#450A0A)", border: "2px solid #FCD34D66", borderRadius: "20px", padding: "28px 24px", marginBottom: "10px", color: "white", maxWidth: "540px", margin: "0 auto 10px", boxShadow: "0 0 50px rgba(220,38,38,0.45)" }}>
-          <div style={{ fontSize: "36px", marginBottom: "10px" }}>🎪</div>
+          <div style={{ marginBottom: "10px" }}><Icon name="tent" size={36} /></div>
           <div style={{ fontWeight: "900", fontSize: "20px", marginBottom: "10px", color: "#FCD34D" }}>Card Shuffle</div>
           <div style={{ fontSize: "15px", lineHeight: 1.7, opacity: 0.95 }}>
-            Roll up, roll up! Four cards take the stage — one hides a lucky <strong style={{ color: "#FCD34D" }}>⭐ star</strong>. Watch closely as the ringmaster shuffles fast!<br />
+            Roll up, roll up! Four cards take the stage — one hides a lucky <strong style={{ color: "#FCD34D" }}><Icon name="star" size={13} /> star</strong>. Watch closely as the ringmaster shuffles fast!<br />
             Each team picks a card and performs a speaking task for the crowd — land on the star for <strong style={{ color: "#FCD34D" }}>120 pts</strong>, any other card still scores <strong>30 pts</strong>.
           </div>
         </div>
         <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "24px" }}>
-          {teams.map(t => (<div key={t.id} style={{ background: `linear-gradient(160deg,${t.color.dark}55,#450A0A)`, border: "3px solid " + t.color.bg, borderRadius: "14px", padding: "10px 18px", fontWeight: "800", fontSize: "14px", color: "white" }}>{t.color.emoji} {t.name}</div>))}
+          {teams.map(t => (<div key={t.id} style={{ background: `linear-gradient(160deg,${t.color.dark}55,#450A0A)`, border: "3px solid " + t.color.bg, borderRadius: "14px", padding: "10px 18px", fontWeight: "800", fontSize: "14px", color: "white", display: "flex", alignItems: "center", gap: "6px" }}><TeamIcon team={t} color="white" /> {t.name}</div>))}
         </div>
-        <button onClick={() => setShowHowTo(true)} className="cs-btn" style={{ display: "block", margin: "0 auto 14px", background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
-          ❓ How to Play
+        <button onClick={() => setShowHowTo(true)} className="cs-btn" style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginBottom: "14px", background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
+          <Icon name="help" size={15} /> How to Play
         </button>
         {showHowTo && (
           <HowToPlayModal
-            gameName={GM.name} gameIcon={GM.icon} accentColor={GM.color}
+            gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color}
             steps={CARDS_TUTORIAL_STEPS}
             onClose={() => setShowHowTo(false)}
           />
         )}
-        <button onClick={() => setPhase("preview")} className="cs-btn" style={{ background: "linear-gradient(135deg,#B91C1C,#FCD34D)", color: "#450A0A", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(252,211,77,0.4)", transition: "transform 0.15s ease" }}>
-          🎪 Step Right Up!
+        <button onClick={() => setPhase("preview")} className="cs-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg,#B91C1C,#FCD34D)", color: "#450A0A", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(252,211,77,0.4)", transition: "transform 0.15s ease" }}>
+          <Icon name="tent" size={20} /> Step Right Up!
         </button>
       </div>
     </div>
@@ -368,19 +372,19 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
         <div style={TENT_STRIPES} />
         {STYLE_TAG}
         <div style={{ position: "relative", zIndex: 1 }}>
-          <div style={{ fontSize: "44px", marginBottom: "6px" }}>🎪</div>
+          <div style={{ marginBottom: "6px" }}><Icon name="tent" size={44} color="#FCD34D" /></div>
           <div style={{ fontWeight: "900", fontSize: "22px", color: "#FCD34D", marginBottom: "16px" }}>{headline}</div>
           <div style={{ display: "grid", gridTemplateColumns: teamsGridCols(teams.length), gap: "10px", margin: "0 auto 20px", maxWidth: "760px" }}>
             {ranking.map(({ item: t, rank, value }) => (
               <div key={t.id} style={{ background: `linear-gradient(160deg,${t.color.dark}55,#450A0A)`, border: `2px solid ${t.color.bg}`, borderRadius: "14px", padding: "12px" }}>
-                <div style={{ fontSize: "22px" }}>{medalForRank(rank)}</div>
-                <div style={{ fontWeight: "800", color: "white", fontSize: "14px", marginTop: "4px" }}>{t.mascot ?? t.color.emoji} {t.name}</div>
+                <div><RankBadge rank={rank} size={22} /></div>
+                <div style={{ fontWeight: "800", color: "white", fontSize: "14px", marginTop: "4px" }}><TeamIcon team={t} /> {t.name}</div>
                 <div style={{ color: "#FCD34D", fontWeight: "900", fontSize: "16px", marginTop: "4px" }}>{value} pts</div>
-                <div style={{ fontSize: "11px", color: "#FEF3C7", fontWeight: "700", marginTop: "4px" }}>{correctByTeam[t.id] ?? 0} correct · ⭐ {starHitsByTeam[t.id] ?? 0} star{(starHitsByTeam[t.id] ?? 0) === 1 ? "" : "s"}</div>
+                <div style={{ fontSize: "11px", color: "#FEF3C7", fontWeight: "700", marginTop: "4px", display: "flex", alignItems: "center", justifyContent: "center", gap: "3px" }}>{correctByTeam[t.id] ?? 0} correct · <Icon name="star" size={10} /> {starHitsByTeam[t.id] ?? 0} star{(starHitsByTeam[t.id] ?? 0) === 1 ? "" : "s"}</div>
               </div>
             ))}
           </div>
-          <button onClick={onEnd} className="cs-btn" style={{ background: "linear-gradient(135deg,#B91C1C,#FCD34D)", color: "#450A0A", border: "none", borderRadius: "14px", padding: "14px 32px", fontSize: "16px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 20px rgba(252,211,77,0.4)", transition: "transform 0.15s ease" }}>🏁 End Game</button>
+          <button onClick={onEnd} className="cs-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg,#B91C1C,#FCD34D)", color: "#450A0A", border: "none", borderRadius: "14px", padding: "14px 32px", fontSize: "16px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 20px rgba(252,211,77,0.4)", transition: "transform 0.15s ease" }}><Icon name="checkeredFlag" size={18} /> End Game</button>
         </div>
       </div>
     );
@@ -395,14 +399,14 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
         {STYLE_TAG}
         <div style={{ position: "relative", zIndex: 1 }}>
           <div style={{ background: "linear-gradient(160deg,#991B1B,#450A0A)", border: "2px solid #FCD34D66", borderRadius: "20px", padding: "28px 24px", marginBottom: "20px", color: "white", maxWidth: "480px", margin: "0 auto 20px" }}>
-            <div style={{ fontSize: "36px", marginBottom: "10px" }}>⏰</div>
-            <div style={{ fontWeight: "900", fontSize: "19px", marginBottom: "10px", color: "#FCD34D" }}>{noticeTeam.mascot ?? noticeTeam.color.emoji} {noticeTeam.name} ran out of time!</div>
+            <div style={{ marginBottom: "10px" }}><Icon name="clock" size={36} /></div>
+            <div style={{ fontWeight: "900", fontSize: "19px", marginBottom: "10px", color: "#FCD34D" }}><TeamIcon team={noticeTeam} /> {noticeTeam.name} ran out of time!</div>
             <div style={{ fontSize: "15px", lineHeight: 1.6, opacity: 0.95 }}>
               {timeoutNotice.retried ? "That's your one free retry for this game — watch the clock this time!" : "You've already used your free retry this game — the turn moves on."}
             </div>
           </div>
-          <button onClick={dismissTimeoutNotice} className="cs-btn" style={{ background: "linear-gradient(135deg,#B91C1C,#FCD34D)", color: "#450A0A", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(252,211,77,0.4)", transition: "transform 0.15s ease" }}>
-            {timeoutNotice.retried ? "🔄 Try Again!" : "➡️ Next Team"}
+          <button onClick={dismissTimeoutNotice} className="cs-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg,#B91C1C,#FCD34D)", color: "#450A0A", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(252,211,77,0.4)", transition: "transform 0.15s ease" }}>
+            {timeoutNotice.retried ? <><Icon name="refresh" size={18} /> Try Again!</> : <><Icon name="next" size={18} /> Next Team</>}
           </button>
         </div>
       </div>
@@ -417,13 +421,13 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
       {STYLE_TAG}
       <div style={{ position: "relative", zIndex: 1 }}>
         <div style={{ background: "linear-gradient(90deg,#991B1B,#B91C1C)", border: "1.5px solid #FCD34D55", borderRadius: "14px", padding: "10px 16px", marginBottom: "14px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px", boxShadow: "0 4px 18px rgba(153,27,27,0.5)" }}>
-          <span style={{ color: "white", fontWeight: "900", fontSize: "16px", textShadow: "0 1px 3px rgba(0,0,0,0.4)" }}>
-            🎪 Round {roundCount + 1}/{maxRounds} —{" "}
-            {phase === "preview" && "⭐ Remember which card is the star — then we shuffle!"}
-            {phase === "shuffling" && "👀 Watch carefully — track the star!"}
-            {phase === "picking" && `${currentTeam.mascot ?? currentTeam.color.emoji} ${currentTeam.name} — step right up and pick a card!`}
-            {phase === "answering" && `${currentTeam.mascot ?? currentTeam.color.emoji} ${currentTeam.name} — the crowd awaits your performance!`}
-            {phase === "reveal" && "🥁 Ta-da! Time for the big reveal!"}
+          <span style={{ color: "white", fontWeight: "900", fontSize: "16px", textShadow: "0 1px 3px rgba(0,0,0,0.4)", display: "inline-flex", alignItems: "center", gap: "6px" }}>
+            <Icon name="tent" size={15} /> Round {roundCount + 1}/{maxRounds} —{" "}
+            {phase === "preview" && <><Icon name="star" size={14} /> Remember which card is the star — then we shuffle!</>}
+            {phase === "shuffling" && <><Icon name="eye" size={14} /> Watch carefully — track the star!</>}
+            {phase === "picking" && <><TeamIcon team={currentTeam} color="white" /> {currentTeam.name} — step right up and pick a card!</>}
+            {phase === "answering" && <><TeamIcon team={currentTeam} color="white" /> {currentTeam.name} — the crowd awaits your performance!</>}
+            {phase === "reveal" && <><Icon name="party" size={14} /> Ta-da! Time for the big reveal!</>}
           </span>
           {phase === "picking" && <TurnTimerBar timeLeft={timeLeft} totalSeconds={TURN_SECONDS} />}
         </div>
@@ -453,11 +457,11 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
                   }}
                 >
                   {phase === "preview" && (
-                    <>{card.isStar ? <div style={{ fontSize: "36px", animation: "csStarPulse 1.1s ease-in-out infinite" }}>⭐</div> : <div style={{ fontSize: "30px", opacity: 0.35 }}>🎪</div>}</>
+                    <>{card.isStar ? <div style={{ animation: "csStarPulse 1.1s ease-in-out infinite" }}><Icon name="star" size={36} /></div> : <div style={{ opacity: 0.35 }}><Icon name="tent" size={30} /></div>}</>
                   )}
                   {(phase === "shuffling" || phase === "picking" || phase === "answering") && (
                     <>
-                      <div style={{ fontSize: "30px", opacity: 0.4 }}>🎪</div>
+                      <div style={{ opacity: 0.4 }}><Icon name="tent" size={30} /></div>
                       {phase !== "shuffling" && (
                         <div style={{ position: "absolute", bottom: "8px", fontSize: "10px", fontWeight: "900", color: "#FCD34D", letterSpacing: "0.03em", textAlign: "center" }}>{SLOT_LABELS[slot]}</div>
                       )}
@@ -465,11 +469,18 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
                   )}
                   {revealed && (
                     <>
-                      {card.isStar && <div style={{ fontSize: "22px", marginBottom: "4px" }}>⭐</div>}
+                      {card.isStar && <div style={{ marginBottom: "4px" }}><Icon name="star" size={22} /></div>}
                       <div style={{ fontSize: "10px", fontWeight: "800", color: card.isStar ? "#450A0A" : "#78350F", textAlign: "center", lineHeight: 1.4, padding: "0 4px" }}>{card.task}</div>
                       {pickerTeams.length > 0 && (
                         <div style={{ position: "absolute", top: "-10px", right: "-10px", display: "flex", flexDirection: "column", gap: "2px" }}>
-                          {pickerTeams.map(t => (<div key={t.id} style={{ width: "20px", height: "20px", borderRadius: "50%", background: t.color.bg, border: "2px solid white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: t.mascot ? "12px" : "10px", fontWeight: "900", color: "white" }}>{t.mascot ?? t.name[0]}</div>))}
+                          {pickerTeams.map(t => {
+                            const iconName = t.mascot ? MASCOT_ICON_BY_EMOJI[t.mascot] : undefined;
+                            return (
+                              <div key={t.id} style={{ width: "20px", height: "20px", borderRadius: "50%", background: t.color.bg, border: "2px solid white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: iconName ? undefined : "10px", fontWeight: "900", color: "white" }}>
+                                {iconName ? <MascotIcon name={iconName} size={16} /> : t.name[0]}
+                              </div>
+                            );
+                          })}
                         </div>
                       )}
                     </>
@@ -482,8 +493,8 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
                       const won = card.isStar && pick.correct;
                       const partial = !card.isStar && pick.correct;
                       return (
-                        <div key={t.id} style={{ background: won ? "rgba(34,197,94,0.18)" : partial ? "rgba(96,165,250,0.18)" : "rgba(248,113,113,0.18)", border: `2px solid ${won ? "#22C55E" : partial ? "#60A5FA" : "#F87171"}`, borderRadius: "8px", padding: "3px 6px", marginBottom: "3px", textAlign: "center", fontSize: "11px", fontWeight: "800", color: "white" }}>
-                          {t.name}: {won ? "⭐ +120" : partial ? "+30" : "0"}
+                        <div key={t.id} style={{ background: won ? "rgba(34,197,94,0.18)" : partial ? "rgba(96,165,250,0.18)" : "rgba(248,113,113,0.18)", border: `2px solid ${won ? "#22C55E" : partial ? "#60A5FA" : "#F87171"}`, borderRadius: "8px", padding: "3px 6px", marginBottom: "3px", textAlign: "center", fontSize: "11px", fontWeight: "800", color: "white", display: "flex", alignItems: "center", justifyContent: "center", gap: "3px" }}>
+                          {t.name}: {won ? <><Icon name="star" size={10} /> +120</> : partial ? "+30" : "0"}
                         </div>
                       );
                     })}
@@ -496,8 +507,8 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
 
         {phase === "preview" && (
           <div style={{ textAlign: "center", marginTop: "20px" }}>
-            <p style={{ color: "#FEF3C7", fontWeight: "700", fontSize: "14px", marginBottom: "10px", animation: "csMarquee 1.6s ease-in-out infinite" }}>One card has a <strong style={{ color: "#FCD34D" }}>⭐ star</strong> — remember which one!</p>
-            <button onClick={runShuffle} className="cs-btn" style={{ background: "linear-gradient(135deg,#B91C1C,#FCD34D)", color: "#450A0A", border: "none", borderRadius: "14px", padding: "14px 36px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 20px rgba(252,211,77,0.4)", transition: "transform 0.15s ease" }}>🔀 Shuffle!</button>
+            <p style={{ color: "#FEF3C7", fontWeight: "700", fontSize: "14px", marginBottom: "10px", animation: "csMarquee 1.6s ease-in-out infinite" }}>One card has a <strong style={{ color: "#FCD34D", display: "inline-flex", alignItems: "center", gap: "3px" }}><Icon name="star" size={12} /> star</strong> — remember which one!</p>
+            <button onClick={runShuffle} className="cs-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg,#B91C1C,#FCD34D)", color: "#450A0A", border: "none", borderRadius: "14px", padding: "14px 36px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 20px rgba(252,211,77,0.4)", transition: "transform 0.15s ease" }}><Icon name="shuffle" size={18} /> Shuffle!</button>
           </div>
         )}
 
@@ -513,17 +524,17 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
               <div style={{ position: "absolute", top: "10px", right: "10px" }}>
                 <FlagPromptButton gameId="cards" questionData={pickedCard} />
               </div>
-              <div style={{ fontSize: "12px", fontWeight: "700", color: "#B45309", marginBottom: "8px", textTransform: "uppercase", letterSpacing: "0.05em" }}>🎤 {currentTeam.name}'s task</div>
+              <div style={{ fontSize: "12px", fontWeight: "700", color: "#B45309", marginBottom: "8px", textTransform: "uppercase", letterSpacing: "0.05em", display: "inline-flex", alignItems: "center", gap: "5px" }}><Icon name="mic" size={12} /> {currentTeam.name}'s task</div>
               <div style={{ fontSize: "clamp(14px,2.5vw,18px)", fontWeight: "800", color: "#450A0A", lineHeight: 1.5 }}>{pickedCard.task}</div>
             </div>
             {!showAns ? (
               <div style={{ textAlign: "center" }}>
-                <button onClick={() => { stop(); setShowAns(true); }} className="cs-btn" style={{ background: "linear-gradient(135deg,#B91C1C,#DC2626)", color: "white", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "15px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease" }}>✋ Performance complete!</button>
+                <button onClick={() => { stop(); setShowAns(true); }} className="cs-btn" style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "linear-gradient(135deg,#B91C1C,#DC2626)", color: "white", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "15px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease" }}><Icon name="hand" size={14} /> Performance complete!</button>
               </div>
             ) : (
               <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
-                <button onClick={() => resolveAnswer(true)} className="cs-btn" style={{ background: "linear-gradient(135deg,#15803D,#22C55E)", color: "white", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease" }}>✅ Correct</button>
-                <button onClick={() => resolveAnswer(false)} className="cs-btn" style={{ background: "linear-gradient(135deg,#B91C1C,#EF4444)", color: "white", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease" }}>❌ Wrong</button>
+                <button onClick={() => resolveAnswer(true)} className="cs-btn" style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "linear-gradient(135deg,#15803D,#22C55E)", color: "white", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease" }}><Icon name="check" size={14} /> Correct</button>
+                <button onClick={() => resolveAnswer(false)} className="cs-btn" style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "linear-gradient(135deg,#B91C1C,#EF4444)", color: "white", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease" }}><Icon name="close" size={14} /> Wrong</button>
               </div>
             )}
           </div>
@@ -532,10 +543,10 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
         {phase === "reveal" && (
           <div style={{ textAlign: "center", marginTop: "70px" }}>
             <div style={{ background: "linear-gradient(160deg,#FDE68A,#F59E0B)", border: "3px solid #FCD34D", borderRadius: "14px", padding: "14px", marginBottom: "14px", boxShadow: "0 0 24px rgba(245,158,11,0.5)" }}>
-              <div style={{ fontSize: "22px", marginBottom: "6px", color: "#450A0A", fontWeight: "900" }}>⭐ Star card revealed!</div>
+              <div style={{ fontSize: "22px", marginBottom: "6px", color: "#450A0A", fontWeight: "900", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}><Icon name="star" size={20} /> Star card revealed!</div>
             </div>
-            <button onClick={nextRound} className="cs-btn" style={{ background: "linear-gradient(135deg,#B91C1C,#FCD34D)", color: "#450A0A", border: "none", borderRadius: "14px", padding: "14px 32px", fontSize: "16px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 20px rgba(252,211,77,0.4)", transition: "transform 0.15s ease" }}>
-              {roundCount + 1 >= maxRounds ? "🏆 See Final Results" : "➡️ Next Round"}
+            <button onClick={nextRound} className="cs-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg,#B91C1C,#FCD34D)", color: "#450A0A", border: "none", borderRadius: "14px", padding: "14px 32px", fontSize: "16px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 20px rgba(252,211,77,0.4)", transition: "transform 0.15s ease" }}>
+              {roundCount + 1 >= maxRounds ? <><Icon name="trophy" size={18} /> See Final Results</> : <><Icon name="next" size={18} /> Next Round</>}
             </button>
           </div>
         )}

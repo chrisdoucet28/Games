@@ -1,10 +1,13 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from "react";
+import { TeamIcon, MascotSprite } from "../shared/TeamIcon";
+import { Icon } from "../shared/Icon";
 import type { GameProps, QuestionData } from "../../types";
-import { teamsGridCols, GAME_MODES } from "../../data/constants";
+import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
 import { useTurnTimer } from "../../hooks/useTurnTimer";
 import { TurnTimerBar } from "../shared/TurnTimerBar";
 import { QuestionCard } from "../shared/QuestionCard";
-import { denseRank, medalForRank } from "../../utils/ranking";
+import { denseRank } from "../../utils/ranking";
+import { RankBadge } from "../shared/RankBadge";
 import { makeSoloCpuTeam } from "../../lib/soloOpponent";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { BATTLESHIP_TUTORIAL_STEPS } from "../../data/tutorials/battleship";
@@ -20,17 +23,19 @@ const CPU_FIRE_MS = 900;
 // low value here reads as the CPU "missing ships it should've hit." Kept high so that rarely happens.
 const CPU_HIT_CHANCE = 0.9;
 
-type ColDef = { letter: string; label: string; emoji: string };
+type ColDef = { letter: string; label: string };
 
 // Battleship's whole identity is error-hunting — every square on every board is a
 // "correct grammar mistakes" question. No other task type appears here; that variety
 // belongs to other games now (Word Whack = choose the correct answer, King of the Hill =
 // fill in the blank). Column letters just name board coordinates, they're not categories.
+// Every column shares the same "pencil" icon at render time (see below) since the task is
+// always the same, so ColDef doesn't carry its own icon field.
 const BATTLESHIP_COLS_5: ColDef[] = ["A", "B", "C", "D", "E"].map(letter => (
-  { letter, label: "Fix the mistake", emoji: "✏️" }
+  { letter, label: "Fix the mistake" }
 ));
 const BATTLESHIP_COLS_4: ColDef[] = ["A", "B", "C", "D"].map(letter => (
-  { letter, label: "Fix the mistake", emoji: "✏️" }
+  { letter, label: "Fix the mistake" }
 ));
 
 function generateShipsNxN(cols: ColDef[]) {
@@ -87,7 +92,7 @@ const AMBIENT_BITS = Array.from({ length: 12 }, (_, i) => ({
   size: 8 + (i % 4) * 3,
   dur: 4 + (i % 5),
   delay: (i % 6) * 0.5,
-  emoji: i % 3 === 0 ? "✦" : "🫧",
+  iconName: i % 3 === 0 ? ("sparkle" as const) : ("bubble" as const),
 }));
 
 const STYLE_TAG = (
@@ -130,14 +135,14 @@ function AmbientBackdrop() {
   return (
     <div style={{ position: "absolute", inset: 0, pointerEvents: "none", overflow: "hidden" }}>
       {AMBIENT_BITS.map((b, i) => (
-        <div key={i} style={{ position: "absolute", left: `${b.left}%`, top: `${b.top}%`, fontSize: `${b.size}px`, animation: `bubbleDrift ${b.dur}s ease-in-out infinite ${b.delay}s` }}>{b.emoji}</div>
+        <div key={i} style={{ position: "absolute", left: `${b.left}%`, top: `${b.top}%`, color: "#60A5FA", opacity: 0.7, animation: `bubbleDrift ${b.dur}s ease-in-out infinite ${b.delay}s` }}><Icon name={b.iconName} size={b.size} /></div>
       ))}
     </div>
   );
 }
 
 type CellFx = { teamId: string | number; coord: string; kind: "hit" | "miss"; key: number };
-type Toast = { text: string; kind: "hit" | "water" | "wrong"; key: number };
+type Toast = { text: React.ReactNode; kind: "hit" | "water" | "wrong"; key: number };
 type EliminationBanner = { teamName: string; color: string; key: number };
 
 // What "Save & Exit" snapshots and "Resume" restores. Fleet layout MUST be included — hits/misses
@@ -234,7 +239,7 @@ export function BattleshipGame({ questions, teams: propTeams, onUpdateScore, onE
     setTimeout(() => setCellFx(prev => (prev?.key === key ? null : prev)), 700);
   };
 
-  const showToast = (text: string, kind: Toast["kind"]) => {
+  const showToast = (text: React.ReactNode, kind: Toast["kind"]) => {
     const key = fxIdRef.current++;
     setToast({ text, kind, key });
     setTimeout(() => setToast(prev => (prev?.key === key ? null : prev)), 2400);
@@ -361,9 +366,9 @@ export function BattleshipGame({ questions, teams: propTeams, onUpdateScore, onE
       spawnCellFx(targetTeamId, pendingCoord, "hit");
       updateScore(activeTeam.id, correct ? 60 : 30);
       showToast(
-        correct
-          ? `💥 ${activeTeam.name} HIT ${targetTeam.name}'s ship at ${pendingCoord}!`
-          : `💥 ${activeTeam.name} HIT ${targetTeam.name}'s ship at ${pendingCoord} — wrong answer, half credit!`,
+        <><Icon name="explosion" size={16} /> {correct
+          ? `${activeTeam.name} HIT ${targetTeam.name}'s ship at ${pendingCoord}!`
+          : `${activeTeam.name} HIT ${targetTeam.name}'s ship at ${pendingCoord} — wrong answer, half credit!`}</>,
         "hit"
       );
 
@@ -385,11 +390,11 @@ export function BattleshipGame({ questions, teams: propTeams, onUpdateScore, onE
       setMisses(m => ({ ...m, [targetTeamId]: [...(m[targetTeamId] || []), pendingCoord] }));
       spawnCellFx(targetTeamId, pendingCoord, "miss");
       updateScore(activeTeam.id, 15);
-      showToast(`🌊 ${activeTeam.name} fired at ${pendingCoord} — splash, no ship there!`, "water");
+      showToast(<><Icon name="wave" size={16} /> {activeTeam.name} fired at {pendingCoord} — splash, no ship there!</>, "water");
     } else {
       setMisses(m => ({ ...m, [targetTeamId]: [...(m[targetTeamId] || []), pendingCoord] }));
       spawnCellFx(targetTeamId, pendingCoord, "miss");
-      showToast(`❌ ${activeTeam.name} got the question wrong — shot goes wide!`, "wrong");
+      showToast(<><Icon name="close" size={14} /> {activeTeam.name} got the question wrong — shot goes wide!</>, "wrong");
     }
     advanceTurn(newHits);
   };
@@ -447,7 +452,7 @@ export function BattleshipGame({ questions, teams: propTeams, onUpdateScore, onE
       {STYLE_TAG}
       <div style={{ position: "relative", zIndex: 1 }}>
         <div style={{ background: "linear-gradient(160deg,#1E3A8A,#0C1B3A)", border: "2px solid #60A5FA55", borderRadius: "20px", padding: "28px 24px", marginBottom: "10px", color: "white", maxWidth: "520px", margin: "0 auto 10px", boxShadow: "0 0 50px rgba(37,99,235,0.4)" }}>
-          <div style={{ fontSize: "36px", marginBottom: "10px" }}>⚓</div>
+          <div style={{ marginBottom: "10px" }}><Icon name="anchor" size={36} /></div>
           <div style={{ fontWeight: "900", fontSize: "20px", marginBottom: "10px", color: "#93C5FD" }}>{gameTitle}</div>
           <div style={{ fontSize: "15px", lineHeight: 1.7, opacity: 0.95 }}>
             Each team has a hidden fleet on their ocean grid. Pick a target, fire at a square, and <strong style={{ color: "#93C5FD" }}>answer correctly to land the hit</strong>.<br />
@@ -455,14 +460,14 @@ export function BattleshipGame({ questions, teams: propTeams, onUpdateScore, onE
           </div>
         </div>
         <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "24px" }}>
-          {teams.map(t => (<div key={t.id} style={{ background: `linear-gradient(160deg,${t.color.dark}55,#0C1B3A)`, border: "3px solid " + t.color.bg, borderRadius: "14px", padding: "10px 18px", fontWeight: "800", fontSize: "14px", color: "white" }}>{t.color.emoji} {t.name}</div>))}
+          {teams.map(t => (<div key={t.id} style={{ background: `linear-gradient(160deg,${t.color.dark}55,#0C1B3A)`, border: "3px solid " + t.color.bg, borderRadius: "14px", padding: "10px 18px", fontWeight: "800", fontSize: "14px", color: "white", display: "flex", alignItems: "center", gap: "6px" }}><TeamIcon team={t} color="white" /> {t.name}</div>))}
         </div>
-        <button onClick={() => setShowHowTo(true)} className="bship-btn" style={{ display: "block", margin: "0 auto 14px", background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
-          ❓ How to Play
+        <button onClick={() => setShowHowTo(true)} className="bship-btn" style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginBottom: "14px", background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
+          <Icon name="help" size={15} /> How to Play
         </button>
         {showHowTo && (
           <HowToPlayModal
-            gameName={GM.name} gameIcon={GM.icon} accentColor={GM.color}
+            gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color}
             steps={BATTLESHIP_TUTORIAL_STEPS}
             onClose={() => setShowHowTo(false)}
           />
@@ -476,8 +481,8 @@ export function BattleshipGame({ questions, teams: propTeams, onUpdateScore, onE
           } else {
             setPhase("pick-target");
           }
-        }} className="bship-btn" style={{ background: "linear-gradient(135deg,#1E3A8A,#2563EB)", color: "white", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(37,99,235,0.5)", transition: "transform 0.15s ease" }}>
-          ⚓ Battle Stations!
+        }} className="bship-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg,#1E3A8A,#2563EB)", color: "white", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(37,99,235,0.5)", transition: "transform 0.15s ease" }}>
+          <Icon name="anchor" size={20} /> Battle Stations!
         </button>
       </div>
     </div>
@@ -495,7 +500,7 @@ export function BattleshipGame({ questions, teams: propTeams, onUpdateScore, onE
           <AmbientBackdrop />
           {STYLE_TAG}
           <div style={{ position: "relative", zIndex: 1 }}>
-            <div style={{ fontSize: "48px", marginBottom: "6px" }}>⚓</div>
+            <div style={{ marginBottom: "6px" }}><Icon name="anchor" size={48} /></div>
             <div style={{ fontWeight: "900", fontSize: "24px", color: "#93C5FD", marginBottom: "4px", textShadow: "0 0 24px rgba(96,165,250,0.6)" }}>
               Battle cut short — final standings
             </div>
@@ -508,13 +513,13 @@ export function BattleshipGame({ questions, teams: propTeams, onUpdateScore, onE
                   border: `2px solid ${rank === 0 ? t.color.bg : "#4B5563"}`, borderRadius: "14px", padding: rank === 0 ? "12px 16px" : "10px 16px",
                   opacity: rank === 0 ? 1 : 0.85,
                 }}>
-                  <span style={{ fontSize: rank === 0 ? "24px" : "20px" }}>{medalForRank(rank)}</span>
-                  <span style={{ flex: 1, textAlign: "left", fontWeight: rank === 0 ? "900" : "800", color: rank === 0 ? "white" : "#D1D5DB", fontSize: rank === 0 ? "16px" : "15px" }}>{t.mascot ?? t.color.emoji} {t.name}</span>
+                  <span><RankBadge rank={rank} size={rank === 0 ? 24 : 20} /></span>
+                  <span style={{ flex: 1, textAlign: "left", fontWeight: rank === 0 ? "900" : "800", color: rank === 0 ? "white" : "#D1D5DB", fontSize: rank === 0 ? "16px" : "15px" }}><TeamIcon team={t} /> {t.name}</span>
                   <span style={{ fontWeight: "800", color: rank === 0 ? "#93C5FD" : "#6B7280", fontSize: "13px" }}>{value}/{fleets[t.id].length} ships left</span>
                 </div>
               ))}
             </div>
-            <button onClick={onEnd} className="bship-btn" style={{ background: "linear-gradient(135deg,#1E3A8A,#2563EB)", color: "white", border: "none", borderRadius: "14px", padding: "14px 32px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(37,99,235,0.5)", transition: "transform 0.15s ease" }}>🏁 End Game</button>
+            <button onClick={onEnd} className="bship-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg,#1E3A8A,#2563EB)", color: "white", border: "none", borderRadius: "14px", padding: "14px 32px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(37,99,235,0.5)", transition: "transform 0.15s ease" }}><Icon name="checkeredFlag" size={18} /> End Game</button>
           </div>
         </div>
       );
@@ -528,26 +533,26 @@ export function BattleshipGame({ questions, teams: propTeams, onUpdateScore, onE
         <AmbientBackdrop />
         {STYLE_TAG}
         <div style={{ position: "relative", zIndex: 1 }}>
-          <div style={{ fontSize: "48px", marginBottom: "6px" }}>🏆</div>
+          <div style={{ marginBottom: "6px" }}><Icon name="trophy" size={48} color="#FCD34D" /></div>
           <div style={{ fontWeight: "900", fontSize: "24px", color: "#93C5FD", marginBottom: "4px", textShadow: "0 0 24px rgba(96,165,250,0.6)" }}>
-            {winnerTeam.mascot ?? winnerTeam.color.emoji} {winnerTeam.name}'s fleet wins the battle!
+            <TeamIcon team={winnerTeam} /> {winnerTeam.name}'s fleet wins the battle!
           </div>
           <div style={{ color: "#94A3B8", fontSize: "14px", marginBottom: "20px" }}>Last fleet still afloat — every other team was sunk.</div>
           <div style={{ display: "flex", flexDirection: "column", gap: "8px", maxWidth: "420px", margin: "0 auto 24px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "12px", background: `linear-gradient(160deg,${winnerTeam.color.dark}66,#0C1B3A)`, border: `2px solid ${winnerTeam.color.bg}`, borderRadius: "14px", padding: "12px 16px" }}>
-              <span style={{ fontSize: "24px" }}>🥇</span>
-              <span style={{ flex: 1, textAlign: "left", fontWeight: "900", color: "white", fontSize: "16px" }}>{winnerTeam.mascot ?? winnerTeam.color.emoji} {winnerTeam.name}</span>
+              <span><Icon name="medal" size={24} color="#FCD34D" /></span>
+              <span style={{ flex: 1, textAlign: "left", fontWeight: "900", color: "white", fontSize: "16px" }}><TeamIcon team={winnerTeam} /> {winnerTeam.name}</span>
               <span style={{ fontWeight: "800", color: "#93C5FD", fontSize: "13px" }}>SURVIVED</span>
             </div>
-            {rankedLosers.map((t, i) => (
+            {rankedLosers.map((t) => (
               <div key={t.id} style={{ display: "flex", alignItems: "center", gap: "12px", background: "linear-gradient(160deg,#1F2937,#0B0F17)", border: "2px solid #4B5563", borderRadius: "14px", padding: "10px 16px", opacity: 0.85 }}>
-                <span style={{ fontSize: "20px" }}>{i === 0 ? "💀" : "☠️"}</span>
-                <span style={{ flex: 1, textAlign: "left", fontWeight: "800", color: "#D1D5DB", fontSize: "15px" }}>{t.mascot ?? t.color.emoji} {t.name}</span>
+                <span><Icon name="skull" size={20} color="#9CA3AF" /></span>
+                <span style={{ flex: 1, textAlign: "left", fontWeight: "800", color: "#D1D5DB", fontSize: "15px" }}><TeamIcon team={t} /> {t.name}</span>
                 <span style={{ fontWeight: "700", color: "#6B7280", fontSize: "12px" }}>SUNK</span>
               </div>
             ))}
           </div>
-          <button onClick={onEnd} className="bship-btn" style={{ background: "linear-gradient(135deg,#1E3A8A,#2563EB)", color: "white", border: "none", borderRadius: "14px", padding: "14px 32px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(37,99,235,0.5)", transition: "transform 0.15s ease" }}>🏁 End Game</button>
+          <button onClick={onEnd} className="bship-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg,#1E3A8A,#2563EB)", color: "white", border: "none", borderRadius: "14px", padding: "14px 32px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(37,99,235,0.5)", transition: "transform 0.15s ease" }}><Icon name="checkeredFlag" size={18} /> End Game</button>
         </div>
       </div>
     );
@@ -562,14 +567,14 @@ export function BattleshipGame({ questions, teams: propTeams, onUpdateScore, onE
         {STYLE_TAG}
         <div style={{ position: "relative", zIndex: 1 }}>
           <div style={{ background: "linear-gradient(160deg,#1E3A8A,#0C1B3A)", border: "2px solid #60A5FA55", borderRadius: "20px", padding: "28px 24px", marginBottom: "20px", color: "white", maxWidth: "480px", margin: "0 auto 20px" }}>
-            <div style={{ fontSize: "36px", marginBottom: "10px" }}>⏰</div>
-            <div style={{ fontWeight: "900", fontSize: "19px", marginBottom: "10px", color: "#93C5FD" }}>{noticeTeam.mascot ?? noticeTeam.color.emoji} {noticeTeam.name} ran out of time!</div>
+            <div style={{ marginBottom: "10px" }}><Icon name="clock" size={36} /></div>
+            <div style={{ fontWeight: "900", fontSize: "19px", marginBottom: "10px", color: "#93C5FD" }}><TeamIcon team={noticeTeam} /> {noticeTeam.name} ran out of time!</div>
             <div style={{ fontSize: "15px", lineHeight: 1.6, opacity: 0.95 }}>
               {timeoutNotice.retried ? "That's your one free retry for this game — watch the clock this time!" : "You've already used your free retry this game — the turn moves on."}
             </div>
           </div>
-          <button onClick={dismissTimeoutNotice} className="bship-btn" style={{ background: "linear-gradient(135deg,#1E3A8A,#2563EB)", color: "white", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(37,99,235,0.5)", transition: "transform 0.15s ease" }}>
-            {timeoutNotice.retried ? "🔄 Try Again!" : "➡️ Next Team"}
+          <button onClick={dismissTimeoutNotice} className="bship-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg,#1E3A8A,#2563EB)", color: "white", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(37,99,235,0.5)", transition: "transform 0.15s ease" }}>
+            {timeoutNotice.retried ? <><Icon name="refresh" size={18} /> Try Again!</> : <><Icon name="next" size={18} /> Next Team</>}
           </button>
         </div>
       </div>
@@ -588,8 +593,8 @@ export function BattleshipGame({ questions, teams: propTeams, onUpdateScore, onE
           borderRadius: "14px", padding: "12px 24px", boxShadow: "0 8px 28px rgba(0,0,0,0.5)",
           animation: "bshipBannerIn 3.2s ease-in-out forwards",
         }}>
-          <span style={{ color: "white", fontWeight: "900", fontSize: "16px", textShadow: "0 1px 3px rgba(0,0,0,0.5)" }}>
-            ☠️ {elimBanner.teamName}'s fleet is SUNK — eliminated!
+          <span style={{ color: "white", fontWeight: "900", fontSize: "16px", textShadow: "0 1px 3px rgba(0,0,0,0.5)", display: "inline-flex", alignItems: "center", gap: "6px" }}>
+            <Icon name="skull" size={18} /> {elimBanner.teamName}'s fleet is SUNK — eliminated!
           </span>
         </div>
       )}
@@ -600,20 +605,20 @@ export function BattleshipGame({ questions, teams: propTeams, onUpdateScore, onE
           borderRadius: "10px", padding: "8px 18px", boxShadow: "0 6px 20px rgba(0,0,0,0.5)",
           animation: "bshipToastIn 2.4s ease-in-out forwards",
         }}>
-          <span style={{ color: "white", fontWeight: "800", fontSize: "13px" }}>{toast.text}</span>
+          <span style={{ color: "white", fontWeight: "800", fontSize: "13px", display: "inline-flex", alignItems: "center", gap: "6px" }}>{toast.text}</span>
         </div>
       )}
       <div style={{ position: "relative", zIndex: 1 }}>
         <div style={{ display: "flex", justifyContent: "center", marginBottom: "12px" }}>
           <div style={{ background: "rgba(255,255,255,0.06)", border: "1.5px solid #EF444488", boxShadow: "0 0 10px #EF444433", color: "white", borderRadius: "10px", padding: "6px 16px", fontSize: "12px", fontWeight: "800", display: "flex", alignItems: "center", gap: "6px" }}>
-            <span>✏️</span>
+            <Icon name="pencil" size={14} />
             <span style={{ opacity: 0.9 }}>Every square hides a mistake to correct</span>
           </div>
         </div>
 
         <div style={{ background: `linear-gradient(90deg,${activeTeam.color.dark},${activeTeam.color.bg})`, borderRadius: "14px", padding: "10px 16px", marginBottom: "14px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px", boxShadow: `0 4px 18px ${activeTeam.color.bg}55` }}>
-          <span style={{ color: "white", fontWeight: "900", fontSize: "17px", textShadow: "0 1px 3px rgba(0,0,0,0.4)" }}>
-            ⚓ {activeTeam.mascot ?? activeTeam.color.emoji} {activeTeam.name} —{" "}
+          <span style={{ color: "white", fontWeight: "900", fontSize: "17px", textShadow: "0 1px 3px rgba(0,0,0,0.4)", display: "inline-flex", alignItems: "center", gap: "6px" }}>
+            <Icon name="anchor" size={16} /> <TeamIcon team={activeTeam} color="white" /> {activeTeam.name} —{" "}
             {phase === "pick-target" && "Choose a team to attack!"}
             {phase === "pick-coord" && `Targeting ${teams.find(t => t.id === targetTeamId)?.name} — pick a square!`}
             {phase === "answer" && `Firing at ${teams.find(t => t.id === targetTeamId)?.name} — ${pendingCoord}!`}
@@ -630,14 +635,23 @@ export function BattleshipGame({ questions, teams: propTeams, onUpdateScore, onE
                 border: "none", borderRadius: "12px", padding: "10px 20px", transition: "transform 0.15s ease",
                 fontWeight: "800", fontSize: "15px", cursor: isEliminated(t.id) ? "not-allowed" : "pointer",
                 boxShadow: isEliminated(t.id) ? "none" : `0 0 14px ${t.color.bg}66`,
+                display: "inline-flex", alignItems: "center", gap: "6px",
               }}>
-                {isEliminated(t.id) ? "💀" : "🎯"} {t.name}
+                <Icon name={isEliminated(t.id) ? "skull" : "target"} size={15} /> {t.name}
               </button>
             ))}
           </div>
         )}
 
-        <div style={{ display: "grid", gridTemplateColumns: teamsGridCols(teams.length), gap: "12px", marginBottom: "14px" }}>
+        {/* Each board's grid has fixed-px cells (see below) that can't shrink to fit a squeezed
+            column — at 2+ boards per row that silently clips the last column on a phone instead
+            of wrapping, so boards stack to full-width one-per-row below ~480px instead. */}
+        <style>{`
+          @media (max-width: 480px) {
+            .cc-bship-boards { grid-template-columns: 1fr !important; }
+          }
+        `}</style>
+        <div className="cc-bship-boards" style={{ display: "grid", gridTemplateColumns: teamsGridCols(teams.length), gap: "12px", marginBottom: "14px" }}>
           {teams.map(team => {
             const teamHits = hits[team.id] || [];
             const teamMisses = misses[team.id] || [];
@@ -658,17 +672,17 @@ export function BattleshipGame({ questions, teams: propTeams, onUpdateScore, onE
                 transition: "all 0.25s"
               }}>
                 <div style={{ background: eliminated ? "#4B5563" : isActive ? team.color.bg : isTarget ? "#2563EB" : `${team.color.bg}CC`, borderRadius: "10px", padding: "8px 12px", marginBottom: "10px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span style={{ fontWeight: "900", fontSize: "13px", color: "white", textShadow: "0 1px 2px rgba(0,0,0,0.4)" }}>
-                    {eliminated ? "💀 SUNK" : isActive ? `🚢 ${team.name}` : isTarget ? `🎯 ${team.name}` : `🛡️ ${team.name}`}
+                  <span style={{ fontWeight: "900", fontSize: "13px", color: "white", textShadow: "0 1px 2px rgba(0,0,0,0.4)", display: "inline-flex", alignItems: "center", gap: "5px" }}>
+                    {eliminated ? <><Icon name="skull" size={13} /> SUNK</> : isActive ? <><Icon name="ship" size={13} /> {team.name}</> : isTarget ? <><Icon name="target" size={13} /> {team.name}</> : <><Icon name="shield" size={13} /> {team.name}</>}
                   </span>
                   <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.9)", display: "flex", gap: "2px", alignItems: "center" }}>
                     {Array.from({ length: totalShips }).map((_, i) => (
                       <span key={i} style={{
-                        fontSize: "12px", display: "inline-block",
+                        display: "inline-block",
                         transition: "transform 0.4s ease, opacity 0.4s ease",
                         transform: i < shipsLeft ? "rotate(0deg)" : "rotate(35deg)",
                         opacity: i < shipsLeft ? 1 : 0.3,
-                      }}>🚢</span>
+                      }}><Icon name="ship" size={12} /></span>
                     ))}
                   </span>
                 </div>
@@ -699,11 +713,13 @@ export function BattleshipGame({ questions, teams: propTeams, onUpdateScore, onE
                               animation: fx?.kind === "hit" ? "explodeShake 0.45s ease-in-out" : "none",
                               overflow: "visible",
                             }}>
-                              {isHit ? "💥" : isMiss ? "·" : (isPending && !isMissileHere) ? "🎯" : "🌊"}
+                              {isHit ? <Icon name="explosion" size={16} /> : isMiss ? "·" : (isPending && !isMissileHere) ? <Icon name="target" size={16} /> : <Icon name="wave" size={16} />}
                               {isMissileHere && (
                                 <span style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
-                                  <span style={{ position: "absolute", top: "-6px", fontSize: "9px", animation: "missileTrail 0.4s ease-out infinite" }}>💨</span>
-                                  <span style={{ fontSize: "18px", display: "inline-block", animation: "missileDrop 0.55s cubic-bezier(.3,.6,.4,1)" }}>{activeTeam.mascot ?? "🚀"}</span>
+                                  <span style={{ position: "absolute", top: "-6px", animation: "missileTrail 0.4s ease-out infinite" }}><Icon name="sparkle" size={9} /></span>
+                                  <span style={{ fontSize: "18px", display: "inline-block", animation: "missileDrop 0.55s cubic-bezier(.3,.6,.4,1)" }}>
+                                    <MascotSprite mascot={activeTeam.mascot} fallback="🚀" size={20} />
+                                  </span>
                                 </span>
                               )}
                               {fx?.kind === "hit" && (
@@ -734,8 +750,8 @@ export function BattleshipGame({ questions, teams: propTeams, onUpdateScore, onE
         {phase === "answer" && currentQ && pendingCoord && (
           <div style={{ marginTop: "4px" }}>
             <div style={{ textAlign: "center", marginBottom: "10px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", flexWrap: "wrap" }}>
-              <div style={{ background: colColor(pendingCoord[0]), color: "white", borderRadius: "10px", padding: "5px 14px", fontWeight: "900", fontSize: "14px" }}>
-                {pendingCoord} — {COLS.find(c => c.letter === pendingCoord[0])?.emoji} {COLS.find(c => c.letter === pendingCoord[0])?.label}
+              <div style={{ background: colColor(pendingCoord[0]), color: "white", borderRadius: "10px", padding: "5px 14px", fontWeight: "900", fontSize: "14px", display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                {pendingCoord} — <Icon name="pencil" size={13} /> {COLS.find(c => c.letter === pendingCoord[0])?.label}
               </div>
               <span style={{ fontWeight: "700", color: "#DBEAFE", fontSize: "14px" }}>
                 Answer correctly to fire at <strong>{teams.find(t => t.id === targetTeamId)?.name}</strong>!
@@ -744,17 +760,19 @@ export function BattleshipGame({ questions, teams: propTeams, onUpdateScore, onE
 
             {missile ? (
               <div style={{ textAlign: "center", padding: "20px 0" }}>
-                <div style={{ fontSize: "40px", animation: "explodeShake 0.3s ease-in-out infinite" }}>{activeTeam.mascot ?? "🚀"}</div>
+                <div style={{ fontSize: "40px", animation: "explodeShake 0.3s ease-in-out infinite" }}>
+                  <MascotSprite mascot={activeTeam.mascot} fallback="🚀" size={44} />
+                </div>
                 <div style={{ fontWeight: "900", color: "#FCD34D", fontSize: "16px", marginTop: "6px" }}>Incoming!</div>
               </div>
             ) : isSpeakingTask ? (
               <div style={{ background: "#0F2440", border: "3px solid #60A5FA", borderRadius: "16px", padding: "20px", textAlign: "center" }}>
-                <div style={{ fontSize: "12px", fontWeight: "700", color: "#93C5FD", marginBottom: "8px", textTransform: "uppercase", letterSpacing: "0.05em" }}>🗣️ Speaking Challenge</div>
+                <div style={{ fontSize: "12px", fontWeight: "700", color: "#93C5FD", marginBottom: "8px", textTransform: "uppercase", letterSpacing: "0.05em", display: "inline-flex", alignItems: "center", gap: "6px" }}><Icon name="mic" size={13} /> Speaking Challenge</div>
                 <div style={{ fontSize: "clamp(15px,2.5vw,19px)", fontWeight: "800", color: "white", lineHeight: 1.5, marginBottom: "16px" }}>{currentQ.question}</div>
                 <p style={{ color: "#93C5FD", fontSize: "13px", marginBottom: "14px" }}>Team speaks their answer — teacher judges.</p>
                 <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
-                  <button onClick={() => launchMissile(true)} className="bship-btn" style={{ background: "#22C55E", color: "white", border: "none", borderRadius: "12px", padding: "12px 24px", fontSize: "16px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease" }}>✅ Good! FIRE!</button>
-                  <button onClick={() => launchMissile(false)} className="bship-btn" style={{ background: "#EF4444", color: "white", border: "none", borderRadius: "12px", padding: "12px 24px", fontSize: "16px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease" }}>❌ Not quite — Miss</button>
+                  <button onClick={() => launchMissile(true)} className="bship-btn" style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "#22C55E", color: "white", border: "none", borderRadius: "12px", padding: "12px 24px", fontSize: "16px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease" }}><Icon name="check" size={15} /> Good! FIRE!</button>
+                  <button onClick={() => launchMissile(false)} className="bship-btn" style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "#EF4444", color: "white", border: "none", borderRadius: "12px", padding: "12px 24px", fontSize: "16px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease" }}><Icon name="close" size={14} /> Not quite — Miss</button>
                 </div>
               </div>
             ) : (
@@ -762,8 +780,8 @@ export function BattleshipGame({ questions, teams: propTeams, onUpdateScore, onE
                 <QuestionCard question={currentQ} showAnswer={showAns} onReveal={() => setShowAns(true)} gameId="battleship" />
                 {showAns && (
                   <div style={{ display: "flex", gap: "10px", justifyContent: "center", marginTop: "12px" }}>
-                    <button onClick={() => launchMissile(true)} className="bship-btn" style={{ background: "#22C55E", color: "white", border: "none", borderRadius: "12px", padding: "12px 24px", fontSize: "16px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease" }}>✅ Correct! FIRE!</button>
-                    <button onClick={() => launchMissile(false)} className="bship-btn" style={{ background: "#EF4444", color: "white", border: "none", borderRadius: "12px", padding: "12px 24px", fontSize: "16px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease" }}>❌ Wrong — Miss</button>
+                    <button onClick={() => launchMissile(true)} className="bship-btn" style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "#22C55E", color: "white", border: "none", borderRadius: "12px", padding: "12px 24px", fontSize: "16px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease" }}><Icon name="check" size={15} /> Correct! FIRE!</button>
+                    <button onClick={() => launchMissile(false)} className="bship-btn" style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "#EF4444", color: "white", border: "none", borderRadius: "12px", padding: "12px 24px", fontSize: "16px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease" }}><Icon name="close" size={14} /> Wrong — Miss</button>
                   </div>
                 )}
               </>

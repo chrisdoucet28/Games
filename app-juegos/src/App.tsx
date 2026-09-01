@@ -9,13 +9,19 @@ import { getProfile } from './lib/profile';
 import { getSubscription, FREE_SUBSCRIPTION } from './lib/subscription';
 import { DEFAULT_THEME, getTheme, type Theme } from './data/themes';
 import { PlanIntroScreen } from './components/shared/PlanIntroScreen';
+import { WelcomeIntroScreen } from './components/shared/WelcomeIntroScreen';
+import { PrivacyPolicyScreen } from './components/shared/PrivacyPolicyScreen';
+import { TermsOfServiceScreen } from './components/shared/TermsOfServiceScreen';
+import { PublicLearnIndexScreen } from './components/shared/PublicLearnIndexScreen';
+import { PublicLearnLessonScreen } from './components/shared/PublicLearnLessonScreen';
 import { FREE_LAUNCH_ALL_PREMIUM } from './data/constants';
+import { Icon } from './components/shared/Icon';
 
 function ConfigErrorScreen() {
   return (
     <div style={{ minHeight: '100vh', background: '#1E1B4B', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '32px 20px', fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
       <div style={{ maxWidth: '440px', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '20px', padding: '28px 24px', color: 'white' }}>
-        <div style={{ fontSize: '32px', marginBottom: '10px' }}>⚠️</div>
+        <Icon name="warning" size={32} color="#FCD34D" style={{ marginBottom: '10px' }} />
         <h2 style={{ margin: '0 0 10px', fontSize: '18px', fontWeight: 900 }}>Missing configuration</h2>
         <p style={{ fontSize: '14px', lineHeight: 1.6, color: '#C4B5FD', margin: 0 }}>
           This deployment is missing <code style={{ background: 'rgba(0,0,0,0.3)', padding: '2px 5px', borderRadius: '4px' }}>VITE_SUPABASE_URL</code> and/or{' '}
@@ -62,6 +68,23 @@ function StatusBadge({ children, action, onAction, theme }: { children: React.Re
 }
 
 function App() {
+  // Public, static, no-auth-required legal pages — linked from the Google OAuth consent screen
+  // (and generally required for a public app to have). No client-side router exists in this app
+  // (every other screen is state-driven, not URL-driven), so this is a plain pathname check ahead
+  // of everything else, same spirit as the ?join= check below but for a real path instead of a
+  // query param. Vercel's vercel.json rewrites every path to "/", so these two components are what
+  // actually make "/privacy" and "/terms" resolve to real content rather than the app shell.
+  if (window.location.pathname === '/privacy') return <PrivacyPolicyScreen />;
+  if (window.location.pathname === '/terms') return <TermsOfServiceScreen />;
+  // Public, no-login Learn pages — same pathname-check pattern as the two above, so they render
+  // (and are Google-indexable) with no dependency on Supabase/auth state. /learn/<id> is a prefix
+  // match (not exact) so it can carry the topic id as the rest of the path; an id that doesn't
+  // resolve to a real lesson is handled inside PublicLearnLessonScreen itself (a real "not found"
+  // page, not a silent redirect).
+  if (window.location.pathname === '/learn') return <PublicLearnIndexScreen />;
+  if (window.location.pathname.startsWith('/learn/')) {
+    return <PublicLearnLessonScreen topicId={window.location.pathname.slice('/learn/'.length)} />;
+  }
   if (!isSupabaseConfigured) return <ConfigErrorScreen />;
   // Students joining a phone-controlled game (see AuctionGame.tsx / SpyAmongUsGame.tsx /
   // WordWhackGame.tsx / HotSeatGame.tsx's "Play on Phones" mode) have no teacher account — this
@@ -73,7 +96,7 @@ function App() {
   const searchParams = new URLSearchParams(window.location.search);
   const joinCode = searchParams.get('join');
   const gameParam = searchParams.get('game');
-  const joinGame = gameParam === 'spy' ? 'spy' : gameParam === 'whack' ? 'whack' : gameParam === 'hotseat' ? 'hotseat' : 'auction';
+  const joinGame = gameParam === 'spy' ? 'spy' : gameParam === 'whack' ? 'whack' : gameParam === 'hotseat' ? 'hotseat' : gameParam === 'orderup' ? 'orderup' : gameParam === 'racetrack' ? 'racetrack' : gameParam === 'hill' ? 'hill' : 'auction';
   if (joinCode) {
     return (
       <>
@@ -104,6 +127,10 @@ function AuthenticatedApp() {
   // row was just created with the column's false default, ever flips this to false and sees
   // PlanIntroScreen. One-time flash of the welcome screen for that case is an acceptable tradeoff.
   const [planIntroSeen, setPlanIntroSeen] = useState(true);
+  // Set only when the welcome screen's "Explore Learn" button is used — passed through to
+  // LessonGamesGenerator as a one-time initial-screen override, same idea as checkoutRedirect
+  // below (both only ever matter on the very first render after this gate clears).
+  const [initialScreen, setInitialScreen] = useState<'learn' | null>(null);
   // Stripe's checkout success/cancel URLs redirect back to "/?checkout=success|cancel" — read
   // that once on load, then strip it from the URL so a refresh doesn't re-trigger it.
   const [checkoutRedirect] = useState<'success' | 'cancel' | null>(() => {
@@ -137,17 +164,22 @@ function AuthenticatedApp() {
     return <AuthScreen />;
   }
 
-  // See FREE_LAUNCH_ALL_PREMIUM's comment in data/constants.ts — skips the onboarding
-  // plan-choice screen entirely during the free-launch phase. The underlying
-  // has_completed_plan_intro tracking is untouched, so real per-account behavior resumes
-  // exactly as designed the moment this flag is switched off.
-  if (!planIntroSeen && !FREE_LAUNCH_ALL_PREMIUM) {
+  // See FREE_LAUNCH_ALL_PREMIUM's comment in data/constants.ts — while it's on, this same
+  // has_completed_plan_intro gate shows a lightweight "how this works" welcome screen instead of
+  // the real plan-choice screen, since there's no billing decision to make right now. Swaps back
+  // to PlanIntroScreen automatically once billing is turned on — no change needed here then.
+  if (!planIntroSeen) {
     return (
       <div>
         <StatusBadge action="Log Out" onAction={() => supabase.auth.signOut()} theme={theme}>
-          🟢 Logged in as {session.user.email}
+          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#22C55E', display: 'inline-block', marginRight: '6px' }} />
+          Logged in as {session.user.email}
         </StatusBadge>
-        <PlanIntroScreen theme={theme} onSubscriptionChange={setSubscription} onDismiss={() => setPlanIntroSeen(true)} />
+        {FREE_LAUNCH_ALL_PREMIUM ? (
+          <WelcomeIntroScreen theme={theme} onDismiss={goTo => { setInitialScreen(goTo ?? null); setPlanIntroSeen(true); }} />
+        ) : (
+          <PlanIntroScreen theme={theme} onSubscriptionChange={setSubscription} onDismiss={() => setPlanIntroSeen(true)} />
+        )}
       </div>
     );
   }
@@ -155,12 +187,14 @@ function AuthenticatedApp() {
   return (
     <div>
       <StatusBadge action="Log Out" onAction={() => supabase.auth.signOut()} theme={theme}>
-        🟢 Logged in as {session.user.email}
+        <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#22C55E', display: 'inline-block', marginRight: '6px' }} />
+        Logged in as {session.user.email}
       </StatusBadge>
       <LessonGamesGenerator
         theme={theme} onThemeChange={setTheme}
         subscription={subscription} onSubscriptionChange={setSubscription}
         checkoutRedirect={checkoutRedirect}
+        initialScreen={initialScreen}
       />
     </div>
   );

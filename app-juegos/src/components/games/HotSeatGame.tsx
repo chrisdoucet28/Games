@@ -1,11 +1,15 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { QRCodeSVG } from "qrcode.react";
+import { TeamIcon } from "../shared/TeamIcon";
+import { Icon } from "../shared/Icon";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 import type { GameProps } from "../../types";
-import { teamsGridCols, GAME_MODES } from "../../data/constants";
-import { denseRank, medalForRank } from "../../utils/ranking";
+import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
+import { denseRank } from "../../utils/ranking";
+import { RankBadge } from "../shared/RankBadge";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
+import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
+import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
 import { HOTSEAT_TUTORIAL_STEPS } from "../../data/tutorials/hotseat";
 import {
   generateSessionCode, openHotSeatChannel, closeChannel,
@@ -431,7 +435,7 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
         {STYLE_TAG}
         <div style={{ position: "relative", zIndex: 1 }}>
           <div style={{ background: "linear-gradient(160deg,#7C2D12,#1C0701)", border: "2px solid #FDBA7455", borderRadius: "20px", padding: "28px 24px", marginBottom: "10px", color: "white", maxWidth: "520px", margin: "0 auto 10px", boxShadow: "0 0 50px rgba(234,88,12,0.45)" }}>
-            <div style={{ fontSize: "36px", marginBottom: "10px" }}>🌋</div>
+            <div style={{ marginBottom: "10px" }}><Icon name="volcano" size={36} /></div>
             <div style={{ fontWeight: "900", fontSize: "20px", marginBottom: "10px", color: "#FDBA74" }}>Hot Seat</div>
             <div style={{ fontSize: "15px", lineHeight: 1.7, opacity: 0.95 }}>
               {teams.length === 1
@@ -445,8 +449,8 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
           </div>
           <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "24px" }}>
             {teams.map((t, i) => (
-              <div key={t.id} style={{ background: `linear-gradient(160deg,${t.color.dark}55,#1C0701)`, border: `3px solid ${t.color.bg}`, borderRadius: "14px", padding: "10px 18px", fontWeight: "800", fontSize: "14px", color: "white" }}>
-                {i + 1}. {t.color.emoji} {t.name}
+              <div key={t.id} style={{ background: `linear-gradient(160deg,${t.color.dark}55,#1C0701)`, border: `3px solid ${t.color.bg}`, borderRadius: "14px", padding: "10px 18px", fontWeight: "800", fontSize: "14px", color: "white", display: "flex", alignItems: "center", gap: "6px" }}>
+                {i + 1}. <TeamIcon team={t} color="white" /> {t.name}
               </div>
             ))}
           </div>
@@ -462,13 +466,15 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
                       border: `2px solid ${inputMode === "screen" ? "#F97316" : "rgba(255,255,255,0.2)"}`,
                       background: inputMode === "screen" ? "rgba(249,115,22,0.15)" : "rgba(255,255,255,0.05)",
                       color: inputMode === "screen" ? "#FDBA74" : "#94A3B8",
-                    }}>🖥️ Play on Screen</button>
+                      display: "inline-flex", alignItems: "center", gap: "6px",
+                    }}><Icon name="screen" size={14} /> Play on Screen</button>
                     <button onClick={handlePickPhoneMode} className="hs-btn" style={{
                       padding: "10px 20px", borderRadius: "12px", fontWeight: "800", fontSize: "14px", cursor: "pointer",
                       border: `2px solid ${inputMode === "phone" ? "#F97316" : "rgba(255,255,255,0.2)"}`,
                       background: inputMode === "phone" ? "rgba(249,115,22,0.15)" : "rgba(255,255,255,0.05)",
                       color: inputMode === "phone" ? "#FDBA74" : "#94A3B8",
-                    }}>📱 Play on Phones</button>
+                      display: "inline-flex", alignItems: "center", gap: "6px",
+                    }}><Icon name="phone" size={14} /> Play on Phones</button>
                   </div>
                 </div>
               )}
@@ -476,13 +482,15 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
               {introStep === "qr" && sessionCode && (() => {
                 const joinUrl = `${window.location.origin}${window.location.pathname}?join=${sessionCode}&game=hotseat`;
                 return (
-                  <div style={{ background: "linear-gradient(160deg,#7C2D12,#1C0701)", border: "2px solid #F9731666", borderRadius: "20px", padding: "20px", marginBottom: "20px", maxWidth: "360px", marginLeft: "auto", marginRight: "auto" }}>
-                    <div style={{ fontWeight: "800", fontSize: "14px", color: "#FDBA74", marginBottom: "12px" }}>📱 Scan to join, or go to the site and enter this code:</div>
-                    <div style={{ background: "white", borderRadius: "12px", padding: "12px", display: "inline-block" }}>
-                      <QRCodeSVG value={joinUrl} size={160} />
-                    </div>
-                    <div style={{ fontSize: "28px", fontWeight: "900", letterSpacing: "0.1em", color: "white", margin: "12px 0" }}>{sessionCode}</div>
-
+                  <PhoneJoinPanel
+                    sessionCode={sessionCode} joinUrl={joinUrl} teams={teams} connectedTeamIds={connectedTeamIds}
+                    accent="#FDBA74" panelBg="linear-gradient(160deg,#7C2D12,#1C0701)" borderColor="#F9731666"
+                    footer={
+                      <button onClick={handlePickScreenMode} style={{ background: "none", border: "none", color: "#FED7AA99", fontSize: "12px", fontWeight: "700", cursor: "pointer", textDecoration: "underline" }}>
+                        Switch back to Play on Screen
+                      </button>
+                    }
+                  >
                     <div style={{ marginBottom: "14px" }}>
                       <div style={{ fontSize: "12px", color: "#FED7AA", fontWeight: "700", marginBottom: "8px" }}>Are your teams groups or solo players?</div>
                       <div style={{ display: "flex", gap: "8px", justifyContent: "center" }}>
@@ -491,51 +499,39 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
                           border: `2px solid ${teamStructure === "groups" ? "#F97316" : "rgba(255,255,255,0.2)"}`,
                           background: teamStructure === "groups" ? "rgba(249,115,22,0.2)" : "rgba(255,255,255,0.05)",
                           color: teamStructure === "groups" ? "#FDBA74" : "#94A3B8",
-                        }}>👥 Groups</button>
+                          display: "inline-flex", alignItems: "center", gap: "5px",
+                        }}><Icon name="people" size={12} /> Groups</button>
                         <button onClick={() => setTeamStructure("solo")} className="hs-btn" style={{
                           padding: "6px 14px", borderRadius: "10px", fontWeight: "800", fontSize: "12px", cursor: "pointer",
                           border: `2px solid ${teamStructure === "solo" ? "#F97316" : "rgba(255,255,255,0.2)"}`,
                           background: teamStructure === "solo" ? "rgba(249,115,22,0.2)" : "rgba(255,255,255,0.05)",
                           color: teamStructure === "solo" ? "#FDBA74" : "#94A3B8",
-                        }}>🧑 Solo</button>
+                          display: "inline-flex", alignItems: "center", gap: "5px",
+                        }}><Icon name="person" size={12} /> Solo</button>
                       </div>
                       <div style={{ fontSize: "11px", color: "#FED7AA99", marginTop: "6px" }}>
                         {teamStructure === "groups" ? "Each team's own phone shows the word to their describers." : "Every other team's phone shows the word — they describe for whoever's up."}
                       </div>
                     </div>
-
-                    <div style={{ display: "flex", flexDirection: "column", gap: "6px", marginBottom: "10px" }}>
-                      {teams.map(t => (
-                        <div key={t.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "rgba(255,255,255,0.06)", borderRadius: "8px", padding: "6px 10px", fontSize: "13px" }}>
-                          <span>{t.mascot ?? t.color.emoji} {t.name}</span>
-                          <span style={{ color: connectedTeamIds.has(t.id) ? "#4ADE80" : "#6B7280", fontWeight: "700" }}>
-                            {connectedTeamIds.has(t.id) ? "✅ Connected" : "⏳ Waiting…"}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                    <button onClick={handlePickScreenMode} style={{ background: "none", border: "none", color: "#FED7AA99", fontSize: "12px", fontWeight: "700", cursor: "pointer", textDecoration: "underline" }}>
-                      Switch back to Play on Screen
-                    </button>
-                  </div>
+                  </PhoneJoinPanel>
                 );
               })()}
             </>
           )}
 
           {wordListToggle}
-          <button onClick={() => setShowHowTo(true)} className="hs-btn" style={{ display: "block", margin: "0 auto 14px", background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
-            ❓ How to Play
+          <button onClick={() => setShowHowTo(true)} className="hs-btn" style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginBottom: "14px", background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
+            <Icon name="help" size={15} /> How to Play
           </button>
           {showHowTo && (
             <HowToPlayModal
-              gameName={GM.name} gameIcon={GM.icon} accentColor={GM.color}
+              gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color}
               steps={HOTSEAT_TUTORIAL_STEPS}
               onClose={() => setShowHowTo(false)}
             />
           )}
-          <button onClick={() => setPhase("intro")} className="hs-btn" style={{ background: "linear-gradient(135deg,#B91C1C,#F97316)", color: "white", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(249,115,22,0.5)", transition: "transform 0.15s ease" }}>
-            🔥 Let's Play!
+          <button onClick={() => setPhase("intro")} className="hs-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg,#B91C1C,#F97316)", color: "white", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(249,115,22,0.5)", transition: "transform 0.15s ease" }}>
+            <Icon name="flame" size={20} /> Let's Play!
           </button>
         </div>
       </div>
@@ -556,7 +552,7 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
             </div>
             <div style={{ background: "rgba(0,0,0,0.3)", border: "1.5px solid #F9731655", borderRadius: "16px", padding: "16px", display: "inline-block", minWidth: "min(100%, 320px)" }}>
               <div style={{ fontSize: "13px", fontWeight: "800", textTransform: "uppercase", opacity: 0.85, marginBottom: "6px", color: "#FDBA74" }}>Up now</div>
-              <div style={{ fontWeight: "900", fontSize: "clamp(24px,5vw,38px)" }}>{currentTeam.mascot ?? currentTeam.color.emoji} {currentTeam.name}</div>
+              <div style={{ fontWeight: "900", fontSize: "clamp(24px,5vw,38px)" }}><TeamIcon team={currentTeam} /> {currentTeam.name}</div>
             </div>
             <div style={{ fontSize: "14px", lineHeight: 1.6, marginTop: "16px", opacity: 0.9 }}>
               {teams.length === 1
@@ -590,19 +586,19 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
         <LavaGlow />
         {STYLE_TAG}
         <div style={{ position: "relative", zIndex: 1 }}>
-          <div style={{ fontSize: "44px", marginBottom: "6px" }}>🌋</div>
+          <div style={{ marginBottom: "6px" }}><Icon name="volcano" size={44} color="#FDBA74" /></div>
           <div style={{ fontWeight: "900", fontSize: "22px", color: "#FDBA74", marginBottom: "16px" }}>{headline}</div>
           <div style={{ display: "grid", gridTemplateColumns: teamsGridCols(teams.length), gap: "10px", margin: "0 auto 20px", maxWidth: "760px" }}>
             {ranking.map(({ item: t, rank, value }) => (
               <div key={t.id} style={{ background: `linear-gradient(160deg,${t.color.dark}55,#1C0701)`, border: `2px solid ${t.color.bg}`, borderRadius: "14px", padding: "12px" }}>
-                <div style={{ fontSize: "22px" }}>{medalForRank(rank)}</div>
-                <div style={{ fontWeight: "800", color: "white", fontSize: "14px", marginTop: "4px" }}>{t.mascot ?? t.color.emoji} {t.name}</div>
+                <div><RankBadge rank={rank} size={22} /></div>
+                <div style={{ fontWeight: "800", color: "white", fontSize: "14px", marginTop: "4px" }}><TeamIcon team={t} /> {t.name}</div>
                 <div style={{ color: "#FDBA74", fontWeight: "900", fontSize: "16px", marginTop: "4px" }}>{value} pts</div>
                 <div style={{ fontSize: "11px", color: "#FED7AA", fontWeight: "700", marginTop: "4px" }}>{totalWordsByTeam[t.id] ?? 0} words guessed</div>
               </div>
             ))}
           </div>
-          <button onClick={onEnd} className="hs-btn" style={{ background: "linear-gradient(135deg,#B91C1C,#F97316)", color: "white", border: "none", borderRadius: "14px", padding: "13px 34px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 20px rgba(249,115,22,0.4)", transition: "transform 0.15s ease" }}>🏁 End Game</button>
+          <button onClick={onEnd} className="hs-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg,#B91C1C,#F97316)", color: "white", border: "none", borderRadius: "14px", padding: "13px 34px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 20px rgba(249,115,22,0.4)", transition: "transform 0.15s ease" }}><Icon name="checkeredFlag" size={18} /> End Game</button>
         </div>
       </div>
     );
@@ -615,6 +611,13 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
       <EmberField />
       <LavaGlow />
       {STYLE_TAG}
+      {inputMode === "phone" && sessionCode && (
+        <PhoneReconnectBadge
+          sessionCode={sessionCode} joinUrl={`${window.location.origin}${window.location.pathname}?join=${sessionCode}&game=hotseat`}
+          teams={teams} connectedTeamIds={connectedTeamIds}
+          accent="#FDBA74" panelBg="linear-gradient(160deg,#7C2D12,#1C0701)" borderColor="#F9731666"
+        />
+      )}
       <div style={{ position: "relative", zIndex: 1 }}>
         <div style={{ background: "linear-gradient(90deg,#7C2D12,#9A3412)", border: "1.5px solid #FDBA7455", borderRadius: "14px", padding: "14px 16px", marginBottom: "16px", textAlign: "center", color: "white", boxShadow: "0 4px 18px rgba(154,52,18,0.5)" }}>
           <div style={{ fontWeight: "900", fontSize: "18px" }}>Round {roundIndex + 1} of {TOTAL_ROUNDS} - {currentTeam.name}</div>
@@ -631,7 +634,7 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
           </div>
           <div style={{ flex: 1 }}>
             <div style={{ display: "flex", justifyContent: "space-between", gap: "12px", flexWrap: "wrap", marginBottom: "8px" }}>
-              <div style={{ fontWeight: "900", color: "white", fontSize: "16px" }}>{currentTeam.mascot ?? currentTeam.color.emoji} {currentTeam.name}</div>
+              <div style={{ fontWeight: "900", color: "white", fontSize: "16px" }}><TeamIcon team={currentTeam} /> {currentTeam.name}</div>
               <div style={{ fontWeight: "900", color: "#FED7AA", fontSize: "16px" }}>This turn: {turnCorrect} words / {turnCorrect * POINTS_PER_WORD} pts</div>
             </div>
             <div style={{ height: "10px", background: "#1C0701", borderRadius: "999px", overflow: "hidden" }}>
@@ -642,7 +645,7 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
 
         {phase === "play" && describersOnPhone && (
           <div style={{ background: "linear-gradient(160deg,#1C0701,#2D0A00)", border: "3px dashed #F9731688", borderRadius: "22px", padding: "34px 18px", textAlign: "center" }}>
-            <div style={{ fontSize: "34px", marginBottom: "10px" }}>📱</div>
+            <div style={{ marginBottom: "10px" }}><Icon name="phone" size={34} /></div>
             <div style={{ fontWeight: "900", fontSize: "17px", color: "#FDBA74", marginBottom: "6px" }}>
               {teamStructure === "groups"
                 ? `${currentTeam.name} is describing on their phone!`
@@ -679,8 +682,8 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
               <div style={{ color: "#86EFAC", fontWeight: "900", fontSize: "18px", marginBottom: "4px" }}>+{lastTurnCorrect * POINTS_PER_WORD} pts</div>
               <div style={{ color: "#FED7AA", fontWeight: "700" }}>Those points have been added to the scoreboard.</div>
             </div>
-            <button onClick={goToNextTurn} className="hs-btn" style={{ background: "linear-gradient(135deg,#B91C1C,#F97316)", color: "white", border: "none", borderRadius: "14px", padding: "13px 34px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 20px rgba(249,115,22,0.4)", transition: "transform 0.15s ease" }}>
-              {isLastTurn ? "🏆 See Final Results" : teamIndex < teams.length - 1 ? "Next Team" : "Start Next Round"}
+            <button onClick={goToNextTurn} className="hs-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg,#B91C1C,#F97316)", color: "white", border: "none", borderRadius: "14px", padding: "13px 34px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 20px rgba(249,115,22,0.4)", transition: "transform 0.15s ease" }}>
+              {isLastTurn ? <><Icon name="trophy" size={18} /> See Final Results</> : teamIndex < teams.length - 1 ? "Next Team" : "Start Next Round"}
             </button>
           </div>
         )}

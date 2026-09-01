@@ -1,16 +1,18 @@
-// Ambient decoration for each theme's hero areas — a slow-drifting emoji plus a twinkling one,
+// Ambient decoration for each theme's hero areas — a slow-drifting icon plus a twinkling one,
 // tailored per theme (Sky's clouds, Violet's moon/stars, Sunset's birds, Ocean's bubbles, Forest's
 // leaves, Rose's petals). Purely decorative, pointer-events disabled throughout.
+import { Icon, type IconName } from "./Icon";
+
 type Direction = "horizontal" | "up" | "down";
-type DecorConfig = { drift: string; twinkle: string; direction: Direction };
+type DecorConfig = { drift: IconName; driftColor: string; twinkle: IconName; twinkleColor: string; direction: Direction };
 
 const THEME_DECOR: Record<string, DecorConfig> = {
-  sky: { drift: "☁️", twinkle: "✨", direction: "horizontal" },
-  violet: { drift: "🌙", twinkle: "⭐", direction: "horizontal" },
-  sunset: { drift: "🕊️", twinkle: "✨", direction: "horizontal" },
-  ocean: { drift: "🫧", twinkle: "✨", direction: "up" },
-  forest: { drift: "🍃", twinkle: "✨", direction: "down" },
-  rose: { drift: "🌸", twinkle: "✨", direction: "down" },
+  sky: { drift: "cloud", driftColor: "#F0F9FF", twinkle: "sparkle", twinkleColor: "#FEF9C3", direction: "horizontal" },
+  violet: { drift: "moon", driftColor: "#FEF9C3", twinkle: "star", twinkleColor: "#FDE68A", direction: "horizontal" },
+  sunset: { drift: "dove", driftColor: "#FFF7ED", twinkle: "sparkle", twinkleColor: "#FED7AA", direction: "horizontal" },
+  ocean: { drift: "bubble", driftColor: "#E0F2FE", twinkle: "sparkle", twinkleColor: "#BAE6FD", direction: "up" },
+  forest: { drift: "leaf", driftColor: "#BBF7D0", twinkle: "sparkle", twinkleColor: "#DCFCE7", direction: "down" },
+  rose: { drift: "blossom", driftColor: "#FBCFE8", twinkle: "sparkle", twinkleColor: "#FCE7F3", direction: "down" },
 };
 
 // `cross` is the position along the axis perpendicular to travel — top% for horizontal movers,
@@ -50,28 +52,28 @@ export function ThemeAmbience({ themeId, variant = "full" }: { themeId: string; 
     <div style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none" }}>
       {STYLE_TAG}
       {driftSlots.map((d, i) => {
-        const size = `${Math.round(d.size * scale)}px`;
+        const size = Math.round(d.size * scale);
         if (config.direction === "horizontal") {
           return (
             <div key={i} style={{
-              position: "absolute", top: `${d.cross}%`, left: 0, fontSize: size, opacity: d.opacity,
+              position: "absolute", top: `${d.cross}%`, left: 0, opacity: d.opacity,
               animation: `ambDriftX ${d.dur}s linear infinite`, animationDelay: `${d.delay}s`,
-            }}>{config.drift}</div>
+            }}><Icon name={config.drift} size={size} color={config.driftColor} style={{ display: "block" }} /></div>
           );
         }
         const anim = config.direction === "up" ? "ambDriftUp" : "ambDriftDown";
         return (
           <div key={i} style={{
-            position: "absolute", left: `${d.cross}%`, fontSize: size, opacity: d.opacity,
+            position: "absolute", left: `${d.cross}%`, opacity: d.opacity,
             animation: `${anim} ${d.dur}s linear infinite`, animationDelay: `${d.delay}s`,
-          }}>{config.drift}</div>
+          }}><Icon name={config.drift} size={size} color={config.driftColor} style={{ display: "block" }} /></div>
         );
       })}
       {twinkleSlots.map((s, i) => (
         <div key={i} style={{
-          position: "absolute", left: `${s.left}%`, top: `${s.top}%`, fontSize: `${Math.round(s.size * scale)}px`,
+          position: "absolute", left: `${s.left}%`, top: `${s.top}%`,
           animation: `ambTwinkle ${2.4 + (i % 3) * 0.5}s ease-in-out infinite`, animationDelay: `${s.delay}s`,
-        }}>{config.twinkle}</div>
+        }}><Icon name={config.twinkle} size={Math.round(s.size * scale)} color={config.twinkleColor} style={{ display: "block" }} /></div>
       ))}
     </div>
   );

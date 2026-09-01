@@ -1,5 +1,7 @@
 import type { Team } from "../../types";
-import { denseRank, medalForRank } from "../../utils/ranking";
+import { TeamIcon } from "./TeamIcon";
+import { denseRank } from "../../utils/ranking";
+import { RankBadge } from "./RankBadge";
 
 interface ScoreBoardProps {
   teams: Team[];
@@ -14,26 +16,30 @@ export function ScoreBoard({ teams, highlight, headingFont }: ScoreBoardProps) {
   const ranked = denseRank(teams, t => t.score).sort((a, b) => b.value - a.value);
 
   return (
+    // flex-basis (not minWidth alone) is what lets cards shrink together and pack 2-3 per row on
+    // a phone instead of each card sizing to its own content and wrapping onto its own line.
     <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", justifyContent: "center" }}>
       {ranked.map(({ item: t, rank }) => (
         <div key={t.id} style={{
           background: highlight === t.id ? t.color.bg : t.color.light,
           border: `3px solid ${t.color.bg}`,
           borderRadius: "16px",
-          padding: "12px 20px",
+          padding: "10px 14px",
           textAlign: "center",
-          minWidth: "120px",
+          flex: "1 1 100px",
+          maxWidth: "160px",
+          boxSizing: "border-box",
           transform: highlight === t.id ? "scale(1.1)" : "scale(1)",
           transition: "all 0.3s",
           boxShadow: highlight === t.id ? `0 0 20px ${t.color.bg}80` : "none"
         }}>
-          <div style={{ fontSize: "24px" }}>
-            {medalForRank(rank)}
+          <div>
+            <RankBadge rank={rank} size={24} />
           </div>
-          <div style={{ fontWeight: "800", fontSize: "15px", color: highlight === t.id ? "white" : t.color.dark, fontFamily: headingFont }}>
-            {t.mascot ?? t.color.emoji} {t.name}
+          <div style={{ fontWeight: "800", fontSize: "14px", color: highlight === t.id ? "white" : t.color.dark, fontFamily: headingFont, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+            <TeamIcon team={t} /> {t.name}
           </div>
-          <div style={{ fontWeight: "900", fontSize: "28px", color: highlight === t.id ? "white" : t.color.dark }}>
+          <div style={{ fontWeight: "900", fontSize: "26px", color: highlight === t.id ? "white" : t.color.dark }}>
             {t.score}
           </div>
         </div>

@@ -1,7 +1,10 @@
 import { useState, useEffect, useRef, useMemo } from "react";
+import { TeamIcon, MascotSprite } from "../shared/TeamIcon";
+import { Icon } from "../shared/Icon";
 import type { GameProps } from "../../types";
-import { teamsGridCols, GAME_MODES } from "../../data/constants";
-import { denseRank, medalForRank } from "../../utils/ranking";
+import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
+import { denseRank } from "../../utils/ranking";
+import { RankBadge } from "../shared/RankBadge";
 import { makeSoloCpuTeam } from "../../lib/soloOpponent";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
@@ -102,6 +105,14 @@ export function MinefieldGame({ gridData, teams: propTeams, onUpdateScore, onEnd
   const [correctByTeam, setCorrectByTeam] = useState<Record<string | number, number>>(() => resumed?.correctByTeam ?? {});
   const [minesHitByTeam, setMinesHitByTeam] = useState<Record<string | number, number>>(() => resumed?.minesHitByTeam ?? {});
 
+  // The 5-col grid is wider than a phone screen and scrolls horizontally (see the overflowX:auto
+  // wrapper below) — desktop rarely needs it since it's plenty wide, but on mobile there was no
+  // visual cue that more columns existed off-screen, just a grid that looked cut off. This tracks
+  // whether the scroll container actually overflows so the edge-fade hint below only ever renders
+  // when there's really more to scroll to — a no-op on desktop, where it naturally never fires.
+  const gridScrollRef = useRef<HTMLDivElement>(null);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
   useEffect(() => {
     if (!serializeStateRef) return;
     serializeStateRef.current = (): MinefieldSnapshot => ({
@@ -146,6 +157,16 @@ export function MinefieldGame({ gridData, teams: propTeams, onUpdateScore, onEnd
     }, CPU_JUDGE_MS);
     return () => clearTimeout(timer);
   }, [isSolo, phase, t]);
+
+  useEffect(() => {
+    const el = gridScrollRef.current;
+    if (!el) return;
+    const update = () => setCanScrollRight(el.scrollWidth - el.clientWidth - el.scrollLeft > 4);
+    update();
+    el.addEventListener("scroll", update);
+    window.addEventListener("resize", update);
+    return () => { el.removeEventListener("scroll", update); window.removeEventListener("resize", update); };
+  }, [gridIndex, phase]);
   const minesLeft = MINE_COUNT - minesFound;
 
   if (!currentGrid || !t) {
@@ -258,15 +279,15 @@ export function MinefieldGame({ gridData, teams: propTeams, onUpdateScore, onEnd
         </div>
         <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "24px" }}>
           {teams.map(team => (
-            <div key={team.id} style={{ background: team.color.light, border: `3px solid ${team.color.bg}`, borderRadius: "14px", padding: "10px 18px", fontWeight: "800", fontSize: "14px", color: team.color.dark }}>{team.color.emoji} {team.name}</div>
+            <div key={team.id} style={{ background: team.color.light, border: `3px solid ${team.color.bg}`, borderRadius: "14px", padding: "10px 18px", fontWeight: "800", fontSize: "14px", color: team.color.dark, display: "flex", alignItems: "center", gap: "6px" }}><TeamIcon team={team} /> {team.name}</div>
           ))}
         </div>
-        <button onClick={() => setShowHowTo(true)} style={{ display: "block", margin: "0 auto 14px", background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
-          ❓ How to Play
+        <button onClick={() => setShowHowTo(true)} style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginBottom: "14px", background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
+          <Icon name="help" size={15} /> How to Play
         </button>
         {showHowTo && (
           <HowToPlayModal
-            gameName={GM.name} gameIcon={GM.icon} accentColor={GM.color}
+            gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color}
             steps={MINEFIELD_TUTORIAL_STEPS}
             onClose={() => setShowHowTo(false)}
           />
@@ -289,19 +310,19 @@ export function MinefieldGame({ gridData, teams: propTeams, onUpdateScore, onEnd
       : `${winners[0]?.item.name} cleared the field!`;
     return (
       <div style={{ textAlign: "center" }}>
-        <div style={{ fontSize: "44px", marginBottom: "6px" }}>💣</div>
+        <div style={{ marginBottom: "6px" }}><Icon name="mine" size={44} color="#4C1D95" /></div>
         <div style={{ fontWeight: "900", fontSize: "22px", color: "#4C1D95", marginBottom: "16px" }}>{headline}</div>
         <div style={{ display: "grid", gridTemplateColumns: teamsGridCols(teams.length), gap: "10px", margin: "0 auto 20px", maxWidth: "760px" }}>
           {ranking.map(({ item: tm, rank, value }) => (
             <div key={tm.id} style={{ background: tm.color.light, border: `2px solid ${tm.color.bg}`, borderRadius: "14px", padding: "12px" }}>
-              <div style={{ fontSize: "20px" }}>{medalForRank(rank)}</div>
-              <div style={{ fontWeight: "800", color: tm.color.dark, fontSize: "14px", marginTop: "4px" }}>{tm.mascot ?? tm.color.emoji} {tm.name}</div>
+              <div><RankBadge rank={rank} size={20} /></div>
+              <div style={{ fontWeight: "800", color: tm.color.dark, fontSize: "14px", marginTop: "4px" }}><TeamIcon team={tm} /> {tm.name}</div>
               <div style={{ color: tm.color.dark, fontWeight: "900", fontSize: "16px", marginTop: "4px" }}>{value} pts</div>
               <div style={{ fontSize: "11px", color: "#4B5563", fontWeight: "700", marginTop: "4px" }}>{correctByTeam[tm.id] ?? 0} correct · {minesHitByTeam[tm.id] ?? 0} mine{(minesHitByTeam[tm.id] ?? 0) === 1 ? "" : "s"} hit</div>
             </div>
           ))}
         </div>
-        <button onClick={onEnd} style={{ background: "linear-gradient(135deg,#4C1D95,#6D28D9)", color: "white", border: "none", borderRadius: "14px", padding: "14px 36px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(109,40,217,0.4)" }}>🏁 End Game</button>
+        <button onClick={onEnd} style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg,#4C1D95,#6D28D9)", color: "white", border: "none", borderRadius: "14px", padding: "14px 36px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(109,40,217,0.4)" }}><Icon name="checkeredFlag" size={18} /> End Game</button>
       </div>
     );
   }
@@ -317,8 +338,8 @@ export function MinefieldGame({ gridData, teams: propTeams, onUpdateScore, onEnd
 
       <div style={{ background: t.color.bg, borderRadius: "14px", padding: "10px 18px", marginBottom: "14px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px" }}>
         <span style={{ color: "white", fontWeight: "900", fontSize: "17px" }}>
-          {phase === "pick" && `${t.mascot ?? t.color.emoji} ${t.name} - Pick a square!`}
-          {phase === "speaking" && `${t.mascot ?? t.color.emoji} ${t.name} - Say the sentence!`}
+          {phase === "pick" && <><TeamIcon team={t} color="white" /> {t.name} - Pick a square!</>}
+          {phase === "speaking" && <><TeamIcon team={t} color="white" /> {t.name} - Say the sentence!</>}
           {phase === "judging" && "Teacher - Judge the sentence"}
           {phase === "topicComplete" && "Topic complete!"}
         </span>
@@ -333,14 +354,13 @@ export function MinefieldGame({ gridData, teams: propTeams, onUpdateScore, onEnd
           <span
             key={i}
             style={{
-              fontSize: "18px",
               filter: i < minesFound ? "grayscale(1) opacity(0.35)" : "none",
               transform: i < minesFound ? "scale(0.85)" : "scale(1)",
               transition: "all 0.3s ease",
               display: "inline-block",
             }}
           >
-            {i < minesFound ? "💥" : "💣"}
+            <Icon name={i < minesFound ? "explosion" : "mine"} size={18} />
           </span>
         ))}
       </div>
@@ -408,7 +428,8 @@ export function MinefieldGame({ gridData, teams: propTeams, onUpdateScore, onEnd
 
       {phase !== "topicComplete" && (
       <>
-      <div style={{ overflowX: "auto", marginBottom: "8px" }}>
+      <div style={{ position: "relative", marginBottom: "8px" }}>
+        <div ref={gridScrollRef} style={{ overflowX: "auto" }}>
         <table style={{ borderCollapse: "separate", borderSpacing: `${GAP}px`, margin: "0 auto" }}>
           <thead>
             <tr>
@@ -429,7 +450,7 @@ export function MinefieldGame({ gridData, teams: propTeams, onUpdateScore, onEnd
                   const isSel = selectedTile === idx;
                   const disabled = isRev || phase !== "pick";
                   let bg;
-                  let label;
+                  let label: React.ReactNode;
                   let cursor;
 
                   if (isRev) {
@@ -438,7 +459,7 @@ export function MinefieldGame({ gridData, teams: propTeams, onUpdateScore, onEnd
                     cursor = "default";
                   } else if (isSel) {
                     bg = "linear-gradient(135deg,#FCD34D,#F59E0B)";
-                    label = t.mascot ?? "?";
+                    label = <MascotSprite mascot={t.mascot} fallback="?" size={18} />;
                     cursor = "default";
                   } else {
                     bg = phase !== "pick" ? "linear-gradient(135deg,#818CF8,#6366F1)" : "linear-gradient(135deg,#6366F1,#4338CA)";
@@ -458,6 +479,12 @@ export function MinefieldGame({ gridData, teams: propTeams, onUpdateScore, onEnd
             ))}
           </tbody>
         </table>
+        </div>
+        {canScrollRight && (
+          <div style={{ position: "absolute", top: 0, right: 0, bottom: 0, width: "36px", background: "linear-gradient(90deg,transparent,white 70%)", display: "flex", alignItems: "center", justifyContent: "flex-end", pointerEvents: "none" }}>
+            <Icon name="next" size={16} color="#7C3AED" />
+          </div>
+        )}
       </div>
       <div style={{ textAlign: "center", fontSize: "12px", color: "#9CA3AF", fontWeight: "600", marginTop: "6px" }}>
         {minesLeft} mine{minesLeft === 1 ? "" : "s"} still hidden - click a square, say the sentence, then the teacher judges

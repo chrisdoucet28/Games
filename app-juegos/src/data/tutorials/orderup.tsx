@@ -17,7 +17,7 @@ export const ORDERUP_TUTORIAL_STEPS: TutorialStep[] = [
     ),
   },
   {
-    narration: "Any team can claim ANY customer on the board — first come, first served. Write ONE sentence that satisfies EVERY requirement on that ticket at once.",
+    narration: "Any team can claim ANY customer on the board — first come, first served. Claiming is a commitment: that order is yours now. Write ONE sentence that satisfies EVERY requirement on that ticket at once.",
     visual: (
       <div style={{ textAlign: "center" }}>
         <div style={{ background: "#FFE4E6", border: "2px solid #FBCFE8", borderRadius: "10px", padding: "6px 12px", display: "inline-block", fontSize: "11px", fontWeight: 700, color: "#BE185D", marginBottom: "6px" }}>
@@ -54,11 +54,11 @@ export const ORDERUP_TUTORIAL_STEPS: TutorialStep[] = [
     ),
   },
   {
-    narration: "Each ticket has a patience timer. If NO team serves it in time, the customer leaves unhappy — and EVERY team loses 5 points, not just whoever was trying!",
+    narration: "Each ticket has a patience timer. Claim one and it's your risk alone — if you don't serve it in time, YOUR team loses 5 points. Not ready? Release the claim any time, no penalty, and someone else can try.",
     visual: (
       <div style={{ textAlign: "center" }}>
         <div style={{ fontSize: "20px" }}>😠🚪</div>
-        <div style={{ fontSize: "11px", fontWeight: 800, color: "#991B1B" }}>Customer left! All teams -5 pts</div>
+        <div style={{ fontSize: "11px", fontWeight: 800, color: "#991B1B" }}>Customer left! Claiming team -5 pts</div>
       </div>
     ),
   },
@@ -72,7 +72,7 @@ export const ORDERUP_TUTORIAL_STEPS: TutorialStep[] = [
     ),
   },
   {
-    narration: "The whole game runs on one shared clock (5, 8, or 12 minutes, picked at the start). Serve as many customers as you can before time runs out — most points wins!",
+    narration: "The whole game runs on one shared clock (8, 12, or 18 minutes, picked at the start). Serve as many customers as you can before time runs out — most points wins!",
     visual: (
       <div style={{ textAlign: "center" }}>
         <div style={{ fontSize: "20px" }}>⏱️</div>

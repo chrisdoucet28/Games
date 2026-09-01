@@ -379,25 +379,87 @@ export const LESSONS: Record<string, Lesson> = {
           "**How much** does it cost?",
         ],
       },
-      {
-        heading: "Subject vs object questions",
-        body: [
-          "If the question word IS the subject, don't add do/does/did — just use the normal word order.",
-          "If the question word is the OBJECT, you need the auxiliary.",
-        ],
-        examples: [
-          "**Who called** you?",
-          "**What happened**?",
-          "**Who did** you call?",
-          "**What did** you see?",
-        ],
-      },
     ],
     commonMistakes: [
       "❌ Where does she works? → ✅ Where does she work? (base verb after 'does')",
       "❌ What you did yesterday? → ✅ What did you do yesterday?",
-      "❌ Who did called you? → ✅ Who called you? ('who' as subject needs no 'did')",
       "❌ How long does it takes? → ✅ How long does it take? (base verb after 'does')",
+      "❌ Where you are going on holiday? → ✅ Where are you going on holiday? (auxiliary before the subject)",
+    ],
+  },
+
+  subject_object_questions: {
+    title: "Subject vs Object Questions",
+    intro: "Every sentence has a subject (who or what does the action) and often an object (who or what receives the action). When you turn a sentence into a question about the SUBJECT, you don't add do/does/did. When you ask about the OBJECT, you do.",
+    sections: [
+      {
+        heading: "The rule",
+        body: [
+          "Statement: SUBJECT + verb + OBJECT.",
+          "Subject question: ask about the subject → question word + verb (+ object). No do/does/did.",
+          "Object question: ask about the object → question word + do/does/did + subject + base verb.",
+        ],
+        examples: [
+          "Someone broke the window. → **Who broke** the window? (subject question)",
+          "You broke something. → **What did you break**? (object question)",
+        ],
+      },
+      {
+        heading: "Subject questions — present simple",
+        body: [
+          "The question word takes the place of the subject, so the verb still needs its normal present-simple ending (-s for he/she/it).",
+        ],
+        examples: [
+          "**Who owns** this house?",
+          "**What makes** you happy?",
+          "**Which team wins** most matches?",
+        ],
+      },
+      {
+        heading: "Subject questions — other tenses",
+        body: [
+          "Past simple: question word + past verb (no 'did').",
+          "Present perfect: question word + has/have + past participle (no 'did').",
+          "Modals and 'will': question word + modal/will + base verb (nothing extra).",
+        ],
+        examples: [
+          "**Who called** you last night?",
+          "**Who has visited** the most countries?",
+          "**Who will win** the election?",
+          "**What can go** wrong?",
+        ],
+      },
+      {
+        heading: "Object questions — every tense needs the auxiliary",
+        body: [
+          "Present simple: question word + do/does + subject + base verb.",
+          "Past simple: question word + did + subject + base verb.",
+          "Present perfect: question word + have/has + subject + past participle.",
+          "Modals and 'will': question word + modal/will + subject + base verb.",
+        ],
+        examples: [
+          "**Who do** you see every day?",
+          "**Who did** you call at the party?",
+          "**Who have** you met that's famous?",
+          "**Who will** you vote for?",
+        ],
+      },
+      {
+        heading: "'Which' can be a subject or an object question",
+        body: [
+          "'Which' is usually followed by a noun ('which team', 'which book'). That noun stays in the question either way — only the auxiliary changes.",
+        ],
+        examples: [
+          "**Which team won** the championship? (subject — no auxiliary)",
+          "**Which book did** she recommend? (object — needs 'did')",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ Who did break the window? → ✅ Who broke the window? (subject question — no 'did')",
+      "❌ What happens does at the end? → ✅ What happens at the end? (subject question — don't add 'does' as well as the -s)",
+      "❌ Who you called last night? → ✅ Who did you call last night? (object question — needs 'did' before the subject)",
+      "❌ Which book she recommended? → ✅ Which book did she recommend? (object question — needs 'did' before the subject)",
     ],
   },
 
@@ -1496,12 +1558,13 @@ export const LESSONS: Record<string, Lesson> = {
         body: [
           "ever/never for life experience",
           "How long have you...? asks about a state that started in the past and continues now.",
+          "Answer 'How long' with 'for' + a length of time, or 'since' + a starting point in time.",
           "Superlative + ever → present perfect.",
         ],
         examples: [
           "**Have** you **ever tried** sushi?",
           "I **have never been** to Japan.",
-          "**How long have you known** her?",
+          "**How long have you known** her? I've known her **for** ten years. / I've known her **since** 2015.",
           "This is the best pizza I **have ever eaten**.",
         ],
       },
@@ -1523,6 +1586,7 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ They didn't arrive yet. → ✅ They haven't arrived yet. ('yet' signals present perfect, not past simple)",
       "❌ This is the most delicious cake I ever tasted. → ✅ This is the most delicious cake I have ever tasted. (superlative + ever needs present perfect)",
       "❌ She just has arrived. → ✅ She has just arrived. ('just' goes between have/has and the past participle)",
+      "❌ I have lived here since ten years. → ✅ I have lived here for ten years. ('for' + a length of time; 'since' + a starting point)",
     ],
   },
 
@@ -1990,6 +2054,56 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ She always is late. → ✅ She is always late. (frequency adverb goes after 'be')",
       "❌ This soup tastes wonderfully. → ✅ This soup tastes wonderful. (adjective after sense verbs, not adverb)",
       "❌ I am not enough strong. → ✅ I am not strong enough. ('enough' comes after the adjective)",
+    ],
+  },
+
+  intensifiers_so_such_enough: {
+    title: "Intensifiers (So, Such & Enough)",
+    intro: "So, such, and enough all make a quality stronger or describe whether there's the right amount of it — but each one follows its own fixed word order, and mixing them up is the most common mistake.",
+    sections: [
+      {
+        heading: "So vs such — the basic rule",
+        body: ["'So' goes directly before an adjective or adverb, with no noun at all.", "'Such (a/an)' goes before an adjective + a noun — use 'such a/an' with a singular countable noun, and 'such' (no article) with a plural or uncountable noun."],
+        examples: [
+          "The traffic was **so** bad this morning. (no noun)",
+          "It was **such an** amazing concert. (singular noun)",
+          "They are **such** generous people. (plural noun)",
+        ],
+      },
+      {
+        heading: "So...that / such...that — result clauses",
+        body: ["Add 'that' + a clause after 'so'/'such' to explain the RESULT of an extreme quality.", "The 'so' or 'such' rule from above still applies — it just depends on whether a noun follows."],
+        examples: [
+          "The exam was **so difficult that** nobody finished on time.",
+          "It was **such a difficult exam that** nobody finished on time.",
+          "He drove **so fast that** he got a speeding ticket.",
+        ],
+      },
+      {
+        heading: "So much / so many",
+        body: ["'So much' intensifies an uncountable noun; 'so many' intensifies a countable plural noun — same countable/uncountable rule as elsewhere in English."],
+        examples: [
+          "She has **so much** energy in the mornings.",
+          "He has **so many** friends that he can't remember all their names.",
+        ],
+      },
+      {
+        heading: "Enough — a fixed word order that never changes",
+        body: ["'Enough' means 'a sufficient amount' — a different idea from 'so'/'such', which just intensify.", "Before a noun: 'enough' + noun.", "After an adjective or adverb: adjective/adverb + 'enough'.", "Add 'to' + a verb to say exactly what the amount is (or isn't) sufficient for."],
+        examples: [
+          "We don't have **enough chairs** for everyone. (before the noun)",
+          "She's not tall **enough** to reach the shelf. (after the adjective)",
+          "He's old **enough to vote** now. (adjective + enough + to)",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ It was so boring film. → ✅ It was such a boring film. ('such a' + adjective + singular noun, not 'so')",
+      "❌ She's such talented. → ✅ She's so talented. ('so' + adjective, no noun)",
+      "❌ I don't have money enough. → ✅ I don't have enough money. ('enough' goes BEFORE a noun)",
+      "❌ She isn't enough old to drive. → ✅ She isn't old enough to drive. ('enough' goes AFTER an adjective)",
+      "❌ He has such many friends. → ✅ He has so many friends. ('so many/so much', never 'such many')",
+      "❌ It was a such cold day. → ✅ It was such a cold day. ('such a', never 'a such')",
     ],
   },
 
@@ -3147,6 +3261,56 @@ export const LESSONS: Record<string, Lesson> = {
     ],
   },
 
+  passive_reporting_structures: {
+    title: "Passive Reporting Structures",
+    intro: "News reports and academic writing often need to state a claim without saying exactly who made it — 'people say', 'experts believe', 'sources report'. English has two fixed passive structures for this, both built from a reporting verb like say/believe/think/report/know/understand/estimate/claim in its passive form.",
+    sections: [
+      {
+        heading: "Impersonal: It is + reporting verb + that + clause",
+        body: ["Start with 'It', the passive form of the reporting verb, then 'that' + a full clause.", "This is the most common and flexible pattern — it works for almost any claim."],
+        examples: [
+          "**It is said that** the company will merge with a rival.",
+          "**It is believed that** the fire started accidentally.",
+          "**It is estimated that** the project will cost millions.",
+        ],
+      },
+      {
+        heading: "Personal, present: Subject + is + reporting verb + to + base verb",
+        body: ["The subject of the claim moves to the front of the sentence instead of using 'it'.", "For a PRESENT state or habit, use 'to' + the base form of the verb."],
+        examples: [
+          "**The area is believed to contain** oil reserves.",
+          "**He is known to dislike** interviews.",
+          "**The virus is thought to spread** through contact.",
+        ],
+      },
+      {
+        heading: "Personal, past: Subject + is + reporting verb + to have + past participle",
+        body: ["For a COMPLETED past action or state, use 'to have' + the past participle instead of the base verb.", "If the subject didn't do the action itself (a passive event), add 'been': 'to have been' + past participle."],
+        examples: [
+          "**He is believed to have fled** the country.",
+          "**The suspect is said to have confessed.**",
+          "**The painting is thought to have been stolen** decades ago.",
+        ],
+      },
+      {
+        heading: "Shifting the whole report into the past",
+        body: ["Change 'is'/'are' to 'was'/'were' to show that the report itself was made in the past, not now.", "The clause after 'that' often needs the past perfect too, since the reported event happened even earlier."],
+        examples: [
+          "**It was said that** the castle was haunted.",
+          "**It was reported that** hundreds had been injured.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ It is say that the company will merge. → ✅ It is said that... ('said', the past participle, not 'say')",
+      "❌ The suspect is said have fled the country. → ✅ ...is said TO have fled... (never drop 'to')",
+      "❌ He is known to has strong opinions. → ✅ ...to have strong opinions. ('to have', not 'to has' — the infinitive never conjugates)",
+      "❌ It were said that the castle was haunted. → ✅ It was said... ('it' always takes 'was', never 'were')",
+      "❌ She is said to resigned from her position. → ✅ ...is said to HAVE resigned... (a completed past action needs 'to have' + past participle)",
+      "❌ The building is reported being unsafe. → ✅ ...is reported TO BE unsafe. ('reported to be', not 'reported being')",
+    ],
+  },
+
   causative_verbs: {
     title: "Causative Verbs (have/get/make/let)",
     intro: "Have/get + something + done means you arrange for someone else to do it; make/let + someone + base verb is about forcing or permitting — and this topic also drills a distinctive mistake where learners add an unnecessary 'that' clause after make/let.",
@@ -3374,7 +3538,7 @@ export const LESSONS: Record<string, Lesson> = {
     sections: [
       {
         heading: "Always gerund",
-        body: ["enjoy, finish, suggest, avoid, consider, admit, keep + -ing"],
+        body: ["enjoy, finish, suggest, avoid, consider, admit, keep, deny + -ing"],
         examples: [
           "I **enjoy visiting** new places.",
           "I **finished doing** my homework.",
@@ -3383,11 +3547,22 @@ export const LESSONS: Record<string, Lesson> = {
       },
       {
         heading: "Always infinitive",
-        body: ["decide, agree, hope, promise, manage, refuse, afford + to + base verb"],
+        body: ["decide, agree, hope, promise, manage, refuse, afford, offer + to + base verb"],
         examples: [
           "She **decided to leave** her job.",
           "They **agreed to accept** the plan.",
           "We **managed to meet** the deadline.",
+        ],
+      },
+      {
+        heading: "Verbs that can take either, with no real difference",
+        body: [
+          "like, love, hate, prefer + -ing OR + to + base verb — both forms are correct, with little or no difference in meaning.",
+        ],
+        examples: [
+          "I **like reading** before bed. / I **like to read** before bed. (both correct)",
+          "She **loves cooking** for her family. / She **loves to cook** for her family.",
+          "He **hates waiting** in long queues. / He **hates to wait** in long queues.",
         ],
       },
       {
@@ -4207,9 +4382,13 @@ export const LESSONS: Record<string, Lesson> = {
     sections: [
       {
         heading: "Positive form",
-        body: ["Add -s (or -es) to the verb for he/she/it; no ending for I/you/we/they."],
+        body: [
+          "Add -s (or -es) to the verb for he/she/it; no ending for I/you/we/they.",
+          "Verbs ending in -o, -ch, -sh, -ss, -x, or -z add -es instead of just -s.",
+        ],
         examples: [
-          "She **goes** to school every day.",
+          "She **goes** to school every day. (verb ends in -o → add -es)",
+          "He **watches** TV after dinner. (verb ends in -ch → add -es)",
           "He **studies** English on Mondays. (consonant + y → ies)",
           "I **live** in Madrid. (no -s for 'I')",
         ],
@@ -4233,6 +4412,64 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ She doesn't goes to the gym. → ✅ She doesn't go to the gym. (base verb after 'doesn't', no -s)",
       "❌ I doesn't understand. → ✅ I don't understand. ('I' needs 'don't')",
       "❌ She don't never eat meat. → ✅ She never eats meat. (only one negative — don't combine 'don't' and 'never')",
+    ],
+  },
+
+  auxiliary_verbs_be_do: {
+    title: "Auxiliary Verbs (Be vs Do)",
+    intro: "English has two different 'helper' patterns for negatives and questions, and beginners often mix them up. The trick is simple: look at what comes after the subject. An adjective, a job, or a place needs 'be' (am/is/are). An action verb needs 'do/does'.",
+    sections: [
+      {
+        heading: "Use 'be' for adjectives, jobs, and places",
+        body: [
+          "If the sentence describes a feeling, a job/role, or where someone is, the main verb is already 'be' — use am/is/are directly, don't add 'do/does' as well.",
+        ],
+        examples: [
+          "**Are** you happy?",
+          "**Is** she a teacher?",
+          "**Are** they at home?",
+        ],
+      },
+      {
+        heading: "Use 'do/does' for action verbs",
+        body: [
+          "If the sentence has an action verb (like, live, work, study, play...), that verb needs 'do/does' for questions and negatives — never 'be'.",
+        ],
+        examples: [
+          "**Do** you like pizza?",
+          "**Does** she work here?",
+          "**Do** they play football?",
+        ],
+      },
+      {
+        heading: "Negatives",
+        body: [
+          "'Be' negative: am not / isn't / aren't.",
+          "Action verb negative: don't / doesn't + base verb.",
+        ],
+        examples: [
+          "I **am not** tired.",
+          "He **isn't** hungry.",
+          "I **don't** like loud music.",
+          "He **doesn't** eat meat.",
+        ],
+      },
+      {
+        heading: "Never combine the two",
+        body: [
+          "A sentence never needs both 'be' and 'do/does' together — pick the one that matches the main verb.",
+        ],
+        examples: [
+          "❌ She is has a car. → ✅ She has a car.",
+          "❌ He don't is tired. → ✅ He isn't tired.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ Do you happy? → ✅ Are you happy? ('happy' is an adjective — use 'be', not 'do')",
+      "❌ Is she like music? → ✅ Does she like music? ('like' is an action verb — use 'does', not 'is')",
+      "❌ Are you speak English? → ✅ Do you speak English? ('speak' is an action verb — use 'do', not 'are')",
+      "❌ Does she a nurse? → ✅ Is she a nurse? (a profession uses 'be', not 'does')",
     ],
   },
 
@@ -4489,6 +4726,64 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ We meet at the morning. → ✅ We meet in the morning. ('in' with parts of the day)",
       "❌ The party is on May 5. → ✅ The party is on May 5th. (dates need the ordinal ending, not the plain number)",
       "❌ Her birthday is on June 3th. → ✅ ...June 3rd. ('3rd' is irregular, not '3th')",
+    ],
+  },
+
+  what_time_is_it: {
+    title: "What Time is It?",
+    intro: "English tells clock time using fixed phrases built around the hour — 'o'clock', 'half past', 'quarter past/to', and minutes 'past' or 'to'. Once you know the pattern for each type, you can say any time on the clock.",
+    sections: [
+      {
+        heading: "Asking and answering",
+        body: ["'What time is it?' and 'What's the time?' mean exactly the same thing.", "Always start your answer with 'It's'."],
+        examples: [
+          "**What time is it?** It's three o'clock.",
+          "**What's the time?** It's half past six.",
+        ],
+      },
+      {
+        heading: "O'clock — exact hours",
+        body: ["Use 'o'clock' only when the time is an exact hour, with no minutes."],
+        examples: [
+          "It's **six o'clock**. (6:00)",
+          "The film starts at **eight o'clock**. (8:00)",
+        ],
+      },
+      {
+        heading: "Half past, quarter past, quarter to",
+        body: ["'Half past' + the hour = 30 minutes after it.", "'Quarter past' + the hour = 15 minutes after it.", "'Quarter to' + the NEXT hour = 15 minutes before it — the hour number jumps forward."],
+        examples: [
+          "It's **half past three**. (3:30)",
+          "It's **quarter past four**. (4:15)",
+          "It's **quarter to five**. (4:45 — 15 minutes before FIVE, not four)",
+        ],
+      },
+      {
+        heading: "Minutes past and minutes to",
+        body: ["For minutes 1-29 after the hour, say the number, then 'past', then the hour.", "For minutes 31-59, count forward to the NEXT hour instead, using 'to'.", "The switch happens exactly at the half hour (30 minutes)."],
+        examples: [
+          "It's **ten past two**. (2:10)",
+          "It's **twenty past two**. (2:20)",
+          "It's **ten to three**. (2:50 — 10 minutes before THREE)",
+        ],
+      },
+      {
+        heading: "Midday, midnight, and the parts of the day",
+        body: ["'Midday' and 'noon' both mean 12:00 in the daytime; 'midnight' means 12:00 at night — both are used alone, with no 'o'clock'.", "Add 'in the morning/afternoon/evening' or 'at night' after a time to make it clear which part of the day you mean.", "Always use 'at' before a clock time."],
+        examples: [
+          "We're meeting for lunch at **midday**.",
+          "The party finished at **midnight**.",
+          "I wake up **at seven in the morning**.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ It's three and a half. → ✅ It's half past three. (never 'and a half' for time)",
+      "❌ What hour is it? → ✅ What time is it? (we ask 'what time', not 'what hour')",
+      "❌ It's ten to past six. → ✅ It's ten past six. (never combine 'to' and 'past')",
+      "❌ It's o'clock eight. → ✅ It's eight o'clock. (the number always comes before 'o'clock')",
+      "❌ It's quarter to nine o'clock. → ✅ It's quarter to nine. (don't add 'o'clock' after 'past'/'to' times)",
+      "❌ My class starts on nine o'clock. → ✅ ...at nine o'clock. (clock times always use 'at')",
     ],
   },
 
@@ -4897,6 +5192,56 @@ export const LESSONS: Record<string, Lesson> = {
     ],
   },
 
+  clauses_of_contrast: {
+    title: "Clauses of Contrast",
+    intro: "A clause of contrast connects two surprising or opposite ideas — a fact and a result you might not expect from it. English has several ways to do this, and they split into two grammatical groups: some join two ideas inside ONE sentence, others start a brand new sentence. Mixing the two up is the most common mistake at this level.",
+    sections: [
+      {
+        heading: "Although / even though / though — a full clause, inside one sentence",
+        body: ["'Although' and 'even though' are followed by a full clause (subject + verb) and join it to the main sentence.", "'Even though' is a stronger version of 'although'.", "'Though' means the same thing and can even go at the very end of a sentence, informally."],
+        examples: [
+          "**Although** it was raining, we went for a walk.",
+          "**Even though** he apologized, she was still upset.",
+          "The house is old. It's very charming, **though**.",
+        ],
+      },
+      {
+        heading: "Despite / in spite of — a noun or gerund, never a clause",
+        body: ["'Despite' and 'in spite of' mean the same as 'although', but they're followed by a noun or a gerund (-ing) — never a full clause directly.", "'In spite of' always needs 'of' right after it; 'despite' never takes 'of' at all.", "To use 'despite'/'in spite of' with a full clause, add the bridge phrase 'the fact that'."],
+        examples: [
+          "**Despite** the heavy traffic, we arrived on time. (not 'despite it was heavy traffic')",
+          "**In spite of** losing the final, the team celebrated.",
+          "**Despite the fact that** she was tired, she finished the project.",
+        ],
+      },
+      {
+        heading: "However / nevertheless / nonetheless — a brand new sentence",
+        body: ["These all mean a similar thing to 'although', but they don't join a clause the way 'although'/'despite' do — they start a completely new sentence, usually followed by a comma.", "A comma alone before 'however' is not enough to join two clauses — that's a common mistake called a comma splice."],
+        examples: [
+          "The film was boring. **However**, the soundtrack was excellent.",
+          "The traffic was terrible. **Nevertheless**, we made it on time.",
+          "The odds were against her. **Nonetheless**, she won.",
+        ],
+      },
+      {
+        heading: "Yet — a coordinating contrast word, like 'but'",
+        body: ["'Yet' can join two contrasting clauses in one sentence, working just like 'but' — with a comma before it, not a full stop."],
+        examples: [
+          "She's brilliant, **yet** she's incredibly humble.",
+          "He looks intimidating, **yet** he's the gentlest person I know.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ Despite it was raining, we went out. → ✅ Despite the rain, we went out. ('despite' + noun/gerund, never a clause)",
+      "❌ In spite the traffic, we arrived early. → ✅ In spite of the traffic, we arrived early. ('in spite of' — never 'in spite' alone)",
+      "❌ Despite of his apology, she stayed angry. → ✅ Despite his apology, she stayed angry. ('despite' never takes 'of')",
+      "❌ She passed the exam, however she didn't study much. → ✅ She passed the exam. However, she didn't study much. ('however' starts a new sentence, not a comma splice)",
+      "❌ Although he was tired, but he kept working. → ✅ Although he was tired, he kept working. (never combine 'although' with 'but')",
+      "❌ Despite the fact she was scared, she spoke up. → ✅ Despite the fact THAT she was scared... ('despite the fact that' needs 'that')",
+    ],
+  },
+
   gerunds: {
     title: "Gerunds",
     intro: "A gerund is the -ing form of a verb used as a noun. This lesson covers the situations where English always requires a gerund: as the subject of a sentence, and after a preposition — including fixed expressions where a small word ('to', 'for', 'of') that looks like part of an infinitive is actually a preposition in disguise.",
@@ -5118,10 +5463,15 @@ export const LESSONS: Record<string, Lesson> = {
     sections: [
       {
         heading: "Saying hello and asking how someone is",
-        body: ["Use 'Good morning/afternoon/evening' depending on the time of day.", "'How are you?' is answered with 'I'm fine, thank you' — don't forget the comma before 'thank you'."],
+        body: [
+          "Use 'Good morning/afternoon/evening' depending on the time of day.",
+          "'How are you?' is answered with 'I'm fine, thank you' — don't forget the comma before 'thank you'.",
+          "In everyday conversation people also answer with 'I'm good', 'Not bad', 'Pretty good', or 'So-so' (meaning average — neither good nor bad).",
+        ],
         examples: [
           "**Good morning**! How are you?",
           "I'm **fine, thank you**. And you?",
+          "I'm **good**, thanks! / **Not bad**, thanks! / **So-so** — a bit tired today.",
           "**Nice to meet you**! (not 'Nice meet you')",
         ],
       },
@@ -5267,6 +5617,17 @@ export const LESSONS: Record<string, Lesson> = {
           "She **works as a** vet.",
         ],
       },
+      {
+        heading: "Common job titles",
+        body: [
+          "A wide range of everyday jobs: teacher, doctor, nurse, dentist, waiter, chef, cook, lawyer, pilot, manager, firefighter, farmer, and police officer.",
+          "A few common jobs start with a vowel sound and take 'an' instead of 'a': engineer, actor, artist, electrician.",
+        ],
+        examples: [
+          "I'm **a** nurse. My sister is **a** lawyer. My uncle is **a** farmer.",
+          "He's **an** engineer. She's **an** artist. My cousin is **an** electrician.",
+        ],
+      },
     ],
     commonMistakes: [
       "❌ He is doctor. → ✅ He is a doctor. (don't forget the article before a job)",
@@ -5344,6 +5705,25 @@ export const LESSONS: Record<string, Lesson> = {
         ],
       },
       {
+        heading: "A wide range of personality adjectives",
+        body: [
+          "Positive: kind, generous, friendly, funny, honest, patient, hardworking, ambitious, creative, confident, cheerful, caring, outgoing, calm, polite, brave, reliable, fair.",
+          "Negative: lazy, impatient, stubborn, selfish, boring, rude, moody.",
+          "Neutral — can be positive or negative depending on the situation: shy, quiet, serious, talkative, strict, curious, flexible, easy-going.",
+        ],
+        examples: [
+          "He's always **polite** to strangers.",
+          "It's **rude** to interrupt someone.",
+          "She was **brave** enough to speak in front of the whole class.",
+          "You can always count on him — he's very **reliable**.",
+          "She's a bit **moody** in the mornings.",
+          "Our new teacher is quite **strict**, but she's fair.",
+          "My little brother is endlessly **curious** about everything.",
+          "He's very **easy-going** — nothing ever bothers him.",
+          "She's **flexible** about changing plans at the last minute.",
+        ],
+      },
+      {
         heading: "Adjective, not adverb or noun",
         body: ["After 'be', use the plain adjective — not the '-ly' adverb form or the noun form."],
         examples: [
@@ -5360,27 +5740,12 @@ export const LESSONS: Record<string, Lesson> = {
           "He is **more patient than** his brother.",
         ],
       },
-      {
-        heading: "So vs such",
-        body: [
-          "Use **so** + adjective when there's no noun after it.",
-          "Use **such a/an** + adjective + singular noun, or **such** + adjective + plural noun (no article), when a noun follows.",
-        ],
-        examples: [
-          "He is **so kind**. (adjective alone — no noun)",
-          "She is **such a generous person**. (adjective + singular noun)",
-          "He is **such an honest person**. ('an' before a vowel sound)",
-          "My classmates are **such talkative people**. (adjective + plural noun — no article)",
-        ],
-      },
     ],
     commonMistakes: [
       "❌ What does she like? She is friendly. → ✅ What is she like? She is friendly.",
       "❌ He is a very kindly person. → ✅ He is a very kind person. ('kind' is the adjective)",
       "❌ She is more shyer than her brother. → ✅ She is shyer than her brother. (don't double the comparative)",
       "❌ They are very creative persons. → ✅ They are very creative people. (irregular plural)",
-      "❌ He is such kind. → ✅ He is so kind. ('such' needs a noun; use 'so' with just an adjective)",
-      "❌ She is so generous person. → ✅ She is such a generous person. ('such a' + adjective + noun)",
     ],
   },
 
@@ -5668,12 +6033,35 @@ export const LESSONS: Record<string, Lesson> = {
         ],
       },
       {
+        heading: "The frequency scale, and asking 'how often'",
+        body: [
+          "From 100% of the time to 0% of the time, in order: **always** → **usually** → **often** → **sometimes** → **rarely** → **never**.",
+          "To ask about frequency, use **'How often...?'** + do/does + subject + base verb.",
+        ],
+        examples: [
+          "I **always** eat breakfast, but I **rarely** eat a big lunch.",
+          "She **usually** walks to work, and she **sometimes** takes the bus.",
+          "**How often** do you exercise? I exercise **often** — about four times a week.",
+        ],
+      },
+      {
         heading: "Present simple third person",
         body: ["He/she/it takes the -s form of the verb: goes, has, wakes, gets."],
         examples: [
           "He **goes** to work at 8. (not 'go')",
           "She **has** breakfast at 7.",
           "She **wakes** up at seven every morning.",
+        ],
+      },
+      {
+        heading: "Common daily routine verbs",
+        body: [
+          "Everyday routine actions, roughly in order: wake up, get up, get dressed, brush your teeth, take a shower, have breakfast/lunch/dinner, go to school, go to work, go home, go to bed.",
+        ],
+        examples: [
+          "I **wake up**, **get dressed**, and **have breakfast** before I **go to school**.",
+          "He **takes a shower** in the morning and **goes to work** at 8.",
+          "She **goes home** at 5 and **goes to bed** at 11.",
         ],
       },
       {

@@ -1,11 +1,27 @@
 import { useState, useRef, useEffect } from "react";
+import { TeamIcon } from "../shared/TeamIcon";
+import { Icon, type IconName } from "../shared/Icon";
+import { RankBadge } from "../shared/RankBadge";
+import type { RealtimeChannel } from "@supabase/supabase-js";
 import type { GameProps, QuestionData } from "../../types";
 import { QuestionCard } from "../shared/QuestionCard";
-import { teamsGridCols, GAME_MODES } from "../../data/constants";
+import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
 import { useTurnTimer } from "../../hooks/useTurnTimer";
 import { TurnTimerBar } from "../shared/TurnTimerBar";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
+import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
+import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
 import { RACETRACK_TUTORIAL_STEPS } from "../../data/tutorials/racetrack";
+import {
+  generateSessionCode, openRaceTrackChannel, closeChannel,
+  type RaceTrackPhase, type RaceTrackStatePayload, type RaceTrackActionPayload,
+} from "../../lib/liveSession";
+
+// How long the screen waits after the first buzz of a round before resolving a winner — long
+// enough to absorb ordinary same-room wifi jitter between phones (so "first" reflects who actually
+// tapped first, not whoever's connection happened to reach the server first), short enough that the
+// room never feels a lag. See the buzzer plan for the full reasoning.
+const BUZZ_WINDOW_MS = 200;
 
 const GM = GAME_MODES.find(g => g.id === "racetrack")!;
 
@@ -13,49 +29,73 @@ const TOTAL = 60;
 // Solo play has no rival team to "beat to the answer," so a per-question countdown replaces
 // that tension — answer before it expires or the turn is skipped, same idea as every other
 // timed game in this codebase.
-const SOLO_TASK_SECONDS = 20;
+const SOLO_TASK_SECONDS = 30;
 
-type ZoneDef = { id: string; label: string; short: string; emoji: string; color: string; end: number };
+type ZoneDef = { id: string; label: string; short: string; icon: IconName; color: string; end: number };
 const ZONES: ZoneDef[] = [
-  { id: "correct grammar mistakes", label: "Error Correction", short: "Error Fix", emoji: "🔍", color: "#60A5FA", end: 15 },
-  { id: "choose correct grammar", label: "Multiple Choice", short: "Multi Choice", emoji: "🔤", color: "#4ADE80", end: 30 },
-  { id: "fill in the blank", label: "Fill the Blank", short: "Fill Blank", emoji: "✏️", color: "#F97316", end: 45 },
-  { id: "speaking task", label: "Speaking", short: "Speaking", emoji: "🗣️", color: "#F7C948", end: 60 },
+  { id: "correct grammar mistakes", label: "Error Correction", short: "Error Fix", icon: "search", color: "#60A5FA", end: 15 },
+  { id: "choose correct grammar", label: "Multiple Choice", short: "Multi Choice", icon: "options", color: "#4ADE80", end: 30 },
+  { id: "fill in the blank", label: "Fill the Blank", short: "Fill Blank", icon: "pencil", color: "#F97316", end: 45 },
+  { id: "speaking task", label: "Speaking", short: "Speaking", icon: "mic", color: "#F7C948", end: 60 },
 ];
 function getZone(pos: number): ZoneDef {
   return ZONES.find(z => pos <= z.end) || ZONES[ZONES.length - 1];
 }
 
+// Content-variety pool, not a fixed mapping — deliberately left as raw emoji, same call as Order
+// Up's CUSTOMER_EMOJIS/DINER_FOOD_EMOJIS. A team's own mascot always takes priority over this.
 const CARS = ["🚗", "🚕", "🚙", "🚌", "🚎", "🏎️", "🚓", "🛻"];
-const DICE_FACES = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"];
 const RANK_POINTS = [100, 65, 40, 20, 10];
 
+// Local pip-mask DiceFace — same pattern as every other game's dice roll this session.
+const DICE_PIPS: Record<number, [number, number][]> = {
+  1: [[12, 12]],
+  2: [[8, 8], [16, 16]],
+  3: [[8, 8], [12, 12], [16, 16]],
+  4: [[8, 8], [16, 8], [8, 16], [16, 16]],
+  5: [[8, 8], [16, 8], [12, 12], [8, 16], [16, 16]],
+  6: [[8, 8], [16, 8], [8, 12], [16, 12], [8, 16], [16, 16]],
+};
+function DiceFace({ value, size = 36, spinning = false }: { value: number | null; size?: number; spinning?: boolean }) {
+  if (value === null) return <Icon name="dice" size={size} />;
+  const maskId = `rt-dice-${value}`;
+  return (
+    <svg viewBox="0 0 24 24" width={size} height={size} aria-hidden="true" style={{ display: "inline-block", animation: spinning ? "dSpin 0.5s ease infinite" : "none" }}>
+      <mask id={maskId}>
+        <rect width="24" height="24" fill="white" />
+        {DICE_PIPS[value].map(([x, y], i) => <circle key={i} cx={x} cy={y} r="1.6" fill="black" />)}
+      </mask>
+      <rect x="3" y="3" width="18" height="18" rx="5" fill="currentColor" mask={`url(#${maskId})`} />
+    </svg>
+  );
+}
+
 type SpaceId = "normal" | "boost" | "mud" | "shortcut" | "trap" | "teleport" | "coin" | "shield" | "lucky" | "question";
-const SPACE_DEFS: { id: SpaceId; icon: string; color: string; weight: number }[] = [
-  { id: "normal", icon: "", color: "#4ADE80", weight: 38 },
-  { id: "boost", icon: "⚡", color: "#F7C948", weight: 10 },
-  { id: "mud", icon: "🟫", color: "#92400E", weight: 8 },
-  { id: "shortcut", icon: "🚀", color: "#7C3AED", weight: 6 },
-  { id: "trap", icon: "💥", color: "#EF4444", weight: 8 },
-  { id: "teleport", icon: "🌀", color: "#06B6D4", weight: 5 },
-  { id: "coin", icon: "🪙", color: "#FBBF24", weight: 9 },
-  { id: "shield", icon: "🛡️", color: "#3B82F6", weight: 6 },
-  { id: "lucky", icon: "🍀", color: "#EC4899", weight: 6 },
-  { id: "question", icon: "❓", color: "#F97316", weight: 4 },
+const SPACE_DEFS: { id: SpaceId; icon: IconName | null; color: string; weight: number }[] = [
+  { id: "normal", icon: null, color: "#4ADE80", weight: 38 },
+  { id: "boost", icon: "bolt", color: "#F7C948", weight: 10 },
+  { id: "mud", icon: "mud", color: "#92400E", weight: 8 },
+  { id: "shortcut", icon: "rocket", color: "#7C3AED", weight: 6 },
+  { id: "trap", icon: "explosion", color: "#EF4444", weight: 8 },
+  { id: "teleport", icon: "vortex", color: "#06B6D4", weight: 5 },
+  { id: "coin", icon: "coin", color: "#FBBF24", weight: 9 },
+  { id: "shield", icon: "shield", color: "#3B82F6", weight: 6 },
+  { id: "lucky", icon: "clover", color: "#EC4899", weight: 6 },
+  { id: "question", icon: "help", color: "#F97316", weight: 4 },
 ];
 
-const POWERUPS = [
-  { id: "rocket", label: "Rocket", icon: "🚀", desc: "+6 spaces on your next roll", cost: 15 },
-  { id: "swap", label: "Swap", icon: "🔄", desc: "Switch places with a random team", cost: 20 },
-  { id: "shield", label: "Shield", icon: "🛡️", desc: "Blocks the next trap / mud / teleport", cost: 10 },
-  { id: "double", label: "Double Roll", icon: "🎲", desc: "Roll twice next turn (powers through mud)", cost: 20 },
-  { id: "banana", label: "Banana Trap", icon: "🍌", desc: "Place a trap on a random space", cost: 10 },
-] as const;
+const POWERUPS: { id: string; label: string; icon: IconName; desc: string; cost: number }[] = [
+  { id: "rocket", label: "Rocket", icon: "rocket", desc: "+6 spaces on your next roll", cost: 15 },
+  { id: "swap", label: "Swap", icon: "refresh", desc: "Switch places with a random team", cost: 20 },
+  { id: "shield", label: "Shield", icon: "shield", desc: "Blocks the next trap / mud / teleport", cost: 10 },
+  { id: "double", label: "Double Roll", icon: "dice", desc: "Roll twice next turn (powers through mud)", cost: 20 },
+  { id: "banana", label: "Banana Trap", icon: "banana", desc: "Place a trap on a random space", cost: 10 },
+];
 
-type TrackSpace = { type: SpaceId | "start" | "finish"; color: string; icon?: string; banana?: boolean };
+type TrackSpace = { type: SpaceId | "start" | "finish"; color: string; icon?: IconName | null; banana?: boolean };
 type RaceTeamState = { pos: number; coins: number; shields: number; skip: boolean; powerups: string[]; car: string };
-type EffectInfo = { msg: string; color: string; icon: string };
-type FxRing = { idx: number; color: string; icon: string; key: number };
+type EffectInfo = { msg: React.ReactNode; color: string; icon: IconName };
+type FxRing = { idx: number; color: string; icon: IconName | null; key: number };
 type Phase = "intro" | "task" | "rolling" | "effect" | "gameover";
 type RankRow = { id: string | number; name: string; pos: number; points: number };
 
@@ -95,15 +135,15 @@ function computeTrackPositions(): { x: number; y: number }[] {
 const TPOS = computeTrackPositions();
 const TRACK_PATH_D = TPOS.map((p, i) => `${i ? "L" : "M"}${p.x},${p.y}`).join(" ") + " Z";
 
-function luckyOutcome(team: RaceTeamState, landedIdx: number, teamName: string): { finalIdx: number; msg: string; patch: Partial<RaceTeamState> } {
+function luckyOutcome(team: RaceTeamState, landedIdx: number, teamName: string): { finalIdx: number; msg: React.ReactNode; patch: Partial<RaceTeamState> } {
   const roll = Math.floor(Math.random() * 5);
-  if (roll === 0) return { finalIdx: landedIdx, msg: `🍀 Lucky! ${teamName} finds 20 bonus coins!`, patch: { coins: team.coins + 20 } };
-  if (roll === 1) return { finalIdx: Math.min(landedIdx + 4, TOTAL), msg: `🍀 Lucky! ${teamName} leaps forward 4 spaces!`, patch: {} };
-  if (roll === 2) return { finalIdx: landedIdx, msg: `🍀 Lucky! ${teamName} earns a free Shield!`, patch: { shields: team.shields + 1 } };
-  if (roll === 3) return { finalIdx: landedIdx, msg: `🍀 Lucky! ${teamName} gets 15 bonus coins!`, patch: { coins: team.coins + 15 } };
+  if (roll === 0) return { finalIdx: landedIdx, msg: `Lucky! ${teamName} finds 20 bonus coins!`, patch: { coins: team.coins + 20 } };
+  if (roll === 1) return { finalIdx: Math.min(landedIdx + 4, TOTAL), msg: `Lucky! ${teamName} leaps forward 4 spaces!`, patch: {} };
+  if (roll === 2) return { finalIdx: landedIdx, msg: `Lucky! ${teamName} earns a free Shield!`, patch: { shields: team.shields + 1 } };
+  if (roll === 3) return { finalIdx: landedIdx, msg: `Lucky! ${teamName} gets 15 bonus coins!`, patch: { coins: team.coins + 15 } };
   const pu = POWERUPS[Math.floor(Math.random() * POWERUPS.length)];
-  if (pu.id === "shield") return { finalIdx: landedIdx, msg: `🍀 Lucky! ${teamName} earns a free Shield!`, patch: { shields: team.shields + 1 } };
-  return { finalIdx: landedIdx, msg: `🍀 Lucky! ${teamName} earns a random powerup: ${pu.icon} ${pu.label}!`, patch: { powerups: [...team.powerups, pu.id] } };
+  if (pu.id === "shield") return { finalIdx: landedIdx, msg: `Lucky! ${teamName} earns a free Shield!`, patch: { shields: team.shields + 1 } };
+  return { finalIdx: landedIdx, msg: <>Lucky! {teamName} earns a random powerup: <Icon name={pu.icon} size={13} /> {pu.label}!</>, patch: { powerups: [...team.powerups, pu.id] } };
 }
 
 const STYLE_TAG = (
@@ -171,14 +211,30 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
   );
   const [winnerId, setWinnerId] = useState<string | number | null>(null);
   const [showAns, setShowAns] = useState(false);
-  const [diceFace, setDiceFace] = useState("🎲");
+  const [diceFace, setDiceFace] = useState<number | null>(null);
   const [rolling, setRolling] = useState(false);
   const [lastEffect, setLastEffect] = useState<EffectInfo | null>(null);
   const [fxRing, setFxRing] = useState<FxRing | null>(null);
-  const [toastMsg, setToastMsg] = useState<string | null>(null);
+  const [toastMsg, setToastMsg] = useState<React.ReactNode | null>(null);
   const [shopOpen, setShopOpen] = useState(false);
   const [shopTeamId, setShopTeamId] = useState<string | number>(teams[0]?.id);
   const [finalRanking, setFinalRanking] = useState<RankRow[]>([]);
+
+  // "Play on Phones" — lets a team buzz in from their seat instead of the teacher guessing who
+  // answered first by ear. Gated to teams.length > 1 below: with only one team there's no "who's
+  // first" question to resolve, so unlike Order Up's typing mode this one has no standalone value
+  // for solo play. Always defaults to screen, even on Resume, same as every other phone-mode game.
+  const [inputMode, setInputMode] = useState<"screen" | "phone">("screen");
+  const [introStep, setIntroStep] = useState<"setup" | "qr">("setup");
+  const [sessionCode, setSessionCode] = useState<string | null>(null);
+  const [connectedTeamIds, setConnectedTeamIds] = useState<Set<string | number>>(new Set());
+  // This round's resolved buzz winner, or null while the buzzer is open.
+  const [buzzedTeamId, setBuzzedTeamId] = useState<string | number | null>(null);
+  // Teams marked "wrong" on the CURRENT question — excluded from re-buzzing until the question
+  // itself changes, even though the buzzer reopens for everyone else once a team's marked wrong.
+  const [rejectedTeamIds, setRejectedTeamIds] = useState<Set<string | number>>(new Set());
+  const channelRef = useRef<RealtimeChannel | null>(null);
+
   const fxIdRef = useRef(0);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   // The roll → glide → effect sequence spans several chained setTimeouts (~2-3s). The shop and
@@ -213,14 +269,64 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
   const currentZone = getZone(leadPos);
   const pool = qByType.current?.[currentZone.id] ?? [];
   const currentQ = pool.length ? pool[(typeIdx[currentZone.id] ?? 0) % pool.length] : null;
+  // Identifies "this exact question" — a new value means a new question. Reused as-is below for
+  // the solo countdown's resetKey (unchanged) and now also for the buzzer's round-reset effect.
+  const taskKey = `${currentZone.id}:${typeIdx[currentZone.id] ?? 0}`;
 
-  const showToast = (msg: string) => {
+  // Refs the phone-mode broadcaster reads synchronously — same reasoning as raceTeamsRef/trackRef
+  // just above (chained setTimeouts and the channel's own closures need current values, not
+  // whatever a stale closure captured).
+  const phaseRef = useRef(phase);
+  const taskKeyRef = useRef(taskKey);
+  const buzzedTeamIdRef = useRef(buzzedTeamId);
+  const rejectedTeamIdsRef = useRef(rejectedTeamIds);
+  const connectedTeamIdsRef = useRef<Set<string | number>>(new Set());
+  const sendStateRef = useRef<(() => void) | null>(null);
+  useEffect(() => { phaseRef.current = phase; }, [phase]);
+  useEffect(() => { taskKeyRef.current = taskKey; }, [taskKey]);
+  useEffect(() => { buzzedTeamIdRef.current = buzzedTeamId; }, [buzzedTeamId]);
+  useEffect(() => { rejectedTeamIdsRef.current = rejectedTeamIds; }, [rejectedTeamIds]);
+
+  // Buffers buzzes for the current round (a "round" resets on a new question OR on markBuzzWrong,
+  // see resetBuzzRound below) so the screen can pick whichever buzz has the earliest client
+  // timestamp once the collection window closes, rather than whichever broadcast physically
+  // arrives first — see the buzzer plan for why that distinction matters.
+  const pendingBuzzesRef = useRef<{ teamId: string | number; ts: number }[]>([]);
+  const buzzWindowTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const resetBuzzRound = () => {
+    if (buzzWindowTimerRef.current) clearTimeout(buzzWindowTimerRef.current);
+    buzzWindowTimerRef.current = null;
+    pendingBuzzesRef.current = [];
+    setBuzzedTeamId(null);
+  };
+
+  // A genuinely new question clears everything, including which teams already had a wrong guess —
+  // that only applies within one question.
+  useEffect(() => {
+    resetBuzzRound();
+    setRejectedTeamIds(new Set());
+    return resetBuzzRound;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [taskKey]);
+
+  // Teacher-only, screen-side: the buzzed-in team didn't actually have it — excludes them from
+  // re-buzzing this same question and reopens the buzzer to everyone else still eligible. Only
+  // meaningful before the answer's revealed; once showAns is true the race is over and the existing
+  // pick-any-team / No one got it row is what resolves things from there.
+  const markBuzzWrong = () => {
+    if (buzzedTeamId === null) return;
+    setRejectedTeamIds(prev => new Set(prev).add(buzzedTeamId));
+    resetBuzzRound();
+  };
+
+  const showToast = (msg: React.ReactNode) => {
     setToastMsg(msg);
     if (toastTimer.current) clearTimeout(toastTimer.current);
     toastTimer.current = setTimeout(() => setToastMsg(null), 2600);
   };
 
-  const bumpFx = (idx: number, color: string, icon: string) => {
+  const bumpFx = (idx: number, color: string, icon: IconName | null) => {
     const key = fxIdRef.current++;
     setFxRing({ idx, color, icon, key });
     setTimeout(() => setFxRing(prev => (prev?.key === key ? null : prev)), 900);
@@ -234,12 +340,12 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
     let ticks = 0;
     const totalTicks = 12;
     const tick = () => {
-      setDiceFace(DICE_FACES[Math.floor(Math.random() * 6)]);
+      setDiceFace(Math.floor(Math.random() * 6) + 1);
       ticks++;
       if (ticks < totalTicks) { setTimeout(tick, 55 + ticks * 15); }
       else {
         const val = Math.floor(Math.random() * 6) + 1;
-        setDiceFace(DICE_FACES[val - 1]);
+        setDiceFace(val);
         setRolling(false);
         onDone(val);
       }
@@ -258,7 +364,7 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
     }
     setRaceTeams(prev => ({ ...prev, [teamId]: { ...prev[teamId], pos: landed } }));
     setTimeout(() => {
-      bumpFx(landed, "#F7C948", "");
+      bumpFx(landed, "#F7C948", null);
       if (landed >= TOTAL) { setTimeout(() => triggerWin(teamId), 500); return; }
       setTimeout(() => resolveLanding(teamId, landed), 500);
     }, 650);
@@ -269,7 +375,7 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
     const space = trackRef.current[landedIdx];
     const name = teamName(teamId);
 
-    const finish = (finalIdx: number, msg: string, color: string, icon: string, patch: Partial<RaceTeamState>) => {
+    const finish = (finalIdx: number, msg: React.ReactNode, color: string, icon: IconName, patch: Partial<RaceTeamState>) => {
       setRaceTeams(prev => ({ ...prev, [teamId]: { ...prev[teamId], ...patch, pos: finalIdx } }));
       const moved = finalIdx !== landedIdx;
       if (moved) setTimeout(() => bumpFx(finalIdx, color, icon), 350);
@@ -283,56 +389,56 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
     if (space.banana) {
       setTrack(prev => prev.map((s, i) => (i === landedIdx ? { ...s, banana: false } : s)));
       if (team.shields > 0) {
-        finish(landedIdx, `🛡️ ${name}'s shield blocked the banana trap!`, "#3B82F6", "🛡️", { shields: team.shields - 1 });
+        finish(landedIdx, `${name}'s shield blocked the banana trap!`, "#3B82F6", "shield", { shields: team.shields - 1 });
       } else {
-        finish(Math.max(0, landedIdx - 3), `🍌 Banana trap! ${name} slides back 3 spaces!`, "#FFE066", "🍌", {});
+        finish(Math.max(0, landedIdx - 3), `Banana trap! ${name} slides back 3 spaces!`, "#FFE066", "banana", {});
       }
       return;
     }
 
     switch (space.type) {
       case "normal":
-        finish(landedIdx, `✅ Normal space — no effect. Keep racing!`, "#4ADE80", "✅", {});
+        finish(landedIdx, `Normal space — no effect. Keep racing!`, "#4ADE80", "check", {});
         return;
       case "boost":
-        finish(Math.min(landedIdx + 3, TOTAL), `⚡ Boost! ${name} zooms forward 3 extra spaces!`, "#F7C948", "⚡", {});
+        finish(Math.min(landedIdx + 3, TOTAL), `Boost! ${name} zooms forward 3 extra spaces!`, "#F7C948", "bolt", {});
         return;
       case "mud":
-        if (team.shields > 0) finish(landedIdx, `🛡️ Shield blocks the mud! ${name} stays clean.`, "#3B82F6", "🛡️", { shields: team.shields - 1 });
-        else finish(landedIdx, `🟫 Mud! ${name} is stuck — skip their next turn!`, "#92400E", "🟫", { skip: true });
+        if (team.shields > 0) finish(landedIdx, `Shield blocks the mud! ${name} stays clean.`, "#3B82F6", "shield", { shields: team.shields - 1 });
+        else finish(landedIdx, `Mud! ${name} is stuck — skip their next turn!`, "#92400E", "mud", { skip: true });
         return;
       case "shortcut":
-        finish(Math.min(landedIdx + 5, TOTAL), `🚀 Shortcut! ${name} races ahead 5 spaces!`, "#7C3AED", "🚀", {});
+        finish(Math.min(landedIdx + 5, TOTAL), `Shortcut! ${name} races ahead 5 spaces!`, "#7C3AED", "rocket", {});
         return;
       case "trap":
-        if (team.shields > 0) finish(landedIdx, `🛡️ Shield blocks the trap! ${name} is safe.`, "#3B82F6", "🛡️", { shields: team.shields - 1 });
-        else finish(Math.max(0, landedIdx - 3), `💥 Trap! ${name} is sent back 3 spaces!`, "#EF4444", "💥", {});
+        if (team.shields > 0) finish(landedIdx, `Shield blocks the trap! ${name} is safe.`, "#3B82F6", "shield", { shields: team.shields - 1 });
+        else finish(Math.max(0, landedIdx - 3), `Trap! ${name} is sent back 3 spaces!`, "#EF4444", "explosion", {});
         return;
       case "teleport": {
-        if (team.shields > 0) { finish(landedIdx, `🛡️ Shield blocks the teleport! ${name} stays put.`, "#3B82F6", "🛡️", { shields: team.shields - 1 }); return; }
+        if (team.shields > 0) { finish(landedIdx, `Shield blocks the teleport! ${name} stays put.`, "#3B82F6", "shield", { shields: team.shields - 1 }); return; }
         const tp = Math.floor(Math.random() * (TOTAL - 1)) + 1;
-        finish(tp, `🌀 Teleport! ${name} warps to space ${tp}!`, "#06B6D4", "🌀", {});
+        finish(tp, `Teleport! ${name} warps to space ${tp}!`, "#06B6D4", "vortex", {});
         return;
       }
       case "coin":
-        finish(landedIdx, `🪙 Coin! ${name} collects 10 bonus coins!`, "#FBBF24", "🪙", { coins: team.coins + 10 });
+        finish(landedIdx, `Coin! ${name} collects 10 bonus coins!`, "#FBBF24", "coin", { coins: team.coins + 10 });
         return;
       case "shield":
-        finish(landedIdx, `🛡️ ${name} picks up a Shield! Negatives bounce off next time.`, "#3B82F6", "🛡️", { shields: team.shields + 1 });
+        finish(landedIdx, `${name} picks up a Shield! Negatives bounce off next time.`, "#3B82F6", "shield", { shields: team.shields + 1 });
         return;
       case "lucky": {
         const luck = luckyOutcome(team, landedIdx, name);
-        finish(luck.finalIdx, luck.msg, "#EC4899", "🍀", luck.patch);
+        finish(luck.finalIdx, luck.msg, "#EC4899", "clover", luck.patch);
         return;
       }
       case "question": {
         const pu = POWERUPS[Math.floor(Math.random() * POWERUPS.length)];
-        if (pu.id === "shield") { finish(landedIdx, `❓ Bonus question! ${name} answered and earned: 🛡️ Shield!`, "#F97316", "❓", { shields: team.shields + 1 }); return; }
-        finish(landedIdx, `❓ Bonus question! ${name} answered and earned: ${pu.icon} ${pu.label}!`, "#F97316", "❓", { powerups: [...team.powerups, pu.id] });
+        if (pu.id === "shield") { finish(landedIdx, `Bonus question! ${name} answered and earned: Shield!`, "#F97316", "help", { shields: team.shields + 1 }); return; }
+        finish(landedIdx, <>Bonus question! {name} answered and earned: <Icon name={pu.icon} size={13} /> {pu.label}!</>, "#F97316", "help", { powerups: [...team.powerups, pu.id] });
         return;
       }
       default:
-        finish(landedIdx, `Space ${landedIdx} — no effect.`, "#4ADE80", "✅", {});
+        finish(landedIdx, `Space ${landedIdx} — no effect.`, "#4ADE80", "check", {});
     }
   };
 
@@ -340,7 +446,7 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
     const name = teamName(teamId);
     if (useDouble) {
       setRaceTeams(prev => { const powerups = [...prev[teamId].powerups]; powerups.splice(powerups.indexOf("double"), 1); return { ...prev, [teamId]: { ...prev[teamId], powerups } }; });
-      showToast(`🎲🎲 ${name} uses Double Roll!`);
+      showToast(<><Icon name="dice" size={13} /> {name} uses Double Roll!</>);
     }
     rollOnce(v1 => {
       if (!useDouble) { finishRoll(teamId, v1); return; }
@@ -353,7 +459,7 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
     const name = teamName(teamId);
     let bonus = 0;
     const powerups = [...team.powerups];
-    if (powerups.includes("rocket")) { powerups.splice(powerups.indexOf("rocket"), 1); bonus += 6; showToast(`🚀 Rocket! ${name} blasts forward 6 extra spaces!`); }
+    if (powerups.includes("rocket")) { powerups.splice(powerups.indexOf("rocket"), 1); bonus += 6; showToast(<><Icon name="rocket" size={13} /> Rocket! {name} blasts forward 6 extra spaces!</>); }
     setRaceTeams(prev => ({ ...prev, [teamId]: { ...prev[teamId], powerups } }));
     landTeam(teamId, total + bonus);
   };
@@ -368,13 +474,13 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
       if (dblIdx !== -1) {
         const powerups = [...team.powerups]; powerups.splice(dblIdx, 1);
         setRaceTeams(prev => ({ ...prev, [teamId]: { ...prev[teamId], skip: false, powerups } }));
-        showToast(`🎲 ${name}'s Double Roll powers them out of the mud!`);
+        showToast(<><Icon name="dice" size={13} /> {name}'s Double Roll powers them out of the mud!</>);
         setTimeout(() => rollForMovement(teamId, false), 500);
         return;
       }
       setRaceTeams(prev => ({ ...prev, [teamId]: { ...prev[teamId], skip: false } }));
       rollOnce(() => {
-        setLastEffect({ msg: `💤 ${name} is stuck in the mud and loses their turn!`, color: "#92400E", icon: "💤" });
+        setLastEffect({ msg: `${name} is stuck in the mud and loses their turn!`, color: "#92400E", icon: "sleep" });
         setPhase("effect");
       });
       return;
@@ -394,14 +500,17 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
   const newTask = () => { bumpType(currentZone.id); setShowAns(false); };
 
   // Solo per-question countdown — starts as soon as a task is shown, resets on every new
-  // question, and skips the task (same as clicking "No one got it") if it runs out. Paused once
-  // "Reveal Answer" is clicked so it can't skip the task out from under the player mid-reveal.
+  // question, and reveals the answer (same as clicking "Reveal Answer") if it runs out, rather
+  // than silently skipping straight to a new question — a solo player has no rival to see the
+  // answer from, so running out of time shouldn't cost them the chance to learn what it was.
+  // Revealing also pauses the timer (see the `showAns` paused-arg below), so the player reviews
+  // at their own pace and then explicitly clicks "No one got it" to move on.
   const isSolo = teams.length === 1;
   const { timeLeft: soloTimeLeft } = useTurnTimer(
     SOLO_TASK_SECONDS,
     isSolo && phase === "task",
-    () => skipTask(),
-    `${currentZone.id}:${typeIdx[currentZone.id] ?? 0}`,
+    () => setShowAns(true),
+    taskKey,
     showAns
   );
 
@@ -420,14 +529,14 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
         const powerups = [...a.powerups]; powerups.splice(idx, 1);
         return { ...prev, [teamId]: { ...a, pos: b.pos, powerups }, [tgt.id]: { ...b, pos: a.pos } };
       });
-      showToast(`🔄 ${name} swaps places with ${tgt.name}!`);
+      showToast(<><Icon name="refresh" size={13} /> {name} swaps places with {tgt.name}!</>);
     } else if (pid === "banana") {
       const spaceIdx = Math.max(1, Math.min(TOTAL - 1, team.pos));
       setTrack(prev => prev.map((s, i) => (i === spaceIdx ? { ...s, banana: true } : s)));
       setRaceTeams(prev => { const powerups = [...prev[teamId].powerups]; powerups.splice(idx, 1); return { ...prev, [teamId]: { ...prev[teamId], powerups } }; });
-      showToast(`🍌 ${name} drops a banana trap right where they're standing!`);
+      showToast(<><Icon name="banana" size={13} /> {name} drops a banana trap right where they're standing!</>);
     } else {
-      showToast(`${pu.icon} ${name}'s ${pu.label} is armed and ready.`);
+      showToast(<><Icon name={pu.icon} size={13} /> {name}'s {pu.label} is armed and ready.</>);
     }
   };
 
@@ -437,11 +546,11 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
     if (team.coins < pu.cost) return;
     if (pid === "shield") {
       setRaceTeams(prev => ({ ...prev, [teamId]: { ...prev[teamId], coins: prev[teamId].coins - pu.cost, shields: prev[teamId].shields + 1 } }));
-      showToast(`🛡️ ${teamName(teamId)} bought a Shield — active now!`);
+      showToast(<><Icon name="shield" size={13} /> {teamName(teamId)} bought a Shield — active now!</>);
       return;
     }
     setRaceTeams(prev => ({ ...prev, [teamId]: { ...prev[teamId], coins: prev[teamId].coins - pu.cost, powerups: [...prev[teamId].powerups, pid] } }));
-    showToast(`${pu.icon} ${teamName(teamId)} bought ${pu.label}!`);
+    showToast(<><Icon name={pu.icon} size={13} /> {teamName(teamId)} bought {pu.label}!</>);
   };
 
   const triggerWin = (teamId: string | number) => {
@@ -490,6 +599,115 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
     return () => { if (serializeStateRef) serializeStateRef.current = null; };
   }, [serializeStateRef, raceTeams, track]);
 
+  const handlePickPhoneMode = () => {
+    setInputMode("phone");
+    setSessionCode(generateSessionCode());
+    setIntroStep("qr");
+  };
+
+  const handlePickScreenMode = () => {
+    setInputMode("screen");
+    setIntroStep("setup");
+    setSessionCode(null);
+    setConnectedTeamIds(new Set());
+  };
+
+  // Opens/closes the realtime channel only when phone mode itself is toggled on/off. Screen-
+  // authoritative like every other phone-mode game — a phone's buzz is purely an input-timing
+  // signal the screen resolves (see resetBuzzRound/BUZZ_WINDOW_MS above); nothing about scoring,
+  // the dice roll, or chooseWinner/skipTask ever runs on a phone.
+  useEffect(() => {
+    if (inputMode !== "phone" || !sessionCode) return;
+    const channel = openRaceTrackChannel(sessionCode);
+    channelRef.current = channel;
+
+    const sendState = () => {
+      const rawPhase = phaseRef.current;
+      const mappedPhase: RaceTrackPhase = rawPhase === "intro" ? "lobby"
+        : rawPhase === "gameover" ? "final"
+        : rawPhase === "task" ? "task"
+        : "interlude";
+      const positions: Record<string, number> = {};
+      teams.forEach(t => { positions[String(t.id)] = raceTeamsRef.current[t.id]?.pos ?? 0; });
+      const payload: RaceTrackStatePayload = {
+        phase: mappedPhase,
+        roster: teams.map(t => ({ id: t.id, name: t.name, color: t.color, mascot: t.mascot })),
+        connectedTeamIds: Array.from(connectedTeamIdsRef.current),
+        taskKey: taskKeyRef.current,
+        buzzedTeamId: buzzedTeamIdRef.current,
+        rejectedTeamIds: Array.from(rejectedTeamIdsRef.current),
+        positions,
+        ts: Date.now(),
+      };
+      channel.send({ type: "broadcast", event: "state", payload });
+    };
+    sendStateRef.current = sendState;
+
+    channel.on("presence", { event: "sync" }, () => {
+      const presenceState = channel.presenceState<{ teamId: string | number }>();
+      const ids = new Set<string | number>();
+      Object.values(presenceState).forEach(entries => entries.forEach(entry => ids.add(entry.teamId)));
+      connectedTeamIdsRef.current = ids;
+      setConnectedTeamIds(ids);
+      sendState();
+    });
+
+    // The only place phone input touches game logic — collects buzzes for the current round into a
+    // buffer and resolves the earliest client timestamp once BUZZ_WINDOW_MS has passed, rather than
+    // trusting arrival order (see the buzzer plan for why).
+    channel.on("broadcast", { event: "action" }, ({ payload }) => {
+      const action = payload as RaceTrackActionPayload;
+      if (action.action !== "buzz") return;
+      if (phaseRef.current !== "task") return;
+      if (rejectedTeamIdsRef.current.has(action.teamId)) return;
+      // This round already has a winner (window already closed) — a straggling buzz doesn't get to
+      // reopen anything; only markBuzzWrong (or a new question) does that.
+      if (buzzedTeamIdRef.current !== null) return;
+      const roundKey = taskKeyRef.current;
+      if (buzzWindowTimerRef.current === null && pendingBuzzesRef.current.length === 0) {
+        // First buzz of this round — open the collection window.
+        pendingBuzzesRef.current = [{ teamId: action.teamId, ts: action.ts }];
+        buzzWindowTimerRef.current = setTimeout(() => {
+          buzzWindowTimerRef.current = null;
+          // A new question (or a markBuzzWrong reopen) since this timer was armed already cleared
+          // the buffer via resetBuzzRound — only resolve if this round is still the live one.
+          if (taskKeyRef.current !== roundKey || pendingBuzzesRef.current.length === 0) return;
+          const winner = [...pendingBuzzesRef.current].sort((a, b) => a.ts - b.ts)[0];
+          pendingBuzzesRef.current = [];
+          setBuzzedTeamId(winner.teamId);
+        }, BUZZ_WINDOW_MS);
+      } else {
+        pendingBuzzesRef.current.push({ teamId: action.teamId, ts: action.ts });
+      }
+    });
+
+    channel.subscribe(status => {
+      if (status === "SUBSCRIBED") sendState();
+    });
+
+    const interval = setInterval(sendState, 4000);
+
+    return () => {
+      clearInterval(interval);
+      closeChannel(channel);
+      channelRef.current = null;
+      sendStateRef.current = null;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inputMode, sessionCode, teams]);
+
+  // Pushes an immediate state update on transitions rather than waiting for the standing interval.
+  useEffect(() => {
+    sendStateRef.current?.();
+  }, [phase, taskKey, buzzedTeamId, rejectedTeamIds]);
+
+  // Tells every connected phone the race is over the moment it actually ends.
+  useEffect(() => {
+    if (phase === "gameover" && channelRef.current) {
+      channelRef.current.send({ type: "broadcast", event: "ended", payload: {} });
+    }
+  }, [phase]);
+
   const arenaStyle: React.CSSProperties = {
     margin: "-20px", padding: "20px", borderRadius: "20px", position: "relative", overflow: "hidden",
     background: "radial-gradient(ellipse at 40% 40%,#0E2040 0%,#060E1C 100%)",
@@ -503,18 +721,18 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
       <div style={{ position: "relative", zIndex: 1 }}>
         <CheckeredStrip />
         <div style={{ background: "linear-gradient(160deg,#1E293B,#0B0F17)", border: "2px solid #EF4444", borderRadius: "18px", padding: "28px 24px", margin: "10px auto", color: "#E2E8F0", maxWidth: "560px", boxShadow: "0 0 44px rgba(239,68,68,0.35)" }}>
-          <div style={{ fontSize: "36px", marginBottom: "10px" }}>🏁</div>
+          <div style={{ marginBottom: "10px" }}><Icon name="checkeredFlag" size={36} /></div>
           <div style={{ fontWeight: "900", fontSize: "20px", marginBottom: "10px", color: "#F87171", letterSpacing: "0.5px" }}>RACE TRACK</div>
           <div style={{ fontSize: "15px", lineHeight: 1.7 }}>
             Every team sees the same task at once — <strong style={{ color: "#93C5FD" }}>tap whichever team answers it first and correctly</strong>, and they roll the dice and race around the track!<br />
-            The challenge ramps up as the leading team advances. Land on special spaces for boosts, traps, coins and shields, and spend coins in the <strong style={{ color: "#93C5FD" }}>🛒 Shop</strong>. First to the finish line wins!
+            The challenge ramps up as the leading team advances. Land on special spaces for boosts, traps, coins and shields, and spend coins in the <strong style={{ color: "#93C5FD", display: "inline-flex", alignItems: "center", gap: "3px" }}><Icon name="cart" size={13} /> Shop</strong>. First to the finish line wins!
           </div>
         </div>
         <CheckeredStrip />
         <div style={{ display: "flex", gap: "6px", justifyContent: "center", flexWrap: "wrap", margin: "18px 0 16px", maxWidth: "560px", marginLeft: "auto", marginRight: "auto" }}>
           {SPACE_DEFS.filter(s => s.id !== "normal").map(s => (
-            <div key={s.id} style={{ background: s.color, color: "#150F00", borderRadius: "8px", padding: "5px 12px", fontSize: "12px", fontWeight: "800" }}>
-              {s.icon} {s.id}
+            <div key={s.id} style={{ background: s.color, color: "#150F00", borderRadius: "8px", padding: "5px 12px", fontSize: "12px", fontWeight: "800", display: "inline-flex", alignItems: "center", gap: "4px" }}>
+              {s.icon && <Icon name={s.icon} size={13} />} {s.id}
             </div>
           ))}
         </div>
@@ -523,17 +741,55 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
           <div style={{ width: "14px", height: "14px", borderRadius: "50%", background: "#FBBF24", animation: "rtLightPulse 1.4s ease-in-out infinite 0.25s" }} />
           <div style={{ width: "14px", height: "14px", borderRadius: "50%", background: "#4ADE80", animation: "rtLightPulse 1.4s ease-in-out infinite 0.5s" }} />
         </div>
+        {teams.length > 1 && (
+          <>
+            {introStep === "setup" && (
+              <div style={{ marginBottom: "20px" }}>
+                <div style={{ fontSize: "13px", color: "#93C5FD", fontWeight: "700", marginBottom: "10px" }}>How will teams buzz in?</div>
+                <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
+                  <button onClick={handlePickScreenMode} className="rt-btn" style={{
+                    padding: "10px 20px", borderRadius: "12px", fontWeight: "800", fontSize: "14px", cursor: "pointer",
+                    border: `2px solid ${inputMode === "screen" ? "#EF4444" : "rgba(255,255,255,0.2)"}`,
+                    background: inputMode === "screen" ? "rgba(239,68,68,0.15)" : "rgba(255,255,255,0.05)",
+                    color: inputMode === "screen" ? "#F87171" : "#93C5FD",
+                  }}><Icon name="screen" size={14} /> Play on Screen</button>
+                  <button onClick={handlePickPhoneMode} className="rt-btn" style={{
+                    padding: "10px 20px", borderRadius: "12px", fontWeight: "800", fontSize: "14px", cursor: "pointer",
+                    border: `2px solid ${inputMode === "phone" ? "#EF4444" : "rgba(255,255,255,0.2)"}`,
+                    background: inputMode === "phone" ? "rgba(239,68,68,0.15)" : "rgba(255,255,255,0.05)",
+                    color: inputMode === "phone" ? "#F87171" : "#93C5FD",
+                  }}><Icon name="phone" size={14} /> Play on Phones</button>
+                </div>
+              </div>
+            )}
+
+            {introStep === "qr" && sessionCode && (() => {
+              const joinUrl = `${window.location.origin}${window.location.pathname}?join=${sessionCode}&game=racetrack`;
+              return (
+                <PhoneJoinPanel
+                  sessionCode={sessionCode} joinUrl={joinUrl} teams={teams} connectedTeamIds={connectedTeamIds}
+                  accent="#F87171" panelBg="linear-gradient(160deg,#1E293B,#0B0F17)" borderColor="#EF444466"
+                  footer={
+                    <button onClick={handlePickScreenMode} style={{ background: "none", border: "none", color: "#5A7399", fontSize: "12px", fontWeight: "700", cursor: "pointer", textDecoration: "underline" }}>
+                      Switch back to Play on Screen
+                    </button>
+                  }
+                />
+              );
+            })()}
+          </>
+        )}
         <button onClick={() => setShowHowTo(true)} className="rt-btn" style={{ display: "block", margin: "0 auto 14px", background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
-          ❓ How to Play
+          <Icon name="help" size={14} /> How to Play
         </button>
         {showHowTo && (
           <HowToPlayModal
-            gameName={GM.name} gameIcon={GM.icon} accentColor={GM.color}
+            gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color}
             steps={RACETRACK_TUTORIAL_STEPS}
             onClose={() => setShowHowTo(false)}
           />
         )}
-        <button onClick={() => setPhase("task")} className="rt-btn" style={{ background: "linear-gradient(135deg,#B91C1C,#EF4444)", color: "white", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(239,68,68,0.5)", transition: "transform 0.15s ease" }}>🚦 Start Race!</button>
+        <button onClick={() => setPhase("task")} className="rt-btn" style={{ background: "linear-gradient(135deg,#B91C1C,#EF4444)", color: "white", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(239,68,68,0.5)", transition: "transform 0.15s ease" }}><Icon name="play" size={18} /> Start Race!</button>
       </div>
     </div>
   );
@@ -541,23 +797,22 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
   if (phase === "gameover") return (
     <div style={{ ...arenaStyle, textAlign: "center" }}>
       {STYLE_TAG}
-      <div style={{ fontSize: "48px", marginBottom: "6px" }}>🏆</div>
+      <div style={{ marginBottom: "6px" }}><Icon name="trophy" size={48} /></div>
       <div style={{ fontWeight: "900", fontSize: "26px", color: "#F7C948", marginBottom: "4px", textShadow: "0 0 24px rgba(247,201,72,0.6)" }}>{finalRanking[0]?.name} wins the race!</div>
       <div style={{ display: "grid", gridTemplateColumns: teamsGridCols(teams.length), gap: "10px", margin: "20px auto", maxWidth: "700px" }}>
         {finalRanking.map((r, i) => {
           const t = teams.find(tm => tm.id === r.id)!;
-          const medal = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : "🏁";
           return (
             <div key={r.id} style={{ background: `linear-gradient(160deg, ${t.color.dark}55, #0A0A18)`, border: `2px solid ${t.color.bg}`, borderRadius: "14px", padding: "12px" }}>
-              <div style={{ fontSize: "22px" }}>{medal}</div>
-              <div style={{ fontWeight: "800", color: "#F3F4F6", fontSize: "14px", marginTop: "4px" }}>{t.mascot ?? t.color.emoji} {r.name}</div>
+              <div><RankBadge rank={i} size={22} /></div>
+              <div style={{ fontWeight: "800", color: "#F3F4F6", fontSize: "14px", marginTop: "4px" }}><TeamIcon team={t} /> {r.name}</div>
               <div style={{ color: "#9CA3AF", fontSize: "12px", marginTop: "2px" }}>Space {r.pos}/{TOTAL}</div>
               <div style={{ color: "#F7C948", fontWeight: "800", fontSize: "13px", marginTop: "4px" }}>+{r.points} pts</div>
             </div>
           );
         })}
       </div>
-      <button onClick={onEnd} className="rt-btn" style={{ background: "#F7C948", color: "#150F00", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "800", cursor: "pointer", transition: "transform 0.15s ease" }}>🏁 End Game</button>
+      <button onClick={onEnd} className="rt-btn" style={{ background: "#F7C948", color: "#150F00", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "800", cursor: "pointer", transition: "transform 0.15s ease" }}><Icon name="checkeredFlag" size={15} /> End Game</button>
     </div>
   );
 
@@ -566,12 +821,19 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
   return (
     <div style={arenaStyle}>
       {STYLE_TAG}
+      {inputMode === "phone" && sessionCode && (
+        <PhoneReconnectBadge
+          sessionCode={sessionCode} joinUrl={`${window.location.origin}${window.location.pathname}?join=${sessionCode}&game=racetrack`}
+          teams={teams} connectedTeamIds={connectedTeamIds}
+          accent="#F87171" panelBg="linear-gradient(160deg,#1E293B,#0B0F17)" borderColor="#EF444466"
+        />
+      )}
       <div style={{ position: "relative", zIndex: 1 }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "10px", marginBottom: "12px", flexWrap: "wrap" }}>
-          <div style={{ background: currentZone.color, color: "#0B0F17", borderRadius: "10px", padding: "6px 14px", fontWeight: "800", fontSize: "13px" }}>
-            {currentZone.emoji} {currentZone.label}
+          <div style={{ background: currentZone.color, color: "#0B0F17", borderRadius: "10px", padding: "6px 14px", fontWeight: "800", fontSize: "13px", display: "inline-flex", alignItems: "center", gap: "5px" }}>
+            <Icon name={currentZone.icon} size={13} /> {currentZone.label}
           </div>
-          <button onClick={() => setShopOpen(v => !v)} className="rt-btn" style={{ background: "#172438", color: "#F7C948", border: "1px solid #F7C948", borderRadius: "8px", padding: "6px 14px", fontWeight: "800", fontSize: "12px", cursor: "pointer" }}>🛒 Shop</button>
+          <button onClick={() => setShopOpen(v => !v)} className="rt-btn" style={{ background: "#172438", color: "#F7C948", border: "1px solid #F7C948", borderRadius: "8px", padding: "6px 14px", fontWeight: "800", fontSize: "12px", cursor: "pointer" }}><Icon name="cart" size={13} /> Shop</button>
         </div>
 
         <div style={{ display: "grid", gridTemplateColumns: teamsGridCols(teams.length), gap: "8px", marginBottom: "12px" }}>
@@ -588,16 +850,16 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
                   <span style={{ fontWeight: "800", fontSize: "12px", color: "#F3F4F6" }}>{rt.car} {t.name}</span>
                   <span style={{ fontSize: "11px", color: "#9CA3AF", fontWeight: "700" }}>{pct}%</span>
                 </div>
-                <div style={{ fontSize: "11px", color: "#9CA3AF", fontWeight: "700", marginTop: "2px" }}>Space {rt.pos}/{TOTAL} · 🪙{rt.coins}</div>
+                <div style={{ fontSize: "11px", color: "#9CA3AF", fontWeight: "700", marginTop: "2px", display: "flex", alignItems: "center", gap: "3px" }}>Space {rt.pos}/{TOTAL} · <Icon name="coin" size={11} />{rt.coins}</div>
                 <div style={{ display: "flex", gap: "3px", marginTop: "4px", flexWrap: "wrap" }}>
-                  {rt.shields > 0 && <span style={{ fontSize: "10px", fontWeight: "800", padding: "1px 6px", borderRadius: "10px", background: "#1E3A5F", color: "#60A5FA" }}>🛡️×{rt.shields}</span>}
-                  {rt.skip && <span style={{ fontSize: "10px", fontWeight: "800", padding: "1px 6px", borderRadius: "10px", background: "#4B2E0E", color: "#F87171" }}>💤 skip</span>}
+                  {rt.shields > 0 && <span style={{ fontSize: "10px", fontWeight: "800", padding: "1px 6px", borderRadius: "10px", background: "#1E3A5F", color: "#60A5FA", display: "inline-flex", alignItems: "center", gap: "2px" }}><Icon name="shield" size={9} />×{rt.shields}</span>}
+                  {rt.skip && <span style={{ fontSize: "10px", fontWeight: "800", padding: "1px 6px", borderRadius: "10px", background: "#4B2E0E", color: "#F87171", display: "inline-flex", alignItems: "center", gap: "2px" }}><Icon name="sleep" size={9} /> skip</span>}
                   {rt.powerups.map((pid, i) => {
                     const pu = POWERUPS.find(p => p.id === pid);
                     if (!pu) return null;
                     return (
-                      <span key={i} onClick={() => activatePowerup(t.id, i)} className="rt-chip" style={{ fontSize: "10px", fontWeight: "800", padding: "1px 6px", borderRadius: "10px", background: "#3B2A5C", color: "#C084FC", cursor: "pointer" }} title={pu.desc}>
-                        {pu.icon}
+                      <span key={i} onClick={() => activatePowerup(t.id, i)} className="rt-chip" style={{ fontSize: "10px", fontWeight: "800", padding: "1px 6px", borderRadius: "10px", background: "#3B2A5C", color: "#C084FC", cursor: "pointer", display: "inline-flex" }} title={pu.desc}>
+                        <Icon name={pu.icon} size={11} />
                       </span>
                     );
                   })}
@@ -640,7 +902,8 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
                   <circle cx={pos.x} cy={pos.y} r={14} fill="#0D1E36" stroke={nextZone.color} strokeWidth={2.5} />
                   <text x={pos.x} y={pos.y + 1} textAnchor="middle" dominantBaseline="middle" fontSize={10} fill={nextZone.color} fontWeight="bold">▶</text>
                   <rect x={lx - 32} y={ly - 10} width={64} height={20} rx={6} fill="#0D1E36" stroke={nextZone.color} strokeWidth={1.5} opacity={0.9} />
-                  <text x={lx} y={ly + 1} textAnchor="middle" dominantBaseline="middle" fontSize={7.5} fontWeight="bold" fill={nextZone.color}>{nextZone.emoji} {nextZone.short}</text>
+                  <g transform={`translate(${lx - 28},${ly - 4})`} style={{ color: nextZone.color }}><Icon name={nextZone.icon} size={8} /></g>
+                  <text x={lx + 7} y={ly + 1} textAnchor="middle" dominantBaseline="middle" fontSize={7.5} fontWeight="bold" fill={nextZone.color}>{nextZone.short}</text>
                 </g>
               );
             })}
@@ -649,13 +912,23 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
               const isSE = i === 0 || i === TOTAL;
               const r = isSE ? 13 : 9;
               const col = sp.banana ? "#FFE066" : sp.color;
-              const icon = sp.banana ? "🍌" : (sp.icon || "");
+              const dotIcon: IconName | null = sp.banana ? "banana" : (sp.icon ?? null);
               return (
                 <g key={i}>
                   <circle cx={pos.x} cy={pos.y} r={r} fill={col} stroke="#fff" strokeWidth={isSE ? 2 : 1.2} opacity={0.92} />
-                  {icon && !isSE && <text x={pos.x} y={pos.y} textAnchor="middle" dominantBaseline="middle" fontSize={7.5}>{icon}</text>}
-                  {i === 0 && <text x={pos.x} y={pos.y - 18} textAnchor="middle" fill="#4ADE80" fontSize={8} fontWeight="bold">🚦 START</text>}
-                  {i === TOTAL && <text x={pos.x} y={pos.y - 18} textAnchor="middle" fill="#F7C948" fontSize={8} fontWeight="bold">🏁 FINISH</text>}
+                  {dotIcon && !isSE && <g transform={`translate(${pos.x - 5},${pos.y - 5})`} style={{ color: "#150F00" }}><Icon name={dotIcon} size={10} /></g>}
+                  {i === 0 && (
+                    <>
+                      <g transform={`translate(${pos.x - 22},${pos.y - 23})`} style={{ color: "#4ADE80" }}><Icon name="play" size={9} /></g>
+                      <text x={pos.x + 4} y={pos.y - 18} textAnchor="middle" fill="#4ADE80" fontSize={8} fontWeight="bold">START</text>
+                    </>
+                  )}
+                  {i === TOTAL && (
+                    <>
+                      <g transform={`translate(${pos.x - 26},${pos.y - 23})`} style={{ color: "#F7C948" }}><Icon name="checkeredFlag" size={9} /></g>
+                      <text x={pos.x + 6} y={pos.y - 18} textAnchor="middle" fill="#F7C948" fontSize={8} fontWeight="bold">FINISH</text>
+                    </>
+                  )}
                 </g>
               );
             })}
@@ -676,7 +949,11 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
             {fxRing && (
               <g key={fxRing.key}>
                 <circle cx={TPOS[fxRing.idx].x} cy={TPOS[fxRing.idx].y} r={4} fill="none" stroke={fxRing.color} style={{ animation: "fxRingExpand 0.9s ease-out forwards" }} />
-                {fxRing.icon && <text x={TPOS[fxRing.idx].x} y={TPOS[fxRing.idx].y - 14} fill={fxRing.color} textAnchor="middle" fontSize={18} style={{ animation: "fxBurstIcon 1.2s ease-out forwards" }}>{fxRing.icon}</text>}
+                {fxRing.icon && (
+                  <g transform={`translate(${TPOS[fxRing.idx].x - 9},${TPOS[fxRing.idx].y - 23})`} style={{ color: fxRing.color, animation: "fxBurstIcon 1.2s ease-out forwards" }}>
+                    <Icon name={fxRing.icon} size={18} />
+                  </g>
+                )}
               </g>
             )}
           </svg>
@@ -685,24 +962,24 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
             <div style={{ position: "absolute", top: 0, right: 0, bottom: 0, width: "260px", maxWidth: "88%", background: "rgba(8,16,30,0.97)", borderLeft: "1px solid #1E3352", display: "flex", flexDirection: "column" }}>
               <div style={{ padding: "12px 14px", borderBottom: "1px solid #1E3352" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <div style={{ fontWeight: "900", color: "#F7C948", fontSize: "15px" }}>🛒 Powerup Shop</div>
-                  <button onClick={() => setShopOpen(false)} style={{ background: "none", border: "none", color: "#5A7399", fontSize: "16px", cursor: "pointer" }}>✕</button>
+                  <div style={{ fontWeight: "900", color: "#F7C948", fontSize: "15px", display: "flex", alignItems: "center", gap: "6px" }}><Icon name="cart" size={14} /> Powerup Shop</div>
+                  <button onClick={() => setShopOpen(false)} style={{ background: "none", border: "none", color: "#5A7399", fontSize: "16px", cursor: "pointer" }}><Icon name="close" size={15} /></button>
                 </div>
                 <select value={shopTeamId} onChange={e => setShopTeamId(teams.find(t => String(t.id) === e.target.value)?.id ?? shopTeamId)} style={{ width: "100%", marginTop: "8px", background: "#172438", border: "1px solid #1E3352", borderRadius: "8px", color: "#DDE8FF", padding: "6px 8px", fontWeight: "700", fontSize: "13px" }}>
                   {teams.map(t => <option key={t.id} value={String(t.id)}>{raceTeams[t.id].car} {t.name}</option>)}
                 </select>
-                <div style={{ fontSize: "12px", fontWeight: "800", color: "#FBBF24", marginTop: "6px" }}>🪙 {raceTeams[shopTeamId]?.coins ?? 0} coins</div>
+                <div style={{ fontSize: "12px", fontWeight: "800", color: "#FBBF24", marginTop: "6px", display: "flex", alignItems: "center", gap: "4px" }}><Icon name="coin" size={12} /> {raceTeams[shopTeamId]?.coins ?? 0} coins</div>
               </div>
               <div style={{ flex: 1, overflowY: "auto", padding: "10px 12px", display: "flex", flexDirection: "column", gap: "8px" }}>
                 {POWERUPS.map(pu => {
                   const canAfford = (raceTeams[shopTeamId]?.coins ?? 0) >= pu.cost;
                   return (
                     <div key={pu.id} style={{ display: "flex", alignItems: "center", gap: "8px", background: "#172438", border: "1px solid #1E3352", borderRadius: "10px", padding: "8px" }}>
-                      <div style={{ fontSize: "20px" }}>{pu.icon}</div>
+                      <div style={{ color: "#C084FC" }}><Icon name={pu.icon} size={20} /></div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ fontWeight: "800", fontSize: "12px", color: "#DDE8FF" }}>{pu.label}</div>
                         <div style={{ fontSize: "10px", color: "#5A7399", fontWeight: "600" }}>{pu.desc}</div>
-                        <div style={{ fontSize: "10px", fontWeight: "800", color: "#FBBF24" }}>🪙 {pu.cost}</div>
+                        <div style={{ fontSize: "10px", fontWeight: "800", color: "#FBBF24", display: "flex", alignItems: "center", gap: "3px" }}><Icon name="coin" size={9} /> {pu.cost}</div>
                       </div>
                       <button disabled={!canAfford} onClick={() => buyPowerup(shopTeamId, pu.id)} className="rt-btn" style={{ background: canAfford ? "#F7C948" : "#1E3352", color: canAfford ? "#150F00" : "#5A7399", border: "none", borderRadius: "8px", padding: "6px 10px", fontWeight: "800", fontSize: "11px", cursor: canAfford ? "pointer" : "not-allowed" }}>Buy</button>
                     </div>
@@ -714,7 +991,7 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
         </div>
 
         {toastMsg && (
-          <div style={{ position: "absolute", bottom: "14px", left: "50%", transform: "translateX(-50%)", background: "#172438", border: "2px solid #F7C948", borderRadius: "10px", padding: "8px 18px", color: "#F7C948", fontWeight: "800", fontSize: "13px", zIndex: 10, animation: "rtToast 2.6s ease-in-out forwards", whiteSpace: "nowrap" }}>
+          <div style={{ position: "absolute", bottom: "14px", left: "50%", transform: "translateX(-50%)", background: "#172438", border: "2px solid #F7C948", borderRadius: "10px", padding: "8px 18px", color: "#F7C948", fontWeight: "800", fontSize: "13px", zIndex: 10, animation: "rtToast 2.6s ease-in-out forwards", whiteSpace: "nowrap", display: "inline-flex", alignItems: "center", gap: "5px" }}>
             {toastMsg}
           </div>
         )}
@@ -727,22 +1004,37 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
               </div>
             )}
             <QuestionCard question={currentQ} showAnswer={showAns} onReveal={() => setShowAns(true)} gameId="racetrack" />
+            {buzzedTeamId !== null && (() => {
+              const buzzedTeam = teams.find(t => t.id === buzzedTeamId);
+              return (
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "12px", flexWrap: "wrap", background: "#172438", border: `1.5px solid ${buzzedTeam?.color.bg ?? "#F7C948"}`, borderRadius: "12px", padding: "10px 16px", marginTop: "12px" }}>
+                  <span style={{ fontWeight: "800", fontSize: "14px", color: "#F7C948", display: "inline-flex", alignItems: "center", gap: "5px" }}><Icon name="bolt" size={13} /> <TeamIcon team={buzzedTeam} /> {buzzedTeam?.name} buzzed in first!</span>
+                  {!showAns && (
+                    <button onClick={markBuzzWrong} className="rt-btn" style={{ background: "#374151", color: "#FCA5A5", border: "1px solid #7F1D1D", borderRadius: "8px", padding: "5px 12px", fontWeight: "700", fontSize: "12px", cursor: "pointer" }}><Icon name="close" size={11} /> Wrong — reopen buzzer</button>
+                  )}
+                </div>
+              );
+            })()}
             {(showAns || currentQ?.type === "speaking task") && (
               <div style={{ marginTop: "14px" }}>
                 <p style={{ textAlign: "center", fontWeight: "700", color: "#DDE8FF", marginBottom: "10px", fontSize: "14px" }}>Which team got it right?</p>
                 <div style={{ display: "grid", gridTemplateColumns: teamsGridCols(teams.length), gap: "8px", marginBottom: "10px" }}>
                   {teams.map(t => (
-                    <button key={t.id} onClick={() => chooseWinner(t.id)} className="rt-btn" style={{ background: t.color.bg, color: "white", border: "none", borderRadius: "10px", padding: "10px 8px", fontWeight: "800", fontSize: "14px", cursor: "pointer", transition: "transform 0.15s ease" }}>✅ {t.name}</button>
+                    <button key={t.id} onClick={() => chooseWinner(t.id)} className="rt-btn" style={{
+                      background: t.color.bg, color: "white", border: t.id === buzzedTeamId ? "3px solid #F7C948" : "none",
+                      borderRadius: "10px", padding: "10px 8px", fontWeight: "800", fontSize: "14px", cursor: "pointer", transition: "transform 0.15s ease",
+                      opacity: rejectedTeamIds.has(t.id) ? 0.6 : 1,
+                    }}><Icon name={rejectedTeamIds.has(t.id) ? "close" : "check"} size={13} /> {t.name}</button>
                   ))}
                 </div>
                 <div style={{ textAlign: "center" }}>
-                  <button onClick={skipTask} className="rt-btn" style={{ background: "#374151", color: "#DDE8FF", border: "none", borderRadius: "10px", padding: "8px 20px", fontWeight: "700", fontSize: "13px", cursor: "pointer", transition: "transform 0.15s ease" }}>⏭️ No one got it</button>
+                  <button onClick={skipTask} className="rt-btn" style={{ background: "#374151", color: "#DDE8FF", border: "none", borderRadius: "10px", padding: "8px 20px", fontWeight: "700", fontSize: "13px", cursor: "pointer", transition: "transform 0.15s ease" }}><Icon name="next" size={12} /> No one got it</button>
                 </div>
               </div>
             )}
             {!showAns && currentQ?.type !== "speaking task" && (
               <div style={{ textAlign: "center", marginTop: "10px" }}>
-                <button onClick={newTask} className="rt-btn" style={{ background: "#172438", color: "#DDE8FF", border: "1px solid #1E3352", borderRadius: "10px", padding: "8px 18px", fontWeight: "700", fontSize: "13px", cursor: "pointer", transition: "transform 0.15s ease" }}>🔀 New Task</button>
+                <button onClick={newTask} className="rt-btn" style={{ background: "#172438", color: "#DDE8FF", border: "1px solid #1E3352", borderRadius: "10px", padding: "8px 18px", fontWeight: "700", fontSize: "13px", cursor: "pointer", transition: "transform 0.15s ease" }}><Icon name="shuffle" size={12} /> New Task</button>
               </div>
             )}
           </>
@@ -751,8 +1043,8 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
         {phase === "rolling" && winnerTeam && (
           <div style={{ textAlign: "center", padding: "20px 0" }}>
             <div style={{ fontFamily: "inherit", fontWeight: "900", fontSize: "18px", color: winnerTeam.color.bg, marginBottom: "8px" }}>Rolling for {winnerTeam.name}…</div>
-            <div style={{ width: "70px", height: "70px", background: "white", borderRadius: "16px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "36px", margin: "0 auto", boxShadow: "0 4px 18px rgba(0,0,0,0.5)", animation: rolling ? "dSpin 0.5s ease infinite" : "none" }}>
-              {diceFace}
+            <div style={{ width: "70px", height: "70px", background: "white", color: winnerTeam.color.bg, borderRadius: "16px", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto", boxShadow: "0 4px 18px rgba(0,0,0,0.5)" }}>
+              <DiceFace value={diceFace} size={44} spinning={rolling} />
             </div>
           </div>
         )}
@@ -760,7 +1052,7 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
         {phase === "effect" && lastEffect && (
           <div style={{ textAlign: "center" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "14px", background: "#172438", border: `1.5px solid ${lastEffect.color}`, borderRadius: "14px", padding: "16px", marginBottom: "14px" }}>
-              <div style={{ fontSize: "40px", flexShrink: 0 }}>{lastEffect.icon}</div>
+              <div style={{ color: lastEffect.color, flexShrink: 0 }}><Icon name={lastEffect.icon} size={40} /></div>
               <div style={{ fontSize: "16px", fontWeight: "700", color: "#DDE8FF", textAlign: "left" }}>{lastEffect.msg}</div>
             </div>
             <button onClick={() => setPhase("task")} className="rt-btn" style={{ background: "#F7C948", color: "#150F00", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "800", cursor: "pointer", transition: "transform 0.15s ease" }}>Next Task →</button>

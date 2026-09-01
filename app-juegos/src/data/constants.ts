@@ -1,5 +1,6 @@
 // Antes: import { TeamColor, GameMode } from "../types";
 import type { TeamColor, GameMode } from "../types";
+import type { IconName } from "../components/shared/Icon";
 
 export const TEAM_COLORS: TeamColor[] = [
   { name: "Red",    bg: "#EF4444", light: "#FEE2E2", dark: "#991B1B", emoji: "🔴" },
@@ -17,7 +18,7 @@ export const TEAM_COLORS: TeamColor[] = [
 export const MASCOT_OPTIONS: string[] = [
   "🐉", "🦄", "🤖", "🦊", "🐸", "🦁", "🐧", "🦖",
   "🐝", "🦋", "🐙", "🦅", "🐢", "🐺", "🦉", "🐯",
-  "🍕", "⚡", "🌟", "🎃", "👻", "🥷",
+  "🍕", "👻", "🥷", "👽", "🐼", "🦈", "🐶", "🐱",
 ];
 
 // Shared between the setup screen's level filter and anywhere a class's default level is picked
@@ -73,10 +74,32 @@ export const GAME_MODES: GameMode[] = [
   { id: "minefield", name: "Minefield", icon: "💣",  desc: "Combine sentence fragments to speak — and dodge the mines", color: "#EF4444", tag: "Full sentences, spoken aloud" },
   { id: "rocket",    name: "Rocket Fuel", icon: "🚀",  desc: "Use the given word in a sentence to fuel your team's rocket", color: "#6366F1", tag: "Original sentences, prompt after prompt" },
   { id: "orderup",   name: "Order Up", icon: "🍽️",  desc: "Customers order food tied to grammar or vocabulary targets — write one sentence that satisfies every item on the ticket before their patience runs out", color: "#F43F5E", tag: "Full sentences, written — not spoken · shared floor" },
-  { id: "cards",     name: "Card Shuffle", icon: "🃏",  desc: "Pick a card and complete an open speaking or writing task", color: "#F59E0B", tag: "One open speaking prompt" },
   { id: "hotseat",   name: "Hot Seat", icon: "🔥",  desc: "Describe words to your teammate — no spelling allowed", color: "#EF4444", tag: "Nonstop improvised talking" },
+  { id: "cards",     name: "Card Shuffle", icon: "🃏",  desc: "Pick a card and complete an open speaking or writing task", color: "#F59E0B", tag: "One open speaking prompt" },
   { id: "spy",       name: "Spy Among Us", icon: "🕵️",  desc: "Speak freely, listen carefully, find who has a different topic", color: "#374151", tag: "Sustained free conversation" },
   { id: "zombie",    name: "Zombie Siege", icon: "🧟",  desc: "Add sentences to a shared prompt to barricade the house — clear each wave of zombies before the next, bigger one arrives", color: "#65A30D", tag: "Free-for-all sentence-throwing · wave-based pressure" },
 ];
+
+// GAME_MODES.icon stays the original raw emoji (kept for reference — nothing besides the mapping
+// below reads it anymore) since changing that field's meaning would ripple through 15 game files'
+// GM.icon reads. This is the actual custom-icon lookup used by every render site instead — one
+// Record<> so a missing/misspelled id fails to typecheck rather than silently rendering nothing.
+export const GAME_ICONS: Record<string, IconName> = {
+  whack: "hammer",
+  auction: "gavel",
+  battleship: "anchor",
+  vault: "safe",
+  hill: "crown",
+  hotpotato: "potato",
+  castle: "castle",
+  racetrack: "checkeredFlag",
+  minefield: "mine",
+  rocket: "rocket",
+  orderup: "plate",
+  hotseat: "flame",
+  cards: "cardTilt",
+  spy: "search",
+  zombie: "skull",
+};
 
 export const TASK_TYPES: string[] = ["fill in the blank", "correct grammar mistakes", "use vocabulary in a sentence", "choose correct grammar", "rewrite sentences", "speaking task"];
