@@ -722,6 +722,80 @@ export const LESSONS: Record<string, Lesson> = {
     ],
   },
 
+  quantifiers: {
+    title: "Quantifiers (Much/Many/A Lot/A Few/A Little)",
+    intro: "English has different words for 'how much of something' depending on whether the noun is countable (books, people) or uncountable (coffee, money), and whether the quantity is large, small, or zero.",
+    sections: [
+      {
+        heading: "Much vs many",
+        body: [
+          "Many + countable plural noun. Much + uncountable noun.",
+          "We normally only use much/many in negative sentences and questions, not in affirmative sentences.",
+        ],
+        examples: [
+          "There isn't **much coffee** in the jar.",
+          "Were there **many people** at the party?",
+        ],
+      },
+      {
+        heading: "How much / how many",
+        body: [
+          "How many + plural noun; how much + uncountable noun, both to ask about quantity.",
+          "'How much is/are...?' also asks about price.",
+        ],
+        examples: [
+          "**How many books** did you read last semester?",
+          "**How much coffee** do you drink every day?",
+          "'**How much is it**?' 'It's 43 pounds.'",
+        ],
+      },
+      {
+        heading: "A lot of / lots of",
+        body: [
+          "A lot of (and the more informal lots of) works with both countable and uncountable nouns, mainly in affirmative sentences — though it's fine in negatives and questions too.",
+          "'A lot of' always needs 'of' before a noun. Drop 'of' when 'a lot' comes at the end of a sentence or stands alone in a short answer.",
+          "'Quite a lot of' means a medium-to-large quantity.",
+        ],
+        examples: [
+          "She spends **a lot of time** watching TV.",
+          "We had **lots of** good moments together.",
+          "'How many beers did you have?' 'I had **a lot**.'",
+          "I like her **a lot**.",
+        ],
+      },
+      {
+        heading: "A few vs a little",
+        body: [
+          "A few + countable plural noun. A little + uncountable noun. Both describe a small quantity, and both work in affirmative, negative, and question sentences.",
+          "'Not many' and 'not much' mean roughly the same as 'a few' and 'a little'.",
+        ],
+        examples: [
+          "I have to do **a few things** this afternoon.",
+          "I always put **a little milk** in my tea.",
+          "I don't have to do **many things** this afternoon. (= a few)",
+        ],
+      },
+      {
+        heading: "No / not...any / none",
+        body: [
+          "No + noun and not...any + noun both express zero quantity — the meaning is the same, just a different structure.",
+          "In short answers, use 'none' alone.",
+        ],
+        examples: [
+          "I have **no time** today.",
+          "I don't have **any time** today.",
+          "'How much time do you have?' '**None**.'",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ There isn't many coffee. → ✅ There isn't much coffee. ('coffee' is uncountable)",
+      "❌ How much books did you read? → ✅ How many books did you read? ('books' is countable)",
+      "❌ She spends a lot time watching TV. → ✅ She spends a lot of time watching TV. ('a lot of' always needs 'of' before a noun)",
+      "❌ I don't have no time today. → ✅ I don't have any time today. (don't combine 'don't' and 'no')",
+    ],
+  },
+
   modals_obligation: {
     title: "Modals of Obligation",
     intro: "Must, have to, mustn't, and don't have to all sound similar but mean quite different things — mixing up 'mustn't' and 'don't have to' is the classic trap.",
