@@ -4835,8 +4835,9 @@ export const LESSONS: Record<string, Lesson> = {
         body: ["Common objects found around the house, grouped by what they're used for."],
         examples: [
           "**sofa**, **table**, **chair**, **bed** — furniture for sitting or sleeping",
-          "**fridge**, **sink**, **lamp**, **mirror** — everyday objects with a clear job",
-          "**wardrobe**, **shelf**, **curtains** — for storing or covering things",
+          "**fridge**, **sink**, **lamp**, **mirror**, **clock**, **plates**, **cushions** — everyday objects with a clear job",
+          "**wardrobe**, **shelf**, **curtains**, **cupboard** — for storing or covering things",
+          "**plants**, **rug** — for decorating a room",
         ],
       },
       {
