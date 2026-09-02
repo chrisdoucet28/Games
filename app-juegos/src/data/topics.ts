@@ -1142,9 +1142,9 @@ export const TOPIC_LIBRARY = {
     ],
     minefieldGrid: {
       topic: "Understanding 'Get'",
-      instructions: "Match each meaning of 'get' (top) with an example that actually uses it that way (side) — mismatched pairs are the mines!",
-      colLabels: ["Get = Obtain", "Get = Become", "Get = Arrive", "Get = Informal Passive"],
-      rowLabels: ["a new phone", "angry quickly", "home late", "promoted"],
+      instructions: "Combine the subject (top) with the 'get' prompt (side) to make a full sentence — add your own details.",
+      colLabels: ["I usually …", "She always …", "They recently …", "We finally …", "He suddenly …"],
+      rowLabels: ["… get a new …", "… get to … late", "… get better at …", "… get married in …", "… get into trouble at …"],
     },
     hotSeatWords: [
       {word:"promoted"},
@@ -6032,9 +6032,9 @@ export const TOPIC_LIBRARY = {
     ],
     minefieldGrid: {
       topic: "Be vs Do Auxiliary Verbs",
-      instructions: "Find the correct pairs — match each auxiliary-question opener (top) with the ending it actually goes with (side). Mismatched pairs are the mines!",
-      colLabels: ["Are you …?", "Do you …?", "Is she …?", "Does she …?"],
-      rowLabels: ["… happy", "… like coffee", "… a teacher", "… work here"],
+      instructions: "Combine the subject (top) with the sentence starter (side) to make a full sentence — choose 'be' or 'do/does' correctly.",
+      colLabels: ["I", "You", "She", "We", "They"],
+      rowLabels: ["___ not happy.", "___ not like coffee.", "___ busy today.", "___ tired.", "___ work here."],
     },
     hotSeatWords: [
       {word:"happy"},
@@ -32098,9 +32098,9 @@ export const TOPIC_LIBRARY = {
     ],
     minefieldGrid: {
       topic: "Subject vs Object Questions",
-      instructions: "Combine the question word (top) with the structure (side) to make a correct question — remember, subject questions need no auxiliary!",
-      colLabels: ["Who …", "What …", "Which team …", "Which book …"],
-      rowLabels: ["… won?", "… did you like?", "… is the best?", "… do you recommend?"],
+      instructions: "Combine the question word (top) with the verb prompt (side) to make a full question — then complete it with your own idea.",
+      colLabels: ["Who", "What", "Which team", "Which book", "Which restaurant"],
+      rowLabels: ["___ win the game?", "___ happen at the party?", "___ you support?", "___ she recommend?", "___ serve the best food?"],
     },
     hotSeatWords: [
       {word:"winner"},
