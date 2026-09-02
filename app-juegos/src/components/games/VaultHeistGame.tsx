@@ -151,19 +151,19 @@ function displayCategory(categoryKey: string): string {
   return formatCategory(transformTag);
 }
 
-// One independent shuffled question list per (team × category), so two teams never draw
-// identical questions in lockstep and a thin category still serves the whole game — the draw
-// index just wraps back to the start once a team has seen everything in that category. Mirrors
-// BattleshipGame's buildCoordMap philosophy of deriving pools from the actual question data
-// rather than a hardcoded structure.
-function buildDrawPools(rewriteQs: QuestionData[], categories: string[], teamIds: (string | number)[]) {
-  const byCategory: Record<string, QuestionData[]> = {};
-  categories.forEach(c => { byCategory[c] = rewriteQs.filter(q => categoryKeyFor(q) === c); });
-  const pools: Record<string | number, Record<string, QuestionData[]>> = {};
-  teamIds.forEach(teamId => {
-    pools[teamId] = {};
-    categories.forEach(c => { pools[teamId][c] = [...byCategory[c]].sort(() => Math.random() - 0.5); });
-  });
+// One question list per category, shared by every team in the game. Deliberately NOT one
+// independent copy per team: pickQuestion below tracks "seen" per category across all teams
+// together, so once Team A has been shown a sentence, Team B won't draw that same sentence
+// until the whole game has exhausted the category — this is what actually prevents cross-team
+// repeats. (An earlier version gave each team its own shuffled copy of the same content with
+// independent per-team freshness tracking; that only stopped a single team from repeating a
+// sentence to *itself*, and did nothing to stop two different teams from independently landing
+// on the same sentence, which is exactly what a teacher running a 3-4 team game reported.)
+// Mirrors BattleshipGame's buildCoordMap philosophy of deriving pools from the actual question
+// data rather than a hardcoded structure.
+function buildDrawPools(rewriteQs: QuestionData[], categories: string[]) {
+  const pools: Record<string, QuestionData[]> = {};
+  categories.forEach(c => { pools[c] = rewriteQs.filter(q => categoryKeyFor(q) === c); });
   return pools;
 }
 
@@ -206,7 +206,7 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
 
   const rewriteQs = useRef(questions.filter(q => q.type === "rewrite sentences")).current;
   const categories = useRef([...new Set(rewriteQs.map(categoryKeyFor).filter((c): c is string => !!c))]).current;
-  const pools = useRef(buildDrawPools(rewriteQs, categories, teams.map(t => t.id))).current;
+  const pools = useRef(buildDrawPools(rewriteQs, categories)).current;
   const resumed = useRef(validateSnapshot(initialGameState, teams.length)).current;
 
   const [vaultLocks, setVaultLocks] = useState<Record<string | number, number>>(
@@ -271,42 +271,44 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
     return picked;
   }, [categories]);
 
-  // Picks one question at random from a (team × category) pool, preferring the lock's target
-  // difficulty and never repeating a sentence this team has already seen in that category until
+  // Picks one question at random from a category's pool, preferring the lock's target difficulty
+  // and never repeating a sentence ANY team in this game has already seen in that category until
   // every question in the pool has come up at least once — same "deck reshuffles only once
   // exhausted" rule Hot Seat's word list uses, rather than the old "just not the literal last
   // one" check, which let the same handful of difficulty/form-matched items resurface within a
   // few turns even with a large topic selection, since the whole pool was rarely small enough to
-  // hit that narrow a repeat window on its own.
+  // hit that narrow a repeat window on its own. Freshness is tracked per CATEGORY, shared across
+  // every team, not per (team × category) — a teacher running a 3-4 team game reported "all teams
+  // got the same sentences," and per-team-only tracking couldn't prevent that: it stops one team
+  // from repeating a sentence to itself, but has no way to know what a different team already saw.
   const seenRef = useRef<Record<string, Set<string>>>({});
   // Six-tier fallback: the first two tiers additionally prefer the lock's desired form (per
   // FORM_PREFERENCE_BY_LOCK_INDEX) on top of the existing difficulty preference; tiers 3-6 are
   // exactly the original four tiers, unchanged, so a topic with no form-tagged content anywhere
   // (i.e. every item's form is undefined) falls straight through to tier 3 and plays exactly as it
   // did before this feature existed — content can migrate topic-by-topic with nothing breaking.
-  const pickQuestion = useCallback((teamId: string | number, category: string, desiredDifficulty: string, desiredForms: (QuestionData["form"] | undefined)[]) => {
-    const teamPool = pools[teamId]?.[category] ?? [];
-    if (!teamPool.length) return null;
-    const key = `${teamId}:${category}`;
-    const seen = seenRef.current[key] ?? (seenRef.current[key] = new Set());
-    // A full lap: every question in this team's category pool has already been shown once since
-    // the last reset. Clearing here (rather than never clearing) is what lets a category keep
-    // being playable turn after turn instead of running dry and falling back to the whole-pool
-    // "ignore freshness" tier for the rest of the game.
-    if (seen.size >= teamPool.length) seen.clear();
+  const pickQuestion = useCallback((category: string, desiredDifficulty: string, desiredForms: (QuestionData["form"] | undefined)[]) => {
+    const categoryPool = pools[category] ?? [];
+    if (!categoryPool.length) return null;
+    const seen = seenRef.current[category] ?? (seenRef.current[category] = new Set());
+    // A full lap: every question in this category has already been shown once (to any team)
+    // since the last reset. Clearing here (rather than never clearing) is what lets a category
+    // keep being playable turn after turn instead of running dry and falling back to the
+    // whole-pool "ignore freshness" tier for the rest of the game.
+    if (seen.size >= categoryPool.length) seen.clear();
     const isFresh = (q: QuestionData) => !seen.has(q.question ?? "");
     const matchesForm = (q: QuestionData) => desiredForms.includes(q.form);
-    const byDifficultyFormFresh = teamPool.filter(q => q.difficulty === desiredDifficulty && matchesForm(q) && isFresh(q));
-    const anyDifficultyFormFresh = teamPool.filter(q => matchesForm(q) && isFresh(q));
-    const byDifficultyFresh = teamPool.filter(q => q.difficulty === desiredDifficulty && isFresh(q));
-    const anyFresh = teamPool.filter(q => isFresh(q));
-    const byDifficultyAny = teamPool.filter(q => q.difficulty === desiredDifficulty);
+    const byDifficultyFormFresh = categoryPool.filter(q => q.difficulty === desiredDifficulty && matchesForm(q) && isFresh(q));
+    const anyDifficultyFormFresh = categoryPool.filter(q => matchesForm(q) && isFresh(q));
+    const byDifficultyFresh = categoryPool.filter(q => q.difficulty === desiredDifficulty && isFresh(q));
+    const anyFresh = categoryPool.filter(q => isFresh(q));
+    const byDifficultyAny = categoryPool.filter(q => q.difficulty === desiredDifficulty);
     const source = byDifficultyFormFresh.length ? byDifficultyFormFresh
       : anyDifficultyFormFresh.length ? anyDifficultyFormFresh
       : byDifficultyFresh.length ? byDifficultyFresh
       : anyFresh.length ? anyFresh
       : byDifficultyAny.length ? byDifficultyAny
-      : teamPool;
+      : categoryPool;
     const chosen = source[Math.floor(Math.random() * source.length)];
     seen.add(chosen.question ?? "");
     return chosen;
@@ -321,7 +323,7 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
     const desiredForms = FORM_PREFERENCE_BY_LOCK_INDEX[clampedLockIndex];
     setOrderPos(pos);
     setCurrentCategory(category);
-    setCurrentQuestion(pickQuestion(teamId, category, desiredDifficulty, desiredForms));
+    setCurrentQuestion(pickQuestion(category, desiredDifficulty, desiredForms));
     setShowAns(false);
     setLastOutcome(null);
     setPhase("reveal");
