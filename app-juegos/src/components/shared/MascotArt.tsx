@@ -272,19 +272,19 @@ const MASCOT_ART: Record<MascotName, React.ReactNode> = {
   wolf: (
     <>
       {/* The old version reused fox's exact muzzle shape with just a grey palette swap, so it
-          read as "a grey fox". Two earlier attempts at fixing this (round cheek fluff, then a
-          fur ruff) instead read as a koala or a random blob — this settles on the thing that
-          actually reads as "wolf" without changing the silhouette much: bigger two-tone upright
-          ears, a narrower muzzle than fox's, and a soft grey forehead "mask" marking (the classic
-          wolf/husky face pattern), which no other canine mascot here has. */}
+          read as "a grey fox". Earlier fixes just made the same rounded ear shape bigger (round
+          cheek fluff read as a koala; a fur ruff read as a random blob) — the ear SHAPE was the
+          actual problem: genuinely pointed, straighter-edged ears (not just a bigger version of
+          fox's soft curved ear) are what finally reads as wolf/husky, together with a narrower
+          muzzle than fox's and a soft grey forehead "mask" marking. */}
       <radialGradient id="m-wolf-body" cx="35%" cy="28%" r="80%">
         <stop offset="0%" stopColor="#CBD5E1" />
         <stop offset="100%" stopColor="#64748B" />
       </radialGradient>
-      <path d="M4.5,8 C3,3.5 6.5,2 8.8,6.3 Z" fill="#64748B" />
-      <path d="M19.5,8 C21,3.5 17.5,2 15.2,6.3 Z" fill="#64748B" />
-      <path d="M5.3,7 C4.6,4.3 6.5,3.6 7.9,6.2 Z" fill="#94A3B8" />
-      <path d="M18.7,7 C19.4,4.3 17.5,3.6 16.1,6.2 Z" fill="#94A3B8" />
+      <path d="M3.8,8.3 C3.2,5.5 3.3,2.6 4.6,1 C6.3,2.8 7.6,5.2 8.6,7.3 C7.3,8.2 5.2,8.5 3.8,8.3 Z" fill="#64748B" />
+      <path d="M20.2,8.3 C20.8,5.5 20.7,2.6 19.4,1 C17.7,2.8 16.4,5.2 15.4,7.3 C16.7,8.2 18.8,8.5 20.2,8.3 Z" fill="#64748B" />
+      <path d="M4.6,6.8 C4.3,5 4.5,3.3 5.2,2.2 C6.3,3.3 7.1,4.8 7.7,6.4 C6.9,7 5.7,7.1 4.6,6.8 Z" fill="#94A3B8" />
+      <path d="M19.4,6.8 C19.7,5 19.5,3.3 18.8,2.2 C17.7,3.3 16.9,4.8 16.3,6.4 C17.1,7 18.3,7.1 19.4,6.8 Z" fill="#94A3B8" />
       <circle cx="12" cy="13" r="9" fill="url(#m-wolf-body)" />
       <ellipse cx="12" cy="8" rx="2.6" ry="4.2" fill="#475569" opacity="0.45" />
       <path d="M12,14.8 C10,14.8 8.3,16.2 8.6,18.5 C9.2,20.5 14.8,20.5 15.4,18.5 C15.7,16.2 14,14.8 12,14.8 Z" fill="#F8FAFC" />
