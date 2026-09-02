@@ -2438,8 +2438,17 @@ export const LESSONS: Record<string, Lesson> = {
       },
       {
         heading: "Asking for someone's opinion",
-        body: ["Do you think that + clause? is the natural way to ask someone for their opinion."],
-        examples: ["**Do you think that** homework is useless?"],
+        body: [
+          "'Do you think that + clause?' works with a full clause, but several other common openers take a noun instead — 'what's your' + opinion/view/take + 'on', or 'how do you feel about'.",
+        ],
+        examples: [
+          "**Do you think that** homework is useless?",
+          "**What's your opinion on** the new policy?",
+          "**What's your view on** working from home?",
+          "**How do you feel about** the changes?",
+          "**Do you have any thoughts on** this idea?",
+          "**What's your take on** the situation?",
+        ],
       },
     ],
     commonMistakes: [
