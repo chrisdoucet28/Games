@@ -167,6 +167,28 @@ handout) with no guarantee they've seen any other specific lesson first.
   This conversation (`new-topics`) is where every new topic in this repo is authored, so this check
   belongs in the build checklist for every single topic from here on — not something to catch on
   a later audit.
+- **`cardTasks` — non-negotiable, check on every single new topic**: every game that reads
+  `cardTasks` (`CastleGame.tsx`, `CardShuffleGame.tsx`, `ZombieSiegeGame.tsx`,
+  `BattleshipGame.tsx`, `KingOfHillGame.tsx`, `RaceTrackGame.tsx`) renders it as `type: "speaking
+  task"` — always an open, out-loud response the teacher listens to and judges live, never a typed
+  or written one. Two rules follow directly from that and both are non-negotiable:
+  1. **Never write a task whose verb implies writing** ("Write a paragraph...", "Write five
+     sentences...") — every task is spoken aloud, so use a speaking verb (Say/Describe/Explain/
+     Tell/Ask/Talk about/Make a sentence...). "Turn this into formal *writing*" has the same
+     problem even without the verb "write" — say "a more formal *sentence*" instead.
+  2. **Never dictate the entire expected utterance**, leaving the student nothing to actually
+     produce. "Answer this question with 'None': 'How many pets do you have?'" hands over the
+     complete answer — there's nothing left to speak except a memorized word. This is different
+     from constraining the *form* while leaving the *content* open (a legitimate, common pattern:
+     "Say a sentence with 'X'...", "Answer using 'because'...", "Correct this mistake: '...'" —
+     all of these require the student to actually construct something). The test: could two
+     different students genuinely produce two different, both-correct answers to this exact task?
+     If not, it's not a speaking prompt, it's a script.
+  Caught live in gameplay: a `quantifiers` task read "Answer this question with 'None': 'How many
+  pets do you have?'" and another read "Write a short paragraph about your city..." while the
+  in-game UI showed "SPEAKING PROMPT" / "Open response — teacher listens and judges" — neither
+  belonged there. Same fix as the Minefield rule above: this conversation authors every new
+  topic's `cardTasks`, so check every single task against both rules before moving on, every time.
 - **"How to Play" tutorials (`data/tutorials/*.tsx`)**: each game's intro screen has a How to
   Play button opening a scripted walkthrough (`components/shared/HowToPlayModal.tsx`) — hand-authored
   mockups, not driven by real game state, so nothing keeps them in sync with the actual game
