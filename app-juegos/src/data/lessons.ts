@@ -71,12 +71,40 @@ export const LESSONS: Record<string, Lesson> = {
           "She **played** tennis every week as a child.",
         ],
       },
+      {
+        heading: "Questions with a question word",
+        body: [
+          "A yes/no question is Did + subject + base verb?",
+          "To ask for specific information, put the question word (What/Where/When/Why/Who) before 'did'.",
+        ],
+        examples: [
+          "**Did** she cook dinner? (yes/no)",
+          "**What did** she cook? (asks what the food was)",
+          "**Where did** they travel last summer?",
+          "**Why did** he leave the party early?",
+        ],
+      },
+      {
+        heading: "Joining two past events in one sentence",
+        body: [
+          "'When', 'before', 'after', 'because', and 'although' can join two past simple clauses into one sentence.",
+          "When the joining word starts the sentence, put a comma after the first clause.",
+        ],
+        examples: [
+          "**When** the rain started, we didn't finish the match.",
+          "**Before** he left, he didn't lock the door.",
+          "**Although** she studied hard, she didn't pass the exam.",
+          "We didn't finish the match **when** the rain started. (no comma needed if the joining word comes in the middle)",
+        ],
+      },
     ],
     commonMistakes: [
       "❌ She goed to school. → ✅ She went to school. (irregular verb)",
       "❌ Did you called her? → ✅ Did you call her? (base verb after 'did', no -ed)",
       "❌ I didn't went. → ✅ I didn't go. (base verb after 'didn't')",
       "❌ He studyed all night. → ✅ He studied all night. (y → i before -ed)",
+      "❌ What she cooked? → ✅ What did she cook? (question word still needs 'did' + base verb)",
+      "❌ When the rain started we didn't finish the match. → ✅ When the rain started, we didn't finish the match. (comma after a fronted 'when' clause)",
     ],
   },
 
@@ -4210,10 +4238,12 @@ export const LESSONS: Record<string, Lesson> = {
       },
       {
         heading: "Relative clauses — adding a consequence or extra fact with 'which'",
-        body: ["'Which' can add a defining or non-defining clause about a thing just mentioned — often used to state a consequence."],
+        body: ["'Which' can add a defining or non-defining clause about a thing just mentioned — often used to state a consequence. 'Who'/'that' identify a person or thing directly — no commas needed."],
         examples: [
           "Factories produce large amounts of carbon dioxide, **which traps heat** in the atmosphere.",
           "Coral reefs, **which support thousands of marine species**, are dying.",
+          "People **who recycle their waste** help protect the environment.",
+          "Cars **that run on electricity** produce no emissions.",
         ],
       },
       {
@@ -4805,8 +4835,9 @@ export const LESSONS: Record<string, Lesson> = {
         body: ["Common objects found around the house, grouped by what they're used for."],
         examples: [
           "**sofa**, **table**, **chair**, **bed** — furniture for sitting or sleeping",
-          "**fridge**, **sink**, **lamp**, **mirror** — everyday objects with a clear job",
-          "**wardrobe**, **shelf**, **curtains** — for storing or covering things",
+          "**fridge**, **sink**, **lamp**, **mirror**, **clock**, **plates**, **cushions** — everyday objects with a clear job",
+          "**wardrobe**, **shelf**, **curtains**, **cupboard** — for storing or covering things",
+          "**plants**, **rug** — for decorating a room",
         ],
       },
       {
