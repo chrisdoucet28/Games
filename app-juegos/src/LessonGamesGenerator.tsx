@@ -14,6 +14,7 @@ import { Confetti } from "./components/shared/Confetti";
 import { ClassesScreen } from "./components/shared/ClassesScreen";
 import { ProfileScreen } from "./components/shared/ProfileScreen";
 import { LearnScreen } from "./components/shared/LearnScreen";
+import { LeaderboardScreen } from "./components/shared/LeaderboardScreen";
 import { BillingScreen } from "./components/shared/BillingScreen";
 import { ThemeAmbience } from "./components/shared/ThemeAmbience";
 import { FeedbackButton } from "./components/shared/FeedbackButton";
@@ -161,7 +162,7 @@ type LessonGamesGeneratorProps = {
 };
 
 export default function LessonGamesGenerator({ theme, onThemeChange, subscription, onSubscriptionChange, checkoutRedirect, initialScreen }: LessonGamesGeneratorProps) {
-  const [screen, setScreen] = useState<"welcome" | "classes" | "profile" | "learn" | "billing" | "setup" | "game-select" | "game" | "results">(
+  const [screen, setScreen] = useState<"welcome" | "classes" | "profile" | "learn" | "leaderboard" | "billing" | "setup" | "game-select" | "game" | "results">(
     checkoutRedirect ? "billing" : initialScreen ?? "welcome"
   );
   const isPaid = isPaidStatus(subscription.status);
@@ -236,6 +237,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
       classes: "My Classes - ClassCade",
       profile: "My Profile - ClassCade",
       learn: "Learn - ClassCade",
+      leaderboard: "Leaderboard - ClassCade",
       billing: "Billing - ClassCade",
     };
     document.title = titles[screen];
@@ -929,6 +931,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
           <button onClick={() => { setActiveClassId(null); setScreen("setup"); }} style={{ background: `linear-gradient(135deg,${theme.cta[0]},${theme.cta[1]})`, color: "white", border: "none", borderRadius: "16px", padding: "18px 56px", fontSize: "20px", fontWeight: "900", cursor: "pointer", boxShadow: `0 8px 32px ${hexToRgba(theme.cta[1], 0.45)}`, letterSpacing: "0.01em", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "8px" }}><Icon name="rocket" size={20} /> Start a Game</button>
           <button onClick={() => setScreen("classes")} style={{ background: "rgba(255,255,255,0.12)", border: "2px solid rgba(255,255,255,0.3)", color: "white", borderRadius: "16px", padding: "18px 40px", fontSize: "18px", fontWeight: "800", cursor: "pointer", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "8px" }}><Icon name="books" size={18} /> My Classes</button>
           <button onClick={() => { setLearnFilter(null); setScreen("learn"); }} style={{ background: "rgba(255,255,255,0.12)", border: "2px solid rgba(255,255,255,0.3)", color: "white", borderRadius: "16px", padding: "18px 40px", fontSize: "18px", fontWeight: "800", cursor: "pointer", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "8px" }}><Icon name="learn" size={18} /> Learn</button>
+          <button onClick={() => setScreen("leaderboard")} style={{ background: "rgba(255,255,255,0.12)", border: "2px solid rgba(255,255,255,0.3)", color: "white", borderRadius: "16px", padding: "18px 40px", fontSize: "18px", fontWeight: "800", cursor: "pointer", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "8px" }}><Icon name="trophy" size={18} /> Leaderboard</button>
           <button onClick={() => setScreen("profile")} style={{ background: "rgba(255,255,255,0.12)", border: "2px solid rgba(255,255,255,0.3)", color: "white", borderRadius: "16px", padding: "18px 40px", fontSize: "18px", fontWeight: "800", cursor: "pointer", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "8px" }}><Icon name="person" size={18} /> My Profile</button>
           {/* Hidden during the free-launch phase — see FREE_LAUNCH_ALL_PREMIUM in data/constants.ts.
               Everyone already has premium, so there's nothing useful for this button to show (and
@@ -954,6 +957,14 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
         isPaid={isPaid}
         onUpgrade={() => setScreen("billing")}
       />
+      <FeedbackButton />
+      <BrandBadge isPaid={isPaid} />
+    </>
+  );
+
+  if (screen === "leaderboard") return (
+    <>
+      <LeaderboardScreen onBack={() => setScreen("welcome")} theme={theme} />
       <FeedbackButton />
       <BrandBadge isPaid={isPaid} />
     </>

@@ -146,6 +146,49 @@ handout) with no guarantee they've seen any other specific lesson first.
   words, not just the variable content (event/time/reason) — otherwise the player has no way to
   know which of several correct phrasings the answer key actually expects, and a different, equally
   valid response gets marked wrong purely because nothing ever cued which one to use.
+- **Minefield's `minefieldGrid` — non-negotiable, check on every single new topic**:
+  `MinefieldGame.tsx` hard-codes a 5x5 board (`ROWS = 5, COLS = 5`) and indexes `colLabels`/
+  `rowLabels` by that fixed size regardless of how many entries the arrays actually have — a topic
+  with fewer than 5 of either isn't a smaller grid, it's tiles rendering `undefined` text to a
+  player. **Every `minefieldGrid` must have exactly 5 `colLabels` and exactly 5 `rowLabels`, always
+  — count them before moving on, every time, no exceptions.** And both arrays must be real,
+  half-sentence-shaped ideas — a genuine sentence opener/subject and a genuine verb-phrase/blank
+  continuation — never abstract category labels ("Get = Obtain") or bare topic words. The game
+  shows a picked tile's col label + row label side by side plus "+ your idea"; the student builds
+  one full sentence combining all three aloud, and the teacher judges it live — there's no
+  auto-graded correct/incorrect pairing, so never frame a grid as "match the correct pairs,
+  mismatched pairs are the mines" (the mines are random hidden tiles, unrelated to grammar).
+  Follow the established shape: `colLabels` = a subject or sentence-opener (e.g. `["I", "She",
+  "They", "We", "He"]` or `["I always …", "She needs to …", ...]`), `rowLabels` = a verb-phrase or
+  blank-templated continuation (e.g. `["___ (go) to…", ...]` or `["… give up …", ...]`) that reads
+  as one coherent sentence stem when combined with any column — see `irregular_verbs`,
+  `present_perfect`, or `phrasal_verbs` for the pattern. It's fine for a row's base-form word to
+  need student-supplied conjugation depending on the column (that's the actual speaking practice).
+  This conversation (`new-topics`) is where every new topic in this repo is authored, so this check
+  belongs in the build checklist for every single topic from here on — not something to catch on
+  a later audit.
+- **`cardTasks` — non-negotiable, check on every single new topic**: every game that reads
+  `cardTasks` (`CastleGame.tsx`, `CardShuffleGame.tsx`, `ZombieSiegeGame.tsx`,
+  `BattleshipGame.tsx`, `KingOfHillGame.tsx`, `RaceTrackGame.tsx`) renders it as `type: "speaking
+  task"` — always an open, out-loud response the teacher listens to and judges live, never a typed
+  or written one. Two rules follow directly from that and both are non-negotiable:
+  1. **Never write a task whose verb implies writing** ("Write a paragraph...", "Write five
+     sentences...") — every task is spoken aloud, so use a speaking verb (Say/Describe/Explain/
+     Tell/Ask/Talk about/Make a sentence...). "Turn this into formal *writing*" has the same
+     problem even without the verb "write" — say "a more formal *sentence*" instead.
+  2. **Never dictate the entire expected utterance**, leaving the student nothing to actually
+     produce. "Answer this question with 'None': 'How many pets do you have?'" hands over the
+     complete answer — there's nothing left to speak except a memorized word. This is different
+     from constraining the *form* while leaving the *content* open (a legitimate, common pattern:
+     "Say a sentence with 'X'...", "Answer using 'because'...", "Correct this mistake: '...'" —
+     all of these require the student to actually construct something). The test: could two
+     different students genuinely produce two different, both-correct answers to this exact task?
+     If not, it's not a speaking prompt, it's a script.
+  Caught live in gameplay: a `quantifiers` task read "Answer this question with 'None': 'How many
+  pets do you have?'" and another read "Write a short paragraph about your city..." while the
+  in-game UI showed "SPEAKING PROMPT" / "Open response — teacher listens and judges" — neither
+  belonged there. Same fix as the Minefield rule above: this conversation authors every new
+  topic's `cardTasks`, so check every single task against both rules before moving on, every time.
 - **"How to Play" tutorials (`data/tutorials/*.tsx`)**: each game's intro screen has a How to
   Play button opening a scripted walkthrough (`components/shared/HowToPlayModal.tsx`) — hand-authored
   mockups, not driven by real game state, so nothing keeps them in sync with the actual game

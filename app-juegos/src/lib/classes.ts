@@ -114,6 +114,14 @@ export async function saveTeams(classId: string, teams: Team[]): Promise<void> {
   if (error) throw error;
 }
 
+// Opts a class in/out of the site-wide Leaderboard. A Postgres trigger on `classes` reacts to this
+// column changing (see lib/leaderboard.ts) — flipping it to true immediately removes that class's
+// teams from public.leaderboard_entries; there's nothing else the client needs to do here.
+export async function setLeaderboardVisibility(classId: string, hidden: boolean): Promise<void> {
+  const { error } = await supabase.from("classes").update({ hide_from_leaderboard: hidden }).eq("id", classId);
+  if (error) throw error;
+}
+
 // Removes one saved team from a class's roster — deliberately doesn't touch the current session's
 // live teams even if that name is in play right now; it only forgets the preset for next time.
 export async function deleteFromTeamRoster(classId: string, rosterId: string): Promise<TeamRosterEntry[]> {

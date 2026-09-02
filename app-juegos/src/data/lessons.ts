@@ -722,6 +722,80 @@ export const LESSONS: Record<string, Lesson> = {
     ],
   },
 
+  quantifiers: {
+    title: "Quantifiers (Much/Many/A Lot/A Few/A Little)",
+    intro: "English has different words for 'how much of something' depending on whether the noun is countable (books, people) or uncountable (coffee, money), and whether the quantity is large, small, or zero.",
+    sections: [
+      {
+        heading: "Much vs many",
+        body: [
+          "Many + countable plural noun. Much + uncountable noun.",
+          "We normally only use much/many in negative sentences and questions, not in affirmative sentences.",
+        ],
+        examples: [
+          "There isn't **much coffee** in the jar.",
+          "Were there **many people** at the party?",
+        ],
+      },
+      {
+        heading: "How much / how many",
+        body: [
+          "How many + plural noun; how much + uncountable noun, both to ask about quantity.",
+          "'How much is/are...?' also asks about price.",
+        ],
+        examples: [
+          "**How many books** did you read last semester?",
+          "**How much coffee** do you drink every day?",
+          "'**How much is it**?' 'It's 43 pounds.'",
+        ],
+      },
+      {
+        heading: "A lot of / lots of",
+        body: [
+          "A lot of (and the more informal lots of) works with both countable and uncountable nouns, mainly in affirmative sentences — though it's fine in negatives and questions too.",
+          "'A lot of' always needs 'of' before a noun. Drop 'of' when 'a lot' comes at the end of a sentence or stands alone in a short answer.",
+          "'Quite a lot of' means a medium-to-large quantity.",
+        ],
+        examples: [
+          "She spends **a lot of time** watching TV.",
+          "We had **lots of** good moments together.",
+          "'How many beers did you have?' 'I had **a lot**.'",
+          "I like her **a lot**.",
+        ],
+      },
+      {
+        heading: "A few vs a little",
+        body: [
+          "A few + countable plural noun. A little + uncountable noun. Both describe a small quantity, and both work in affirmative, negative, and question sentences.",
+          "'Not many' and 'not much' mean roughly the same as 'a few' and 'a little'.",
+        ],
+        examples: [
+          "I have to do **a few things** this afternoon.",
+          "I always put **a little milk** in my tea.",
+          "I don't have to do **many things** this afternoon. (= a few)",
+        ],
+      },
+      {
+        heading: "No / not...any / none",
+        body: [
+          "No + noun and not...any + noun both express zero quantity — the meaning is the same, just a different structure.",
+          "In short answers, use 'none' alone.",
+        ],
+        examples: [
+          "I have **no time** today.",
+          "I don't have **any time** today.",
+          "'How much time do you have?' '**None**.'",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ There isn't many coffee. → ✅ There isn't much coffee. ('coffee' is uncountable)",
+      "❌ How much books did you read? → ✅ How many books did you read? ('books' is countable)",
+      "❌ She spends a lot time watching TV. → ✅ She spends a lot of time watching TV. ('a lot of' always needs 'of' before a noun)",
+      "❌ I don't have no time today. → ✅ I don't have any time today. (don't combine 'don't' and 'no')",
+    ],
+  },
+
   modals_obligation: {
     title: "Modals of Obligation",
     intro: "Must, have to, mustn't, and don't have to all sound similar but mean quite different things — mixing up 'mustn't' and 'don't have to' is the classic trap.",
@@ -1664,6 +1738,87 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ Can you look after for my dog? → ✅ Can you look after my dog? ('look after' is inseparable — no 'for')",
       "❌ We need to cut down of sugar. → ✅ We need to cut down on sugar. (fixed preposition 'on')",
       "❌ He couldn't come up an excuse. → ✅ He couldn't come up with an excuse. ('come up with' needs 'with')",
+    ],
+  },
+
+  understanding_get: {
+    title: "Understanding 'Get'",
+    intro: "'Get' is one of the most common verbs in English, and it changes meaning completely depending on what comes after it. This lesson covers its most useful everyday meanings.",
+    sections: [
+      {
+        heading: "Get = obtain, receive, or buy",
+        body: [
+          "The most basic meaning: something comes into your possession.",
+        ],
+        examples: [
+          "I **got** a new laptop for my birthday. (received)",
+          "I **got** this jacket from a small shop. (bought)",
+          "Did you **get** my message? (receive)",
+        ],
+      },
+      {
+        heading: "Get = arrive or reach",
+        body: [
+          "'Get to' + a place means arrive there.",
+        ],
+        examples: [
+          "We **got to** the airport just in time.",
+          "What time did you **get** home last night?",
+        ],
+      },
+      {
+        heading: "Get + adjective = become",
+        body: [
+          "'Get' + an adjective (or a comparative adjective) describes a change of state.",
+        ],
+        examples: [
+          "It's **getting** dark outside.",
+          "He **got** really angry when he heard the news.",
+          "She's **getting** better at tennis every week.",
+        ],
+      },
+      {
+        heading: "Common 'get' phrasal verbs",
+        body: [
+          "'Get' combines with particles for everyday actions — each combination has its own specific meaning.",
+        ],
+        examples: [
+          "**get up** = leave your bed",
+          "**get on/off** = board/leave a bus, train, or plane",
+          "**get in/out of** = enter/leave a car",
+          "**get back** = return",
+          "**get together** = meet socially",
+          "**get into** (trouble) = end up in a bad situation",
+        ],
+      },
+      {
+        heading: "Get + past participle = an informal passive",
+        body: [
+          "In everyday spoken English, 'get' + past participle is a common informal alternative to 'be' + past participle for things that happen to someone.",
+        ],
+        examples: [
+          "She **got promoted** last month.",
+          "He **got injured** playing football.",
+          "They **got married** last summer.",
+          "My bag **got stolen** on the train.",
+        ],
+      },
+      {
+        heading: "Get + object + past participle = arrange for a service",
+        body: [
+          "This pattern means you arrange for someone else to do something for you, not that you did it yourself.",
+        ],
+        examples: [
+          "I **got my hair cut** yesterday. (a hairdresser cut it, not me)",
+          "We **got the car fixed** at the garage.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ She promoted last month. → ✅ She got promoted last month. (informal passive needs 'get' + past participle)",
+      "❌ I got my hair cutting. → ✅ I got my hair cut. ('get + object + past participle' — not '-ing')",
+      "❌ Did you got my message? → ✅ Did you get my message? (after 'did', use the base form 'get')",
+      "❌ It get really cold at night. → ✅ It gets really cold at night. (third person singular needs 'gets')",
     ],
   },
 
