@@ -9,9 +9,13 @@ import { MascotIcon, type MascotName } from "./MascotArt";
 export const MASCOT_ICON_BY_EMOJI: Record<string, MascotName> = {
   "🐉": "dragon", "🦄": "unicorn", "🤖": "robot", "🦊": "fox", "🐸": "frog",
   "🦁": "lion", "🐧": "penguin", "🦖": "dino", "🐝": "bee", "🦋": "butterfly",
-  "🐙": "octopus", "🦅": "eagle", "🐢": "turtle", "🐺": "wolf", "🦉": "owl",
+  "🐙": "octopus", "🐰": "rabbit", "🐢": "turtle", "🐺": "wolf", "🦉": "owl",
   "🐯": "tiger", "🍕": "pizza", "👻": "ghost", "🥷": "ninja", "👽": "alien",
   "🐼": "panda", "🦈": "shark", "🐶": "dog", "🐱": "cat",
+  // 🦅 isn't offered in MASCOT_OPTIONS anymore (the "eagle" art didn't read as an eagle at all,
+  // replaced with a rabbit) — kept mapped here so any already-saved team that picked it still
+  // renders instead of silently breaking.
+  "🦅": "rabbit",
 };
 
 type TeamLike = { mascot?: string | null; color: { bg: string } };

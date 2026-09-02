@@ -17,7 +17,7 @@ export const TEAM_COLORS: TeamColor[] = [
 // identity, and gives teams a bit of personality beyond a plain colored circle.
 export const MASCOT_OPTIONS: string[] = [
   "🐉", "🦄", "🤖", "🦊", "🐸", "🦁", "🐧", "🦖",
-  "🐝", "🦋", "🐙", "🦅", "🐢", "🐺", "🦉", "🐯",
+  "🐝", "🦋", "🐙", "🐰", "🐢", "🐺", "🦉", "🐯",
   "🍕", "👻", "🥷", "👽", "🐼", "🦈", "🐶", "🐱",
 ];
 
