@@ -508,9 +508,12 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
   );
 
   if (phase === "final") {
-    // Dense rank on final score (bank already flushed in) — a tie for the highest bank shows two
+    // Rank by this auction's own bank, not team.score — score is the cross-game running total
+    // (already includes whatever a team walked in with from earlier games, plus this auction's
+    // flushed-in bank), so ranking by it declared whoever was ahead overall as "winning the
+    // auction" even when another team had the bigger bank. A tie for the highest bank shows two
     // gold gavels instead of an arbitrary array-order winner.
-    const ranking = denseRank(teams, t => t.score).sort((a, b) => b.value - a.value);
+    const ranking = denseRank(teams, t => auctionBank[t.id] ?? 0).sort((a, b) => b.value - a.value);
     const winners = ranking.filter(r => r.rank === 0);
     const isTie = winners.length > 1;
     const headline = isTie
@@ -531,10 +534,9 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
                   <MascotAvatar mascot={t.mascot} color={t.color.bg} size={24} />
                   <span style={{ fontWeight: "800", color: "white", fontSize: "14px" }}>{t.name}</span>
                 </div>
-                <div style={{ color: "#FCD34D", fontWeight: "900", fontSize: "16px", marginTop: "4px" }}>{value} pts</div>
+                <div style={{ color: "#FCD34D", fontWeight: "900", fontSize: "16px", marginTop: "4px" }}>{value} final bank</div>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "5px", marginTop: "6px" }}>
-                  <ChipStack amount={auctionBank[t.id] ?? 0} />
-                  <span style={{ fontSize: "12px", color: "#FCD34D", fontWeight: "700" }}>{auctionBank[t.id] ?? 0} final bank</span>
+                  <ChipStack amount={value} />
                 </div>
                 <div style={{ fontSize: "11px", color: "#C4B5FD", fontWeight: "700", marginTop: "4px" }}>Won {roundsWon[t.id] ?? 0} of {questions.length} lots</div>
               </div>

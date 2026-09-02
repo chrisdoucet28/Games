@@ -120,6 +120,7 @@ type SpySnapshot = {
   timesWasSpy: Record<string | number, number>;
   spyWinsByTeam: Record<string | number, number>;
   crewWinsByTeam: Record<string | number, number>;
+  gameScoreByTeam: Record<string | number, number>;
   // Only meaningful in solo (teacher stand-in) sessions — undefined/absent in normal multi-team
   // games, where there's no teacher participant to track a score for.
   teacherScore?: number;
@@ -132,6 +133,7 @@ function validateSpySnapshot(raw: unknown, teamCount: number, roundCount: number
   return {
     ri: s.ri, spyTeamIdx: s.spyTeamIdx,
     timesWasSpy: s.timesWasSpy ?? {}, spyWinsByTeam: s.spyWinsByTeam ?? {}, crewWinsByTeam: s.crewWinsByTeam ?? {},
+    gameScoreByTeam: s.gameScoreByTeam ?? {},
     teacherScore: typeof s.teacherScore === "number" ? s.teacherScore : undefined,
   };
 }
@@ -155,9 +157,14 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
     () => (isSolo ? [propTeams[0], { ...teacherTeamRef.current!, score: teacherScore }] : propTeams),
     [isSolo, propTeams, teacherScore]
   );
+  // Points earned in THIS game only — team.score is the cross-game running total, so the final
+  // screen ranking by it declared whoever was ahead overall the winner even when another team
+  // scored more here.
+  const [gameScoreByTeam, setGameScoreByTeam] = useState<Record<string | number, number>>(() => resumed?.gameScoreByTeam ?? {});
   // The teacher's score is never real class data — it stays local here instead of reaching the
   // parent's onUpdateScore/ScoreBoard/saved-class state.
   const updateScore = (id: string | number, delta: number) => {
+    setGameScoreByTeam(prev => ({ ...prev, [id]: (prev[id] ?? 0) + delta }));
     if (isSolo && id === teacherTeamRef.current?.id) { setTeacherScore(s => s + delta); }
     else { onUpdateScore(id, delta); }
   };
@@ -183,9 +190,9 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
 
   useEffect(() => {
     if (!serializeStateRef) return;
-    serializeStateRef.current = (): SpySnapshot => ({ ri, spyTeamIdx, timesWasSpy, spyWinsByTeam, crewWinsByTeam, teacherScore });
+    serializeStateRef.current = (): SpySnapshot => ({ ri, spyTeamIdx, timesWasSpy, spyWinsByTeam, crewWinsByTeam, gameScoreByTeam, teacherScore });
     return () => { if (serializeStateRef) serializeStateRef.current = null; };
-  }, [serializeStateRef, ri, spyTeamIdx, timesWasSpy, spyWinsByTeam, crewWinsByTeam, teacherScore]);
+  }, [serializeStateRef, ri, spyTeamIdx, timesWasSpy, spyWinsByTeam, crewWinsByTeam, gameScoreByTeam, teacherScore]);
   const [peekIdx, setPeekIdx] = useState(0);
   const [revealed, setRevealed] = useState(false);
   const [votes, setVotes] = useState<Record<string | number, string | number>>({});
@@ -753,9 +760,10 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
   }
 
   if (phase === "final") {
-    // Dense rank on final score — two teams tied for the top both get gold instead of an
-    // arbitrary array-order winner.
-    const ranking = denseRank(teams, (team) => team.score).sort((a, b) => b.value - a.value);
+    // Dense rank on points earned in THIS game (gameScoreByTeam), not team.score (the cross-game
+    // running total) — two teams tied for the top both get gold instead of an arbitrary
+    // array-order winner.
+    const ranking = denseRank(teams, (team) => gameScoreByTeam[team.id] ?? 0).sort((a, b) => b.value - a.value);
     const winners = ranking.filter((r) => r.rank === 0);
     const isTie = winners.length > 1;
     const headline = isTie
