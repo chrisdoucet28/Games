@@ -572,9 +572,11 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
   }
 
   if (phase === "final") {
-    // Dense rank on final score — two teams tied for the top both get gold instead of an
-    // arbitrary array-order winner.
-    const ranking = denseRank(teams, t => t.score).sort((a, b) => b.value - a.value);
+    // Dense rank on points earned in THIS game (words guessed × POINTS_PER_WORD), not team.score
+    // (the cross-game running total) — the headline below already claims "guessed the most
+    // words," but the ranking itself was reading the wrong field entirely. Two teams tied for the
+    // top both get gold instead of an arbitrary array-order winner.
+    const ranking = denseRank(teams, t => (totalWordsByTeam[t.id] ?? 0) * POINTS_PER_WORD).sort((a, b) => b.value - a.value);
     const winners = ranking.filter(r => r.rank === 0);
     const isTie = winners.length > 1;
     const headline = isTie

@@ -78,12 +78,13 @@ type CardShuffleSnapshot = {
   roundCount: number;
   starHitsByTeam: Record<string | number, number>;
   correctByTeam: Record<string | number, number>;
+  gameScoreByTeam: Record<string | number, number>;
 };
 
 function validateCardShuffleSnapshot(raw: unknown): CardShuffleSnapshot | undefined {
   const s = raw as Partial<CardShuffleSnapshot> | null | undefined;
   if (!s || typeof s.roundCount !== "number" || s.roundCount < 0) return undefined;
-  return { roundCount: s.roundCount, starHitsByTeam: s.starHitsByTeam ?? {}, correctByTeam: s.correctByTeam ?? {} };
+  return { roundCount: s.roundCount, starHitsByTeam: s.starHitsByTeam ?? {}, correctByTeam: s.correctByTeam ?? {}, gameScoreByTeam: s.gameScoreByTeam ?? {} };
 }
 
 export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState }: GameProps) {
@@ -126,12 +127,16 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
   // what needs to survive to the final results screen.
   const [starHitsByTeam, setStarHitsByTeam] = useState<Record<string | number, number>>(() => resumed?.starHitsByTeam ?? {});
   const [correctByTeam, setCorrectByTeam] = useState<Record<string | number, number>>(() => resumed?.correctByTeam ?? {});
+  // Points earned in THIS game only — team.score is the cross-game running total, so the final
+  // screen ranking by it declared whoever was ahead overall the "star of the show" even when
+  // another team scored more here.
+  const [gameScoreByTeam, setGameScoreByTeam] = useState<Record<string | number, number>>(() => resumed?.gameScoreByTeam ?? {});
 
   useEffect(() => {
     if (!serializeStateRef) return;
-    serializeStateRef.current = (): CardShuffleSnapshot => ({ roundCount, starHitsByTeam, correctByTeam });
+    serializeStateRef.current = (): CardShuffleSnapshot => ({ roundCount, starHitsByTeam, correctByTeam, gameScoreByTeam });
     return () => { if (serializeStateRef) serializeStateRef.current = null; };
-  }, [serializeStateRef, roundCount, starHitsByTeam, correctByTeam]);
+  }, [serializeStateRef, roundCount, starHitsByTeam, correctByTeam, gameScoreByTeam]);
 
   const [answeringTeamIdx, setAnsweringTeamIdx] = useState(0);
   const [showAns, setShowAns] = useState(false);
@@ -285,9 +290,11 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
         onUpdateScore(t.id, 120);
         setStarHitsByTeam(prev => ({ ...prev, [t.id]: (prev[t.id] ?? 0) + 1 }));
         setCorrectByTeam(prev => ({ ...prev, [t.id]: (prev[t.id] ?? 0) + 1 }));
+        setGameScoreByTeam(prev => ({ ...prev, [t.id]: (prev[t.id] ?? 0) + 120 }));
       } else if (!cards[pick.cardIdx]?.isStar && pick.correct) {
         onUpdateScore(t.id, 30);
         setCorrectByTeam(prev => ({ ...prev, [t.id]: (prev[t.id] ?? 0) + 1 }));
+        setGameScoreByTeam(prev => ({ ...prev, [t.id]: (prev[t.id] ?? 0) + 30 }));
       }
     });
   }, [phase, teams, teamPicks, cards, onUpdateScore]);
@@ -358,9 +365,10 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
   );
 
   if (phase === "final") {
-    // Dense rank on final score — two teams tied for top billing both get gold instead of an
-    // arbitrary array-order winner.
-    const ranking = denseRank(teams, t => t.score).sort((a, b) => b.value - a.value);
+    // Dense rank on points earned in THIS game (gameScoreByTeam), not team.score (the cross-game
+    // running total) — two teams tied for top billing both get gold instead of an arbitrary
+    // array-order winner.
+    const ranking = denseRank(teams, t => gameScoreByTeam[t.id] ?? 0).sort((a, b) => b.value - a.value);
     const winners = ranking.filter(r => r.rank === 0);
     const isTie = winners.length > 1;
     const headline = isTie

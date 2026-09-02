@@ -47,6 +47,7 @@ type MinefieldSnapshot = {
   activeTeam: number;
   correctByTeam: Record<string | number, number>;
   minesHitByTeam: Record<string | number, number>;
+  gameScoreByTeam: Record<string | number, number>;
 };
 
 function validateMinefieldSnapshot(raw: unknown, teamCount: number, gridCount: number): MinefieldSnapshot | undefined {
@@ -61,6 +62,7 @@ function validateMinefieldSnapshot(raw: unknown, teamCount: number, gridCount: n
     activeTeam: s.activeTeam,
     correctByTeam: s.correctByTeam ?? {},
     minesHitByTeam: s.minesHitByTeam ?? {},
+    gameScoreByTeam: s.gameScoreByTeam ?? {},
   };
 }
 
@@ -77,12 +79,17 @@ export function MinefieldGame({ gridData, teams: propTeams, onUpdateScore, onEnd
     () => (isSolo ? [propTeams[0], { ...cpuRef.current!, score: cpuScore }] : propTeams),
     [isSolo, propTeams, cpuScore]
   );
+  const resumed = useRef(validateMinefieldSnapshot(initialGameState, teams.length, grids.length)).current;
+  // Points earned in THIS game only — team.score is the cross-game running total, so the final
+  // screen ranking by it declared whoever was ahead overall the winner even when another team
+  // scored more here. Also fixes solo mode specifically comparing apples to oranges: cpuScore is
+  // already reset every game, but the human team's t.score never was.
+  const [gameScoreByTeam, setGameScoreByTeam] = useState<Record<string | number, number>>(() => resumed?.gameScoreByTeam ?? {});
   const updateScore = (id: string | number, delta: number) => {
+    setGameScoreByTeam(prev => ({ ...prev, [id]: (prev[id] ?? 0) + delta }));
     if (isSolo && id === cpuRef.current?.id) { setCpuScore(s => s + delta); }
     else { onUpdateScore(id, delta); }
   };
-
-  const resumed = useRef(validateMinefieldSnapshot(initialGameState, teams.length, grids.length)).current;
 
   const [gridIndex, setGridIndex] = useState(() => resumed?.gridIndex ?? 0);
   const [mines] = useState<Set<number>>(() => resumed ? new Set(resumed.mines) : createMines());
@@ -116,10 +123,10 @@ export function MinefieldGame({ gridData, teams: propTeams, onUpdateScore, onEnd
   useEffect(() => {
     if (!serializeStateRef) return;
     serializeStateRef.current = (): MinefieldSnapshot => ({
-      mines: [...mines], revealed: [...revealed], gridIndex, activeTeam, correctByTeam, minesHitByTeam,
+      mines: [...mines], revealed: [...revealed], gridIndex, activeTeam, correctByTeam, minesHitByTeam, gameScoreByTeam,
     });
     return () => { if (serializeStateRef) serializeStateRef.current = null; };
-  }, [serializeStateRef, mines, revealed, gridIndex, activeTeam, correctByTeam, minesHitByTeam]);
+  }, [serializeStateRef, mines, revealed, gridIndex, activeTeam, correctByTeam, minesHitByTeam, gameScoreByTeam]);
 
   const currentGrid = grids[Math.min(gridIndex, Math.max(0, grids.length - 1))];
   const topicRotation = grids.length > 1;
@@ -300,9 +307,10 @@ export function MinefieldGame({ gridData, teams: propTeams, onUpdateScore, onEnd
   }
 
   if (phase === "final") {
-    // Dense rank on final score — two teams tied for the lead both get gold instead of an
-    // arbitrary array-order winner.
-    const ranking = denseRank(teams, tm => tm.score).sort((a, b) => b.value - a.value);
+    // Dense rank on points earned in THIS game (gameScoreByTeam), not team.score (the cross-game
+    // running total) — two teams tied for the lead both get gold instead of an arbitrary
+    // array-order winner.
+    const ranking = denseRank(teams, tm => gameScoreByTeam[tm.id] ?? 0).sort((a, b) => b.value - a.value);
     const winners = ranking.filter(r => r.rank === 0);
     const isTie = winners.length > 1;
     const headline = isTie
