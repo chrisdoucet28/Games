@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { TeamIcon } from "./TeamIcon";
 import type { SavedClass } from "../../types";
 import { TEAM_COLORS, GAME_MODES, LEVELS_META, FREE_PLAN_LIMITS } from "../../data/constants";
-import { listClasses, createClass, deleteClass } from "../../lib/classes";
+import { listClasses, createClass, deleteClass, setLeaderboardVisibility } from "../../lib/classes";
 import { hexToRgba, type Theme } from "../../data/themes";
 import { Icon } from "./Icon";
 
@@ -57,6 +57,17 @@ export function ClassesScreen({ onBack, onResumeClass, onStartWithClass, theme, 
       await deleteClass(id);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Couldn't delete the class.");
+      refresh();
+    }
+  };
+
+  const handleToggleLeaderboard = async (cls: SavedClass) => {
+    const nextHidden = !cls.hide_from_leaderboard;
+    setClasses(prev => prev?.map(c => (c.id === cls.id ? { ...c, hide_from_leaderboard: nextHidden } : c)) ?? prev);
+    try {
+      await setLeaderboardVisibility(cls.id, nextHidden);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Couldn't update Leaderboard visibility.");
       refresh();
     }
   };
@@ -139,12 +150,21 @@ export function ClassesScreen({ onBack, onResumeClass, onStartWithClass, theme, 
                       </div>
                     )}
                   </div>
-                  <button
-                    onClick={() => handleDelete(cls.id)} title="Delete class"
-                    style={{ background: "none", border: "none", color: "#9CA3AF", cursor: "pointer", padding: "2px 4px", display: "inline-flex" }}
-                  >
-                    <Icon name="trash" size={15} />
-                  </button>
+                  <div style={{ display: "flex", gap: "4px" }}>
+                    <button
+                      onClick={() => handleToggleLeaderboard(cls)}
+                      title={cls.hide_from_leaderboard ? "Hidden from Leaderboard — click to show" : "Visible on Leaderboard — click to hide"}
+                      style={{ background: "none", border: "none", color: cls.hide_from_leaderboard ? "#D1D5DB" : "#9CA3AF", cursor: "pointer", padding: "2px 4px", display: "inline-flex" }}
+                    >
+                      <Icon name={cls.hide_from_leaderboard ? "eyeOff" : "eye"} size={15} />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(cls.id)} title="Delete class"
+                      style={{ background: "none", border: "none", color: "#9CA3AF", cursor: "pointer", padding: "2px 4px", display: "inline-flex" }}
+                    >
+                      <Icon name="trash" size={15} />
+                    </button>
+                  </div>
                 </div>
 
                 {cls.teams.length > 0 && (

@@ -176,6 +176,22 @@ export interface TeamColor {
     // since it's the "question content" equivalent for that one game.
     minefield_grid_data: unknown | null;
     game_state: unknown | null;
+    // Opt-out of the site-wide Leaderboard (on by default) — a class's team scores stop being
+    // synced to public.leaderboard_entries the moment this flips true, via a Postgres trigger on
+    // this table (see lib/leaderboard.ts). Never toggled by the client for any other reason.
+    hide_from_leaderboard: boolean;
     created_at: string;
     updated_at: string;
+  }
+
+  // One team's standing on the site-wide Leaderboard for the current semester — deliberately
+  // carries nothing beyond team identity + score (no teacher name, no school, no class name), kept
+  // in sync by a Postgres trigger on `classes` (see lib/leaderboard.ts), never written by the
+  // client directly.
+  export interface LeaderboardEntry {
+    class_id: string;
+    team_name: string;
+    team_color: TeamColor;
+    mascot: string | null;
+    score: number;
   }
