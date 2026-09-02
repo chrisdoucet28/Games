@@ -408,6 +408,7 @@ type OrderUpSnapshot = {
   resolvedCount: number;
   dishCounts: Record<string | number, DishCounts>;
   comboBonusByTeam: Record<string | number, number>;
+  gameScoreByTeam: Record<string | number, number>;
 };
 
 function validateOrderUpSnapshot(raw: unknown): OrderUpSnapshot | undefined {
@@ -421,6 +422,7 @@ function validateOrderUpSnapshot(raw: unknown): OrderUpSnapshot | undefined {
     resolvedCount: s.resolvedCount,
     dishCounts: s.dishCounts ?? {},
     comboBonusByTeam: s.comboBonusByTeam ?? {},
+    gameScoreByTeam: s.gameScoreByTeam ?? {},
   };
 }
 
@@ -452,6 +454,10 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
   // Running total of combo bonuses already paid out per team — purely for the final screen's
   // display (the actual points already landed live via onUpdateScore when each combo fired).
   const [comboBonusByTeam, setComboBonusByTeam] = useState<Record<string | number, number>>(() => resumed?.comboBonusByTeam ?? {});
+  // Points earned in THIS game only (serve + combo bonuses, minus unhappy-customer penalties) —
+  // team.score is the cross-game running total, so the final screen ranking by it declared
+  // whoever was ahead overall the "best dinner rush" even when another team scored more here.
+  const [gameScoreByTeam, setGameScoreByTeam] = useState<Record<string | number, number>>(() => resumed?.gameScoreByTeam ?? {});
 
   // "Play on Phones" — lets a team claim from their seat instead of walking up to the shared
   // screen. Available at any team count, including true solo — every ticket is auto-claimed for
@@ -510,9 +516,10 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
       resolvedCount: resolvedCountRef.current,
       dishCounts,
       comboBonusByTeam,
+      gameScoreByTeam,
     });
     return () => { if (serializeStateRef) serializeStateRef.current = null; };
-  }, [serializeStateRef, sessionLength, sessionTimeLeft, dishCounts, comboBonusByTeam]);
+  }, [serializeStateRef, sessionLength, sessionTimeLeft, dishCounts, comboBonusByTeam, gameScoreByTeam]);
 
   // Tops the queue up to whatever the current ramp allows — fires on mount (spawning the first
   // customer) and again after every resolution (serve/expire), since removing a ticket changes
@@ -570,7 +577,10 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
             const teamId = t.claimedBy!;
             penaltyByTeam.set(teamId, (penaltyByTeam.get(teamId) ?? 0) + UNHAPPY_PENALTY);
           });
-          penaltyByTeam.forEach((amount, teamId) => onUpdateScore(teamId, -amount));
+          penaltyByTeam.forEach((amount, teamId) => {
+            onUpdateScore(teamId, -amount);
+            setGameScoreByTeam(prev => ({ ...prev, [teamId]: (prev[teamId] ?? 0) - amount }));
+          });
         }
         if (claimedExpired.length === 1 && unclaimedCount === 0) {
           const team = teams.find(t => t.id === claimedExpired[0].claimedBy);
@@ -638,6 +648,7 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
     if (!ticket) { setJudging(null); return; }
     const score = ORDER_SCORE_BY_ITEM_COUNT[ticket.items.length] ?? ORDER_SCORE_BY_ITEM_COUNT[1];
     onUpdateScore(judging.teamId, score);
+    setGameScoreByTeam(prev => ({ ...prev, [judging.teamId]: (prev[judging.teamId] ?? 0) + score }));
     resolvedCountRef.current += 1;
 
     // One dish per badge, not one dish for the whole ticket — a multi-item order can advance (or
@@ -672,6 +683,7 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
     if (comboBonusEarned > 0) {
       onUpdateScore(judging.teamId, comboBonusEarned);
       setComboBonusByTeam(prev => ({ ...prev, [judging.teamId]: (prev[judging.teamId] ?? 0) + comboBonusEarned }));
+      setGameScoreByTeam(prev => ({ ...prev, [judging.teamId]: (prev[judging.teamId] ?? 0) + comboBonusEarned }));
     }
     // No inline replacement — removing this ticket changes tickets.length, which re-triggers the
     // top-up effect to spawn a new customer if the current ramp capacity allows it.
@@ -960,9 +972,10 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
   );
 
   if (phase === "final") {
-    // Dense rank on final score — two teams tied for first both get gold instead of an
-    // arbitrary array-order winner/runner-up split.
-    const ranking = denseRank(teams, t => t.score).sort((a, b) => b.value - a.value);
+    // Dense rank on points earned in THIS game (gameScoreByTeam), not team.score (the cross-game
+    // running total) — two teams tied for first both get gold instead of an arbitrary
+    // array-order winner/runner-up split.
+    const ranking = denseRank(teams, t => gameScoreByTeam[t.id] ?? 0).sort((a, b) => b.value - a.value);
     const winners = ranking.filter(r => r.rank === 0);
     const isTie = winners.length > 1;
     const headline = isTie

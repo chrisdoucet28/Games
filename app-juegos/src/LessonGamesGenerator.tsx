@@ -1504,7 +1504,12 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
   }
 
   if (screen === "results") {
-    const headline = winners.length > 1 ? `${winners.map(w => w.name).join(" & ")} tie!` : `${winners[0]?.name} wins!`;
+    // This screen shows the running cross-game total (finalRanking is denseRank(teams, t =>
+    // t.score) above), not a settled result — a class can keep playing more games afterward via
+    // "Play Again"/"New Lesson", so "wins!" overstated it as final. "is winning" (current
+    // standings) matches what's actually being shown; each game's own end screen is what
+    // declares who won that specific game.
+    const headline = winners.length > 1 ? `${winners.map(w => w.name).join(" & ")} are tied for the lead!` : `${winners[0]?.name} is winning!`;
     return (
       <div style={{ minHeight: "100vh", background: `linear-gradient(135deg,${theme.heroBg[0]},${theme.heroBg[2]})`, padding: "20px", textAlign: "center", color: "white", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
         <Confetti active={confetti} />

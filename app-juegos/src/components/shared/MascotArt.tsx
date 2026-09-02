@@ -13,7 +13,7 @@ import type { CSSProperties } from "react";
 
 export type MascotName =
   | "dragon" | "unicorn" | "robot" | "fox" | "frog" | "lion" | "penguin" | "dino" | "bee"
-  | "butterfly" | "octopus" | "eagle" | "turtle" | "wolf" | "owl" | "tiger" | "pizza"
+  | "butterfly" | "octopus" | "rabbit" | "turtle" | "wolf" | "owl" | "tiger" | "pizza"
   | "ghost" | "ninja" | "alien" | "panda" | "shark" | "dog" | "cat";
 
 // Standard glossy eye pair — reused verbatim by every mascot whose face sits at the default
@@ -49,9 +49,24 @@ const MASCOT_ART: Record<MascotName, React.ReactNode> = {
         <stop offset="0%" stopColor="#FFFFFF" />
         <stop offset="100%" stopColor="#E9D5FF" />
       </radialGradient>
-      <polygon points="13,2 11.3,6.5 14.5,6" fill="#FCD34D" />
-      <path d="M6.5,7 C5,6.3 4,7.3 3.2,6.3 M6.8,9.3 C5.3,9 4.5,10.2 3.5,9.5" stroke="#F0ABFC" strokeWidth="1.4" fill="none" strokeLinecap="round" />
+      <linearGradient id="m-unicorn-horn" x1="0%" y1="100%" x2="0%" y2="0%">
+        <stop offset="0%" stopColor="#F59E0B" />
+        <stop offset="100%" stopColor="#FCD34D" />
+      </linearGradient>
+      {/* ears, then a big centered horn — teachers reported the first pass (thin, and a gradient
+          fading to near-white at the tip) was invisible enough that students genuinely couldn't
+          tell it was a unicorn. This one is much wider/taller and stays fully saturated gold
+          top to bottom, no fade. */}
+      <path d="M7,6 C6.3,3.3 8.3,2.6 9.3,5.3 Z" fill="#E9D5FF" />
+      <path d="M17,6 C17.7,3.3 15.7,2.6 14.7,5.3 Z" fill="#E9D5FF" />
+      <path d="M12,0.5 L9.7,8 H14.3 Z" fill="url(#m-unicorn-horn)" />
+      <path d="M10.5,3.1 L13.5,3.3 M10,5.6 L14,5.8" stroke="#D97706" strokeWidth="0.7" opacity="0.7" />
       <circle cx="12" cy="13" r="9" fill="url(#m-unicorn-body)" />
+      {/* flowing rainbow mane, drawn over the body so it reads as hair draped along the side —
+          the old version was two thin eyelash-like lines that didn't read as a mane at all */}
+      <ellipse cx="3.8" cy="9.5" rx="2.8" ry="4.2" fill="#F0ABFC" transform="rotate(-20 3.8 9.5)" />
+      <ellipse cx="3.2" cy="14.5" rx="2.5" ry="3.8" fill="#C4B5FD" transform="rotate(-4 3.2 14.5)" />
+      <ellipse cx="3.9" cy="19" rx="2.2" ry="3.4" fill="#93C5FD" transform="rotate(12 3.9 19)" />
       <ellipse cx="12" cy="17" rx="5" ry="3.4" fill="#FBF7FF" />
       {EYES}
       <ellipse cx="12" cy="18" rx="1.1" ry="0.8" fill="#F9A8D4" />
@@ -77,16 +92,21 @@ const MASCOT_ART: Record<MascotName, React.ReactNode> = {
   ),
   fox: (
     <>
+      {/* Bigger, genuinely pointed ears with black tips — the same "shape not just size" fix
+          that made wolf finally read correctly, plus the single most recognizable red-fox
+          marking (black ear tips), which the old small rounded ears never had room for. */}
       <radialGradient id="m-fox-body" cx="35%" cy="28%" r="80%">
         <stop offset="0%" stopColor="#FDA95D" />
         <stop offset="100%" stopColor="#F0740E" />
       </radialGradient>
-      <path d="M5.5,7 C5,4.5 6.5,3.5 8.5,5.5 Z" fill="#F0740E" />
-      <path d="M18.5,7 C19,4.5 17.5,3.5 15.5,5.5 Z" fill="#F0740E" />
+      <path d="M4,8 C3,5.5 2.2,3 2.8,1.3 C4.8,2.7 6.8,5 8.2,7.2 C6.9,8 5.3,8.3 4,8 Z" fill="#F0740E" />
+      <path d="M20,8 C21,5.5 21.8,3 21.2,1.3 C19.2,2.7 17.2,5 15.8,7.2 C17.1,8 18.7,8.3 20,8 Z" fill="#F0740E" />
+      <path d="M2.8,1.3 C3.6,2.2 4.3,3.3 4.9,4.5 C4.1,4.5 3.3,4.1 2.7,3.5 C2.6,2.8 2.6,2 2.8,1.3 Z" fill="#1E293B" />
+      <path d="M21.2,1.3 C20.4,2.2 19.7,3.3 19.1,4.5 C19.9,4.5 20.7,4.1 21.3,3.5 C21.4,2.8 21.4,2 21.2,1.3 Z" fill="#1E293B" />
       <circle cx="12" cy="13" r="9" fill="url(#m-fox-body)" />
       <path d="M12,15 C9,15 7,17 7.5,19.5 C9,21.5 15,21.5 16.5,19.5 C17,17 15,15 12,15 Z" fill="#FEF3E2" />
       {EYES}
-      <ellipse cx="12" cy="17.3" rx="1" ry="0.75" fill="#7C2D12" />
+      <ellipse cx="12" cy="17.3" rx="1" ry="0.75" fill="#1E293B" />
     </>
   ),
   frog: (
@@ -213,42 +233,66 @@ const MASCOT_ART: Record<MascotName, React.ReactNode> = {
       <path d="M9.3,13.8 Q12,15.3 14.7,13.8" stroke="#1E293B" strokeWidth="1" fill="none" strokeLinecap="round" opacity="0.8" />
     </>
   ),
-  eagle: (
+  rabbit: (
     <>
-      <radialGradient id="m-eagle-body" cx="35%" cy="28%" r="80%">
-        <stop offset="0%" stopColor="#B4844A" />
-        <stop offset="100%" stopColor="#7C5A2E" />
+      <radialGradient id="m-rabbit-body" cx="35%" cy="28%" r="80%">
+        <stop offset="0%" stopColor="#FDF2F8" />
+        <stop offset="100%" stopColor="#F0D9E8" />
       </radialGradient>
-      <circle cx="12" cy="13" r="9" fill="url(#m-eagle-body)" />
-      <ellipse cx="12" cy="11.5" rx="6.3" ry="5.6" fill="#FBF8F2" />
-      <path d="M10.3,14.3 Q12,16.3 13.7,14.3 Q12,15.6 10.3,14.3 Z" fill="#F2A93B" />
+      <ellipse cx="7.3" cy="4.2" rx="1.9" ry="3.6" fill="#F0D9E8" transform="rotate(-10 7.3 4.2)" />
+      <ellipse cx="16.7" cy="4.2" rx="1.9" ry="3.6" fill="#F0D9E8" transform="rotate(10 16.7 4.2)" />
+      <ellipse cx="7.3" cy="4.6" rx="0.85" ry="2.4" fill="#F9A8D4" transform="rotate(-10 7.3 4.6)" />
+      <ellipse cx="16.7" cy="4.6" rx="0.85" ry="2.4" fill="#F9A8D4" transform="rotate(10 16.7 4.6)" />
+      <circle cx="12" cy="13" r="9" fill="url(#m-rabbit-body)" />
+      <ellipse cx="12" cy="17" rx="5" ry="3.4" fill="#FFFFFF" />
       {EYES}
+      <ellipse cx="12" cy="17.2" rx="1" ry="0.75" fill="#F472B6" />
     </>
   ),
   turtle: (
     <>
-      <radialGradient id="m-turtle-body" cx="35%" cy="28%" r="80%">
+      {/* The old version put the eyes directly on the shell face with no separate head, and a
+          plain criss-cross line pattern — read as a plain green ball, not a turtle. This gives
+          it a distinct patterned shell plus a proper head (with its own eyes) peeking out below. */}
+      <radialGradient id="m-turtle-shell" cx="35%" cy="24%" r="85%">
         <stop offset="0%" stopColor="#8CE6A0" />
         <stop offset="100%" stopColor="#2F9653" />
       </radialGradient>
-      <circle cx="3.6" cy="12" r="2.3" fill="#8CE6A0" />
-      <circle cx="20.4" cy="12" r="2.3" fill="#8CE6A0" />
-      <circle cx="12" cy="13" r="9" fill="url(#m-turtle-body)" />
-      <path d="M12,7.5 L12,18.5 M6.5,13 L17.5,13 M8.3,9.3 L15.7,16.7 M15.7,9.3 L8.3,16.7" stroke="#1D7A42" strokeWidth="0.7" opacity="0.35" />
-      <ellipse cx="12" cy="17.3" rx="5.3" ry="3.2" fill="#E7FBE8" />
-      {EYES}
+      <radialGradient id="m-turtle-head" cx="35%" cy="28%" r="80%">
+        <stop offset="0%" stopColor="#B7E86B" />
+        <stop offset="100%" stopColor="#6BA22E" />
+      </radialGradient>
+      <ellipse cx="4.3" cy="17.5" rx="2.2" ry="1.7" fill="#3FAE5C" transform="rotate(-15 4.3 17.5)" />
+      <ellipse cx="19.7" cy="17.5" rx="2.2" ry="1.7" fill="#3FAE5C" transform="rotate(15 19.7 17.5)" />
+      <circle cx="12" cy="10.5" r="8" fill="url(#m-turtle-shell)" />
+      <path d="M12,3.5 L12,18.5 M5,10.5 L19,10.5 M7.3,5.3 L16.7,15.7 M16.7,5.3 L7.3,15.7" stroke="#1D7A42" strokeWidth="0.7" opacity="0.35" />
+      <circle cx="12" cy="10.5" r="8" fill="none" stroke="#1D7A42" strokeWidth="1" opacity="0.3" />
+      <circle cx="12" cy="18.5" r="4.3" fill="url(#m-turtle-head)" />
+      <circle cx="9.6" cy="17.6" r="1.5" fill="#1E293B" />
+      <circle cx="14.4" cy="17.6" r="1.5" fill="#1E293B" />
+      <circle cx="9.15" cy="17.1" r="0.42" fill="#FFFFFF" />
+      <circle cx="13.95" cy="17.1" r="0.42" fill="#FFFFFF" />
     </>
   ),
   wolf: (
     <>
+      {/* The old version reused fox's exact muzzle shape with just a grey palette swap, so it
+          read as "a grey fox". Earlier fixes just made the same rounded ear shape bigger (round
+          cheek fluff read as a koala; a fur ruff read as a random blob) — the ear SHAPE was the
+          actual problem: genuinely pointed, straighter-edged ears (not just a bigger version of
+          fox's soft curved ear) are what finally reads as wolf/husky, together with a narrower
+          muzzle than fox's and a soft grey forehead "mask" marking. */}
       <radialGradient id="m-wolf-body" cx="35%" cy="28%" r="80%">
         <stop offset="0%" stopColor="#CBD5E1" />
         <stop offset="100%" stopColor="#64748B" />
       </radialGradient>
-      <path d="M5.5,7 C5,4 7,3 8.7,5.7 Z" fill="#64748B" />
-      <path d="M18.5,7 C19,4 17,3 15.3,5.7 Z" fill="#64748B" />
+      <path d="M3.8,8.3 C3.2,5.5 3.3,2.6 4.6,1 C6.3,2.8 7.6,5.2 8.6,7.3 C7.3,8.2 5.2,8.5 3.8,8.3 Z" fill="#64748B" />
+      <path d="M20.2,8.3 C20.8,5.5 20.7,2.6 19.4,1 C17.7,2.8 16.4,5.2 15.4,7.3 C16.7,8.2 18.8,8.5 20.2,8.3 Z" fill="#64748B" />
+      <path d="M4.6,6.8 C4.3,5 4.5,3.3 5.2,2.2 C6.3,3.3 7.1,4.8 7.7,6.4 C6.9,7 5.7,7.1 4.6,6.8 Z" fill="#94A3B8" />
+      <path d="M19.4,6.8 C19.7,5 19.5,3.3 18.8,2.2 C17.7,3.3 16.9,4.8 16.3,6.4 C17.1,7 18.3,7.1 19.4,6.8 Z" fill="#94A3B8" />
       <circle cx="12" cy="13" r="9" fill="url(#m-wolf-body)" />
-      <path d="M12,15 C9.3,15 7.5,16.8 8,19 C9.3,20.8 14.7,20.8 16,19 C16.5,16.8 14.7,15 12,15 Z" fill="#F8FAFC" />
+      <ellipse cx="12" cy="8" rx="2.6" ry="4.2" fill="#475569" opacity="0.45" />
+      <path d="M12,14.8 C10,14.8 8.3,16.2 8.6,18.5 C9.2,20.5 14.8,20.5 15.4,18.5 C15.7,16.2 14,14.8 12,14.8 Z" fill="#F8FAFC" />
       {EYES}
       <ellipse cx="12" cy="17.3" rx="1" ry="0.75" fill="#334155" />
     </>
@@ -352,16 +396,25 @@ const MASCOT_ART: Record<MascotName, React.ReactNode> = {
   ),
   dog: (
     <>
+      {/* A student mistook this for a bear — the old ears sat high and short, closer to a bear's
+          small round ears than a dog's floppy ones. Repositioned to actually hang down past the
+          eyes toward the jaw (the real "floppy ear" cue), plus a collar and tag, which no wild
+          animal in this set wears — an unambiguous "pet dog" signal on its own. */}
       <radialGradient id="m-dog-body" cx="35%" cy="26%" r="82%">
         <stop offset="0%" stopColor="#E8B274" />
         <stop offset="100%" stopColor="#C4874A" />
       </radialGradient>
-      <ellipse cx="4.3" cy="10" rx="3.3" ry="5.2" fill="#C4874A" transform="rotate(-18 4.3 10)" />
-      <ellipse cx="19.7" cy="10" rx="3.3" ry="5.2" fill="#C4874A" transform="rotate(18 19.7 10)" />
+      <ellipse cx="3.6" cy="13.5" rx="2.9" ry="6.6" fill="#C4874A" transform="rotate(-16 3.6 13.5)" />
+      <ellipse cx="20.4" cy="13.5" rx="2.9" ry="6.6" fill="#C4874A" transform="rotate(16 20.4 13.5)" />
+      <ellipse cx="4" cy="14" rx="1.5" ry="4.6" fill="#A9713A" transform="rotate(-16 4 14)" />
+      <ellipse cx="20" cy="14" rx="1.5" ry="4.6" fill="#A9713A" transform="rotate(16 20 14)" />
       <circle cx="12" cy="13" r="9" fill="url(#m-dog-body)" />
       <ellipse cx="12" cy="17" rx="5.3" ry="3.4" fill="#FDF3E4" />
       {EYES}
       <ellipse cx="12" cy="16.3" rx="1.3" ry="1" fill="#3B241A" />
+      <path d="M5.3,18.3 A7,4.2 0 0 0 18.7,18.3" fill="none" stroke="#EF4444" strokeWidth="2.3" strokeLinecap="round" />
+      <circle cx="12" cy="22.2" r="1.4" fill="#FCD34D" />
+      <circle cx="12" cy="22.2" r="0.5" fill="#B45309" />
     </>
   ),
   cat: (

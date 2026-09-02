@@ -128,6 +128,7 @@ function AmbientBackdrop() {
 type HillSnapshot = {
   owners: Record<string, string | number>;
   roundPoints: Record<string | number, number>;
+  gameScores: Record<string | number, number>;
   round: number;
   turnOrder: number[];
   activeTeamIdx: number;
@@ -138,7 +139,7 @@ function validateHillSnapshot(raw: unknown, teamCount: number): HillSnapshot | u
   if (!s || !Array.isArray(s.turnOrder) || s.turnOrder.length !== teamCount) return undefined;
   if (typeof s.activeTeamIdx !== "number" || s.activeTeamIdx < 0 || s.activeTeamIdx >= teamCount) return undefined;
   if (typeof s.round !== "number" || s.round < 1) return undefined;
-  return { owners: s.owners ?? {}, roundPoints: s.roundPoints ?? {}, round: s.round, turnOrder: s.turnOrder, activeTeamIdx: s.activeTeamIdx };
+  return { owners: s.owners ?? {}, roundPoints: s.roundPoints ?? {}, gameScores: s.gameScores ?? {}, round: s.round, turnOrder: s.turnOrder, activeTeamIdx: s.activeTeamIdx };
 }
 
 export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState }: GameProps) {
@@ -158,14 +159,18 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
     () => (isSolo ? [propTeams[0], { ...cpuRef.current!, score: cpuScore }] : propTeams),
     [isSolo, propTeams, cpuScore]
   );
-  const updateScore = (id: string | number, delta: number) => {
-    if (isSolo && id === cpuRef.current?.id) { setCpuScore(s => s + delta); }
-    else { onUpdateScore(id, delta); }
-  };
-
   const isTopicMode = questions.length > 0 && questions.every(q => q.type === "speaking task");
   const ZONES = isTopicMode ? HILL_ZONES_TOPIC : HILL_ZONES_GRAMMAR;
   const resumed = useRef(validateHillSnapshot(initialGameState, teams.length)).current;
+  // Points earned in THIS game only — team.score is the cross-game running total, so the "final"
+  // screen below ranking by it declared whoever was ahead overall the winner of this specific
+  // King of the Hill match, even when another team scored more zone-control/duel points here.
+  const [gameScores, setGameScores] = useState<Record<string | number, number>>(() => resumed?.gameScores ?? Object.fromEntries(teams.map(t => [t.id, 0])));
+  const updateScore = (id: string | number, delta: number) => {
+    setGameScores(prev => ({ ...prev, [id]: (prev[id] ?? 0) + delta }));
+    if (isSolo && id === cpuRef.current?.id) { setCpuScore(s => s + delta); }
+    else { onUpdateScore(id, delta); }
+  };
 
   const pool = useRef((() => {
     // Grammar mode is "fill in the blank" only — never "correct grammar mistakes", even as a
@@ -215,9 +220,9 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
 
   useEffect(() => {
     if (!serializeStateRef) return;
-    serializeStateRef.current = (): HillSnapshot => ({ owners, roundPoints, round, turnOrder, activeTeamIdx });
+    serializeStateRef.current = (): HillSnapshot => ({ owners, roundPoints, gameScores, round, turnOrder, activeTeamIdx });
     return () => { if (serializeStateRef) serializeStateRef.current = null; };
-  }, [serializeStateRef, owners, roundPoints, round, turnOrder, activeTeamIdx]);
+  }, [serializeStateRef, owners, roundPoints, gameScores, round, turnOrder, activeTeamIdx]);
   const [chosenZone, setChosenZone] = useState<string | null>(null);
   const [showAns, setShowAns] = useState(false);
   const [contest, setContest] = useState<any>(null);
@@ -723,9 +728,10 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
   }
 
   if (phase === "final") {
-    // Dense rank on final score — two teams tied for the throne both wear the crown instead of
-    // an arbitrary array-order winner.
-    const ranking = denseRank(teams, t => t.score).sort((a, b) => b.value - a.value);
+    // Dense rank on points earned in THIS game (gameScores), not team.score (the cross-game
+    // running total) — two teams tied for the throne both wear the crown instead of an
+    // arbitrary array-order winner.
+    const ranking = denseRank(teams, t => gameScores[t.id] ?? 0).sort((a, b) => b.value - a.value);
     const winners = ranking.filter(r => r.rank === 0);
     const isTie = winners.length > 1;
     const headline = isTie

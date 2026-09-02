@@ -71,12 +71,40 @@ export const LESSONS: Record<string, Lesson> = {
           "She **played** tennis every week as a child.",
         ],
       },
+      {
+        heading: "Questions with a question word",
+        body: [
+          "A yes/no question is Did + subject + base verb?",
+          "To ask for specific information, put the question word (What/Where/When/Why/Who) before 'did'.",
+        ],
+        examples: [
+          "**Did** she cook dinner? (yes/no)",
+          "**What did** she cook? (asks what the food was)",
+          "**Where did** they travel last summer?",
+          "**Why did** he leave the party early?",
+        ],
+      },
+      {
+        heading: "Joining two past events in one sentence",
+        body: [
+          "'When', 'before', 'after', 'because', and 'although' can join two past simple clauses into one sentence.",
+          "When the joining word starts the sentence, put a comma after the first clause.",
+        ],
+        examples: [
+          "**When** the rain started, we didn't finish the match.",
+          "**Before** he left, he didn't lock the door.",
+          "**Although** she studied hard, she didn't pass the exam.",
+          "We didn't finish the match **when** the rain started. (no comma needed if the joining word comes in the middle)",
+        ],
+      },
     ],
     commonMistakes: [
       "❌ She goed to school. → ✅ She went to school. (irregular verb)",
       "❌ Did you called her? → ✅ Did you call her? (base verb after 'did', no -ed)",
       "❌ I didn't went. → ✅ I didn't go. (base verb after 'didn't')",
       "❌ He studyed all night. → ✅ He studied all night. (y → i before -ed)",
+      "❌ What she cooked? → ✅ What did she cook? (question word still needs 'did' + base verb)",
+      "❌ When the rain started we didn't finish the match. → ✅ When the rain started, we didn't finish the match. (comma after a fronted 'when' clause)",
     ],
   },
 
@@ -379,25 +407,87 @@ export const LESSONS: Record<string, Lesson> = {
           "**How much** does it cost?",
         ],
       },
-      {
-        heading: "Subject vs object questions",
-        body: [
-          "If the question word IS the subject, don't add do/does/did — just use the normal word order.",
-          "If the question word is the OBJECT, you need the auxiliary.",
-        ],
-        examples: [
-          "**Who called** you?",
-          "**What happened**?",
-          "**Who did** you call?",
-          "**What did** you see?",
-        ],
-      },
     ],
     commonMistakes: [
       "❌ Where does she works? → ✅ Where does she work? (base verb after 'does')",
       "❌ What you did yesterday? → ✅ What did you do yesterday?",
-      "❌ Who did called you? → ✅ Who called you? ('who' as subject needs no 'did')",
       "❌ How long does it takes? → ✅ How long does it take? (base verb after 'does')",
+      "❌ Where you are going on holiday? → ✅ Where are you going on holiday? (auxiliary before the subject)",
+    ],
+  },
+
+  subject_object_questions: {
+    title: "Subject vs Object Questions",
+    intro: "Every sentence has a subject (who or what does the action) and often an object (who or what receives the action). When you turn a sentence into a question about the SUBJECT, you don't add do/does/did. When you ask about the OBJECT, you do.",
+    sections: [
+      {
+        heading: "The rule",
+        body: [
+          "Statement: SUBJECT + verb + OBJECT.",
+          "Subject question: ask about the subject → question word + verb (+ object). No do/does/did.",
+          "Object question: ask about the object → question word + do/does/did + subject + base verb.",
+        ],
+        examples: [
+          "Someone broke the window. → **Who broke** the window? (subject question)",
+          "You broke something. → **What did you break**? (object question)",
+        ],
+      },
+      {
+        heading: "Subject questions — present simple",
+        body: [
+          "The question word takes the place of the subject, so the verb still needs its normal present-simple ending (-s for he/she/it).",
+        ],
+        examples: [
+          "**Who owns** this house?",
+          "**What makes** you happy?",
+          "**Which team wins** most matches?",
+        ],
+      },
+      {
+        heading: "Subject questions — other tenses",
+        body: [
+          "Past simple: question word + past verb (no 'did').",
+          "Present perfect: question word + has/have + past participle (no 'did').",
+          "Modals and 'will': question word + modal/will + base verb (nothing extra).",
+        ],
+        examples: [
+          "**Who called** you last night?",
+          "**Who has visited** the most countries?",
+          "**Who will win** the election?",
+          "**What can go** wrong?",
+        ],
+      },
+      {
+        heading: "Object questions — every tense needs the auxiliary",
+        body: [
+          "Present simple: question word + do/does + subject + base verb.",
+          "Past simple: question word + did + subject + base verb.",
+          "Present perfect: question word + have/has + subject + past participle.",
+          "Modals and 'will': question word + modal/will + subject + base verb.",
+        ],
+        examples: [
+          "**Who do** you see every day?",
+          "**Who did** you call at the party?",
+          "**Who have** you met that's famous?",
+          "**Who will** you vote for?",
+        ],
+      },
+      {
+        heading: "'Which' can be a subject or an object question",
+        body: [
+          "'Which' is usually followed by a noun ('which team', 'which book'). That noun stays in the question either way — only the auxiliary changes.",
+        ],
+        examples: [
+          "**Which team won** the championship? (subject — no auxiliary)",
+          "**Which book did** she recommend? (object — needs 'did')",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ Who did break the window? → ✅ Who broke the window? (subject question — no 'did')",
+      "❌ What happens does at the end? → ✅ What happens at the end? (subject question — don't add 'does' as well as the -s)",
+      "❌ Who you called last night? → ✅ Who did you call last night? (object question — needs 'did' before the subject)",
+      "❌ Which book she recommended? → ✅ Which book did she recommend? (object question — needs 'did' before the subject)",
     ],
   },
 
@@ -3476,7 +3566,7 @@ export const LESSONS: Record<string, Lesson> = {
     sections: [
       {
         heading: "Always gerund",
-        body: ["enjoy, finish, suggest, avoid, consider, admit, keep + -ing"],
+        body: ["enjoy, finish, suggest, avoid, consider, admit, keep, deny + -ing"],
         examples: [
           "I **enjoy visiting** new places.",
           "I **finished doing** my homework.",
@@ -3485,11 +3575,22 @@ export const LESSONS: Record<string, Lesson> = {
       },
       {
         heading: "Always infinitive",
-        body: ["decide, agree, hope, promise, manage, refuse, afford + to + base verb"],
+        body: ["decide, agree, hope, promise, manage, refuse, afford, offer + to + base verb"],
         examples: [
           "She **decided to leave** her job.",
           "They **agreed to accept** the plan.",
           "We **managed to meet** the deadline.",
+        ],
+      },
+      {
+        heading: "Verbs that can take either, with no real difference",
+        body: [
+          "like, love, hate, prefer + -ing OR + to + base verb — both forms are correct, with little or no difference in meaning.",
+        ],
+        examples: [
+          "I **like reading** before bed. / I **like to read** before bed. (both correct)",
+          "She **loves cooking** for her family. / She **loves to cook** for her family.",
+          "He **hates waiting** in long queues. / He **hates to wait** in long queues.",
         ],
       },
       {
@@ -4137,10 +4238,12 @@ export const LESSONS: Record<string, Lesson> = {
       },
       {
         heading: "Relative clauses — adding a consequence or extra fact with 'which'",
-        body: ["'Which' can add a defining or non-defining clause about a thing just mentioned — often used to state a consequence."],
+        body: ["'Which' can add a defining or non-defining clause about a thing just mentioned — often used to state a consequence. 'Who'/'that' identify a person or thing directly — no commas needed."],
         examples: [
           "Factories produce large amounts of carbon dioxide, **which traps heat** in the atmosphere.",
           "Coral reefs, **which support thousands of marine species**, are dying.",
+          "People **who recycle their waste** help protect the environment.",
+          "Cars **that run on electricity** produce no emissions.",
         ],
       },
       {
@@ -4339,6 +4442,64 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ She doesn't goes to the gym. → ✅ She doesn't go to the gym. (base verb after 'doesn't', no -s)",
       "❌ I doesn't understand. → ✅ I don't understand. ('I' needs 'don't')",
       "❌ She don't never eat meat. → ✅ She never eats meat. (only one negative — don't combine 'don't' and 'never')",
+    ],
+  },
+
+  auxiliary_verbs_be_do: {
+    title: "Auxiliary Verbs (Be vs Do)",
+    intro: "English has two different 'helper' patterns for negatives and questions, and beginners often mix them up. The trick is simple: look at what comes after the subject. An adjective, a job, or a place needs 'be' (am/is/are). An action verb needs 'do/does'.",
+    sections: [
+      {
+        heading: "Use 'be' for adjectives, jobs, and places",
+        body: [
+          "If the sentence describes a feeling, a job/role, or where someone is, the main verb is already 'be' — use am/is/are directly, don't add 'do/does' as well.",
+        ],
+        examples: [
+          "**Are** you happy?",
+          "**Is** she a teacher?",
+          "**Are** they at home?",
+        ],
+      },
+      {
+        heading: "Use 'do/does' for action verbs",
+        body: [
+          "If the sentence has an action verb (like, live, work, study, play...), that verb needs 'do/does' for questions and negatives — never 'be'.",
+        ],
+        examples: [
+          "**Do** you like pizza?",
+          "**Does** she work here?",
+          "**Do** they play football?",
+        ],
+      },
+      {
+        heading: "Negatives",
+        body: [
+          "'Be' negative: am not / isn't / aren't.",
+          "Action verb negative: don't / doesn't + base verb.",
+        ],
+        examples: [
+          "I **am not** tired.",
+          "He **isn't** hungry.",
+          "I **don't** like loud music.",
+          "He **doesn't** eat meat.",
+        ],
+      },
+      {
+        heading: "Never combine the two",
+        body: [
+          "A sentence never needs both 'be' and 'do/does' together — pick the one that matches the main verb.",
+        ],
+        examples: [
+          "❌ She is has a car. → ✅ She has a car.",
+          "❌ He don't is tired. → ✅ He isn't tired.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ Do you happy? → ✅ Are you happy? ('happy' is an adjective — use 'be', not 'do')",
+      "❌ Is she like music? → ✅ Does she like music? ('like' is an action verb — use 'does', not 'is')",
+      "❌ Are you speak English? → ✅ Do you speak English? ('speak' is an action verb — use 'do', not 'are')",
+      "❌ Does she a nurse? → ✅ Is she a nurse? (a profession uses 'be', not 'does')",
     ],
   },
 
@@ -4674,8 +4835,9 @@ export const LESSONS: Record<string, Lesson> = {
         body: ["Common objects found around the house, grouped by what they're used for."],
         examples: [
           "**sofa**, **table**, **chair**, **bed** — furniture for sitting or sleeping",
-          "**fridge**, **sink**, **lamp**, **mirror** — everyday objects with a clear job",
-          "**wardrobe**, **shelf**, **curtains** — for storing or covering things",
+          "**fridge**, **sink**, **lamp**, **mirror**, **clock**, **plates**, **cushions** — everyday objects with a clear job",
+          "**wardrobe**, **shelf**, **curtains**, **cupboard** — for storing or covering things",
+          "**plants**, **rug** — for decorating a room",
         ],
       },
       {
@@ -5902,12 +6064,35 @@ export const LESSONS: Record<string, Lesson> = {
         ],
       },
       {
+        heading: "The frequency scale, and asking 'how often'",
+        body: [
+          "From 100% of the time to 0% of the time, in order: **always** → **usually** → **often** → **sometimes** → **rarely** → **never**.",
+          "To ask about frequency, use **'How often...?'** + do/does + subject + base verb.",
+        ],
+        examples: [
+          "I **always** eat breakfast, but I **rarely** eat a big lunch.",
+          "She **usually** walks to work, and she **sometimes** takes the bus.",
+          "**How often** do you exercise? I exercise **often** — about four times a week.",
+        ],
+      },
+      {
         heading: "Present simple third person",
         body: ["He/she/it takes the -s form of the verb: goes, has, wakes, gets."],
         examples: [
           "He **goes** to work at 8. (not 'go')",
           "She **has** breakfast at 7.",
           "She **wakes** up at seven every morning.",
+        ],
+      },
+      {
+        heading: "Common daily routine verbs",
+        body: [
+          "Everyday routine actions, roughly in order: wake up, get up, get dressed, brush your teeth, take a shower, have breakfast/lunch/dinner, go to school, go to work, go home, go to bed.",
+        ],
+        examples: [
+          "I **wake up**, **get dressed**, and **have breakfast** before I **go to school**.",
+          "He **takes a shower** in the morning and **goes to work** at 8.",
+          "She **goes home** at 5 and **goes to bed** at 11.",
         ],
       },
       {
