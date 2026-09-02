@@ -71,12 +71,40 @@ export const LESSONS: Record<string, Lesson> = {
           "She **played** tennis every week as a child.",
         ],
       },
+      {
+        heading: "Questions with a question word",
+        body: [
+          "A yes/no question is Did + subject + base verb?",
+          "To ask for specific information, put the question word (What/Where/When/Why/Who) before 'did'.",
+        ],
+        examples: [
+          "**Did** she cook dinner? (yes/no)",
+          "**What did** she cook? (asks what the food was)",
+          "**Where did** they travel last summer?",
+          "**Why did** he leave the party early?",
+        ],
+      },
+      {
+        heading: "Joining two past events in one sentence",
+        body: [
+          "'When', 'before', 'after', 'because', and 'although' can join two past simple clauses into one sentence.",
+          "When the joining word starts the sentence, put a comma after the first clause.",
+        ],
+        examples: [
+          "**When** the rain started, we didn't finish the match.",
+          "**Before** he left, he didn't lock the door.",
+          "**Although** she studied hard, she didn't pass the exam.",
+          "We didn't finish the match **when** the rain started. (no comma needed if the joining word comes in the middle)",
+        ],
+      },
     ],
     commonMistakes: [
       "❌ She goed to school. → ✅ She went to school. (irregular verb)",
       "❌ Did you called her? → ✅ Did you call her? (base verb after 'did', no -ed)",
       "❌ I didn't went. → ✅ I didn't go. (base verb after 'didn't')",
       "❌ He studyed all night. → ✅ He studied all night. (y → i before -ed)",
+      "❌ What she cooked? → ✅ What did she cook? (question word still needs 'did' + base verb)",
+      "❌ When the rain started we didn't finish the match. → ✅ When the rain started, we didn't finish the match. (comma after a fronted 'when' clause)",
     ],
   },
 
