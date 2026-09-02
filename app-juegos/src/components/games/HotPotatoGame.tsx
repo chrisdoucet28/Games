@@ -240,10 +240,15 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
       setPassing(false);
       setHolderIdx(i => (i + 1) % teams.length);
       setJustCaught(true);
+      // Resume the round clock only once the new holder is actually in effect — resuming it
+      // synchronously here (as it used to) left a 650ms window, while the potato is still mid-
+      // throw, where the round could time out and the explosion penalty would read the OLD
+      // holderIdxRef, charging the team that had just correctly answered and passed instead of
+      // whoever the potato was actually landing on.
+      timerPaused.current = false;
       setTimeout(() => setJustCaught(false), 420);
     }, 650);
     setShowAnswer(false);
-    timerPaused.current = false;
     setQi(i => i + 1);
   };
 
