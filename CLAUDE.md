@@ -146,6 +146,20 @@ handout) with no guarantee they've seen any other specific lesson first.
   words, not just the variable content (event/time/reason) — otherwise the player has no way to
   know which of several correct phrasings the answer key actually expects, and a different, equally
   valid response gets marked wrong purely because nothing ever cued which one to use.
+- **Minefield's `minefieldGrid`**: `MinefieldGame.tsx` hard-codes a 5x5 board (`ROWS = 5, COLS = 5`)
+  and indexes `colLabels`/`rowLabels` by that fixed size regardless of how many entries the arrays
+  actually have — a topic with fewer than 5 of either isn't a smaller grid, it's tiles rendering
+  `undefined` text. Every `minefieldGrid` needs exactly 5 `colLabels` and 5 `rowLabels`, no more,
+  no fewer. The game shows a picked tile's col label + row label side by side plus "+ your idea",
+  the student builds one full sentence combining all three aloud, and the teacher judges it live —
+  there's no auto-graded correct/incorrect pairing, so never frame a grid as "match the correct
+  pairs, mismatched pairs are the mines" (the mines are random hidden tiles, unrelated to grammar).
+  Follow the established shape instead: `colLabels` = a subject or sentence-opener (e.g. `["I",
+  "She", "They", "We", "He"]` or `["I always …", "She needs to …", ...]`), `rowLabels` = a verb-
+  phrase or blank-templated continuation (e.g. `["___ (go) to…", ...]` or `["… give up …", ...]`)
+  that reads as one coherent sentence stem when combined with any column — see `irregular_verbs`,
+  `present_perfect`, or `phrasal_verbs` for the pattern. It's fine for a row's base-form word to
+  need student-supplied conjugation depending on the column (that's the actual speaking practice).
 - **"How to Play" tutorials (`data/tutorials/*.tsx`)**: each game's intro screen has a How to
   Play button opening a scripted walkthrough (`components/shared/HowToPlayModal.tsx`) — hand-authored
   mockups, not driven by real game state, so nothing keeps them in sync with the actual game
