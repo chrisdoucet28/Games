@@ -1667,6 +1667,87 @@ export const LESSONS: Record<string, Lesson> = {
     ],
   },
 
+  understanding_get: {
+    title: "Understanding 'Get'",
+    intro: "'Get' is one of the most common verbs in English, and it changes meaning completely depending on what comes after it. This lesson covers its most useful everyday meanings.",
+    sections: [
+      {
+        heading: "Get = obtain, receive, or buy",
+        body: [
+          "The most basic meaning: something comes into your possession.",
+        ],
+        examples: [
+          "I **got** a new laptop for my birthday. (received)",
+          "I **got** this jacket from a small shop. (bought)",
+          "Did you **get** my message? (receive)",
+        ],
+      },
+      {
+        heading: "Get = arrive or reach",
+        body: [
+          "'Get to' + a place means arrive there.",
+        ],
+        examples: [
+          "We **got to** the airport just in time.",
+          "What time did you **get** home last night?",
+        ],
+      },
+      {
+        heading: "Get + adjective = become",
+        body: [
+          "'Get' + an adjective (or a comparative adjective) describes a change of state.",
+        ],
+        examples: [
+          "It's **getting** dark outside.",
+          "He **got** really angry when he heard the news.",
+          "She's **getting** better at tennis every week.",
+        ],
+      },
+      {
+        heading: "Common 'get' phrasal verbs",
+        body: [
+          "'Get' combines with particles for everyday actions — each combination has its own specific meaning.",
+        ],
+        examples: [
+          "**get up** = leave your bed",
+          "**get on/off** = board/leave a bus, train, or plane",
+          "**get in/out of** = enter/leave a car",
+          "**get back** = return",
+          "**get together** = meet socially",
+          "**get into** (trouble) = end up in a bad situation",
+        ],
+      },
+      {
+        heading: "Get + past participle = an informal passive",
+        body: [
+          "In everyday spoken English, 'get' + past participle is a common informal alternative to 'be' + past participle for things that happen to someone.",
+        ],
+        examples: [
+          "She **got promoted** last month.",
+          "He **got injured** playing football.",
+          "They **got married** last summer.",
+          "My bag **got stolen** on the train.",
+        ],
+      },
+      {
+        heading: "Get + object + past participle = arrange for a service",
+        body: [
+          "This pattern means you arrange for someone else to do something for you, not that you did it yourself.",
+        ],
+        examples: [
+          "I **got my hair cut** yesterday. (a hairdresser cut it, not me)",
+          "We **got the car fixed** at the garage.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ She promoted last month. → ✅ She got promoted last month. (informal passive needs 'get' + past participle)",
+      "❌ I got my hair cutting. → ✅ I got my hair cut. ('get + object + past participle' — not '-ing')",
+      "❌ Did you got my message? → ✅ Did you get my message? (after 'did', use the base form 'get')",
+      "❌ It get really cold at night. → ✅ It gets really cold at night. (third person singular needs 'gets')",
+    ],
+  },
+
   so_neither: {
     title: "So do I / Neither do I",
     intro: "Agreeing with someone in English needs an auxiliary verb and inverted word order — matching the right auxiliary is the whole challenge.",
