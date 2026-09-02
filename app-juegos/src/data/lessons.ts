@@ -4238,10 +4238,12 @@ export const LESSONS: Record<string, Lesson> = {
       },
       {
         heading: "Relative clauses — adding a consequence or extra fact with 'which'",
-        body: ["'Which' can add a defining or non-defining clause about a thing just mentioned — often used to state a consequence."],
+        body: ["'Which' can add a defining or non-defining clause about a thing just mentioned — often used to state a consequence. 'Who'/'that' identify a person or thing directly — no commas needed."],
         examples: [
           "Factories produce large amounts of carbon dioxide, **which traps heat** in the atmosphere.",
           "Coral reefs, **which support thousands of marine species**, are dying.",
+          "People **who recycle their waste** help protect the environment.",
+          "Cars **that run on electricity** produce no emissions.",
         ],
       },
       {
