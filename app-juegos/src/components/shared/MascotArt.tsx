@@ -13,7 +13,7 @@ import type { CSSProperties } from "react";
 
 export type MascotName =
   | "dragon" | "unicorn" | "robot" | "fox" | "frog" | "lion" | "penguin" | "dino" | "bee"
-  | "butterfly" | "octopus" | "eagle" | "turtle" | "wolf" | "owl" | "tiger" | "pizza"
+  | "butterfly" | "octopus" | "rabbit" | "turtle" | "wolf" | "owl" | "tiger" | "pizza"
   | "ghost" | "ninja" | "alien" | "panda" | "shark" | "dog" | "cat";
 
 // Standard glossy eye pair — reused verbatim by every mascot whose face sits at the default
@@ -49,9 +49,24 @@ const MASCOT_ART: Record<MascotName, React.ReactNode> = {
         <stop offset="0%" stopColor="#FFFFFF" />
         <stop offset="100%" stopColor="#E9D5FF" />
       </radialGradient>
-      <polygon points="13,2 11.3,6.5 14.5,6" fill="#FCD34D" />
-      <path d="M6.5,7 C5,6.3 4,7.3 3.2,6.3 M6.8,9.3 C5.3,9 4.5,10.2 3.5,9.5" stroke="#F0ABFC" strokeWidth="1.4" fill="none" strokeLinecap="round" />
+      <linearGradient id="m-unicorn-horn" x1="0%" y1="100%" x2="0%" y2="0%">
+        <stop offset="0%" stopColor="#F59E0B" />
+        <stop offset="100%" stopColor="#FCD34D" />
+      </linearGradient>
+      {/* ears, then a big centered horn — teachers reported the first pass (thin, and a gradient
+          fading to near-white at the tip) was invisible enough that students genuinely couldn't
+          tell it was a unicorn. This one is much wider/taller and stays fully saturated gold
+          top to bottom, no fade. */}
+      <path d="M7,6 C6.3,3.3 8.3,2.6 9.3,5.3 Z" fill="#E9D5FF" />
+      <path d="M17,6 C17.7,3.3 15.7,2.6 14.7,5.3 Z" fill="#E9D5FF" />
+      <path d="M12,0.5 L9.7,8 H14.3 Z" fill="url(#m-unicorn-horn)" />
+      <path d="M10.5,3.1 L13.5,3.3 M10,5.6 L14,5.8" stroke="#D97706" strokeWidth="0.7" opacity="0.7" />
       <circle cx="12" cy="13" r="9" fill="url(#m-unicorn-body)" />
+      {/* flowing rainbow mane, drawn over the body so it reads as hair draped along the side —
+          the old version was two thin eyelash-like lines that didn't read as a mane at all */}
+      <ellipse cx="3.8" cy="9.5" rx="2.8" ry="4.2" fill="#F0ABFC" transform="rotate(-20 3.8 9.5)" />
+      <ellipse cx="3.2" cy="14.5" rx="2.5" ry="3.8" fill="#C4B5FD" transform="rotate(-4 3.2 14.5)" />
+      <ellipse cx="3.9" cy="19" rx="2.2" ry="3.4" fill="#93C5FD" transform="rotate(12 3.9 19)" />
       <ellipse cx="12" cy="17" rx="5" ry="3.4" fill="#FBF7FF" />
       {EYES}
       <ellipse cx="12" cy="18" rx="1.1" ry="0.8" fill="#F9A8D4" />
@@ -213,42 +228,66 @@ const MASCOT_ART: Record<MascotName, React.ReactNode> = {
       <path d="M9.3,13.8 Q12,15.3 14.7,13.8" stroke="#1E293B" strokeWidth="1" fill="none" strokeLinecap="round" opacity="0.8" />
     </>
   ),
-  eagle: (
+  rabbit: (
     <>
-      <radialGradient id="m-eagle-body" cx="35%" cy="28%" r="80%">
-        <stop offset="0%" stopColor="#B4844A" />
-        <stop offset="100%" stopColor="#7C5A2E" />
+      <radialGradient id="m-rabbit-body" cx="35%" cy="28%" r="80%">
+        <stop offset="0%" stopColor="#FDF2F8" />
+        <stop offset="100%" stopColor="#F0D9E8" />
       </radialGradient>
-      <circle cx="12" cy="13" r="9" fill="url(#m-eagle-body)" />
-      <ellipse cx="12" cy="11.5" rx="6.3" ry="5.6" fill="#FBF8F2" />
-      <path d="M10.3,14.3 Q12,16.3 13.7,14.3 Q12,15.6 10.3,14.3 Z" fill="#F2A93B" />
+      <ellipse cx="7.3" cy="4.2" rx="1.9" ry="3.6" fill="#F0D9E8" transform="rotate(-10 7.3 4.2)" />
+      <ellipse cx="16.7" cy="4.2" rx="1.9" ry="3.6" fill="#F0D9E8" transform="rotate(10 16.7 4.2)" />
+      <ellipse cx="7.3" cy="4.6" rx="0.85" ry="2.4" fill="#F9A8D4" transform="rotate(-10 7.3 4.6)" />
+      <ellipse cx="16.7" cy="4.6" rx="0.85" ry="2.4" fill="#F9A8D4" transform="rotate(10 16.7 4.6)" />
+      <circle cx="12" cy="13" r="9" fill="url(#m-rabbit-body)" />
+      <ellipse cx="12" cy="17" rx="5" ry="3.4" fill="#FFFFFF" />
       {EYES}
+      <ellipse cx="12" cy="17.2" rx="1" ry="0.75" fill="#F472B6" />
     </>
   ),
   turtle: (
     <>
-      <radialGradient id="m-turtle-body" cx="35%" cy="28%" r="80%">
+      {/* The old version put the eyes directly on the shell face with no separate head, and a
+          plain criss-cross line pattern — read as a plain green ball, not a turtle. This gives
+          it a distinct patterned shell plus a proper head (with its own eyes) peeking out below. */}
+      <radialGradient id="m-turtle-shell" cx="35%" cy="24%" r="85%">
         <stop offset="0%" stopColor="#8CE6A0" />
         <stop offset="100%" stopColor="#2F9653" />
       </radialGradient>
-      <circle cx="3.6" cy="12" r="2.3" fill="#8CE6A0" />
-      <circle cx="20.4" cy="12" r="2.3" fill="#8CE6A0" />
-      <circle cx="12" cy="13" r="9" fill="url(#m-turtle-body)" />
-      <path d="M12,7.5 L12,18.5 M6.5,13 L17.5,13 M8.3,9.3 L15.7,16.7 M15.7,9.3 L8.3,16.7" stroke="#1D7A42" strokeWidth="0.7" opacity="0.35" />
-      <ellipse cx="12" cy="17.3" rx="5.3" ry="3.2" fill="#E7FBE8" />
-      {EYES}
+      <radialGradient id="m-turtle-head" cx="35%" cy="28%" r="80%">
+        <stop offset="0%" stopColor="#B7E86B" />
+        <stop offset="100%" stopColor="#6BA22E" />
+      </radialGradient>
+      <ellipse cx="4.3" cy="17.5" rx="2.2" ry="1.7" fill="#3FAE5C" transform="rotate(-15 4.3 17.5)" />
+      <ellipse cx="19.7" cy="17.5" rx="2.2" ry="1.7" fill="#3FAE5C" transform="rotate(15 19.7 17.5)" />
+      <circle cx="12" cy="10.5" r="8" fill="url(#m-turtle-shell)" />
+      <path d="M12,3.5 L12,18.5 M5,10.5 L19,10.5 M7.3,5.3 L16.7,15.7 M16.7,5.3 L7.3,15.7" stroke="#1D7A42" strokeWidth="0.7" opacity="0.35" />
+      <circle cx="12" cy="10.5" r="8" fill="none" stroke="#1D7A42" strokeWidth="1" opacity="0.3" />
+      <circle cx="12" cy="18.5" r="4.3" fill="url(#m-turtle-head)" />
+      <circle cx="9.6" cy="17.6" r="1.5" fill="#1E293B" />
+      <circle cx="14.4" cy="17.6" r="1.5" fill="#1E293B" />
+      <circle cx="9.15" cy="17.1" r="0.42" fill="#FFFFFF" />
+      <circle cx="13.95" cy="17.1" r="0.42" fill="#FFFFFF" />
     </>
   ),
   wolf: (
     <>
+      {/* The old version reused fox's exact muzzle shape with just a grey palette swap, so it
+          read as "a grey fox". Two earlier attempts at fixing this (round cheek fluff, then a
+          fur ruff) instead read as a koala or a random blob — this settles on the thing that
+          actually reads as "wolf" without changing the silhouette much: bigger two-tone upright
+          ears, a narrower muzzle than fox's, and a soft grey forehead "mask" marking (the classic
+          wolf/husky face pattern), which no other canine mascot here has. */}
       <radialGradient id="m-wolf-body" cx="35%" cy="28%" r="80%">
         <stop offset="0%" stopColor="#CBD5E1" />
         <stop offset="100%" stopColor="#64748B" />
       </radialGradient>
-      <path d="M5.5,7 C5,4 7,3 8.7,5.7 Z" fill="#64748B" />
-      <path d="M18.5,7 C19,4 17,3 15.3,5.7 Z" fill="#64748B" />
+      <path d="M4.5,8 C3,3.5 6.5,2 8.8,6.3 Z" fill="#64748B" />
+      <path d="M19.5,8 C21,3.5 17.5,2 15.2,6.3 Z" fill="#64748B" />
+      <path d="M5.3,7 C4.6,4.3 6.5,3.6 7.9,6.2 Z" fill="#94A3B8" />
+      <path d="M18.7,7 C19.4,4.3 17.5,3.6 16.1,6.2 Z" fill="#94A3B8" />
       <circle cx="12" cy="13" r="9" fill="url(#m-wolf-body)" />
-      <path d="M12,15 C9.3,15 7.5,16.8 8,19 C9.3,20.8 14.7,20.8 16,19 C16.5,16.8 14.7,15 12,15 Z" fill="#F8FAFC" />
+      <ellipse cx="12" cy="8" rx="2.6" ry="4.2" fill="#475569" opacity="0.45" />
+      <path d="M12,14.8 C10,14.8 8.3,16.2 8.6,18.5 C9.2,20.5 14.8,20.5 15.4,18.5 C15.7,16.2 14,14.8 12,14.8 Z" fill="#F8FAFC" />
       {EYES}
       <ellipse cx="12" cy="17.3" rx="1" ry="0.75" fill="#334155" />
     </>
