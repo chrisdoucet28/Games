@@ -5,7 +5,7 @@ import type { GameProps } from "../../types";
 import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
 import { denseRank } from "../../utils/ranking";
 import { RankBadge } from "../shared/RankBadge";
-import { makeSoloCpuTeam } from "../../lib/soloOpponent";
+import { makeSoloCpuTeam, makeTeacherTeam } from "../../lib/soloOpponent";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
 import { MINEFIELD_TUTORIAL_STEPS } from "../../data/tutorials/minefield";
@@ -48,6 +48,12 @@ type MinefieldSnapshot = {
   correctByTeam: Record<string | number, number>;
   minesHitByTeam: Record<string | number, number>;
   gameScoreByTeam: Record<string | number, number>;
+  // Which solo opponent was chosen, and its score — both default for saves made before this field
+  // existed (cpuScore/teacherScore were never snapshotted at all before, silently resetting the
+  // solo opponent's score to 0 on every resume even though gameScoreByTeam resumed fine).
+  opponentType: "cpu" | "teacher";
+  cpuScore: number;
+  teacherScore: number;
 };
 
 function validateMinefieldSnapshot(raw: unknown, teamCount: number, gridCount: number): MinefieldSnapshot | undefined {
@@ -63,23 +69,39 @@ function validateMinefieldSnapshot(raw: unknown, teamCount: number, gridCount: n
     correctByTeam: s.correctByTeam ?? {},
     minesHitByTeam: s.minesHitByTeam ?? {},
     gameScoreByTeam: s.gameScoreByTeam ?? {},
+    opponentType: s.opponentType === "teacher" ? "teacher" : "cpu",
+    cpuScore: s.cpuScore ?? 0,
+    teacherScore: s.teacherScore ?? 0,
   };
 }
 
 export function MinefieldGame({ gridData, teams: propTeams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState }: GameProps) {
   const grids = (Array.isArray(gridData) ? gridData : gridData ? [gridData] : []) as MinefieldGrid[];
 
+  // Solo has no rival team to split mine risk with — either a CPU or a live teacher takes real
+  // turns on the same shared board exactly like a second human team would. Neither one actually
+  // produces or is judged on a sentence — only the student ever is — so both opponent types share
+  // the same resolution: an auto-"thinking" delay, then a guaranteed-correct auto-judge (a CPU's
+  // used to be a tunable random chance; a teacher's is always successful, since there's no real
+  // opponent to lose to). The shared mine risk stays exactly as real either way, since hitting a
+  // mine is independent of that correctness roll — see afterJudge below.
   const isSolo = propTeams.length === 1;
+  const effectiveTeamCount = isSolo ? 2 : propTeams.length;
+  const resumed = useRef(validateMinefieldSnapshot(initialGameState, effectiveTeamCount, grids.length)).current;
+  const [opponentType, setOpponentType] = useState<"cpu" | "teacher">(() => resumed?.opponentType ?? "cpu");
   const cpuRef = useRef(isSolo ? makeSoloCpuTeam() : null);
-  const [cpuScore, setCpuScore] = useState(0);
+  const teacherRef = useRef(isSolo ? makeTeacherTeam() : null);
+  const [cpuScore, setCpuScore] = useState(() => resumed?.cpuScore ?? 0);
+  const [teacherScore, setTeacherScore] = useState(() => resumed?.teacherScore ?? 0);
   // Memoized so `teams` is referentially stable across renders when nothing has actually
   // changed — effects in this file depend on `teams`/`t` by reference, and a fresh array
   // literal every render would make them re-fire (and re-setState) forever.
   const teams = useMemo(
-    () => (isSolo ? [propTeams[0], { ...cpuRef.current!, score: cpuScore }] : propTeams),
-    [isSolo, propTeams, cpuScore]
+    () => (isSolo
+      ? [propTeams[0], opponentType === "teacher" ? { ...teacherRef.current!, score: teacherScore } : { ...cpuRef.current!, score: cpuScore }]
+      : propTeams),
+    [isSolo, propTeams, opponentType, cpuScore, teacherScore]
   );
-  const resumed = useRef(validateMinefieldSnapshot(initialGameState, teams.length, grids.length)).current;
   // Points earned in THIS game only — team.score is the cross-game running total, so the final
   // screen ranking by it declared whoever was ahead overall the winner even when another team
   // scored more here. Also fixes solo mode specifically comparing apples to oranges: cpuScore is
@@ -88,6 +110,7 @@ export function MinefieldGame({ gridData, teams: propTeams, onUpdateScore, onEnd
   const updateScore = (id: string | number, delta: number) => {
     setGameScoreByTeam(prev => ({ ...prev, [id]: (prev[id] ?? 0) + delta }));
     if (isSolo && id === cpuRef.current?.id) { setCpuScore(s => s + delta); }
+    else if (isSolo && id === teacherRef.current?.id) { setTeacherScore(s => s + delta); }
     else { onUpdateScore(id, delta); }
   };
 
@@ -124,9 +147,10 @@ export function MinefieldGame({ gridData, teams: propTeams, onUpdateScore, onEnd
     if (!serializeStateRef) return;
     serializeStateRef.current = (): MinefieldSnapshot => ({
       mines: [...mines], revealed: [...revealed], gridIndex, activeTeam, correctByTeam, minesHitByTeam, gameScoreByTeam,
+      opponentType, cpuScore, teacherScore,
     });
     return () => { if (serializeStateRef) serializeStateRef.current = null; };
-  }, [serializeStateRef, mines, revealed, gridIndex, activeTeam, correctByTeam, minesHitByTeam, gameScoreByTeam]);
+  }, [serializeStateRef, mines, revealed, gridIndex, activeTeam, correctByTeam, minesHitByTeam, gameScoreByTeam, opponentType, cpuScore, teacherScore]);
 
   const currentGrid = grids[Math.min(gridIndex, Math.max(0, grids.length - 1))];
   const topicRotation = grids.length > 1;
@@ -161,6 +185,18 @@ export function MinefieldGame({ gridData, teams: propTeams, onUpdateScore, onEnd
     if (!isSolo || phase !== "speaking" || t?.id !== cpuRef.current?.id) return;
     const timer = setTimeout(() => {
       afterJudgeRef.current(Math.random() < CPU_SUCCESS_CHANCE);
+    }, CPU_JUDGE_MS);
+    return () => clearTimeout(timer);
+  }, [isSolo, phase, t]);
+
+  // A teacher picks their own tile for real (the click handler below is already ungated by team
+  // identity), but never produces or is judged on a sentence — only the student ever is. There's
+  // no real opponent to lose to, so it always resolves as correct; the shared mine risk is still
+  // fully real either way, since a mine hit is independent of this correctness roll.
+  useEffect(() => {
+    if (!isSolo || phase !== "speaking" || t?.id !== teacherRef.current?.id) return;
+    const timer = setTimeout(() => {
+      afterJudgeRef.current(true);
     }, CPU_JUDGE_MS);
     return () => clearTimeout(timer);
   }, [isSolo, phase, t]);
@@ -289,6 +325,30 @@ export function MinefieldGame({ gridData, teams: propTeams, onUpdateScore, onEnd
             <div key={team.id} style={{ background: team.color.light, border: `3px solid ${team.color.bg}`, borderRadius: "14px", padding: "10px 18px", fontWeight: "800", fontSize: "14px", color: team.color.dark, display: "flex", alignItems: "center", gap: "6px" }}><TeamIcon team={team} /> {team.name}</div>
           ))}
         </div>
+        {isSolo && (
+          <div style={{ marginBottom: "20px" }}>
+            <div style={{ fontSize: "13px", color: "#6B7280", fontWeight: "700", marginBottom: "10px" }}>Who do you want to play against?</div>
+            <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
+              <button onClick={() => setOpponentType("cpu")} style={{
+                padding: "10px 20px", borderRadius: "12px", fontWeight: "800", fontSize: "14px", cursor: "pointer",
+                border: `2px solid ${opponentType === "cpu" ? "#6D28D9" : "#E5E7EB"}`,
+                background: opponentType === "cpu" ? "#EDE9FE" : "white",
+                color: opponentType === "cpu" ? "#6D28D9" : "#6B7280",
+              }}><Icon name="robot" size={14} /> CPU</button>
+              <button onClick={() => setOpponentType("teacher")} style={{
+                padding: "10px 20px", borderRadius: "12px", fontWeight: "800", fontSize: "14px", cursor: "pointer",
+                border: `2px solid ${opponentType === "teacher" ? "#6D28D9" : "#E5E7EB"}`,
+                background: opponentType === "teacher" ? "#EDE9FE" : "white",
+                color: opponentType === "teacher" ? "#6D28D9" : "#6B7280",
+              }}><Icon name="person" size={14} /> Teacher</button>
+            </div>
+            {opponentType === "teacher" && (
+              <div style={{ fontSize: "11px", color: "#9CA3AF", marginTop: "6px" }}>
+                The teacher picks a real tile each turn, but only the student ever speaks a sentence — the teacher's own pick always counts as correct, though it can still hit a mine just like anyone else's.
+              </div>
+            )}
+          </div>
+        )}
         <button onClick={() => setShowHowTo(true)} style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginBottom: "14px", background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
           <Icon name="help" size={15} /> How to Play
         </button>
