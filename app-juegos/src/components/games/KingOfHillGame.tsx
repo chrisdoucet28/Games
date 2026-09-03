@@ -29,7 +29,10 @@ const GM = GAME_MODES.find(g => g.id === "hill")!;
 // How long the CPU "thinks" before picking a zone, and before its uncontested claim resolves.
 const CPU_THINK_MS = 1400;
 const CPU_ANSWER_MS = 1000;
-const CPU_CLAIM_SUCCESS_PROB = 0.8;
+// Chance the CPU goes after a zone the student already owns even while free zones remain — without
+// this it only ever attacks as a last resort once every zone is claimed, which reads as passive for
+// most of a match. When no free zone is left it always attacks regardless of this constant.
+const CPU_ATTACK_PREFERENCE = 0.5;
 // Countdown the student gets to defend/attack a contested zone against the CPU, replacing the
 // teacher's Attacker/Defender/Neither judgment in solo — same idea as Race Track's timer.
 const CONTEST_SECONDS = 20;
@@ -466,8 +469,9 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
     setContest((c: any) => ({ ...c, step: "result", winner: winnerId, reason }));
   };
 
-  // CPU auto-picks a zone on its own turn: unclaimed if any exist, otherwise attacks a
-  // player-owned zone. Reuses pickZone's existing branch logic unchanged — must stay above the
+  // CPU auto-picks a zone on its own turn: attacks a player-owned zone either because there's no
+  // free zone left (a guaranteed attack) or, even when free zones remain, by the
+  // CPU_ATTACK_PREFERENCE roll — otherwise it expands into an unclaimed zone. Must stay above the
   // intro/final early returns below (Rules of Hooks).
   useEffect(() => {
     if (!isSolo || phase !== "pick" || activeTeam.id !== cpuRef.current?.id) return;
@@ -475,7 +479,8 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
     const zoneIds = ZONES.map(z => z.id);
     const unclaimed = zoneIds.filter(id => owners[id] === undefined);
     const attackable = zoneIds.filter(id => owners[id] !== undefined && owners[id] !== cpuId);
-    const pool = unclaimed.length > 0 ? unclaimed : attackable;
+    const shouldAttack = attackable.length > 0 && (unclaimed.length === 0 || Math.random() < CPU_ATTACK_PREFERENCE);
+    const pool = shouldAttack ? attackable : unclaimed;
     if (pool.length === 0) return;
     const timer = setTimeout(() => {
       pickZone(pool[Math.floor(Math.random() * pool.length)]);
@@ -484,13 +489,14 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSolo, phase, activeTeam.id, owners]);
 
-  // CPU can't actually answer a real question — auto-resolve its own uncontested zone claim via
-  // a tunable random success roll, driving the exact same resolveUncontested path a teacher's
-  // Correct/Wrong click would.
+  // CPU only reaches "answer" phase when it picked an unclaimed zone (a real duel against the
+  // student's zone goes through the "contested" timer path below instead) — there's no actual
+  // opponent to lose to here, so the claim always succeeds. Drives the exact same
+  // resolveUncontested path a teacher's Correct/Wrong click would.
   useEffect(() => {
     if (!isSolo || phase !== "answer" || activeTeam.id !== cpuRef.current?.id) return;
     const timer = setTimeout(() => {
-      resolveUncontested(Math.random() < CPU_CLAIM_SUCCESS_PROB);
+      resolveUncontested(true);
     }, CPU_ANSWER_MS);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
