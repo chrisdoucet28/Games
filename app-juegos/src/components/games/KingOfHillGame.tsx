@@ -528,13 +528,41 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSolo, phase, activeTeam.id]);
 
+  // The teacher exists to keep the game structurally competitive (deciding what to attack), not to
+  // produce more moments of language — only the student ever answers a real prompt. A teacher
+  // claiming an unclaimed zone has no student defending it, so there's nothing to test; it always
+  // succeeds with no prompt shown at all, same as the CPU's uncontested claim above.
+  useEffect(() => {
+    if (!isSolo || phase !== "answer" || activeTeam.id !== teacherRef.current?.id) return;
+    const timer = setTimeout(() => {
+      resolveUncontested(true);
+    }, CPU_ANSWER_MS);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSolo, phase, activeTeam.id]);
+
   // Contested (head-to-head) duels against the CPU use a countdown instead of teacher judgment —
   // the one spot the base game already frames as "whoever answers correctly first/better wins,"
   // which doesn't work with a CPU that can't actually answer. The student defends/attacks by
-  // clicking "Got it!" before time runs out; letting it expire hands the zone to the CPU. A teacher
-  // opponent has no such problem — a duel against them falls through to the normal judged
-  // Attacker/Defender/Neither UI a real second team already uses, so this must exclude that case.
+  // clicking "Got it!" before time runs out; letting it expire hands the zone to the CPU.
   const contestIsSoloDuel = isSolo && opponentType === "cpu" && phase === "contested" && contest?.step === "simultaneous";
+  // A teacher opponent has a different problem than the CPU — they easily *could* answer for real,
+  // but that's not the point: only the student is ever meant to produce/prove language, the teacher
+  // exists purely to keep zones contestable. So a duel against the teacher is never a two-sided
+  // race — it's a single prompt the student answers, and whichever side that answer favors gets the
+  // zone (see resolveTeacherContest below), never the normal Attacker/Defender/Neither judged UI.
+  const teacherContest = isSolo && opponentType === "teacher" && phase === "contested" && contest?.step === "simultaneous";
+  const studentIsAttacker = contest?.attackerId === propTeams[0].id;
+  const resolveTeacherContest = (studentCorrect: boolean) => {
+    if (!contest) return;
+    if (studentCorrect) {
+      resolveContest(studentIsAttacker ? contest.attackerId : contest.defenderId);
+    } else {
+      // A failed attack just leaves the zone as it was (same as a normal "neither" outcome) — you
+      // don't lose ground you never had. A failed defense does lose the zone, same as normally.
+      resolveContest(studentIsAttacker ? null : contest.attackerId);
+    }
+  };
   const { timeLeft: contestTimeLeft, stop: stopContestTimer } = useTurnTimer(
     CONTEST_SECONDS,
     contestIsSoloDuel && contestReady,
@@ -743,7 +771,7 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
             </div>
             {opponentType === "teacher" && (
               <div style={{ fontSize: "11px", color: "#F9A8D488", marginTop: "6px" }}>
-                You'll play for real — answering questions, defending zones, and judging your own turns exactly like a second team would.
+                The teacher picks real zones to attack or claim, but only the student ever answers a question — every claim or duel comes down to what the student says.
               </div>
             )}
           </div>
@@ -954,7 +982,9 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
                 <div style={{ background: "linear-gradient(90deg,rgba(255,255,255,0) 0%, rgba(248,113,113,0.18) 50%, rgba(255,255,255,0) 100%)", border: "2px solid #FCA5A5", borderRadius: "16px", padding: "14px", marginBottom: "12px", textAlign: "center", animation: "koDuelPulse 1.6s ease-in-out infinite" }}>
                   <div style={{ fontWeight: "900", fontSize: "18px", color: "#FCA5A5", display: "inline-flex", alignItems: "center", gap: "6px" }}><Icon name="sword" size={17} /> Battle for {contest.zoneId}!</div>
                   <div style={{ fontSize: "13px", color: "#F3E8FF", fontWeight: "700", lineHeight: 1.5 }}>
-                    {attacker?.name} is attacking a claimed zone. Both teams face the same question, and only one can control it.
+                    {teacherContest
+                      ? (studentIsAttacker ? "Answer correctly to take this zone from the Teacher." : "The Teacher is attacking — answer correctly to defend your zone.")
+                      : <>{attacker?.name} is attacking a claimed zone. Both teams face the same question, and only one can control it.</>}
                   </div>
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginBottom: "12px" }}>
@@ -995,6 +1025,13 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
                             outcome a timeout would give anyway. */}
                         <button onClick={() => { stopContestTimer(); resolveContest(cpuRef.current!.id); }} className="ko-btn" style={{ background: "rgba(255,255,255,0.1)", color: "#F9A8D4", border: "1px solid #F9A8D455", borderRadius: "12px", padding: "14px 28px", cursor: "pointer", fontWeight: "800", fontSize: "16px", transition: "transform 0.15s ease" }}><Icon name="close" size={13} /> Wrong</button>
                       </div>
+                    </div>
+                  )
+                ) : teacherContest ? (
+                  (showAns || q?.type === "speaking task") && (
+                    <div style={{ display: "flex", gap: "10px", justifyContent: "center", marginTop: "12px" }}>
+                      <button onClick={() => resolveTeacherContest(true)} className="ko-btn" style={{ background: "#22C55E", color: "white", border: "none", borderRadius: "12px", padding: "12px 24px", fontSize: "16px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease" }}><Icon name="check" size={15} /> Correct! {studentIsAttacker ? "Claim it!" : "Defended!"}</button>
+                      <button onClick={() => resolveTeacherContest(false)} className="ko-btn" style={{ background: "#EF4444", color: "white", border: "none", borderRadius: "12px", padding: "12px 24px", fontSize: "16px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease" }}><Icon name="close" size={13} /> Wrong</button>
                     </div>
                   )
                 ) : (
