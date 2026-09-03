@@ -9,7 +9,7 @@ import { QuestionCard } from "../shared/QuestionCard";
 import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
 import { denseRank } from "../../utils/ranking";
 import { RankBadge } from "../shared/RankBadge";
-import { makeSoloCpuTeam } from "../../lib/soloOpponent";
+import { makeSoloCpuTeam, makeTeacherTeam, SOLO_CPU_COLOR, TEACHER_COLOR } from "../../lib/soloOpponent";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
 import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
@@ -135,6 +135,12 @@ type HillSnapshot = {
   round: number;
   turnOrder: number[];
   activeTeamIdx: number;
+  // Which solo opponent was chosen, and its score — both default for saves made before this field
+  // existed. cpuScore/teacherScore were previously missing entirely, silently resetting the solo
+  // opponent's score to 0 on every resume even though gameScores (the per-game tally) resumed fine.
+  opponentType: "cpu" | "teacher";
+  cpuScore: number;
+  teacherScore: number;
 };
 
 function validateHillSnapshot(raw: unknown, teamCount: number): HillSnapshot | undefined {
@@ -142,29 +148,48 @@ function validateHillSnapshot(raw: unknown, teamCount: number): HillSnapshot | u
   if (!s || !Array.isArray(s.turnOrder) || s.turnOrder.length !== teamCount) return undefined;
   if (typeof s.activeTeamIdx !== "number" || s.activeTeamIdx < 0 || s.activeTeamIdx >= teamCount) return undefined;
   if (typeof s.round !== "number" || s.round < 1) return undefined;
-  return { owners: s.owners ?? {}, roundPoints: s.roundPoints ?? {}, gameScores: s.gameScores ?? {}, round: s.round, turnOrder: s.turnOrder, activeTeamIdx: s.activeTeamIdx };
+  return {
+    owners: s.owners ?? {}, roundPoints: s.roundPoints ?? {}, gameScores: s.gameScores ?? {}, round: s.round, turnOrder: s.turnOrder, activeTeamIdx: s.activeTeamIdx,
+    opponentType: s.opponentType === "teacher" ? "teacher" : "cpu", cpuScore: s.cpuScore ?? 0, teacherScore: s.teacherScore ?? 0,
+  };
 }
 
 export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState }: GameProps) {
   const TURN_SECONDS = 20;
 
-  // Solo play makes the CPU a real dice-rolled turn participant — "just another team, but it's
-  // a CPU" — gets a real turn slot, claims/attacks zones on its own turn. The one thing it can't
-  // do is answer a real question, so its own turn auto-resolves via a random roll, and a
-  // contested duel against it uses a timer instead of teacher judgment (see below).
+  // Solo play makes the second team a real dice-rolled turn participant — "just another team,"
+  // either a CPU or a live teacher (opponentType below). A CPU can't actually answer a real
+  // question, so its own turn auto-resolves via a timer, and a contested duel against it uses a
+  // countdown instead of teacher judgment; a teacher opponent needs none of that — it just plays
+  // through the exact same human-judged flow a second real team already uses (see contestIsSoloDuel
+  // and the two CPU-only effects below, both of which naturally no-op once cpuRef.current is null).
   const isSolo = propTeams.length === 1;
+  // Needed before `resumed` (which needs a team count to validate against) can be computed, but
+  // before `opponentType`/`cpuRef`/`teacherRef` (which `resumed` itself seeds) exist yet — same
+  // ordering fix SpyAmongUsGame.tsx already uses for its own teacher-opponent solo mode.
+  const effectiveTeamCount = isSolo ? 2 : propTeams.length;
+  const resumed = useRef(validateHillSnapshot(initialGameState, effectiveTeamCount)).current;
+  const [opponentType, setOpponentType] = useState<"cpu" | "teacher">(() => resumed?.opponentType ?? "cpu");
+  // Both constructed unconditionally (not gated on opponentType) — a useRef's initializer only
+  // ever runs once at mount, so gating either on opponentType would freeze whichever wasn't picked
+  // as the default at null forever, even after switching. Cheap plain objects either way; every
+  // downstream check compares against a specific ref's .id, so having both allocated doesn't
+  // change which one is ever actually treated as "the opponent."
   const cpuRef = useRef(isSolo ? makeSoloCpuTeam() : null);
-  const [cpuScore, setCpuScore] = useState(0);
+  const teacherRef = useRef(isSolo ? makeTeacherTeam() : null);
+  const [cpuScore, setCpuScore] = useState(() => resumed?.cpuScore ?? 0);
+  const [teacherScore, setTeacherScore] = useState(() => resumed?.teacherScore ?? 0);
   // Memoized so `teams` is referentially stable across renders when nothing has actually
   // changed — several existing effects/callbacks in this file depend on `teams` by reference,
   // and a fresh array literal every render would make them re-fire (and re-setState) forever.
   const teams = useMemo(
-    () => (isSolo ? [propTeams[0], { ...cpuRef.current!, score: cpuScore }] : propTeams),
-    [isSolo, propTeams, cpuScore]
+    () => (isSolo
+      ? [propTeams[0], opponentType === "teacher" ? { ...teacherRef.current!, score: teacherScore } : { ...cpuRef.current!, score: cpuScore }]
+      : propTeams),
+    [isSolo, propTeams, opponentType, cpuScore, teacherScore]
   );
   const isTopicMode = questions.length > 0 && questions.every(q => q.type === "speaking task");
   const ZONES = isTopicMode ? HILL_ZONES_TOPIC : HILL_ZONES_GRAMMAR;
-  const resumed = useRef(validateHillSnapshot(initialGameState, teams.length)).current;
   // Points earned in THIS game only — team.score is the cross-game running total, so the "final"
   // screen below ranking by it declared whoever was ahead overall the winner of this specific
   // King of the Hill match, even when another team scored more zone-control/duel points here.
@@ -172,6 +197,7 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
   const updateScore = (id: string | number, delta: number) => {
     setGameScores(prev => ({ ...prev, [id]: (prev[id] ?? 0) + delta }));
     if (isSolo && id === cpuRef.current?.id) { setCpuScore(s => s + delta); }
+    else if (isSolo && id === teacherRef.current?.id) { setTeacherScore(s => s + delta); }
     else { onUpdateScore(id, delta); }
   };
 
@@ -223,9 +249,9 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
 
   useEffect(() => {
     if (!serializeStateRef) return;
-    serializeStateRef.current = (): HillSnapshot => ({ owners, roundPoints, gameScores, round, turnOrder, activeTeamIdx });
+    serializeStateRef.current = (): HillSnapshot => ({ owners, roundPoints, gameScores, round, turnOrder, activeTeamIdx, opponentType, cpuScore, teacherScore });
     return () => { if (serializeStateRef) serializeStateRef.current = null; };
-  }, [serializeStateRef, owners, roundPoints, gameScores, round, turnOrder, activeTeamIdx]);
+  }, [serializeStateRef, owners, roundPoints, gameScores, round, turnOrder, activeTeamIdx, opponentType, cpuScore, teacherScore]);
   const [chosenZone, setChosenZone] = useState<string | null>(null);
   const [showAns, setShowAns] = useState(false);
   const [contest, setContest] = useState<any>(null);
@@ -361,7 +387,7 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
     setRoundSummary(summary);
     setPhase("round-end");
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [owners, teams, ZONES, cpuScore]);
+  }, [owners, teams, ZONES, cpuScore, teacherScore]);
 
   const nextTeamTurn = useCallback((_scored: boolean, ownersOverride?: Record<string, string | number>) => {
     const nextIdx = (activeTeamIdx + 1) % teams.length;
@@ -505,8 +531,10 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
   // Contested (head-to-head) duels against the CPU use a countdown instead of teacher judgment —
   // the one spot the base game already frames as "whoever answers correctly first/better wins,"
   // which doesn't work with a CPU that can't actually answer. The student defends/attacks by
-  // clicking "Got it!" before time runs out; letting it expire hands the zone to the CPU.
-  const contestIsSoloDuel = isSolo && phase === "contested" && contest?.step === "simultaneous";
+  // clicking "Got it!" before time runs out; letting it expire hands the zone to the CPU. A teacher
+  // opponent has no such problem — a duel against them falls through to the normal judged
+  // Attacker/Defender/Neither UI a real second team already uses, so this must exclude that case.
+  const contestIsSoloDuel = isSolo && opponentType === "cpu" && phase === "contested" && contest?.step === "simultaneous";
   const { timeLeft: contestTimeLeft, stop: stopContestTimer } = useTurnTimer(
     CONTEST_SECONDS,
     contestIsSoloDuel && contestReady,
@@ -695,6 +723,30 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
               );
             })()}
           </>
+        )}
+        {isSolo && (
+          <div style={{ marginBottom: "20px" }}>
+            <div style={{ fontSize: "13px", color: "#F9A8D4", fontWeight: "700", marginBottom: "10px" }}>Who do you want to play against?</div>
+            <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
+              <button onClick={() => setOpponentType("cpu")} className="ko-btn" style={{
+                padding: "10px 20px", borderRadius: "12px", fontWeight: "800", fontSize: "14px", cursor: "pointer",
+                border: `2px solid ${opponentType === "cpu" ? "#DB2777" : "rgba(255,255,255,0.2)"}`,
+                background: opponentType === "cpu" ? "rgba(219,39,119,0.15)" : "rgba(255,255,255,0.05)",
+                color: opponentType === "cpu" ? "#F9A8D4" : "#F9A8D488",
+              }}>{SOLO_CPU_COLOR.emoji} CPU</button>
+              <button onClick={() => setOpponentType("teacher")} className="ko-btn" style={{
+                padding: "10px 20px", borderRadius: "12px", fontWeight: "800", fontSize: "14px", cursor: "pointer",
+                border: `2px solid ${opponentType === "teacher" ? "#DB2777" : "rgba(255,255,255,0.2)"}`,
+                background: opponentType === "teacher" ? "rgba(219,39,119,0.15)" : "rgba(255,255,255,0.05)",
+                color: opponentType === "teacher" ? "#F9A8D4" : "#F9A8D488",
+              }}>{TEACHER_COLOR.emoji} Teacher</button>
+            </div>
+            {opponentType === "teacher" && (
+              <div style={{ fontSize: "11px", color: "#F9A8D488", marginTop: "6px" }}>
+                You'll play for real — answering questions, defending zones, and judging your own turns exactly like a second team would.
+              </div>
+            )}
+          </div>
         )}
         <button onClick={() => setShowHowTo(true)} className="ko-btn" style={{ display: "block", margin: "0 auto 14px", background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
           <Icon name="help" size={14} /> How to Play
