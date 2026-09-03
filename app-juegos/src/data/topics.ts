@@ -5808,10 +5808,10 @@ export const TOPIC_LIBRARY = {
       { type:"fill in the blank", question:"'She ___ (wash) her car every weekend.'", answer:"washes", hint:"Verbs ending in -sh add -es", difficulty:"medium" },
     ],
     spyRounds: [
-      { crewmateTopic:"Present Simple (Daily Routine)", spyTopic:"What You Are Doing Right Now", crewmatePrompt:"Tell the group about your normal day. Say what you do EVERY day. Example: 'I wake up at 7. I eat breakfast. I go to school. I study English. I go to bed at 11.' Use simple sentences.", spyPrompt:"Tell the group what you are doing RIGHT NOW or today. Example: 'Now I am sitting in class. I am listening to music. My teacher is talking. My friend is writing.' Say 3 or 4 things.", explanation:"Crewmates talk about what they ALWAYS do (wake up, eat, go). The spy talks about what is happening RIGHT NOW (am sitting, is talking)." },
+      { crewmateTopic:"Present Simple (Morning Routine)", spyTopic:"Present Simple (Weekend Routine)", crewmatePrompt:"Tell the group about your morning routine. Say what you do every morning. Example: 'I wake up at 7. I have breakfast. I brush my teeth. I go to school.' Use simple present tense.", spyPrompt:"Tell the group about your weekend routine. Say what you do every weekend. Example: 'I wake up late. I watch TV. I visit my grandparents. I play football.' Use simple present tense.", explanation:"Both used present simple. Crewmates talked about their morning routine, the spy talked about their weekend routine." },
       { crewmateTopic:"Present Simple (Positive Habits)", spyTopic:"What You Don't Do", crewmatePrompt:"Tell the group about three things you do every day. Say sentences like: 'I eat breakfast every morning.', 'She goes to school.', 'He drinks coffee.' Keep it positive!", spyPrompt:"Tell the group about three things you DON'T do. Say sentences like: 'I don't eat meat.', 'She doesn't like coffee.', 'He doesn't play football.' Use 'don't' or 'doesn't'.", explanation:"Crewmates make positive sentences (I eat, she goes). The spy uses don't/doesn't to say what they do NOT do." },
       { crewmateTopic:"Present Simple (Weekly Routine)", spyTopic:"How Often You Do Things", crewmatePrompt:"Describe your week. Say things like: 'I go to school every day.', 'She studies English.', 'He works in the morning.' Use simple verbs in the correct form.", spyPrompt:"Tell the group how often you do things. Use words like: ALWAYS, USUALLY, SOMETIMES, NEVER. Example: 'I always eat breakfast.', 'I sometimes watch TV.', 'I never go to bed late.'", explanation:"Crewmates say what they do (I go, she studies). The spy says HOW OFTEN they do it (always, sometimes, never)." },
-      { crewmateTopic:"Present Simple (Everyday Habits)", spyTopic:"What You Did Yesterday", crewmatePrompt:"Talk about your normal everyday routine. Say: 'Every morning I...', 'Every day she...', 'He usually...' Tell us 3 or 4 things you or someone you know does regularly.", spyPrompt:"Talk about what you did YESTERDAY. Say: 'Yesterday I woke up at 8.', 'I ate pizza for lunch.', 'I watched TV in the evening.', 'I went to bed at 10.' Tell us 3 or 4 things.", explanation:"Crewmates talk about what they do every day (present). The spy talks about what happened yesterday (past)." },
+      { crewmateTopic:"Present Simple (School Habits)", spyTopic:"Present Simple (Family Habits)", crewmatePrompt:"Talk about your everyday school habits. Say: 'Every day I...', 'My teacher usually...' Tell us 3 or 4 things that happen regularly at school.", spyPrompt:"Talk about your family's everyday habits. Say: 'My mother always...', 'My brother usually...' Tell us 3 or 4 things a family member does regularly.", explanation:"Both used present simple for habits. Crewmates talked about school habits, the spy talked about family habits." },
     ],
     halfSentences: [
       { starter: "I usually wake up", hint: "Present simple for a daily habit", exampleCompletion: "at seven o'clock." },
@@ -14100,7 +14100,7 @@ export const TOPIC_LIBRARY = {
     ],
     spyRounds: [
       { crewmateTopic:"There is / There are", spyTopic:"It is / They are", crewmatePrompt:"Describe your classroom, town, or home using 'There is' and 'There are' — 'There is a big window.', 'There are twenty students.', 'There aren't any books on the table.'", spyPrompt:"Describe your classroom, town, or home using 'It is' and 'They are' — 'It is a big window.', 'They are twenty students.', 'It is near the school.' Describe things that already exist in context.", explanation:"Crewmates use 'there is/are' to introduce existence. The spy uses 'it is/they are' for known things.", spyGuessOptions:["There is / There are","It is / They are","This is / These are","Has / Have got"] },
-      { crewmateTopic:"There is/are (Present)", spyTopic:"There was/were (Past)", crewmatePrompt:"Describe what is in your school, home, or town NOW — 'There is a café on the corner.', 'There are lots of students.', 'There aren't any chairs.'", spyPrompt:"Describe what was in a place in the PAST — 'There was an old cinema here.', 'There were only five students.', 'There wasn't a park.'", explanation:"Crewmates describe present existence. The spy uses past forms (was/were).", spyGuessOptions:["There is/are (present)","There was/were (past)","There will be (future)","There have been"] },
+      { crewmateTopic:"There is/are (Your School)", spyTopic:"There is/are (Your Home)", crewmatePrompt:"Describe what is in your school right now using 'there is/are' — 'There is a big library.', 'There are twenty classrooms.', 'There isn't a swimming pool.'", spyPrompt:"Describe what is in your home right now using 'there is/are' — 'There is a garden.', 'There are three bedrooms.', 'There isn't a garage.'", explanation:"Both used there is/are for the present. Crewmates described their school, the spy described their home." },
       { crewmateTopic:"There is/are (Positive)", spyTopic:"Negative and Question Forms", crewmatePrompt:"Describe a place telling people what IS there — 'There is a swimming pool.', 'There are two cafés.' Say five positive things.", spyPrompt:"Describe a place saying what is NOT there and asking questions — 'There isn't a cinema.', 'Are there any parks?', 'There aren't any good restaurants.'", explanation:"Crewmates use positive forms. The spy uses negative and question forms.", spyGuessOptions:["Positive there is/are","Negative and question forms","It is/they are","Some and any"] },
       { crewmateTopic:"There is/are (places)", spyTopic:"Have got (possession)", crewmatePrompt:"Describe your city or school using 'there is/are' — 'There is a big library.', 'There are lots of classrooms.'", spyPrompt:"Describe your city or school as possessions — 'My school has got a library.', 'We have got thirty classrooms.', 'We haven't got a café.'", explanation:"Crewmates use existential 'there is/are'. The spy uses 'have got' for possession.", spyGuessOptions:["There is/are (existence)","Have/Has got (possession)","It is/they are","Some and any"] },
     ],
@@ -16911,10 +16911,10 @@ export const TOPIC_LIBRARY = {
       { type:"fill in the blank", question:"'My little sister ___ read yet — she's only three.'", answer:"can't", hint:"'Can't' = not able to", difficulty:"hard" },
     ],
     spyRounds: [
-      { crewmateTopic:"Ability with Can/Can't", spyTopic:"Talent and Skill (be good at)", crewmatePrompt:"Talk about things you can and can't do. Use 'can' and 'can't' with action verbs — 'I can swim', 'I can't drive', 'I can cook simple food'.", spyPrompt:"Talk about your talents and skills using 'be good at'. Use phrases like 'I'm good at swimming', 'I'm not good at cooking', 'I'm good at drawing'.", explanation:"Crewmates used can/can't for ability. The spy used 'be good/bad at' instead of the modal." },
-      { crewmateTopic:"Permission with Can/Can't", spyTopic:"Rules with Must/Must Not", crewmatePrompt:"Talk about things you can and can't do in a place like school or home. Use 'can' and 'can't' for permission — 'We can eat lunch outside', 'We can't use phones in class'.", spyPrompt:"Talk about rules using 'must' and 'must not'. Use phrases like 'We must be quiet', 'We must not run in the hallway'.", explanation:"Crewmates expressed permission with can/can't. The spy expressed rules with must/must not." },
-      { crewmateTopic:"Asking for Permission (Can I...?)", spyTopic:"Polite Requests (Could you...?)", crewmatePrompt:"Practice asking for permission with 'Can I...?'. Use phrases like 'Can I open the window?', 'Can I leave early?', 'Can I borrow your pen?'.", spyPrompt:"Practice making polite requests with 'Could you...?'. Use phrases like 'Could you open the window?', 'Could you help me?', 'Could you pass the pen?'.", explanation:"Crewmates asked for permission for themselves with 'Can I...?'. The spy asked someone else to do something with 'Could you...?'." },
-      { crewmateTopic:"General Possibility with Can", spyTopic:"Facts with Simple Present", crewmatePrompt:"Talk about things that can happen in general. Use phrases like 'It can be very cold in winter', 'Traffic can be bad in the morning', 'Life can be difficult'.", spyPrompt:"Talk about facts using the simple present, without 'can'. Use phrases like 'It is very cold in winter', 'Traffic is bad in the morning', 'Life is difficult sometimes'.", explanation:"Crewmates talked about possibility using 'can'. The spy stated the same ideas as plain facts with the simple present." },
+      { crewmateTopic:"Ability with Can/Can't (Sports)", spyTopic:"Ability with Can/Can't (Music)", crewmatePrompt:"Talk about sports and physical activities you can and can't do. Use 'can' and 'can't' — 'I can swim', 'I can't play tennis', 'I can ride a bike'.", spyPrompt:"Talk about music and instruments you can and can't play. Use 'can' and 'can't' — 'I can play the guitar', 'I can't play the piano', 'I can sing'.", explanation:"Both used can/can't for ability. Crewmates talked about sports, the spy talked about music." },
+      { crewmateTopic:"Permission with Can/Can't (At School)", spyTopic:"Permission with Can/Can't (At Home)", crewmatePrompt:"Talk about things you can and can't do at school. Use 'can' and 'can't' for permission — 'We can eat lunch outside', 'We can't use phones in class'.", spyPrompt:"Talk about things you can and can't do at home. Use 'can' and 'can't' for permission — 'I can watch TV after dinner', 'I can't stay up late'.", explanation:"Both used can/can't for permission. Crewmates talked about school rules, the spy talked about home rules." },
+      { crewmateTopic:"Asking for Permission (Can I...? at School)", spyTopic:"Asking for Permission (Can I...? at a Friend's House)", crewmatePrompt:"Practice asking for permission at school with 'Can I...?'. Use phrases like 'Can I open the window?', 'Can I leave early?', 'Can I borrow a pen?'.", spyPrompt:"Practice asking for permission at a friend's house with 'Can I...?'. Use phrases like 'Can I use the bathroom?', 'Can I have some water?', 'Can I watch TV?'.", explanation:"Both asked for permission with Can I...?. Crewmates asked questions at school, the spy asked questions at a friend's house." },
+      { crewmateTopic:"General Possibility with Can (Weather)", spyTopic:"General Possibility with Can (City Life)", crewmatePrompt:"Talk about things that can happen with the weather. Use 'can' — 'It can be very cold in winter', 'It can rain suddenly in spring'.", spyPrompt:"Talk about things that can happen in a big city. Use 'can' — 'Traffic can be bad in the morning', 'Parking can be difficult downtown'.", explanation:"Both used can for general possibility. Crewmates talked about weather, the spy talked about city life." },
     ],
     halfSentences: [
       { starter: "I can speak", hint: "'Can' + base verb describes an ability", exampleCompletion: "three languages fluently." },
@@ -17145,10 +17145,10 @@ export const TOPIC_LIBRARY = {
       { type:"fill in the blank", question:"'My dad ___ (work) in the garden.'", answer:"is working", hint:"'My dad' takes 'is'", difficulty:"hard" },
     ],
     spyRounds: [
-      { crewmateTopic:"Actions Happening Now", spyTopic:"Daily Habits and Routines", crewmatePrompt:"Talk about what is happening right now, in this moment. Use phrases like 'I am sitting down', 'She is talking', 'They are working'.", spyPrompt:"Talk about things you do every day as a routine. Use phrases like 'I get up at seven', 'She works every day', 'They study every evening'.", explanation:"Crewmates described actions happening right now with present continuous. The spy described daily routines with present simple." },
-      { crewmateTopic:"What I Am Doing Today", spyTopic:"Future Plans (going to)", crewmatePrompt:"Talk about what you are doing today, right now or very soon. Use phrases like 'I am cleaning the house', 'I am cooking dinner', 'I am writing an email'.", spyPrompt:"Talk about your plans for the future using 'going to'. Use phrases like 'I am going to clean the house', 'I am going to cook dinner later', 'I am going to write an email tomorrow'.", explanation:"Crewmates described present actions happening now. The spy described future plans with 'going to'." },
-      { crewmateTopic:"Describing a Photo (Present Continuous)", spyTopic:"Describing Yesterday (Past Continuous)", crewmatePrompt:"Describe what people are doing in a picture right now. Use phrases like 'The man is running', 'The children are playing', 'The dog is sleeping'.", spyPrompt:"Describe what people were doing yesterday at a certain time. Use phrases like 'The man was running', 'The children were playing', 'The dog was sleeping'.", explanation:"Crewmates used present continuous for now. The spy used past continuous for yesterday." },
-      { crewmateTopic:"Temporary Situations (Present Continuous)", spyTopic:"Permanent Facts (Present Simple)", crewmatePrompt:"Talk about temporary situations happening these days. Use phrases like 'I am staying with a friend this week', 'I am learning to cook', 'It is raining a lot this month'.", spyPrompt:"Talk about permanent facts and general truths. Use phrases like 'I live in a small house', 'I know how to cook', 'It rains a lot in this country'.", explanation:"Crewmates described temporary situations with present continuous. The spy described permanent facts with present simple." },
+      { crewmateTopic:"Actions Happening Now (At Home)", spyTopic:"Actions Happening Now (At School)", crewmatePrompt:"Talk about what is happening right now at home. Use phrases like 'My mom is cooking', 'My brother is watching TV', 'I am sitting on the sofa'.", spyPrompt:"Talk about what is happening right now at school. Use phrases like 'My teacher is talking', 'My friend is writing', 'I am listening'.", explanation:"Both used present continuous for now. Crewmates talked about home, the spy talked about school." },
+      { crewmateTopic:"What I Am Doing Today (Chores)", spyTopic:"What I Am Doing Today (Fun Activities)", crewmatePrompt:"Talk about chores you are doing today. Use phrases like 'I am cleaning my room', 'I am washing the dishes', 'I am doing the laundry'.", spyPrompt:"Talk about fun activities you are doing today. Use phrases like 'I am playing video games', 'I am watching a movie', 'I am reading a comic book'.", explanation:"Both used present continuous for today. Crewmates talked about chores, the spy talked about fun activities." },
+      { crewmateTopic:"Describing a Photo (At the Park)", spyTopic:"Describing a Photo (At the Beach)", crewmatePrompt:"Describe what people are doing in a picture at a park. Use phrases like 'The children are playing', 'The dog is running', 'A man is reading on a bench'.", spyPrompt:"Describe what people are doing in a picture at the beach. Use phrases like 'The children are swimming', 'A man is sleeping in the sun', 'Someone is building a sandcastle'.", explanation:"Both used present continuous to describe a photo. Crewmates described a park scene, the spy described a beach scene." },
+      { crewmateTopic:"Temporary Situations (Travel)", spyTopic:"Temporary Situations (Health)", crewmatePrompt:"Talk about a temporary travel situation happening these days. Use phrases like 'I am staying in a hotel this week', 'I am visiting my cousins', 'I am travelling around Europe'.", spyPrompt:"Talk about a temporary health situation happening these days. Use phrases like 'I am recovering from a cold', 'I am taking medicine this week', 'I am resting more than usual'.", explanation:"Both used present continuous for temporary situations. Crewmates talked about travel, the spy talked about health." },
     ],
     halfSentences: [
       { starter: "Right now, I am", hint: "Present continuous for an action happening now", exampleCompletion: "doing my homework." },
@@ -20138,8 +20138,8 @@ export const TOPIC_LIBRARY = {
       { type:"fill in the blank", question:"'That is the ___ (team) uniform.'", answer:"team's", hint:"Singular noun + 's, even for a group treated as one unit", difficulty:"medium" },
     ],
     "spyRounds": [
-      { crewmateTopic:"Possessive 's", spyTopic:"The verb be", crewmatePrompt:"Describe who owns things using possessive 's: my sister's bag, my father's car, Ana's phone.", spyPrompt:"Describe people using the verb be: she is my sister, he is tall, they are friendly.", explanation:"Crewmates used possessive 's. The spy used descriptions with be." },
-      { crewmateTopic:"Names and Belonging", spyTopic:"Basic Introductions", crewmatePrompt:"Use names plus possessive 's: Carlos's cousin, Ana's aunt, Pedro's parents.", spyPrompt:"Introduce people with names, ages, and countries.", explanation:"Crewmates used names with possession. The spy introduced people." },
+      { crewmateTopic:"Possessive 's (Family)", spyTopic:"Possessive 's (Friends)", crewmatePrompt:"Describe who owns things in your family using possessive 's — 'my sister's bag', 'my father's car', 'my mom's phone'.", spyPrompt:"Describe who owns things among your friends using possessive 's — 'my friend's bike', 'Ana's backpack', 'Carlos's jacket'.", explanation:"Both used possessive 's. Crewmates talked about family belongings, the spy talked about friends' belongings." },
+      { crewmateTopic:"Names and Belonging (Classmates)", spyTopic:"Names and Belonging (Neighbours)", crewmatePrompt:"Use classmates' names plus possessive 's — 'Carlos's pencil case', 'Ana's notebook', 'Pedro's chair'.", spyPrompt:"Use neighbours' names plus possessive 's — 'Mr. Smith's garden', 'Mrs. Lopez's car', 'my neighbour's dog'.", explanation:"Both used possessive 's with names. Crewmates talked about classmates, the spy talked about neighbours." },
       { crewmateTopic:"Singular Possessive 's", spyTopic:"Plural Possessive (s')", crewmatePrompt:"Talk about things belonging to one person or animal: the dog's bowl, the teacher's desk, Tom's bike.", spyPrompt:"Talk about things belonging to more than one person: the students' books, the boys' bikes, my parents' car.", explanation:"Crewmates used the singular possessive ('s). The spy used the plural possessive (s')." },
       { crewmateTopic:"Possessive 's for Places", spyTopic:"Possessive 'of' Structure", crewmatePrompt:"Describe things belonging to places or objects using 's: 'the shop's window', 'the city's center', 'the car's engine'.", spyPrompt:"Describe things belonging to places or objects using 'of' instead: 'the window of the shop', 'the center of the city', 'the engine of the car'.", explanation:"Crewmates used possessive 's for places and objects. The spy used the 'of' structure to express the same idea." },
     ],
@@ -20825,58 +20825,10 @@ export const TOPIC_LIBRARY = {
       { type:"fill in the blank", question:"'The shop closes ___ midnight.'", answer:"at", hint:"Use 'at' with midnight and noon", difficulty:"easy" },
     ],
     "spyRounds": [
-      {
-        "crewmateTopic": "Days and Dates",
-        "spyTopic": "Clock Times",
-        "crewmatePrompt": "Talk about days, dates, birthdays, weekends, and months.",
-        "spyPrompt": "Talk about times of day and clock times: at 7, at noon, in the morning.",
-        "explanation": "Crewmates focused on days and dates. The spy focused on clock times.",
-        "spyGuessOptions": [
-          "Days and Dates",
-          "Clock Times",
-          "Months and Years",
-          "Seasons"
-        ]
-      },
-      {
-        "crewmateTopic": "Prepositions of Time",
-        "spyTopic": "Prepositions of Place",
-        "crewmatePrompt": "Use in, on, and at for time: in July, on Monday, at 5 o'clock.",
-        "spyPrompt": "Use in, on, and at for places: in the bag, on the table, at school.",
-        "explanation": "Crewmates used time prepositions. The spy used place prepositions.",
-        "spyGuessOptions": [
-          "Prepositions of Time",
-          "Prepositions of Place",
-          "Prepositions of Movement",
-          "Frequency Adverbs"
-        ]
-      },
-      {
-        "crewmateTopic": "Weekly Schedule",
-        "spyTopic": "Daily Routine",
-        "crewmatePrompt": "Talk about what happens on Monday, Tuesday, Wednesday, and the weekend.",
-        "spyPrompt": "Talk about what happens in the morning, afternoon, evening, and at night.",
-        "explanation": "Crewmates used days. The spy used parts of the day.",
-        "spyGuessOptions": [
-          "Weekly Schedule",
-          "Daily Routine",
-          "Monthly Plans",
-          "Holiday Schedule"
-        ]
-      },
-      {
-        "crewmateTopic": "Important Dates",
-        "spyTopic": "Important Places",
-        "crewmatePrompt": "Talk about birthdays, holidays, and special dates.",
-        "spyPrompt": "Talk about important places in your city or school.",
-        "explanation": "Crewmates focused on dates. The spy focused on places.",
-        "spyGuessOptions": [
-          "Important Dates",
-          "Important Places",
-          "Important People",
-          "Important Events"
-        ]
-      }
+      { crewmateTopic:"Days and Dates", spyTopic:"Clock Times", crewmatePrompt:"Talk about days, dates, birthdays, weekends, and months.", spyPrompt:"Talk about times of day and clock times: at 7, at noon, in the morning.", explanation:"Crewmates focused on days and dates. The spy focused on clock times.", spyGuessOptions:["Days and Dates","Clock Times","Months and Years","Seasons"] },
+      { crewmateTopic:"Prepositions of Time (Schedule)", spyTopic:"Prepositions of Time (Special Occasions)", crewmatePrompt:"Use in, on, and at for time about your daily schedule — 'I have class at 9', 'I have lunch at noon', 'I study in the evening'.", spyPrompt:"Use in, on, and at for time about special occasions — 'My birthday is in July', 'The party is on Saturday', 'The show starts at 8'.", explanation:"Both used prepositions of time. Crewmates talked about their daily schedule, the spy talked about special occasions." },
+      { crewmateTopic:"Weekly Schedule", spyTopic:"Daily Routine", crewmatePrompt:"Talk about what happens on Monday, Tuesday, Wednesday, and the weekend.", spyPrompt:"Talk about what happens in the morning, afternoon, evening, and at night.", explanation:"Crewmates used days. The spy used parts of the day.", spyGuessOptions:["Weekly Schedule","Daily Routine","Monthly Plans","Holiday Schedule"] },
+      { crewmateTopic:"Important Dates (Personal)", spyTopic:"Important Dates (National Holidays)", crewmatePrompt:"Talk about birthdays, holidays, and special personal dates.", spyPrompt:"Talk about national holidays and their dates in your country.", explanation:"Both talked about important dates. Crewmates talked about personal dates, the spy talked about national holidays." },
     ],
     halfSentences: [
       { starter: "My birthday is in", hint: "'In' + month for a date without a specific day", exampleCompletion: "October." },
@@ -24160,58 +24112,10 @@ export const TOPIC_LIBRARY = {
       { type:"fill in the blank", question:"'This isn't my bag — it's ___, not mine.'", answer:"yours", hint:"Possessive pronoun stands alone, no noun after", difficulty:"easy" },
     ],
     "spyRounds": [
-      {
-        "crewmateTopic": "Possessive Adjectives",
-        "spyTopic": "Possessive Pronouns",
-        "crewmatePrompt": "Use my, your, his, her, our, and their before nouns: my bag, your phone, her book.",
-        "spyPrompt": "Use mine, yours, his, hers, ours, and theirs without nouns: It is mine, That is hers.",
-        "explanation": "Crewmates used possessive adjectives. The spy used possessive pronouns.",
-        "spyGuessOptions": [
-          "Possessive Adjectives",
-          "Possessive Pronouns",
-          "Personal Pronouns",
-          "Demonstrative Pronouns"
-        ]
-      },
-      {
-        "crewmateTopic": "Whose Questions",
-        "spyTopic": "This/That Questions",
-        "crewmatePrompt": "Ask and answer questions with whose: Whose pen is this? It is mine.",
-        "spyPrompt": "Ask and answer questions with this and that: What is this? Is that a pen?",
-        "explanation": "Crewmates used whose. The spy used this/that questions.",
-        "spyGuessOptions": [
-          "Whose Questions",
-          "This/That Questions",
-          "What Questions",
-          "Where Questions"
-        ]
-      },
-      {
-        "crewmateTopic": "Classroom Objects and Owners",
-        "spyTopic": "Classroom Object Names",
-        "crewmatePrompt": "Talk about who owns classroom objects: my pen, yours, her notebook, their bags.",
-        "spyPrompt": "Name classroom objects without focusing on owners.",
-        "explanation": "Crewmates focused on ownership. The spy focused on object names.",
-        "spyGuessOptions": [
-          "Classroom Objects and Owners",
-          "Classroom Object Names",
-          "Classroom Colours",
-          "Classroom Numbers"
-        ]
-      },
-      {
-        "crewmateTopic": "Lost and Found",
-        "spyTopic": "Shopping",
-        "crewmatePrompt": "Ask whose things are in a lost-and-found box.",
-        "spyPrompt": "Talk about buying or choosing objects in a shop.",
-        "explanation": "Crewmates used whose and ownership. The spy talked about shopping.",
-        "spyGuessOptions": [
-          "Lost and Found",
-          "Shopping",
-          "Borrowing Things",
-          "Giving Gifts"
-        ]
-      }
+      { crewmateTopic:"Possessive Adjectives", spyTopic:"Possessive Pronouns", crewmatePrompt:"Use my, your, his, her, our, and their before nouns: my bag, your phone, her book.", spyPrompt:"Use mine, yours, his, hers, ours, and theirs without nouns: It is mine, That is hers.", explanation:"Crewmates used possessive adjectives. The spy used possessive pronouns.", spyGuessOptions:["Possessive Adjectives","Possessive Pronouns","Personal Pronouns","Demonstrative Pronouns"] },
+      { crewmateTopic:"Whose Questions", spyTopic:"This/That Questions", crewmatePrompt:"Ask and answer questions with whose: Whose pen is this? It is mine.", spyPrompt:"Ask and answer questions with this and that: What is this? Is that a pen?", explanation:"Crewmates used whose. The spy used this/that questions.", spyGuessOptions:["Whose Questions","This/That Questions","What Questions","Where Questions"] },
+      { crewmateTopic:"Classroom Objects and Owners", spyTopic:"Sports Equipment and Owners", crewmatePrompt:"Talk about who owns classroom objects using possessive adjectives — 'This is my pen.', 'That is her notebook.', 'These are our books.'", spyPrompt:"Talk about who owns sports equipment using possessive adjectives — 'This is my football.', 'That is his racket.', 'These are our balls.'", explanation:"Both used possessive adjectives (my/her/our...). Crewmates talked about classroom objects, the spy talked about sports equipment." },
+      { crewmateTopic:"Lost and Found (School)", spyTopic:"Lost and Found (The Park)", crewmatePrompt:"Ask whose things are in the school's lost-and-found box — 'Whose jacket is this? It's mine.', 'Whose bag is that? It's hers.'", spyPrompt:"Ask whose things are in a lost-and-found box at the park — 'Whose ball is this? It's ours.', 'Whose towel is that? It's his.'", explanation:"Both used whose-questions and possessive pronouns. Crewmates talked about a lost-and-found at school, the spy talked about one at the park." },
     ],
     halfSentences: [
       { starter: "That book is", hint: "Possessive pronoun (mine, yours, hers) stands alone without a noun", exampleCompletion: "mine, not yours." },
@@ -25583,8 +25487,8 @@ export const TOPIC_LIBRARY = {
       { type:"fill in the blank", question:"'The post office is ___ the bakery and the bank.'", answer:"between", hint:"Two things on either side", difficulty:"medium" },
     ],
     "spyRounds": [
-      { crewmateTopic:"Prepositions of Place", spyTopic:"Prepositions of Time", crewmatePrompt:"Describe where things are located: under the table, next to the door, between the shops.", spyPrompt:"Describe when things happen: on Monday, in July, at six o'clock.", explanation:"Crewmates described location with place prepositions. The spy described time with time prepositions." },
-      { crewmateTopic:"Locating Objects Precisely", spyTopic:"Giving Directions", crewmatePrompt:"Describe exactly where something is using prepositions: opposite the bank, between the shops, behind the school.", spyPrompt:"Give directions on how to get somewhere: turn left, go straight ahead, take the second street.", explanation:"Crewmates described static locations. The spy described how to travel to a location." },
+      { crewmateTopic:"Prepositions of Place (Your Room)", spyTopic:"Prepositions of Place (Your Kitchen)", crewmatePrompt:"Describe where things are in your bedroom using place prepositions — 'My bed is next to the window', 'My clothes are in the closet', 'My shoes are under the bed'.", spyPrompt:"Describe where things are in your kitchen using place prepositions — 'The plates are in the cupboard', 'The fridge is next to the sink', 'The table is between two chairs'.", explanation:"Both used prepositions of place. Crewmates described their bedroom, the spy described their kitchen." },
+      { crewmateTopic:"Locating Objects Precisely (Classroom)", spyTopic:"Locating Objects Precisely (Street)", crewmatePrompt:"Describe exactly where things are in your classroom using prepositions — 'The board is in front of the desks', 'My bag is behind my chair', 'The bin is between the door and the window'.", spyPrompt:"Describe exactly where things are on your street using prepositions — 'The shop is opposite the bank', 'The bus stop is next to the bakery', 'The park is behind the school'.", explanation:"Both located objects precisely with place prepositions. Crewmates described their classroom, the spy described their street." },
       { crewmateTopic:"Static Position (under/on/between)", spyTopic:"Movement Prepositions (through/across/along)", crewmatePrompt:"Describe things that are staying in one place: the cat is under the table, the lamp is above the desk.", spyPrompt:"Describe movement from one place to another: we walked through the park, she ran across the street.", explanation:"Crewmates described fixed positions. The spy described movement between places." },
       { crewmateTopic:"Vertical Position (above/below/over/under)", spyTopic:"Proximity (near/next to/close to)", crewmatePrompt:"Describe things positioned higher or lower than something else: 'the picture is above the sofa', 'the box is under the bed'.", spyPrompt:"Describe things positioned close to something else: 'the school is near the park', 'the shop is next to the bank'.", explanation:"Crewmates described vertical position with prepositions like above and under. The spy described closeness with prepositions like near and next to." },
     ],
