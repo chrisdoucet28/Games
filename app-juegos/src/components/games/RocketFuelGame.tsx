@@ -17,6 +17,10 @@ const TURN_SECONDS = 90;
 // turn per team felt too short on its own, per teacher feedback; 2 gives the full experience
 // without dragging the game out.
 const TOTAL_ROUNDS = 2;
+// Solo only: after the first launch, one optional bonus round for "one more launch, try to beat
+// it" — see the "One More Launch!" button on the final screen. Multi-team never reaches this;
+// TOTAL_ROUNDS stays exactly 2 for everyone as before.
+const SOLO_MAX_ROUNDS = 3;
 const POINTS_PER_CORRECT = 20;
 const LAUNCH_BONUS_BY_RANK = [50, 30, 15, 5];
 const MAX_FLIGHT_PX = 460;
@@ -45,6 +49,18 @@ const SOLO_FLYBY_COUNT = 26;
 // How far below its cruise (frame-centered) position the rocket sits while still on the pad, for
 // a frame of the given height.
 const groundOffsetPx = (frameH: number) => frameH / 2 - 70;
+
+// Solo's "beat your own best" record — deliberately session-only (sessionStorage, not Supabase):
+// resets next class visit, but survives "Play Again" and the bonus round within one sitting, which
+// is exactly what a live "race your ghost" comparison needs. Keyed by team.id (stable across a
+// session — teams are owned by LessonGamesGenerator and never rebuilt between games), not name.
+const bestFuelKey = (teamId: string | number) => `classcade-rocketfuel-best-${teamId}`;
+function getBestFuel(teamId: string | number): number {
+  try { return Number(sessionStorage.getItem(bestFuelKey(teamId))) || 0; } catch { return 0; }
+}
+function setBestFuelIfHigher(teamId: string | number, fuel: number): void {
+  try { if (fuel > getBestFuel(teamId)) sessionStorage.setItem(bestFuelKey(teamId), String(fuel)); } catch { /* private browsing etc — a missing personal-best is a fine degradation */ }
+}
 // Each stage's emoji pool takes over once the flight's elapsed fraction crosses `from` — later
 // stages layer in on top of earlier ones as the rocket climbs higher, exactly like passing
 // through progressively higher altitude bands.
@@ -115,6 +131,7 @@ const STYLE_TAG = (
     @keyframes rfIgnitionFlash{0%{opacity:0}30%{opacity:1}100%{opacity:0}}
     @keyframes rfMiniShake{0%,100%{transform:translate(0,0) rotate(0deg)}20%{transform:translate(-4px,-2px) rotate(-7deg)}40%{transform:translate(4px,-5px) rotate(6deg)}60%{transform:translate(-3px,-7px) rotate(-4deg)}80%{transform:translate(2px,-3px) rotate(3deg)}}
     @keyframes rfFuelRise{0%{transform:translate(-50%,0) scale(1);opacity:1}100%{transform:translate(-50%,-64px) scale(0.5);opacity:0}}
+    @keyframes rfGhostCutout{0%{opacity:0.7}85%{opacity:0.7}100%{opacity:0}}
     .rf-btn:hover:not(:disabled){transform:translateY(-2px) scale(1.02);filter:brightness(1.1)}
     .rf-btn:active:not(:disabled){transform:translateY(0) scale(0.97)}
   `}</style>
@@ -194,7 +211,9 @@ type RocketFuelSnapshot = {
 function validateRocketFuelSnapshot(raw: unknown, teamCount: number): RocketFuelSnapshot | undefined {
   const s = raw as Partial<RocketFuelSnapshot> | null | undefined;
   if (!s || typeof s.teamIdx !== "number" || s.teamIdx < 0 || s.teamIdx >= teamCount) return undefined;
-  if (typeof s.round !== "number" || s.round < 1 || s.round > TOTAL_ROUNDS) return undefined;
+  // Bounded by SOLO_MAX_ROUNDS (not TOTAL_ROUNDS) since a Save & Exit mid-bonus-round would
+  // otherwise fail validation and silently discard real progress back to the intro screen.
+  if (typeof s.round !== "number" || s.round < 1 || s.round > SOLO_MAX_ROUNDS) return undefined;
   return { teamIdx: s.teamIdx, round: s.round, fuel: s.fuel && typeof s.fuel === "object" ? s.fuel : {} };
 }
 
@@ -233,6 +252,12 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
   // How long solo's flythrough plays for — locked in once fuel is final (entering "launchpad"),
   // so it stays fixed for the rest of the sequence instead of recomputing every render.
   const soloFlightMsRef = useRef(SOLO_FLIGHT_MS_MIN);
+  // The team's best fuel *before* this launch, and how long that run's flight would have lasted —
+  // both captured fresh every time "launchpad" fires (so the bonus round's second launch compares
+  // against launch #1 automatically, no special-casing needed) and read by the ghost rocket + the
+  // results-screen comparison. 0 means no record yet this session (first-ever launch).
+  const prevBestFuelRef = useRef(0);
+  const prevBestFlightMsRef = useRef(0);
 
   const finalizeLaunch = useCallback(() => {
     if (payoutDoneRef.current) return;
@@ -317,6 +342,14 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
       const soloFuel = fuelRef.current[teams[0].id] ?? 0;
       const frac = Math.max(MIN_HEIGHT_FRACTION, Math.min(1, soloFuel / SOLO_FUEL_CEILING));
       soloFlightMsRef.current = SOLO_FLIGHT_MS_MIN + frac * (SOLO_FLIGHT_MS_MAX - SOLO_FLIGHT_MS_MIN);
+      // Capture the record BEFORE (possibly) overwriting it, so the ghost/results comparison has
+      // something to compare against — then update it right away, not gated on watching the
+      // animation play out.
+      const prevBestFuel = getBestFuel(teams[0].id);
+      prevBestFuelRef.current = prevBestFuel;
+      const prevBestFrac = Math.max(MIN_HEIGHT_FRACTION, Math.min(1, prevBestFuel / SOLO_FUEL_CEILING));
+      prevBestFlightMsRef.current = SOLO_FLIGHT_MS_MIN + prevBestFrac * (SOLO_FLIGHT_MS_MAX - SOLO_FLIGHT_MS_MIN);
+      setBestFuelIfHigher(teams[0].id, soloFuel);
     }
   }, [phase, teams]);
 
@@ -396,7 +429,7 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
       {STYLE_TAG}
       <div style={{ position: "relative", zIndex: 1 }}>
         <div style={{ background: `linear-gradient(90deg,${activeTeam.color.dark},${activeTeam.color.bg})`, borderRadius: "14px", padding: "10px 16px", marginBottom: "14px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px", boxShadow: `0 4px 18px ${activeTeam.color.bg}55` }}>
-          <span style={{ color: "white", fontWeight: "900", fontSize: "16px", textShadow: "0 1px 3px rgba(0,0,0,0.4)", display: "inline-flex", alignItems: "center", gap: "6px" }}><Icon name="rocket" size={15} /> {activeTeam.name}'s turn — Round {round}/{TOTAL_ROUNDS}, Team {teamIdx + 1} of {teams.length}</span>
+          <span style={{ color: "white", fontWeight: "900", fontSize: "16px", textShadow: "0 1px 3px rgba(0,0,0,0.4)", display: "inline-flex", alignItems: "center", gap: "6px" }}><Icon name="rocket" size={15} /> {activeTeam.name}'s turn — {round > TOTAL_ROUNDS ? "Bonus Round" : `Round ${round}/${TOTAL_ROUNDS}`}, Team {teamIdx + 1} of {teams.length}</span>
           {phase === "team-turn" && (
             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
               <TurnTimerBar timeLeft={timeLeft} totalSeconds={TURN_SECONDS} />
@@ -468,9 +501,17 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
           <Starfield />
           {STYLE_TAG}
           <div style={{ position: "relative", zIndex: 1 }}>
-            <div style={{ fontWeight: "900", fontSize: "20px", color: "#A5B4FC", marginBottom: "18px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+            <div style={{ fontWeight: "900", fontSize: "20px", color: "#A5B4FC", marginBottom: "8px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
               {phase === "launchpad" ? <><Icon name="satellite" size={18} /> All engines fuelled. Prepare for launch!</> : phase === "igniting" ? <><Icon name="flame" size={18} /> IGNITION...</> : <><Icon name="rocket" size={18} /> LAUNCH!</>}
             </div>
+            {/* Fuel itself stays secret (the "???" tag below) right up to the reveal — this
+                doesn't break that, it only shows the target from a PAST launch, never this run's
+                own number. */}
+            {prevBestFuelRef.current > 0 && (
+              <div style={{ fontSize: "13px", color: "#C4B5FD", fontWeight: "700", marginBottom: "10px" }}>
+                <Icon name="trophy" size={12} /> Chasing your best: {prevBestFuelRef.current} fuel
+              </div>
+            )}
             <div style={{ position: "relative", height: `${frameH}px`, borderRadius: "18px", overflow: "hidden", background: "radial-gradient(ellipse at 50% 40%,#1E1B4B 0%,#030014 75%)" }}>
               {/* Ground drops away below on liftoff, in step with the rocket rising off it —
                   the camera is meant to be attached to the rocket, not watching it from afar. */}
@@ -487,6 +528,22 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
               )}
 
               {phase === "launching" && launched && <Flyby flightMs={flightMs} count={SOLO_FLYBY_COUNT} frameH={frameH} keyPrefix="solo" />}
+
+              {/* The "ghost" — a translucent companion that sits beside the real rocket and cuts
+                  out (fades) at the exact moment the PREVIOUS best run's flight would have ended.
+                  Beat the record and the ghost visibly drops away first, real rocket still going;
+                  fall short and the ghost is still flying when this run's flyby ends. Deliberately
+                  not part of Flyby/buildFlybyParticles — this doesn't travel the flyby field, it's
+                  a fixed companion beside the stationary rocket, since the camera never moves. */}
+              {phase === "launching" && launched && prevBestFuelRef.current > 0 && (
+                <div style={{
+                  position: "absolute", left: "50%", top: "50%",
+                  transform: "translate(calc(-50% + 34px), -50%)",
+                  animation: `rfGhostCutout ${prevBestFlightMsRef.current}ms ease-in ${LIFTOFF_MS}ms both`,
+                }}>
+                  <div style={{ filter: "grayscale(1) brightness(1.6)", opacity: 0.85 }}><Icon name="rocket" size={30} /></div>
+                </div>
+              )}
 
               {/* Starts sitting on the pad (offset down from center) and rises to its fixed
                   cruise position over LIFTOFF_MS once launched — after that it never moves again;
@@ -637,6 +694,16 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
   const headline = isTie
     ? `${winners.map(w => w.team.name).join(" & ")} tied for the highest flight!`
     : `${winners[0]?.team.name}'s rocket flew the highest!`;
+  const isSolo = teams.length === 1;
+  // One optional bonus launch, same sitting — see SOLO_MAX_ROUNDS. Never offered again after the
+  // bonus round itself (round would already be SOLO_MAX_ROUNDS by then).
+  const canLaunchAgain = isSolo && round < SOLO_MAX_ROUNDS;
+  const launchAgain = () => {
+    fuelRef.current[teams[0].id] = 0;
+    payoutDoneRef.current = false;
+    setRound(r => r + 1);
+    startTeamTurn(0);
+  };
   return (
     <div style={{ ...arenaStyle, textAlign: "center" }}>
       <Starfield />
@@ -653,11 +720,25 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
                 <div style={{ fontWeight: "800", color: "white", fontSize: "14px", marginTop: "4px" }}><TeamIcon team={t} /> {t.name}</div>
                 <div style={{ color: "#FDBA74", fontWeight: "800", fontSize: "13px", marginTop: "2px", display: "flex", alignItems: "center", justifyContent: "center", gap: "4px" }}><Icon name="fuel" size={12} /> {fuelCount} fuelled · {basePts} pts</div>
                 {bonusAwarded[t.id] > 0 && <div style={{ color: "#86EFAC", fontWeight: "700", fontSize: "12px", marginTop: "2px" }}>+{bonusAwarded[t.id]} launch bonus</div>}
+                {isSolo && (
+                  prevBestFuelRef.current > 0 ? (
+                    fuelCount > prevBestFuelRef.current
+                      ? <div style={{ color: "#FCD34D", fontWeight: "800", fontSize: "12px", marginTop: "4px" }}><Icon name="trophy" size={11} /> New personal best!</div>
+                      : <div style={{ color: "#94A3B8", fontWeight: "700", fontSize: "12px", marginTop: "4px" }}>{prevBestFuelRef.current - fuelCount} fuel short of your best of {prevBestFuelRef.current}</div>
+                  ) : (
+                    <div style={{ color: "#94A3B8", fontWeight: "700", fontSize: "12px", marginTop: "4px" }}>First launch this session — that's your best to beat!</div>
+                  )
+                )}
               </div>
             );
           })}
         </div>
-        <button onClick={onEnd} className="rf-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg,#4338CA,#818CF8)", color: "white", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "800", cursor: "pointer", transition: "transform 0.15s ease" }}><Icon name="checkeredFlag" size={16} /> End Game</button>
+        <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap" }}>
+          {canLaunchAgain && (
+            <button onClick={launchAgain} className="rf-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg,#7C3AED,#C4B5FD)", color: "white", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "800", cursor: "pointer", transition: "transform 0.15s ease" }}><Icon name="rocket" size={16} /> One More Launch!</button>
+          )}
+          <button onClick={onEnd} className="rf-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg,#4338CA,#818CF8)", color: "white", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "800", cursor: "pointer", transition: "transform 0.15s ease" }}><Icon name="checkeredFlag" size={16} /> End Game</button>
+        </div>
       </div>
     </div>
   );
