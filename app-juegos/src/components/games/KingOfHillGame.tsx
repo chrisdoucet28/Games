@@ -158,11 +158,15 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
   const TURN_SECONDS = 20;
 
   // Solo play makes the second team a real dice-rolled turn participant — "just another team,"
-  // either a CPU or a live teacher (opponentType below). A CPU can't actually answer a real
-  // question, so its own turn auto-resolves via a timer, and a contested duel against it uses a
-  // countdown instead of teacher judgment; a teacher opponent needs none of that — it just plays
-  // through the exact same human-judged flow a second real team already uses (see contestIsSoloDuel
-  // and the two CPU-only effects below, both of which naturally no-op once cpuRef.current is null).
+  // either a CPU or a live teacher (opponentType below) — but neither one ever actually answers a
+  // question. Only the student is ever meant to produce/prove language; the opponent exists purely
+  // to keep zones contestable (pick a real zone to attack or claim). So both opponent types share
+  // the exact same resolution shape: an uncontested claim on their own turn always just succeeds
+  // with no prompt shown (see the two "answer"-phase effects below — both refs always exist, but
+  // only whichever one opponentType actually selected ever shows up in `teams`/matches
+  // activeTeam.id, so the other effect naturally never fires), and a contested duel always uses the
+  // student-facing countdown ("Got it!"/"Wrong" before time runs out) rather than judged
+  // Attacker/Defender/Neither UI — see contestIsSoloDuel/soloOpponentRef below.
   const isSolo = propTeams.length === 1;
   // Needed before `resumed` (which needs a team count to validate against) can be computed, but
   // before `opponentType`/`cpuRef`/`teacherRef` (which `resumed` itself seeds) exist yet — same
@@ -541,32 +545,20 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSolo, phase, activeTeam.id]);
 
-  // Contested (head-to-head) duels against the CPU use a countdown instead of teacher judgment —
-  // the one spot the base game already frames as "whoever answers correctly first/better wins,"
-  // which doesn't work with a CPU that can't actually answer. The student defends/attacks by
-  // clicking "Got it!" before time runs out; letting it expire hands the zone to the CPU.
-  const contestIsSoloDuel = isSolo && opponentType === "cpu" && phase === "contested" && contest?.step === "simultaneous";
-  // A teacher opponent has a different problem than the CPU — they easily *could* answer for real,
-  // but that's not the point: only the student is ever meant to produce/prove language, the teacher
-  // exists purely to keep zones contestable. So a duel against the teacher is never a two-sided
-  // race — it's a single prompt the student answers, and whichever side that answer favors gets the
-  // zone (see resolveTeacherContest below), never the normal Attacker/Defender/Neither judged UI.
-  const teacherContest = isSolo && opponentType === "teacher" && phase === "contested" && contest?.step === "simultaneous";
-  const studentIsAttacker = contest?.attackerId === propTeams[0].id;
-  const resolveTeacherContest = (studentCorrect: boolean) => {
-    if (!contest) return;
-    if (studentCorrect) {
-      resolveContest(studentIsAttacker ? contest.attackerId : contest.defenderId);
-    } else {
-      // A failed attack just leaves the zone as it was (same as a normal "neither" outcome) — you
-      // don't lose ground you never had. A failed defense does lose the zone, same as normally.
-      resolveContest(studentIsAttacker ? null : contest.attackerId);
-    }
-  };
+  // Contested (head-to-head) duels against a solo opponent (CPU or teacher — same mechanic either
+  // way, per the design decision that this specific moment should "go down just like the CPU
+  // interaction" regardless of who's on the other side) use a countdown instead of judged
+  // Attacker/Defender/Neither UI: the student defends/attacks by clicking "Got it!" before time
+  // runs out; letting it expire (or clicking "Wrong") hands the zone to whichever opponent is
+  // actually active. This is still only ever testing the student — the opponent never "answers"
+  // anything, timer or not — it's just that the CPU literally can't, and (per feedback) the
+  // teacher deliberately doesn't either, so both share this exact resolution path.
+  const contestIsSoloDuel = isSolo && phase === "contested" && contest?.step === "simultaneous";
+  const soloOpponentRef = opponentType === "teacher" ? teacherRef : cpuRef;
   const { timeLeft: contestTimeLeft, stop: stopContestTimer } = useTurnTimer(
     CONTEST_SECONDS,
     contestIsSoloDuel && contestReady,
-    () => { if (contest) resolveContest(cpuRef.current!.id); },
+    () => { if (contest) resolveContest(soloOpponentRef.current!.id); },
     contest?.zoneId ?? "none"
   );
 
@@ -982,9 +974,7 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
                 <div style={{ background: "linear-gradient(90deg,rgba(255,255,255,0) 0%, rgba(248,113,113,0.18) 50%, rgba(255,255,255,0) 100%)", border: "2px solid #FCA5A5", borderRadius: "16px", padding: "14px", marginBottom: "12px", textAlign: "center", animation: "koDuelPulse 1.6s ease-in-out infinite" }}>
                   <div style={{ fontWeight: "900", fontSize: "18px", color: "#FCA5A5", display: "inline-flex", alignItems: "center", gap: "6px" }}><Icon name="sword" size={17} /> Battle for {contest.zoneId}!</div>
                   <div style={{ fontSize: "13px", color: "#F3E8FF", fontWeight: "700", lineHeight: 1.5 }}>
-                    {teacherContest
-                      ? (studentIsAttacker ? "Answer correctly to take this zone from the Teacher." : "The Teacher is attacking — answer correctly to defend your zone.")
-                      : <>{attacker?.name} is attacking a claimed zone. Both teams face the same question, and only one can control it.</>}
+                    {attacker?.name} is attacking a claimed zone. Both teams face the same question, and only one can control it.
                   </div>
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginBottom: "12px" }}>
@@ -1021,17 +1011,10 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
                       <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
                         <button onClick={() => { stopContestTimer(); resolveContest(propTeams[0].id); }} className="ko-btn" style={{ background: "#22C55E", color: "white", border: "none", borderRadius: "12px", padding: "14px 28px", cursor: "pointer", fontWeight: "800", fontSize: "16px", transition: "transform 0.15s ease" }}><Icon name="check" size={15} /> Got it!</button>
                         {/* Lets the student concede the instant they know they missed it, instead of
-                            being forced to sit out the rest of the countdown for the same CPU-wins
-                            outcome a timeout would give anyway. */}
-                        <button onClick={() => { stopContestTimer(); resolveContest(cpuRef.current!.id); }} className="ko-btn" style={{ background: "rgba(255,255,255,0.1)", color: "#F9A8D4", border: "1px solid #F9A8D455", borderRadius: "12px", padding: "14px 28px", cursor: "pointer", fontWeight: "800", fontSize: "16px", transition: "transform 0.15s ease" }}><Icon name="close" size={13} /> Wrong</button>
+                            being forced to sit out the rest of the countdown for the same
+                            opponent-wins outcome a timeout would give anyway. */}
+                        <button onClick={() => { stopContestTimer(); resolveContest(soloOpponentRef.current!.id); }} className="ko-btn" style={{ background: "rgba(255,255,255,0.1)", color: "#F9A8D4", border: "1px solid #F9A8D455", borderRadius: "12px", padding: "14px 28px", cursor: "pointer", fontWeight: "800", fontSize: "16px", transition: "transform 0.15s ease" }}><Icon name="close" size={13} /> Wrong</button>
                       </div>
-                    </div>
-                  )
-                ) : teacherContest ? (
-                  (showAns || q?.type === "speaking task") && (
-                    <div style={{ display: "flex", gap: "10px", justifyContent: "center", marginTop: "12px" }}>
-                      <button onClick={() => resolveTeacherContest(true)} className="ko-btn" style={{ background: "#22C55E", color: "white", border: "none", borderRadius: "12px", padding: "12px 24px", fontSize: "16px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease" }}><Icon name="check" size={15} /> Correct! {studentIsAttacker ? "Claim it!" : "Defended!"}</button>
-                      <button onClick={() => resolveTeacherContest(false)} className="ko-btn" style={{ background: "#EF4444", color: "white", border: "none", borderRadius: "12px", padding: "12px 24px", fontSize: "16px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease" }}><Icon name="close" size={13} /> Wrong</button>
                     </div>
                   )
                 ) : (
