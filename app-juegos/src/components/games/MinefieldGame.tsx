@@ -346,10 +346,9 @@ export function MinefieldGame({ gridData, teams: propTeams, onUpdateScore, onEnd
 
       <div style={{ background: t.color.bg, borderRadius: "14px", padding: "10px 18px", marginBottom: "14px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px" }}>
         <span style={{ color: "white", fontWeight: "900", fontSize: "17px" }}>
-          {phase === "pick" && <><TeamIcon team={t} color="white" /> {t.name} - Pick a square!</>}
+          {(phase === "pick" || phase === "topicComplete") && <><TeamIcon team={t} color="white" /> {t.name} - Pick a square!</>}
           {phase === "speaking" && <><TeamIcon team={t} color="white" /> {t.name} - Say the sentence!</>}
           {phase === "judging" && "Teacher - Judge the sentence"}
-          {phase === "topicComplete" && "Topic complete!"}
         </span>
         <div style={{ background: "rgba(255,255,255,0.2)", borderRadius: "20px", padding: "4px 12px", color: "white", fontWeight: "700", fontSize: "13px" }}>
           {topicRotation ? `Team ${activeTeam + 1}/${teams.length} | ${safeRevealed}/${totalSafe} safe` : `${safeRevealed}/${totalSafe} safe | ${MINE_COUNT} mines`}
@@ -397,12 +396,6 @@ export function MinefieldGame({ gridData, teams: propTeams, onUpdateScore, onEnd
         </div>
       )}
 
-      {phase === "topicComplete" && (
-        <div style={{ textAlign: "center", marginBottom: "14px", fontSize: "13px", color: "#9CA3AF", fontWeight: "700" }}>
-          Moving to the next topic…
-        </div>
-      )}
-
       {phase === "speaking" && selData && (
         <div style={{ background: "linear-gradient(135deg,#FEF3C7,#FDE68A)", border: "3px solid #F59E0B", borderRadius: "16px", padding: "20px", marginBottom: "14px", textAlign: "center" }}>
           <div style={{ fontSize: "13px", fontWeight: "700", color: "#92400E", marginBottom: "10px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
@@ -434,8 +427,6 @@ export function MinefieldGame({ gridData, teams: propTeams, onUpdateScore, onEnd
         </div>
       )}
 
-      {phase !== "topicComplete" && (
-      <>
       <div style={{ position: "relative", marginBottom: "8px" }}>
         <div ref={gridScrollRef} style={{ overflowX: "auto" }}>
         <table style={{ borderCollapse: "separate", borderSpacing: `${GAP}px`, margin: "0 auto" }}>
@@ -497,8 +488,6 @@ export function MinefieldGame({ gridData, teams: propTeams, onUpdateScore, onEnd
       <div style={{ textAlign: "center", fontSize: "12px", color: "#9CA3AF", fontWeight: "600", marginTop: "6px" }}>
         {minesLeft} mine{minesLeft === 1 ? "" : "s"} still hidden - click a square, say the sentence, then the teacher judges
       </div>
-      </>
-      )}
       <style>{`@keyframes boomPulse { 0% { transform: scale(0.92); opacity: 0.6; } 60% { transform: scale(1.04); } 100% { transform: scale(1); opacity: 1; } }`}</style>
     </div>
   );
