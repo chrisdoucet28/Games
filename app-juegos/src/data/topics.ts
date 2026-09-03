@@ -2597,9 +2597,9 @@ export const TOPIC_LIBRARY = {
     ],
     minefieldGrid: {
       topic: "I'd prefer / I'd rather",
-      instructions: "Students combine the situation (top) with the starter (side) to make a full preference sentence — then complete it naturally.",
-      colLabels: ["It's raining outside.", "You have a free afternoon.", "Your friend suggests fast food.", "You have to travel far.", "You need to study."],
-      rowLabels: ["I'd rather …", "I'd prefer to …", "I'd rather not …", "I'd prefer … to …", "I'd rather you …"],
+      instructions: "Students combine the preference starter (top) with the situation (side) to make a full preference sentence, conjugating the verb as needed.",
+      colLabels: ["I'd rather …", "I'd prefer to …", "I'd rather not …", "I'd really rather …", "I'd rather you …"],
+      rowLabels: ["… (stay) in and watch a movie.", "… (relax) at home this afternoon.", "… (go) out in this weather.", "… (take) the scenic route.", "… (say) something honest for once."],
     },
     cardTasks: [
       { task:"Tell your partner what you'd rather do this evening, and why." },
@@ -4897,7 +4897,7 @@ export const TOPIC_LIBRARY = {
       topic: "Third Conditional",
       instructions: "Students combine the if-clause start (top) with the result clause starter (side) to build a full third conditional sentence — completing it with their imagination.",
       colLabels: ["If she hadn't overslept, …", "If we had left earlier, …", "If he had studied harder, …", "If they had listened, …", "If I had known, …"],
-      rowLabels: ["… she/we/he/I would have …", "… they wouldn't have …", "… everything would have …", "… she/he could have …", "… it might have …"],
+      rowLabels: ["… ___ would have …", "… ___ wouldn't have …", "… everything would have …", "… ___ could have …", "… it might have …"],
     },
     hotSeatWords: [
       {word:"exam"},
@@ -17878,9 +17878,9 @@ export const TOPIC_LIBRARY = {
     ],
     minefieldGrid: {
       topic: "Comparatives & Superlatives",
-      instructions: "Combine the frame (top) with the ending (side) and complete it with your own adjective and subject.",
-      colLabels: ["... is bigger than...", "... is the most...", "... is worse than...", "... is the best...", "... is not as ... as..."],
-      rowLabels: ["... in my opinion, because ...", "... without a doubt.", "... especially during ...", "... in my country / city.", "... most people think."],
+      instructions: "Combine the subject and comparison (top) with the closing tail (side) into one full opinion sentence.",
+      colLabels: ["My hometown is bigger than most other cities", "Winter is the most beautiful season", "The traffic here is worse than anywhere else", "This is the best restaurant", "My English isn't as good as I'd like it to be"],
+      rowLabels: ["… in my opinion, because ...", "… without a doubt.", "… especially during ...", "… in my country / city.", "… most people think."],
     },
     hotSeatWords: [
       {word:"bigger"},{word:"smaller"},{word:"faster"},{word:"slower"},{word:"better"},
@@ -18238,9 +18238,9 @@ export const TOPIC_LIBRARY = {
 ],
     minefieldGrid: {
       topic: "Superlatives",
-      instructions: "Combine the sentence starter (top) with the ending (side), then complete it with your own superlative adjective.",
+      instructions: "Combine the sentence starter (top) with the ending (side), then complete it with your own superlative adjective — use the plural form after 'One of the...'.",
       colLabels: ["This is...", "She is...", "That was...", "One of the...", "What is..."],
-      rowLabels: ["... building in the city.", "... student in the class.", "... day of my life.", "... restaurants in town.", "... the most difficult exam you've taken?"],
+      rowLabels: ["... building(s) in the city.", "... student(s) in the class.", "... day(s) of my life.", "... restaurant(s) in town.", "... exam(s) I've ever taken."],
     },
     hotSeatWords: [
       {word:"tall"},{word:"big"},{word:"good"},{word:"bad"},{word:"expensive"},
@@ -20221,7 +20221,7 @@ export const TOPIC_LIBRARY = {
     "minefieldGrid": {
       "topic": "Possessive 's",
       "instructions": "Combine a person or animal (top) with an object (side) and make a sentence using possessive 's.",
-      "colLabels": ["mother","father","teacher","dog","the students"],
+      "colLabels": ["mother","father","teacher","dog","sister"],
       "rowLabels": ["... phone","... car","... house","... name","... bag"]
     },
     "hotSeatWords": [
@@ -21089,11 +21089,11 @@ export const TOPIC_LIBRARY = {
         "I relax..."
       ],
       "rowLabels": [
-        "Monday",
-        "January",
-        "7 o'clock",
-        "May 5th",
-        "the weekend"
+        "___ Monday.",
+        "___ January.",
+        "___ 7 o'clock.",
+        "___ May 5th.",
+        "___ the weekend."
       ]
     },
     "hotSeatWords": [
@@ -22258,20 +22258,20 @@ export const TOPIC_LIBRARY = {
     ],
     "minefieldGrid": {
       "topic": "Weather and Seasons",
-      "instructions": "Combine the weather or season with the sentence starter and complete the sentence.",
+      "instructions": "Combine the sentence starter (top) with the weather adjective (side) and complete the sentence.",
       "colLabels": [
         "Today is...",
-        "I like...",
-        "I wear...",
-        "In my country...",
-        "I do not like..."
+        "This morning was...",
+        "The weather here is often...",
+        "In winter, it gets...",
+        "I think tomorrow will be..."
       ],
       "rowLabels": [
-        "sunny",
-        "rainy",
-        "cold",
-        "hot",
-        "winter"
+        "sunny.",
+        "rainy.",
+        "cold.",
+        "hot.",
+        "windy."
       ]
     },
     "hotSeatWords": [
@@ -28659,9 +28659,9 @@ export const TOPIC_LIBRARY = {
 ],
     "minefieldGrid": {
       "topic": "I wish / If only",
-      "instructions": "Combine a subject (top) with a wish structure (side) and complete the sentence with your own idea.",
+      "instructions": "Combine the wish structure (top) with the verb (side), conjugating the verb to fit the structure you land on.",
       "colLabels": ["I wish I …","I wish I had …","I wish I could …","I wish you would …","If only I were …"],
-      "rowLabels": ["… (present regret).","… (past regret).","… (present ability).","… (a habit to change).","… (an unreal state)."]
+      "rowLabels": ["… (speak) French fluently.","… (study) harder for that exam.","… (play) the guitar.","… (stop) leaving dishes in the sink.","… (be) taller."]
     },
     "hotSeatWords": [
       {word:"lottery"},
@@ -30858,9 +30858,9 @@ export const TOPIC_LIBRARY = {
     ],
     minefieldGrid: {
       topic: "Cleft Sentences",
-      instructions: "Combine the cleft opener (top) with the completion cue (side) — supply your own details to build a full, natural emphatic sentence.",
+      instructions: "Combine the cleft opener (top) with the filler (side) — slot the filler into the blank and add your own clause to finish the sentence naturally.",
       colLabels: ["It was ___ who…", "It was ___ that…", "What I need is ___", "All I want is ___", "What surprised me was ___"],
-      rowLabels: ["(a person you know)", "(a reason or excuse)", "(something practical)", "(something simple)", "(a recent event)"],
+      rowLabels: ["my neighbour", "the heavy rain", "a bit more time", "a quiet evening alone", "how fast she recovered"],
     },
     hotSeatWords: [
       {word:"misunderstanding"},
