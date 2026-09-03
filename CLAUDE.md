@@ -166,7 +166,52 @@ handout) with no guarantee they've seen any other specific lesson first.
   need student-supplied conjugation depending on the column (that's the actual speaking practice).
   This conversation (`new-topics`) is where every new topic in this repo is authored, so this check
   belongs in the build checklist for every single topic from here on — not something to catch on
-  a later audit.
+  a later audit. Three more things the game-lesson-changes audit found breaking this rule, so check
+  all of them together:
+  1. **The opener always goes in `colLabels`, never `rowLabels`.** A grid with complete independent
+     sentences in `colLabels` and the actual sentence-opener sitting in `rowLabels` has the axes
+     backwards — verify the column really is what starts the sentence, not what finishes it.
+  2. **Every column must combine grammatically with every row**, including plural/singular
+     agreement — e.g. a "One of the…" column needs plural nouns on every row, not a mix of
+     singular ones; a linking-verb column needs a predicate adjective on every row, not a bare
+     noun that doesn't attach to it.
+  3. **Leave a real gap to fill, never a pre-completed sentence.** A column/row that's already a
+     fully-formed correct sentence ("My hometown is bigger than most other cities") gives the
+     player nothing to produce — just something to read aloud. Use a bracketed base form the
+     player must transform themselves (`"___ (big) than…"` → bigger), matching the blank-templated
+     convention already required above, applied strictly: if a native speaker could read the cell
+     text aloud without changing a single word, it's not testing production.
+  4. **`minefieldGrid.instructions` is a real field rendered live to players**, describing which
+     axis is "top" vs "side" and how to combine them — not just internal documentation. Any fix
+     that swaps or reshapes an axis must update this text too, not just the two label arrays.
+- **Spy Among Us `spyRounds` — non-negotiable, check on every single new grammar topic**: for a
+  grammar-category topic that teaches ONE target structure, `crewmatePrompt` and `spyPrompt` must
+  use that SAME structure, differing only by real-world scenario/topic (e.g. crewmate talks about
+  their morning routine, spy talks about their weekend routine — both in present simple). Never
+  let the spy's prompt use a genuinely different tense/structure (e.g. crewmate in present simple,
+  spy in present continuous) — that turns the spy into an instant-obvious "different verb form"
+  giveaway a listening student catches by ear before the content even registers, which defeats the
+  actual "spot the odd one out by listening" mechanic. The one test that matters: **does the spy's
+  alternate content belong to a genuinely different topic in the library, or is it one of the
+  sub-skills this exact topic exists to teach?** Only the former is a bug. A topic explicitly built
+  around contrasting two related forms (e.g. `auxiliary_verbs_be_do`'s be- vs do-questions,
+  `subject_object_questions`'s subject- vs object-questions, `modal_verbs`'s multi-sense survey,
+  `understanding_get`'s multi-sense bundle) is *supposed* to contrast those two things in its
+  spyRounds — normalizing those to one structure would undermine the topic's own purpose, so check
+  first whether the topic's whole declared scope already is that contrast before treating two
+  different-looking prompts as a leak. Two more rules, both non-negotiable:
+  1. **`spyPrompt` must be fully self-contained**, exactly like `crewmatePrompt` — the player
+     controlling the spy only ever sees their own prompt during play, never the crewmate's, until
+     the post-round reveal. Never phrase it as "…instead", "the same kind of claim", or anything
+     else that assumes the reader has also seen the crewmate's prompt.
+  2. **Don't hand-author `spyGuessOptions`.** The game builds the guess list itself at runtime by
+     pooling every `crewmateTopic`/`spyTopic` string used across that topic's own `spyRounds` (no
+     fabricated decoys) — the field is unused now. What actually matters instead: give each round
+     genuinely distinct `crewmateTopic`/`spyTopic` label strings (even when two rounds share the
+     same grammar, label them differently, e.g. `"...(Duration, Studying)"` vs
+     `"...(Duration, Exercising)"`) so the topic has at least 4 rounds contributing 8 distinct
+     labels between them — otherwise the auto-built guess pool degenerates into a near-binary
+     coin flip.
 - **`cardTasks` — non-negotiable, check on every single new topic**: every game that reads
   `cardTasks` (`CastleGame.tsx`, `CardShuffleGame.tsx`, `ZombieSiegeGame.tsx`,
   `BattleshipGame.tsx`, `KingOfHillGame.tsx`, `RaceTrackGame.tsx`) renders it as `type: "speaking
