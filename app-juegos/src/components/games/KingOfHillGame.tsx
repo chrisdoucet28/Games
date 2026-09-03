@@ -761,11 +761,6 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
                 color: opponentType === "teacher" ? "#F9A8D4" : "#F9A8D488",
               }}><Icon name="person" size={14} /> Teacher</button>
             </div>
-            {opponentType === "teacher" && (
-              <div style={{ fontSize: "11px", color: "#F9A8D488", marginTop: "6px" }}>
-                The teacher picks real zones to attack or claim, but only the student ever answers a question — every claim or duel comes down to what the student says.
-              </div>
-            )}
           </div>
         )}
         <button onClick={() => setShowHowTo(true)} className="ko-btn" style={{ display: "block", margin: "0 auto 14px", background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
