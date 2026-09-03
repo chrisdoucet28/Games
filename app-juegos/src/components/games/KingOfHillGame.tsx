@@ -9,7 +9,7 @@ import { QuestionCard } from "../shared/QuestionCard";
 import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
 import { denseRank } from "../../utils/ranking";
 import { RankBadge } from "../shared/RankBadge";
-import { makeSoloCpuTeam, makeTeacherTeam, SOLO_CPU_COLOR, TEACHER_COLOR } from "../../lib/soloOpponent";
+import { makeSoloCpuTeam, makeTeacherTeam } from "../../lib/soloOpponent";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
 import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
@@ -733,13 +733,13 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
                 border: `2px solid ${opponentType === "cpu" ? "#DB2777" : "rgba(255,255,255,0.2)"}`,
                 background: opponentType === "cpu" ? "rgba(219,39,119,0.15)" : "rgba(255,255,255,0.05)",
                 color: opponentType === "cpu" ? "#F9A8D4" : "#F9A8D488",
-              }}>{SOLO_CPU_COLOR.emoji} CPU</button>
+              }}><Icon name="robot" size={14} /> CPU</button>
               <button onClick={() => setOpponentType("teacher")} className="ko-btn" style={{
                 padding: "10px 20px", borderRadius: "12px", fontWeight: "800", fontSize: "14px", cursor: "pointer",
                 border: `2px solid ${opponentType === "teacher" ? "#DB2777" : "rgba(255,255,255,0.2)"}`,
                 background: opponentType === "teacher" ? "rgba(219,39,119,0.15)" : "rgba(255,255,255,0.05)",
                 color: opponentType === "teacher" ? "#F9A8D4" : "#F9A8D488",
-              }}>{TEACHER_COLOR.emoji} Teacher</button>
+              }}><Icon name="person" size={14} /> Teacher</button>
             </div>
             {opponentType === "teacher" && (
               <div style={{ fontSize: "11px", color: "#F9A8D488", marginTop: "6px" }}>
