@@ -107,6 +107,10 @@ type VaultHeistSnapshot = {
   turnOrder: number[];
   orderPos: number;
   difficulty: Difficulty;
+  // Solo-only: how accurate the CPU is, independent of `difficulty` above (which only ever
+  // controls time pressure — the turn timer and how fast the CPU "responds"). Defaults for saves
+  // made before this field existed.
+  cpuDifficulty: Difficulty;
   finishOrder: (string | number)[];
 };
 
@@ -119,6 +123,7 @@ function validateSnapshot(raw: unknown, teamCount: number): VaultHeistSnapshot |
     turnOrder: s.turnOrder,
     orderPos: s.orderPos,
     difficulty: s.difficulty ?? "medium",
+    cpuDifficulty: s.cpuDifficulty ?? "medium",
     finishOrder: s.finishOrder ?? [],
   };
 }
@@ -187,8 +192,13 @@ function LockRow({ cracked, total, justChanged }: { cracked: number; total: numb
 export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState }: GameProps) {
   // Solo play makes the CPU a real dice-rolled turn participant — "just another team, but it's
   // a CPU" — cracking its own vault on its own turn in the same rolled order. The one thing it
-  // can't do is answer a real question, so its own turn auto-resolves via a difficulty-tuned
-  // random roll (see the two new effects below).
+  // can't do is answer a real question, so its own turn auto-resolves via a cpuDifficulty-tuned
+  // random roll (see the CPU effect below). A live-teacher opponent was considered and deliberately
+  // NOT built for this game — Vault Heist's "correct answer keeps your turn, chain locks" mechanic
+  // means a guaranteed-correct teacher would sweep all 5 locks in one uninterrupted turn with no
+  // real competition, unlike Minefield/King of the Hill where every turn advances regardless of
+  // outcome. cpuDifficulty (accuracy) exists instead, as a separate dial from `difficulty` (time
+  // pressure) — see the two new effects below.
   const isSolo = propTeams.length === 1;
   const cpuRef = useRef(isSolo ? makeSoloCpuTeam() : null);
   const [cpuScore, setCpuScore] = useState(0);
@@ -228,6 +238,9 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
   const [phase, setPhase] = useState<Phase>(() => resumed ? "reveal" : "intro");
   const [showHowTo, setShowHowTo] = useState(false);
   const [difficulty, setDifficulty] = useState<Difficulty>(() => resumed?.difficulty ?? "medium");
+  // Solo-only dial, independent of `difficulty` above: how accurate the CPU is, not how much time
+  // anyone gets. Unused whenever a real second team is playing instead of a CPU.
+  const [cpuDifficulty, setCpuDifficulty] = useState<Difficulty>(() => resumed?.cpuDifficulty ?? "medium");
   const [currentCategory, setCurrentCategory] = useState<string | null>(null);
   const [currentQuestion, setCurrentQuestion] = useState<QuestionData | null>(null);
   const [showAns, setShowAns] = useState(false);
@@ -343,10 +356,10 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
   useEffect(() => {
     if (!serializeStateRef) return;
     serializeStateRef.current = (): VaultHeistSnapshot => ({
-      vaultLocks, turnOrder, orderPos, difficulty, finishOrder: finishOrderRef.current,
+      vaultLocks, turnOrder, orderPos, difficulty, cpuDifficulty, finishOrder: finishOrderRef.current,
     });
     return () => { if (serializeStateRef) serializeStateRef.current = null; };
-  }, [serializeStateRef, vaultLocks, turnOrder, orderPos, difficulty]);
+  }, [serializeStateRef, vaultLocks, turnOrder, orderPos, difficulty, cpuDifficulty]);
 
   // Hands the turn to the next team in the rolled order — on a wrong answer, or when the active
   // team just finished and has nothing left to crack. Skips any team that's already finished
@@ -484,20 +497,22 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
   };
 
   // CPU can't actually answer a real question — auto-resolve its own lock attempt via a
-  // difficulty-tuned random success roll, driving the exact same handleCorrect/handleWrong path
+  // cpuDifficulty-tuned random success roll, driving the exact same handleCorrect/handleWrong path
   // a teacher's judgment would. Success chance depends on which lock it's attempting (not just the
-  // game's overall difficulty setting), so it gets less reliable on the later, form-stacked locks.
+  // chosen CPU difficulty), so it gets less reliable on the later, form-stacked locks. Response
+  // pacing (CPU_ANSWER_MS) stays tied to the game's own `difficulty` (time pressure), not
+  // `cpuDifficulty` (accuracy) — these are two deliberately independent dials.
   // Must stay above every early return below (Rules of Hooks).
   useEffect(() => {
     if (!isSolo || phase !== "answer" || activeTeam.id !== cpuRef.current?.id) return;
     const lockIndex = Math.min(vaultLocks[activeTeam.id] ?? 0, LOCK_COUNT - 1);
-    const successProb = CPU_SUCCESS_PROB_BY_DIFFICULTY[difficulty][lockIndex];
+    const successProb = CPU_SUCCESS_PROB_BY_DIFFICULTY[cpuDifficulty][lockIndex];
     const timer = setTimeout(() => {
       if (Math.random() < successProb) handleCorrect(); else handleWrong();
     }, CPU_ANSWER_MS_BY_DIFFICULTY[difficulty]);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isSolo, phase, activeTeam.id, difficulty]);
+  }, [isSolo, phase, activeTeam.id, difficulty, cpuDifficulty]);
 
   // Once the CPU's result banner has had a moment to show, auto-advance — reuses the exact same
   // keepGoing/advanceTurn a human clicking "Keep Going!"/"Next Team" would trigger.
@@ -596,6 +611,38 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
             })}
           </div>
         </div>
+        {isSolo && (
+          <div style={{ marginBottom: "20px" }}>
+            <div style={{ color: "#D6C9AE", fontWeight: "800", fontSize: "13px", marginBottom: "10px", letterSpacing: "0.04em", textTransform: "uppercase", display: "flex", alignItems: "center", justifyContent: "center", gap: "5px" }}><Icon name="robot" size={13} /> CPU accuracy</div>
+            <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap" }}>
+              {(["easy", "medium", "hard"] as const).map(d => {
+                const selected = cpuDifficulty === d;
+                const dotColor = d === "easy" ? "#22C55E" : d === "medium" ? "#EAB308" : "#EF4444";
+                const label = d[0].toUpperCase() + d.slice(1);
+                return (
+                  <button
+                    key={d}
+                    onClick={() => setCpuDifficulty(d)}
+                    className="vault-next-btn"
+                    style={{
+                      background: selected ? "linear-gradient(135deg,#7A5C1E,#D4AF37)" : "rgba(255,255,255,0.08)",
+                      color: selected ? "#1F1608" : "#E8D8AE",
+                      border: `2px solid ${selected ? "#D4AF37" : "#6B5B3A"}`,
+                      borderRadius: "12px", padding: "10px 20px", fontWeight: "800", fontSize: "14px",
+                      cursor: "pointer", transition: "transform 0.15s ease",
+                      display: "inline-flex", alignItems: "center", gap: "6px",
+                    }}
+                  >
+                    <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: dotColor, display: "inline-block" }} /> {label}
+                  </button>
+                );
+              })}
+            </div>
+            <div style={{ fontSize: "11px", color: "#B8A87A", marginTop: "6px" }}>
+              How likely the CPU is to crack each lock — separate from the timer speed above.
+            </div>
+          </div>
+        )}
         <button onClick={() => setShowHowTo(true)} className="vault-next-btn" style={{ display: "block", margin: "0 auto 14px", background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
           <Icon name="help" size={14} /> How to Play
         </button>
