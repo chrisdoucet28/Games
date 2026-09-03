@@ -17878,8 +17878,8 @@ export const TOPIC_LIBRARY = {
     ],
     minefieldGrid: {
       topic: "Comparatives & Superlatives",
-      instructions: "Combine the subject and comparison (top) with the closing tail (side) into one full opinion sentence.",
-      colLabels: ["My hometown is bigger than most other cities", "Winter is the most beautiful season", "The traffic here is worse than anywhere else", "This is the best restaurant", "My English isn't as good as I'd like it to be"],
+      instructions: "Combine the subject (top) with the closing tail (side) — build the comparative or superlative form of the adjective in brackets yourself, then finish the sentence.",
+      colLabels: ["My hometown is ___ (big) than most other cities", "Winter is the ___ (beautiful) season of the year", "The traffic here is ___ (bad) than anywhere else", "This is the ___ (good) restaurant in town", "My English isn't as ___ (good) as I'd like it to be"],
       rowLabels: ["… in my opinion, because ...", "… without a doubt.", "… especially during ...", "… in my country / city.", "… most people think."],
     },
     hotSeatWords: [
