@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import { TeamIcon, MascotSprite } from "../shared/TeamIcon";
 import { Icon, type IconName } from "../shared/Icon";
 import type { GameProps, QuestionData, Team } from "../../types";
@@ -8,6 +8,7 @@ import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
 import { TurnTimerBar } from "../shared/TurnTimerBar";
 import { ZOMBIE_TUTORIAL_STEPS } from "../../data/tutorials/zombie";
+import { makeTeacherTeam, TEACHER_ID } from "../../lib/soloOpponent";
 
 const GM = GAME_MODES.find(g => g.id === "zombie")!;
 
@@ -629,9 +630,12 @@ function SiegeQuestionCard({ question }: { question: QuestionData | null }) {
 type ZombieSiegeSnapshot = {
   siege: SiegeState;
   statsByTeam: Record<string | number, TeamStats>;
+  // Solo only: whether the teacher joined as a second defender. Missing on saves made before this
+  // existed, which correctly resolves to false (play alone, exactly as it always worked).
+  withTeacherAlly: boolean;
 };
 
-function validateZombieSiegeSnapshot(raw: unknown, teams: { id: string | number }[]): ZombieSiegeSnapshot | undefined {
+function validateZombieSiegeSnapshot(raw: unknown, teams: { id: string | number }[], isSolo: boolean): ZombieSiegeSnapshot | undefined {
   const s = raw as Partial<ZombieSiegeSnapshot> | null | undefined;
   const siege = s?.siege as Partial<SiegeState> | undefined;
   if (!siege || typeof siege.round !== "number" || siege.round < 1) return undefined;
@@ -655,6 +659,12 @@ function validateZombieSiegeSnapshot(raw: unknown, teams: { id: string | number 
   teams.forEach(t => {
     if (!persons[t.id]) persons[t.id] = { bullets: BULLET_CAP_START, bulletCap: BULLET_CAP_START, axes: MAX_AXES, alive: true, rechargeSeconds: BULLET_RECHARGE_SECONDS, secondsSinceRecharge: 0 };
   });
+  // Backfilled unconditionally whenever solo (not gated on withTeacherAlly) so the teacher's own
+  // person entry already exists the instant the player flips the intro toggle on — see the same
+  // fix applied to the initial siege state below.
+  if (isSolo && !persons[TEACHER_ID]) {
+    persons[TEACHER_ID] = { bullets: BULLET_CAP_START, bulletCap: BULLET_CAP_START, axes: MAX_AXES, alive: true, rechargeSeconds: BULLET_RECHARGE_SECONDS, secondsSinceRecharge: 0 };
+  }
   const barricades = { ...emptyBarricades(), ...siege.barricades };
 
   const statsByTeam = { ...(s?.statsByTeam ?? {}) };
@@ -674,14 +684,21 @@ function validateZombieSiegeSnapshot(raw: unknown, teams: { id: string | number 
       awaitingNextWave: siege.awaitingNextWave ?? false,
     },
     statsByTeam,
+    withTeacherAlly: isSolo && s?.withTeacherAlly === true,
   };
 }
 
 export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef, paused, onTogglePause, serializeStateRef, initialGameState }: GameProps) {
-  const resumed = useRef(validateZombieSiegeSnapshot(initialGameState, teams)).current;
+  const isSolo = teams.length === 1;
+  // The teacher as an optional second defender — an ally standing alongside the student, not a
+  // stand-in occupying a "2nd team" slot (unlike this rollout's other teacher-as-opponent games).
+  // See activeRoster below for how this actually joins the house-defense simulation.
+  const teacherRef = useRef(isSolo ? makeTeacherTeam() : null);
+  const resumed = useRef(validateZombieSiegeSnapshot(initialGameState, teams, isSolo)).current;
 
   const [phase, setPhase] = useState<Phase>(resumed ? "playing" : "intro");
   const [showHowTo, setShowHowTo] = useState(false);
+  const [withTeacherAlly, setWithTeacherAlly] = useState<boolean>(() => resumed?.withTeacherAlly ?? false);
   // A ref (not just the `paused` prop) so the tick interval's closure always reads the latest
   // value without needing to tear down and rebuild the interval every time pause is toggled.
   const pausedRef = useRef(false);
@@ -692,10 +709,29 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
     forceFinalRef.current = phase === "gameover" ? null : () => { setPhase("gameover"); return true; };
     return () => { if (forceFinalRef) forceFinalRef.current = null; };
   }, [forceFinalRef, phase]);
+  // Real teams + (solo only) the teacher, once the intro toggle picks them — everything about WHO
+  // HAS A BODY IN THE HOUSE (auto-shoot pool, breach targeting, the scene/HUD rendering) reads this
+  // instead of the raw `teams` prop; scoring, difficulty scaling, and the game-over condition stay
+  // on `teams` alone so the teacher never affects any of that. Memoized (not a plain const) because
+  // it feeds the tick effect's own dependency array below, which tears down/rebuilds its interval
+  // on every dependency change — an unmemoized array literal would do that on every single tick.
+  const activeRoster = useMemo(
+    () => (isSolo && withTeacherAlly ? [...teams, teacherRef.current!] : teams),
+    [teams, isSolo, withTeacherAlly]
+  );
   const [siege, setSiege] = useState<SiegeState>(() => resumed?.siege ?? ({
     barricades: emptyBarricades(),
     zombies: [],
-    persons: Object.fromEntries(teams.map(t => [t.id, { bullets: BULLET_CAP_START, bulletCap: BULLET_CAP_START, axes: MAX_AXES, alive: true, rechargeSeconds: BULLET_RECHARGE_SECONDS, secondsSinceRecharge: 0 }])),
+    // The teacher's own person entry is seeded here unconditionally whenever solo — not gated on
+    // withTeacherAlly, which is always false at this exact mount instant regardless of what the
+    // player ends up picking on the intro screen (this lazy initializer only ever runs once). If
+    // they later pick "Play with the Teacher," the entry needs to already exist to write to. Same
+    // fix already applied to Castle Defense's `rpg` state and Battleship's `allPossibleTeamIds` for
+    // their own teacher-as-opponent additions. Sits inert, never read, if they pick "Play Alone".
+    persons: Object.fromEntries([
+      ...teams.map(t => [t.id, { bullets: BULLET_CAP_START, bulletCap: BULLET_CAP_START, axes: MAX_AXES, alive: true, rechargeSeconds: BULLET_RECHARGE_SECONDS, secondsSinceRecharge: 0 }] as const),
+      ...(isSolo ? [[TEACHER_ID, { bullets: BULLET_CAP_START, bulletCap: BULLET_CAP_START, axes: MAX_AXES, alive: true, rechargeSeconds: BULLET_RECHARGE_SECONDS, secondsSinceRecharge: 0 }] as const] : []),
+    ]),
     elapsedSeconds: 0,
     round: 1,
     roundElapsedSeconds: 0,
@@ -714,9 +750,9 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
 
   useEffect(() => {
     if (!serializeStateRef) return;
-    serializeStateRef.current = (): ZombieSiegeSnapshot => ({ siege, statsByTeam });
+    serializeStateRef.current = (): ZombieSiegeSnapshot => ({ siege, statsByTeam, withTeacherAlly });
     return () => { if (serializeStateRef) serializeStateRef.current = null; };
-  }, [serializeStateRef, siege, statsByTeam]);
+  }, [serializeStateRef, siege, statsByTeam, withTeacherAlly]);
 
   const bumpStat = useCallback((teamId: string | number, key: keyof TeamStats, amount = 1) => {
     setStatsByTeam(prev => ({
@@ -815,7 +851,10 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
     if (phase !== "playing") return;
     const id = setInterval(() => {
       if (pausedRef.current) return;
-      const aliveTeamIds = teams.map(t => t.id);
+      // activeRoster (not teams) — the teacher, when present, has a real body in the house and
+      // needs to be in the auto-shoot/breach-targeting pool. teams.length (2nd arg, difficulty
+      // scaling) stays real-team-count on purpose: the teacher is a pure buff, not a bigger horde.
+      const aliveTeamIds = activeRoster.map(t => t.id);
       const { next, events } = advanceTick(siegeRef.current, aliveTeamIds, teams.length, () => zombieIdRef.current++);
       setSiege(next);
       events.forEach(ev => {
@@ -827,15 +866,17 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
         }
         if (ev.kind === "axeUsed") pushFx("axeUsed");
         if (ev.kind === "personEliminated" && ev.teamId !== undefined) {
-          const team = teams.find(t => t.id === ev.teamId);
+          const team = activeRoster.find(t => t.id === ev.teamId);
           if (team) showElimination(team.name, team.color.bg);
         }
       });
+      // teams (not activeRoster) — game over is tied only to the real student's own elimination;
+      // the teacher can be overrun independently without ending the siege.
       const stillAlive = teams.some(t => next.persons[t.id]?.alive);
       if (!stillAlive) setPhase("gameover");
     }, TICK_MS);
     return () => clearInterval(id);
-  }, [phase, teams, pushFx, showElimination, bumpStat]);
+  }, [phase, teams, activeRoster, pushFx, showElimination, bumpStat]);
 
   useEffect(() => {
     if (phase === "playing" && !currentQuestion) startRound(pickNextQuestion(siegeRef.current.round), siegeRef.current.round);
@@ -888,15 +929,20 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
       }
       return { ...prev, persons, barricades, zombies };
     });
-    const team = teams.find(t => t.id === teamId);
+    // activeRoster, not teams — the teacher can now trigger this too (see handleCorrectAnswer),
+    // and needs a real name/color to show in the banner instead of falling through to "".
+    const team = activeRoster.find(t => t.id === teamId);
     showPowerUpBanner(<><TeamIcon team={team} color="white" /> {team?.name ?? ""}: {POWERUP_LABEL[kind]}</>);
-  }, [teams, showPowerUpBanner]);
+  }, [activeRoster, showPowerUpBanner]);
 
-  // The prompt persists for the whole round — any team can throw a sentence at it as many times
-  // as they like, each one its own reward roll. No per-team cap: the horde only gets harder, so
-  // the class needs to be able to keep answering at whatever pace keeps them alive.
+  // The prompt persists for the whole round — any team (and, if playing with the teacher, the
+  // teacher too) can throw a sentence at it as many times as they like, each one its own reward
+  // roll. No per-team cap: the horde only gets harder, so the class needs to be able to keep
+  // answering at whatever pace keeps them alive.
   const handleCorrectAnswer = (teamId: string | number) => {
-    onUpdateScore(teamId, CORRECT_ANSWER_SCORE);
+    // The teacher's own contributions never earn real points — they have no scoreboard entry to
+    // credit. Everything else (barricade/power-up roll, bumpStat) runs identically either way.
+    if (teamId !== TEACHER_ID) onUpdateScore(teamId, CORRECT_ANSWER_SCORE);
     if (Math.random() < POWERUP_CHANCE) {
       const kind = pickPowerUpKind();
       if (kind === "nuke") bumpStat(teamId, "kills", siege.zombies.length);
@@ -944,6 +990,32 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
             Clear the wave, and a bigger one begins!
           </div>
         </div>
+        {isSolo && (
+          <div style={{ marginBottom: "14px" }}>
+            <div style={{ fontSize: "13px", color: "#D9F99D", fontWeight: "700", marginBottom: "10px" }}>
+              How do you want to defend the house?
+            </div>
+            <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
+              <button onClick={() => setWithTeacherAlly(false)} className="zs-btn" style={{
+                padding: "10px 20px", borderRadius: "12px", fontWeight: "800", fontSize: "14px", cursor: "pointer",
+                border: `2px solid ${!withTeacherAlly ? "#BEF264" : "#4D7C0F55"}`,
+                background: !withTeacherAlly ? "#365314" : "rgba(255,255,255,0.06)",
+                color: !withTeacherAlly ? "#BEF264" : "#A3B899",
+              }}><Icon name="person" size={14} /> Play Alone</button>
+              <button onClick={() => setWithTeacherAlly(true)} className="zs-btn" style={{
+                padding: "10px 20px", borderRadius: "12px", fontWeight: "800", fontSize: "14px", cursor: "pointer",
+                border: `2px solid ${withTeacherAlly ? "#BEF264" : "#4D7C0F55"}`,
+                background: withTeacherAlly ? "#365314" : "rgba(255,255,255,0.06)",
+                color: withTeacherAlly ? "#BEF264" : "#A3B899",
+              }}><Icon name="person" size={14} /> Play with the Teacher</button>
+            </div>
+            {withTeacherAlly && (
+              <div style={{ fontSize: "11px", color: "#A3B899", marginTop: "6px", maxWidth: "360px", marginLeft: "auto", marginRight: "auto" }}>
+                The teacher joins the house as a second defender, with their own gun and axes — the horde stays the same size either way. They can add to the prompt too, but it never earns them points, and they can be overrun by a breach without ending the game.
+              </div>
+            )}
+          </div>
+        )}
         <button onClick={() => setShowHowTo(true)} className="zs-btn" style={{ display: "block", margin: "0 auto 14px", background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
           <Icon name="help" size={14} /> How to Play
         </button>
@@ -991,7 +1063,9 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
     );
   }
 
-  const aliveTeams = teams.filter(t => siege.persons[t.id]?.alive);
+  // activeRoster, not teams — the teacher gets an "added to it!" button of their own alongside
+  // every real team, once they're in the game (see handleCorrectAnswer for the no-score carve-out).
+  const aliveTeams = activeRoster.filter(t => siege.persons[t.id]?.alive);
   const round = siege.round;
   const roundQuota = roundZombieQuota(round, teams.length);
   const roundDefeated = siege.zombiesSpawnedThisRound - siege.zombies.length;
@@ -1044,7 +1118,7 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
       )}
       <div style={{ position: "absolute", top: "8px", right: "8px", zIndex: 15, display: "flex", flexDirection: "column", gap: "4px", alignItems: "flex-end", pointerEvents: "none" }}>
         {fx.map(f => {
-          const shooter = f.teamId !== undefined ? teams.find(t => t.id === f.teamId) : undefined;
+          const shooter = f.teamId !== undefined ? activeRoster.find(t => t.id === f.teamId) : undefined;
           return (
             <div key={f.id} style={{
               background: "#0A140AE0", border: "1px solid #65A30D", borderRadius: "8px", padding: "4px 10px",
@@ -1105,10 +1179,10 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
           </div>
         </div>
 
-        <HouseScene siege={siege} teams={teams} />
+        <HouseScene siege={siege} teams={activeRoster} />
 
         <div style={{ display: "flex", gap: "5px", justifyContent: "center", flexWrap: "wrap", marginBottom: "4px" }}>
-          {teams.map(t => <PersonChip key={t.id} team={t} person={siege.persons[t.id]} />)}
+          {activeRoster.map(t => <PersonChip key={t.id} team={t} person={siege.persons[t.id]} />)}
         </div>
 
         <div style={{ maxWidth: "480px", width: "100%", margin: "0 auto" }}>
