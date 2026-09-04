@@ -28,8 +28,12 @@ const GM = GAME_MODES.find(g => g.id === "racetrack")!;
 const TOTAL = 60;
 // Solo play has no rival team to "beat to the answer," so a per-question countdown replaces
 // that tension — answer before it expires or the turn is skipped, same idea as every other
-// timed game in this codebase.
-const SOLO_TASK_SECONDS = 30;
+// timed game in this codebase. No CPU/teacher rival fits a shared-track board game where the
+// board itself (dice, spaces, effects, coins) already carries the whole solo experience — per
+// teacher feedback, difficulty levels for this countdown (mirroring Vault Heist's own timer-speed
+// dial) are what solo actually needs, not an opponent.
+type Difficulty = "easy" | "medium" | "hard";
+const SOLO_TASK_SECONDS_BY_DIFFICULTY: Record<Difficulty, number> = { easy: 45, medium: 30, hard: 18 };
 
 type ZoneDef = { id: string; label: string; short: string; icon: IconName; color: string; end: number };
 const ZONES: ZoneDef[] = [
@@ -191,13 +195,18 @@ function CheckeredStrip() {
 type RaceSnapshot = {
   raceTeams: Record<string | number, RaceTeamState>;
   track?: TrackSpace[];
+  difficulty?: Difficulty;
 };
 
 function validateRaceSnapshot(raw: unknown, teamIds: (string | number)[]): RaceSnapshot | undefined {
   const s = raw as Partial<RaceSnapshot> | null | undefined;
   if (!s || typeof s.raceTeams !== "object" || s.raceTeams === null) return undefined;
   if (!teamIds.every(id => s.raceTeams![id] && typeof s.raceTeams![id].pos === "number")) return undefined;
-  return { raceTeams: s.raceTeams, track: Array.isArray(s.track) && s.track.length === TOTAL + 1 ? s.track : undefined };
+  return {
+    raceTeams: s.raceTeams,
+    track: Array.isArray(s.track) && s.track.length === TOTAL + 1 ? s.track : undefined,
+    difficulty: s.difficulty === "easy" || s.difficulty === "hard" ? s.difficulty : "medium",
+  };
 }
 
 export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState }: GameProps) {
@@ -205,6 +214,9 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
   // A resumed race skips the intro and drops straight into a fresh task for the group.
   const [phase, setPhase] = useState<Phase>(() => resumed ? "task" : "intro");
   const [showHowTo, setShowHowTo] = useState(false);
+  // Solo only — see SOLO_TASK_SECONDS_BY_DIFFICULTY. Picked on the intro screen; harmless to seed
+  // even for multi-team games, since it's never read outside the isSolo branch of the timer below.
+  const [difficulty, setDifficulty] = useState<Difficulty>(() => resumed?.difficulty ?? "medium");
   const [track, setTrack] = useState<TrackSpace[]>(() => resumed?.track ?? buildTrack());
   const [raceTeams, setRaceTeams] = useState<Record<string | number, RaceTeamState>>(() =>
     resumed?.raceTeams ?? Object.fromEntries(teams.map((t, i) => [t.id, { pos: 0, coins: 0, shields: 0, skip: false, powerups: [], car: t.mascot ?? CARS[i % CARS.length] }]))
@@ -507,7 +519,7 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
   // at their own pace and then explicitly clicks "No one got it" to move on.
   const isSolo = teams.length === 1;
   const { timeLeft: soloTimeLeft } = useTurnTimer(
-    SOLO_TASK_SECONDS,
+    SOLO_TASK_SECONDS_BY_DIFFICULTY[difficulty],
     isSolo && phase === "task",
     () => setShowAns(true),
     taskKey,
@@ -595,9 +607,9 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
 
   useEffect(() => {
     if (!serializeStateRef) return;
-    serializeStateRef.current = (): RaceSnapshot => ({ raceTeams, track });
+    serializeStateRef.current = (): RaceSnapshot => ({ raceTeams, track, difficulty });
     return () => { if (serializeStateRef) serializeStateRef.current = null; };
-  }, [serializeStateRef, raceTeams, track]);
+  }, [serializeStateRef, raceTeams, track, difficulty]);
 
   const handlePickPhoneMode = () => {
     setInputMode("phone");
@@ -778,6 +790,29 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
               );
             })()}
           </>
+        )}
+        {isSolo && (
+          <div style={{ marginBottom: "20px" }}>
+            <div style={{ fontSize: "13px", color: "#93C5FD", fontWeight: "700", marginBottom: "10px" }}>Choose a timer speed</div>
+            <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap" }}>
+              {(["easy", "medium", "hard"] as const).map(d => {
+                const selected = difficulty === d;
+                const dotColor = d === "easy" ? "#22C55E" : d === "medium" ? "#EAB308" : "#EF4444";
+                const label = d[0].toUpperCase() + d.slice(1);
+                return (
+                  <button key={d} onClick={() => setDifficulty(d)} className="rt-btn" style={{
+                    padding: "10px 20px", borderRadius: "12px", fontWeight: "800", fontSize: "14px", cursor: "pointer",
+                    border: `2px solid ${selected ? "#EF4444" : "rgba(255,255,255,0.2)"}`,
+                    background: selected ? "rgba(239,68,68,0.15)" : "rgba(255,255,255,0.05)",
+                    color: selected ? "#F87171" : "#93C5FD",
+                    display: "inline-flex", alignItems: "center", gap: "6px",
+                  }}>
+                    <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: dotColor, display: "inline-block" }} /> {label} · {SOLO_TASK_SECONDS_BY_DIFFICULTY[d]}s
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         )}
         <button onClick={() => setShowHowTo(true)} className="rt-btn" style={{ display: "block", margin: "0 auto 14px", background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
           <Icon name="help" size={14} /> How to Play
@@ -1000,7 +1035,7 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
           <>
             {isSolo && (
               <div style={{ display: "flex", justifyContent: "center", marginBottom: "10px" }}>
-                <TurnTimerBar timeLeft={soloTimeLeft} totalSeconds={SOLO_TASK_SECONDS} />
+                <TurnTimerBar timeLeft={soloTimeLeft} totalSeconds={SOLO_TASK_SECONDS_BY_DIFFICULTY[difficulty]} />
               </div>
             )}
             <QuestionCard question={currentQ} showAnswer={showAns} onReveal={() => setShowAns(true)} gameId="racetrack" />
