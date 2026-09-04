@@ -8,7 +8,7 @@ import { TurnTimerBar } from "../shared/TurnTimerBar";
 import { QuestionCard } from "../shared/QuestionCard";
 import { denseRank } from "../../utils/ranking";
 import { RankBadge } from "../shared/RankBadge";
-import { makeSoloCpuTeam } from "../../lib/soloOpponent";
+import { makeSoloCpuTeam, makeTeacherTeam } from "../../lib/soloOpponent";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { BATTLESHIP_TUTORIAL_STEPS } from "../../data/tutorials/battleship";
 
@@ -154,12 +154,19 @@ type BattleshipSnapshot = {
   activeTeamIdx: number;
   eliminationOrder: (string | number)[];
   fleets: Record<string | number, string[]>;
+  // Solo-only; defaults for saves made before this field existed.
+  opponentType: "cpu" | "teacher";
 };
 
-function validateBattleshipSnapshot(raw: unknown, teamIds: (string | number)[]): BattleshipSnapshot | undefined {
+// `teamIds` is checked for fleet completeness (the full solo id set — student + BOTH synthetic
+// opponents — not just whichever one was actually chosen, since fleets is always seeded for both;
+// see allPossibleTeamIds at the call site). `activeTeamCount` bounds activeTeamIdx separately,
+// since it must reflect how many participants are actually IN a turn (always 2 in solo — student
+// + whichever one opponentType selects — never 3, unlike teamIds.length).
+function validateBattleshipSnapshot(raw: unknown, teamIds: (string | number)[], activeTeamCount: number): BattleshipSnapshot | undefined {
   const s = raw as Partial<BattleshipSnapshot> | null | undefined;
   if (!s || typeof s.fleets !== "object" || s.fleets === null) return undefined;
-  if (typeof s.activeTeamIdx !== "number" || s.activeTeamIdx < 0 || s.activeTeamIdx >= teamIds.length) return undefined;
+  if (typeof s.activeTeamIdx !== "number" || s.activeTeamIdx < 0 || s.activeTeamIdx >= activeTeamCount) return undefined;
   if (!teamIds.every(id => Array.isArray(s.fleets![id]))) return undefined;
   return {
     fleets: s.fleets,
@@ -167,6 +174,7 @@ function validateBattleshipSnapshot(raw: unknown, teamIds: (string | number)[]):
     misses: s.misses ?? {},
     activeTeamIdx: s.activeTeamIdx,
     eliminationOrder: s.eliminationOrder ?? [],
+    opponentType: s.opponentType === "teacher" ? "teacher" : "cpu",
   };
 }
 
@@ -174,34 +182,50 @@ export function BattleshipGame({ questions, teams: propTeams, onUpdateScore, onE
   const TURN_SECONDS = 25;
   const gameTitle = "Battleship";
 
-  // Solo play makes the CPU a real second fleet — a genuine alternating-turn participant that
-  // fires back on its own turn, not a passive target. This reuses the existing 2-team fast path
-  // (board size, skip target-picking) unchanged, since `teams` is now genuinely length 2.
+  // Solo play makes the second fleet a real alternating-turn participant — either a CPU or a live
+  // teacher — that fires back on its own turn, not a passive target. This reuses the existing
+  // 2-team fast path (board size, skip target-picking) unchanged, since `teams` is now genuinely
+  // length 2. Neither opponent type ever actually answers a question — only the student does —
+  // so a teacher's own "answer" phase always auto-succeeds with no prompt, same as the CPU's
+  // random-chance roll but guaranteed; the teacher still picks their own real target square,
+  // exactly like the CPU's random pick, just via an actual click.
   const isSolo = propTeams.length === 1;
+  const teamCount = isSolo ? 2 : propTeams.length;
   const cpuRef = useRef(isSolo ? makeSoloCpuTeam() : null);
+  const teacherRef = useRef(isSolo ? makeTeacherTeam() : null);
+  // Every per-team dictionary below (coordMap/fleets/hits/misses, and the snapshot validator) is
+  // seeded against BOTH synthetic solo opponents up front, not just whichever one `opponentType`
+  // currently selects — the initializers below only ever run once, at mount, before the
+  // intro-screen picker can switch away from the default. Same bug (and fix) as Castle Defense's
+  // rpg state: an id with no dictionary entry crashes the instant anything reads it.
+  const allPossibleTeamIds = isSolo ? [propTeams[0].id, cpuRef.current!.id, teacherRef.current!.id] : propTeams.map(t => t.id);
+  const resumed = useRef(validateBattleshipSnapshot(initialGameState, allPossibleTeamIds, teamCount)).current;
+  const [opponentType, setOpponentType] = useState<"cpu" | "teacher">(() => resumed?.opponentType ?? "cpu");
   const [cpuScore, setCpuScore] = useState(0);
+  const [teacherScore, setTeacherScore] = useState(0);
   // Memoized so `teams` is referentially stable across renders when nothing has actually
   // changed — effects/callbacks in this file depend on `teams` by reference, and a fresh array
   // literal every render would make them re-fire (and re-setState) forever.
   const teams = useMemo(
-    () => (isSolo ? [propTeams[0], { ...cpuRef.current!, score: cpuScore }] : propTeams),
-    [isSolo, propTeams, cpuScore]
+    () => (isSolo
+      ? [propTeams[0], opponentType === "teacher" ? { ...teacherRef.current!, score: teacherScore } : { ...cpuRef.current!, score: cpuScore }]
+      : propTeams),
+    [isSolo, propTeams, opponentType, cpuScore, teacherScore]
   );
   const updateScore = (id: string | number, delta: number) => {
     if (isSolo && id === cpuRef.current?.id) { setCpuScore(s => s + delta); }
+    else if (isSolo && id === teacherRef.current?.id) { setTeacherScore(s => s + delta); }
     else { onUpdateScore(id, delta); }
   };
 
-  const COLS = teams.length === 2 ? BATTLESHIP_COLS_5 : BATTLESHIP_COLS_4;
+  const COLS = teamCount === 2 ? BATTLESHIP_COLS_5 : BATTLESHIP_COLS_4;
   const ROWS = COLS.map((_, i) => i + 1);
 
-  const resumed = useRef(validateBattleshipSnapshot(initialGameState, teams.map(t => t.id))).current;
+  const coordMap = useRef(buildCoordMap(questions, COLS, allPossibleTeamIds)).current;
+  const fleets = useRef(resumed?.fleets ?? Object.fromEntries(allPossibleTeamIds.map(id => [id, [...generateShipsNxN(COLS)]]))).current;
 
-  const coordMap = useRef(buildCoordMap(questions, COLS, teams.map(t => t.id))).current;
-  const fleets = useRef(resumed?.fleets ?? Object.fromEntries(teams.map(t => [t.id, [...generateShipsNxN(COLS)]]))).current;
-
-  const [hits, setHits] = useState<Record<string | number, string[]>>(() => resumed?.hits ?? Object.fromEntries(teams.map(t => [t.id, []])));
-  const [misses, setMisses] = useState<Record<string | number, string[]>>(() => resumed?.misses ?? Object.fromEntries(teams.map(t => [t.id, []])));
+  const [hits, setHits] = useState<Record<string | number, string[]>>(() => resumed?.hits ?? Object.fromEntries(allPossibleTeamIds.map(id => [id, []])));
+  const [misses, setMisses] = useState<Record<string | number, string[]>>(() => resumed?.misses ?? Object.fromEntries(allPossibleTeamIds.map(id => [id, []])));
 
   const [activeTeamIdx, setActiveTeamIdx] = useState(() => resumed?.activeTeamIdx ?? 0);
   // A resumed battle skips the intro screen and drops straight into target/coordinate selection
@@ -274,10 +298,10 @@ export function BattleshipGame({ questions, teams: propTeams, onUpdateScore, onE
   useEffect(() => {
     if (!serializeStateRef) return;
     serializeStateRef.current = (): BattleshipSnapshot => ({
-      hits, misses, activeTeamIdx, eliminationOrder: eliminationOrderRef.current, fleets,
+      hits, misses, activeTeamIdx, eliminationOrder: eliminationOrderRef.current, fleets, opponentType,
     });
     return () => { if (serializeStateRef) serializeStateRef.current = null; };
-  }, [serializeStateRef, hits, misses, activeTeamIdx, fleets]);
+  }, [serializeStateRef, hits, misses, activeTeamIdx, fleets, opponentType]);
 
   const advanceTurn = useCallback((hitsOverride?: Record<string | number, string[]>) => {
     setShowAns(false);
@@ -432,6 +456,18 @@ export function BattleshipGame({ questions, teams: propTeams, onUpdateScore, onE
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSolo, phase, activeTeam.id]);
 
+  // A teacher picks their own target square for real (the click handler is already ungated by
+  // team identity), but never answers a real question — only the student ever does. There's no
+  // real opponent to lose to, so it always hits.
+  useEffect(() => {
+    if (!isSolo || phase !== "answer" || activeTeam.id !== teacherRef.current?.id) return;
+    const timer = setTimeout(() => {
+      launchMissile(true);
+    }, CPU_FIRE_MS);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSolo, phase, activeTeam.id]);
+
   const isSpeakingTask = currentQ?.type === "speaking task";
   const colColor = (letter: string) => {
     const idx = COLS.findIndex(c => c.letter === letter);
@@ -462,6 +498,25 @@ export function BattleshipGame({ questions, teams: propTeams, onUpdateScore, onE
         <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "24px" }}>
           {teams.map(t => (<div key={t.id} style={{ background: `linear-gradient(160deg,${t.color.dark}55,#0C1B3A)`, border: "3px solid " + t.color.bg, borderRadius: "14px", padding: "10px 18px", fontWeight: "800", fontSize: "14px", color: "white", display: "flex", alignItems: "center", gap: "6px" }}><TeamIcon team={t} color="white" /> {t.name}</div>))}
         </div>
+        {isSolo && (
+          <div style={{ marginBottom: "20px" }}>
+            <div style={{ fontSize: "13px", color: "#93C5FD", fontWeight: "700", marginBottom: "10px" }}>Who do you want to play against?</div>
+            <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
+              <button onClick={() => setOpponentType("cpu")} className="bship-btn" style={{
+                padding: "10px 20px", borderRadius: "12px", fontWeight: "800", fontSize: "14px", cursor: "pointer",
+                border: `2px solid ${opponentType === "cpu" ? "#2563EB" : "rgba(255,255,255,0.2)"}`,
+                background: opponentType === "cpu" ? "rgba(37,99,235,0.15)" : "rgba(255,255,255,0.05)",
+                color: opponentType === "cpu" ? "#93C5FD" : "#93C5FD88",
+              }}><Icon name="robot" size={14} /> CPU</button>
+              <button onClick={() => setOpponentType("teacher")} className="bship-btn" style={{
+                padding: "10px 20px", borderRadius: "12px", fontWeight: "800", fontSize: "14px", cursor: "pointer",
+                border: `2px solid ${opponentType === "teacher" ? "#2563EB" : "rgba(255,255,255,0.2)"}`,
+                background: opponentType === "teacher" ? "rgba(37,99,235,0.15)" : "rgba(255,255,255,0.05)",
+                color: opponentType === "teacher" ? "#93C5FD" : "#93C5FD88",
+              }}><Icon name="person" size={14} /> Teacher</button>
+            </div>
+          </div>
+        )}
         <button onClick={() => setShowHowTo(true)} className="bship-btn" style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginBottom: "14px", background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
           <Icon name="help" size={15} /> How to Play
         </button>

@@ -30,7 +30,7 @@ export type IconName =
   | "door" | "window" | "zombie" | "gun" | "axe" | "tree" | "megaphone" | "house" | "chair"
   | "handshake" | "idea" | "sword" | "heart" | "crystalBall" | "apple"
   | "wind" | "eyeOff" | "unlocked" | "wrench" | "forbidden"
-  | "options" | "mud" | "vortex" | "clover" | "banana" | "cart" | "fullscreen"
+  | "options" | "mud" | "vortex" | "clover" | "banana" | "cart" | "fullscreen" | "robot"
   // Phase 4 — ThemeAmbience's decorative floating background glyphs (one drift + one twinkle
   // per accent theme). Rendered at low opacity/small scale, so simpler silhouettes than the
   // functional icons above are fine here.
@@ -664,6 +664,18 @@ const ICONS: Record<IconName, React.ReactNode> = {
         <path d="M8,17 Q12,15 16,17 Q12,19.5 8,17 Z" fill="black" />
       </mask>
       <circle cx="12" cy="13" r="9" fill="currentColor" mask="url(#icon-zombie-face)" />
+    </>
+  ),
+  robot: (
+    <>
+      <mask id="icon-robot-face">
+        <rect width="24" height="24" fill="white" />
+        <circle cx="9" cy="14.5" r="1.6" fill="black" />
+        <circle cx="15" cy="14.5" r="1.6" fill="black" />
+      </mask>
+      <rect x="10.5" y="3" width="3" height="4" rx="1.5" fill="currentColor" />
+      <circle cx="12" cy="2.5" r="1.4" fill="currentColor" />
+      <rect x="3" y="8" width="18" height="12" rx="4" fill="currentColor" mask="url(#icon-robot-face)" />
     </>
   ),
   gun: <path d="M3,13 H15 V10 H21 V15 H17 V19 H13 V15 H7 L5,19 H2 Z" fill="currentColor" />,

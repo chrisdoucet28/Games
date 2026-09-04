@@ -14,14 +14,18 @@ const TURN_SECONDS_OPTIONS = [15, 20, 25, 30];
 const ROUND_SECONDS_MULT = 4;
 const TOTAL_ROUNDS = 5;
 // How long the CPU realistically "holds" the potato before passing it back — standing in for
-// the fact it can't actually answer a real question out loud. Most passes land in the normal
-// range below; occasionally the CPU "stumbles" and takes noticeably longer, giving the lone
-// player a real breather instead of the potato coming right back almost every single time.
-const CPU_HOLD_MS_MIN = 2000;
-const CPU_HOLD_MS_MAX = 6000;
-const CPU_STUMBLE_CHANCE = 0.2;
-const CPU_STUMBLE_MS_MIN = 7000;
-const CPU_STUMBLE_MS_MAX = 10000;
+// the fact it can't actually answer a real question out loud. It never actually fails to pass
+// (there's no answer for it to get wrong, and no strategic choice for it to make — with only two
+// players, "pass" always just means "back to the student"), so the only thing worth making
+// tunable is hold TIMING: how much pressure a fast, rarely-stumbling CPU keeps the student under
+// vs. how much breathing room a slow, often-stumbling one gives. Solo-only (`cpuDifficulty`);
+// unused whenever a real second team is playing instead of a CPU.
+type Difficulty = "easy" | "medium" | "hard";
+const CPU_HOLD_MS_BY_DIFFICULTY: Record<Difficulty, { min: number; max: number; stumbleChance: number; stumbleMsMin: number; stumbleMsMax: number }> = {
+  easy: { min: 3500, max: 7500, stumbleChance: 0.35, stumbleMsMin: 8000, stumbleMsMax: 12000 },
+  medium: { min: 2000, max: 6000, stumbleChance: 0.2, stumbleMsMin: 7000, stumbleMsMax: 10000 },
+  hard: { min: 1000, max: 3000, stumbleChance: 0.08, stumbleMsMin: 5000, stumbleMsMax: 6500 },
+};
 
 const AMBIENT_BITS = Array.from({ length: 12 }, (_, i) => ({
   left: (i * 41) % 100,
@@ -75,6 +79,8 @@ type HotPotatoSnapshot = {
   holderIdx: number;
   history: { round: number; holderName: string; holderId: string | number }[];
   turnSeconds: number;
+  // Solo-only; defaults for saves made before this field existed.
+  cpuDifficulty: Difficulty;
 };
 
 function validateHotPotatoSnapshot(raw: unknown, teamCount: number): HotPotatoSnapshot | undefined {
@@ -82,7 +88,10 @@ function validateHotPotatoSnapshot(raw: unknown, teamCount: number): HotPotatoSn
   if (!s || typeof s.round !== "number" || s.round < 1 || s.round > TOTAL_ROUNDS) return undefined;
   if (typeof s.holderIdx !== "number" || s.holderIdx < 0 || s.holderIdx >= teamCount) return undefined;
   if (typeof s.turnSeconds !== "number" || !TURN_SECONDS_OPTIONS.includes(s.turnSeconds)) return undefined;
-  return { round: s.round, holderIdx: s.holderIdx, history: Array.isArray(s.history) ? s.history : [], turnSeconds: s.turnSeconds };
+  return {
+    round: s.round, holderIdx: s.holderIdx, history: Array.isArray(s.history) ? s.history : [], turnSeconds: s.turnSeconds,
+    cpuDifficulty: s.cpuDifficulty === "easy" || s.cpuDifficulty === "hard" ? s.cpuDifficulty : "medium",
+  };
 }
 
 export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEnd, level, forceFinalRef, serializeStateRef, initialGameState }: GameProps) {
@@ -111,6 +120,7 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
   const resumed = useRef(validateHotPotatoSnapshot(initialGameState, teams.length)).current;
 
   const [turnSeconds, setTurnSeconds] = useState(resumed?.turnSeconds ?? TURN_SECONDS_OPTIONS[0]);
+  const [cpuDifficulty, setCpuDifficulty] = useState<Difficulty>(() => resumed?.cpuDifficulty ?? "medium");
   const Q_SECONDS = turnSeconds;
   const ROUND_SECONDS = turnSeconds * ROUND_SECONDS_MULT;
 
@@ -135,9 +145,9 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
 
   useEffect(() => {
     if (!serializeStateRef) return;
-    serializeStateRef.current = (): HotPotatoSnapshot => ({ round, holderIdx, history, turnSeconds });
+    serializeStateRef.current = (): HotPotatoSnapshot => ({ round, holderIdx, history, turnSeconds, cpuDifficulty });
     return () => { if (serializeStateRef) serializeStateRef.current = null; };
-  }, [serializeStateRef, round, holderIdx, history, turnSeconds]);
+  }, [serializeStateRef, round, holderIdx, history, turnSeconds, cpuDifficulty]);
 
   const roundTimeRef = useRef(ROUND_SECONDS);
   const timerPaused = useRef(false);
@@ -164,15 +174,16 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
   // Hooks).
   useEffect(() => {
     if (!isSolo || phase !== "play" || teams[holderIdx]?.id !== cpuRef.current?.id) return;
-    const holdMs = Math.random() < CPU_STUMBLE_CHANCE
-      ? CPU_STUMBLE_MS_MIN + Math.random() * (CPU_STUMBLE_MS_MAX - CPU_STUMBLE_MS_MIN)
-      : CPU_HOLD_MS_MIN + Math.random() * (CPU_HOLD_MS_MAX - CPU_HOLD_MS_MIN);
+    const t = CPU_HOLD_MS_BY_DIFFICULTY[cpuDifficulty];
+    const holdMs = Math.random() < t.stumbleChance
+      ? t.stumbleMsMin + Math.random() * (t.stumbleMsMax - t.stumbleMsMin)
+      : t.min + Math.random() * (t.max - t.min);
     const timer = setTimeout(() => {
       if (!roundEndedRef.current) confirmPass();
     }, holdMs);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isSolo, phase, holderIdx]);
+  }, [isSolo, phase, holderIdx, cpuDifficulty]);
 
   useEffect(() => {
     roundTimeRef.current = ROUND_SECONDS;
@@ -375,6 +386,28 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
             ))}
           </div>
         </div>
+
+        {isSolo && (
+          <div style={{ marginBottom: "24px" }}>
+            <div style={{ fontSize: "13px", fontWeight: "700", color: "#7C2D12", marginBottom: "8px", display: "flex", alignItems: "center", justifyContent: "center", gap: "5px" }}><Icon name="robot" size={13} /> CPU pass speed</div>
+            <div style={{ display: "flex", gap: "8px", justifyContent: "center", flexWrap: "wrap" }}>
+              {(["easy", "medium", "hard"] as const).map(d => (
+                <button key={d} onClick={() => setCpuDifficulty(d)} className="hp-btn" style={{
+                  background: cpuDifficulty === d ? "linear-gradient(135deg,#EA580C,#F97316)" : "white",
+                  color: cpuDifficulty === d ? "white" : "#7C2D12",
+                  border: `2px solid ${cpuDifficulty === d ? "#EA580C" : "#FED7AA"}`,
+                  borderRadius: "12px", padding: "10px 16px", cursor: "pointer",
+                  fontWeight: "800", fontSize: "14px", minWidth: "78px", transition: "all 0.15s"
+                }}>
+                  {d[0].toUpperCase() + d.slice(1)}
+                </button>
+              ))}
+            </div>
+            <div style={{ fontSize: "11px", color: "#9A3412", marginTop: "6px" }}>
+              Hard means the CPU passes it back to you fast — Easy gives you more time between turns.
+            </div>
+          </div>
+        )}
 
         <button onClick={() => setShowHowTo(true)} className="hp-btn" style={{ display: "block", margin: "0 auto 14px", background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
           <Icon name="help" size={14} /> How to Play
