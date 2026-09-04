@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { TeamIcon, MascotSprite } from "../shared/TeamIcon";
 import { Icon, type IconName } from "../shared/Icon";
 import { RankBadge } from "../shared/RankBadge";
-import type { GameProps, QuestionData } from "../../types";
+import type { GameProps, QuestionData, Team } from "../../types";
 import { useTurnTimer } from "../../hooks/useTurnTimer";
 import { TurnTimerBar } from "../shared/TurnTimerBar";
 import { QuestionCard } from "../shared/QuestionCard";
@@ -61,6 +61,19 @@ function getBestFuel(teamId: string | number): number {
 function setBestFuelIfHigher(teamId: string | number, fuel: number): void {
   try { if (fuel > getBestFuel(teamId)) sessionStorage.setItem(bestFuelKey(teamId), String(fuel)); } catch { /* private browsing etc — a missing personal-best is a fine degradation */ }
 }
+// A synthetic second "team" standing in for the player's own previous-best launch, once one
+// exists — fed through the exact same multi-team comparative-climb rendering as a real rival,
+// per the "your rounds are compared to each other in different rockets" ask. Its fuel is written
+// into fuelRef right before render (see the launchpad phase branch below); it never earns real
+// points (finalizeLaunch only ever iterates the real `teams` prop, never this).
+const GHOST_TEAM_ID = "rocket-fuel-ghost";
+const GHOST_TEAM: Team = {
+  id: GHOST_TEAM_ID,
+  name: "Your Best",
+  color: { name: "Ghost", bg: "#94A3B8", light: "#E2E8F0", dark: "#334155", emoji: "👻" },
+  mascot: null,
+  score: 0,
+};
 // Each stage's emoji pool takes over once the flight's elapsed fraction crosses `from` — later
 // stages layer in on top of earlier ones as the rocket climbs higher, exactly like passing
 // through progressively higher altitude bands.
@@ -131,7 +144,6 @@ const STYLE_TAG = (
     @keyframes rfIgnitionFlash{0%{opacity:0}30%{opacity:1}100%{opacity:0}}
     @keyframes rfMiniShake{0%,100%{transform:translate(0,0) rotate(0deg)}20%{transform:translate(-4px,-2px) rotate(-7deg)}40%{transform:translate(4px,-5px) rotate(6deg)}60%{transform:translate(-3px,-7px) rotate(-4deg)}80%{transform:translate(2px,-3px) rotate(3deg)}}
     @keyframes rfFuelRise{0%{transform:translate(-50%,0) scale(1);opacity:1}100%{transform:translate(-50%,-64px) scale(0.5);opacity:0}}
-    @keyframes rfGhostCutout{0%{opacity:0.7}85%{opacity:0.7}100%{opacity:0}}
     .rf-btn:hover:not(:disabled){transform:translateY(-2px) scale(1.02);filter:brightness(1.1)}
     .rf-btn:active:not(:disabled){transform:translateY(0) scale(0.97)}
   `}</style>
@@ -252,12 +264,11 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
   // How long solo's flythrough plays for — locked in once fuel is final (entering "launchpad"),
   // so it stays fixed for the rest of the sequence instead of recomputing every render.
   const soloFlightMsRef = useRef(SOLO_FLIGHT_MS_MIN);
-  // The team's best fuel *before* this launch, and how long that run's flight would have lasted —
-  // both captured fresh every time "launchpad" fires (so the bonus round's second launch compares
-  // against launch #1 automatically, no special-casing needed) and read by the ghost rocket + the
-  // results-screen comparison. 0 means no record yet this session (first-ever launch).
+  // The team's best fuel *before* this launch — captured fresh every time "launchpad" fires (so
+  // the bonus round's second launch compares against launch #1 automatically, no special-casing
+  // needed) and read by the "Your Best" ghost rocket + the results-screen comparison. 0 means no
+  // record yet this session (first-ever launch), which keeps the single-camera cinematic view.
   const prevBestFuelRef = useRef(0);
-  const prevBestFlightMsRef = useRef(0);
 
   const finalizeLaunch = useCallback(() => {
     if (payoutDoneRef.current) return;
@@ -347,8 +358,9 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
       // animation play out.
       const prevBestFuel = getBestFuel(teams[0].id);
       prevBestFuelRef.current = prevBestFuel;
-      const prevBestFrac = Math.max(MIN_HEIGHT_FRACTION, Math.min(1, prevBestFuel / SOLO_FUEL_CEILING));
-      prevBestFlightMsRef.current = SOLO_FLIGHT_MS_MIN + prevBestFrac * (SOLO_FLIGHT_MS_MAX - SOLO_FLIGHT_MS_MIN);
+      // Feeds the same fuel number into the comparative climb view's height calculation as the
+      // "Your Best" rocket — read by the render branch below whenever prevBestFuel > 0.
+      fuelRef.current[GHOST_TEAM_ID] = prevBestFuel;
       setBestFuelIfHigher(teams[0].id, soloFuel);
     }
   }, [phase, teams]);
@@ -488,8 +500,13 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
 
   if (phase === "launchpad" || phase === "igniting" || phase === "launching") {
     const isSolo = teams.length === 1;
+    // Solo only gets the cinematic single-camera view on a team's very first-ever launch this
+    // session — there's nothing yet to compare against. From the second launch on (a previous
+    // best exists), solo drops into the same side-by-side comparative view multi-team uses,
+    // racing a synthetic "Your Best" rocket — see GHOST_TEAM/compareTeams below.
+    const hasRival = isSolo && prevBestFuelRef.current > 0;
 
-    if (isSolo) {
+    if (isSolo && !hasRival) {
       // Solo's launch is a camera locked on the rocket, not a rocket climbing past a fixed
       // camera — the rocket itself never moves in frame. See buildFlybyParticles/Flyby for the
       // flying-past field, and soloFlightMsRef for how fuel maps to how long it plays.
@@ -504,14 +521,6 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
             <div style={{ fontWeight: "900", fontSize: "20px", color: "#A5B4FC", marginBottom: "8px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
               {phase === "launchpad" ? <><Icon name="satellite" size={18} /> All engines fuelled. Prepare for launch!</> : phase === "igniting" ? <><Icon name="flame" size={18} /> IGNITION...</> : <><Icon name="rocket" size={18} /> LAUNCH!</>}
             </div>
-            {/* Fuel itself stays secret (the "???" tag below) right up to the reveal — this
-                doesn't break that, it only shows the target from a PAST launch, never this run's
-                own number. */}
-            {prevBestFuelRef.current > 0 && (
-              <div style={{ fontSize: "13px", color: "#C4B5FD", fontWeight: "700", marginBottom: "10px" }}>
-                <Icon name="trophy" size={12} /> Chasing your best: {prevBestFuelRef.current} fuel
-              </div>
-            )}
             <div style={{ position: "relative", height: `${frameH}px`, borderRadius: "18px", overflow: "hidden", background: "radial-gradient(ellipse at 50% 40%,#1E1B4B 0%,#030014 75%)" }}>
               {/* Ground drops away below on liftoff, in step with the rocket rising off it —
                   the camera is meant to be attached to the rocket, not watching it from afar. */}
@@ -528,22 +537,6 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
               )}
 
               {phase === "launching" && launched && <Flyby flightMs={flightMs} count={SOLO_FLYBY_COUNT} frameH={frameH} keyPrefix="solo" />}
-
-              {/* The "ghost" — a translucent companion that sits beside the real rocket and cuts
-                  out (fades) at the exact moment the PREVIOUS best run's flight would have ended.
-                  Beat the record and the ghost visibly drops away first, real rocket still going;
-                  fall short and the ghost is still flying when this run's flyby ends. Deliberately
-                  not part of Flyby/buildFlybyParticles — this doesn't travel the flyby field, it's
-                  a fixed companion beside the stationary rocket, since the camera never moves. */}
-              {phase === "launching" && launched && prevBestFuelRef.current > 0 && (
-                <div style={{
-                  position: "absolute", left: "50%", top: "50%",
-                  transform: "translate(calc(-50% + 34px), -50%)",
-                  animation: `rfGhostCutout ${prevBestFlightMsRef.current}ms ease-in ${LIFTOFF_MS}ms both`,
-                }}>
-                  <div style={{ filter: "grayscale(1) brightness(1.6)", opacity: 0.85 }}><Icon name="rocket" size={30} /></div>
-                </div>
-              )}
 
               {/* Starts sitting on the pad (offset down from center) and rises to its fixed
                   cruise position over LIFTOFF_MS once launched — after that it never moves again;
@@ -584,10 +577,14 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
     // (ground falling away, a single flyby field flying past everyone) — it's just one shared
     // scene instead of an isolated one per rocket, with height doing the comparison instead of
     // flight length.
+    // Solo with a previous best races a synthetic "Your Best" rocket instead of real teammates —
+    // everything below reads compareTeams instead of the raw teams prop so the two cases share
+    // one rendering path; finalizeLaunch (scoring) still only ever iterates the real teams prop.
+    const compareTeams: Team[] = hasRival ? [teams[0], GHOST_TEAM] : teams;
     // actualMaxFuel (unfloored) decides who's actually in the lead — maxFuel below is only
     // floored at 1 to keep the height-fraction division safe, and using the floored value here
     // too would make everyone "the leader" whenever the whole class scored zero.
-    const actualMaxFuel = Math.max(...teams.map(t => fuelRef.current[t.id] ?? 0));
+    const actualMaxFuel = Math.max(...compareTeams.map(t => fuelRef.current[t.id] ?? 0));
     const maxFuel = Math.max(1, actualMaxFuel);
     const frameH = MAX_FLIGHT_PX + 90;
     // Everyone rises together for the first third of the climb, then the pack peels off one
@@ -598,16 +595,21 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
     const RISE_PCT = 32;
     const FALL_STEP_PCT = 10;
     const COMMON_PX = 0.38 * MAX_FLIGHT_PX;
-    const rankById = Object.fromEntries(rankByFuel(teams, fuelRef.current).map(r => [r.team.id, r.rank]));
+    const rankById = Object.fromEntries(rankByFuel(compareTeams, fuelRef.current).map(r => [r.team.id, r.rank]));
     const maxRank = Math.max(...Object.values(rankById));
     return (
       <div style={{ ...arenaStyle, textAlign: "center" }}>
         <Starfield />
         {STYLE_TAG}
         <div style={{ position: "relative", zIndex: 1 }}>
-          <div style={{ fontWeight: "900", fontSize: "20px", color: "#A5B4FC", marginBottom: "18px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+          <div style={{ fontWeight: "900", fontSize: "20px", color: "#A5B4FC", marginBottom: hasRival ? "4px" : "18px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
             {phase === "launchpad" ? <><Icon name="satellite" size={18} /> All engines fuelled. Prepare for launch!</> : phase === "igniting" ? <><Icon name="flame" size={18} /> IGNITION...</> : <><Icon name="rocket" size={18} /> LAUNCH!</>}
           </div>
+          {hasRival && (
+            <div style={{ fontSize: "13px", color: "#C4B5FD", fontWeight: "700", marginBottom: "14px" }}>
+              <Icon name="trophy" size={12} /> Racing your best launch this session
+            </div>
+          )}
           <div style={{ display: "flex", justifyContent: "center", alignItems: "flex-end", gap: "28px", height: `${frameH}px`, position: "relative", overflow: "hidden", borderRadius: "18px" }}>
             {/* Ground drops away below on liftoff, the same beat as solo — the camera stays
                 with the fleet as it climbs instead of watching from a fixed spot on the pad. */}
@@ -627,7 +629,7 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
                 getting its own — everyone's climbing through the same sky together. */}
             {phase === "launching" && launched && <Flyby flightMs={Math.max(1000, ASCENT_MS - LIFTOFF_MS)} count={SOLO_FLYBY_COUNT} frameH={frameH} keyPrefix="fleet" />}
 
-            {teams.map(t => {
+            {compareTeams.map(t => {
               const fuel = fuelRef.current[t.id] ?? 0;
               const isLeader = fuel === actualMaxFuel;
               const heightFraction = Math.max(MIN_HEIGHT_FRACTION, fuel / maxFuel);
@@ -672,7 +674,10 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
                       instead of growing wide enough to overlap the neighbouring rocket's bubble. */}
                   <div style={{ position: "absolute", bottom: "0", left: "50%", transform: "translateX(-50%)", maxWidth: "94px", background: `linear-gradient(180deg,${t.color.dark}88,#0B0B2E)`, border: `2px solid ${t.color.bg}`, borderRadius: "10px", padding: "6px 10px", fontSize: "12px", fontWeight: "800", color: "white", textAlign: "center" }}>
                     <TeamIcon team={t} color="white" /> {t.name}<br />
-                    <span style={{ color: "#FDBA74", display: "inline-flex", alignItems: "center", gap: "3px" }}><Icon name="fuel" size={11} /> ???</span>
+                    {/* Every real team's own fuel stays secret until the reveal — but the ghost's
+                        number is already-known history, not something this run could leak, so it
+                        shows straight away as the actual target to beat. */}
+                    <span style={{ color: "#FDBA74", display: "inline-flex", alignItems: "center", gap: "3px" }}><Icon name="fuel" size={11} /> {t.id === GHOST_TEAM_ID ? fuel : "???"}</span>
                   </div>
                 </div>
               );
