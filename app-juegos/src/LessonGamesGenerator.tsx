@@ -167,8 +167,8 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     checkoutRedirect ? "billing" : initialScreen ?? "welcome"
   );
   // Set right before switching to "lessonplan" when arriving from a specific Learn lesson's
-  // "Turn this into a Lesson Plan" button — null when arriving from the welcome screen's own
-  // "Lesson Plans" button instead, so LessonPlanScreen opens on its browsable index.
+  // "Start Lesson Plan" button — null when arriving from Learn's own "Lesson Plans" toggle
+  // instead, so LessonPlanScreen opens on its browsable index.
   const [lessonPlanTopicId, setLessonPlanTopicId] = useState<string | null>(null);
   const isPaid = isPaidStatus(subscription.status);
   // The class this session is tied to, if any. Games started via "Start a Game" (not through "My
@@ -937,7 +937,6 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
           <button onClick={() => { setActiveClassId(null); setScreen("setup"); }} style={{ background: `linear-gradient(135deg,${theme.cta[0]},${theme.cta[1]})`, color: "white", border: "none", borderRadius: "16px", padding: "18px 56px", fontSize: "20px", fontWeight: "900", cursor: "pointer", boxShadow: `0 8px 32px ${hexToRgba(theme.cta[1], 0.45)}`, letterSpacing: "0.01em", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "8px" }}><Icon name="rocket" size={20} /> Start a Game</button>
           <button onClick={() => setScreen("classes")} style={{ background: "rgba(255,255,255,0.12)", border: "2px solid rgba(255,255,255,0.3)", color: "white", borderRadius: "16px", padding: "18px 40px", fontSize: "18px", fontWeight: "800", cursor: "pointer", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "8px" }}><Icon name="books" size={18} /> My Classes</button>
           <button onClick={() => { setLearnFilter(null); setScreen("learn"); }} style={{ background: "rgba(255,255,255,0.12)", border: "2px solid rgba(255,255,255,0.3)", color: "white", borderRadius: "16px", padding: "18px 40px", fontSize: "18px", fontWeight: "800", cursor: "pointer", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "8px" }}><Icon name="learn" size={18} /> Learn</button>
-          <button onClick={() => { setLessonPlanTopicId(null); setScreen("lessonplan"); }} style={{ background: "rgba(255,255,255,0.12)", border: "2px solid rgba(255,255,255,0.3)", color: "white", borderRadius: "16px", padding: "18px 40px", fontSize: "18px", fontWeight: "800", cursor: "pointer", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "8px" }}><Icon name="school" size={18} /> Lesson Plans</button>
           <button onClick={() => setScreen("leaderboard")} style={{ background: "rgba(255,255,255,0.12)", border: "2px solid rgba(255,255,255,0.3)", color: "white", borderRadius: "16px", padding: "18px 40px", fontSize: "18px", fontWeight: "800", cursor: "pointer", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "8px" }}><Icon name="trophy" size={18} /> Leaderboard</button>
           <button onClick={() => setScreen("profile")} style={{ background: "rgba(255,255,255,0.12)", border: "2px solid rgba(255,255,255,0.3)", color: "white", borderRadius: "16px", padding: "18px 40px", fontSize: "18px", fontWeight: "800", cursor: "pointer", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "8px" }}><Icon name="person" size={18} /> My Profile</button>
           {/* Hidden during the free-launch phase — see FREE_LAUNCH_ALL_PREMIUM in data/constants.ts.
@@ -1006,6 +1005,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
         theme={theme}
         filterTopicIds={learnFilter ?? undefined}
         onOpenLessonPlan={id => { setLessonPlanTopicId(id); setScreen("lessonplan"); }}
+        onOpenLessonPlanIndex={() => { setLessonPlanTopicId(null); setScreen("lessonplan"); }}
       />
       <FeedbackButton />
       <BrandBadge isPaid={isPaid} />
@@ -1018,6 +1018,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
         onBack={() => setScreen("welcome")}
         theme={theme}
         initialTopicId={lessonPlanTopicId}
+        onOpenLearn={() => { setLearnFilter(null); setScreen("learn"); }}
       />
       <FeedbackButton />
       <BrandBadge isPaid={isPaid} />

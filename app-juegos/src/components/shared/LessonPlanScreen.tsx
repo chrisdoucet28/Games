@@ -3,7 +3,7 @@ import { hexToRgba, type Theme } from "../../data/themes";
 import { LESSON_TOPICS, LEVEL_ORDER, LEVEL_COLOR, FOCUS_ORDER, FOCUS_LABEL, type LearnTopic } from "../../data/learnTopics";
 import { LESSON_PLANS, buildUnscrambleItems, type RoundOut, type UnscrambleItem } from "../../data/lessonPlans";
 import { TOPIC_LIBRARY } from "../../data/topics";
-import { LessonContent } from "./LessonContent";
+import { LessonSectionBlock, CommonMistakesBlock } from "./LessonContent";
 import { QuestionCard } from "./QuestionCard";
 import { Icon, type IconName } from "./Icon";
 import type { QuestionData } from "../../types";
@@ -11,9 +11,11 @@ import type { QuestionData } from "../../types";
 type Props = {
   onBack: () => void;
   theme: Theme;
-  // Set when arriving directly from a specific Learn lesson's "Turn this into a Lesson Plan"
-  // button — skips the index and drops straight into that topic's slideshow.
+  // Set when arriving directly from a specific Learn lesson's "Start Lesson Plan" button — skips
+  // the index and drops straight into that topic's slideshow.
   initialTopicId?: string | null;
+  // Switches to the Learn screen (the "Learn" pill in the mode toggle below, shown on the index).
+  onOpenLearn: () => void;
 };
 
 const PRINT_CSS = `
@@ -31,7 +33,7 @@ function sampleByType(questions: QuestionData[], type: string, count: number): Q
   return [...pool].sort(() => Math.random() - 0.5).slice(0, count);
 }
 
-export function LessonPlanScreen({ onBack, theme, initialTopicId }: Props) {
+export function LessonPlanScreen({ onBack, theme, initialTopicId, onOpenLearn }: Props) {
   const availableTopics = useMemo(() => LESSON_TOPICS.filter(t => LESSON_PLANS[t.id]), []);
   const [selectedId, setSelectedId] = useState<string | null>(initialTopicId ?? null);
   const selected = selectedId ? availableTopics.find(t => t.id === selectedId) : null;
@@ -58,6 +60,17 @@ export function LessonPlanScreen({ onBack, theme, initialTopicId }: Props) {
           <p style={{ color: "#6B7280", marginTop: "8px" }}>
             Traditional, ~30-minute class activities for one topic — presentation, practice, and production, no game pressure. Currently piloting at A1.
           </p>
+          <div style={{ display: "inline-flex", background: "white", border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, borderRadius: "999px", padding: "4px", marginTop: "14px" }}>
+            <button
+              onClick={onOpenLearn}
+              style={{ background: "none", border: "none", color: theme.accentSolid, borderRadius: "999px", padding: "8px 18px", fontWeight: "800", fontSize: "13px", fontFamily: theme.headingFont, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "6px" }}
+            >
+              <Icon name="learn" size={14} /> Learn
+            </button>
+            <div style={{ background: theme.accentSolid, color: "white", borderRadius: "999px", padding: "8px 18px", fontWeight: "800", fontSize: "13px", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px" }}>
+              <Icon name="school" size={14} /> Lesson Plans
+            </div>
+          </div>
         </div>
 
         {availableTopics.length === 0 ? (
@@ -94,10 +107,14 @@ export function LessonPlanScreen({ onBack, theme, initialTopicId }: Props) {
 
 // One flat slide per screen the class sees — built once from whatever's already in scope for this
 // topic (existing lesson content + sampled question-bank items), plus the one authored round-out
-// exercise. "question" slides reuse QuestionCard exactly as every game already does.
+// exercise. "question" slides reuse QuestionCard exactly as every game already does. "presentation"
+// is split one slide per Lesson section — the same blue-header divisions the Learn page shows all
+// at once on one scrolling card — so the explanation reads like the rest of the slideshow instead
+// of a wall of text; "commonMistakes" is its own trailing slide, shown only when the lesson has any.
 type Slide =
   | { kind: "intro" }
-  | { kind: "presentation" }
+  | { kind: "presentation"; sectionIndex: number }
+  | { kind: "commonMistakes" }
   | { kind: "question"; sectionLabel: string; sectionIcon: IconName; question: QuestionData; progress: string }
   | { kind: "roundOut" }
   | { kind: "speaking"; tasks: string[] }
@@ -128,7 +145,9 @@ function LessonPlanSlideshow({ topic, theme, onBack }: { topic: LearnTopic; them
       ? topicData.cardTasks.slice(0, 3).map(t => t.task)
       : sampleByType(topicData.questions, "speaking task", 3).map(q => q.question ?? "").filter(Boolean);
 
-    const list: Slide[] = [{ kind: "intro" }, { kind: "presentation" }];
+    const list: Slide[] = [{ kind: "intro" }];
+    topic.lesson.sections.forEach((_, i) => list.push({ kind: "presentation", sectionIndex: i }));
+    if (topic.lesson.commonMistakes.length > 0) list.push({ kind: "commonMistakes" });
     practiceA.items.forEach((q, i) => list.push({ kind: "question", sectionLabel: "Warm-Up Practice", sectionIcon: practiceA.icon, question: q, progress: `${i + 1}/${practiceA.items.length}` }));
     practiceB.items.forEach((q, i) => list.push({ kind: "question", sectionLabel: "More Practice", sectionIcon: practiceB.icon, question: q, progress: `${i + 1}/${practiceB.items.length}` }));
     list.push({ kind: "roundOut" });
@@ -172,7 +191,32 @@ function LessonPlanSlideshow({ topic, theme, onBack }: { topic: LearnTopic; them
             </div>
           )}
 
-          {slide.kind === "presentation" && <LessonContent lesson={topic.lesson} theme={theme} />}
+          {slide.kind === "presentation" && (() => {
+            const sectionCount = topic.lesson.sections.length;
+            return (
+              <div>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", marginBottom: "14px", color: theme.accentSolid, fontWeight: "800", fontSize: "13px", textTransform: "uppercase", letterSpacing: "0.04em" }}>
+                  <Icon name="bookOpen" size={14} /> Explanation {sectionCount > 1 && <span style={{ color: "#9CA3AF", fontWeight: "700" }}>· {slide.sectionIndex + 1}/{sectionCount}</span>}
+                </div>
+                {slide.sectionIndex === 0 && (
+                  <>
+                    <h2 style={{ fontSize: "22px", fontWeight: "900", color: theme.heroBg[0], margin: "0 0 8px", fontFamily: theme.headingFont }}>{topic.lesson.title}</h2>
+                    <p style={{ color: "#4B5563", fontSize: "14px", lineHeight: 1.6, margin: "0 0 18px" }}>{topic.lesson.intro}</p>
+                  </>
+                )}
+                <LessonSectionBlock section={topic.lesson.sections[slide.sectionIndex]} theme={theme} />
+              </div>
+            );
+          })()}
+
+          {slide.kind === "commonMistakes" && (
+            <div>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", marginBottom: "14px", color: theme.accentSolid, fontWeight: "800", fontSize: "13px", textTransform: "uppercase", letterSpacing: "0.04em" }}>
+                <Icon name="warning" size={14} /> Explanation <span style={{ color: "#9CA3AF", fontWeight: "700" }}>· Common Mistakes</span>
+              </div>
+              <CommonMistakesBlock commonMistakes={topic.lesson.commonMistakes} />
+            </div>
+          )}
 
           {slide.kind === "question" && (
             <div>

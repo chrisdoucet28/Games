@@ -17,6 +17,10 @@ type Props = {
   // Present only for topics with an authored Lesson Plan (see data/lessonPlans.ts) — omitted
   // entirely when the caller doesn't support navigating there.
   onOpenLessonPlan?: (topicId: string) => void;
+  // Switches to the full Lesson Plans index (the "Lesson Plans" pill in the mode toggle below).
+  // Omitted on the game-scoped "Review these topics" view (filterTopicIds set) — jumping to the
+  // full, unscoped index doesn't make sense from inside that flow.
+  onOpenLessonPlanIndex?: () => void;
 };
 
 // Hides interactive chrome and reveals the ink-economical print block when the browser's
@@ -81,7 +85,7 @@ function PrintableLesson({ t, logoUrl }: { t: (typeof LESSON_TOPICS)[number]; lo
   );
 }
 
-export function LearnScreen({ onBack, theme, filterTopicIds, onOpenLessonPlan }: Props) {
+export function LearnScreen({ onBack, theme, filterTopicIds, onOpenLessonPlan, onOpenLessonPlanIndex }: Props) {
   const visibleTopics = filterTopicIds ? LESSON_TOPICS.filter(t => filterTopicIds.includes(t.id)) : LESSON_TOPICS;
 
   // Paid-only branding perk (see ProfileScreen/BrandBadge) — org_logo_url is only ever set by a
@@ -123,7 +127,7 @@ export function LearnScreen({ onBack, theme, filterTopicIds, onOpenLessonPlan }:
                 onClick={() => onOpenLessonPlan(selected.id)}
                 style={{ background: theme.accentSolid, border: "none", color: "white", borderRadius: "10px", padding: "8px 16px", cursor: "pointer", fontWeight: "700", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px" }}
               >
-                <Icon name="school" size={14} /> Turn this into a Lesson Plan
+                <Icon name="school" size={14} /> Start Lesson Plan
               </button>
             )}
           </div>
@@ -161,6 +165,19 @@ export function LearnScreen({ onBack, theme, filterTopicIds, onOpenLessonPlan }:
           <p style={{ color: "#6B7280", marginTop: "8px" }}>
             {filterTopicIds ? "A quick refresher on the topics you picked for this game." : "Quick, no-fluff explanations — the same things the games actually test."}
           </p>
+          {!filterTopicIds && onOpenLessonPlanIndex && (
+            <div style={{ display: "inline-flex", background: "white", border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, borderRadius: "999px", padding: "4px", marginTop: "14px" }}>
+              <div style={{ background: theme.accentSolid, color: "white", borderRadius: "999px", padding: "8px 18px", fontWeight: "800", fontSize: "13px", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                <Icon name="learn" size={14} /> Learn
+              </div>
+              <button
+                onClick={onOpenLessonPlanIndex}
+                style={{ background: "none", border: "none", color: theme.accentSolid, borderRadius: "999px", padding: "8px 18px", fontWeight: "800", fontSize: "13px", fontFamily: theme.headingFont, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "6px" }}
+              >
+                <Icon name="school" size={14} /> Lesson Plans
+              </button>
+            </div>
+          )}
           {filterTopicIds && visibleTopics.length > 0 && (
             <button
               onClick={() => window.print()}
