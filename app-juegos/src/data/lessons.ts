@@ -4709,6 +4709,81 @@ export const LESSONS: Record<string, Lesson> = {
     ],
   },
 
+  money_and_economy: {
+    title: "Money & the Economy",
+    intro: "Talking about the economy combines five things: describing ongoing economic trends (present perfect continuous), how policies and events are reported (expanded passive), adding extra information about people, things, places, and reasons (relative clauses), imagining hypothetical financial situations (second conditional), and asking indirect questions politely (embedded questions).",
+    sections: [
+      {
+        heading: "Useful economic vocabulary",
+        body: [
+          "inflation, recession, wage, salary, income, afford, budget, debt, loan, interest rate, tax, invest, savings, unemployment, poverty, wealth.",
+        ],
+        examples: [
+          "**Inflation** makes everything more expensive over time.",
+          "Many people lost their jobs during the **recession**.",
+          "They took out a **loan** to buy their first house.",
+        ],
+      },
+      {
+        heading: "Describing ongoing economic trends (present perfect continuous)",
+        body: [
+          "have/has been + -ing — for a situation that started in the past and is still continuing, or has just stopped with visible results.",
+        ],
+        examples: [
+          "**Prices have been rising** for months.",
+          "**The government has been discussing** new tax policies.",
+        ],
+      },
+      {
+        heading: "Reporting economic events and policy (expanded passive)",
+        body: [
+          "Passive present perfect: have/has been + past participle. Passive future: will be + past participle.",
+        ],
+        examples: [
+          "**Interest rates have been raised** several times this year.",
+          "**Taxes will be raised** next year.",
+        ],
+      },
+      {
+        heading: "Adding extra information (relative clauses)",
+        body: [
+          "who = people, that/which = things, where = places, when = times, why = reasons, whose = possession.",
+          "Defining clauses identify which one you mean (no commas). Non-defining clauses add extra, non-essential information (commas).",
+        ],
+        examples: [
+          "The economist **who works for the bank** explains inflation clearly. (defining)",
+          "My uncle, **whose company went bankrupt**, lost his job. (non-defining)",
+        ],
+      },
+      {
+        heading: "Imagining hypothetical financial situations (second conditional)",
+        body: [
+          "if + past simple, ... would + base verb — for an unreal or unlikely present/future situation.",
+        ],
+        examples: [
+          "If I **had** more money, I **would travel** more.",
+          "**What would** you do if you **won** the lottery?",
+        ],
+      },
+      {
+        heading: "Asking indirect, polite questions (embedded questions)",
+        body: [
+          "Question word + normal statement word order (no do/does/did) inside a longer sentence.",
+        ],
+        examples: [
+          "Can you explain **why prices rise** so quickly?",
+          "I don't know **how the economy works**.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ Interest rates have raised this year. → ✅ Interest rates have been raised this year. (passive present perfect needs 'been')",
+      "❌ If I have more money, I would travel more. → ✅ If I had more money, I would travel more. (second conditional needs past simple)",
+      "❌ The policy who raises taxes causes controversy. → ✅ The policy that raises taxes causes controversy. ('that/which' for things)",
+      "❌ Do you know what does cause inflation? → ✅ Do you know what causes inflation? (embedded questions use normal word order)",
+    ],
+  },
+
   present_simple: {
     title: "Present Simple",
     intro: "The foundation of present simple: add -s for he/she/it, and use do/does for negatives and questions — never both at once.",
