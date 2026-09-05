@@ -1,12 +1,12 @@
 import type { QuestionData } from "../types";
 
-// Real-world reading (and future listening, once ElevenLabs narration is wired in) content for
-// the Lesson Plans feature — original short passages written specifically for this slot, styled
-// like an authentic text a student would actually encounter (a text-message thread, a diary
-// entry, a notice, a letter...) rather than the grammar-drill prose used everywhere else on the
-// site. Sits as its own slide between Open Production and the Speaking Wrap-Up (see
-// LessonPlanScreen.tsx). Only topics with an entry here get the slide — safe to build out
-// gradually level by level; LessonPlanScreen simply skips it when a topic has none yet.
+// Real-world reading/listening content for the Lesson Plans feature — original short passages
+// written specifically for this slot, styled like an authentic text a student would actually
+// encounter (a text-message thread, a diary entry, a notice, a letter...) rather than the
+// grammar-drill prose used everywhere else on the site. Sits as its own step between Open
+// Production and the Speaking Wrap-Up (see RealWorldReadingStep in LessonPlanScreen.tsx). Only
+// topics with an entry here get the step — safe to build out gradually level by level;
+// LessonPlanScreen simply skips it when a topic has none yet.
 //
 // Scope: A1 pilot (25 topics) only, for now. Length/complexity guide for future levels: A1
 // 40-70 words (present simple/simple past only, no subordinate clauses), A2 ~70-110, B1 ~120-160,
@@ -17,8 +17,11 @@ export type RealWorldReading = {
   // its own line, so a text-message thread reads as separate messages, a diary entry as separate
   // sentences/paragraphs, etc.
   passage: string[];
-  // Set once ElevenLabs narration exists for this topic; omitted until then — no audio control
-  // renders without it.
+  // WAV files under public/audio/real-world/, generated with the Windows built-in SAPI voice
+  // ("Microsoft Zira Desktop") as a temporary placeholder — swap each one for real ElevenLabs
+  // narration later; the filename convention and RealWorldReadingStep/AudioPlayer code don't need
+  // to change either way. A reading with no audioUrl skips the Reading/Listening mode choice
+  // entirely and just shows the text (matching the "skip if no data" pattern used throughout).
   audioUrl?: string;
   // 3 comprehension-check questions about the text's content (not the grammar point itself —
   // that's what Practice A/B/Production already cover). Same QuestionData shape/reveal-answer
@@ -29,6 +32,7 @@ export type RealWorldReading = {
 export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
   greetings_introductions: {
     title: "New at School",
+    audioUrl: "/audio/real-world/greetings_introductions.wav",
     passage: [
       "Hi! I'm Marta. I'm new here. Nice to meet you!",
       "Hi Marta! I'm Leo. Nice to meet you too. How are you?",
@@ -44,6 +48,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   introducing_others: {
     title: "At the Party",
+    audioUrl: "/audio/real-world/introducing_others.wav",
     passage: [
       "Come in! This is my brother, Diego. He's a doctor.",
       "And this is his wife, Ana. She's a teacher.",
@@ -58,6 +63,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   days_dates_prepositions_time: {
     title: "This Week's Notice",
+    audioUrl: "/audio/real-world/days_dates_prepositions_time.wav",
     passage: [
       "English class is on Monday and Wednesday at six o'clock in the evening.",
       "The test is on Friday, 15th May, at nine o'clock in the morning.",
@@ -73,6 +79,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   what_time_is_it: {
     title: "What Time Should We Meet?",
+    audioUrl: "/audio/real-world/what_time_is_it.wav",
     passage: [
       "What time is the film?",
       "It starts at half past seven.",
@@ -89,6 +96,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   weather_temperature_seasons: {
     title: "Weekend Weather",
+    audioUrl: "/audio/real-world/weather_temperature_seasons.wav",
     passage: [
       "Good morning! Today it is sunny and warm — perfect for the beach.",
       "Tomorrow it is going to be cloudy, and on Sunday it is rainy and cold.",
@@ -103,6 +111,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   daily_routines_frequency: {
     title: "My Diary",
+    audioUrl: "/audio/real-world/daily_routines_frequency.wav",
     passage: [
       "I always get up at seven o'clock.",
       "I usually have breakfast at home, but I never eat breakfast on Sundays.",
@@ -117,6 +126,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   house_objects_rooms_there_is_are: {
     title: "Room for Rent",
+    audioUrl: "/audio/real-world/house_objects_rooms_there_is_are.wav",
     passage: [
       "Nice room in a shared flat! There is a big bed and a wardrobe in the bedroom.",
       "There isn't a private bathroom, but there are two bathrooms in the flat.",
@@ -131,6 +141,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   possessive_adjectives_pronouns: {
     title: "Lost and Found",
+    audioUrl: "/audio/real-world/possessive_adjectives_pronouns.wav",
     passage: [
       "Is this your bag? I found it near the door.",
       "No, it isn't mine. Maybe it's Anna's — that blue one over there is hers, but this isn't the same colour.",
@@ -146,6 +157,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   present_simple: {
     title: "About Sofia",
+    audioUrl: "/audio/real-world/present_simple.wav",
     passage: [
       "Hi, I'm Sofia! I live in Madrid and I work in a hospital.",
       "I don't drive to work — I take the metro.",
@@ -160,6 +172,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   auxiliary_verbs_be_do: {
     title: "Joining the Club",
+    audioUrl: "/audio/real-world/auxiliary_verbs_be_do.wav",
     passage: [
       "Are you a member of the sports club?",
       "Yes, I am! Do you want to join too?",
@@ -176,6 +189,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   can_cant: {
     title: "Can You Help?",
+    audioUrl: "/audio/real-world/can_cant.wav",
     passage: [
       "Can you swim?",
       "Yes, I can. I can also play tennis, but I can't ski.",
@@ -191,6 +205,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   present_continuous_a1: {
     title: "What Is Everyone Doing?",
+    audioUrl: "/audio/real-world/present_continuous_a1.wav",
     passage: [
       "Where is everyone?",
       "Mum is cooking dinner in the kitchen. Dad is watching the news.",
@@ -205,6 +220,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   likes_dislikes: {
     title: "My Profile",
+    audioUrl: "/audio/real-world/likes_dislikes.wav",
     passage: [
       "Hi! I love reading and I really enjoy cooking on weekends.",
       "I like playing football, but I don't like watching it on TV.",
@@ -219,6 +235,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   what_do_you_do: {
     title: "Meet the Team",
+    audioUrl: "/audio/real-world/what_do_you_do.wav",
     passage: [
       "Hi, I'm Carlos. I'm a chef, and I work in a restaurant in the city centre.",
       "This is Lucia — she's an engineer, and she works for a big company.",
@@ -233,6 +250,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   hobbies: {
     title: "Free Time Forum",
+    audioUrl: "/audio/real-world/hobbies.wav",
     passage: [
       "In my free time, I go swimming twice a week and I'm really into photography.",
       "My best friend loves painting and is interested in gardening too.",
@@ -247,6 +265,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   personality: {
     title: "My New Roommate",
+    audioUrl: "/audio/real-world/personality.wav",
     passage: [
       "What is your new roommate like?",
       "She's really kind and very patient. She's a bit shy at first, but she's also funny once you know her.",
@@ -261,6 +280,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   feelings: {
     title: "Checking In",
+    audioUrl: "/audio/real-world/feelings.wav",
     passage: [
       "How are you feeling today?",
       "I'm a bit tired, but I'm happy because it's Friday! How about you?",
@@ -276,6 +296,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   appearance: {
     title: "How Will I Know You?",
+    audioUrl: "/audio/real-world/appearance.wav",
     passage: [
       "How will I know you at the airport?",
       "I'm tall, with short black hair. I'll be wearing a blue jacket.",
@@ -291,6 +312,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   clothes: {
     title: "Packing for the Trip",
+    audioUrl: "/audio/real-world/clothes.wav",
     passage: [
       "What are you packing?",
       "I'm wearing my jeans and a jacket today, but I'm packing shorts and a swimsuit for the beach.",
@@ -305,6 +327,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   there_is_are: {
     title: "My New Neighbourhood",
+    audioUrl: "/audio/real-world/there_is_are.wav",
     passage: [
       "There is a small park near my flat, and there are two cafés on my street.",
       "There isn't a supermarket close by, but there are three bus stops nearby.",
@@ -319,6 +342,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   family_members: {
     title: "A Letter Home",
+    audioUrl: "/audio/real-world/family_members.wav",
     passage: [
       "Dear Grandma, I miss you!",
       "My aunt and uncle visited us last week with my cousins.",
@@ -333,6 +357,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   possessive_s: {
     title: "Whose Is This?",
+    audioUrl: "/audio/real-world/possessive_s.wav",
     passage: [
       "Is this Tom's bag?",
       "No, I think it's my sister's bag.",
@@ -348,6 +373,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   prepositions_place: {
     title: "Where's My Phone?",
+    audioUrl: "/audio/real-world/prepositions_place.wav",
     passage: [
       "Have you seen my phone?",
       "Is it on the table?",
@@ -364,6 +390,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   basic_word_order: {
     title: "My Day",
+    audioUrl: "/audio/real-world/basic_word_order.wav",
     passage: [
       "I eat breakfast every morning.",
       "My mother makes coffee, and my brother reads the newspaper.",
@@ -378,6 +405,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   giving_directions: {
     title: "How Do I Get There?",
+    audioUrl: "/audio/real-world/giving_directions.wav",
     passage: [
       "How do I get to the café?",
       "Go straight ahead, then turn left at the bank. It's on your right, next to the bookshop.",

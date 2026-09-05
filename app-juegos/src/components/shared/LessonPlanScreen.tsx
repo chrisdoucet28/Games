@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { hexToRgba, type Theme } from "../../data/themes";
 import { LESSON_TOPICS, LEVEL_ORDER, LEVEL_COLOR, FOCUS_ORDER, FOCUS_LABEL, type LearnTopic } from "../../data/learnTopics";
 import { LESSON_PLANS, buildUnscrambleItems, type RoundOut, type UnscrambleItem } from "../../data/lessonPlans";
@@ -113,8 +113,8 @@ export function LessonPlanScreen({ onBack, theme, initialTopicId, onOpenLearn }:
 // at once on one scrolling card — so the explanation reads like the rest of the slideshow instead
 // of a wall of text; "commonMistakes" is its own trailing slide, shown only when the lesson has
 // any. "realWorld" is likewise shown only when REAL_WORLD_READINGS has an entry for this topic
-// (currently the A1 pilot only) — its own comprehension-check questions ride the "question" kind
-// exactly like Practice A/B/Production, tagged with sectionLabel "Real-World Check".
+// (currently the A1 pilot only) — like "roundOut", it's one step with its own internal phases
+// (mode select, content, comprehension questions, optional reveal), rendered by RealWorldReadingStep.
 type Slide =
   | { kind: "intro" }
   | { kind: "presentation"; sectionIndex: number }
@@ -158,10 +158,7 @@ function LessonPlanSlideshow({ topic, theme, onBack }: { topic: LearnTopic; them
     list.push({ kind: "roundOut" });
     production.forEach((q, i) => list.push({ kind: "question", sectionLabel: "Your Turn", sectionIcon: "star", question: q, progress: `${i + 1}/${production.length}` }));
     const realWorld = REAL_WORLD_READINGS[topic.id];
-    if (realWorld) {
-      list.push({ kind: "realWorld", reading: realWorld });
-      realWorld.questions.forEach((q, i) => list.push({ kind: "question", sectionLabel: "Real-World Check", sectionIcon: "books", question: q, progress: `${i + 1}/${realWorld.questions.length}` }));
-    }
+    if (realWorld) list.push({ kind: "realWorld", reading: realWorld });
     if (speakingTasks.length) list.push({ kind: "speaking", tasks: speakingTasks });
     list.push({ kind: "done" });
     return list;
@@ -249,22 +246,7 @@ function LessonPlanSlideshow({ topic, theme, onBack }: { topic: LearnTopic; them
 
           {slide.kind === "roundOut" && <RoundOutStep roundOut={roundOut} topicId={topic.id} theme={theme} onDone={goNext} />}
 
-          {slide.kind === "realWorld" && (
-            <div>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", marginBottom: "14px", color: theme.accentSolid, fontWeight: "800", fontSize: "13px", textTransform: "uppercase", letterSpacing: "0.04em" }}>
-                <Icon name="books" size={14} /> Real-World Reading
-              </div>
-              <div style={{ background: "#FFFBEB", border: "2px solid #FDE68A", borderRadius: "12px", padding: "16px 18px" }}>
-                <h3 style={{ margin: "0 0 10px", fontSize: "16px", fontWeight: "800", color: "#92400E", fontFamily: theme.headingFont }}>{slide.reading.title}</h3>
-                {slide.reading.audioUrl && (
-                  <audio controls src={slide.reading.audioUrl} style={{ width: "100%", marginBottom: "12px" }} />
-                )}
-                {slide.reading.passage.map((p, i) => (
-                  <p key={i} style={{ margin: "0 0 8px", fontSize: "14.5px", lineHeight: 1.6, color: "#78350F" }}>{p}</p>
-                ))}
-              </div>
-            </div>
-          )}
+          {slide.kind === "realWorld" && <RealWorldReadingStep reading={slide.reading} theme={theme} onDone={goNext} />}
 
           {slide.kind === "speaking" && (
             <div>
@@ -291,7 +273,7 @@ function LessonPlanSlideshow({ topic, theme, onBack }: { topic: LearnTopic; them
           )}
         </div>
 
-        {slide.kind !== "done" && slide.kind !== "roundOut" && (
+        {slide.kind !== "done" && slide.kind !== "roundOut" && slide.kind !== "realWorld" && (
           <div className="lp-no-print" style={{ textAlign: "center", marginTop: "16px" }}>
             <button onClick={goNext} style={nextBtnStyle}><Icon name="next" size={15} /> {slideIndex === slides.length - 2 ? "Finish" : "Next"}</button>
           </div>
@@ -495,6 +477,139 @@ function UnscrambleRoundOut({ topicId, theme, onDone }: { topicId: string; theme
   );
 }
 
+// Custom-styled play/pause + seek bar, built around a plain <audio> element kept out of the
+// visible layout (display:none) — reused for every real-world reading with audio, and will keep
+// working unchanged once `src` points at real ElevenLabs narration instead of the temporary
+// placeholder voice.
+function AudioPlayer({ src, theme }: { src: string; theme: Theme }) {
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const [playing, setPlaying] = useState(false);
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    const onTime = () => setProgress(audio.duration ? audio.currentTime / audio.duration : 0);
+    const onEnd = () => setPlaying(false);
+    audio.addEventListener("timeupdate", onTime);
+    audio.addEventListener("ended", onEnd);
+    return () => {
+      audio.removeEventListener("timeupdate", onTime);
+      audio.removeEventListener("ended", onEnd);
+    };
+  }, []);
+
+  const toggle = () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    if (playing) { audio.pause(); setPlaying(false); }
+    else { audio.play(); setPlaying(true); }
+  };
+
+  const seek = (fraction: number) => {
+    const audio = audioRef.current;
+    if (!audio || !audio.duration) return;
+    audio.currentTime = fraction * audio.duration;
+    setProgress(fraction);
+  };
+
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: "10px", background: "white", border: `2px solid ${theme.accentSolid}`, borderRadius: "999px", padding: "8px 14px", marginBottom: "14px" }}>
+      <audio ref={audioRef} src={src} preload="metadata" style={{ display: "none" }} />
+      <button onClick={toggle} style={{ background: theme.accentSolid, color: "white", border: "none", borderRadius: "50%", width: "36px", height: "36px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, padding: 0 }}>
+        <Icon name={playing ? "pause" : "play"} size={16} />
+      </button>
+      <input
+        type="range" min={0} max={1} step={0.001} value={progress}
+        onChange={e => seek(Number(e.target.value))}
+        style={{ flex: 1, accentColor: theme.accentSolid }}
+      />
+    </div>
+  );
+}
+
+// The Real-World Reading step, self-contained like RoundOutStep — its own internal phases (mode
+// select, content, comprehension questions, optional transcript reveal) advance with their own
+// buttons, calling onDone() once the student's worked through it. Mode select only appears when
+// there's audio to choose between; a reading with no audioUrl goes straight to "reading" mode
+// (text always visible), matching the graceful degradation used everywhere else in this file.
+function RealWorldReadingStep({ reading, theme, onDone }: { reading: RealWorldReading; theme: Theme; onDone: () => void }) {
+  const { headerStyle, nextBtnStyle } = roundOutStyles(theme);
+  const [mode, setMode] = useState<"reading" | "listening" | null>(reading.audioUrl ? null : "reading");
+  const [phase, setPhase] = useState<"content" | "questions" | "reveal">("content");
+  const [qIndex, setQIndex] = useState(0);
+  const [showAnswer, setShowAnswer] = useState(false);
+
+  const articleCardStyle: React.CSSProperties = { background: "#FFFBEB", border: "2px solid #FDE68A", borderRadius: "12px", padding: "16px 18px" };
+  const modeBtnStyle: React.CSSProperties = { flex: 1, background: "white", border: `2px solid ${theme.accentSolid}`, color: theme.accentSolid, borderRadius: "12px", padding: "16px", cursor: "pointer", fontWeight: "800", fontSize: "14px", fontFamily: theme.headingFont };
+
+  if (mode === null) {
+    return (
+      <div>
+        <div style={headerStyle}><Icon name="books" size={14} /> Real-World Reading</div>
+        <p style={{ textAlign: "center", color: "#6B7280", fontSize: "13px", marginBottom: "16px" }}>How should students experience this text? Choose before revealing it.</p>
+        <div style={{ display: "flex", gap: "12px" }}>
+          <button onClick={() => setMode("reading")} style={modeBtnStyle}><Icon name="bookOpen" size={16} /><br />Reading<br /><span style={{ fontWeight: "600", fontSize: "11.5px", color: "#6B7280" }}>Text visible from the start</span></button>
+          <button onClick={() => setMode("listening")} style={modeBtnStyle}><Icon name="mic" size={16} /><br />Listening<br /><span style={{ fontWeight: "600", fontSize: "11.5px", color: "#6B7280" }}>Text hidden until after the questions</span></button>
+        </div>
+      </div>
+    );
+  }
+
+  if (phase === "content") {
+    return (
+      <div>
+        <div style={headerStyle}><Icon name="books" size={14} /> Real-World {mode === "listening" ? "Listening" : "Reading"}</div>
+        <div style={articleCardStyle}>
+          <h3 style={{ margin: "0 0 10px", fontSize: "16px", fontWeight: "800", color: "#92400E", fontFamily: theme.headingFont }}>{reading.title}</h3>
+          {reading.audioUrl && <AudioPlayer src={reading.audioUrl} theme={theme} />}
+          {mode === "reading"
+            ? reading.passage.map((p, i) => <p key={i} style={{ margin: "0 0 8px", fontSize: "14.5px", lineHeight: 1.6, color: "#78350F" }}>{p}</p>)
+            : <p style={{ margin: 0, fontSize: "13.5px", lineHeight: 1.6, color: "#92400E", fontStyle: "italic" }}>Listen carefully — the text will be revealed after the questions.</p>}
+        </div>
+        <div style={{ textAlign: "center" }}><button onClick={() => setPhase("questions")} style={nextBtnStyle}><Icon name="next" size={15} /> Continue</button></div>
+      </div>
+    );
+  }
+
+  if (phase === "questions") {
+    const q = reading.questions[qIndex];
+    const isLast = qIndex === reading.questions.length - 1;
+    return (
+      <div>
+        <div style={headerStyle}><Icon name="books" size={14} /> Real-World Check <span style={{ color: "#9CA3AF", fontWeight: "700" }}>· {qIndex + 1}/{reading.questions.length}</span></div>
+        <QuestionCard question={q} showAnswer={showAnswer} onReveal={() => setShowAnswer(true)} gameId="lessonplan" />
+        {showAnswer && (
+          <div style={{ textAlign: "center" }}>
+            <button
+              onClick={() => {
+                if (!isLast) { setQIndex(i => i + 1); setShowAnswer(false); return; }
+                if (mode === "listening") { setPhase("reveal"); return; }
+                onDone();
+              }}
+              style={nextBtnStyle}
+            >
+              <Icon name="next" size={15} /> {!isLast ? "Next" : mode === "listening" ? "See the Text" : "Continue"}
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <div style={headerStyle}><Icon name="eye" size={14} /> Here's the Text</div>
+      <div style={articleCardStyle}>
+        <h3 style={{ margin: "0 0 10px", fontSize: "16px", fontWeight: "800", color: "#92400E", fontFamily: theme.headingFont }}>{reading.title}</h3>
+        {reading.passage.map((p, i) => <p key={i} style={{ margin: "0 0 8px", fontSize: "14.5px", lineHeight: 1.6, color: "#78350F" }}>{p}</p>)}
+      </div>
+      <p style={{ textAlign: "center", color: "#6B7280", fontSize: "13px", margin: "10px 0" }}>Check your answers against the text.</p>
+      <div style={{ textAlign: "center" }}><button onClick={onDone} style={nextBtnStyle}><Icon name="next" size={15} /> Continue</button></div>
+    </div>
+  );
+}
+
 // Ink-economical, single flowing worksheet — mirrors LearnScreen's PrintableLesson pattern.
 // Practice/production questions get blank space instead of the on-screen reveal interaction;
 // the round-out exercise and speaking tasks print as plain instructions.
@@ -537,6 +652,13 @@ function PrintableLessonPlan({ topic, slides, roundOut }: { topic: LearnTopic; s
         <div style={{ marginTop: "10px" }}>
           <div style={{ fontWeight: "800", fontSize: "11px", textTransform: "uppercase", color: "#374151" }}>Real-World Reading — {realWorldSlide.reading.title}</div>
           {realWorldSlide.reading.passage.map((p, i) => <div key={i} style={{ fontSize: "11.5px", color: "#1F2937", margin: "3px 0" }}>{p}</div>)}
+          <div style={{ fontWeight: "800", fontSize: "11px", textTransform: "uppercase", color: "#374151", marginTop: "6px" }}>Real-World Check</div>
+          {realWorldSlide.reading.questions.map((q, i) => (
+            <div key={i} style={{ marginTop: "4px" }}>
+              <div style={{ fontSize: "11.5px", margin: "3px 0" }}>{q.question}</div>
+              <div style={{ borderBottom: "1px solid #9CA3AF", height: "14px" }} />
+            </div>
+          ))}
         </div>
       )}
 
