@@ -5246,6 +5246,84 @@ export const LESSONS: Record<string, Lesson> = {
     ],
   },
 
+  health_healthcare_systems: {
+    title: "Health & Healthcare Systems",
+    intro: "Talking about healthcare systems at an advanced level combines five things: reporting what someone said (reported speech), emphasising a point with dramatic word order (inversion), imagining how a different past would have changed things (third conditional), mixing a past cause with a present result or vice versa (mixed conditional), and describing what should or must be done about healthcare (modal passive).",
+    sections: [
+      {
+        heading: "Useful healthcare-systems vocabulary",
+        body: [
+          "universal healthcare, preventive care, health inequality, public health, health insurance, chronic illness, mental health services, healthcare provider, medical malpractice, patient outcomes, healthcare funding, outbreak, life expectancy, healthcare access, overburdened, telemedicine, health policy, underfunded, waiting times, burnout.",
+        ],
+        examples: [
+          "**Universal healthcare** guarantees medical care to every citizen.",
+          "**Preventive care** catches illnesses before they become serious.",
+          "**Burnout** among healthcare workers has become a serious problem.",
+        ],
+      },
+      {
+        heading: "Reporting what someone said (reported speech)",
+        body: [
+          "Tenses shift back one step: present simple → past simple, present continuous → past continuous, present perfect → past perfect, will → would, can → could.",
+          "Time and place words shift too: 'this' → 'that', 'today' → 'that day'.",
+        ],
+        examples: [
+          "'The system is failing rural patients,' claimed the doctor. → The doctor claimed (that) the system **was failing** rural patients.",
+          "'We will increase healthcare funding,' promised the government. → The government promised (that) they **would increase** healthcare funding.",
+        ],
+      },
+      {
+        heading: "Emphasising a point with dramatic word order (inversion)",
+        body: [
+          "A negative/limiting adverbial at the start of a sentence (Rarely, Never before, Seldom, Under no circumstances, Not only) triggers question word order: auxiliary before the subject.",
+        ],
+        examples: [
+          "**Rarely does** a hospital treat so many patients this efficiently.",
+          "**Never before had** anyone expected such a rapid recovery.",
+          "**Under no circumstances should** hospitals turn away emergency patients.",
+        ],
+      },
+      {
+        heading: "Imagining a different past (third conditional)",
+        body: [
+          "if + past perfect, ... would have + past participle — for an unreal past situation and its unreal past result.",
+        ],
+        examples: [
+          "If the doctors **had diagnosed** the illness sooner, they **would have saved** his life.",
+          "If she **hadn't had** health insurance, she **wouldn't have afforded** the treatment.",
+        ],
+      },
+      {
+        heading: "Mixing time frames (mixed conditional)",
+        body: [
+          "Past cause → present result: if + past perfect, ... would + base verb.",
+          "Present state/general truth → past result: if + past simple, ... would have + past participle.",
+        ],
+        examples: [
+          "If they **had reformed** the system years ago, waiting times **wouldn't be** so long today. (past cause → present result)",
+          "If she **weren't** so dedicated, she **wouldn't have stayed** in such a difficult job. (present state → past result)",
+        ],
+      },
+      {
+        heading: "Describing what should be done about healthcare (modal passive)",
+        body: [
+          "modal + be + past participle (present/future); modal + have been + past participle (past); need + gerund is a semi-passive shortcut.",
+        ],
+        examples: [
+          "**Health inequality must be addressed.**",
+          "**The complication could have been prevented** by the surgeon.",
+          "**The old system needs reforming.**",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ The doctor claimed the system is failing rural patients. → ✅ ...the system was failing rural patients. (reported speech backshifts the tense)",
+      "❌ Rarely a hospital treats so many patients this efficiently. → ✅ Rarely does a hospital treat so many patients this efficiently. (inversion needs 'does' before the subject)",
+      "❌ If the doctors diagnose the illness sooner, they would have saved his life. → ✅ If the doctors had diagnosed... (third conditional needs past perfect)",
+      "❌ Health inequality must addressed. → ✅ Health inequality must be addressed. (modal passive needs 'be' + past participle)",
+    ],
+  },
+
   present_simple: {
     title: "Present Simple",
     intro: "The foundation of present simple: add -s for he/she/it, and use do/does for negatives and questions — never both at once.",
