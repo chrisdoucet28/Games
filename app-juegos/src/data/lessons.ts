@@ -1637,6 +1637,66 @@ export const LESSONS: Record<string, Lesson> = {
     ],
   },
 
+  money_and_shopping: {
+    title: "Money & Shopping",
+    intro: "Talking about money and shopping means switching between three things: what you did in the past (bought, sold, returned), what's happening right now (looking, trying on, paying), and what you should or must do.",
+    sections: [
+      {
+        heading: "Useful shopping vocabulary",
+        body: [
+          "receipt, discount, refund, bargain, sale, budget, afford, save, spend, checkout, currency, exchange, return, price tag.",
+        ],
+        examples: [
+          "Always keep your **receipt** in case you need a **refund**.",
+          "This jacket was a real **bargain** — I got a 20% **discount**.",
+          "I always make a **budget** before I go **shopping**.",
+        ],
+      },
+      {
+        heading: "Talking about past shopping trips",
+        body: [
+          "Use the past simple for finished shopping actions — many common shopping verbs are irregular.",
+          "buy → **bought**, sell → **sold**, get → **got**, have → **had**, spend → **spent**, find → **found**.",
+        ],
+        examples: [
+          "I **bought** this jacket for $40 last week.",
+          "She **sold** her old phone yesterday.",
+          "The shop **had** a big sale last weekend.",
+        ],
+      },
+      {
+        heading: "Describing shopping happening right now",
+        body: [
+          "Use the present continuous (am/is/are + -ing) for shopping actions in progress.",
+        ],
+        examples: [
+          "I **am looking** for a birthday present right now.",
+          "She **is trying on** a dress at the moment.",
+          "We **are waiting** in the checkout line.",
+        ],
+      },
+      {
+        heading: "Giving shopping advice and obligations",
+        body: [
+          "must / have to = necessary. should = advice.",
+          "don't have to = not necessary (but not forbidden). mustn't / shouldn't = advice against doing something.",
+        ],
+        examples: [
+          "You **must** show your receipt for a refund.",
+          "You **should** compare prices before buying.",
+          "You **don't have to** pay in cash — cards are fine.",
+          "You **shouldn't** spend all your money on one thing.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ I buyed this jacket last week. → ✅ I bought this jacket last week. (irregular past simple: bought, not buyed)",
+      "❌ She look for shoes right now. → ✅ She is looking for shoes right now. (present continuous needs 'is')",
+      "❌ You must to show your receipt. → ✅ You must show your receipt. ('must' takes the base verb, no 'to')",
+      "❌ You should to save more money. → ✅ You should save more money. ('should' takes the base verb, no 'to')",
+    ],
+  },
+
   present_perfect: {
     title: "Present Perfect: Just, Already, Yet & Unfinished Time",
     intro: "Present perfect (have/has + past participle) links a past action to the present moment. This lesson covers the specific time words that trigger it — just, already, yet, ever, never, how long — plus the idea of an 'unfinished' time period like this week or so far.",
