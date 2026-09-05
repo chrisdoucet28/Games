@@ -8,7 +8,7 @@ import { LESSONS } from "./lessons";
 // this file holds only the piece that can't be, plus a helper for the one format (Unscramble)
 // that's generated at render time instead of hand-authored.
 //
-// Scope: A1 only, all 25 topics — a deliberate test run before deciding whether to extend further.
+// Scope: A1 (all 25 topics) and A2 (all 29 topics) so far, extending level by level.
 // Every key here must match a topics.ts / lessons.ts topic id (both already required to match
 // each other — see CLAUDE.md's Learn/topics parity rule).
 export type RoundOut =
@@ -300,6 +300,351 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
       { situation: "A driver at a roundabout asks you which way to go for the hospital — they need the second exit.", instruction: "Tell them which exit to take.", sample: "Go round the roundabout and take the second exit." },
       { situation: "Someone describes a place to you: “The café is on your left, right here.” Your friend then asks you what to do.", instruction: "Turn their description into an instruction for your friend.", sample: "Turn left for the café." },
       { situation: "Someone is about to cross a busy road in the wrong place, right in front of you.", instruction: "Warn them not to, using a negative instruction.", sample: "Don't cross the road here — use the crossing over there." },
+    ],
+  },
+
+  // --- A2 ---
+
+  past_simple: {
+    kind: "paragraphCloze",
+    segments: [
+      "Last Saturday, my friend Marco ", { blank: "arrived", base: "arrive" }, " at my house early. We ",
+      { blank: "wanted", base: "want" }, " to visit the coast, so we ", { blank: "planned", base: "plan" },
+      " our trip carefully. First, we ", { blank: "drove", base: "drive" }, " to the beach and parked the car near the sea. Marco ",
+      { blank: "didn't bring", base: "not bring" }, " his swimsuit, so he ", { blank: "bought", base: "buy" },
+      " one from a small shop. We ", { blank: "swam", base: "swim" }, " for an hour, and then we ",
+      { blank: "ate", base: "eat" }, " fish and chips for lunch. Unfortunately, it ", { blank: "began", base: "begin" },
+      " to rain in the afternoon, so we ", { blank: "didn't stay", base: "not stay" }, " much longer.",
+    ],
+  },
+
+  present_simple_vs_continuous: {
+    kind: "paragraphCloze",
+    segments: [
+      "My name is Elena, and I ", { blank: "work", base: "work" }, " as a nurse in a busy hospital. Every day I ",
+      { blank: "start", base: "start" }, " my shift at seven o'clock. This month, though, I ",
+      { blank: "am covering", base: "cover" }, " for a colleague on the night shift. Right now I ",
+      { blank: "am sitting", base: "sit" }, " in the staff room, and I ", { blank: "am drinking", base: "drink" },
+      " my coffee before the shift starts. I really ", { blank: "like", base: "like" },
+      " the night shift — it's quieter. My manager ", { blank: "knows", base: "know" },
+      " I prefer it, so these days she ", { blank: "is trying", base: "try" }, " to give me more night shifts.",
+    ],
+  },
+
+  irregular_verbs: {
+    kind: "matching",
+    pairs: [
+      { term: "go", definition: "past simple: went, past participle: gone" },
+      { term: "eat", definition: "past simple: ate, past participle: eaten" },
+      { term: "see", definition: "past simple: saw, past participle: seen" },
+      { term: "buy", definition: "past simple: bought, past participle: bought" },
+      { term: "take", definition: "past simple: took, past participle: taken" },
+      { term: "write", definition: "past simple: wrote, past participle: written" },
+      { term: "break", definition: "past simple: broke, past participle: broken" },
+      { term: "know", definition: "past simple: knew, past participle: known" },
+    ],
+  },
+
+  future_will_going_to: {
+    kind: "scenario",
+    prompts: [
+      { situation: "The phone starts ringing right next to you, and no one else moves to answer it.", instruction: "Say what you'll do, using 'will'.", sample: "I'll get it!" },
+      { situation: "You look outside and see huge dark clouds rolling in.", instruction: "Make a prediction using 'going to' (you have visible evidence).", sample: "It's going to rain." },
+      { situation: "Your friend asks about your weekend — you decided last week to visit your parents.", instruction: "Answer using 'going to' (already planned).", sample: "I'm going to visit my parents this weekend." },
+      { situation: "Your friend is carrying too many heavy bags and can't manage.", instruction: "Offer to help, using 'will'.", sample: "I'll carry that for you." },
+      { situation: "A friend asks if you think it'll be sunny tomorrow — you have no real evidence, just a feeling.", instruction: "Give your opinion using 'will'.", sample: "I think it'll be sunny tomorrow." },
+    ],
+  },
+
+  zero_conditional: {
+    kind: "scenario",
+    prompts: [
+      { situation: "A child asks you what happens when you mix red and blue paint.", instruction: "Explain the rule, using the zero conditional.", sample: "If you mix red and blue, you get purple." },
+      { situation: "Someone asks why their plants keep dying.", instruction: "Explain the general rule about plants and water.", sample: "Plants die if they don't get water." },
+      { situation: "A friend asks what happens to ice when it gets warm.", instruction: "Explain the scientific fact, using the zero conditional.", sample: "If you heat ice, it melts." },
+      { situation: "You're explaining the fire alarm procedure to a new colleague.", instruction: "Explain the rule, using the zero conditional.", sample: "If the alarm goes off, everyone leaves the building." },
+      { situation: "Someone asks what happens to the streets in your city when it rains.", instruction: "Answer using the zero conditional.", sample: "If it rains, the streets get wet." },
+    ],
+  },
+
+  first_conditional: {
+    kind: "scenario",
+    prompts: [
+      { situation: "You're planning a picnic tomorrow, but the forecast looks uncertain.", instruction: "Say what will happen if it rains, using the first conditional.", sample: "If it rains, we'll cancel the trip." },
+      { situation: "Your friend keeps putting off leaving for the station.", instruction: "Warn them about being late, using the first conditional.", sample: "If you don't leave now, you'll miss the train." },
+      { situation: "Your friend is nervous about an upcoming exam.", instruction: "Reassure them about what will happen if they study hard, using the first conditional.", sample: "If you study hard, you'll pass the exam." },
+      { situation: "A friend offers to help you move house if you buy them dinner in return.", instruction: "Make the same offer to another friend, using the first conditional.", sample: "If you help me move, I'll buy you dinner." },
+      { situation: "You want to say a friend can go out only if they finish their homework first.", instruction: "Say it, using 'as long as'.", sample: "You can go out as long as you finish your homework." },
+    ],
+  },
+
+  making_questions: {
+    kind: "errorPassage",
+    text: "A: Where does she works?\nB: She works at a hospital in the city centre.\nA: What you did yesterday?\nB: I stayed home and watched a film.\nA: How long does it takes to get there?\nB: About twenty minutes by bus.\nA: Where you are going on holiday this year?\nB: We're going to Portugal in July.",
+    corrected: "A: Where does she work?\nB: She works at a hospital in the city centre.\nA: What did you do yesterday?\nB: I stayed home and watched a film.\nA: How long does it take to get there?\nB: About twenty minutes by bus.\nA: Where are you going on holiday this year?\nB: We're going to Portugal in July.",
+    fixes: [
+      "'Where does she works?' → 'Where does she work?' (base verb after 'does')",
+      "'What you did yesterday?' → 'What did you do yesterday?' (need 'did' before the subject)",
+      "'How long does it takes?' → 'How long does it take?' (base verb after 'does')",
+      "'Where you are going...?' → 'Where are you going...?' (auxiliary before the subject)",
+    ],
+  },
+
+  present_perfect_vs_past_simple: {
+    kind: "paragraphCloze",
+    segments: [
+      "Let me tell you about my sister. She ", { blank: "has visited", base: "visit" }, " many countries — she ",
+      { blank: "has been", base: "be" }, " to over twenty already! Last year, she ", { blank: "travelled", base: "travel" },
+      " to Japan for a month. She ", { blank: "has never tried", base: "never / try" },
+      " sushi before, but now she loves it. She ", { blank: "moved", base: "move" },
+      " back home in December, and since then she ", { blank: "has started", base: "start" },
+      " planning her next trip. She ", { blank: "has already booked", base: "already / book" },
+      " her flights, but she ", { blank: "hasn't decided", base: "not / decide" }, " where to stay yet.",
+    ],
+  },
+
+  comparatives_superlatives: {
+    kind: "errorPassage",
+    text: "My brother is more tall than me, but I am more fast than him. Our sister is the most young in the family, but she is the goodest student of the three of us. Our house is more big than our cousins' house, but it isn't the most old one on the street.",
+    corrected: "My brother is taller than me, but I am faster than him. Our sister is the youngest in the family, but she is the best student of the three of us. Our house is bigger than our cousins' house, but it isn't the oldest one on the street.",
+    fixes: [
+      "'more tall' → 'taller' (short adjectives use -er, not 'more')",
+      "'more fast' → 'faster' (short adjectives use -er, not 'more')",
+      "'the most young' → 'the youngest' (short adjectives use -est, not 'the most')",
+      "'the goodest' → 'the best' ('good' is irregular)",
+      "'more big' → 'bigger' (double the final consonant: big → bigger)",
+      "'the most old' → 'the oldest' (short adjectives use -est, not 'the most')",
+    ],
+  },
+
+  comparatives: {
+    kind: "scenario",
+    prompts: [
+      { situation: "Someone asks you to compare your height to your best friend's.", instruction: "Compare using a short adjective (+ -er).", sample: "I'm taller than my best friend." },
+      { situation: "Someone asks you to compare two cities you know — one is more interesting to visit.", instruction: "Compare using a long adjective (+ more).", sample: "Barcelona is more interesting than my hometown." },
+      { situation: "You want to say your cooking and your mother's cooking are equally good.", instruction: "Say it using 'as...as'.", sample: "My cooking is as good as my mother's." },
+      { situation: "You want to say your phone isn't as expensive as your friend's phone.", instruction: "Say it using 'not as...as'.", sample: "My phone isn't as expensive as yours." },
+      { situation: "Someone asks whether your English has improved compared to last year.", instruction: "Answer using a comparative.", sample: "My English is better than it was last year." },
+    ],
+  },
+
+  superlatives: {
+    kind: "paragraphCloze",
+    segments: [
+      "The Nile is ", { blank: "the longest", base: "long" }, " river in the world. Mount Everest is ",
+      { blank: "the highest", base: "high" }, " mountain on Earth. Some scientists say the blue whale is ",
+      { blank: "the biggest", base: "big" }, " animal that has ever lived. In my opinion, Japanese food is ",
+      { blank: "the most delicious", base: "delicious" }, " food in the world, but my friend thinks Italian food is even better — for her, it's one of ",
+      { blank: "the best", base: "good" }, " cuisines anywhere. My hometown isn't ", { blank: "the most famous", base: "famous" },
+      " city in my country, but it's definitely ", { blank: "the friendliest", base: "friendly" }, " one I know.",
+    ],
+  },
+
+  too_much_many: {
+    kind: "errorPassage",
+    text: "This city is too much crowded for me. There are too much tourists everywhere, and there's too many traffic on every street. The hotel room was too much small, and honestly, I paid too much many for it.",
+    corrected: "This city is too crowded for me. There are too many tourists everywhere, and there's too much traffic on every street. The hotel room was too small, and honestly, I paid too much for it.",
+    fixes: [
+      "'too much crowded' → 'too crowded' (adjective — no noun, so just 'too')",
+      "'too much tourists' → 'too many tourists' ('tourists' is countable plural)",
+      "'too many traffic' → 'too much traffic' ('traffic' is uncountable)",
+      "'too much small' → 'too small' (adjective — no noun, so just 'too')",
+      "'too much many' → 'too much' (price/money — just 'too much', no extra 'many')",
+    ],
+  },
+
+  modals_obligation: {
+    kind: "scenario",
+    prompts: [
+      { situation: "Your school requires all students to wear a uniform — there's no choice.", instruction: "Say it using 'must' or 'have to'.", sample: "Students must wear a uniform." },
+      { situation: "Smoking is completely forbidden inside your office building.", instruction: "Say it using 'mustn't'.", sample: "You mustn't smoke here." },
+      { situation: "The museum is free, so visitors don't need to pay.", instruction: "Say it using 'don't have to'.", sample: "You don't have to pay — it's free." },
+      { situation: "You want to ask a colleague whether booking a table in advance is necessary at a restaurant.", instruction: "Ask, using 'have to'.", sample: "Do you have to book in advance?" },
+      { situation: "Your report is due by Friday — there's no way around it.", instruction: "Say it using 'have to'.", sample: "I have to finish this by Friday." },
+    ],
+  },
+
+  modals_possibility: {
+    kind: "matching",
+    pairs: [
+      { term: "It's very cloudy outside.", definition: "It might rain later." },
+      { term: "Someone is knocking, but you don't recognize the knock.", definition: "That could be anyone." },
+      { term: "He's been working all day without a break.", definition: "He must be tired." },
+      { term: "The lights are off and her car is gone.", definition: "She can't be at home." },
+      { term: "You're not sure if the story is true.", definition: "It might be true." },
+      { term: "Someone seems tired and quiet, and you're not sure why.", definition: "She might be worried about something." },
+    ],
+  },
+
+  invitations: {
+    kind: "scenario",
+    prompts: [
+      { situation: "You want to invite a friend to your birthday party this weekend.", instruction: "Invite them, using 'would you like to'.", sample: "Would you like to come to my party?" },
+      { situation: "A friend invites you to the cinema, and you're excited to go.", instruction: "Accept enthusiastically.", sample: "I'd love to! That sounds great." },
+      { situation: "A friend invites you to dinner, but you already have plans that evening.", instruction: "Decline politely, without closing the door completely.", sample: "I'm afraid I can't make it — I already have plans. Maybe another time?" },
+      { situation: "You want to suggest going bowling tonight, in a casual way.", instruction: "Suggest it, using 'how about'.", sample: "How about going bowling tonight?" },
+      { situation: "You're organizing a formal work event and inviting a business partner.", instruction: "Invite them formally.", sample: "We would be delighted if you could attend." },
+    ],
+  },
+
+  telling_stories: {
+    kind: "paragraphCloze",
+    segments: [
+      "", { blank: "One day", base: "story opener" }, ", I was walking home from work when something strange happened. I ",
+      { blank: "saw", base: "see" }, " a small dog sitting outside a shop, completely alone. ",
+      { blank: "First", base: "sequence word" }, ", I looked around for its owner, but nobody was there. ",
+      { blank: "Then", base: "sequence word" }, ", I decided to take the dog to the police station. ",
+      { blank: "Suddenly", base: "unexpected event" }, ", the dog started running — straight towards a woman down the street! ",
+      { blank: "Luckily", base: "lucky turn" }, ", she was the owner, and she was overjoyed to see her dog again. ",
+      { blank: "In the end", base: "outcome" }, ", she thanked me and even invited me for coffee. It was ",
+      { blank: "such a", base: "so / such" }, " surprising day that I told everyone about it for weeks.",
+    ],
+  },
+
+  health_and_body: {
+    kind: "errorPassage",
+    text: "A: What's wrong?\nB: I have a bad cough, and I'm suffering of a cold too.\nA: Are you allergic at anything?\nB: Yes, I'm allergic at penicillin. I've had this cough since three days now.\nA: You should stopped talking so much, and you should rested your voice.\nB: Okay. My feet hurts too, actually — I have broke my toe last week and it still aches.",
+    corrected: "A: What's wrong?\nB: I have a bad cough, and I'm suffering from a cold too.\nA: Are you allergic to anything?\nB: Yes, I'm allergic to penicillin. I've had this cough for three days now.\nA: You should stop talking so much, and you should rest your voice.\nB: Okay. My feet hurt too, actually — I have broken my toe last week and it still aches.",
+    fixes: [
+      "'suffering of a cold' → 'suffering from a cold' ('suffer from', not 'suffer of')",
+      "'allergic at anything/penicillin' → 'allergic to anything/penicillin' ('allergic to')",
+      "'since three days' → 'for three days' ('for' + a length of time)",
+      "'should stopped / should rested' → 'should stop / should rest' (modal + base verb, no '-ed')",
+      "'My feet hurts' → 'My feet hurt' (plural body part, no -s)",
+      "'I have broke my toe' → 'I have broken my toe' (past participle 'broken')",
+    ],
+  },
+
+  ordering_food: {
+    kind: "scenario",
+    prompts: [
+      { situation: "The waiter asks if you're ready to order.", instruction: "Order politely, using 'I'd like' or 'could I have'.", sample: "Could I have the pasta, please?" },
+      { situation: "You want to know if your dish comes with rice before you order.", instruction: "Ask the waiter.", sample: "Does it come with rice?" },
+      { situation: "You'd prefer a salad instead of the chips that come with your meal.", instruction: "Ask to swap them.", sample: "Could I swap the chips for a salad?" },
+      { situation: "You're allergic to nuts and want to check the soup is safe.", instruction: "Ask the waiter.", sample: "Could you tell me if the soup contains nuts?" },
+      { situation: "You've finished eating and want to pay.", instruction: "Ask for the bill.", sample: "Could we have the bill, please?" },
+    ],
+  },
+
+  making_excuses: {
+    kind: "errorPassage",
+    text: "A: Why were you late this morning?\nB: I'm so sorry! My alarm didn't go off, my car wouldn't started, and then I had a traffic on the way here.\nA: You should have call me to let me know.\nB: I know, I'm sorry. It slipped of my mind completely — I forget my phone at home too.\nA: Okay, don't worry. Just try not to let it happen again.",
+    corrected: "A: Why were you late this morning?\nB: I'm so sorry! My alarm didn't go off, my car wouldn't start, and then I was stuck in traffic on the way here.\nA: You should have called me to let me know.\nB: I know, I'm sorry. It slipped my mind completely — I forgot my phone at home too.\nA: Okay, don't worry. Just try not to let it happen again.",
+    fixes: [
+      "'wouldn't started' → 'wouldn't start' (modal + base verb, no '-ed')",
+      "'had a traffic' → 'was stuck in traffic' ('traffic' is uncountable, no article)",
+      "'should have call' → 'should have called' ('should have' + past participle)",
+      "'slipped of my mind' → 'slipped my mind' (no preposition — fixed phrase)",
+      "'I forget my phone' → 'I forgot my phone' (irregular past simple)",
+    ],
+  },
+
+  making_suggestions: {
+    kind: "matching",
+    pairs: [
+      { term: "Let's", definition: "+ base verb: Let's take a break." },
+      { term: "Shall we", definition: "+ base verb: Shall we meet at six?" },
+      { term: "Why don't we", definition: "+ base verb: Why don't we try that café?" },
+      { term: "How about", definition: "+ -ing: How about going for a walk?" },
+      { term: "I suggest", definition: "+ -ing: I suggest postponing the meeting." },
+      { term: "Have you considered", definition: "+ -ing: Have you considered asking for help?" },
+      { term: "What if", definition: "+ past simple: What if we went camping?" },
+    ],
+  },
+
+  daily_life_a2: {
+    kind: "errorPassage",
+    text: "Hi! My name is Sofia and I have 22 years old. Every day I wake up early and I am agree that mornings are the best part of the day. I like to listen music while I have breakfast. I have a house big with a garden, which I love. Yesterday, I goed to the gym after work. On Sundays, I don't do nothing special — I just relax at home.",
+    corrected: "Hi! My name is Sofia and I am 22 years old. Every day I wake up early and I agree that mornings are the best part of the day. I like to listen to music while I have breakfast. I have a big house with a garden, which I love. Yesterday, I went to the gym after work. On Sundays, I don't do anything special — I just relax at home.",
+    fixes: [
+      "'I have 22 years old' → 'I am 22 years old' ('to be' + age, not 'to have')",
+      "'I am agree that' → 'I agree that' ('agree' is a verb on its own, no 'am')",
+      "'listen music' → 'listen to music' ('listen to' + thing)",
+      "'a house big with a garden' → 'a big house with a garden' (adjective before the noun)",
+      "'I goed to the gym' → 'I went to the gym' ('go' is irregular in the past simple)",
+      "'I don't do nothing special' → 'I don't do anything special' (only one negative per clause)",
+    ],
+  },
+
+  food_and_eating: {
+    kind: "scenario",
+    prompts: [
+      { situation: "A friend asks what you ate for dinner last night.", instruction: "Answer using the past simple.", sample: "I had pasta for dinner last night." },
+      { situation: "Someone offers you a dish that contains nuts, and you're allergic to them.", instruction: "Explain politely why you can't eat it.", sample: "I'm allergic to nuts, so I can't eat that, sorry." },
+      { situation: "You're at a restaurant and want to know if a dish is suitable for vegetarians.", instruction: "Ask the waiter.", sample: "Is this dish suitable for vegetarians?" },
+      { situation: "Your friend is trying to eat healthier and asks for your advice about breakfast.", instruction: "Give advice using 'shouldn't'.", sample: "You shouldn't skip breakfast." },
+      { situation: "Someone asks if you're doing anything special with food this evening.", instruction: "Answer using the present continuous.", sample: "We're eating out tonight, actually." },
+    ],
+  },
+
+  school_and_study: {
+    kind: "matching",
+    pairs: [
+      { term: "hand in", definition: "To submit your homework or assignment to a teacher" },
+      { term: "classmate", definition: "A student in the same class as you" },
+      { term: "timetable", definition: "A schedule showing when each class happens" },
+      { term: "grade / mark", definition: "The score you get for a piece of work or a test" },
+      { term: "take notes", definition: "To write down key information during a class" },
+      { term: "pass an exam", definition: "To succeed in a test" },
+      { term: "fail an exam", definition: "To not succeed in a test" },
+      { term: "be good at", definition: "To have a natural skill or talent for something" },
+    ],
+  },
+
+  friends_and_family: {
+    kind: "matching",
+    pairs: [
+      { term: "get on with", definition: "To have a good relationship with someone" },
+      { term: "take after", definition: "To look or act like an older relative" },
+      { term: "keep in touch", definition: "To stay in contact with someone" },
+      { term: "close-knit", definition: "Very close and supportive, as a family" },
+      { term: "rely on", definition: "To depend on someone for help or support" },
+      { term: "only child", definition: "Someone with no brothers or sisters" },
+    ],
+  },
+
+  free_time_a2: { kind: "unscramble" },
+
+  my_town_city: { kind: "unscramble" },
+
+  used_to_past: {
+    kind: "errorPassage",
+    text: "When I was a child, I use to play outside every day after school. I didn't used to like vegetables at all, but now I eat them all the time. Did you used to live near a park too? I used to went to the swimming pool every Saturday with my brother. Life used to being much simpler back then.",
+    corrected: "When I was a child, I used to play outside every day after school. I didn't use to like vegetables at all, but now I eat them all the time. Did you use to live near a park too? I used to go to the swimming pool every Saturday with my brother. Life used to be much simpler back then.",
+    fixes: [
+      "'I use to play' → 'I used to play' (positive statements need 'used to', with -d)",
+      "'didn't used to like' → 'didn't use to like' (no -d after 'use' in the negative)",
+      "'Did you used to live' → 'Did you use to live' (no -d after 'use' in questions)",
+      "'used to went' → 'used to go' ('used to' + base verb, not the past form)",
+      "'used to being' → 'used to be' ('used to' + base verb, not -ing)",
+    ],
+  },
+
+  present_continuous_a2: {
+    kind: "matching",
+    pairs: [
+      { term: "believe", definition: "To think that something is true" },
+      { term: "belong", definition: "To be owned by someone, or be a member of a group" },
+      { term: "seem", definition: "To appear to be true, based on how something looks" },
+      { term: "own", definition: "To possess something as yours" },
+      { term: "understand", definition: "To know the meaning of something" },
+      { term: "remember", definition: "To keep something in your memory" },
+      { term: "need", definition: "To require something necessary" },
+      { term: "know", definition: "To have information about something in your mind" },
+    ],
+  },
+
+  conjunctions: {
+    kind: "paragraphCloze",
+    segments: [
+      "Yesterday was a strange day. I wanted to go for a run, ", { blank: "but", base: "contrast" },
+      " it was raining heavily. ", { blank: "Although", base: "contrast (starts the sentence)" },
+      " it was raining, I decided to go anyway, ", { blank: "so", base: "result" },
+      " I put on a warm jacket first. I love running in the rain, ", { blank: "whereas", base: "formal contrast" },
+      " my sister refuses to leave the house in bad weather. I only run outside ",
+      { blank: "if", base: "future condition — present tense, no 'will'" }, " it isn't freezing, ",
+      { blank: "because", base: "reason" }, " I don't like getting sick. ", { blank: "When", base: "future time — present tense" },
+      " I finish a run like that, I always feel fantastic — cold and wet, ", { blank: "though", base: "informal contrast at the end" }, "!",
     ],
   },
 };
