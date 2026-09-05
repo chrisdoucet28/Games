@@ -722,6 +722,80 @@ export const LESSONS: Record<string, Lesson> = {
     ],
   },
 
+  quantifiers: {
+    title: "Quantifiers (Much/Many/A Lot/A Few/A Little)",
+    intro: "English has different words for 'how much of something' depending on whether the noun is countable (books, people) or uncountable (coffee, money), and whether the quantity is large, small, or zero.",
+    sections: [
+      {
+        heading: "Much vs many",
+        body: [
+          "Many + countable plural noun. Much + uncountable noun.",
+          "We normally only use much/many in negative sentences and questions, not in affirmative sentences.",
+        ],
+        examples: [
+          "There isn't **much coffee** in the jar.",
+          "Were there **many people** at the party?",
+        ],
+      },
+      {
+        heading: "How much / how many",
+        body: [
+          "How many + plural noun; how much + uncountable noun, both to ask about quantity.",
+          "'How much is/are...?' also asks about price.",
+        ],
+        examples: [
+          "**How many books** did you read last semester?",
+          "**How much coffee** do you drink every day?",
+          "'**How much is it**?' 'It's 43 pounds.'",
+        ],
+      },
+      {
+        heading: "A lot of / lots of",
+        body: [
+          "A lot of (and the more informal lots of) works with both countable and uncountable nouns, mainly in affirmative sentences — though it's fine in negatives and questions too.",
+          "'A lot of' always needs 'of' before a noun. Drop 'of' when 'a lot' comes at the end of a sentence or stands alone in a short answer.",
+          "'Quite a lot of' means a medium-to-large quantity.",
+        ],
+        examples: [
+          "She spends **a lot of time** watching TV.",
+          "We had **lots of** good moments together.",
+          "'How many beers did you have?' 'I had **a lot**.'",
+          "I like her **a lot**.",
+        ],
+      },
+      {
+        heading: "A few vs a little",
+        body: [
+          "A few + countable plural noun. A little + uncountable noun. Both describe a small quantity, and both work in affirmative, negative, and question sentences.",
+          "'Not many' and 'not much' mean roughly the same as 'a few' and 'a little'.",
+        ],
+        examples: [
+          "I have to do **a few things** this afternoon.",
+          "I always put **a little milk** in my tea.",
+          "I don't have to do **many things** this afternoon. (= a few)",
+        ],
+      },
+      {
+        heading: "No / not...any / none",
+        body: [
+          "No + noun and not...any + noun both express zero quantity — the meaning is the same, just a different structure.",
+          "In short answers, use 'none' alone.",
+        ],
+        examples: [
+          "I have **no time** today.",
+          "I don't have **any time** today.",
+          "'How much time do you have?' '**None**.'",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ There isn't many coffee. → ✅ There isn't much coffee. ('coffee' is uncountable)",
+      "❌ How much books did you read? → ✅ How many books did you read? ('books' is countable)",
+      "❌ She spends a lot time watching TV. → ✅ She spends a lot of time watching TV. ('a lot of' always needs 'of' before a noun)",
+      "❌ I don't have no time today. → ✅ I don't have any time today. (don't combine 'don't' and 'no')",
+    ],
+  },
+
   modals_obligation: {
     title: "Modals of Obligation",
     intro: "Must, have to, mustn't, and don't have to all sound similar but mean quite different things — mixing up 'mustn't' and 'don't have to' is the classic trap.",
@@ -1563,6 +1637,66 @@ export const LESSONS: Record<string, Lesson> = {
     ],
   },
 
+  money_and_shopping: {
+    title: "Money & Shopping",
+    intro: "Talking about money and shopping means switching between three things: what you did in the past (bought, sold, returned), what's happening right now (looking, trying on, paying), and what you should or must do.",
+    sections: [
+      {
+        heading: "Useful shopping vocabulary",
+        body: [
+          "receipt, discount, refund, bargain, sale, budget, afford, save, spend, checkout, currency, exchange, return, price tag.",
+        ],
+        examples: [
+          "Always keep your **receipt** in case you need a **refund**.",
+          "This jacket was a real **bargain** — I got a 20% **discount**.",
+          "I always make a **budget** before I go **shopping**.",
+        ],
+      },
+      {
+        heading: "Talking about past shopping trips",
+        body: [
+          "Use the past simple for finished shopping actions — many common shopping verbs are irregular.",
+          "buy → **bought**, sell → **sold**, get → **got**, have → **had**, spend → **spent**, find → **found**.",
+        ],
+        examples: [
+          "I **bought** this jacket for $40 last week.",
+          "She **sold** her old phone yesterday.",
+          "The shop **had** a big sale last weekend.",
+        ],
+      },
+      {
+        heading: "Describing shopping happening right now",
+        body: [
+          "Use the present continuous (am/is/are + -ing) for shopping actions in progress.",
+        ],
+        examples: [
+          "I **am looking** for a birthday present right now.",
+          "She **is trying on** a dress at the moment.",
+          "We **are waiting** in the checkout line.",
+        ],
+      },
+      {
+        heading: "Giving shopping advice and obligations",
+        body: [
+          "must / have to = necessary. should = advice.",
+          "don't have to = not necessary (but not forbidden). mustn't / shouldn't = advice against doing something.",
+        ],
+        examples: [
+          "You **must** show your receipt for a refund.",
+          "You **should** compare prices before buying.",
+          "You **don't have to** pay in cash — cards are fine.",
+          "You **shouldn't** spend all your money on one thing.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ I buyed this jacket last week. → ✅ I bought this jacket last week. (irregular past simple: bought, not buyed)",
+      "❌ She look for shoes right now. → ✅ She is looking for shoes right now. (present continuous needs 'is')",
+      "❌ You must to show your receipt. → ✅ You must show your receipt. ('must' takes the base verb, no 'to')",
+      "❌ You should to save more money. → ✅ You should save more money. ('should' takes the base verb, no 'to')",
+    ],
+  },
+
   present_perfect: {
     title: "Present Perfect: Just, Already, Yet & Unfinished Time",
     intro: "Present perfect (have/has + past participle) links a past action to the present moment. This lesson covers the specific time words that trigger it — just, already, yet, ever, never, how long — plus the idea of an 'unfinished' time period like this week or so far.",
@@ -1664,6 +1798,87 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ Can you look after for my dog? → ✅ Can you look after my dog? ('look after' is inseparable — no 'for')",
       "❌ We need to cut down of sugar. → ✅ We need to cut down on sugar. (fixed preposition 'on')",
       "❌ He couldn't come up an excuse. → ✅ He couldn't come up with an excuse. ('come up with' needs 'with')",
+    ],
+  },
+
+  understanding_get: {
+    title: "Understanding 'Get'",
+    intro: "'Get' is one of the most common verbs in English, and it changes meaning completely depending on what comes after it. This lesson covers its most useful everyday meanings.",
+    sections: [
+      {
+        heading: "Get = obtain, receive, or buy",
+        body: [
+          "The most basic meaning: something comes into your possession.",
+        ],
+        examples: [
+          "I **got** a new laptop for my birthday. (received)",
+          "I **got** this jacket from a small shop. (bought)",
+          "Did you **get** my message? (receive)",
+        ],
+      },
+      {
+        heading: "Get = arrive or reach",
+        body: [
+          "'Get to' + a place means arrive there.",
+        ],
+        examples: [
+          "We **got to** the airport just in time.",
+          "What time did you **get** home last night?",
+        ],
+      },
+      {
+        heading: "Get + adjective = become",
+        body: [
+          "'Get' + an adjective (or a comparative adjective) describes a change of state.",
+        ],
+        examples: [
+          "It's **getting** dark outside.",
+          "He **got** really angry when he heard the news.",
+          "She's **getting** better at tennis every week.",
+        ],
+      },
+      {
+        heading: "Common 'get' phrasal verbs",
+        body: [
+          "'Get' combines with particles for everyday actions — each combination has its own specific meaning.",
+        ],
+        examples: [
+          "**get up** = leave your bed",
+          "**get on/off** = board/leave a bus, train, or plane",
+          "**get in/out of** = enter/leave a car",
+          "**get back** = return",
+          "**get together** = meet socially",
+          "**get into** (trouble) = end up in a bad situation",
+        ],
+      },
+      {
+        heading: "Get + past participle = an informal passive",
+        body: [
+          "In everyday spoken English, 'get' + past participle is a common informal alternative to 'be' + past participle for things that happen to someone.",
+        ],
+        examples: [
+          "She **got promoted** last month.",
+          "He **got injured** playing football.",
+          "They **got married** last summer.",
+          "My bag **got stolen** on the train.",
+        ],
+      },
+      {
+        heading: "Get + object + past participle = arrange for a service",
+        body: [
+          "This pattern means you arrange for someone else to do something for you, not that you did it yourself.",
+        ],
+        examples: [
+          "I **got my hair cut** yesterday. (a hairdresser cut it, not me)",
+          "We **got the car fixed** at the garage.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ She promoted last month. → ✅ She got promoted last month. (informal passive needs 'get' + past participle)",
+      "❌ I got my hair cutting. → ✅ I got my hair cut. ('get + object + past participle' — not '-ing')",
+      "❌ Did you got my message? → ✅ Did you get my message? (after 'did', use the base form 'get')",
+      "❌ It get really cold at night. → ✅ It gets really cold at night. (third person singular needs 'gets')",
     ],
   },
 
@@ -2466,8 +2681,17 @@ export const LESSONS: Record<string, Lesson> = {
       },
       {
         heading: "Asking for someone's opinion",
-        body: ["Do you think that + clause? is the natural way to ask someone for their opinion."],
-        examples: ["**Do you think that** homework is useless?"],
+        body: [
+          "'Do you think that + clause?' works with a full clause, but several other common openers take a noun instead — 'what's your' + opinion/view/take + 'on', or 'how do you feel about'.",
+        ],
+        examples: [
+          "**Do you think that** homework is useless?",
+          "**What's your opinion on** the new policy?",
+          "**What's your view on** working from home?",
+          "**How do you feel about** the changes?",
+          "**Do you have any thoughts on** this idea?",
+          "**What's your take on** the situation?",
+        ],
       },
     ],
     commonMistakes: [
@@ -3241,6 +3465,146 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ She is tour guide who knows the city well. → ✅ She is a tour guide... (article needed before a role noun)",
       "❌ I have visited Rome last year. → ✅ I visited Rome last year. (specific past time → past simple)",
       "❌ If you will book early, you'll save money. → ✅ If you book early... (no 'will' in the if-clause)",
+    ],
+  },
+
+  sport_and_fitness: {
+    title: "Sport & Fitness",
+    intro: "Talking about sport and fitness naturally combines four things: your sporting experiences (present perfect), predictions about training (first conditional), how sport is organised and reported (passive voice), and comparing performance and progress (comparatives).",
+    sections: [
+      {
+        heading: "Useful sport & fitness vocabulary",
+        body: [
+          "workout, stamina, muscle, coach, opponent, compete, championship, injury, recover, referee, marathon, personal best.",
+        ],
+        examples: [
+          "I do a **workout** at the gym three times a week.",
+          "He's out for the season because of a serious **injury**.",
+          "She set a new **personal best** in the 100 metres.",
+        ],
+      },
+      {
+        heading: "Talking about sporting experience (present perfect)",
+        body: [
+          "have/has + past participle for experiences, achievements, and things not yet done.",
+          "never/ever/just/already for experiences and recent events; for/since for duration.",
+        ],
+        examples: [
+          "I **have never run** a marathon.",
+          "She **has just won** the championship.",
+          "He **hasn't played** football **since** his injury.",
+        ],
+      },
+      {
+        heading: "Predicting training outcomes (first conditional)",
+        body: [
+          "if + present simple, ... will + base verb — for a likely future result.",
+        ],
+        examples: [
+          "If you **train** every day, you **will get** fitter.",
+          "If she **doesn't warm up**, she **will injure** herself.",
+        ],
+      },
+      {
+        heading: "How sport is organised and reported (passive voice)",
+        body: [
+          "be + past participle — used when the action matters more than who does it.",
+          "Present simple passive: is/are + past participle. Past simple passive: was/were + past participle.",
+        ],
+        examples: [
+          "This sport **is played** all over the world.",
+          "The championship **is held** every year.",
+          "The match **was cancelled** because of the rain.",
+          "The player **was injured** during the match.",
+        ],
+      },
+      {
+        heading: "Comparing performance and progress (comparatives)",
+        body: [
+          "Short adjectives: add -er (fit → fitter). Long adjectives: use more (difficult → more difficult).",
+          "Double comparative: the + comparative, the + comparative — shows two things changing together.",
+        ],
+        examples: [
+          "Running is **better** than not exercising at all.",
+          "She is **fitter** than she was last year.",
+          "**The more** you train, **the more** stamina you build.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ She has just win the championship. → ✅ She has just won the championship. (present perfect needs the past participle)",
+      "❌ If you train every day, you get fitter. → ✅ If you train every day, you will get fitter. (first conditional needs 'will')",
+      "❌ This sport plays all over the world. → ✅ This sport is played all over the world. (passive needs 'is' + past participle)",
+      "❌ Running is gooder than walking. → ✅ Running is better than walking. (irregular comparative: better, not gooder)",
+    ],
+  },
+
+  relationships_and_socialising: {
+    title: "Relationships & Socialising",
+    intro: "Talking about relationships combines four things: your history with people (present perfect), predictions about how relationships develop (first conditional), how social events are organised (passive voice), and comparing closeness between people (comparatives).",
+    sections: [
+      {
+        heading: "Useful relationship vocabulary",
+        body: [
+          "friendship, trust, support, apologise, forgive, keep in touch, lose touch, fall out, make up, acquaintance, bond, reunion.",
+        ],
+        examples: [
+          "**Trust** is the most important part of any friendship.",
+          "We promised to **keep in touch** after graduation.",
+          "They **fell out** over something silly last month, but they **made up** the next day.",
+        ],
+      },
+      {
+        heading: "Talking about relationship history (present perfect)",
+        body: [
+          "have/has + past participle for experiences and states that continue to now.",
+          "for/since for duration; just/already/ever for recent or life experiences.",
+        ],
+        examples: [
+          "I **have known** my best friend for ten years.",
+          "She **has just apologised** to her friend.",
+          "He **hasn't spoken** to his brother **since** the argument.",
+        ],
+      },
+      {
+        heading: "Predicting how relationships develop (first conditional)",
+        body: [
+          "if + present simple, ... will + base verb — for a likely future result.",
+        ],
+        examples: [
+          "If you **apologise** sincerely, she **will forgive** you.",
+          "If we **keep in touch**, we **will stay** close friends.",
+        ],
+      },
+      {
+        heading: "How social events are organised (passive voice)",
+        body: [
+          "be + past participle — used when the event or action matters more than who organised it.",
+        ],
+        examples: [
+          "Close friendships **are valued** by most people.",
+          "She **was invited** to the wedding.",
+          "The reunion **was planned** months in advance.",
+        ],
+      },
+      {
+        heading: "Comparing closeness and connection (comparatives)",
+        body: [
+          "Short adjectives: add -er (close → closer). Long adjectives: use more (supportive → more supportive).",
+          "Double comparative: the + comparative, the + comparative — shows two things changing together.",
+        ],
+        examples: [
+          "She is **closer** to her sister than to her brother.",
+          "Good friends are **more supportive** than acquaintances.",
+          "**The more** you socialise, **the more** friends you make.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ She has just apologise to her friend. → ✅ She has just apologised to her friend. (present perfect needs the past participle)",
+      "❌ If you apologise sincerely, she forgive you. → ✅ ...she will forgive you. (first conditional needs 'will')",
+      "❌ She invited to the wedding. → ✅ She was invited to the wedding. (passive past simple needs 'was')",
+      "❌ She is more close to her sister. → ✅ She is closer to her sister. (short adjectives take -er, not 'more')",
     ],
   },
 
@@ -4281,67 +4645,6 @@ export const LESSONS: Record<string, Lesson> = {
     ],
   },
 
-  fast_fashion: {
-    title: "Fast Fashion",
-    intro: "Fast fashion vocabulary comes with fixed collocations (criticised for, accused of, alternative to) — plus the recurring Spanish-L1 traps.",
-    sections: [
-      {
-        heading: "Talking about the fashion industry",
-        body: ["Common fast fashion vocabulary."],
-        examples: [
-          "**landfill**, **second-hand**, **sustainable**, **capsule wardrobe**, **conscious consumer**, **greenwashing**",
-          "Fast fashion has been **criticised for** exploiting workers.",
-          "The company was **accused of** exploiting workers.",
-        ],
-      },
-      {
-        heading: "Hypothetical improvement",
-        body: ["Second conditional for imagining a better outcome."],
-        examples: ["If people bought fewer clothes, the industry **would produce** less waste."],
-      },
-      {
-        heading: "Present perfect continuous — a rising trend",
-        body: ["Has/have been + -ing describes a trend that's been building over time."],
-        examples: [
-          "More shoppers **have been choosing** second-hand clothes recently.",
-          "The brand **has been losing** customers for months.",
-        ],
-      },
-      {
-        heading: "Passive voice — perfect and future",
-        body: ["Has/have been + past participle for a completed process that matters now; will be + past participle for the future."],
-        examples: [
-          "Unsold stock **has been destroyed** by several major brands.",
-          "A new recycling scheme **will be launched** by the company next year.",
-        ],
-      },
-      {
-        heading: "Relative clauses — adding a consequence with 'which'",
-        body: ["'Which' can add extra information or a consequence about a thing just mentioned."],
-        examples: [
-          "The brand releases a new collection every month, **which creates** huge amounts of waste.",
-          "Fast fashion, **which relies on cheap labour**, has been widely criticised.",
-        ],
-      },
-      {
-        heading: "Embedded and reported questions",
-        body: ["Embed a question inside a polite phrase using statement word order — no 'do/does/did', no inverted subject and verb."],
-        examples: [
-          "**Do you know if** this brand uses sustainable materials? (not 'does this brand use')",
-          "**Could you tell me why** workers don't receive fair wages? (not 'don't workers receive')",
-        ],
-      },
-    ],
-    commonMistakes: [
-      "❌ Consumers try to avoid to buy unethical clothes. → ✅ ...avoid buying unethical clothes. ('avoid' + gerund)",
-      "❌ Young consumers are more interested on sustainable fashion. → ✅ ...interested in sustainable fashion. ('interested in', not 'on')",
-      "❌ My aunt works in factory. → ✅ My aunt works in a factory. (article needed before a singular countable noun)",
-      "❌ Brands own fabrics in countries where labour is cheap. → ✅ ...own factories... ('fabric' ≠ 'factory' — false friend)",
-      "❌ Fast fashion has become popular in the 1990s. → ✅ Fast fashion became popular in the 1990s. (specific past decade → past simple)",
-      "❌ Do you know does this brand use sustainable materials? → ✅ Do you know if this brand uses sustainable materials? (statement word order, no second 'does')",
-    ],
-  },
-
   technology_daily_life: {
     title: "Technology in Daily Life",
     intro: "Technology vocabulary treats terms like 'artificial intelligence' as singular, and pairs with fixed prepositions (dependent on, protect from) — plus the recurring Spanish-L1 traps.",
@@ -4403,6 +4706,621 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ Many people listen music while they commute. → ✅ ...listen to music... ('listen to' + thing)",
       "❌ She has downloaded that app last week. → ✅ She downloaded that app last week. (specific past time → past simple)",
       "❌ Do you know does this app track my location? → ✅ Do you know if this app tracks my location? (statement word order, no second 'does')",
+    ],
+  },
+
+  money_and_economy: {
+    title: "Money & the Economy",
+    intro: "Talking about the economy combines five things: describing ongoing economic trends (present perfect continuous), how policies and events are reported (expanded passive), adding extra information about people, things, places, and reasons (relative clauses), imagining hypothetical financial situations (second conditional), and asking indirect questions politely (embedded questions).",
+    sections: [
+      {
+        heading: "Useful economic vocabulary",
+        body: [
+          "inflation, recession, wage, salary, income, afford, budget, debt, loan, interest rate, tax, invest, savings, unemployment, poverty, wealth.",
+        ],
+        examples: [
+          "**Inflation** makes everything more expensive over time.",
+          "Many people lost their jobs during the **recession**.",
+          "They took out a **loan** to buy their first house.",
+        ],
+      },
+      {
+        heading: "Describing ongoing economic trends (present perfect continuous)",
+        body: [
+          "have/has been + -ing — for a situation that started in the past and is still continuing, or has just stopped with visible results.",
+        ],
+        examples: [
+          "**Prices have been rising** for months.",
+          "**The government has been discussing** new tax policies.",
+        ],
+      },
+      {
+        heading: "Reporting economic events and policy (expanded passive)",
+        body: [
+          "Passive present perfect: have/has been + past participle. Passive future: will be + past participle.",
+        ],
+        examples: [
+          "**Interest rates have been raised** several times this year.",
+          "**Taxes will be raised** next year.",
+        ],
+      },
+      {
+        heading: "Adding extra information (relative clauses)",
+        body: [
+          "who = people, that/which = things, where = places, when = times, why = reasons, whose = possession.",
+          "Defining clauses identify which one you mean (no commas). Non-defining clauses add extra, non-essential information (commas).",
+        ],
+        examples: [
+          "The economist **who works for the bank** explains inflation clearly. (defining)",
+          "My uncle, **whose company went bankrupt**, lost his job. (non-defining)",
+        ],
+      },
+      {
+        heading: "Imagining hypothetical financial situations (second conditional)",
+        body: [
+          "if + past simple, ... would + base verb — for an unreal or unlikely present/future situation.",
+        ],
+        examples: [
+          "If I **had** more money, I **would travel** more.",
+          "**What would** you do if you **won** the lottery?",
+        ],
+      },
+      {
+        heading: "Asking indirect, polite questions (embedded questions)",
+        body: [
+          "Question word + normal statement word order (no do/does/did) inside a longer sentence.",
+        ],
+        examples: [
+          "Can you explain **why prices rise** so quickly?",
+          "I don't know **how the economy works**.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ Interest rates have raised this year. → ✅ Interest rates have been raised this year. (passive present perfect needs 'been')",
+      "❌ If I have more money, I would travel more. → ✅ If I had more money, I would travel more. (second conditional needs past simple)",
+      "❌ The policy who raises taxes causes controversy. → ✅ The policy that raises taxes causes controversy. ('that/which' for things)",
+      "❌ Do you know what does cause inflation? → ✅ Do you know what causes inflation? (embedded questions use normal word order)",
+    ],
+  },
+
+  crime_and_law: {
+    title: "Crime & the Law",
+    intro: "Talking about crime and the law combines five things: describing ongoing investigations (present perfect continuous), how legal actions are reported (expanded passive), adding extra information about people, things, places, and reasons (relative clauses), imagining hypothetical situations (second conditional), and asking indirect questions politely (embedded questions).",
+    sections: [
+      {
+        heading: "Useful crime & law vocabulary",
+        body: [
+          "crime, suspect, investigate, evidence, witness, court, trial, jury, verdict, sentence, guilty, innocent, theft, burglary, fraud, victim.",
+        ],
+        examples: [
+          "The main **suspect** was questioned for several hours.",
+          "There wasn't enough **evidence** to convict him.",
+          "The jury delivered a guilty **verdict**.",
+        ],
+      },
+      {
+        heading: "Describing ongoing investigations (present perfect continuous)",
+        body: [
+          "have/has been + -ing — for a situation that started in the past and is still continuing, or has just stopped with visible results.",
+        ],
+        examples: [
+          "**The police have been investigating** the crime for weeks.",
+          "**She has been working** on this case since it started.",
+        ],
+      },
+      {
+        heading: "Reporting legal actions (expanded passive)",
+        body: [
+          "Passive present perfect: have/has been + past participle. Passive future: will be + past participle.",
+        ],
+        examples: [
+          "**The suspect has been arrested.**",
+          "**He will be sentenced** tomorrow.",
+        ],
+      },
+      {
+        heading: "Adding extra information (relative clauses)",
+        body: [
+          "who = people, that/which = things, where = places, when = times, why = reasons, whose = possession.",
+          "Defining clauses identify which one you mean (no commas). Non-defining clauses add extra, non-essential information (commas).",
+        ],
+        examples: [
+          "The man **who robbed the bank** escaped on foot. (defining)",
+          "The lawyer, **whose argument was convincing**, won the case. (non-defining)",
+        ],
+      },
+      {
+        heading: "Imagining hypothetical situations (second conditional)",
+        body: [
+          "if + past simple, ... would + base verb — for an unreal or unlikely present/future situation.",
+        ],
+        examples: [
+          "If you **witnessed** a crime, you **would call** the police.",
+          "**What would** you do if someone **broke into** your house?",
+        ],
+      },
+      {
+        heading: "Asking indirect, polite questions (embedded questions)",
+        body: [
+          "Question word + normal statement word order (no do/does/did) inside a longer sentence.",
+        ],
+        examples: [
+          "Can you explain **why he committed** the crime?",
+          "I don't know **how the trial will end**.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ The suspect have arrested. → ✅ The suspect has been arrested. (passive present perfect needs 'has been')",
+      "❌ If you witnessed a crime, you will call the police. → ✅ ...you would call the police. (second conditional needs 'would')",
+      "❌ The evidence who the police found. → ✅ The evidence that the police found. ('that/which' for things)",
+      "❌ Do you know what be the punishment? → ✅ Do you know what the punishment is? (embedded questions use normal word order)",
+    ],
+  },
+
+  arts_and_entertainment: {
+    title: "Arts & Entertainment",
+    intro: "Talking about arts and entertainment combines five things: describing ongoing creative work (present perfect continuous), how films and performances are reported (expanded passive), adding extra information about people, things, places, and reasons (relative clauses), imagining hypothetical creative situations (second conditional), and asking indirect questions politely (embedded questions).",
+    sections: [
+      {
+        heading: "Useful arts & entertainment vocabulary",
+        body: [
+          "exhibition, gallery, masterpiece, performance, audience, critic, review, box office, soundtrack, genre, cast, director, blockbuster, streaming.",
+        ],
+        examples: [
+          "The gallery is hosting a new **exhibition** next month.",
+          "The film was a huge success at the **box office**.",
+          "My favourite **genre** is science fiction.",
+        ],
+      },
+      {
+        heading: "Describing ongoing creative work (present perfect continuous)",
+        body: [
+          "have/has been + -ing — for a situation that started in the past and is still continuing, or has just stopped with visible results.",
+        ],
+        examples: [
+          "**The museum has been planning** this exhibition for months.",
+          "**Critics have been praising** the new film all week.",
+        ],
+      },
+      {
+        heading: "Reporting films and performances (expanded passive)",
+        body: [
+          "Passive present perfect: have/has been + past participle. Passive future: will be + past participle.",
+        ],
+        examples: [
+          "**The film has been praised** by critics.",
+          "**The film will be released** next month.",
+        ],
+      },
+      {
+        heading: "Adding extra information (relative clauses)",
+        body: [
+          "who = people, that/which = things, where = places, when = times, why = reasons, whose = possession.",
+          "Defining clauses identify which one you mean (no commas). Non-defining clauses add extra, non-essential information (commas).",
+        ],
+        examples: [
+          "The actor **who starred in the film** won an award. (defining)",
+          "The director, **whose last film flopped**, made this masterpiece. (non-defining)",
+        ],
+      },
+      {
+        heading: "Imagining hypothetical creative situations (second conditional)",
+        body: [
+          "if + past simple, ... would + base verb — for an unreal or unlikely present/future situation.",
+        ],
+        examples: [
+          "If I **had** more talent, I **would become** an actor.",
+          "**What would** you do if you **won** an Oscar?",
+        ],
+      },
+      {
+        heading: "Asking indirect, polite questions (embedded questions)",
+        body: [
+          "Question word + normal statement word order (no do/does/did) inside a longer sentence.",
+        ],
+        examples: [
+          "Can you explain **why this film is** so popular?",
+          "I don't know **how this ends**.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ The film have praised by critics. → ✅ The film has been praised by critics. (passive present perfect needs 'has been')",
+      "❌ If I have more talent, I would become an actor. → ✅ If I had more talent... (second conditional needs past simple)",
+      "❌ The painting who hangs in the gallery. → ✅ The painting that hangs in the gallery. ('that/which' for things)",
+      "❌ Do you know what be this genre? → ✅ Do you know what genre this is? (embedded questions use normal word order)",
+    ],
+  },
+
+  memory_mind_psychology: {
+    title: "Memory, Mind & Psychology",
+    intro: "Talking about the mind and psychology at an advanced level combines five things: reporting what someone said (reported speech), emphasising a point with dramatic word order (inversion), imagining how a different past would have changed things (third conditional), mixing a past cause with a present result or vice versa (mixed conditional), and describing what should or must be done about the mind (modal passive).",
+    sections: [
+      {
+        heading: "Useful psychology vocabulary",
+        body: [
+          "memory, recall, subconscious, perception, cognitive, instinct, mindset, bias, trauma, therapy, mental health, wellbeing, resilience, self-esteem.",
+        ],
+        examples: [
+          "Our **subconscious** influences many of our daily decisions.",
+          "We all have some **bias**, even if we don't realise it.",
+          "She showed incredible **resilience** after the setback.",
+        ],
+      },
+      {
+        heading: "Reporting what someone said (reported speech)",
+        body: [
+          "Tenses shift back one step: present simple → past simple, present continuous → past continuous, present perfect → past perfect, will → would, can → could.",
+          "Time and place words shift too: 'this' → 'that', 'last year' → 'the year before', 'next month' → 'the following month'.",
+        ],
+        examples: [
+          "'I forget things all the time,' said the patient. → The patient said (that) she **forgot** things all the time.",
+          "'We are studying memory,' explained the psychologist. → The psychologist explained (that) they **were studying** memory.",
+        ],
+      },
+      {
+        heading: "Emphasising a point with dramatic word order (inversion)",
+        body: [
+          "A negative/limiting adverbial at the start of a sentence (Rarely, Never before, Seldom, Under no circumstances, Not only) triggers question word order: auxiliary before the subject.",
+        ],
+        examples: [
+          "**Rarely does** someone forget such an important memory.",
+          "**Never before had** anyone experienced such vivid flashbacks.",
+          "**Not only did** the therapy help him, but he also felt more confident.",
+        ],
+      },
+      {
+        heading: "Imagining a different past (third conditional)",
+        body: [
+          "if + past perfect, ... would have + past participle — for an unreal past situation and its unreal past result.",
+        ],
+        examples: [
+          "If she **had sought** help sooner, she **would have recovered** faster.",
+          "If he **hadn't confronted** his fear, he **would never have overcome** it.",
+        ],
+      },
+      {
+        heading: "Mixing time frames (mixed conditional)",
+        body: [
+          "Past cause → present result: if + past perfect, ... would + base verb.",
+          "Present/general cause → past result: if + past simple, ... would have + past participle.",
+        ],
+        examples: [
+          "If he **hadn't gone** to therapy years ago, he **wouldn't be** so resilient today. (past cause → present result)",
+          "If she **weren't** so self-aware, she **wouldn't have noticed** the pattern. (present state → past result)",
+        ],
+      },
+      {
+        heading: "Describing what should be done about the mind (modal passive)",
+        body: [
+          "modal + be + past participle (present/future); modal + have been + past participle (past); need + gerund is a semi-passive shortcut.",
+        ],
+        examples: [
+          "**This bias must be addressed.**",
+          "**The relapse could have been prevented** by the therapist.",
+          "**The outdated theory needs updating.**",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ The patient said she forget things all the time. → ✅ ...she forgot things all the time. (reported speech backshifts the tense)",
+      "❌ Rarely someone forgets such a memory. → ✅ Rarely does someone forget such a memory. (inversion needs 'does' before the subject)",
+      "❌ If she seek help sooner, she would have recovered faster. → ✅ If she had sought help sooner... (third conditional needs past perfect)",
+      "❌ This bias must addressed. → ✅ This bias must be addressed. (modal passive needs 'be' + past participle)",
+    ],
+  },
+
+  future_of_work: {
+    title: "The Future of Work",
+    intro: "Talking about the future of work at an advanced level combines five things: reporting what someone said (reported speech), emphasising a point with dramatic word order (inversion), imagining how a different past would have changed things (third conditional), mixing a past cause with a present result or vice versa (mixed conditional), and describing what should or must be done about work (modal passive).",
+    sections: [
+      {
+        heading: "Useful future-of-work vocabulary",
+        body: [
+          "automation, artificial intelligence (AI), remote work, freelance, gig economy, redundancy, upskill, workforce, job security, burnout, entrepreneur.",
+        ],
+        examples: [
+          "**Automation** has changed the way factories operate.",
+          "Many workers are **upskilling** to keep up with new technology.",
+          "**Job security** has decreased in many industries due to automation.",
+        ],
+      },
+      {
+        heading: "Reporting what someone said (reported speech)",
+        body: [
+          "Tenses shift back one step: present simple → past simple, present continuous → past continuous, present perfect → past perfect, will → would, can → could.",
+          "Time and place words shift too: 'this' → 'that', 'next year' → 'the following year', 'today' → 'that day'.",
+        ],
+        examples: [
+          "'AI is transforming our industry,' said the CEO. → The CEO said (that) AI **was transforming** their industry.",
+          "'We will automate this next year,' announced the manager. → The manager announced (that) they **would automate** that the following year.",
+        ],
+      },
+      {
+        heading: "Emphasising a point with dramatic word order (inversion)",
+        body: [
+          "A negative/limiting adverbial at the start of a sentence (Rarely, Never before, Seldom, Under no circumstances, Not only) triggers question word order: auxiliary before the subject.",
+        ],
+        examples: [
+          "**Rarely does** a company adapt this quickly.",
+          "**Never before had** anyone predicted such rapid change.",
+          "**Not only does** automation save time, but it also reduces costs.",
+        ],
+      },
+      {
+        heading: "Imagining a different past (third conditional)",
+        body: [
+          "if + past perfect, ... would have + past participle — for an unreal past situation and its unreal past result.",
+        ],
+        examples: [
+          "If she **had upskilled** sooner, she **would have found** a new job faster.",
+          "If he **hadn't automated** the process, he **would never have saved** so much time.",
+        ],
+      },
+      {
+        heading: "Mixing time frames (mixed conditional)",
+        body: [
+          "Past cause → present result: if + past perfect, ... would + base verb.",
+          "Present/general cause → past result: if + past simple, ... would have + past participle.",
+        ],
+        examples: [
+          "If he **hadn't lost** his job years ago, he **wouldn't be** a freelancer today. (past cause → present result)",
+          "If she **weren't** so hardworking, she **wouldn't have been** promoted. (present state → past result)",
+        ],
+      },
+      {
+        heading: "Describing what should be done about work (modal passive)",
+        body: [
+          "modal + be + past participle (present/future); modal + have been + past participle (past); need + gerund is a semi-passive shortcut.",
+        ],
+        examples: [
+          "**Job insecurity must be addressed.**",
+          "**The redundancies could have been prevented** by the manager.",
+          "**The outdated system needs replacing.**",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ The CEO said AI is transforming their industry. → ✅ ...AI was transforming their industry. (reported speech backshifts the tense)",
+      "❌ Rarely a company adapts this quickly. → ✅ Rarely does a company adapt this quickly. (inversion needs 'does' before the subject)",
+      "❌ If she upskill sooner, she would have found a job faster. → ✅ If she had upskilled sooner... (third conditional needs past perfect)",
+      "❌ Job insecurity must addressed. → ✅ Job insecurity must be addressed. (modal passive needs 'be' + past participle)",
+    ],
+  },
+
+  relationships_modern_life: {
+    title: "Relationships in Modern Life",
+    intro: "Talking about relationships in modern life at an advanced level combines five things: reporting what someone said (reported speech), emphasising a point with dramatic word order (inversion), imagining how a different past would have changed things (third conditional), mixing a past cause with a present result or vice versa (mixed conditional), and describing what should or must be done in a relationship (modal passive).",
+    sections: [
+      {
+        heading: "Useful relationships vocabulary",
+        body: [
+          "intimacy, commitment, compatibility, infidelity, cohabit, online dating, ghosting, boundaries, reconciliation, estrangement, nuclear family, blended family, vulnerability, attachment style, drift apart, break up, reconcile, trust, codependency, emotional labour.",
+        ],
+        examples: [
+          "Building real **intimacy** takes time and trust.",
+          "Setting healthy **boundaries** is important in any relationship.",
+          "**Online dating** has changed the way people meet.",
+        ],
+      },
+      {
+        heading: "Reporting what someone said (reported speech)",
+        body: [
+          "Tenses shift back one step: present simple → past simple, present continuous → past continuous, present perfect → past perfect, will → would, can → could.",
+          "Time and place words shift too: 'this' → 'that', 'last week' → 'the week before'.",
+        ],
+        examples: [
+          "'I am not ready to commit,' admitted James. → James admitted (that) he **was** not ready to commit.",
+          "'We will work through this together,' promised the couple. → The couple promised (that) they **would work** through that together.",
+        ],
+      },
+      {
+        heading: "Emphasising a point with dramatic word order (inversion)",
+        body: [
+          "A negative/limiting adverbial at the start of a sentence (Rarely, Never before, Seldom, Under no circumstances, Not only, No sooner...than) triggers question word order: auxiliary before the subject.",
+        ],
+        examples: [
+          "**Rarely does** a relationship survive such distance.",
+          "**Never before had** anyone expected such a sudden breakup.",
+          "**Not only did** they rebuild trust, but they also grew closer.",
+        ],
+      },
+      {
+        heading: "Imagining a different past (third conditional)",
+        body: [
+          "if + past perfect, ... would have + past participle — for an unreal past situation and its unreal past result.",
+        ],
+        examples: [
+          "If they **had communicated** better, they **would have avoided** the breakup.",
+          "If she **hadn't ignored** the warning signs, she **wouldn't have gotten** hurt.",
+        ],
+      },
+      {
+        heading: "Mixing time frames (mixed conditional)",
+        body: [
+          "Past cause → present result: if + past perfect, ... would + base verb.",
+          "Present state → past result: if + past simple, ... would have + past participle.",
+        ],
+        examples: [
+          "If they **hadn't gone** to counselling years ago, they **wouldn't be** so happy today. (past cause → present result)",
+          "If she **weren't** so forgiving, she **wouldn't have stayed** with him. (present state → past result)",
+        ],
+      },
+      {
+        heading: "Describing what should be done in a relationship (modal passive)",
+        body: [
+          "modal + be + past participle (present/future); modal + have been + past participle (past); need + gerund is a semi-passive shortcut.",
+        ],
+        examples: [
+          "**This issue must be addressed.**",
+          "**The breakup could have been prevented** by the counsellor.",
+          "**The old pattern needs breaking.**",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ James admitted he is not ready to commit. → ✅ James admitted he was not ready to commit. (reported speech backshifts the tense)",
+      "❌ Rarely a relationship survives such distance. → ✅ Rarely does a relationship survive such distance. (inversion needs 'does' before the subject)",
+      "❌ If they communicate better, they would have avoided the breakup. → ✅ If they had communicated better... (third conditional needs past perfect)",
+      "❌ This issue must addressed. → ✅ This issue must be addressed. (modal passive needs 'be' + past participle)",
+    ],
+  },
+
+  crime_and_justice: {
+    title: "Crime & Justice",
+    intro: "Talking about crime and justice at an advanced level combines five things: reporting what someone said (reported speech), emphasising a point with dramatic word order (inversion), imagining how a different past would have changed things (third conditional), mixing a past cause with a present result or vice versa (mixed conditional), and describing what should or must be done about the justice system (modal passive).",
+    sections: [
+      {
+        heading: "Useful crime & justice vocabulary",
+        body: [
+          "deterrence, rehabilitation, recidivism, restorative justice, presumption of innocence, wrongful conviction, incarceration, systemic bias, juvenile offender, parole, clemency, retribution, due process, miscarriage of justice, proportionality, vigilante justice, plea bargain, reintegration, sentencing guidelines, mitigating circumstances.",
+        ],
+        examples: [
+          "**Rehabilitation** programs help offenders build a different future.",
+          "The presumption of **innocence** is a cornerstone of a fair justice system.",
+          "**Systemic bias** in the courts affects some communities more than others.",
+        ],
+      },
+      {
+        heading: "Reporting what someone said (reported speech)",
+        body: [
+          "Tenses shift back one step: present simple → past simple, present continuous → past continuous, present perfect → past perfect, will → would, can → could.",
+          "Time and place words shift too: 'this' → 'that', 'today' → 'that day'.",
+        ],
+        examples: [
+          "'Rehabilitation works better than punishment,' argued the criminologist. → The criminologist argued (that) rehabilitation **worked** better than punishment.",
+          "'We will reform the parole system,' promised the minister. → The minister promised (that) they **would reform** the parole system.",
+        ],
+      },
+      {
+        heading: "Emphasising a point with dramatic word order (inversion)",
+        body: [
+          "A negative/limiting adverbial at the start of a sentence (Rarely, Never before, Seldom, Under no circumstances, Not only) triggers question word order: auxiliary before the subject.",
+        ],
+        examples: [
+          "**Rarely does** a court overturn a conviction this quickly.",
+          "**Never before had** anyone expected such a swift reform.",
+          "**Under no circumstances should** judges ignore mitigating circumstances.",
+        ],
+      },
+      {
+        heading: "Imagining a different past (third conditional)",
+        body: [
+          "if + past perfect, ... would have + past participle — for an unreal past situation and its unreal past result.",
+        ],
+        examples: [
+          "If the police **had investigated** more carefully, they **would have avoided** the wrongful conviction.",
+          "If she **hadn't had** access to a lawyer, she **wouldn't have gotten** a fair trial.",
+        ],
+      },
+      {
+        heading: "Mixing time frames (mixed conditional)",
+        body: [
+          "Past cause → present result: if + past perfect, ... would + base verb.",
+          "Present state/general truth → past result: if + past simple, ... would have + past participle.",
+        ],
+        examples: [
+          "If they **had reformed** the system years ago, recidivism **wouldn't be** so high today. (past cause → present result)",
+          "If she **weren't** so persistent, she **wouldn't have cleared** his name. (present state → past result)",
+        ],
+      },
+      {
+        heading: "Describing what should be done about justice (modal passive)",
+        body: [
+          "modal + be + past participle (present/future); modal + have been + past participle (past); need + gerund is a semi-passive shortcut.",
+        ],
+        examples: [
+          "**Systemic bias must be addressed.**",
+          "**The wrongful conviction could have been prevented** by the defence.",
+          "**The old system needs reforming.**",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ The lawyer claimed the system is failing young offenders. → ✅ ...the system was failing young offenders. (reported speech backshifts the tense)",
+      "❌ Rarely a court overturns a conviction this quickly. → ✅ Rarely does a court overturn a conviction this quickly. (inversion needs 'does' before the subject)",
+      "❌ If the police investigate more carefully, they would have avoided the wrongful conviction. → ✅ If the police had investigated... (third conditional needs past perfect)",
+      "❌ Systemic bias must addressed. → ✅ Systemic bias must be addressed. (modal passive needs 'be' + past participle)",
+    ],
+  },
+
+  health_healthcare_systems: {
+    title: "Health & Healthcare Systems",
+    intro: "Talking about healthcare systems at an advanced level combines five things: reporting what someone said (reported speech), emphasising a point with dramatic word order (inversion), imagining how a different past would have changed things (third conditional), mixing a past cause with a present result or vice versa (mixed conditional), and describing what should or must be done about healthcare (modal passive).",
+    sections: [
+      {
+        heading: "Useful healthcare-systems vocabulary",
+        body: [
+          "universal healthcare, preventive care, health inequality, public health, health insurance, chronic illness, mental health services, healthcare provider, medical malpractice, patient outcomes, healthcare funding, outbreak, life expectancy, healthcare access, overburdened, telemedicine, health policy, underfunded, waiting times, burnout.",
+        ],
+        examples: [
+          "**Universal healthcare** guarantees medical care to every citizen.",
+          "**Preventive care** catches illnesses before they become serious.",
+          "**Burnout** among healthcare workers has become a serious problem.",
+        ],
+      },
+      {
+        heading: "Reporting what someone said (reported speech)",
+        body: [
+          "Tenses shift back one step: present simple → past simple, present continuous → past continuous, present perfect → past perfect, will → would, can → could.",
+          "Time and place words shift too: 'this' → 'that', 'today' → 'that day'.",
+        ],
+        examples: [
+          "'The system is failing rural patients,' claimed the doctor. → The doctor claimed (that) the system **was failing** rural patients.",
+          "'We will increase healthcare funding,' promised the government. → The government promised (that) they **would increase** healthcare funding.",
+        ],
+      },
+      {
+        heading: "Emphasising a point with dramatic word order (inversion)",
+        body: [
+          "A negative/limiting adverbial at the start of a sentence (Rarely, Never before, Seldom, Under no circumstances, Not only) triggers question word order: auxiliary before the subject.",
+        ],
+        examples: [
+          "**Rarely does** a hospital treat so many patients this efficiently.",
+          "**Never before had** anyone expected such a rapid recovery.",
+          "**Under no circumstances should** hospitals turn away emergency patients.",
+        ],
+      },
+      {
+        heading: "Imagining a different past (third conditional)",
+        body: [
+          "if + past perfect, ... would have + past participle — for an unreal past situation and its unreal past result.",
+        ],
+        examples: [
+          "If the doctors **had diagnosed** the illness sooner, they **would have saved** his life.",
+          "If she **hadn't had** health insurance, she **wouldn't have afforded** the treatment.",
+        ],
+      },
+      {
+        heading: "Mixing time frames (mixed conditional)",
+        body: [
+          "Past cause → present result: if + past perfect, ... would + base verb.",
+          "Present state/general truth → past result: if + past simple, ... would have + past participle.",
+        ],
+        examples: [
+          "If they **had reformed** the system years ago, waiting times **wouldn't be** so long today. (past cause → present result)",
+          "If she **weren't** so dedicated, she **wouldn't have stayed** in such a difficult job. (present state → past result)",
+        ],
+      },
+      {
+        heading: "Describing what should be done about healthcare (modal passive)",
+        body: [
+          "modal + be + past participle (present/future); modal + have been + past participle (past); need + gerund is a semi-passive shortcut.",
+        ],
+        examples: [
+          "**Health inequality must be addressed.**",
+          "**The complication could have been prevented** by the surgeon.",
+          "**The old system needs reforming.**",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ The doctor claimed the system is failing rural patients. → ✅ ...the system was failing rural patients. (reported speech backshifts the tense)",
+      "❌ Rarely a hospital treats so many patients this efficiently. → ✅ Rarely does a hospital treat so many patients this efficiently. (inversion needs 'does' before the subject)",
+      "❌ If the doctors diagnose the illness sooner, they would have saved his life. → ✅ If the doctors had diagnosed... (third conditional needs past perfect)",
+      "❌ Health inequality must addressed. → ✅ Health inequality must be addressed. (modal passive needs 'be' + past participle)",
     ],
   },
 
@@ -6362,88 +7280,6 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ What I need it a break. → ✅ What I need is a break. (needs 'is', not 'it')",
       "❌ It weren't until Monday that we found out. → ✅ It wasn't until Monday... ('it' is singular: wasn't)",
       "❌ What impressed the judges were her confidence. → ✅ ...was her confidence. (singular subject takes 'was')",
-    ],
-  },
-
-  globalisation: {
-    title: "Globalisation",
-    intro: "Discussing globalisation means handling abstract, mostly-singular subjects (globalisation, trade, wages) correctly, plus a set of topic-specific vocabulary for its causes and effects.",
-    sections: [
-      {
-        heading: "Key vocabulary",
-        body: ["multinational corporation, migration, outsourcing, supply chain, cultural homogenisation, trade barriers, protectionism, brain drain."],
-        examples: [
-          "Coca-Cola is a **multinational corporation** operating in almost every country.",
-          "Many brands rely on **outsourcing** to countries where labour is cheaper.",
-          "Critics worry about **cultural homogenisation** as local traditions disappear.",
-        ],
-      },
-      {
-        heading: "Subject-verb agreement with abstract nouns",
-        body: ["'Globalisation' and 'trade' are singular (has/is); 'corporations', 'wages', 'agreements' are plural (are/have)."],
-        examples: [
-          "**Globalisation has** lifted millions of people out of poverty. (not 'have')",
-          "**Multinational corporations are** often criticised for exploiting cheap labour.",
-          "Since the 1990s, world **trade has** grown enormously.",
-        ],
-      },
-      {
-        heading: "Finished time → past simple",
-        body: ["With a specific finished time period (e.g. 'in the 1990s'), use past simple, not present perfect."],
-        examples: [
-          "Globalisation **increased** trade a lot **in the 1990s**. (not 'has increased')",
-        ],
-      },
-      {
-        heading: "Reported speech — backshifting tenses",
-        body: ["When reporting what someone said, tenses usually shift one step back: present simple → past simple, present perfect → past perfect, will → would, can → could."],
-        examples: [
-          "'Globalisation has reduced poverty,' said the economist. → The economist said (that) globalisation **had reduced** poverty.",
-          "'We will protect local industries,' said the minister. → The minister said (that) they **would protect** local industries.",
-        ],
-      },
-      {
-        heading: "Inversion — fronting a negative adverb for emphasis",
-        body: ["Rarely / Never before / Not only...but also / No sooner...than / Under no circumstances + auxiliary + subject + verb — moving a negative adverbial to the front inverts the normal subject-verb order, like in a question."],
-        examples: [
-          "**Rarely does** globalisation benefit every country equally.",
-          "**Never before has** a country faced such economic interdependence.",
-          "**Not only do** multinational corporations create jobs, **but they also** increase inequality.",
-        ],
-      },
-      {
-        heading: "Third conditional — an unreal past result",
-        body: ["If + past perfect, ... would have + past participle — imagining a different outcome for something that already happened and can't be changed."],
-        examples: [
-          "If the WTO **hadn't existed**, trade disputes **would have escalated** more often.",
-          "If governments **had acted** sooner, the recession **would have hit** less hard.",
-        ],
-      },
-      {
-        heading: "Mixed conditional — a past cause, a present result",
-        body: ["If + past perfect, ... would + base verb — a past action or decision explains a situation that is still true now."],
-        examples: [
-          "If the country **hadn't opened** its borders decades ago, it **wouldn't be** so wealthy today.",
-          "If the company **hadn't outsourced** production years ago, it **wouldn't be** so profitable today.",
-        ],
-      },
-      {
-        heading: "Advanced passive — modal and modal perfect passive",
-        body: ["modal + be + past participle (present/future obligation or possibility); modal + have been + past participle (a judgement or guess about the past)."],
-        examples: [
-          "Multinational corporations **must be regulated** by governments.",
-          "The job losses **could have been prevented** by the government.",
-          "The outdated tariffs **need reforming**.",
-        ],
-      },
-    ],
-    commonMistakes: [
-      "❌ Delegates assisted to the trade summit. → ✅ ...attended the trade summit. ('assist' means 'to help'; 'attend' for going to an event)",
-      "❌ Companies depend of cheap labour. → ✅ ...depend on cheap labour. (preposition 'on', not 'of')",
-      "❌ Globalisation has increased trade a lot in the 1990s. → ✅ Globalisation increased trade... (finished time needs past simple)",
-      "❌ Critics say globalisation doesn't help nobody. → ✅ ...doesn't help anybody. (avoid double negatives)",
-      "❌ 'We will protect local industries,' said the minister. → The minister said they **will** protect local industries. → ✅ ...they **would** protect local industries. ('will' backshifts to 'would' in reported speech)",
-      "❌ Rarely globalisation benefits every country equally. → ✅ Rarely **does** globalisation benefit... (inversion needs the auxiliary before the subject)",
     ],
   },
 
