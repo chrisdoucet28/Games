@@ -1321,7 +1321,7 @@ export const LESSONS: Record<string, Lesson> = {
       },
     ],
     commonMistakes: [
-      "❌ I have 20 years old. → ✅ I am 20 years old. ('to be' + age, not 'to have' — a direct Spanish translation trap)",
+      "❌ I have 20 years old. → ✅ I am 20 years old. ('to be' + age, not 'to have' — a classic literal-translation trap)",
       "❌ I am agree with my sister. → ✅ I agree with my sister. ('agree' is a verb on its own, no 'am')",
       "❌ I like to listen music. → ✅ I like to listen to music. ('listen to' + thing)",
       "❌ I have a house big with a garden. → ✅ I have a big house with a garden. (adjective before the noun in English)",
@@ -1631,7 +1631,7 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ I like to make photos of old buildings. → ✅ I like to take photos of old buildings. (English 'takes' a photo, never 'makes' one)",
       "❌ Tourists arrive to my city by train. → ✅ Tourists arrive in my city by train. ('arrive in/at a place', never 'arrive to')",
       "❌ My town has market in the centre. → ✅ My town has a market in the centre. (don't drop 'a' before a singular countable noun)",
-      "❌ There is a good library where you can buy books. → ✅ There is a good bookshop where you can buy books. ('library' = borrow books; 'librería' in Spanish is false friend for bookshop)",
+      "❌ There is a good library where you can buy books. → ✅ There is a good bookshop where you can buy books. ('library' = borrow books; a common false friend for 'bookshop')",
       "❌ There isn't nothing interesting to do. → ✅ There isn't anything interesting to do. (only one negative per clause)",
       "❌ They builded a new bridge last year. → ✅ They built a new bridge last year. ('build' is irregular in the past simple)",
     ],
@@ -2871,7 +2871,7 @@ export const LESSONS: Record<string, Lesson> = {
 
   working_from_home: {
     title: "Working from Home",
-    intro: "Talking about remote work leans on present perfect for change over time ('has become popular') and a set of fixed collocations — plus the same Spanish-L1 traps seen in other topics.",
+    intro: "Talking about remote work leans on present perfect for change over time ('has become popular') and a set of fixed collocations — plus the same learner traps seen in other topics.",
     sections: [
       {
         heading: "Talking about remote work",
@@ -2937,7 +2937,7 @@ export const LESSONS: Record<string, Lesson> = {
 
   learning_language: {
     title: "Learning a Foreign Language",
-    intro: "This topic mixes learning-strategy vocabulary with present perfect for ongoing duration ('has learned...for six years') — plus the recurring Spanish-L1 traps.",
+    intro: "This topic mixes learning-strategy vocabulary with present perfect for ongoing duration ('has learned...for six years') — plus the recurring learner traps.",
     sections: [
       {
         heading: "Talking about learning strategies",
@@ -2995,7 +2995,7 @@ export const LESSONS: Record<string, Lesson> = {
 
   career_choices: {
     title: "Career Choices",
-    intro: "Career vocabulary comes with a set of fixed prepositions (apply for, interested in, good at) plus present perfect for career history — and the same recurring Spanish-L1 traps.",
+    intro: "Career vocabulary comes with a set of fixed prepositions (apply for, interested in, good at) plus present perfect for career history — and the same recurring learner traps.",
     sections: [
       {
         heading: "Talking about careers",
@@ -3050,7 +3050,7 @@ export const LESSONS: Record<string, Lesson> = {
 
   time_management: {
     title: "Time Management",
-    intro: "Time-management vocabulary pairs naturally with modals of advice (should) and gerunds after avoid/depend — plus the recurring Spanish-L1 traps.",
+    intro: "Time-management vocabulary pairs naturally with modals of advice (should) and gerunds after avoid/depend — plus the recurring learner traps.",
     sections: [
       {
         heading: "Talking about managing time",
@@ -3104,7 +3104,7 @@ export const LESSONS: Record<string, Lesson> = {
     commonMistakes: [
       "❌ I have to assist a time-management workshop. → ✅ I have to attend a time-management workshop. ('assist' means to help; 'attend' means to go to')",
       "❌ The team meeting has place every Monday. → ✅ The team meeting takes place every Monday. ('take place', not 'have place')",
-      "❌ I eventually check my emails two or three times. → ✅ I occasionally check my emails... ('eventually' means 'in the end'; Spanish 'eventualmente' means 'occasionally')",
+      "❌ I eventually check my emails two or three times. → ✅ I occasionally check my emails... ('eventually' means 'in the end', not 'occasionally' — a classic false-friend mix-up)",
       "❌ Good time manager always makes a schedule. → ✅ A good time manager always makes a schedule. (article needed before a role noun)",
       "❌ She has completed the report yesterday. → ✅ She completed the report yesterday. (specific past time → past simple)",
       "❌ If she will plan her day, she'll get more done. → ✅ If she plans her day... (no 'will' in the if-clause of a first conditional)",
@@ -3113,7 +3113,7 @@ export const LESSONS: Record<string, Lesson> = {
 
   free_time_hobbies: {
     title: "Free Time and Hobbies",
-    intro: "This B1 hobbies topic builds on gerunds after enjoy/spend time, plus present perfect for how long you've had a hobby — and the same recurring Spanish-L1 traps.",
+    intro: "This B1 hobbies topic builds on gerunds after enjoy/spend time, plus present perfect for how long you've had a hobby — and the same recurring learner traps.",
     sections: [
       {
         heading: "Talking about hobbies and their benefits",
@@ -3169,7 +3169,7 @@ export const LESSONS: Record<string, Lesson> = {
 
   social_media: {
     title: "Social Media",
-    intro: "'Social media' and 'people' are grammatically tricky (singular vs plural verb agreement), and this topic drills gerunds after 'addicted to' — plus the recurring Spanish-L1 traps.",
+    intro: "'Social media' and 'people' are grammatically tricky (singular vs plural verb agreement), and this topic drills gerunds after 'addicted to' — plus the recurring learner traps.",
     sections: [
       {
         heading: "Talking about social media",
@@ -3235,7 +3235,7 @@ export const LESSONS: Record<string, Lesson> = {
 
   reading: {
     title: "Reading",
-    intro: "Talking about books uses fixed prepositions (interested in, based on) and present perfect for lifetime reading experience — plus the recurring Spanish-L1 traps.",
+    intro: "Talking about books uses fixed prepositions (interested in, based on) and present perfect for lifetime reading experience — plus the recurring learner traps.",
     sections: [
       {
         heading: "Talking about books",
@@ -3284,14 +3284,14 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ I am agree that this book deserves its awards. → ✅ I agree that this book deserves its awards. ('agree' is a verb, no 'am')",
       "❌ Whether I like a book depends of the characters. → ✅ ...depends on the characters. ('depend on', not 'depend of')",
       "❌ She is avid reader who finishes a book every week. → ✅ She is an avid reader... (article needed before a role noun)",
-      "❌ I bought this novel at the library. → ✅ I bought this novel at the bookshop. ('library' = borrow books; Spanish 'librería' is a false friend for bookshop)",
+      "❌ I bought this novel at the library. → ✅ I bought this novel at the bookshop. ('library' = borrow books; a common false friend for 'bookshop')",
       "❌ If you will read every day, you'll improve your vocabulary. → ✅ If you read every day... (no 'will' in the if-clause)",
     ],
   },
 
   city_vs_country: {
     title: "City Life vs. Country Life",
-    intro: "Comparing city and country life relies on comparatives and fixed collocations (cost of living, sense of community) — plus the recurring Spanish-L1 traps.",
+    intro: "Comparing city and country life relies on comparatives and fixed collocations (cost of living, sense of community) — plus the recurring learner traps.",
     sections: [
       {
         heading: "Comparing city and country life",
@@ -3344,7 +3344,7 @@ export const LESSONS: Record<string, Lesson> = {
     ],
     commonMistakes: [
       "❌ When you arrive to the countryside... → ✅ When you arrive in the countryside... ('arrive in/at', never 'arrive to')",
-      "❌ I live in countryside. → ✅ I live in the countryside. (needs 'the', unlike Spanish)",
+      "❌ I live in countryside. → ✅ I live in the countryside. (always needs 'the' before 'countryside')",
       "❌ The people in my village is very friendly. → ✅ The people in my village are very friendly. ('people' is plural in English)",
       "❌ The commute is very large. → ✅ The commute is very long. ('large' = big in size; 'long' describes time/distance)",
       "❌ I have moved to the city two years ago. → ✅ I moved to the city two years ago. (specific past time → past simple)",
@@ -3354,7 +3354,7 @@ export const LESSONS: Record<string, Lesson> = {
 
   travel_and_holidays: {
     title: "Travel & Holidays",
-    intro: "Travel vocabulary comes with fixed prepositions (arrive at, look forward to) and past simple for trip recounts — plus the recurring Spanish-L1 traps.",
+    intro: "Travel vocabulary comes with fixed prepositions (arrive at, look forward to) and past simple for trip recounts — plus the recurring learner traps.",
     sections: [
       {
         heading: "Talking about a trip",
@@ -4092,7 +4092,7 @@ export const LESSONS: Record<string, Lesson> = {
 
   education_systems: {
     title: "Education Systems",
-    intro: "Education vocabulary comes with fixed collocations (focus on, responsible for) and present perfect for change over time — plus the recurring Spanish-L1 traps.",
+    intro: "Education vocabulary comes with fixed collocations (focus on, responsible for) and present perfect for change over time — plus the recurring learner traps.",
     sections: [
       {
         heading: "Talking about education systems",
@@ -4171,7 +4171,7 @@ export const LESSONS: Record<string, Lesson> = {
 
   work_life_balance: {
     title: "Work-Life Balance",
-    intro: "This topic pairs workplace vocabulary with fixed phrasal verbs (switch off, set boundaries) — plus the recurring Spanish-L1 traps.",
+    intro: "This topic pairs workplace vocabulary with fixed phrasal verbs (switch off, set boundaries) — plus the recurring learner traps.",
     sections: [
       {
         heading: "Talking about balance and burnout",
@@ -4238,7 +4238,7 @@ export const LESSONS: Record<string, Lesson> = {
 
   success_motivation: {
     title: "Success and Motivation",
-    intro: "Talking about goals and achievement uses present perfect for progress made so far, plus a set of fixed collocations (depend on, proud of) — and the recurring Spanish-L1 traps.",
+    intro: "Talking about goals and achievement uses present perfect for progress made so far, plus a set of fixed collocations (depend on, proud of) — and the recurring learner traps.",
     sections: [
       {
         heading: "Talking about goals and mindset",
@@ -4311,7 +4311,7 @@ export const LESSONS: Record<string, Lesson> = {
 
   cultural_differences: {
     title: "Cultural Differences",
-    intro: "Describing cultural differences uses fixed collocations (different from, aware of) and present perfect for lived experience — plus the recurring Spanish-L1 traps.",
+    intro: "Describing cultural differences uses fixed collocations (different from, aware of) and present perfect for lived experience — plus the recurring learner traps.",
     sections: [
       {
         heading: "Talking about cultural differences",
@@ -4381,7 +4381,7 @@ export const LESSONS: Record<string, Lesson> = {
 
   climate_change: {
     title: "Climate Change",
-    intro: "Climate change vocabulary comes with fixed prepositions (responsible for, protect from) and passive voice for large-scale processes — plus the recurring Spanish-L1 traps.",
+    intro: "Climate change vocabulary comes with fixed prepositions (responsible for, protect from) and passive voice for large-scale processes — plus the recurring learner traps.",
     sections: [
       {
         heading: "Talking about causes and effects",
@@ -4447,7 +4447,7 @@ export const LESSONS: Record<string, Lesson> = {
 
   fast_fashion: {
     title: "Fast Fashion",
-    intro: "Fast fashion vocabulary comes with fixed collocations (criticised for, accused of, alternative to) — plus the recurring Spanish-L1 traps.",
+    intro: "Fast fashion vocabulary comes with fixed collocations (criticised for, accused of, alternative to) — plus the recurring learner traps.",
     sections: [
       {
         heading: "Talking about the fashion industry",
@@ -4508,7 +4508,7 @@ export const LESSONS: Record<string, Lesson> = {
 
   technology_daily_life: {
     title: "Technology in Daily Life",
-    intro: "Technology vocabulary treats terms like 'artificial intelligence' as singular, and pairs with fixed prepositions (dependent on, protect from) — plus the recurring Spanish-L1 traps.",
+    intro: "Technology vocabulary treats terms like 'artificial intelligence' as singular, and pairs with fixed prepositions (dependent on, protect from) — plus the recurring learner traps.",
     sections: [
       {
         heading: "Talking about technology",
