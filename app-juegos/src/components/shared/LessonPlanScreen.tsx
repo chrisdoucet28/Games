@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { hexToRgba, type Theme } from "../../data/themes";
 import { LESSON_TOPICS, LEVEL_ORDER, LEVEL_COLOR, FOCUS_ORDER, FOCUS_LABEL, type LearnTopic } from "../../data/learnTopics";
 import { LESSON_PLANS, buildUnscrambleItems, type RoundOut, type UnscrambleItem } from "../../data/lessonPlans";
+import { REAL_WORLD_READINGS, type RealWorldReading } from "../../data/realWorldReadings";
 import { TOPIC_LIBRARY } from "../../data/topics";
 import { LessonSectionBlock, CommonMistakesBlock } from "./LessonContent";
 import { QuestionCard } from "./QuestionCard";
@@ -110,13 +111,17 @@ export function LessonPlanScreen({ onBack, theme, initialTopicId, onOpenLearn }:
 // exercise. "question" slides reuse QuestionCard exactly as every game already does. "presentation"
 // is split one slide per Lesson section — the same blue-header divisions the Learn page shows all
 // at once on one scrolling card — so the explanation reads like the rest of the slideshow instead
-// of a wall of text; "commonMistakes" is its own trailing slide, shown only when the lesson has any.
+// of a wall of text; "commonMistakes" is its own trailing slide, shown only when the lesson has
+// any. "realWorld" is likewise shown only when REAL_WORLD_READINGS has an entry for this topic
+// (currently the A1 pilot only) — its own comprehension-check questions ride the "question" kind
+// exactly like Practice A/B/Production, tagged with sectionLabel "Real-World Check".
 type Slide =
   | { kind: "intro" }
   | { kind: "presentation"; sectionIndex: number }
   | { kind: "commonMistakes" }
   | { kind: "question"; sectionLabel: string; sectionIcon: IconName; question: QuestionData; progress: string }
   | { kind: "roundOut" }
+  | { kind: "realWorld"; reading: RealWorldReading }
   | { kind: "speaking"; tasks: string[] }
   | { kind: "done" };
 
@@ -152,6 +157,11 @@ function LessonPlanSlideshow({ topic, theme, onBack }: { topic: LearnTopic; them
     practiceB.items.forEach((q, i) => list.push({ kind: "question", sectionLabel: "More Practice", sectionIcon: practiceB.icon, question: q, progress: `${i + 1}/${practiceB.items.length}` }));
     list.push({ kind: "roundOut" });
     production.forEach((q, i) => list.push({ kind: "question", sectionLabel: "Your Turn", sectionIcon: "star", question: q, progress: `${i + 1}/${production.length}` }));
+    const realWorld = REAL_WORLD_READINGS[topic.id];
+    if (realWorld) {
+      list.push({ kind: "realWorld", reading: realWorld });
+      realWorld.questions.forEach((q, i) => list.push({ kind: "question", sectionLabel: "Real-World Check", sectionIcon: "books", question: q, progress: `${i + 1}/${realWorld.questions.length}` }));
+    }
     if (speakingTasks.length) list.push({ kind: "speaking", tasks: speakingTasks });
     list.push({ kind: "done" });
     return list;
@@ -238,6 +248,23 @@ function LessonPlanSlideshow({ topic, theme, onBack }: { topic: LearnTopic; them
           )}
 
           {slide.kind === "roundOut" && <RoundOutStep roundOut={roundOut} topicId={topic.id} theme={theme} onDone={goNext} />}
+
+          {slide.kind === "realWorld" && (
+            <div>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", marginBottom: "14px", color: theme.accentSolid, fontWeight: "800", fontSize: "13px", textTransform: "uppercase", letterSpacing: "0.04em" }}>
+                <Icon name="books" size={14} /> Real-World Reading
+              </div>
+              <div style={{ background: "#FFFBEB", border: "2px solid #FDE68A", borderRadius: "12px", padding: "16px 18px" }}>
+                <h3 style={{ margin: "0 0 10px", fontSize: "16px", fontWeight: "800", color: "#92400E", fontFamily: theme.headingFont }}>{slide.reading.title}</h3>
+                {slide.reading.audioUrl && (
+                  <audio controls src={slide.reading.audioUrl} style={{ width: "100%", marginBottom: "12px" }} />
+                )}
+                {slide.reading.passage.map((p, i) => (
+                  <p key={i} style={{ margin: "0 0 8px", fontSize: "14.5px", lineHeight: 1.6, color: "#78350F" }}>{p}</p>
+                ))}
+              </div>
+            </div>
+          )}
 
           {slide.kind === "speaking" && (
             <div>
@@ -473,6 +500,7 @@ function UnscrambleRoundOut({ topicId, theme, onDone }: { topicId: string; theme
 // the round-out exercise and speaking tasks print as plain instructions.
 function PrintableLessonPlan({ topic, slides, roundOut }: { topic: LearnTopic; slides: Slide[]; roundOut: RoundOut }) {
   const questionSlides = slides.filter((s): s is Extract<Slide, { kind: "question" }> => s.kind === "question");
+  const realWorldSlide = slides.find((s): s is Extract<Slide, { kind: "realWorld" }> => s.kind === "realWorld");
   const speakingSlide = slides.find((s): s is Extract<Slide, { kind: "speaking" }> => s.kind === "speaking");
   let currentSection = "";
   return (
@@ -504,6 +532,13 @@ function PrintableLessonPlan({ topic, slides, roundOut }: { topic: LearnTopic; s
 
       <div style={{ fontWeight: "800", fontSize: "11px", textTransform: "uppercase", color: "#374151", marginTop: "10px" }}>Exercise</div>
       <div style={{ fontSize: "11px", color: "#4B5563" }}>{roundOutPrintSummary(roundOut)}</div>
+
+      {realWorldSlide && (
+        <div style={{ marginTop: "10px" }}>
+          <div style={{ fontWeight: "800", fontSize: "11px", textTransform: "uppercase", color: "#374151" }}>Real-World Reading — {realWorldSlide.reading.title}</div>
+          {realWorldSlide.reading.passage.map((p, i) => <div key={i} style={{ fontSize: "11.5px", color: "#1F2937", margin: "3px 0" }}>{p}</div>)}
+        </div>
+      )}
 
       {speakingSlide && (
         <div style={{ marginTop: "10px" }}>
