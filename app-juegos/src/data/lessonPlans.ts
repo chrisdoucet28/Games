@@ -8,7 +8,7 @@ import { LESSONS } from "./lessons";
 // this file holds only the piece that can't be, plus a helper for the one format (Unscramble)
 // that's generated at render time instead of hand-authored.
 //
-// Scope: A1 (25), A2 (29), and B1 (all 40 topics) so far, extending level by level.
+// Scope: all 5 CEFR levels — every topic in topics.ts/lessons.ts has a Lesson Plan.
 // Every key here must match a topics.ts / lessons.ts topic id (both already required to match
 // each other — see CLAUDE.md's Learn/topics parity rule).
 export type RoundOut =
@@ -1108,6 +1108,505 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
       " everyone again next month. Honestly, there's no point in ", { blank: "worrying", base: "worry" },
       " about things you can't control, and it's no use ", { blank: "complaining", base: "complain" },
       " about the weather. ", { blank: "Not smoking", base: "not / smoke" }, " indoors is the rule at every one of our offices now.",
+    ],
+  },
+
+  // --- A2/B1 gap-fills (topics added by other sessions after the original A1-B1 pass) ---
+
+  quantifiers: {
+    kind: "errorPassage",
+    text: "There isn't many coffee left in the jar, so I need to buy some more. How much books did you borrow from the library this week? I don't have no time today to go shopping, but she spends a lot time every weekend browsing the shops anyway.",
+    corrected: "There isn't much coffee left in the jar, so I need to buy some more. How many books did you borrow from the library this week? I don't have any time today to go shopping, but she spends a lot of time every weekend browsing the shops anyway.",
+    fixes: [
+      "'isn't many coffee' → 'isn't much coffee' ('coffee' is uncountable)",
+      "'How much books' → 'How many books' ('books' is countable)",
+      "'don't have no time' → 'don't have any time' (don't combine 'don't' and 'no')",
+      "'spends a lot time' → 'spends a lot of time' ('a lot of' always needs 'of' before a noun)",
+    ],
+  },
+
+  understanding_get: {
+    kind: "matching",
+    pairs: [
+      { term: "get up", definition: "Leave your bed" },
+      { term: "get on / off", definition: "Board or leave a bus, train, or plane" },
+      { term: "get in / out of", definition: "Enter or leave a car" },
+      { term: "get back", definition: "Return" },
+      { term: "get together", definition: "Meet socially" },
+      { term: "get into (trouble)", definition: "End up in a bad situation" },
+    ],
+  },
+
+  money_and_shopping: {
+    kind: "matching",
+    pairs: [
+      { term: "receipt", definition: "Proof of purchase, needed for a refund" },
+      { term: "discount", definition: "A reduction in the usual price" },
+      { term: "refund", definition: "Money given back after a return" },
+      { term: "bargain", definition: "Something bought for a very good price" },
+      { term: "budget", definition: "A plan for how much you can spend" },
+      { term: "afford", definition: "To have enough money for something" },
+      { term: "checkout", definition: "Where you pay for your shopping" },
+      { term: "price tag", definition: "The label showing how much something costs" },
+    ],
+  },
+
+  sport_and_fitness: {
+    kind: "scenario",
+    prompts: [
+      { situation: "Someone asks if you've ever run a marathon.", instruction: "Answer using the present perfect.", sample: "I have never run a marathon, but I'd like to try one day." },
+      { situation: "A friend asks what will happen if they train every day.", instruction: "Answer using the first conditional.", sample: "If you train every day, you will get fitter." },
+      { situation: "Someone asks how the championship is organised each year.", instruction: "Answer using the passive voice.", sample: "The championship is held every year in a different city." },
+      { situation: "Someone asks you to compare your fitness now to last year.", instruction: "Compare using a comparative.", sample: "I'm fitter than I was last year." },
+      { situation: "A friend didn't warm up before a game and got hurt.", instruction: "Explain what happens if you don't warm up, using the first conditional.", sample: "If you don't warm up, you will injure yourself." },
+    ],
+  },
+
+  relationships_and_socialising: {
+    kind: "matching",
+    pairs: [
+      { term: "keep in touch", definition: "To stay in contact with someone" },
+      { term: "lose touch", definition: "To stop being in contact with someone" },
+      { term: "fall out", definition: "To have an argument and stop being friends for a while" },
+      { term: "make up", definition: "To become friends again after an argument" },
+      { term: "acquaintance", definition: "Someone you know a little, but not a close friend" },
+      { term: "bond", definition: "A close connection between people" },
+      { term: "reunion", definition: "A gathering of people who haven't seen each other for a while" },
+    ],
+  },
+
+  // --- B2 ---
+
+  passive_complex: {
+    kind: "errorPassage",
+    text: "A: What's happening with the investigation?\nB: The suspect are been questioned right now, actually. The evidence has been completing already, and the report must finished by tomorrow.\nA: Really? I heard the package might been delivered to the wrong address.\nB: That's possible — he is thought to stole some documents too.",
+    corrected: "A: What's happening with the investigation?\nB: The suspect is being questioned right now, actually. The evidence has been completed already, and the report must be finished by tomorrow.\nA: Really? I heard the package might have been delivered to the wrong address.\nB: That's possible — he is thought to have stolen some documents too.",
+    fixes: [
+      "'are been questioned' → 'is being questioned' (present continuous passive: am/is/are + being)",
+      "'has been completing' → 'has been completed' (past participle, not -ing)",
+      "'must finished' → 'must be finished' (modal passive needs 'be')",
+      "'might been delivered' → 'might have been delivered' (modal perfect passive needs 'have been')",
+      "'is thought to stole' → 'is thought to have stolen' (perfect infinitive for past reference)",
+    ],
+  },
+
+  causative_verbs: {
+    kind: "errorPassage",
+    text: "Our teacher made us that we had to finish our homework before the weekend. My mother didn't let that I went to the party on Friday, which was so unfair. I need to have my shoes repair before the trip, and I finally got the plumber fix the leak in the kitchen.",
+    corrected: "Our teacher made us finish our homework before the weekend. My mother didn't let me go to the party on Friday, which was so unfair. I need to have my shoes repaired before the trip, and I finally got the plumber to fix the leak in the kitchen.",
+    fixes: [
+      "'made us that we had to finish' → 'made us finish' (no 'that + clause' after 'make')",
+      "'didn't let that I went' → 'didn't let me go' (no 'that + clause' after 'let')",
+      "'have my shoes repair' → 'have my shoes repaired' ('have' + object + past participle)",
+      "'got the plumber fix' → 'got the plumber to fix' ('get' + person + to-infinitive)",
+    ],
+  },
+
+  embedded_questions: {
+    kind: "errorPassage",
+    text: "A: Do you know where is the nearest bank?\nB: I'm not sure, actually. Could you tell me what does he want first?\nA: She asked me if was I ready to go.\nB: Could you explain me how does this work? I'm confused.",
+    corrected: "A: Do you know where the nearest bank is?\nB: I'm not sure, actually. Could you tell me what he wants first?\nA: She asked me if I was ready to go.\nB: Could you explain how this works? I'm confused.",
+    fixes: [
+      "'where is the nearest bank' → 'where the nearest bank is' (no inversion)",
+      "'what does he want' → 'what he wants' (no auxiliary inversion)",
+      "'if was I ready' → 'if I was ready' (statement word order after 'if')",
+      "'Could you explain me how does this work' → 'Could you explain how this works' (no inversion; 'explain' has no object here)",
+    ],
+  },
+
+  future_in_past: {
+    kind: "scenario",
+    prompts: [
+      { situation: "You had planned to go for a run, but it started raining just as you were about to leave.", instruction: "Describe your interrupted plan, using 'was going to'.", sample: "I was going to go for a run, but it started raining." },
+      { situation: "You were right at the door, ready to leave the house, when the phone suddenly rang.", instruction: "Describe it, using 'was about to'.", sample: "I was about to leave the house when the phone rang." },
+      { situation: "A friend told you last week she would call you back later that day.", instruction: "Report what she said, using reported speech.", sample: "She said she would call me back later." },
+      { situation: "As a child, you never thought you'd end up living in another country — but you do now.", instruction: "Describe that surprise, using 'would'.", sample: "I never thought I would live abroad one day." },
+      { situation: "You had big plans for the weekend, but everything changed at the last minute.", instruction: "Describe your original plan and what actually happened.", sample: "I was going to visit my parents, but I got sick instead." },
+    ],
+  },
+
+  third_conditional: {
+    kind: "scenario",
+    prompts: [
+      { situation: "You failed an exam because you didn't study.", instruction: "Say what would have happened if you had studied, using the third conditional.", sample: "If I had studied, I would have passed." },
+      { situation: "A friend wasn't careful and had an accident.", instruction: "Say what would have happened if they'd been more careful.", sample: "If you had been more careful, the accident wouldn't have happened." },
+      { situation: "The fire alarm went off just in time, and everyone escaped.", instruction: "Say what might not have happened without the alarm, using 'might not have'.", sample: "If the fire alarm hadn't gone off, we might not have escaped in time." },
+      { situation: "A friend didn't tell you about a problem, so you couldn't help.", instruction: "Say what you could have done if they'd told you, using 'could have'.", sample: "If you had told me, I could have helped." },
+      { situation: "Someone missed a great opportunity because they were too nervous to apply.", instruction: "Say what would have happened if they'd applied, using the third conditional.", sample: "If she had applied, she would have gotten the job." },
+    ],
+  },
+
+  future_perfect: {
+    kind: "paragraphCloze",
+    segments: [
+      "By June, she ", { blank: "will have finished", base: "finish" }, " the course. By the end of this year, I ",
+      { blank: "will have saved", base: "save" }, " enough money for a new car. By the time the ceremony starts, they ",
+      { blank: "will have arrived", base: "arrive" }, " already. By next month, the team ", { blank: "will have completed", base: "complete" },
+      " the whole project, so we should celebrate. She's worried she ", { blank: "won't have finished", base: "not / finish" },
+      " her thesis by the deadline.",
+    ],
+  },
+
+  wish_if_only: {
+    kind: "matching",
+    pairs: [
+      { term: "You don't have much free time.", definition: "I wish I had more free time." },
+      { term: "You can't speak French.", definition: "If only I could speak French!" },
+      { term: "Someone won't stop interrupting you.", definition: "I wish you would stop interrupting me." },
+      { term: "You aren't tall.", definition: "If only I were taller!" },
+      { term: "You didn't study hard enough for last week's exam.", definition: "I wish I had studied harder for the exam." },
+      { term: "It keeps raining and you want it to stop.", definition: "I wish it would stop raining." },
+    ],
+  },
+
+  gerunds_infinitives: {
+    kind: "matching",
+    pairs: [
+      { term: "enjoy", definition: "+ gerund: I enjoy visiting new places." },
+      { term: "decide", definition: "+ infinitive: She decided to leave her job." },
+      { term: "suggest", definition: "+ gerund: He suggested taking a break." },
+      { term: "manage", definition: "+ infinitive: We managed to meet the deadline." },
+      { term: "remember + gerund", definition: "Recall a past action: I remember watching that film." },
+      { term: "remember + infinitive", definition: "A future task not to forget: Remember to lock the door." },
+      { term: "stop + gerund", definition: "Stop an activity: She stopped walking." },
+      { term: "stop + infinitive", definition: "Pause to do something else: He stopped to buy a coffee." },
+    ],
+  },
+
+  past_modals_deduction: {
+    kind: "scenario",
+    prompts: [
+      { situation: "The lights in your friend's house are off and her car is gone.", instruction: "Make a confident guess about where she is, using 'must have'.", sample: "She must have left already." },
+      { situation: "Your friend wasn't at the party, and you're not sure why.", instruction: "Make an uncertain guess, using 'might have'.", sample: "He might have forgotten about it." },
+      { situation: "Someone claims to have known about a surprise party in advance, but they looked completely shocked when it happened.", instruction: "Say it's impossible, using 'can't have'.", sample: "She can't have known about the surprise — she looked so shocked." },
+      { situation: "You failed an exam because you didn't study enough.", instruction: "Express regret, using 'should have'.", sample: "I should have studied harder." },
+      { situation: "A friend drove dangerously fast and nearly crashed.", instruction: "Criticize their choice, using 'shouldn't have'.", sample: "You shouldn't have driven so fast." },
+    ],
+  },
+
+  present_perfect_continuous: {
+    kind: "paragraphCloze",
+    segments: [
+      "I ", { blank: "have been waiting", base: "wait" }, " here for over an hour, and I'm getting impatient. I ",
+      { blank: "have known", base: "know" }, " my best friend for ten years now. He ", { blank: "has been working", base: "work" },
+      " at that company since 2020. You look exhausted — ", { blank: "have you been running", base: "run" },
+      "? My hands are covered in paint because I ", { blank: "have been painting", base: "paint" },
+      " the fence all afternoon. ", { blank: "How long have you been learning", base: "how long / learn" }, " English?",
+    ],
+  },
+
+  describing_trends_data: {
+    kind: "paragraphCloze",
+    segments: [
+      "Last year, house prices ", { blank: "rose", base: "rise" }, " sharply, while the government ", { blank: "raised", base: "raise" },
+      " taxes at the same time. Sales increased ", { blank: "by", base: "preposition" }, " 15% last quarter, and revenue grew ",
+      { blank: "from", base: "preposition" }, " $2 million to $5 million. ", { blank: "There was a sharp rise", base: "noun-sentence: rise" },
+      " in prices, and stock prices later plummeted after the scandal. According to the report, the survey ",
+      { blank: "was conducted", base: "conduct" }, " among 1,000 people last month.",
+    ],
+  },
+
+  workplace_professional_vocabulary: {
+    kind: "matching",
+    pairs: [
+      { term: "hand in your notice", definition: "To formally tell your employer you're resigning" },
+      { term: "meet a deadline", definition: "To finish something by the required time" },
+      { term: "pay rise", definition: "An increase in your salary" },
+      { term: "probation period", definition: "A trial period at the start of a new job" },
+      { term: "sign off on something", definition: "To officially approve it" },
+      { term: "burn the midnight oil", definition: "To work very late into the night" },
+      { term: "pull your weight", definition: "To do your fair share of the work" },
+    ],
+  },
+
+  advanced_idioms_expressions: {
+    kind: "matching",
+    pairs: [
+      { term: "get the ball rolling", definition: "Start something" },
+      { term: "back to the drawing board", definition: "Start over after a failure" },
+      { term: "cut corners", definition: "Do something badly to save time or money" },
+      { term: "on the same page", definition: "In agreement" },
+      { term: "read between the lines", definition: "Understand an unstated meaning" },
+      { term: "out of the blue", definition: "Unexpectedly" },
+      { term: "the tip of the iceberg", definition: "A small part of a much bigger problem" },
+      { term: "a blessing in disguise", definition: "Something that seemed bad but turned out good" },
+    ],
+  },
+
+  persuading_disagreeing_advanced: {
+    kind: "scenario",
+    prompts: [
+      { situation: "You want to present a formal argument that remote work has made teams more productive.", instruction: "Introduce your argument formally.", sample: "I'd argue that remote work has made teams more productive." },
+      { situation: "You want to present both sides of a debate about a new policy.", instruction: "Weigh both sides using 'on the one hand... on the other hand'.", sample: "On the one hand, it saves money; on the other hand, it risks quality." },
+      { situation: "A colleague makes a valid point, but you still think you should wait before deciding.", instruction: "Concede politely, then disagree.", sample: "That's a fair point, but it doesn't account for long-term costs." },
+      { situation: "You strongly disagree with someone's data-based conclusion.", instruction: "Disagree formally, using 'I beg to differ'.", sample: "I beg to differ — the data suggests the opposite." },
+      { situation: "After a long debate, you and a colleague still don't agree, and you want to end it politely.", instruction: "Suggest ending the disagreement peacefully.", sample: "Let's just agree to disagree on this one." },
+    ],
+  },
+
+  prefixes_suffixes_adjectives: {
+    kind: "errorPassage",
+    text: "My little brother is very inmature for his age. Some of his jokes are honestly inrational and don't make sense. His behavior at school was borderline inlegal according to the teacher, which worried our parents. His graduation speech was supposed to be inspirationful, but it came out innovateful and confusing instead. Still, he's extremely persistful about improving, so I'm proud of him.",
+    corrected: "My little brother is very immature for his age. Some of his jokes are honestly irrational and don't make sense. His behavior at school was borderline illegal according to the teacher, which worried our parents. His graduation speech was supposed to be inspirational, but it came out innovative and confusing instead. Still, he's extremely persistent about improving, so I'm proud of him.",
+    fixes: [
+      "'inmature' → 'immature' ('im-' before 'm')",
+      "'inrational' → 'irrational' ('ir-' before 'r')",
+      "'inlegal' → 'illegal' ('il-' before 'l')",
+      "'inspirationful' → 'inspirational' ('-al', not '-ful')",
+      "'innovateful' → 'innovative' ('-ive', not '-ful')",
+      "'persistful' → 'persistent' ('-ent', not '-ful')",
+    ],
+  },
+
+  education_systems: {
+    kind: "errorPassage",
+    text: "A: During the lecture, students made lots of questions about the new curriculum.\nB: Really? Your grade depends of how well you handle the material, right?\nA: Right. My mother is teacher at a primary school, actually, and she says students should avoid to fail at all costs.\nB: I have finished my degree in 2020 myself. Do you know does the university offer scholarships to new students?",
+    corrected: "A: During the lecture, students asked lots of questions about the new curriculum.\nB: Really? Your grade depends on how well you handle the material, right?\nA: Right. My mother is a teacher at a primary school, actually, and she says students should avoid failing at all costs.\nB: I finished my degree in 2020 myself. Do you know if the university offers scholarships to new students?",
+    fixes: [
+      "'made lots of questions' → 'asked lots of questions' (English 'asks' a question, never 'makes' one)",
+      "'depends of how well' → 'depends on how well' ('depend on', not 'depend of')",
+      "'My mother is teacher' → 'My mother is a teacher' (article needed before a profession)",
+      "'avoid to fail' → 'avoid failing' ('avoid' + gerund)",
+      "'I have finished my degree in 2020' → 'I finished my degree in 2020' (specific past time → past simple)",
+      "'Do you know does the university offer' → 'Do you know if the university offers' (statement word order, no second 'does')",
+    ],
+  },
+
+  work_life_balance: {
+    kind: "scenario",
+    prompts: [
+      { situation: "You've been working overtime every weekend and feel completely exhausted.", instruction: "Give advice to someone in the same situation, using 'should'.", sample: "You should take regular breaks to avoid burnout." },
+      { situation: "A friend keeps checking work emails late at night and can never relax.", instruction: "Tell them what they need to do, using 'switch off'.", sample: "You need to switch off at the end of the day." },
+      { situation: "Someone asks what would happen if companies offered more flexible hours.", instruction: "Answer using the second conditional.", sample: "If companies offered more flexibility, employees would feel less stressed." },
+      { situation: "A colleague's manager never takes a lunch break and always seems stressed.", instruction: "Describe them, using a relative clause with 'who'.", sample: "Her manager, who never takes a lunch break, seems constantly stressed." },
+      { situation: "You want to politely ask a colleague whether their company offers mental health support.", instruction: "Ask an indirect, polite question.", sample: "Do you know if your company offers mental health support?" },
+    ],
+  },
+
+  success_motivation: {
+    kind: "paragraphCloze",
+    segments: [
+      "She ", { blank: "has been working", base: "work" }, " toward her goal for two years now, and she ", { blank: "has stayed", base: "stay" },
+      " motivated the whole time. Her role model ", { blank: "has achieved", base: "achieve" }, " so much already. If she ",
+      { blank: "believed", base: "believe" }, " in herself more, she ", { blank: "would achieve", base: "achieve" },
+      " even more. People who have a growth mindset embrace failure as a learning opportunity — do you know if you ",
+      { blank: "believe", base: "believe" }, " in hard work over talent?",
+    ],
+  },
+
+  cultural_differences: {
+    kind: "matching",
+    pairs: [
+      { term: "culture shock", definition: "The confusion of adjusting to an unfamiliar culture" },
+      { term: "body language", definition: "Communicating through gestures and posture instead of words" },
+      { term: "etiquette", definition: "The accepted rules of polite behavior in a culture" },
+      { term: "stereotype", definition: "An oversimplified, fixed idea about a whole group of people" },
+      { term: "multicultural", definition: "Made up of many different cultures" },
+      { term: "adapt to", definition: "To change your behavior to fit a new situation" },
+    ],
+  },
+
+  climate_change: {
+    kind: "scenario",
+    prompts: [
+      { situation: "Someone asks what would happen if governments invested more in renewable energy.", instruction: "Answer using the second conditional.", sample: "If governments invested more in renewable energy, emissions would fall." },
+      { situation: "A friend asks why deforestation causes biodiversity loss, but doesn't want a lecture — just a quick, polite answer.", instruction: "Ask them back politely if they'd like to know why, using an embedded question.", sample: "Could you tell me why deforestation causes biodiversity loss? I've always wondered." },
+      { situation: "Someone asks who is most responsible for greenhouse gas emissions.", instruction: "Give your opinion.", sample: "Factories are responsible for a large percentage of emissions, in my opinion." },
+      { situation: "A friend says they never recycle and asks if it really matters.", instruction: "Explain why it matters, describing people who do using a relative clause.", sample: "People who recycle their waste help protect the environment." },
+      { situation: "Someone asks what would happen if more people used public transport.", instruction: "Answer using the second conditional.", sample: "If people used public transport more, air quality would improve." },
+    ],
+  },
+
+  technology_daily_life: {
+    kind: "errorPassage",
+    text: "Actually, most people use their phone for social media constantly these days. My phone battery lasts a large time, which is great. I have this laptop since five years, and it still works perfectly. Many people listen music while they commute to work. She has downloaded that app last week and loves it already. Do you know does this app track my location?",
+    corrected: "Nowadays, most people use their phone for social media constantly these days. My phone battery lasts a long time, which is great. I have had this laptop for five years, and it still works perfectly. Many people listen to music while they commute to work. She downloaded that app last week and loves it already. Do you know if this app tracks my location?",
+    fixes: [
+      "'Actually, most people' → 'Nowadays, most people' ('actually' means 'in fact', not 'nowadays')",
+      "'lasts a large time' → 'lasts a long time' ('large' = big in size; 'long' describes duration)",
+      "'I have this laptop since five years' → 'I have had this laptop for five years' ('for' + duration, and 'have had' not 'have')",
+      "'listen music' → 'listen to music' ('listen to' + thing)",
+      "'has downloaded that app last week' → 'downloaded that app last week' (specific past time → past simple)",
+      "'Do you know does this app track' → 'Do you know if this app tracks' (statement word order, no second 'does')",
+    ],
+  },
+
+  money_and_economy: {
+    kind: "paragraphCloze",
+    segments: [
+      "Prices ", { blank: "have been rising", base: "rise" }, " for months now, and the government ", { blank: "has been discussing", base: "discuss" },
+      " new tax policies. Interest rates ", { blank: "have been raised", base: "raise" }, " several times this year already. If I ",
+      { blank: "had", base: "have" }, " more money, I ", { blank: "would travel", base: "travel" },
+      " more. The economist who works for the bank explains inflation clearly — do you know ",
+      { blank: "what causes", base: "what / cause" }, " inflation exactly?",
+    ],
+  },
+
+  crime_and_law: {
+    kind: "scenario",
+    prompts: [
+      { situation: "The police have spent weeks working on a difficult case.", instruction: "Describe their ongoing effort, using the present perfect continuous.", sample: "The police have been investigating the crime for weeks." },
+      { situation: "Someone asks what you'd do if you witnessed a crime.", instruction: "Answer using the second conditional.", sample: "If you witnessed a crime, you would call the police." },
+      { situation: "You want to ask a lawyer, politely and indirectly, what the punishment for a crime usually is.", instruction: "Ask an embedded question.", sample: "Do you know what the punishment usually is for this kind of crime?" },
+      { situation: "A man robbed a bank and escaped on foot before anyone could stop him.", instruction: "Describe him, using a relative clause with 'who'.", sample: "The man who robbed the bank escaped on foot." },
+      { situation: "Someone asks what would happen if someone broke into your house.", instruction: "Answer using the second conditional.", sample: "If someone broke into my house, I would call the police immediately." },
+    ],
+  },
+
+  arts_and_entertainment: {
+    kind: "matching",
+    pairs: [
+      { term: "exhibition", definition: "A public display of art or objects" },
+      { term: "masterpiece", definition: "An artist's greatest work" },
+      { term: "box office", definition: "Where cinema/theatre tickets are sold, or a film's earnings" },
+      { term: "soundtrack", definition: "The music that accompanies a film" },
+      { term: "genre", definition: "A category of art, defined by style or subject" },
+      { term: "blockbuster", definition: "A hugely popular and commercially successful film" },
+    ],
+  },
+
+  // --- C1 ---
+
+  passive_reporting_structures: {
+    kind: "paragraphCloze",
+    segments: [
+      "", { blank: "It is said that", base: "impersonal reporting" }, " the company will merge with a rival. The area ",
+      { blank: "is believed to contain", base: "believe / contain, present" }, " oil reserves, and he ",
+      { blank: "is known to dislike", base: "know / dislike, present" }, " interviews. He ",
+      { blank: "is believed to have fled", base: "believe / flee, past" }, " the country, and the suspect ",
+      { blank: "is said to have confessed", base: "say / confess, past" }, ". Long ago, ",
+      { blank: "it was said that", base: "impersonal reporting, past" }, " the castle was haunted.",
+    ],
+  },
+
+  inversion: {
+    kind: "errorPassage",
+    text: "Never I have seen such a beautiful view in my life. Hardly had we arrived than the storm began, which ruined our plans completely. Little did he knew about the dangers of the mountain, so he wasn't prepared. So proud was them that they couldn't stop smiling all evening.",
+    corrected: "Never have I seen such a beautiful view in my life. Hardly had we arrived when the storm began, which ruined our plans completely. Little did he know about the dangers of the mountain, so he wasn't prepared. So proud were they that they couldn't stop smiling all evening.",
+    fixes: [
+      "'Never I have seen' → 'Never have I seen' (invert auxiliary and subject)",
+      "'Hardly had we arrived than' → 'Hardly had we arrived when' ('hardly had' pairs with 'when', not 'than')",
+      "'Little did he knew' → 'Little did he know' (base verb after 'did', not past tense)",
+      "'So proud was them' → 'So proud were they' (subject pronoun 'they', plural 'were')",
+    ],
+  },
+
+  mixed_conditionals: {
+    kind: "scenario",
+    prompts: [
+      { situation: "Someone chose a different career path years ago and now works in a completely different field.", instruction: "Say what would be true today if they'd made a different choice, using a mixed conditional.", sample: "If she had studied medicine, she would be a doctor today." },
+      { situation: "A shy colleague never speaks up in meetings, and missed a chance to share a good idea last week.", instruction: "Say what would have happened if they weren't so shy, using a mixed conditional.", sample: "If he weren't so shy, he would have spoken up at the meeting." },
+      { situation: "Someone took a scholarship years ago and it changed where they live now.", instruction: "Say what's true today because of that past decision.", sample: "If I had taken that scholarship, I would be studying in London now." },
+      { situation: "A friend missed a flight, and as a result isn't with everyone now.", instruction: "Say what would be true now if they hadn't missed it.", sample: "If she hadn't missed that flight, she would be here with us now." },
+      { situation: "Someone isn't a native speaker, and you think that's why they didn't get a certain job.", instruction: "Say what would have happened if they were a native speaker.", sample: "If she were a native speaker, she would have gotten that job." },
+    ],
+  },
+
+  cleft_sentences: {
+    kind: "matching",
+    pairs: [
+      { term: "Maria solved the problem, not James.", definition: "It was Maria who solved the problem, not James." },
+      { term: "I really need a good night's sleep.", definition: "What I really need is a good night's sleep." },
+      { term: "The company first launched the product in 2019.", definition: "It was in 2019 that the company first launched the product." },
+      { term: "She wants a little appreciation.", definition: "All she wants is a little appreciation." },
+      { term: "Her confidence surprised me most.", definition: "What surprised me most was how calm she stayed." },
+      { term: "He just asked a simple question.", definition: "All he did was ask a simple question." },
+    ],
+  },
+
+  advanced_vocabulary: {
+    kind: "matching",
+    pairs: [
+      { term: "utilise", definition: "use" },
+      { term: "postpone", definition: "put off" },
+      { term: "ascertain", definition: "find out" },
+      { term: "facilitate", definition: "help" },
+      { term: "commence", definition: "start" },
+      { term: "undergo", definition: "go through" },
+      { term: "devise", definition: "come up with" },
+      { term: "tolerate", definition: "put up with" },
+    ],
+  },
+
+  business_professional_vocabulary: {
+    kind: "scenario",
+    prompts: [
+      { situation: "You want to briefly reconnect with a colleague once the figures are ready next week.", instruction: "Suggest it, using 'touch base'.", sample: "Let's touch base next week once the figures are in." },
+      { situation: "Your project needs someone to lead a new company initiative.", instruction: "Say who was chosen for the role, using 'spearhead'.", sample: "She was chosen to spearhead the new initiative." },
+      { situation: "Your team's process is too slow and needs simplifying to cut costs.", instruction: "Say what needs to happen, using 'streamline'.", sample: "We need to streamline our processes to cut costs." },
+      { situation: "A new project failed testing and the whole design needs to be redone.", instruction: "Describe the situation, using 'back to the drawing board'.", sample: "The design failed testing, so it's back to the drawing board." },
+      { situation: "Your assistant is overloaded, so you decide to reduce her workload.", instruction: "Describe what you did, using 'take something off someone's plate'.", sample: "The manager took some tasks off her assistant's plate." },
+    ],
+  },
+
+  memory_mind_psychology: {
+    kind: "errorPassage",
+    text: "The patient said she forget things all the time, which worried her family. Rarely someone forgets such an important memory, according to her doctor. If she seek help sooner, she would have recovered faster, in his opinion. This bias must addressed before it gets worse, he explained.",
+    corrected: "The patient said she forgot things all the time, which worried her family. Rarely does someone forget such an important memory, according to her doctor. If she had sought help sooner, she would have recovered faster, in his opinion. This bias must be addressed before it gets worse, he explained.",
+    fixes: [
+      "'said she forget things' → 'said she forgot things' (reported speech backshifts the tense)",
+      "'Rarely someone forgets' → 'Rarely does someone forget' (inversion needs 'does' before the subject)",
+      "'If she seek help sooner' → 'If she had sought help sooner' (third conditional needs past perfect)",
+      "'This bias must addressed' → 'This bias must be addressed' (modal passive needs 'be' + past participle)",
+    ],
+  },
+
+  future_of_work: {
+    kind: "scenario",
+    prompts: [
+      { situation: "A CEO recently announced that AI is transforming their industry.", instruction: "Report what the CEO said, using reported speech.", sample: "The CEO said that AI was transforming their industry." },
+      { situation: "Someone claims that companies rarely adapt to change this quickly.", instruction: "Make the same point using inversion for dramatic emphasis.", sample: "Rarely does a company adapt this quickly." },
+      { situation: "A colleague didn't upskill in time and lost their job to automation — now they're struggling to find work.", instruction: "Say what would have happened if they had upskilled sooner, using the third conditional.", sample: "If she had upskilled sooner, she would have found a new job faster." },
+      { situation: "Someone lost their job years ago, and that's exactly why they're a freelancer today.", instruction: "Connect the past cause to the present result, using a mixed conditional.", sample: "If he hadn't lost his job years ago, he wouldn't be a freelancer today." },
+      { situation: "You think job insecurity in the modern workplace is a serious problem that needs fixing.", instruction: "Say so, using a modal passive.", sample: "Job insecurity must be addressed." },
+    ],
+  },
+
+  relationships_modern_life: {
+    kind: "paragraphCloze",
+    segments: [
+      "James finally ", { blank: "admitted", base: "admit" }, " that he was not ready to commit. He said he ",
+      { blank: "was", base: "be, backshifted" }, " not ready, and the couple promised they ", { blank: "would work", base: "will → would" },
+      " through it together. ", { blank: "Rarely does", base: "inversion: rarely" },
+      " a relationship survive such distance, but theirs did. If they ", { blank: "had communicated", base: "communicate, past perfect" },
+      " better earlier on, they ", { blank: "would have avoided", base: "avoid, would have" }, " the whole breakup.",
+    ],
+  },
+
+  crime_and_justice: {
+    kind: "matching",
+    pairs: [
+      { term: "deterrence", definition: "Discouraging crime through the threat of punishment" },
+      { term: "rehabilitation", definition: "Helping an offender build a better future, not just punishing them" },
+      { term: "recidivism", definition: "The tendency to reoffend after punishment" },
+      { term: "parole", definition: "Early release from prison under certain conditions" },
+      { term: "clemency", definition: "Mercy or leniency shown by an authority" },
+      { term: "due process", definition: "Fair legal treatment through the proper procedures" },
+      { term: "restorative justice", definition: "A justice approach focused on repairing harm, not just punishing" },
+      { term: "wrongful conviction", definition: "Being found guilty of a crime you didn't commit" },
+    ],
+  },
+
+  health_healthcare_systems: {
+    kind: "scenario",
+    prompts: [
+      { situation: "A doctor recently claimed that the healthcare system is failing rural patients.", instruction: "Report what the doctor said, using reported speech.", sample: "The doctor claimed that the system was failing rural patients." },
+      { situation: "You think it's rare for a hospital to treat so many patients this efficiently.", instruction: "Say so, using inversion for emphasis.", sample: "Rarely does a hospital treat so many patients this efficiently." },
+      { situation: "A patient's illness wasn't caught early enough, and they didn't survive.", instruction: "Say what would have happened if doctors had diagnosed it sooner, using the third conditional.", sample: "If the doctors had diagnosed the illness sooner, they would have saved his life." },
+      { situation: "A country never reformed its healthcare system, and waiting times are still very long today.", instruction: "Connect that past inaction to the present result, using a mixed conditional.", sample: "If they had reformed the system years ago, waiting times wouldn't be so long today." },
+      { situation: "You believe health inequality is a serious problem that needs to be fixed.", instruction: "Say so, using a modal passive.", sample: "Health inequality must be addressed." },
+    ],
+  },
+
+  media_misinformation: {
+    kind: "errorPassage",
+    text: "Social media algorithms is designed to maximise engagement, which worries a lot of people. The platform have been criticised for spreading fake news lately. Not only the story was false, but it also went viral within hours. It is often the headlines which spread fastest, according to researchers.",
+    corrected: "Social media algorithms are designed to maximise engagement, which worries a lot of people. The platform has been criticised for spreading fake news lately. Not only was the story false, but it also went viral within hours. It is often the headlines that spread fastest, according to researchers.",
+    fixes: [
+      "'algorithms is designed' → 'algorithms are designed' (plural subject)",
+      "'The platform have been criticised' → 'The platform has been criticised' (singular subject 'platform')",
+      "'Not only the story was false' → 'Not only was the story false' ('not only' triggers inversion)",
+      "'headlines which spread fastest' → 'headlines that spread fastest' (it-clefts use 'that')",
     ],
   },
 };

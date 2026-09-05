@@ -58,7 +58,7 @@ export function LessonPlanScreen({ onBack, theme, initialTopicId, onOpenLearn }:
             <Icon name="school" size={26} /> Lesson Plans
           </h2>
           <p style={{ color: "#6B7280", marginTop: "8px" }}>
-            Traditional, ~30-minute class activities for one topic — presentation, practice, and production, no game pressure. Currently piloting at A1, A2, and B1.
+            Traditional, ~30-minute class activities for one topic — presentation, practice, and production, no game pressure. Covers every level, A1 to C1.
           </p>
           <div style={{ display: "inline-flex", background: "white", border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, borderRadius: "999px", padding: "4px", marginTop: "14px" }}>
             <button
