@@ -4784,6 +4784,81 @@ export const LESSONS: Record<string, Lesson> = {
     ],
   },
 
+  crime_and_law: {
+    title: "Crime & the Law",
+    intro: "Talking about crime and the law combines five things: describing ongoing investigations (present perfect continuous), how legal actions are reported (expanded passive), adding extra information about people, things, places, and reasons (relative clauses), imagining hypothetical situations (second conditional), and asking indirect questions politely (embedded questions).",
+    sections: [
+      {
+        heading: "Useful crime & law vocabulary",
+        body: [
+          "crime, suspect, investigate, evidence, witness, court, trial, jury, verdict, sentence, guilty, innocent, theft, burglary, fraud, victim.",
+        ],
+        examples: [
+          "The main **suspect** was questioned for several hours.",
+          "There wasn't enough **evidence** to convict him.",
+          "The jury delivered a guilty **verdict**.",
+        ],
+      },
+      {
+        heading: "Describing ongoing investigations (present perfect continuous)",
+        body: [
+          "have/has been + -ing — for a situation that started in the past and is still continuing, or has just stopped with visible results.",
+        ],
+        examples: [
+          "**The police have been investigating** the crime for weeks.",
+          "**She has been working** on this case since it started.",
+        ],
+      },
+      {
+        heading: "Reporting legal actions (expanded passive)",
+        body: [
+          "Passive present perfect: have/has been + past participle. Passive future: will be + past participle.",
+        ],
+        examples: [
+          "**The suspect has been arrested.**",
+          "**He will be sentenced** tomorrow.",
+        ],
+      },
+      {
+        heading: "Adding extra information (relative clauses)",
+        body: [
+          "who = people, that/which = things, where = places, when = times, why = reasons, whose = possession.",
+          "Defining clauses identify which one you mean (no commas). Non-defining clauses add extra, non-essential information (commas).",
+        ],
+        examples: [
+          "The man **who robbed the bank** escaped on foot. (defining)",
+          "The lawyer, **whose argument was convincing**, won the case. (non-defining)",
+        ],
+      },
+      {
+        heading: "Imagining hypothetical situations (second conditional)",
+        body: [
+          "if + past simple, ... would + base verb — for an unreal or unlikely present/future situation.",
+        ],
+        examples: [
+          "If you **witnessed** a crime, you **would call** the police.",
+          "**What would** you do if someone **broke into** your house?",
+        ],
+      },
+      {
+        heading: "Asking indirect, polite questions (embedded questions)",
+        body: [
+          "Question word + normal statement word order (no do/does/did) inside a longer sentence.",
+        ],
+        examples: [
+          "Can you explain **why he committed** the crime?",
+          "I don't know **how the trial will end**.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ The suspect have arrested. → ✅ The suspect has been arrested. (passive present perfect needs 'has been')",
+      "❌ If you witnessed a crime, you will call the police. → ✅ ...you would call the police. (second conditional needs 'would')",
+      "❌ The evidence who the police found. → ✅ The evidence that the police found. ('that/which' for things)",
+      "❌ Do you know what be the punishment? → ✅ Do you know what the punishment is? (embedded questions use normal word order)",
+    ],
+  },
+
   present_simple: {
     title: "Present Simple",
     intro: "The foundation of present simple: add -s for he/she/it, and use do/does for negatives and questions — never both at once.",
