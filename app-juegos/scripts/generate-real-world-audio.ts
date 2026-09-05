@@ -1,8 +1,12 @@
-// One-off batch script: (re)generates every Lesson Plans "Real-World Reading" audio clip via the
-// ElevenLabs text-to-speech API, replacing whatever's currently at public/audio/real-world/. Not
-// run automatically (no npm lifecycle hook) — costs API quota, so run manually only when adding
-// or editing real-world-reading content:
+// One-off batch script: generates any Lesson Plans "Real-World Reading" audio clip that doesn't
+// already exist at public/audio/real-world/, via the ElevenLabs text-to-speech API. Not run
+// automatically (no npm lifecycle hook) — costs API quota, so run manually only when adding new
+// real-world-reading content:
 //   npx tsx scripts/generate-real-world-audio.ts
+// Pass --force to regenerate every clip instead (e.g. after changing a voice), even ones that
+// already exist — otherwise existing clips are left untouched, so it's safe to re-run repeatedly
+// as more topics get authored, or after switching to a different ELEVENLABS_API_KEY (e.g. a
+// second account) partway through a big batch, without re-spending quota on what's already done.
 // Needs an ELEVENLABS_API_KEY in app-juegos/.env (git-ignored, never commit it).
 import { readFileSync, writeFileSync, existsSync, unlinkSync, readdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
@@ -50,20 +54,35 @@ async function generateOne(id: string, text: string, voiceId: string, apiKey: st
 }
 
 async function main() {
+  const force = process.argv.includes("--force");
   const apiKey = loadApiKey();
-  const entries = Object.entries(REAL_WORLD_READINGS);
-  console.log(`Generating ${entries.length} clips...`);
+  const allEntries = Object.entries(REAL_WORLD_READINGS);
+  const entries = force ? allEntries : allEntries.filter(([id]) => !existsSync(path.join(AUDIO_DIR, `${id}.mp3`)));
+  const skipped = allEntries.length - entries.length;
+  console.log(`Generating ${entries.length} clip(s)${skipped ? ` (skipping ${skipped} already present)` : ""}...`);
+
+  const remaining = entries.map(([id]) => id);
   for (const [id, r] of entries) {
     const voiceId = VOICE_OVERRIDES[id] ?? DEFAULT_VOICE;
     const text = r.passage.join(" ... ");
-    await generateOne(id, text, voiceId, apiKey);
+    try {
+      await generateOne(id, text, voiceId, apiKey);
+      remaining.shift();
+    } catch (err) {
+      console.error((err as Error).message ?? err);
+      console.error(`\nStopped after a failure. Not yet generated: ${remaining.join(", ")}`);
+      console.error(`Re-run this script later (e.g. with a different account's ELEVENLABS_API_KEY in .env) — it will pick up exactly where it left off.`);
+      process.exit(1);
+    }
     await new Promise(res => setTimeout(res, 250));
   }
 
-  // Clean up any stale file (e.g. an old placeholder, or a topic renamed/removed since the last run).
-  const validNames = new Set(Object.keys(REAL_WORLD_READINGS).map(id => `${id}.mp3`));
-  for (const file of readdirSync(AUDIO_DIR)) {
-    if (!validNames.has(file)) unlinkSync(path.join(AUDIO_DIR, file));
+  // Clean up any stale file (e.g. a topic renamed/removed since the last run) — only on a full run.
+  if (force || skipped === 0) {
+    const validNames = new Set(Object.keys(REAL_WORLD_READINGS).map(id => `${id}.mp3`));
+    for (const file of readdirSync(AUDIO_DIR)) {
+      if (!validNames.has(file)) unlinkSync(path.join(AUDIO_DIR, file));
+    }
   }
 
   console.log("Done.");
