@@ -5168,6 +5168,84 @@ export const LESSONS: Record<string, Lesson> = {
     ],
   },
 
+  crime_and_justice: {
+    title: "Crime & Justice",
+    intro: "Talking about crime and justice at an advanced level combines five things: reporting what someone said (reported speech), emphasising a point with dramatic word order (inversion), imagining how a different past would have changed things (third conditional), mixing a past cause with a present result or vice versa (mixed conditional), and describing what should or must be done about the justice system (modal passive).",
+    sections: [
+      {
+        heading: "Useful crime & justice vocabulary",
+        body: [
+          "deterrence, rehabilitation, recidivism, restorative justice, presumption of innocence, wrongful conviction, incarceration, systemic bias, juvenile offender, parole, clemency, retribution, due process, miscarriage of justice, proportionality, vigilante justice, plea bargain, reintegration, sentencing guidelines, mitigating circumstances.",
+        ],
+        examples: [
+          "**Rehabilitation** programs help offenders build a different future.",
+          "The presumption of **innocence** is a cornerstone of a fair justice system.",
+          "**Systemic bias** in the courts affects some communities more than others.",
+        ],
+      },
+      {
+        heading: "Reporting what someone said (reported speech)",
+        body: [
+          "Tenses shift back one step: present simple → past simple, present continuous → past continuous, present perfect → past perfect, will → would, can → could.",
+          "Time and place words shift too: 'this' → 'that', 'today' → 'that day'.",
+        ],
+        examples: [
+          "'Rehabilitation works better than punishment,' argued the criminologist. → The criminologist argued (that) rehabilitation **worked** better than punishment.",
+          "'We will reform the parole system,' promised the minister. → The minister promised (that) they **would reform** the parole system.",
+        ],
+      },
+      {
+        heading: "Emphasising a point with dramatic word order (inversion)",
+        body: [
+          "A negative/limiting adverbial at the start of a sentence (Rarely, Never before, Seldom, Under no circumstances, Not only) triggers question word order: auxiliary before the subject.",
+        ],
+        examples: [
+          "**Rarely does** a court overturn a conviction this quickly.",
+          "**Never before had** anyone expected such a swift reform.",
+          "**Under no circumstances should** judges ignore mitigating circumstances.",
+        ],
+      },
+      {
+        heading: "Imagining a different past (third conditional)",
+        body: [
+          "if + past perfect, ... would have + past participle — for an unreal past situation and its unreal past result.",
+        ],
+        examples: [
+          "If the police **had investigated** more carefully, they **would have avoided** the wrongful conviction.",
+          "If she **hadn't had** access to a lawyer, she **wouldn't have gotten** a fair trial.",
+        ],
+      },
+      {
+        heading: "Mixing time frames (mixed conditional)",
+        body: [
+          "Past cause → present result: if + past perfect, ... would + base verb.",
+          "Present state/general truth → past result: if + past simple, ... would have + past participle.",
+        ],
+        examples: [
+          "If they **had reformed** the system years ago, recidivism **wouldn't be** so high today. (past cause → present result)",
+          "If she **weren't** so persistent, she **wouldn't have cleared** his name. (present state → past result)",
+        ],
+      },
+      {
+        heading: "Describing what should be done about justice (modal passive)",
+        body: [
+          "modal + be + past participle (present/future); modal + have been + past participle (past); need + gerund is a semi-passive shortcut.",
+        ],
+        examples: [
+          "**Systemic bias must be addressed.**",
+          "**The wrongful conviction could have been prevented** by the defence.",
+          "**The old system needs reforming.**",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ The lawyer claimed the system is failing young offenders. → ✅ ...the system was failing young offenders. (reported speech backshifts the tense)",
+      "❌ Rarely a court overturns a conviction this quickly. → ✅ Rarely does a court overturn a conviction this quickly. (inversion needs 'does' before the subject)",
+      "❌ If the police investigate more carefully, they would have avoided the wrongful conviction. → ✅ If the police had investigated... (third conditional needs past perfect)",
+      "❌ Systemic bias must addressed. → ✅ Systemic bias must be addressed. (modal passive needs 'be' + past participle)",
+    ],
+  },
+
   present_simple: {
     title: "Present Simple",
     intro: "The foundation of present simple: add -s for he/she/it, and use do/does for negatives and questions — never both at once.",
