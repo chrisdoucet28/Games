@@ -4859,6 +4859,81 @@ export const LESSONS: Record<string, Lesson> = {
     ],
   },
 
+  arts_and_entertainment: {
+    title: "Arts & Entertainment",
+    intro: "Talking about arts and entertainment combines five things: describing ongoing creative work (present perfect continuous), how films and performances are reported (expanded passive), adding extra information about people, things, places, and reasons (relative clauses), imagining hypothetical creative situations (second conditional), and asking indirect questions politely (embedded questions).",
+    sections: [
+      {
+        heading: "Useful arts & entertainment vocabulary",
+        body: [
+          "exhibition, gallery, masterpiece, performance, audience, critic, review, box office, soundtrack, genre, cast, director, blockbuster, streaming.",
+        ],
+        examples: [
+          "The gallery is hosting a new **exhibition** next month.",
+          "The film was a huge success at the **box office**.",
+          "My favourite **genre** is science fiction.",
+        ],
+      },
+      {
+        heading: "Describing ongoing creative work (present perfect continuous)",
+        body: [
+          "have/has been + -ing — for a situation that started in the past and is still continuing, or has just stopped with visible results.",
+        ],
+        examples: [
+          "**The museum has been planning** this exhibition for months.",
+          "**Critics have been praising** the new film all week.",
+        ],
+      },
+      {
+        heading: "Reporting films and performances (expanded passive)",
+        body: [
+          "Passive present perfect: have/has been + past participle. Passive future: will be + past participle.",
+        ],
+        examples: [
+          "**The film has been praised** by critics.",
+          "**The film will be released** next month.",
+        ],
+      },
+      {
+        heading: "Adding extra information (relative clauses)",
+        body: [
+          "who = people, that/which = things, where = places, when = times, why = reasons, whose = possession.",
+          "Defining clauses identify which one you mean (no commas). Non-defining clauses add extra, non-essential information (commas).",
+        ],
+        examples: [
+          "The actor **who starred in the film** won an award. (defining)",
+          "The director, **whose last film flopped**, made this masterpiece. (non-defining)",
+        ],
+      },
+      {
+        heading: "Imagining hypothetical creative situations (second conditional)",
+        body: [
+          "if + past simple, ... would + base verb — for an unreal or unlikely present/future situation.",
+        ],
+        examples: [
+          "If I **had** more talent, I **would become** an actor.",
+          "**What would** you do if you **won** an Oscar?",
+        ],
+      },
+      {
+        heading: "Asking indirect, polite questions (embedded questions)",
+        body: [
+          "Question word + normal statement word order (no do/does/did) inside a longer sentence.",
+        ],
+        examples: [
+          "Can you explain **why this film is** so popular?",
+          "I don't know **how this ends**.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ The film have praised by critics. → ✅ The film has been praised by critics. (passive present perfect needs 'has been')",
+      "❌ If I have more talent, I would become an actor. → ✅ If I had more talent... (second conditional needs past simple)",
+      "❌ The painting who hangs in the gallery. → ✅ The painting that hangs in the gallery. ('that/which' for things)",
+      "❌ Do you know what be this genre? → ✅ Do you know what genre this is? (embedded questions use normal word order)",
+    ],
+  },
+
   present_simple: {
     title: "Present Simple",
     intro: "The foundation of present simple: add -s for he/she/it, and use do/does for negatives and questions — never both at once.",
