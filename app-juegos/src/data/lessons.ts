@@ -5090,6 +5090,84 @@ export const LESSONS: Record<string, Lesson> = {
     ],
   },
 
+  relationships_modern_life: {
+    title: "Relationships in Modern Life",
+    intro: "Talking about relationships in modern life at an advanced level combines five things: reporting what someone said (reported speech), emphasising a point with dramatic word order (inversion), imagining how a different past would have changed things (third conditional), mixing a past cause with a present result or vice versa (mixed conditional), and describing what should or must be done in a relationship (modal passive).",
+    sections: [
+      {
+        heading: "Useful relationships vocabulary",
+        body: [
+          "intimacy, commitment, compatibility, infidelity, cohabit, online dating, ghosting, boundaries, reconciliation, estrangement, nuclear family, blended family, vulnerability, attachment style, drift apart, break up, reconcile, trust, codependency, emotional labour.",
+        ],
+        examples: [
+          "Building real **intimacy** takes time and trust.",
+          "Setting healthy **boundaries** is important in any relationship.",
+          "**Online dating** has changed the way people meet.",
+        ],
+      },
+      {
+        heading: "Reporting what someone said (reported speech)",
+        body: [
+          "Tenses shift back one step: present simple → past simple, present continuous → past continuous, present perfect → past perfect, will → would, can → could.",
+          "Time and place words shift too: 'this' → 'that', 'last week' → 'the week before'.",
+        ],
+        examples: [
+          "'I am not ready to commit,' admitted James. → James admitted (that) he **was** not ready to commit.",
+          "'We will work through this together,' promised the couple. → The couple promised (that) they **would work** through that together.",
+        ],
+      },
+      {
+        heading: "Emphasising a point with dramatic word order (inversion)",
+        body: [
+          "A negative/limiting adverbial at the start of a sentence (Rarely, Never before, Seldom, Under no circumstances, Not only, No sooner...than) triggers question word order: auxiliary before the subject.",
+        ],
+        examples: [
+          "**Rarely does** a relationship survive such distance.",
+          "**Never before had** anyone expected such a sudden breakup.",
+          "**Not only did** they rebuild trust, but they also grew closer.",
+        ],
+      },
+      {
+        heading: "Imagining a different past (third conditional)",
+        body: [
+          "if + past perfect, ... would have + past participle — for an unreal past situation and its unreal past result.",
+        ],
+        examples: [
+          "If they **had communicated** better, they **would have avoided** the breakup.",
+          "If she **hadn't ignored** the warning signs, she **wouldn't have gotten** hurt.",
+        ],
+      },
+      {
+        heading: "Mixing time frames (mixed conditional)",
+        body: [
+          "Past cause → present result: if + past perfect, ... would + base verb.",
+          "Present state → past result: if + past simple, ... would have + past participle.",
+        ],
+        examples: [
+          "If they **hadn't gone** to counselling years ago, they **wouldn't be** so happy today. (past cause → present result)",
+          "If she **weren't** so forgiving, she **wouldn't have stayed** with him. (present state → past result)",
+        ],
+      },
+      {
+        heading: "Describing what should be done in a relationship (modal passive)",
+        body: [
+          "modal + be + past participle (present/future); modal + have been + past participle (past); need + gerund is a semi-passive shortcut.",
+        ],
+        examples: [
+          "**This issue must be addressed.**",
+          "**The breakup could have been prevented** by the counsellor.",
+          "**The old pattern needs breaking.**",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ James admitted he is not ready to commit. → ✅ James admitted he was not ready to commit. (reported speech backshifts the tense)",
+      "❌ Rarely a relationship survives such distance. → ✅ Rarely does a relationship survive such distance. (inversion needs 'does' before the subject)",
+      "❌ If they communicate better, they would have avoided the breakup. → ✅ If they had communicated better... (third conditional needs past perfect)",
+      "❌ This issue must addressed. → ✅ This issue must be addressed. (modal passive needs 'be' + past participle)",
+    ],
+  },
+
   present_simple: {
     title: "Present Simple",
     intro: "The foundation of present simple: add -s for he/she/it, and use do/does for negatives and questions — never both at once.",
