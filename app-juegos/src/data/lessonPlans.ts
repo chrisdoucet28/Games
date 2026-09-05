@@ -655,7 +655,7 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
 // question-and-reply answers like "'What's your name?' 'I'm Ana.'"), no bracket placeholders
 // (rules out free-answer items like "(free - e.g. ...)"), a plain 3-9 word sentence.
 function isCleanSentence(s: string): boolean {
-  if (!s || s.includes("'") || s.includes("’") || s.includes("(") || s.includes("/")) return false;
+  if (!s || s.includes("'") || s.includes("’") || s.includes('"') || s.includes("(") || s.includes("/")) return false;
   const wordCount = s.trim().split(/\s+/).length;
   return wordCount >= 3 && wordCount <= 9;
 }
