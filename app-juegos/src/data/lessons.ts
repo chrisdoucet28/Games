@@ -3468,6 +3468,77 @@ export const LESSONS: Record<string, Lesson> = {
     ],
   },
 
+  sport_and_fitness: {
+    title: "Sport & Fitness",
+    intro: "Talking about sport and fitness naturally combines four things: your sporting experiences (present perfect), predictions about training (first conditional), how sport is organised and reported (passive voice), and comparing performance and progress (comparatives).",
+    sections: [
+      {
+        heading: "Useful sport & fitness vocabulary",
+        body: [
+          "workout, stamina, muscle, coach, opponent, compete, championship, injury, recover, referee, marathon, personal best.",
+        ],
+        examples: [
+          "I do a **workout** at the gym three times a week.",
+          "He's out for the season because of a serious **injury**.",
+          "She set a new **personal best** in the 100 metres.",
+        ],
+      },
+      {
+        heading: "Talking about sporting experience (present perfect)",
+        body: [
+          "have/has + past participle for experiences, achievements, and things not yet done.",
+          "never/ever/just/already for experiences and recent events; for/since for duration.",
+        ],
+        examples: [
+          "I **have never run** a marathon.",
+          "She **has just won** the championship.",
+          "He **hasn't played** football **since** his injury.",
+        ],
+      },
+      {
+        heading: "Predicting training outcomes (first conditional)",
+        body: [
+          "if + present simple, ... will + base verb — for a likely future result.",
+        ],
+        examples: [
+          "If you **train** every day, you **will get** fitter.",
+          "If she **doesn't warm up**, she **will injure** herself.",
+        ],
+      },
+      {
+        heading: "How sport is organised and reported (passive voice)",
+        body: [
+          "be + past participle — used when the action matters more than who does it.",
+          "Present simple passive: is/are + past participle. Past simple passive: was/were + past participle.",
+        ],
+        examples: [
+          "This sport **is played** all over the world.",
+          "The championship **is held** every year.",
+          "The match **was cancelled** because of the rain.",
+          "The player **was injured** during the match.",
+        ],
+      },
+      {
+        heading: "Comparing performance and progress (comparatives)",
+        body: [
+          "Short adjectives: add -er (fit → fitter). Long adjectives: use more (difficult → more difficult).",
+          "Double comparative: the + comparative, the + comparative — shows two things changing together.",
+        ],
+        examples: [
+          "Running is **better** than not exercising at all.",
+          "She is **fitter** than she was last year.",
+          "**The more** you train, **the more** stamina you build.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ She has just win the championship. → ✅ She has just won the championship. (present perfect needs the past participle)",
+      "❌ If you train every day, you get fitter. → ✅ If you train every day, you will get fitter. (first conditional needs 'will')",
+      "❌ This sport plays all over the world. → ✅ This sport is played all over the world. (passive needs 'is' + past participle)",
+      "❌ Running is gooder than walking. → ✅ Running is better than walking. (irregular comparative: better, not gooder)",
+    ],
+  },
+
   passive_complex: {
     title: "Passive Voice — Complex Tenses",
     intro: "Beyond simple tenses, the passive can combine with continuous, perfect, modal, and reporting structures — the key is keeping 'be'/'been'/'being' in the right slot.",
