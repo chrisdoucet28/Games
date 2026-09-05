@@ -8,7 +8,7 @@ import { LESSONS } from "./lessons";
 // this file holds only the piece that can't be, plus a helper for the one format (Unscramble)
 // that's generated at render time instead of hand-authored.
 //
-// Scope: A1 only, 17 topics — a deliberate test run before deciding whether to extend further.
+// Scope: A1 only, all 25 topics — a deliberate test run before deciding whether to extend further.
 // Every key here must match a topics.ts / lessons.ts topic id (both already required to match
 // each other — see CLAUDE.md's Learn/topics parity rule).
 export type RoundOut =
@@ -206,6 +206,100 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
       " the news today because she's too busy. I ", { blank: "am sitting", base: "sit" },
       " on the sofa, and I ", { blank: "am reading", base: "read" },
       " a very interesting book.",
+    ],
+  },
+
+  possessive_s: {
+    kind: "errorPassage",
+    text: "A: Excuse me, is this your bag?\nB: No, I think it's my sisters bag. She left it here yesterday.\nA: And is this jacket Toms?\nB: Yes, that's Toms jacket — he's my classmate.\nA: Whose car is that outside?\nB: That's my parents car.\nA: Wow, and look at all those toys on the lawn!\nB: Yes, the childrens toys are always everywhere. Even the boys bikes are out there.",
+    corrected: "A: Excuse me, is this your bag?\nB: No, I think it's my sister's bag. She left it here yesterday.\nA: And is this jacket Tom's?\nB: Yes, that's Tom's jacket — he's my classmate.\nA: Whose car is that outside?\nB: That's my parents' car.\nA: Wow, and look at all those toys on the lawn!\nB: Yes, the children's toys are always everywhere. Even the boys' bikes are out there.",
+    fixes: [
+      "'my sisters bag' → 'my sister's bag' (singular possessive needs an apostrophe before the s)",
+      "'Toms' → 'Tom's' (a name is a singular possessive too — never drop the apostrophe)",
+      "'my parents car' → 'my parents' car' (plural noun already ending in -s just needs the apostrophe)",
+      "'the childrens toys' → 'the children's toys' ('children' isn't already plural-with-s, so it takes 's, not s')",
+      "'the boys bikes' → 'the boys' bikes' (plural possessive needs the apostrophe after the s)",
+    ],
+  },
+
+  days_dates_prepositions_time: {
+    kind: "paragraphCloze",
+    segments: [
+      "My English class is ", { blank: "on", base: "day" }, " Monday, and it starts ",
+      { blank: "at", base: "time" }, " six o'clock ", { blank: "in", base: "part of day" },
+      " the evening. My birthday is ", { blank: "in", base: "month" }, " July, ",
+      { blank: "on", base: "date" }, " the 15th (the fifteenth). This year, my birthday party is ",
+      { blank: "on", base: "day" }, " Saturday, and it starts ", { blank: "at", base: "time" },
+      " midday. We usually meet ", { blank: "in", base: "part of day" },
+      " the morning for coffee, but the final exam is ", { blank: "on", base: "date" },
+      " June 3rd (the third), and it starts ", { blank: "at", base: "time" }, " nine o'clock.",
+    ],
+  },
+
+  possessive_adjectives_pronouns: {
+    kind: "matching",
+    pairs: [
+      { term: "This is my book.", definition: "This book is mine." },
+      { term: "Is this your phone?", definition: "Is this phone yours?" },
+      { term: "That is her jacket.", definition: "That jacket is hers." },
+      { term: "This is our house.", definition: "This house is ours." },
+      { term: "That is their car.", definition: "That car is theirs." },
+      { term: "Whose bag is this?", definition: "It's mine." },
+    ],
+  },
+
+  prepositions_place: { kind: "unscramble" },
+
+  family_members: {
+    kind: "matching",
+    pairs: [
+      { term: "aunt", definition: "Your mother's or father's sister" },
+      { term: "uncle", definition: "Your mother's or father's brother" },
+      { term: "cousin", definition: "Your aunt or uncle's child" },
+      { term: "niece", definition: "Your sibling's daughter" },
+      { term: "nephew", definition: "Your sibling's son" },
+      { term: "sibling", definition: "A general word for a brother or sister" },
+      { term: "in-laws", definition: "Family you gain through marriage, like a husband's or wife's parents" },
+      { term: "take after", definition: "To resemble an older relative in looks or personality" },
+    ],
+  },
+
+  weather_temperature_seasons: {
+    kind: "paragraphCloze",
+    segments: [
+      "Yesterday it ", { blank: "rained", base: "rain" }, " all day, so we stayed inside. Today ",
+      { blank: "is", base: "be" }, " different — it ", { blank: "is", base: "be" },
+      " sunny and warm. In fact, today ", { blank: "is", base: "be" },
+      " even hotter than yesterday. My favorite season is summer, because it ", { blank: "is", base: "be" },
+      " usually hot and sunny here. But in winter, it often ", { blank: "snows", base: "snow" },
+      ", and it ", { blank: "gets", base: "get" },
+      " very cold. Right now it ", { blank: "isn't snowing", base: "not / snow" },
+      " — it's only autumn, and the leaves are just starting to fall. Look outside — it ",
+      { blank: "is starting", base: "start" }, " to get windy!",
+    ],
+  },
+
+  daily_routines_frequency: {
+    kind: "errorPassage",
+    text: "My sister has a very busy schedule. She wake up at six o'clock every morning, and she has breakfast on the morning before work. She go always to the gym after breakfast. She never am late for her job — she is very responsible. After work, she go home at six and cooks dinner for the family.",
+    corrected: "My sister has a very busy schedule. She wakes up at six o'clock every morning, and she has breakfast in the morning before work. She always goes to the gym after breakfast. She is never late for her job — she is very responsible. After work, she goes home at six and cooks dinner for the family.",
+    fixes: [
+      "'She wake up' → 'She wakes up' (third person singular needs -s)",
+      "'breakfast on the morning' → 'breakfast in the morning' ('in' with parts of the day, not 'on')",
+      "'she go always to the gym' → 'she always goes to the gym' (the frequency adverb goes before the main verb)",
+      "'She never am late' → 'She is never late' (with 'be', the adverb goes after it)",
+      "'she go home' → 'she goes home' (third person singular needs -s — the mistake students make far more than the reverse)",
+    ],
+  },
+
+  giving_directions: {
+    kind: "scenario",
+    prompts: [
+      { situation: "A tourist stops you and asks: “Excuse me, how do I get to the train station?” It's straight ahead, then left at the lights.", instruction: "Give them directions.", sample: "Go straight ahead, then turn left at the traffic lights. It's just around the corner." },
+      { situation: "Someone asks if the museum is far from where you're standing — it's about a five-minute walk.", instruction: "Answer their question about distance.", sample: "No, it isn't far — it's about a five-minute walk from here." },
+      { situation: "A driver at a roundabout asks you which way to go for the hospital — they need the second exit.", instruction: "Tell them which exit to take.", sample: "Go round the roundabout and take the second exit." },
+      { situation: "Someone describes a place to you: “The café is on your left, right here.” Your friend then asks you what to do.", instruction: "Turn their description into an instruction for your friend.", sample: "Turn left for the café." },
+      { situation: "Someone is about to cross a busy road in the wrong place, right in front of you.", instruction: "Warn them not to, using a negative instruction.", sample: "Don't cross the road here — use the crossing over there." },
     ],
   },
 };

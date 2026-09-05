@@ -176,7 +176,17 @@ function LessonPlanSlideshow({ topic, theme, onBack }: { topic: LearnTopic; them
           <button onClick={goPrev} style={{ background: "none", border: `2px solid ${theme.accentSolid}`, color: theme.accentSolid, borderRadius: "10px", padding: "8px 14px", cursor: "pointer", fontWeight: "700", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px" }}>
             <Icon name="back" size={13} /> {slideIndex === 0 ? "Back" : "Previous"}
           </button>
-          <span style={{ color: "#9CA3AF", fontSize: "12px", fontWeight: "700" }}>Step {slideIndex + 1} of {slides.length}</span>
+          <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+            <span style={{ color: "#9CA3AF", fontSize: "12px", fontWeight: "700" }}>Step {slideIndex + 1} of {slides.length}</span>
+            {/* Previous only steps back one slide at a time — with up to 20+ steps, leaving the
+                lesson mid-way otherwise means clicking it that many times. Skips straight to the
+                index regardless of progress; nothing here is saved, so there's nothing to lose. */}
+            {slideIndex > 0 && (
+              <button onClick={onBack} style={{ background: "none", border: "none", color: "#9CA3AF", cursor: "pointer", fontWeight: "700", fontFamily: theme.headingFont, fontSize: "12px", display: "inline-flex", alignItems: "center", gap: "4px", padding: 0 }}>
+                <Icon name="close" size={11} /> Exit
+              </button>
+            )}
+          </div>
         </div>
 
         <div className="lp-no-print" style={cardStyle}>
