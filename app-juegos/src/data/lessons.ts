@@ -4934,6 +4934,84 @@ export const LESSONS: Record<string, Lesson> = {
     ],
   },
 
+  memory_mind_psychology: {
+    title: "Memory, Mind & Psychology",
+    intro: "Talking about the mind and psychology at an advanced level combines five things: reporting what someone said (reported speech), emphasising a point with dramatic word order (inversion), imagining how a different past would have changed things (third conditional), mixing a past cause with a present result or vice versa (mixed conditional), and describing what should or must be done about the mind (modal passive).",
+    sections: [
+      {
+        heading: "Useful psychology vocabulary",
+        body: [
+          "memory, recall, subconscious, perception, cognitive, instinct, mindset, bias, trauma, therapy, mental health, wellbeing, resilience, self-esteem.",
+        ],
+        examples: [
+          "Our **subconscious** influences many of our daily decisions.",
+          "We all have some **bias**, even if we don't realise it.",
+          "She showed incredible **resilience** after the setback.",
+        ],
+      },
+      {
+        heading: "Reporting what someone said (reported speech)",
+        body: [
+          "Tenses shift back one step: present simple → past simple, present continuous → past continuous, present perfect → past perfect, will → would, can → could.",
+          "Time and place words shift too: 'this' → 'that', 'last year' → 'the year before', 'next month' → 'the following month'.",
+        ],
+        examples: [
+          "'I forget things all the time,' said the patient. → The patient said (that) she **forgot** things all the time.",
+          "'We are studying memory,' explained the psychologist. → The psychologist explained (that) they **were studying** memory.",
+        ],
+      },
+      {
+        heading: "Emphasising a point with dramatic word order (inversion)",
+        body: [
+          "A negative/limiting adverbial at the start of a sentence (Rarely, Never before, Seldom, Under no circumstances, Not only) triggers question word order: auxiliary before the subject.",
+        ],
+        examples: [
+          "**Rarely does** someone forget such an important memory.",
+          "**Never before had** anyone experienced such vivid flashbacks.",
+          "**Not only did** the therapy help him, but he also felt more confident.",
+        ],
+      },
+      {
+        heading: "Imagining a different past (third conditional)",
+        body: [
+          "if + past perfect, ... would have + past participle — for an unreal past situation and its unreal past result.",
+        ],
+        examples: [
+          "If she **had sought** help sooner, she **would have recovered** faster.",
+          "If he **hadn't confronted** his fear, he **would never have overcome** it.",
+        ],
+      },
+      {
+        heading: "Mixing time frames (mixed conditional)",
+        body: [
+          "Past cause → present result: if + past perfect, ... would + base verb.",
+          "Present/general cause → past result: if + past simple, ... would have + past participle.",
+        ],
+        examples: [
+          "If he **hadn't gone** to therapy years ago, he **wouldn't be** so resilient today. (past cause → present result)",
+          "If she **weren't** so self-aware, she **wouldn't have noticed** the pattern. (present state → past result)",
+        ],
+      },
+      {
+        heading: "Describing what should be done about the mind (modal passive)",
+        body: [
+          "modal + be + past participle (present/future); modal + have been + past participle (past); need + gerund is a semi-passive shortcut.",
+        ],
+        examples: [
+          "**This bias must be addressed.**",
+          "**The relapse could have been prevented** by the therapist.",
+          "**The outdated theory needs updating.**",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ The patient said she forget things all the time. → ✅ ...she forgot things all the time. (reported speech backshifts the tense)",
+      "❌ Rarely someone forgets such a memory. → ✅ Rarely does someone forget such a memory. (inversion needs 'does' before the subject)",
+      "❌ If she seek help sooner, she would have recovered faster. → ✅ If she had sought help sooner... (third conditional needs past perfect)",
+      "❌ This bias must addressed. → ✅ This bias must be addressed. (modal passive needs 'be' + past participle)",
+    ],
+  },
+
   present_simple: {
     title: "Present Simple",
     intro: "The foundation of present simple: add -s for he/she/it, and use do/does for negatives and questions — never both at once.",
