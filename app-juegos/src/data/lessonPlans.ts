@@ -763,8 +763,8 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
 
   adverbs: {
     kind: "errorPassage",
-    text: "My sister is a carefully driver, but yesterday she drove a bit careless in the rain. She looked happily when she arrived, and she sang beautiful in the car the whole way. Honestly, she did good on her driving test — this soup I made tastes wonderfully too, by the way!",
-    corrected: "My sister is a careful driver, but yesterday she drove a bit carelessly in the rain. She looked happy when she arrived, and she sang beautifully in the car the whole way. Honestly, she did well on her driving test — this soup I made tastes wonderful too, by the way!",
+    text: "My sister is a carefully driver, but yesterday she drove a bit careless in the rain on her way to her driving test. She looked happily when she arrived, and she sang beautiful in the car the whole way there. Honestly, she did good on her driving test — to celebrate, she made us dinner, and the soup she made tastes wonderfully!",
+    corrected: "My sister is a careful driver, but yesterday she drove a bit carelessly in the rain on her way to her driving test. She looked happy when she arrived, and she sang beautifully in the car the whole way there. Honestly, she did well on her driving test — to celebrate, she made us dinner, and the soup she made tastes wonderful!",
     fixes: [
       "'a carefully driver' → 'a careful driver' (adjectives, not adverbs, describe nouns)",
       "'drove a bit careless' → 'drove a bit carelessly' (adverbs, not adjectives, describe verbs)",
@@ -923,8 +923,8 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
 
   working_from_home: {
     kind: "errorPassage",
-    text: "I am agree that working from home saves time. How productive you are depends of your self-discipline, honestly. Actually, I work from home three days a week — my manager is remote worker who trusts the team completely. I have bought a new desk last week, and if you will set clear boundaries, you'll feel less stressed too.",
-    corrected: "I agree that working from home saves time. How productive you are depends on your self-discipline, honestly. Currently, I work from home three days a week — my manager is a remote worker who trusts the team completely. I bought a new desk last week, and if you set clear boundaries, you'll feel less stressed too.",
+    text: "I am agree that working from home saves time, so last month I finally convinced my boss to let me try it. How productive you are depends of your self-discipline, honestly, and at first I really struggled. Actually, I work from home three days a week now, and my manager is remote worker herself, so she trusts the team completely. I have bought a new desk last week to make my setup more comfortable, and if you will set clear boundaries with your family from the start, you'll feel less stressed too.",
+    corrected: "I agree that working from home saves time, so last month I finally convinced my boss to let me try it. How productive you are depends on your self-discipline, honestly, and at first I really struggled. Currently, I work from home three days a week now, and my manager is a remote worker herself, so she trusts the team completely. I bought a new desk last week to make my setup more comfortable, and if you set clear boundaries with your family from the start, you'll feel less stressed too.",
     fixes: [
       "'I am agree' → 'I agree' ('agree' is a verb, no 'am')",
       "'depends of your self-discipline' → 'depends on your self-discipline' ('depend on', not 'depend of')",
@@ -937,8 +937,8 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
 
   learning_language: {
     kind: "errorPassage",
-    text: "I assisted to an English class every week last year. I am beginner, so I try not to be afraid to make questions in class. I improve my listening by listening music every day. I have started learning English when I was eight, and if you will practise every day, you'll improve faster.",
-    corrected: "I attended an English class every week last year. I am a beginner, so I try not to be afraid to ask questions in class. I improve my listening by listening to music every day. I started learning English when I was eight, and if you practise every day, you'll improve faster.",
+    text: "I assisted to an English class every week last year, and I am beginner, so at first I was too nervous to make questions in class. My teacher told us to improve our listening by listening music every day, so I started doing that at home too. I have started learning English when I was eight, but I only got serious about it last year — and if you will practise every day like I do now, you'll improve faster too.",
+    corrected: "I attended an English class every week last year, and I am a beginner, so at first I was too nervous to ask questions in class. My teacher told us to improve our listening by listening to music every day, so I started doing that at home too. I started learning English when I was eight, but I only got serious about it last year — and if you practise every day like I do now, you'll improve faster too.",
     fixes: [
       "'I assisted to an English class' → 'I attended an English class' ('assist' means to help; 'attend' means to go to')",
       "'I am beginner' → 'I am a beginner' (article needed before a role/level noun)",
@@ -951,8 +951,8 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
 
   career_choices: {
     kind: "errorPassage",
-    text: "I am agree that soft skills are important in any job. Your success depends of how hard you work, in my experience. Unfortunately, I couldn't assist the job interview last week because I was sick. My brother is engineer at a tech company, and I have started my new job last Monday — if you will update your CV, you'll have a better chance next time.",
-    corrected: "I agree that soft skills are important in any job. Your success depends on how hard you work, in my experience. Unfortunately, I couldn't attend the job interview last week because I was sick. My brother is an engineer at a tech company, and I started my new job last Monday — if you update your CV, you'll have a better chance next time.",
+    text: "I am agree that soft skills are important in any job, and I learned that the hard way this year. Your success depends of how hard you work, in my experience — I studied for weeks before my interview. Unfortunately, I couldn't assist the job interview last week because I was sick, so I had to reschedule it. My brother is engineer at a tech company, and he helped me prepare — I have started my new job last Monday thanks to his advice, and if you will update your CV like he showed me, you'll have a better chance next time.",
+    corrected: "I agree that soft skills are important in any job, and I learned that the hard way this year. Your success depends on how hard you work, in my experience — I studied for weeks before my interview. Unfortunately, I couldn't attend the job interview last week because I was sick, so I had to reschedule it. My brother is an engineer at a tech company, and he helped me prepare — I started my new job last Monday thanks to his advice, and if you update your CV like he showed me, you'll have a better chance next time.",
     fixes: [
       "'I am agree' → 'I agree' ('agree' is a verb, no 'am')",
       "'depends of how hard you work' → 'depends on how hard you work' ('depend on', not 'depend of')",
@@ -988,8 +988,8 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
 
   social_media: {
     kind: "errorPassage",
-    text: "Social media have changed how young people communicate with each other. The people is worried about fake news these days, and honestly, I am agree that misinformation spreads too fast. Whether a post goes viral depends of the algorithm, not just the content. I have posted that photo yesterday, and if you will spend less time online, you'll feel happier.",
-    corrected: "Social media has changed how young people communicate with each other. People are worried about fake news these days, and honestly, I agree that misinformation spreads too fast. Whether a post goes viral depends on the algorithm, not just the content. I posted that photo yesterday, and if you spend less time online, you'll feel happier.",
+    text: "Social media have changed how young people communicate with each other, and I've noticed it in my own life too. The people is worried about fake news these days, and honestly, I am agree that misinformation spreads too fast. Whether a post goes viral depends of the algorithm, not just the content — I saw that firsthand this week. I have posted that photo yesterday and it got thousands of likes overnight, which honestly scared me a little, and if you will spend less time online like I'm trying to now, you'll feel happier.",
+    corrected: "Social media has changed how young people communicate with each other, and I've noticed it in my own life too. People are worried about fake news these days, and honestly, I agree that misinformation spreads too fast. Whether a post goes viral depends on the algorithm, not just the content — I saw that firsthand this week. I posted that photo yesterday and it got thousands of likes overnight, which honestly scared me a little, and if you spend less time online like I'm trying to now, you'll feel happier.",
     fixes: [
       "'Social media have changed' → 'Social media has changed' ('social media' takes a singular verb)",
       "'The people is worried' → 'People are worried' ('people' is plural in English)",
@@ -1049,14 +1049,14 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
 
   articles: {
     kind: "errorPassage",
-    text: "The dogs are loyal animals, and the money can't buy happiness — that's what my grandmother always said. She was teacher for thirty years at a school near an university. It took hour every day just for her to commute there. She always dreamed of visiting a United States one day, and she always said her school was a best in the whole region.",
-    corrected: "Dogs are loyal animals, and money can't buy happiness — that's what my grandmother always said. She was a teacher for thirty years at a school near a university. It took an hour every day just for her to commute there. She always dreamed of visiting the United States one day, and she always said her school was the best in the whole region.",
+    text: "My grandmother always used to say two things: that the dogs are loyal animals, and that the money can't buy happiness. She was teacher for thirty years at a school near an university, and it took hour every day just for her to commute there. Despite the long commute, she always dreamed of visiting a United States one day, and she always said her school was a best in the whole region.",
+    corrected: "My grandmother always used to say two things: that dogs are loyal animals, and that money can't buy happiness. She was a teacher for thirty years at a school near a university, and it took an hour every day just for her to commute there. Despite the long commute, she always dreamed of visiting the United States one day, and she always said her school was the best in the whole region.",
     fixes: [
-      "'The dogs are loyal animals' → 'Dogs are loyal animals' (a general statement needs no article)",
+      "'the dogs are loyal animals' → 'dogs are loyal animals' (a general statement needs no article)",
       "'the money can't buy happiness' → 'money can't buy happiness' (abstract noun used generally needs no article)",
       "'She was teacher' → 'She was a teacher' (never drop 'a/an' before a singular countable noun)",
       "'near an university' → 'near a university' ('university' starts with a consonant sound)",
-      "'It took hour' → 'It took an hour' ('hour' starts with a vowel sound)",
+      "'it took hour' → 'it took an hour' ('hour' starts with a vowel sound)",
       "'visiting a United States' → 'visiting the United States' (plural-form country names need 'the')",
       "'her school was a best' → 'her school was the best' (superlatives always need 'the')",
     ],
@@ -1064,8 +1064,8 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
 
   clauses_of_purpose: {
     kind: "errorPassage",
-    text: "I went to the store for buy milk this morning. Later, I called the dentist's office to book an appointment — actually, I called for book a table at a restaurant too, for my parents' anniversary. This new blender is to blending smoothies quickly. I turned off my phone for not to be disturbed during the meeting, and my colleague whispered to no one would hear him, but everyone still heard.",
-    corrected: "I went to the store to buy milk this morning. Later, I called the dentist's office to book an appointment — actually, I called to book a table at a restaurant too, for my parents' anniversary. This new blender is for blending smoothies quickly. I turned off my phone in order not to be disturbed during the meeting, and my colleague whispered so that no one would hear him, but everyone still heard.",
+    text: "I went to the store for buy milk this morning, then called the dentist's office to book an appointment before heading into work. Actually, I also called for book a table at a nice restaurant, all for my parents' anniversary dinner tonight — and I bought them a new blender as a gift, since this new blender is to blending smoothies quickly and they've wanted one for ages. At the restaurant, I turned off my phone for not to be disturbed during the surprise, and my colleague whispered to no one would hear him about the cake, but everyone still heard.",
+    corrected: "I went to the store to buy milk this morning, then called the dentist's office to book an appointment before heading into work. Actually, I also called to book a table at a nice restaurant, all for my parents' anniversary dinner tonight — and I bought them a new blender as a gift, since this new blender is for blending smoothies quickly and they've wanted one for ages. At the restaurant, I turned off my phone in order not to be disturbed during the surprise, and my colleague whispered so that no one would hear him about the cake, but everyone still heard.",
     fixes: [
       "'for buy milk' → 'to buy milk' (never 'for' + verb — use 'to' + verb)",
       "'for book a table' → 'to book a table' ('to' + verb for a specific action)",
@@ -1115,11 +1115,11 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
 
   quantifiers: {
     kind: "errorPassage",
-    text: "There isn't many coffee left in the jar, so I need to buy some more. How much books did you borrow from the library this week? I don't have no time today to go shopping, but she spends a lot time every weekend browsing the shops anyway.",
-    corrected: "There isn't much coffee left in the jar, so I need to buy some more. How many books did you borrow from the library this week? I don't have any time today to go shopping, but she spends a lot of time every weekend browsing the shops anyway.",
+    text: "There isn't many coffee left in the jar, so I need to buy some more before my sister gets up — she always wants a cup first thing. Speaking of her, how much books did you say she borrowed from the library this week? I don't have no time today to go shopping for the coffee, but she spends a lot time every weekend browsing the shops anyway, so I'll just ask her to grab some too.",
+    corrected: "There isn't much coffee left in the jar, so I need to buy some more before my sister gets up — she always wants a cup first thing. Speaking of her, how many books did you say she borrowed from the library this week? I don't have any time today to go shopping for the coffee, but she spends a lot of time every weekend browsing the shops anyway, so I'll just ask her to grab some too.",
     fixes: [
       "'isn't many coffee' → 'isn't much coffee' ('coffee' is uncountable)",
-      "'How much books' → 'How many books' ('books' is countable)",
+      "'how much books' → 'how many books' ('books' is countable)",
       "'don't have no time' → 'don't have any time' (don't combine 'don't' and 'no')",
       "'spends a lot time' → 'spends a lot of time' ('a lot of' always needs 'of' before a noun)",
     ],
@@ -1192,8 +1192,8 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
 
   causative_verbs: {
     kind: "errorPassage",
-    text: "Our teacher made us that we had to finish our homework before the weekend. My mother didn't let that I went to the party on Friday, which was so unfair. I need to have my shoes repair before the trip, and I finally got the plumber fix the leak in the kitchen.",
-    corrected: "Our teacher made us finish our homework before the weekend. My mother didn't let me go to the party on Friday, which was so unfair. I need to have my shoes repaired before the trip, and I finally got the plumber to fix the leak in the kitchen.",
+    text: "This week hasn't stopped for me. Our teacher made us that we had to finish our homework before the weekend, so my mother didn't let that I went to the party on Friday, which was so unfair since I'd already finished everything. On top of that, I need to have my shoes repair before Monday's school trip, and this morning I finally got the plumber fix the leak in our bathroom that's been driving me crazy all week.",
+    corrected: "This week hasn't stopped for me. Our teacher made us finish our homework before the weekend, so my mother didn't let me go to the party on Friday, which was so unfair since I'd already finished everything. On top of that, I need to have my shoes repaired before Monday's school trip, and this morning I finally got the plumber to fix the leak in our bathroom that's been driving me crazy all week.",
     fixes: [
       "'made us that we had to finish' → 'made us finish' (no 'that + clause' after 'make')",
       "'didn't let that I went' → 'didn't let me go' (no 'that + clause' after 'let')",
@@ -1360,12 +1360,12 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
 
   education_systems: {
     kind: "errorPassage",
-    text: "A: During the lecture, students made lots of questions about the new curriculum.\nB: Really? Your grade depends of how well you handle the material, right?\nA: Right. My mother is teacher at a primary school, actually, and she says students should avoid to fail at all costs.\nB: I have finished my degree in 2020 myself. Do you know does the university offer scholarships to new students?",
-    corrected: "A: During the lecture, students asked lots of questions about the new curriculum.\nB: Really? Your grade depends on how well you handle the material, right?\nA: Right. My mother is a teacher at a primary school, actually, and she says students should avoid failing at all costs.\nB: I finished my degree in 2020 myself. Do you know if the university offers scholarships to new students?",
+    text: "A: My daughter had her first lecture yesterday, and apparently the students made lots of questions about the new curriculum.\nB: Really? Well, your grade depends of how well you handle the material, right — I always tell my own students that.\nA: Right, that's exactly what my mother always says — my mother is teacher at a primary school, actually, and she says students should avoid to fail at all costs.\nB: I have finished my degree in 2020 myself, at that same university. Do you know does the university offer scholarships to new students? My son's applying there next year.",
+    corrected: "A: My daughter had her first lecture yesterday, and apparently the students asked lots of questions about the new curriculum.\nB: Really? Well, your grade depends on how well you handle the material, right — I always tell my own students that.\nA: Right, that's exactly what my mother always says — my mother is a teacher at a primary school, actually, and she says students should avoid failing at all costs.\nB: I finished my degree in 2020 myself, at that same university. Do you know if the university offers scholarships to new students? My son's applying there next year.",
     fixes: [
       "'made lots of questions' → 'asked lots of questions' (English 'asks' a question, never 'makes' one)",
       "'depends of how well' → 'depends on how well' ('depend on', not 'depend of')",
-      "'My mother is teacher' → 'My mother is a teacher' (article needed before a profession)",
+      "'my mother is teacher' → 'my mother is a teacher' (article needed before a profession)",
       "'avoid to fail' → 'avoid failing' ('avoid' + gerund)",
       "'I have finished my degree in 2020' → 'I finished my degree in 2020' (specific past time → past simple)",
       "'Do you know does the university offer' → 'Do you know if the university offers' (statement word order, no second 'does')",
@@ -1419,15 +1419,15 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
 
   technology_daily_life: {
     kind: "errorPassage",
-    text: "Actually, most people use their phone for social media constantly these days. My phone battery lasts a large time, which is great. I have this laptop since five years, and it still works perfectly. Many people listen music while they commute to work. She has downloaded that app last week and loves it already. Do you know does this app track my location?",
-    corrected: "Nowadays, most people use their phone for social media constantly these days. My phone battery lasts a long time, which is great. I have had this laptop for five years, and it still works perfectly. Many people listen to music while they commute to work. She downloaded that app last week and loves it already. Do you know if this app tracks my location?",
+    text: "My sister and I are both glued to our phones, but in different ways. Actually, most people use their phone for social media constantly these days, and she's exactly the same. Her phone battery lasts a large time, which is great, because she's always scrolling. I have this laptop since five years, and it still works perfectly, even though she keeps telling me to buy a new one. Many people listen music while they commute to work, and that's exactly how she spends her bus ride every morning. She has downloaded that app last week that everyone's talking about, and now do you know does this app track my location? I want to check before I try it myself.",
+    corrected: "My sister and I are both glued to our phones, but in different ways. Nowadays, most people use their phone for social media constantly these days, and she's exactly the same. Her phone battery lasts a long time, which is great, because she's always scrolling. I have had this laptop for five years, and it still works perfectly, even though she keeps telling me to buy a new one. Many people listen to music while they commute to work, and that's exactly how she spends her bus ride every morning. She downloaded that app last week that everyone's talking about, and now do you know if this app tracks my location? I want to check before I try it myself.",
     fixes: [
       "'Actually, most people' → 'Nowadays, most people' ('actually' means 'in fact', not 'nowadays')",
       "'lasts a large time' → 'lasts a long time' ('large' = big in size; 'long' describes duration)",
       "'I have this laptop since five years' → 'I have had this laptop for five years' ('for' + duration, and 'have had' not 'have')",
       "'listen music' → 'listen to music' ('listen to' + thing)",
       "'has downloaded that app last week' → 'downloaded that app last week' (specific past time → past simple)",
-      "'Do you know does this app track' → 'Do you know if this app tracks' (statement word order, no second 'does')",
+      "'do you know does this app track' → 'do you know if this app tracks' (statement word order, no second 'does')",
     ],
   },
 
@@ -1481,13 +1481,13 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
 
   inversion: {
     kind: "errorPassage",
-    text: "Never I have seen such a beautiful view in my life. Hardly had we arrived than the storm began, which ruined our plans completely. Little did he knew about the dangers of the mountain, so he wasn't prepared. So proud was them that they couldn't stop smiling all evening.",
-    corrected: "Never have I seen such a beautiful view in my life. Hardly had we arrived when the storm began, which ruined our plans completely. Little did he know about the dangers of the mountain, so he wasn't prepared. So proud were they that they couldn't stop smiling all evening.",
+    text: "Never I have seen such a beautiful view in my life as the one from the summit that day, when our small group finally reached the top of the mountain. Hardly had we arrived than the storm began, which ruined our plans completely. Little did he knew about the dangers of the mountain — our guide had never climbed in that kind of weather before, so he wasn't prepared at all. Still, so proud was them that they couldn't stop smiling all evening, even after the storm forced us back down early.",
+    corrected: "Never have I seen such a beautiful view in my life as the one from the summit that day, when our small group finally reached the top of the mountain. Hardly had we arrived when the storm began, which ruined our plans completely. Little did he know about the dangers of the mountain — our guide had never climbed in that kind of weather before, so he wasn't prepared at all. Still, so proud were they that they couldn't stop smiling all evening, even after the storm forced us back down early.",
     fixes: [
       "'Never I have seen' → 'Never have I seen' (invert auxiliary and subject)",
       "'Hardly had we arrived than' → 'Hardly had we arrived when' ('hardly had' pairs with 'when', not 'than')",
       "'Little did he knew' → 'Little did he know' (base verb after 'did', not past tense)",
-      "'So proud was them' → 'So proud were they' (subject pronoun 'they', plural 'were')",
+      "'so proud was them' → 'so proud were they' (subject pronoun 'they', plural 'were')",
     ],
   },
 
