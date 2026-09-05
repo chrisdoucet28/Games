@@ -1266,7 +1266,7 @@ export const LESSONS: Record<string, Lesson> = {
 
   daily_life_a2: {
     title: "Daily Life & Routines",
-    intro: "Talking about your daily routine is mostly present simple with time expressions — but this topic also drills a set of classic mistakes Spanish speakers make when describing everyday life.",
+    intro: "Talking about your daily routine is mostly present simple with time expressions — but this topic also drills a set of classic mistakes learners make when describing everyday life.",
     sections: [
       {
         heading: "Describing a routine",
@@ -1332,7 +1332,7 @@ export const LESSONS: Record<string, Lesson> = {
 
   food_and_eating: {
     title: "Food & Eating",
-    intro: "This topic mixes everyday food vocabulary with a set of classic mistakes Spanish speakers make when talking about meals, restaurants, and diet.",
+    intro: "This topic mixes everyday food vocabulary with a set of classic mistakes learners make when talking about meals, restaurants, and diet.",
     sections: [
       {
         heading: "Talking about food and diet",
@@ -1396,7 +1396,7 @@ export const LESSONS: Record<string, Lesson> = {
 
   school_and_study: {
     title: "School and Study",
-    intro: "School vocabulary comes with its own obligation grammar (must/have to) and a set of classic mistakes Spanish speakers make when talking about classes and studying.",
+    intro: "School vocabulary comes with its own obligation grammar (must/have to) and a set of classic mistakes learners make when talking about classes and studying.",
     sections: [
       {
         heading: "Talking about school",
@@ -1452,7 +1452,7 @@ export const LESSONS: Record<string, Lesson> = {
 
   friends_and_family: {
     title: "Friends and Family",
-    intro: "Describing relationships leans on present perfect ('have been friends since…') and a handful of fixed phrasal expressions — plus another set of classic Spanish-speaker mix-ups.",
+    intro: "Describing relationships leans on present perfect ('have been friends since…') and a handful of fixed phrasal expressions — plus another set of classic learner mix-ups.",
     sections: [
       {
         heading: "Talking about relationships",
@@ -1519,7 +1519,7 @@ export const LESSONS: Record<string, Lesson> = {
 
   free_time_a2: {
     title: "Free Time and Interests",
-    intro: "Talking about hobbies mostly needs 'enjoy'/'like' + gerund and 'prefer X to Y' — plus a few classic Spanish-speaker slips worth watching for.",
+    intro: "Talking about hobbies mostly needs 'enjoy'/'like' + gerund and 'prefer X to Y' — plus a few classic learner slips worth watching for.",
     sections: [
       {
         heading: "Talking about hobbies",
@@ -1582,7 +1582,7 @@ export const LESSONS: Record<string, Lesson> = {
 
   my_town_city: {
     title: "My Town and City",
-    intro: "Describing a place uses 'there is/are', comparatives/superlatives, and passive voice for history ('was built') — plus a last round of classic Spanish-speaker slips.",
+    intro: "Describing a place uses 'there is/are', comparatives/superlatives, and passive voice for history ('was built') — plus a last round of classic learner slips.",
     sections: [
       {
         heading: "Describing your town",
