@@ -5012,6 +5012,84 @@ export const LESSONS: Record<string, Lesson> = {
     ],
   },
 
+  future_of_work: {
+    title: "The Future of Work",
+    intro: "Talking about the future of work at an advanced level combines five things: reporting what someone said (reported speech), emphasising a point with dramatic word order (inversion), imagining how a different past would have changed things (third conditional), mixing a past cause with a present result or vice versa (mixed conditional), and describing what should or must be done about work (modal passive).",
+    sections: [
+      {
+        heading: "Useful future-of-work vocabulary",
+        body: [
+          "automation, artificial intelligence (AI), remote work, freelance, gig economy, redundancy, upskill, workforce, job security, burnout, entrepreneur.",
+        ],
+        examples: [
+          "**Automation** has changed the way factories operate.",
+          "Many workers are **upskilling** to keep up with new technology.",
+          "**Job security** has decreased in many industries due to automation.",
+        ],
+      },
+      {
+        heading: "Reporting what someone said (reported speech)",
+        body: [
+          "Tenses shift back one step: present simple → past simple, present continuous → past continuous, present perfect → past perfect, will → would, can → could.",
+          "Time and place words shift too: 'this' → 'that', 'next year' → 'the following year', 'today' → 'that day'.",
+        ],
+        examples: [
+          "'AI is transforming our industry,' said the CEO. → The CEO said (that) AI **was transforming** their industry.",
+          "'We will automate this next year,' announced the manager. → The manager announced (that) they **would automate** that the following year.",
+        ],
+      },
+      {
+        heading: "Emphasising a point with dramatic word order (inversion)",
+        body: [
+          "A negative/limiting adverbial at the start of a sentence (Rarely, Never before, Seldom, Under no circumstances, Not only) triggers question word order: auxiliary before the subject.",
+        ],
+        examples: [
+          "**Rarely does** a company adapt this quickly.",
+          "**Never before had** anyone predicted such rapid change.",
+          "**Not only does** automation save time, but it also reduces costs.",
+        ],
+      },
+      {
+        heading: "Imagining a different past (third conditional)",
+        body: [
+          "if + past perfect, ... would have + past participle — for an unreal past situation and its unreal past result.",
+        ],
+        examples: [
+          "If she **had upskilled** sooner, she **would have found** a new job faster.",
+          "If he **hadn't automated** the process, he **would never have saved** so much time.",
+        ],
+      },
+      {
+        heading: "Mixing time frames (mixed conditional)",
+        body: [
+          "Past cause → present result: if + past perfect, ... would + base verb.",
+          "Present/general cause → past result: if + past simple, ... would have + past participle.",
+        ],
+        examples: [
+          "If he **hadn't lost** his job years ago, he **wouldn't be** a freelancer today. (past cause → present result)",
+          "If she **weren't** so hardworking, she **wouldn't have been** promoted. (present state → past result)",
+        ],
+      },
+      {
+        heading: "Describing what should be done about work (modal passive)",
+        body: [
+          "modal + be + past participle (present/future); modal + have been + past participle (past); need + gerund is a semi-passive shortcut.",
+        ],
+        examples: [
+          "**Job insecurity must be addressed.**",
+          "**The redundancies could have been prevented** by the manager.",
+          "**The outdated system needs replacing.**",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ The CEO said AI is transforming their industry. → ✅ ...AI was transforming their industry. (reported speech backshifts the tense)",
+      "❌ Rarely a company adapts this quickly. → ✅ Rarely does a company adapt this quickly. (inversion needs 'does' before the subject)",
+      "❌ If she upskill sooner, she would have found a job faster. → ✅ If she had upskilled sooner... (third conditional needs past perfect)",
+      "❌ Job insecurity must addressed. → ✅ Job insecurity must be addressed. (modal passive needs 'be' + past participle)",
+    ],
+  },
+
   present_simple: {
     title: "Present Simple",
     intro: "The foundation of present simple: add -s for he/she/it, and use do/does for negatives and questions — never both at once.",
