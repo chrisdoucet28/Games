@@ -3539,6 +3539,75 @@ export const LESSONS: Record<string, Lesson> = {
     ],
   },
 
+  relationships_and_socialising: {
+    title: "Relationships & Socialising",
+    intro: "Talking about relationships combines four things: your history with people (present perfect), predictions about how relationships develop (first conditional), how social events are organised (passive voice), and comparing closeness between people (comparatives).",
+    sections: [
+      {
+        heading: "Useful relationship vocabulary",
+        body: [
+          "friendship, trust, support, apologise, forgive, keep in touch, lose touch, fall out, make up, acquaintance, bond, reunion.",
+        ],
+        examples: [
+          "**Trust** is the most important part of any friendship.",
+          "We promised to **keep in touch** after graduation.",
+          "They **fell out** over something silly last month, but they **made up** the next day.",
+        ],
+      },
+      {
+        heading: "Talking about relationship history (present perfect)",
+        body: [
+          "have/has + past participle for experiences and states that continue to now.",
+          "for/since for duration; just/already/ever for recent or life experiences.",
+        ],
+        examples: [
+          "I **have known** my best friend for ten years.",
+          "She **has just apologised** to her friend.",
+          "He **hasn't spoken** to his brother **since** the argument.",
+        ],
+      },
+      {
+        heading: "Predicting how relationships develop (first conditional)",
+        body: [
+          "if + present simple, ... will + base verb — for a likely future result.",
+        ],
+        examples: [
+          "If you **apologise** sincerely, she **will forgive** you.",
+          "If we **keep in touch**, we **will stay** close friends.",
+        ],
+      },
+      {
+        heading: "How social events are organised (passive voice)",
+        body: [
+          "be + past participle — used when the event or action matters more than who organised it.",
+        ],
+        examples: [
+          "Close friendships **are valued** by most people.",
+          "She **was invited** to the wedding.",
+          "The reunion **was planned** months in advance.",
+        ],
+      },
+      {
+        heading: "Comparing closeness and connection (comparatives)",
+        body: [
+          "Short adjectives: add -er (close → closer). Long adjectives: use more (supportive → more supportive).",
+          "Double comparative: the + comparative, the + comparative — shows two things changing together.",
+        ],
+        examples: [
+          "She is **closer** to her sister than to her brother.",
+          "Good friends are **more supportive** than acquaintances.",
+          "**The more** you socialise, **the more** friends you make.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ She has just apologise to her friend. → ✅ She has just apologised to her friend. (present perfect needs the past participle)",
+      "❌ If you apologise sincerely, she forgive you. → ✅ ...she will forgive you. (first conditional needs 'will')",
+      "❌ She invited to the wedding. → ✅ She was invited to the wedding. (passive past simple needs 'was')",
+      "❌ She is more close to her sister. → ✅ She is closer to her sister. (short adjectives take -er, not 'more')",
+    ],
+  },
+
   passive_complex: {
     title: "Passive Voice — Complex Tenses",
     intro: "Beyond simple tenses, the passive can combine with continuous, perfect, modal, and reporting structures — the key is keeping 'be'/'been'/'being' in the right slot.",
