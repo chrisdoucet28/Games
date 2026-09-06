@@ -16,17 +16,29 @@ import { REAL_WORLD_READINGS } from "../src/data/realWorldReadings.ts";
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 const AUDIO_DIR = path.join(ROOT, "public", "audio", "real-world");
 
-// One consistent narrator voice for every reading, except the two topics with an explicit named
-// first-person narrator (present_simple = "Hi, I'm Sofia!", what_do_you_do = "Hi, I'm Carlos."),
-// which get a gender-matched voice instead so the narrator's voice never contradicts the name in
-// the text. Add a topic id here if a future reading gets its own named first-person narrator too.
 const FEMALE_VOICE = "XrExE9yKIg1WjnnlVkGX";
 const MALE_VOICE = "CwhRBWXzGAHq8TQ4Fs17";
-const DEFAULT_VOICE = FEMALE_VOICE;
-const VOICE_OVERRIDES: Record<string, string> = {
-  present_simple: FEMALE_VOICE,
-  what_do_you_do: MALE_VOICE,
+
+// Topics with an explicit named first-person narrator whose gender the voice must match — kept as
+// an explicit override (not left to whatever the alternation below would produce), so this stays
+// correct even if topics get reordered or new ones inserted before these. Add a topic id here if a
+// future reading gets its own named first-person narrator too.
+const LOCKED_VOICE: Record<string, string> = {
+  present_simple: FEMALE_VOICE, // "Hi, I'm Sofia!"
+  what_do_you_do: MALE_VOICE,   // "Hi, I'm Carlos."
 };
+
+// Every other topic alternates female/male by position in REAL_WORLD_READINGS — deterministic (a
+// re-run never flips anyone's existing voice), and gives real variety across the whole feature
+// instead of one voice narrating almost everything (the bug this replaced: a single DEFAULT_VOICE
+// meant only the 1 locked-male topic out of 56 was ever male).
+function buildVoiceAssignment(ids: string[]): Record<string, string> {
+  const assignment: Record<string, string> = {};
+  ids.forEach((id, i) => {
+    assignment[id] = LOCKED_VOICE[id] ?? (i % 2 === 0 ? FEMALE_VOICE : MALE_VOICE);
+  });
+  return assignment;
+}
 
 function loadApiKey(): string {
   const envPath = path.join(ROOT, ".env");
@@ -61,9 +73,10 @@ async function main() {
   const skipped = allEntries.length - entries.length;
   console.log(`Generating ${entries.length} clip(s)${skipped ? ` (skipping ${skipped} already present)` : ""}...`);
 
+  const voiceAssignment = buildVoiceAssignment(Object.keys(REAL_WORLD_READINGS));
   const remaining = entries.map(([id]) => id);
   for (const [id, r] of entries) {
-    const voiceId = VOICE_OVERRIDES[id] ?? DEFAULT_VOICE;
+    const voiceId = voiceAssignment[id];
     const text = r.passage.join(" ... ");
     try {
       await generateOne(id, text, voiceId, apiKey);

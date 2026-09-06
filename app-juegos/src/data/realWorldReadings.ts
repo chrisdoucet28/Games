@@ -21,14 +21,15 @@ export type RealWorldReading = {
   passage: string[];
   // MP3 files under public/audio/real-world/, generated via the ElevenLabs text-to-speech API
   // (see scripts/generate-real-world-audio.ts — a checked-in batch tool, not part of the shipped
-  // app). One consistent narrator voice is used for every reading except the two with an explicit
-  // named first-person narrator (present_simple = Sofia, what_do_you_do = Carlos), which get a
-  // gender-matched voice instead — see VOICE_OVERRIDES in that script if regenerating. A reading
-  // with no audioUrl (e.g. once a new level's text is authored but its audio hasn't been generated
-  // yet — a free-tier ElevenLabs account only covers so many characters a month) simply skips the
-  // Reading/Listening mode choice and shows the text directly, matching the "skip if no data"
-  // pattern used throughout — re-running the script (any account with quota left) fills in
-  // whatever's still missing without touching what's already there.
+  // app). Narrator voice alternates female/male by topic position for real variety across the
+  // feature, except the two topics with an explicit named first-person narrator (present_simple =
+  // Sofia, what_do_you_do = Carlos), which are locked to a gender-matched voice instead — see
+  // LOCKED_VOICE in that script if regenerating. A reading with no audioUrl (e.g. once a new
+  // level's text is authored but its audio hasn't been generated yet — a free-tier ElevenLabs
+  // account only covers so many characters a month) simply skips the Reading/Listening mode
+  // choice and shows the text directly, matching the "skip if no data" pattern used throughout —
+  // re-running the script (any account with quota left) fills in whatever's still missing without
+  // touching what's already there.
   audioUrl?: string;
   // 3 comprehension-check questions about the text's content (not the grammar point itself —
   // that's what Practice A/B/Production already cover). Same QuestionData shape/reveal-answer
@@ -592,7 +593,6 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   making_questions: {
     title: "The Job Interview",
-    audioUrl: "/audio/real-world/making_questions.mp3",
     passage: [
       "Thank you for coming in today. First, where do you currently work?",
       "I work at a small marketing agency downtown.",
@@ -627,7 +627,6 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   comparatives_superlatives: {
     title: "Choosing a Laptop",
-    audioUrl: "/audio/real-world/comparatives_superlatives.mp3",
     passage: [
       "I compared three laptops before buying one. The first was cheaper than the second, but the second had a better screen.",
       "The third was the most expensive of the three, but also the fastest by far. In the end, I chose the second one — it wasn't the cheapest or the fastest, but it had the best balance of price and quality.",
@@ -657,7 +656,6 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   superlatives: {
     title: "Visiting the City",
-    audioUrl: "/audio/real-world/superlatives.mp3",
     passage: [
       "Welcome to our city! Here are a few highlights. The cathedral in the main square is the oldest building in the city, built over 800 years ago.",
       "Our central market is the busiest place in town, especially on weekends.",
@@ -687,7 +685,6 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   school_and_study: {
     title: "Exam Week Notice",
-    audioUrl: "/audio/real-world/school_and_study.mp3",
     passage: [
       "Dear students, exam week starts on Monday. You must bring your student ID to every exam, and you have to arrive at least fifteen minutes early.",
       "Mobile phones aren't allowed in the exam hall. If you miss an exam for a valid reason, you don't have to worry — just contact your teacher immediately to arrange a resit.",
@@ -717,7 +714,6 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   free_time_a2: {
     title: "My Weekend Hobbies",
-    audioUrl: "/audio/real-world/free_time_a2.mp3",
     passage: [
       "On weekends, I really enjoy going for long bike rides in the countryside. I also like reading, especially mystery novels — I'm currently halfway through a great one.",
       "My sister prefers painting to reading; she says it helps her relax after a busy week.",
@@ -747,7 +743,6 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   money_and_shopping: {
     title: "A Shopping Mix-Up",
-    audioUrl: "/audio/real-world/money_and_shopping.mp3",
     passage: [
       "Hello, I bought a pair of shoes from your shop last week, but they don't fit — they're too small. I'd like to return them for a refund, please.",
       "I still have the receipt, and the shoes are unworn, still in their original box. Could you tell me if I need to bring anything else?",
@@ -777,7 +772,6 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   health_and_body: {
     title: "Feeling Under the Weather",
-    audioUrl: "/audio/real-world/health_and_body.mp3",
     passage: [
       "Hey, I can't make it to the gym today — I've had a headache since this morning and my throat hurts too. I think I'm coming down with something.",
       "I took some medicine and I'm going to rest for the rest of the day. My back's also been aching a bit, probably from sitting too much at work this week.",
@@ -811,7 +805,6 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   making_excuses: {
     title: "Sorry I'm Late Again",
-    audioUrl: "/audio/real-world/making_excuses.mp3",
     passage: [
       "I'm so sorry I missed our meeting this morning! My alarm didn't go off, and by the time I woke up, I was already running late.",
       "Then my bus was delayed for twenty minutes, which didn't help at all. I should have set a backup alarm — I know that now.",
@@ -844,7 +837,6 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   conjunctions: {
     title: "A Day I'll Remember",
-    audioUrl: "/audio/real-world/conjunctions.mp3",
     passage: [
       "I wanted to go for a run yesterday, but it was raining heavily outside. Although the weather was bad, I decided to go to the gym instead, so I wouldn't break my routine.",
       "I stayed longer than planned because the classes were really enjoyable. When I got home, I was tired but happy.",
@@ -874,7 +866,6 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   quantifiers: {
     title: "Checking the Kitchen",
-    audioUrl: "/audio/real-world/quantifiers.mp3",
     passage: [
       "I checked the kitchen before going shopping. We don't have much milk left, and there isn't any bread at all.",
       "There are a few eggs, but not many — maybe three or four. We have a lot of pasta, so we don't need more of that.",
@@ -904,7 +895,6 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   modals_possibility: {
     title: "Where's Everyone?",
-    audioUrl: "/audio/real-world/modals_possibility.mp3",
     passage: [
       "Has anyone seen Tom today? His car isn't in the car park, so he might be working from home. Actually, he mentioned a dentist appointment yesterday, so that could be why he's out.",
       "Sarah isn't here either — she must be at the client meeting, since it's in her calendar.",
