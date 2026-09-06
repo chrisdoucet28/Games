@@ -22,12 +22,12 @@ export type RealWorldReading = {
   // (see scripts/generate-real-world-audio.ts — a checked-in batch tool, not part of the shipped
   // app). One consistent narrator voice is used for every reading except the two with an explicit
   // named first-person narrator (present_simple = Sofia, what_do_you_do = Carlos), which get a
-  // gender-matched voice instead — see VOICE_OVERRIDES in that script if regenerating. Some
-  // readings temporarily have no audioUrl even though the text is finished, because generating it
-  // exhausted the ElevenLabs account's free-tier quota mid-batch — the script picks up exactly
-  // where it left off once quota is available again (a different account, or next month's
-  // reset). A reading with no audioUrl simply skips the Reading/Listening mode choice and shows
-  // the text directly (matching the "skip if no data" pattern used throughout).
+  // gender-matched voice instead — see VOICE_OVERRIDES in that script if regenerating. A reading
+  // with no audioUrl (e.g. once a new level's text is authored but its audio hasn't been generated
+  // yet — a free-tier ElevenLabs account only covers so many characters a month) simply skips the
+  // Reading/Listening mode choice and shows the text directly, matching the "skip if no data"
+  // pattern used throughout — re-running the script (any account with quota left) fills in
+  // whatever's still missing without touching what's already there.
   audioUrl?: string;
   // 3 comprehension-check questions about the text's content (not the grammar point itself —
   // that's what Practice A/B/Production already cover). Same QuestionData shape/reveal-answer
@@ -686,6 +686,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   school_and_study: {
     title: "Exam Week Notice",
+    audioUrl: "/audio/real-world/school_and_study.mp3",
     passage: [
       "Dear students, exam week starts on Monday. You must bring your student ID to every exam, and you have to arrive at least fifteen minutes early.",
       "Mobile phones aren't allowed in the exam hall. If you miss an exam for a valid reason, you don't have to worry — just contact your teacher immediately to arrange a resit.",
@@ -700,6 +701,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   friends_and_family: {
     title: "Best Friends Since Childhood",
+    audioUrl: "/audio/real-world/friends_and_family.mp3",
     passage: [
       "I've been friends with Elena since we were seven years old — that's over twenty years now! We met at school and just clicked immediately.",
       "Over the years, we've grown apart from some old friends, but we've always stayed close, even when she moved to another city.",
@@ -714,6 +716,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   free_time_a2: {
     title: "My Weekend Hobbies",
+    audioUrl: "/audio/real-world/free_time_a2.mp3",
     passage: [
       "On weekends, I really enjoy going for long bike rides in the countryside. I also like reading, especially mystery novels — I'm currently halfway through a great one.",
       "My sister prefers painting to reading; she says it helps her relax after a busy week.",
@@ -728,6 +731,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   my_town_city: {
     title: "A Town That's Changing",
+    audioUrl: "/audio/real-world/my_town_city.mp3",
     passage: [
       "My town has changed so much in the last ten years. There used to be a small cinema on the main street, but now there's a modern shopping centre instead.",
       "The old train station was built in the 1920s and is still standing today — it's actually one of the prettiest buildings in town.",
@@ -742,6 +746,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   money_and_shopping: {
     title: "A Shopping Mix-Up",
+    audioUrl: "/audio/real-world/money_and_shopping.mp3",
     passage: [
       "Hello, I bought a pair of shoes from your shop last week, but they don't fit — they're too small. I'd like to return them for a refund, please.",
       "I still have the receipt, and the shoes are unworn, still in their original box. Could you tell me if I need to bring anything else?",
@@ -756,6 +761,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   food_and_eating: {
     title: "Restaurant Review: Casa Bella",
+    audioUrl: "/audio/real-world/food_and_eating.mp3",
     passage: [
       "I tried Casa Bella last weekend and it didn't disappoint! The pasta was cooked perfectly, and the sauce had just the right amount of flavour.",
       "We also ordered a salad to share, which was fresh and generous in size. Service was friendly, though we waited a while for our bill at the end.",
@@ -770,6 +776,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   health_and_body: {
     title: "Feeling Under the Weather",
+    audioUrl: "/audio/real-world/health_and_body.mp3",
     passage: [
       "Hey, I can't make it to the gym today — I've had a headache since this morning and my throat hurts too. I think I'm coming down with something.",
       "I took some medicine and I'm going to rest for the rest of the day. My back's also been aching a bit, probably from sitting too much at work this week.",
@@ -784,6 +791,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   ordering_food: {
     title: "At the Restaurant",
+    audioUrl: "/audio/real-world/ordering_food.mp3",
     passage: [
       "Are you ready to order?",
       "Yes, could I have the chicken soup to start, please?",
@@ -802,6 +810,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   making_excuses: {
     title: "Sorry I'm Late Again",
+    audioUrl: "/audio/real-world/making_excuses.mp3",
     passage: [
       "I'm so sorry I missed our meeting this morning! My alarm didn't go off, and by the time I woke up, I was already running late.",
       "Then my bus was delayed for twenty minutes, which didn't help at all. I should have set a backup alarm — I know that now.",
@@ -816,6 +825,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   making_suggestions: {
     title: "Planning Friday Night",
+    audioUrl: "/audio/real-world/making_suggestions.mp3",
     passage: [
       "What should we do on Friday night?",
       "How about trying that new restaurant downtown?",
@@ -833,6 +843,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   conjunctions: {
     title: "A Day I'll Remember",
+    audioUrl: "/audio/real-world/conjunctions.mp3",
     passage: [
       "I wanted to go for a run yesterday, but it was raining heavily outside. Although the weather was bad, I decided to go to the gym instead, so I wouldn't break my routine.",
       "I stayed longer than planned because the classes were really enjoyable. When I got home, I was tired but happy.",
@@ -847,6 +858,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   too_much_many: {
     title: "A Disappointing Concert",
+    audioUrl: "/audio/real-world/too_much_many.mp3",
     passage: [
       "I went to a concert last weekend, but honestly, it was too crowded to really enjoy it. There were too many people pushing near the stage, and the music was too loud even for a concert.",
       "We also waited too much time in line just to get a drink.",
@@ -861,6 +873,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   quantifiers: {
     title: "Checking the Kitchen",
+    audioUrl: "/audio/real-world/quantifiers.mp3",
     passage: [
       "I checked the kitchen before going shopping. We don't have much milk left, and there isn't any bread at all.",
       "There are a few eggs, but not many — maybe three or four. We have a lot of pasta, so we don't need more of that.",
@@ -875,6 +888,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   modals_obligation: {
     title: "Office Rules",
+    audioUrl: "/audio/real-world/modals_obligation.mp3",
     passage: [
       "Welcome to the office! A few important rules: you must wear your ID badge at all times, and you have to sign in at reception every morning.",
       "You mustn't use your phone during meetings — please keep it on silent. You don't have to work weekends, but if a project needs it, extra hours are sometimes required.",
@@ -889,6 +903,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   modals_possibility: {
     title: "Where's Everyone?",
+    audioUrl: "/audio/real-world/modals_possibility.mp3",
     passage: [
       "Has anyone seen Tom today? His car isn't in the car park, so he might be working from home. Actually, he mentioned a dentist appointment yesterday, so that could be why he's out.",
       "Sarah isn't here either — she must be at the client meeting, since it's in her calendar.",
