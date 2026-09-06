@@ -8,9 +8,12 @@ import type { QuestionData } from "../types";
 // topics with an entry here get the step — safe to build out gradually level by level;
 // LessonPlanScreen simply skips it when a topic has none yet.
 //
-// Scope: A1 (25 topics) + A2 (31 topics) so far, extending level by level. Length/complexity
-// guide: A1 40-70 words (present simple/simple past only, no subordinate clauses), A2 ~70-110
-// (past simple/continuous, first conditional, used to). B1-and-up deliberately jump to
+// Scope: A1 (25 topics) + A2 (31 topics) + B1 (43 topics) so far, extending level by level. Text
+// for all of B1 is done; its audio is not (see the per-entry audioUrl comment above) — generating
+// it needs roughly 43,000 characters, well beyond one free-tier account's monthly allowance, so
+// expect it to arrive in several waves across multiple accounts/months. Length/complexity guide:
+// A1 40-70 words (present simple/simple past only, no subordinate clauses), A2 ~70-110 (past
+// simple/continuous, first conditional, used to). B1-and-up deliberately jump to
 // closer-to-authentic exam-passage length rather than a small step up from A2: B1 ~180-250 words,
 // B2 ~280-380, C1 ~400-550 — increasing length, tense range, and abstraction per level.
 export type RealWorldReading = {
@@ -904,6 +907,764 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
       { type: "reading comprehension", question: "Why might Tom be working from home?", answer: "Because his car isn't in the car park." },
       { type: "reading comprehension", question: "What could explain why Tom is out?", answer: "A dentist appointment." },
       { type: "reading comprehension", question: "Where must Sarah be?", answer: "At the client meeting." },
+    ],
+  },
+
+  // --- B1 ---
+
+  present_perfect: {
+    title: "Checking In on the Move",
+    passage: [
+      "Have you finished packing yet?",
+      "Not yet — I've already packed the kitchen and the bedroom, but I haven't started on the living room. I've been putting it off because there's just so much stuff!",
+      "Have you called the moving company already?",
+      "Yes, I called them yesterday. They've confirmed everything for Saturday morning. Have you ever moved house before, by the way? I don't really know what to expect.",
+      "I've moved three times so far, actually. The first week is always chaotic, but it gets easier. Have you sorted out the internet and electricity yet, or is that still on the list?",
+      "That's still on the list! I haven't had a spare moment this week. I'll deal with it tonight, before it's too late. Have you told your landlord you're leaving yet?",
+      "Yes, I gave notice last month, so that's all sorted. Honestly, once Saturday's over, I think I'll just collapse on the sofa for a week!",
+    ],
+    questions: [
+      { type: "reading comprehension", question: "What has the first speaker already packed?", answer: "The kitchen and the bedroom." },
+      { type: "reading comprehension", question: "When did they call the moving company?", answer: "Yesterday." },
+      { type: "reading comprehension", question: "How many times has the second speaker moved house before?", answer: "Three times." },
+    ],
+  },
+
+  phrasal_verbs: {
+    title: "An Email to the Team",
+    passage: [
+      "Hi team, a quick update before the long weekend. I know we've all been putting off the budget review, but we really need to sort it out before next month.",
+      "Could someone look into the numbers from Q1 and come up with a rough summary by Friday? I ran into James yesterday and he mentioned he's already started, so maybe team up with him rather than duplicating the work.",
+      "Also, please don't give up on the client proposal just because it was rejected once — let's carry out one more round of edits and see if we can turn it around.",
+      "One more thing: could everyone look over the shared document before Monday's call? I'd like us to be on the same page going into next week, rather than figuring things out on the spot.",
+      "I know a few of you have been dealing with personal stuff too, so please don't hesitate to reach out if you need to take a step back for a day or two. We'll work around it.",
+      "Thanks for putting up with such a busy month, everyone. Let's catch up properly once things calm down, and hopefully wrap up all these loose ends before they pile up any further.",
+    ],
+    questions: [
+      { type: "reading comprehension", question: "What have the team been putting off?", answer: "The budget review." },
+      { type: "reading comprehension", question: "Who should the reader team up with?", answer: "James." },
+      { type: "reading comprehension", question: "What should happen with the client proposal?", answer: "One more round of edits, to try to turn it around." },
+    ],
+  },
+
+  understanding_get: {
+    title: "A Week of 'Get'",
+    passage: [
+      "This week has been a real mix. I get up earlier now that the mornings are lighter, which has been nice.",
+      "My new colleague and I get on really well — we've already started getting together for lunch most days. I'm slowly getting used to the new software at work, even though it was confusing at first.",
+      "I got into a bit of trouble on Tuesday for missing a deadline, which wasn't great, but I got it sorted by the end of the day.",
+      "My manager and I got talking about it afterwards, and she said I should get in touch sooner next time if I'm falling behind, rather than trying to fix everything alone.",
+      "On the bus home, I got off one stop early just to get some fresh air. I've been trying to get more exercise into my week however I can, even small amounts like that.",
+      "By the time I got back home, I was exhausted — but in a good way! I think I'm finally getting the hang of balancing everything again after a slow start to the year.",
+    ],
+    questions: [
+      { type: "reading comprehension", question: "How does the writer get on with their new colleague?", answer: "Really well." },
+      { type: "reading comprehension", question: "What happened on Tuesday?", answer: "They got into a bit of trouble for missing a deadline." },
+      { type: "reading comprehension", question: "Why did they get off the bus one stop early?", answer: "To get some fresh air." },
+    ],
+  },
+
+  so_neither: {
+    title: "We Have So Much in Common",
+    passage: [
+      "I love hiking on weekends.",
+      "So do I! I try to get out to the hills at least once a month.",
+      "I don't really enjoy cooking, though.",
+      "Neither do I, if I'm honest — I order takeaway more than I probably should.",
+      "I've never been skiing.",
+      "Neither have I! Maybe we should try it together sometime.",
+      "I can't stand horror films.",
+      "Neither can I — I always end up covering my eyes.",
+      "I've always wanted to learn to paint.",
+      "So have I! Maybe we could take a class together sometime, if you're serious about it.",
+      "I don't drink coffee at all, actually.",
+      "Neither do I! Everyone finds that so surprising for some reason.",
+      "I was actually really nervous meeting you today.",
+      "So was I! I'm glad we get on so well — it's rare to find someone with so many of the same habits.",
+      "I've honestly never met anyone quite like this before.",
+      "Neither have I, and I don't say that lightly! I think this is the start of a proper friendship.",
+    ],
+    questions: [
+      { type: "reading comprehension", question: "What does the first speaker enjoy doing on weekends?", answer: "Hiking." },
+      { type: "reading comprehension", question: "Has either of them been skiing before?", answer: "No, neither of them has." },
+      { type: "reading comprehension", question: "How did both speakers feel before meeting today?", answer: "Nervous." },
+    ],
+  },
+
+  prefer_rather: {
+    title: "Choosing a Restaurant",
+    passage: [
+      "Where should we eat tonight?",
+      "I'd rather stay in, honestly — I've had a long week. I'd prefer to order something and relax at home.",
+      "That's fine with me. Would you prefer pizza or Thai food?",
+      "I'd prefer Thai, if that's okay. I'd rather not have anything too heavy tonight.",
+      "Sounds good. I'd rather you choose the dish, though — you always pick better than me!",
+      "Alright. I'd prefer we split a few things rather than each getting our own, if you're up for sharing.",
+      "Definitely. I'd much rather share anyway — I always want to try everything on the menu. Would you prefer to eat on the sofa or at the table tonight?",
+      "I'd rather sit at the table, if that's alright — I've been slouching on the sofa all week and my back's not thanking me for it.",
+      "Fair enough! I'd prefer that too, honestly. I'll set the table while you finish choosing exactly what we're ordering.",
+    ],
+    questions: [
+      { type: "reading comprehension", question: "Would the first speaker rather stay in or go out?", answer: "Stay in." },
+      { type: "reading comprehension", question: "Which food do they choose, pizza or Thai?", answer: "Thai." },
+      { type: "reading comprehension", question: "Do they decide to share dishes or order separately?", answer: "Share." },
+    ],
+  },
+
+  passive_simple: {
+    title: "How Your Coffee Gets to You",
+    passage: [
+      "Coffee is grown in more than seventy countries, mostly near the equator. Once the beans are picked, they are dried and sorted by hand or machine.",
+      "The beans are then shipped to roasting facilities around the world, where they are roasted at high temperatures to bring out their flavour.",
+      "After roasting, the coffee is packaged and sent to shops and cafés. In most cafés, the coffee is ground fresh just before it's brewed, since ground coffee loses its flavour quickly once it's exposed to air.",
+      "Along the way, the beans are also tested for quality several times, and any batches that don't meet the standard are rejected before they ever reach a shop shelf.",
+      "In recent years, more attention has been paid to how the farmers themselves are treated and paid, and many brands are now certified to guarantee a fair price is being offered at every stage.",
+      "Every cup you drink is the result of a long journey — grown by farmers, processed by workers, tested by inspectors, and finally prepared by a barista just for you.",
+    ],
+    questions: [
+      { type: "reading comprehension", question: "Where is most coffee grown?", answer: "Near the equator, in more than seventy countries." },
+      { type: "reading comprehension", question: "What happens to the beans after they're picked?", answer: "They are dried and sorted." },
+      { type: "reading comprehension", question: "Why is coffee ground fresh just before brewing?", answer: "Because ground coffee loses its flavour quickly once exposed to air." },
+    ],
+  },
+
+  get_used_to: {
+    title: "Moving Abroad",
+    passage: [
+      "What was the hardest part of moving to a new country?",
+      "Honestly, getting used to the food took the longest. I didn't use to eat spicy food at all back home, so it was a real shock at first. Now I'm completely used to it — I actually crave it!",
+      "Did you use to speak the language before you moved?",
+      "Not a word! I used to rely on translation apps constantly during my first few months. Now I'm used to having basic conversations, though I still can't say I'm fluent.",
+      "What about making friends? Did you use to find that difficult too?",
+      "Very difficult at first. I didn't use to go out much back home either, so it wasn't only a language problem. I'm slowly getting used to putting myself out there more.",
+      "What about the weather?",
+      "That was easier, actually. I used to complain about the rain back home, so I'm just used to adapting to whatever comes. My family still asks if I've gotten used to the heat here, and honestly, I think I finally have.",
+    ],
+    questions: [
+      { type: "reading comprehension", question: "What took the longest to get used to?", answer: "The food." },
+      { type: "reading comprehension", question: "What did the speaker rely on during their first few months?", answer: "Translation apps." },
+      { type: "reading comprehension", question: "Was adjusting to the weather easy or hard for them?", answer: "Easier than expected." },
+    ],
+  },
+
+  reported_speech: {
+    title: "What Did She Say?",
+    passage: [
+      "So what did the manager say in the meeting?",
+      "She said the company was doing well this quarter, and she told us we would get an update on bonuses by the end of the month. She also said that she had already spoken to head office about it.",
+      "Did she say anything about the new office?",
+      "Yes — she said they were still deciding, and she asked if anyone had any preferences about the location. I told her I would prefer somewhere closer to the station.",
+      "What did your teammate say afterwards?",
+      "He said he thought the meeting went well, and he asked me if I believed the bonus news. I said I hoped so, but I wasn't completely sure.",
+      "Did anyone bring up the new project?",
+      "Actually, yes — she said it would start next month, and she warned us that the deadline was tighter than usual. She also promised she would send a full schedule by email.",
+      "That's a lot to take in. Did she say who would be leading it?",
+      "She said the team would decide together, but she suggested I might be a good fit, given my experience last year. I told her I'd think about it and let her know by Friday.",
+    ],
+    questions: [
+      { type: "reading comprehension", question: "What did the manager say about the company?", answer: "That it was doing well this quarter." },
+      { type: "reading comprehension", question: "What preference did the speaker tell the manager?", answer: "That they'd prefer somewhere closer to the station." },
+      { type: "reading comprehension", question: "What did the teammate ask afterwards?", answer: "If the speaker believed the bonus news." },
+    ],
+  },
+
+  indefinite_pronouns: {
+    title: "An Empty House",
+    passage: [
+      "When I got home, something felt strange. Nobody had left a note, and there was no sign of anyone in the house.",
+      "I checked everywhere, but I couldn't find anything unusual — everything seemed to be in its place. I called out, but no one answered.",
+      "I thought I heard someone in the kitchen, so I went to check, but there was nobody there either. At that point, I started imagining all sorts of things, though none of them made much sense.",
+      "I tried calling a few people, but nobody picked up, which only made things feel stranger. I couldn't think of anyone who might know what was going on.",
+      "Eventually, I found a message on the fridge: everyone had gone to a surprise party — for me! I felt silly for being so worried about nothing, especially once I realised no one had meant to scare me at all.",
+      "Looking back, I probably should have checked my phone first, since apparently someone had already texted me the details hours earlier — I just hadn't noticed.",
+    ],
+    questions: [
+      { type: "reading comprehension", question: "Had anyone left a note?", answer: "No, nobody had." },
+      { type: "reading comprehension", question: "Where did the writer think they heard someone?", answer: "In the kitchen." },
+      { type: "reading comprehension", question: "Why had everyone actually gone?", answer: "To a surprise party for the writer." },
+    ],
+  },
+
+  relative_clauses: {
+    title: "The Neighbour I'll Never Forget",
+    passage: [
+      "My old neighbour, who lived next door for twenty years, was the kind of person everyone remembers. He had a garden that was famous on our whole street, full of flowers whose names I could never remember.",
+      "The house where he lived is empty now, but I still think about the summer when he taught me to grow tomatoes.",
+      "There was a reason why everyone liked him so much: he always had time for people, no matter how busy he was. Even neighbours who barely knew him would stop by just for a chat.",
+      "He had a dog whose bark everyone on the street recognised instantly, and a shed where he kept every tool he'd ever owned, each one labelled in his own handwriting.",
+      "The day when he moved away was genuinely sad for the whole neighbourhood. It's the kind of loss where you don't realise how much someone shaped a place until they're simply not there anymore.",
+    ],
+    questions: [
+      { type: "reading comprehension", question: "How long did the neighbour live next door?", answer: "Twenty years." },
+      { type: "reading comprehension", question: "What did he teach the writer to grow?", answer: "Tomatoes." },
+      { type: "reading comprehension", question: "Why did everyone like him so much?", answer: "He always had time for people, no matter how busy he was." },
+    ],
+  },
+
+  adverbs: {
+    title: "My Brother the Perfectionist",
+    passage: [
+      "My brother does everything carefully, sometimes a little too carefully. He drives slowly and cautiously, which used to annoy me until I realised how safely he actually gets us there.",
+      "At work, he speaks calmly even under pressure, and he always explains things clearly. He cooks beautifully too — honestly, his food usually tastes better than mine!",
+      "He treats people fairly and listens patiently, which is probably why colleagues trust him so much. Even when something goes badly wrong, he responds surprisingly calmly, never raising his voice.",
+      "The only thing he does badly is relax; he works constantly and rarely takes a proper break. I keep telling him to slow down occasionally, but he just laughs and says he feels perfectly fine.",
+      "Honestly, I secretly admire how consistently he behaves, even if it occasionally drives the rest of the family slightly mad. We're hoping he'll finally take a proper holiday this year — realistically, though, I doubt it.",
+    ],
+    questions: [
+      { type: "reading comprehension", question: "How does the brother drive?", answer: "Slowly and cautiously." },
+      { type: "reading comprehension", question: "How does he speak at work, even under pressure?", answer: "Calmly." },
+      { type: "reading comprehension", question: "What does he do badly, according to the writer?", answer: "Relax." },
+    ],
+  },
+
+  intensifiers_so_such_enough: {
+    title: "A Trip to Remember",
+    passage: [
+      "The trip was so much fun that we didn't want it to end. The hotel had such a beautiful view that we spent the first evening just staring out the window.",
+      "The food was so good that we ate at the same restaurant three times. It wasn't warm enough to swim every day, unfortunately, but it was sunny enough for us to enjoy the beach anyway.",
+      "The old town was so charming that we spent an entire day just wandering the streets without any real plan. We were so tired by evening that we barely made it through dinner before falling asleep.",
+      "Our guide was such a knowledgeable person that we learned more in one afternoon than we expected to learn all week. He had such a good sense of humour, too, that even the boring parts of the tour felt entertaining.",
+      "Honestly, it was such a memorable trip that we're already planning to go back, even though it wasn't quite long enough to see absolutely everything we wanted to.",
+    ],
+    questions: [
+      { type: "reading comprehension", question: "How many times did they eat at the same restaurant?", answer: "Three times." },
+      { type: "reading comprehension", question: "Was it warm enough to swim every day?", answer: "No, it wasn't." },
+      { type: "reading comprehension", question: "What did they think of their guide?", answer: "Such a knowledgeable person." },
+    ],
+  },
+
+  double_comparatives: {
+    title: "Working From a Café",
+    passage: [
+      "The more I work from cafés, the more productive I seem to become. The busier the café gets, the harder it is to concentrate, though — so I've learned to arrive early.",
+      "The earlier I get there, the quieter it usually is. The more coffee I drink, the more focused I feel, at least for the first hour!",
+      "The bigger the table I manage to find, the more spread out I can get with my notes, which somehow makes everything feel more organised. The more organised things look, the calmer I feel about the whole day ahead.",
+      "The longer I stay, though, the more tempted I am to just chat with the staff instead of working. The friendlier they get, the harder it becomes to leave and actually go home.",
+      "The better I get at managing my time, the less guilty I feel about mixing work and relaxation like this. Honestly, the more I think about it, the less I want to go back to a normal office routine.",
+    ],
+    questions: [
+      { type: "reading comprehension", question: "Why has the writer learned to arrive early?", answer: "Because the busier the café gets, the harder it is to concentrate." },
+      { type: "reading comprehension", question: "What happens the more coffee they drink?", answer: "The more focused they feel." },
+      { type: "reading comprehension", question: "What happens the longer they stay?", answer: "The more tempted they are to chat with the staff instead of working." },
+    ],
+  },
+
+  giving_opinions: {
+    title: "A Debate Worth Having",
+    passage: [
+      "In my opinion, remote work has completely changed how people balance their lives. I tend to think it's mostly positive, though I understand it doesn't suit everyone.",
+      "If you ask me, the biggest benefit is simply not commuting every day. I strongly believe companies should offer more flexibility in general, not just for parents or carers.",
+      "As far as I'm concerned, the productivity argument is overstated too — some people work better from an office, and I don't think that should be dismissed just because remote work suits the majority.",
+      "That said, I do think there are downsides — some people find it isolating, and I can see why. From my point of view, younger employees especially lose out on mentorship they'd otherwise get naturally in person.",
+      "Personally, I believe the best solution is a hybrid model, giving people the choice rather than forcing one approach on everyone. In my experience, the companies that trust their staff to figure out what works tend to get the best results either way.",
+    ],
+    questions: [
+      { type: "reading comprehension", question: "What does the writer think is the biggest benefit of remote work?", answer: "Not commuting every day." },
+      { type: "reading comprehension", question: "What downside do they mention?", answer: "Some people find it isolating." },
+      { type: "reading comprehension", question: "What solution do they personally believe in?", answer: "A hybrid model, giving people the choice." },
+    ],
+  },
+
+  working_from_home: {
+    title: "One Year of Working From Home",
+    passage: [
+      "It's been exactly a year since I started working from home, and I have mixed feelings about it. On one hand, I've saved so much time not commuting, and I've genuinely become more productive.",
+      "On the other hand, I sometimes miss the casual conversations you only get in an office. Working from home has become increasingly popular since the pandemic, and I understand why — the flexibility is hard to give up once you've had it.",
+      "My employer has been supportive throughout, offering a small budget for home office equipment and checking in regularly to make sure everyone still feels connected to the team, even from a distance.",
+      "That said, I've had to set strict boundaries, because it's easy to end up working later than I would in an office. Some weeks I've caught myself still answering messages well into the evening, which isn't sustainable long-term.",
+      "Overall, I wouldn't go back to a five-day commute, but I do try to visit the office at least once a week just to stay connected with my team, since some conversations really are easier face to face.",
+    ],
+    questions: [
+      { type: "reading comprehension", question: "What does the writer miss about the office?", answer: "The casual conversations." },
+      { type: "reading comprehension", question: "Why has the writer had to set strict boundaries?", answer: "Because it's easy to end up working later than in an office." },
+      { type: "reading comprehension", question: "How often does the writer still visit the office?", answer: "At least once a week." },
+    ],
+  },
+
+  learning_language: {
+    title: "Six Months of Learning Portuguese",
+    passage: [
+      "I've been learning Portuguese for six months now, and it's been a rollercoaster. In the beginning, I was completely lost — even ordering coffee felt impossible.",
+      "Slowly, though, I built up my vocabulary through daily practice, mostly listening to podcasts on my commute. I've learned that consistency matters far more than long study sessions; twenty minutes a day beats a single three-hour session on a Sunday.",
+      "I also found a language exchange partner online, which has honestly made the biggest difference — having a real person to talk to, rather than just an app, keeps me accountable in a way nothing else has.",
+      "My biggest challenge has been speaking confidently, since I still translate in my head before I say anything. My teacher says that will fade with time and more real conversations, and I'm starting to believe her, since last week I managed a whole phone call without switching to English once.",
+      "For now, I'm proud of how far I've come, even if I still make plenty of mistakes. My goal is to be comfortable holding a full conversation by the time I visit Lisbon next year.",
+    ],
+    questions: [
+      { type: "reading comprehension", question: "How long has the writer been learning Portuguese?", answer: "Six months." },
+      { type: "reading comprehension", question: "How did they mostly practise?", answer: "By listening to podcasts on their commute." },
+      { type: "reading comprehension", question: "What has been their biggest challenge?", answer: "Speaking confidently." },
+    ],
+  },
+
+  career_choices: {
+    title: "Changing Careers at Thirty",
+    passage: [
+      "At thirty, I decided to leave my job in finance and retrain as a nurse — a decision that surprised almost everyone I know. I'd been interested in healthcare for years, but I was always too afraid to take the leap.",
+      "What finally convinced me was realising how unhappy I'd become, despite a good salary and a stable position. The first year of training was genuinely difficult, both financially and emotionally, but I don't regret it for a second.",
+      "My family were supportive from the start, though a few colleagues in finance seemed genuinely confused by the decision, as though giving up a comfortable career made no sense at all.",
+      "Looking back, the hardest part wasn't the studying itself, but adjusting to being a beginner again after years of feeling competent in my old role. That kind of humility turned out to be good for me in the end.",
+      "My advice to anyone considering a similar change is simple: talk to people who've already done it, and be honest with yourself about what actually matters to you, rather than what looks impressive on paper.",
+    ],
+    questions: [
+      { type: "reading comprehension", question: "What career did the writer leave, and what did they retrain as?", answer: "They left finance and retrained as a nurse." },
+      { type: "reading comprehension", question: "What finally convinced them to change careers?", answer: "Realising how unhappy they'd become." },
+      { type: "reading comprehension", question: "What advice do they give to others considering a similar change?", answer: "Talk to people who've already done it, and be honest about what matters to you." },
+    ],
+  },
+
+  time_management: {
+    title: "Getting My Mornings Under Control",
+    passage: [
+      "For years, I struggled with time management, constantly rushing from one thing to another without ever feeling in control. Everything changed when I started planning my mornings the night before.",
+      "I now prioritise my three most important tasks and avoid checking emails until at least ten o'clock. I've also learned to say no to meetings that don't really need me, which used to feel impossible.",
+      "I started using a simple paper planner rather than yet another app, since I found that writing things down by hand actually helped the plan stick better in my memory.",
+      "Procrastination is still something I battle with occasionally, especially with tasks I find boring, but breaking big projects into smaller steps has helped enormously. Setting a timer for just twenty-five minutes at a time has also made starting the hardest part feel far less overwhelming.",
+      "My advice would be to start small: one new habit at a time is far more sustainable than trying to overhaul your entire routine overnight, no matter how motivated you feel on day one.",
+    ],
+    questions: [
+      { type: "reading comprehension", question: "What changed everything for the writer?", answer: "Planning their mornings the night before." },
+      { type: "reading comprehension", question: "Until what time do they now avoid checking emails?", answer: "Ten o'clock." },
+      { type: "reading comprehension", question: "What has helped with procrastination on boring tasks?", answer: "Breaking big projects into smaller steps." },
+    ],
+  },
+
+  free_time_hobbies: {
+    title: "Finding Time for What I Love",
+    passage: [
+      "Between work and family responsibilities, finding time for hobbies used to feel like a luxury I couldn't afford. Eventually, I realised that spending even thirty minutes a day painting made a real difference to how I felt overall.",
+      "I've been doing it for almost two years now, and it's become as important to me as exercise. My friend, who's always been passionate about photography, says the same thing — having a creative outlet outside of work keeps her sane during stressful weeks.",
+      "Neither of us are particularly talented, if I'm honest, but that's never really been the point. The value seems to come from the process itself, not from producing something impressive at the end.",
+      "We've started meeting up occasionally to work on projects together, which has been a wonderful way to stay motivated. Some evenings we barely talk at all, just sit painting or editing photos side by side, and it's still one of my favourite parts of the week.",
+      "If you've been putting off a hobby because you feel too busy, I'd genuinely encourage you to just start small. Even a tiny amount of time spent on something you enjoy adds up more than people expect.",
+    ],
+    questions: [
+      { type: "reading comprehension", question: "What hobby does the writer spend thirty minutes a day on?", answer: "Painting." },
+      { type: "reading comprehension", question: "What is the friend passionate about?", answer: "Photography." },
+      { type: "reading comprehension", question: "What have they started doing together?", answer: "Meeting up to work on projects together." },
+    ],
+  },
+
+  social_media: {
+    title: "A Week Without Social Media",
+    passage: [
+      "Last month, I decided to delete social media from my phone for one week, just to see what would happen. The first two days were surprisingly hard — I kept reaching for my phone out of habit, even though there was nothing there anymore.",
+      "By day three, though, I noticed I was reading more and sleeping better. Social media has become such a huge part of daily life that most people don't even realise how much time they spend scrolling.",
+      "A few friends assumed something was wrong when I stopped replying to messages as quickly, which honestly made me realise how much I'd trained people to expect an instant response from me.",
+      "What surprised me most was how much calmer I felt without constantly comparing myself to other people's highlight reels. I hadn't even noticed how much that comparison was affecting my mood until it suddenly stopped.",
+      "I've since gone back to using it, but much more consciously — no more mindless scrolling before bed, and I've muted a few accounts that only ever made me feel worse about my own life.",
+    ],
+    questions: [
+      { type: "reading comprehension", question: "How long did the writer delete social media for?", answer: "One week." },
+      { type: "reading comprehension", question: "What did they notice by day three?", answer: "They were reading more and sleeping better." },
+      { type: "reading comprehension", question: "What surprised them most?", answer: "How much calmer they felt without comparing themselves to others." },
+    ],
+  },
+
+  reading: {
+    title: "Why I Started Reading Again",
+    passage: [
+      "I hadn't read a proper book in years until a friend recommended one during a long flight. I finished it before we even landed, and I've been hooked ever since.",
+      "I'm particularly interested in historical fiction, though I'll read almost anything if the story grabs me. Based on recommendations from an online book club, I've discovered authors I never would have picked up on my own.",
+      "I've started keeping a small notebook of every book I finish, along with a couple of lines about what I thought. It's oddly satisfying watching the list grow month by month.",
+      "Reading before bed instead of scrolling on my phone has genuinely improved my sleep too. I fall asleep faster now, and I no longer lie there thinking about whatever I just saw online.",
+      "My only regret is not starting again sooner — there are so many books I still want to read, and honestly, not nearly enough time to read them all before I add even more to the list.",
+    ],
+    questions: [
+      { type: "reading comprehension", question: "When did the writer read the book that got them hooked again?", answer: "During a long flight." },
+      { type: "reading comprehension", question: "What genre are they particularly interested in?", answer: "Historical fiction." },
+      { type: "reading comprehension", question: "What has reading before bed improved?", answer: "Their sleep." },
+    ],
+  },
+
+  city_vs_country: {
+    title: "City or Countryside? Our Family's Debate",
+    passage: [
+      "My partner and I have been debating whether to move from the city to the countryside for almost a year now. The cost of living in the city keeps rising, and honestly, the noise and traffic wear on me more than they used to.",
+      "On the other hand, the sense of community in a smaller town appeals to my partner far more than it does to me — I worry about feeling isolated, especially since most of our friends still live in the city.",
+      "We've visited a few towns to get a feel for what it might actually be like, and I have to admit, the pace of life there is genuinely appealing in a way I hadn't expected.",
+      "City life offers convenience: everything is within walking distance, and there's always something to do. Country life offers space and quiet, which sounds appealing until I remember how much I rely on being near good hospitals and public transport.",
+      "We still haven't decided, but the conversation itself has been useful — if nothing else, it's forced us to actually talk about what we each want our day-to-day life to look like in five years.",
+    ],
+    questions: [
+      { type: "reading comprehension", question: "How long have they been debating the move?", answer: "Almost a year." },
+      { type: "reading comprehension", question: "What worries the writer about the countryside?", answer: "Feeling isolated." },
+      { type: "reading comprehension", question: "Have they decided yet?", answer: "No, they still haven't." },
+    ],
+  },
+
+  subject_object_questions: {
+    title: "Detective Notes",
+    passage: [
+      "Who broke the window?",
+      "We don't know yet — that's what we're trying to find out.",
+      "Who did the neighbour see near the house last night?",
+      "She said she saw a man in a dark jacket, but she couldn't describe his face.",
+      "What happened after that?",
+      "According to her, he walked away quickly once a car passed by.",
+      "Who called the police?",
+      "The neighbour did, about ten minutes later.",
+      "What did the police find at the scene?",
+      "Just some footprints, unfortunately — nothing else useful so far.",
+      "Who lives in the house next door?",
+      "An elderly couple, though neither of them noticed anything until the neighbour mentioned it this morning.",
+      "What time did the neighbour first notice the noise?",
+      "Around midnight, she said, though she didn't think much of it until she saw the broken glass this morning.",
+      "Who's leading the investigation?",
+      "Detective Reyes is, and she's asked to speak with anyone who was out walking last night.",
+    ],
+    questions: [
+      { type: "reading comprehension", question: "Who did the neighbour see near the house?", answer: "A man in a dark jacket." },
+      { type: "reading comprehension", question: "Who called the police?", answer: "The neighbour." },
+      { type: "reading comprehension", question: "What did the police find at the scene?", answer: "Just some footprints." },
+    ],
+  },
+
+  second_conditional: {
+    title: "If I Won the Lottery...",
+    passage: [
+      "Someone asked me recently what I would do if I won the lottery, and it made me really think. If I had that much money, I probably wouldn't quit my job completely — I'd just work fewer hours.",
+      "I'd buy a small house by the coast if I could find the right place, and I'd definitely travel more than I currently do. If my friends needed help, I'd want to support them too, rather than just spending it all on myself.",
+      "If I were completely honest, I think I'd struggle to keep it a secret from my family for very long — I've never been good at hiding big news like that.",
+      "I'd probably set some of it aside for a rainy day too, if I'm being sensible, rather than spending everything all at once the way I sometimes imagine I would.",
+      "Honestly, if I'm being completely truthful, I think I'd feel a bit lost without some kind of routine, even with unlimited money. Money would solve some problems, but I don't think it would solve all of them.",
+    ],
+    questions: [
+      { type: "reading comprehension", question: "Would the writer quit their job completely if they won the lottery?", answer: "No, they'd just work fewer hours." },
+      { type: "reading comprehension", question: "What would they buy if they could find the right place?", answer: "A small house by the coast." },
+      { type: "reading comprehension", question: "How does the writer think they'd feel without a routine?", answer: "A bit lost." },
+    ],
+  },
+
+  past_continuous: {
+    title: "The Night the Power Went Out",
+    passage: [
+      "I was cooking dinner when the lights suddenly went out. My neighbours were apparently having the same problem, because I could hear them shouting from their balcony.",
+      "While I was searching for candles in the dark, I knocked over a glass of water, which didn't help the situation at all. My phone was charging at the time, so I couldn't even use the torch.",
+      "Meanwhile, my flatmate was watching a film on her laptop, so at least her battery gave us a little bit of light while we figured out what to do.",
+      "Eventually, I found some candles while my flatmate was calling the electricity company to ask what was happening. It turned out a storm was causing power cuts across the whole area, and engineers were already working to fix it.",
+      "We ended up eating dinner by candlelight, which was actually kind of romantic, in a strange way. By the time the power came back around ten, we'd almost forgotten we were waiting for it at all.",
+    ],
+    questions: [
+      { type: "reading comprehension", question: "What was the writer doing when the lights went out?", answer: "Cooking dinner." },
+      { type: "reading comprehension", question: "Why couldn't they use their phone as a torch?", answer: "Because it was charging at the time." },
+      { type: "reading comprehension", question: "What was causing the power cuts?", answer: "A storm." },
+    ],
+  },
+
+  past_perfect: {
+    title: "The Flight I Almost Missed",
+    passage: [
+      "By the time I arrived at the airport, my flight had already started boarding. I'd left home later than planned because I'd forgotten my passport and had to go back for it.",
+      "Once I got through security, I realised I hadn't printed my boarding pass, so I had to find a machine to do it there. By the time I reached the gate, most passengers had already boarded, and the staff had almost closed the doors.",
+      "A member of staff had already radioed ahead to check whether I'd made it through security, since apparently the system had flagged that I hadn't checked in properly online beforehand.",
+      "Luckily, I made it just in time, practically running the last hundred metres with my bag bouncing on my shoulder. The staff at the gate had clearly seen this kind of panic before, since they didn't seem surprised at all.",
+      "Looking back, I'd never cut it that close before, and I promised myself I would never leave packing until the last minute again — a promise I've already broken once since then, if I'm honest.",
+    ],
+    questions: [
+      { type: "reading comprehension", question: "Why had the writer left home later than planned?", answer: "Because they'd forgotten their passport." },
+      { type: "reading comprehension", question: "What had they not done before getting through security?", answer: "Printed their boarding pass." },
+      { type: "reading comprehension", question: "Did they make it onto the flight?", answer: "Yes, just in time." },
+    ],
+  },
+
+  modal_verbs: {
+    title: "Ask Before You Assume",
+    passage: [
+      "Excuse me, may I ask you something about the new policy?",
+      "Of course, go ahead.",
+      "Could I take next Friday off? I have a family event.",
+      "You should check with HR first, but it's usually fine with enough notice.",
+      "I can speak a little French, by the way — would that be useful for the client meeting?",
+      "Actually, yes! You'd better let the team know before Thursday.",
+      "Could you also tell me whether I might be able to work from home next week? My car's in the garage for a few days.",
+      "That should be fine, but you must let your manager know directly, just so it's on record for HR.",
+      "I was able to finish the report early, so I have some time to help with anything else too.",
+      "That's great — you really shouldn't have rushed it, though. Quality matters more than speed here. You mustn't feel pressured to always finish early, especially if it means cutting corners.",
+      "Understood. Might I ask one more thing — could I possibly borrow the projector for a client call this afternoon?",
+      "Of course, that shouldn't be a problem at all. Just make sure it's back in the cupboard by five.",
+    ],
+    questions: [
+      { type: "reading comprehension", question: "Why does the speaker want Friday off?", answer: "They have a family event." },
+      { type: "reading comprehension", question: "What language can the speaker speak a little of?", answer: "French." },
+      { type: "reading comprehension", question: "What did the speaker manage to finish early?", answer: "The report." },
+    ],
+  },
+
+  travel_and_holidays: {
+    title: "A Holiday That Didn't Go to Plan",
+    passage: [
+      "We arrived at the hotel expecting a sea view, but our room looked directly onto the car park instead. Determined not to let it ruin the trip, we spent most of our time exploring instead of staying at the hotel.",
+      "We looked forward to visiting the old town the most, and it didn't disappoint — the architecture was stunning. Unfortunately, we arrived at the main museum just as it closed for the day, which was disappointing.",
+      "The hotel staff, to be fair, were apologetic about the room and offered us a free breakfast for the rest of the stay, which softened the disappointment considerably.",
+      "We also got caught in a sudden downpour on our second day, which nobody had warned us about, so we ended up buying two very overpriced umbrellas from a nearby shop.",
+      "Despite the mix-ups, the local food more than made up for it, and we're already looking forward to going back one day, hopefully with a better room and slightly better luck with the weather this time.",
+    ],
+    questions: [
+      { type: "reading comprehension", question: "What did the hotel room actually look onto?", answer: "The car park." },
+      { type: "reading comprehension", question: "What did they look forward to visiting the most?", answer: "The old town." },
+      { type: "reading comprehension", question: "What made up for the mix-ups?", answer: "The local food." },
+    ],
+  },
+
+  sport_and_fitness: {
+    title: "Training for My First Marathon",
+    passage: [
+      "I've been training for my first marathon for the past four months, and it's been more demanding than I expected. If I stick to the training plan, I'll definitely be ready by race day — at least, that's what my coach keeps telling me.",
+      "The event itself is organised by a local running club, and it's held every spring in the same route through the city. Compared to when I started, I'm noticeably faster and my endurance has improved a lot.",
+      "A few of my colleagues have signed up too, which has made the whole thing more enjoyable — we've been comparing our times after every long run, half competitive and half just supportive.",
+      "I've never run more than ten kilometres before this year, so completing a full marathon will be a huge milestone for me. My coach keeps reminding me that finishing is the real achievement, not the exact time on the clock.",
+      "If everything goes to plan, I'll cross the finish line in under five hours. If I don't quite make that target, though, I'll still be proud simply for having trained this consistently for so long.",
+    ],
+    questions: [
+      { type: "reading comprehension", question: "How long has the writer been training?", answer: "Four months." },
+      { type: "reading comprehension", question: "Who organises the event?", answer: "A local running club." },
+      { type: "reading comprehension", question: "What is the longest distance they'd run before this year?", answer: "Ten kilometres." },
+    ],
+  },
+
+  relationships_and_socialising: {
+    title: "Rebuilding an Old Friendship",
+    passage: [
+      "I've known my friend Layla since university, though we lost touch for almost five years after she moved abroad. If we hadn't reconnected on social media, I doubt we'd still be in touch today.",
+      "Our friendship was organised entirely around spontaneous plans back then — nothing was ever scheduled in advance. Compared to my other friendships, ours feels different somehow, maybe because we've been through so many changes together.",
+      "These days, our conversations are arranged around time zones and shared calendars instead, which felt strange at first but has become oddly normal now that we're used to it.",
+      "If she hadn't reached out first after all those years apart, I honestly don't know if I would have — I think I assumed too much time had passed to bother trying.",
+      "If she visits next year like she's planning to, it'll be the first time we've seen each other in person in over five years. I think our bond is actually closer now than it was before she left, maybe because neither of us takes the friendship for granted anymore.",
+    ],
+    questions: [
+      { type: "reading comprehension", question: "How long did they lose touch for?", answer: "Almost five years." },
+      { type: "reading comprehension", question: "How did they reconnect?", answer: "On social media." },
+      { type: "reading comprehension", question: "How does the writer describe their bond now compared to before?", answer: "Closer now than before Layla left." },
+    ],
+  },
+
+  asking_for_clarification: {
+    title: "Lost in the Instructions",
+    passage: [
+      "Sorry, could you repeat that last part? I didn't quite catch it.",
+      "Sure — I said you need to restart the system before applying the update.",
+      "What do you mean by 'restart the system' exactly? Just the app, or the whole computer?",
+      "The whole computer, sorry for not being clearer.",
+      "Just to clarify, should I save my work first?",
+      "Yes, definitely — save everything before you restart.",
+      "Sorry, one more question — when you say 'settings menu', do you mean the one in the top corner, or the one inside the app itself?",
+      "The one in the top corner, sorry, I should have specified that from the start.",
+      "Could you go over the last step again? I want to make sure I don't miss anything.",
+      "Of course — after restarting, open the settings menu and click 'apply update'. If nothing happens after a minute, could you let me know? Sometimes it just needs a second try.",
+    ],
+    questions: [
+      { type: "reading comprehension", question: "What needs to happen before applying the update?", answer: "Restarting the system." },
+      { type: "reading comprehension", question: "Does 'restart the system' mean just the app or the whole computer?", answer: "The whole computer." },
+      { type: "reading comprehension", question: "What should you do before restarting?", answer: "Save everything." },
+    ],
+  },
+
+  agreeing_disagreeing: {
+    title: "The Office Debate",
+    passage: [
+      "I think we should move the deadline back a week.",
+      "I couldn't agree more — the team's clearly under too much pressure right now.",
+      "I'm afraid I disagree, actually. We promised the client this date, and pushing it back could damage trust.",
+      "That's a fair point, but quality matters more than speed here, in my opinion.",
+      "To some extent, I agree, but we still need to manage expectations with the client properly.",
+      "There's no doubt about it — a rushed job could cost us the account entirely if something goes wrong. That's a risk I'm not willing to take right now.",
+      "Fair enough. Maybe we could deliver an early version now and finish the rest next week?",
+      "I beg to differ, actually — splitting the delivery might confuse the client more than reassure them. I'd rather we communicate clearly instead.",
+      "I can't deny that's a reasonable point too. Let's at least propose the delay and explain our reasoning honestly, rather than deciding anything without them.",
+    ],
+    questions: [
+      { type: "reading comprehension", question: "What does the first speaker suggest?", answer: "Moving the deadline back a week." },
+      { type: "reading comprehension", question: "Why does one speaker disagree at first?", answer: "Because they promised the client this date." },
+      { type: "reading comprehension", question: "What compromise do they eventually agree on?", answer: "Delivering an early version now and finishing the rest next week." },
+    ],
+  },
+
+  question_tags: {
+    title: "Small Talk at the Bus Stop",
+    passage: [
+      "Lovely weather today, isn't it?",
+      "It really is! You're waiting for the number twelve, aren't you?",
+      "Yes, I am. It hasn't come yet, has it?",
+      "No, it's running late again. You don't live around here, do you?",
+      "I don't, actually — I'm just visiting my sister. She works nearby, doesn't she?",
+      "She does! Small world. You'll tell her I said hello, won't you?",
+      "Of course I will! You know her well, don't you?",
+      "We've been neighbours for years, so yes, quite well. You look a lot like her, don't you know?",
+      "People say that all the time! We don't sound alike at all, though, do we?",
+      "Not really, no. You must visit more often, mustn't you, if you're not from around here?",
+      "I try to, whenever I can get the time off work. The bus should be here any minute now, shouldn't it?",
+      "It really should — here it comes now, actually. Lovely chatting with you!",
+    ],
+    questions: [
+      { type: "reading comprehension", question: "Which bus is the first speaker waiting for?", answer: "The number twelve." },
+      { type: "reading comprehension", question: "Why is the visitor in the area?", answer: "To visit their sister." },
+      { type: "reading comprehension", question: "How does the second speaker know the sister?", answer: "They've been neighbours for years." },
+    ],
+  },
+
+  dependent_prepositions: {
+    title: "A Letter of Advice",
+    passage: [
+      "Dear Sam, I heard you're worried about the interview next week, so I wanted to share some advice. First, don't be afraid of asking questions — interviewers are always interested in candidates who show curiosity.",
+      "Try not to be too focused on giving a perfect answer to every question; it's fine to admit you're not familiar with something.",
+      "Be prepared to talk about a time you dealt with a difficult situation, since almost every interviewer relies on questions like that to get a real sense of how you think under pressure.",
+      "Don't be afraid to ask about the role itself either — interviewers are often impressed by candidates who seem genuinely interested in what the job actually involves day to day.",
+      "Remember that you're capable of more than you think, and you're responsible for how you present yourself, not for the outcome itself. I'm confident in your ability to do well, and I'm proud of how far you've come already. Good luck — I know you're ready for this.",
+    ],
+    questions: [
+      { type: "reading comprehension", question: "What is Sam worried about?", answer: "The interview next week." },
+      { type: "reading comprehension", question: "What are interviewers interested in, according to the letter?", answer: "Candidates who show curiosity." },
+      { type: "reading comprehension", question: "What is Sam responsible for, according to the writer?", answer: "How they present themselves." },
+    ],
+  },
+
+  articles: {
+    title: "A Story My Grandmother Told",
+    passage: [
+      "My grandmother once told me a story about the year she moved to the United States. She was a teacher at a small school near a university, and it took an hour every day just to get there.",
+      "She said the hardest part wasn't the distance, but learning a completely new culture. Money was tight in those early years, but she always said that money can't buy the kind of happiness she felt building a new life.",
+      "She remembered her first winter there vividly, since snow was something she'd never seen before moving. The cold, she said, was a shock, but the kindness of a few neighbours made it bearable.",
+      "Dogs were a comfort to her too — she always kept one, calling them the best company a person could ask for. An old photograph of her first dog still sits on her bookshelf to this day.",
+      "Looking back, she said her school was the best one she ever worked at, despite the difficult start. A university nearby even invited her to guest-lecture once, which she called one of the proudest days of her life.",
+    ],
+    questions: [
+      { type: "reading comprehension", question: "Where did the grandmother move to?", answer: "The United States." },
+      { type: "reading comprehension", question: "What did she say was the hardest part?", answer: "Learning a completely new culture." },
+      { type: "reading comprehension", question: "What comforted her, according to the story?", answer: "Dogs." },
+    ],
+  },
+
+  clauses_of_purpose: {
+    title: "A Busy Saturday of Errands",
+    passage: [
+      "I went to the pharmacy to pick up a prescription before it closed for the weekend. Afterwards, I stopped by the bakery to buy bread for Sunday's breakfast.",
+      "I also called the garage to book an appointment for an oil change, since the car's been making a strange noise. I asked specifically for a morning slot in order to avoid missing any more work than necessary.",
+      "In the evening, I turned my phone off in order not to be disturbed during dinner with my parents, which we'd planned weeks in advance specifically to catch up properly, since we hadn't seen each other in months.",
+      "My sister texted quietly so that our surprise guest wouldn't hear about the plan too early, and we arranged the whole evening carefully so as not to give anything away before the right moment.",
+      "By the time I got home, I was exhausted, but everything on my list had finally been done. I set an early alarm for tomorrow too, purely so I could actually enjoy a slow morning for once.",
+    ],
+    questions: [
+      { type: "reading comprehension", question: "Why did the writer go to the pharmacy?", answer: "To pick up a prescription." },
+      { type: "reading comprehension", question: "Why did they call the garage?", answer: "To book an appointment for an oil change." },
+      { type: "reading comprehension", question: "Why did they turn their phone off in the evening?", answer: "In order not to be disturbed during dinner with their parents." },
+    ],
+  },
+
+  clauses_of_reason: {
+    title: "Why the Trip Got Cancelled",
+    passage: [
+      "We cancelled our trip because the flights were suddenly too expensive to justify. Since we'd already booked the hotel, we had to cancel that too, which was a frustrating process.",
+      "The airline offered a refund due to the schedule changes on their end, which was at least some relief. As we'd already taken time off work, we decided to plan a smaller trip closer to home instead.",
+      "Owing to the short notice, we couldn't find anywhere quite as exciting as our original plan, but we managed to book a cosy cabin about two hours away, which turned out fine in the end.",
+      "Considering how stressful the whole situation became, we're actually glad we made the change. As a result of planning something simpler, we ended up genuinely relaxing instead of rushing between attractions the whole week.",
+      "Because of everything that happened, we've decided to book further in advance next time, just to avoid a repeat of the same problem, and we're also considering travel insurance, given how close we came to losing everything.",
+    ],
+    questions: [
+      { type: "reading comprehension", question: "Why did they cancel the trip?", answer: "Because the flights were suddenly too expensive." },
+      { type: "reading comprehension", question: "Why did the airline offer a refund?", answer: "Due to schedule changes on their end." },
+      { type: "reading comprehension", question: "What have they decided to do next time?", answer: "Book further in advance." },
+    ],
+  },
+
+  clauses_of_contrast: {
+    title: "A Difficult Year, Looking Back",
+    passage: [
+      "Despite the challenges we faced this year, our small business somehow managed to grow. Although sales were slow at the start, things picked up significantly by the summer.",
+      "In spite of losing two major clients early on, we found several new ones through word of mouth alone. The market was tough, however, we stayed committed to our original plan rather than panicking.",
+      "Nevertheless, we made a few painful decisions along the way, including cutting costs in areas we'd rather have kept. While it was uncomfortable, those choices are probably what kept us afloat.",
+      "Even though we considered giving up more than once, something always kept us going. Whereas some of our competitors closed down entirely this year, we somehow managed to hold on and even grow slightly.",
+      "Looking back, although it was one of the hardest years we've had, it also taught us more about resilience than any easier year ever could. Despite everything, we're heading into next year cautiously optimistic for the first time in a while.",
+    ],
+    questions: [
+      { type: "reading comprehension", question: "What happened to sales by the summer?", answer: "They picked up significantly." },
+      { type: "reading comprehension", question: "How did they find new clients after losing two major ones?", answer: "Through word of mouth alone." },
+      { type: "reading comprehension", question: "Did they ever consider giving up?", answer: "Yes, more than once." },
+    ],
+  },
+
+  gerunds: {
+    title: "Advice From a Personal Trainer",
+    passage: [
+      "Staying consistent is more important than training hard occasionally. I always tell my clients that skipping a single workout isn't the problem — giving up on the whole routine afterwards is.",
+      "There's no point in worrying about perfection when you're just starting out; getting started at all is the real achievement. Instead of comparing yourself to others, focus on improving your own numbers week by week.",
+      "Avoid skipping the warm-up too, even when you're short on time — I've seen far too many injuries caused by rushing straight into the hard part of a session without preparing properly first.",
+      "I'm a big believer in mixing things up too — running every single day gets boring fast, and boredom is often the real reason people quit. Consider trying a completely different activity every few weeks just to keep things interesting.",
+      "Thank you for reading this far, and here's to building a habit you'll actually keep, one small session at a time rather than one dramatic burst of motivation that fades by February.",
+    ],
+    questions: [
+      { type: "reading comprehension", question: "What does the trainer say is more important than training hard occasionally?", answer: "Staying consistent." },
+      { type: "reading comprehension", question: "What's the real achievement when just starting out?", answer: "Getting started at all." },
+      { type: "reading comprehension", question: "What does the trainer say is often the real reason people quit?", answer: "Boredom." },
+    ],
+  },
+
+  ed_ing_adjectives: {
+    title: "The Most Confusing Lecture Ever",
+    passage: [
+      "I was so bored during yesterday's lecture that I nearly fell asleep. To be fair, the topic itself sounded interesting on paper, but the delivery was incredibly confusing.",
+      "Some classmates seemed genuinely fascinated, which honestly surprised me, while others looked just as exhausted as I felt. The professor's explanation of the final example was so complicated that half the room looked completely lost by the end.",
+      "One friend of mine, who's usually the most interested person in any class, admitted afterwards that she was just as puzzled as everyone else, which was oddly reassuring to hear.",
+      "Afterwards, a few of us admitted we were embarrassed to ask questions, worried we'd sound uninterested rather than simply confused. It's a shame, really, since the professor is normally excellent at explaining even the most complicated topics clearly.",
+      "Still, I left feeling motivated to read the material myself, since clearly the lecture alone wasn't going to get the job done. If anything, feeling this confused pushed me to actually understand the topic properly for once.",
+    ],
+    questions: [
+      { type: "reading comprehension", question: "How did the writer feel during the lecture?", answer: "Bored." },
+      { type: "reading comprehension", question: "How did some classmates feel, surprising the writer?", answer: "Genuinely fascinated." },
+      { type: "reading comprehension", question: "What did the writer feel motivated to do afterwards?", answer: "Read the material themselves." },
+    ],
+  },
+
+  future_continuous: {
+    title: "This Time Next Week",
+    passage: [
+      "By this time next week, I'll be lying on a beach somewhere, finally on holiday after months of overtime. My colleagues will still be working through the usual Monday chaos back at the office, which honestly makes the holiday feel even sweeter.",
+      "My parents will be visiting relatives that same week, so the house will be completely empty apart from the cat. I won't be checking my emails at all — I've promised myself a proper break this time.",
+      "A neighbour will be feeding the cat twice a day while we're gone, which is a huge relief, since we always worry about leaving him alone for too long.",
+      "This time tomorrow, I'll still be packing and double-checking everything, wondering whether I've forgotten something important, the way I always seem to before every single trip.",
+      "But by Friday evening, I'll finally be relaxing with absolutely nothing on my schedule, probably not even thinking about what day of the week it is, which honestly sounds like the whole point of a proper holiday.",
+    ],
+    questions: [
+      { type: "reading comprehension", question: "Where will the writer be this time next week?", answer: "Lying on a beach." },
+      { type: "reading comprehension", question: "What will their colleagues still be doing?", answer: "Working through the usual Monday chaos." },
+      { type: "reading comprehension", question: "What will the writer not be doing at all?", answer: "Checking their emails." },
+    ],
+  },
+
+  describing_locations: {
+    title: "Where Should We Stay?",
+    passage: [
+      "I found a great little town for our trip. It's situated in a valley, surrounded by mountains on almost every side.",
+      "That sounds beautiful. Is it within walking distance of the train station?",
+      "Yes, actually — everything is. It's known for its old market square and its incredible local cheese.",
+      "Is it touristy, or more off the beaten track?",
+      "Definitely off the beaten track — most visitors don't even know it exists. It's home to only about two thousand people.",
+      "Perfect, that's exactly what we're looking for. Is it up-and-coming, or has it always been like this?",
+      "It's actually becoming more popular recently, so I think we should visit before it changes too much. There's also a small vineyard on the outskirts of town that's apparently worth a visit.",
+      "That sounds wonderful. Is the accommodation situated close to the centre, or would we need a car to get around?",
+      "Everything's within walking distance, honestly. Most of the guesthouses are located right on the market square itself, so you'd barely need to move to see everything.",
+      "That settles it, then — let's book it before it becomes too well known and loses what makes it special in the first place.",
+    ],
+    questions: [
+      { type: "reading comprehension", question: "What is the town surrounded by?", answer: "Mountains." },
+      { type: "reading comprehension", question: "What is it known for?", answer: "Its old market square and local cheese." },
+      { type: "reading comprehension", question: "About how many people live there?", answer: "About two thousand." },
+    ],
+  },
+
+  common_idioms: {
+    title: "Grandpa's Favourite Sayings",
+    passage: [
+      "My grandfather has a saying for everything. When something is easy, he calls it a piece of cake. If he's feeling slightly ill, he says he's a bit under the weather.",
+      "He always warns us that flights abroad can cost an arm and a leg, so he prefers holidays closer to home. When we first meet someone new at a family gathering, he's the one who breaks the ice with a joke.",
+      "If two of my cousins ever disagree about something small, he tells them not to make a mountain out of a molehill, usually while laughing at his own joke before anyone else does.",
+      "He rarely tells secrets, but once in a blue moon, he'll spill the beans about something from his past. When my brother finally passed his driving test after failing twice, grandpa said it was better late than never.",
+      "If a problem seems small on the surface, he reminds us it might just be the tip of the iceberg. Losing his old job decades ago, he always says, turned out to be a blessing in disguise, since it's what pushed him to start his own business instead.",
+    ],
+    questions: [
+      { type: "reading comprehension", question: "What does grandfather call something that's easy?", answer: "A piece of cake." },
+      { type: "reading comprehension", question: "What does he warn about flights abroad?", answer: "That they can cost an arm and a leg." },
+      { type: "reading comprehension", question: "What did losing his old job turn out to be?", answer: "A blessing in disguise." },
     ],
   },
 };
