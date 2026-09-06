@@ -10,8 +10,9 @@ import type { QuestionData } from "../types";
 //
 // Scope: A1 (25 topics) + A2 (31 topics) so far, extending level by level. Length/complexity
 // guide: A1 40-70 words (present simple/simple past only, no subordinate clauses), A2 ~70-110
-// (past simple/continuous, first conditional, used to), B1 ~120-160, B2 ~180-220, C1 ~250-320 —
-// increasing length, tense range, and abstraction per level.
+// (past simple/continuous, first conditional, used to). B1-and-up deliberately jump to
+// closer-to-authentic exam-passage length rather than a small step up from A2: B1 ~180-250 words,
+// B2 ~280-380, C1 ~400-550 — increasing length, tense range, and abstraction per level.
 export type RealWorldReading = {
   title: string;
   // One string per paragraph/message — never one giant block. LessonPlanScreen renders each as
