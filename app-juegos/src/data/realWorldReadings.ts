@@ -596,6 +596,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   making_questions: {
     title: "The Job Interview",
+    audioUrl: "/audio/real-world/making_questions.mp3",
     passage: [
       "Thank you for coming in today. First, where do you currently work?",
       "I work at a small marketing agency downtown.",
@@ -630,6 +631,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   comparatives_superlatives: {
     title: "Choosing a Laptop",
+    audioUrl: "/audio/real-world/comparatives_superlatives.mp3",
     passage: [
       "I compared three laptops before buying one. The first was cheaper than the second, but the second had a better screen.",
       "The third was the most expensive of the three, but also the fastest by far. In the end, I chose the second one — it wasn't the cheapest or the fastest, but it had the best balance of price and quality.",
@@ -659,6 +661,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   superlatives: {
     title: "Visiting the City",
+    audioUrl: "/audio/real-world/superlatives.mp3",
     passage: [
       "Welcome to our city! Here are a few highlights. The cathedral in the main square is the oldest building in the city, built over 800 years ago.",
       "Our central market is the busiest place in town, especially on weekends.",
@@ -688,6 +691,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   school_and_study: {
     title: "Exam Week Notice",
+    audioUrl: "/audio/real-world/school_and_study.mp3",
     passage: [
       "Dear students, exam week starts on Monday. You must bring your student ID to every exam, and you have to arrive at least fifteen minutes early.",
       "Mobile phones aren't allowed in the exam hall. If you miss an exam for a valid reason, you don't have to worry — just contact your teacher immediately to arrange a resit.",
@@ -717,6 +721,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   free_time_a2: {
     title: "My Weekend Hobbies",
+    audioUrl: "/audio/real-world/free_time_a2.mp3",
     passage: [
       "On weekends, I really enjoy going for long bike rides in the countryside. I also like reading, especially mystery novels — I'm currently halfway through a great one.",
       "My sister prefers painting to reading; she says it helps her relax after a busy week.",
@@ -746,6 +751,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   money_and_shopping: {
     title: "A Shopping Mix-Up",
+    audioUrl: "/audio/real-world/money_and_shopping.mp3",
     passage: [
       "Hello, I bought a pair of shoes from your shop last week, but they don't fit — they're too small. I'd like to return them for a refund, please.",
       "I still have the receipt, and the shoes are unworn, still in their original box. Could you tell me if I need to bring anything else?",
@@ -775,6 +781,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   health_and_body: {
     title: "Feeling Under the Weather",
+    audioUrl: "/audio/real-world/health_and_body.mp3",
     passage: [
       "Hey, I can't make it to the gym today — I've had a headache since this morning and my throat hurts too. I think I'm coming down with something.",
       "I took some medicine and I'm going to rest for the rest of the day. My back's also been aching a bit, probably from sitting too much at work this week.",
@@ -808,6 +815,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   making_excuses: {
     title: "Sorry I'm Late Again",
+    audioUrl: "/audio/real-world/making_excuses.mp3",
     passage: [
       "I'm so sorry I missed our meeting this morning! My alarm didn't go off, and by the time I woke up, I was already running late.",
       "Then my bus was delayed for twenty minutes, which didn't help at all. I should have set a backup alarm — I know that now.",
@@ -840,6 +848,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   conjunctions: {
     title: "A Day I'll Remember",
+    audioUrl: "/audio/real-world/conjunctions.mp3",
     passage: [
       "I wanted to go for a run yesterday, but it was raining heavily outside. Although the weather was bad, I decided to go to the gym instead, so I wouldn't break my routine.",
       "I stayed longer than planned because the classes were really enjoyable. When I got home, I was tired but happy.",
@@ -869,6 +878,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   quantifiers: {
     title: "Checking the Kitchen",
+    audioUrl: "/audio/real-world/quantifiers.mp3",
     passage: [
       "I checked the kitchen before going shopping. We don't have much milk left, and there isn't any bread at all.",
       "There are a few eggs, but not many — maybe three or four. We have a lot of pasta, so we don't need more of that.",
@@ -898,6 +908,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   modals_possibility: {
     title: "Where's Everyone?",
+    audioUrl: "/audio/real-world/modals_possibility.mp3",
     passage: [
       "Has anyone seen Tom today? His car isn't in the car park, so he might be working from home. Actually, he mentioned a dentist appointment yesterday, so that could be why he's out.",
       "Sarah isn't here either — she must be at the client meeting, since it's in her calendar.",
@@ -914,6 +925,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   present_perfect: {
     title: "Checking In on the Move",
+    audioUrl: "/audio/real-world/present_perfect.mp3",
     passage: [
       "Have you finished packing yet?",
       "Not yet — I've already packed the kitchen and the bedroom, but I haven't started on the living room. I've been putting it off because there's just so much stuff!",
@@ -932,6 +944,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   phrasal_verbs: {
     title: "An Email to the Team",
+    audioUrl: "/audio/real-world/phrasal_verbs.mp3",
     passage: [
       "Hi team, a quick update before the long weekend. I know we've all been putting off the budget review, but we really need to sort it out before next month.",
       "Could someone look into the numbers from Q1 and come up with a rough summary by Friday? I ran into James yesterday and he mentioned he's already started, so maybe team up with him rather than duplicating the work.",
@@ -949,6 +962,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   understanding_get: {
     title: "A Week of 'Get'",
+    audioUrl: "/audio/real-world/understanding_get.mp3",
     passage: [
       "This week has been a real mix. I get up earlier now that the mornings are lighter, which has been nice.",
       "My new colleague and I get on really well — we've already started getting together for lunch most days. I'm slowly getting used to the new software at work, even though it was confusing at first.",
@@ -966,6 +980,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   so_neither: {
     title: "We Have So Much in Common",
+    audioUrl: "/audio/real-world/so_neither.mp3",
     passage: [
       "I love hiking on weekends.",
       "So do I! I try to get out to the hills at least once a month.",
@@ -993,6 +1008,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   prefer_rather: {
     title: "Choosing a Restaurant",
+    audioUrl: "/audio/real-world/prefer_rather.mp3",
     passage: [
       "Where should we eat tonight?",
       "I'd rather stay in, honestly — I've had a long week. I'd prefer to order something and relax at home.",
@@ -1013,6 +1029,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   passive_simple: {
     title: "How Your Coffee Gets to You",
+    audioUrl: "/audio/real-world/passive_simple.mp3",
     passage: [
       "Coffee is grown in more than seventy countries, mostly near the equator. Once the beans are picked, they are dried and sorted by hand or machine.",
       "The beans are then shipped to roasting facilities around the world, where they are roasted at high temperatures to bring out their flavour.",
@@ -1030,6 +1047,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   get_used_to: {
     title: "Moving Abroad",
+    audioUrl: "/audio/real-world/get_used_to.mp3",
     passage: [
       "What was the hardest part of moving to a new country?",
       "Honestly, getting used to the food took the longest. I didn't use to eat spicy food at all back home, so it was a real shock at first. Now I'm completely used to it — I actually crave it!",
@@ -1049,6 +1067,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   reported_speech: {
     title: "What Did She Say?",
+    audioUrl: "/audio/real-world/reported_speech.mp3",
     passage: [
       "So what did the manager say in the meeting?",
       "She said the company was doing well this quarter, and she told us we would get an update on bonuses by the end of the month. She also said that she had already spoken to head office about it.",

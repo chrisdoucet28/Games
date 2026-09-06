@@ -7,14 +7,34 @@
 // already exist — otherwise existing clips are left untouched, so it's safe to re-run repeatedly
 // as more topics get authored, or after switching to a different ELEVENLABS_API_KEY (e.g. a
 // second account) partway through a big batch, without re-spending quota on what's already done.
+// Processes earlier levels before later ones, and within a level, grammar-focus topics before
+// vocabulary/theme ones (see priorityKey) — so a partial run driven by limited quota always
+// covers the most-used content first, not just whatever happens to sit earliest in the file.
 // Needs an ELEVENLABS_API_KEY in app-juegos/.env (git-ignored, never commit it).
 import { readFileSync, writeFileSync, existsSync, unlinkSync, readdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import { REAL_WORLD_READINGS } from "../src/data/realWorldReadings.ts";
+import { TOPIC_OPTIONS } from "../src/data/topics.ts";
 
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 const AUDIO_DIR = path.join(ROOT, "public", "audio", "real-world");
+
+// Generation priority: earlier levels first, and — per teacher feedback that grammar topics are
+// used far more than vocabulary/theme ones — grammar-focus topics before other focuses within the
+// same level. A stable sort (guaranteed since ES2019) keeps everything else in its original
+// REAL_WORLD_READINGS order, so this only reorders across level/focus boundaries, never within a
+// group. Update LEVEL_RANK if a level ever gets added beyond C1.
+const LEVEL_RANK: Record<string, number> = { A1: 0, A2: 1, B1: 2, B2: 3, C1: 4 };
+const TOPIC_META: Record<string, { level: string | null; focus: string | null }> =
+  Object.fromEntries(TOPIC_OPTIONS.map(t => [t.value, { level: t.level, focus: t.focus }]));
+
+function priorityKey(id: string): [number, number] {
+  const meta = TOPIC_META[id];
+  const levelRank = meta?.level ? LEVEL_RANK[meta.level] ?? 99 : 99;
+  const focusRank = meta?.focus === "grammar" ? 0 : 1;
+  return [levelRank, focusRank];
+}
 
 const FEMALE_VOICE = "XrExE9yKIg1WjnnlVkGX";
 const MALE_VOICE = "CwhRBWXzGAHq8TQ4Fs17";
@@ -70,6 +90,11 @@ async function main() {
   const apiKey = loadApiKey();
   const allEntries = Object.entries(REAL_WORLD_READINGS);
   const entries = force ? allEntries : allEntries.filter(([id]) => !existsSync(path.join(AUDIO_DIR, `${id}.mp3`)));
+  entries.sort((a, b) => {
+    const [al, af] = priorityKey(a[0]);
+    const [bl, bf] = priorityKey(b[0]);
+    return al !== bl ? al - bl : af - bf;
+  });
   const skipped = allEntries.length - entries.length;
   console.log(`Generating ${entries.length} clip(s)${skipped ? ` (skipping ${skipped} already present)` : ""}...`);
 
