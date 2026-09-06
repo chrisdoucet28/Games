@@ -42,6 +42,10 @@ export function LessonPlanScreen({ onBack, theme, initialTopicId, onOpenLearn, o
   const availableTopics = useMemo(() => LESSON_TOPICS.filter(t => LESSON_PLANS[t.id]), []);
   const [selectedId, setSelectedId] = useState<string | null>(initialTopicId ?? null);
   const [searchTerm, setSearchTerm] = useState("");
+  // "type" (default) keeps the Grammar/Vocabulary/Themes sections; "order" flattens each level into
+  // one single teaching sequence instead — only meaningful for levels that actually have `order`
+  // values assigned (A1 so far), but harmless (falls back to existing array order) elsewhere.
+  const [viewMode, setViewMode] = useState<"type" | "order">("type");
   const selected = selectedId ? availableTopics.find(t => t.id === selectedId) : null;
 
   if (selected) {
@@ -107,6 +111,23 @@ export function LessonPlanScreen({ onBack, theme, initialTopicId, onOpenLearn, o
           </div>
         )}
 
+        {availableTopics.length > 0 && (
+          <div style={{ display: "inline-flex", background: "white", border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, borderRadius: "999px", padding: "4px", marginBottom: "20px" }}>
+            <button
+              onClick={() => setViewMode("type")}
+              style={{ background: viewMode === "type" ? theme.accentSolid : "none", color: viewMode === "type" ? "white" : theme.accentSolid, border: "none", borderRadius: "999px", padding: "7px 16px", fontWeight: "800", fontSize: "13px", fontFamily: theme.headingFont, cursor: "pointer" }}
+            >
+              By Type
+            </button>
+            <button
+              onClick={() => setViewMode("order")}
+              style={{ background: viewMode === "order" ? theme.accentSolid : "none", color: viewMode === "order" ? "white" : theme.accentSolid, border: "none", borderRadius: "999px", padding: "7px 16px", fontWeight: "800", fontSize: "13px", fontFamily: theme.headingFont, cursor: "pointer" }}
+            >
+              Recommended Order
+            </button>
+          </div>
+        )}
+
         {availableTopics.length === 0 ? (
           <div style={{ textAlign: "center", color: "#6B7280", padding: "40px 0" }}>No lesson plans yet — check back soon.</div>
         ) : searchedTopics.length === 0 ? (
@@ -118,27 +139,53 @@ export function LessonPlanScreen({ onBack, theme, initialTopicId, onOpenLearn, o
                 <span style={{ background: LEVEL_COLOR[group.level], color: "white", borderRadius: "999px", padding: "3px 12px", fontSize: "13px", fontWeight: "800" }}>{group.level}</span>
                 <span style={{ color: "#9CA3AF", fontSize: "12px", fontWeight: "700" }}>{group.topics.length} lesson plan{group.topics.length === 1 ? "" : "s"}</span>
               </div>
-              {FOCUS_ORDER.filter(focus => group.topics.some(t => (t.meta.focus ?? "grammar") === focus)).map(focus => (
-                <div key={focus} style={{ marginBottom: "16px" }}>
-                  <div style={{ color: "#6B7280", fontSize: "12px", fontWeight: "800", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: "8px" }}>{FOCUS_LABEL[focus]}</div>
+              {viewMode === "order" ? (
+                <div>
+                  {!group.topics.some(t => t.meta.order != null) && (
+                    <div style={{ color: "#9CA3AF", fontSize: "12px", fontStyle: "italic", marginBottom: "8px" }}>
+                      No recommended order set for {group.level} yet — showing default order.
+                    </div>
+                  )}
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(200px,1fr))", gap: "10px" }}>
-                    {group.topics
-                      .filter(t => (t.meta.focus ?? "grammar") === focus)
+                    {[...group.topics]
                       .sort((a, b) => (a.meta.order ?? Number.MAX_SAFE_INTEGER) - (b.meta.order ?? Number.MAX_SAFE_INTEGER))
                       .map((t, i) => (
                         <button
                           key={t.id} onClick={() => setSelectedId(t.id)}
                           style={{ textAlign: "left", background: "white", border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, borderRadius: "12px", padding: "14px 16px", cursor: "pointer", fontFamily: "inherit", display: "flex", alignItems: "flex-start", gap: "10px" }}
                         >
-                          {t.meta.order != null && (
-                            <span style={{ background: hexToRgba(theme.accentSolid, 0.12), color: theme.accentSolid, borderRadius: "50%", width: "22px", height: "22px", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "11px", fontWeight: "800" }}>{i + 1}</span>
-                          )}
-                          <div style={{ fontWeight: "800", color: theme.heroBg[0], fontSize: "14px", fontFamily: theme.headingFont }}>{t.lesson.title}</div>
+                          <span style={{ background: hexToRgba(theme.accentSolid, 0.12), color: theme.accentSolid, borderRadius: "50%", width: "22px", height: "22px", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "11px", fontWeight: "800" }}>{i + 1}</span>
+                          <div>
+                            <div style={{ fontWeight: "800", color: theme.heroBg[0], fontSize: "14px", fontFamily: theme.headingFont }}>{t.lesson.title}</div>
+                            <div style={{ color: "#9CA3AF", fontSize: "11px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.03em", marginTop: "3px" }}>{FOCUS_LABEL[t.meta.focus ?? "grammar"]}</div>
+                          </div>
                         </button>
                       ))}
                   </div>
                 </div>
-              ))}
+              ) : (
+                FOCUS_ORDER.filter(focus => group.topics.some(t => (t.meta.focus ?? "grammar") === focus)).map(focus => (
+                  <div key={focus} style={{ marginBottom: "16px" }}>
+                    <div style={{ color: "#6B7280", fontSize: "12px", fontWeight: "800", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: "8px" }}>{FOCUS_LABEL[focus]}</div>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(200px,1fr))", gap: "10px" }}>
+                      {group.topics
+                        .filter(t => (t.meta.focus ?? "grammar") === focus)
+                        .sort((a, b) => (a.meta.order ?? Number.MAX_SAFE_INTEGER) - (b.meta.order ?? Number.MAX_SAFE_INTEGER))
+                        .map((t, i) => (
+                          <button
+                            key={t.id} onClick={() => setSelectedId(t.id)}
+                            style={{ textAlign: "left", background: "white", border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, borderRadius: "12px", padding: "14px 16px", cursor: "pointer", fontFamily: "inherit", display: "flex", alignItems: "flex-start", gap: "10px" }}
+                          >
+                            {t.meta.order != null && (
+                              <span style={{ background: hexToRgba(theme.accentSolid, 0.12), color: theme.accentSolid, borderRadius: "50%", width: "22px", height: "22px", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "11px", fontWeight: "800" }}>{i + 1}</span>
+                            )}
+                            <div style={{ fontWeight: "800", color: theme.heroBg[0], fontSize: "14px", fontFamily: theme.headingFont }}>{t.lesson.title}</div>
+                          </button>
+                        ))}
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           ))
         )}
