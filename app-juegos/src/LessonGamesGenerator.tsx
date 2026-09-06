@@ -14,6 +14,7 @@ import { Confetti } from "./components/shared/Confetti";
 import { ClassesScreen } from "./components/shared/ClassesScreen";
 import { ProfileScreen } from "./components/shared/ProfileScreen";
 import { LearnScreen } from "./components/shared/LearnScreen";
+import { LessonPlanScreen } from "./components/shared/LessonPlanScreen";
 import { LeaderboardScreen } from "./components/shared/LeaderboardScreen";
 import { BillingScreen } from "./components/shared/BillingScreen";
 import { ThemeAmbience } from "./components/shared/ThemeAmbience";
@@ -162,9 +163,13 @@ type LessonGamesGeneratorProps = {
 };
 
 export default function LessonGamesGenerator({ theme, onThemeChange, subscription, onSubscriptionChange, checkoutRedirect, initialScreen }: LessonGamesGeneratorProps) {
-  const [screen, setScreen] = useState<"welcome" | "classes" | "profile" | "learn" | "leaderboard" | "billing" | "setup" | "game-select" | "game" | "results">(
+  const [screen, setScreen] = useState<"welcome" | "classes" | "profile" | "learn" | "lessonplan" | "leaderboard" | "billing" | "setup" | "game-select" | "game" | "results">(
     checkoutRedirect ? "billing" : initialScreen ?? "welcome"
   );
+  // Set right before switching to "lessonplan" when arriving from a specific Learn lesson's
+  // "Start Lesson Plan" button — null when arriving from Learn's own "Lesson Plans" toggle
+  // instead, so LessonPlanScreen opens on its browsable index.
+  const [lessonPlanTopicId, setLessonPlanTopicId] = useState<string | null>(null);
   const isPaid = isPaidStatus(subscription.status);
   // The class this session is tied to, if any. Games started via "Start a Game" (not through "My
   // Classes") leave this null — but "Save & Exit" is still available; clicking it with no class
@@ -237,6 +242,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
       classes: "My Classes - ClassCade",
       profile: "My Profile - ClassCade",
       learn: "Learn - ClassCade",
+      lessonplan: "Lesson Plans - ClassCade",
       leaderboard: "Leaderboard - ClassCade",
       billing: "Billing - ClassCade",
     };
@@ -998,6 +1004,21 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
         onBack={() => setScreen(learnFilter ? "game-select" : "welcome")}
         theme={theme}
         filterTopicIds={learnFilter ?? undefined}
+        onOpenLessonPlan={id => { setLessonPlanTopicId(id); setScreen("lessonplan"); }}
+        onOpenLessonPlanIndex={() => { setLessonPlanTopicId(null); setScreen("lessonplan"); }}
+      />
+      <FeedbackButton />
+      <BrandBadge isPaid={isPaid} />
+    </>
+  );
+
+  if (screen === "lessonplan") return (
+    <>
+      <LessonPlanScreen
+        onBack={() => setScreen("welcome")}
+        theme={theme}
+        initialTopicId={lessonPlanTopicId}
+        onOpenLearn={() => { setLearnFilter(null); setScreen("learn"); }}
       />
       <FeedbackButton />
       <BrandBadge isPaid={isPaid} />

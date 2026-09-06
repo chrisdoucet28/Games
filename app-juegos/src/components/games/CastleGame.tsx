@@ -8,7 +8,7 @@ import { QuestionCard } from "../shared/QuestionCard";
 import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
 import { denseRank } from "../../utils/ranking";
 import { RankBadge } from "../shared/RankBadge";
-import { makeSoloCpuTeam } from "../../lib/soloOpponent";
+import { makeSoloCpuTeam, makeTeacherTeam } from "../../lib/soloOpponent";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { CASTLE_TUTORIAL_STEPS } from "../../data/tutorials/castle";
 
@@ -103,13 +103,15 @@ type CastleSnapshot = {
   rpg: Record<string | number, TeamRpg>;
   activeTeamIdx: number;
   eliminationOrder: (string | number)[];
+  // Solo-only; defaults for saves made before this field existed.
+  opponentType: "cpu" | "teacher";
 };
 
 function validateCastleSnapshot(raw: unknown, teamCount: number): CastleSnapshot | undefined {
   const s = raw as Partial<CastleSnapshot> | null | undefined;
   if (!s || typeof s.rpg !== "object" || s.rpg === null) return undefined;
   if (typeof s.activeTeamIdx !== "number" || s.activeTeamIdx < 0 || s.activeTeamIdx >= teamCount) return undefined;
-  return { rpg: s.rpg, activeTeamIdx: s.activeTeamIdx, eliminationOrder: s.eliminationOrder ?? [] };
+  return { rpg: s.rpg, activeTeamIdx: s.activeTeamIdx, eliminationOrder: s.eliminationOrder ?? [], opponentType: s.opponentType === "teacher" ? "teacher" : "cpu" };
 }
 
 const AMBIENT_PARTICLES = Array.from({ length: 14 }, (_, i) => ({
@@ -250,28 +252,43 @@ function DiceRoller({ rolling, result }: { rolling: boolean, result: number | nu
 export function CastleGame({ questions, teams: propTeams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState }: GameProps) {
   const TURN_SECONDS = 25;
 
-  // Solo play makes the CPU a real second castle — a genuine alternating-turn participant that
-  // attacks back on its own turn, not a passive target. This reuses the existing 2-team fast
-  // path (skip target-picking) unchanged, since `teams` is now genuinely length 2.
+  // Solo play makes the second castle a real alternating-turn participant — either a CPU or a
+  // live teacher — that attacks back on its own turn, not a passive target. This reuses the
+  // existing 2-team fast path (skip target-picking) unchanged, since `teams` is now genuinely
+  // length 2. Neither opponent type ever actually answers a question — only the student does —
+  // so a teacher's own "answer" phase always auto-succeeds with no prompt, same as the CPU's
+  // random-chance roll but guaranteed; the teacher still picks their own real action for real,
+  // exactly like the CPU's weighted-random action pick, just via an actual click.
   const isSolo = propTeams.length === 1;
+  const effectiveTeamCount = isSolo ? 2 : propTeams.length;
+  const resumed = useRef(validateCastleSnapshot(initialGameState, effectiveTeamCount)).current;
+  const [opponentType, setOpponentType] = useState<"cpu" | "teacher">(() => resumed?.opponentType ?? "cpu");
   const cpuRef = useRef(isSolo ? makeSoloCpuTeam() : null);
+  const teacherRef = useRef(isSolo ? makeTeacherTeam() : null);
   const [cpuScore, setCpuScore] = useState(0);
+  const [teacherScore, setTeacherScore] = useState(0);
   // Memoized so `teams` is referentially stable across renders when nothing has actually
   // changed — effects/callbacks in this file depend on `teams` by reference, and a fresh array
   // literal every render would make them re-fire (and re-setState) forever.
   const teams = useMemo(
-    () => (isSolo ? [propTeams[0], { ...cpuRef.current!, score: cpuScore }] : propTeams),
-    [isSolo, propTeams, cpuScore]
+    () => (isSolo
+      ? [propTeams[0], opponentType === "teacher" ? { ...teacherRef.current!, score: teacherScore } : { ...cpuRef.current!, score: cpuScore }]
+      : propTeams),
+    [isSolo, propTeams, opponentType, cpuScore, teacherScore]
   );
   const updateScore = (id: string | number, delta: number) => {
     if (isSolo && id === cpuRef.current?.id) { setCpuScore(s => s + delta); }
+    else if (isSolo && id === teacherRef.current?.id) { setTeacherScore(s => s + delta); }
     else { onUpdateScore(id, delta); }
   };
 
-  const resumed = useRef(validateCastleSnapshot(initialGameState, teams.length)).current;
-
+  // Seeded from propTeams plus BOTH synthetic solo opponents (not just `teams`, which only ever
+  // contains whichever one opponentType currently selects) — otherwise switching the intro-screen
+  // picker after this initializer already ran (it only runs once, at mount) would leave the
+  // newly-selected opponent's id with no rpg entry at all. The unused entry for whichever one
+  // wasn't picked is harmless, never read.
   const [rpg, setRpg] = useState<Record<string | number, TeamRpg>>(() => resumed?.rpg ?? Object.fromEntries(
-    teams.map(t => [t.id, { hp: MAX_HP, xp: 0, level: 1, mp: START_MP, maxMp: MAX_MP, shieldTurnsLeft: 0, shieldFresh: false }])
+    [...propTeams, ...(isSolo ? [cpuRef.current!, teacherRef.current!] : [])].map(t => [t.id, { hp: MAX_HP, xp: 0, level: 1, mp: START_MP, maxMp: MAX_MP, shieldTurnsLeft: 0, shieldFresh: false }])
   ));
   const [activeTeamIdx, setActiveTeamIdx] = useState(() => resumed?.activeTeamIdx ?? 0);
   const [selectedAction, setSelectedAction] = useState<ActionId | null>(null);
@@ -360,10 +377,10 @@ export function CastleGame({ questions, teams: propTeams, onUpdateScore, onEnd, 
   useEffect(() => {
     if (!serializeStateRef) return;
     serializeStateRef.current = (): CastleSnapshot => ({
-      rpg, activeTeamIdx, eliminationOrder: eliminationOrderRef.current,
+      rpg, activeTeamIdx, eliminationOrder: eliminationOrderRef.current, opponentType,
     });
     return () => { if (serializeStateRef) serializeStateRef.current = null; };
-  }, [serializeStateRef, rpg, activeTeamIdx]);
+  }, [serializeStateRef, rpg, activeTeamIdx, opponentType]);
 
   const advanceTurn = useCallback(() => {
     setRpg(prev => {
@@ -453,6 +470,18 @@ export function CastleGame({ questions, teams: propTeams, onUpdateScore, onEnd, 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSolo, phase, activeTeam.id]);
 
+  // A teacher picks their own action for real (the button below is already ungated by team
+  // identity), but never answers a real question — only the student ever does. There's no real
+  // opponent to lose to, so it always succeeds.
+  useEffect(() => {
+    if (!isSolo || phase !== "answer" || activeTeam.id !== teacherRef.current?.id) return;
+    const timer = setTimeout(() => {
+      handleCorrect();
+    }, CPU_ANSWER_MS);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSolo, phase, activeTeam.id]);
+
   const arenaStyle: React.CSSProperties = {
     margin: "-20px", padding: "20px", borderRadius: "20px", position: "relative", overflow: "hidden",
     background: "radial-gradient(circle at 30% 0%, #1E3A2F 0%, #0B0B1F 55%, #050510 100%)",
@@ -506,6 +535,25 @@ export function CastleGame({ questions, teams: propTeams, onUpdateScore, onEnd, 
             Land a hit and you might turn up a <strong style={{ display: "inline-flex", alignItems: "center", gap: "3px" }}><Icon name="apple" size={13} /> healing apple</strong> for bonus HP! The last castle standing wins!
           </div>
         </div>
+        {isSolo && (
+          <div style={{ marginBottom: "20px" }}>
+            <div style={{ fontSize: "13px", color: "#6EE7B7", fontWeight: "700", marginBottom: "10px" }}>Who do you want to play against?</div>
+            <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
+              <button onClick={() => setOpponentType("cpu")} className="castle-next-btn" style={{
+                padding: "10px 20px", borderRadius: "12px", fontWeight: "800", fontSize: "14px", cursor: "pointer",
+                border: `2px solid ${opponentType === "cpu" ? "#059669" : "rgba(255,255,255,0.2)"}`,
+                background: opponentType === "cpu" ? "rgba(5,150,105,0.15)" : "rgba(255,255,255,0.05)",
+                color: opponentType === "cpu" ? "#6EE7B7" : "#6EE7B788",
+              }}><Icon name="robot" size={14} /> CPU</button>
+              <button onClick={() => setOpponentType("teacher")} className="castle-next-btn" style={{
+                padding: "10px 20px", borderRadius: "12px", fontWeight: "800", fontSize: "14px", cursor: "pointer",
+                border: `2px solid ${opponentType === "teacher" ? "#059669" : "rgba(255,255,255,0.2)"}`,
+                background: opponentType === "teacher" ? "rgba(5,150,105,0.15)" : "rgba(255,255,255,0.05)",
+                color: opponentType === "teacher" ? "#6EE7B7" : "#6EE7B788",
+              }}><Icon name="person" size={14} /> Teacher</button>
+            </div>
+          </div>
+        )}
         <button onClick={() => setShowHowTo(true)} className="castle-next-btn" style={{ display: "block", margin: "0 auto 14px", background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
           <Icon name="help" size={14} /> How to Play
         </button>

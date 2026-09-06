@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { TeamIcon, MascotSprite } from "../shared/TeamIcon";
 import { Icon, type IconName } from "../shared/Icon";
 import { RankBadge } from "../shared/RankBadge";
-import type { GameProps, QuestionData } from "../../types";
+import type { GameProps, QuestionData, Team } from "../../types";
 import { useTurnTimer } from "../../hooks/useTurnTimer";
 import { TurnTimerBar } from "../shared/TurnTimerBar";
 import { QuestionCard } from "../shared/QuestionCard";
@@ -17,6 +17,10 @@ const TURN_SECONDS = 90;
 // turn per team felt too short on its own, per teacher feedback; 2 gives the full experience
 // without dragging the game out.
 const TOTAL_ROUNDS = 2;
+// Solo only: after the first launch, one optional bonus round for "one more launch, try to beat
+// it" — see the "One More Launch!" button on the final screen. Multi-team never reaches this;
+// TOTAL_ROUNDS stays exactly 2 for everyone as before.
+const SOLO_MAX_ROUNDS = 3;
 const POINTS_PER_CORRECT = 20;
 const LAUNCH_BONUS_BY_RANK = [50, 30, 15, 5];
 const MAX_FLIGHT_PX = 460;
@@ -24,27 +28,16 @@ const MIN_HEIGHT_FRACTION = 0.12; // even a 0-fuel rocket still visibly lifts of
 const ASCENT_MS = 14000;
 const IGNITION_MS = 550;
 const HOLD_MS = 1600;
-// Solo has no other team to measure height against — comparing to an absolute ceiling instead
-// means the flight actually reflects how many correct answers were banked, rather than always
-// maxing out.
-const SOLO_FUEL_CEILING = 12;
-// Solo's launch is a "camera locked on the rocket" flythrough. The rocket lifts off the pad
-// (see LIFTOFF_MS/groundOffsetPx below), rises to a fixed cruise position, and then never moves
-// again — from that point on, the illusion of climbing comes entirely from clouds/stars/the
-// moon/planets scrolling from the top of the frame down past the rocket and off the bottom, the
-// same direction the ground is falling away, not from anything flying "out of" the rocket
-// itself. A better run means a longer flight through more distant stages; a poor run barely
-// clears the clouds before the sequence ends. Multi-team has no use for this — with a real rival
-// to race against, seeing everyone's rocket side by side at relatively different heights (best
-// team visibly leaving the others behind) tells the story better than isolating each team in
-// its own camera, so multi-team keeps the classic shared-frame comparative climb instead.
 const LIFTOFF_MS = 1800;
-const SOLO_FLIGHT_MS_MIN = 5000;
-const SOLO_FLIGHT_MS_MAX = 16000;
-const SOLO_FLYBY_COUNT = 26;
-// How far below its cruise (frame-centered) position the rocket sits while still on the pad, for
-// a frame of the given height.
-const groundOffsetPx = (frameH: number) => frameH / 2 - 70;
+const FLYBY_COUNT = 26;
+
+// Solo tracks fuel per ROUND, not just per team — each round is raced as its own separate
+// rocket (see roundFuelRef below), so "how much fuel team X has" isn't a single number, it's one
+// number per round played. Every round but the most recent one just played renders as a muted
+// "shadow" rocket — a target from an earlier attempt this game, not a real competitor — using
+// this shared grey palette and a synthetic id so it never collides with a real team.id.
+const SHADOW_COLOR = { name: "Shadow", bg: "#94A3B8", light: "#E2E8F0", dark: "#334155", emoji: "👻" };
+const shadowRoundId = (roundNum: number) => `rocket-fuel-shadow-round-${roundNum}`;
 // Each stage's emoji pool takes over once the flight's elapsed fraction crosses `from` — later
 // stages layer in on top of earlier ones as the rocket climbs higher, exactly like passing
 // through progressively higher altitude bands.
@@ -180,22 +173,32 @@ function rankByFuel(teams: GameProps["teams"], fuelById: Record<string | number,
     .sort((a, b) => b.fuel - a.fuel);
 }
 
-// What "Save & Exit" snapshots and "Resume" restores — the round/team turn cursor and each
-// team's secret fuel count (fuel lives in a ref, not React state, since it must stay hidden
-// until the final reveal — losing it on resume would silently erase real progress, not just
-// restart the round counter). Resuming skips straight to a fresh turn for the team who was up,
-// rather than replaying the intro screen or the exact prompt that was on screen when it was saved.
+// What "Save & Exit" snapshots and "Resume" restores — the round/team turn cursor, each team's
+// secret fuel count, and (solo only) each individual round's own fuel tally (fuel lives in refs,
+// not React state, since it must stay hidden until the final reveal — losing it on resume would
+// silently erase real progress, not just restart the round counter). roundFuel is what lets a
+// resumed game still show the correct shadow rockets for rounds finished before the save.
+// Resuming skips straight to a fresh turn for the team who was up, rather than replaying the
+// intro screen or the exact prompt that was on screen when it was saved.
 type RocketFuelSnapshot = {
   teamIdx: number;
   round: number;
   fuel: Record<string | number, number>;
+  roundFuel: Record<number, number>;
 };
 
 function validateRocketFuelSnapshot(raw: unknown, teamCount: number): RocketFuelSnapshot | undefined {
   const s = raw as Partial<RocketFuelSnapshot> | null | undefined;
   if (!s || typeof s.teamIdx !== "number" || s.teamIdx < 0 || s.teamIdx >= teamCount) return undefined;
-  if (typeof s.round !== "number" || s.round < 1 || s.round > TOTAL_ROUNDS) return undefined;
-  return { teamIdx: s.teamIdx, round: s.round, fuel: s.fuel && typeof s.fuel === "object" ? s.fuel : {} };
+  // Bounded by SOLO_MAX_ROUNDS (not TOTAL_ROUNDS) since a Save & Exit mid-bonus-round would
+  // otherwise fail validation and silently discard real progress back to the intro screen.
+  if (typeof s.round !== "number" || s.round < 1 || s.round > SOLO_MAX_ROUNDS) return undefined;
+  return {
+    teamIdx: s.teamIdx,
+    round: s.round,
+    fuel: s.fuel && typeof s.fuel === "object" ? s.fuel : {},
+    roundFuel: s.roundFuel && typeof s.roundFuel === "object" ? s.roundFuel : {},
+  };
 }
 
 export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState }: GameProps) {
@@ -220,19 +223,22 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
 
   const cursorRef = useRef(0);
   const fuelRef = useRef<Record<string | number, number>>(resumed?.fuel ?? {});
+  // Solo only: each individual round's own fuel tally, kept separate from fuelRef (which stays a
+  // per-launch-cycle cumulative total used for scoring). Never reset between rounds or launches —
+  // round 1's entry survives all the way to the bonus round's launch, so it can still render as a
+  // shadow rocket there. See judge() (where it's filled in) and the launchpad render branch below
+  // (where it's read).
+  const roundFuelRef = useRef<Record<number, number>>(resumed?.roundFuel ?? {});
 
   useEffect(() => {
     if (!serializeStateRef) return;
-    serializeStateRef.current = (): RocketFuelSnapshot => ({ teamIdx, round, fuel: fuelRef.current });
+    serializeStateRef.current = (): RocketFuelSnapshot => ({ teamIdx, round, fuel: fuelRef.current, roundFuel: roundFuelRef.current });
     return () => { if (serializeStateRef) serializeStateRef.current = null; };
   }, [serializeStateRef, teamIdx, round]);
   const turnFuelRef = useRef(0);
   // Guards against double-awarding points if the launch payout fires both from the natural
   // "landing" timeout and a forced early end racing each other.
   const payoutDoneRef = useRef(false);
-  // How long solo's flythrough plays for — locked in once fuel is final (entering "launchpad"),
-  // so it stays fixed for the rest of the sequence instead of recomputing every render.
-  const soloFlightMsRef = useRef(SOLO_FLIGHT_MS_MIN);
 
   const finalizeLaunch = useCallback(() => {
     if (payoutDoneRef.current) return;
@@ -294,6 +300,9 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
       fuelRef.current[activeTeam.id] = (fuelRef.current[activeTeam.id] ?? 0) + 1;
       turnFuelRef.current += 1;
       setTurnFuel(turnFuelRef.current);
+      // Solo only — see roundFuelRef's declaration for why this is tracked separately from the
+      // cumulative fuelRef above.
+      if (teams.length === 1) roundFuelRef.current[round] = (roundFuelRef.current[round] ?? 0) + 1;
     }
     drawPrompt();
   };
@@ -313,12 +322,7 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
     if (phase !== "launchpad") return;
     setCountdown(3);
     setLaunched(false);
-    if (teams.length === 1) {
-      const soloFuel = fuelRef.current[teams[0].id] ?? 0;
-      const frac = Math.max(MIN_HEIGHT_FRACTION, Math.min(1, soloFuel / SOLO_FUEL_CEILING));
-      soloFlightMsRef.current = SOLO_FLIGHT_MS_MIN + frac * (SOLO_FLIGHT_MS_MAX - SOLO_FLIGHT_MS_MIN);
-    }
-  }, [phase, teams]);
+  }, [phase]);
 
   useEffect(() => {
     if (phase !== "launchpad") return;
@@ -336,13 +340,11 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
   useEffect(() => {
     if (phase !== "launching") return;
     const liftoffT = setTimeout(() => setLaunched(true), 50);
-    // All points — base fuel points AND the launch-rank bonus — land together right as
-    // the flight resolves, so the scoreboard stays blank through the whole simulation. Solo
-    // additionally spends LIFTOFF_MS actually rising off the pad before the flyby field takes
-    // over, so that time needs to be added on top of the flyby's own duration.
-    const isSolo = teams.length === 1;
-    const flightMs = isSolo ? LIFTOFF_MS + soloFlightMsRef.current : ASCENT_MS;
-    const finishT = setTimeout(finalizeLaunch, flightMs + HOLD_MS);
+    // All points — base fuel points AND the launch-rank bonus — land together right as the
+    // flight resolves, so the scoreboard stays blank through the whole simulation. Solo now uses
+    // the same shared-frame comparative climb as multi-team (see the render branch below), so it
+    // shares the same fixed ASCENT_MS timing too — no more fuel-scaled flight length.
+    const finishT = setTimeout(finalizeLaunch, ASCENT_MS + HOLD_MS);
     return () => { clearTimeout(liftoffT); clearTimeout(finishT); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase]);
@@ -396,7 +398,7 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
       {STYLE_TAG}
       <div style={{ position: "relative", zIndex: 1 }}>
         <div style={{ background: `linear-gradient(90deg,${activeTeam.color.dark},${activeTeam.color.bg})`, borderRadius: "14px", padding: "10px 16px", marginBottom: "14px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px", boxShadow: `0 4px 18px ${activeTeam.color.bg}55` }}>
-          <span style={{ color: "white", fontWeight: "900", fontSize: "16px", textShadow: "0 1px 3px rgba(0,0,0,0.4)", display: "inline-flex", alignItems: "center", gap: "6px" }}><Icon name="rocket" size={15} /> {activeTeam.name}'s turn — Round {round}/{TOTAL_ROUNDS}, Team {teamIdx + 1} of {teams.length}</span>
+          <span style={{ color: "white", fontWeight: "900", fontSize: "16px", textShadow: "0 1px 3px rgba(0,0,0,0.4)", display: "inline-flex", alignItems: "center", gap: "6px" }}><Icon name="rocket" size={15} /> {activeTeam.name}'s turn — {round > TOTAL_ROUNDS ? "Bonus Round" : `Round ${round}/${TOTAL_ROUNDS}`}, Team {teamIdx + 1} of {teams.length}</span>
           {phase === "team-turn" && (
             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
               <TurnTimerBar timeLeft={timeLeft} totalSeconds={TURN_SECONDS} />
@@ -454,103 +456,63 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
   );
 
   if (phase === "launchpad" || phase === "igniting" || phase === "launching") {
+    // Everyone launches side by side in one shared frame — the whole point of the comparison is
+    // seeing whoever fuelled the most visibly climb higher and leave the rest behind, which only
+    // reads correctly when every rocket shares one frame of reference and one camera. Ties in
+    // fuel end at the same height, by design.
+    //
+    // Multi-team: one rocket per real team, exactly as always.
+    //
+    // Solo: one rocket per ROUND played so far this game, not per team — round 1 becomes its own
+    // rocket, round 2 its own separate rocket, etc. (fuel is never combined across rounds; see
+    // roundFuelRef). Every round except the one just played renders as a muted "shadow" — a
+    // target from an earlier round this same game — while the round just played renders as the
+    // real, full-color team rocket. TOTAL_ROUNDS is always >= 2, so solo always has at least one
+    // shadow to race by its very first launch.
     const isSolo = teams.length === 1;
-
-    if (isSolo) {
-      // Solo's launch is a camera locked on the rocket, not a rocket climbing past a fixed
-      // camera — the rocket itself never moves in frame. See buildFlybyParticles/Flyby for the
-      // flying-past field, and soloFlightMsRef for how fuel maps to how long it plays.
-      const t = teams[0];
-      const frameH = MAX_FLIGHT_PX + 90;
-      const flightMs = soloFlightMsRef.current;
-      return (
-        <div style={{ ...arenaStyle, textAlign: "center" }}>
-          <Starfield />
-          {STYLE_TAG}
-          <div style={{ position: "relative", zIndex: 1 }}>
-            <div style={{ fontWeight: "900", fontSize: "20px", color: "#A5B4FC", marginBottom: "18px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
-              {phase === "launchpad" ? <><Icon name="satellite" size={18} /> All engines fuelled. Prepare for launch!</> : phase === "igniting" ? <><Icon name="flame" size={18} /> IGNITION...</> : <><Icon name="rocket" size={18} /> LAUNCH!</>}
-            </div>
-            <div style={{ position: "relative", height: `${frameH}px`, borderRadius: "18px", overflow: "hidden", background: "radial-gradient(ellipse at 50% 40%,#1E1B4B 0%,#030014 75%)" }}>
-              {/* Ground drops away below on liftoff, in step with the rocket rising off it —
-                  the camera is meant to be attached to the rocket, not watching it from afar. */}
-              <div style={{
-                position: "absolute", left: 0, right: 0, bottom: 0, height: "60px",
-                background: "linear-gradient(180deg,#1E293B,#0B0F17)", borderTop: "3px solid #334155",
-                transform: launched ? "translateY(140px)" : "translateY(0)",
-                opacity: launched ? 0 : 1,
-                transition: `transform ${LIFTOFF_MS}ms ease-in, opacity ${LIFTOFF_MS}ms ease-in`,
-              }} />
-
-              {phase === "igniting" && (
-                <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at 50% 100%,rgba(253,224,71,0.5),transparent 60%)", animation: `rfIgnitionFlash ${IGNITION_MS}ms ease-out` }} />
-              )}
-
-              {phase === "launching" && launched && <Flyby flightMs={flightMs} count={SOLO_FLYBY_COUNT} frameH={frameH} keyPrefix="solo" />}
-
-              {/* Starts sitting on the pad (offset down from center) and rises to its fixed
-                  cruise position over LIFTOFF_MS once launched — after that it never moves again;
-                  the flyby field above is what carries the rest of the climb. */}
-              <div style={{
-                position: "absolute", left: "50%", top: "50%",
-                transform: `translate(-50%,-50%) translateY(${launched ? 0 : groundOffsetPx(frameH)}px)`,
-                transition: `transform ${LIFTOFF_MS}ms ease-out`,
-              }}>
-                {(phase === "igniting" || (phase === "launching" && launched)) && (
-                  <div style={{ position: "absolute", left: "50%", bottom: "-18px", transform: "translateX(-50%)", animation: "rfFlameFlicker 0.15s ease-in-out infinite" }}><Icon name="flame" size={26} color="#F97316" /></div>
-                )}
-                <div style={{ position: "absolute", left: "-10px", top: "6px", filter: `drop-shadow(0 0 4px ${t.color.bg})` }}>
-                  <MascotSprite mascot={t.mascot} fallback={null} size={20} />
-                </div>
-                <div style={{ filter: `drop-shadow(0 0 10px ${t.color.bg})`, animation: phase === "launchpad" ? "none" : "rfShake 0.1s linear infinite" }}><Icon name="rocket" size={48} /></div>
-              </div>
-
-              <div style={{ position: "absolute", bottom: "14px", left: "50%", transform: "translateX(-50%)", maxWidth: "140px", background: `linear-gradient(180deg,${t.color.dark}88,#0B0B2E)`, border: `2px solid ${t.color.bg}`, borderRadius: "10px", padding: "6px 10px", fontSize: "12px", fontWeight: "800", color: "white", textAlign: "center", zIndex: 1 }}>
-                <TeamIcon team={t} color="white" /> {t.name}<br />
-                <span style={{ color: "#FDBA74", display: "inline-flex", alignItems: "center", gap: "3px" }}><Icon name="fuel" size={11} /> ???</span>
-              </div>
-            </div>
-            {phase === "launchpad" && (
-              <div key={countdown} style={{ fontSize: "64px", fontWeight: "900", color: "#A5B4FC", animation: "rfCountPulse 0.6s ease-out", textShadow: "0 4px 12px rgba(0,0,0,0.6)", marginTop: "20px" }}>
-                {countdown > 0 ? countdown : "GO!"}
-              </div>
-            )}
-          </div>
-        </div>
-      );
-    }
-
-    // Multi-team: everyone launches side by side in one shared frame — the whole point of the
-    // comparison is seeing whoever fuelled the most visibly climb higher and leave the rest
-    // behind, which only reads correctly when every rocket shares one frame of reference and
-    // one camera. Ties in fuel end at the same height, by design. Same visual language as solo
-    // (ground falling away, a single flyby field flying past everyone) — it's just one shared
-    // scene instead of an isolated one per rocket, with height doing the comparison instead of
-    // flight length.
+    const roundsThisLaunch = isSolo ? Array.from({ length: round }, (_, i) => i + 1) : [];
+    const compareTeams: Team[] = isSolo
+      ? roundsThisLaunch.map(r => r === round ? teams[0] : {
+          id: shadowRoundId(r), name: `Round ${r}`, color: SHADOW_COLOR, mascot: null, score: 0,
+        })
+      : teams;
+    // Solo reads each rocket's fuel from its own round's tally (roundFuelRef), never the
+    // cumulative fuelRef total (fuelRef stays a per-launch-cycle sum, used only for scoring).
+    // Multi-team is unaffected — it still reads the real per-team cumulative total.
+    const compareFuelById: Record<string | number, number> = isSolo
+      ? Object.fromEntries(roundsThisLaunch.map(r => [r === round ? teams[0].id : shadowRoundId(r), roundFuelRef.current[r] ?? 0]))
+      : fuelRef.current;
     // actualMaxFuel (unfloored) decides who's actually in the lead — maxFuel below is only
     // floored at 1 to keep the height-fraction division safe, and using the floored value here
     // too would make everyone "the leader" whenever the whole class scored zero.
-    const actualMaxFuel = Math.max(...teams.map(t => fuelRef.current[t.id] ?? 0));
+    const actualMaxFuel = Math.max(...compareTeams.map(t => compareFuelById[t.id] ?? 0));
     const maxFuel = Math.max(1, actualMaxFuel);
     const frameH = MAX_FLIGHT_PX + 90;
     // Everyone rises together for the first third of the climb, then the pack peels off one
     // tier at a time — dead last stalls and tumbles away first, then the next tier up, and so
     // on, so the standings reveal themselves in order instead of every loser dropping out at
     // once. Whoever's still in the lead at the end (tied leaders included, so a tie visibly ends
-    // together) never falls — it just keeps climbing to its real height.
+    // together) never falls — it just keeps climbing to its real height. A shadow with more fuel
+    // than the round just played climbs higher and stays the leader, exactly like a real rival —
+    // beating your own past rounds is not guaranteed.
     const RISE_PCT = 32;
     const FALL_STEP_PCT = 10;
     const COMMON_PX = 0.38 * MAX_FLIGHT_PX;
-    const rankById = Object.fromEntries(rankByFuel(teams, fuelRef.current).map(r => [r.team.id, r.rank]));
+    const rankById = Object.fromEntries(rankByFuel(compareTeams, compareFuelById).map(r => [r.team.id, r.rank]));
     const maxRank = Math.max(...Object.values(rankById));
     return (
       <div style={{ ...arenaStyle, textAlign: "center" }}>
         <Starfield />
         {STYLE_TAG}
         <div style={{ position: "relative", zIndex: 1 }}>
-          <div style={{ fontWeight: "900", fontSize: "20px", color: "#A5B4FC", marginBottom: "18px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+          <div style={{ fontWeight: "900", fontSize: "20px", color: "#A5B4FC", marginBottom: isSolo ? "4px" : "18px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
             {phase === "launchpad" ? <><Icon name="satellite" size={18} /> All engines fuelled. Prepare for launch!</> : phase === "igniting" ? <><Icon name="flame" size={18} /> IGNITION...</> : <><Icon name="rocket" size={18} /> LAUNCH!</>}
           </div>
+          {isSolo && (
+            <div style={{ fontSize: "13px", color: "#C4B5FD", fontWeight: "700", marginBottom: "14px" }}>
+              <Icon name="trophy" size={12} /> Round {round} vs. your earlier rounds
+            </div>
+          )}
           <div style={{ display: "flex", justifyContent: "center", alignItems: "flex-end", gap: "28px", height: `${frameH}px`, position: "relative", overflow: "hidden", borderRadius: "18px" }}>
             {/* Ground drops away below on liftoff, the same beat as solo — the camera stays
                 with the fleet as it climbs instead of watching from a fixed spot on the pad. */}
@@ -568,10 +530,10 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
 
             {/* One shared field flies past the whole fleet at once, rather than each rocket
                 getting its own — everyone's climbing through the same sky together. */}
-            {phase === "launching" && launched && <Flyby flightMs={Math.max(1000, ASCENT_MS - LIFTOFF_MS)} count={SOLO_FLYBY_COUNT} frameH={frameH} keyPrefix="fleet" />}
+            {phase === "launching" && launched && <Flyby flightMs={Math.max(1000, ASCENT_MS - LIFTOFF_MS)} count={FLYBY_COUNT} frameH={frameH} keyPrefix="fleet" />}
 
-            {teams.map(t => {
-              const fuel = fuelRef.current[t.id] ?? 0;
+            {compareTeams.map(t => {
+              const fuel = compareFuelById[t.id] ?? 0;
               const isLeader = fuel === actualMaxFuel;
               const heightFraction = Math.max(MIN_HEIGHT_FRACTION, fuel / maxFuel);
               const finalPx = heightFraction * MAX_FLIGHT_PX;
@@ -615,7 +577,11 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
                       instead of growing wide enough to overlap the neighbouring rocket's bubble. */}
                   <div style={{ position: "absolute", bottom: "0", left: "50%", transform: "translateX(-50%)", maxWidth: "94px", background: `linear-gradient(180deg,${t.color.dark}88,#0B0B2E)`, border: `2px solid ${t.color.bg}`, borderRadius: "10px", padding: "6px 10px", fontSize: "12px", fontWeight: "800", color: "white", textAlign: "center" }}>
                     <TeamIcon team={t} color="white" /> {t.name}<br />
-                    <span style={{ color: "#FDBA74", display: "inline-flex", alignItems: "center", gap: "3px" }}><Icon name="fuel" size={11} /> ???</span>
+                    {/* The round just played (and every real multi-team rocket) stays secret
+                        until the reveal — but a shadow's number is already-known history from
+                        earlier this game, not something this run could leak, so it shows
+                        straight away as the actual target to beat. */}
+                    <span style={{ color: "#FDBA74", display: "inline-flex", alignItems: "center", gap: "3px" }}><Icon name="fuel" size={11} /> {isSolo && t.id !== teams[0].id ? fuel : "???"}</span>
                   </div>
                 </div>
               );
@@ -637,6 +603,23 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
   const headline = isTie
     ? `${winners.map(w => w.team.name).join(" & ")} tied for the highest flight!`
     : `${winners[0]?.team.name}'s rocket flew the highest!`;
+  const isSolo = teams.length === 1;
+  // The round just played vs. the best of every earlier round this game — mirrors the shadow
+  // rockets shown during the launch itself. TOTAL_ROUNDS is always >= 2, so there's always at
+  // least one earlier round (round 1) to compare against by the time this screen can show.
+  const thisRoundFuel = roundFuelRef.current[round] ?? 0;
+  const pastRoundsMaxFuel = isSolo
+    ? Math.max(0, ...Array.from({ length: round - 1 }, (_, i) => roundFuelRef.current[i + 1] ?? 0))
+    : 0;
+  // One optional bonus launch, same sitting — see SOLO_MAX_ROUNDS. Never offered again after the
+  // bonus round itself (round would already be SOLO_MAX_ROUNDS by then).
+  const canLaunchAgain = isSolo && round < SOLO_MAX_ROUNDS;
+  const launchAgain = () => {
+    fuelRef.current[teams[0].id] = 0;
+    payoutDoneRef.current = false;
+    setRound(r => r + 1);
+    startTeamTurn(0);
+  };
   return (
     <div style={{ ...arenaStyle, textAlign: "center" }}>
       <Starfield />
@@ -653,11 +636,21 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
                 <div style={{ fontWeight: "800", color: "white", fontSize: "14px", marginTop: "4px" }}><TeamIcon team={t} /> {t.name}</div>
                 <div style={{ color: "#FDBA74", fontWeight: "800", fontSize: "13px", marginTop: "2px", display: "flex", alignItems: "center", justifyContent: "center", gap: "4px" }}><Icon name="fuel" size={12} /> {fuelCount} fuelled · {basePts} pts</div>
                 {bonusAwarded[t.id] > 0 && <div style={{ color: "#86EFAC", fontWeight: "700", fontSize: "12px", marginTop: "2px" }}>+{bonusAwarded[t.id]} launch bonus</div>}
+                {isSolo && (
+                  thisRoundFuel > pastRoundsMaxFuel
+                    ? <div style={{ color: "#FCD34D", fontWeight: "800", fontSize: "12px", marginTop: "4px" }}><Icon name="trophy" size={11} /> You beat your past round records!</div>
+                    : <div style={{ color: "#94A3B8", fontWeight: "700", fontSize: "12px", marginTop: "4px" }}>You didn't beat your past round records — best was {pastRoundsMaxFuel} fuel.</div>
+                )}
               </div>
             );
           })}
         </div>
-        <button onClick={onEnd} className="rf-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg,#4338CA,#818CF8)", color: "white", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "800", cursor: "pointer", transition: "transform 0.15s ease" }}><Icon name="checkeredFlag" size={16} /> End Game</button>
+        <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap" }}>
+          {canLaunchAgain && (
+            <button onClick={launchAgain} className="rf-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg,#7C3AED,#C4B5FD)", color: "white", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "800", cursor: "pointer", transition: "transform 0.15s ease" }}><Icon name="rocket" size={16} /> One More Launch!</button>
+          )}
+          <button onClick={onEnd} className="rf-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg,#4338CA,#818CF8)", color: "white", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "800", cursor: "pointer", transition: "transform 0.15s ease" }}><Icon name="checkeredFlag" size={16} /> End Game</button>
+        </div>
       </div>
     </div>
   );
