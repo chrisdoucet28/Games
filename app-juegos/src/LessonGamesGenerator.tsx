@@ -49,6 +49,7 @@ type TopicOption = {
   label: string;
   level: string | null;
   focus: string | null;
+  order?: number;
 };
 
 type TopicLibraryEntry = {
@@ -126,8 +127,12 @@ const getTopicOption = (value: string) => realTopicOptions.find(o => o.value ===
 
 const getTopicLabel = (value: string) => getTopicOption(value)?.label ?? value;
 
+// Sorted by the optional teaching-sequence `order` (levels/topics without one keep their existing
+// relative position, since Array.sort is stable and they all compare equal via the same fallback).
 const getFilteredTopicOptions = (level: string, focus: string) =>
-  realTopicOptions.filter(o => (level === "all" || o.level === level) && (focus === "all" || o.focus === focus));
+  realTopicOptions
+    .filter(o => (level === "all" || o.level === level) && (focus === "all" || o.focus === focus))
+    .sort((a, b) => (a.order ?? Number.MAX_SAFE_INTEGER) - (b.order ?? Number.MAX_SAFE_INTEGER));
 
 const getSelectedTopicEntries = (selectedTopics: string[]) =>
   selectedTopics
@@ -1440,9 +1445,9 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
             {selectedTopics.some(id => LESSONS[id]) && (
               <button
                 onClick={() => { setLearnFilter(selectedTopics.filter(id => LESSONS[id])); setLearnReturnTo("game-select"); setScreen("learn"); }}
-                style={{ background: "white", color: theme.heroBg[0], border: "none", borderRadius: "14px", padding: "14px 28px", fontSize: "16px", fontWeight: "900", cursor: "pointer", marginTop: "14px", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "8px", boxShadow: "0 6px 20px rgba(0,0,0,0.25)" }}
+                style={{ background: "white", color: theme.heroBg[0], border: "none", borderRadius: "16px", padding: "18px 36px", fontSize: "19px", fontWeight: "900", cursor: "pointer", marginTop: "16px", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "10px", boxShadow: "0 6px 20px rgba(0,0,0,0.25)" }}
               >
-                <Icon name="bookOpen" size={16} /> Review these topics
+                <Icon name="bookOpen" size={19} /> Review these topics
               </button>
             )}
           </div>

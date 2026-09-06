@@ -122,14 +122,20 @@ export function LessonPlanScreen({ onBack, theme, initialTopicId, onOpenLearn, o
                 <div key={focus} style={{ marginBottom: "16px" }}>
                   <div style={{ color: "#6B7280", fontSize: "12px", fontWeight: "800", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: "8px" }}>{FOCUS_LABEL[focus]}</div>
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(200px,1fr))", gap: "10px" }}>
-                    {group.topics.filter(t => (t.meta.focus ?? "grammar") === focus).map(t => (
-                      <button
-                        key={t.id} onClick={() => setSelectedId(t.id)}
-                        style={{ textAlign: "left", background: "white", border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, borderRadius: "12px", padding: "14px 16px", cursor: "pointer", fontFamily: "inherit" }}
-                      >
-                        <div style={{ fontWeight: "800", color: theme.heroBg[0], fontSize: "14px", fontFamily: theme.headingFont }}>{t.lesson.title}</div>
-                      </button>
-                    ))}
+                    {group.topics
+                      .filter(t => (t.meta.focus ?? "grammar") === focus)
+                      .sort((a, b) => (a.meta.order ?? Number.MAX_SAFE_INTEGER) - (b.meta.order ?? Number.MAX_SAFE_INTEGER))
+                      .map((t, i) => (
+                        <button
+                          key={t.id} onClick={() => setSelectedId(t.id)}
+                          style={{ textAlign: "left", background: "white", border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, borderRadius: "12px", padding: "14px 16px", cursor: "pointer", fontFamily: "inherit", display: "flex", alignItems: "flex-start", gap: "10px" }}
+                        >
+                          {t.meta.order != null && (
+                            <span style={{ background: hexToRgba(theme.accentSolid, 0.12), color: theme.accentSolid, borderRadius: "50%", width: "22px", height: "22px", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "11px", fontWeight: "800" }}>{i + 1}</span>
+                          )}
+                          <div style={{ fontWeight: "800", color: theme.heroBg[0], fontSize: "14px", fontFamily: theme.headingFont }}>{t.lesson.title}</div>
+                        </button>
+                      ))}
                   </div>
                 </div>
               ))}
