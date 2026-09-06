@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { hexToRgba, type Theme } from "../../data/themes";
-import { LESSON_TOPICS, LEVEL_ORDER, LEVEL_COLOR, FOCUS_ORDER, FOCUS_LABEL, type LearnTopic } from "../../data/learnTopics";
+import { LESSON_TOPICS, LEVEL_ORDER, LEVEL_COLOR, FOCUS_ORDER, FOCUS_LABEL, matchesTopicSearch, type LearnTopic } from "../../data/learnTopics";
 import { LESSON_PLANS, buildUnscrambleItems, type RoundOut, type UnscrambleItem } from "../../data/lessonPlans";
 import { REAL_WORLD_READINGS, type RealWorldReading } from "../../data/realWorldReadings";
 import { TOPIC_LIBRARY } from "../../data/topics";
@@ -17,6 +17,10 @@ type Props = {
   initialTopicId?: string | null;
   // Switches to the Learn screen (the "Learn" pill in the mode toggle below, shown on the index).
   onOpenLearn: () => void;
+  // Set by the top-level screen orchestrator so a finished lesson can hand off straight into game
+  // team setup for the same topic, skipping topic re-selection. Undefined in any context that
+  // doesn't support that handoff (there isn't one today, but the button only renders when set).
+  onPlayGameForTopic?: (topicId: string) => void;
 };
 
 const PRINT_CSS = `
@@ -34,19 +38,21 @@ function sampleByType(questions: QuestionData[], type: string, count: number): Q
   return [...pool].sort(() => Math.random() - 0.5).slice(0, count);
 }
 
-export function LessonPlanScreen({ onBack, theme, initialTopicId, onOpenLearn }: Props) {
+export function LessonPlanScreen({ onBack, theme, initialTopicId, onOpenLearn, onPlayGameForTopic }: Props) {
   const availableTopics = useMemo(() => LESSON_TOPICS.filter(t => LESSON_PLANS[t.id]), []);
   const [selectedId, setSelectedId] = useState<string | null>(initialTopicId ?? null);
+  const [searchTerm, setSearchTerm] = useState("");
   const selected = selectedId ? availableTopics.find(t => t.id === selectedId) : null;
 
   if (selected) {
     // Keyed on the topic id so picking a different topic from the index (rather than unmounting
     // the whole screen) still gets a fresh sampling of practice items and a reset slide position.
-    return <LessonPlanSlideshow key={selected.id} topic={selected} theme={theme} onBack={() => setSelectedId(null)} />;
+    return <LessonPlanSlideshow key={selected.id} topic={selected} theme={theme} onBack={() => setSelectedId(null)} onPlayGameForTopic={onPlayGameForTopic} />;
   }
 
+  const searchedTopics = availableTopics.filter(t => matchesTopicSearch(t.lesson.title, searchTerm));
   const byLevel = LEVEL_ORDER
-    .map(level => ({ level, topics: availableTopics.filter(t => t.meta.level === level) }))
+    .map(level => ({ level, topics: searchedTopics.filter(t => t.meta.level === level) }))
     .filter(g => g.topics.length > 0);
 
   return (
@@ -74,8 +80,37 @@ export function LessonPlanScreen({ onBack, theme, initialTopicId, onOpenLearn }:
           </div>
         </div>
 
+        {availableTopics.length > 0 && (
+          <div style={{ position: "relative", marginBottom: "20px" }}>
+            <Icon name="search" size={15} color="#9CA3AF" style={{ position: "absolute", left: "14px", top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+              placeholder="Search lesson plans..."
+              style={{
+                width: "100%", boxSizing: "border-box", padding: "11px 40px 11px 38px",
+                border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, borderRadius: "12px", fontSize: "14px",
+                fontWeight: "600", color: theme.heroBg[0], outline: "none",
+              }}
+            />
+            {searchTerm !== "" && (
+              <button
+                type="button"
+                onClick={() => setSearchTerm("")}
+                aria-label="Clear search"
+                style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", background: hexToRgba(theme.accentSolid, 0.12), border: "none", borderRadius: "50%", width: "22px", height: "22px", color: theme.accentSolid, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
+              >
+                <Icon name="close" size={10} />
+              </button>
+            )}
+          </div>
+        )}
+
         {availableTopics.length === 0 ? (
           <div style={{ textAlign: "center", color: "#6B7280", padding: "40px 0" }}>No lesson plans yet — check back soon.</div>
+        ) : searchedTopics.length === 0 ? (
+          <div style={{ textAlign: "center", color: "#6B7280", padding: "40px 0" }}>No topics match "{searchTerm.trim()}"</div>
         ) : (
           byLevel.map(group => (
             <div key={group.level} style={{ marginBottom: "24px" }}>
@@ -125,7 +160,7 @@ type Slide =
   | { kind: "speaking"; tasks: string[] }
   | { kind: "done" };
 
-function LessonPlanSlideshow({ topic, theme, onBack }: { topic: LearnTopic; theme: Theme; onBack: () => void }) {
+function LessonPlanSlideshow({ topic, theme, onBack, onPlayGameForTopic }: { topic: LearnTopic; theme: Theme; onBack: () => void; onPlayGameForTopic?: (topicId: string) => void }) {
   const topicData = TOPIC_LIBRARY[topic.id as keyof typeof TOPIC_LIBRARY] as { questions: QuestionData[]; cardTasks?: { task: string }[] };
   const roundOut = LESSON_PLANS[topic.id];
 
@@ -266,6 +301,9 @@ function LessonPlanSlideshow({ topic, theme, onBack }: { topic: LearnTopic; them
               <h2 style={{ fontSize: "22px", fontWeight: "900", color: theme.heroBg[0], marginBottom: "10px", fontFamily: theme.headingFont }}>Lesson complete!</h2>
               <p style={{ color: "#6B7280", fontSize: "14px", marginBottom: "20px" }}>Print this as a worksheet, or head back to try another topic.</p>
               <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap" }}>
+                {onPlayGameForTopic && (
+                  <button onClick={() => onPlayGameForTopic(topic.id)} style={nextBtnStyle}><Icon name="rocket" size={15} /> Play a Game on This Topic</button>
+                )}
                 <button onClick={() => window.print()} style={nextBtnStyle}><Icon name="printer" size={15} /> Print this lesson</button>
                 <button onClick={onBack} style={{ background: "none", border: `2px solid ${theme.accentSolid}`, color: theme.accentSolid, borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "800", cursor: "pointer", fontFamily: theme.headingFont }}>Back to Lesson Plans</button>
               </div>

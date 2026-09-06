@@ -8,6 +8,7 @@ import { PPPDiagram } from "./components/shared/PPPDiagram";
 import { TOPIC_OPTIONS, TOPIC_LIBRARY } from "./data/topics";
 import { hexToRgba, type Theme } from "./data/themes";
 import { LESSONS } from "./data/lessons";
+import { matchesTopicSearch } from "./data/learnTopics";
 
 import { ScoreBoard } from "./components/shared/ScoreBoard";
 import { Confetti } from "./components/shared/Confetti";
@@ -121,11 +122,6 @@ const DEFAULT_TEAM_NAMES = ["Team Red", "Team Blue", "Team Green", "Team Yellow"
 
 const uniqueValues = (values: string[]) => Array.from(new Set(values));
 
-const matchesTopicSearch = (label: string, search: string) => {
-  const term = search.trim().toLowerCase();
-  return term === "" || label.toLowerCase().includes(term);
-};
-
 const getTopicOption = (value: string) => realTopicOptions.find(o => o.value === value);
 
 const getTopicLabel = (value: string) => getTopicOption(value)?.label ?? value;
@@ -163,9 +159,13 @@ type LessonGamesGeneratorProps = {
 };
 
 export default function LessonGamesGenerator({ theme, onThemeChange, subscription, onSubscriptionChange, checkoutRedirect, initialScreen }: LessonGamesGeneratorProps) {
-  const [screen, setScreen] = useState<"welcome" | "classes" | "profile" | "learn" | "lessonplan" | "leaderboard" | "billing" | "setup" | "game-select" | "game" | "results">(
+  const [screen, setScreen] = useState<"welcome" | "classes" | "profile" | "learn" | "lessonplan" | "leaderboard" | "billing" | "topic-select" | "team-setup" | "game-select" | "game" | "results">(
     checkoutRedirect ? "billing" : initialScreen ?? "welcome"
   );
+  // Where Learn's own "Back" should return to — it can now be reached from 3 different places
+  // (the welcome screen's own Learn button, game-select's "Review these topics", and results'
+  // "Review these topics"), so a single learnFilter-based binary no longer captures it.
+  const [learnReturnTo, setLearnReturnTo] = useState<"welcome" | "game-select" | "results">("welcome");
   // Set right before switching to "lessonplan" when arriving from a specific Learn lesson's
   // "Start Lesson Plan" button — null when arriving from Learn's own "Lesson Plans" toggle
   // instead, so LessonPlanScreen opens on its browsable index.
@@ -235,7 +235,8 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
   useEffect(() => {
     const titles: Record<typeof screen, string> = {
       welcome: "ClassCade",
-      setup: "Game Setup - ClassCade",
+      "topic-select": "Choose Topics - ClassCade",
+      "team-setup": "Team Setup - ClassCade",
       "game-select": "Choose a Game - ClassCade",
       game: selectedGame ? `${selectedGame.name} - ClassCade` : "ClassCade",
       results: "Results - ClassCade",
@@ -452,7 +453,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
       });
       setTeams(cls.teams);
     }
-    setScreen("setup");
+    setScreen("topic-select");
   };
 
   // "Resume" from My Classes — skips setup/game-select entirely and drops straight back into
@@ -654,14 +655,18 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     )
   );
 
-  const handleSetup = () => {
+  // Topic-select's "Continue" — the only validation that ever belonged to topic selection, not
+  // team setup, so it moves with the split rather than staying on handleSetup below.
+  const handleContinueToTeamSetup = () => {
     setLoadError("");
-
     if (selectedTopics.length === 0) {
       setLoadError("Choose at least one topic.");
       return;
     }
+    setScreen("team-setup");
+  };
 
+  const handleSetup = () => {
     const existingScores = Object.fromEntries(teams.map(t => [t.name, t.score]));
     const builtTeams = teamNames.slice(0, numTeams).map((name, i) => ({
       id: i, name, color: TEAM_COLORS[teamColors[i] ?? i], mascot: teamMascots[i] ?? null,
@@ -933,18 +938,27 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
             </div>
           ))}
         </div>
-        <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
-          <button onClick={() => { setActiveClassId(null); setScreen("setup"); }} style={{ background: `linear-gradient(135deg,${theme.cta[0]},${theme.cta[1]})`, color: "white", border: "none", borderRadius: "16px", padding: "18px 56px", fontSize: "20px", fontWeight: "900", cursor: "pointer", boxShadow: `0 8px 32px ${hexToRgba(theme.cta[1], 0.45)}`, letterSpacing: "0.01em", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "8px" }}><Icon name="rocket" size={20} /> Start a Game</button>
-          <button onClick={() => setScreen("classes")} style={{ background: "rgba(255,255,255,0.12)", border: "2px solid rgba(255,255,255,0.3)", color: "white", borderRadius: "16px", padding: "18px 40px", fontSize: "18px", fontWeight: "800", cursor: "pointer", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "8px" }}><Icon name="books" size={18} /> My Classes</button>
-          <button onClick={() => { setLearnFilter(null); setScreen("learn"); }} style={{ background: "rgba(255,255,255,0.12)", border: "2px solid rgba(255,255,255,0.3)", color: "white", borderRadius: "16px", padding: "18px 40px", fontSize: "18px", fontWeight: "800", cursor: "pointer", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "8px" }}><Icon name="learn" size={18} /> Learn</button>
-          <button onClick={() => setScreen("leaderboard")} style={{ background: "rgba(255,255,255,0.12)", border: "2px solid rgba(255,255,255,0.3)", color: "white", borderRadius: "16px", padding: "18px 40px", fontSize: "18px", fontWeight: "800", cursor: "pointer", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "8px" }}><Icon name="trophy" size={18} /> Leaderboard</button>
-          <button onClick={() => setScreen("profile")} style={{ background: "rgba(255,255,255,0.12)", border: "2px solid rgba(255,255,255,0.3)", color: "white", borderRadius: "16px", padding: "18px 40px", fontSize: "18px", fontWeight: "800", cursor: "pointer", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "8px" }}><Icon name="person" size={18} /> My Profile</button>
+        {/* Primary fork: "games or lesson plans" is the first real decision after login — both
+            equally weighted (same size/padding/font-weight), distinguished only by which gradient
+            each uses, so neither reads as the "default" choice over the other. */}
+        <div style={{ display: "flex", gap: "16px", justifyContent: "center", flexWrap: "wrap", marginBottom: "18px" }}>
+          <button onClick={() => { setActiveClassId(null); setScreen("topic-select"); }} style={{ background: `linear-gradient(135deg,${theme.cta[0]},${theme.cta[1]})`, color: "white", border: "none", borderRadius: "16px", padding: "18px 48px", fontSize: "20px", fontWeight: "900", cursor: "pointer", boxShadow: `0 8px 32px ${hexToRgba(theme.cta[1], 0.45)}`, letterSpacing: "0.01em", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "8px" }}><Icon name="rocket" size={20} /> Start a Game</button>
+          <button onClick={() => { setLessonPlanTopicId(null); setScreen("lessonplan"); }} style={{ background: `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "16px", padding: "18px 48px", fontSize: "20px", fontWeight: "900", cursor: "pointer", boxShadow: `0 8px 32px ${hexToRgba(theme.accent[1], 0.45)}`, letterSpacing: "0.01em", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "8px" }}><Icon name="school" size={20} /> Lesson Plans</button>
+        </div>
+
+        {/* Secondary toolbar: one shared quiet pill (not 4-5 independent bordered buttons) so this
+            reads as a lower-priority row instead of competing with the primary fork above it. */}
+        <div style={{ display: "inline-flex", alignItems: "center", gap: "2px", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: "999px", padding: "6px", flexWrap: "wrap", justifyContent: "center" }}>
+          <button onClick={() => setScreen("classes")} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.75)", borderRadius: "999px", padding: "10px 18px", fontSize: "14px", fontWeight: "700", cursor: "pointer", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px" }}><Icon name="books" size={14} /> My Classes</button>
+          <button onClick={() => { setLearnFilter(null); setLearnReturnTo("welcome"); setScreen("learn"); }} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.75)", borderRadius: "999px", padding: "10px 18px", fontSize: "14px", fontWeight: "700", cursor: "pointer", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px" }}><Icon name="learn" size={14} /> Learn</button>
+          <button onClick={() => setScreen("leaderboard")} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.75)", borderRadius: "999px", padding: "10px 18px", fontSize: "14px", fontWeight: "700", cursor: "pointer", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px" }}><Icon name="trophy" size={14} /> Leaderboard</button>
+          <button onClick={() => setScreen("profile")} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.75)", borderRadius: "999px", padding: "10px 18px", fontSize: "14px", fontWeight: "700", cursor: "pointer", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px" }}><Icon name="person" size={14} /> My Profile</button>
           {/* Hidden during the free-launch phase — see FREE_LAUNCH_ALL_PREMIUM in data/constants.ts.
               Everyone already has premium, so there's nothing useful for this button to show (and
               clicking into BillingScreen would render a confusing paid-but-no-real-subscription
               state). Just delete this guard clause to bring it back once billing is re-enabled. */}
           {!FREE_LAUNCH_ALL_PREMIUM && (
-            <button onClick={() => setScreen("billing")} style={{ background: "rgba(255,255,255,0.12)", border: "2px solid rgba(255,255,255,0.3)", color: "white", borderRadius: "16px", padding: "18px 40px", fontSize: "18px", fontWeight: "800", cursor: "pointer", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "8px" }}><Icon name="gem" size={18} /> {isPaid ? "My Plan" : "Upgrade"}</button>
+            <button onClick={() => setScreen("billing")} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.75)", borderRadius: "999px", padding: "10px 18px", fontSize: "14px", fontWeight: "700", cursor: "pointer", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px" }}><Icon name="gem" size={14} /> {isPaid ? "My Plan" : "Upgrade"}</button>
           )}
         </div>
       </div>
@@ -1001,7 +1015,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
   if (screen === "learn") return (
     <>
       <LearnScreen
-        onBack={() => setScreen(learnFilter ? "game-select" : "welcome")}
+        onBack={() => setScreen(learnReturnTo)}
         theme={theme}
         filterTopicIds={learnFilter ?? undefined}
         onOpenLessonPlan={id => { setLessonPlanTopicId(id); setScreen("lessonplan"); }}
@@ -1018,14 +1032,22 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
         onBack={() => setScreen("welcome")}
         theme={theme}
         initialTopicId={lessonPlanTopicId}
-        onOpenLearn={() => { setLearnFilter(null); setScreen("learn"); }}
+        onOpenLearn={() => { setLearnFilter(null); setLearnReturnTo("welcome"); setScreen("learn"); }}
+        onPlayGameForTopic={(topicId) => {
+          setSelectedTopics([topicId]);
+          const opt = getTopicOption(topicId);
+          if (opt?.level) setLevel(opt.level);
+          if (opt?.focus) setFocus(opt.focus);
+          setActiveClassId(null);
+          setScreen("team-setup");
+        }}
       />
       <FeedbackButton />
       <BrandBadge isPaid={isPaid} />
     </>
   );
 
-  if (screen === "setup") {
+  if (screen === "topic-select") {
     const filteredTopics = getFilteredTopicOptions(level, focus).filter(o => matchesTopicSearch(o.label, topicSearch));
     const TOPIC_DEFAULT_CAP = 30;
     const isSearchingTopics = topicSearch.trim() !== "";
@@ -1185,192 +1207,10 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
             )}
           </div>
 
-          <div style={{ background: "white", border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, borderRadius: "16px", padding: "clamp(14px,4vw,20px)", marginBottom: "16px" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px", flexWrap: "wrap" }}>
-              <div style={{ background: theme.accentSolid, color: "white", borderRadius: "50%", width: "28px", height: "28px", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "900", fontSize: "14px", flexShrink: 0 }}>4</div>
-              <div style={{ fontWeight: "800", color: theme.heroBg[0], fontSize: "16px", fontFamily: theme.headingFont, flex: 1, minWidth: "140px" }}>How many teams?</div>
-              <button
-                onClick={handleSaveTeamsToRoster} disabled={rosterSaveStatus === "saving"}
-                title={activeClassId ? "Save these team names/colors/mascots to this class, without picking a topic or game" : "Pick or create a class to save these teams to"}
-                style={{
-                  background: rosterSaveStatus === "saved" ? "#DCFCE7" : "none",
-                  border: `2px solid ${rosterSaveStatus === "saved" ? "#22C55E" : "#D1D5DB"}`,
-                  borderRadius: "20px", padding: "4px 14px", fontWeight: "700", fontSize: "12px",
-                  color: rosterSaveStatus === "saved" ? "#166534" : "#9CA3AF",
-                  cursor: rosterSaveStatus === "saving" ? "default" : "pointer", flexShrink: 0,
-                  display: "inline-flex", alignItems: "center", gap: "5px",
-                }}
-              >
-                {rosterSaveStatus === "saving" ? "Saving…" : rosterSaveStatus === "saved" ? <><Icon name="check" size={12} /> Saved!</> : <><Icon name="save" size={12} /> Save teams to class</>}
-              </button>
-              <button onClick={() => resetTeamsToNormal()} title="0 points, no mascots, original colors and names" style={{ background: "none", border: "2px solid #D1D5DB", borderRadius: "20px", padding: "4px 14px", fontWeight: "700", fontSize: "12px", color: "#9CA3AF", cursor: "pointer", flexShrink: 0, display: "inline-flex", alignItems: "center", gap: "5px" }}><Icon name="refresh" size={12} /> Reset teams to normal</button>
-            </div>
-            {activeClassId && teamRoster.length > 0 && (
-              <div style={{ marginBottom: "14px" }}>
-                <div style={{ fontSize: "12px", fontWeight: "700", color: "#6B7280", marginBottom: "6px", display: "flex", alignItems: "center", gap: "5px" }}>
-                  <Icon name="folder" size={13} /> Saved teams for this class — tap to bring in today
-                </div>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
-                  {teamRoster.map(entry => {
-                    const isActive = isRosterTeamActive(entry);
-                    const cap = isPaid ? 5 : FREE_PLAN_LIMITS.maxTeams;
-                    const locked = !isActive && numTeams >= cap;
-                    return (
-                      <div key={entry.id} style={{ position: "relative" }}>
-                        <button
-                          type="button"
-                          onClick={() => locked ? setScreen("billing") : toggleRosterTeam(entry)}
-                          title={locked ? `Free plan is limited to ${cap} teams — upgrade to unlock more` : undefined}
-                          style={{
-                            background: isActive ? entry.color.bg : "#F0F9FF",
-                            color: isActive ? "white" : "#374151",
-                            border: `2px solid ${isActive ? entry.color.bg : "#D1D5DB"}`,
-                            borderRadius: "999px", padding: "8px 16px 8px 12px", cursor: "pointer",
-                            fontWeight: isActive ? "800" : "700", fontSize: "13px", opacity: locked ? 0.5 : 1,
-                          }}
-                        >
-                          <TeamIcon team={entry} color={isActive ? "white" : undefined} /> {entry.name}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={(e) => { e.stopPropagation(); removeFromRoster(entry); }}
-                          title="Remove from saved teams"
-                          style={{
-                            position: "absolute", top: "-6px", right: "-6px", width: "18px", height: "18px", borderRadius: "50%",
-                            background: "#EF4444", color: "white", border: "2px solid white", fontSize: "10px", lineHeight: 1, cursor: "pointer",
-                            padding: 0, display: "flex", alignItems: "center", justifyContent: "center",
-                          }}
-                        ><Icon name="close" size={9} /></button>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-            <div style={{ display: "flex", gap: "10px", marginBottom: "16px", flexWrap: "wrap", alignItems: "center" }}>
-              {[1, 2, 3, 4, 5].map(n => {
-                const locked = !isPaid && n > FREE_PLAN_LIMITS.maxTeams;
-                return (
-                  <button
-                    key={n}
-                    onClick={() => locked ? setScreen("billing") : setNumTeams(n)}
-                    title={locked ? `Free plan is limited to ${FREE_PLAN_LIMITS.maxTeams} teams — upgrade to unlock more` : undefined}
-                    style={{ background: numTeams === n ? theme.accentSolid : "white", color: numTeams === n ? "white" : locked ? "#9CA3AF" : "#374151", border: `3px solid ${numTeams === n ? theme.accentSolid : "#D1D5DB"}`, borderRadius: "12px", padding: "10px 24px", fontSize: "18px", fontWeight: "800", cursor: "pointer", opacity: locked ? 0.6 : 1, display: "inline-flex", alignItems: "center", gap: "5px" }}
-                  >
-                    {locked && <Icon name="lock" size={13} />}{n}
-                  </button>
-                );
-              })}
-              {!isPaid && (
-                <span style={{ color: "#9CA3AF", fontSize: "12px", fontWeight: "700", display: "inline-flex", alignItems: "center", gap: "5px" }}><Icon name="gem" size={13} /> Upgrade for up to 5 teams</span>
-              )}
-            </div>
-            <div style={{ display: "grid", gridTemplateColumns: `repeat(auto-fit,minmax(${numTeams > 3 ? "160px" : "180px"},1fr))`, gap: "12px" }}>
-              {Array.from({ length: numTeams }).map((_, i) => {
-                const color = TEAM_COLORS[teamColors[i] ?? i];
-
-                return (
-                  <div key={i} style={{ border: `3px solid ${color.bg}`, borderRadius: "14px", overflow: "hidden", background: "white" }}>
-                    <div style={{ background: color.bg, padding: "8px 10px", display: "flex", alignItems: "center", gap: "6px" }}>
-                      <TeamIcon team={{ mascot: teamMascots[i], color }} size={16} color="white" />
-                      <span style={{ color: "white", fontWeight: "800", fontSize: "13px" }}>{color.name}</span>
-                    </div>
-                    <input
-                      value={teamNames[i]}
-                      onChange={e => {
-                        const next = [...teamNames];
-                        next[i] = e.target.value;
-                        setTeamNames(next);
-                      }}
-                      style={{
-                        width: "100%",
-                        padding: "10px 12px",
-                        fontSize: "14px",
-                        fontWeight: "700",
-                        border: "none",
-                        borderBottom: `2px solid ${color.bg}20`,
-                        color: color.dark,
-                        background: color.light,
-                        outline: "none",
-                        boxSizing: "border-box"
-                      }}
-                      placeholder="Team name..."
-                    />
-                    <div style={{ background: color.light, padding: "8px 10px", display: "flex", flexWrap: "wrap", gap: "6px" }}>
-                      {TEAM_COLORS.map((swatch, swatchIndex) => (
-                        <button
-                          key={swatchIndex}
-                          type="button"
-                          onClick={() => {
-                            const next = [...teamColors];
-                            next[i] = swatchIndex;
-                            setTeamColors(next);
-                          }}
-                          title={swatch.name}
-                          aria-label={`${teamNames[i] || `Team ${i + 1}`} color ${swatch.name}`}
-                          style={{
-                            width: "24px",
-                            height: "24px",
-                            borderRadius: "50%",
-                            background: swatch.bg,
-                            cursor: "pointer",
-                            border: teamColors[i] === swatchIndex ? `3px solid ${swatch.dark}` : `2px solid ${swatch.bg}`,
-                            transform: teamColors[i] === swatchIndex ? "scale(1.25)" : "scale(1)",
-                            transition: "all 0.15s",
-                            flexShrink: 0,
-                            boxShadow: teamColors[i] === swatchIndex ? `0 0 0 2px white, 0 0 0 4px ${swatch.bg}` : "none"
-                          }}
-                        />
-                      ))}
-                    </div>
-                    {expandedMascotTeam === i ? (
-                      <div style={{ background: "white", padding: "8px 10px", borderTop: `1px solid ${color.bg}20` }}>
-                        <div style={{ display: "flex", flexWrap: "wrap", gap: "4px", marginBottom: "6px" }}>
-                          <button
-                            type="button" title="No mascot"
-                            onClick={() => { const next = [...teamMascots]; next[i] = null; setTeamMascots(next); setExpandedMascotTeam(null); }}
-                            style={{ width: "28px", height: "28px", borderRadius: "8px", color: "#9CA3AF", background: teamMascots[i] == null ? "#F3F4F6" : "transparent", border: teamMascots[i] == null ? `2px solid ${color.bg}` : "1px solid #E5E7EB", cursor: "pointer", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}
-                          ><Icon name="close" size={12} /></button>
-                          {MASCOT_OPTIONS.map(m => (
-                            <button
-                              key={m} type="button" title={m}
-                              onClick={() => { const next = [...teamMascots]; next[i] = m; setTeamMascots(next); setExpandedMascotTeam(null); }}
-                              style={{
-                                width: "28px", height: "28px", borderRadius: "8px", cursor: "pointer", flexShrink: 0,
-                                background: teamMascots[i] === m ? color.light : "transparent",
-                                border: teamMascots[i] === m ? `2px solid ${color.bg}` : "1px solid transparent",
-                                display: "flex", alignItems: "center", justifyContent: "center",
-                              }}
-                            ><MascotIcon name={MASCOT_ICON_BY_EMOJI[m]} size={20} /></button>
-                          ))}
-                        </div>
-                        <button type="button" onClick={() => setExpandedMascotTeam(null)} style={{ background: "none", border: "none", color: "#6B7280", fontWeight: "700", fontSize: "12px", cursor: "pointer", padding: "2px 0" }}>
-                          Done
-                        </button>
-                      </div>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => setExpandedMascotTeam(i)}
-                        style={{ width: "100%", boxSizing: "border-box", background: "white", padding: "8px 10px", borderTop: `1px solid ${color.bg}20`, borderLeft: "none", borderRight: "none", borderBottom: "none", display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", textAlign: "left" }}
-                      >
-                        {teamMascots[i] ? <MascotIcon name={MASCOT_ICON_BY_EMOJI[teamMascots[i]!]} size={20} /> : <Icon name="close" size={14} color="#9CA3AF" />}
-                        <span style={{ fontSize: "12px", fontWeight: "700", color: "#374151", flex: 1 }}>
-                          {teamMascots[i] ? MASCOT_ICON_BY_EMOJI[teamMascots[i]!].replace(/^./, c => c.toUpperCase()) : "No mascot"}
-                        </span>
-                        <span style={{ fontSize: "12px", fontWeight: "800", color: color.bg }}>Change</span>
-                      </button>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
           {loadError && <div style={{ color: "#DC2626", fontWeight: "800", textAlign: "center", marginBottom: "12px" }}>{loadError}</div>}
 
-          <button onClick={handleSetup} disabled={selectedTopics.length === 0} style={{ width: "100%", background: selectedTopics.length === 0 ? "#CBD5E1" : `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "16px", padding: "18px", fontSize: "20px", fontWeight: "900", cursor: selectedTopics.length === 0 ? "not-allowed" : "pointer", fontFamily: theme.headingFont, display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
-            <Icon name="controller" size={20} /> Choose a Game!
+          <button onClick={handleContinueToTeamSetup} disabled={selectedTopics.length === 0} style={{ width: "100%", background: selectedTopics.length === 0 ? "#CBD5E1" : `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "16px", padding: "18px", fontSize: "20px", fontWeight: "900", cursor: selectedTopics.length === 0 ? "not-allowed" : "pointer", fontFamily: theme.headingFont, display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+            Continue <Icon name="next" size={20} />
           </button>
         </div>
         <FeedbackButton />
@@ -1378,6 +1218,207 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
       </div>
     );
   }
+
+  if (screen === "team-setup") return (
+    <div style={{ minHeight: "100vh", background: "#F0F9FF", padding: "clamp(10px,4vw,20px)", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
+      {renderSavePicker()}
+      <div style={{ maxWidth: "900px", margin: "0 auto" }}>
+        <button onClick={() => setScreen("topic-select")} style={{ background: "none", border: `2px solid ${theme.accentSolid}`, color: theme.accentSolid, borderRadius: "10px", padding: "8px 16px", cursor: "pointer", fontWeight: "700", marginBottom: "20px", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px" }}><Icon name="back" size={13} /> Back</button>
+
+        <div style={{ textAlign: "center", marginBottom: "28px" }}>
+          <h2 style={{ fontSize: "32px", fontWeight: "900", color: theme.heroBg[0], margin: 0, fontFamily: theme.headingFont, display: "flex", alignItems: "center", justifyContent: "center", gap: "10px" }}><Icon name="people" size={28} /> Team Setup</h2>
+          <p style={{ color: "#6B7280", marginTop: "8px" }}>Names, colors, and mascots for each team</p>
+        </div>
+
+        <div style={{ background: "white", border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, borderRadius: "16px", padding: "clamp(14px,4vw,20px)", marginBottom: "16px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px", flexWrap: "wrap" }}>
+            <div style={{ fontWeight: "800", color: theme.heroBg[0], fontSize: "16px", fontFamily: theme.headingFont, flex: 1, minWidth: "140px" }}>How many teams?</div>
+            <button
+              onClick={handleSaveTeamsToRoster} disabled={rosterSaveStatus === "saving"}
+              title={activeClassId ? "Save these team names/colors/mascots to this class, without picking a topic or game" : "Pick or create a class to save these teams to"}
+              style={{
+                background: rosterSaveStatus === "saved" ? "#DCFCE7" : "none",
+                border: `2px solid ${rosterSaveStatus === "saved" ? "#22C55E" : "#D1D5DB"}`,
+                borderRadius: "20px", padding: "4px 14px", fontWeight: "700", fontSize: "12px",
+                color: rosterSaveStatus === "saved" ? "#166534" : "#9CA3AF",
+                cursor: rosterSaveStatus === "saving" ? "default" : "pointer", flexShrink: 0,
+                display: "inline-flex", alignItems: "center", gap: "5px",
+              }}
+            >
+              {rosterSaveStatus === "saving" ? "Saving…" : rosterSaveStatus === "saved" ? <><Icon name="check" size={12} /> Saved!</> : <><Icon name="save" size={12} /> Save teams to class</>}
+            </button>
+            <button onClick={() => resetTeamsToNormal()} title="0 points, no mascots, original colors and names" style={{ background: "none", border: "2px solid #D1D5DB", borderRadius: "20px", padding: "4px 14px", fontWeight: "700", fontSize: "12px", color: "#9CA3AF", cursor: "pointer", flexShrink: 0, display: "inline-flex", alignItems: "center", gap: "5px" }}><Icon name="refresh" size={12} /> Reset teams to normal</button>
+          </div>
+          {activeClassId && teamRoster.length > 0 && (
+            <div style={{ marginBottom: "14px" }}>
+              <div style={{ fontSize: "12px", fontWeight: "700", color: "#6B7280", marginBottom: "6px", display: "flex", alignItems: "center", gap: "5px" }}>
+                <Icon name="folder" size={13} /> Saved teams for this class — tap to bring in today
+              </div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+                {teamRoster.map(entry => {
+                  const isActive = isRosterTeamActive(entry);
+                  const cap = isPaid ? 5 : FREE_PLAN_LIMITS.maxTeams;
+                  const locked = !isActive && numTeams >= cap;
+                  return (
+                    <div key={entry.id} style={{ position: "relative" }}>
+                      <button
+                        type="button"
+                        onClick={() => locked ? setScreen("billing") : toggleRosterTeam(entry)}
+                        title={locked ? `Free plan is limited to ${cap} teams — upgrade to unlock more` : undefined}
+                        style={{
+                          background: isActive ? entry.color.bg : "#F0F9FF",
+                          color: isActive ? "white" : "#374151",
+                          border: `2px solid ${isActive ? entry.color.bg : "#D1D5DB"}`,
+                          borderRadius: "999px", padding: "8px 16px 8px 12px", cursor: "pointer",
+                          fontWeight: isActive ? "800" : "700", fontSize: "13px", opacity: locked ? 0.5 : 1,
+                        }}
+                      >
+                        <TeamIcon team={entry} color={isActive ? "white" : undefined} /> {entry.name}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); removeFromRoster(entry); }}
+                        title="Remove from saved teams"
+                        style={{
+                          position: "absolute", top: "-6px", right: "-6px", width: "18px", height: "18px", borderRadius: "50%",
+                          background: "#EF4444", color: "white", border: "2px solid white", fontSize: "10px", lineHeight: 1, cursor: "pointer",
+                          padding: 0, display: "flex", alignItems: "center", justifyContent: "center",
+                        }}
+                      ><Icon name="close" size={9} /></button>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+          <div style={{ display: "flex", gap: "10px", marginBottom: "16px", flexWrap: "wrap", alignItems: "center" }}>
+            {[1, 2, 3, 4, 5].map(n => {
+              const locked = !isPaid && n > FREE_PLAN_LIMITS.maxTeams;
+              return (
+                <button
+                  key={n}
+                  onClick={() => locked ? setScreen("billing") : setNumTeams(n)}
+                  title={locked ? `Free plan is limited to ${FREE_PLAN_LIMITS.maxTeams} teams — upgrade to unlock more` : undefined}
+                  style={{ background: numTeams === n ? theme.accentSolid : "white", color: numTeams === n ? "white" : locked ? "#9CA3AF" : "#374151", border: `3px solid ${numTeams === n ? theme.accentSolid : "#D1D5DB"}`, borderRadius: "12px", padding: "10px 24px", fontSize: "18px", fontWeight: "800", cursor: "pointer", opacity: locked ? 0.6 : 1, display: "inline-flex", alignItems: "center", gap: "5px" }}
+                >
+                  {locked && <Icon name="lock" size={13} />}{n}
+                </button>
+              );
+            })}
+            {!isPaid && (
+              <span style={{ color: "#9CA3AF", fontSize: "12px", fontWeight: "700", display: "inline-flex", alignItems: "center", gap: "5px" }}><Icon name="gem" size={13} /> Upgrade for up to 5 teams</span>
+            )}
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(240px,1fr))", gap: "16px" }}>
+            {Array.from({ length: numTeams }).map((_, i) => {
+              const color = TEAM_COLORS[teamColors[i] ?? i];
+
+              return (
+                <div key={i} style={{ border: `3px solid ${color.bg}`, borderRadius: "14px", overflow: "hidden", background: "white" }}>
+                  <div style={{ background: color.bg, padding: "10px 12px", display: "flex", alignItems: "center", gap: "8px" }}>
+                    <TeamIcon team={{ mascot: teamMascots[i], color }} size={18} color="white" />
+                    <span style={{ color: "white", fontWeight: "800", fontSize: "14px" }}>{color.name}</span>
+                  </div>
+                  <input
+                    value={teamNames[i]}
+                    onChange={e => {
+                      const next = [...teamNames];
+                      next[i] = e.target.value;
+                      setTeamNames(next);
+                    }}
+                    style={{
+                      width: "100%",
+                      padding: "12px 14px",
+                      fontSize: "15px",
+                      fontWeight: "700",
+                      border: "none",
+                      borderBottom: `2px solid ${color.bg}20`,
+                      color: color.dark,
+                      background: color.light,
+                      outline: "none",
+                      boxSizing: "border-box"
+                    }}
+                    placeholder="Team name..."
+                  />
+                  <div style={{ background: color.light, padding: "10px 12px", display: "flex", flexWrap: "wrap", gap: "10px" }}>
+                    {TEAM_COLORS.map((swatch, swatchIndex) => (
+                      <button
+                        key={swatchIndex}
+                        type="button"
+                        onClick={() => {
+                          const next = [...teamColors];
+                          next[i] = swatchIndex;
+                          setTeamColors(next);
+                        }}
+                        title={swatch.name}
+                        aria-label={`${teamNames[i] || `Team ${i + 1}`} color ${swatch.name}`}
+                        style={{
+                          width: "36px",
+                          height: "36px",
+                          borderRadius: "50%",
+                          background: swatch.bg,
+                          cursor: "pointer",
+                          border: teamColors[i] === swatchIndex ? `3px solid ${swatch.dark}` : `2px solid ${swatch.bg}`,
+                          transform: teamColors[i] === swatchIndex ? "scale(1.2)" : "scale(1)",
+                          transition: "all 0.15s",
+                          flexShrink: 0,
+                          boxShadow: teamColors[i] === swatchIndex ? `0 0 0 2px white, 0 0 0 4px ${swatch.bg}` : "none"
+                        }}
+                      />
+                    ))}
+                  </div>
+                  {expandedMascotTeam === i ? (
+                    <div style={{ background: "white", padding: "10px 12px", borderTop: `1px solid ${color.bg}20` }}>
+                      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(44px,1fr))", gap: "8px", marginBottom: "8px" }}>
+                        <button
+                          type="button" title="No mascot"
+                          onClick={() => { const next = [...teamMascots]; next[i] = null; setTeamMascots(next); setExpandedMascotTeam(null); }}
+                          style={{ width: "44px", height: "44px", borderRadius: "10px", color: "#9CA3AF", background: teamMascots[i] == null ? "#F3F4F6" : "transparent", border: teamMascots[i] == null ? `2px solid ${color.bg}` : "1px solid #E5E7EB", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
+                        ><Icon name="close" size={16} /></button>
+                        {MASCOT_OPTIONS.map(m => (
+                          <button
+                            key={m} type="button" title={m}
+                            onClick={() => { const next = [...teamMascots]; next[i] = m; setTeamMascots(next); setExpandedMascotTeam(null); }}
+                            style={{
+                              width: "44px", height: "44px", borderRadius: "10px", cursor: "pointer",
+                              background: teamMascots[i] === m ? color.light : "transparent",
+                              border: teamMascots[i] === m ? `2px solid ${color.bg}` : "1px solid transparent",
+                              display: "flex", alignItems: "center", justifyContent: "center",
+                            }}
+                          ><MascotIcon name={MASCOT_ICON_BY_EMOJI[m]} size={26} /></button>
+                        ))}
+                      </div>
+                      <button type="button" onClick={() => setExpandedMascotTeam(null)} style={{ background: "none", border: "none", color: "#6B7280", fontWeight: "700", fontSize: "12px", cursor: "pointer", padding: "2px 0" }}>
+                        Done
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setExpandedMascotTeam(i)}
+                      style={{ width: "100%", boxSizing: "border-box", background: "white", padding: "10px 12px", borderTop: `1px solid ${color.bg}20`, borderLeft: "none", borderRight: "none", borderBottom: "none", display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", textAlign: "left" }}
+                    >
+                      {teamMascots[i] ? <MascotIcon name={MASCOT_ICON_BY_EMOJI[teamMascots[i]!]} size={24} /> : <Icon name="close" size={16} color="#9CA3AF" />}
+                      <span style={{ fontSize: "13px", fontWeight: "700", color: "#374151", flex: 1 }}>
+                        {teamMascots[i] ? MASCOT_ICON_BY_EMOJI[teamMascots[i]!].replace(/^./, c => c.toUpperCase()) : "No mascot"}
+                      </span>
+                      <span style={{ fontSize: "13px", fontWeight: "800", color: color.bg }}>Change</span>
+                    </button>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <button onClick={handleSetup} style={{ width: "100%", background: `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "16px", padding: "18px", fontSize: "20px", fontWeight: "900", cursor: "pointer", fontFamily: theme.headingFont, display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+          <Icon name="controller" size={20} /> Choose a Game!
+        </button>
+      </div>
+      <FeedbackButton />
+      <BrandBadge isPaid={isPaid} />
+    </div>
+  );
 
   if (screen === "game-select") return (
     <div style={{ minHeight: "100vh", background: "#F0F9FF", padding: "20px", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
@@ -1398,10 +1439,10 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
             )}
             {selectedTopics.some(id => LESSONS[id]) && (
               <button
-                onClick={() => { setLearnFilter(selectedTopics.filter(id => LESSONS[id])); setScreen("learn"); }}
-                style={{ background: "rgba(255,255,255,0.15)", border: "2px solid rgba(255,255,255,0.35)", color: "white", borderRadius: "12px", padding: "8px 18px", fontSize: "13px", fontWeight: "800", cursor: "pointer", marginTop: "14px", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px" }}
+                onClick={() => { setLearnFilter(selectedTopics.filter(id => LESSONS[id])); setLearnReturnTo("game-select"); setScreen("learn"); }}
+                style={{ background: "white", color: theme.heroBg[0], border: "none", borderRadius: "14px", padding: "14px 28px", fontSize: "16px", fontWeight: "900", cursor: "pointer", marginTop: "14px", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "8px", boxShadow: "0 6px 20px rgba(0,0,0,0.25)" }}
               >
-                <Icon name="bookOpen" size={14} /> Review these topics
+                <Icon name="bookOpen" size={16} /> Review these topics
               </button>
             )}
           </div>
@@ -1435,7 +1476,8 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
             </button>
             <button onClick={() => setTeams(ts => ts.map(t => ({ ...t, score: 0 })))} style={{ background: "none", border: "2px solid #D1D5DB", borderRadius: "20px", padding: "4px 16px", fontWeight: "700", fontSize: "12px", color: "#9CA3AF", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "5px" }}><Icon name="refresh" size={12} /> Reset all scores to 0</button>
             <button onClick={() => resetTeamsToNormal()} title="0 points, no mascots, original colors and names" style={{ background: "none", border: "2px solid #D1D5DB", borderRadius: "20px", padding: "4px 16px", fontWeight: "700", fontSize: "12px", color: "#9CA3AF", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "5px" }}><Icon name="refresh" size={12} /> Reset teams to normal</button>
-            <button onClick={() => setScreen("setup")} style={{ background: "none", border: "2px solid #D1D5DB", borderRadius: "20px", padding: "4px 16px", fontWeight: "700", fontSize: "12px", color: "#9CA3AF", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "5px" }}><Icon name="gear" size={12} /> Edit teams & settings</button>
+            <button onClick={() => setScreen("team-setup")} style={{ background: "none", border: "2px solid #D1D5DB", borderRadius: "20px", padding: "4px 16px", fontWeight: "700", fontSize: "12px", color: "#9CA3AF", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "5px" }}><Icon name="gear" size={12} /> Edit teams & settings</button>
+            <button onClick={() => setScreen("topic-select")} style={{ background: "none", border: "2px solid #D1D5DB", borderRadius: "20px", padding: "4px 16px", fontWeight: "700", fontSize: "12px", color: "#9CA3AF", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "5px" }}><Icon name="target" size={12} /> Change topics</button>
         </div>
 
         {loadError && <div style={{ color: "red", fontWeight: "bold", textAlign: "center" }}>{loadError}</div>}
@@ -1561,7 +1603,15 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
         
         <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
           <button onClick={() => setScreen("game-select")} style={{ background: `linear-gradient(135deg,${theme.cta[0]},${theme.cta[1]})`, color: "white", border: "none", borderRadius: "14px", padding: "14px 28px", fontSize: "17px", fontWeight: "800", cursor: "pointer", fontFamily: theme.headingFont }}>🎮 Play Again</button>
-          <button onClick={() => setScreen("setup")} style={{ background: `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "14px", padding: "14px 28px", fontSize: "17px", fontWeight: "800", cursor: "pointer", fontFamily: theme.headingFont }}>📚 New Lesson</button>
+          {selectedTopics.some(id => LESSONS[id]) && (
+            <button
+              onClick={() => { setLearnFilter(selectedTopics.filter(id => LESSONS[id])); setLearnReturnTo("results"); setScreen("learn"); }}
+              style={{ background: "white", color: theme.heroBg[0], border: "none", borderRadius: "14px", padding: "14px 28px", fontSize: "17px", fontWeight: "800", cursor: "pointer", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "8px" }}
+            >
+              <Icon name="bookOpen" size={16} /> Review these topics
+            </button>
+          )}
+          <button onClick={() => setScreen("topic-select")} style={{ background: `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "14px", padding: "14px 28px", fontSize: "17px", fontWeight: "800", cursor: "pointer", fontFamily: theme.headingFont }}>📚 New Lesson</button>
         </div>
         <FeedbackButton />
         <BrandBadge isPaid={isPaid} />
