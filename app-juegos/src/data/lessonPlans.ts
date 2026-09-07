@@ -356,22 +356,22 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
     ],
   },
 
-  // Vocabulary pre-teach rather than a grammar-practice activity, deliberately — this topic's
-  // Real-World Listening ("Grandma's Kitchen Tips") leans on several kitchen words (stale, boil,
-  // ingredient...) that A2 students often haven't met yet, and hearing them cold in audio on top of
-  // the new zero-conditional structure doubles the load. Matching them here, right before that step,
-  // means the listening is testing the grammar rather than testing unfamiliar vocabulary.
+  // Vocabulary pre-teach rather than a grammar-practice activity, deliberately — the zero
+  // conditional's whole question bank leans on "result" verbs describing physical/natural change
+  // (melt, boil, freeze, expand, dissolve, go stale, wilt, rot...) that A2 students often haven't
+  // met yet, on top of the new grammar structure itself. Matching them here, before the sentence
+  // work, means the rest of the lesson tests the grammar rather than doubling as a vocabulary test.
   zero_conditional: {
     kind: "matching",
     pairs: [
-      { term: "stale", definition: "Not fresh anymore (used especially for bread)" },
-      { term: "boil", definition: "Cook something in water that is bubbling hot" },
-      { term: "oven", definition: "The part of a kitchen used to bake or roast food" },
-      { term: "shape", definition: "The outer form of something, like round or square" },
-      { term: "fridge", definition: "A machine that keeps food cold" },
-      { term: "ingredient", definition: "One of the foods used to make a dish" },
-      { term: "recipe", definition: "A set of instructions for cooking something" },
-      { term: "flavor", definition: "The taste of a food" },
+      { term: "melt", definition: "Change from solid to liquid because of heat" },
+      { term: "boil", definition: "Reach a very high temperature and bubble, turning to steam" },
+      { term: "freeze", definition: "Change from liquid to solid because of cold" },
+      { term: "expand", definition: "Become bigger in size" },
+      { term: "dissolve", definition: "Mix completely into a liquid and disappear" },
+      { term: "go stale", definition: "Become old and dry, and lose its fresh taste (bread)" },
+      { term: "wilt", definition: "Become weak and droop, losing its freshness (a plant)" },
+      { term: "rot", definition: "Slowly decay and go bad (fruit or food)" },
     ],
   },
 
