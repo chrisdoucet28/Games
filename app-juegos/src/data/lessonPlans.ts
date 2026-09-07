@@ -356,14 +356,22 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
     ],
   },
 
+  // Vocabulary pre-teach rather than a grammar-practice activity, deliberately — this topic's
+  // Real-World Listening ("Grandma's Kitchen Tips") leans on several kitchen words (stale, boil,
+  // ingredient...) that A2 students often haven't met yet, and hearing them cold in audio on top of
+  // the new zero-conditional structure doubles the load. Matching them here, right before that step,
+  // means the listening is testing the grammar rather than testing unfamiliar vocabulary.
   zero_conditional: {
-    kind: "scenario",
-    prompts: [
-      { situation: "A child asks you what happens when you mix red and blue paint.", instruction: "Explain the rule, using the zero conditional.", sample: "If you mix red and blue, you get purple." },
-      { situation: "Someone asks why their plants keep dying.", instruction: "Explain the general rule about plants and water.", sample: "Plants die if they don't get water." },
-      { situation: "A friend asks what happens to ice when it gets warm.", instruction: "Explain the scientific fact, using the zero conditional.", sample: "If you heat ice, it melts." },
-      { situation: "You're explaining the fire alarm procedure to a new colleague.", instruction: "Explain the rule, using the zero conditional.", sample: "If the alarm goes off, everyone leaves the building." },
-      { situation: "Someone asks what happens to the streets in your city when it rains.", instruction: "Answer using the zero conditional.", sample: "If it rains, the streets get wet." },
+    kind: "matching",
+    pairs: [
+      { term: "stale", definition: "Not fresh anymore (used especially for bread)" },
+      { term: "boil", definition: "Cook something in water that is bubbling hot" },
+      { term: "oven", definition: "The part of a kitchen used to bake or roast food" },
+      { term: "shape", definition: "The outer form of something, like round or square" },
+      { term: "fridge", definition: "A machine that keeps food cold" },
+      { term: "ingredient", definition: "One of the foods used to make a dish" },
+      { term: "recipe", definition: "A set of instructions for cooking something" },
+      { term: "flavor", definition: "The taste of a food" },
     ],
   },
 
