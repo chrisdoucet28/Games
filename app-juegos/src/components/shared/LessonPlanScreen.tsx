@@ -4,6 +4,7 @@ import { LESSON_TOPICS, LEVEL_ORDER, LEVEL_COLOR, FOCUS_ORDER, FOCUS_LABEL, matc
 import { LESSON_PLANS, buildUnscrambleItems, type RoundOut, type UnscrambleItem } from "../../data/lessonPlans";
 import { REAL_WORLD_READINGS, type RealWorldReading } from "../../data/realWorldReadings";
 import { TOPIC_LIBRARY } from "../../data/topics";
+import { getProfile } from "../../lib/profile";
 import { LessonSectionBlock, CommonMistakesBlock } from "./LessonContent";
 import { QuestionCard } from "./QuestionCard";
 import { Icon, type IconName } from "./Icon";
@@ -257,6 +258,12 @@ function LessonPlanSlideshow({ topic, theme, onBack, onPlayGameForTopic }: { top
   const [showAnswer, setShowAnswer] = useState(false);
   const slide = slides[slideIndex];
 
+  // Paid-only branding perk (see ProfileScreen/BrandBadge), same as Learn's own printable handout.
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  useEffect(() => {
+    getProfile().then(p => setLogoUrl(p.org_logo_url)).catch(() => {});
+  }, []);
+
   const goNext = () => { setSlideIndex(i => Math.min(i + 1, slides.length - 1)); setShowAnswer(false); };
   const goPrev = () => { if (slideIndex === 0) onBack(); else { setSlideIndex(i => i - 1); setShowAnswer(false); } };
 
@@ -371,7 +378,7 @@ function LessonPlanSlideshow({ topic, theme, onBack, onPlayGameForTopic }: { top
         )}
 
         <div className="lp-print-only">
-          <PrintableLessonPlan topic={topic} slides={slides} roundOut={roundOut} />
+          <PrintableLessonPlan topic={topic} slides={slides} roundOut={roundOut} logoUrl={logoUrl} />
         </div>
       </div>
     </div>
@@ -701,53 +708,74 @@ function RealWorldReadingStep({ reading, theme, onDone }: { reading: RealWorldRe
   );
 }
 
-// Ink-economical, single flowing worksheet — mirrors LearnScreen's PrintableLesson pattern.
-// Practice/production questions get blank space instead of the on-screen reveal interaction;
-// the round-out exercise and speaking tasks print as plain instructions.
-function PrintableLessonPlan({ topic, slides, roundOut }: { topic: LearnTopic; slides: Slide[]; roundOut: RoundOut }) {
+// Ink-economical, single flowing worksheet — mirrors LearnScreen's PrintableLesson pattern (same
+// paid-org-logo perk, same B&W-friendly borders-not-fills approach). Practice/production questions
+// get blank space instead of the on-screen reveal interaction and are numbered per section so this
+// reads as a real worksheet; the round-out exercise prints its actual content (PrintRoundOut) rather
+// than a "see screen version" placeholder, since a parent/student holding the paper has no screen to
+// go back to. FeedbackButton/BrandBadge are hidden from every print via the global .cc-no-print rule
+// (index.css) rather than needing their own line here.
+const printDividerStyle: React.CSSProperties = { border: "none", borderTop: "1px solid #D1D5DB", margin: "10px 0" };
+const printSectionHeadingStyle: React.CSSProperties = { fontWeight: "800", fontSize: "11px", textTransform: "uppercase", letterSpacing: "0.03em", color: "#374151", marginBottom: "4px" };
+
+function PrintableLessonPlan({ topic, slides, roundOut, logoUrl }: { topic: LearnTopic; slides: Slide[]; roundOut: RoundOut; logoUrl?: string | null }) {
   const questionSlides = slides.filter((s): s is Extract<Slide, { kind: "question" }> => s.kind === "question");
   const realWorldSlide = slides.find((s): s is Extract<Slide, { kind: "realWorld" }> => s.kind === "realWorld");
   const speakingSlide = slides.find((s): s is Extract<Slide, { kind: "speaking" }> => s.kind === "speaking");
   let currentSection = "";
+  let numberInSection = 0;
+
   return (
     <div>
+      {logoUrl && (
+        <img src={logoUrl} alt="" style={{ display: "block", maxHeight: "34px", maxWidth: "160px", objectFit: "contain", marginBottom: "8px" }} />
+      )}
       <span style={{ background: LEVEL_COLOR[topic.meta.level ?? "A1"], color: "white", borderRadius: "999px", padding: "2px 10px", fontSize: "10.5px", fontWeight: "800" }}>{topic.meta.level}</span>
-      <h2 style={{ fontSize: "19px", fontWeight: "900", color: "#111827", margin: "6px 0 5px" }}>{topic.lesson.title} — Lesson Plan</h2>
-      <p style={{ color: "#374151", fontSize: "12px", lineHeight: 1.4, margin: "0 0 10px" }}>{topic.lesson.intro}</p>
+      <h2 style={{ fontSize: "20px", fontWeight: "900", color: "#111827", margin: "7px 0 6px" }}>{topic.lesson.title} — Lesson Plan</h2>
+      <div style={{ display: "flex", gap: "24px", fontSize: "11.5px", color: "#374151", fontWeight: "700", margin: "0 0 10px" }}>
+        <span>Name: ________________________</span>
+        <span>Date: ______________</span>
+      </div>
+      <p style={{ color: "#374151", fontSize: "12px", lineHeight: 1.4, margin: "0 0 8px" }}>{topic.lesson.intro}</p>
+      <hr style={printDividerStyle} />
 
       {topic.lesson.sections.map((section, i) => (
         <div key={i} style={{ marginBottom: "9px" }}>
-          <div style={{ fontWeight: "800", color: "#374151", fontSize: "11px", marginBottom: "3px", textTransform: "uppercase" }}>{section.heading}</div>
+          <div style={printSectionHeadingStyle}>{section.heading}</div>
           <ul style={{ margin: 0, paddingLeft: "16px", color: "#1F2937" }}>
             {section.body.map((line, j) => <li key={j} style={{ marginBottom: "2px", lineHeight: 1.3, fontSize: "11.5px" }}>{line.replace(/\*\*/g, "")}</li>)}
           </ul>
         </div>
       ))}
+      <hr style={printDividerStyle} />
 
       {questionSlides.map((s, i) => {
         const showHeading = s.sectionLabel !== currentSection;
         currentSection = s.sectionLabel;
+        numberInSection = showHeading ? 1 : numberInSection + 1;
         return (
-          <div key={i} style={{ marginTop: showHeading ? "10px" : "4px" }}>
-            {showHeading && <div style={{ fontWeight: "800", fontSize: "11px", textTransform: "uppercase", color: "#374151", marginTop: "6px" }}>{s.sectionLabel}</div>}
-            <div style={{ fontSize: "11.5px", margin: "3px 0" }}>{s.question.question}</div>
-            <div style={{ borderBottom: "1px solid #9CA3AF", height: "14px" }} />
+          <div key={i} style={{ marginTop: showHeading && i > 0 ? "12px" : "4px" }}>
+            {showHeading && <div style={printSectionHeadingStyle}>{s.sectionLabel}</div>}
+            <div style={{ fontSize: "11.5px", margin: "4px 0" }}>{numberInSection}. {s.question.question}</div>
+            <div style={{ borderBottom: "1px solid #9CA3AF", height: "16px" }} />
           </div>
         );
       })}
+      <hr style={printDividerStyle} />
 
-      <div style={{ fontWeight: "800", fontSize: "11px", textTransform: "uppercase", color: "#374151", marginTop: "10px" }}>Exercise</div>
-      <div style={{ fontSize: "11px", color: "#4B5563" }}>{roundOutPrintSummary(roundOut)}</div>
+      <div style={printSectionHeadingStyle}>Exercise</div>
+      <PrintRoundOut roundOut={roundOut} topicId={topic.id} />
 
       {realWorldSlide && (
         <div style={{ marginTop: "10px" }}>
-          <div style={{ fontWeight: "800", fontSize: "11px", textTransform: "uppercase", color: "#374151" }}>Real-World Reading — {realWorldSlide.reading.title}</div>
+          <hr style={printDividerStyle} />
+          <div style={printSectionHeadingStyle}>Real-World Reading — {realWorldSlide.reading.title}</div>
           {realWorldSlide.reading.passage.map((p, i) => <div key={i} style={{ fontSize: "11.5px", color: "#1F2937", margin: "3px 0" }}>{p}</div>)}
-          <div style={{ fontWeight: "800", fontSize: "11px", textTransform: "uppercase", color: "#374151", marginTop: "6px" }}>Real-World Check</div>
+          <div style={{ ...printSectionHeadingStyle, marginTop: "8px" }}>Real-World Check</div>
           {realWorldSlide.reading.questions.map((q, i) => (
             <div key={i} style={{ marginTop: "4px" }}>
-              <div style={{ fontSize: "11.5px", margin: "3px 0" }}>{q.question}</div>
-              <div style={{ borderBottom: "1px solid #9CA3AF", height: "14px" }} />
+              <div style={{ fontSize: "11.5px", margin: "3px 0" }}>{i + 1}. {q.question}</div>
+              <div style={{ borderBottom: "1px solid #9CA3AF", height: "16px" }} />
             </div>
           ))}
         </div>
@@ -755,20 +783,89 @@ function PrintableLessonPlan({ topic, slides, roundOut }: { topic: LearnTopic; s
 
       {speakingSlide && (
         <div style={{ marginTop: "10px" }}>
-          <div style={{ fontWeight: "800", fontSize: "11px", textTransform: "uppercase", color: "#374151" }}>Speaking</div>
+          <hr style={printDividerStyle} />
+          <div style={printSectionHeadingStyle}>Speaking</div>
           <ul style={{ margin: "3px 0 0", paddingLeft: "16px" }}>
             {speakingSlide.tasks.map((t, i) => <li key={i} style={{ fontSize: "11px", marginBottom: "2px" }}>{t}</li>)}
           </ul>
         </div>
       )}
+
+      <hr style={printDividerStyle} />
+      <p style={{ textAlign: "center", color: "#9CA3AF", fontSize: "10px", fontStyle: "italic", margin: "6px 0 0" }}>
+        Made with ClassCade — spot an issue with this lesson? Open the app and tap Feedback to let us know.
+      </p>
     </div>
   );
 }
 
-function roundOutPrintSummary(roundOut: RoundOut): string {
-  if (roundOut.kind === "paragraphCloze") return "Fill in the gaps in the story (see screen version, or ask your teacher to read it aloud).";
-  if (roundOut.kind === "matching") return `Match each word to its meaning: ${roundOut.pairs.map(p => p.term).join(", ")}.`;
-  if (roundOut.kind === "errorPassage") return "Find and correct the mistakes in the passage (see screen version).";
-  if (roundOut.kind === "scenario") return "Respond to each situation your teacher reads aloud.";
-  return "Put the scrambled words back into the correct order (ask your teacher for the sentences).";
+// Real, fillable content per round-out kind instead of a one-line summary — a printed page has no
+// screen to fall back to, so this mirrors each kind's on-screen *unrevealed* state (blanks shown as
+// "___ (base)", scrambled words, situations without their sample answer, etc.) rather than leaking
+// the answer key onto a student handout.
+function PrintRoundOut({ roundOut, topicId }: { roundOut: RoundOut; topicId: string }) {
+  if (roundOut.kind === "paragraphCloze") {
+    return (
+      <p style={{ fontSize: "12px", lineHeight: 1.9, color: "#1F2937", margin: "4px 0 0" }}>
+        {roundOut.segments.map((seg, i) => typeof seg === "string" ? <span key={i}>{seg}</span> : <span key={i} style={{ fontWeight: "700" }}>___ ({seg.base})</span>)}
+      </p>
+    );
+  }
+
+  if (roundOut.kind === "matching") {
+    const offset = Math.max(1, Math.floor(roundOut.pairs.length / 2));
+    const shuffledDefs = roundOut.pairs.map((_, i) => roundOut.pairs[(i + offset) % roundOut.pairs.length].definition);
+    return (
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginTop: "4px" }}>
+        <div>
+          {roundOut.pairs.map((p, i) => (
+            <div key={i} style={{ fontSize: "11.5px", margin: "4px 0", color: "#1F2937" }}>___ &nbsp; {i + 1}. {p.term}</div>
+          ))}
+        </div>
+        <div>
+          {shuffledDefs.map((def, i) => (
+            <div key={i} style={{ fontSize: "11.5px", margin: "4px 0", color: "#1F2937" }}>{String.fromCharCode(65 + i)}. {def}</div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (roundOut.kind === "errorPassage") {
+    return (
+      <div>
+        <p style={{ fontSize: "11px", color: "#4B5563", margin: "4px 0 6px" }}>Find and correct the mistakes below.</p>
+        <div style={{ border: "1px solid #9CA3AF", borderRadius: "6px", padding: "10px 12px", whiteSpace: "pre-line", fontSize: "11.5px", lineHeight: 1.7, color: "#1F2937" }}>{roundOut.text}</div>
+      </div>
+    );
+  }
+
+  if (roundOut.kind === "scenario") {
+    return (
+      <div>
+        {roundOut.prompts.map((p, i) => (
+          <div key={i} style={{ marginTop: i > 0 ? "10px" : "4px" }}>
+            <div style={{ fontSize: "11.5px", color: "#1F2937", margin: "3px 0" }}>{i + 1}. {p.situation} — <span style={{ fontWeight: "700" }}>{p.instruction}</span></div>
+            <div style={{ borderBottom: "1px solid #9CA3AF", height: "16px" }} />
+            <div style={{ borderBottom: "1px solid #9CA3AF", height: "16px" }} />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  // unscramble
+  const items = buildUnscrambleItems(topicId, 4);
+  if (!items.length) return null;
+  return (
+    <div>
+      <p style={{ fontSize: "11px", color: "#4B5563", margin: "4px 0 6px" }}>Put the words in the correct order.</p>
+      {items.map((item, i) => (
+        <div key={i} style={{ marginTop: i > 0 ? "8px" : 0 }}>
+          <div style={{ fontSize: "11.5px", color: "#1F2937", margin: "3px 0" }}>{i + 1}. {item.words.join(" / ")}</div>
+          <div style={{ borderBottom: "1px solid #9CA3AF", height: "16px" }} />
+        </div>
+      ))}
+    </div>
+  );
 }
