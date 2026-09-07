@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://playclasscade.com/sitemap.xml
+Sitemap: https://www.playclasscade.com/sitemap.xml
