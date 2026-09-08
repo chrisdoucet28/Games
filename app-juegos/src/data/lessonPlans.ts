@@ -378,11 +378,11 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
   first_conditional: {
     kind: "scenario",
     prompts: [
-      { situation: "You're planning a picnic tomorrow, but the forecast looks uncertain.", instruction: "Say what will happen if it rains, using the first conditional.", sample: "If it rains, we'll cancel the trip." },
-      { situation: "Your friend keeps putting off leaving for the station.", instruction: "Warn them about being late, using the first conditional.", sample: "If you don't leave now, you'll miss the train." },
+      { situation: "You're planning a picnic tomorrow, but the forecast looks uncertain.", instruction: "Say what will happen if it rains, using the first conditional.", sample: "If it rains, we'll have the picnic indoors instead." },
+      { situation: "Your friend keeps putting off leaving for the station.", instruction: "Warn them about being late, using the first conditional.", sample: "If you don't get a move on, you'll miss your train." },
       { situation: "Your friend is nervous about an upcoming exam.", instruction: "Reassure them about what will happen if they study hard, using the first conditional.", sample: "If you study hard, you'll pass the exam." },
-      { situation: "A friend offers to help you move house if you buy them dinner in return.", instruction: "Make the same offer to another friend, using the first conditional.", sample: "If you help me move, I'll buy you dinner." },
-      { situation: "You want to say a friend can go out only if they finish their homework first.", instruction: "Say it, using 'as long as'.", sample: "You can go out as long as you finish your homework." },
+      { situation: "A friend offers to help you move house if you buy them dinner in return.", instruction: "Make the same offer to another friend, using the first conditional.", sample: "If you help me move this weekend, I'll cook you dinner." },
+      { situation: "You want to say a friend can go out only if they finish their homework first.", instruction: "Say it, using 'as long as'.", sample: "You can go out and play as long as you finish your homework first." },
     ],
   },
 
@@ -464,11 +464,11 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
   modals_obligation: {
     kind: "scenario",
     prompts: [
-      { situation: "Your school requires all students to wear a uniform — there's no choice.", instruction: "Say it using 'must' or 'have to'.", sample: "Students must wear a uniform." },
+      { situation: "Your school requires all students to wear a uniform — there's no choice.", instruction: "Say it using 'must' or 'have to'.", sample: "Students have to wear a uniform every day." },
       { situation: "Smoking is completely forbidden inside your office building.", instruction: "Say it using 'mustn't'.", sample: "You mustn't smoke here." },
-      { situation: "The museum is free, so visitors don't need to pay.", instruction: "Say it using 'don't have to'.", sample: "You don't have to pay — it's free." },
-      { situation: "You want to ask a colleague whether booking a table in advance is necessary at a restaurant.", instruction: "Ask, using 'have to'.", sample: "Do you have to book in advance?" },
-      { situation: "Your report is due by Friday — there's no way around it.", instruction: "Say it using 'have to'.", sample: "I have to finish this by Friday." },
+      { situation: "The museum is free, so visitors don't need to pay.", instruction: "Say it using 'don't have to'.", sample: "Visitors don't have to pay any entry fee." },
+      { situation: "You want to ask a colleague whether booking a table in advance is necessary at a restaurant.", instruction: "Ask, using 'have to'.", sample: "Do we have to reserve a table ahead of time?" },
+      { situation: "Your report is due by Friday — there's no way around it.", instruction: "Say it using 'have to'.", sample: "I have to hand in my project by Friday." },
     ],
   },
 
@@ -487,18 +487,18 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
   invitations: {
     kind: "scenario",
     prompts: [
-      { situation: "You want to invite a friend to your birthday party this weekend.", instruction: "Invite them, using 'would you like to'.", sample: "Would you like to come to my party?" },
+      { situation: "You want to invite a friend to your birthday party this weekend.", instruction: "Invite them, using 'would you like to'.", sample: "Would you like to come to my party this weekend?" },
       { situation: "A friend invites you to the cinema, and you're excited to go.", instruction: "Accept enthusiastically.", sample: "I'd love to! That sounds great." },
       { situation: "A friend invites you to dinner, but you already have plans that evening.", instruction: "Decline politely, without closing the door completely.", sample: "I'm afraid I can't make it — I already have plans. Maybe another time?" },
-      { situation: "You want to suggest going bowling tonight, in a casual way.", instruction: "Suggest it, using 'how about'.", sample: "How about going bowling tonight?" },
-      { situation: "You're organizing a formal work event and inviting a business partner.", instruction: "Invite them formally.", sample: "We would be delighted if you could attend." },
+      { situation: "You want to suggest going bowling tonight, in a casual way.", instruction: "Suggest it, using 'how about'.", sample: "How about we go bowling this evening?" },
+      { situation: "You're organizing a formal work event and inviting a business partner.", instruction: "Invite them formally.", sample: "We would be delighted if you could attend our annual conference." },
     ],
   },
 
   telling_stories: {
     kind: "paragraphCloze",
     segments: [
-      "", { blank: "One day", base: "story opener" }, ", I was walking home from work when something strange happened. I ",
+      "", { blank: "One day", base: "story opener" }, ", I was walking home from work when I heard a strange noise behind me. I ",
       { blank: "saw", base: "see" }, " a small dog sitting outside a shop, completely alone. ",
       { blank: "First", base: "sequence word" }, ", I looked around for its owner, but nobody was there. ",
       { blank: "Then", base: "sequence word" }, ", I decided to take the dog to the police station. ",
@@ -526,11 +526,11 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
   ordering_food: {
     kind: "scenario",
     prompts: [
-      { situation: "The waiter asks if you're ready to order.", instruction: "Order politely, using 'I'd like' or 'could I have'.", sample: "Could I have the pasta, please?" },
-      { situation: "You want to know if your dish comes with rice before you order.", instruction: "Ask the waiter.", sample: "Does it come with rice?" },
-      { situation: "You'd prefer a salad instead of the chips that come with your meal.", instruction: "Ask to swap them.", sample: "Could I swap the chips for a salad?" },
-      { situation: "You're allergic to nuts and want to check the soup is safe.", instruction: "Ask the waiter.", sample: "Could you tell me if the soup contains nuts?" },
-      { situation: "You've finished eating and want to pay.", instruction: "Ask for the bill.", sample: "Could we have the bill, please?" },
+      { situation: "The waiter asks if you're ready to order.", instruction: "Order politely, using 'I'd like' or 'could I have'.", sample: "I'd like the grilled chicken, please." },
+      { situation: "You want to know if your dish comes with rice before you order.", instruction: "Ask the waiter.", sample: "Does it come with a side salad?" },
+      { situation: "You'd prefer a salad instead of the chips that come with your meal.", instruction: "Ask to swap them.", sample: "Could I swap the fries for a side salad instead?" },
+      { situation: "You're allergic to nuts and want to check the soup is safe.", instruction: "Ask the waiter.", sample: "Could you tell me if this dish contains any nuts?" },
+      { situation: "You've finished eating and want to pay.", instruction: "Ask for the bill.", sample: "Excuse me, could we get the check, please?" },
     ],
   },
 
@@ -577,7 +577,7 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
   food_and_eating: {
     kind: "scenario",
     prompts: [
-      { situation: "A friend asks what you ate for dinner last night.", instruction: "Answer using the past simple.", sample: "I had pasta for dinner last night." },
+      { situation: "A friend asks what you ate for dinner last night.", instruction: "Answer using the past simple.", sample: "I cooked a chicken curry for dinner last night." },
       { situation: "Someone offers you a dish that contains nuts, and you're allergic to them.", instruction: "Explain politely why you can't eat it.", sample: "I'm allergic to nuts, so I can't eat that, sorry." },
       { situation: "You're at a restaurant and want to know if a dish is suitable for vegetarians.", instruction: "Ask the waiter.", sample: "Is this dish suitable for vegetarians?" },
       { situation: "Your friend is trying to eat healthier and asks for your advice about breakfast.", instruction: "Give advice using 'shouldn't'.", sample: "You shouldn't skip breakfast." },
