@@ -60,22 +60,21 @@ export function WelcomeIntroScreen({ theme, onDismiss }: Props) {
           ))}
         </div>
 
-        <div style={{ background: `linear-gradient(135deg,${hexToRgba(theme.accentSolid, 0.1)},${hexToRgba(theme.accentSolid, 0.04)})`, border: `2px solid ${theme.accentSolid}`, borderRadius: "16px", padding: "22px", marginBottom: "24px" }}>
-          <div style={{ display: "flex", gap: "14px", alignItems: "flex-start" }}>
-            <Icon name="learn" size={30} color={theme.accentSolid} style={{ flexShrink: 0 }} />
-            <div>
-              <div style={{ fontWeight: "900", fontSize: "17px", color: theme.heroBg[0], marginBottom: "4px", fontFamily: theme.headingFont }}>Don't miss the Learn section</div>
-              <div style={{ fontSize: "14px", color: "#374151", lineHeight: 1.6, marginBottom: "14px" }}>
-                Every topic in the games has a matching Learn lesson — the exact same grammar and vocabulary, explained clearly with examples and common mistakes. Use it to pre-teach a topic before playing, review afterward, or print a handout straight from the page.
-              </div>
-              <button
-                onClick={() => finish("learn")}
-                style={{ background: theme.accentSolid, color: "white", border: "none", borderRadius: "12px", padding: "10px 20px", fontWeight: "800", fontSize: "14px", cursor: "pointer", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px" }}
-              >
-                <Icon name="learn" size={14} /> Explore Learn
-              </button>
-            </div>
-          </div>
+        {/* Demoted from a big highlighted callout to one quiet line, deliberately — with the
+            two-path fork right above it, giving Learn the same visual weight risked reading as a
+            competing third option ("wait, is this a third way to start a class?") instead of what
+            it actually is: a quick-reference/printable resource either path can use, not a
+            separate path of its own. Still gets a real, clickable mention on the one screen every
+            new teacher is guaranteed to see, just without competing with the fork above. */}
+        <div style={{ textAlign: "center", color: "#6B7280", fontSize: "13px", marginBottom: "24px" }}>
+          Every topic also has a matching{" "}
+          <button
+            onClick={() => finish("learn")}
+            style={{ background: "none", border: "none", color: theme.accentSolid, fontWeight: "800", cursor: "pointer", padding: 0, fontSize: "13px", textDecoration: "underline", fontFamily: "inherit" }}
+          >
+            Learn lesson
+          </button>{" "}
+          for quick reference or a printable handout.
         </div>
 
         <div style={{ textAlign: "center" }}>
