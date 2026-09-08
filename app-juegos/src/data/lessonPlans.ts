@@ -227,12 +227,12 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
     segments: [
       "My English class is ", { blank: "on", base: "day" }, " Monday, and it starts ",
       { blank: "at", base: "time" }, " six o'clock ", { blank: "in", base: "part of day" },
-      " the evening. My birthday is ", { blank: "in", base: "month" }, " July, ",
-      { blank: "on", base: "date" }, " the 15th (the fifteenth). This year, my birthday party is ",
+      " the evening. My birthday is ", { blank: "in", base: "month" }, " August, ",
+      { blank: "on", base: "date" }, " the 20th (the twentieth). This year, my birthday party is ",
       { blank: "on", base: "day" }, " Saturday, and it starts ", { blank: "at", base: "time" },
       " midday. We usually meet ", { blank: "in", base: "part of day" },
       " the morning for coffee, but the final exam is ", { blank: "on", base: "date" },
-      " June 3rd (the third), and it starts ", { blank: "at", base: "time" }, " nine o'clock.",
+      " October 12th (the twelfth), and it starts ", { blank: "at", base: "time" }, " nine o'clock.",
     ],
   },
 
@@ -244,7 +244,7 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
       { term: "That is her jacket.", definition: "That jacket is hers." },
       { term: "This is our house.", definition: "This house is ours." },
       { term: "That is their car.", definition: "That car is theirs." },
-      { term: "Whose bag is this?", definition: "It's mine." },
+      { term: "Whose keys are these?", definition: "They're his." },
     ],
   },
 
@@ -295,7 +295,7 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
   giving_directions: {
     kind: "scenario",
     prompts: [
-      { situation: "A tourist stops you and asks: “Excuse me, how do I get to the train station?” It's straight ahead, then left at the lights.", instruction: "Give them directions.", sample: "Go straight ahead, then turn left at the traffic lights. It's just around the corner." },
+      { situation: "A tourist stops you and asks: “Excuse me, how do I get to the train station?” It's straight ahead, then left at the lights.", instruction: "Give them directions.", sample: "Go straight ahead, then turn left at the church. You can't miss it." },
       { situation: "Someone asks if the museum is far from where you're standing — it's about a five-minute walk.", instruction: "Answer their question about distance.", sample: "No, it isn't far — it's about a five-minute walk from here." },
       { situation: "A driver at a roundabout asks you which way to go for the hospital — they need the second exit.", instruction: "Tell them which exit to take.", sample: "Go round the roundabout and take the second exit." },
       { situation: "Someone describes a place to you: “The café is on your left, right here.” Your friend then asks you what to do.", instruction: "Turn their description into an instruction for your friend.", sample: "Turn left for the café." },
