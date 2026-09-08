@@ -790,8 +790,8 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
   second_conditional: {
     kind: "scenario",
     prompts: [
-      { situation: "Someone asks what you would do if you won the lottery.", instruction: "Answer using the second conditional.", sample: "If I won the lottery, I would travel the world." },
-      { situation: "A friend can't decide what to do and asks for your advice.", instruction: "Give advice, using 'if I were you'.", sample: "If I were you, I would apologise." },
+      { situation: "Someone asks what you would do if you won the lottery.", instruction: "Answer using the second conditional.", sample: "If I won the lottery, I would buy a house by the sea." },
+      { situation: "A friend can't decide what to do and asks for your advice.", instruction: "Give advice, using 'if I were you'.", sample: "If I were you, I would talk to your manager about it." },
       { situation: "Someone asks what you'd do if you could live anywhere in the world.", instruction: "Answer using the second conditional.", sample: "If I could live anywhere, I would live by the sea." },
       { situation: "A friend asks what would happen if you lost your phone right now.", instruction: "Answer using the second conditional.", sample: "If I lost my phone, I would panic." },
       { situation: "Someone asks you to imagine having no work or school tomorrow.", instruction: "Say what you would do, using the second conditional.", sample: "If I had no work tomorrow, I would sleep all day." },
@@ -801,11 +801,11 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
   modal_verbs: {
     kind: "scenario",
     prompts: [
-      { situation: "You want to ask your teacher, very politely, if you can leave the room.", instruction: "Ask permission, using 'may'.", sample: "May I leave the room?" },
-      { situation: "A friend has had a bad cough for two weeks.", instruction: "Give advice, using 'should'.", sample: "You should see a doctor." },
-      { situation: "Your friend is about to miss their train if they don't hurry.", instruction: "Warn them, using 'had better'.", sample: "You had better hurry up." },
+      { situation: "You want to ask your teacher, very politely, if you can leave the room.", instruction: "Ask permission, using 'may'.", sample: "May I be excused for a few minutes?" },
+      { situation: "A friend has had a bad cough for two weeks.", instruction: "Give advice, using 'should'.", sample: "You should get that cough checked out." },
+      { situation: "Your friend is about to miss their train if they don't hurry.", instruction: "Warn them, using 'had better'.", sample: "You had better get moving or you'll miss it." },
       { situation: "Someone asks if you can speak any other languages.", instruction: "Answer using 'can' for present ability.", sample: "I can speak a little French." },
-      { situation: "Someone asks about a specific achievement — running a marathon after months of training.", instruction: "Answer using 'was able to' for one specific past achievement.", sample: "After months of training, I was able to run a marathon." },
+      { situation: "Someone asks about a specific achievement — running a marathon after months of training.", instruction: "Answer using 'was able to' for one specific past achievement.", sample: "After six months of training, I was able to finish my first marathon." },
     ],
   },
 
@@ -870,8 +870,8 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
   giving_opinions: {
     kind: "scenario",
     prompts: [
-      { situation: "Someone asks your opinion on whether social media is good or bad for society.", instruction: "Give your opinion, using a fixed opinion-opener.", sample: "In my opinion, social media has both positive and negative effects." },
-      { situation: "You want to give a cautious, softened opinion about working from home.", instruction: "Give your opinion, using a softened phrase.", sample: "I tend to think that working from home is more productive." },
+      { situation: "Someone asks your opinion on whether social media is good or bad for society.", instruction: "Give your opinion, using a fixed opinion-opener.", sample: "In my opinion, social media does more harm than good for teenagers." },
+      { situation: "You want to give a cautious, softened opinion about working from home.", instruction: "Give your opinion, using a softened phrase.", sample: "I tend to think that a hybrid schedule works best for most people." },
       { situation: "You feel very strongly that every child deserves a good education.", instruction: "Give a strong, confident opinion.", sample: "I strongly believe that every child deserves a good education." },
       { situation: "Someone asks: “Do you think homework is useless?”", instruction: "Answer with your own opinion.", sample: "If you ask me, homework does have some value, but not too much of it." },
       { situation: "You want to ask a classmate for their opinion about banning phones in schools.", instruction: "Ask them, using 'do you think that'.", sample: "Do you think that phones should be banned in schools?" },
@@ -881,11 +881,11 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
   asking_for_clarification: {
     kind: "scenario",
     prompts: [
-      { situation: "Someone speaks too quickly and you didn't catch what they said.", instruction: "Ask them to repeat it.", sample: "Sorry, could you repeat that, please?" },
-      { situation: "A colleague uses the phrase 'flexible working hours' and you're not sure exactly what it means.", instruction: "Ask them to explain.", sample: "What do you mean by 'flexible working hours'?" },
-      { situation: "Someone gives you complicated instructions and you want to check you understood before they continue.", instruction: "Confirm what you think they meant.", sample: "Just to clarify, are we meeting at nine or ten?" },
-      { situation: "You didn't hear a name properly and need it spelled out.", instruction: "Ask them to spell it.", sample: "Could you spell that for me? I've never heard that surname before." },
-      { situation: "Someone explains something quickly and you lost track partway through.", instruction: "Ask them to slow down or clarify.", sample: "I'm not sure I follow — could you go back to your first point?" },
+      { situation: "Someone speaks too quickly and you didn't catch what they said.", instruction: "Ask them to repeat it.", sample: "Sorry, I missed that — could you say it again?" },
+      { situation: "A colleague uses the phrase 'work-life balance' and you're not sure exactly what it means.", instruction: "Ask them to explain.", sample: "What do you mean by 'work-life balance'?" },
+      { situation: "Someone gives you complicated instructions and you want to check you understood before they continue.", instruction: "Confirm what you think they meant.", sample: "Just to clarify, are we submitting the report on Thursday or Friday?" },
+      { situation: "You didn't hear a name properly and need it spelled out.", instruction: "Ask them to spell it.", sample: "Could you spell that for me? I want to get the company name right." },
+      { situation: "Someone explains something quickly and you lost track partway through.", instruction: "Ask them to slow down or clarify.", sample: "Sorry, I lost you halfway through — could you start again from the second step?" },
     ],
   },
 
@@ -1034,9 +1034,9 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
     kind: "scenario",
     prompts: [
       { situation: "A travel agent asks if you've ever been to South America.", instruction: "Answer using the present perfect.", sample: "No, I've never been to South America, but I'd love to go." },
-      { situation: "Someone asks about your last holiday specifically.", instruction: "Answer using the past simple.", sample: "We went to Spain last summer." },
-      { situation: "A friend asks what happens if you book your flights early.", instruction: "Answer using the first conditional.", sample: "If you book early, you'll save money." },
-      { situation: "You're excited about an upcoming trip to see the pyramids.", instruction: "Say so, using 'look forward to'.", sample: "I'm looking forward to seeing the pyramids." },
+      { situation: "Someone asks about your last holiday specifically.", instruction: "Answer using the past simple.", sample: "We drove down the coast of Portugal last April." },
+      { situation: "A friend asks what happens if you book your flights early.", instruction: "Answer using the first conditional.", sample: "If you book early, you'll get the window seat." },
+      { situation: "You're excited about an upcoming trip to see the pyramids.", instruction: "Say so, using 'look forward to'.", sample: "I'm looking forward to trying the street food there." },
       { situation: "Someone asks how your flight was arranged.", instruction: "Answer using the passive voice.", sample: "The whole trip was organized by a travel agency." },
     ],
   },
@@ -1089,8 +1089,8 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
       { situation: "Someone asks why you were late to the meeting.", instruction: "Explain the reason, using 'because'.", sample: "I was late because I missed the bus." },
       { situation: "You need to explain a flight delay in a formal announcement.", instruction: "Explain it, using 'due to'.", sample: "The flight was delayed due to bad weather." },
       { situation: "Your friend is already at the café, so there's no need to explain why you're going there too.", instruction: "Say it, using 'as' or 'since' (a reason they already expect).", sample: "As you're already there, I'll join you." },
-      { situation: "You want to explain that, taking the circumstances into account, everything actually went well.", instruction: "Say it, using 'considering'.", sample: "Considering the weather, the event went really well." },
-      { situation: "A match got cancelled because of heavy rain.", instruction: "Explain the cancellation, using 'because of'.", sample: "The match was cancelled because of the heavy rain." },
+      { situation: "You want to explain that, taking the circumstances into account, everything actually went well.", instruction: "Say it, using 'considering'.", sample: "Considering how last-minute it was, the party turned out great." },
+      { situation: "A match got cancelled because of heavy rain.", instruction: "Explain the cancellation, using 'because of'.", sample: "The concert was cancelled because of a power outage." },
     ],
   },
 
@@ -1162,11 +1162,11 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
   sport_and_fitness: {
     kind: "scenario",
     prompts: [
-      { situation: "Someone asks if you've ever run a marathon.", instruction: "Answer using the present perfect.", sample: "I have never run a marathon, but I'd like to try one day." },
-      { situation: "A friend asks what will happen if they train every day.", instruction: "Answer using the first conditional.", sample: "If you train every day, you will get fitter." },
-      { situation: "Someone asks how the championship is organised each year.", instruction: "Answer using the passive voice.", sample: "The championship is held every year in a different city." },
-      { situation: "Someone asks you to compare your fitness now to last year.", instruction: "Compare using a comparative.", sample: "I'm fitter than I was last year." },
-      { situation: "A friend didn't warm up before a game and got hurt.", instruction: "Explain what happens if you don't warm up, using the first conditional.", sample: "If you don't warm up, you will injure yourself." },
+      { situation: "Someone asks if you've ever run a marathon.", instruction: "Answer using the present perfect.", sample: "I've never done a triathlon, but I'm training for one now." },
+      { situation: "A friend asks what will happen if they train every day.", instruction: "Answer using the first conditional.", sample: "If you train every day, you'll build up more stamina." },
+      { situation: "Someone asks how the championship is organised each year.", instruction: "Answer using the passive voice.", sample: "The tournament is sponsored by a different company each season." },
+      { situation: "Someone asks you to compare your fitness now to last year.", instruction: "Compare using a comparative.", sample: "I can run much further than I could a year ago." },
+      { situation: "A friend didn't warm up before a game and got hurt.", instruction: "Explain what happens if you don't warm up, using the first conditional.", sample: "If you skip your warm-up, you'll risk pulling a muscle." },
     ],
   },
 
