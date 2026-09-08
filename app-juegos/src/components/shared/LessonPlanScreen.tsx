@@ -258,6 +258,13 @@ function LessonPlanSlideshow({ topic, theme, onBack, onPlayGameForTopic }: { top
   const [showAnswer, setShowAnswer] = useState(false);
   const slide = slides[slideIndex];
 
+  // The realWorld slide manages its own internal phases (mode select → content → questions →
+  // reveal) — Previous should step back through those before exiting to the prior outer slide.
+  // RealWorldReadingStep assigns its own handler here every render (same pattern as
+  // MinefieldGame.tsx's pickTileRef); it returns true when it handled the back-navigation
+  // internally, false when there's nowhere further back to go inside the step.
+  const realWorldBackRef = useRef<(() => boolean) | null>(null);
+
   // Paid-only branding perk (see ProfileScreen/BrandBadge), same as Learn's own printable handout.
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   useEffect(() => {
@@ -265,7 +272,10 @@ function LessonPlanSlideshow({ topic, theme, onBack, onPlayGameForTopic }: { top
   }, []);
 
   const goNext = () => { setSlideIndex(i => Math.min(i + 1, slides.length - 1)); setShowAnswer(false); };
-  const goPrev = () => { if (slideIndex === 0) onBack(); else { setSlideIndex(i => i - 1); setShowAnswer(false); } };
+  const goPrev = () => {
+    if (slide.kind === "realWorld" && realWorldBackRef.current?.()) return;
+    if (slideIndex === 0) onBack(); else { setSlideIndex(i => i - 1); setShowAnswer(false); }
+  };
 
   const cardStyle: React.CSSProperties = { background: "white", border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, borderRadius: "16px", padding: "24px", minHeight: "320px" };
   const nextBtnStyle: React.CSSProperties = { background: `linear-gradient(135deg,${theme.cta[0]},${theme.cta[1]})`, color: "white", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "800", cursor: "pointer", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px" };
@@ -341,7 +351,7 @@ function LessonPlanSlideshow({ topic, theme, onBack, onPlayGameForTopic }: { top
 
           {slide.kind === "roundOut" && <RoundOutStep roundOut={roundOut} topicId={topic.id} theme={theme} onDone={goNext} />}
 
-          {slide.kind === "realWorld" && <RealWorldReadingStep reading={slide.reading} theme={theme} onDone={goNext} />}
+          {slide.kind === "realWorld" && <RealWorldReadingStep reading={slide.reading} theme={theme} onDone={goNext} backRef={realWorldBackRef} />}
 
           {slide.kind === "speaking" && (
             <div>
@@ -631,12 +641,26 @@ function AudioPlayer({ src, theme }: { src: string; theme: Theme }) {
 // buttons, calling onDone() once the student's worked through it. Mode select only appears when
 // there's audio to choose between; a reading with no audioUrl goes straight to "reading" mode
 // (text always visible), matching the graceful degradation used everywhere else in this file.
-function RealWorldReadingStep({ reading, theme, onDone }: { reading: RealWorldReading; theme: Theme; onDone: () => void }) {
+function RealWorldReadingStep({ reading, theme, onDone, backRef }: { reading: RealWorldReading; theme: Theme; onDone: () => void; backRef: React.MutableRefObject<(() => boolean) | null> }) {
   const { headerStyle, nextBtnStyle } = roundOutStyles(theme);
   const [mode, setMode] = useState<"reading" | "listening" | null>(reading.audioUrl ? null : "reading");
   const [phase, setPhase] = useState<"content" | "questions" | "reveal">("content");
   const [qIndex, setQIndex] = useState(0);
   const [showAnswer, setShowAnswer] = useState(false);
+
+  // Steps back through this component's own internal phases before handing control back to the
+  // outer slideshow's Previous button. Returns false only when there's nowhere further back to go
+  // in here (mode select, or content with no mode-select step to return to).
+  backRef.current = () => {
+    if (phase === "reveal") { setPhase("questions"); setQIndex(reading.questions.length - 1); setShowAnswer(false); return true; }
+    if (phase === "questions") {
+      if (qIndex > 0) { setQIndex(i => i - 1); setShowAnswer(false); return true; }
+      setPhase("content");
+      return true;
+    }
+    if (reading.audioUrl && mode !== null) { setMode(null); return true; }
+    return false;
+  };
 
   const articleCardStyle: React.CSSProperties = { background: "#FFFBEB", border: "2px solid #FDE68A", borderRadius: "12px", padding: "16px 18px" };
   const modeBtnStyle: React.CSSProperties = { flex: 1, background: "white", border: `2px solid ${theme.accentSolid}`, color: theme.accentSolid, borderRadius: "12px", padding: "16px", cursor: "pointer", fontWeight: "800", fontSize: "14px", fontFamily: theme.headingFont };
