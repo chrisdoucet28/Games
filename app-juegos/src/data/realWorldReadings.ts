@@ -1088,6 +1088,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   indefinite_pronouns: {
     title: "An Empty House",
+    audioUrl: "/audio/real-world/indefinite_pronouns.mp3",
     passage: [
       "When I got home, something felt strange. Nobody had left a note, and there was no sign of anyone in the house.",
       "I checked everywhere, but I couldn't find anything unusual — everything seemed to be in its place. I called out, but no one answered.",
@@ -1105,6 +1106,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   relative_clauses: {
     title: "The Neighbour I'll Never Forget",
+    audioUrl: "/audio/real-world/relative_clauses.mp3",
     passage: [
       "My old neighbour, who lived next door for twenty years, was the kind of person everyone remembers. He had a garden that was famous on our whole street, full of flowers whose names I could never remember.",
       "The house where he lived is empty now, but I still think about the summer when he taught me to grow tomatoes.",
@@ -1121,6 +1123,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   adverbs: {
     title: "My Brother the Perfectionist",
+    audioUrl: "/audio/real-world/adverbs.mp3",
     passage: [
       "My brother does everything carefully, sometimes a little too carefully. He drives slowly and cautiously, which used to annoy me until I realised how safely he actually gets us there.",
       "At work, he speaks calmly even under pressure, and he always explains things clearly. He cooks beautifully too — honestly, his food usually tastes better than mine!",
@@ -1137,6 +1140,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   intensifiers_so_such_enough: {
     title: "A Trip to Remember",
+    audioUrl: "/audio/real-world/intensifiers_so_such_enough.mp3",
     passage: [
       "The trip was so much fun that we didn't want it to end. The hotel had such a beautiful view that we spent the first evening just staring out the window.",
       "The food was so good that we ate at the same restaurant three times. It wasn't warm enough to swim every day, unfortunately, but it was sunny enough for us to enjoy the beach anyway.",
@@ -1153,6 +1157,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   double_comparatives: {
     title: "Working From a Café",
+    audioUrl: "/audio/real-world/double_comparatives.mp3",
     passage: [
       "The more I work from cafés, the more productive I seem to become. The busier the café gets, the harder it is to concentrate, though — so I've learned to arrive early.",
       "The earlier I get there, the quieter it usually is. The more coffee I drink, the more focused I feel, at least for the first hour!",
@@ -1313,6 +1318,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   subject_object_questions: {
     title: "Detective Notes",
+    audioUrl: "/audio/real-world/subject_object_questions.mp3",
     passage: [
       "Who broke the window?",
       "We don't know yet — that's what we're trying to find out.",
@@ -1340,6 +1346,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   second_conditional: {
     title: "If I Won the Lottery...",
+    audioUrl: "/audio/real-world/second_conditional.mp3",
     passage: [
       "Someone asked me recently what I would do if I won the lottery, and it made me really think. If I had that much money, I probably wouldn't quit my job completely — I'd just work fewer hours.",
       "I'd buy a small house by the coast if I could find the right place, and I'd definitely travel more than I currently do. If my friends needed help, I'd want to support them too, rather than just spending it all on myself.",
@@ -1356,6 +1363,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   past_continuous: {
     title: "The Night the Power Went Out",
+    audioUrl: "/audio/real-world/past_continuous.mp3",
     passage: [
       "I was cooking dinner when the lights suddenly went out. My neighbours were apparently having the same problem, because I could hear them shouting from their balcony.",
       "While I was searching for candles in the dark, I knocked over a glass of water, which didn't help the situation at all. My phone was charging at the time, so I couldn't even use the torch.",
@@ -1372,6 +1380,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   past_perfect: {
     title: "The Flight I Almost Missed",
+    audioUrl: "/audio/real-world/past_perfect.mp3",
     passage: [
       "By the time I arrived at the airport, my flight had already started boarding. I'd left home later than planned because I'd forgotten my passport and had to go back for it.",
       "Once I got through security, I realised I hadn't printed my boarding pass, so I had to find a machine to do it there. By the time I reached the gate, most passengers had already boarded, and the staff had almost closed the doors.",
@@ -1388,6 +1397,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   modal_verbs: {
     title: "Ask Before You Assume",
+    audioUrl: "/audio/real-world/modal_verbs.mp3",
     passage: [
       "Excuse me, may I ask you something about the new policy?",
       "Of course, go ahead.",
