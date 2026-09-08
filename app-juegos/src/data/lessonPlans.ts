@@ -348,11 +348,11 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
   future_will_going_to: {
     kind: "scenario",
     prompts: [
-      { situation: "The phone starts ringing right next to you, and no one else moves to answer it.", instruction: "Say what you'll do, using 'will'.", sample: "I'll get it!" },
-      { situation: "You look outside and see huge dark clouds rolling in.", instruction: "Make a prediction using 'going to' (you have visible evidence).", sample: "It's going to rain." },
-      { situation: "Your friend asks about your weekend — you decided last week to visit your parents.", instruction: "Answer using 'going to' (already planned).", sample: "I'm going to visit my parents this weekend." },
-      { situation: "Your friend is carrying too many heavy bags and can't manage.", instruction: "Offer to help, using 'will'.", sample: "I'll carry that for you." },
-      { situation: "A friend asks if you think it'll be sunny tomorrow — you have no real evidence, just a feeling.", instruction: "Give your opinion using 'will'.", sample: "I think it'll be sunny tomorrow." },
+      { situation: "Someone drops their pen right in front of you.", instruction: "Say what you'll do, using 'will'.", sample: "I'll pick it up!" },
+      { situation: "The kids won't stop jumping on the sofa.", instruction: "Make a prediction using 'going to' (you have visible evidence).", sample: "It's going to break." },
+      { situation: "Your friend asks about the summer — you already booked a language course.", instruction: "Answer using 'going to' (already planned).", sample: "I'm going to take a language course this summer." },
+      { situation: "Your classmate can't reach the top shelf.", instruction: "Offer to help, using 'will'.", sample: "I'll grab it for you." },
+      { situation: "A friend asks if you think the new restaurant will be good — you have no real evidence, just a feeling.", instruction: "Give your opinion using 'will'.", sample: "I think it'll be great." },
     ],
   },
 
