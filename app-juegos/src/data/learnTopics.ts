@@ -23,3 +23,10 @@ export const LEVEL_COLOR: Record<string, string> = {
 };
 export const FOCUS_ORDER = ["grammar", "vocabulary", "topic"];
 export const FOCUS_LABEL: Record<string, string> = { grammar: "Grammar", vocabulary: "Vocabulary", topic: "Themes" };
+
+// Shared by the game-setup topic picker and the Lesson Plans index — both search a list of
+// human-readable labels the same simple way, so this lives here once instead of twice.
+export const matchesTopicSearch = (label: string, search: string) => {
+  const term = search.trim().toLowerCase();
+  return term === "" || label.toLowerCase().includes(term);
+};

@@ -6,7 +6,10 @@ import { fileURLToPath } from "node:url";
 import path from "node:path";
 import { LESSON_TOPICS } from "../src/data/learnTopics.ts";
 
-const SITE = "https://playclasscade.com";
+// Must match Vercel's canonical host exactly — Vercel 308-redirects the bare apex domain to
+// www, so a sitemap listing the apex made every single URL in it a "page with redirect" to
+// Google (confirmed live: curl -I https://playclasscade.com/ -> 308 to https://www...).
+const SITE = "https://www.playclasscade.com";
 
 const STATIC_URLS: { loc: string; changefreq: string; priority: string }[] = [
   { loc: "/", changefreq: "weekly", priority: "1.0" },

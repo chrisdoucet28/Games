@@ -356,14 +356,22 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
     ],
   },
 
+  // Vocabulary pre-teach rather than a grammar-practice activity, deliberately — the zero
+  // conditional's whole question bank leans on "result" verbs describing physical/natural change
+  // (melt, boil, freeze, expand, dissolve, go stale, wilt, rot...) that A2 students often haven't
+  // met yet, on top of the new grammar structure itself. Matching them here, before the sentence
+  // work, means the rest of the lesson tests the grammar rather than doubling as a vocabulary test.
   zero_conditional: {
-    kind: "scenario",
-    prompts: [
-      { situation: "A child asks you what happens when you mix red and blue paint.", instruction: "Explain the rule, using the zero conditional.", sample: "If you mix red and blue, you get purple." },
-      { situation: "Someone asks why their plants keep dying.", instruction: "Explain the general rule about plants and water.", sample: "Plants die if they don't get water." },
-      { situation: "A friend asks what happens to ice when it gets warm.", instruction: "Explain the scientific fact, using the zero conditional.", sample: "If you heat ice, it melts." },
-      { situation: "You're explaining the fire alarm procedure to a new colleague.", instruction: "Explain the rule, using the zero conditional.", sample: "If the alarm goes off, everyone leaves the building." },
-      { situation: "Someone asks what happens to the streets in your city when it rains.", instruction: "Answer using the zero conditional.", sample: "If it rains, the streets get wet." },
+    kind: "matching",
+    pairs: [
+      { term: "melt", definition: "Change from solid to liquid because of heat" },
+      { term: "boil", definition: "Reach a very high temperature and bubble, turning to steam" },
+      { term: "freeze", definition: "Change from liquid to solid because of cold" },
+      { term: "expand", definition: "Become bigger in size" },
+      { term: "dissolve", definition: "Mix completely into a liquid and disappear" },
+      { term: "go stale", definition: "Become old and dry, and lose its fresh taste (bread)" },
+      { term: "wilt", definition: "Become weak and droop, losing its freshness (a plant)" },
+      { term: "rot", definition: "Slowly decay and go bad (fruit or food)" },
     ],
   },
 

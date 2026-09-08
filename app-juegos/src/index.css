@@ -4,3 +4,13 @@ body {
     font-family: 'Segoe UI', system-ui, sans-serif;
     background-color: #F0F9FF;
   }
+
+/* Global print-hide for fixed-position chrome (FeedbackButton, BrandBadge) that floats above
+   every screen — unlike a screen's own "-no-print"/"-print-only" pair (learn-*, lp-*), this one
+   lives here rather than in a per-screen <style> tag because these components render alongside
+   many different printable screens, and a screen-scoped rule only applies while that screen's own
+   style tag happens to be mounted (missed Lesson Plans entirely before this existed, since only
+   LearnScreen's local rule covered FeedbackButton's class). */
+@media print {
+  .cc-no-print { display: none !important; }
+}

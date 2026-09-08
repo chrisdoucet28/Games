@@ -1,8 +1,10 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { hexToRgba, type Theme } from "../../data/themes";
-import { LESSON_TOPICS, LEVEL_ORDER, LEVEL_COLOR, FOCUS_ORDER, FOCUS_LABEL, type LearnTopic } from "../../data/learnTopics";
+import { LESSON_TOPICS, LEVEL_ORDER, LEVEL_COLOR, FOCUS_ORDER, FOCUS_LABEL, matchesTopicSearch, type LearnTopic } from "../../data/learnTopics";
 import { LESSON_PLANS, buildUnscrambleItems, type RoundOut, type UnscrambleItem } from "../../data/lessonPlans";
+import { REAL_WORLD_READINGS, type RealWorldReading } from "../../data/realWorldReadings";
 import { TOPIC_LIBRARY } from "../../data/topics";
+import { getProfile } from "../../lib/profile";
 import { LessonSectionBlock, CommonMistakesBlock } from "./LessonContent";
 import { QuestionCard } from "./QuestionCard";
 import { Icon, type IconName } from "./Icon";
@@ -16,6 +18,10 @@ type Props = {
   initialTopicId?: string | null;
   // Switches to the Learn screen (the "Learn" pill in the mode toggle below, shown on the index).
   onOpenLearn: () => void;
+  // Set by the top-level screen orchestrator so a finished lesson can hand off straight into game
+  // team setup for the same topic, skipping topic re-selection. Undefined in any context that
+  // doesn't support that handoff (there isn't one today, but the button only renders when set).
+  onPlayGameForTopic?: (topicId: string) => void;
 };
 
 const PRINT_CSS = `
@@ -33,19 +39,25 @@ function sampleByType(questions: QuestionData[], type: string, count: number): Q
   return [...pool].sort(() => Math.random() - 0.5).slice(0, count);
 }
 
-export function LessonPlanScreen({ onBack, theme, initialTopicId, onOpenLearn }: Props) {
+export function LessonPlanScreen({ onBack, theme, initialTopicId, onOpenLearn, onPlayGameForTopic }: Props) {
   const availableTopics = useMemo(() => LESSON_TOPICS.filter(t => LESSON_PLANS[t.id]), []);
   const [selectedId, setSelectedId] = useState<string | null>(initialTopicId ?? null);
+  const [searchTerm, setSearchTerm] = useState("");
+  // "type" (default) keeps the Grammar/Vocabulary/Themes sections; "order" flattens each level into
+  // one single teaching sequence instead — only meaningful for levels that actually have `order`
+  // values assigned (A1 so far), but harmless (falls back to existing array order) elsewhere.
+  const [viewMode, setViewMode] = useState<"type" | "order">("type");
   const selected = selectedId ? availableTopics.find(t => t.id === selectedId) : null;
 
   if (selected) {
     // Keyed on the topic id so picking a different topic from the index (rather than unmounting
     // the whole screen) still gets a fresh sampling of practice items and a reset slide position.
-    return <LessonPlanSlideshow key={selected.id} topic={selected} theme={theme} onBack={() => setSelectedId(null)} />;
+    return <LessonPlanSlideshow key={selected.id} topic={selected} theme={theme} onBack={() => setSelectedId(null)} onPlayGameForTopic={onPlayGameForTopic} />;
   }
 
+  const searchedTopics = availableTopics.filter(t => matchesTopicSearch(t.lesson.title, searchTerm));
   const byLevel = LEVEL_ORDER
-    .map(level => ({ level, topics: availableTopics.filter(t => t.meta.level === level) }))
+    .map(level => ({ level, topics: searchedTopics.filter(t => t.meta.level === level) }))
     .filter(g => g.topics.length > 0);
 
   return (
@@ -73,8 +85,54 @@ export function LessonPlanScreen({ onBack, theme, initialTopicId, onOpenLearn }:
           </div>
         </div>
 
+        {availableTopics.length > 0 && (
+          <div style={{ position: "relative", marginBottom: "20px" }}>
+            <Icon name="search" size={15} color="#9CA3AF" style={{ position: "absolute", left: "14px", top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+              placeholder="Search lesson plans..."
+              style={{
+                width: "100%", boxSizing: "border-box", padding: "11px 40px 11px 38px",
+                border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, borderRadius: "12px", fontSize: "14px",
+                fontWeight: "600", color: theme.heroBg[0], outline: "none",
+              }}
+            />
+            {searchTerm !== "" && (
+              <button
+                type="button"
+                onClick={() => setSearchTerm("")}
+                aria-label="Clear search"
+                style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", background: hexToRgba(theme.accentSolid, 0.12), border: "none", borderRadius: "50%", width: "22px", height: "22px", color: theme.accentSolid, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
+              >
+                <Icon name="close" size={10} />
+              </button>
+            )}
+          </div>
+        )}
+
+        {availableTopics.length > 0 && (
+          <div style={{ display: "inline-flex", background: "white", border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, borderRadius: "999px", padding: "4px", marginBottom: "20px" }}>
+            <button
+              onClick={() => setViewMode("type")}
+              style={{ background: viewMode === "type" ? theme.accentSolid : "none", color: viewMode === "type" ? "white" : theme.accentSolid, border: "none", borderRadius: "999px", padding: "7px 16px", fontWeight: "800", fontSize: "13px", fontFamily: theme.headingFont, cursor: "pointer" }}
+            >
+              By Type
+            </button>
+            <button
+              onClick={() => setViewMode("order")}
+              style={{ background: viewMode === "order" ? theme.accentSolid : "none", color: viewMode === "order" ? "white" : theme.accentSolid, border: "none", borderRadius: "999px", padding: "7px 16px", fontWeight: "800", fontSize: "13px", fontFamily: theme.headingFont, cursor: "pointer" }}
+            >
+              Recommended Order
+            </button>
+          </div>
+        )}
+
         {availableTopics.length === 0 ? (
           <div style={{ textAlign: "center", color: "#6B7280", padding: "40px 0" }}>No lesson plans yet — check back soon.</div>
+        ) : searchedTopics.length === 0 ? (
+          <div style={{ textAlign: "center", color: "#6B7280", padding: "40px 0" }}>No topics match "{searchTerm.trim()}"</div>
         ) : (
           byLevel.map(group => (
             <div key={group.level} style={{ marginBottom: "24px" }}>
@@ -82,21 +140,53 @@ export function LessonPlanScreen({ onBack, theme, initialTopicId, onOpenLearn }:
                 <span style={{ background: LEVEL_COLOR[group.level], color: "white", borderRadius: "999px", padding: "3px 12px", fontSize: "13px", fontWeight: "800" }}>{group.level}</span>
                 <span style={{ color: "#9CA3AF", fontSize: "12px", fontWeight: "700" }}>{group.topics.length} lesson plan{group.topics.length === 1 ? "" : "s"}</span>
               </div>
-              {FOCUS_ORDER.filter(focus => group.topics.some(t => (t.meta.focus ?? "grammar") === focus)).map(focus => (
-                <div key={focus} style={{ marginBottom: "16px" }}>
-                  <div style={{ color: "#6B7280", fontSize: "12px", fontWeight: "800", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: "8px" }}>{FOCUS_LABEL[focus]}</div>
+              {viewMode === "order" ? (
+                <div>
+                  {!group.topics.some(t => t.meta.order != null) && (
+                    <div style={{ color: "#9CA3AF", fontSize: "12px", fontStyle: "italic", marginBottom: "8px" }}>
+                      No recommended order set for {group.level} yet — showing default order.
+                    </div>
+                  )}
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(200px,1fr))", gap: "10px" }}>
-                    {group.topics.filter(t => (t.meta.focus ?? "grammar") === focus).map(t => (
-                      <button
-                        key={t.id} onClick={() => setSelectedId(t.id)}
-                        style={{ textAlign: "left", background: "white", border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, borderRadius: "12px", padding: "14px 16px", cursor: "pointer", fontFamily: "inherit" }}
-                      >
-                        <div style={{ fontWeight: "800", color: theme.heroBg[0], fontSize: "14px", fontFamily: theme.headingFont }}>{t.lesson.title}</div>
-                      </button>
-                    ))}
+                    {[...group.topics]
+                      .sort((a, b) => (a.meta.order ?? Number.MAX_SAFE_INTEGER) - (b.meta.order ?? Number.MAX_SAFE_INTEGER))
+                      .map((t, i) => (
+                        <button
+                          key={t.id} onClick={() => setSelectedId(t.id)}
+                          style={{ textAlign: "left", background: "white", border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, borderRadius: "12px", padding: "14px 16px", cursor: "pointer", fontFamily: "inherit", display: "flex", alignItems: "flex-start", gap: "10px" }}
+                        >
+                          <span style={{ background: hexToRgba(theme.accentSolid, 0.12), color: theme.accentSolid, borderRadius: "50%", width: "22px", height: "22px", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "11px", fontWeight: "800" }}>{i + 1}</span>
+                          <div>
+                            <div style={{ fontWeight: "800", color: theme.heroBg[0], fontSize: "14px", fontFamily: theme.headingFont }}>{t.lesson.title}</div>
+                            <div style={{ color: "#9CA3AF", fontSize: "11px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.03em", marginTop: "3px" }}>{FOCUS_LABEL[t.meta.focus ?? "grammar"]}</div>
+                          </div>
+                        </button>
+                      ))}
                   </div>
                 </div>
-              ))}
+              ) : (
+                FOCUS_ORDER.filter(focus => group.topics.some(t => (t.meta.focus ?? "grammar") === focus)).map(focus => (
+                  <div key={focus} style={{ marginBottom: "16px" }}>
+                    <div style={{ color: "#6B7280", fontSize: "12px", fontWeight: "800", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: "8px" }}>{FOCUS_LABEL[focus]}</div>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(200px,1fr))", gap: "10px" }}>
+                      {group.topics
+                        .filter(t => (t.meta.focus ?? "grammar") === focus)
+                        .sort((a, b) => (a.meta.order ?? Number.MAX_SAFE_INTEGER) - (b.meta.order ?? Number.MAX_SAFE_INTEGER))
+                        .map((t, i) => (
+                          <button
+                            key={t.id} onClick={() => setSelectedId(t.id)}
+                            style={{ textAlign: "left", background: "white", border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, borderRadius: "12px", padding: "14px 16px", cursor: "pointer", fontFamily: "inherit", display: "flex", alignItems: "flex-start", gap: "10px" }}
+                          >
+                            {t.meta.order != null && (
+                              <span style={{ background: hexToRgba(theme.accentSolid, 0.12), color: theme.accentSolid, borderRadius: "50%", width: "22px", height: "22px", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "11px", fontWeight: "800" }}>{i + 1}</span>
+                            )}
+                            <div style={{ fontWeight: "800", color: theme.heroBg[0], fontSize: "14px", fontFamily: theme.headingFont }}>{t.lesson.title}</div>
+                          </button>
+                        ))}
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           ))
         )}
@@ -110,17 +200,21 @@ export function LessonPlanScreen({ onBack, theme, initialTopicId, onOpenLearn }:
 // exercise. "question" slides reuse QuestionCard exactly as every game already does. "presentation"
 // is split one slide per Lesson section — the same blue-header divisions the Learn page shows all
 // at once on one scrolling card — so the explanation reads like the rest of the slideshow instead
-// of a wall of text; "commonMistakes" is its own trailing slide, shown only when the lesson has any.
+// of a wall of text; "commonMistakes" is its own trailing slide, shown only when the lesson has
+// any. "realWorld" is likewise shown only when REAL_WORLD_READINGS has an entry for this topic
+// (currently the A1 pilot only) — like "roundOut", it's one step with its own internal phases
+// (mode select, content, comprehension questions, optional reveal), rendered by RealWorldReadingStep.
 type Slide =
   | { kind: "intro" }
   | { kind: "presentation"; sectionIndex: number }
   | { kind: "commonMistakes" }
   | { kind: "question"; sectionLabel: string; sectionIcon: IconName; question: QuestionData; progress: string }
   | { kind: "roundOut" }
+  | { kind: "realWorld"; reading: RealWorldReading }
   | { kind: "speaking"; tasks: string[] }
   | { kind: "done" };
 
-function LessonPlanSlideshow({ topic, theme, onBack }: { topic: LearnTopic; theme: Theme; onBack: () => void }) {
+function LessonPlanSlideshow({ topic, theme, onBack, onPlayGameForTopic }: { topic: LearnTopic; theme: Theme; onBack: () => void; onPlayGameForTopic?: (topicId: string) => void }) {
   const topicData = TOPIC_LIBRARY[topic.id as keyof typeof TOPIC_LIBRARY] as { questions: QuestionData[]; cardTasks?: { task: string }[] };
   const roundOut = LESSON_PLANS[topic.id];
 
@@ -152,6 +246,8 @@ function LessonPlanSlideshow({ topic, theme, onBack }: { topic: LearnTopic; them
     practiceB.items.forEach((q, i) => list.push({ kind: "question", sectionLabel: "More Practice", sectionIcon: practiceB.icon, question: q, progress: `${i + 1}/${practiceB.items.length}` }));
     list.push({ kind: "roundOut" });
     production.forEach((q, i) => list.push({ kind: "question", sectionLabel: "Your Turn", sectionIcon: "star", question: q, progress: `${i + 1}/${production.length}` }));
+    const realWorld = REAL_WORLD_READINGS[topic.id];
+    if (realWorld) list.push({ kind: "realWorld", reading: realWorld });
     if (speakingTasks.length) list.push({ kind: "speaking", tasks: speakingTasks });
     list.push({ kind: "done" });
     return list;
@@ -161,6 +257,12 @@ function LessonPlanSlideshow({ topic, theme, onBack }: { topic: LearnTopic; them
   const [slideIndex, setSlideIndex] = useState(0);
   const [showAnswer, setShowAnswer] = useState(false);
   const slide = slides[slideIndex];
+
+  // Paid-only branding perk (see ProfileScreen/BrandBadge), same as Learn's own printable handout.
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  useEffect(() => {
+    getProfile().then(p => setLogoUrl(p.org_logo_url)).catch(() => {});
+  }, []);
 
   const goNext = () => { setSlideIndex(i => Math.min(i + 1, slides.length - 1)); setShowAnswer(false); };
   const goPrev = () => { if (slideIndex === 0) onBack(); else { setSlideIndex(i => i - 1); setShowAnswer(false); } };
@@ -239,6 +341,8 @@ function LessonPlanSlideshow({ topic, theme, onBack }: { topic: LearnTopic; them
 
           {slide.kind === "roundOut" && <RoundOutStep roundOut={roundOut} topicId={topic.id} theme={theme} onDone={goNext} />}
 
+          {slide.kind === "realWorld" && <RealWorldReadingStep reading={slide.reading} theme={theme} onDone={goNext} />}
+
           {slide.kind === "speaking" && (
             <div>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", marginBottom: "14px", color: theme.accentSolid, fontWeight: "800", fontSize: "13px", textTransform: "uppercase", letterSpacing: "0.04em" }}>
@@ -257,6 +361,9 @@ function LessonPlanSlideshow({ topic, theme, onBack }: { topic: LearnTopic; them
               <h2 style={{ fontSize: "22px", fontWeight: "900", color: theme.heroBg[0], marginBottom: "10px", fontFamily: theme.headingFont }}>Lesson complete!</h2>
               <p style={{ color: "#6B7280", fontSize: "14px", marginBottom: "20px" }}>Print this as a worksheet, or head back to try another topic.</p>
               <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap" }}>
+                {onPlayGameForTopic && (
+                  <button onClick={() => onPlayGameForTopic(topic.id)} style={nextBtnStyle}><Icon name="rocket" size={15} /> Play a Game on This Topic</button>
+                )}
                 <button onClick={() => window.print()} style={nextBtnStyle}><Icon name="printer" size={15} /> Print this lesson</button>
                 <button onClick={onBack} style={{ background: "none", border: `2px solid ${theme.accentSolid}`, color: theme.accentSolid, borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "800", cursor: "pointer", fontFamily: theme.headingFont }}>Back to Lesson Plans</button>
               </div>
@@ -264,14 +371,14 @@ function LessonPlanSlideshow({ topic, theme, onBack }: { topic: LearnTopic; them
           )}
         </div>
 
-        {slide.kind !== "done" && slide.kind !== "roundOut" && (
+        {slide.kind !== "done" && slide.kind !== "roundOut" && slide.kind !== "realWorld" && (
           <div className="lp-no-print" style={{ textAlign: "center", marginTop: "16px" }}>
             <button onClick={goNext} style={nextBtnStyle}><Icon name="next" size={15} /> {slideIndex === slides.length - 2 ? "Finish" : "Next"}</button>
           </div>
         )}
 
         <div className="lp-print-only">
-          <PrintableLessonPlan topic={topic} slides={slides} roundOut={roundOut} />
+          <PrintableLessonPlan topic={topic} slides={slides} roundOut={roundOut} logoUrl={logoUrl} />
         </div>
       </div>
     </div>
@@ -468,59 +575,297 @@ function UnscrambleRoundOut({ topicId, theme, onDone }: { topicId: string; theme
   );
 }
 
-// Ink-economical, single flowing worksheet — mirrors LearnScreen's PrintableLesson pattern.
-// Practice/production questions get blank space instead of the on-screen reveal interaction;
-// the round-out exercise and speaking tasks print as plain instructions.
-function PrintableLessonPlan({ topic, slides, roundOut }: { topic: LearnTopic; slides: Slide[]; roundOut: RoundOut }) {
-  const questionSlides = slides.filter((s): s is Extract<Slide, { kind: "question" }> => s.kind === "question");
-  const speakingSlide = slides.find((s): s is Extract<Slide, { kind: "speaking" }> => s.kind === "speaking");
-  let currentSection = "";
+// Custom-styled play/pause + seek bar, built around a plain <audio> element kept out of the
+// visible layout (display:none) — reused for every real-world reading with audio, and will keep
+// working unchanged once `src` points at real ElevenLabs narration instead of the temporary
+// placeholder voice.
+function AudioPlayer({ src, theme }: { src: string; theme: Theme }) {
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const [playing, setPlaying] = useState(false);
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    const onTime = () => setProgress(audio.duration ? audio.currentTime / audio.duration : 0);
+    const onEnd = () => setPlaying(false);
+    audio.addEventListener("timeupdate", onTime);
+    audio.addEventListener("ended", onEnd);
+    return () => {
+      audio.removeEventListener("timeupdate", onTime);
+      audio.removeEventListener("ended", onEnd);
+    };
+  }, []);
+
+  const toggle = () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    if (playing) { audio.pause(); setPlaying(false); }
+    else { audio.play(); setPlaying(true); }
+  };
+
+  const seek = (fraction: number) => {
+    const audio = audioRef.current;
+    if (!audio || !audio.duration) return;
+    audio.currentTime = fraction * audio.duration;
+    setProgress(fraction);
+  };
+
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: "10px", background: "white", border: `2px solid ${theme.accentSolid}`, borderRadius: "999px", padding: "8px 14px", marginBottom: "14px" }}>
+      <audio ref={audioRef} src={src} preload="metadata" style={{ display: "none" }} />
+      <button onClick={toggle} style={{ background: theme.accentSolid, color: "white", border: "none", borderRadius: "50%", width: "36px", height: "36px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, padding: 0 }}>
+        <Icon name={playing ? "pause" : "play"} size={16} />
+      </button>
+      <input
+        type="range" min={0} max={1} step={0.001} value={progress}
+        onChange={e => seek(Number(e.target.value))}
+        style={{ flex: 1, accentColor: theme.accentSolid }}
+      />
+    </div>
+  );
+}
+
+// The Real-World Reading step, self-contained like RoundOutStep — its own internal phases (mode
+// select, content, comprehension questions, optional transcript reveal) advance with their own
+// buttons, calling onDone() once the student's worked through it. Mode select only appears when
+// there's audio to choose between; a reading with no audioUrl goes straight to "reading" mode
+// (text always visible), matching the graceful degradation used everywhere else in this file.
+function RealWorldReadingStep({ reading, theme, onDone }: { reading: RealWorldReading; theme: Theme; onDone: () => void }) {
+  const { headerStyle, nextBtnStyle } = roundOutStyles(theme);
+  const [mode, setMode] = useState<"reading" | "listening" | null>(reading.audioUrl ? null : "reading");
+  const [phase, setPhase] = useState<"content" | "questions" | "reveal">("content");
+  const [qIndex, setQIndex] = useState(0);
+  const [showAnswer, setShowAnswer] = useState(false);
+
+  const articleCardStyle: React.CSSProperties = { background: "#FFFBEB", border: "2px solid #FDE68A", borderRadius: "12px", padding: "16px 18px" };
+  const modeBtnStyle: React.CSSProperties = { flex: 1, background: "white", border: `2px solid ${theme.accentSolid}`, color: theme.accentSolid, borderRadius: "12px", padding: "16px", cursor: "pointer", fontWeight: "800", fontSize: "14px", fontFamily: theme.headingFont };
+
+  if (mode === null) {
+    return (
+      <div>
+        <div style={headerStyle}><Icon name="books" size={14} /> Real-World Reading</div>
+        <p style={{ textAlign: "center", color: "#6B7280", fontSize: "13px", marginBottom: "16px" }}>How should students experience this text? Choose before revealing it.</p>
+        <div style={{ display: "flex", gap: "12px" }}>
+          <button onClick={() => setMode("reading")} style={modeBtnStyle}><Icon name="bookOpen" size={16} /><br />Reading<br /><span style={{ fontWeight: "600", fontSize: "11.5px", color: "#6B7280" }}>Text visible from the start</span></button>
+          <button onClick={() => setMode("listening")} style={modeBtnStyle}><Icon name="mic" size={16} /><br />Listening<br /><span style={{ fontWeight: "600", fontSize: "11.5px", color: "#6B7280" }}>Text hidden until after the questions</span></button>
+        </div>
+      </div>
+    );
+  }
+
+  if (phase === "content") {
+    return (
+      <div>
+        <div style={headerStyle}><Icon name="books" size={14} /> Real-World {mode === "listening" ? "Listening" : "Reading"}</div>
+        <div style={articleCardStyle}>
+          <h3 style={{ margin: "0 0 10px", fontSize: "16px", fontWeight: "800", color: "#92400E", fontFamily: theme.headingFont }}>{reading.title}</h3>
+          {reading.audioUrl && <AudioPlayer src={reading.audioUrl} theme={theme} />}
+          {mode === "reading"
+            ? reading.passage.map((p, i) => <p key={i} style={{ margin: "0 0 8px", fontSize: "14.5px", lineHeight: 1.6, color: "#78350F" }}>{p}</p>)
+            : <p style={{ margin: 0, fontSize: "13.5px", lineHeight: 1.6, color: "#92400E", fontStyle: "italic" }}>Listen carefully — the text will be revealed after the questions.</p>}
+        </div>
+        <div style={{ textAlign: "center" }}><button onClick={() => setPhase("questions")} style={nextBtnStyle}><Icon name="next" size={15} /> Continue</button></div>
+      </div>
+    );
+  }
+
+  if (phase === "questions") {
+    const q = reading.questions[qIndex];
+    const isLast = qIndex === reading.questions.length - 1;
+    return (
+      <div>
+        <div style={headerStyle}><Icon name="books" size={14} /> Real-World Check <span style={{ color: "#9CA3AF", fontWeight: "700" }}>· {qIndex + 1}/{reading.questions.length}</span></div>
+        <QuestionCard question={q} showAnswer={showAnswer} onReveal={() => setShowAnswer(true)} gameId="lessonplan" />
+        {showAnswer && (
+          <div style={{ textAlign: "center" }}>
+            <button
+              onClick={() => {
+                if (!isLast) { setQIndex(i => i + 1); setShowAnswer(false); return; }
+                if (mode === "listening") { setPhase("reveal"); return; }
+                onDone();
+              }}
+              style={nextBtnStyle}
+            >
+              <Icon name="next" size={15} /> {!isLast ? "Next" : mode === "listening" ? "See the Text" : "Continue"}
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div>
+      <div style={headerStyle}><Icon name="eye" size={14} /> Here's the Text</div>
+      <div style={articleCardStyle}>
+        <h3 style={{ margin: "0 0 10px", fontSize: "16px", fontWeight: "800", color: "#92400E", fontFamily: theme.headingFont }}>{reading.title}</h3>
+        {reading.passage.map((p, i) => <p key={i} style={{ margin: "0 0 8px", fontSize: "14.5px", lineHeight: 1.6, color: "#78350F" }}>{p}</p>)}
+      </div>
+      <p style={{ textAlign: "center", color: "#6B7280", fontSize: "13px", margin: "10px 0" }}>Check your answers against the text.</p>
+      <div style={{ textAlign: "center" }}><button onClick={onDone} style={nextBtnStyle}><Icon name="next" size={15} /> Continue</button></div>
+    </div>
+  );
+}
+
+// Ink-economical, single flowing worksheet — mirrors LearnScreen's PrintableLesson pattern (same
+// paid-org-logo perk, same B&W-friendly borders-not-fills approach). Practice/production questions
+// get blank space instead of the on-screen reveal interaction and are numbered per section so this
+// reads as a real worksheet; the round-out exercise prints its actual content (PrintRoundOut) rather
+// than a "see screen version" placeholder, since a parent/student holding the paper has no screen to
+// go back to. FeedbackButton/BrandBadge are hidden from every print via the global .cc-no-print rule
+// (index.css) rather than needing their own line here.
+const printDividerStyle: React.CSSProperties = { border: "none", borderTop: "1px solid #D1D5DB", margin: "10px 0" };
+const printSectionHeadingStyle: React.CSSProperties = { fontWeight: "800", fontSize: "11px", textTransform: "uppercase", letterSpacing: "0.03em", color: "#374151", marginBottom: "4px" };
+
+function PrintableLessonPlan({ topic, slides, roundOut, logoUrl }: { topic: LearnTopic; slides: Slide[]; roundOut: RoundOut; logoUrl?: string | null }) {
+  const questionSlides = slides.filter((s): s is Extract<Slide, { kind: "question" }> => s.kind === "question");
+  const realWorldSlide = slides.find((s): s is Extract<Slide, { kind: "realWorld" }> => s.kind === "realWorld");
+  const speakingSlide = slides.find((s): s is Extract<Slide, { kind: "speaking" }> => s.kind === "speaking");
+  let currentSection = "";
+  let numberInSection = 0;
+
+  return (
+    <div>
+      {logoUrl && (
+        <img src={logoUrl} alt="" style={{ display: "block", maxHeight: "34px", maxWidth: "160px", objectFit: "contain", marginBottom: "8px" }} />
+      )}
       <span style={{ background: LEVEL_COLOR[topic.meta.level ?? "A1"], color: "white", borderRadius: "999px", padding: "2px 10px", fontSize: "10.5px", fontWeight: "800" }}>{topic.meta.level}</span>
-      <h2 style={{ fontSize: "19px", fontWeight: "900", color: "#111827", margin: "6px 0 5px" }}>{topic.lesson.title} — Lesson Plan</h2>
-      <p style={{ color: "#374151", fontSize: "12px", lineHeight: 1.4, margin: "0 0 10px" }}>{topic.lesson.intro}</p>
+      <h2 style={{ fontSize: "20px", fontWeight: "900", color: "#111827", margin: "7px 0 6px" }}>{topic.lesson.title} — Lesson Plan</h2>
+      <div style={{ display: "flex", gap: "24px", fontSize: "11.5px", color: "#374151", fontWeight: "700", margin: "0 0 10px" }}>
+        <span>Name: ________________________</span>
+        <span>Date: ______________</span>
+      </div>
+      <p style={{ color: "#374151", fontSize: "12px", lineHeight: 1.4, margin: "0 0 8px" }}>{topic.lesson.intro}</p>
+      <hr style={printDividerStyle} />
 
       {topic.lesson.sections.map((section, i) => (
         <div key={i} style={{ marginBottom: "9px" }}>
-          <div style={{ fontWeight: "800", color: "#374151", fontSize: "11px", marginBottom: "3px", textTransform: "uppercase" }}>{section.heading}</div>
+          <div style={printSectionHeadingStyle}>{section.heading}</div>
           <ul style={{ margin: 0, paddingLeft: "16px", color: "#1F2937" }}>
             {section.body.map((line, j) => <li key={j} style={{ marginBottom: "2px", lineHeight: 1.3, fontSize: "11.5px" }}>{line.replace(/\*\*/g, "")}</li>)}
           </ul>
         </div>
       ))}
+      <hr style={printDividerStyle} />
 
       {questionSlides.map((s, i) => {
         const showHeading = s.sectionLabel !== currentSection;
         currentSection = s.sectionLabel;
+        numberInSection = showHeading ? 1 : numberInSection + 1;
         return (
-          <div key={i} style={{ marginTop: showHeading ? "10px" : "4px" }}>
-            {showHeading && <div style={{ fontWeight: "800", fontSize: "11px", textTransform: "uppercase", color: "#374151", marginTop: "6px" }}>{s.sectionLabel}</div>}
-            <div style={{ fontSize: "11.5px", margin: "3px 0" }}>{s.question.question}</div>
-            <div style={{ borderBottom: "1px solid #9CA3AF", height: "14px" }} />
+          <div key={i} style={{ marginTop: showHeading && i > 0 ? "12px" : "4px" }}>
+            {showHeading && <div style={printSectionHeadingStyle}>{s.sectionLabel}</div>}
+            <div style={{ fontSize: "11.5px", margin: "4px 0" }}>{numberInSection}. {s.question.question}</div>
+            <div style={{ borderBottom: "1px solid #9CA3AF", height: "16px" }} />
           </div>
         );
       })}
+      <hr style={printDividerStyle} />
 
-      <div style={{ fontWeight: "800", fontSize: "11px", textTransform: "uppercase", color: "#374151", marginTop: "10px" }}>Exercise</div>
-      <div style={{ fontSize: "11px", color: "#4B5563" }}>{roundOutPrintSummary(roundOut)}</div>
+      <div style={printSectionHeadingStyle}>Exercise</div>
+      <PrintRoundOut roundOut={roundOut} topicId={topic.id} />
+
+      {realWorldSlide && (
+        <div style={{ marginTop: "10px" }}>
+          <hr style={printDividerStyle} />
+          <div style={printSectionHeadingStyle}>Real-World Reading — {realWorldSlide.reading.title}</div>
+          {realWorldSlide.reading.passage.map((p, i) => <div key={i} style={{ fontSize: "11.5px", color: "#1F2937", margin: "3px 0" }}>{p}</div>)}
+          <div style={{ ...printSectionHeadingStyle, marginTop: "8px" }}>Real-World Check</div>
+          {realWorldSlide.reading.questions.map((q, i) => (
+            <div key={i} style={{ marginTop: "4px" }}>
+              <div style={{ fontSize: "11.5px", margin: "3px 0" }}>{i + 1}. {q.question}</div>
+              <div style={{ borderBottom: "1px solid #9CA3AF", height: "16px" }} />
+            </div>
+          ))}
+        </div>
+      )}
 
       {speakingSlide && (
         <div style={{ marginTop: "10px" }}>
-          <div style={{ fontWeight: "800", fontSize: "11px", textTransform: "uppercase", color: "#374151" }}>Speaking</div>
+          <hr style={printDividerStyle} />
+          <div style={printSectionHeadingStyle}>Speaking</div>
           <ul style={{ margin: "3px 0 0", paddingLeft: "16px" }}>
             {speakingSlide.tasks.map((t, i) => <li key={i} style={{ fontSize: "11px", marginBottom: "2px" }}>{t}</li>)}
           </ul>
         </div>
       )}
+
+      <hr style={printDividerStyle} />
+      <p style={{ textAlign: "center", color: "#9CA3AF", fontSize: "10px", fontStyle: "italic", margin: "6px 0 0" }}>
+        Made with ClassCade — spot an issue with this lesson? Open the app and tap Feedback to let us know.
+      </p>
     </div>
   );
 }
 
-function roundOutPrintSummary(roundOut: RoundOut): string {
-  if (roundOut.kind === "paragraphCloze") return "Fill in the gaps in the story (see screen version, or ask your teacher to read it aloud).";
-  if (roundOut.kind === "matching") return `Match each word to its meaning: ${roundOut.pairs.map(p => p.term).join(", ")}.`;
-  if (roundOut.kind === "errorPassage") return "Find and correct the mistakes in the passage (see screen version).";
-  if (roundOut.kind === "scenario") return "Respond to each situation your teacher reads aloud.";
-  return "Put the scrambled words back into the correct order (ask your teacher for the sentences).";
+// Real, fillable content per round-out kind instead of a one-line summary — a printed page has no
+// screen to fall back to, so this mirrors each kind's on-screen *unrevealed* state (blanks shown as
+// "___ (base)", scrambled words, situations without their sample answer, etc.) rather than leaking
+// the answer key onto a student handout.
+function PrintRoundOut({ roundOut, topicId }: { roundOut: RoundOut; topicId: string }) {
+  if (roundOut.kind === "paragraphCloze") {
+    return (
+      <p style={{ fontSize: "12px", lineHeight: 1.9, color: "#1F2937", margin: "4px 0 0" }}>
+        {roundOut.segments.map((seg, i) => typeof seg === "string" ? <span key={i}>{seg}</span> : <span key={i} style={{ fontWeight: "700" }}>___ ({seg.base})</span>)}
+      </p>
+    );
+  }
+
+  if (roundOut.kind === "matching") {
+    const offset = Math.max(1, Math.floor(roundOut.pairs.length / 2));
+    const shuffledDefs = roundOut.pairs.map((_, i) => roundOut.pairs[(i + offset) % roundOut.pairs.length].definition);
+    return (
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginTop: "4px" }}>
+        <div>
+          {roundOut.pairs.map((p, i) => (
+            <div key={i} style={{ fontSize: "11.5px", margin: "4px 0", color: "#1F2937" }}>___ &nbsp; {i + 1}. {p.term}</div>
+          ))}
+        </div>
+        <div>
+          {shuffledDefs.map((def, i) => (
+            <div key={i} style={{ fontSize: "11.5px", margin: "4px 0", color: "#1F2937" }}>{String.fromCharCode(65 + i)}. {def}</div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (roundOut.kind === "errorPassage") {
+    return (
+      <div>
+        <p style={{ fontSize: "11px", color: "#4B5563", margin: "4px 0 6px" }}>Find and correct the mistakes below.</p>
+        <div style={{ border: "1px solid #9CA3AF", borderRadius: "6px", padding: "10px 12px", whiteSpace: "pre-line", fontSize: "11.5px", lineHeight: 1.7, color: "#1F2937" }}>{roundOut.text}</div>
+      </div>
+    );
+  }
+
+  if (roundOut.kind === "scenario") {
+    return (
+      <div>
+        {roundOut.prompts.map((p, i) => (
+          <div key={i} style={{ marginTop: i > 0 ? "10px" : "4px" }}>
+            <div style={{ fontSize: "11.5px", color: "#1F2937", margin: "3px 0" }}>{i + 1}. {p.situation} — <span style={{ fontWeight: "700" }}>{p.instruction}</span></div>
+            <div style={{ borderBottom: "1px solid #9CA3AF", height: "16px" }} />
+            <div style={{ borderBottom: "1px solid #9CA3AF", height: "16px" }} />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  // unscramble
+  const items = buildUnscrambleItems(topicId, 4);
+  if (!items.length) return null;
+  return (
+    <div>
+      <p style={{ fontSize: "11px", color: "#4B5563", margin: "4px 0 6px" }}>Put the words in the correct order.</p>
+      {items.map((item, i) => (
+        <div key={i} style={{ marginTop: i > 0 ? "8px" : 0 }}>
+          <div style={{ fontSize: "11.5px", color: "#1F2937", margin: "3px 0" }}>{i + 1}. {item.words.join(" / ")}</div>
+          <div style={{ borderBottom: "1px solid #9CA3AF", height: "16px" }} />
+        </div>
+      ))}
+    </div>
+  );
 }
