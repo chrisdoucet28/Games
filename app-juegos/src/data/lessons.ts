@@ -1918,37 +1918,54 @@ export const LESSONS: Record<string, Lesson> = {
   },
 
   prefer_rather: {
-    title: "I'd prefer vs I'd rather",
-    intro: "Both express a preference, but they need completely different grammar afterward — 'rather' never takes 'to', and 'prefer' usually does.",
+    title: "Prefer vs I'd Rather vs I'd Prefer",
+    intro: "English has two different ways to talk about preferences, and mixing them up is one of the most common mistakes at this level: plain 'prefer' for a general, ongoing preference that's always true, and 'I'd rather' / 'I'd prefer' for a specific choice right now — each with its own grammar afterward.",
     sections: [
       {
-        heading: "I'd rather",
+        heading: "General preferences: prefer (no 'would')",
         body: [
-          "I'd rather + bare infinitive (no 'to')",
+          "Use plain 'prefer' — present simple, with -s for he/she/it — for a general, ongoing preference, not just a choice for one specific moment.",
+          "prefer + verb-ing + to + verb-ing (comparing two activities in general)",
+          "prefer + noun + to + noun (comparing two things in general)",
+        ],
+        examples: [
+          "I **prefer** tea **to** coffee. (a general fact about me, true every day)",
+          "She **prefers** walking **to** driving.",
+          "My parents **prefer** quiet holidays **to** busy city trips.",
+        ],
+      },
+      {
+        heading: "I'd rather (a specific choice, right now)",
+        body: [
+          "I'd rather + bare infinitive (no 'to') — for a specific choice, not a general habit",
           "I'd rather X than Y (both bare infinitives)",
           "I'd rather + subject + past simple (a preference about someone else, present meaning)",
         ],
         examples: [
-          "I**'d rather stay** home tonight.",
+          "I**'d rather stay** home tonight. (this evening specifically, not a general habit)",
           "I**'d rather walk than** take the bus.",
           "I**'d rather** you **called** me first.",
         ],
       },
       {
-        heading: "I'd prefer",
+        heading: "I'd prefer (a specific choice, right now)",
         body: [
           "I'd prefer to + infinitive",
           "I'd prefer + noun + to + noun",
           "I'd prefer to X rather than Y",
         ],
         examples: [
-          "I**'d prefer to relax** at home.",
-          "I**'d prefer** tea **to** coffee.",
+          "I**'d prefer to relax** at home. (right now — not a general statement)",
+          "I**'d prefer** tea **to** coffee, please. (this specific cup — compare to the general example above)",
           "She**'d prefer to walk rather than** drive.",
         ],
       },
     ],
     commonMistakes: [
+      "❌ I would prefer tea to coffee, in general. → ✅ I prefer tea to coffee, in general. (a general truth or habit uses plain 'prefer' — no 'would')",
+      "❌ She prefer coffee to tea. → ✅ She prefers coffee to tea. (third person singular needs -s)",
+      "❌ I prefer a coffee right now, please. → ✅ I'd prefer a coffee right now, please. (for this specific moment, use 'I'd prefer', not plain 'prefer')",
+      "❌ I prefer to walking to running. → ✅ I prefer walking to running. ('prefer' + gerund + 'to' + gerund — no extra 'to' before the first verb)",
       "❌ I'd rather to go by train. → ✅ I'd rather go by train. (no 'to' after 'would rather')",
       "❌ I'd prefer go early. → ✅ I'd prefer to go early. ('prefer' needs 'to' before the infinitive)",
       "❌ She'd prefer coffee than tea. → ✅ She'd prefer coffee to tea. ('prefer X to Y', not 'than')",

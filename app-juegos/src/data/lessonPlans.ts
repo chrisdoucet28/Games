@@ -699,13 +699,13 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
 
   prefer_rather: {
     kind: "errorPassage",
-    text: "A: What do you want to do tonight?\nB: I'd rather to stay home, honestly. I'd prefer watch a film tonight.\nA: Really? I'd prefer going out than staying in.\nB: Well, I'd rather you don't tell everyone I'm boring!",
-    corrected: "A: What do you want to do tonight?\nB: I'd rather stay home, honestly. I'd prefer to watch a film tonight.\nA: Really? I'd prefer going out to staying in.\nB: Well, I'd rather you didn't tell everyone I'm boring!",
+    text: "A: What do you want to do tonight?\nB: I generally would prefer staying in to going out, but tonight I fancy a change — maybe the cinema?\nA: Sure! I'd prefer watch something big on the screen anyway — the sound at home isn't great.\nB: True. I usually prefers comedies, but tonight I'd rather see something more serious.\nA: Okay, but I'd rather you don't pick anything too long — I'm exhausted.\nB: Deal, I'd rather find something under two hours.",
+    corrected: "A: What do you want to do tonight?\nB: I generally prefer staying in to going out, but tonight I fancy a change — maybe the cinema?\nA: Sure! I'd prefer to watch something big on the screen anyway — the sound at home isn't great.\nB: True. I usually prefer comedies, but tonight I'd rather see something more serious.\nA: Okay, but I'd rather you didn't pick anything too long — I'm exhausted.\nB: Deal, I'd rather find something under two hours.",
     fixes: [
-      "'I'd rather to stay home' → 'I'd rather stay home' (no 'to' after 'would rather')",
-      "'I'd prefer watch a film' → 'I'd prefer to watch a film' ('prefer' needs 'to' before the infinitive)",
-      "'I'd prefer going out than staying in' → 'I'd prefer going out to staying in' ('prefer X to Y', not 'than')",
-      "'I'd rather you don't tell' → 'I'd rather you didn't tell' (past simple after 'would rather + subject' for a present request)",
+      "'I generally would prefer staying in' → 'I generally prefer staying in' (a general truth or habit uses plain 'prefer' — no 'would')",
+      "'I'd prefer watch something' → 'I'd prefer to watch something' ('prefer' needs 'to' before the infinitive)",
+      "'I usually prefers comedies' → 'I usually prefer comedies' ('I' never takes -s)",
+      "'I'd rather you don't pick' → 'I'd rather you didn't pick' (past simple after 'would rather + subject' for a present request)",
     ],
   },
 
