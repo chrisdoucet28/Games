@@ -1502,9 +1502,9 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
   mixed_conditionals: {
     kind: "scenario",
     prompts: [
-      { situation: "Someone chose a different career path years ago and now works in a completely different field.", instruction: "Say what would be true today if they'd made a different choice, using a mixed conditional.", sample: "If she had studied medicine, she would be a doctor today." },
-      { situation: "A shy colleague never speaks up in meetings, and missed a chance to share a good idea last week.", instruction: "Say what would have happened if they weren't so shy, using a mixed conditional.", sample: "If he weren't so shy, he would have spoken up at the meeting." },
-      { situation: "Someone took a scholarship years ago and it changed where they live now.", instruction: "Say what's true today because of that past decision.", sample: "If I had taken that scholarship, I would be studying in London now." },
+      { situation: "Someone chose a different career path years ago and now works in a completely different field.", instruction: "Say what would be true today if they'd made a different choice, using a mixed conditional.", sample: "If he had pursued music instead of law, he'd be touring the world today." },
+      { situation: "A shy colleague never speaks up in meetings, and missed a chance to share a good idea last week.", instruction: "Say what would have happened if they weren't so shy, using a mixed conditional.", sample: "If she weren't so nervous around the boss, she would have pitched her idea last week." },
+      { situation: "Someone took a scholarship years ago and it changed where they live now.", instruction: "Say what's true today because of that past decision.", sample: "If he hadn't accepted that transfer, he wouldn't be living overseas now." },
       { situation: "A friend missed a flight, and as a result isn't with everyone now.", instruction: "Say what would be true now if they hadn't missed it.", sample: "If she hadn't missed that flight, she would be here with us now." },
       { situation: "Someone isn't a native speaker, and you think that's why they didn't get a certain job.", instruction: "Say what would have happened if they were a native speaker.", sample: "If she were a native speaker, she would have gotten that job." },
     ],
@@ -1539,11 +1539,11 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
   business_professional_vocabulary: {
     kind: "scenario",
     prompts: [
-      { situation: "You want to briefly reconnect with a colleague once the figures are ready next week.", instruction: "Suggest it, using 'touch base'.", sample: "Let's touch base next week once the figures are in." },
-      { situation: "Your project needs someone to lead a new company initiative.", instruction: "Say who was chosen for the role, using 'spearhead'.", sample: "She was chosen to spearhead the new initiative." },
-      { situation: "Your team's process is too slow and needs simplifying to cut costs.", instruction: "Say what needs to happen, using 'streamline'.", sample: "We need to streamline our processes to cut costs." },
-      { situation: "A new project failed testing and the whole design needs to be redone.", instruction: "Describe the situation, using 'back to the drawing board'.", sample: "The design failed testing, so it's back to the drawing board." },
-      { situation: "Your assistant is overloaded, so you decide to reduce her workload.", instruction: "Describe what you did, using 'take something off someone's plate'.", sample: "The manager took some tasks off her assistant's plate." },
+      { situation: "You want to briefly reconnect with a colleague once the figures are ready next week.", instruction: "Suggest it, using 'touch base'.", sample: "Let's touch base after the client call on Thursday." },
+      { situation: "Your project needs someone to lead a new company initiative.", instruction: "Say who was chosen for the role, using 'spearhead'.", sample: "He was asked to spearhead the merger negotiations." },
+      { situation: "Your team's process is too slow and needs simplifying to cut costs.", instruction: "Say what needs to happen, using 'streamline'.", sample: "The board wants us to streamline the approval process by next quarter." },
+      { situation: "A new project failed testing and the whole design needs to be redone.", instruction: "Describe the situation, using 'back to the drawing board'.", sample: "The prototype didn't meet safety standards, so it's back to the drawing board." },
+      { situation: "Your assistant is overloaded, so you decide to reduce her workload.", instruction: "Describe what you did, using 'take something off someone's plate'.", sample: "I took the reporting duties off his plate so he could focus on the launch." },
     ],
   },
 
@@ -1562,8 +1562,8 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
   future_of_work: {
     kind: "scenario",
     prompts: [
-      { situation: "A CEO recently announced that AI is transforming their industry.", instruction: "Report what the CEO said, using reported speech.", sample: "The CEO said that AI was transforming their industry." },
-      { situation: "Someone claims that companies rarely adapt to change this quickly.", instruction: "Make the same point using inversion for dramatic emphasis.", sample: "Rarely does a company adapt this quickly." },
+      { situation: "A CEO recently announced that AI is transforming their industry.", instruction: "Report what the CEO said, using reported speech.", sample: "The CEO announced that the company would be cutting a third of its workforce." },
+      { situation: "Someone claims that companies rarely adapt to change this quickly.", instruction: "Make the same point using inversion for dramatic emphasis.", sample: "Rarely has an industry been reshaped so quickly by a single technology." },
       { situation: "A colleague didn't upskill in time and lost their job to automation — now they're struggling to find work.", instruction: "Say what would have happened if they had upskilled sooner, using the third conditional.", sample: "If she had upskilled sooner, she would have found a new job faster." },
       { situation: "Someone lost their job years ago, and that's exactly why they're a freelancer today.", instruction: "Connect the past cause to the present result, using a mixed conditional.", sample: "If he hadn't lost his job years ago, he wouldn't be a freelancer today." },
       { situation: "You think job insecurity in the modern workplace is a serious problem that needs fixing.", instruction: "Say so, using a modal passive.", sample: "Job insecurity must be addressed." },
@@ -1598,8 +1598,8 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
   health_healthcare_systems: {
     kind: "scenario",
     prompts: [
-      { situation: "A doctor recently claimed that the healthcare system is failing rural patients.", instruction: "Report what the doctor said, using reported speech.", sample: "The doctor claimed that the system was failing rural patients." },
-      { situation: "You think it's rare for a hospital to treat so many patients this efficiently.", instruction: "Say so, using inversion for emphasis.", sample: "Rarely does a hospital treat so many patients this efficiently." },
+      { situation: "A doctor recently claimed that the healthcare system is failing rural patients.", instruction: "Report what the doctor said, using reported speech.", sample: "The nurse warned that the ward was understaffed for the night shift." },
+      { situation: "You think it's rare for a hospital to treat so many patients this efficiently.", instruction: "Say so, using inversion for emphasis.", sample: "Rarely has a clinic managed to cut waiting times so dramatically." },
       { situation: "A patient's illness wasn't caught early enough, and they didn't survive.", instruction: "Say what would have happened if doctors had diagnosed it sooner, using the third conditional.", sample: "If the doctors had diagnosed the illness sooner, they would have saved his life." },
       { situation: "A country never reformed its healthcare system, and waiting times are still very long today.", instruction: "Connect that past inaction to the present result, using a mixed conditional.", sample: "If they had reformed the system years ago, waiting times wouldn't be so long today." },
       { situation: "You believe health inequality is a serious problem that needs to be fixed.", instruction: "Say so, using a modal passive.", sample: "Health inequality must be addressed." },
