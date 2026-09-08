@@ -1009,6 +1009,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   prefer_rather: {
     title: "Choosing a Restaurant",
+    audioUrl: "/audio/real-world/prefer_rather.mp3",
     passage: [
       "Where should we eat tonight?",
       "I don't know — I generally prefer Italian food to anything else, but I've had pasta three times this week already. What about you?",
@@ -1510,6 +1511,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   question_tags: {
     title: "Small Talk at the Bus Stop",
+    audioUrl: "/audio/real-world/question_tags.mp3",
     passage: [
       "Lovely weather today, isn't it?",
       "It really is! You're waiting for the number twelve, aren't you?",
@@ -1533,6 +1535,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   dependent_prepositions: {
     title: "A Letter of Advice",
+    audioUrl: "/audio/real-world/dependent_prepositions.mp3",
     passage: [
       "Dear Sam, I heard you're worried about the interview next week, so I wanted to share some advice. First, don't be afraid of asking questions — interviewers are always interested in candidates who show curiosity.",
       "Try not to be too focused on giving a perfect answer to every question; it's fine to admit you're not familiar with something.",
@@ -1549,6 +1552,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   articles: {
     title: "A Story My Grandmother Told",
+    audioUrl: "/audio/real-world/articles.mp3",
     passage: [
       "My grandmother once told me a story about the year she moved to the United States. She was a teacher at a small school near a university, and it took an hour every day just to get there.",
       "She said the hardest part wasn't the distance, but learning a completely new culture. Money was tight in those early years, but she always said that money can't buy the kind of happiness she felt building a new life.",
@@ -1565,6 +1569,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   clauses_of_purpose: {
     title: "A Busy Saturday of Errands",
+    audioUrl: "/audio/real-world/clauses_of_purpose.mp3",
     passage: [
       "I went to the pharmacy to pick up a prescription before it closed for the weekend. Afterwards, I stopped by the bakery to buy bread for Sunday's breakfast.",
       "I also called the garage to book an appointment for an oil change, since the car's been making a strange noise. I asked specifically for a morning slot in order to avoid missing any more work than necessary.",
@@ -1581,6 +1586,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   clauses_of_reason: {
     title: "Why the Trip Got Cancelled",
+    audioUrl: "/audio/real-world/clauses_of_reason.mp3",
     passage: [
       "We cancelled our trip because the flights were suddenly too expensive to justify. Since we'd already booked the hotel, we had to cancel that too, which was a frustrating process.",
       "The airline offered a refund due to the schedule changes on their end, which was at least some relief. As we'd already taken time off work, we decided to plan a smaller trip closer to home instead.",
@@ -1597,6 +1603,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   clauses_of_contrast: {
     title: "A Difficult Year, Looking Back",
+    audioUrl: "/audio/real-world/clauses_of_contrast.mp3",
     passage: [
       "Despite the challenges we faced this year, our small business somehow managed to grow. Although sales were slow at the start, things picked up significantly by the summer.",
       "In spite of losing two major clients early on, we found several new ones through word of mouth alone. The market was tough, however, we stayed committed to our original plan rather than panicking.",
@@ -1613,6 +1620,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   gerunds: {
     title: "Advice From a Personal Trainer",
+    audioUrl: "/audio/real-world/gerunds.mp3",
     passage: [
       "Staying consistent is more important than training hard occasionally. I always tell my clients that skipping a single workout isn't the problem — giving up on the whole routine afterwards is.",
       "There's no point in worrying about perfection when you're just starting out; getting started at all is the real achievement. Instead of comparing yourself to others, focus on improving your own numbers week by week.",
@@ -1629,6 +1637,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   ed_ing_adjectives: {
     title: "The Most Confusing Lecture Ever",
+    audioUrl: "/audio/real-world/ed_ing_adjectives.mp3",
     passage: [
       "I was so bored during yesterday's lecture that I nearly fell asleep. To be fair, the topic itself sounded interesting on paper, but the delivery was incredibly confusing.",
       "Some classmates seemed genuinely fascinated, which honestly surprised me, while others looked just as exhausted as I felt. The professor's explanation of the final example was so complicated that half the room looked completely lost by the end.",
@@ -1645,6 +1654,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   future_continuous: {
     title: "This Time Next Week",
+    audioUrl: "/audio/real-world/future_continuous.mp3",
     passage: [
       "By this time next week, I'll be lying on a beach somewhere, finally on holiday after months of overtime. My colleagues will still be working through the usual Monday chaos back at the office, which honestly makes the holiday feel even sweeter.",
       "My parents will be visiting relatives that same week, so the house will be completely empty apart from the cat. I won't be checking my emails at all — I've promised myself a proper break this time.",
