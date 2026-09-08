@@ -945,10 +945,19 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
         </div>
         {/* Primary fork: "games or lesson plans" is the first real decision after login — both
             equally weighted (same size/padding/font-weight), distinguished only by which gradient
-            each uses, so neither reads as the "default" choice over the other. */}
+            each uses, so neither reads as the "default" choice over the other. Each gets a short
+            hint underneath (not on the button itself, so the button label stays scannable) telling
+            a new teacher what to actually expect time-wise before they click — the two paths take
+            genuinely different amounts of class time and this is the one place that says so. */}
         <div style={{ display: "flex", gap: "16px", justifyContent: "center", flexWrap: "wrap", marginBottom: "18px" }}>
-          <button onClick={() => { setActiveClassId(null); setScreen("topic-select"); }} style={{ background: `linear-gradient(135deg,${theme.cta[0]},${theme.cta[1]})`, color: "white", border: "none", borderRadius: "16px", padding: "18px 48px", fontSize: "20px", fontWeight: "900", cursor: "pointer", boxShadow: `0 8px 32px ${hexToRgba(theme.cta[1], 0.45)}`, letterSpacing: "0.01em", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "8px" }}><Icon name="rocket" size={20} /> Start a Game</button>
-          <button onClick={() => { setLessonPlanTopicId(null); setScreen("lessonplan"); }} style={{ background: `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "16px", padding: "18px 48px", fontSize: "20px", fontWeight: "900", cursor: "pointer", boxShadow: `0 8px 32px ${hexToRgba(theme.accent[1], 0.45)}`, letterSpacing: "0.01em", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "8px" }}><Icon name="school" size={20} /> Lesson Plans</button>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
+            <button onClick={() => { setActiveClassId(null); setScreen("topic-select"); }} style={{ background: `linear-gradient(135deg,${theme.cta[0]},${theme.cta[1]})`, color: "white", border: "none", borderRadius: "16px", padding: "18px 48px", fontSize: "20px", fontWeight: "900", cursor: "pointer", boxShadow: `0 8px 32px ${hexToRgba(theme.cta[1], 0.45)}`, letterSpacing: "0.01em", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "8px" }}><Icon name="rocket" size={20} /> Start a Game</button>
+            <span style={{ color: "rgba(255,255,255,0.65)", fontSize: "12.5px", fontWeight: "700" }}>Perfect for the last 30 minutes of class!</span>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
+            <button onClick={() => { setLessonPlanTopicId(null); setScreen("lessonplan"); }} style={{ background: `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "16px", padding: "18px 48px", fontSize: "20px", fontWeight: "900", cursor: "pointer", boxShadow: `0 8px 32px ${hexToRgba(theme.accent[1], 0.45)}`, letterSpacing: "0.01em", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "8px" }}><Icon name="school" size={20} /> Lesson Plans</button>
+            <span style={{ color: "rgba(255,255,255,0.65)", fontSize: "12.5px", fontWeight: "700" }}>~30 min lesson + ~30 min playing</span>
+          </div>
         </div>
 
         {/* Secondary toolbar: one shared quiet pill (not 4-5 independent bordered buttons) so this

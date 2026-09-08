@@ -15,10 +15,14 @@ type Props = {
   onDismiss: (goTo?: "learn") => void;
 };
 
-const STEPS: { icon: IconName; title: string; body: string }[] = [
-  { icon: "chart", title: "Pick a level & topic", body: "Filter by A1-C1 and grammar, vocabulary, or themes, then choose one or more topics to play with." },
-  { icon: "trophy", title: "Set up teams", body: "Name your teams, or just use the ready-made defaults — no setup required to jump straight in." },
-  { icon: "controller", title: "Play a game", body: "15 competitive game modes, from silent judgment calls to full spoken sentences — every one built around your chosen topics." },
+// Two genuinely different entry points, not sequential steps — a teacher picks whichever fits
+// today's lesson, so this is framed as a fork (mirroring the welcome screen's own two-tier CTA)
+// rather than a numbered flow. Each carries the same short time-expectation hint the welcome
+// screen's buttons show, since this is the very first thing a new teacher sees and shouldn't have
+// to guess how much class time either path actually takes before trying it.
+const PATHS: { icon: IconName; title: string; hint: string; body: string }[] = [
+  { icon: "rocket", title: "Start a Game", hint: "Perfect for the last 30 minutes of class!", body: "Pick a level and topic, set up teams (or use the ready-made defaults), and play — 15 competitive game modes, zero prep." },
+  { icon: "school", title: "Lesson Plans", hint: "~30 min lesson + ~30 min playing", body: "A full presentation-practice-production lesson on one topic, then a button at the end drops your class straight into a game on that same topic — no re-picking anything." },
 ];
 
 export function WelcomeIntroScreen({ theme, onDismiss }: Props) {
@@ -40,17 +44,18 @@ export function WelcomeIntroScreen({ theme, onDismiss }: Props) {
         <div style={{ textAlign: "center", marginBottom: "28px" }}>
           <Icon name="joystick" size={44} color={theme.accentSolid} style={{ marginBottom: "8px" }} />
           <h2 style={{ fontSize: "32px", fontWeight: "900", color: theme.heroBg[0], margin: 0, fontFamily: theme.headingFont, display: "flex", alignItems: "center", justifyContent: "center", gap: "10px" }}><Icon name="party" size={26} /> Welcome to ClassCade!</h2>
-          <p style={{ color: "#6B7280", marginTop: "10px", fontSize: "15px" }}>Here's the whole flow, in three steps.</p>
+          <p style={{ color: "#6B7280", marginTop: "10px", fontSize: "15px" }}>There are two ways to start a class — pick whichever fits today's lesson.</p>
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginBottom: "24px" }}>
-          {STEPS.map((s, i) => (
-            <div key={s.title} style={{ display: "flex", gap: "16px", alignItems: "flex-start", background: "white", border: `2px solid ${hexToRgba(theme.accentSolid, 0.15)}`, borderRadius: "16px", padding: "18px 20px" }}>
-              <div style={{ flexShrink: 0, width: "40px", height: "40px", borderRadius: "50%", background: theme.accentSolid, color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "900", fontSize: "17px" }}>{i + 1}</div>
-              <div>
-                <div style={{ fontWeight: "800", fontSize: "16px", color: "#1F2937", marginBottom: "3px", display: "flex", alignItems: "center", gap: "6px" }}><Icon name={s.icon} size={16} color={theme.accentSolid} /> {s.title}</div>
-                <div style={{ fontSize: "14px", color: "#6B7280", lineHeight: 1.5 }}>{s.body}</div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(260px,1fr))", gap: "14px", marginBottom: "24px" }}>
+          {PATHS.map(p => (
+            <div key={p.title} style={{ background: "white", border: `2px solid ${hexToRgba(theme.accentSolid, 0.15)}`, borderRadius: "16px", padding: "20px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "8px" }}>
+                <div style={{ flexShrink: 0, width: "40px", height: "40px", borderRadius: "50%", background: theme.accentSolid, color: "white", display: "flex", alignItems: "center", justifyContent: "center" }}><Icon name={p.icon} size={18} /></div>
+                <div style={{ fontWeight: "900", fontSize: "17px", color: "#1F2937", fontFamily: theme.headingFont }}>{p.title}</div>
               </div>
+              <div style={{ color: theme.accentSolid, fontWeight: "800", fontSize: "13px", marginBottom: "8px" }}>{p.hint}</div>
+              <div style={{ fontSize: "14px", color: "#6B7280", lineHeight: 1.5 }}>{p.body}</div>
             </div>
           ))}
         </div>

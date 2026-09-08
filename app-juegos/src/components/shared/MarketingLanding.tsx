@@ -64,6 +64,22 @@ function LessonMockup() {
   );
 }
 
+// Depicts the concrete moment the two paths connect — a finished Lesson Plan handing off straight
+// into a game on the same topic — since that link is the whole point of the two-path pitch above
+// and is otherwise invisible from a static screenshot of either screen alone.
+function LessonPlanHandoffMockup() {
+  return (
+    <div style={{ padding: "22px 18px", fontFamily: "'Segoe UI',system-ui,sans-serif", textAlign: "center" }}>
+      <div style={{ marginBottom: "8px" }}><Icon name="checkeredFlag" size={26} color="#0369A1" /></div>
+      <div style={{ fontSize: "14px", fontWeight: "900", color: "#0C1E3D", marginBottom: "4px" }}>Lesson complete!</div>
+      <div style={{ fontSize: "10.5px", color: "#6B7280", marginBottom: "12px" }}>Print this as a worksheet, or head back to try another topic.</div>
+      <div style={{ background: "linear-gradient(135deg,#0369A1,#0EA5E9)", color: "white", borderRadius: "10px", padding: "10px 14px", fontSize: "11px", fontWeight: "800", display: "inline-flex", alignItems: "center", gap: "6px" }}>
+        <Icon name="rocket" size={13} /> Play a Game on This Topic
+      </div>
+    </div>
+  );
+}
+
 function ScoreboardMockup() {
   const rows = [
     { color: "#EF4444", name: "Team Red", score: 90 },
@@ -82,20 +98,23 @@ function ScoreboardMockup() {
   );
 }
 
-const HOW_IT_WORKS: { n: number; icon: IconName; title: string; body: string }[] = [
-  { n: 1, icon: "chart", title: "Pick a level & topic", body: "Filter by A1–C1 and grammar, vocabulary, or theme, then choose one or more topics for the class." },
-  { n: 2, icon: "learn", title: "Pre-teach with a Learn lesson", body: "Open the matching Learn lesson to introduce the language first — no separate prep, it's built from the exact same content." },
-  { n: 3, icon: "controller", title: "Play games left to right", body: "Start with low-pressure, no-speech games and move toward full spoken production as students get comfortable." },
-  { n: 4, icon: "trophy", title: "Track scores & progress", body: "Save classes and teams so scores carry over between lessons — no setup lost between sessions." },
+// Two genuinely different entry points, not sequential steps — a teacher picks whichever fits
+// today's lesson. Framed as a fork (mirroring the in-app welcome screen's own two-tier CTA)
+// rather than a numbered "how it works" list, since the old 4-step version only ever described
+// the game path and had no room for Lesson Plans at all.
+const PATHS: { icon: IconName; title: string; hint: string; body: string }[] = [
+  { icon: "rocket", title: "Start a Game", hint: "Perfect for the last 30 minutes of class!", body: "Pick a level and topic, set up teams (or use the ready-made defaults), and play — zero prep, ready in seconds." },
+  { icon: "school", title: "Lesson Plans", hint: "~30 min lesson + ~30 min playing", body: "A full presentation-practice-production lesson on one topic, then a button at the end drops the class straight into a game on that same topic — no re-picking anything." },
 ];
 
 const FEATURES: { icon: IconName; title: string; body: string }[] = [
+  { icon: "school", title: "Lesson Plans that end in a game", body: "A full ~30-minute presentation-practice-production lesson for every topic, finishing with one click straight into a matching game." },
   { icon: "controller", title: "15 competitive games", body: `From silent judgment calls to full free conversation — ${GAME_MODES.length} team-based formats.` },
   { icon: "learn", title: "A matching Learn lesson for every topic", body: `${realTopicCount}+ lessons, one for every game topic, free to browse without an account.` },
   { icon: "books", title: "Classes & teams that save", body: "Set up a class once — teams, mascots, and scores carry over between lessons." },
   { icon: "phone", title: "Phone-controlled play modes", body: "Students buzz in, type answers, or claim tickets from their own phones for select games." },
   { icon: "palette", title: "Accent themes", body: "Give the shared screen a look that fits your classroom, without touching any game's own identity." },
-  { icon: "bolt", title: "Zero prep, ready in seconds", body: "No slides to build — pick a topic and a game, and you're playing." },
+  { icon: "bolt", title: "Zero prep, ready in seconds", body: "No slides to build — pick a topic and a game (or a Lesson Plan), and you're going." },
 ];
 
 export function MarketingLanding({ onSignUp, onLogIn }: Props) {
@@ -108,10 +127,11 @@ export function MarketingLanding({ onSignUp, onLogIn }: Props) {
           Class<span style={{ color: "#FCD34D" }}>Cade</span>
         </h1>
         <p style={{ color: "#BAE6FD", fontSize: "14px", lineHeight: 1.6, margin: "10px 0 0" }}>
-          A classroom game website built for English teachers. Pick a level and topic, then play
-          one of {GAME_MODES.length} competitive team games — every one built around{" "}
+          A classroom game website built for English teachers. Jump straight into one of{" "}
+          {GAME_MODES.length} competitive team games, or start with a full Lesson Plan that ends
+          by dropping the class straight into a game — either way, built around{" "}
           {realTopicCount}+ grammar, vocabulary, and theme topics, from A1 to C1. No prep, ready
-          in seconds, with matching Learn lessons for every topic.
+          in seconds.
         </p>
       </div>
 
@@ -141,17 +161,20 @@ export function MarketingLanding({ onSignUp, onLogIn }: Props) {
         </div>
       </div>
 
-      {/* How it works */}
-      <Section title="How it works" subtitle="The actual teaching flow, not just an app tour.">
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: "14px" }}>
-          {HOW_IT_WORKS.map(s => (
-            <div key={s.n} style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: "14px", padding: "16px 14px" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
-                <div style={{ width: "24px", height: "24px", borderRadius: "50%", background: "#F59E0B", color: "white", fontSize: "12px", fontWeight: "900", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{s.n}</div>
-                <Icon name={s.icon} size={18} color="white" />
+      {/* Two ways to start — the fork mirrors the in-app welcome screen's own two-tier CTA, so a
+          teacher sees the same choice here before signing up as they'll see the moment they log
+          in. Bigger and more prominent than a plain feature card, since this is the single most
+          important thing a new teacher needs to understand about how the site works. */}
+      <Section title="Two ways to run a class" subtitle="Pick whichever fits today's lesson — both lead to the same 15 games.">
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(240px,1fr))", gap: "16px" }}>
+          {PATHS.map(p => (
+            <div key={p.title} style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: "16px", padding: "22px 20px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
+                <div style={{ width: "36px", height: "36px", borderRadius: "50%", background: "#F59E0B", color: "white", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}><Icon name={p.icon} size={18} /></div>
+                <div style={{ color: "white", fontWeight: "900", fontSize: "17px" }}>{p.title}</div>
               </div>
-              <div style={{ color: "white", fontWeight: "800", fontSize: "14px", marginBottom: "4px" }}>{s.title}</div>
-              <div style={{ color: "#BAE6FD", fontSize: "12px", lineHeight: 1.5 }}>{s.body}</div>
+              <div style={{ color: "#FCD34D", fontWeight: "800", fontSize: "13px", marginBottom: "8px" }}>{p.hint}</div>
+              <div style={{ color: "#BAE6FD", fontSize: "13px", lineHeight: 1.55 }}>{p.body}</div>
             </div>
           ))}
         </div>
@@ -179,6 +202,7 @@ export function MarketingLanding({ onSignUp, onLogIn }: Props) {
       <Section title="See it in action">
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: "20px", justifyItems: "center" }}>
           <DeviceFrame><LessonMockup /></DeviceFrame>
+          <DeviceFrame><LessonPlanHandoffMockup /></DeviceFrame>
           <DeviceFrame><ScoreboardMockup /></DeviceFrame>
         </div>
       </Section>
