@@ -13,6 +13,7 @@ import { MascotIcon } from "../shared/MascotArt";
 import { Icon, type IconName } from "../shared/Icon";
 import { AUCTION_TUTORIAL_STEPS } from "../../data/tutorials/auction";
 import { playSound } from "../../lib/sounds";
+import { setMusicContext } from "../../lib/music";
 import {
   generateSessionCode, openAuctionChannel, closeChannel,
   type AuctionStatePayload, type AuctionBetPayload, type AuctionResultInfo,
@@ -188,6 +189,13 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
 
   const [qi, setQi] = useState(() => resumed?.qi ?? 0);
   const [phase, setPhase] = useState<"intro" | "betting" | "result" | "final">(resumed ? "betting" : "intro");
+  // No shared countdown hook here (Auction runs its own betting-window timing per phone/screen
+  // mode), so this game needs its own tension cue for "teams are actively deciding" — same
+  // context useTurnTimer sets for the games that do use it.
+  useEffect(() => {
+    if (phase === "betting") setMusicContext("tension");
+    return () => setMusicContext("gameplay");
+  }, [phase === "betting"]);
   const [showHowTo, setShowHowTo] = useState(false);
   const [bets, setBets] = useState<Record<string | number, Bet>>({});
   const [resultMsg, setResultMsg] = useState<ResultMsg[]>([]);

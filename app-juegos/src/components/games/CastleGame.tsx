@@ -720,6 +720,7 @@ export function CastleGame({ questions, teams: propTeams, onUpdateScore, onEnd, 
   };
 
   const rollDice = (targetId: string | number) => {
+    playSound("dice");
     setPhase("rolling");
     setRolling(true);
     let ticks = 0;

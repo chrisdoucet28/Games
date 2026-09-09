@@ -9,6 +9,7 @@ import { FlagPromptButton } from "../shared/FlagPromptButton";
 import { TurnTimerBar } from "../shared/TurnTimerBar";
 import { ZOMBIE_TUTORIAL_STEPS } from "../../data/tutorials/zombie";
 import { playSound } from "../../lib/sounds";
+import { setMusicContext } from "../../lib/music";
 import { makeTeacherTeam, TEACHER_ID } from "../../lib/soloOpponent";
 
 const GM = GAME_MODES.find(g => g.id === "zombie")!;
@@ -743,6 +744,13 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
     zombiesSpawnedThisRound: 0,
     awaitingNextWave: false,
   }));
+  // Continuous real-time pressure (no shared useTurnTimer here) — tension for the whole active
+  // wave, but not during the "wave cleared, waiting for the teacher" breather.
+  const isUnderSiege = phase === "playing" && !siege.awaitingNextWave;
+  useEffect(() => {
+    if (isUnderSiege) setMusicContext("tension");
+    return () => setMusicContext("gameplay");
+  }, [isUnderSiege]);
   const [currentQuestion, setCurrentQuestion] = useState<QuestionData | null>(null);
   const [roundPhase, setRoundPhase] = useState<RoundPhase>("reveal");
   const [fx, setFx] = useState<SiegeFx[]>([]);

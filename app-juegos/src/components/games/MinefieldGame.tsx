@@ -10,6 +10,7 @@ import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
 import { MINEFIELD_TUTORIAL_STEPS } from "../../data/tutorials/minefield";
 import { playSound } from "../../lib/sounds";
+import { setMusicContext } from "../../lib/music";
 
 const GM = GAME_MODES.find(g => g.id === "minefield")!;
 
@@ -121,6 +122,12 @@ export function MinefieldGame({ gridData, teams: propTeams, onUpdateScore, onEnd
   const [activeTeam, setActiveTeam] = useState(() => resumed?.activeTeam ?? 0);
   // A resumed board skips the intro and drops straight into tile selection.
   const [phase, setPhase] = useState<"intro" | "pick" | "speaking" | "judging" | "topicComplete" | "final">(() => resumed ? "pick" : "intro");
+  // No shared countdown hook (untimed, teacher-paced speaking) — this is still the "a team is
+  // actively answering" moment, so it gets the same tension cue useTurnTimer sets elsewhere.
+  useEffect(() => {
+    if (phase === "speaking") setMusicContext("tension");
+    return () => setMusicContext("gameplay");
+  }, [phase === "speaking"]);
   const [showHowTo, setShowHowTo] = useState(false);
 
   useEffect(() => {

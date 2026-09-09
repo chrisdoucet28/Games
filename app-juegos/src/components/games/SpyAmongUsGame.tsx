@@ -13,6 +13,7 @@ import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
 import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
 import { SPY_TWOPLAYER_STEPS, SPY_GROUP_STEPS } from "../../data/tutorials/spy";
 import { playSound } from "../../lib/sounds";
+import { setMusicContext } from "../../lib/music";
 import {
   generateSessionCode, openSpyChannel, closeChannel,
   type SpyStatePayload, type SpyPhase, type SpyRoleInfo,
@@ -182,6 +183,13 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
   const [crewWinsByTeam, setCrewWinsByTeam] = useState<Record<string | number, number>>(() => resumed?.crewWinsByTeam ?? {});
   // A resumed mission skips the intro and re-peeks everyone for the same round/spy.
   const [phase, setPhase] = useState<Phase>(() => resumed ? "peek" : "intro");
+  // Tension for the actual decision moments (voting who the spy is, the spy guessing the topic) —
+  // not "discuss"/"speak", which is free conversation, not an answer under pressure.
+  const isDeciding = phase === "vote" || phase === "spy-guess" || phase === "guess-2p";
+  useEffect(() => {
+    if (isDeciding) setMusicContext("tension");
+    return () => setMusicContext("gameplay");
+  }, [isDeciding]);
 
   useEffect(() => {
     if (phase === "final") playSound("win");
@@ -406,6 +414,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
 
   const runOrderRoll = useCallback(
     (indicesToRoll: number[], existingRolls: Record<number, number>) => {
+      playSound("dice");
       const rolls = { ...existingRolls };
       setRollDone(false);
 

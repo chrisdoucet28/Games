@@ -348,6 +348,7 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
   const teamName = (id: string | number) => teams.find(t => t.id === id)?.name ?? "Team";
 
   const rollOnce = (onDone: (val: number) => void) => {
+    playSound("dice");
     setPhase("rolling");
     setRolling(true);
     let ticks = 0;

@@ -8,6 +8,7 @@ import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
 import { HOTPOTATO_TUTORIAL_STEPS } from "../../data/tutorials/hotpotato";
 import { playSound } from "../../lib/sounds";
+import { setMusicContext } from "../../lib/music";
 
 const GM = GAME_MODES.find(g => g.id === "hotpotato")!;
 
@@ -126,6 +127,12 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
   const ROUND_SECONDS = turnSeconds * ROUND_SECONDS_MULT;
 
   const [phase, setPhase] = useState<"intro" | "play" | "exploding" | "roundend" | "gameover">(resumed ? "play" : "intro");
+  // The whole point of this game is racing an unpredictable fuse while answering — "play" is
+  // exactly the tension moment, and it doesn't route through the shared useTurnTimer hook.
+  useEffect(() => {
+    if (phase === "play") setMusicContext("tension");
+    return () => setMusicContext("gameplay");
+  }, [phase === "play"]);
   const [showHowTo, setShowHowTo] = useState(false);
 
   useEffect(() => {

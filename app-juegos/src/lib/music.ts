@@ -20,7 +20,10 @@ export type MusicContext = keyof typeof MUSIC_FILES;
 const MUSIC_VOLUME: Record<MusicContext, number> = {
   ambient: 0.22,
   gameplay: 0.25,
-  tension: 0.28,
+  // Teacher feedback: this was too loud relative to the other two — it's the one context that
+  // overlaps with a team actively trying to think/speak/write, so it needs to sit further back,
+  // not stand out more.
+  tension: 0.14,
 };
 
 const FADE_MS = 700;

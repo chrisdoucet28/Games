@@ -12,6 +12,7 @@ import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
 import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
 import { HOTSEAT_TUTORIAL_STEPS } from "../../data/tutorials/hotseat";
 import { playSound } from "../../lib/sounds";
+import { setMusicContext } from "../../lib/music";
 import {
   generateSessionCode, openHotSeatChannel, closeChannel,
   type HotSeatPhase, type HotSeatStatePayload, type HotSeatActionPayload,
@@ -93,6 +94,13 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
   const resumed = useRef(validateHotSeatSnapshot(initialGameState, teams.length)).current;
 
   const [phase, setPhase] = useState<"welcome" | "intro" | "play" | "turnend" | "final">(resumed ? "intro" : "welcome");
+  // This game's own 60s turn timer isn't the shared useTurnTimer hook, so "play" (the describer
+  // actively racing the clock) needs its own tension cue, same as every other game's answering
+  // window.
+  useEffect(() => {
+    if (phase === "play") setMusicContext("tension");
+    return () => setMusicContext("gameplay");
+  }, [phase === "play"]);
   const [showHowTo, setShowHowTo] = useState(false);
 
   // "Play on Phones" mode — available whenever there's more than one team (gated below); true

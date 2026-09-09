@@ -275,6 +275,7 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
   const [finalOrder, setFinalOrder] = useState<any[] | null>(null);
 
   const runRoundRoll = useCallback((teamIndicesToRoll: number[], existingRolls: Record<number, number>) => {
+    playSound("dice");
     const rolls = { ...existingRolls };
     setDiceValues(prev => {
       const next = [...prev];

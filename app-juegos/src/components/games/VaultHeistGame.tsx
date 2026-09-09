@@ -391,6 +391,7 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
   }, [orderPos, beginReveal]);
 
   const runOrderRoll = useCallback((teamIndicesToRoll: number[], existingRolls: Record<number, number>) => {
+    playSound("dice");
     const rolls = { ...existingRolls };
     setDiceValues(prev => {
       const next = [...prev];
