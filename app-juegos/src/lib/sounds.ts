@@ -40,11 +40,11 @@ export type SoundName = keyof typeof SOUND_FILES;
 // moment more often than not, and shouldn't fight it for attention.
 const DEFAULT_TIER2_VOLUME = 0.7;
 const SOUND_VOLUME: Record<SoundName, number> = {
-  correct: 0.8,
+  correct: 0.55,
   wrong: 0.8,
   tick: 0.35,
   timesUp: 0.8,
-  win: 0.8,
+  win: 0.55,
   auction: DEFAULT_TIER2_VOLUME,
   battleship: DEFAULT_TIER2_VOLUME,
   cards: DEFAULT_TIER2_VOLUME,

@@ -244,6 +244,8 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
   const finalizeLaunch = useCallback(() => {
     if (payoutDoneRef.current) return;
     payoutDoneRef.current = true;
+    // No separate playSound("win") on entering "final" here (unlike every other game) — the
+    // ignition below already fires at this exact same moment, and would just double up with it.
     playSound("rocket");
     const ranked = rankByFuel(teams, fuelRef.current);
     const bonuses: Record<string | number, number> = {};

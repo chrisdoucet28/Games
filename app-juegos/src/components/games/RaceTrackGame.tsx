@@ -600,6 +600,10 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
   };
 
   useEffect(() => {
+    if (phase === "gameover") playSound("win");
+  }, [phase]);
+
+  useEffect(() => {
     if (!forceFinalRef) return;
     forceFinalRef.current = phase === "gameover" ? null : () => { forceFinish(); return true; };
     return () => { if (forceFinalRef) forceFinalRef.current = null; };

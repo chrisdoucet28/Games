@@ -213,10 +213,10 @@ export function BattleshipGame({ questions, teams: propTeams, onUpdateScore, onE
       : propTeams),
     [isSolo, propTeams, opponentType, cpuScore, teacherScore]
   );
-  const updateScore = (id: string | number, delta: number) => {
+  const updateScore = (id: string | number, delta: number, opts?: { silent?: boolean }) => {
     if (isSolo && id === cpuRef.current?.id) { setCpuScore(s => s + delta); }
     else if (isSolo && id === teacherRef.current?.id) { setTeacherScore(s => s + delta); }
-    else { onUpdateScore(id, delta); }
+    else { onUpdateScore(id, delta, opts); }
   };
 
   const COLS = teamCount === 2 ? BATTLESHIP_COLS_5 : BATTLESHIP_COLS_4;
@@ -280,6 +280,10 @@ export function BattleshipGame({ questions, teams: propTeams, onUpdateScore, onE
     const h = hitsOverride || hits;
     return fleets[teamId].every((s: string) => (h[teamId] || []).includes(s));
   }, [hits, fleets]);
+
+  useEffect(() => {
+    if (phase === "gameover") playSound("win");
+  }, [phase]);
 
   useEffect(() => {
     if (!forceFinalRef) return;
@@ -390,10 +394,11 @@ export function BattleshipGame({ questions, teams: propTeams, onUpdateScore, onE
       setHits(newHits);
       spawnCellFx(targetTeamId, pendingCoord, "hit");
       // The signature "found a ship" boom — a real hit lands either way (right or wrong answer),
-      // so this fires regardless of correctness, layered under whichever Tier 1 correct/wrong
-      // chime updateScore triggers next.
+      // so this fires regardless of correctness. Silences the Tier 1 correct/wrong chime here
+      // specifically (teacher feedback: the two overlapped and read as cluttered) — the explosion
+      // itself is the feedback for a hit; correct/wrong still plays normally on a miss below.
       playSound("battleship");
-      updateScore(activeTeam.id, correct ? 60 : 30);
+      updateScore(activeTeam.id, correct ? 60 : 30, { silent: true });
       showToast(
         <><Icon name="explosion" size={16} /> {correct
           ? `${activeTeam.name} HIT ${targetTeam.name}'s ship at ${pendingCoord}!`

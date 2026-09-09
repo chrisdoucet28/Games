@@ -254,6 +254,10 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
   const finishOrderRef = useRef<(string | number)[]>(resumed?.finishOrder ?? []);
 
   useEffect(() => {
+    if (phase === "gameover") playSound("win");
+  }, [phase]);
+
+  useEffect(() => {
     if (!forceFinalRef) return;
     forceFinalRef.current = phase === "gameover" ? null : () => {
       // The gameover screen assumes finishOrderRef covers every team — backfill anyone who

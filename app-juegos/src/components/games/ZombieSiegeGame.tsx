@@ -706,6 +706,10 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
   useEffect(() => { pausedRef.current = !!paused; }, [paused]);
 
   useEffect(() => {
+    if (phase === "gameover") playSound("win");
+  }, [phase]);
+
+  useEffect(() => {
     if (!forceFinalRef) return;
     forceFinalRef.current = phase === "gameover" ? null : () => { setPhase("gameover"); return true; };
     return () => { if (forceFinalRef) forceFinalRef.current = null; };

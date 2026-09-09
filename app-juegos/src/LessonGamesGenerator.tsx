@@ -266,12 +266,15 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     }
   };
 
-  const updateScore = useCallback((teamId: string | number, delta: number) => {
+  const updateScore = useCallback((teamId: string | number, delta: number, opts?: { silent?: boolean }) => {
     // Every one of the 15 games routes every score change through this one function, so it's the
     // single chokepoint for "points gained/lost" feedback sounds rather than something wired into
-    // each game individually.
-    if (delta > 0) playSound("correct");
-    else if (delta < 0) playSound("wrong");
+    // each game individually. `silent` opts out for a game whose own Tier 2 sound already covers
+    // this exact moment (see the GameProps.onUpdateScore comment).
+    if (!opts?.silent) {
+      if (delta > 0) playSound("correct");
+      else if (delta < 0) playSound("wrong");
+    }
     setTeams(ts => ts.map(t => t.id === teamId ? { ...t, score: Math.max(0, t.score + delta) } : t));
   }, []);
 

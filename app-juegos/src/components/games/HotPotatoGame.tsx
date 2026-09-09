@@ -129,6 +129,10 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
   const [showHowTo, setShowHowTo] = useState(false);
 
   useEffect(() => {
+    if (phase === "gameover") playSound("win");
+  }, [phase]);
+
+  useEffect(() => {
     if (!forceFinalRef) return;
     forceFinalRef.current = phase === "gameover" ? null : () => { setPhase("gameover"); return true; };
     return () => { if (forceFinalRef) forceFinalRef.current = null; };

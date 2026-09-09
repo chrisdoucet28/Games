@@ -247,6 +247,10 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
   const channelRef = useRef<RealtimeChannel | null>(null);
 
   useEffect(() => {
+    if (phase === "final") playSound("win");
+  }, [phase]);
+
+  useEffect(() => {
     if (!forceFinalRef) return;
     forceFinalRef.current = phase === "final" ? null : () => { setPhase("final"); return true; };
     return () => { if (forceFinalRef) forceFinalRef.current = null; };

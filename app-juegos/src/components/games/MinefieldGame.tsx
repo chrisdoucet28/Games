@@ -124,6 +124,10 @@ export function MinefieldGame({ gridData, teams: propTeams, onUpdateScore, onEnd
   const [showHowTo, setShowHowTo] = useState(false);
 
   useEffect(() => {
+    if (phase === "final") playSound("win");
+  }, [phase]);
+
+  useEffect(() => {
     if (!forceFinalRef) return;
     forceFinalRef.current = phase === "final" ? null : () => { setPhase("final"); return true; };
     return () => { if (forceFinalRef) forceFinalRef.current = null; };

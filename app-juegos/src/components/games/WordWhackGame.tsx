@@ -18,6 +18,7 @@ import { FlagPromptButton } from "../shared/FlagPromptButton";
 import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
 import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
 import { WHACK_TUTORIAL_STEPS } from "../../data/tutorials/whack";
+import { playSound } from "../../lib/sounds";
 import {
   generateSessionCode, openWhackChannel, closeChannel,
   type WhackPhase, type WhackStatePayload, type WhackTurnReportPayload,
@@ -147,6 +148,10 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
 
   const [phase, setPhase] = useState<"intro" | "countdown" | "playing" | "turn-end" | "final">(resumed ? "countdown" : "intro");
   const [showHowTo, setShowHowTo] = useState(false);
+
+  useEffect(() => {
+    if (phase === "final") playSound("win");
+  }, [phase]);
 
   useEffect(() => {
     if (!forceFinalRef) return;

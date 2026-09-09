@@ -329,6 +329,13 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
     onEnd();
   }, [flushBankToScores, forceFinalRef, onEnd]);
 
+  // The game's own final screen deserves the same celebratory cue as the shared app-level results
+  // screen — a teacher sees this one first, and reaching it is just as much "the game is over" as
+  // the later shared screen is.
+  useEffect(() => {
+    if (phase === "final") playSound("win");
+  }, [phase]);
+
   useEffect(() => {
     if (!forceFinalRef) return;
     forceFinalRef.current = phase === "final" ? null : () => {

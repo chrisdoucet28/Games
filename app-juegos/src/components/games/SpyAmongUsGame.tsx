@@ -184,6 +184,10 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
   const [phase, setPhase] = useState<Phase>(() => resumed ? "peek" : "intro");
 
   useEffect(() => {
+    if (phase === "final") playSound("win");
+  }, [phase]);
+
+  useEffect(() => {
     if (!forceFinalRef) return;
     forceFinalRef.current = phase === "final" ? null : () => { setPhase("final"); return true; };
     return () => { if (forceFinalRef) forceFinalRef.current = null; };

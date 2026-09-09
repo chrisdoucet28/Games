@@ -498,6 +498,10 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
   const handleSessionEnd = useCallback(() => setPhase("final"), []);
 
   useEffect(() => {
+    if (phase === "final") playSound("win");
+  }, [phase]);
+
+  useEffect(() => {
     if (!forceFinalRef) return;
     forceFinalRef.current = phase === "final" ? null : () => { handleSessionEnd(); return true; };
     return () => { if (forceFinalRef) forceFinalRef.current = null; };

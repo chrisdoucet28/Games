@@ -80,7 +80,10 @@ export interface TeamColor {
   export interface GameProps {
     questions: QuestionData[];
     teams: Team[];
-    onUpdateScore: (teamId: string | number, delta: number) => void;
+    // `silent` skips the shared correct/wrong feedback sound — for a game whose own Tier 2 sound
+    // already covers this exact moment (e.g. Battleship's explosion on a landed hit) and would
+    // otherwise play on top of it every time, regardless of which team is affected or by how much.
+    onUpdateScore: (teamId: string | number, delta: number, opts?: { silent?: boolean }) => void;
     onEnd: () => void;
     // Lets the top-bar "End Game" button push a game into its own internal final/results phase
     // (where one exists) instead of jumping straight to the app-level results screen. The
