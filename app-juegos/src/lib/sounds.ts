@@ -77,7 +77,9 @@ export function playSound(name: SoundName): void {
   const base = getPreloaded(name);
   const instance = base.cloneNode(true) as HTMLAudioElement;
   instance.volume = SOUND_VOLUME[name];
-  // Playback can be blocked (no user gesture yet, tab backgrounded) — never let that throw into
-  // the caller's own game logic.
-  instance.play().catch(() => {});
+  // Playback can be blocked (no user gesture yet, tab backgrounded) or the file itself can fail
+  // to decode (a bad source file — caught tick.ogg this way once already) — never let that throw
+  // into the caller's own game logic, but do warn so a silently-broken sound is discoverable
+  // instead of just "nobody heard it and nobody knew why".
+  instance.play().catch(err => console.warn(`[sounds] "${name}" failed to play:`, err));
 }
