@@ -1,4 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { playSound } from "../lib/sounds";
+
+// Last few seconds of any timed turn get an audible tick — 3 seconds gives players enough warning
+// without turning every short turn (some are only 15-20s total) into mostly-tick.
+const TICK_STARTS_AT = 3;
 
 // `paused` freezes the countdown in place (no tick, no reset) without tearing down the interval —
 // for turns that span several questions in a row (e.g. Rocket Fuel's "prompt after prompt" turn,
@@ -40,6 +45,7 @@ export function useTurnTimer(seconds: number, active: boolean, onExpire: () => v
       remaining -= 1;
       if (remaining <= 0) {
         if (timerRef.current) clearInterval(timerRef.current);
+        playSound("timesUp");
         // Call onExpire as a plain statement here, not from inside the setTimeLeft updater above —
         // React can invoke updater functions during its own render pass, and onExpire often triggers
         // state updates on ancestor components (e.g. onUpdateScore), which then throws "Cannot update
@@ -47,6 +53,7 @@ export function useTurnTimer(seconds: number, active: boolean, onExpire: () => v
         setTimeLeft(seconds);
         onExpireRef.current?.();
       } else {
+        if (remaining <= TICK_STARTS_AT) playSound("tick");
         setTimeLeft(remaining);
       }
     }, 1000);

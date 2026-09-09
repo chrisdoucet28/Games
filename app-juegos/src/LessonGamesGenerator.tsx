@@ -26,6 +26,7 @@ import { IconBadge } from "./components/shared/IconBadge";
 import { MascotIcon } from "./components/shared/MascotArt";
 import { saveProgress, clearProgress, listClasses, createClass, upsertTeamRoster, deleteFromTeamRoster, saveTeams } from "./lib/classes";
 import { isPaidStatus } from "./lib/subscription";
+import { playSound, isSoundEnabled, setSoundEnabled, onSoundEnabledChange } from "./lib/sounds";
 import { denseRank } from "./utils/ranking";
 import { RankBadge } from "./components/shared/RankBadge";
 import { AuctionGame } from "./components/games/AuctionGame";
@@ -266,6 +267,11 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
   };
 
   const updateScore = useCallback((teamId: string | number, delta: number) => {
+    // Every one of the 15 games routes every score change through this one function, so it's the
+    // single chokepoint for "points gained/lost" feedback sounds rather than something wired into
+    // each game individually.
+    if (delta > 0) playSound("correct");
+    else if (delta < 0) playSound("wrong");
     setTeams(ts => ts.map(t => t.id === teamId ? { ...t, score: Math.max(0, t.score + delta) } : t));
   }, []);
 
@@ -886,11 +892,14 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
   // GameProps.paused. Every other game is turn-based and has nothing running that needs a pause,
   // so the header button below only ever appears for those two.
   const [paused, setPaused] = useState(false);
+  const [soundEnabled, setSoundEnabledState] = useState(isSoundEnabled);
+  useEffect(() => onSoundEnabledChange(setSoundEnabledState), []);
 
   const handleGameEnd = () => {
     // The class's running scores persist either way; a naturally-finished game just has nothing
     // left to resume, so the in-progress snapshot gets cleared rather than left stale.
     if (activeClassId) clearProgress(activeClassId, teams).catch(() => {});
+    playSound("win");
     setConfetti(true);
     setScreen("results");
     setTimeout(() => setConfetti(false), 4000);
@@ -1563,6 +1572,11 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
             >
               {saveStatus === "saving" ? "Saving…" : saveStatus === "saved" ? <><Icon name="check" size={13} /> Saved!</> : saveStatus === "error" ? <><Icon name="warning" size={13} /> Failed — try again</> : <><Icon name="save" size={13} /> Save & Exit</>}
             </button>
+            <button
+              onClick={() => setSoundEnabled(!soundEnabled)}
+              title={soundEnabled ? "Mute sound effects" : "Unmute sound effects"}
+              style={{ background: "rgba(255,255,255,0.15)", color: "white", border: "none", borderRadius: "8px", padding: "6px 12px", cursor: "pointer", fontWeight: "700", fontFamily: theme.headingFont }}
+            ><Icon name={soundEnabled ? "soundOn" : "soundOff"} size={13} /></button>
             <button onClick={toggleFullscreen} style={{ background: "rgba(255,255,255,0.15)", color: "white", border: "none", borderRadius: "8px", padding: "6px 12px", cursor: "pointer", fontWeight: "700", fontFamily: theme.headingFont }}><Icon name="fullscreen" size={13} /> Fullscreen</button>
             <button onClick={handleTopBarEndGame} style={{ background: "rgba(255,255,255,0.15)", color: "white", border: "none", borderRadius: "8px", padding: "6px 12px", cursor: "pointer", fontWeight: "700", fontFamily: theme.headingFont }}><Icon name="checkeredFlag" size={13} /> End Game</button>
           </div>

@@ -34,7 +34,9 @@ export type IconName =
   // Phase 4 — ThemeAmbience's decorative floating background glyphs (one drift + one twinkle
   // per accent theme). Rendered at low opacity/small scale, so simpler silhouettes than the
   // functional icons above are fine here.
-  | "cloud" | "sparkle" | "moon" | "star" | "dove" | "bubble" | "leaf" | "blossom";
+  | "cloud" | "sparkle" | "moon" | "star" | "dove" | "bubble" | "leaf" | "blossom"
+  // Sound effects mute toggle (game screen header).
+  | "soundOn" | "soundOff";
 
 const ICONS: Record<IconName, React.ReactNode> = {
   learn: (
@@ -790,6 +792,20 @@ const ICONS: Record<IconName, React.ReactNode> = {
       <circle cx="16.5" cy="18" r="4.2" fill="currentColor" />
       <circle cx="7.5" cy="18" r="4.2" fill="currentColor" />
       <circle cx="5" cy="10" r="4.2" fill="currentColor" />
+    </>
+  ),
+  soundOn: (
+    <>
+      <polygon points="3,9 7,9 12,4 12,20 7,15 3,15" fill="currentColor" />
+      <path d="M15 9 Q18 12 15 15" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" />
+      <path d="M17.5 6.5 Q22 12 17.5 17.5" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" />
+    </>
+  ),
+  soundOff: (
+    <>
+      <polygon points="3,9 7,9 12,4 12,20 7,15 3,15" fill="currentColor" />
+      <line x1="15.5" y1="9" x2="21.5" y2="15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <line x1="21.5" y1="9" x2="15.5" y2="15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
     </>
   ),
 };
