@@ -12,6 +12,7 @@ import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
 import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
 import { RACETRACK_TUTORIAL_STEPS } from "../../data/tutorials/racetrack";
+import { playSound } from "../../lib/sounds";
 import {
   generateSessionCode, openRaceTrackChannel, closeChannel,
   type RaceTrackPhase, type RaceTrackStatePayload, type RaceTrackActionPayload,
@@ -824,7 +825,7 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
             onClose={() => setShowHowTo(false)}
           />
         )}
-        <button onClick={() => setPhase("task")} className="rt-btn" style={{ background: "linear-gradient(135deg,#B91C1C,#EF4444)", color: "white", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(239,68,68,0.5)", transition: "transform 0.15s ease" }}><Icon name="play" size={18} /> Start Race!</button>
+        <button onClick={() => { playSound("racetrack"); setPhase("task"); }} className="rt-btn" style={{ background: "linear-gradient(135deg,#B91C1C,#EF4444)", color: "white", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(239,68,68,0.5)", transition: "transform 0.15s ease" }}><Icon name="play" size={18} /> Start Race!</button>
       </div>
     </div>
   );
@@ -1090,7 +1091,7 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
               <div style={{ color: lastEffect.color, flexShrink: 0 }}><Icon name={lastEffect.icon} size={40} /></div>
               <div style={{ fontSize: "16px", fontWeight: "700", color: "#DDE8FF", textAlign: "left" }}>{lastEffect.msg}</div>
             </div>
-            <button onClick={() => setPhase("task")} className="rt-btn" style={{ background: "#F7C948", color: "#150F00", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "800", cursor: "pointer", transition: "transform 0.15s ease" }}>Next Task →</button>
+            <button onClick={() => { playSound("racetrack"); setPhase("task"); }} className="rt-btn" style={{ background: "#F7C948", color: "#150F00", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "800", cursor: "pointer", transition: "transform 0.15s ease" }}>Next Task →</button>
           </div>
         )}
       </div>

@@ -9,6 +9,7 @@ import { QuestionCard } from "../shared/QuestionCard";
 import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { ROCKET_TUTORIAL_STEPS } from "../../data/tutorials/rocket";
+import { playSound } from "../../lib/sounds";
 
 const GM = GAME_MODES.find(g => g.id === "rocket")!;
 
@@ -243,6 +244,7 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
   const finalizeLaunch = useCallback(() => {
     if (payoutDoneRef.current) return;
     payoutDoneRef.current = true;
+    playSound("rocket");
     const ranked = rankByFuel(teams, fuelRef.current);
     const bonuses: Record<string | number, number> = {};
     ranked.forEach(({ team, fuel, rank }) => {

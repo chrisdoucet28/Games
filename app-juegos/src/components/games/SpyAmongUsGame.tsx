@@ -12,6 +12,7 @@ import { FlagPromptButton } from "../shared/FlagPromptButton";
 import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
 import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
 import { SPY_TWOPLAYER_STEPS, SPY_GROUP_STEPS } from "../../data/tutorials/spy";
+import { playSound } from "../../lib/sounds";
 import {
   generateSessionCode, openSpyChannel, closeChannel,
   type SpyStatePayload, type SpyPhase, type SpyRoleInfo,
@@ -545,6 +546,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
     } else {
       updateScore(spyTeam.id, 100);
       setSpyWinsByTeam((prev) => ({ ...prev, [spyTeam.id]: (prev[spyTeam.id] ?? 0) + 1 }));
+      playSound("spy");
       setPhase("reveal");
     }
   };
@@ -559,6 +561,10 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
         setCrewWinsByTeam((prev) => ({ ...prev, [team.id]: (prev[team.id] ?? 0) + 1 }));
       });
     }
+    // Who-was-the-spy reveal sting — fires for this path (crew guessed the spy correctly and is
+    // now guessing their topic) same as the other resolution path above (spy evaded the vote
+    // entirely), since both end on the same "reveal" phase showing who the spy really was.
+    playSound("spy");
     setPhase("reveal");
   };
 

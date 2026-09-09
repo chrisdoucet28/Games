@@ -12,6 +12,7 @@ import { MASCOT_ICON_BY_EMOJI } from "../shared/TeamIcon";
 import { MascotIcon } from "../shared/MascotArt";
 import { Icon, type IconName } from "../shared/Icon";
 import { AUCTION_TUTORIAL_STEPS } from "../../data/tutorials/auction";
+import { playSound } from "../../lib/sounds";
 import {
   generateSessionCode, openAuctionChannel, closeChannel,
   type AuctionStatePayload, type AuctionBetPayload, type AuctionResultInfo,
@@ -369,6 +370,9 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
   });
 
   const resolveRound = () => {
+    // The gavel bang — every other Tier 2 sound fires on a single team's moment, but this is the
+    // one shared "the sentence is revealed" beat every team is watching for at once.
+    playSound("auction");
     const msgs: ResultMsg[] = [];
     const brokeThisRound = new Set<string | number>();
     const newBank = { ...auctionBank };

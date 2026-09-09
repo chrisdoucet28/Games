@@ -12,6 +12,7 @@ import { TOPIC_OPTIONS } from "../../data/topics";
 import { makeSoloCpuTeam } from "../../lib/soloOpponent";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { VAULT_TUTORIAL_STEPS } from "../../data/tutorials/vault";
+import { playSound } from "../../lib/sounds";
 
 const GM = GAME_MODES.find(g => g.id === "vault")!;
 
@@ -339,6 +340,7 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
     setCurrentQuestion(pickQuestion(category, desiredDifficulty, desiredForms));
     setShowAns(false);
     setLastOutcome(null);
+    playSound("vault");
     setPhase("reveal");
     setTimeout(() => setPhase(p => (p === "reveal" ? "answer" : p)), REVEAL_MS);
   }, [pickCategory, pickQuestion, teams, turnOrder, vaultLocks]);

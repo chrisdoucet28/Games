@@ -8,6 +8,7 @@ import { TurnTimerBar } from "../shared/TurnTimerBar";
 import { QuestionCard } from "../shared/QuestionCard";
 import { denseRank } from "../../utils/ranking";
 import { RankBadge } from "../shared/RankBadge";
+import { playSound } from "../../lib/sounds";
 import { makeSoloCpuTeam, makeTeacherTeam } from "../../lib/soloOpponent";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { BATTLESHIP_TUTORIAL_STEPS } from "../../data/tutorials/battleship";
@@ -388,6 +389,10 @@ export function BattleshipGame({ questions, teams: propTeams, onUpdateScore, onE
       newHits = { ...hits, [targetTeamId]: [...(hits[targetTeamId] || []), pendingCoord] };
       setHits(newHits);
       spawnCellFx(targetTeamId, pendingCoord, "hit");
+      // The signature "found a ship" boom — a real hit lands either way (right or wrong answer),
+      // so this fires regardless of correctness, layered under whichever Tier 1 correct/wrong
+      // chime updateScore triggers next.
+      playSound("battleship");
       updateScore(activeTeam.id, correct ? 60 : 30);
       showToast(
         <><Icon name="explosion" size={16} /> {correct

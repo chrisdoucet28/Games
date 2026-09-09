@@ -14,6 +14,7 @@ import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
 import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
 import { HILL_TOPIC_STEPS, HILL_GRAMMAR_STEPS } from "../../data/tutorials/hill";
+import { playSound } from "../../lib/sounds";
 import {
   generateSessionCode, openHillChannel, closeChannel,
   type HillPhase, type HillStatePayload, type HillActionPayload,
@@ -487,6 +488,9 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
     let reason;
     if (winnerId === contest.attackerId) {
       newOwners[contest.zoneId] = contest.attackerId;
+      // Capture fanfare — only an actual zone flip earns this; a successful defense (below) held
+      // ground rather than took it, which doesn't call for the same celebratory beat.
+      playSound("hill");
       updateScore(contest.attackerId, 30);
       reason = "attacker";
     } else if (winnerId === contest.defenderId) {

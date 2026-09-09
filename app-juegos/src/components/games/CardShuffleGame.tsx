@@ -11,6 +11,7 @@ import { RankBadge } from "../shared/RankBadge";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
 import { CARDS_TUTORIAL_STEPS } from "../../data/tutorials/cards";
+import { playSound } from "../../lib/sounds";
 
 const GM = GAME_MODES.find(g => g.id === "cards")!;
 
@@ -211,6 +212,7 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
   };
 
   const runShuffle = async () => {
+    playSound("cards");
     setPhase("shuffling");
     slotsRef.current = [0, 1, 2, 3];
     setCardSlots([0, 1, 2, 3]);

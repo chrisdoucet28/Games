@@ -11,6 +11,7 @@ import { RankBadge } from "../shared/RankBadge";
 import { makeSoloCpuTeam, makeTeacherTeam } from "../../lib/soloOpponent";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { CASTLE_TUTORIAL_STEPS } from "../../data/tutorials/castle";
+import { playSound } from "../../lib/sounds";
 
 const GM = GAME_MODES.find(g => g.id === "castle")!;
 
@@ -734,6 +735,9 @@ export function CastleGame({ questions, teams: propTeams, onUpdateScore, onEnd, 
   };
 
   const resolveAttack = (roll: number, targetId: string | number) => {
+    // Siege impact — plays for every landed attack (sword or magic), win or lose the roll,
+    // since the point is the strike connecting, not whether it happened to hit hard.
+    playSound("castle");
     const isMagic = selectedAction === "magic";
     const attackerRpg = rpg[activeTeam.id];
     const lvlInfo = getLevelInfo(attackerRpg.xp);

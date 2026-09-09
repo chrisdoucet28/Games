@@ -12,6 +12,7 @@ import { FlagPromptButton } from "../shared/FlagPromptButton";
 import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
 import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
 import { ORDERUP_TUTORIAL_STEPS } from "../../data/tutorials/orderup";
+import { playSound } from "../../lib/sounds";
 import {
   generateSessionCode, openOrderUpChannel, closeChannel,
   type OrderUpPhase, type OrderUpStatePayload, type OrderUpActionPayload, type OrderUpTicketInfo,
@@ -647,6 +648,7 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
     const ticket = tickets.find(t => t.id === judging.ticketId);
     if (!ticket) { setJudging(null); return; }
     const score = ORDER_SCORE_BY_ITEM_COUNT[ticket.items.length] ?? ORDER_SCORE_BY_ITEM_COUNT[1];
+    playSound("orderup");
     onUpdateScore(judging.teamId, score);
     setGameScoreByTeam(prev => ({ ...prev, [judging.teamId]: (prev[judging.teamId] ?? 0) + score }));
     resolvedCountRef.current += 1;

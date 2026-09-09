@@ -8,6 +8,7 @@ import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
 import { TurnTimerBar } from "../shared/TurnTimerBar";
 import { ZOMBIE_TUTORIAL_STEPS } from "../../data/tutorials/zombie";
+import { playSound } from "../../lib/sounds";
 import { makeTeacherTeam, TEACHER_ID } from "../../lib/soloOpponent";
 
 const GM = GAME_MODES.find(g => g.id === "zombie")!;
@@ -886,6 +887,8 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
   // round/roundElapsedSeconds/zombiesSpawnedThisRound actually reset and awaitingNextWave clears,
   // so nothing about the next wave (spawning, its prompt) starts until the teacher says so.
   const confirmNextWave = useCallback(() => {
+    // Siege horn — the escalation cue as the next, bigger wave begins.
+    playSound("zombie");
     const newRound = siegeRef.current.round + 1;
     setSiege(prev => ({ ...prev, round: newRound, roundElapsedSeconds: 0, zombiesSpawnedThisRound: 0, awaitingNextWave: false }));
     startRound(pickNextQuestion(newRound), newRound);

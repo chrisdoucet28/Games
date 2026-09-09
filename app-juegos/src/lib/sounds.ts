@@ -1,8 +1,12 @@
-// Tier-1 game sound effects — all sourced from kenney.nl's CC0 "Interface Sounds" and "Digital
-// Audio" packs (public domain, no attribution required). Every sound routes through the single
-// shared chokepoints that already exist for these events (updateScore, useTurnTimer, the
-// confetti trigger) rather than being called from each of the 15 games individually — see the
-// comments at each call site.
+// Game sound effects — all sourced from kenney.nl CC0 packs (Interface Sounds, Digital Audio,
+// Sci-Fi Sounds, Impact Sounds, RPG Audio, Casino Audio — all public domain, no attribution
+// required). Two tiers:
+//  - Tier 1 (correct/wrong/tick/timesUp/win): shared feedback routed through the chokepoints
+//    that already exist for these events (updateScore, useTurnTimer, the confetti trigger)
+//    rather than being called from each of the 15 games individually.
+//  - Tier 2 (one entry per game id, matching GAME_MODES): a single signature sound per game,
+//    layered on top of the Tier 1 ones at that game's own defining moment — see the comment at
+//    each game's call site for exactly which moment and why.
 
 const SOUND_FILES = {
   correct: "/sounds/correct.ogg",
@@ -10,18 +14,52 @@ const SOUND_FILES = {
   tick: "/sounds/tick.ogg",
   timesUp: "/sounds/times-up.ogg",
   win: "/sounds/win.ogg",
+  // Tier 2 — one per game, keyed by GAME_MODES id.
+  auction: "/sounds/auction.ogg",
+  battleship: "/sounds/battleship.ogg",
+  cards: "/sounds/cardshuffle.ogg",
+  castle: "/sounds/castle.ogg",
+  hotpotato: "/sounds/hotpotato.ogg",
+  hotseat: "/sounds/hotseat.ogg",
+  hill: "/sounds/hill.ogg",
+  minefield: "/sounds/minefield.ogg",
+  orderup: "/sounds/orderup.ogg",
+  racetrack: "/sounds/racetrack.ogg",
+  rocket: "/sounds/rocket.ogg",
+  spy: "/sounds/spy.ogg",
+  vault: "/sounds/vault.ogg",
+  whack: "/sounds/whack.ogg",
+  zombie: "/sounds/zombie.ogg",
 } as const;
 
 export type SoundName = keyof typeof SOUND_FILES;
 
 // Ticks fire once a second near the end of every timed turn across ~11 games — quieter so it
-// reads as a subtle cue, not a metronome competing with the teacher's voice.
+// reads as a subtle cue, not a metronome competing with the teacher's voice. Tier 2 sounds default
+// to 0.7 (a touch under Tier 1's 0.8) since they layer on top of a Tier 1 sound at the same
+// moment more often than not, and shouldn't fight it for attention.
+const DEFAULT_TIER2_VOLUME = 0.7;
 const SOUND_VOLUME: Record<SoundName, number> = {
   correct: 0.8,
   wrong: 0.8,
   tick: 0.35,
   timesUp: 0.8,
   win: 0.8,
+  auction: DEFAULT_TIER2_VOLUME,
+  battleship: DEFAULT_TIER2_VOLUME,
+  cards: DEFAULT_TIER2_VOLUME,
+  castle: DEFAULT_TIER2_VOLUME,
+  hotpotato: DEFAULT_TIER2_VOLUME,
+  hotseat: DEFAULT_TIER2_VOLUME,
+  hill: DEFAULT_TIER2_VOLUME,
+  minefield: DEFAULT_TIER2_VOLUME,
+  orderup: DEFAULT_TIER2_VOLUME,
+  racetrack: DEFAULT_TIER2_VOLUME,
+  rocket: DEFAULT_TIER2_VOLUME,
+  spy: DEFAULT_TIER2_VOLUME,
+  vault: DEFAULT_TIER2_VOLUME,
+  whack: DEFAULT_TIER2_VOLUME,
+  zombie: DEFAULT_TIER2_VOLUME,
 };
 
 const STORAGE_KEY = "classcade_sound_enabled";

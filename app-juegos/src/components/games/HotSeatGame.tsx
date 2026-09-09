@@ -11,6 +11,7 @@ import { FlagPromptButton } from "../shared/FlagPromptButton";
 import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
 import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
 import { HOTSEAT_TUTORIAL_STEPS } from "../../data/tutorials/hotseat";
+import { playSound } from "../../lib/sounds";
 import {
   generateSessionCode, openHotSeatChannel, closeChannel,
   type HotSeatPhase, type HotSeatStatePayload, type HotSeatActionPayload,
@@ -182,6 +183,7 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
 
   const endTurn = () => {
     if (timerRef.current) clearInterval(timerRef.current);
+    playSound("hotseat");
     setLastTurnCorrect(turnCorrectRef.current);
     setPhase("turnend");
   };
@@ -199,6 +201,7 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
       setTimeLeft(t => {
         if (t <= 1) {
           if (timerRef.current) clearInterval(timerRef.current);
+          playSound("hotseat");
           setLastTurnCorrect(turnCorrectRef.current);
           setPhase("turnend");
           return 0;

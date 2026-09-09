@@ -7,6 +7,7 @@ import { makeSoloCpuTeam } from "../../lib/soloOpponent";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
 import { HOTPOTATO_TUTORIAL_STEPS } from "../../data/tutorials/hotpotato";
+import { playSound } from "../../lib/sounds";
 
 const GM = GAME_MODES.find(g => g.id === "hotpotato")!;
 
@@ -163,6 +164,7 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
   useEffect(() => {
     if (phase === "roundend" && penalizedRoundRef.current !== round) {
       penalizedRoundRef.current = round;
+      playSound("hotpotato");
       updateScore(teams[holderIdxRef.current].id, -PENALTY_PTS);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
