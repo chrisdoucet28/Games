@@ -341,7 +341,7 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
   // screen — a teacher sees this one first, and reaching it is just as much "the game is over" as
   // the later shared screen is.
   useEffect(() => {
-    if (phase === "final") playSound("win");
+    if (phase === "final") playSound("roundComplete");
   }, [phase]);
 
   useEffect(() => {

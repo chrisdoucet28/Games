@@ -19,6 +19,10 @@ const SOUND_FILES = {
   tick: "/sounds/tick.ogg",
   timesUp: "/sounds/times-up.mp3",
   win: "/sounds/win.mp3",
+  // A shorter, distinct sting for each GAME's own final screen — deliberately not "win" a second
+  // time. Both used to play the trumpet fanfare (that screen, then the shared results screen
+  // moments later), and if a teacher clicked through quickly the two fanfares audibly overlapped.
+  roundComplete: "/sounds/roundcomplete.mp3",
   // A physical dice-roll clatter (kenney.nl Casino Audio, CC0) — plays once at the start of the
   // roll animation in every game that has one (Vault Heist and Spy Among Us's turn-order rolls,
   // King of the Hill's turn-order roll, Castle/Race Track's attack rolls).
@@ -57,6 +61,7 @@ const SOUND_VOLUME: Record<SoundName, number> = {
   tick: 0.35,
   timesUp: 0.8,
   win: 0.55,
+  roundComplete: 0.6,
   dice: 0.75,
   auction: DEFAULT_TIER2_VOLUME,
   battleship: DEFAULT_TIER2_VOLUME,

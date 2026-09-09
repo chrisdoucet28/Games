@@ -118,7 +118,7 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
   const channelRef = useRef<RealtimeChannel | null>(null);
 
   useEffect(() => {
-    if (phase === "final") playSound("win");
+    if (phase === "final") playSound("roundComplete");
   }, [phase]);
 
   useEffect(() => {

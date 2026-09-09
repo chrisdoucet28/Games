@@ -601,7 +601,7 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
   };
 
   useEffect(() => {
-    if (phase === "gameover") playSound("win");
+    if (phase === "gameover") playSound("roundComplete");
   }, [phase]);
 
   useEffect(() => {

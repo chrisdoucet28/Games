@@ -136,7 +136,7 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
   const [showHowTo, setShowHowTo] = useState(false);
 
   useEffect(() => {
-    if (phase === "gameover") playSound("win");
+    if (phase === "gameover") playSound("roundComplete");
   }, [phase]);
 
   useEffect(() => {

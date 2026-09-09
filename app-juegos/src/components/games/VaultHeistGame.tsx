@@ -257,7 +257,7 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
   const finishOrderRef = useRef<(string | number)[]>(resumed?.finishOrder ?? []);
 
   useEffect(() => {
-    if (phase === "gameover") playSound("win");
+    if (phase === "gameover") playSound("roundComplete");
   }, [phase]);
 
   useEffect(() => {

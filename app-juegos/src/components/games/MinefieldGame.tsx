@@ -131,7 +131,7 @@ export function MinefieldGame({ gridData, teams: propTeams, onUpdateScore, onEnd
   const [showHowTo, setShowHowTo] = useState(false);
 
   useEffect(() => {
-    if (phase === "final") playSound("win");
+    if (phase === "final") playSound("roundComplete");
   }, [phase]);
 
   useEffect(() => {

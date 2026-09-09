@@ -150,7 +150,7 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
   const [showHowTo, setShowHowTo] = useState(false);
 
   useEffect(() => {
-    if (phase === "final") playSound("win");
+    if (phase === "final") playSound("roundComplete");
   }, [phase]);
 
   useEffect(() => {

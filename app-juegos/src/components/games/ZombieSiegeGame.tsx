@@ -707,7 +707,7 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
   useEffect(() => { pausedRef.current = !!paused; }, [paused]);
 
   useEffect(() => {
-    if (phase === "gameover") playSound("win");
+    if (phase === "gameover") playSound("roundComplete");
   }, [phase]);
 
   useEffect(() => {

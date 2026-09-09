@@ -282,7 +282,7 @@ export function BattleshipGame({ questions, teams: propTeams, onUpdateScore, onE
   }, [hits, fleets]);
 
   useEffect(() => {
-    if (phase === "gameover") playSound("win");
+    if (phase === "gameover") playSound("roundComplete");
   }, [phase]);
 
   useEffect(() => {

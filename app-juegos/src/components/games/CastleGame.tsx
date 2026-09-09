@@ -360,7 +360,7 @@ export function CastleGame({ questions, teams: propTeams, onUpdateScore, onEnd, 
   const isEliminated = (teamId: string | number) => rpg[teamId]?.hp <= 0;
 
   useEffect(() => {
-    if (phase === "gameover") playSound("win");
+    if (phase === "gameover") playSound("roundComplete");
   }, [phase]);
 
   useEffect(() => {

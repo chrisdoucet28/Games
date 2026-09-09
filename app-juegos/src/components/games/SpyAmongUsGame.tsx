@@ -192,7 +192,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
   }, [isDeciding]);
 
   useEffect(() => {
-    if (phase === "final") playSound("win");
+    if (phase === "final") playSound("roundComplete");
   }, [phase]);
 
   useEffect(() => {
