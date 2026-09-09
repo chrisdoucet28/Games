@@ -483,6 +483,9 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
     if (correct && chosenZone) {
       newOwners = { ...owners, [chosenZone]: activeTeam.id };
       setOwners(newOwners);
+      // Claiming a free zone is just as much "capturing the hill" as winning a contested duel
+      // below — in fact the more common case early in a round, before many zones are taken.
+      playSound("hill");
     }
     nextTeamTurn(correct, newOwners);
   };

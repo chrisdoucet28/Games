@@ -244,6 +244,9 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
   const [cpuDifficulty, setCpuDifficulty] = useState<Difficulty>(() => resumed?.cpuDifficulty ?? "medium");
   const [currentCategory, setCurrentCategory] = useState<string | null>(null);
   const [currentQuestion, setCurrentQuestion] = useState<QuestionData | null>(null);
+  // Bumped once per beginReveal call so the vault-door swing below can key off it and replay its
+  // CSS animation on every new lock, not just the very first one this game.
+  const [revealNonce, setRevealNonce] = useState(0);
   const [showAns, setShowAns] = useState(false);
   const [lastOutcome, setLastOutcome] = useState<Outcome | null>(null);
   const [winBanner, setWinBanner] = useState<WinBanner | null>(null);
@@ -344,6 +347,7 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
     setCurrentQuestion(pickQuestion(category, desiredDifficulty, desiredForms));
     setShowAns(false);
     setLastOutcome(null);
+    setRevealNonce(n => n + 1);
     playSound("vault");
     setPhase("reveal");
     setTimeout(() => setPhase(p => (p === "reveal" ? "answer" : p)), REVEAL_MS);
@@ -546,6 +550,7 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
       @keyframes vaultBannerIn{0%{opacity:0;transform:translate(-50%,-16px) scale(0.9)}15%{opacity:1;transform:translate(-50%,0) scale(1.03)}25%{transform:translate(-50%,0) scale(1)}85%{opacity:1;transform:translate(-50%,0) scale(1)}100%{opacity:0;transform:translate(-50%,-10px) scale(0.96)}}
       @keyframes twinkle{0%,100%{opacity:0.12;transform:scale(0.8)}50%{opacity:0.7;transform:scale(1.3)}}
       @keyframes vaultDiceSpin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+      @keyframes vaultDoorSwing{0%{transform:scaleX(1)}100%{transform:scaleX(0.08)}}
       .vault-next-btn:hover{transform:scale(1.04);filter:brightness(1.1)}
       .vault-next-btn:active{transform:scale(0.97)}
     `}</style>
@@ -818,6 +823,25 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
               borderRadius: "16px", padding: "20px 32px", boxShadow: "0 8px 28px rgba(212,175,55,0.4)",
               animation: "toolFlip 0.5s ease-out",
             }}>
+              {/* The vault door the creak sound (playSound("vault") in beginReveal) is actually
+                  coming from — without this there was nothing on screen for that sound to match.
+                  Swings open once on mount, revealing the dark vault interior behind it, then
+                  stays open for the rest of this card's time on screen. */}
+              <div style={{ width: "56px", height: "56px", margin: "0 auto 8px", position: "relative" }} key={revealNonce}>
+                <svg viewBox="0 0 64 64" width="56" height="56">
+                  <circle cx="32" cy="32" r="30" fill="#1A1206" stroke="#7A5C1E" strokeWidth="3" />
+                  <g style={{ transformOrigin: "6px 32px", animation: "vaultDoorSwing 0.6s ease-out forwards" }}>
+                    <circle cx="32" cy="32" r="26" fill="#D4AF37" stroke="#7A5C1E" strokeWidth="2" />
+                    <circle cx="32" cy="32" r="9" fill="none" stroke="#3A2E12" strokeWidth="3" />
+                    <line x1="32" y1="23" x2="32" y2="41" stroke="#3A2E12" strokeWidth="3" />
+                    <line x1="23" y1="32" x2="41" y2="32" stroke="#3A2E12" strokeWidth="3" />
+                    <circle cx="32" cy="10" r="2" fill="#7A5C1E" />
+                    <circle cx="32" cy="54" r="2" fill="#7A5C1E" />
+                    <circle cx="10" cy="32" r="2" fill="#7A5C1E" />
+                    <circle cx="54" cy="32" r="2" fill="#7A5C1E" />
+                  </g>
+                </svg>
+              </div>
               {topicLabel && (
                 <div style={{ fontSize: "12px", fontWeight: "800", color: "#B8A98A", marginBottom: "8px", letterSpacing: "0.05em", textTransform: "uppercase", display: "flex", alignItems: "center", justifyContent: "center", gap: "5px" }}><Icon name="books" size={12} /> {topicLabel}</div>
               )}
