@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { playSound } from "../lib/sounds";
 
-// Last few seconds of any timed turn get an audible tick — 3 seconds gives players enough warning
+// Last few seconds of any timed turn get an audible tick — 5 seconds gives players enough warning
 // without turning every short turn (some are only 15-20s total) into mostly-tick.
-const TICK_STARTS_AT = 3;
+const TICK_STARTS_AT = 5;
 
 // `paused` freezes the countdown in place (no tick, no reset) without tearing down the interval —
 // for turns that span several questions in a row (e.g. Rocket Fuel's "prompt after prompt" turn,
