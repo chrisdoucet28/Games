@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { updateProfile } from "../../lib/profile";
 import { hexToRgba, type Theme } from "../../data/themes";
 import { Icon, type IconName } from "./Icon";
+import { setMusicContext } from "../../lib/music";
 
 // Shown once, the very first time an account clears the login gate — the one app-level "here's
 // how this works" moment that exists (every other explanation is scoped to a single game's own
@@ -28,6 +29,9 @@ const PATHS: { icon: IconName; title: string; hint: string; body: string }[] = [
 export function WelcomeIntroScreen({ theme, onDismiss }: Props) {
   useEffect(() => {
     document.title = "Welcome - ClassCade";
+    // Shown before LessonGamesGenerator ever mounts, so its own screen-based music effect can't
+    // reach this one moment — set the same "ambient" default here so there's no silent gap.
+    setMusicContext("ambient");
   }, []);
 
   // Best-effort, same as PlanIntroScreen's markSeen — a failed write shouldn't trap anyone here.

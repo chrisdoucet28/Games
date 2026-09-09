@@ -472,6 +472,9 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
       setContest({ attackerId: activeTeam.id, defenderId: currentOwner, zoneId, step: "simultaneous", key: `${round}-${activeTeamIdx}-${zoneId}` });
       setShowAns(false);
       setContestReady(false);
+      // The clash of the duel actually starting — attacking an owned zone, distinct from the
+      // victory cue in resolveContest/resolveUncontested above, which only fires once it's over.
+      playSound("hillClash");
       setPhase("contested");
     } else {
       setPhase("answer");

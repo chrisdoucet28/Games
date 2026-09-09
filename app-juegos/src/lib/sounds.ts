@@ -1,27 +1,35 @@
-// Game sound effects — all sourced from kenney.nl CC0 packs (Interface Sounds, Digital Audio,
-// Sci-Fi Sounds, Impact Sounds, RPG Audio, Casino Audio — all public domain, no attribution
-// required). Two tiers:
+// Game sound effects. Two tiers:
 //  - Tier 1 (correct/wrong/tick/timesUp/win): shared feedback routed through the chokepoints
 //    that already exist for these events (updateScore, useTurnTimer, the confetti trigger)
 //    rather than being called from each of the 15 games individually.
-//  - Tier 2 (one entry per game id, matching GAME_MODES): a single signature sound per game,
-//    layered on top of the Tier 1 ones at that game's own defining moment — see the comment at
-//    each game's call site for exactly which moment and why.
-
+//  - Tier 2 (one entry per game id, matching GAME_MODES, plus hillClash): a signature sound per
+//    game, layered on top of the Tier 1 ones at that game's own defining moment — see the comment
+//    at each game's call site for exactly which moment and why.
+//
+// correct/wrong/timesUp/win/hill/hillClash/hotpotato are sourced from mixkit.co's "Game Show" SFX
+// category (Mixkit Sound Effects Free License — free for commercial use, no attribution required)
+// — a deliberate move away from the original kenney.nl arcade/sci-fi set after teacher feedback
+// that those read as "arcadey" rather than the Kahoot-style quiz-show tone this app wants. The
+// remaining Tier 2 entries (auction/battleship/cards/castle/hotseat/minefield/orderup/racetrack/
+// rocket/spy/vault/whack/zombie/tick) are still the original kenney.nl CC0 picks — not yet
+// revisited, since only correct/wrong/win/hill/hotpotato were flagged.
 const SOUND_FILES = {
-  correct: "/sounds/correct.ogg",
-  wrong: "/sounds/wrong.ogg",
+  correct: "/sounds/correct.mp3",
+  wrong: "/sounds/wrong.mp3",
   tick: "/sounds/tick.ogg",
-  timesUp: "/sounds/times-up.ogg",
-  win: "/sounds/win.ogg",
+  timesUp: "/sounds/times-up.mp3",
+  win: "/sounds/win.mp3",
   // Tier 2 — one per game, keyed by GAME_MODES id.
   auction: "/sounds/auction.ogg",
   battleship: "/sounds/battleship.ogg",
   cards: "/sounds/cardshuffle.ogg",
   castle: "/sounds/castle.ogg",
-  hotpotato: "/sounds/hotpotato.ogg",
+  hotpotato: "/sounds/hotpotato.mp3",
   hotseat: "/sounds/hotseat.ogg",
-  hill: "/sounds/hill.ogg",
+  hill: "/sounds/hill.mp3",
+  // A contested zone (attacking a team that already owns it) — the clash of a duel actually
+  // starting, distinct from the hill's own capture/victory cue above.
+  hillClash: "/sounds/hillclash.mp3",
   minefield: "/sounds/minefield.ogg",
   orderup: "/sounds/orderup.ogg",
   racetrack: "/sounds/racetrack.ogg",
@@ -52,6 +60,7 @@ const SOUND_VOLUME: Record<SoundName, number> = {
   hotpotato: DEFAULT_TIER2_VOLUME,
   hotseat: DEFAULT_TIER2_VOLUME,
   hill: DEFAULT_TIER2_VOLUME,
+  hillClash: DEFAULT_TIER2_VOLUME,
   minefield: DEFAULT_TIER2_VOLUME,
   orderup: DEFAULT_TIER2_VOLUME,
   racetrack: DEFAULT_TIER2_VOLUME,

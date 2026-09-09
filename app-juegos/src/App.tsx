@@ -16,6 +16,7 @@ import { PublicLearnIndexScreen } from './components/shared/PublicLearnIndexScre
 import { PublicLearnLessonScreen } from './components/shared/PublicLearnLessonScreen';
 import { FREE_LAUNCH_ALL_PREMIUM } from './data/constants';
 import { Icon } from './components/shared/Icon';
+import { isMusicEnabled, setMusicEnabled, onMusicEnabledChange } from './lib/music';
 
 function ConfigErrorScreen() {
   return (
@@ -40,6 +41,12 @@ function ConfigErrorScreen() {
 // document flow just pushes the rest of the page down instead, so it can never overlap anything
 // regardless of which screen is showing.
 function StatusBadge({ children, action, onAction, theme }: { children: React.ReactNode; action: string; onAction: () => void; theme: Theme }) {
+  // The one spot rendered on every logged-in screen, so it's the only place a persistent
+  // background-music mute control can live — the per-game sound toggle in LessonGamesGenerator's
+  // game header only covers the actual game screen, but music now plays everywhere.
+  const [musicOn, setMusicOnState] = useState(isMusicEnabled);
+  useEffect(() => onMusicEnabledChange(setMusicOnState), []);
+
   return (
     <div
       // "learn-no-print" is a global class defined in LearnScreen.tsx's injected print
@@ -53,6 +60,16 @@ function StatusBadge({ children, action, onAction, theme }: { children: React.Re
       }}
     >
       <span style={{ color: 'white', fontSize: '12px', fontWeight: 700, fontFamily: theme.headingFont }}>{children}</span>
+      <button
+        onClick={() => setMusicEnabled(!musicOn)}
+        title={musicOn ? 'Mute background music' : 'Unmute background music'}
+        style={{
+          background: 'rgba(255,255,255,0.15)', color: 'white', border: 'none',
+          borderRadius: '14px', padding: '6px 8px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center',
+        }}
+      >
+        <Icon name={musicOn ? 'musicOn' : 'musicOff'} size={13} />
+      </button>
       <button
         onClick={onAction}
         style={{

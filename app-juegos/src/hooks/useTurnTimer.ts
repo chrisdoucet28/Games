@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { playSound } from "../lib/sounds";
+import { setMusicContext } from "../lib/music";
 
 // Last few seconds of any timed turn get an audible tick — 5 seconds gives players enough warning
 // without turning every short turn (some are only 15-20s total) into mostly-tick.
@@ -23,6 +24,14 @@ export function useTurnTimer(seconds: number, active: boolean, onExpire: () => v
   useEffect(() => {
     pausedRef.current = paused;
   }, [paused]);
+
+  // The tension music bed while this timer is actually counting down — reverts to "gameplay"
+  // (never "ambient") on stop/cleanup, safe because this hook only ever runs while a game screen
+  // is already showing.
+  useEffect(() => {
+    if (active) setMusicContext("tension");
+    return () => setMusicContext("gameplay");
+  }, [active]);
 
   const stop = useCallback(() => {
     if (timerRef.current) clearInterval(timerRef.current);

@@ -27,6 +27,7 @@ import { MascotIcon } from "./components/shared/MascotArt";
 import { saveProgress, clearProgress, listClasses, createClass, upsertTeamRoster, deleteFromTeamRoster, saveTeams } from "./lib/classes";
 import { isPaidStatus } from "./lib/subscription";
 import { playSound, isSoundEnabled, setSoundEnabled, onSoundEnabledChange } from "./lib/sounds";
+import { setMusicContext } from "./lib/music";
 import { denseRank } from "./utils/ranking";
 import { RankBadge } from "./components/shared/RankBadge";
 import { AuctionGame } from "./components/games/AuctionGame";
@@ -168,6 +169,13 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
   const [screen, setScreen] = useState<"welcome" | "classes" | "profile" | "learn" | "lessonplan" | "leaderboard" | "billing" | "topic-select" | "team-setup" | "game-select" | "game" | "results">(
     checkoutRedirect ? "billing" : initialScreen ?? "welcome"
   );
+  // Background music context: "gameplay" only for the actual game screen, "ambient" everywhere
+  // else in the app (menus, setup, lesson plans, results...). The louder "tension" context is set
+  // separately by useTurnTimer whenever a timed turn is actively running, and reverts to
+  // "gameplay" (not this effect) once that timer stops — see its own comment.
+  useEffect(() => {
+    setMusicContext(screen === "game" ? "gameplay" : "ambient");
+  }, [screen]);
   // Where Learn's own "Back" should return to — it can now be reached from 3 different places
   // (the welcome screen's own Learn button, game-select's "Review these topics", and results'
   // "Review these topics"), so a single learnFilter-based binary no longer captures it.
