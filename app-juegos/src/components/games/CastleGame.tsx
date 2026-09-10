@@ -12,6 +12,7 @@ import { makeSoloCpuTeam, makeTeacherTeam } from "../../lib/soloOpponent";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { CASTLE_TUTORIAL_STEPS } from "../../data/tutorials/castle";
 import { playSound } from "../../lib/sounds";
+import { stopMusic } from "../../lib/music";
 
 const GM = GAME_MODES.find(g => g.id === "castle")!;
 
@@ -360,7 +361,7 @@ export function CastleGame({ questions, teams: propTeams, onUpdateScore, onEnd, 
   const isEliminated = (teamId: string | number) => rpg[teamId]?.hp <= 0;
 
   useEffect(() => {
-    if (phase === "gameover") playSound("roundComplete");
+    if (phase === "gameover") { playSound("roundComplete"); stopMusic(); }
   }, [phase]);
 
   useEffect(() => {

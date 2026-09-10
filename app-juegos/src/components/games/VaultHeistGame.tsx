@@ -13,6 +13,7 @@ import { makeSoloCpuTeam } from "../../lib/soloOpponent";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { VAULT_TUTORIAL_STEPS } from "../../data/tutorials/vault";
 import { playSound } from "../../lib/sounds";
+import { stopMusic } from "../../lib/music";
 
 const GM = GAME_MODES.find(g => g.id === "vault")!;
 
@@ -257,7 +258,7 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
   const finishOrderRef = useRef<(string | number)[]>(resumed?.finishOrder ?? []);
 
   useEffect(() => {
-    if (phase === "gameover") playSound("roundComplete");
+    if (phase === "gameover") { playSound("roundComplete"); stopMusic(); }
   }, [phase]);
 
   useEffect(() => {

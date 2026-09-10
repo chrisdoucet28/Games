@@ -10,6 +10,7 @@ import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { ROCKET_TUTORIAL_STEPS } from "../../data/tutorials/rocket";
 import { playSound } from "../../lib/sounds";
+import { stopMusic } from "../../lib/music";
 
 const GM = GAME_MODES.find(g => g.id === "rocket")!;
 
@@ -246,7 +247,9 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
     payoutDoneRef.current = true;
     // No separate playSound("win") on entering "final" here (unlike every other game) — the
     // ignition below already fires at this exact same moment, and would just double up with it.
+    // Still cuts the background music like every other game's final screen does, though.
     playSound("rocket");
+    stopMusic();
     const ranked = rankByFuel(teams, fuelRef.current);
     const bonuses: Record<string | number, number> = {};
     ranked.forEach(({ team, fuel, rank }) => {

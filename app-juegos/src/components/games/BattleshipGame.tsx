@@ -9,6 +9,7 @@ import { QuestionCard } from "../shared/QuestionCard";
 import { denseRank } from "../../utils/ranking";
 import { RankBadge } from "../shared/RankBadge";
 import { playSound } from "../../lib/sounds";
+import { stopMusic } from "../../lib/music";
 import { makeSoloCpuTeam, makeTeacherTeam } from "../../lib/soloOpponent";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { BATTLESHIP_TUTORIAL_STEPS } from "../../data/tutorials/battleship";
@@ -282,7 +283,7 @@ export function BattleshipGame({ questions, teams: propTeams, onUpdateScore, onE
   }, [hits, fleets]);
 
   useEffect(() => {
-    if (phase === "gameover") playSound("roundComplete");
+    if (phase === "gameover") { playSound("roundComplete"); stopMusic(); }
   }, [phase]);
 
   useEffect(() => {

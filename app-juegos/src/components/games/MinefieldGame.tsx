@@ -10,7 +10,7 @@ import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
 import { MINEFIELD_TUTORIAL_STEPS } from "../../data/tutorials/minefield";
 import { playSound } from "../../lib/sounds";
-import { setMusicContext } from "../../lib/music";
+import { setMusicContext, stopMusic } from "../../lib/music";
 
 const GM = GAME_MODES.find(g => g.id === "minefield")!;
 
@@ -131,7 +131,7 @@ export function MinefieldGame({ gridData, teams: propTeams, onUpdateScore, onEnd
   const [showHowTo, setShowHowTo] = useState(false);
 
   useEffect(() => {
-    if (phase === "final") playSound("roundComplete");
+    if (phase === "final") { playSound("roundComplete"); stopMusic(); }
   }, [phase]);
 
   useEffect(() => {

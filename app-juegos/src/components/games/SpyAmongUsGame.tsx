@@ -13,7 +13,7 @@ import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
 import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
 import { SPY_TWOPLAYER_STEPS, SPY_GROUP_STEPS } from "../../data/tutorials/spy";
 import { playSound } from "../../lib/sounds";
-import { setMusicContext } from "../../lib/music";
+import { setMusicContext, stopMusic } from "../../lib/music";
 import {
   generateSessionCode, openSpyChannel, closeChannel,
   type SpyStatePayload, type SpyPhase, type SpyRoleInfo,
@@ -192,7 +192,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
   }, [isDeciding]);
 
   useEffect(() => {
-    if (phase === "final") playSound("roundComplete");
+    if (phase === "final") { playSound("roundComplete"); stopMusic(); }
   }, [phase]);
 
   useEffect(() => {

@@ -19,6 +19,7 @@ import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
 import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
 import { WHACK_TUTORIAL_STEPS } from "../../data/tutorials/whack";
 import { playSound } from "../../lib/sounds";
+import { stopMusic } from "../../lib/music";
 import {
   generateSessionCode, openWhackChannel, closeChannel,
   type WhackPhase, type WhackStatePayload, type WhackTurnReportPayload,
@@ -150,7 +151,7 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
   const [showHowTo, setShowHowTo] = useState(false);
 
   useEffect(() => {
-    if (phase === "final") playSound("roundComplete");
+    if (phase === "final") { playSound("roundComplete"); stopMusic(); }
   }, [phase]);
 
   useEffect(() => {

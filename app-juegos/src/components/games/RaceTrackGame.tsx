@@ -13,6 +13,7 @@ import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
 import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
 import { RACETRACK_TUTORIAL_STEPS } from "../../data/tutorials/racetrack";
 import { playSound } from "../../lib/sounds";
+import { stopMusic } from "../../lib/music";
 import {
   generateSessionCode, openRaceTrackChannel, closeChannel,
   type RaceTrackPhase, type RaceTrackStatePayload, type RaceTrackActionPayload,
@@ -601,7 +602,7 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
   };
 
   useEffect(() => {
-    if (phase === "gameover") playSound("roundComplete");
+    if (phase === "gameover") { playSound("roundComplete"); stopMusic(); }
   }, [phase]);
 
   useEffect(() => {

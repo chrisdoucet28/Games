@@ -9,7 +9,7 @@ import { FlagPromptButton } from "../shared/FlagPromptButton";
 import { TurnTimerBar } from "../shared/TurnTimerBar";
 import { ZOMBIE_TUTORIAL_STEPS } from "../../data/tutorials/zombie";
 import { playSound } from "../../lib/sounds";
-import { setMusicContext } from "../../lib/music";
+import { setMusicContext, stopMusic } from "../../lib/music";
 import { makeTeacherTeam, TEACHER_ID } from "../../lib/soloOpponent";
 
 const GM = GAME_MODES.find(g => g.id === "zombie")!;
@@ -707,7 +707,7 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
   useEffect(() => { pausedRef.current = !!paused; }, [paused]);
 
   useEffect(() => {
-    if (phase === "gameover") playSound("roundComplete");
+    if (phase === "gameover") { playSound("roundComplete"); stopMusic(); }
   }, [phase]);
 
   useEffect(() => {

@@ -13,6 +13,7 @@ import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
 import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
 import { ORDERUP_TUTORIAL_STEPS } from "../../data/tutorials/orderup";
 import { playSound } from "../../lib/sounds";
+import { stopMusic } from "../../lib/music";
 import {
   generateSessionCode, openOrderUpChannel, closeChannel,
   type OrderUpPhase, type OrderUpStatePayload, type OrderUpActionPayload, type OrderUpTicketInfo,
@@ -498,7 +499,7 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
   const handleSessionEnd = useCallback(() => setPhase("final"), []);
 
   useEffect(() => {
-    if (phase === "final") playSound("roundComplete");
+    if (phase === "final") { playSound("roundComplete"); stopMusic(); }
   }, [phase]);
 
   useEffect(() => {

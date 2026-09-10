@@ -12,7 +12,7 @@ import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
 import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
 import { HOTSEAT_TUTORIAL_STEPS } from "../../data/tutorials/hotseat";
 import { playSound } from "../../lib/sounds";
-import { setMusicContext } from "../../lib/music";
+import { setMusicContext, stopMusic } from "../../lib/music";
 import {
   generateSessionCode, openHotSeatChannel, closeChannel,
   type HotSeatPhase, type HotSeatStatePayload, type HotSeatActionPayload,
@@ -118,7 +118,7 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
   const channelRef = useRef<RealtimeChannel | null>(null);
 
   useEffect(() => {
-    if (phase === "final") playSound("roundComplete");
+    if (phase === "final") { playSound("roundComplete"); stopMusic(); }
   }, [phase]);
 
   useEffect(() => {

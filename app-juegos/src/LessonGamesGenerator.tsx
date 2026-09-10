@@ -27,7 +27,7 @@ import { MascotIcon } from "./components/shared/MascotArt";
 import { saveProgress, clearProgress, listClasses, createClass, upsertTeamRoster, deleteFromTeamRoster, saveTeams } from "./lib/classes";
 import { isPaidStatus } from "./lib/subscription";
 import { playSound, isSoundEnabled, setSoundEnabled, onSoundEnabledChange } from "./lib/sounds";
-import { setMusicContext } from "./lib/music";
+import { setMusicContext, stopMusic } from "./lib/music";
 import { denseRank } from "./utils/ranking";
 import { RankBadge } from "./components/shared/RankBadge";
 import { AuctionGame } from "./components/games/AuctionGame";
@@ -174,7 +174,11 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
   // separately by useTurnTimer whenever a timed turn is actively running, and reverts to
   // "gameplay" (not this effect) once that timer stops — see its own comment.
   useEffect(() => {
-    setMusicContext(screen === "game" ? "gameplay" : "ambient");
+    if (screen === "game") setMusicContext("gameplay");
+    // Lesson Plans is real reading/teaching content, not a menu — music under it (even the quiet
+    // ambient bed) competes with the teacher actually presenting, so it goes silent instead.
+    else if (screen === "lessonplan") stopMusic();
+    else setMusicContext("ambient");
   }, [screen]);
   // Where Learn's own "Back" should return to — it can now be reached from 3 different places
   // (the welcome screen's own Learn button, game-select's "Review these topics", and results'

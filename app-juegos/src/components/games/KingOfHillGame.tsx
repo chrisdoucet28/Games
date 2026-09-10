@@ -15,6 +15,7 @@ import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
 import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
 import { HILL_TOPIC_STEPS, HILL_GRAMMAR_STEPS } from "../../data/tutorials/hill";
 import { playSound } from "../../lib/sounds";
+import { stopMusic } from "../../lib/music";
 import {
   generateSessionCode, openHillChannel, closeChannel,
   type HillPhase, type HillStatePayload, type HillActionPayload,
@@ -247,7 +248,7 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
   const channelRef = useRef<RealtimeChannel | null>(null);
 
   useEffect(() => {
-    if (phase === "final") playSound("roundComplete");
+    if (phase === "final") { playSound("roundComplete"); stopMusic(); }
   }, [phase]);
 
   useEffect(() => {

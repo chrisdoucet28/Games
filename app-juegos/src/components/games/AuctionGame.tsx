@@ -13,7 +13,7 @@ import { MascotIcon } from "../shared/MascotArt";
 import { Icon, type IconName } from "../shared/Icon";
 import { AUCTION_TUTORIAL_STEPS } from "../../data/tutorials/auction";
 import { playSound } from "../../lib/sounds";
-import { setMusicContext } from "../../lib/music";
+import { setMusicContext, stopMusic } from "../../lib/music";
 import {
   generateSessionCode, openAuctionChannel, closeChannel,
   type AuctionStatePayload, type AuctionBetPayload, type AuctionResultInfo,
@@ -341,7 +341,7 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
   // screen — a teacher sees this one first, and reaching it is just as much "the game is over" as
   // the later shared screen is.
   useEffect(() => {
-    if (phase === "final") playSound("roundComplete");
+    if (phase === "final") { playSound("roundComplete"); stopMusic(); }
   }, [phase]);
 
   useEffect(() => {

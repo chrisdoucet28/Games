@@ -8,7 +8,7 @@ import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
 import { HOTPOTATO_TUTORIAL_STEPS } from "../../data/tutorials/hotpotato";
 import { playSound } from "../../lib/sounds";
-import { setMusicContext } from "../../lib/music";
+import { setMusicContext, stopMusic } from "../../lib/music";
 
 const GM = GAME_MODES.find(g => g.id === "hotpotato")!;
 
@@ -136,7 +136,7 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
   const [showHowTo, setShowHowTo] = useState(false);
 
   useEffect(() => {
-    if (phase === "gameover") playSound("roundComplete");
+    if (phase === "gameover") { playSound("roundComplete"); stopMusic(); }
   }, [phase]);
 
   useEffect(() => {
