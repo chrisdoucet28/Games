@@ -194,8 +194,16 @@ function fadeTo(el: HTMLAudioElement, target: number, ms: number) {
   const start = el.volume;
   const startTime = performance.now();
   function step(now: number) {
-    const t = Math.min(1, (now - startTime) / ms);
-    el.volume = start + (target - start) * t;
+    // Clamped on both ends, not just the upper one — requestAnimationFrame's timestamp isn't
+    // guaranteed to come from the exact same clock reading as the performance.now() captured
+    // above (seen in practice on mobile browsers, especially right after a backgrounded tab
+    // resumes), so `now` can land a hair before `startTime` on the very first frame. That makes
+    // t go slightly negative, which (e.g. fading in from a near-zero start) computes a volume a
+    // hair below 0 — Sentry caught this crashing with "IndexSizeError: volume outside [0,1]".
+    // The final Math.max/Math.min on the assignment itself is a second, independent guard so an
+    // out-of-range value can never reach el.volume regardless of how t was computed.
+    const t = Math.min(1, Math.max(0, (now - startTime) / ms));
+    el.volume = Math.max(0, Math.min(1, start + (target - start) * t));
     if (t < 1) {
       requestAnimationFrame(step);
     } else if (target === 0) {
