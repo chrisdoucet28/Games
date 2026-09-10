@@ -10,7 +10,7 @@ import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
 import { MINEFIELD_TUTORIAL_STEPS } from "../../data/tutorials/minefield";
 import { playSound } from "../../lib/sounds";
-import { setMusicContext, stopMusic } from "../../lib/music";
+import { setMusicContext, setMusicGame, stopMusic } from "../../lib/music";
 
 const GM = GAME_MODES.find(g => g.id === "minefield")!;
 
@@ -133,6 +133,11 @@ export function MinefieldGame({ gridData, teams: propTeams, onUpdateScore, onEnd
   useEffect(() => {
     if (phase === "final") { playSound("roundComplete"); stopMusic(); }
   }, [phase]);
+  // Custom Suno tension track — see GAME_OVERRIDES in lib/music.ts.
+  useEffect(() => {
+    setMusicGame("minefield");
+    return () => setMusicGame(null);
+  }, []);
 
   useEffect(() => {
     if (!forceFinalRef) return;

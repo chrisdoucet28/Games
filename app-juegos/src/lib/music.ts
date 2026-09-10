@@ -82,6 +82,23 @@ const GAME_OVERRIDES: Partial<Record<string, Partial<Record<MusicContext, string
   rocket: {
     tension: "/music/rocket-tension.mp3",
   },
+  // Tension-only — Order Up's whole session runs on a shared clock, so it never really leaves
+  // this context; the shared gameplay track would only ever show up in a sliver of transition time.
+  orderup: {
+    tension: "/music/orderup-tension.mp3",
+  },
+  // Tension-only — the "speaking phase" (building and saying the sentence) is Minefield's real
+  // main event each turn; the shared gameplay track covers the brief pick/judging windows.
+  minefield: {
+    tension: "/music/minefield-tension.mp3",
+  },
+  // Reused rather than a new track — Battleship's target-picking tension is the same medieval/
+  // swashbuckling-adventure combat-decision energy Castle Defense's track already covers, per
+  // teacher feedback that it reads as a "Pirates of the Caribbean" vibe at points — naval instead
+  // of siege, same family as castle/hill.
+  battleship: {
+    tension: "/music/castle-tension.mp3",
+  },
 };
 
 function resolveSrc(ctx: MusicContext, gameId: string | null): string {

@@ -9,7 +9,7 @@ import { QuestionCard } from "../shared/QuestionCard";
 import { denseRank } from "../../utils/ranking";
 import { RankBadge } from "../shared/RankBadge";
 import { playSound } from "../../lib/sounds";
-import { stopMusic } from "../../lib/music";
+import { setMusicGame, stopMusic } from "../../lib/music";
 import { makeSoloCpuTeam, makeTeacherTeam } from "../../lib/soloOpponent";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { BATTLESHIP_TUTORIAL_STEPS } from "../../data/tutorials/battleship";
@@ -285,6 +285,13 @@ export function BattleshipGame({ questions, teams: propTeams, onUpdateScore, onE
   useEffect(() => {
     if (phase === "gameover") { playSound("roundComplete"); stopMusic(); }
   }, [phase]);
+  // Reuses Castle Defense's tension track (see GAME_OVERRIDES in lib/music.ts) — teacher feedback
+  // that its medieval/adventure energy reads as a "Pirates of the Caribbean" vibe that fits the
+  // target-picking moment here too.
+  useEffect(() => {
+    setMusicGame("battleship");
+    return () => setMusicGame(null);
+  }, []);
 
   useEffect(() => {
     if (!forceFinalRef) return;
