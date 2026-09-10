@@ -13,7 +13,7 @@ import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
 import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
 import { RACETRACK_TUTORIAL_STEPS } from "../../data/tutorials/racetrack";
 import { playSound } from "../../lib/sounds";
-import { stopMusic } from "../../lib/music";
+import { setMusicGame, stopMusic } from "../../lib/music";
 import {
   generateSessionCode, openRaceTrackChannel, closeChannel,
   type RaceTrackPhase, type RaceTrackStatePayload, type RaceTrackActionPayload,
@@ -604,6 +604,11 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
   useEffect(() => {
     if (phase === "gameover") { playSound("roundComplete"); stopMusic(); }
   }, [phase]);
+  // Custom Suno gameplay track — see GAME_OVERRIDES in lib/music.ts.
+  useEffect(() => {
+    setMusicGame("racetrack");
+    return () => setMusicGame(null);
+  }, []);
 
   useEffect(() => {
     if (!forceFinalRef) return;

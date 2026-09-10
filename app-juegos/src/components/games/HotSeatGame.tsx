@@ -12,7 +12,7 @@ import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
 import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
 import { HOTSEAT_TUTORIAL_STEPS } from "../../data/tutorials/hotseat";
 import { playSound } from "../../lib/sounds";
-import { setMusicContext, stopMusic } from "../../lib/music";
+import { setMusicContext, setMusicGame, stopMusic } from "../../lib/music";
 import {
   generateSessionCode, openHotSeatChannel, closeChannel,
   type HotSeatPhase, type HotSeatStatePayload, type HotSeatActionPayload,
@@ -120,6 +120,11 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
   useEffect(() => {
     if (phase === "final") { playSound("roundComplete"); stopMusic(); }
   }, [phase]);
+  // Custom Suno tension track — see GAME_OVERRIDES in lib/music.ts.
+  useEffect(() => {
+    setMusicGame("hotseat");
+    return () => setMusicGame(null);
+  }, []);
 
   useEffect(() => {
     if (!forceFinalRef) return;

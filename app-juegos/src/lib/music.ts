@@ -99,6 +99,17 @@ const GAME_OVERRIDES: Partial<Record<string, Partial<Record<MusicContext, string
   battleship: {
     tension: "/music/castle-tension.mp3",
   },
+  // Tension-only — Hot Seat's 90s describe-and-guess turn is basically the whole game; the shared
+  // gameplay track covers the brief intro/turn-end windows.
+  hotseat: {
+    tension: "/music/hotseat-tension.mp3",
+  },
+  // Gameplay-only — Race Track barely ever leaves this context in normal team play (its timer-
+  // driven tension is gated to solo mode), so this is the track that carries almost the entire
+  // game; the shared tension track fills the rare solo-mode countdown instead.
+  racetrack: {
+    gameplay: "/music/racetrack-gameplay.mp3",
+  },
 };
 
 function resolveSrc(ctx: MusicContext, gameId: string | null): string {
