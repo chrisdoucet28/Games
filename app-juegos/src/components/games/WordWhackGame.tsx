@@ -19,7 +19,7 @@ import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
 import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
 import { WHACK_TUTORIAL_STEPS } from "../../data/tutorials/whack";
 import { playSound } from "../../lib/sounds";
-import { stopMusic } from "../../lib/music";
+import { stopMusic, setMusicGame } from "../../lib/music";
 import {
   generateSessionCode, openWhackChannel, closeChannel,
   type WhackPhase, type WhackStatePayload, type WhackTurnReportPayload,
@@ -153,6 +153,13 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
   useEffect(() => {
     if (phase === "final") { playSound("roundComplete"); stopMusic(); }
   }, [phase]);
+
+  // Word Whack has its own Suno-made gameplay/tension tracks (carnival whack-a-mole energy,
+  // not the shared "someone is quietly thinking" bed) — see GAME_OVERRIDES in lib/music.ts.
+  useEffect(() => {
+    setMusicGame("whack");
+    return () => setMusicGame(null);
+  }, []);
 
   useEffect(() => {
     if (!forceFinalRef) return;

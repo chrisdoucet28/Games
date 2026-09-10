@@ -7,12 +7,18 @@
 //    mark on tone.
 //  - gameplay: playing a game, between timed/thinking moments. Mixkit Stock Music Free License
 //    (free for commercial use, no attribution required) — "Light It Up Boy".
-//  - tension: Mixkit, same license — "Serene View".
 //  - tension: a timed turn is actively running (see useTurnTimer) — swapped back to gameplay the
-//    moment that timer stops, since it only ever runs while a game is already on screen.
+//    moment that timer stops, since it only ever runs while a game is already on screen. Mixkit,
+//    same license — "Serene View".
 // Plus true silence via stopMusic() (not a context) for the moments nothing should play at all —
 // a Lesson Plan's own reading/teaching content, and a game's own final screen (cut off the moment
 // that screen appears, rather than let gameplay music run under it).
+//
+// Per-game overrides: the shared gameplay/tension identity above doesn't fit every game (a
+// whack-a-mole frenzy needs carnival energy, not the same "someone is quietly thinking" bed used
+// by Hot Seat/Order Up/Auction) — see GAME_OVERRIDES. A game with its own tracks calls
+// setMusicGame(gameId) on mount and setMusicGame(null) on unmount; every other game never calls
+// it at all; the shared defaults below still apply to any context that game doesn't override.
 const MUSIC_FILES = {
   ambient: "/music/ambient.mp3",
   gameplay: "/music/gameplay.mp3",
@@ -21,8 +27,23 @@ const MUSIC_FILES = {
 
 export type MusicContext = keyof typeof MUSIC_FILES;
 
+// Custom Suno tracks for one specific game's own gameplay/tension moments, in place of the shared
+// defaults above. A game with no entry here (or missing one of the two contexts) just falls
+// through to the shared track for that context — additive, never a replacement for the defaults.
+const GAME_OVERRIDES: Partial<Record<string, Partial<Record<MusicContext, string>>>> = {
+  whack: {
+    gameplay: "/music/whack-gameplay.mp3",
+    tension: "/music/whack-tension.mp3",
+  },
+};
+
+function resolveSrc(ctx: MusicContext, gameId: string | null): string {
+  return (gameId && GAME_OVERRIDES[gameId]?.[ctx]) || MUSIC_FILES[ctx];
+}
+
 // Kept low relative to SFX — this plays continuously under everything else, including a
-// teacher's own voice, so it should always read as background, never foreground.
+// teacher's own voice, so it should always read as background, never foreground. Applies
+// regardless of which actual file plays for a context (shared default or a game's own override).
 const MUSIC_VOLUME: Record<MusicContext, number> = {
   ambient: 0.22,
   gameplay: 0.25,
@@ -37,6 +58,11 @@ const STORAGE_KEY = "classcade_music_enabled";
 
 let enabled = readEnabledFromStorage();
 let currentContext: MusicContext | null = null;
+let currentGameId: string | null = null;
+// The actual file path behind currentContext right now — tracked separately from currentContext
+// because the same context can resolve to a different file depending on currentGameId (e.g.
+// "tension" is whack-tension.mp3 while Word Whack is mounted, tension.mp3 for every other game).
+let currentSrc: string | null = null;
 const listeners = new Set<(enabled: boolean) => void>();
 
 function readEnabledFromStorage(): boolean {
@@ -57,15 +83,17 @@ export function onMusicEnabledChange(fn: (enabled: boolean) => void): () => void
   return () => listeners.delete(fn);
 }
 
-const players: Partial<Record<MusicContext, HTMLAudioElement>> = {};
+// Keyed by resolved file path (not MusicContext): the same context can point at different files
+// depending on currentGameId, so a context-keyed cache would mix up two games' tracks.
+const players = new Map<string, HTMLAudioElement>();
 
-function getPlayer(ctx: MusicContext): HTMLAudioElement {
-  let el = players[ctx];
+function getPlayer(src: string): HTMLAudioElement {
+  let el = players.get(src);
   if (!el) {
-    el = new Audio(MUSIC_FILES[ctx]);
+    el = new Audio(src);
     el.loop = true;
     el.volume = 0;
-    players[ctx] = el;
+    players.set(src, el);
   }
   return el;
 }
@@ -87,10 +115,10 @@ function fadeTo(el: HTMLAudioElement, target: number, ms: number) {
   requestAnimationFrame(step);
 }
 
-function fadeIn(ctx: MusicContext) {
-  const el = getPlayer(ctx);
-  el.play().catch(err => console.warn(`[music] "${ctx}" failed to play:`, err));
-  fadeTo(el, MUSIC_VOLUME[ctx], FADE_MS);
+function fadeInSrc(src: string, volume: number) {
+  const el = getPlayer(src);
+  el.play().catch(err => console.warn(`[music] "${src}" failed to play:`, err));
+  fadeTo(el, volume, FADE_MS);
 }
 
 export function setMusicEnabled(next: boolean): void {
@@ -101,27 +129,41 @@ export function setMusicEnabled(next: boolean): void {
     // Best-effort — a private/incognito window shouldn't crash the toggle, just not persist it.
   }
   if (!enabled) {
-    (Object.keys(players) as MusicContext[]).forEach(ctx => {
-      const el = players[ctx];
-      if (el && !el.paused) fadeTo(el, 0, FADE_MS);
+    players.forEach(el => {
+      if (!el.paused) fadeTo(el, 0, FADE_MS);
     });
-  } else if (currentContext) {
-    fadeIn(currentContext);
+  } else if (currentSrc && currentContext) {
+    fadeInSrc(currentSrc, MUSIC_VOLUME[currentContext]);
   }
   listeners.forEach(fn => fn(enabled));
 }
 
-// Idempotent — safe to call every render/effect run without retriggering the fade.
+// Idempotent — safe to call every render/effect run without retriggering the fade. Re-resolves
+// against currentGameId every time, so the same ctx can still trigger a real crossfade if the
+// active game (and therefore the actual file behind that context) changed since the last call.
 export function setMusicContext(ctx: MusicContext): void {
-  if (currentContext === ctx) return;
-  const prev = currentContext;
+  const nextSrc = resolveSrc(ctx, currentGameId);
+  if (currentContext === ctx && currentSrc === nextSrc) return;
+  const prevSrc = currentSrc;
   currentContext = ctx;
+  currentSrc = nextSrc;
   if (!enabled) return;
-  if (prev) {
-    const prevEl = players[prev];
+  if (prevSrc && prevSrc !== nextSrc) {
+    const prevEl = players.get(prevSrc);
     if (prevEl) fadeTo(prevEl, 0, FADE_MS);
   }
-  fadeIn(ctx);
+  if (prevSrc !== nextSrc) fadeInSrc(nextSrc, MUSIC_VOLUME[ctx]);
+}
+
+// Called by a game's own component (mount → its id, unmount → null) only when that game has a
+// GAME_OVERRIDES entry — every other game never calls this, since the default (no override) is
+// already correct for them. Re-resolves whatever context is currently playing so an override for
+// the game just entered (or the shared default for the game just left) takes effect immediately,
+// without that game needing to also call setMusicContext itself.
+export function setMusicGame(gameId: string | null): void {
+  if (currentGameId === gameId) return;
+  currentGameId = gameId;
+  if (currentContext) setMusicContext(currentContext);
 }
 
 // True silence, not another context — for the moments music shouldn't be playing at all (a
@@ -129,8 +171,11 @@ export function setMusicContext(ctx: MusicContext): void {
 // call starts fresh from here rather than no-op'ing (currentContext is null, not some old value).
 export function stopMusic(): void {
   if (currentContext === null) return;
-  const prev = currentContext;
+  const prevSrc = currentSrc;
   currentContext = null;
-  const prevEl = players[prev];
-  if (prevEl) fadeTo(prevEl, 0, FADE_MS);
+  currentSrc = null;
+  if (prevSrc) {
+    const prevEl = players.get(prevSrc);
+    if (prevEl) fadeTo(prevEl, 0, FADE_MS);
+  }
 }
