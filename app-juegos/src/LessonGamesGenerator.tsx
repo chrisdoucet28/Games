@@ -198,6 +198,13 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
   // linked opens showSavePicker so the teacher can pick/create one on the spot instead of losing
   // the save entirely.
   const [activeClassId, setActiveClassId] = useState<string | null>(null);
+  // Display-only companion to activeClassId — team-setup's Saved Teams panel names which class is
+  // linked (not just an "Autosaved" pill with no context), so a teacher can actually tell whether
+  // they're still on last period's class before naming new teams into it. Kept in sync everywhere
+  // activeClassId itself changes to a genuinely different class (or clears); re-affirming the same
+  // already-active class (saveTeamsToRoster/saveTeamsToClass/saveToClass's own defaulted-classId
+  // calls) doesn't need to touch it.
+  const [activeClassName, setActiveClassName] = useState<string | null>(null);
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [showSavePicker, setShowSavePicker] = useState(false);
   // Which action the picker should run once a class is picked/created — "exit" (mid-game
@@ -398,15 +405,19 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
 
   // Auto-save once a class is linked — teams named/edited on team-setup should feel automatically
   // saved (like a video game's autosave), not require an explicit button. A baseline snapshot is
-  // captured the instant activeClassId transitions from null to set (reading teamSlotsRef, already
-  // kept in sync a few lines above this — its own effect runs first in the same commit, so it
-  // reflects any team state a caller like startWithClass set in the same batch), so hydrating an
-  // already-linked class's teams never itself counts as an edit. Any later change that actually
-  // differs from that baseline debounces a write via saveTeamsToRoster.
+  // captured any time activeClassId actually CHANGES to a different class (covers both the first
+  // link and later switching to a different one via "Switch" — see dispatchPendingSave's "link"
+  // branch, which resets the editing slots to blank defaults on every link so a switch can never
+  // leave the previous class's team names sitting in the editor about to be autosaved into the new
+  // class's roster). Reads teamSlotsRef, already kept in sync a few lines above this — its own
+  // effect runs first in the same commit, so it reflects whatever the same click handler that
+  // changed activeClassId also set in that same batch (startWithClass's pre-fill, or the reset on
+  // link/switch) — so that hydration/reset never itself counts as an edit. Any later change that
+  // actually differs from the baseline debounces a write via saveTeamsToRoster.
   const autosaveBaselineRef = useRef<{ names: string[]; colors: number[]; mascots: (string | null)[]; count: number } | null>(null);
   const prevActiveClassIdRef = useRef<string | null>(null);
   useEffect(() => {
-    if (activeClassId && !prevActiveClassIdRef.current) {
+    if (activeClassId && activeClassId !== prevActiveClassIdRef.current) {
       const { names, colors, mascots, count } = teamSlotsRef.current;
       autosaveBaselineRef.current = { names: [...names], colors: [...colors], mascots: [...mascots], count };
     } else if (!activeClassId) {
@@ -494,6 +505,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
   // normal setup flow, same as if the teacher had typed those names in themselves.
   const startWithClass = (cls: SavedClass) => {
     setActiveClassId(cls.id);
+    setActiveClassName(cls.name);
     // Pre-selects step 1 of Game Setup with this class's own level, so a teacher who already told
     // us "this is my B2 class" doesn't have to re-pick it every single time they start a game.
     setLevel(cls.default_level ?? "all");
@@ -527,6 +539,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
   // the exact game, teams, topics, and question pool that were in play when it was saved.
   const resumeClass = (cls: SavedClass) => {
     setActiveClassId(cls.id);
+    setActiveClassName(cls.name);
     setTeams(cls.teams);
     setSelectedTopics(cls.selected_topics ?? []);
     setLevel(cls.level ?? "all");
@@ -610,7 +623,14 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     setPendingSaveAction(null);
     if (action === "link") {
       setActiveClassId(cls.id);
+      setActiveClassName(cls.name);
       setTeamRoster(cls.team_roster ?? []);
+      // Blanks the live editor to this class's own clean slate — without this, switching from an
+      // already-linked class straight to a different one would leave the FIRST class's team names
+      // sitting in the editor, about to autosave into the SECOND class's roster the moment anything
+      // else changes. The teacher taps chips below to bring in whichever of this class's own saved
+      // teams they want, same as any other link.
+      resetTeamsToNormal();
     } else if (action === "teams") saveTeamsToClass(cls.id);
     else saveToClass(cls.id);
   };
@@ -1021,7 +1041,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
             genuinely different amounts of class time and this is the one place that says so. */}
         <div style={{ display: "flex", gap: "16px", justifyContent: "center", flexWrap: "wrap", marginBottom: "18px" }}>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
-            <button onClick={() => { setActiveClassId(null); setPendingLessonTopicId(null); setScreen("topic-select"); }} style={{ background: `linear-gradient(135deg,${theme.cta[0]},${theme.cta[1]})`, color: "white", border: "none", borderRadius: "16px", padding: "18px 48px", fontSize: "20px", fontWeight: "900", cursor: "pointer", boxShadow: `0 8px 32px ${hexToRgba(theme.cta[1], 0.45)}`, letterSpacing: "0.01em", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "8px" }}><Icon name="rocket" size={20} /> Start a Game</button>
+            <button onClick={() => { setActiveClassId(null); setActiveClassName(null); setPendingLessonTopicId(null); setScreen("topic-select"); }} style={{ background: `linear-gradient(135deg,${theme.cta[0]},${theme.cta[1]})`, color: "white", border: "none", borderRadius: "16px", padding: "18px 48px", fontSize: "20px", fontWeight: "900", cursor: "pointer", boxShadow: `0 8px 32px ${hexToRgba(theme.cta[1], 0.45)}`, letterSpacing: "0.01em", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "8px" }}><Icon name="rocket" size={20} /> Start a Game</button>
             <span style={{ color: "rgba(255,255,255,0.65)", fontSize: "12.5px", fontWeight: "700" }}>Perfect for the last 30 minutes of class!</span>
           </div>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
@@ -1104,7 +1124,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
         filterTopicIds={learnFilter ?? undefined}
         // Topic is already fixed (whatever lesson was open in Learn) before team-setup — same
         // ordering as picking one from the Lesson Plan index below.
-        onOpenLessonPlan={id => { setPendingLessonTopicId(id); setActiveClassId(null); setScreen("team-setup"); }}
+        onOpenLessonPlan={id => { setPendingLessonTopicId(id); setActiveClassId(null); setActiveClassName(null); setScreen("team-setup"); }}
         onOpenLessonPlanIndex={() => { setPendingLessonTopicId(null); setScreen("lessonplan"); }}
       />
       <FeedbackButton />
@@ -1178,7 +1198,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
       <div style={{ minHeight: "100vh", background: "#F0F9FF", padding: "clamp(10px,4vw,20px)", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
         {renderSavePicker()}
         <div style={{ maxWidth: "720px", margin: "0 auto" }}>
-          <button onClick={() => { setActiveClassId(null); setScreen("welcome"); }} style={{ background: "none", border: `2px solid ${theme.accentSolid}`, color: theme.accentSolid, borderRadius: "10px", padding: "8px 16px", cursor: "pointer", fontWeight: "700", marginBottom: "20px", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px" }}><Icon name="back" size={13} /> Back</button>
+          <button onClick={() => { setActiveClassId(null); setActiveClassName(null); setScreen("welcome"); }} style={{ background: "none", border: `2px solid ${theme.accentSolid}`, color: theme.accentSolid, borderRadius: "10px", padding: "8px 16px", cursor: "pointer", fontWeight: "700", marginBottom: "20px", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px" }}><Icon name="back" size={13} /> Back</button>
 
           <div style={{ textAlign: "center", marginBottom: "28px" }}>
             <h2 style={{ fontSize: "32px", fontWeight: "900", color: theme.heroBg[0], margin: 0, fontFamily: theme.headingFont, display: "flex", alignItems: "center", justifyContent: "center", gap: "10px" }}><Icon name="gear" size={28} /> Game Setup</h2>
@@ -1351,7 +1371,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
               game vs. load game" style CTA), linked with an empty roster, or linked with saved
               teams to tap in. */}
           <div style={{ flex: "1 1 260px", minWidth: "240px", background: "white", border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, borderRadius: "16px", padding: "clamp(14px,4vw,20px)" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "12px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: activeClassId ? "2px" : "12px" }}>
               <Icon name="folder" size={16} color={theme.accentSolid} />
               <span style={{ fontWeight: "800", color: theme.heroBg[0], fontSize: "15px", fontFamily: theme.headingFont, flex: 1 }}>Saved Teams</span>
               {activeClassId && (
@@ -1360,6 +1380,20 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
                 </span>
               )}
             </div>
+            {activeClassId && (
+              // Names which class is actually linked — otherwise a teacher moving fast between
+              // back-to-back classes has no way to tell (from this screen alone) whether they're
+              // still on the previous period's class before naming new teams into it. "Switch"
+              // reopens the same link picker so this isn't a one-way door once linked.
+              <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "12px", fontSize: "12px", color: "#6B7280" }}>
+                <span>Linked to <strong style={{ color: theme.heroBg[0] }}>{activeClassName ?? "this class"}</strong></span>
+                <button
+                  type="button"
+                  onClick={() => openSavePicker("link")}
+                  style={{ background: "none", border: "none", color: theme.accentSolid, fontWeight: "800", fontSize: "12px", cursor: "pointer", padding: 0, textDecoration: "underline" }}
+                >Switch</button>
+              </div>
+            )}
             {!activeClassId ? (
               <div style={{ border: "2px dashed #93C5FD", borderRadius: "12px", padding: "16px", textAlign: "center" }}>
                 <p style={{ color: "#6B7280", fontSize: "13px", margin: "0 0 12px" }}>Link this session to a class to load its saved teams — like picking a save file.</p>
@@ -1743,6 +1777,15 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
           )}
           <button onClick={() => setScreen("topic-select")} style={{ background: `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "14px", padding: "14px 28px", fontSize: "17px", fontWeight: "800", cursor: "pointer", fontFamily: theme.headingFont }}>📚 New Lesson</button>
         </div>
+        {/* Every other button here continues WITH whatever class is currently linked — nothing on
+            this screen otherwise gets a teacher back to "no class linked" once one is, so a
+            back-to-back class right after this one would otherwise have to go through it. Lower
+            visual weight (plain text, not a filled button) since it's the "leave" action, not a
+            "keep going" one. */}
+        <button
+          onClick={() => { setActiveClassId(null); setActiveClassName(null); setScreen("welcome"); }}
+          style={{ background: "none", border: "none", color: "rgba(255,255,255,0.65)", fontWeight: "700", fontSize: "13px", cursor: "pointer", marginTop: "18px", textDecoration: "underline" }}
+        >Done with this class — back to Home</button>
         <FeedbackButton />
         <BrandBadge isPaid={isPaid} />
       </div>

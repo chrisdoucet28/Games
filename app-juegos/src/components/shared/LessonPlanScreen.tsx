@@ -303,9 +303,11 @@ export function LessonPlanSlideshow({ topic, theme, teams, onBack, onPlayGameFor
   // has), so they're consumed at that exact point in the walk and returned separately rather than
   // attached to the Slide itself. errorPassage has no discrete sub-items — the whole exercise gets
   // one team, still wrapped in a one-element array so every roundOut kind shares the same prop
-  // shape downstream.
+  // shape downstream. Skipped entirely for a solo team (<=1) — with nobody to rotate to, every
+  // single badge would just say the same one team's name over and over, which is noise, not
+  // information; a solo class plays through with no badges at all, same as before this feature.
   const { slides, roundOutAssignedTeams, realWorldAssignedTeams } = useMemo(() => {
-    if (teams.length === 0) return { slides: rawSlides, roundOutAssignedTeams: [] as Team[], realWorldAssignedTeams: [] as Team[] };
+    if (teams.length <= 1) return { slides: rawSlides, roundOutAssignedTeams: [] as Team[], realWorldAssignedTeams: [] as Team[] };
     let turn = 0;
     const nextTeam = () => teams[turn++ % teams.length];
     let roundOutAssignedTeams: Team[] = [];
