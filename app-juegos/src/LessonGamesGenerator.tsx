@@ -15,7 +15,9 @@ import { Confetti } from "./components/shared/Confetti";
 import { ClassesScreen } from "./components/shared/ClassesScreen";
 import { ProfileScreen } from "./components/shared/ProfileScreen";
 import { LearnScreen } from "./components/shared/LearnScreen";
-import { LessonPlanScreen } from "./components/shared/LessonPlanScreen";
+import { LessonPlanScreen, LessonPlanSlideshow } from "./components/shared/LessonPlanScreen";
+import { LESSON_TOPICS } from "./data/learnTopics";
+import { LESSON_PLANS } from "./data/lessonPlans";
 import { LeaderboardScreen } from "./components/shared/LeaderboardScreen";
 import { BillingScreen } from "./components/shared/BillingScreen";
 import { ThemeAmbience } from "./components/shared/ThemeAmbience";
@@ -166,7 +168,7 @@ type LessonGamesGeneratorProps = {
 };
 
 export default function LessonGamesGenerator({ theme, onThemeChange, subscription, onSubscriptionChange, checkoutRedirect, initialScreen }: LessonGamesGeneratorProps) {
-  const [screen, setScreen] = useState<"welcome" | "classes" | "profile" | "learn" | "lessonplan" | "leaderboard" | "billing" | "topic-select" | "team-setup" | "game-select" | "game" | "results">(
+  const [screen, setScreen] = useState<"welcome" | "classes" | "profile" | "learn" | "lessonplan" | "lessonplan-play" | "leaderboard" | "billing" | "topic-select" | "team-setup" | "game-select" | "game" | "results">(
     checkoutRedirect ? "billing" : initialScreen ?? "welcome"
   );
   // Background music context: "gameplay" only for the actual game screen, "ambient" everywhere
@@ -177,17 +179,19 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     if (screen === "game") setMusicContext("gameplay");
     // Lesson Plans is real reading/teaching content, not a menu — music under it (even the quiet
     // ambient bed) competes with the teacher actually presenting, so it goes silent instead.
-    else if (screen === "lessonplan") stopMusic();
+    else if (screen === "lessonplan" || screen === "lessonplan-play") stopMusic();
     else setMusicContext("ambient");
   }, [screen]);
   // Where Learn's own "Back" should return to — it can now be reached from 3 different places
   // (the welcome screen's own Learn button, game-select's "Review these topics", and results'
   // "Review these topics"), so a single learnFilter-based binary no longer captures it.
   const [learnReturnTo, setLearnReturnTo] = useState<"welcome" | "game-select" | "results">("welcome");
-  // Set right before switching to "lessonplan" when arriving from a specific Learn lesson's
-  // "Start Lesson Plan" button — null when arriving from Learn's own "Lesson Plans" toggle
-  // instead, so LessonPlanScreen opens on its browsable index.
-  const [lessonPlanTopicId, setLessonPlanTopicId] = useState<string | null>(null);
+  // The lesson a teacher is en route to play — set the moment a topic is picked (from the Lesson
+  // Plan index, or Learn's "Start Lesson Plan" button) and read once team-setup's CTA is clicked,
+  // so team-setup knows to route to "lessonplan-play" instead of "game-select". Every team-setup
+  // entry point that ISN'T a lesson explicitly clears this, so no path can misroute on stale state
+  // left over from a previous visit.
+  const [pendingLessonTopicId, setPendingLessonTopicId] = useState<string | null>(null);
   const isPaid = isPaidStatus(subscription.status);
   // The class this session is tied to, if any. Games started via "Start a Game" (not through "My
   // Classes") leave this null — but "Save & Exit" is still available; clicking it with no class
@@ -196,11 +200,10 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
   const [activeClassId, setActiveClassId] = useState<string | null>(null);
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [showSavePicker, setShowSavePicker] = useState(false);
-  // Which save action the picker should run once a class is picked/created — "exit" (mid-game
-  // Save & Exit), "roster" (setup screen's "Save teams to class"), or "teams" (game-select
-  // screen's "Save teams to class"). All three used to just no-op with no class linked yet; now
-  // they all fall back to this same picker, matching the fallback Save & Exit already had.
-  const [pendingSaveAction, setPendingSaveAction] = useState<"exit" | "roster" | "teams" | null>(null);
+  // Which action the picker should run once a class is picked/created — "exit" (mid-game
+  // Save & Exit), "teams" (game-select screen's "Save teams to class"), or "link" (team-setup's
+  // "Load saved teams" — just links the picked class and hydrates its roster in place, no save).
+  const [pendingSaveAction, setPendingSaveAction] = useState<"exit" | "link" | "teams" | null>(null);
   const [pickerClasses, setPickerClasses] = useState<SavedClass[] | null>(null);
   const [pickerNewName, setPickerNewName] = useState("");
   const [pickerNewSchool, setPickerNewSchool] = useState("");
@@ -262,6 +265,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
       profile: "My Profile - ClassCade",
       learn: "Learn - ClassCade",
       lessonplan: "Lesson Plans - ClassCade",
+      "lessonplan-play": "Lesson Plan - ClassCade",
       leaderboard: "Leaderboard - ClassCade",
       billing: "Billing - ClassCade",
     };
@@ -391,6 +395,43 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
       })
       .catch(() => setRosterSaveStatus("idle"));
   };
+
+  // Auto-save once a class is linked — teams named/edited on team-setup should feel automatically
+  // saved (like a video game's autosave), not require an explicit button. A baseline snapshot is
+  // captured the instant activeClassId transitions from null to set (reading teamSlotsRef, already
+  // kept in sync a few lines above this — its own effect runs first in the same commit, so it
+  // reflects any team state a caller like startWithClass set in the same batch), so hydrating an
+  // already-linked class's teams never itself counts as an edit. Any later change that actually
+  // differs from that baseline debounces a write via saveTeamsToRoster.
+  const autosaveBaselineRef = useRef<{ names: string[]; colors: number[]; mascots: (string | null)[]; count: number } | null>(null);
+  const prevActiveClassIdRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (activeClassId && !prevActiveClassIdRef.current) {
+      const { names, colors, mascots, count } = teamSlotsRef.current;
+      autosaveBaselineRef.current = { names: [...names], colors: [...colors], mascots: [...mascots], count };
+    } else if (!activeClassId) {
+      autosaveBaselineRef.current = null;
+    }
+    prevActiveClassIdRef.current = activeClassId;
+  }, [activeClassId]);
+
+  useEffect(() => {
+    if (!activeClassId) return;
+    const baseline = autosaveBaselineRef.current;
+    if (!baseline) return;
+    const current = teamSlotsRef.current;
+    const changed = current.count !== baseline.count
+      || current.names.slice(0, current.count).some((n, i) => n !== baseline.names[i])
+      || current.colors.slice(0, current.count).some((c, i) => c !== baseline.colors[i])
+      || current.mascots.slice(0, current.count).some((m, i) => m !== baseline.mascots[i]);
+    if (!changed) return;
+    const timer = setTimeout(() => {
+      saveTeamsToRoster(activeClassId);
+      autosaveBaselineRef.current = { names: [...current.names], colors: [...current.colors], mascots: [...current.mascots], count: current.count };
+    }, 800);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeClassId, teamNames, teamColors, teamMascots, numTeams]);
 
   // Game-select equivalent — here `teams` already IS the live, scored session (unlike setup,
   // where scores are still keyed off the previous session by name until handleSetup runs), so
@@ -528,10 +569,10 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
   // Games started directly (not via "My Classes") have no activeClassId yet — instead of hiding
   // a save button entirely in that case, open a quick pick-or-create prompt so the save still
   // lands somewhere, then behaves exactly like a class-linked save from then on. Shared by all
-  // three save actions (mid-game Save & Exit, setup's "Save teams to class", game-select's
-  // "Save teams to class") — pendingSaveAction remembers which one to actually run once a class
+  // pending actions (mid-game Save & Exit, game-select's "Save teams to class", team-setup's
+  // "Load saved teams") — pendingSaveAction remembers which one to actually run once a class
   // comes back from the picker.
-  const openSavePicker = (action: "exit" | "roster" | "teams") => {
+  const openSavePicker = (action: "exit" | "link" | "teams") => {
     setPendingSaveAction(action);
     setPickerError(null);
     setPickerClasses(null);
@@ -550,15 +591,6 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     openSavePicker("exit");
   };
 
-  // Setup screen's "Save teams to class" — see openSavePicker above.
-  const handleSaveTeamsToRoster = () => {
-    if (activeClassId) {
-      saveTeamsToRoster(activeClassId);
-      return;
-    }
-    openSavePicker("roster");
-  };
-
   // Game-select screen's "Save teams to class" — see openSavePicker above.
   const handleSaveTeamsToClass = () => {
     if (activeClassId) {
@@ -568,20 +600,24 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     openSavePicker("teams");
   };
 
-  // Runs whichever save action was pending once a class has actually been picked/created — an
-  // explicit classId (not the activeClassId closure, which won't have updated yet) so each save
-  // function links the class and acts in the same call.
-  const dispatchPendingSave = (classId: string) => {
+  // Runs whichever action was pending once a class has actually been picked/created — takes the
+  // full class row (not just an id) since "link" needs its team_roster right away, with no round
+  // trip back through listClasses. "link" just hydrates state in place (same data startWithClass
+  // loads) rather than running a save — that's what turns this picker into a "which save file"
+  // prompt instead of a one-way save action.
+  const dispatchPendingSave = (cls: SavedClass) => {
     const action = pendingSaveAction;
     setPendingSaveAction(null);
-    if (action === "roster") saveTeamsToRoster(classId);
-    else if (action === "teams") saveTeamsToClass(classId);
-    else saveToClass(classId);
+    if (action === "link") {
+      setActiveClassId(cls.id);
+      setTeamRoster(cls.team_roster ?? []);
+    } else if (action === "teams") saveTeamsToClass(cls.id);
+    else saveToClass(cls.id);
   };
 
   const handlePickClassForSave = (cls: SavedClass) => {
     setShowSavePicker(false);
-    dispatchPendingSave(cls.id);
+    dispatchPendingSave(cls);
   };
 
   const handleCreateClassForSave = async () => {
@@ -594,7 +630,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
       setPickerNewSchool("");
       setPickerNewLevel("all");
       setShowSavePicker(false);
-      dispatchPendingSave(created.id);
+      dispatchPendingSave(created);
     } catch (err) {
       setPickerError(err instanceof Error ? err.message : "Couldn't create the class.");
     } finally {
@@ -609,8 +645,12 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     showSavePicker && (
       <div style={{ position: "fixed", inset: 0, background: "rgba(15,10,46,0.75)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 2000, padding: "20px" }}>
         <div style={{ background: "white", borderRadius: "20px", padding: "24px", maxWidth: "420px", width: "100%", maxHeight: "80vh", overflowY: "auto", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
-          <h3 style={{ margin: "0 0 6px", fontSize: "18px", fontWeight: 900, color: theme.heroBg[0], fontFamily: theme.headingFont }}>Save to which class?</h3>
-          <p style={{ margin: "0 0 16px", fontSize: "13px", color: "#6B7280" }}>Pick an existing class, or create a new one — you'll return to it later from "My Classes."</p>
+          <h3 style={{ margin: "0 0 6px", fontSize: "18px", fontWeight: 900, color: theme.heroBg[0], fontFamily: theme.headingFont }}>{pendingSaveAction === "link" ? "Which class are these teams for?" : "Save to which class?"}</h3>
+          <p style={{ margin: "0 0 16px", fontSize: "13px", color: "#6B7280" }}>
+            {pendingSaveAction === "link"
+              ? "Pick an existing class to load its saved teams, or create a new one — teams you name below will be saved to it automatically."
+              : "Pick an existing class, or create a new one — you'll return to it later from \"My Classes.\""}
+          </p>
 
           {pickerError && <div style={{ background: "#FEE2E2", color: "#991B1B", padding: "8px 12px", borderRadius: "8px", fontSize: "13px", marginBottom: "12px" }}>{pickerError}</div>}
 
@@ -624,7 +664,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
                   style={{ textAlign: "left", background: "#F0F9FF", border: "2px solid #E5E7EB", borderRadius: "10px", padding: "10px 14px", cursor: "pointer", fontWeight: 700, color: theme.heroBg[0], fontSize: "14px" }}
                 >
                   {cls.name}
-                  {cls.in_progress && <span style={{ display: "flex", alignItems: "center", gap: "4px", fontWeight: 500, fontSize: "12px", color: "#B45309", marginTop: "2px" }}><Icon name="warning" size={11} /> Has a game in progress — saving here will replace it</span>}
+                  {cls.in_progress && pendingSaveAction !== "link" && <span style={{ display: "flex", alignItems: "center", gap: "4px", fontWeight: 500, fontSize: "12px", color: "#B45309", marginTop: "2px" }}><Icon name="warning" size={11} /> Has a game in progress — saving here will replace it</span>}
                 </button>
               ))}
             </div>
@@ -682,13 +722,16 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
   );
 
   // Topic-select's "Continue" — the only validation that ever belonged to topic selection, not
-  // team setup, so it moves with the split rather than staying on handleSetup below.
+  // team setup, so it moves with the split rather than staying on handleSetup below. This path
+  // never carries a pending lesson (that's picked from the Lesson Plan index instead), but clears
+  // it defensively so team-setup's CTA can never misroute on state left over from a prior visit.
   const handleContinueToTeamSetup = () => {
     setLoadError("");
     if (selectedTopics.length === 0) {
       setLoadError("Choose at least one topic.");
       return;
     }
+    setPendingLessonTopicId(null);
     setScreen("team-setup");
   };
 
@@ -700,7 +743,10 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     }));
     setTeams(builtTeams);
     if (activeClassId) upsertTeamRoster(activeClassId, builtTeams).then(setTeamRoster).catch(() => {});
-    setScreen("game-select");
+    // A pending lesson topic means the teacher arrived here via the Lesson Plan index (topic
+    // already fixed before this screen was ever reached) — send them into that lesson's slideshow
+    // instead of the usual game-select.
+    setScreen(pendingLessonTopicId ? "lessonplan-play" : "game-select");
   };
 
   const toggleTopicSelection = (topicValue: string) => {
@@ -975,11 +1021,11 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
             genuinely different amounts of class time and this is the one place that says so. */}
         <div style={{ display: "flex", gap: "16px", justifyContent: "center", flexWrap: "wrap", marginBottom: "18px" }}>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
-            <button onClick={() => { setActiveClassId(null); setScreen("topic-select"); }} style={{ background: `linear-gradient(135deg,${theme.cta[0]},${theme.cta[1]})`, color: "white", border: "none", borderRadius: "16px", padding: "18px 48px", fontSize: "20px", fontWeight: "900", cursor: "pointer", boxShadow: `0 8px 32px ${hexToRgba(theme.cta[1], 0.45)}`, letterSpacing: "0.01em", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "8px" }}><Icon name="rocket" size={20} /> Start a Game</button>
+            <button onClick={() => { setActiveClassId(null); setPendingLessonTopicId(null); setScreen("topic-select"); }} style={{ background: `linear-gradient(135deg,${theme.cta[0]},${theme.cta[1]})`, color: "white", border: "none", borderRadius: "16px", padding: "18px 48px", fontSize: "20px", fontWeight: "900", cursor: "pointer", boxShadow: `0 8px 32px ${hexToRgba(theme.cta[1], 0.45)}`, letterSpacing: "0.01em", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "8px" }}><Icon name="rocket" size={20} /> Start a Game</button>
             <span style={{ color: "rgba(255,255,255,0.65)", fontSize: "12.5px", fontWeight: "700" }}>Perfect for the last 30 minutes of class!</span>
           </div>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
-            <button onClick={() => { setLessonPlanTopicId(null); setScreen("lessonplan"); }} style={{ background: `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "16px", padding: "18px 48px", fontSize: "20px", fontWeight: "900", cursor: "pointer", boxShadow: `0 8px 32px ${hexToRgba(theme.accent[1], 0.45)}`, letterSpacing: "0.01em", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "8px" }}><Icon name="school" size={20} /> Lesson Plans</button>
+            <button onClick={() => setScreen("lessonplan")} style={{ background: `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "16px", padding: "18px 48px", fontSize: "20px", fontWeight: "900", cursor: "pointer", boxShadow: `0 8px 32px ${hexToRgba(theme.accent[1], 0.45)}`, letterSpacing: "0.01em", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "8px" }}><Icon name="school" size={20} /> Lesson Plans</button>
             <span style={{ color: "rgba(255,255,255,0.65)", fontSize: "12.5px", fontWeight: "700" }}>~30 min lesson + ~30 min playing</span>
           </div>
         </div>
@@ -1056,34 +1102,62 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
         onBack={() => setScreen(learnReturnTo)}
         theme={theme}
         filterTopicIds={learnFilter ?? undefined}
-        onOpenLessonPlan={id => { setLessonPlanTopicId(id); setScreen("lessonplan"); }}
-        onOpenLessonPlanIndex={() => { setLessonPlanTopicId(null); setScreen("lessonplan"); }}
+        // Topic is already fixed (whatever lesson was open in Learn) before team-setup — same
+        // ordering as picking one from the Lesson Plan index below.
+        onOpenLessonPlan={id => { setPendingLessonTopicId(id); setActiveClassId(null); setScreen("team-setup"); }}
+        onOpenLessonPlanIndex={() => { setPendingLessonTopicId(null); setScreen("lessonplan"); }}
       />
       <FeedbackButton />
       <BrandBadge isPaid={isPaid} />
     </>
   );
 
+  // Browsable index only — picking a topic here routes through team-setup (teams are required for
+  // every lesson) before the actual slideshow ("lessonplan-play" below) ever renders.
   if (screen === "lessonplan") return (
     <>
       <LessonPlanScreen
         onBack={() => setScreen("welcome")}
         theme={theme}
-        initialTopicId={lessonPlanTopicId}
         onOpenLearn={() => { setLearnFilter(null); setLearnReturnTo("welcome"); setScreen("learn"); }}
-        onPlayGameForTopic={(topicId) => {
-          setSelectedTopics([topicId]);
-          const opt = getTopicOption(topicId);
-          if (opt?.level) setLevel(opt.level);
-          if (opt?.focus) setFocus(opt.focus);
-          setActiveClassId(null);
-          setScreen("team-setup");
-        }}
+        onSelectTopic={topicId => { setPendingLessonTopicId(topicId); setScreen("team-setup"); }}
       />
       <FeedbackButton />
       <BrandBadge isPaid={isPaid} />
     </>
   );
+
+  if (screen === "lessonplan-play") {
+    const pendingTopic = pendingLessonTopicId
+      ? LESSON_TOPICS.find(t => t.id === pendingLessonTopicId && LESSON_PLANS[t.id])
+      : undefined;
+    // Shouldn't normally happen (this screen is only ever reached via a topic already picked from
+    // the index or Learn), but stale/refreshed state should recover to the index rather than crash.
+    if (!pendingTopic) { setScreen("lessonplan"); return null; }
+    return (
+      <>
+        <LessonPlanSlideshow
+          key={pendingTopic.id}
+          topic={pendingTopic}
+          theme={theme}
+          teams={teams}
+          onBack={() => { setPendingLessonTopicId(null); setScreen("lessonplan"); }}
+          onPlayGameForTopic={(topicId) => {
+            setSelectedTopics([topicId]);
+            const opt = getTopicOption(topicId);
+            if (opt?.level) setLevel(opt.level);
+            if (opt?.focus) setFocus(opt.focus);
+            // Teams were already picked for this lesson (team-setup ran on the way in) — carry
+            // them straight into game-select instead of asking again.
+            setPendingLessonTopicId(null);
+            setScreen("game-select");
+          }}
+        />
+        <FeedbackButton />
+        <BrandBadge isPaid={isPaid} />
+      </>
+    );
+  }
 
   if (screen === "topic-select") {
     const filteredTopics = getFilteredTopicOptions(level, focus).filter(o => matchesTopicSearch(o.label, topicSearch));
@@ -1260,38 +1334,43 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
   if (screen === "team-setup") return (
     <div style={{ minHeight: "100vh", background: "#F0F9FF", padding: "clamp(10px,4vw,20px)", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
       {renderSavePicker()}
-      <div style={{ maxWidth: "900px", margin: "0 auto" }}>
-        <button onClick={() => setScreen("topic-select")} style={{ background: "none", border: `2px solid ${theme.accentSolid}`, color: theme.accentSolid, borderRadius: "10px", padding: "8px 16px", cursor: "pointer", fontWeight: "700", marginBottom: "20px", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px" }}><Icon name="back" size={13} /> Back</button>
+      <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
+        <button
+          onClick={() => setScreen(pendingLessonTopicId ? "lessonplan" : "topic-select")}
+          style={{ background: "none", border: `2px solid ${theme.accentSolid}`, color: theme.accentSolid, borderRadius: "10px", padding: "8px 16px", cursor: "pointer", fontWeight: "700", marginBottom: "20px", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px" }}
+        ><Icon name="back" size={13} /> Back</button>
 
         <div style={{ textAlign: "center", marginBottom: "28px" }}>
           <h2 style={{ fontSize: "32px", fontWeight: "900", color: theme.heroBg[0], margin: 0, fontFamily: theme.headingFont, display: "flex", alignItems: "center", justifyContent: "center", gap: "10px" }}><Icon name="people" size={28} /> Team Setup</h2>
           <p style={{ color: "#6B7280", marginTop: "8px" }}>Names, colors, and mascots for each team</p>
         </div>
 
-        <div style={{ background: "white", border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, borderRadius: "16px", padding: "clamp(14px,4vw,20px)", marginBottom: "16px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px", flexWrap: "wrap" }}>
-            <div style={{ fontWeight: "800", color: theme.heroBg[0], fontSize: "16px", fontFamily: theme.headingFont, flex: 1, minWidth: "140px" }}>How many teams?</div>
-            <button
-              onClick={handleSaveTeamsToRoster} disabled={rosterSaveStatus === "saving"}
-              title={activeClassId ? "Save these team names/colors/mascots to this class, without picking a topic or game" : "Pick or create a class to save these teams to"}
-              style={{
-                background: rosterSaveStatus === "saved" ? "#DCFCE7" : "none",
-                border: `2px solid ${rosterSaveStatus === "saved" ? "#22C55E" : "#D1D5DB"}`,
-                borderRadius: "20px", padding: "4px 14px", fontWeight: "700", fontSize: "12px",
-                color: rosterSaveStatus === "saved" ? "#166534" : "#9CA3AF",
-                cursor: rosterSaveStatus === "saving" ? "default" : "pointer", flexShrink: 0,
-                display: "inline-flex", alignItems: "center", gap: "5px",
-              }}
-            >
-              {rosterSaveStatus === "saving" ? "Saving…" : rosterSaveStatus === "saved" ? <><Icon name="check" size={12} /> Saved!</> : <><Icon name="save" size={12} /> Save teams to class</>}
-            </button>
-            <button onClick={() => resetTeamsToNormal()} title="0 points, no mascots, original colors and names" style={{ background: "none", border: "2px solid #D1D5DB", borderRadius: "20px", padding: "4px 14px", fontWeight: "700", fontSize: "12px", color: "#9CA3AF", cursor: "pointer", flexShrink: 0, display: "inline-flex", alignItems: "center", gap: "5px" }}><Icon name="refresh" size={12} /> Reset teams to normal</button>
-          </div>
-          {activeClassId && teamRoster.length > 0 && (
-            <div style={{ marginBottom: "14px" }}>
-              <div style={{ fontSize: "12px", fontWeight: "700", color: "#6B7280", marginBottom: "6px", display: "flex", alignItems: "center", gap: "5px" }}>
-                <Icon name="folder" size={13} /> Saved teams for this class — tap to bring in today
+        <div style={{ display: "flex", gap: "16px", flexWrap: "wrap", marginBottom: "16px", alignItems: "flex-start" }}>
+          {/* Saved Teams panel — its own visually distinct section rather than a strip squeezed
+              into the top of the team-editor card. Three states: no class linked yet (a "start new
+              game vs. load game" style CTA), linked with an empty roster, or linked with saved
+              teams to tap in. */}
+          <div style={{ flex: "1 1 260px", minWidth: "240px", background: "white", border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, borderRadius: "16px", padding: "clamp(14px,4vw,20px)" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "12px" }}>
+              <Icon name="folder" size={16} color={theme.accentSolid} />
+              <span style={{ fontWeight: "800", color: theme.heroBg[0], fontSize: "15px", fontFamily: theme.headingFont, flex: 1 }}>Saved Teams</span>
+              {activeClassId && (
+                <span style={{ fontSize: "11px", fontWeight: "700", color: rosterSaveStatus === "saving" ? "#9CA3AF" : "#166534", display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                  {rosterSaveStatus === "saving" ? "Saving…" : <><Icon name="check" size={10} /> Autosaved</>}
+                </span>
+              )}
+            </div>
+            {!activeClassId ? (
+              <div style={{ border: "2px dashed #93C5FD", borderRadius: "12px", padding: "16px", textAlign: "center" }}>
+                <p style={{ color: "#6B7280", fontSize: "13px", margin: "0 0 12px" }}>Link this session to a class to load its saved teams — like picking a save file.</p>
+                <button
+                  onClick={() => openSavePicker("link")}
+                  style={{ background: theme.accentSolid, color: "white", border: "none", borderRadius: "10px", padding: "9px 16px", fontWeight: "800", fontSize: "13px", cursor: "pointer", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px" }}
+                ><Icon name="folder" size={13} /> Load saved teams…</button>
               </div>
+            ) : teamRoster.length === 0 ? (
+              <p style={{ color: "#9CA3AF", fontSize: "13px", fontStyle: "italic", margin: 0 }}>No saved teams yet for this class — name a team on the right and it'll be saved here automatically.</p>
+            ) : (
               <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
                 {teamRoster.map(entry => {
                   const isActive = isRosterTeamActive(entry);
@@ -1327,8 +1406,15 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
                   );
                 })}
               </div>
-            </div>
-          )}
+            )}
+          </div>
+
+          {/* Team Editor panel */}
+          <div style={{ flex: "2 1 480px", minWidth: "280px", background: "white", border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, borderRadius: "16px", padding: "clamp(14px,4vw,20px)" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px", flexWrap: "wrap" }}>
+            <div style={{ fontWeight: "800", color: theme.heroBg[0], fontSize: "16px", fontFamily: theme.headingFont, flex: 1, minWidth: "140px" }}>How many teams?</div>
+            <button onClick={() => resetTeamsToNormal()} title="0 points, no mascots, original colors and names" style={{ background: "none", border: "2px solid #D1D5DB", borderRadius: "20px", padding: "4px 14px", fontWeight: "700", fontSize: "12px", color: "#9CA3AF", cursor: "pointer", flexShrink: 0, display: "inline-flex", alignItems: "center", gap: "5px" }}><Icon name="refresh" size={12} /> Reset teams to normal</button>
+          </div>
           <div style={{ display: "flex", gap: "10px", marginBottom: "16px", flexWrap: "wrap", alignItems: "center" }}>
             {[1, 2, 3, 4, 5].map(n => {
               const locked = !isPaid && n > FREE_PLAN_LIMITS.maxTeams;
@@ -1447,10 +1533,11 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
               );
             })}
           </div>
+          </div>
         </div>
 
         <button onClick={handleSetup} style={{ width: "100%", background: `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "16px", padding: "18px", fontSize: "20px", fontWeight: "900", cursor: "pointer", fontFamily: theme.headingFont, display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
-          <Icon name="controller" size={20} /> Choose a Game!
+          {pendingLessonTopicId ? <><Icon name="school" size={20} /> Start Lesson</> : <><Icon name="controller" size={20} /> Choose a Game!</>}
         </button>
       </div>
       <FeedbackButton />
