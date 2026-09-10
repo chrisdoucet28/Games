@@ -13,7 +13,7 @@ import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
 import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
 import { SPY_TWOPLAYER_STEPS, SPY_GROUP_STEPS } from "../../data/tutorials/spy";
 import { playSound } from "../../lib/sounds";
-import { setMusicContext, stopMusic } from "../../lib/music";
+import { setMusicContext, setMusicGame, stopMusic } from "../../lib/music";
 import {
   generateSessionCode, openSpyChannel, closeChannel,
   type SpyStatePayload, type SpyPhase, type SpyRoleInfo,
@@ -194,6 +194,11 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
   useEffect(() => {
     if (phase === "final") { playSound("roundComplete"); stopMusic(); }
   }, [phase]);
+  // Custom Suno gameplay/tension tracks — see GAME_OVERRIDES in lib/music.ts.
+  useEffect(() => {
+    setMusicGame("spy");
+    return () => setMusicGame(null);
+  }, []);
 
   useEffect(() => {
     if (!forceFinalRef) return;

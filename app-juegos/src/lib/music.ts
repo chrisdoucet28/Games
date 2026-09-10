@@ -113,6 +113,13 @@ const GAME_OVERRIDES: Partial<Record<string, Partial<Record<MusicContext, string
   racetrack: {
     gameplay: "/music/racetrack-gameplay.mp3",
   },
+  // Genuinely dual-mood, same shape as Auction — a real calm/unhurried stretch (peeking at your
+  // role, free discussion trying to spot the spy) and a real distinct tense moment (the vote, or
+  // the spy's under-pressure guess), not one context dominating the other.
+  spy: {
+    gameplay: "/music/spy-gameplay.mp3",
+    tension: "/music/spy-tension.mp3",
+  },
 };
 
 function resolveSrc(ctx: MusicContext, gameId: string | null): string {
