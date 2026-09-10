@@ -95,12 +95,17 @@ const GAME_OVERRIDES: Partial<Record<string, Partial<Record<MusicContext, string
   minefield: {
     tension: "/music/minefield-tension.mp3",
   },
-  // Reused rather than a new track — Battleship's target-picking tension is the same medieval/
-  // swashbuckling-adventure combat-decision energy Castle Defense's track already covers, per
-  // teacher feedback that it reads as a "Pirates of the Caribbean" vibe at points — naval instead
-  // of siege, same family as castle/hill.
   battleship: {
+    // Reused rather than a new track — the target-picking tension is the same medieval/
+    // swashbuckling-adventure combat-decision energy Castle Defense's track already covers, per
+    // teacher feedback that it reads as a "Pirates of the Caribbean" vibe at points — naval
+    // instead of siege, same family as castle/hill.
     tension: "/music/castle-tension.mp3",
+    // The calm moment right after firing, while a team reads and discusses the grammar
+    // correction — quiet nautical ambiance, deliberately the most background/least-in-your-face
+    // track in the set (per teacher direction, worth remembering for any future moment that
+    // needs to sit further back than usual).
+    gameplay: "/music/battleship-gameplay.mp3",
   },
   // Tension-only — Hot Seat's 90s describe-and-guess turn is basically the whole game; the shared
   // gameplay track covers the brief intro/turn-end windows.
