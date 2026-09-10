@@ -35,6 +35,13 @@ const GAME_OVERRIDES: Partial<Record<string, Partial<Record<MusicContext, string
     gameplay: "/music/whack-gameplay.mp3",
     tension: "/music/whack-tension.mp3",
   },
+  // Teacher feedback: the shared tension track read as pure meditation, and the shared gameplay
+  // track felt way too hyped/party for the between-round moments — Auction wants official/classy
+  // bidding-hall energy for both, not chillout or funk.
+  auction: {
+    gameplay: "/music/auction-gameplay.mp3",
+    tension: "/music/auction-tension.mp3",
+  },
 };
 
 function resolveSrc(ctx: MusicContext, gameId: string | null): string {

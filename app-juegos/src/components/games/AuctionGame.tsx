@@ -13,7 +13,7 @@ import { MascotIcon } from "../shared/MascotArt";
 import { Icon, type IconName } from "../shared/Icon";
 import { AUCTION_TUTORIAL_STEPS } from "../../data/tutorials/auction";
 import { playSound } from "../../lib/sounds";
-import { setMusicContext, stopMusic } from "../../lib/music";
+import { setMusicContext, setMusicGame, stopMusic } from "../../lib/music";
 import {
   generateSessionCode, openAuctionChannel, closeChannel,
   type AuctionStatePayload, type AuctionBetPayload, type AuctionResultInfo,
@@ -196,6 +196,12 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
     if (phase === "betting") setMusicContext("tension");
     return () => setMusicContext("gameplay");
   }, [phase === "betting"]);
+  // Auction has its own Suno-made gameplay/tension tracks (official bidding-hall energy, not the
+  // shared chillout/funk pair) — see GAME_OVERRIDES in lib/music.ts.
+  useEffect(() => {
+    setMusicGame("auction");
+    return () => setMusicGame(null);
+  }, []);
   const [showHowTo, setShowHowTo] = useState(false);
   const [bets, setBets] = useState<Record<string | number, Bet>>({});
   const [resultMsg, setResultMsg] = useState<ResultMsg[]>([]);
