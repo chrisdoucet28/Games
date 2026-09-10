@@ -166,7 +166,11 @@ function armAutoplayRetry() {
     // have already navigated somewhere else by the time this first gesture actually happens.
     if (enabled && currentSrc) {
       const el = players.get(currentSrc);
-      if (el && el.paused) el.play().catch(() => {});
+      console.warn(`[music] gesture retry firing: src=${currentSrc} elExists=${!!el} paused=${el?.paused}`);
+      if (el && el.paused) el.play().then(
+        () => console.warn(`[music] gesture retry play() resolved`),
+        err => console.warn(`[music] gesture retry play() rejected:`, err?.name, err?.message)
+      );
     }
   };
   document.addEventListener("pointerdown", retry, { once: true });
@@ -217,7 +221,11 @@ export function setMusicContext(ctx: MusicContext): void {
     // rechecking whether the element is actually playing. Every one of those navigations is a
     // real click, so use it to notice and recover instead of trusting the stale bookkeeping.
     const el = players.get(nextSrc);
-    if (el && el.paused && enabled) el.play().catch(() => {});
+    console.warn(`[music] no-op recheck: ctx=${ctx} elExists=${!!el} paused=${el?.paused} enabled=${enabled}`);
+    if (el && el.paused && enabled) el.play().then(
+      () => console.warn(`[music] no-op recheck play() resolved`),
+      err => console.warn(`[music] no-op recheck play() rejected:`, err?.name, err?.message)
+    );
     return;
   }
   const prevSrc = currentSrc;
