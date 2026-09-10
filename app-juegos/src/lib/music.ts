@@ -146,7 +146,10 @@ function fadeInSrc(src: string, volume: number) {
   const el = getPlayer(src);
   el.play().catch(err => {
     console.warn(`[music] "${src}" failed to play:`, err);
-    if (err instanceof Error && err.name === "NotAllowedError") armAutoplayRetry();
+    // DOMException (what play() actually rejects with) does NOT satisfy `instanceof Error` in
+    // browsers — it has its own separate WebIDL prototype chain, not the ECMAScript Error one —
+    // so check `.name` directly rather than gating on an Error-instance test first.
+    if (err?.name === "NotAllowedError") armAutoplayRetry();
   });
   fadeTo(el, volume, FADE_MS);
 }
