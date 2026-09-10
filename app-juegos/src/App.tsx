@@ -16,7 +16,7 @@ import { PublicLearnIndexScreen } from './components/shared/PublicLearnIndexScre
 import { PublicLearnLessonScreen } from './components/shared/PublicLearnLessonScreen';
 import { FREE_LAUNCH_ALL_PREMIUM } from './data/constants';
 import { Icon } from './components/shared/Icon';
-import { isMusicEnabled, setMusicEnabled, onMusicEnabledChange } from './lib/music';
+import { isMusicEnabled, setMusicEnabled, onMusicEnabledChange, stopMusic } from './lib/music';
 
 function ConfigErrorScreen() {
   return (
@@ -161,7 +161,13 @@ function AuthenticatedApp() {
   });
 
   useEffect(() => {
-    if (!session) return;
+    if (!session) {
+      // Nothing else ever silences the music on its own here — the AuthScreen/MarketingLanding
+      // shown below never calls into lib/music at all, so without this, music started while
+      // logged in would just keep looping straight through a Log Out (or a session expiring).
+      stopMusic();
+      return;
+    }
     getProfile().then(p => {
       setTheme(getTheme(p.theme_id));
       setPlanIntroSeen(p.has_completed_plan_intro);
