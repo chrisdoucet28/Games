@@ -1175,6 +1175,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   giving_opinions: {
     title: "A Debate Worth Having",
+    audioUrl: "/audio/real-world/giving_opinions.mp3",
     passage: [
       "In my opinion, remote work has completely changed how people balance their lives. I tend to think it's mostly positive, though I understand it doesn't suit everyone.",
       "If you ask me, the biggest benefit is simply not commuting every day. I strongly believe companies should offer more flexibility in general, not just for parents or carers.",
@@ -1191,6 +1192,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   working_from_home: {
     title: "One Year of Working From Home",
+    audioUrl: "/audio/real-world/working_from_home.mp3",
     passage: [
       "It's been exactly a year since I started working from home, and I have mixed feelings about it. On one hand, I've saved so much time not commuting, and I've genuinely become more productive.",
       "On the other hand, I sometimes miss the casual conversations you only get in an office. Working from home has become increasingly popular since the pandemic, and I understand why — the flexibility is hard to give up once you've had it.",
@@ -1207,6 +1209,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   learning_language: {
     title: "Six Months of Learning Portuguese",
+    audioUrl: "/audio/real-world/learning_language.mp3",
     passage: [
       "I've been learning Portuguese for six months now, and it's been a rollercoaster. In the beginning, I was completely lost — even ordering coffee felt impossible.",
       "Slowly, though, I built up my vocabulary through daily practice, mostly listening to podcasts on my commute. I've learned that consistency matters far more than long study sessions; twenty minutes a day beats a single three-hour session on a Sunday.",
@@ -1223,6 +1226,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   career_choices: {
     title: "Changing Careers at Thirty",
+    audioUrl: "/audio/real-world/career_choices.mp3",
     passage: [
       "At thirty, I decided to leave my job in finance and retrain as a nurse — a decision that surprised almost everyone I know. I'd been interested in healthcare for years, but I was always too afraid to take the leap.",
       "What finally convinced me was realising how unhappy I'd become, despite a good salary and a stable position. The first year of training was genuinely difficult, both financially and emotionally, but I don't regret it for a second.",
@@ -1239,6 +1243,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   time_management: {
     title: "Getting My Mornings Under Control",
+    audioUrl: "/audio/real-world/time_management.mp3",
     passage: [
       "For years, I struggled with time management, constantly rushing from one thing to another without ever feeling in control. Everything changed when I started planning my mornings the night before.",
       "I now prioritise my three most important tasks and avoid checking emails until at least ten o'clock. I've also learned to say no to meetings that don't really need me, which used to feel impossible.",
@@ -1255,6 +1260,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   free_time_hobbies: {
     title: "Finding Time for What I Love",
+    audioUrl: "/audio/real-world/free_time_hobbies.mp3",
     passage: [
       "Between work and family responsibilities, finding time for hobbies used to feel like a luxury I couldn't afford. Eventually, I realised that spending even thirty minutes a day painting made a real difference to how I felt overall.",
       "I've been doing it for almost two years now, and it's become as important to me as exercise. My friend, who's always been passionate about photography, says the same thing — having a creative outlet outside of work keeps her sane during stressful weeks.",
@@ -1271,6 +1277,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   social_media: {
     title: "A Week Without Social Media",
+    audioUrl: "/audio/real-world/social_media.mp3",
     passage: [
       "Last month, I decided to delete social media from my phone for one week, just to see what would happen. The first two days were surprisingly hard — I kept reaching for my phone out of habit, even though there was nothing there anymore.",
       "By day three, though, I noticed I was reading more and sleeping better. Social media has become such a huge part of daily life that most people don't even realise how much time they spend scrolling.",
@@ -1287,6 +1294,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   reading: {
     title: "Why I Started Reading Again",
+    audioUrl: "/audio/real-world/reading.mp3",
     passage: [
       "I hadn't read a proper book in years until a friend recommended one during a long flight. I finished it before we even landed, and I've been hooked ever since.",
       "I'm particularly interested in historical fiction, though I'll read almost anything if the story grabs me. Based on recommendations from an online book club, I've discovered authors I never would have picked up on my own.",
@@ -1303,6 +1311,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   city_vs_country: {
     title: "City or Countryside? Our Family's Debate",
+    audioUrl: "/audio/real-world/city_vs_country.mp3",
     passage: [
       "My partner and I have been debating whether to move from the city to the countryside for almost a year now. The cost of living in the city keeps rising, and honestly, the noise and traffic wear on me more than they used to.",
       "On the other hand, the sense of community in a smaller town appeals to my partner far more than it does to me — I worry about feeling isolated, especially since most of our friends still live in the city.",
