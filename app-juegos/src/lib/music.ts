@@ -115,9 +115,39 @@ function fadeTo(el: HTMLAudioElement, target: number, ms: number) {
   requestAnimationFrame(step);
 }
 
+// Browsers refuse to start audio before the page has seen a real user gesture (click/key/tap) —
+// harmless for every OTHER call to this function, since by then a login click or a game-select tap
+// already happened on this same page, but the very first ambient track on a page load that's
+// already authenticated (session restored from storage, no click yet) hits this and gets silently
+// rejected. Rather than leave that first track dead until the teacher happens to click the mute
+// toggle, arm a one-time listener for the next real interaction anywhere on the page and retry
+// whatever should currently be playing then.
+let autoplayRetryArmed = false;
+
+function armAutoplayRetry() {
+  if (autoplayRetryArmed) return;
+  autoplayRetryArmed = true;
+  const retry = () => {
+    autoplayRetryArmed = false;
+    document.removeEventListener("pointerdown", retry);
+    document.removeEventListener("keydown", retry);
+    // Re-read current state rather than closing over the original src/context — the teacher may
+    // have already navigated somewhere else by the time this first gesture actually happens.
+    if (enabled && currentSrc) {
+      const el = players.get(currentSrc);
+      if (el && el.paused) el.play().catch(() => {});
+    }
+  };
+  document.addEventListener("pointerdown", retry, { once: true });
+  document.addEventListener("keydown", retry, { once: true });
+}
+
 function fadeInSrc(src: string, volume: number) {
   const el = getPlayer(src);
-  el.play().catch(err => console.warn(`[music] "${src}" failed to play:`, err));
+  el.play().catch(err => {
+    console.warn(`[music] "${src}" failed to play:`, err);
+    if (err instanceof Error && err.name === "NotAllowedError") armAutoplayRetry();
+  });
   fadeTo(el, volume, FADE_MS);
 }
 
