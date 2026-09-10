@@ -311,6 +311,10 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
   // Points are NOT awarded live — every team's fuel count is a secret until the final
   // reveal during the launch sequence, so nobody knows who's ahead until the very end.
   const judge = (correct: boolean) => {
+    // Same neutral "tick" regardless of correct/incorrect — this is the one place in the app where
+    // a distinct correct/wrong chime would actively break the game (fuel is a secret until launch;
+    // two different sounds here would let the room hear who's fuelling up just by ear).
+    playSound("tick");
     if (correct) {
       fuelRef.current[activeTeam.id] = (fuelRef.current[activeTeam.id] ?? 0) + 1;
       turnFuelRef.current += 1;
