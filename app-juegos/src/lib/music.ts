@@ -56,6 +56,16 @@ const GAME_OVERRIDES: Partial<Record<string, Partial<Record<MusicContext, string
     gameplay: "/music/auction-gameplay.mp3",
     tension: "/music/auction-tension.mp3",
   },
+  // Tension-only overrides — these three games spend almost their entire active playtime in the
+  // timed/tension moment (a brief resolution/breather window is all "gameplay" ever covers for
+  // them), so only that one context got a custom Suno track; the shared gameplay track fills the
+  // rest, same tradeoff as Hot Potato before it needed a gameplay override too.
+  castle: {
+    tension: "/music/castle-tension.mp3",
+  },
+  cards: {
+    tension: "/music/cards-tension.mp3",
+  },
 };
 
 function resolveSrc(ctx: MusicContext, gameId: string | null): string {

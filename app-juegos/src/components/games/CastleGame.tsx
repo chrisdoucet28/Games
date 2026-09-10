@@ -12,7 +12,7 @@ import { makeSoloCpuTeam, makeTeacherTeam } from "../../lib/soloOpponent";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { CASTLE_TUTORIAL_STEPS } from "../../data/tutorials/castle";
 import { playSound } from "../../lib/sounds";
-import { stopMusic } from "../../lib/music";
+import { setMusicGame, stopMusic } from "../../lib/music";
 
 const GM = GAME_MODES.find(g => g.id === "castle")!;
 
@@ -363,6 +363,13 @@ export function CastleGame({ questions, teams: propTeams, onUpdateScore, onEnd, 
   useEffect(() => {
     if (phase === "gameover") { playSound("roundComplete"); stopMusic(); }
   }, [phase]);
+  // Reuses only a tension track (see GAME_OVERRIDES in lib/music.ts) — Castle Defense spends
+  // almost all its active playtime in the timed attack-decision moment, so that's the only
+  // context worth a custom Suno track; brief resolution windows keep the shared gameplay track.
+  useEffect(() => {
+    setMusicGame("castle");
+    return () => setMusicGame(null);
+  }, []);
 
   useEffect(() => {
     if (!forceFinalRef) return;

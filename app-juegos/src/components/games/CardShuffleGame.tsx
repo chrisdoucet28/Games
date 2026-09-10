@@ -12,7 +12,7 @@ import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
 import { CARDS_TUTORIAL_STEPS } from "../../data/tutorials/cards";
 import { playSound } from "../../lib/sounds";
-import { stopMusic } from "../../lib/music";
+import { setMusicGame, stopMusic } from "../../lib/music";
 
 const GM = GAME_MODES.find(g => g.id === "cards")!;
 
@@ -121,6 +121,13 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
   useEffect(() => {
     if (phase === "final") { playSound("roundComplete"); stopMusic(); }
   }, [phase]);
+  // Reuses only a tension track (see GAME_OVERRIDES in lib/music.ts) — Card Shuffle's core loop
+  // (picking a face-down slot under time pressure) *is* the tension moment, so that's the only
+  // context worth a custom Suno track; brief reveal/scoring windows keep the shared gameplay track.
+  useEffect(() => {
+    setMusicGame("cards");
+    return () => setMusicGame(null);
+  }, []);
 
   useEffect(() => {
     if (!forceFinalRef) return;
