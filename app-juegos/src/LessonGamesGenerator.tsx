@@ -658,85 +658,103 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     }
   };
 
-  // The picker can now be triggered from setup, game-select, or mid-game (see openSavePicker
-  // above) — each of those screens is its own early-return render branch (not shared JSX), so
-  // this has to be called from all three rather than living inline in just one of them.
+  // Shared between the modal picker (mid-game Save & Exit, game-select's "Save teams to class")
+  // and team-setup's inline slide-out drawer (see renderClassLinkDrawer below) — same list-or-
+  // create-a-class body, just mounted in two different containers. `listMaxHeight` lets the drawer
+  // cap the class list to a scrollable region instead of growing the whole page.
+  const renderClassPickerBody = (listMaxHeight?: string) => (
+    <>
+      {pickerError && <div style={{ background: "#FEE2E2", color: "#991B1B", padding: "8px 12px", borderRadius: "8px", fontSize: "13px", marginBottom: "12px" }}>{pickerError}</div>}
+
+      {pickerClasses === null ? (
+        <div style={{ textAlign: "center", color: "#6B7280", padding: "16px 0" }}>Loading your classes…</div>
+      ) : pickerClasses.length > 0 ? (
+        <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginBottom: "16px", maxHeight: listMaxHeight, overflowY: listMaxHeight ? "auto" : undefined, paddingRight: listMaxHeight ? "4px" : undefined }}>
+          {pickerClasses.map(cls => (
+            <button
+              key={cls.id} onClick={() => handlePickClassForSave(cls)}
+              style={{ textAlign: "left", background: "#F0F9FF", border: "2px solid #E5E7EB", borderRadius: "10px", padding: "10px 14px", cursor: "pointer", fontWeight: 700, color: theme.heroBg[0], fontSize: "14px", flexShrink: 0 }}
+            >
+              {cls.name}
+              {cls.in_progress && pendingSaveAction !== "link" && <span style={{ display: "flex", alignItems: "center", gap: "4px", fontWeight: 500, fontSize: "12px", color: "#B45309", marginTop: "2px" }}><Icon name="warning" size={11} /> Has a game in progress — saving here will replace it</span>}
+            </button>
+          ))}
+        </div>
+      ) : null}
+
+      {!isPaid && pickerClasses !== null && pickerClasses.length >= FREE_PLAN_LIMITS.maxClasses ? (
+        <div style={{ background: "#F0F9FF", border: "2px dashed #93C5FD", borderRadius: "10px", padding: "14px", textAlign: "center" }}>
+          <div style={{ fontSize: "13px", color: "#374151", fontWeight: "700", marginBottom: "8px" }}>Free plan is limited to {FREE_PLAN_LIMITS.maxClasses} class. Upgrade for unlimited classes.</div>
+          <button
+            onClick={() => { setShowSavePicker(false); setScreen("billing"); }}
+            style={{ background: `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "10px", padding: "8px 16px", fontWeight: 800, cursor: "pointer", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px" }}
+          >
+            <Icon name="gem" size={14} /> Upgrade
+          </button>
+        </div>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+          <input
+            value={pickerNewName} onChange={e => setPickerNewName(e.target.value)} placeholder="e.g. Tuesday B2 Advanced"
+            style={{ padding: "10px 12px", borderRadius: "10px", border: "2px solid #E5E7EB", fontSize: "14px", boxSizing: "border-box" }}
+          />
+          <input
+            value={pickerNewSchool} onChange={e => setPickerNewSchool(e.target.value)} placeholder="School (optional)"
+            style={{ padding: "10px 12px", borderRadius: "10px", border: "2px solid #E5E7EB", fontSize: "14px", boxSizing: "border-box" }}
+          />
+          <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
+            <span style={{ fontSize: "12px", color: "#6B7280", fontWeight: "700", marginRight: "2px" }}>Level:</span>
+            {LEVELS_META.map(l => (
+              <button
+                key={l.id} type="button" onClick={() => setPickerNewLevel(l.id)}
+                style={{
+                  background: pickerNewLevel === l.id ? l.color : "white",
+                  color: pickerNewLevel === l.id ? "white" : "#374151",
+                  border: `2px solid ${pickerNewLevel === l.id ? l.color : "#E5E7EB"}`,
+                  borderRadius: "8px", padding: "5px 10px", cursor: "pointer", fontWeight: "700", fontSize: "12px",
+                }}
+              >
+                {l.id === "all" ? "Any" : l.id}
+              </button>
+            ))}
+          </div>
+          <button
+            onClick={handleCreateClassForSave} disabled={pickerBusy || !pickerNewName.trim()}
+            style={{ background: `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "10px", padding: "10px 16px", fontWeight: 800, cursor: pickerBusy ? "default" : "pointer", opacity: pickerBusy || !pickerNewName.trim() ? 0.6 : 1, fontFamily: theme.headingFont }}
+          >
+            + New
+          </button>
+        </div>
+      )}
+    </>
+  );
+
+  // The modal picker — still used for mid-game Save & Exit and game-select's "Save teams to
+  // class", where there's no "Saved Teams" panel to slide a drawer out of. Team-setup's own
+  // "link"/"switch" action uses renderClassLinkDrawer below instead (see openSavePicker's callers).
   const renderSavePicker = () => (
-    showSavePicker && (
+    showSavePicker && pendingSaveAction !== "link" && (
       <div style={{ position: "fixed", inset: 0, background: "rgba(15,10,46,0.75)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 2000, padding: "20px" }}>
         <div style={{ background: "white", borderRadius: "20px", padding: "24px", maxWidth: "420px", width: "100%", maxHeight: "80vh", overflowY: "auto", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
-          <h3 style={{ margin: "0 0 6px", fontSize: "18px", fontWeight: 900, color: theme.heroBg[0], fontFamily: theme.headingFont }}>{pendingSaveAction === "link" ? "Which class are these teams for?" : "Save to which class?"}</h3>
-          <p style={{ margin: "0 0 16px", fontSize: "13px", color: "#6B7280" }}>
-            {pendingSaveAction === "link"
-              ? "Pick an existing class to load its saved teams, or create a new one — teams you name below will be saved to it automatically."
-              : "Pick an existing class, or create a new one — you'll return to it later from \"My Classes.\""}
-          </p>
-
-          {pickerError && <div style={{ background: "#FEE2E2", color: "#991B1B", padding: "8px 12px", borderRadius: "8px", fontSize: "13px", marginBottom: "12px" }}>{pickerError}</div>}
-
-          {pickerClasses === null ? (
-            <div style={{ textAlign: "center", color: "#6B7280", padding: "16px 0" }}>Loading your classes…</div>
-          ) : pickerClasses.length > 0 ? (
-            <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginBottom: "16px" }}>
-              {pickerClasses.map(cls => (
-                <button
-                  key={cls.id} onClick={() => handlePickClassForSave(cls)}
-                  style={{ textAlign: "left", background: "#F0F9FF", border: "2px solid #E5E7EB", borderRadius: "10px", padding: "10px 14px", cursor: "pointer", fontWeight: 700, color: theme.heroBg[0], fontSize: "14px" }}
-                >
-                  {cls.name}
-                  {cls.in_progress && pendingSaveAction !== "link" && <span style={{ display: "flex", alignItems: "center", gap: "4px", fontWeight: 500, fontSize: "12px", color: "#B45309", marginTop: "2px" }}><Icon name="warning" size={11} /> Has a game in progress — saving here will replace it</span>}
-                </button>
-              ))}
-            </div>
-          ) : null}
-
-          {!isPaid && pickerClasses !== null && pickerClasses.length >= FREE_PLAN_LIMITS.maxClasses ? (
-            <div style={{ background: "#F0F9FF", border: "2px dashed #93C5FD", borderRadius: "10px", padding: "14px", textAlign: "center" }}>
-              <div style={{ fontSize: "13px", color: "#374151", fontWeight: "700", marginBottom: "8px" }}>Free plan is limited to {FREE_PLAN_LIMITS.maxClasses} class. Upgrade for unlimited classes.</div>
-              <button
-                onClick={() => { setShowSavePicker(false); setScreen("billing"); }}
-                style={{ background: `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "10px", padding: "8px 16px", fontWeight: 800, cursor: "pointer", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px" }}
-              >
-                <Icon name="gem" size={14} /> Upgrade
-              </button>
-            </div>
-          ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-              <input
-                value={pickerNewName} onChange={e => setPickerNewName(e.target.value)} placeholder="e.g. Tuesday B2 Advanced"
-                style={{ padding: "10px 12px", borderRadius: "10px", border: "2px solid #E5E7EB", fontSize: "14px" }}
-              />
-              <input
-                value={pickerNewSchool} onChange={e => setPickerNewSchool(e.target.value)} placeholder="School (optional)"
-                style={{ padding: "10px 12px", borderRadius: "10px", border: "2px solid #E5E7EB", fontSize: "14px" }}
-              />
-              <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
-                <span style={{ fontSize: "12px", color: "#6B7280", fontWeight: "700", marginRight: "2px" }}>Level:</span>
-                {LEVELS_META.map(l => (
-                  <button
-                    key={l.id} type="button" onClick={() => setPickerNewLevel(l.id)}
-                    style={{
-                      background: pickerNewLevel === l.id ? l.color : "white",
-                      color: pickerNewLevel === l.id ? "white" : "#374151",
-                      border: `2px solid ${pickerNewLevel === l.id ? l.color : "#E5E7EB"}`,
-                      borderRadius: "8px", padding: "5px 10px", cursor: "pointer", fontWeight: "700", fontSize: "12px",
-                    }}
-                  >
-                    {l.id === "all" ? "Any" : l.id}
-                  </button>
-                ))}
-              </div>
-              <button
-                onClick={handleCreateClassForSave} disabled={pickerBusy || !pickerNewName.trim()}
-                style={{ background: `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "10px", padding: "10px 16px", fontWeight: 800, cursor: pickerBusy ? "default" : "pointer", opacity: pickerBusy || !pickerNewName.trim() ? 0.6 : 1, fontFamily: theme.headingFont }}
-              >
-                + New
-              </button>
-            </div>
-          )}
-
+          <h3 style={{ margin: "0 0 6px", fontSize: "18px", fontWeight: 900, color: theme.heroBg[0], fontFamily: theme.headingFont }}>Save to which class?</h3>
+          <p style={{ margin: "0 0 16px", fontSize: "13px", color: "#6B7280" }}>Pick an existing class, or create a new one — you'll return to it later from "My Classes."</p>
+          {renderClassPickerBody()}
           <button onClick={() => setShowSavePicker(false)} style={{ marginTop: "16px", background: "none", border: "none", color: "#9CA3AF", fontWeight: 700, cursor: "pointer" }}>Cancel</button>
         </div>
+      </div>
+    )
+  );
+
+  // Team-setup's "Load saved teams…"/"Switch" — expands in place under the Saved Teams panel
+  // instead of a modal dialog, so picking a class reads as part of that panel rather than an
+  // interruption. The class list itself scrolls within a fixed height once there are more than a
+  // handful, rather than the drawer (or the whole page) growing indefinitely.
+  const renderClassLinkDrawer = () => (
+    showSavePicker && pendingSaveAction === "link" && (
+      <div className="cc-slide-drawer" style={{ marginTop: "10px", border: `2px solid ${hexToRgba(theme.accentSolid, 0.3)}`, borderRadius: "12px", padding: "14px", background: "#F8FAFF" }}>
+        <p style={{ margin: "0 0 12px", fontSize: "12.5px", color: "#6B7280" }}>Pick an existing class to load its saved teams, or create a new one — teams you name below will be saved to it automatically.</p>
+        {renderClassPickerBody("220px")}
+        <button onClick={() => setShowSavePicker(false)} style={{ marginTop: "12px", background: "none", border: "none", color: "#9CA3AF", fontWeight: 700, cursor: "pointer", fontSize: "13px" }}>Cancel</button>
       </div>
     )
   );
@@ -1365,6 +1383,10 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
           <p style={{ color: "#6B7280", marginTop: "8px" }}>Names, colors, and mascots for each team</p>
         </div>
 
+        <style>{`
+          @keyframes ccSlideDown { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+          .cc-slide-drawer { animation: ccSlideDown 0.18s ease-out; transform-origin: top; }
+        `}</style>
         <div style={{ display: "flex", gap: "16px", flexWrap: "wrap", marginBottom: "16px", alignItems: "flex-start" }}>
           {/* Saved Teams panel — its own visually distinct section rather than a strip squeezed
               into the top of the team-editor card. Three states: no class linked yet (a "start new
@@ -1441,6 +1463,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
                 })}
               </div>
             )}
+            {renderClassLinkDrawer()}
           </div>
 
           {/* Team Editor panel */}
