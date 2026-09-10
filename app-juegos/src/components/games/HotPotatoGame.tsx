@@ -8,7 +8,7 @@ import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
 import { HOTPOTATO_TUTORIAL_STEPS } from "../../data/tutorials/hotpotato";
 import { playSound } from "../../lib/sounds";
-import { setMusicContext, stopMusic } from "../../lib/music";
+import { setMusicContext, setMusicGame, stopMusic } from "../../lib/music";
 
 const GM = GAME_MODES.find(g => g.id === "hotpotato")!;
 
@@ -133,6 +133,12 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
     if (phase === "play") setMusicContext("tension");
     return () => setMusicContext("gameplay");
   }, [phase === "play"]);
+  // Reuses Word Whack's own tracks (see GAME_OVERRIDES in lib/music.ts) — same frantic, silly
+  // carnival energy, not a distinct Suno pair of its own.
+  useEffect(() => {
+    setMusicGame("hotpotato");
+    return () => setMusicGame(null);
+  }, []);
   const [showHowTo, setShowHowTo] = useState(false);
 
   useEffect(() => {

@@ -13,7 +13,7 @@ import { makeSoloCpuTeam } from "../../lib/soloOpponent";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { VAULT_TUTORIAL_STEPS } from "../../data/tutorials/vault";
 import { playSound } from "../../lib/sounds";
-import { stopMusic } from "../../lib/music";
+import { setMusicGame, stopMusic } from "../../lib/music";
 
 const GM = GAME_MODES.find(g => g.id === "vault")!;
 
@@ -260,6 +260,12 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
   useEffect(() => {
     if (phase === "gameover") { playSound("roundComplete"); stopMusic(); }
   }, [phase]);
+  // Reuses Auction's own tracks (see GAME_OVERRIDES in lib/music.ts) — same high-stakes,
+  // suspense-before-a-reveal shape, not a distinct Suno pair of its own.
+  useEffect(() => {
+    setMusicGame("vault");
+    return () => setMusicGame(null);
+  }, []);
 
   useEffect(() => {
     if (!forceFinalRef) return;

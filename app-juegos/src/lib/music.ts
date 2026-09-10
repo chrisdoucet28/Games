@@ -42,6 +42,20 @@ const GAME_OVERRIDES: Partial<Record<string, Partial<Record<MusicContext, string
     gameplay: "/music/auction-gameplay.mp3",
     tension: "/music/auction-tension.mp3",
   },
+  // Reused rather than new tracks — Hot Potato's frantic, comedic-explosion energy is the same
+  // "silly carnival frenzy" identity Word Whack's own tracks were made for, and it barely has a
+  // calm moment of its own to need a distinct gameplay track.
+  hotpotato: {
+    gameplay: "/music/whack-gameplay.mp3",
+    tension: "/music/whack-tension.mp3",
+  },
+  // Reused rather than new tracks — Vault Heist's high-stakes, no-partial-credit, suspense-before-
+  // a-reveal shape is the same beat Auction's tracks were made for, just heist- instead of
+  // auction-themed.
+  vault: {
+    gameplay: "/music/auction-gameplay.mp3",
+    tension: "/music/auction-tension.mp3",
+  },
 };
 
 function resolveSrc(ctx: MusicContext, gameId: string | null): string {
