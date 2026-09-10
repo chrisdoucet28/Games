@@ -5,18 +5,21 @@
 //    Custom-made for ClassCade (the repo owner's own Suno generation), not stock — swapped in
 //    after two rounds of stock-library picks ("Smile", then a 4-way audition) both missed the
 //    mark on tone.
-//  - gameplay: playing a game, between timed/thinking moments. Mixkit Stock Music Free License
-//    (free for commercial use, no attribution required) — "Light It Up Boy".
+//  - gameplay: playing a game, between timed/thinking moments — the fallback for any game that
+//    hasn't earned its own override for this context (a brief intro/setup window is often all it
+//    ever covers, once a game's dominant context has its own track). Custom Suno track ("Smooth
+//    Learning Groove", same file as Order Up's own tension track) — replaced the original Mixkit
+//    "Light It Up Boy" after teacher feedback that it "didn't work with really any moment."
 //  - tension: a timed turn is actively running (see useTurnTimer) — swapped back to gameplay the
-//    moment that timer stops, since it only ever runs while a game is already on screen. Mixkit,
-//    same license — "Serene View".
+//    moment that timer stops, since it only ever runs while a game is already on screen. Mixkit
+//    Stock Music Free License (free for commercial use, no attribution required) — "Serene View".
 // Plus true silence via stopMusic() (not a context) for the moments nothing should play at all —
 // a Lesson Plan's own reading/teaching content, and a game's own final screen (cut off the moment
 // that screen appears, rather than let gameplay music run under it).
 //
 // Per-game overrides: the shared gameplay/tension identity above doesn't fit every game (a
-// whack-a-mole frenzy needs carnival energy, not the same "someone is quietly thinking" bed used
-// by Hot Seat/Order Up/Auction) — see GAME_OVERRIDES. A game with its own tracks calls
+// whack-a-mole frenzy needs carnival energy, not the same "someone is quietly thinking" bed most
+// timer-based games use) — see GAME_OVERRIDES. A game with its own tracks calls
 // setMusicGame(gameId) on mount and setMusicGame(null) on unmount; every other game never calls
 // it at all; the shared defaults below still apply to any context that game doesn't override.
 const MUSIC_FILES = {
