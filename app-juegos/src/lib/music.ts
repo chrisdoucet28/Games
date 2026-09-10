@@ -176,7 +176,19 @@ export function setMusicEnabled(next: boolean): void {
 // active game (and therefore the actual file behind that context) changed since the last call.
 export function setMusicContext(ctx: MusicContext): void {
   const nextSrc = resolveSrc(ctx, currentGameId);
-  if (currentContext === ctx && currentSrc === nextSrc) return;
+  if (currentContext === ctx && currentSrc === nextSrc) {
+    // Same context/track by our own bookkeeping — but that bookkeeping updates the moment
+    // fadeInSrc is CALLED, regardless of whether the browser actually let it play. A page load
+    // that already had a session restored (no click yet) hits exactly this: the very first
+    // ambient attempt gets silently blocked, currentContext/currentSrc still record "ambient" as
+    // if it worked, and every later screen change (My Classes, Learn, Leaderboard, back to the
+    // welcome screen — all "ambient" too) would otherwise no-op here forever, never once
+    // rechecking whether the element is actually playing. Every one of those navigations is a
+    // real click, so use it to notice and recover instead of trusting the stale bookkeeping.
+    const el = players.get(nextSrc);
+    if (el && el.paused && enabled) el.play().catch(() => {});
+    return;
+  }
   const prevSrc = currentSrc;
   currentContext = ctx;
   currentSrc = nextSrc;
