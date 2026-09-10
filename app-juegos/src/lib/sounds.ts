@@ -59,7 +59,8 @@ const SOUND_VOLUME: Record<SoundName, number> = {
   correct: 0.55,
   wrong: 0.8,
   tick: 0.35,
-  timesUp: 0.8,
+  // Teacher feedback: the buzzer read as way too loud/harsh next to everything else at 0.8.
+  timesUp: 0.45,
   win: 0.55,
   roundComplete: 0.6,
   dice: 0.75,
