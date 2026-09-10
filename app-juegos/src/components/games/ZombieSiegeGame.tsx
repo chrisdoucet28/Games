@@ -876,8 +876,14 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
       const { next, events } = advanceTick(siegeRef.current, aliveTeamIds, teams.length, () => zombieIdRef.current++);
       setSiege(next);
       events.forEach(ev => {
-        if (ev.kind === "barricadeDestroyed") pushFx("barricadeDestroyed");
-        if (ev.kind === "chairExploded") pushFx("chairExploded");
+        // A stack item only breaks once its hp is fully depleted (not every tick), so this doesn't
+        // fire continuously even in a busy wave — reusing "dice" (already a generic physical-action
+        // cue elsewhere) rather than "wrong", which is reserved for the bigger personEliminated beat
+        // below so that one still reads as more severe.
+        if (ev.kind === "barricadeDestroyed") { playSound("dice"); pushFx("barricadeDestroyed"); }
+        // The rarer, more dramatic version of the same moment — it also takes the zombie down with
+        // it, so it gets the punchier "hillClash" impact cue instead.
+        if (ev.kind === "chairExploded") { playSound("hillClash"); pushFx("chairExploded"); }
         if (ev.kind === "zombieShot") {
           pushFx("zombieShot", ev.teamId);
           if (ev.teamId !== undefined) bumpStat(ev.teamId, "kills");
@@ -886,9 +892,8 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
         if (ev.kind === "personEliminated" && ev.teamId !== undefined) {
           const team = activeRoster.find(t => t.id === ev.teamId);
           if (team) {
-            // The one combat event that gets its own sound — barricadeDestroyed/chairExploded fire
-            // too often in a busy wave (several entry points at once) to give each a cue without it
-            // turning into noise; a team actually going down is rare and severe enough to earn one.
+            // A team actually going down is rare and severe enough to earn the more serious "wrong"
+            // cue, distinct from the barricade/chair cues above.
             playSound("wrong");
             showElimination(team.name, team.color.bg);
           }
