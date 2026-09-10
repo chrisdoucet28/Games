@@ -1579,9 +1579,14 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
                       onClick={() => setExpandedMascotTeam(i)}
                       style={{ width: "100%", boxSizing: "border-box", background: "white", padding: "10px 12px", borderTop: `1px solid ${color.bg}20`, borderLeft: "none", borderRight: "none", borderBottom: "none", display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", textAlign: "left" }}
                     >
-                      {teamMascots[i] ? <MascotIcon name={MASCOT_ICON_BY_EMOJI[teamMascots[i]!]} size={24} /> : <Icon name="close" size={16} color="#9CA3AF" />}
+                      {/* teamMascots[i] can hold an emoji that's no longer a real key in
+                          MASCOT_ICON_BY_EMOJI (retired from MASCOT_OPTIONS with no compat entry
+                          added, or a roster entry saved under an older option set) — a teacher's
+                          already-saved data is never something to trust blindly, so this falls
+                          through to "No mascot" rather than crashing on an undefined lookup. */}
+                      {teamMascots[i] && MASCOT_ICON_BY_EMOJI[teamMascots[i]!] ? <MascotIcon name={MASCOT_ICON_BY_EMOJI[teamMascots[i]!]} size={24} /> : <Icon name="close" size={16} color="#9CA3AF" />}
                       <span style={{ fontSize: "13px", fontWeight: "700", color: "#374151", flex: 1 }}>
-                        {teamMascots[i] ? MASCOT_ICON_BY_EMOJI[teamMascots[i]!].replace(/^./, c => c.toUpperCase()) : "No mascot"}
+                        {teamMascots[i] && MASCOT_ICON_BY_EMOJI[teamMascots[i]!] ? MASCOT_ICON_BY_EMOJI[teamMascots[i]!].replace(/^./, c => c.toUpperCase()) : "No mascot"}
                       </span>
                       <span style={{ fontSize: "13px", fontWeight: "800", color: color.bg }}>Change</span>
                     </button>

@@ -16,6 +16,12 @@ export const MASCOT_ICON_BY_EMOJI: Record<string, MascotName> = {
   // replaced with a rabbit) — kept mapped here so any already-saved team that picked it still
   // renders instead of silently breaking.
   "🦅": "rabbit",
+  // 🌟 was offered at some earlier point too (found in real saved production data — a teacher's
+  // roster crashed the app on this exact lookup being missing, see the production incident this
+  // comment was added for) but isn't in MASCOT_OPTIONS anymore either. No dedicated "star" art
+  // exists, so mapped to the closest thematic fit already available (magical/sparkly) rather than
+  // dropping to the color-dot fallback.
+  "🌟": "unicorn",
 };
 
 type TeamLike = { mascot?: string | null; color: { bg: string } };
