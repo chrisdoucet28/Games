@@ -60,6 +60,18 @@ function AssignedTeamBadge({ team }: { team?: Team }) {
   );
 }
 
+// Compact sibling of AssignedTeamBadge — for assignments that sit inline inside running text or a
+// tight list (a paragraph-cloze blank, a matching term) rather than above a whole card, where the
+// full badge would overwhelm the line it's attached to.
+function InlineTeamTag({ team }: { team?: Team }) {
+  if (!team) return null;
+  return (
+    <span style={{ display: "inline-flex", alignItems: "center", gap: "3px", background: team.color.bg, color: "white", borderRadius: "999px", padding: "1px 7px 1px 4px", fontSize: "10px", fontWeight: "800", verticalAlign: "middle", whiteSpace: "nowrap", flexShrink: 0 }}>
+      <TeamIcon team={team} size={10} color="white" /> {team.name}
+    </span>
+  );
+}
+
 export function LessonPlanScreen({ onBack, theme, onOpenLearn, onSelectTopic }: Props) {
   const availableTopics = useMemo(() => LESSON_TOPICS.filter(t => LESSON_PLANS[t.id]), []);
   const [searchTerm, setSearchTerm] = useState("");
@@ -276,26 +288,43 @@ export function LessonPlanSlideshow({ topic, theme, teams, onBack, onPlayGameFor
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // How many unscramble items to show — same team-scaling as every other section, computed here
+  // (not inside UnscrambleRoundOut) so the assignment pass below knows exactly how many ticks to
+  // reserve for it. Only the COUNT needs to be known up front; buildUnscrambleItems is still called
+  // again for the actual (freshly re-shuffled) content where it's rendered — safe, since the pool
+  // size (and therefore the length after slicing to this count) doesn't depend on the shuffle.
+  const unscrambleCount = roundOut.kind === "unscramble" ? scaledCount(4, Math.max(1, teams.length), 20) : 0;
+
   // Assignment pass: a single running counter walked across the WHOLE lesson in document order —
   // not reset per section — so rotation stays smooth class-wide instead of every section starting
-  // back on team 1. Scenario roundOut prompts aren't their own Slide entries (there's one "roundOut"
-  // slide for however many prompts it has), so they're consumed at that exact point in the walk and
-  // returned separately as scenarioAssignedTeams rather than attached to the Slide itself.
-  const { slides, scenarioAssignedTeams } = useMemo(() => {
-    if (teams.length === 0) return { slides: rawSlides, scenarioAssignedTeams: [] as Team[] };
+  // back on team 1. Covers every genuinely assignable unit in the lesson, not just questions:
+  // roundOut prompts/blanks/pairs/items and realWorld's comprehension questions aren't their own
+  // Slide entries (there's one "roundOut"/"realWorld" slide regardless of how many sub-items it
+  // has), so they're consumed at that exact point in the walk and returned separately rather than
+  // attached to the Slide itself. errorPassage has no discrete sub-items — the whole exercise gets
+  // one team, still wrapped in a one-element array so every roundOut kind shares the same prop
+  // shape downstream.
+  const { slides, roundOutAssignedTeams, realWorldAssignedTeams } = useMemo(() => {
+    if (teams.length === 0) return { slides: rawSlides, roundOutAssignedTeams: [] as Team[], realWorldAssignedTeams: [] as Team[] };
     let turn = 0;
     const nextTeam = () => teams[turn++ % teams.length];
-    let scenarioAssignedTeams: Team[] = [];
+    let roundOutAssignedTeams: Team[] = [];
+    let realWorldAssignedTeams: Team[] = [];
     const assigned = rawSlides.map((s): Slide => {
       if (s.kind === "question") return { ...s, assignedTeam: nextTeam() };
       if (s.kind === "speaking") return { ...s, tasks: s.tasks.map(t => ({ ...t, assignedTeam: nextTeam() })) };
-      if (s.kind === "roundOut" && roundOut.kind === "scenario") {
-        scenarioAssignedTeams = roundOut.prompts.map(() => nextTeam());
+      if (s.kind === "roundOut") {
+        if (roundOut.kind === "scenario") roundOutAssignedTeams = roundOut.prompts.map(() => nextTeam());
+        else if (roundOut.kind === "paragraphCloze") roundOutAssignedTeams = roundOut.segments.filter(seg => typeof seg !== "string").map(() => nextTeam());
+        else if (roundOut.kind === "matching") roundOutAssignedTeams = roundOut.pairs.map(() => nextTeam());
+        else if (roundOut.kind === "unscramble") roundOutAssignedTeams = Array.from({ length: unscrambleCount }, () => nextTeam());
+        else if (roundOut.kind === "errorPassage") roundOutAssignedTeams = [nextTeam()];
       }
+      if (s.kind === "realWorld") realWorldAssignedTeams = s.reading.questions.map(() => nextTeam());
       return s;
     });
-    return { slides: assigned, scenarioAssignedTeams };
-  }, [rawSlides, teams, roundOut]);
+    return { slides: assigned, roundOutAssignedTeams, realWorldAssignedTeams };
+  }, [rawSlides, teams, roundOut, unscrambleCount]);
 
   const [slideIndex, setSlideIndex] = useState(0);
   const [showAnswer, setShowAnswer] = useState(false);
@@ -393,9 +422,9 @@ export function LessonPlanSlideshow({ topic, theme, teams, onBack, onPlayGameFor
             </div>
           )}
 
-          {slide.kind === "roundOut" && <RoundOutStep roundOut={roundOut} topicId={topic.id} theme={theme} onDone={goNext} assignedTeams={scenarioAssignedTeams} />}
+          {slide.kind === "roundOut" && <RoundOutStep roundOut={roundOut} topicId={topic.id} theme={theme} onDone={goNext} assignedTeams={roundOutAssignedTeams} unscrambleCount={unscrambleCount} />}
 
-          {slide.kind === "realWorld" && <RealWorldReadingStep reading={slide.reading} theme={theme} onDone={goNext} backRef={realWorldBackRef} />}
+          {slide.kind === "realWorld" && <RealWorldReadingStep reading={slide.reading} theme={theme} onDone={goNext} backRef={realWorldBackRef} assignedTeams={realWorldAssignedTeams} />}
 
           {slide.kind === "speaking" && (
             <div>
@@ -456,38 +485,42 @@ function roundOutStyles(theme: Theme) {
 // Dispatches to one fully separate component per kind (rather than branching with early returns in
 // one function body) so each kind's hooks are called unconditionally — mixing different hook calls
 // across branches of a single component body would break React's rules of hooks.
-function RoundOutStep({ roundOut, topicId, theme, onDone, assignedTeams }: { roundOut: RoundOut; topicId: string; theme: Theme; onDone: () => void; assignedTeams?: Team[] }) {
-  if (roundOut.kind === "paragraphCloze") return <ParagraphClozeRoundOut roundOut={roundOut} theme={theme} onDone={onDone} />;
-  if (roundOut.kind === "matching") return <MatchingRoundOut roundOut={roundOut} theme={theme} onDone={onDone} />;
-  if (roundOut.kind === "errorPassage") return <ErrorPassageRoundOut roundOut={roundOut} theme={theme} onDone={onDone} />;
+function RoundOutStep({ roundOut, topicId, theme, onDone, assignedTeams, unscrambleCount }: { roundOut: RoundOut; topicId: string; theme: Theme; onDone: () => void; assignedTeams?: Team[]; unscrambleCount: number }) {
+  if (roundOut.kind === "paragraphCloze") return <ParagraphClozeRoundOut roundOut={roundOut} theme={theme} onDone={onDone} assignedTeams={assignedTeams} />;
+  if (roundOut.kind === "matching") return <MatchingRoundOut roundOut={roundOut} theme={theme} onDone={onDone} assignedTeams={assignedTeams} />;
+  if (roundOut.kind === "errorPassage") return <ErrorPassageRoundOut roundOut={roundOut} theme={theme} onDone={onDone} assignedTeam={assignedTeams?.[0]} />;
   if (roundOut.kind === "scenario") return <ScenarioRoundOut roundOut={roundOut} theme={theme} onDone={onDone} assignedTeams={assignedTeams} />;
-  return <UnscrambleRoundOut topicId={topicId} theme={theme} onDone={onDone} />;
+  return <UnscrambleRoundOut topicId={topicId} theme={theme} onDone={onDone} count={unscrambleCount} assignedTeams={assignedTeams} />;
 }
 
-function ParagraphClozeRoundOut({ roundOut, theme, onDone }: { roundOut: Extract<RoundOut, { kind: "paragraphCloze" }>; theme: Theme; onDone: () => void }) {
+function ParagraphClozeRoundOut({ roundOut, theme, onDone, assignedTeams }: { roundOut: Extract<RoundOut, { kind: "paragraphCloze" }>; theme: Theme; onDone: () => void; assignedTeams?: Team[] }) {
   const { headerStyle, nextBtnStyle } = roundOutStyles(theme);
   const [revealed, setRevealed] = useState<Set<number>>(new Set());
   let blankIdx = 0;
   return (
     <div>
       <div style={headerStyle}><Icon name="clipboard" size={14} /> Fill in the Story</div>
-      <p style={{ textAlign: "center", color: "#6B7280", fontSize: "13px", marginBottom: "14px" }}>Click each gap to check your answer.</p>
-      <p style={{ fontSize: "16px", lineHeight: 2, color: "#1F2937" }}>
+      <p style={{ textAlign: "center", color: "#6B7280", fontSize: "13px", marginBottom: "14px" }}>Click each gap to check your answer — the color/name shows whose turn each one is.</p>
+      <p style={{ fontSize: "16px", lineHeight: 2.4, color: "#1F2937" }}>
         {roundOut.segments.map((seg, i) => {
           if (typeof seg === "string") return <span key={i}>{seg}</span>;
           const idx = blankIdx++;
           const isRevealed = revealed.has(idx);
+          const assignedTeam = assignedTeams?.[idx];
           return (
-            <button
-              key={i}
-              onClick={() => setRevealed(prev => new Set(prev).add(idx))}
-              style={{
-                display: "inline-block", margin: "0 2px", padding: "2px 10px", borderRadius: "8px", border: `2px solid ${theme.accentSolid}`, cursor: isRevealed ? "default" : "pointer",
-                background: isRevealed ? "#ECFDF5" : "white", color: isRevealed ? "#14532D" : "#9CA3AF", fontWeight: "800", fontSize: "15px",
-              }}
-            >
-              {isRevealed ? seg.blank : `___ (${seg.base})`}
-            </button>
+            <span key={i}>
+              <InlineTeamTag team={assignedTeam} />{" "}
+              <button
+                onClick={() => setRevealed(prev => new Set(prev).add(idx))}
+                style={{
+                  display: "inline-block", margin: "0 2px", padding: "2px 10px", borderRadius: "8px",
+                  border: `2px solid ${assignedTeam ? assignedTeam.color.bg : theme.accentSolid}`, cursor: isRevealed ? "default" : "pointer",
+                  background: isRevealed ? "#ECFDF5" : "white", color: isRevealed ? "#14532D" : "#9CA3AF", fontWeight: "800", fontSize: "15px",
+                }}
+              >
+                {isRevealed ? seg.blank : `___ (${seg.base})`}
+              </button>
+            </span>
           );
         })}
       </p>
@@ -496,7 +529,7 @@ function ParagraphClozeRoundOut({ roundOut, theme, onDone }: { roundOut: Extract
   );
 }
 
-function MatchingRoundOut({ roundOut, theme, onDone }: { roundOut: Extract<RoundOut, { kind: "matching" }>; theme: Theme; onDone: () => void }) {
+function MatchingRoundOut({ roundOut, theme, onDone, assignedTeams }: { roundOut: Extract<RoundOut, { kind: "matching" }>; theme: Theme; onDone: () => void; assignedTeams?: Team[] }) {
   const { headerStyle, nextBtnStyle } = roundOutStyles(theme);
   const terms = useMemo(() => [...roundOut.pairs.map(p => p.term)].sort(() => Math.random() - 0.5), [roundOut]);
   const defs = useMemo(() => [...roundOut.pairs.map(p => p.definition)].sort(() => Math.random() - 0.5), [roundOut]);
@@ -504,6 +537,10 @@ function MatchingRoundOut({ roundOut, theme, onDone }: { roundOut: Extract<Round
   const [matched, setMatched] = useState<Set<string>>(new Set());
   const [wrong, setWrong] = useState<string | null>(null);
   const defFor = (term: string) => roundOut.pairs.find(p => p.term === term)?.definition;
+  // Assignment is per PAIR (its position in the original, unshuffled roundOut.pairs), not per
+  // shuffled display position — looked up by term so the badge stays attached to the right pair
+  // regardless of where the shuffle happened to place it in the terms column.
+  const teamForTerm = (term: string) => assignedTeams?.[roundOut.pairs.findIndex(p => p.term === term)];
 
   const tryMatch = (def: string) => {
     if (!selectedTerm) return;
@@ -521,7 +558,7 @@ function MatchingRoundOut({ roundOut, theme, onDone }: { roundOut: Extract<Round
   return (
     <div>
       <div style={headerStyle}><Icon name="handshake" size={14} /> Match the Word to Its Meaning</div>
-      <p style={{ textAlign: "center", color: "#6B7280", fontSize: "13px", marginBottom: "14px" }}>Tap a word, then tap its meaning.</p>
+      <p style={{ textAlign: "center", color: "#6B7280", fontSize: "13px", marginBottom: "14px" }}>Tap a word, then tap its meaning — each word shows whose pair it is.</p>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
         <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
           {terms.map(term => {
@@ -531,7 +568,8 @@ function MatchingRoundOut({ roundOut, theme, onDone }: { roundOut: Extract<Round
                 padding: "10px 12px", borderRadius: "10px", border: `2px solid ${done ? "#22C55E" : selectedTerm === term ? theme.accentSolid : "#E5E7EB"}`,
                 background: done ? "#ECFDF5" : selectedTerm === term ? hexToRgba(theme.accentSolid, 0.1) : "white",
                 color: done ? "#14532D" : "#1F2937", fontWeight: "700", fontSize: "13px", cursor: done ? "default" : "pointer", textAlign: "left",
-              }}>{term}</button>
+                display: "flex", alignItems: "center", gap: "6px",
+              }}><InlineTeamTag team={teamForTerm(term)} /> {term}</button>
             );
           })}
         </div>
@@ -553,12 +591,13 @@ function MatchingRoundOut({ roundOut, theme, onDone }: { roundOut: Extract<Round
   );
 }
 
-function ErrorPassageRoundOut({ roundOut, theme, onDone }: { roundOut: Extract<RoundOut, { kind: "errorPassage" }>; theme: Theme; onDone: () => void }) {
+function ErrorPassageRoundOut({ roundOut, theme, onDone, assignedTeam }: { roundOut: Extract<RoundOut, { kind: "errorPassage" }>; theme: Theme; onDone: () => void; assignedTeam?: Team }) {
   const { headerStyle, nextBtnStyle, revealBtnStyle } = roundOutStyles(theme);
   const [showFixed, setShowFixed] = useState(false);
   return (
     <div>
       <div style={headerStyle}><Icon name="warning" size={14} /> Find the Mistakes</div>
+      <div style={{ textAlign: "center" }}><AssignedTeamBadge team={assignedTeam} /></div>
       <div style={{ background: "#FEF2F2", border: "2px solid #FCA5A5", borderRadius: "12px", padding: "14px 16px", whiteSpace: "pre-line", fontSize: "14px", lineHeight: 1.7, color: "#7F1D1D" }}>{roundOut.text}</div>
       {!showFixed ? (
         <div style={{ textAlign: "center" }}><button onClick={() => setShowFixed(true)} style={revealBtnStyle}><Icon name="eye" size={13} /> Show corrected version</button></div>
@@ -603,9 +642,9 @@ function ScenarioRoundOut({ roundOut, theme, onDone, assignedTeams }: { roundOut
   );
 }
 
-function UnscrambleRoundOut({ topicId, theme, onDone }: { topicId: string; theme: Theme; onDone: () => void }) {
+function UnscrambleRoundOut({ topicId, theme, onDone, count, assignedTeams }: { topicId: string; theme: Theme; onDone: () => void; count: number; assignedTeams?: Team[] }) {
   const { headerStyle, nextBtnStyle, revealBtnStyle } = roundOutStyles(theme);
-  const items = useMemo(() => buildUnscrambleItems(topicId, 4), [topicId]);
+  const items = useMemo(() => buildUnscrambleItems(topicId, count), [topicId, count]);
   const [i, setI] = useState(0);
   const [show, setShow] = useState(false);
   if (!items.length) return <div style={{ textAlign: "center" }}><button onClick={onDone} style={nextBtnStyle}>Continue</button></div>;
@@ -614,6 +653,7 @@ function UnscrambleRoundOut({ topicId, theme, onDone }: { topicId: string; theme
   return (
     <div>
       <div style={headerStyle}><Icon name="shuffle" size={14} /> Put the Words in Order <span style={{ color: "#9CA3AF", fontWeight: "700" }}>· {i + 1}/{items.length}</span></div>
+      <div style={{ textAlign: "center" }}><AssignedTeamBadge team={assignedTeams?.[i]} /></div>
       <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", justifyContent: "center", marginBottom: "14px" }}>
         {current.words.map((w, wi) => (
           <span key={wi} style={{ background: "white", border: `2px solid ${theme.accentSolid}`, borderRadius: "8px", padding: "6px 12px", fontWeight: "700", fontSize: "15px", color: "#1F2937" }}>{w}</span>
@@ -689,7 +729,7 @@ function AudioPlayer({ src, theme }: { src: string; theme: Theme }) {
 // buttons, calling onDone() once the student's worked through it. Mode select only appears when
 // there's audio to choose between; a reading with no audioUrl goes straight to "reading" mode
 // (text always visible), matching the graceful degradation used everywhere else in this file.
-function RealWorldReadingStep({ reading, theme, onDone, backRef }: { reading: RealWorldReading; theme: Theme; onDone: () => void; backRef: React.MutableRefObject<(() => boolean) | null> }) {
+function RealWorldReadingStep({ reading, theme, onDone, backRef, assignedTeams }: { reading: RealWorldReading; theme: Theme; onDone: () => void; backRef: React.MutableRefObject<(() => boolean) | null>; assignedTeams?: Team[] }) {
   const { headerStyle, nextBtnStyle } = roundOutStyles(theme);
   const [mode, setMode] = useState<"reading" | "listening" | null>(reading.audioUrl ? null : "reading");
   const [phase, setPhase] = useState<"content" | "questions" | "reveal">("content");
@@ -748,6 +788,7 @@ function RealWorldReadingStep({ reading, theme, onDone, backRef }: { reading: Re
     return (
       <div>
         <div style={headerStyle}><Icon name="books" size={14} /> Real-World Check <span style={{ color: "#9CA3AF", fontWeight: "700" }}>· {qIndex + 1}/{reading.questions.length}</span></div>
+        <div style={{ textAlign: "center" }}><AssignedTeamBadge team={assignedTeams?.[qIndex]} /></div>
         <QuestionCard question={q} showAnswer={showAnswer} onReveal={() => setShowAnswer(true)} gameId="lessonplan" />
         {showAnswer && (
           <div style={{ textAlign: "center" }}>
