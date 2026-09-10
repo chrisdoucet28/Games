@@ -66,6 +66,12 @@ const GAME_OVERRIDES: Partial<Record<string, Partial<Record<MusicContext, string
   cards: {
     tension: "/music/cards-tension.mp3",
   },
+  // Reused rather than a new track — King of the Hill's zone-picking/contested-duel tension is
+  // genuinely the same medieval-combat decision-under-pressure beat Castle Defense's track was
+  // made for, just zone-conquest instead of siege-defense.
+  hill: {
+    tension: "/music/castle-tension.mp3",
+  },
 };
 
 function resolveSrc(ctx: MusicContext, gameId: string | null): string {

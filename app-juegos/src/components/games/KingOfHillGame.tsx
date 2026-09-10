@@ -15,7 +15,7 @@ import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
 import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
 import { HILL_TOPIC_STEPS, HILL_GRAMMAR_STEPS } from "../../data/tutorials/hill";
 import { playSound } from "../../lib/sounds";
-import { stopMusic } from "../../lib/music";
+import { setMusicGame, stopMusic } from "../../lib/music";
 import {
   generateSessionCode, openHillChannel, closeChannel,
   type HillPhase, type HillStatePayload, type HillActionPayload,
@@ -250,6 +250,12 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
   useEffect(() => {
     if (phase === "final") { playSound("roundComplete"); stopMusic(); }
   }, [phase]);
+  // Reuses Castle Defense's tension track (see GAME_OVERRIDES in lib/music.ts) — same medieval-
+  // combat decision-under-pressure beat, zone-conquest instead of siege-defense.
+  useEffect(() => {
+    setMusicGame("hill");
+    return () => setMusicGame(null);
+  }, []);
 
   useEffect(() => {
     if (!forceFinalRef) return;
