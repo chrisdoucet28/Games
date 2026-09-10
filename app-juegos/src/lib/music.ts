@@ -1,10 +1,13 @@
 // Background music — separate from lib/sounds.ts (SFX) on purpose: its own mute toggle/volume,
 // so a teacher can keep the correct/wrong dings but kill the music bed, or vice versa. Three
-// looping tracks crossfade based on where the class currently is, all from mixkit.co (Mixkit
-// Stock Music Free / Sound Effects Free License — free for commercial use, no attribution
-// required):
+// looping tracks crossfade based on where the class currently is:
 //  - ambient: menus, setup, results — anywhere that isn't active gameplay or a Lesson Plan.
-//  - gameplay: playing a game, between timed/thinking moments.
+//    Custom-made for ClassCade (the repo owner's own Suno generation), not stock — swapped in
+//    after two rounds of stock-library picks ("Smile", then a 4-way audition) both missed the
+//    mark on tone.
+//  - gameplay: playing a game, between timed/thinking moments. Mixkit Stock Music Free License
+//    (free for commercial use, no attribution required) — "Light It Up Boy".
+//  - tension: Mixkit, same license — "Serene View".
 //  - tension: a timed turn is actively running (see useTurnTimer) — swapped back to gameplay the
 //    moment that timer stops, since it only ever runs while a game is already on screen.
 // Plus true silence via stopMusic() (not a context) for the moments nothing should play at all —
