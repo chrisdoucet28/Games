@@ -460,6 +460,8 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
             <div style={{ fontSize: "15px", lineHeight: 1.7, opacity: 0.95 }}>
               {teams.length === 1
                 ? "The teacher will describe each word out loud for your team to guess."
+                : inputMode === "phone"
+                ? "The describer(s) see the word privately on their own phone — no one needs to turn away from the screen."
                 : "One player on the team turns away from the screen — everyone else on their team gives clues."}
               <br />
               Guess as many words as you can in <strong style={{ color: "#FDBA74" }}>{TURN_SECONDS} seconds</strong> — no spelling, and no saying the word itself!

@@ -6,7 +6,7 @@ import type { GameProps, QuestionData, Team } from "../../types";
 import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
 import { denseRank } from "../../utils/ranking";
 import { RankBadge } from "../shared/RankBadge";
-import { makeTeacherTeam, TEACHER_ID } from "../../lib/soloOpponent";
+import { makeTeacherTeam } from "../../lib/soloOpponent";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
 import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
@@ -282,17 +282,18 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
           ? { role: "spy", prompt: currentRound?.spyPrompt ?? "" }
           : { role: "crew", prompt: currentRound?.crewmatePrompt ?? "" };
       });
-      // Only "intro" (not started) collapses to "lobby" — "peek" is a real, reachable phase now
-      // (solo play's teacher stand-in still peeks on-screen while the one real team's phone
-      // already has its role), so it's reported as-is.
+      // Only "intro" (not started) collapses to "lobby" — every other phase is reported as-is.
+      // "peek" itself is never reachable in phone mode (see enterRoundStartPhase), so phones only
+      // ever see "lobby", "speak-2p"/"discuss"/"vote"/"reveal", or "final".
       const rawPhase = phaseRef.current;
       const mappedPhase: SpyPhase = rawPhase === "intro" ? "lobby" : (rawPhase as SpyPhase);
       // 1v1's speak-2p tracks its own order/index (tp2SpeakOrder/tp2SpeakIdx) instead of the
       // group-mode speakOrder/speakIdx state.
       const usingTp2Order = rawPhase === "speak-2p";
-      // The teacher stand-in (solo play) never has a phone — never show it as a joinable/waiting
-      // team in the lobby.
-      const roster = teams.filter(t => t.id !== TEACHER_ID);
+      // The teacher stand-in (solo play) is a fully joinable phone team like any other — it needs
+      // its own phone to see its role privately, same as a real team would, since this broadcast
+      // and the shared/projected screen are visible to the whole class.
+      const roster = teams;
       const payload: SpyStatePayload = {
         phase: mappedPhase,
         ri: riRef.current,
@@ -359,28 +360,25 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
     setConnectedTeamIds(new Set());
   };
 
-  // Shared by the Start Mission button and nextRound() — decides which phase (and, for solo
-  // phone play, which peekIdx) a fresh round actually opens on:
+  // Shared by the Start Mission button and nextRound() — decides which phase a fresh round
+  // actually opens on:
   //   - screen mode: always "peek" from the top, unchanged.
   //   - group mode + phone: peek is skipped entirely (every real team already got its role via
   //     phone) straight to "discuss", unchanged from the group-mode-only version of this feature.
-  //   - solo + phone: the one real team already has its role; only the teacher stand-in
-  //     (always teams[1] in solo play) still needs their on-screen reveal, so peek starts at
-  //     index 1 instead of 0 — the existing "Okay, I've read it" advance logic already falls
-  //     straight into the isTwoPlayer branch (speak-2p) once that single reveal is acknowledged,
-  //     no other change needed.
-  //   - real 2-team 1v1 + phone: both teams already have their role via phone, so peek is
-  //     skipped entirely too — this replicates the same tp2SpeakOrder/tp2SpeakIdx reset the peek
-  //     flow's own advance handler does when it reaches this same transition normally.
+  //   - two-player + phone (solo's teacher stand-in is a normal joinable team now, see the
+  //     `roster` broadcast above and the intro QR panel below): both sides already have their
+  //     role via their own phone, so peek is skipped entirely too, straight into speak-2p. The
+  //     teacher's stand-in used to be excluded from
+  //     phone eligibility and had to peek on the shared screen instead — which meant their secret
+  //     role was displayed on a screen the whole class (including the one real team) could see,
+  //     the exact privacy the phone-mode feature exists to provide. Now that the teacher can claim
+  //     their own phone the same way any team does, solo behaves identically to a real 2-team 1v1.
   const enterRoundStartPhase = () => {
     if (inputMode !== "phone") {
       setPhase("peek");
       setPeekIdx(0);
     } else if (!isTwoPlayer) {
       setPhase("discuss");
-    } else if (isSolo) {
-      setPhase("peek");
-      setPeekIdx(1);
     } else {
       setTp2SpeakOrder([...teams].sort(() => Math.random() - 0.5));
       setTp2SpeakIdx(0);
@@ -725,17 +723,21 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
 
           {introStep === "qr" && sessionCode && (() => {
             const joinUrl = `${window.location.origin}${window.location.pathname}?join=${sessionCode}&game=spy`;
-            // The teacher stand-in (solo play) never has a phone — never list it as a joinable
-            // or "waiting to connect" team here.
-            const phoneEligibleTeams = teams.filter(t => t.id !== TEACHER_ID);
             return (
               <PhoneJoinPanel
-                sessionCode={sessionCode} joinUrl={joinUrl} teams={phoneEligibleTeams} connectedTeamIds={connectedTeamIds}
+                sessionCode={sessionCode} joinUrl={joinUrl} teams={teams} connectedTeamIds={connectedTeamIds}
                 accent="#38BDF8" panelBg="linear-gradient(160deg,#1E3A5F,#0F172A)" borderColor="#38BDF866"
                 footer={
-                  <button onClick={handlePickScreenMode} style={{ background: "none", border: "none", color: "#9CA3AF", fontSize: "12px", fontWeight: "700", cursor: "pointer", textDecoration: "underline" }}>
-                    Switch back to Play on Screen
-                  </button>
+                  <>
+                    {isSolo && (
+                      <div style={{ fontSize: "12px", color: "#FCD34D", fontWeight: "700", marginBottom: "10px", lineHeight: 1.5 }}>
+                        <Icon name="phone" size={12} /> Playing solo? Scan this with your own phone too and join as "Teacher" — that way your role stays hidden from the class, same as theirs.
+                      </div>
+                    )}
+                    <button onClick={handlePickScreenMode} style={{ background: "none", border: "none", color: "#9CA3AF", fontSize: "12px", fontWeight: "700", cursor: "pointer", textDecoration: "underline" }}>
+                      Switch back to Play on Screen
+                    </button>
+                  </>
                 }
               />
             );
@@ -836,7 +838,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
       {inputMode === "phone" && sessionCode && (
         <PhoneReconnectBadge
           sessionCode={sessionCode} joinUrl={`${window.location.origin}${window.location.pathname}?join=${sessionCode}&game=spy`}
-          teams={teams.filter(t => t.id !== TEACHER_ID)} connectedTeamIds={connectedTeamIds}
+          teams={teams} connectedTeamIds={connectedTeamIds}
           accent="#38BDF8" panelBg="linear-gradient(160deg,#1E3A5F,#0F172A)" borderColor="#38BDF866"
         />
       )}
