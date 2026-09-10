@@ -164,13 +164,12 @@ function armAutoplayRetry() {
     document.removeEventListener("keydown", retry);
     // Re-read current state rather than closing over the original src/context — the teacher may
     // have already navigated somewhere else by the time this first gesture actually happens.
+    // Not gated on el.paused: calling play() on an already-playing element is a harmless no-op,
+    // and .paused is NOT a reliable signal here — the browser sets it false synchronously the
+    // moment play() is CALLED, independent of whether autoplay policy goes on to reject it.
     if (enabled && currentSrc) {
       const el = players.get(currentSrc);
-      console.warn(`[music] gesture retry firing: src=${currentSrc} elExists=${!!el} paused=${el?.paused}`);
-      if (el && el.paused) el.play().then(
-        () => console.warn(`[music] gesture retry play() resolved`),
-        err => console.warn(`[music] gesture retry play() rejected:`, err?.name, err?.message)
-      );
+      if (el) el.play().catch(() => {});
     }
   };
   document.addEventListener("pointerdown", retry, { once: true });
@@ -220,12 +219,12 @@ export function setMusicContext(ctx: MusicContext): void {
     // welcome screen — all "ambient" too) would otherwise no-op here forever, never once
     // rechecking whether the element is actually playing. Every one of those navigations is a
     // real click, so use it to notice and recover instead of trusting the stale bookkeeping.
+    // Not gated on el.paused: confirmed live that it reads false here even when nothing is
+    // actually audible (the browser sets it false synchronously the moment play() is CALLED,
+    // independent of whether autoplay policy goes on to reject it) — and calling play() on an
+    // already-playing element is a harmless no-op, so there's no cost to just always trying.
     const el = players.get(nextSrc);
-    console.warn(`[music] no-op recheck: ctx=${ctx} elExists=${!!el} paused=${el?.paused} enabled=${enabled}`);
-    if (el && el.paused && enabled) el.play().then(
-      () => console.warn(`[music] no-op recheck play() resolved`),
-      err => console.warn(`[music] no-op recheck play() rejected:`, err?.name, err?.message)
-    );
+    if (el && enabled) el.play().catch(() => {});
     return;
   }
   const prevSrc = currentSrc;
