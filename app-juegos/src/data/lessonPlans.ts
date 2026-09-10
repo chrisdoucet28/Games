@@ -388,13 +388,13 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
 
   making_questions: {
     kind: "errorPassage",
-    text: "A: Where does she works?\nB: She works at a hospital in the city centre.\nA: What you did yesterday?\nB: I stayed home and watched a film.\nA: How long does it takes to get there?\nB: About twenty minutes by bus.\nA: Where you are going on holiday this year?\nB: We're going to Portugal in July.",
-    corrected: "A: Where does she work?\nB: She works at a hospital in the city centre.\nA: What did you do yesterday?\nB: I stayed home and watched a film.\nA: How long does it take to get there?\nB: About twenty minutes by bus.\nA: Where are you going on holiday this year?\nB: We're going to Portugal in July.",
+    text: "A: Where does she works?\nB: She works at a hospital in the city centre.\nA: What she did yesterday?\nB: She stayed home and watched a film.\nA: How long does it takes to get there?\nB: About twenty minutes by bus.\nA: Where she is going on holiday this year?\nB: She's going to Portugal in July.",
+    corrected: "A: Where does she work?\nB: She works at a hospital in the city centre.\nA: What did she do yesterday?\nB: She stayed home and watched a film.\nA: How long does it take to get there?\nB: About twenty minutes by bus.\nA: Where is she going on holiday this year?\nB: She's going to Portugal in July.",
     fixes: [
       "'Where does she works?' → 'Where does she work?' (base verb after 'does')",
-      "'What you did yesterday?' → 'What did you do yesterday?' (need 'did' before the subject)",
+      "'What she did yesterday?' → 'What did she do yesterday?' (need 'did' before the subject)",
       "'How long does it takes?' → 'How long does it take?' (base verb after 'does')",
-      "'Where you are going...?' → 'Where are you going...?' (auxiliary before the subject)",
+      "'Where she is going...?' → 'Where is she going...?' (auxiliary before the subject)",
     ],
   },
 
@@ -959,12 +959,12 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
 
   career_choices: {
     kind: "errorPassage",
-    text: "I am agree that soft skills are important in any job, and I learned that the hard way this year. Your success depends of how hard you work, in my experience — I studied for weeks before my interview. Unfortunately, I couldn't assist the job interview last week because I was sick, so I had to reschedule it. My brother is engineer at a tech company, and he helped me prepare — I have started my new job last Monday thanks to his advice, and if you will update your CV like he showed me, you'll have a better chance next time.",
-    corrected: "I agree that soft skills are important in any job, and I learned that the hard way this year. Your success depends on how hard you work, in my experience — I studied for weeks before my interview. Unfortunately, I couldn't attend the job interview last week because I was sick, so I had to reschedule it. My brother is an engineer at a tech company, and he helped me prepare — I started my new job last Monday thanks to his advice, and if you update your CV like he showed me, you'll have a better chance next time.",
+    text: "I am agree that soft skills are important in any job, and I learned that the hard way this year. Your success depends of how hard you work, in my experience — I studied for weeks before my interview. Unfortunately, I couldn't assist a similar interview last year because I was sick, so I missed my chance that time. My brother is engineer at a tech company, and he helped me prepare properly this time — I have started my new job last Monday thanks to his advice, and if you will update your CV like he showed me, you'll have a better chance next time.",
+    corrected: "I agree that soft skills are important in any job, and I learned that the hard way this year. Your success depends on how hard you work, in my experience — I studied for weeks before my interview. Unfortunately, I couldn't attend a similar interview last year because I was sick, so I missed my chance that time. My brother is an engineer at a tech company, and he helped me prepare properly this time — I started my new job last Monday thanks to his advice, and if you update your CV like he showed me, you'll have a better chance next time.",
     fixes: [
       "'I am agree' → 'I agree' ('agree' is a verb, no 'am')",
       "'depends of how hard you work' → 'depends on how hard you work' ('depend on', not 'depend of')",
-      "'I couldn't assist the job interview' → 'I couldn't attend the job interview' ('assist' means to help; 'attend' means to go to')",
+      "'I couldn't assist a similar interview' → 'I couldn't attend a similar interview' ('assist' means to help; 'attend' means to go to')",
       "'My brother is engineer' → 'My brother is an engineer' (article needed before a profession)",
       "'I have started my new job last Monday' → 'I started my new job last Monday' (specific past time → past simple)",
       "'if you will update your CV' → 'if you update your CV' (no 'will' in the if-clause)",
