@@ -496,7 +496,14 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
 
   // Combo bonuses are already paid out live as they happen (see resolveCorrect) — nothing left to
   // settle here, this just moves to the results screen.
-  const handleSessionEnd = useCallback(() => setPhase("final"), []);
+  // Small delay before flipping phase: the shared session timer's onExpire plays "timesUp" right
+  // before calling this (the only normal way a session ends), and without the delay the "final"
+  // phase effect below fires "roundComplete" back-to-back on top of it — same "give the last Tier-1
+  // sound room to land" fix as the win-banner delays elsewhere (see GAMEOVER_DELAY_MS in
+  // VaultHeistGame.tsx), just for audio spacing here instead of a banner.
+  const handleSessionEnd = useCallback(() => {
+    setTimeout(() => setPhase("final"), 900);
+  }, []);
 
   useEffect(() => {
     if (phase === "final") { playSound("roundComplete"); stopMusic(); }

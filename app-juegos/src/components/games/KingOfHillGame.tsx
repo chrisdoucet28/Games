@@ -580,7 +580,11 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
   const { timeLeft: contestTimeLeft, stop: stopContestTimer } = useTurnTimer(
     CONTEST_SECONDS,
     contestIsSoloDuel && contestReady,
-    () => { if (contest) resolveContest(soloOpponentRef.current!.id); },
+    // useTurnTimer's onExpire plays "timesUp" right before calling this — when the opponent wins by
+    // capturing (resolveContest's attacker branch), it plays "hill" immediately after, landing right
+    // on top of the buzzer. Same short delay as OrderUpGame's session-timer/"roundComplete" fix, just
+    // to give the buzzer room before the capture fanfare.
+    () => { setTimeout(() => { if (contest) resolveContest(soloOpponentRef.current!.id); }, 700); },
     contest?.zoneId ?? "none"
   );
 

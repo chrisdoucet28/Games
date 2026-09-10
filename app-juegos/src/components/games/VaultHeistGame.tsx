@@ -211,9 +211,9 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
     () => (isSolo ? [propTeams[0], { ...cpuRef.current!, score: cpuScore }] : propTeams),
     [isSolo, propTeams, cpuScore]
   );
-  const updateScore = (id: string | number, delta: number) => {
+  const updateScore = (id: string | number, delta: number, opts?: { silent?: boolean }) => {
     if (isSolo && id === cpuRef.current?.id) { setCpuScore(s => s + delta); }
-    else { onUpdateScore(id, delta); }
+    else { onUpdateScore(id, delta, opts); }
   };
 
   const rewriteQs = useRef(questions.filter(q => q.type === "rewrite sentences")).current;
@@ -495,7 +495,9 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
       finishOrderRef.current.push(activeTeam.id);
       const rank = finishOrderRef.current.length;
       const bonus = finishBonusForRank(rank);
-      updateScore(activeTeam.id, bonus);
+      // Silent: a finish-rank bonus stacked right on top of this same crack's own CRACK_SCORE
+      // payout above — unsilenced, finishing the vault played "correct" twice back-to-back.
+      updateScore(activeTeam.id, bonus, { silent: true });
       if (rank === 1) setConfettiActive(true);
       showWin(activeTeam.name, activeTeam.color.bg, rank, bonus);
       if (finishOrderRef.current.length >= teams.length) {

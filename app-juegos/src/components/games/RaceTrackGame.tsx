@@ -576,12 +576,20 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
     const rows: RankRow[] = ranking.map(t => {
       const rank = distinctPosDesc.indexOf(finalPos[t.id]);
       const pts = RANK_POINTS[rank] ?? 5;
-      onUpdateScore(t.id, pts);
+      // Silent: a final-ranking points tally, not a single correct answer, immediately followed
+      // by the phase change to "gameover" — unsilenced, every team's payout stacked a "correct"
+      // chime right on top of the roundComplete sting that follows.
+      onUpdateScore(t.id, pts, { silent: true });
       return { id: t.id, name: t.name, pos: finalPos[t.id], points: pts };
     });
     setRaceTeams(prev => ({ ...prev, [teamId]: { ...prev[teamId], pos: TOTAL } }));
     setFinalRanking(rows);
-    setPhase("gameover");
+    // The finish line itself had no sound of its own — only "Start Race!"/"Next Task →" played the
+    // engine-rev cue, never the moment a team actually crosses it. Reused here for that, with a
+    // short delay before "gameover" so it isn't stepped on by the "roundComplete" sting the phase
+    // change triggers (same fix pattern as OrderUpGame's session-end/KingOfHillGame's contest-timer).
+    playSound("racetrack");
+    setTimeout(() => setPhase("gameover"), 700);
   };
 
   // Ranks every team by wherever they currently stand on the track — no one gets bumped to the
@@ -594,7 +602,10 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
     const rows: RankRow[] = ranking.map(t => {
       const rank = distinctPosDesc.indexOf(finalPos[t.id]);
       const pts = RANK_POINTS[rank] ?? 5;
-      onUpdateScore(t.id, pts);
+      // Silent: a final-ranking points tally, not a single correct answer, immediately followed
+      // by the phase change to "gameover" — unsilenced, every team's payout stacked a "correct"
+      // chime right on top of the roundComplete sting that follows.
+      onUpdateScore(t.id, pts, { silent: true });
       return { id: t.id, name: t.name, pos: finalPos[t.id], points: pts };
     });
     setFinalRanking(rows);

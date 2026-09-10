@@ -237,7 +237,11 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
 
   const endTurn = () => {
     const finalTurnScore = game.turnScore;
-    if (finalTurnScore > 0) onUpdateScore(activeTeam.id, finalTurnScore);
+    // Silent: this is a turn-tally update, not a single correct answer — each individual whack
+    // already got its own feedback via the mallet sound during play. Unsilenced, it stacked a
+    // "correct" chime directly on top of timesUp on every normally-timed-out turn (the most
+    // common way a turn ends in this game).
+    if (finalTurnScore > 0) onUpdateScore(activeTeam.id, finalTurnScore, { silent: true });
     // Accumulates across both of a team's rounds — this is "points scored in this Word Whack
     // playthrough" for the game's own final ranking, separate from the team's cross-game score.
     setFinalScores(prev => ({ ...prev, [activeTeam.id]: (prev[activeTeam.id] ?? 0) + finalTurnScore }));
@@ -329,7 +333,9 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
 
     channel.on("broadcast", { event: "turnReport" }, ({ payload }) => {
       const report = payload as WhackTurnReportPayload;
-      if (report.finalScore > 0) onUpdateScore(report.teamId, report.finalScore);
+      // Silent for the same reason as the screen-mode endTurn() above — a turn tally, not a
+      // single correct answer.
+      if (report.finalScore > 0) onUpdateScore(report.teamId, report.finalScore, { silent: true });
       setFinalScores(prev => ({ ...prev, [report.teamId]: (prev[report.teamId] ?? 0) + report.finalScore }));
       globalRoundIdxRef.current = report.endRoundIdx;
       setPlayedRounds(prev => mergeUniqueRounds(prev, report.playedRounds));

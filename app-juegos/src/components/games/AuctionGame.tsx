@@ -333,7 +333,10 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
     hasFlushedBankRef.current = true;
     teams.forEach(t => {
       const bank = auctionBankRef.current[t.id] ?? 0;
-      if (bank > 0) onUpdateScore(t.id, bank);
+      // Silent: this is a final bank tally, not a single correct answer — each round's own bet
+      // already resolved with the gavel-bang reveal. Unsilenced, every team's flush stacked a
+      // "correct" chime right on top of the roundComplete sting that follows immediately after.
+      if (bank > 0) onUpdateScore(t.id, bank, { silent: true });
     });
   }, [teams, onUpdateScore]);
 

@@ -261,7 +261,10 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
       const basePts = fuel * POINTS_PER_CORRECT;
       const bonus = LAUNCH_BONUS_BY_RANK[rank] ?? 0;
       bonuses[team.id] = bonus;
-      onUpdateScore(team.id, basePts + bonus);
+      // Silent: this is the secret-fuel reveal, the one moment this game is actually built
+      // around — the ignition sound above is what should carry it, not a "correct" chime
+      // stacked once per team on top.
+      onUpdateScore(team.id, basePts + bonus, { silent: true });
     });
     setBonusAwarded(bonuses);
     setPhase("final");

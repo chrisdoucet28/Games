@@ -57,13 +57,19 @@ export type SoundName = keyof typeof SOUND_FILES;
 const DEFAULT_TIER2_VOLUME = 0.7;
 const SOUND_VOLUME: Record<SoundName, number> = {
   correct: 0.55,
-  wrong: 0.8,
+  // Was 0.8 — the exact level teacher feedback flagged as "too loud/harsh" for timesUp below,
+  // and wrong fires far more often (every incorrect answer, nearly every game) than timesUp
+  // (once per turn, at expiry only). Same fix applied here for consistency, pending confirmation.
+  wrong: 0.6,
   tick: 0.35,
   // Teacher feedback: the buzzer read as way too loud/harsh next to everything else at 0.8.
   timesUp: 0.45,
   win: 0.55,
   roundComplete: 0.6,
-  dice: 0.75,
+  // Was 0.75 — louder than every Tier 2 signature sound (0.7) despite being a minor, frequent
+  // transitional effect (turn-order/attack rolls), not a "big moment." Matched to the Tier 2
+  // default instead.
+  dice: 0.7,
   auction: DEFAULT_TIER2_VOLUME,
   battleship: DEFAULT_TIER2_VOLUME,
   cards: DEFAULT_TIER2_VOLUME,

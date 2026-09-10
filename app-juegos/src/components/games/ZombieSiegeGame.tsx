@@ -885,7 +885,13 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
         if (ev.kind === "axeUsed") pushFx("axeUsed");
         if (ev.kind === "personEliminated" && ev.teamId !== undefined) {
           const team = activeRoster.find(t => t.id === ev.teamId);
-          if (team) showElimination(team.name, team.color.bg);
+          if (team) {
+            // The one combat event that gets its own sound — barricadeDestroyed/chairExploded fire
+            // too often in a busy wave (several entry points at once) to give each a cue without it
+            // turning into noise; a team actually going down is rare and severe enough to earn one.
+            playSound("wrong");
+            showElimination(team.name, team.color.bg);
+          }
         }
       });
       // teams (not activeRoster) — game over is tied only to the real student's own elimination;
