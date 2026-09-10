@@ -10,7 +10,7 @@ import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { ROCKET_TUTORIAL_STEPS } from "../../data/tutorials/rocket";
 import { playSound } from "../../lib/sounds";
-import { stopMusic } from "../../lib/music";
+import { setMusicGame, stopMusic } from "../../lib/music";
 
 const GM = GAME_MODES.find(g => g.id === "rocket")!;
 
@@ -213,6 +213,11 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
   })()).current;
 
   const [phase, setPhase] = useState<"intro" | "team-turn" | "team-end" | "launchpad" | "igniting" | "launching" | "final">(resumed ? "team-turn" : "intro");
+  // Custom Suno tension track — see GAME_OVERRIDES in lib/music.ts.
+  useEffect(() => {
+    setMusicGame("rocket");
+    return () => setMusicGame(null);
+  }, []);
   const [showHowTo, setShowHowTo] = useState(false);
   const [teamIdx, setTeamIdx] = useState(() => resumed?.teamIdx ?? 0);
   const [round, setRound] = useState(() => resumed?.round ?? 1);

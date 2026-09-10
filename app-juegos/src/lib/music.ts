@@ -72,6 +72,16 @@ const GAME_OVERRIDES: Partial<Record<string, Partial<Record<MusicContext, string
   hill: {
     tension: "/music/castle-tension.mp3",
   },
+  // Tension-only — Zombie Siege's active wave defense is the whole game; the short post-wave
+  // breather before confirming the next wave keeps the shared gameplay track.
+  zombie: {
+    tension: "/music/zombie-tension.mp3",
+  },
+  // Tension-only — Rocket Fuel's 90s "fuel your rocket" turns dominate playtime; the shared
+  // gameplay track covers the brief team-end transition and the launch spectacle.
+  rocket: {
+    tension: "/music/rocket-tension.mp3",
+  },
 };
 
 function resolveSrc(ctx: MusicContext, gameId: string | null): string {

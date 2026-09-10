@@ -9,7 +9,7 @@ import { FlagPromptButton } from "../shared/FlagPromptButton";
 import { TurnTimerBar } from "../shared/TurnTimerBar";
 import { ZOMBIE_TUTORIAL_STEPS } from "../../data/tutorials/zombie";
 import { playSound } from "../../lib/sounds";
-import { setMusicContext, stopMusic } from "../../lib/music";
+import { setMusicContext, setMusicGame, stopMusic } from "../../lib/music";
 import { makeTeacherTeam, TEACHER_ID } from "../../lib/soloOpponent";
 
 const GM = GAME_MODES.find(g => g.id === "zombie")!;
@@ -709,6 +709,11 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
   useEffect(() => {
     if (phase === "gameover") { playSound("roundComplete"); stopMusic(); }
   }, [phase]);
+  // Custom Suno tension track — see GAME_OVERRIDES in lib/music.ts.
+  useEffect(() => {
+    setMusicGame("zombie");
+    return () => setMusicGame(null);
+  }, []);
 
   useEffect(() => {
     if (!forceFinalRef) return;
