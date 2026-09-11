@@ -110,9 +110,9 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
     () => (isSolo ? [propTeams[0], { ...cpuRef.current!, score: cpuScore }] : propTeams),
     [isSolo, propTeams, cpuScore]
   );
-  const updateScore = (id: string | number, delta: number) => {
+  const updateScore = (id: string | number, delta: number, opts?: { silent?: boolean }) => {
     if (isSolo && id === cpuRef.current?.id) { setCpuScore(s => s + delta); }
-    else { onUpdateScore(id, delta); }
+    else { onUpdateScore(id, delta, opts); }
   };
 
   const showSpanish = level === "A1" || level === "A2";
@@ -181,8 +181,12 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
   useEffect(() => {
     if (phase === "roundend" && penalizedRoundRef.current !== round) {
       penalizedRoundRef.current = round;
+      // Silent: the explosion itself is this game's own feedback for running out of time —
+      // unsilenced, the shared "wrong" sound (one of the loudest/harshest in the whole roster)
+      // stacked directly on top of it every single explosion, which read as a much louder,
+      // harsher bang than the "hotpotato" sound alone was ever mixed for.
       playSound("hotpotato");
-      updateScore(teams[holderIdxRef.current].id, -PENALTY_PTS);
+      updateScore(teams[holderIdxRef.current].id, -PENALTY_PTS, { silent: true });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, round, teams]);
@@ -264,6 +268,11 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
   };
 
   const confirmPass = () => {
+    // The only audible feedback for the pass itself — until now the whole hand-to-hand toss was
+    // completely silent apart from the background music, with nothing marking "answered in time"
+    // short of watching the potato icon move. Reuses the dice-roll clatter rather than a new
+    // asset — the closest existing sound to a quick physical toss.
+    playSound("dice");
     setPassing(true);
     setPassId(id => id + 1);
     setTimeout(() => {

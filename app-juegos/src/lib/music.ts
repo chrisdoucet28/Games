@@ -143,6 +143,27 @@ const MUSIC_VOLUME: Record<MusicContext, number> = {
   tension: 0.14,
 };
 
+// Most games' tension track is a genuinely calmer variant of their gameplay track, so dropping to
+// the shared tension volume above reads as a natural dip. A couple of games' tension override is
+// mixed at a much bigger contrast to their own gameplay track than that — for those, the sudden
+// switch itself (not just the volume) reads as jarring. Scales tension's volume up for just that
+// game; every other game (no entry, scale 1) is unaffected.
+const TENSION_VOLUME_SCALE: Partial<Record<string, number>> = {
+  // Teacher feedback: "the switch up is crazy" the moment a lock's question appears — auction-
+  // tension.mp3 reads as way calmer than auction-gameplay.mp3, a much bigger contrast than the
+  // shared gameplay/tension pair. Narrows the gap rather than eliminating it — Vault Heist's
+  // answer phase is still a team reading/discussing/answering out loud, so it should stay quieter
+  // than full gameplay energy, just not this big a cliff.
+  vault: 1.6,
+};
+
+function resolveVolume(ctx: MusicContext, gameId: string | null): number {
+  const base = MUSIC_VOLUME[ctx];
+  if (ctx !== "tension" || !gameId) return base;
+  const scale = TENSION_VOLUME_SCALE[gameId] ?? 1;
+  return Math.min(1, base * scale);
+}
+
 const FADE_MS = 700;
 const STORAGE_KEY = "classcade_music_enabled";
 
@@ -267,7 +288,7 @@ export function setMusicEnabled(next: boolean): void {
       if (!el.paused) fadeTo(el, 0, FADE_MS);
     });
   } else if (currentSrc && currentContext) {
-    fadeInSrc(currentSrc, MUSIC_VOLUME[currentContext]);
+    fadeInSrc(currentSrc, resolveVolume(currentContext, currentGameId));
   }
   listeners.forEach(fn => fn(enabled));
 }
@@ -302,7 +323,7 @@ export function setMusicContext(ctx: MusicContext): void {
     const prevEl = players.get(prevSrc);
     if (prevEl) fadeTo(prevEl, 0, FADE_MS);
   }
-  if (prevSrc !== nextSrc) fadeInSrc(nextSrc, MUSIC_VOLUME[ctx]);
+  if (prevSrc !== nextSrc) fadeInSrc(nextSrc, resolveVolume(ctx, currentGameId));
 }
 
 // Called by a game's own component (mount → its id, unmount → null) only when that game has a

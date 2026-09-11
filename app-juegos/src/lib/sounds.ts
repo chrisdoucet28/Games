@@ -62,8 +62,9 @@ const SOUND_VOLUME: Record<SoundName, number> = {
   // (once per turn, at expiry only). Same fix applied here for consistency, pending confirmation.
   wrong: 0.6,
   tick: 0.35,
-  // Teacher feedback: the buzzer read as way too loud/harsh next to everything else at 0.8.
-  timesUp: 0.45,
+  // Was 0.8, then 0.45 — teacher feedback flagged the buzzer as too loud a second time (this time
+  // specifically via Word Whack), so dropped again to match tick's already-settled level.
+  timesUp: 0.35,
   win: 0.55,
   roundComplete: 0.6,
   // Was 0.75 — louder than every Tier 2 signature sound (0.7) despite being a minor, frequent
@@ -76,16 +77,34 @@ const SOUND_VOLUME: Record<SoundName, number> = {
   castle: DEFAULT_TIER2_VOLUME,
   hotpotato: DEFAULT_TIER2_VOLUME,
   hotseat: DEFAULT_TIER2_VOLUME,
-  hill: DEFAULT_TIER2_VOLUME,
+  // Teacher feedback: King of the Hill's capture fanfare read as way louder than every other
+  // moment in the game and dragged on for far too long for a routine, frequent event — measured
+  // RMS on this source file is on par with "wrong" (the hottest Tier 1 sound), so the default
+  // Tier 2 volume hits it much harder than a normally-mixed signature sound. Paired with the
+  // playback cap in SOUND_MAX_MS below.
+  hill: 0.4,
   hillClash: DEFAULT_TIER2_VOLUME,
   minefield: DEFAULT_TIER2_VOLUME,
   orderup: DEFAULT_TIER2_VOLUME,
-  racetrack: DEFAULT_TIER2_VOLUME,
+  // Teacher feedback: the "Start Race!"/"Next Task" sting read as jarring and out of place —
+  // measured RMS here is well above every other Tier 2 sound too, so the default volume hits it
+  // much harder than intended. Paired with the playback cap in SOUND_MAX_MS below.
+  racetrack: 0.5,
   rocket: DEFAULT_TIER2_VOLUME,
   spy: DEFAULT_TIER2_VOLUME,
   vault: DEFAULT_TIER2_VOLUME,
   whack: DEFAULT_TIER2_VOLUME,
   zombie: DEFAULT_TIER2_VOLUME,
+};
+
+// Most one-shot SFX are short enough that letting the file simply finish is fine. A couple of the
+// Tier 2 source files run much longer than the single "moment" they're meant to mark (hill.mp3 is
+// a genuine 10 seconds for what should be a quick capture sting) — capped here rather than needing
+// a re-exported/re-trimmed audio file. Only add an entry when a sound is specifically flagged as
+// dragging on too long; most sounds should finish naturally.
+const SOUND_MAX_MS: Partial<Record<SoundName, number>> = {
+  hill: 3000,
+  racetrack: 2000,
 };
 
 const STORAGE_KEY = "classcade_sound_enabled";
@@ -136,6 +155,10 @@ function getPreloaded(name: SoundName): HTMLAudioElement {
   return el;
 }
 
+// Short fade-out (rather than an abrupt cut) when a capped sound hits its max duration — an
+// instant pause mid-note reads as a glitch, same reasoning as lib/music.ts's own fadeTo.
+const CUTOFF_FADE_MS = 200;
+
 export function playSound(name: SoundName): void {
   if (!enabled) return;
   const base = getPreloaded(name);
@@ -146,4 +169,19 @@ export function playSound(name: SoundName): void {
   // into the caller's own game logic, but do warn so a silently-broken sound is discoverable
   // instead of just "nobody heard it and nobody knew why".
   instance.play().catch(err => console.warn(`[sounds] "${name}" failed to play:`, err));
+
+  const maxMs = SOUND_MAX_MS[name];
+  if (maxMs === undefined) return;
+  setTimeout(() => {
+    if (instance.paused) return; // already finished naturally before the cap kicked in
+    const startVol = instance.volume;
+    const startTime = performance.now();
+    function step(now: number) {
+      const t = Math.min(1, Math.max(0, (now - startTime) / CUTOFF_FADE_MS));
+      instance.volume = Math.max(0, startVol * (1 - t));
+      if (t < 1) requestAnimationFrame(step);
+      else instance.pause();
+    }
+    requestAnimationFrame(step);
+  }, maxMs);
 }
