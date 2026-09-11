@@ -587,11 +587,11 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
     // The original engine-rev cue that used to play here (and on "Start Race!"/"Next Task →") was
     // pulled entirely — teacher feedback: a genuinely sustained, non-decaying 5-second drone, not a
     // proper one-shot sting, and it read as "absurdly weird and bad" for a single button-press
-    // moment. A fresh, much shorter replacement now plays here only, at the actual crossing-the-
-    // line moment — kept off "Start Race!"/"Next Task →" (frequent, lower-stakes moments) so it
-    // doesn't turn into a repeated jump scare. Short delay before "gameover" preserved so it isn't
-    // stepped on by the "roundComplete" sting the phase change triggers (same fix pattern as
-    // OrderUpGame's session-end/KingOfHillGame's contest-timer).
+    // moment. A fresh, much shorter replacement now plays at the finish line and on "Start Race!"
+    // (see the intro screen's button below) — kept off "Next Task →" since that fires on every
+    // single task, far too often for even a short engine cue not to get grating. Short delay before
+    // "gameover" preserved so it isn't stepped on by the "roundComplete" sting the phase change
+    // triggers (same fix pattern as OrderUpGame's session-end/KingOfHillGame's contest-timer).
     playSound("racetrack");
     setTimeout(() => setPhase("gameover"), 700);
   };
@@ -851,7 +851,7 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
             onClose={() => setShowHowTo(false)}
           />
         )}
-        <button onClick={() => setPhase("task")} className="rt-btn" style={{ background: "linear-gradient(135deg,#B91C1C,#EF4444)", color: "white", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(239,68,68,0.5)", transition: "transform 0.15s ease" }}><Icon name="play" size={18} /> Start Race!</button>
+        <button onClick={() => { playSound("racetrack"); setPhase("task"); }} className="rt-btn" style={{ background: "linear-gradient(135deg,#B91C1C,#EF4444)", color: "white", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(239,68,68,0.5)", transition: "transform 0.15s ease" }}><Icon name="play" size={18} /> Start Race!</button>
       </div>
     </div>
   );

@@ -46,11 +46,11 @@ const SOUND_FILES = {
   minefield: "/sounds/minefield.ogg",
   orderup: "/sounds/orderup.mp3",
   rocket: "/sounds/rocket.ogg",
-  // A quick, low-key engine rev — not a full "vroom" — for Race Track's finish-line moment only
-  // (triggerWin; deliberately not "Start Race!"/"Next Task →", which fire far more often).
-  // Deliberately kept modest (see SOUND_VOLUME below) per teacher feedback: it should read as a
-  // nice touch, not a jump scare, after the original racetrack.ogg (a broken sustained drone) was
-  // pulled entirely.
+  // A quick, low-key engine rev — not a full "vroom" — for Race Track's "Start Race!" and
+  // finish-line (triggerWin) moments. Deliberately left off "Next Task →" since that fires on
+  // every single task, far too often for even a short cue not to get grating. Kept modest (see
+  // SOUND_VOLUME below) per teacher feedback: it should read as a nice touch, not a jump scare,
+  // after the original racetrack.ogg (a broken sustained drone) was pulled entirely.
   racetrack: "/sounds/racetrack.mp3",
   spy: "/sounds/spy.mp3",
   vault: "/sounds/vault.ogg",
@@ -111,7 +111,7 @@ const SOUND_VOLUME: Record<SoundName, number> = {
   orderup: 0.85,
   rocket: DEFAULT_TIER2_VOLUME,
   // Kept deliberately quiet — teacher feedback explicitly warned against this landing like a jump
-  // scare, and it fires at a frequent, low-stakes moment (see RaceTrackGame.tsx's triggerWin).
+  // scare (see RaceTrackGame.tsx's "Start Race!" button and triggerWin).
   racetrack: 0.45,
   // Replaced the near-inaudible 27ms original with a full "ominous drums" sting, meant to land
   // over the quiet reveal bed (see SpyAmongUsGame.tsx's music-context effect). Web Audio API pass
