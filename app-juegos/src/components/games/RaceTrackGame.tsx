@@ -584,11 +584,12 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
     });
     setRaceTeams(prev => ({ ...prev, [teamId]: { ...prev[teamId], pos: TOTAL } }));
     setFinalRanking(rows);
-    // The finish line itself had no sound of its own — only "Start Race!"/"Next Task →" played the
-    // engine-rev cue, never the moment a team actually crosses it. Reused here for that, with a
-    // short delay before "gameover" so it isn't stepped on by the "roundComplete" sting the phase
-    // change triggers (same fix pattern as OrderUpGame's session-end/KingOfHillGame's contest-timer).
-    playSound("racetrack");
+    // The engine-rev cue that used to play here (and on "Start Race!"/"Next Task →") was pulled
+    // entirely — teacher feedback: a genuinely sustained, non-decaying 5-second drone, not a
+    // proper one-shot sting, and it read as "absurdly weird and bad" for a single button-press
+    // moment. Short delay before "gameover" preserved anyway so it isn't stepped on by the
+    // "roundComplete" sting the phase change triggers (same fix pattern as OrderUpGame's
+    // session-end/KingOfHillGame's contest-timer).
     setTimeout(() => setPhase("gameover"), 700);
   };
 
@@ -847,7 +848,7 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
             onClose={() => setShowHowTo(false)}
           />
         )}
-        <button onClick={() => { playSound("racetrack"); setPhase("task"); }} className="rt-btn" style={{ background: "linear-gradient(135deg,#B91C1C,#EF4444)", color: "white", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(239,68,68,0.5)", transition: "transform 0.15s ease" }}><Icon name="play" size={18} /> Start Race!</button>
+        <button onClick={() => setPhase("task")} className="rt-btn" style={{ background: "linear-gradient(135deg,#B91C1C,#EF4444)", color: "white", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(239,68,68,0.5)", transition: "transform 0.15s ease" }}><Icon name="play" size={18} /> Start Race!</button>
       </div>
     </div>
   );
@@ -1113,7 +1114,7 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
               <div style={{ color: lastEffect.color, flexShrink: 0 }}><Icon name={lastEffect.icon} size={40} /></div>
               <div style={{ fontSize: "16px", fontWeight: "700", color: "#DDE8FF", textAlign: "left" }}>{lastEffect.msg}</div>
             </div>
-            <button onClick={() => { playSound("racetrack"); setPhase("task"); }} className="rt-btn" style={{ background: "#F7C948", color: "#150F00", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "800", cursor: "pointer", transition: "transform 0.15s ease" }}>Next Task →</button>
+            <button onClick={() => setPhase("task")} className="rt-btn" style={{ background: "#F7C948", color: "#150F00", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "800", cursor: "pointer", transition: "transform 0.15s ease" }}>Next Task →</button>
           </div>
         )}
       </div>

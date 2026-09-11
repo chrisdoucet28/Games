@@ -10,9 +10,15 @@
 // category (Mixkit Sound Effects Free License — free for commercial use, no attribution required)
 // — a deliberate move away from the original kenney.nl arcade/sci-fi set after teacher feedback
 // that those read as "arcadey" rather than the Kahoot-style quiz-show tone this app wants. The
-// remaining Tier 2 entries (auction/battleship/cards/castle/hotseat/minefield/orderup/racetrack/
-// rocket/spy/vault/whack/zombie/tick) are still the original kenney.nl CC0 picks — not yet
-// revisited, since only correct/wrong/win/hill/hotpotato were flagged.
+// remaining Tier 2 entries (auction/cards/castle/rocket/spy/vault/whack/zombie/tick) are still the
+// original kenney.nl CC0 picks. A full Web Audio API loudness pass (RMS/peak per file) later found
+// battleship/hotseat/minefield/orderup mixed considerably hotter than the rest of the set too —
+// see the volume comments below — and orderup.ogg has genuine sample-level clipping baked into the
+// source file itself (121 samples over ±1.0 on decode), which volume alone can reduce the impact
+// of but can't truly fix; a re-exported/normalized file would be the real fix if it's ever
+// revisited. spy.ogg (27ms) and zombie.ogg (114ms) are suspiciously short for a "signature sound"
+// meant to register as its own moment — likely truncated on export — but left alone since there's
+// no replacement asset to swap in.
 const SOUND_FILES = {
   correct: "/sounds/correct.mp3",
   wrong: "/sounds/wrong.mp3",
@@ -40,7 +46,6 @@ const SOUND_FILES = {
   hillClash: "/sounds/hillclash.mp3",
   minefield: "/sounds/minefield.ogg",
   orderup: "/sounds/orderup.ogg",
-  racetrack: "/sounds/racetrack.ogg",
   rocket: "/sounds/rocket.ogg",
   spy: "/sounds/spy.ogg",
   vault: "/sounds/vault.ogg",
@@ -72,11 +77,17 @@ const SOUND_VOLUME: Record<SoundName, number> = {
   // default instead.
   dice: 0.7,
   auction: DEFAULT_TIER2_VOLUME,
-  battleship: DEFAULT_TIER2_VOLUME,
+  // Web Audio API loudness pass: measured RMS well above the rest of the Tier 2 roster (close to
+  // "wrong"'s own hot mix). Brought down to land near the same effective loudness as a normally-
+  // mixed signature sound like "whack" or "hillClash".
+  battleship: 0.5,
   cards: DEFAULT_TIER2_VOLUME,
   castle: DEFAULT_TIER2_VOLUME,
   hotpotato: DEFAULT_TIER2_VOLUME,
-  hotseat: DEFAULT_TIER2_VOLUME,
+  // Web Audio API loudness pass: by far the hottest file in the entire roster — nearly double
+  // "wrong"'s own RMS, and "wrong" was already the loudest Tier 1 sound. Cut hard to land in the
+  // same range as everything else instead of dominating over it.
+  hotseat: 0.3,
   // Teacher feedback: King of the Hill's capture fanfare read as way louder than every other
   // moment in the game and dragged on for far too long for a routine, frequent event — measured
   // RMS on this source file is on par with "wrong" (the hottest Tier 1 sound), so the default
@@ -84,12 +95,13 @@ const SOUND_VOLUME: Record<SoundName, number> = {
   // playback cap in SOUND_MAX_MS below.
   hill: 0.4,
   hillClash: DEFAULT_TIER2_VOLUME,
-  minefield: DEFAULT_TIER2_VOLUME,
-  orderup: DEFAULT_TIER2_VOLUME,
-  // Teacher feedback: the "Start Race!"/"Next Task" sting read as jarring and out of place —
-  // measured RMS here is well above every other Tier 2 sound too, so the default volume hits it
-  // much harder than intended. Paired with the playback cap in SOUND_MAX_MS below.
-  racetrack: 0.5,
+  // Web Audio API loudness pass: measured RMS well above the rest of the roster, on the same
+  // order as "wrong". Brought down to match.
+  minefield: 0.4,
+  // Web Audio API loudness pass: this source file has genuine clipping (121 samples over ±1.0 on
+  // decode, right in its loud opening attack) as well as being mixed hot — volume can't remove the
+  // distortion itself, but cutting it down hard at least reduces how much of it cuts through.
+  orderup: 0.4,
   rocket: DEFAULT_TIER2_VOLUME,
   spy: DEFAULT_TIER2_VOLUME,
   vault: DEFAULT_TIER2_VOLUME,
@@ -104,7 +116,6 @@ const SOUND_VOLUME: Record<SoundName, number> = {
 // dragging on too long; most sounds should finish naturally.
 const SOUND_MAX_MS: Partial<Record<SoundName, number>> = {
   hill: 3000,
-  racetrack: 2000,
 };
 
 const STORAGE_KEY = "classcade_sound_enabled";
