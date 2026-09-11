@@ -750,12 +750,19 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
     awaitingNextWave: false,
   }));
   // Continuous real-time pressure (no shared useTurnTimer here) — tension for the whole active
-  // wave, but not during the "wave cleared, waiting for the teacher" breather.
+  // wave. The "wave cleared, waiting for the teacher" breather goes silent instead of falling
+  // back to the shared gameplay bed — teacher feedback: this is the natural moment for a genuine
+  // lull before the next wave's siege horn hits, rather than music just continuing underneath.
+  // confirmNextWave() below plays that horn the instant awaitingNextWave clears, so the sequence
+  // is silence -> horn -> tension music fading back in over its normal crossfade, not a flat cut
+  // straight from one bed to another.
   const isUnderSiege = phase === "playing" && !siege.awaitingNextWave;
   useEffect(() => {
     if (isUnderSiege) setMusicContext("tension");
+    else if (siege.awaitingNextWave) stopMusic();
+    else setMusicContext("gameplay");
     return () => setMusicContext("gameplay");
-  }, [isUnderSiege]);
+  }, [isUnderSiege, siege.awaitingNextWave]);
   const [currentQuestion, setCurrentQuestion] = useState<QuestionData | null>(null);
   const [roundPhase, setRoundPhase] = useState<RoundPhase>("reveal");
   const [fx, setFx] = useState<SiegeFx[]>([]);
@@ -915,7 +922,9 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
   // round/roundElapsedSeconds/zombiesSpawnedThisRound actually reset and awaitingNextWave clears,
   // so nothing about the next wave (spawning, its prompt) starts until the teacher says so.
   const confirmNextWave = useCallback(() => {
-    // Siege horn — the escalation cue as the next, bigger wave begins.
+    // Siege horn — the escalation cue as the next, bigger wave begins. The breather right before
+    // this was silent (see the music-context effect above), so this lands as a clean hit rather
+    // than fighting with whatever bed was already playing.
     playSound("zombie");
     const newRound = siegeRef.current.round + 1;
     setSiege(prev => ({ ...prev, round: newRound, roundElapsedSeconds: 0, zombiesSpawnedThisRound: 0, awaitingNextWave: false }));

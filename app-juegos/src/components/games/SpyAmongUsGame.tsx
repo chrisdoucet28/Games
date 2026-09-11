@@ -184,12 +184,15 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
   // A resumed mission skips the intro and re-peeks everyone for the same round/spy.
   const [phase, setPhase] = useState<Phase>(() => resumed ? "peek" : "intro");
   // Tension for the actual decision moments (voting who the spy is, the spy guessing the topic) —
-  // not "discuss"/"speak", which is free conversation, not an answer under pressure.
-  const isDeciding = phase === "vote" || phase === "spy-guess" || phase === "guess-2p";
+  // not "discuss"/"speak", which is free conversation, not an answer under pressure. Also covers
+  // "reveal"/"reveal-2p" (who the spy actually was) — teacher feedback: the reveal sting needs a
+  // quiet bed under it to actually land, not the more energetic gameplay track fighting it.
+  const wantsQuietMusic = phase === "vote" || phase === "spy-guess" || phase === "guess-2p"
+    || phase === "reveal" || phase === "reveal-2p";
   useEffect(() => {
-    if (isDeciding) setMusicContext("tension");
+    if (wantsQuietMusic) setMusicContext("tension");
     return () => setMusicContext("gameplay");
-  }, [isDeciding]);
+  }, [wantsQuietMusic]);
 
   useEffect(() => {
     if (phase === "final") { playSound("roundComplete"); stopMusic(); }

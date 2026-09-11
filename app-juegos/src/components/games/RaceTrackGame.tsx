@@ -584,12 +584,15 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
     });
     setRaceTeams(prev => ({ ...prev, [teamId]: { ...prev[teamId], pos: TOTAL } }));
     setFinalRanking(rows);
-    // The engine-rev cue that used to play here (and on "Start Race!"/"Next Task →") was pulled
-    // entirely — teacher feedback: a genuinely sustained, non-decaying 5-second drone, not a
+    // The original engine-rev cue that used to play here (and on "Start Race!"/"Next Task →") was
+    // pulled entirely — teacher feedback: a genuinely sustained, non-decaying 5-second drone, not a
     // proper one-shot sting, and it read as "absurdly weird and bad" for a single button-press
-    // moment. Short delay before "gameover" preserved anyway so it isn't stepped on by the
-    // "roundComplete" sting the phase change triggers (same fix pattern as OrderUpGame's
-    // session-end/KingOfHillGame's contest-timer).
+    // moment. A fresh, much shorter replacement now plays here only, at the actual crossing-the-
+    // line moment — kept off "Start Race!"/"Next Task →" (frequent, lower-stakes moments) so it
+    // doesn't turn into a repeated jump scare. Short delay before "gameover" preserved so it isn't
+    // stepped on by the "roundComplete" sting the phase change triggers (same fix pattern as
+    // OrderUpGame's session-end/KingOfHillGame's contest-timer).
+    playSound("racetrack");
     setTimeout(() => setPhase("gameover"), 700);
   };
 

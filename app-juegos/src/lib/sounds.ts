@@ -10,15 +10,14 @@
 // category (Mixkit Sound Effects Free License — free for commercial use, no attribution required)
 // — a deliberate move away from the original kenney.nl arcade/sci-fi set after teacher feedback
 // that those read as "arcadey" rather than the Kahoot-style quiz-show tone this app wants. The
-// remaining Tier 2 entries (auction/cards/castle/rocket/spy/vault/whack/zombie/tick) are still the
-// original kenney.nl CC0 picks. A full Web Audio API loudness pass (RMS/peak per file) later found
-// battleship/hotseat/minefield/orderup mixed considerably hotter than the rest of the set too —
-// see the volume comments below — and orderup.ogg has genuine sample-level clipping baked into the
-// source file itself (121 samples over ±1.0 on decode), which volume alone can reduce the impact
-// of but can't truly fix; a re-exported/normalized file would be the real fix if it's ever
-// revisited. spy.ogg (27ms) and zombie.ogg (114ms) are suspiciously short for a "signature sound"
-// meant to register as its own moment — likely truncated on export — but left alone since there's
-// no replacement asset to swap in.
+// remaining Tier 2 entries (auction/cards/castle/rocket/vault/whack/tick) are still the original
+// kenney.nl CC0 picks. A full Web Audio API loudness pass (RMS/peak per file) later found
+// battleship/hotseat/minefield mixed considerably hotter than the rest of the set too — see the
+// volume comments below. orderup/zombie/spy/racetrack were also replaced with fresh mixkit.co
+// picks after teacher feedback flagged the originals as clipped/distorted (orderup.ogg), too short
+// to register (spy.ogg/zombie.ogg), or an outright broken sustained-drone loop (racetrack.ogg) —
+// see the per-sound comments below and each game's own call-site comments for how they're now
+// sequenced.
 const SOUND_FILES = {
   correct: "/sounds/correct.mp3",
   wrong: "/sounds/wrong.mp3",
@@ -45,12 +44,18 @@ const SOUND_FILES = {
   // starting, distinct from the hill's own capture/victory cue above.
   hillClash: "/sounds/hillclash.mp3",
   minefield: "/sounds/minefield.ogg",
-  orderup: "/sounds/orderup.ogg",
+  orderup: "/sounds/orderup.mp3",
   rocket: "/sounds/rocket.ogg",
-  spy: "/sounds/spy.ogg",
+  // A quick, low-key engine rev — not a full "vroom" — for Race Track's finish-line moment only
+  // (triggerWin; deliberately not "Start Race!"/"Next Task →", which fire far more often).
+  // Deliberately kept modest (see SOUND_VOLUME below) per teacher feedback: it should read as a
+  // nice touch, not a jump scare, after the original racetrack.ogg (a broken sustained drone) was
+  // pulled entirely.
+  racetrack: "/sounds/racetrack.mp3",
+  spy: "/sounds/spy.mp3",
   vault: "/sounds/vault.ogg",
   whack: "/sounds/whack.ogg",
-  zombie: "/sounds/zombie.ogg",
+  zombie: "/sounds/zombie.mp3",
 } as const;
 
 export type SoundName = keyof typeof SOUND_FILES;
@@ -98,14 +103,27 @@ const SOUND_VOLUME: Record<SoundName, number> = {
   // Web Audio API loudness pass: measured RMS well above the rest of the roster, on the same
   // order as "wrong". Brought down to match.
   minefield: 0.4,
-  // Web Audio API loudness pass: this source file has genuine clipping (121 samples over ±1.0 on
-  // decode, right in its loud opening attack) as well as being mixed hot — volume can't remove the
-  // distortion itself, but cutting it down hard at least reduces how much of it cuts through.
-  orderup: 0.4,
+  // Replaced the clipped/distorted source file with a clean mixkit "positive notification" — no
+  // distortion to compensate for anymore. Web Audio API pass shows this file is mixed noticeably
+  // quieter overall than the rest of the roster (RMS ~0.07 vs. ~0.14 for a typical Tier 2 sound
+  // like whack/hillClash), so it's pushed above the Tier 2 default rather than below it to actually
+  // register.
+  orderup: 0.85,
   rocket: DEFAULT_TIER2_VOLUME,
-  spy: DEFAULT_TIER2_VOLUME,
+  // Kept deliberately quiet — teacher feedback explicitly warned against this landing like a jump
+  // scare, and it fires at a frequent, low-stakes moment (see RaceTrackGame.tsx's triggerWin).
+  racetrack: 0.45,
+  // Replaced the near-inaudible 27ms original with a full "ominous drums" sting, meant to land
+  // over the quiet reveal bed (see SpyAmongUsGame.tsx's music-context effect). Web Audio API pass
+  // shows this file mixed quieter than a typical Tier 2 sound, so nudged above the Tier 2 default
+  // — it still doesn't need to fight a louder gameplay track since the bed underneath is quiet.
+  spy: 0.75,
   vault: DEFAULT_TIER2_VOLUME,
   whack: DEFAULT_TIER2_VOLUME,
+  // Replaced the near-inaudible 114ms original with a real "warfare horn" — it now plays into
+  // silence (see ZombieSiegeGame.tsx's music-context effect), so it doesn't need to compete with a
+  // bed underneath. Web Audio API pass shows it's mixed in line with a typical Tier 2 sound, so
+  // left at the default.
   zombie: DEFAULT_TIER2_VOLUME,
 };
 
