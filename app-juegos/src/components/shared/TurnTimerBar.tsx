@@ -3,8 +3,8 @@ interface TurnTimerBarProps {
   totalSeconds: number;
 }
 
-// Same fixed pixel-art language as QuestionCard.tsx/ScoreBoard.tsx — square edges, a thick dark
-// casing instead of a soft translucent pill, so it reads as a retro game HUD meter rather than a
+// Same fixed pixel-art language as QuestionCard.tsx/ScoreBoard.tsx — a thick dark casing with hard
+// (unblurred) shadows and rounded corners, so it reads as a chunky game HUD meter rather than a
 // flat SaaS progress bar. This one gets rendered inside every game's own colored turn banner, so
 // the dark casing (rather than one of the site's own brand colors) is what keeps it legible
 // regardless of which color banner it's sitting in.
@@ -25,7 +25,7 @@ export function TurnTimerBar({ timeLeft, totalSeconds }: TurnTimerBarProps) {
 
   return (
     <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-      <div style={{ display: "flex", gap: "3px", background: INK, border: `2px solid ${INK}`, padding: "2px" }}>
+      <div style={{ display: "flex", gap: "3px", background: INK, border: `2px solid ${INK}`, borderRadius: "6px", padding: "2px" }}>
         {Array.from({ length: SEGMENTS }).map((_, i) => {
           // Drains right to left: pip i (0 = leftmost) is the i-th chunk of time to be SPENT, so
           // it only starts emptying once timeLeft drops below (SEGMENTS - i) chunks' worth — the
@@ -39,7 +39,7 @@ export function TurnTimerBar({ timeLeft, totalSeconds }: TurnTimerBarProps) {
             // a spent pip still reads as its own distinct box — otherwise an empty pip and the
             // gaps around it are the same color and blur into one shapeless dark smear instead of
             // a row of clean, evenly-spaced pips.
-            <div key={i} style={{ width: "13px", height: "12px", position: "relative", overflow: "hidden", background: "rgba(255,255,255,0.12)" }}>
+            <div key={i} style={{ width: "13px", height: "12px", borderRadius: "3px", position: "relative", overflow: "hidden", background: "rgba(255,255,255,0.12)" }}>
               <div style={{
                 position: "absolute", left: 0, top: 0, bottom: 0,
                 width: `${fraction * 100}%`, background: barColor,

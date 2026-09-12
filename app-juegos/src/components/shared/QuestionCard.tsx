@@ -22,13 +22,6 @@ const ORANGE_DEEP = "#B45309";
 const GREEN = "#22C55E";
 const GREEN_DEEP = "#15803D";
 
-// A pixel-cut notch on every corner instead of a plain rectangle — a flat rect with a solid-color
-// bar across the top (the first pass at this) reads as an old Windows dialog box, not a game. Real
-// sprite-art panels are never a clean 90° rectangle; chamfering each corner by a few pixels is the
-// actual detail that reads as "pixel art" (Super Paper Mario's own text boxes do the same thing).
-const NOTCH = 10;
-const NOTCH_CLIP = `polygon(${NOTCH}px 0, calc(100% - ${NOTCH}px) 0, 100% ${NOTCH}px, 100% calc(100% - ${NOTCH}px), calc(100% - ${NOTCH}px) 100%, ${NOTCH}px 100%, 0 calc(100% - ${NOTCH}px), 0 ${NOTCH}px)`;
-
 export function QuestionCard({ question, showAnswer, onReveal, gameId }: QuestionCardProps) {
   if (!question) return null;
   const isSpeaking = question.type === "speaking task";
@@ -38,11 +31,8 @@ export function QuestionCard({ question, showAnswer, onReveal, gameId }: Questio
     <div style={{
       background: "white",
       border: `4px solid ${INK}`,
-      clipPath: NOTCH_CLIP,
-      // clip-path also clips a box-shadow painted on the same box, so the hard offset shadow
-      // uses drop-shadow (a filter) instead — it follows the notched silhouette rather than
-      // getting chopped off at the corners.
-      filter: `drop-shadow(6px 6px 0 ${INK})`,
+      borderRadius: "20px",
+      boxShadow: `6px 6px 0 ${INK}`,
       textAlign: "center",
       padding: "20px 26px 28px",
     }}>
@@ -57,7 +47,7 @@ export function QuestionCard({ question, showAnswer, onReveal, gameId }: Questio
           on top of them rather than beside them. */}
       <div style={{ display: "flex", justifyContent: "flex-start", marginBottom: "14px" }}>
         <span style={{
-          background: "white", border: `3px solid ${INK}`, padding: "4px 12px",
+          background: "white", border: `3px solid ${INK}`, borderRadius: "8px", padding: "4px 12px",
           color: accent, fontWeight: 900, fontSize: "12px", textTransform: "uppercase", letterSpacing: "0.08em",
           display: "inline-flex", alignItems: "center", gap: "6px",
         }}>
@@ -70,7 +60,7 @@ export function QuestionCard({ question, showAnswer, onReveal, gameId }: Questio
       </p>
 
       {isSpeaking ? (
-        <div style={{ background: "white", border: `3px solid ${ORANGE}`, padding: "14px 16px", fontSize: "14px", color: ORANGE_DEEP, fontWeight: "700", position: "relative" }}>
+        <div style={{ background: "white", border: `3px solid ${ORANGE}`, borderRadius: "14px", padding: "14px 16px", fontSize: "14px", color: ORANGE_DEEP, fontWeight: "700", position: "relative" }}>
           {/* No separate reveal step for open-response prompts — the prompt itself is the whole
               card, so the flag belongs here immediately rather than gated behind a Reveal Answer
               click that doesn't exist for this question type. */}
@@ -82,12 +72,12 @@ export function QuestionCard({ question, showAnswer, onReveal, gameId }: Questio
           </div>
         </div>
       ) : showAnswer ? (
-        <div style={{ background: "white", border: `3px solid ${GREEN}`, padding: "16px", position: "relative" }}>
+        <div style={{ background: "white", border: `3px solid ${GREEN}`, borderRadius: "14px", padding: "16px", position: "relative" }}>
           <div style={{ position: "absolute", top: "8px", right: "8px" }}>
             <FlagPromptButton gameId={gameId} questionData={question} />
           </div>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "9px" }}>
-            <span style={{ background: GREEN, width: "24px", height: "24px", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, border: `2px solid ${INK}` }}>
+            <span style={{ background: GREEN, width: "24px", height: "24px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, border: `2px solid ${INK}` }}>
               <Icon name="check" size={13} color="white" />
             </span>
             <span style={{ fontWeight: "900", fontSize: "20px", color: GREEN_DEEP }}>{question.answer}</span>
@@ -111,7 +101,7 @@ export function QuestionCard({ question, showAnswer, onReveal, gameId }: Questio
             .qc-reveal-btn:active { transform: translate(6px, 6px); box-shadow: 0 0 0 ${INK}; }
           `}</style>
           <button onClick={onReveal} className="qc-reveal-btn" style={{
-            color: "white", border: `3px solid ${INK}`, padding: "13px 34px",
+            color: "white", border: `3px solid ${INK}`, borderRadius: "999px", padding: "13px 34px",
             fontSize: "16px", fontWeight: "900", cursor: "pointer", letterSpacing: "0.05em",
             textTransform: "uppercase", display: "inline-flex", alignItems: "center", gap: "9px",
             textShadow: `2px 2px 0 ${ORANGE_DEEP}`,

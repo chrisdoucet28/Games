@@ -10,10 +10,11 @@ interface ScoreBoardProps {
   headingFont?: string;
 }
 
-// Same fixed pixel-art language as QuestionCard.tsx/TurnTimerBar.tsx — a square-edged plaque with
-// a thick dark outline and a hard offset shadow instead of a rounded card with a soft glow. Team
-// colors themselves stay untouched (a team's own color is the player's choice, not chrome to
-// reskin) — only the card shape/outline/shadow language changes.
+// Same fixed pixel-art language as QuestionCard.tsx/TurnTimerBar.tsx — a thick dark outline and a
+// hard offset shadow instead of a soft glow, rounded corners kept (not squared off — a flat 90°
+// card next to the rest of the app's rounded chrome read as inconsistent, not "more game-like").
+// Team colors themselves stay untouched (a team's own color is the player's choice, not chrome to
+// reskin) — only the outline/shadow language changes.
 const INK = "#1A1A2E";
 
 export function ScoreBoard({ teams, highlight, headingFont }: ScoreBoardProps) {
@@ -31,6 +32,7 @@ export function ScoreBoard({ teams, highlight, headingFont }: ScoreBoardProps) {
           <div key={t.id} style={{
             background: isHighlighted ? t.color.bg : t.color.light,
             border: `3px solid ${INK}`,
+            borderRadius: "16px",
             padding: "10px 14px",
             textAlign: "center",
             flex: "1 1 100px",
