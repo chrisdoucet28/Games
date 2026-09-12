@@ -527,10 +527,12 @@ export function CastleGame({ questions, teams: propTeams, onUpdateScore, onEnd, 
       @keyframes characterStrike{0%{opacity:0;transform:translate(-50%,-50%) scale(0.4) rotate(-15deg)}35%{opacity:1;transform:translate(-50%,-50%) scale(1.3) rotate(8deg)}60%{opacity:1;transform:translate(-50%,-50%) scale(1.05) rotate(-4deg)}100%{opacity:0;transform:translate(-50%,-50%) scale(0.9) rotate(0deg)}}
       @keyframes attackerWindup{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-6px) rotate(4deg)}}
       @keyframes castleBannerIn{0%{opacity:0;transform:translate(-50%,-16px) scale(0.9)}15%{opacity:1;transform:translate(-50%,0) scale(1.03)}25%{transform:translate(-50%,0) scale(1)}85%{opacity:1;transform:translate(-50%,0) scale(1)}100%{opacity:0;transform:translate(-50%,-10px) scale(0.96)}}
-      .castle-action-btn:hover:not(:disabled){transform:translateY(-3px) scale(1.03);filter:brightness(1.15)}
-      .castle-action-btn:active:not(:disabled){transform:translateY(0) scale(0.97)}
-      .castle-target-btn:hover{transform:translateY(-2px) scale(1.03);filter:brightness(1.1)}
-      .castle-next-btn:hover{transform:scale(1.04);filter:brightness(1.1)}
+      .castle-action-btn:hover:not(:disabled){filter:brightness(1.15)}
+      .castle-action-btn:active:not(:disabled){transform:translate(3px,3px) !important;box-shadow:0 0 0 #1A1A2E !important}
+      .castle-target-btn:hover{filter:brightness(1.1)}
+      .castle-target-btn:active{transform:translate(3px,3px) !important;box-shadow:0 0 0 #1A1A2E !important}
+      .castle-next-btn:hover{filter:brightness(1.1)}
+      .castle-next-btn:active{transform:translate(4px,4px) !important;box-shadow:0 0 0 #1A1A2E !important}
     `}</style>
   );
 
@@ -540,7 +542,7 @@ export function CastleGame({ questions, teams: propTeams, onUpdateScore, onEnd, 
       {ambientLayer}
       {styleTag}
       <div style={{ position: "relative", zIndex: 1 }}>
-        <div style={{ background: "linear-gradient(135deg,#064E3B,#059669)", borderRadius: "20px", padding: "28px 24px", marginBottom: "10px", position: "relative", color: "white", maxWidth: "520px", margin: "0 auto 10px", boxShadow: "0 0 40px #05966955" }}>
+        <div style={{ background: "#059669", border: "4px solid #1A1A2E", borderRadius: "20px", padding: "28px 24px", marginBottom: "10px", position: "relative", color: "white", maxWidth: "520px", margin: "0 auto 10px", boxShadow: "6px 6px 0 #1A1A2E" }}>
           <div style={{ marginBottom: "10px" }}><Icon name="castle" size={36} /></div>
           <div style={{ fontWeight: "900", fontSize: "20px", marginBottom: "10px" }}>Castle Defense</div>
           <div style={{ fontSize: "15px", lineHeight: 1.7, opacity: 0.95 }}>
@@ -577,7 +579,7 @@ export function CastleGame({ questions, teams: propTeams, onUpdateScore, onEnd, 
             onClose={() => setShowHowTo(false)}
           />
         )}
-        <button onClick={() => setPhase("select-action")} className="castle-next-btn" style={{ background: "linear-gradient(135deg,#064E3B,#059669)", color: "white", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(5,150,105,0.5)", transition: "transform 0.15s ease" }}><Icon name="castle" size={18} /> Prepare for Battle!</button>
+        <button onClick={() => setPhase("select-action")} className="castle-next-btn" style={{ background: "#059669", color: "white", border: "3px solid #1A1A2E", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "6px 6px 0 #1A1A2E" }}><Icon name="castle" size={18} /> Prepare for Battle!</button>
       </div>
     </div>
   );
@@ -602,8 +604,9 @@ export function CastleGame({ questions, teams: propTeams, onUpdateScore, onEnd, 
               {ranking.map(({ item: t, rank, value }) => (
                 <div key={t.id} style={{
                   display: "flex", alignItems: "center", gap: "12px",
-                  background: rank === 0 ? `linear-gradient(160deg,${t.color.dark}66,#0B0B1F)` : "linear-gradient(160deg,#1F2937,#0B0F17)",
-                  border: `2px solid ${rank === 0 ? t.color.bg : "#4B5563"}`, borderRadius: "14px", padding: rank === 0 ? "12px 16px" : "10px 16px",
+                  background: rank === 0 ? t.color.dark : "#1F2937",
+                  border: "2px solid #1A1A2E", boxShadow: rank === 0 ? "4px 4px 0 #1A1A2E" : "3px 3px 0 #1A1A2E",
+                  borderRadius: "14px", padding: rank === 0 ? "12px 16px" : "10px 16px",
                   opacity: rank === 0 ? 1 : 0.85,
                 }}>
                   <span><RankBadge rank={rank} size={rank === 0 ? 24 : 20} /></span>
@@ -612,7 +615,7 @@ export function CastleGame({ questions, teams: propTeams, onUpdateScore, onEnd, 
                 </div>
               ))}
             </div>
-            <button onClick={onEnd} className="castle-next-btn" style={{ background: "linear-gradient(135deg,#064E3B,#059669)", color: "white", border: "none", borderRadius: "14px", padding: "14px 32px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(5,150,105,0.5)", transition: "transform 0.15s ease" }}><Icon name="checkeredFlag" size={17} /> End Game</button>
+            <button onClick={onEnd} className="castle-next-btn" style={{ background: "#059669", color: "white", border: "3px solid #1A1A2E", borderRadius: "14px", padding: "14px 32px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "6px 6px 0 #1A1A2E" }}><Icon name="checkeredFlag" size={17} /> End Game</button>
           </div>
         </div>
       );
@@ -632,20 +635,20 @@ export function CastleGame({ questions, teams: propTeams, onUpdateScore, onEnd, 
           </div>
           <div style={{ color: "#94A3B8", fontSize: "14px", marginBottom: "20px" }}>Last castle standing — every other castle fell.</div>
           <div style={{ display: "flex", flexDirection: "column", gap: "8px", maxWidth: "420px", margin: "0 auto 24px" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "12px", background: `linear-gradient(160deg,${winnerTeam.color.dark}66,#0B0B1F)`, border: `2px solid ${winnerTeam.color.bg}`, borderRadius: "14px", padding: "12px 16px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "12px", background: winnerTeam.color.dark, border: "2px solid #1A1A2E", boxShadow: "4px 4px 0 #1A1A2E", borderRadius: "14px", padding: "12px 16px" }}>
               <span><RankBadge rank={0} size={24} /></span>
               <span style={{ flex: 1, textAlign: "left", fontWeight: "900", color: "white", fontSize: "16px" }}><TeamIcon team={winnerTeam} /> {winnerTeam.name}</span>
               <span style={{ fontWeight: "800", color: "#6EE7B7", fontSize: "13px" }}>STOOD STRONG</span>
             </div>
             {rankedLosers.map((t, i) => (
-              <div key={t.id} style={{ display: "flex", alignItems: "center", gap: "12px", background: "linear-gradient(160deg,#1F2937,#0B0F17)", border: "2px solid #4B5563", borderRadius: "14px", padding: "10px 16px", opacity: 0.85 }}>
+              <div key={t.id} style={{ display: "flex", alignItems: "center", gap: "12px", background: "#1F2937", border: "2px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E", borderRadius: "14px", padding: "10px 16px", opacity: 0.85 }}>
                 <span><Icon name="skull" size={i === 0 ? 20 : 17} /></span>
                 <span style={{ flex: 1, textAlign: "left", fontWeight: "800", color: "#D1D5DB", fontSize: "15px" }}><TeamIcon team={t} /> {t.name}</span>
                 <span style={{ fontWeight: "700", color: "#6B7280", fontSize: "12px" }}>FELL</span>
               </div>
             ))}
           </div>
-          <button onClick={onEnd} className="castle-next-btn" style={{ background: "linear-gradient(135deg,#064E3B,#059669)", color: "white", border: "none", borderRadius: "14px", padding: "14px 32px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(5,150,105,0.5)", transition: "transform 0.15s ease" }}><Icon name="checkeredFlag" size={17} /> End Game</button>
+          <button onClick={onEnd} className="castle-next-btn" style={{ background: "#059669", color: "white", border: "3px solid #1A1A2E", borderRadius: "14px", padding: "14px 32px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "6px 6px 0 #1A1A2E" }}><Icon name="checkeredFlag" size={17} /> End Game</button>
         </div>
       </div>
     );
@@ -658,14 +661,14 @@ export function CastleGame({ questions, teams: propTeams, onUpdateScore, onEnd, 
         {ambientLayer}
         {styleTag}
         <div style={{ position: "relative", zIndex: 1 }}>
-          <div style={{ background: "linear-gradient(135deg,#064E3B,#059669)", borderRadius: "20px", padding: "28px 24px", marginBottom: "20px", color: "white", maxWidth: "480px", margin: "0 auto 20px", boxShadow: "0 0 40px #05966955" }}>
+          <div style={{ background: "#059669", border: "4px solid #1A1A2E", borderRadius: "20px", padding: "28px 24px", marginBottom: "20px", color: "white", maxWidth: "480px", margin: "0 auto 20px", boxShadow: "6px 6px 0 #1A1A2E" }}>
             <div style={{ marginBottom: "10px" }}><Icon name="hourglass" size={36} /></div>
             <div style={{ fontWeight: "900", fontSize: "19px", marginBottom: "10px" }}><TeamIcon team={noticeTeam} /> {noticeTeam.name} ran out of time!</div>
             <div style={{ fontSize: "15px", lineHeight: 1.6, opacity: 0.95 }}>
               {timeoutNotice.retried ? "That's your one free retry for this game — watch the clock this time!" : "You've already used your free retry this game — the turn moves on."}
             </div>
           </div>
-          <button onClick={dismissTimeoutNotice} className="castle-next-btn" style={{ background: "linear-gradient(135deg,#064E3B,#059669)", color: "white", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(5,150,105,0.5)", transition: "transform 0.15s ease" }}>
+          <button onClick={dismissTimeoutNotice} className="castle-next-btn" style={{ background: "#059669", color: "white", border: "3px solid #1A1A2E", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "6px 6px 0 #1A1A2E" }}>
             {timeoutNotice.retried ? <><Icon name="refresh" size={17} /> Try Again!</> : <><Icon name="next" size={17} /> Next Team</>}
           </button>
         </div>
@@ -834,8 +837,8 @@ export function CastleGame({ questions, teams: propTeams, onUpdateScore, onEnd, 
       {elimBanner && (
         <div key={elimBanner.key} style={{
           position: "absolute", top: "14px", left: "50%", zIndex: 20, whiteSpace: "nowrap",
-          background: `linear-gradient(135deg,${elimBanner.color},#7F1D1D)`, border: "2px solid #FCA5A5",
-          borderRadius: "14px", padding: "12px 24px", boxShadow: "0 8px 28px rgba(0,0,0,0.5)",
+          background: elimBanner.color, border: "3px solid #1A1A2E",
+          borderRadius: "14px", padding: "12px 24px", boxShadow: "4px 4px 0 #1A1A2E",
           animation: "castleBannerIn 3.2s ease-in-out forwards",
         }}>
           <span style={{ color: "white", fontWeight: "900", fontSize: "16px", textShadow: "0 1px 3px rgba(0,0,0,0.5)", display: "inline-flex", alignItems: "center", gap: "6px" }}>
@@ -899,7 +902,7 @@ export function CastleGame({ questions, teams: propTeams, onUpdateScore, onEnd, 
           })}
         </div>
 
-        <div style={{ background: `linear-gradient(90deg, ${activeTeam.color.bg}, ${activeTeam.color.dark})`, borderRadius: "14px", padding: "10px 16px", marginBottom: "12px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px", boxShadow: `0 4px 18px ${activeTeam.color.bg}55` }}>
+        <div style={{ background: activeTeam.color.bg, border: "3px solid #1A1A2E", borderRadius: "14px", padding: "10px 16px", marginBottom: "12px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px", boxShadow: "4px 4px 0 #1A1A2E" }}>
           <span style={{ color: "white", fontWeight: "900", fontSize: "16px", textShadow: "0 1px 3px rgba(0,0,0,0.4)", display: "inline-flex", alignItems: "center", gap: "6px" }}><Icon name="castle" size={16} /> {activeTeam.name} — {phaseHeaderText()}</span>
           {(phase === "pick-target" || phase === "select-action") && <TurnTimerBar timeLeft={timeLeft} totalSeconds={TURN_SECONDS} />}
         </div>
@@ -912,12 +915,11 @@ export function CastleGame({ questions, teams: propTeams, onUpdateScore, onEnd, 
                 const disabled = !!a.cost && rpg[activeTeam.id].mp < a.cost;
                 return (
                   <button key={a.id} disabled={disabled} onClick={() => pickAction(a.id)} className="castle-action-btn" style={{
-                    background: disabled ? "#3F3F46" : `linear-gradient(160deg, ${a.color}, ${a.color}CC)`,
-                    color: "white", border: `2px solid ${disabled ? "#52525B" : a.glow}`, borderRadius: "14px",
+                    background: disabled ? "#3F3F46" : a.color,
+                    color: "white", border: "3px solid #1A1A2E", borderRadius: "14px",
                     padding: "14px 18px", fontWeight: "800", fontSize: "15px", cursor: disabled ? "not-allowed" : "pointer",
                     opacity: disabled ? 0.65 : 1, minWidth: "130px",
-                    boxShadow: disabled ? "none" : `0 0 16px ${a.glow}88`,
-                    transition: "transform 0.15s ease, filter 0.15s ease",
+                    boxShadow: disabled ? "none" : "4px 4px 0 #1A1A2E",
                   }}>
                     <div style={{ filter: "drop-shadow(0 2px 3px rgba(0,0,0,0.4))" }}><Icon name={a.icon} size={24} /></div>
                     <div>{a.label}</div>
@@ -938,8 +940,8 @@ export function CastleGame({ questions, teams: propTeams, onUpdateScore, onEnd, 
             <QuestionCard question={q} showAnswer={showAns} onReveal={handleReveal} gameId="castle" />
             {q && (showAns || q?.type === "speaking task") && (
               <div style={{ display: "flex", gap: "10px", justifyContent: "center", marginTop: "12px" }}>
-                <button onClick={handleCorrect} className="castle-next-btn" style={{ background: "#22C55E", color: "white", border: "none", borderRadius: "12px", padding: "12px 24px", fontSize: "16px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease" }}><Icon name="check" size={15} /> Correct — {actionDef?.label}!</button>
-                <button onClick={handleWrong} className="castle-next-btn" style={{ background: "#EF4444", color: "white", border: "none", borderRadius: "12px", padding: "12px 24px", fontSize: "16px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease" }}><Icon name="close" size={13} /> Wrong</button>
+                <button onClick={handleCorrect} className="castle-next-btn" style={{ background: "#22C55E", color: "white", border: "3px solid #1A1A2E", borderRadius: "12px", padding: "12px 24px", fontSize: "16px", fontWeight: "700", cursor: "pointer", boxShadow: "4px 4px 0 #1A1A2E" }}><Icon name="check" size={15} /> Correct — {actionDef?.label}!</button>
+                <button onClick={handleWrong} className="castle-next-btn" style={{ background: "#EF4444", color: "white", border: "3px solid #1A1A2E", borderRadius: "12px", padding: "12px 24px", fontSize: "16px", fontWeight: "700", cursor: "pointer", boxShadow: "4px 4px 0 #1A1A2E" }}><Icon name="close" size={13} /> Wrong</button>
               </div>
             )}
           </>
@@ -950,7 +952,7 @@ export function CastleGame({ questions, teams: propTeams, onUpdateScore, onEnd, 
             <p style={{ fontWeight: "700", color: "#E5E7EB", marginBottom: "12px" }}>Pick a castle to attack:</p>
             <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap" }}>
               {aliveEnemies.map(tm => (
-                <button key={tm.id} onClick={() => rollDice(tm.id)} className="castle-target-btn" style={{ background: `linear-gradient(160deg, ${tm.color.bg}, ${tm.color.dark})`, color: "white", border: "none", borderRadius: "12px", padding: "12px 22px", fontWeight: "800", fontSize: "15px", cursor: "pointer", boxShadow: `0 0 14px ${tm.color.bg}66`, transition: "transform 0.15s ease, filter 0.15s ease", display: "inline-flex", alignItems: "center", gap: "5px" }}>
+                <button key={tm.id} onClick={() => rollDice(tm.id)} className="castle-target-btn" style={{ background: tm.color.bg, color: "white", border: "3px solid #1A1A2E", borderRadius: "12px", padding: "12px 22px", fontWeight: "800", fontSize: "15px", cursor: "pointer", boxShadow: "3px 3px 0 #1A1A2E", display: "inline-flex", alignItems: "center", gap: "5px" }}>
                   <Icon name="sword" size={14} /> {tm.name} ({Math.round(rpg[tm.id].hp)} HP){rpg[tm.id].shieldTurnsLeft > 0 && <Icon name="shield" size={13} />}
                 </button>
               ))}
