@@ -54,8 +54,8 @@ const STYLE_TAG = (
     @keyframes roundPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.09)}}
     @keyframes burstPop{0%{transform:translate(-50%,-50%) scale(0.3);opacity:1}60%{transform:translate(-50%,-50%) scale(1.4);opacity:1}100%{transform:translate(-50%,-50%) scale(1.8);opacity:0}}
     @keyframes burstBit{0%{opacity:1;transform:translate(-50%,-50%) rotate(var(--a)) translateY(0) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) rotate(var(--a)) translateY(-70px) scale(1.3)}}
-    .hp-btn:hover{transform:translateY(-2px) scale(1.02)}
-    .hp-btn:active{transform:translateY(0) scale(0.97)}
+    .hp-btn:hover{filter:brightness(1.08)}
+    .hp-btn:active{transform:translate(4px,4px) !important;box-shadow:0 0 0 #1A1A2E !important}
   `}</style>
 );
 
@@ -453,7 +453,7 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
             seededStartRef.current = true;
           }
           setPhase("play");
-        }} className="hp-btn" style={{ background: "linear-gradient(135deg,#EA580C,#F97316)", color: "white", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(249,115,22,0.4)", transition: "transform 0.15s ease" }}>
+        }} className="hp-btn" style={{ background: "#F97316", color: "white", border: "3px solid #1A1A2E", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "6px 6px 0 #1A1A2E" }}>
           <Icon name="potato" size={18} /> Start Round 1!
         </button>
       </div>
@@ -520,7 +520,7 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
               const count = penaltyCounts[t.id] || 0;
               const isWorst = count === Math.max(...Object.values(penaltyCounts));
               return (
-                <div key={t.id} style={{ background: isWorst ? "linear-gradient(135deg,#FEF2F2,#FEE2E2)" : "white", border: `3px solid ${isWorst ? "#EF4444" : t.color.bg}`, borderRadius: "16px", padding: "14px", textAlign: "center", boxShadow: "0 4px 14px rgba(0,0,0,0.12)" }}>
+                <div key={t.id} style={{ background: isWorst ? "#FEE2E2" : "white", border: "3px solid #1A1A2E", borderRadius: "16px", padding: "14px", textAlign: "center", boxShadow: "3px 3px 0 #1A1A2E" }}>
                   <div style={{ marginBottom: "4px", color: count === 0 ? "#F59E0B" : isWorst ? "#92400E" : "#EA580C" }}>{count === 0 ? <Icon name="trophy" size={26} /> : isWorst ? <Icon name="potato" size={26} /> : <Icon name="warning" size={24} />}</div>
                   <div style={{ fontWeight: "800", color: isWorst ? "#991B1B" : t.color.dark, fontSize: "14px", marginBottom: "4px" }}><TeamIcon team={t} /> {t.name}</div>
                   <div style={{ fontSize: "12px", fontWeight: "700", color: "#6B7280" }}>Held potato {count}×</div>
@@ -541,7 +541,7 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
               );
             })}
           </div>
-          <button onClick={onEnd} className="hp-btn" style={{ background: "white", color: "#EA580C", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "18px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(0,0,0,0.2)", transition: "transform 0.15s ease" }}><Icon name="checkeredFlag" size={17} /> End Game</button>
+          <button onClick={onEnd} className="hp-btn" style={{ background: "white", color: "#EA580C", border: "3px solid #1A1A2E", borderRadius: "16px", padding: "16px 48px", fontSize: "18px", fontWeight: "900", cursor: "pointer", boxShadow: "6px 6px 0 #1A1A2E" }}><Icon name="checkeredFlag" size={17} /> End Game</button>
         </div>
       </div>
     );
@@ -555,8 +555,8 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
       {STYLE_TAG}
       <div style={{ position: "relative", zIndex: 1 }}>
         <div style={{
-          background: "linear-gradient(135deg,#EA580C,#F97316)", borderRadius: "14px", padding: "12px 16px", marginBottom: "14px",
-          boxShadow: "0 4px 16px rgba(124,45,18,0.3)",
+          background: "#F97316", border: "3px solid #1A1A2E", borderRadius: "14px", padding: "12px 16px", marginBottom: "14px",
+          boxShadow: "4px 4px 0 #1A1A2E",
           animation: !isExploding && ((qTimeLeft <= 3 && !showAnswer) || roundCritical) ? "cardShake 0.4s ease-in-out infinite" : "none",
         }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px" }}>
@@ -693,15 +693,15 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
         </div>
 
         {!showAnswer ? (
-          <button onClick={revealAnswer} className="hp-btn" style={{ width: "100%", background: "white", color: "#4338CA", border: "2px solid #C4B5FD", borderRadius: "12px", padding: "13px", fontSize: "15px", fontWeight: "800", cursor: "pointer", transition: "transform 0.15s ease" }}>
+          <button onClick={revealAnswer} className="hp-btn" style={{ width: "100%", background: "white", color: "#4338CA", border: "3px solid #1A1A2E", borderRadius: "12px", padding: "13px", fontSize: "15px", fontWeight: "800", cursor: "pointer", boxShadow: "3px 3px 0 #1A1A2E" }}>
             <Icon name="eye" size={14} /> Reveal answer early
           </button>
         ) : (
           <div style={{ display: "flex", gap: "10px" }}>
-            <button onClick={confirmPass} className="hp-btn" style={{ flex: 1, background: "linear-gradient(135deg,#16A34A,#22C55E)", color: "white", border: "none", borderRadius: "12px", padding: "14px 8px", fontSize: "14px", fontWeight: "900", cursor: "pointer", boxShadow: "0 4px 14px #22C55E40", transition: "transform 0.15s ease" }}>
+            <button onClick={confirmPass} className="hp-btn" style={{ flex: 1, background: "#22C55E", color: "white", border: "3px solid #1A1A2E", borderRadius: "12px", padding: "14px 8px", fontSize: "14px", fontWeight: "900", cursor: "pointer", boxShadow: "4px 4px 0 #1A1A2E" }}>
               <Icon name="check" size={13} /> Answered in time<br /><span style={{ fontSize: "12px", opacity: 0.85, display: "inline-flex", alignItems: "center", gap: "3px" }}>Pass potato <Icon name="next" size={11} /></span>
             </button>
-            <button onClick={confirmKeep} className="hp-btn" style={{ flex: 1, background: "linear-gradient(135deg,#DC2626,#EF4444)", color: "white", border: "none", borderRadius: "12px", padding: "14px 8px", fontSize: "14px", fontWeight: "900", cursor: "pointer", boxShadow: "0 4px 14px #EF444440", transition: "transform 0.15s ease" }}>
+            <button onClick={confirmKeep} className="hp-btn" style={{ flex: 1, background: "#EF4444", color: "white", border: "3px solid #1A1A2E", borderRadius: "12px", padding: "14px 8px", fontSize: "14px", fontWeight: "900", cursor: "pointer", boxShadow: "4px 4px 0 #1A1A2E" }}>
               <Icon name="close" size={12} /> Too slow / wrong<br /><span style={{ fontSize: "12px", opacity: 0.85, display: "inline-flex", alignItems: "center", gap: "3px" }}>Keep potato <Icon name="potato" size={12} /></span>
             </button>
           </div>
