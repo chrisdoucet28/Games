@@ -427,8 +427,8 @@ const STYLE_TAG = (
     @keyframes zsFog{0%,100%{opacity:0.08}50%{opacity:0.22}}
     @keyframes zsPulse{0%,100%{opacity:1}50%{opacity:0.55}}
     @keyframes zsFxIn{0%{opacity:0;transform:translateX(12px)}15%{opacity:1;transform:translateX(0)}80%{opacity:1}100%{opacity:0}}
-    .zs-btn:hover:not(:disabled){transform:translateY(-2px) scale(1.02);filter:brightness(1.08)}
-    .zs-btn:active:not(:disabled){transform:translateY(0) scale(0.97)}
+    .zs-btn:hover:not(:disabled){filter:brightness(1.08)}
+    .zs-btn:active:not(:disabled){transform:translate(3px,3px) !important;box-shadow:0 0 0 #1A1A2E !important}
     .zs-btn:disabled{opacity:0.4;cursor:not-allowed}
   `}</style>
 );
@@ -591,8 +591,8 @@ function SiegeQuestionCard({ question }: { question: QuestionData | null }) {
   const badgeText = isHalfSentence ? <><Icon name="pencil" size={11} /> finish the sentence</> : isSpeakingTask ? <><Icon name="mic" size={11} /> speaking task</> : <><Icon name="bookOpen" size={11} /> add to the prompt</>;
   return (
     <div style={{
-      position: "relative", background: "white", border: "3px solid #6366F1", borderRadius: "16px",
-      padding: "16px 20px", textAlign: "center", boxShadow: "0 6px 20px #6366F144",
+      position: "relative", background: "white", border: "3px solid #1A1A2E", borderRadius: "16px",
+      padding: "16px 20px", textAlign: "center", boxShadow: "4px 4px 0 #1A1A2E",
     }}>
       <div style={{ position: "absolute", top: "10px", right: "10px" }}>
         <FlagPromptButton gameId="zombie" questionData={question} />
@@ -1022,7 +1022,7 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
       {fogLayer}
       {STYLE_TAG}
       <div style={{ position: "relative", zIndex: 1 }}>
-        <div style={{ background: "linear-gradient(135deg,#14210F,#365314)", border: "2px solid #65A30D55", borderRadius: "20px", padding: "28px 24px", marginBottom: "10px", color: "white", maxWidth: "560px", margin: "0 auto 10px", boxShadow: "0 0 40px #65A30D33" }}>
+        <div style={{ background: "#14210F", border: "4px solid #1A1A2E", borderRadius: "20px", padding: "28px 24px", marginBottom: "10px", color: "white", maxWidth: "560px", margin: "0 auto 10px", boxShadow: "6px 6px 0 #1A1A2E" }}>
           <div style={{ marginBottom: "10px" }}><Icon name="zombie" size={36} /></div>
           <div style={{ fontWeight: "900", fontSize: "20px", marginBottom: "10px", color: "#BEF264" }}>Zombie Siege</div>
           <div style={{ fontSize: "15px", lineHeight: 1.6, opacity: 0.95 }}>
@@ -1038,13 +1038,13 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
             <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
               <button onClick={() => setWithTeacherAlly(false)} className="zs-btn" style={{
                 padding: "10px 20px", borderRadius: "12px", fontWeight: "800", fontSize: "14px", cursor: "pointer",
-                border: `2px solid ${!withTeacherAlly ? "#BEF264" : "#4D7C0F55"}`,
+                border: "2px solid #1A1A2E", boxShadow: !withTeacherAlly ? "3px 3px 0 #1A1A2E" : "none",
                 background: !withTeacherAlly ? "#365314" : "rgba(255,255,255,0.06)",
                 color: !withTeacherAlly ? "#BEF264" : "#A3B899",
               }}><Icon name="person" size={14} /> Play Alone</button>
               <button onClick={() => setWithTeacherAlly(true)} className="zs-btn" style={{
                 padding: "10px 20px", borderRadius: "12px", fontWeight: "800", fontSize: "14px", cursor: "pointer",
-                border: `2px solid ${withTeacherAlly ? "#BEF264" : "#4D7C0F55"}`,
+                border: "2px solid #1A1A2E", boxShadow: withTeacherAlly ? "3px 3px 0 #1A1A2E" : "none",
                 background: withTeacherAlly ? "#365314" : "rgba(255,255,255,0.06)",
                 color: withTeacherAlly ? "#BEF264" : "#A3B899",
               }}><Icon name="person" size={14} /> Play with the Teacher</button>
@@ -1056,7 +1056,7 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
             )}
           </div>
         )}
-        <button onClick={() => setShowHowTo(true)} className="zs-btn" style={{ display: "block", margin: "0 auto 14px", background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
+        <button onClick={() => setShowHowTo(true)} className="zs-btn" style={{ display: "block", margin: "0 auto 14px", background: "white", color: GM.color, border: "3px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
           <Icon name="help" size={14} /> How to Play
         </button>
         {showHowTo && (
@@ -1066,7 +1066,7 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
             onClose={() => setShowHowTo(false)}
           />
         )}
-        <button onClick={() => setPhase("playing")} className="zs-btn" style={{ background: "linear-gradient(135deg,#365314,#65A30D)", color: "#0D1A0D", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(101,163,13,0.5)", transition: "transform 0.15s ease" }}><Icon name="house" size={17} /> Board Up the House!</button>
+        <button onClick={() => setPhase("playing")} className="zs-btn" style={{ background: "#65A30D", color: "#0D1A0D", border: "3px solid #1A1A2E", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "6px 6px 0 #1A1A2E" }}><Icon name="house" size={17} /> Board Up the House!</button>
       </div>
     </div>
   );
@@ -1087,7 +1087,7 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
             {teams.map(t => {
               const stats = statsByTeam[t.id] ?? { kills: 0, chairsPlaced: 0 };
               return (
-                <div key={t.id} style={{ background: "linear-gradient(160deg,#14210F,#0D1A0D)", border: `2px solid ${t.color.bg}`, borderRadius: "14px", padding: "10px" }}>
+                <div key={t.id} style={{ background: "#14210F", border: "2px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E", borderRadius: "14px", padding: "10px" }}>
                   <div style={{ fontWeight: "800", color: "#BEF264", fontSize: "13px", marginBottom: "6px" }}><TeamIcon team={t} /> {t.name}</div>
                   <div style={{ fontSize: "12px", color: "#DCFCE7", lineHeight: 1.7 }}>
                     <div><Icon name="zombie" size={12} /> {stats.kills} zombie{stats.kills === 1 ? "" : "s"} shot</div>
@@ -1097,7 +1097,7 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
               );
             })}
           </div>
-          <button onClick={onEnd} className="zs-btn" style={{ background: "linear-gradient(135deg,#365314,#65A30D)", color: "#0D1A0D", border: "none", borderRadius: "14px", padding: "14px 32px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(101,163,13,0.5)", transition: "transform 0.15s ease" }}><Icon name="checkeredFlag" size={17} /> End Game</button>
+          <button onClick={onEnd} className="zs-btn" style={{ background: "#65A30D", color: "#0D1A0D", border: "3px solid #1A1A2E", borderRadius: "14px", padding: "14px 32px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "6px 6px 0 #1A1A2E" }}><Icon name="checkeredFlag" size={17} /> End Game</button>
         </div>
       </div>
     );
@@ -1149,9 +1149,9 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
               The house held! Get ready for wave {round + 1}.
             </div>
             <button onClick={confirmNextWave} className="zs-btn" style={{
-              background: "linear-gradient(135deg,#365314,#65A30D)", color: "#0D1A0D", border: "none",
+              background: "#65A30D", color: "#0D1A0D", border: "3px solid #1A1A2E",
               borderRadius: "14px", padding: "14px 32px", fontSize: "17px", fontWeight: "900", cursor: "pointer",
-              boxShadow: "0 6px 24px rgba(101,163,13,0.5)", transition: "transform 0.15s ease",
+              boxShadow: "5px 5px 0 #1A1A2E",
             }}><Icon name="next" size={15} /> Start Wave {round + 1}</button>
           </div>
         </div>
@@ -1177,8 +1177,8 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
       {elimBanner && (
         <div key={elimBanner.key} style={{
           position: "absolute", top: "14px", left: "50%", zIndex: 20, whiteSpace: "nowrap",
-          background: `linear-gradient(135deg,${elimBanner.color},#365314)`, border: "2px solid #BEF264",
-          borderRadius: "14px", padding: "12px 24px", boxShadow: "0 8px 28px rgba(0,0,0,0.5)",
+          background: elimBanner.color, border: "3px solid #1A1A2E",
+          borderRadius: "14px", padding: "12px 24px", boxShadow: "5px 5px 0 #1A1A2E",
           animation: "zsBannerIn 3.2s ease-in-out forwards",
         }}>
           <span style={{ color: "white", fontWeight: "900", fontSize: "16px", textShadow: "0 1px 3px rgba(0,0,0,0.5)", display: "inline-flex", alignItems: "center", gap: "6px" }}>
@@ -1189,8 +1189,8 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
       {powerUpBanner && (
         <div key={powerUpBanner.key} style={{
           position: "absolute", top: "106px", left: "50%", zIndex: 18, whiteSpace: "nowrap",
-          background: "linear-gradient(135deg,#B45309,#F59E0B)", border: "2px solid #FDE68A",
-          borderRadius: "14px", padding: "10px 22px", boxShadow: "0 8px 28px rgba(0,0,0,0.5)",
+          background: "#F59E0B", border: "3px solid #1A1A2E",
+          borderRadius: "14px", padding: "10px 22px", boxShadow: "4px 4px 0 #1A1A2E",
           animation: "zsBannerIn 2.6s ease-in-out forwards",
         }}>
           <span style={{ color: "white", fontWeight: "900", fontSize: "15px", textShadow: "0 1px 3px rgba(0,0,0,0.5)", display: "inline-flex", alignItems: "center", gap: "6px" }}>
@@ -1208,9 +1208,9 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
             {onTogglePause && (
               <button onClick={onTogglePause} className="zs-btn" title="Freeze the clock so you can explain something to the class" style={{
                 background: paused ? "#F59E0B" : "#D97706", color: "white",
-                border: paused ? "2px solid #FDE68A" : "2px solid rgba(255,255,255,0.6)",
+                border: "2px solid #1A1A2E",
                 borderRadius: "8px", padding: "3px 9px", fontSize: "11px", fontWeight: "800", cursor: "pointer",
-                boxShadow: paused ? "0 0 0 3px rgba(245,158,11,0.35)" : "0 2px 6px rgba(217,119,6,0.45)",
+                boxShadow: "2px 2px 0 #1A1A2E",
                 display: "inline-flex", alignItems: "center", gap: "4px",
               }}>
                 {paused ? <><Icon name="play" size={11} /> Resume</> : <><Icon name="pause" size={11} /> Pause</>}
@@ -1237,16 +1237,16 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
                 <TurnTimerBar timeLeft={prepSecondsLeft} totalSeconds={prepSecondsTotal} />
               </div>
               <button onClick={skipReadPause} className="zs-btn" style={{
-                marginTop: "8px", background: "none", border: "1px solid #4D7C0F", color: "#BEF264",
-                borderRadius: "8px", padding: "4px 14px", fontSize: "11px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease",
+                marginTop: "8px", background: "none", border: "2px solid #1A1A2E", color: "#BEF264",
+                borderRadius: "8px", padding: "4px 14px", fontSize: "11px", fontWeight: "700", cursor: "pointer",
               }}><Icon name="check" size={11} /> Ready — skip countdown</button>
             </div>
           ) : (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "5px", marginTop: "6px" }}>
               {aliveTeams.map(t => (
                 <button key={t.id} onClick={() => handleCorrectAnswer(t.id)} className="zs-btn" style={{
-                  background: t.color.bg, color: "white", border: "none", borderRadius: "10px",
-                  padding: "6px 8px", fontSize: "11px", fontWeight: "800", cursor: "pointer", transition: "transform 0.15s ease",
+                  background: t.color.bg, color: "white", border: "2px solid #1A1A2E", boxShadow: "2px 2px 0 #1A1A2E", borderRadius: "10px",
+                  padding: "6px 8px", fontSize: "11px", fontWeight: "800", cursor: "pointer",
                   display: "flex", alignItems: "center", justifyContent: "center", gap: "4px",
                 }}><Icon name="plus" size={11} /> <TeamIcon team={t} color="white" /> {t.name} added to it!</button>
               ))}
