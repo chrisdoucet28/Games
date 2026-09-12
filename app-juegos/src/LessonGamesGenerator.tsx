@@ -171,6 +171,12 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
   const [screen, setScreen] = useState<"welcome" | "classes" | "profile" | "learn" | "lessonplan" | "lessonplan-play" | "leaderboard" | "billing" | "topic-select" | "team-setup" | "game-select" | "game" | "results">(
     checkoutRedirect ? "billing" : initialScreen ?? "welcome"
   );
+  // The lesson a teacher is en route to play — set the moment a topic is picked (from the Lesson
+  // Plan index, or Learn's "Start Lesson Plan" button) and read once team-setup's CTA is clicked,
+  // so team-setup knows to route to "lessonplan-play" instead of "game-select". Every team-setup
+  // entry point that ISN'T a lesson explicitly clears this, so no path can misroute on stale state
+  // left over from a previous visit.
+  const [pendingLessonTopicId, setPendingLessonTopicId] = useState<string | null>(null);
   // Background music context: "gameplay" only for the actual game screen, "ambient" everywhere
   // else in the app (menus, setup, lesson plans, results...). The louder "tension" context is set
   // separately by useTurnTimer whenever a timed turn is actively running, and reverts to
@@ -178,20 +184,18 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
   useEffect(() => {
     if (screen === "game") setMusicContext("gameplay");
     // Lesson Plans is real reading/teaching content, not a menu — music under it (even the quiet
-    // ambient bed) competes with the teacher actually presenting, so it goes silent instead.
-    else if (screen === "lessonplan" || screen === "lessonplan-play") stopMusic();
+    // ambient bed) competes with the teacher actually presenting, so it goes silent instead. This
+    // also covers team-setup when it's reached via a lesson plan (pendingLessonTopicId set) rather
+    // than the normal game flow — team-setup is shared between both, and without this check the
+    // ambient bed would suddenly kick in there mid-lesson-plan before going silent again on
+    // "lessonplan-play".
+    else if (screen === "lessonplan" || screen === "lessonplan-play" || (screen === "team-setup" && pendingLessonTopicId)) stopMusic();
     else setMusicContext("ambient");
-  }, [screen]);
+  }, [screen, pendingLessonTopicId]);
   // Where Learn's own "Back" should return to — it can now be reached from 3 different places
   // (the welcome screen's own Learn button, game-select's "Review these topics", and results'
   // "Review these topics"), so a single learnFilter-based binary no longer captures it.
   const [learnReturnTo, setLearnReturnTo] = useState<"welcome" | "game-select" | "results">("welcome");
-  // The lesson a teacher is en route to play — set the moment a topic is picked (from the Lesson
-  // Plan index, or Learn's "Start Lesson Plan" button) and read once team-setup's CTA is clicked,
-  // so team-setup knows to route to "lessonplan-play" instead of "game-select". Every team-setup
-  // entry point that ISN'T a lesson explicitly clears this, so no path can misroute on stale state
-  // left over from a previous visit.
-  const [pendingLessonTopicId, setPendingLessonTopicId] = useState<string | null>(null);
   const isPaid = isPaidStatus(subscription.status);
   // The class this session is tied to, if any. Games started via "Start a Game" (not through "My
   // Classes") leave this null — but "Save & Exit" is still available; clicking it with no class
