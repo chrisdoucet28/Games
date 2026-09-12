@@ -329,6 +329,13 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
   const isRosterTeamActive = (entry: TeamRosterEntry) =>
     teamNames.slice(0, numTeams).some(n => n.trim().toLowerCase() === entry.name.trim().toLowerCase());
 
+  // True when every active slot still holds its untouched "Team Red"/"Team Blue"-style default —
+  // i.e. the teacher hasn't actually set up teams yet. Shared by toggleRosterTeam (which replaces
+  // these instead of appending behind them) and the roster chips' own lock check below (replacing
+  // never needs extra plan capacity, so it shouldn't trip the free-plan cap the way appending does).
+  const isPlaceholderState = (names: string[], count: number) =>
+    names.slice(0, count).every((n, i) => n === DEFAULT_TEAM_NAMES[i]);
+
   // Mirrors the four team-slot pieces of state, updated synchronously (not just via useEffect)
   // inside toggleRosterTeam itself — same idea as this codebase's existing pausedRef/
   // turnCorrectRef pattern. Needed because two roster cards tapped in quick succession fire
@@ -345,9 +352,9 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     const key = entry.name.trim().toLowerCase();
     const activeIdx = names.slice(0, count).findIndex(n => n.trim().toLowerCase() === key);
 
-    const nextNames = [...names];
-    const nextColors = [...colors];
-    const nextMascots = [...mascots];
+    let nextNames = [...names];
+    let nextColors = [...colors];
+    let nextMascots = [...mascots];
     let nextCount = count;
 
     if (activeIdx !== -1) {
@@ -357,13 +364,39 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
         nextMascots[i] = nextMascots[i + 1];
       }
       nextCount = count - 1;
+      // Untapping a class's only real team would otherwise leave 0 active teams — a state the
+      // "how many teams?" buttons above can never produce themselves, and nothing downstream
+      // (handleSetup, game-select) expects. Land back on the normal untouched defaults instead of
+      // an empty roster.
+      if (nextCount === 0) {
+        nextNames = DEFAULT_TEAM_NAMES.slice();
+        nextColors = [0, 1, 2, 3, 4];
+        nextMascots = [null, null, null, null, null];
+        nextCount = 2;
+      }
     } else {
-      if (count >= cap) return;
-      nextNames[count] = entry.name;
-      const idx = TEAM_COLORS.findIndex(c => c.name === entry.color.name);
-      nextColors[count] = idx === -1 ? count : idx;
-      nextMascots[count] = entry.mascot;
-      nextCount = count + 1;
+      // Teacher feedback: tapping a saved team while the editor still shows the untouched "Team
+      // Red"/"Team Blue" placeholders should leave exactly that one team, not that team stacked
+      // behind the placeholders — the defaults were never a real choice to begin with, so a saved
+      // team replaces them outright instead of appending after them. Once any real team is active,
+      // further taps go back to the normal add/remove behavior below.
+      if (isPlaceholderState(names, count)) {
+        nextNames = DEFAULT_TEAM_NAMES.slice();
+        nextColors = [0, 1, 2, 3, 4];
+        nextMascots = [null, null, null, null, null];
+        nextNames[0] = entry.name;
+        const idx = TEAM_COLORS.findIndex(c => c.name === entry.color.name);
+        nextColors[0] = idx === -1 ? 0 : idx;
+        nextMascots[0] = entry.mascot;
+        nextCount = 1;
+      } else {
+        if (count >= cap) return;
+        nextNames[count] = entry.name;
+        const idx = TEAM_COLORS.findIndex(c => c.name === entry.color.name);
+        nextColors[count] = idx === -1 ? count : idx;
+        nextMascots[count] = entry.mascot;
+        nextCount = count + 1;
+      }
     }
 
     teamSlotsRef.current = { names: nextNames, colors: nextColors, mascots: nextMascots, count: nextCount };
@@ -1435,7 +1468,10 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
                 {teamRoster.map(entry => {
                   const isActive = isRosterTeamActive(entry);
                   const cap = isPaid ? 5 : FREE_PLAN_LIMITS.maxTeams;
-                  const locked = !isActive && numTeams >= cap;
+                  // Replacing the untouched defaults collapses down to 1 team rather than adding
+                  // on top of them, so it never actually needs extra capacity — only a genuine
+                  // append (teams already set up) should hit the plan cap.
+                  const locked = !isActive && numTeams >= cap && !isPlaceholderState(teamNames, numTeams);
                   return (
                     <div key={entry.id} style={{ position: "relative" }}>
                       <button
