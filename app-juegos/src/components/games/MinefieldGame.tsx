@@ -318,7 +318,8 @@ export function MinefieldGame({ gridData, teams: propTeams, onUpdateScore, onEnd
   if (phase === "intro") {
     return (
       <div style={{ textAlign: "center" }}>
-        <div style={{ background: "linear-gradient(135deg,#4C1D95,#6D28D9)", borderRadius: "20px", padding: "28px 24px", marginBottom: "10px", position: "relative", color: "white", maxWidth: "560px", margin: "0 auto 10px" }}>
+        <style>{`.mf-btn:hover:not(:disabled){filter:brightness(1.08)} .mf-btn:active:not(:disabled){transform:translate(4px,4px) !important;box-shadow:0 0 0 #1A1A2E !important}`}</style>
+        <div style={{ background: "#6D28D9", border: "4px solid #1A1A2E", boxShadow: "6px 6px 0 #1A1A2E", borderRadius: "20px", padding: "28px 24px", marginBottom: "10px", position: "relative", color: "white", maxWidth: "560px", margin: "0 auto 10px" }}>
           <div style={{ fontWeight: "900", fontSize: "20px", marginBottom: "8px" }}>Minefield</div>
           {topicRotation && (
             <div style={{ background: "rgba(255,255,255,0.16)", borderRadius: "999px", padding: "6px 14px", display: "inline-block", fontWeight: "900", fontSize: "13px", marginBottom: "12px" }}>
@@ -377,7 +378,7 @@ export function MinefieldGame({ gridData, teams: propTeams, onUpdateScore, onEnd
             onClose={() => setShowHowTo(false)}
           />
         )}
-        <button onClick={() => setPhase("pick")} style={{ background: "linear-gradient(135deg,#4C1D95,#6D28D9)", color: "white", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(109,40,217,0.4)" }}>
+        <button onClick={() => setPhase("pick")} className="mf-btn" style={{ background: "#6D28D9", color: "white", border: "3px solid #1A1A2E", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "5px 5px 0 #1A1A2E" }}>
           {topicRotation ? "Start This Topic" : "Enter the Minefield"}
         </button>
       </div>
@@ -396,11 +397,12 @@ export function MinefieldGame({ gridData, teams: propTeams, onUpdateScore, onEnd
       : `${winners[0]?.item.name} cleared the field!`;
     return (
       <div style={{ textAlign: "center" }}>
+        <style>{`.mf-btn:hover:not(:disabled){filter:brightness(1.08)} .mf-btn:active:not(:disabled){transform:translate(4px,4px) !important;box-shadow:0 0 0 #1A1A2E !important}`}</style>
         <div style={{ marginBottom: "6px" }}><Icon name="mine" size={44} color="#4C1D95" /></div>
         <div style={{ fontWeight: "900", fontSize: "22px", color: "#4C1D95", marginBottom: "16px" }}>{headline}</div>
         <div style={{ display: "grid", gridTemplateColumns: teamsGridCols(teams.length), gap: "10px", margin: "0 auto 20px", maxWidth: "760px" }}>
           {ranking.map(({ item: tm, rank, value }) => (
-            <div key={tm.id} style={{ background: tm.color.light, border: `2px solid ${tm.color.bg}`, borderRadius: "14px", padding: "12px" }}>
+            <div key={tm.id} style={{ background: tm.color.light, border: "2px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E", borderRadius: "14px", padding: "12px" }}>
               <div><RankBadge rank={rank} size={20} /></div>
               <div style={{ fontWeight: "800", color: tm.color.dark, fontSize: "14px", marginTop: "4px" }}><TeamIcon team={tm} /> {tm.name}</div>
               <div style={{ color: tm.color.dark, fontWeight: "900", fontSize: "16px", marginTop: "4px" }}>{value} pts</div>
@@ -408,21 +410,22 @@ export function MinefieldGame({ gridData, teams: propTeams, onUpdateScore, onEnd
             </div>
           ))}
         </div>
-        <button onClick={onEnd} style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg,#4C1D95,#6D28D9)", color: "white", border: "none", borderRadius: "14px", padding: "14px 36px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(109,40,217,0.4)" }}><Icon name="checkeredFlag" size={18} /> End Game</button>
+        <button onClick={onEnd} className="mf-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#6D28D9", color: "white", border: "3px solid #1A1A2E", borderRadius: "14px", padding: "14px 36px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "5px 5px 0 #1A1A2E" }}><Icon name="checkeredFlag" size={18} /> End Game</button>
       </div>
     );
   }
 
   return (
     <div>
-      <div style={{ background: "linear-gradient(135deg,#4C1D95,#6D28D9)", borderRadius: "14px", padding: "12px 18px", marginBottom: "14px", textAlign: "center" }}>
+      <style>{`.mf-btn:hover:not(:disabled){filter:brightness(1.08)} .mf-btn:active:not(:disabled){transform:translate(4px,4px) !important;box-shadow:0 0 0 #1A1A2E !important}`}</style>
+      <div style={{ background: "#6D28D9", border: "3px solid #1A1A2E", boxShadow: "4px 4px 0 #1A1A2E", borderRadius: "14px", padding: "12px 18px", marginBottom: "14px", textAlign: "center" }}>
         <div style={{ color: "#DDD6FE", fontWeight: "900", fontSize: "15px", marginBottom: "4px" }}>
           {topicRotation ? `Topic ${gridIndex + 1}/${grids.length}: ` : ""}{topic}
         </div>
         <div style={{ color: "#C4B5FD", fontSize: "13px", lineHeight: 1.5 }}>{instructions}</div>
       </div>
 
-      <div style={{ background: t.color.bg, borderRadius: "14px", padding: "10px 18px", marginBottom: "14px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px" }}>
+      <div style={{ background: t.color.bg, border: "3px solid #1A1A2E", boxShadow: "4px 4px 0 #1A1A2E", borderRadius: "14px", padding: "10px 18px", marginBottom: "14px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px" }}>
         <span style={{ color: "white", fontWeight: "900", fontSize: "17px" }}>
           {(phase === "pick" || phase === "topicComplete") && <><TeamIcon team={t} color="white" /> {t.name} - Pick a square!</>}
           {phase === "speaking" && <><TeamIcon team={t} color="white" /> {t.name} - Say the sentence!</>}
@@ -475,7 +478,7 @@ export function MinefieldGame({ gridData, teams: propTeams, onUpdateScore, onEnd
       )}
 
       {phase === "speaking" && selData && (
-        <div style={{ background: "linear-gradient(135deg,#FEF3C7,#FDE68A)", border: "3px solid #F59E0B", borderRadius: "16px", padding: "20px", marginBottom: "14px", textAlign: "center" }}>
+        <div style={{ background: "#FDE68A", border: "3px solid #1A1A2E", boxShadow: "4px 4px 0 #1A1A2E", borderRadius: "16px", padding: "20px", marginBottom: "14px", textAlign: "center" }}>
           <div style={{ fontSize: "13px", fontWeight: "700", color: "#92400E", marginBottom: "10px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
             {t.name} - Combine these and complete the sentence:
           </div>
@@ -486,20 +489,20 @@ export function MinefieldGame({ gridData, teams: propTeams, onUpdateScore, onEnd
             <div style={{ display: "flex", alignItems: "center", fontSize: "20px", color: "#92400E", fontWeight: "800" }}>+ your idea</div>
           </div>
           <div style={{ color: "#78350F", fontSize: "13px", fontWeight: "600", marginBottom: "14px" }}>Say the full sentence out loud - then your teacher will judge it.</div>
-          <button onClick={() => setPhase("judging")} style={{ background: "linear-gradient(135deg,#7C3AED,#6D28D9)", color: "white", border: "none", borderRadius: "12px", padding: "12px 32px", fontSize: "16px", fontWeight: "800", cursor: "pointer", boxShadow: "0 4px 16px rgba(124,58,237,0.35)" }}>Teacher judges</button>
+          <button onClick={() => setPhase("judging")} className="mf-btn" style={{ background: "#6D28D9", color: "white", border: "3px solid #1A1A2E", borderRadius: "12px", padding: "12px 32px", fontSize: "16px", fontWeight: "800", cursor: "pointer", boxShadow: "4px 4px 0 #1A1A2E" }}>Teacher judges</button>
         </div>
       )}
 
       {phase === "judging" && selData && (
-        <div style={{ position: "relative", background: "#F8F7FF", border: "3px solid #6366F1", borderRadius: "16px", padding: "20px", marginBottom: "14px", textAlign: "center" }}>
+        <div style={{ position: "relative", background: "#F8F7FF", border: "3px solid #1A1A2E", boxShadow: "4px 4px 0 #1A1A2E", borderRadius: "16px", padding: "20px", marginBottom: "14px", textAlign: "center" }}>
           <div style={{ position: "absolute", top: "10px", right: "10px" }}>
             <FlagPromptButton gameId="minefield" questionData={selData} />
           </div>
           <div style={{ fontSize: "13px", fontWeight: "700", color: "#4338CA", marginBottom: "8px", textTransform: "uppercase", letterSpacing: "0.05em" }}>Teacher - Did the student use the target language correctly?</div>
           <div style={{ background: "#EEF2FF", borderRadius: "10px", padding: "10px 16px", marginBottom: "16px", fontStyle: "italic", color: "#3730A3", fontWeight: "700", fontSize: "15px" }}>"{selData.col} {selData.row} ..."</div>
           <div style={{ display: "flex", gap: "14px", justifyContent: "center", flexWrap: "wrap" }}>
-            <button onClick={() => afterJudge(true)} style={{ background: "linear-gradient(135deg,#22C55E,#15803D)", color: "white", border: "none", borderRadius: "14px", padding: "14px 36px", fontSize: "18px", fontWeight: "900", cursor: "pointer", boxShadow: "0 4px 16px rgba(34,197,94,0.4)" }}>Correct! +50</button>
-            <button onClick={() => afterJudge(false)} style={{ background: "linear-gradient(135deg,#EF4444,#B91C1C)", color: "white", border: "none", borderRadius: "14px", padding: "14px 36px", fontSize: "18px", fontWeight: "900", cursor: "pointer", boxShadow: "0 4px 16px rgba(239,68,68,0.4)" }}>Wrong - 0 pts</button>
+            <button onClick={() => afterJudge(true)} className="mf-btn" style={{ background: "#22C55E", color: "white", border: "3px solid #1A1A2E", borderRadius: "14px", padding: "14px 36px", fontSize: "18px", fontWeight: "900", cursor: "pointer", boxShadow: "4px 4px 0 #1A1A2E" }}>Correct! +50</button>
+            <button onClick={() => afterJudge(false)} className="mf-btn" style={{ background: "#EF4444", color: "white", border: "3px solid #1A1A2E", borderRadius: "14px", padding: "14px 36px", fontSize: "18px", fontWeight: "900", cursor: "pointer", boxShadow: "4px 4px 0 #1A1A2E" }}>Wrong - 0 pts</button>
           </div>
           <div style={{ fontSize: "12px", color: "#6B7280", marginTop: "10px", fontWeight: "600" }}>(Mine risk still applies regardless of answer. A wrong answer on a safe tile leaves the square open for next time.)</div>
         </div>
