@@ -110,8 +110,8 @@ const STYLE_TAG = (
     @keyframes koDiceSpin{0%{transform:rotate(0deg) scale(1)}50%{transform:rotate(200deg) scale(1.1)}100%{transform:rotate(360deg) scale(1)}}
     @keyframes koCoinShine{0%,100%{filter:brightness(1)}50%{filter:brightness(1.35)}}
     @keyframes koCrownPop{0%{transform:scale(0) rotate(-20deg);opacity:0}70%{transform:scale(1.2) rotate(8deg);opacity:1}100%{transform:scale(1) rotate(0deg);opacity:1}}
-    .ko-btn:hover:not(:disabled){transform:translateY(-2px) scale(1.02);filter:brightness(1.08)}
-    .ko-btn:active:not(:disabled){transform:translateY(0) scale(0.97)}
+    .ko-btn:hover:not(:disabled){filter:brightness(1.08)}
+    .ko-btn:active:not(:disabled){transform:translate(4px,4px) !important;box-shadow:0 0 0 #1A1A2E !important}
     .ko-zone:hover{filter:brightness(1.15)}
   `}</style>
 );
@@ -789,7 +789,7 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
             </div>
           </div>
         )}
-        <button onClick={() => setShowHowTo(true)} className="ko-btn" style={{ display: "block", margin: "0 auto 14px", background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
+        <button onClick={() => setShowHowTo(true)} className="ko-btn" style={{ display: "block", margin: "0 auto 14px", background: "white", color: GM.color, border: "3px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E", borderRadius: 0, padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
           <Icon name="help" size={14} /> How to Play
         </button>
         {showHowTo && (
@@ -799,7 +799,7 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
             onClose={() => setShowHowTo(false)}
           />
         )}
-        <button onClick={() => setPhase("rolling")} className="ko-btn" style={{ background: "linear-gradient(135deg,#831843,#DB2777)", color: "white", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(219,39,119,0.5)", transition: "transform 0.15s ease" }}><Icon name="crown" size={18} /> Roll for Turn Order!</button>
+        <button onClick={() => setPhase("rolling")} className="ko-btn" style={{ background: "#DB2777", color: "white", border: "3px solid #1A1A2E", borderRadius: 0, padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "6px 6px 0 #1A1A2E" }}><Icon name="crown" size={18} /> Roll for Turn Order!</button>
       </div>
     </div>
   );
@@ -811,14 +811,14 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
         <AmbientBackdrop />
         {STYLE_TAG}
         <div style={{ position: "relative", zIndex: 1 }}>
-          <div style={{ background: "linear-gradient(160deg,#831843,#4C0519)", border: "2px solid #F9A8D455", borderRadius: "20px", padding: "28px 24px", marginBottom: "20px", color: "white", maxWidth: "480px", margin: "0 auto 20px", boxShadow: "0 0 50px rgba(219,39,119,0.4)" }}>
+          <div style={{ background: "#4C0519", border: "4px solid #1A1A2E", borderRadius: 0, padding: "28px 24px", marginBottom: "20px", color: "white", maxWidth: "480px", margin: "0 auto 20px", boxShadow: "6px 6px 0 #1A1A2E" }}>
             <div style={{ marginBottom: "10px" }}><Icon name="hourglass" size={36} /></div>
             <div style={{ fontWeight: "900", fontSize: "19px", marginBottom: "10px", color: "#F9A8D4" }}><TeamIcon team={noticeTeam} /> {noticeTeam.name} ran out of time!</div>
             <div style={{ fontSize: "15px", lineHeight: 1.6, opacity: 0.95 }}>
               {timeoutNotice.retried ? "That's your one free retry for this game — watch the clock this time!" : "You've already used your free retry this game — the turn moves on."}
             </div>
           </div>
-          <button onClick={dismissTimeoutNotice} className="ko-btn" style={{ background: "linear-gradient(135deg,#831843,#DB2777)", color: "white", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(219,39,119,0.5)", transition: "transform 0.15s ease" }}>
+          <button onClick={dismissTimeoutNotice} className="ko-btn" style={{ background: "#DB2777", color: "white", border: "3px solid #1A1A2E", borderRadius: 0, padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "6px 6px 0 #1A1A2E" }}>
             {timeoutNotice.retried ? <><Icon name="refresh" size={17} /> Try Again!</> : <><Icon name="next" size={17} /> Next Team</>}
           </button>
         </div>
@@ -845,7 +845,7 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
           <div style={{ fontWeight: "900", fontSize: "22px", color: "#F9A8D4", marginBottom: "16px" }}>{headline}</div>
           <div style={{ display: "grid", gridTemplateColumns: teamsGridCols(teams.length), gap: "10px", margin: "0 auto 20px", maxWidth: "760px" }}>
             {ranking.map(({ item: t, rank, value }) => (
-              <div key={t.id} style={{ background: `linear-gradient(160deg,${t.color.dark}55,#1F0A1F)`, border: `2px solid ${t.color.bg}`, borderRadius: "14px", padding: "12px" }}>
+              <div key={t.id} style={{ background: t.color.dark, border: "3px solid #1A1A2E", boxShadow: "4px 4px 0 #1A1A2E", borderRadius: 0, padding: "12px" }}>
                 <div><RankBadge rank={rank} size={22} /></div>
                 <div style={{ fontWeight: "800", color: "white", fontSize: "14px", marginTop: "4px" }}><TeamIcon team={t} /> {t.name}</div>
                 <div style={{ color: "#FCD34D", fontWeight: "900", fontSize: "16px", marginTop: "4px" }}>{value} pts</div>
@@ -853,7 +853,7 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
               </div>
             ))}
           </div>
-          <button onClick={onEnd} className="ko-btn" style={{ background: "linear-gradient(135deg,#831843,#DB2777)", color: "white", border: "none", borderRadius: "14px", padding: "14px 36px", fontSize: "17px", fontWeight: "900", cursor: "pointer", transition: "transform 0.15s ease" }}><Icon name="checkeredFlag" size={17} /> End Game</button>
+          <button onClick={onEnd} className="ko-btn" style={{ background: "#DB2777", color: "white", border: "3px solid #1A1A2E", borderRadius: 0, padding: "14px 36px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "5px 5px 0 #1A1A2E" }}><Icon name="checkeredFlag" size={17} /> End Game</button>
         </div>
       </div>
     );
@@ -934,7 +934,7 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
                   </div>
                 </div>
                 <div>
-                  <button onClick={() => setPhase("pick")} className="ko-btn" style={{ background: "linear-gradient(135deg,#831843,#DB2777)", color: "white", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "800", cursor: "pointer", transition: "transform 0.15s ease" }}><Icon name="play" size={15} /> Start Round {round}</button>
+                  <button onClick={() => setPhase("pick")} className="ko-btn" style={{ background: "#DB2777", color: "white", border: "3px solid #1A1A2E", borderRadius: 0, padding: "12px 28px", fontSize: "16px", fontWeight: "800", cursor: "pointer", boxShadow: "4px 4px 0 #1A1A2E" }}><Icon name="play" size={15} /> Start Round {round}</button>
                 </div>
               </div>
             )}
@@ -962,7 +962,7 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
                 const ownedZones = ZONES.filter(zone => owners[zone.id] === team.id);
                 const income = ownedZones.reduce((sum, zone) => sum + zone.pts, 0);
                 return (
-                  <div key={team.id} style={{ background: `linear-gradient(160deg,${team.color.dark}44,#1F0A1F)`, border: `2px solid ${team.color.bg}`, borderRadius: "12px", padding: "8px 12px", fontSize: "12px", color: "white", fontWeight: "700", display: "inline-flex", alignItems: "center", gap: "5px" }}>
+                  <div key={team.id} style={{ background: team.color.dark, border: "2px solid #1A1A2E", boxShadow: "2px 2px 0 #1A1A2E", borderRadius: 0, padding: "8px 12px", fontSize: "12px", color: "white", fontWeight: "700", display: "inline-flex", alignItems: "center", gap: "5px" }}>
                     <TeamIcon team={team} color="white" /> {team.name}: {income} pts/rnd
                   </div>
                 );
@@ -973,8 +973,8 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
             </div>
 
             {phase !== "round-end" && (
-              <div style={{ background: `linear-gradient(90deg,${activeTeam.color.dark},${activeTeam.color.bg})`, borderRadius: "14px", padding: "10px 16px", marginBottom: "12px", boxShadow: `0 4px 18px ${activeTeam.color.bg}55` }}>
-                <span style={{ color: "white", fontWeight: "900", fontSize: "16px", textShadow: "0 1px 3px rgba(0,0,0,0.4)", display: "inline-flex", alignItems: "center", gap: "6px" }}><Icon name="crown" size={16} /> {activeTeam.name}'s turn</span>
+              <div style={{ background: activeTeam.color.bg, border: "3px solid #1A1A2E", borderRadius: 0, padding: "10px 16px", marginBottom: "12px", boxShadow: "4px 4px 0 #1A1A2E" }}>
+                <span style={{ color: "white", fontWeight: "900", fontSize: "16px", textShadow: "2px 2px 0 #1A1A2E", display: "inline-flex", alignItems: "center", gap: "6px" }}><Icon name="crown" size={16} /> {activeTeam.name}'s turn</span>
               </div>
             )}
 
@@ -983,8 +983,8 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
                 <QuestionCard question={q} showAnswer={showAns} onReveal={() => { stop(); setShowAns(true); }} gameId="hill" />
                 {(showAns || q?.type === "speaking task") && (
                   <div style={{ display: "flex", gap: "10px", justifyContent: "center", marginTop: "12px" }}>
-                    <button onClick={() => resolveUncontested(true)} className="ko-btn" style={{ background: "#22C55E", color: "white", border: "none", borderRadius: "12px", padding: "12px 24px", fontSize: "16px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease" }}><Icon name="check" size={15} /> Correct! Claim!</button>
-                    <button onClick={() => resolveUncontested(false)} className="ko-btn" style={{ background: "#EF4444", color: "white", border: "none", borderRadius: "12px", padding: "12px 24px", fontSize: "16px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease" }}><Icon name="close" size={13} /> Wrong</button>
+                    <button onClick={() => resolveUncontested(true)} className="ko-btn" style={{ background: "#22C55E", color: "white", border: "3px solid #1A1A2E", borderRadius: 0, padding: "12px 24px", fontSize: "16px", fontWeight: "700", cursor: "pointer", boxShadow: "4px 4px 0 #1A1A2E" }}><Icon name="check" size={15} /> Correct! Claim!</button>
+                    <button onClick={() => resolveUncontested(false)} className="ko-btn" style={{ background: "#EF4444", color: "white", border: "3px solid #1A1A2E", borderRadius: 0, padding: "12px 24px", fontSize: "16px", fontWeight: "700", cursor: "pointer", boxShadow: "4px 4px 0 #1A1A2E" }}><Icon name="close" size={13} /> Wrong</button>
                   </div>
                 )}
               </>
@@ -992,19 +992,19 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
 
             {phase === "contested" && contest?.step === "simultaneous" && (
               <div>
-                <div style={{ background: "linear-gradient(90deg,rgba(255,255,255,0) 0%, rgba(248,113,113,0.18) 50%, rgba(255,255,255,0) 100%)", border: "2px solid #FCA5A5", borderRadius: "16px", padding: "14px", marginBottom: "12px", textAlign: "center", animation: "koDuelPulse 1.6s ease-in-out infinite" }}>
+                <div style={{ background: "#4C0519", border: "3px solid #1A1A2E", boxShadow: "4px 4px 0 #1A1A2E", borderRadius: 0, padding: "14px", marginBottom: "12px", textAlign: "center", animation: "koDuelPulse 1.6s ease-in-out infinite" }}>
                   <div style={{ fontWeight: "900", fontSize: "18px", color: "#FCA5A5", display: "inline-flex", alignItems: "center", gap: "6px" }}><Icon name="sword" size={17} /> Battle for {contest.zoneId}!</div>
                   <div style={{ fontSize: "13px", color: "#F3E8FF", fontWeight: "700", lineHeight: 1.5 }}>
                     {attacker?.name} is attacking a claimed zone. Both teams face the same question, and only one can control it.
                   </div>
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginBottom: "12px" }}>
-                  <div style={{ background: `linear-gradient(160deg,${attacker?.color.dark}55,#1F0A1F)`, border: `3px solid ${attacker?.color.bg}`, borderRadius: "12px", padding: "10px", textAlign: "center" }}>
+                  <div style={{ background: attacker?.color.dark, border: "3px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E", borderRadius: 0, padding: "10px", textAlign: "center" }}>
                     <div style={{ marginBottom: "2px" }}><Icon name="sword" size={18} /></div>
                     <div style={{ fontWeight: "900", fontSize: "13px", color: "white" }}>{attacker?.name}</div>
                     <div style={{ fontSize: "11px", color: "#F3E8FF", opacity: 0.8 }}>Attacker</div>
                   </div>
-                  <div style={{ background: `linear-gradient(160deg,${defender?.color.dark}55,#1F0A1F)`, border: `3px solid ${defender?.color.bg}`, borderRadius: "12px", padding: "10px", textAlign: "center" }}>
+                  <div style={{ background: defender?.color.dark, border: "3px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E", borderRadius: 0, padding: "10px", textAlign: "center" }}>
                     <div style={{ marginBottom: "2px" }}><Icon name="shield" size={18} /></div>
                     <div style={{ fontWeight: "900", fontSize: "13px", color: "white" }}>{defender?.name}</div>
                     <div style={{ fontSize: "11px", color: "#F3E8FF", opacity: 0.8 }}>Defender of {contest.zoneId}</div>
@@ -1015,7 +1015,7 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
                     <div style={{ fontWeight: "700", fontSize: "14px", color: "#F9A8D4", marginBottom: "14px" }}>
                       Take a second to look at the board — the {CONTEST_SECONDS}s clock only starts once you're ready.
                     </div>
-                    <button onClick={() => setContestReady(true)} className="ko-btn" style={{ background: "linear-gradient(135deg,#831843,#DB2777)", color: "white", border: "none", borderRadius: "12px", padding: "14px 28px", cursor: "pointer", fontWeight: "800", fontSize: "16px", transition: "transform 0.15s ease" }}><Icon name="play" size={15} /> I'm Ready!</button>
+                    <button onClick={() => setContestReady(true)} className="ko-btn" style={{ background: "#DB2777", color: "white", border: "3px solid #1A1A2E", borderRadius: 0, padding: "14px 28px", cursor: "pointer", fontWeight: "800", fontSize: "16px", boxShadow: "4px 4px 0 #1A1A2E" }}><Icon name="play" size={15} /> I'm Ready!</button>
                   </div>
                 ) : (
                   <QuestionCard question={q} showAnswer={showAns} onReveal={() => { stop(); if (contestIsSoloDuel) stopContestTimer(); setShowAns(true); }} gameId="hill" />
@@ -1030,11 +1030,11 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
                         Answer correctly before time runs out to {contest.attackerId === propTeams[0].id ? "capture" : "defend"} the zone!
                       </div>
                       <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
-                        <button onClick={() => { stopContestTimer(); resolveContest(propTeams[0].id); }} className="ko-btn" style={{ background: "#22C55E", color: "white", border: "none", borderRadius: "12px", padding: "14px 28px", cursor: "pointer", fontWeight: "800", fontSize: "16px", transition: "transform 0.15s ease" }}><Icon name="check" size={15} /> Got it!</button>
+                        <button onClick={() => { stopContestTimer(); resolveContest(propTeams[0].id); }} className="ko-btn" style={{ background: "#22C55E", color: "white", border: "3px solid #1A1A2E", borderRadius: 0, padding: "14px 28px", cursor: "pointer", fontWeight: "800", fontSize: "16px", boxShadow: "4px 4px 0 #1A1A2E" }}><Icon name="check" size={15} /> Got it!</button>
                         {/* Lets the student concede the instant they know they missed it, instead of
                             being forced to sit out the rest of the countdown for the same
                             opponent-wins outcome a timeout would give anyway. */}
-                        <button onClick={() => { stopContestTimer(); resolveContest(soloOpponentRef.current!.id); }} className="ko-btn" style={{ background: "rgba(255,255,255,0.1)", color: "#F9A8D4", border: "1px solid #F9A8D455", borderRadius: "12px", padding: "14px 28px", cursor: "pointer", fontWeight: "800", fontSize: "16px", transition: "transform 0.15s ease" }}><Icon name="close" size={13} /> Wrong</button>
+                        <button onClick={() => { stopContestTimer(); resolveContest(soloOpponentRef.current!.id); }} className="ko-btn" style={{ background: "rgba(255,255,255,0.1)", color: "#F9A8D4", border: "3px solid #1A1A2E", borderRadius: 0, padding: "14px 28px", cursor: "pointer", fontWeight: "800", fontSize: "16px", boxShadow: "4px 4px 0 #1A1A2E" }}><Icon name="close" size={13} /> Wrong</button>
                       </div>
                     </div>
                   )
@@ -1048,7 +1048,7 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
                     {buzzedTeamId !== null && (() => {
                       const buzzedTeam = teams.find(t => t.id === buzzedTeamId);
                       return (
-                        <div style={{ textAlign: "center", marginTop: "10px", background: "#172438", border: `1.5px solid ${buzzedTeam?.color.bg ?? "#F7C948"}`, borderRadius: "12px", padding: "8px 14px" }}>
+                        <div style={{ textAlign: "center", marginTop: "10px", background: "#172438", border: "3px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E", borderRadius: 0, padding: "8px 14px" }}>
                           <span style={{ fontWeight: "800", fontSize: "13px", color: "#FCD34D", display: "inline-flex", alignItems: "center", gap: "5px" }}><Icon name="bolt" size={13} /> <TeamIcon team={buzzedTeam} /> {buzzedTeam?.name} buzzed in first!</span>
                         </div>
                       );
@@ -1061,10 +1061,10 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
                             : "Who answered correctly first?"}
                         </div>
                         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "8px" }}>
-                          <button onClick={() => resolveContest(contest.attackerId)} className="ko-btn" style={{ background: attacker?.color.bg, color: "white", border: contest.attackerId === buzzedTeamId ? "3px solid #F7C948" : "none", borderRadius: "12px", padding: "14px 10px", cursor: "pointer", fontWeight: "800", transition: "transform 0.15s ease" }}><Icon name="sword" size={14} /> {attacker?.name}</button>
-                          <button onClick={() => resolveContest(contest.defenderId)} className="ko-btn" style={{ background: defender?.color.bg, color: "white", border: contest.defenderId === buzzedTeamId ? "3px solid #F7C948" : "none", borderRadius: "12px", padding: "14px 10px", cursor: "pointer", fontWeight: "800", transition: "transform 0.15s ease" }}><Icon name="shield" size={14} /> {defender?.name}</button>
+                          <button onClick={() => resolveContest(contest.attackerId)} className="ko-btn" style={{ background: attacker?.color.bg, color: "white", border: contest.attackerId === buzzedTeamId ? "3px solid #F7C948" : "3px solid #1A1A2E", borderRadius: 0, padding: "14px 10px", cursor: "pointer", fontWeight: "800", boxShadow: "3px 3px 0 #1A1A2E" }}><Icon name="sword" size={14} /> {attacker?.name}</button>
+                          <button onClick={() => resolveContest(contest.defenderId)} className="ko-btn" style={{ background: defender?.color.bg, color: "white", border: contest.defenderId === buzzedTeamId ? "3px solid #F7C948" : "3px solid #1A1A2E", borderRadius: 0, padding: "14px 10px", cursor: "pointer", fontWeight: "800", boxShadow: "3px 3px 0 #1A1A2E" }}><Icon name="shield" size={14} /> {defender?.name}</button>
                         </div>
-                        <button onClick={() => resolveContest(null)} className="ko-btn" style={{ marginTop: "10px", background: "rgba(255,255,255,0.1)", color: "#F9A8D4", cursor: "pointer", border: "1px solid #F9A8D455", padding: "8px 16px", borderRadius: "10px", transition: "transform 0.15s ease" }}><Icon name="handshake" size={13} /> Neither</button>
+                        <button onClick={() => resolveContest(null)} className="ko-btn" style={{ marginTop: "10px", background: "rgba(255,255,255,0.1)", color: "#F9A8D4", cursor: "pointer", border: "3px solid #1A1A2E", padding: "8px 16px", borderRadius: 0, boxShadow: "3px 3px 0 #1A1A2E" }}><Icon name="handshake" size={13} /> Neither</button>
                       </div>
                     )}
                   </>
@@ -1084,13 +1084,13 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
                   {contest.reason === "defender" && <div style={{ fontWeight: "900", fontSize: "16px", color: "white" }}>{defender?.name} defended {contest.zoneId}! +20 bonus pts</div>}
                   {contest.reason === "neither" && <div style={{ fontWeight: "900", fontSize: "16px", color: "white" }}>Neither wins — {contest.zoneId} stays with {defender?.name}!</div>}
                 </div>
-                <button onClick={() => nextTeamTurn(false, owners)} className="ko-btn" style={{ background: "linear-gradient(135deg,#831843,#DB2777)", color: "white", border: "none", borderRadius: "12px", padding: "12px 28px", cursor: "pointer", fontWeight: "800", transition: "transform 0.15s ease" }}><Icon name="next" size={14} /> Next Turn</button>
+                <button onClick={() => nextTeamTurn(false, owners)} className="ko-btn" style={{ background: "#DB2777", color: "white", border: "3px solid #1A1A2E", borderRadius: 0, padding: "12px 28px", cursor: "pointer", fontWeight: "800", boxShadow: "4px 4px 0 #1A1A2E" }}><Icon name="next" size={14} /> Next Turn</button>
               </div>
             )}
 
             {phase === "round-end" && roundSummary && (
               <div style={{ textAlign: "center" }}>
-                <div style={{ background: "linear-gradient(160deg,#78350F,#451A03)", border: "2px solid #FCD34D66", borderRadius: "16px", padding: "16px", marginBottom: "14px" }}>
+                <div style={{ background: "#451A03", border: "3px solid #1A1A2E", boxShadow: "4px 4px 0 #1A1A2E", borderRadius: 0, padding: "16px", marginBottom: "14px" }}>
                   <div style={{ fontWeight: "900", fontSize: "18px", color: "#FCD34D", animation: "koCoinShine 2s ease-in-out infinite", display: "inline-flex", alignItems: "center", gap: "6px" }}><Icon name="coin" size={17} /> End of Round {round}</div>
                 </div>
                 <div style={{ display: "grid", gap: "10px", marginBottom: "16px" }}>
@@ -1099,7 +1099,7 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
                     if (!team) return null;
                     const totalRoundControl = roundPoints[summary.teamId] ?? 0;
                     return (
-                      <div key={summary.teamId} style={{ background: `linear-gradient(160deg,${team.color.dark}44,#1F0A1F)`, border: `3px solid ${team.color.bg}`, borderRadius: "16px", padding: "12px 16px", textAlign: "left" }}>
+                      <div key={summary.teamId} style={{ background: team.color.dark, border: "3px solid #1A1A2E", boxShadow: "4px 4px 0 #1A1A2E", borderRadius: 0, padding: "12px 16px", textAlign: "left" }}>
                         <div style={{ fontWeight: "900", fontSize: "16px", color: "white", marginBottom: "6px", display: "flex", alignItems: "center", gap: "6px" }}>
                           <TeamIcon team={team} color="white" /> {team.name}
                         </div>
@@ -1122,7 +1122,7 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
                     );
                   })}
                 </div>
-                <button onClick={startNextRound} className="ko-btn" style={{ background: "linear-gradient(135deg,#831843,#DB2777)", color: "white", border: "none", borderRadius: "14px", padding: "14px 36px", fontSize: "17px", fontWeight: "900", cursor: "pointer", transition: "transform 0.15s ease" }}>{round >= TOTAL_ROUNDS ? <><Icon name="trophy" size={16} /> See Final Results</> : <><Icon name="play" size={16} /> Start Round {round + 1}</>}</button>
+                <button onClick={startNextRound} className="ko-btn" style={{ background: "#DB2777", color: "white", border: "3px solid #1A1A2E", borderRadius: 0, padding: "14px 36px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "5px 5px 0 #1A1A2E" }}>{round >= TOTAL_ROUNDS ? <><Icon name="trophy" size={16} /> See Final Results</> : <><Icon name="play" size={16} /> Start Round {round + 1}</>}</button>
               </div>
             )}
           </>
