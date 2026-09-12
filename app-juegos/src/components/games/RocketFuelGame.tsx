@@ -110,8 +110,8 @@ const STYLE_TAG = (
     @keyframes rfIgnitionFlash{0%{opacity:0}30%{opacity:1}100%{opacity:0}}
     @keyframes rfMiniShake{0%,100%{transform:translate(0,0) rotate(0deg)}20%{transform:translate(-4px,-2px) rotate(-7deg)}40%{transform:translate(4px,-5px) rotate(6deg)}60%{transform:translate(-3px,-7px) rotate(-4deg)}80%{transform:translate(2px,-3px) rotate(3deg)}}
     @keyframes rfFuelRise{0%{transform:translate(-50%,0) scale(1);opacity:1}100%{transform:translate(-50%,-64px) scale(0.5);opacity:0}}
-    .rf-btn:hover:not(:disabled){transform:translateY(-2px) scale(1.02);filter:brightness(1.1)}
-    .rf-btn:active:not(:disabled){transform:translateY(0) scale(0.97)}
+    .rf-btn:hover:not(:disabled){filter:brightness(1.1)}
+    .rf-btn:active:not(:disabled){transform:translate(4px,4px) !important;box-shadow:0 0 0 #1A1A2E !important}
   `}</style>
 );
 
@@ -379,7 +379,7 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
       <Starfield />
       {STYLE_TAG}
       <div style={{ position: "relative", zIndex: 1 }}>
-        <div style={{ background: "linear-gradient(160deg,#312E81,#0B0B2E)", border: "2px solid #A5B4FC55", borderRadius: "20px", padding: "28px 24px", marginBottom: "10px", color: "white", maxWidth: "560px", margin: "0 auto 10px", boxShadow: "0 0 50px rgba(99,102,241,0.4)" }}>
+        <div style={{ background: "#312E81", border: "4px solid #1A1A2E", boxShadow: "6px 6px 0 #1A1A2E", borderRadius: "20px", padding: "28px 24px", marginBottom: "10px", color: "white", maxWidth: "560px", margin: "0 auto 10px" }}>
           <div style={{ marginBottom: "10px" }}><Icon name="rocket" size={36} /></div>
           <div style={{ fontWeight: "900", fontSize: "20px", marginBottom: "10px", color: "#A5B4FC" }}>Rocket Fuel</div>
           <div style={{ fontSize: "15px", lineHeight: 1.7 }}>
@@ -389,7 +389,7 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
         </div>
         <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "24px" }}>
           {teams.map((t, i) => (
-            <div key={t.id} style={{ background: `linear-gradient(160deg,${t.color.dark}55,#0B0B2E)`, border: `3px solid ${t.color.bg}`, borderRadius: "14px", padding: "10px 18px", fontWeight: "800", fontSize: "14px", color: "white", display: "flex", alignItems: "center", gap: "6px" }}>
+            <div key={t.id} style={{ background: t.color.dark, border: "2px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E", borderRadius: "14px", padding: "10px 18px", fontWeight: "800", fontSize: "14px", color: "white", display: "flex", alignItems: "center", gap: "6px" }}>
               {i + 1}. <TeamIcon team={t} color="white" /> {t.name}
             </div>
           ))}
@@ -404,7 +404,7 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
             onClose={() => setShowHowTo(false)}
           />
         )}
-        <button onClick={() => startTeamTurn(0)} className="rf-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg,#4338CA,#818CF8)", color: "white", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(99,102,241,0.5)", transition: "transform 0.15s ease" }}>
+        <button onClick={() => startTeamTurn(0)} className="rf-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#4338CA", color: "white", border: "3px solid #1A1A2E", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "6px 6px 0 #1A1A2E" }}>
           <Icon name="flame" size={20} /> Ignite Engines!
         </button>
       </div>
@@ -416,7 +416,7 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
       <Starfield />
       {STYLE_TAG}
       <div style={{ position: "relative", zIndex: 1 }}>
-        <div style={{ background: `linear-gradient(90deg,${activeTeam.color.dark},${activeTeam.color.bg})`, borderRadius: "14px", padding: "10px 16px", marginBottom: "14px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px", boxShadow: `0 4px 18px ${activeTeam.color.bg}55` }}>
+        <div style={{ background: activeTeam.color.bg, border: "3px solid #1A1A2E", borderRadius: "14px", padding: "10px 16px", marginBottom: "14px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px", boxShadow: "4px 4px 0 #1A1A2E" }}>
           <span style={{ color: "white", fontWeight: "900", fontSize: "16px", textShadow: "0 1px 3px rgba(0,0,0,0.4)", display: "inline-flex", alignItems: "center", gap: "6px" }}><Icon name="rocket" size={15} /> {activeTeam.name}'s turn — {round > TOTAL_ROUNDS ? "Bonus Round" : `Round ${round}/${TOTAL_ROUNDS}`}, Team {teamIdx + 1} of {teams.length}</span>
           {phase === "team-turn" && (
             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
@@ -445,8 +445,8 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
               <div style={{ display: "flex", gap: "10px", justifyContent: "center", marginTop: "14px" }}>
                 {showAnswer ? (
                   <>
-                    <button onClick={() => judge(true)} className="rf-btn" style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "linear-gradient(135deg,#15803D,#22C55E)", color: "white", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "15px", fontWeight: "800", cursor: "pointer", transition: "transform 0.15s ease" }}><Icon name="check" size={14} /> Fuelled it!</button>
-                    <button onClick={() => judge(false)} className="rf-btn" style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "linear-gradient(135deg,#B91C1C,#EF4444)", color: "white", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "15px", fontWeight: "800", cursor: "pointer", transition: "transform 0.15s ease" }}><Icon name="close" size={13} /> No fuel</button>
+                    <button onClick={() => judge(true)} className="rf-btn" style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "#22C55E", color: "white", border: "3px solid #1A1A2E", borderRadius: "12px", padding: "12px 28px", fontSize: "15px", fontWeight: "800", cursor: "pointer", boxShadow: "4px 4px 0 #1A1A2E" }}><Icon name="check" size={14} /> Fuelled it!</button>
+                    <button onClick={() => judge(false)} className="rf-btn" style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "#EF4444", color: "white", border: "3px solid #1A1A2E", borderRadius: "12px", padding: "12px 28px", fontSize: "15px", fontWeight: "800", cursor: "pointer", boxShadow: "4px 4px 0 #1A1A2E" }}><Icon name="close" size={13} /> No fuel</button>
                   </>
                 ) : (
                   <button onClick={drawPrompt} className="rf-btn" style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "rgba(255,255,255,0.1)", color: "#C7D2FE", border: "2px solid #A5B4FC55", borderRadius: "12px", padding: "10px 22px", fontSize: "14px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease" }}><Icon name="next" size={13} /> Skip — try a different one</button>
@@ -458,12 +458,12 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
 
         {phase === "team-end" && (
           <div style={{ textAlign: "center" }}>
-            <div style={{ background: "linear-gradient(160deg,#312E81,#0B0B2E)", border: "2px solid #A5B4FC66", borderRadius: "16px", padding: "20px", marginBottom: "16px" }}>
+            <div style={{ background: "#312E81", border: "3px solid #1A1A2E", boxShadow: "4px 4px 0 #1A1A2E", borderRadius: "16px", padding: "20px", marginBottom: "16px" }}>
               <div style={{ marginBottom: "6px" }}><Icon name="rocket" size={34} /></div>
               <div style={{ fontWeight: "900", fontSize: "20px", color: "white", marginBottom: "8px" }}>{activeTeam.name}'s tank is sealed!</div>
               <div style={{ fontSize: "14px", color: "#C7D2FE" }}>Nice work! Time for the next team.</div>
             </div>
-            <button onClick={nextTeam} className="rf-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg,#4338CA,#818CF8)", color: "white", border: "none", borderRadius: "14px", padding: "14px 36px", fontSize: "17px", fontWeight: "900", cursor: "pointer", transition: "transform 0.15s ease" }}>
+            <button onClick={nextTeam} className="rf-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#4338CA", color: "white", border: "3px solid #1A1A2E", borderRadius: "14px", padding: "14px 36px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "5px 5px 0 #1A1A2E" }}>
               {teamIdx + 1 >= teams.length
                 ? (round >= TOTAL_ROUNDS ? <><Icon name="rocket" size={18} /> Go to Launchpad</> : <><Icon name="next" size={18} /> Start Round {round + 1}</>)
                 : <><Icon name="next" size={18} /> Next Team's Turn</>}
@@ -650,7 +650,7 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
           {ranked.map(({ team: t, fuel: fuelCount, rank }) => {
             const basePts = fuelCount * POINTS_PER_CORRECT;
             return (
-              <div key={t.id} style={{ background: `linear-gradient(160deg,${t.color.dark}55,#0B0B2E)`, border: `2px solid ${t.color.bg}`, borderRadius: "14px", padding: "12px" }}>
+              <div key={t.id} style={{ background: t.color.dark, border: "2px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E", borderRadius: "14px", padding: "12px" }}>
                 <div><RankBadge rank={rank} size={22} /></div>
                 <div style={{ fontWeight: "800", color: "white", fontSize: "14px", marginTop: "4px" }}><TeamIcon team={t} /> {t.name}</div>
                 <div style={{ color: "#FDBA74", fontWeight: "800", fontSize: "13px", marginTop: "2px", display: "flex", alignItems: "center", justifyContent: "center", gap: "4px" }}><Icon name="fuel" size={12} /> {fuelCount} fuelled · {basePts} pts</div>
@@ -666,9 +666,9 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
         </div>
         <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap" }}>
           {canLaunchAgain && (
-            <button onClick={launchAgain} className="rf-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg,#7C3AED,#C4B5FD)", color: "white", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "800", cursor: "pointer", transition: "transform 0.15s ease" }}><Icon name="rocket" size={16} /> One More Launch!</button>
+            <button onClick={launchAgain} className="rf-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#7C3AED", color: "white", border: "3px solid #1A1A2E", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "800", cursor: "pointer", boxShadow: "4px 4px 0 #1A1A2E" }}><Icon name="rocket" size={16} /> One More Launch!</button>
           )}
-          <button onClick={onEnd} className="rf-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg,#4338CA,#818CF8)", color: "white", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "800", cursor: "pointer", transition: "transform 0.15s ease" }}><Icon name="checkeredFlag" size={16} /> End Game</button>
+          <button onClick={onEnd} className="rf-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#4338CA", color: "white", border: "3px solid #1A1A2E", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "800", cursor: "pointer", boxShadow: "4px 4px 0 #1A1A2E" }}><Icon name="checkeredFlag" size={16} /> End Game</button>
         </div>
       </div>
     </div>
