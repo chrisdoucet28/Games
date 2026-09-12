@@ -36,8 +36,8 @@ const STYLE_TAG = (
     @keyframes hsEmberRise{0%{transform:translateY(0) scale(1);opacity:0}15%{opacity:0.9}100%{transform:translateY(-280px) scale(0.4);opacity:0}}
     @keyframes hsLavaGlow{0%,100%{opacity:0.5}50%{opacity:0.85}}
     @keyframes hsPulseDanger{0%,100%{box-shadow:0 0 0px rgba(239,68,68,0)}50%{box-shadow:0 0 24px rgba(239,68,68,0.85)}}
-    .hs-btn:hover:not(:disabled){transform:translateY(-2px) scale(1.02);filter:brightness(1.12)}
-    .hs-btn:active:not(:disabled){transform:translateY(0) scale(0.97)}
+    .hs-btn:hover:not(:disabled){filter:brightness(1.12)}
+    .hs-btn:active:not(:disabled){transform:translate(4px,4px) !important;box-shadow:0 0 0 #1A1A2E !important}
   `}</style>
 );
 
@@ -422,7 +422,7 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
         {STYLE_TAG}
         <div style={{ position: "relative", zIndex: 1 }}>
           <div style={{ fontWeight: "900", fontSize: "20px", color: "white", marginBottom: "10px" }}>Hot Seat needs words to play.</div>
-          <button onClick={onEnd} className="hs-btn" style={{ background: "linear-gradient(135deg,#B91C1C,#F97316)", color: "white", border: "none", borderRadius: "14px", padding: "12px 28px", fontWeight: "900", cursor: "pointer", transition: "transform 0.15s ease" }}>End Game</button>
+          <button onClick={onEnd} className="hs-btn" style={{ background: "#F97316", color: "white", border: "3px solid #1A1A2E", borderRadius: "14px", padding: "12px 28px", fontWeight: "900", cursor: "pointer", boxShadow: "4px 4px 0 #1A1A2E" }}>End Game</button>
         </div>
       </div>
     );
@@ -471,7 +471,7 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
           </div>
           <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "24px" }}>
             {teams.map((t, i) => (
-              <div key={t.id} style={{ background: `linear-gradient(160deg,${t.color.dark}55,#1C0701)`, border: `3px solid ${t.color.bg}`, borderRadius: "14px", padding: "10px 18px", fontWeight: "800", fontSize: "14px", color: "white", display: "flex", alignItems: "center", gap: "6px" }}>
+              <div key={t.id} style={{ background: t.color.dark, border: "2px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E", borderRadius: "14px", padding: "10px 18px", fontWeight: "800", fontSize: "14px", color: "white", display: "flex", alignItems: "center", gap: "6px" }}>
                 {i + 1}. <TeamIcon team={t} color="white" /> {t.name}
               </div>
             ))}
@@ -552,7 +552,7 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
               onClose={() => setShowHowTo(false)}
             />
           )}
-          <button onClick={() => setPhase("intro")} className="hs-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg,#B91C1C,#F97316)", color: "white", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(249,115,22,0.5)", transition: "transform 0.15s ease" }}>
+          <button onClick={() => setPhase("intro")} className="hs-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#F97316", color: "white", border: "3px solid #1A1A2E", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "6px 6px 0 #1A1A2E" }}>
             <Icon name="flame" size={20} /> Let's Play!
           </button>
         </div>
@@ -567,7 +567,7 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
         <LavaGlow />
         {STYLE_TAG}
         <div style={{ position: "relative", zIndex: 1 }}>
-          <div style={{ background: "linear-gradient(160deg,#7C2D12,#1C0701)", border: "2px solid #FDBA7455", borderRadius: "20px", padding: "28px 24px", marginBottom: "16px", color: "white" }}>
+          <div style={{ background: "#7C2D12", border: "4px solid #1A1A2E", boxShadow: "6px 6px 0 #1A1A2E", borderRadius: "20px", padding: "28px 24px", marginBottom: "16px", color: "white" }}>
             <div style={{ fontWeight: "900", fontSize: "clamp(22px,4vw,32px)", marginBottom: "8px", color: "#FDBA74" }}>Hot Seat</div>
             <div style={{ fontWeight: "900", fontSize: "18px", marginBottom: "14px" }}>
               Round {roundIndex + 1} of {TOTAL_ROUNDS} - Turn {turnNumber} of {totalTurns}
@@ -585,7 +585,7 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
 
           {wordListToggle}
 
-          <button onClick={startTurn} className="hs-btn" style={{ background: "linear-gradient(135deg,#B91C1C,#F97316)", color: "white", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(249,115,22,0.5)", transition: "transform 0.15s ease" }}>
+          <button onClick={startTurn} className="hs-btn" style={{ background: "#F97316", color: "white", border: "3px solid #1A1A2E", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "6px 6px 0 #1A1A2E" }}>
             Start {currentTeam.name}'s Turn
           </button>
         </div>
@@ -614,7 +614,7 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
           <div style={{ fontWeight: "900", fontSize: "22px", color: "#FDBA74", marginBottom: "16px" }}>{headline}</div>
           <div style={{ display: "grid", gridTemplateColumns: teamsGridCols(teams.length), gap: "10px", margin: "0 auto 20px", maxWidth: "760px" }}>
             {ranking.map(({ item: t, rank, value }) => (
-              <div key={t.id} style={{ background: `linear-gradient(160deg,${t.color.dark}55,#1C0701)`, border: `2px solid ${t.color.bg}`, borderRadius: "14px", padding: "12px" }}>
+              <div key={t.id} style={{ background: t.color.dark, border: "2px solid #1A1A2E", boxShadow: "4px 4px 0 #1A1A2E", borderRadius: "14px", padding: "12px" }}>
                 <div><RankBadge rank={rank} size={22} /></div>
                 <div style={{ fontWeight: "800", color: "white", fontSize: "14px", marginTop: "4px" }}><TeamIcon team={t} /> {t.name}</div>
                 <div style={{ color: "#FDBA74", fontWeight: "900", fontSize: "16px", marginTop: "4px" }}>{value} pts</div>
@@ -622,7 +622,7 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
               </div>
             ))}
           </div>
-          <button onClick={onEnd} className="hs-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg,#B91C1C,#F97316)", color: "white", border: "none", borderRadius: "14px", padding: "13px 34px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 20px rgba(249,115,22,0.4)", transition: "transform 0.15s ease" }}><Icon name="checkeredFlag" size={18} /> End Game</button>
+          <button onClick={onEnd} className="hs-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#F97316", color: "white", border: "3px solid #1A1A2E", borderRadius: "14px", padding: "13px 34px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "5px 5px 0 #1A1A2E" }}><Icon name="checkeredFlag" size={18} /> End Game</button>
         </div>
       </div>
     );
@@ -643,7 +643,7 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
         />
       )}
       <div style={{ position: "relative", zIndex: 1 }}>
-        <div style={{ background: "linear-gradient(90deg,#7C2D12,#9A3412)", border: "1.5px solid #FDBA7455", borderRadius: "14px", padding: "14px 16px", marginBottom: "16px", textAlign: "center", color: "white", boxShadow: "0 4px 18px rgba(154,52,18,0.5)" }}>
+        <div style={{ background: "#9A3412", border: "3px solid #1A1A2E", borderRadius: "14px", padding: "14px 16px", marginBottom: "16px", textAlign: "center", color: "white", boxShadow: "4px 4px 0 #1A1A2E" }}>
           <div style={{ fontWeight: "900", fontSize: "18px" }}>Round {roundIndex + 1} of {TOTAL_ROUNDS} - {currentTeam.name}</div>
           <div style={{ fontWeight: "800", fontSize: "13px", opacity: 0.9, marginTop: "4px" }}>Turn {turnNumber} of {totalTurns}</div>
         </div>
@@ -668,7 +668,7 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
         </div>
 
         {phase === "play" && describersOnPhone && (
-          <div style={{ background: "linear-gradient(160deg,#1C0701,#2D0A00)", border: "3px dashed #F9731688", borderRadius: "22px", padding: "34px 18px", textAlign: "center" }}>
+          <div style={{ background: "#1C0701", border: "3px dashed #F97316", borderRadius: "22px", padding: "34px 18px", textAlign: "center" }}>
             <div style={{ marginBottom: "10px" }}><Icon name="phone" size={34} /></div>
             <div style={{ fontWeight: "900", fontSize: "17px", color: "#FDBA74", marginBottom: "6px" }}>
               {teamStructure === "groups"
@@ -681,7 +681,7 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
 
         {phase === "play" && !describersOnPhone && (
           <>
-            <div style={{ position: "relative", background: "linear-gradient(160deg,#1C0701,#2D0A00)", border: "4px solid #F97316", borderRadius: "22px", padding: "26px 18px", textAlign: "center", marginBottom: "16px", boxShadow: "0 0 30px rgba(249,115,22,0.35)" }}>
+            <div style={{ position: "relative", background: "#1C0701", border: "4px solid #1A1A2E", borderRadius: "22px", padding: "26px 18px", textAlign: "center", marginBottom: "16px", boxShadow: "6px 6px 0 #1A1A2E" }}>
               <div style={{ position: "absolute", top: "10px", right: "10px" }}>
                 <FlagPromptButton gameId="hotseat" questionData={{ raw: currentWord }} />
               </div>
@@ -692,21 +692,21 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
             </div>
 
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(160px,1fr))", gap: "12px" }}>
-              <button onClick={markCorrect} className="hs-btn" style={{ background: "linear-gradient(135deg,#15803D,#22C55E)", color: "white", border: "none", borderRadius: "14px", padding: "16px", fontSize: "18px", fontWeight: "900", cursor: "pointer", transition: "transform 0.15s ease" }}>Correct +{POINTS_PER_WORD}</button>
-              <button onClick={skipWord} className="hs-btn" style={{ background: "rgba(0,0,0,0.3)", color: "#FDBA74", border: "3px solid #F59E0B", borderRadius: "14px", padding: "16px", fontSize: "18px", fontWeight: "900", cursor: "pointer", transition: "transform 0.15s ease" }}>Skip</button>
-              <button onClick={endTurn} className="hs-btn" style={{ background: "rgba(0,0,0,0.3)", color: "#FCA5A5", border: "3px solid #EF4444", borderRadius: "14px", padding: "16px", fontSize: "18px", fontWeight: "900", cursor: "pointer", transition: "transform 0.15s ease" }}>End Turn</button>
+              <button onClick={markCorrect} className="hs-btn" style={{ background: "#22C55E", color: "white", border: "3px solid #1A1A2E", borderRadius: "14px", padding: "16px", fontSize: "18px", fontWeight: "900", cursor: "pointer", boxShadow: "4px 4px 0 #1A1A2E" }}>Correct +{POINTS_PER_WORD}</button>
+              <button onClick={skipWord} className="hs-btn" style={{ background: "rgba(0,0,0,0.3)", color: "#FDBA74", border: "3px solid #1A1A2E", borderRadius: "14px", padding: "16px", fontSize: "18px", fontWeight: "900", cursor: "pointer", boxShadow: "4px 4px 0 #1A1A2E" }}>Skip</button>
+              <button onClick={endTurn} className="hs-btn" style={{ background: "rgba(0,0,0,0.3)", color: "#FCA5A5", border: "3px solid #1A1A2E", borderRadius: "14px", padding: "16px", fontSize: "18px", fontWeight: "900", cursor: "pointer", boxShadow: "4px 4px 0 #1A1A2E" }}>End Turn</button>
             </div>
           </>
         )}
 
         {phase === "turnend" && (
           <div style={{ textAlign: "center" }}>
-            <div style={{ background: "linear-gradient(160deg,#1C0701,#2D0A00)", border: "2px solid #22C55E", borderRadius: "16px", padding: "18px", marginBottom: "16px" }}>
+            <div style={{ background: "#1C0701", border: "3px solid #22C55E", boxShadow: "4px 4px 0 #22C55E", borderRadius: "16px", padding: "18px", marginBottom: "16px" }}>
               <div style={{ fontWeight: "900", fontSize: "22px", color: "white", marginBottom: "6px" }}>{currentTeam.name} guessed {lastTurnCorrect} word{lastTurnCorrect === 1 ? "" : "s"}.</div>
               <div style={{ color: "#86EFAC", fontWeight: "900", fontSize: "18px", marginBottom: "4px" }}>+{lastTurnCorrect * POINTS_PER_WORD} pts</div>
               <div style={{ color: "#FED7AA", fontWeight: "700" }}>Those points have been added to the scoreboard.</div>
             </div>
-            <button onClick={goToNextTurn} className="hs-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg,#B91C1C,#F97316)", color: "white", border: "none", borderRadius: "14px", padding: "13px 34px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 20px rgba(249,115,22,0.4)", transition: "transform 0.15s ease" }}>
+            <button onClick={goToNextTurn} className="hs-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#F97316", color: "white", border: "3px solid #1A1A2E", borderRadius: "14px", padding: "13px 34px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "5px 5px 0 #1A1A2E" }}>
               {isLastTurn ? <><Icon name="trophy" size={18} /> See Final Results</> : teamIndex < teams.length - 1 ? "Next Team" : "Start Next Round"}
             </button>
           </div>
