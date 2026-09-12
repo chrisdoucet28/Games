@@ -25,7 +25,7 @@ export function TurnTimerBar({ timeLeft, totalSeconds }: TurnTimerBarProps) {
 
   return (
     <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-      <div style={{ display: "flex", gap: "2px", background: INK, border: `2px solid ${INK}` }}>
+      <div style={{ display: "flex", gap: "3px", background: INK, border: `2px solid ${INK}`, padding: "2px" }}>
         {Array.from({ length: SEGMENTS }).map((_, i) => {
           // Drains right to left: pip i (0 = leftmost) is the i-th chunk of time to be SPENT, so
           // it only starts emptying once timeLeft drops below (SEGMENTS - i) chunks' worth — the
@@ -35,7 +35,11 @@ export function TurnTimerBar({ timeLeft, totalSeconds }: TurnTimerBarProps) {
           const secondsAboveThisPip = i * segmentSeconds;
           const fraction = Math.max(0, Math.min(1, (timeLeft - secondsAboveThisPip) / segmentSeconds));
           return (
-            <div key={i} style={{ width: "13px", height: "12px", position: "relative", overflow: "hidden" }}>
+            // A visible "empty slot" background (not just transparent casing showing through) so
+            // a spent pip still reads as its own distinct box — otherwise an empty pip and the
+            // gaps around it are the same color and blur into one shapeless dark smear instead of
+            // a row of clean, evenly-spaced pips.
+            <div key={i} style={{ width: "13px", height: "12px", position: "relative", overflow: "hidden", background: "rgba(255,255,255,0.12)" }}>
               <div style={{
                 position: "absolute", left: 0, top: 0, bottom: 0,
                 width: `${fraction * 100}%`, background: barColor,
