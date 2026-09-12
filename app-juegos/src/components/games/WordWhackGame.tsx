@@ -56,8 +56,9 @@ const STYLE_TAG = (
     @keyframes wwCountPulse{0%{transform:scale(0.5);opacity:0}50%{transform:scale(1.2);opacity:1}100%{transform:scale(1);opacity:1}}
     @keyframes wwComboGlow{0%,100%{filter:brightness(1)}50%{filter:brightness(1.4)}}
     @keyframes wwShine{0%,100%{opacity:0.5}50%{opacity:0.9}}
-    .ww-btn:hover:not(:disabled){transform:translateY(-2px) scale(1.02);filter:brightness(1.08)}
-    .ww-btn:active:not(:disabled){transform:translateY(0) scale(0.97)}
+    .ww-btn:hover:not(:disabled){filter:brightness(1.08)}
+    .ww-btn:active:not(:disabled){transform:translate(3px,3px) !important;box-shadow:0 0 0 #1A1A2E !important}
+    .ww-btn:disabled{opacity:.5;cursor:not-allowed}
     .ww-mole:hover{filter:brightness(1.15)}
     .ww-mole:active{filter:brightness(0.85)}
   `}</style>
@@ -107,7 +108,7 @@ function PhoneTurnSpectator({ activeTeam, timeLeft, totalSeconds }: {
 }) {
   const timeColor = timeLeft > totalSeconds * 0.5 ? "#BEF264" : timeLeft > totalSeconds * 0.25 ? "#F59E0B" : "#EF4444";
   return (
-    <div style={{ textAlign: "center", padding: "40px 20px", background: `linear-gradient(160deg,${activeTeam.color.dark}55,#1A2E05)`, border: `3px solid ${activeTeam.color.bg}`, borderRadius: "16px" }}>
+    <div style={{ textAlign: "center", padding: "40px 20px", background: activeTeam.color.dark, border: "3px solid #1A1A2E", boxShadow: "5px 5px 0 #1A1A2E", borderRadius: "16px" }}>
       <div style={{ fontSize: "40px", marginBottom: "10px" }}><TeamIcon team={activeTeam} size={40} /></div>
       <div style={{ fontWeight: "900", fontSize: "18px", color: "white", marginBottom: "14px", display: "inline-flex", alignItems: "center", gap: "6px" }}><Icon name="hammer" size={16} /> {activeTeam.name} is playing on their phone!</div>
       <div style={{ fontWeight: "900", fontSize: "56px", color: timeColor, fontVariantNumeric: "tabular-nums", lineHeight: 1 }}>{timeLeft}s</div>
@@ -124,11 +125,11 @@ function DisconnectedTurnOverride({ activeTeam, onSkip }: {
   onSkip: () => void;
 }) {
   return (
-    <div style={{ textAlign: "center", padding: "40px 20px", background: "linear-gradient(160deg,#7C2D1255,#1A2E05)", border: "3px solid #F59E0B", borderRadius: "16px" }}>
+    <div style={{ textAlign: "center", padding: "40px 20px", background: "#7C2D12", border: "3px solid #1A1A2E", boxShadow: "5px 5px 0 #1A1A2E", borderRadius: "16px" }}>
       <div style={{ fontSize: "40px", marginBottom: "10px" }}><TeamIcon team={activeTeam} size={40} /></div>
       <div style={{ fontWeight: "900", fontSize: "18px", color: "#FCD34D", marginBottom: "8px", display: "inline-flex", alignItems: "center", gap: "6px" }}><Icon name="warning" size={16} /> {activeTeam.name} lost connection</div>
       <div style={{ fontSize: "13px", color: "#FDE68A", marginBottom: "18px" }}>Waiting to see if they reconnect — use "<Icon name="phone" size={11} /> Reconnect a phone" below if they need the code again.</div>
-      <button onClick={onSkip} className="ww-btn" style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "linear-gradient(135deg,#B45309,#F59E0B)", color: "#1F1300", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "15px", fontWeight: "900", cursor: "pointer" }}>
+      <button onClick={onSkip} className="ww-btn" style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "#F59E0B", color: "#1F1300", border: "3px solid #1A1A2E", boxShadow: "4px 4px 0 #1A1A2E", borderRadius: "12px", padding: "12px 28px", fontSize: "15px", fontWeight: "900", cursor: "pointer" }}>
         Skip Their Turn <Icon name="next" size={15} />
       </button>
     </div>
@@ -423,7 +424,7 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
         <div style={{ position: "relative", zIndex: 1 }}>
           <div style={{ marginBottom: "10px" }}><Icon name="hammer" size={40} /></div>
           <div style={{ fontWeight: "800", fontSize: "18px", color: "white" }}>No multiple-choice content found for this topic selection.</div>
-          <button onClick={onEnd} className="ww-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", marginTop: "16px", background: "linear-gradient(135deg,#3F6212,#84CC16)", color: "#0F1A05", border: "none", borderRadius: "14px", padding: "14px 32px", fontSize: "16px", fontWeight: "900", cursor: "pointer" }}><Icon name="checkeredFlag" size={18} /> End Game</button>
+          <button onClick={onEnd} className="ww-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", marginTop: "16px", background: "#84CC16", color: "#0F1A05", border: "3px solid #1A1A2E", boxShadow: "4px 4px 0 #1A1A2E", borderRadius: "14px", padding: "14px 32px", fontSize: "16px", fontWeight: "900", cursor: "pointer" }}><Icon name="checkeredFlag" size={18} /> End Game</button>
         </div>
       </div>
     );
@@ -435,7 +436,7 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
       <AmbientBackdrop />
       {STYLE_TAG}
       <div style={{ position: "relative", zIndex: 1 }}>
-        <div style={{ background: "linear-gradient(160deg,#3F6212,#1A2E05)", border: "2px solid #BEF26455", borderRadius: "20px", padding: "28px 24px", marginBottom: "10px", color: "white", maxWidth: "540px", margin: "0 auto 10px", boxShadow: "0 0 50px rgba(132,204,22,0.4)" }}>
+        <div style={{ background: "#3F6212", border: "4px solid #1A1A2E", borderRadius: "20px", padding: "28px 24px", marginBottom: "10px", color: "white", maxWidth: "540px", margin: "0 auto 10px", boxShadow: "6px 6px 0 #1A1A2E" }}>
           <div style={{ marginBottom: "10px" }}><Icon name="hammer" size={36} /></div>
           <div style={{ fontWeight: "900", fontSize: "20px", marginBottom: "10px", color: "#BEF264" }}>Word Whack</div>
           <div style={{ fontSize: "15px", lineHeight: 1.7 }}>
@@ -445,7 +446,7 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
         </div>
         <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "20px" }}>
           {teams.map((t, i) => (
-            <div key={t.id} style={{ background: `linear-gradient(160deg,${t.color.dark}55,#1A2E05)`, border: `3px solid ${t.color.bg}`, borderRadius: "14px", padding: "10px 18px", fontWeight: "800", fontSize: "14px", color: "white", display: "flex", alignItems: "center", gap: "6px" }}>
+            <div key={t.id} style={{ background: t.color.dark, border: "3px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E", borderRadius: "14px", padding: "10px 18px", fontWeight: "800", fontSize: "14px", color: "white", display: "flex", alignItems: "center", gap: "6px" }}>
               {i + 1}. <TeamIcon team={t} color="white" /> {t.name}
             </div>
           ))}
@@ -455,11 +456,11 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
           <div style={{ display: "flex", gap: "8px", justifyContent: "center", flexWrap: "wrap" }}>
             {DIFFICULTY_OPTIONS.map(d => (
               <button key={d} onClick={() => setDifficulty(d)} className="ww-btn" style={{
-                background: difficulty === d ? "linear-gradient(135deg,#3F6212,#84CC16)" : "rgba(255,255,255,0.08)",
+                background: difficulty === d ? "#84CC16" : "rgba(255,255,255,0.08)",
                 color: difficulty === d ? "#0F1A05" : "#D9F99D",
-                border: `2px solid ${difficulty === d ? "#84CC16" : "#BEF26455"}`,
+                border: "2px solid #1A1A2E", boxShadow: difficulty === d ? "3px 3px 0 #1A1A2E" : "none",
                 borderRadius: "12px", padding: "10px 20px", cursor: "pointer",
-                fontWeight: "800", fontSize: "14px", minWidth: "84px", textTransform: "capitalize", transition: "all 0.15s",
+                fontWeight: "800", fontSize: "14px", minWidth: "84px", textTransform: "capitalize",
               }}>
                 {d}
               </button>
@@ -502,7 +503,7 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
             />
           );
         })()}
-        <button onClick={() => setShowHowTo(true)} className="ww-btn" style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginBottom: "14px", background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
+        <button onClick={() => setShowHowTo(true)} className="ww-btn" style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginBottom: "14px", background: "white", color: GM.color, border: "3px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
           <Icon name="help" size={15} /> How to Play
         </button>
         {showHowTo && (
@@ -512,7 +513,7 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
             onClose={() => setShowHowTo(false)}
           />
         )}
-        <button onClick={() => { setTeamIdx(0); startTeamTurn(); }} className="ww-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg,#3F6212,#84CC16)", color: "#0F1A05", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(132,204,22,0.5)", transition: "transform 0.15s ease" }}>
+        <button onClick={() => { setTeamIdx(0); startTeamTurn(); }} className="ww-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#84CC16", color: "#0F1A05", border: "3px solid #1A1A2E", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "6px 6px 0 #1A1A2E" }}>
           <Icon name="hammer" size={20} /> Start Whacking!
         </button>
       </div>
@@ -536,7 +537,7 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
         <div style={{ fontWeight: "900", fontSize: "24px", color: "#BEF264", marginBottom: "16px" }}>{headline}</div>
         <div style={{ display: "grid", gridTemplateColumns: teamsGridCols(teams.length), gap: "10px", margin: "0 auto 20px", maxWidth: "700px" }}>
           {ranking.map(({ item: t, rank, value }) => (
-            <div key={t.id} style={{ background: `linear-gradient(160deg,${t.color.dark}55,#1A2E05)`, border: `2px solid ${t.color.bg}`, borderRadius: "14px", padding: "12px" }}>
+            <div key={t.id} style={{ background: t.color.dark, border: "2px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E", borderRadius: "14px", padding: "12px" }}>
               <div><RankBadge rank={rank} size={22} /></div>
               <div style={{ fontWeight: "800", color: "white", fontSize: "14px", marginTop: "4px" }}><TeamIcon team={t} /> {t.name}</div>
               <div style={{ color: "#BEF264", fontWeight: "800", fontSize: "15px", marginTop: "4px" }}>{value} pts</div>
@@ -549,7 +550,7 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
             <div style={{ textAlign: "center", fontWeight: "900", fontSize: "16px", color: "#BEF264", marginBottom: "10px", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}><Icon name="clipboard" size={15} /> Review the Questions</div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(260px,1fr))", gap: "8px" }}>
               {playedRounds.map((r, i) => (
-                <div key={i} style={{ background: "rgba(255,255,255,0.06)", border: "1.5px solid #BEF26440", borderRadius: "10px", padding: "10px 12px" }}>
+                <div key={i} style={{ background: "rgba(255,255,255,0.06)", border: "2px solid #1A1A2E", borderRadius: "10px", padding: "10px 12px" }}>
                   <div style={{ fontSize: "13px", fontWeight: "700", color: "white", marginBottom: "6px" }}>{r.prompt}</div>
                   <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
                     {r.choices.map((c, ci) => (
@@ -570,7 +571,7 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
           </div>
         )}
 
-        <button onClick={onEnd} className="ww-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg,#3F6212,#84CC16)", color: "#0F1A05", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "800", cursor: "pointer", transition: "transform 0.15s ease" }}><Icon name="checkeredFlag" size={16} /> End Game</button>
+        <button onClick={onEnd} className="ww-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#84CC16", color: "#0F1A05", border: "3px solid #1A1A2E", boxShadow: "4px 4px 0 #1A1A2E", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "800", cursor: "pointer" }}><Icon name="checkeredFlag" size={16} /> End Game</button>
       </div>
     );
   }
@@ -587,7 +588,7 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
         />
       )}
       <div style={{ position: "relative", zIndex: 1 }}>
-        <div style={{ background: `linear-gradient(90deg,${activeTeam.color.dark},${activeTeam.color.bg})`, borderRadius: "14px", padding: "10px 16px", marginBottom: "14px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px", boxShadow: `0 4px 18px ${activeTeam.color.bg}55` }}>
+        <div style={{ background: activeTeam.color.bg, border: "3px solid #1A1A2E", borderRadius: "14px", padding: "10px 16px", marginBottom: "14px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px", boxShadow: "4px 4px 0 #1A1A2E" }}>
           <span style={{ color: "white", fontWeight: "900", fontSize: "16px", textShadow: "0 1px 3px rgba(0,0,0,0.4)", display: "inline-flex", alignItems: "center", gap: "6px" }}><Icon name="hammer" size={15} /> <TeamIcon team={activeTeam} color="white" /> {activeTeam.name}'s turn — Round {round}/{TOTAL_ROUNDS}, Team {teamIdx + 1} of {teams.length}</span>
           {phase === "playing" && <TurnTimerBar timeLeft={turnOwnedByPhoneRef.current ? spectatorTimeLeft : turnTimeLeft} totalSeconds={TURN_SECONDS} />}
         </div>
@@ -605,11 +606,11 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
           ) : (
           <>
             <div style={{ display: "flex", gap: "8px", justifyContent: "center", marginBottom: "12px", flexWrap: "wrap" }}>
-              <div style={{ background: "rgba(255,255,255,0.1)", border: "1.5px solid #BEF26466", borderRadius: "10px", padding: "6px 14px", fontSize: "13px", fontWeight: "800", color: "#BEF264", display: "inline-flex", alignItems: "center", gap: "5px" }}><Icon name="coin" size={13} /> {game.turnScore} pts</div>
-              <div style={{ background: game.combo > 0 ? "linear-gradient(135deg,#CA8A04,#F59E0B)" : "rgba(255,255,255,0.1)", border: "1.5px solid #FCD34D66", borderRadius: "10px", padding: "6px 14px", fontSize: "13px", fontWeight: "800", color: game.combo > 0 ? "#1F1300" : "#FCD34D88", animation: game.combo > 2 ? "wwComboGlow 0.8s ease-in-out infinite" : "none", display: "inline-flex", alignItems: "center", gap: "5px" }}><Icon name="flame" size={13} /> Combo x{game.combo}</div>
+              <div style={{ background: "rgba(255,255,255,0.1)", border: "2px solid #1A1A2E", borderRadius: "10px", padding: "6px 14px", fontSize: "13px", fontWeight: "800", color: "#BEF264", display: "inline-flex", alignItems: "center", gap: "5px" }}><Icon name="coin" size={13} /> {game.turnScore} pts</div>
+              <div style={{ background: game.combo > 0 ? "#F59E0B" : "rgba(255,255,255,0.1)", border: "2px solid #1A1A2E", borderRadius: "10px", padding: "6px 14px", fontSize: "13px", fontWeight: "800", color: game.combo > 0 ? "#1F1300" : "#FCD34D88", animation: game.combo > 2 ? "wwComboGlow 0.8s ease-in-out infinite" : "none", display: "inline-flex", alignItems: "center", gap: "5px" }}><Icon name="flame" size={13} /> Combo x{game.combo}</div>
             </div>
 
-            <div style={{ position: "relative", background: "rgba(255,255,255,0.08)", border: "2px solid #BEF26455", borderRadius: "14px", padding: "14px 18px", marginBottom: "14px", textAlign: "center" }}>
+            <div style={{ position: "relative", background: "rgba(255,255,255,0.08)", border: "2px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E", borderRadius: "14px", padding: "14px 18px", marginBottom: "14px", textAlign: "center" }}>
               <div style={{ position: "absolute", top: "8px", right: "8px" }}>
                 <FlagPromptButton gameId="whack" questionData={{ raw: game.prompt }} />
               </div>
@@ -675,13 +676,13 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
 
         {phase === "turn-end" && (
           <div style={{ textAlign: "center" }}>
-            <div style={{ background: "linear-gradient(160deg,#3F6212,#1A2E05)", border: "2px solid #BEF26466", borderRadius: "16px", padding: "20px", marginBottom: "16px" }}>
+            <div style={{ background: "#3F6212", border: "3px solid #1A1A2E", boxShadow: "4px 4px 0 #1A1A2E", borderRadius: "16px", padding: "20px", marginBottom: "16px" }}>
               <div style={{ marginBottom: "6px" }}><Icon name="hammer" size={34} /></div>
               <div style={{ fontWeight: "900", fontSize: "20px", color: "white", marginBottom: "8px" }}>{activeTeam.name}'s turn is over!</div>
               <div style={{ fontWeight: "800", fontSize: "26px", color: "#BEF264" }}>+{lastTurnScore} pts</div>
               <div style={{ fontSize: "13px", color: "#D9F99D", marginTop: "6px", display: "flex", alignItems: "center", justifyContent: "center", gap: "5px" }}>Best combo this turn: <Icon name="flame" size={12} /> x{lastTurnBestCombo}</div>
             </div>
-            <button onClick={nextTeam} className="ww-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg,#3F6212,#84CC16)", color: "#0F1A05", border: "none", borderRadius: "14px", padding: "14px 36px", fontSize: "17px", fontWeight: "900", cursor: "pointer", transition: "transform 0.15s ease" }}>
+            <button onClick={nextTeam} className="ww-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#84CC16", color: "#0F1A05", border: "3px solid #1A1A2E", boxShadow: "4px 4px 0 #1A1A2E", borderRadius: "14px", padding: "14px 36px", fontSize: "17px", fontWeight: "900", cursor: "pointer" }}>
               {teamIdx + 1 >= teams.length
                 ? (round >= TOTAL_ROUNDS ? <><Icon name="trophy" size={18} /> See Final Results</> : <><Icon name="next" size={18} /> Start Round {round + 1}</>)
                 : <><Icon name="next" size={18} /> Next Team's Turn</>}
