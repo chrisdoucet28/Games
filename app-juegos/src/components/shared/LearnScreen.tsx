@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { hexToRgba, type Theme } from "../../data/themes";
 import { getProfile } from "../../lib/profile";
 import { FlagLessonButton } from "./FlagLessonButton";
-import { LESSON_TOPICS, LEVEL_ORDER, LEVEL_COLOR, FOCUS_ORDER, FOCUS_LABEL } from "../../data/learnTopics";
+import { LESSON_TOPICS, LEVEL_ORDER, LEVEL_COLOR, FOCUS_ORDER, FOCUS_LABEL, matchesTopicSearch } from "../../data/learnTopics";
 import { renderBold, renderMistake } from "../../data/learnTopicsRender";
 import { LESSON_PLANS } from "../../data/lessonPlans";
 import { LessonContent } from "./LessonContent";
@@ -87,6 +87,7 @@ function PrintableLesson({ t, logoUrl }: { t: (typeof LESSON_TOPICS)[number]; lo
 
 export function LearnScreen({ onBack, theme, filterTopicIds, onOpenLessonPlan, onOpenLessonPlanIndex }: Props) {
   const visibleTopics = filterTopicIds ? LESSON_TOPICS.filter(t => filterTopicIds.includes(t.id)) : LESSON_TOPICS;
+  const [searchTerm, setSearchTerm] = useState("");
 
   // Paid-only branding perk (see ProfileScreen/BrandBadge) — org_logo_url is only ever set by a
   // paid account uploading one, so no separate isPaid check is needed here to decide whether to
@@ -148,8 +149,9 @@ export function LearnScreen({ onBack, theme, filterTopicIds, onOpenLessonPlan, o
     );
   }
 
+  const searchedTopics = visibleTopics.filter(t => matchesTopicSearch(t.lesson.title, searchTerm));
   const byLevel = LEVEL_ORDER
-    .map(level => ({ level, topics: visibleTopics.filter(t => t.meta.level === level) }))
+    .map(level => ({ level, topics: searchedTopics.filter(t => t.meta.level === level) }))
     .filter(g => g.topics.length > 0);
 
   return (
@@ -188,8 +190,37 @@ export function LearnScreen({ onBack, theme, filterTopicIds, onOpenLessonPlan, o
           )}
         </div>
 
+        {visibleTopics.length > 0 && (
+          <div style={{ position: "relative", marginBottom: "20px" }}>
+            <Icon name="search" size={15} color="#9CA3AF" style={{ position: "absolute", left: "14px", top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+              placeholder="Search lessons..."
+              style={{
+                width: "100%", boxSizing: "border-box", padding: "11px 40px 11px 38px",
+                border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, borderRadius: "12px", fontSize: "14px",
+                fontWeight: "600", color: theme.heroBg[0], outline: "none",
+              }}
+            />
+            {searchTerm !== "" && (
+              <button
+                type="button"
+                onClick={() => setSearchTerm("")}
+                aria-label="Clear search"
+                style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", background: hexToRgba(theme.accentSolid, 0.12), border: "none", borderRadius: "50%", width: "22px", height: "22px", color: theme.accentSolid, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
+              >
+                <Icon name="close" size={10} />
+              </button>
+            )}
+          </div>
+        )}
+
         {visibleTopics.length === 0 ? (
           <div style={{ textAlign: "center", color: "#6B7280", padding: "40px 0" }}>No lessons yet — check back soon.</div>
+        ) : searchedTopics.length === 0 ? (
+          <div style={{ textAlign: "center", color: "#6B7280", padding: "40px 0" }}>No topics match "{searchTerm.trim()}"</div>
         ) : (
           byLevel.map(group => (
             <div key={group.level} style={{ marginBottom: "24px" }}>
