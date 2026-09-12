@@ -161,8 +161,8 @@ const STYLE_TAG = (
     @keyframes rtConfetti{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(160px) rotate(360deg);opacity:0}}
     @keyframes rtSpeedLine{0%{transform:translateX(-130%);opacity:0}12%{opacity:.5}88%{opacity:.5}100%{transform:translateX(230%);opacity:0}}
     @keyframes rtLightPulse{0%,100%{opacity:.4}50%{opacity:1}}
-    .rt-btn:hover:not(:disabled){transform:translateY(-2px) scale(1.02);filter:brightness(1.08)}
-    .rt-btn:active:not(:disabled){transform:translateY(0) scale(0.97)}
+    .rt-btn:hover:not(:disabled){filter:brightness(1.08)}
+    .rt-btn:active:not(:disabled){transform:translate(4px,4px) !important;box-shadow:0 0 0 #1A1A2E !important}
     .rt-btn:disabled{opacity:.4;cursor:not-allowed}
     .rt-chip:hover{filter:brightness(1.2)}
   `}</style>
@@ -759,7 +759,7 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
       <SpeedLines />
       <div style={{ position: "relative", zIndex: 1 }}>
         <CheckeredStrip />
-        <div style={{ background: "linear-gradient(160deg,#1E293B,#0B0F17)", border: "2px solid #EF4444", borderRadius: "18px", padding: "28px 24px", margin: "10px auto", color: "#E2E8F0", maxWidth: "560px", boxShadow: "0 0 44px rgba(239,68,68,0.35)" }}>
+        <div style={{ background: "#1E293B", border: "3px solid #1A1A2E", borderRadius: "18px", padding: "28px 24px", margin: "10px auto", color: "#E2E8F0", maxWidth: "560px", boxShadow: "5px 5px 0 #1A1A2E" }}>
           <div style={{ marginBottom: "10px" }}><Icon name="checkeredFlag" size={36} /></div>
           <div style={{ fontWeight: "900", fontSize: "20px", marginBottom: "10px", color: "#F87171", letterSpacing: "0.5px" }}>RACE TRACK</div>
           <div style={{ fontSize: "15px", lineHeight: 1.7 }}>
@@ -851,7 +851,7 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
             onClose={() => setShowHowTo(false)}
           />
         )}
-        <button onClick={() => { playSound("racetrack"); setPhase("task"); }} className="rt-btn" style={{ background: "linear-gradient(135deg,#B91C1C,#EF4444)", color: "white", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(239,68,68,0.5)", transition: "transform 0.15s ease" }}><Icon name="play" size={18} /> Start Race!</button>
+        <button onClick={() => { playSound("racetrack"); setPhase("task"); }} className="rt-btn" style={{ background: "#EF4444", color: "white", border: "3px solid #1A1A2E", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "6px 6px 0 #1A1A2E" }}><Icon name="play" size={18} /> Start Race!</button>
       </div>
     </div>
   );
@@ -865,7 +865,7 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
         {finalRanking.map((r, i) => {
           const t = teams.find(tm => tm.id === r.id)!;
           return (
-            <div key={r.id} style={{ background: `linear-gradient(160deg, ${t.color.dark}55, #0A0A18)`, border: `2px solid ${t.color.bg}`, borderRadius: "14px", padding: "12px" }}>
+            <div key={r.id} style={{ background: t.color.dark, border: "2px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E", borderRadius: "14px", padding: "12px" }}>
               <div><RankBadge rank={i} size={22} /></div>
               <div style={{ fontWeight: "800", color: "#F3F4F6", fontSize: "14px", marginTop: "4px" }}><TeamIcon team={t} /> {r.name}</div>
               <div style={{ color: "#9CA3AF", fontSize: "12px", marginTop: "2px" }}>Space {r.pos}/{TOTAL}</div>
@@ -874,7 +874,7 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
           );
         })}
       </div>
-      <button onClick={onEnd} className="rt-btn" style={{ background: "#F7C948", color: "#150F00", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "800", cursor: "pointer", transition: "transform 0.15s ease" }}><Icon name="checkeredFlag" size={15} /> End Game</button>
+      <button onClick={onEnd} className="rt-btn" style={{ background: "#F7C948", color: "#150F00", border: "3px solid #1A1A2E", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "800", cursor: "pointer", boxShadow: "4px 4px 0 #1A1A2E" }}><Icon name="checkeredFlag" size={15} /> End Game</button>
     </div>
   );
 
@@ -905,8 +905,8 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
             const isActive = phase !== "task" && winnerId === t.id;
             return (
               <div key={t.id} style={{
-                background: `linear-gradient(160deg, ${t.color.dark}44, #0A0A18)`, border: `2px solid ${t.color.bg}`, borderRadius: "12px", padding: "8px 10px",
-                boxShadow: isActive ? `0 0 16px ${t.color.bg}88` : "none",
+                background: t.color.dark, border: "2px solid #1A1A2E", borderRadius: "12px", padding: "8px 10px",
+                boxShadow: isActive ? "3px 3px 0 #F7C948" : "2px 2px 0 #1A1A2E",
               }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "4px" }}>
                   <span style={{ fontWeight: "800", fontSize: "12px", color: "#F3F4F6" }}>{rt.car} {t.name}</span>
