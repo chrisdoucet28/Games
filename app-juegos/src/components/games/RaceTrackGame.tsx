@@ -13,7 +13,7 @@ import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
 import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
 import { RACETRACK_TUTORIAL_STEPS } from "../../data/tutorials/racetrack";
 import { playSound } from "../../lib/sounds";
-import { setMusicGame, stopMusic } from "../../lib/music";
+import { setMusicContext, setMusicGame, stopMusic } from "../../lib/music";
 import {
   generateSessionCode, openRaceTrackChannel, closeChannel,
   type RaceTrackPhase, type RaceTrackStatePayload, type RaceTrackActionPayload,
@@ -615,9 +615,17 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
   useEffect(() => {
     if (phase === "gameover") { playSound("roundComplete"); stopMusic(); }
   }, [phase]);
-  // Custom Suno gameplay track — see GAME_OVERRIDES in lib/music.ts.
+  // Custom Suno gameplay track — see GAME_OVERRIDES in lib/music.ts. Unlike every other
+  // tension-only game (Castle, Zombie Siege, etc.), Race Track's team mode never runs a turn timer
+  // at all (its tension is solo-only, gated behind useTurnTimer above) — so nothing in this
+  // component ever calls setMusicContext("gameplay") itself the way those games' timer cleanup
+  // does. Entry used to depend entirely on the PARENT's generic "screen === 'game'" effect
+  // (LessonGamesGenerator) to assert that context, racing this component's own setMusicGame call
+  // to set the right gameId first — asserting it here directly instead, same as it would if a
+  // timer's cleanup did it, removes that cross-component race for good.
   useEffect(() => {
     setMusicGame("racetrack");
+    setMusicContext("gameplay");
     return () => setMusicGame(null);
   }, []);
 
