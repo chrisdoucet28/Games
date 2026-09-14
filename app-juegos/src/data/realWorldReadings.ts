@@ -597,6 +597,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   making_questions: {
     title: "The Job Interview",
+    audioUrl: "/audio/real-world/making_questions.mp3",
     passage: [
       "Thank you for coming in today. First, where do you currently work?",
       "I work at a small marketing agency downtown.",
@@ -1430,6 +1431,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   travel_and_holidays: {
     title: "A Holiday That Didn't Go to Plan",
+    audioUrl: "/audio/real-world/travel_and_holidays.mp3",
     passage: [
       "We arrived at the hotel expecting a sea view, but our room looked directly onto the car park instead. Determined not to let it ruin the trip, we spent most of our time exploring instead of staying at the hotel.",
       "We looked forward to visiting the old town the most, and it didn't disappoint — the architecture was stunning. Unfortunately, we arrived at the main museum just as it closed for the day, which was disappointing.",
@@ -1446,6 +1448,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   sport_and_fitness: {
     title: "Training for My First Marathon",
+    audioUrl: "/audio/real-world/sport_and_fitness.mp3",
     passage: [
       "I've been training for my first marathon for the past four months, and it's been more demanding than I expected. If I stick to the training plan, I'll definitely be ready by race day — at least, that's what my coach keeps telling me.",
       "The event itself is organised by a local running club, and it's held every spring in the same route through the city. Compared to when I started, I'm noticeably faster and my endurance has improved a lot.",
@@ -1462,6 +1465,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   relationships_and_socialising: {
     title: "Rebuilding an Old Friendship",
+    audioUrl: "/audio/real-world/relationships_and_socialising.mp3",
     passage: [
       "I've known my friend Layla since university, though we lost touch for almost five years after she moved abroad. If we hadn't reconnected on social media, I doubt we'd still be in touch today.",
       "Our friendship was organised entirely around spontaneous plans back then — nothing was ever scheduled in advance. Compared to my other friendships, ours feels different somehow, maybe because we've been through so many changes together.",
@@ -1478,6 +1482,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   asking_for_clarification: {
     title: "Lost in the Instructions",
+    audioUrl: "/audio/real-world/asking_for_clarification.mp3",
     passage: [
       "Sorry, could you repeat that last part? I didn't quite catch it.",
       "Sure — I said you need to restart the system before applying the update.",
@@ -1499,6 +1504,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   agreeing_disagreeing: {
     title: "The Office Debate",
+    audioUrl: "/audio/real-world/agreeing_disagreeing.mp3",
     passage: [
       "I think we should move the deadline back a week.",
       "I couldn't agree more — the team's clearly under too much pressure right now.",
@@ -1679,6 +1685,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   describing_locations: {
     title: "Where Should We Stay?",
+    audioUrl: "/audio/real-world/describing_locations.mp3",
     passage: [
       "I found a great little town for our trip. It's situated in a valley, surrounded by mountains on almost every side.",
       "That sounds beautiful. Is it within walking distance of the train station?",
@@ -1700,6 +1707,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   common_idioms: {
     title: "Grandpa's Favourite Sayings",
+    audioUrl: "/audio/real-world/common_idioms.mp3",
     passage: [
       "My grandfather has a saying for everything. When something is easy, he calls it a piece of cake. If he's feeling slightly ill, he says he's a bit under the weather.",
       "He always warns us that flights abroad can cost an arm and a leg, so he prefers holidays closer to home. When we first meet someone new at a family gathering, he's the one who breaks the ice with a joke.",
@@ -1718,6 +1726,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   passive_complex: {
     title: "The Old Cinema Reopens",
+    audioUrl: "/audio/real-world/passive_complex.mp3",
     passage: [
       "For thirty years, the Regal Cinema on Mill Street sat empty, its windows boarded up and its neon sign dark. Built in 1932, it had once been the grandest building in town, but by the 1990s it had been abandoned entirely, and most people assumed it would eventually be knocked down.",
       "That changed five years ago, when a local trust was formed to save it. Since then, the building has been restored piece by piece. The original ceiling, which had been covered by a false one in the 1960s, has now been uncovered and repaired. The seats, all six hundred of them, have been replaced with replicas of the originals, and the projection room, which was being rebuilt from scratch last year, is now fully equipped.",
