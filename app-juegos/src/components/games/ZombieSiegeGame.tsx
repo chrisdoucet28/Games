@@ -749,9 +749,14 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
     zombiesSpawnedThisRound: 0,
     awaitingNextWave: false,
   }));
-  // Continuous real-time pressure (no shared useTurnTimer here) — tension for the whole active
-  // wave, but not during the "wave cleared, waiting for the teacher" breather.
-  const isUnderSiege = phase === "playing" && !siege.awaitingNextWave;
+  // Continuous real-time pressure (no shared useTurnTimer here) — tension only once zombies are
+  // actually spawning and attacking, matching advanceTick's own `spawningAllowed` gate exactly
+  // (roundElapsedSeconds > roundReadPauseSeconds(round)). Excludes both "preparing" moments: the
+  // read-pause right after a new wave's prompt appears (nothing spawns yet — see startRound/
+  // advanceTick above) and the "wave cleared, waiting for the teacher" breather — both fall
+  // through to the "gameplay" context instead, which now has its own custom override too.
+  const isUnderSiege = phase === "playing" && !siege.awaitingNextWave
+    && siege.roundElapsedSeconds > roundReadPauseSeconds(siege.round);
   useEffect(() => {
     if (isUnderSiege) setMusicContext("tension");
     return () => setMusicContext("gameplay");

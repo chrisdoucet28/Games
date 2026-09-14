@@ -75,9 +75,15 @@ const GAME_OVERRIDES: Partial<Record<string, Partial<Record<MusicContext, string
   hill: {
     tension: "/music/castle-tension.mp3",
   },
-  // Tension-only — Zombie Siege's active wave defense is the whole game; the short post-wave
-  // breather before confirming the next wave keeps the shared gameplay track.
+  // Both contexts now custom — teacher feedback that the between-wave "preparing" moments (the
+  // read-pause before a new wave's zombies start spawning, and the "Wave Complete!" breather)
+  // were silently getting "Haunted House Chase" too, when that track is meant to mean "zombies are
+  // actually attacking right now." Reused rather than a new track — Rocket Fuel's "Misión Control"
+  // is already the house's build-to-a-climax countdown track (the fueling turn ramping up to
+  // launch), the same "something big is about to happen" shape a wave's incoming-horde countdown
+  // needs, just siege- instead of launch-themed.
   zombie: {
+    gameplay: "/music/rocket-tension.mp3",
     tension: "/music/zombie-tension.mp3",
   },
   // Tension-only — Rocket Fuel's 90s "fuel your rocket" turns dominate playtime; the shared
@@ -236,7 +242,12 @@ function armAutoplayRetry() {
     // moment play() is CALLED, independent of whether autoplay policy goes on to reject it.
     if (enabled && currentSrc) {
       const el = players.get(currentSrc);
-      if (el) el.play().catch(() => {});
+      // Re-arm on a second rejection instead of swallowing it — a stricter mobile browser (seen in
+      // practice on iOS) can reject this retry too, and a brand-new track that's never played
+      // before in this page session (e.g. the first time a game with its own override is entered)
+      // gets exactly one shot here; without re-arming, that track would stay silent for the rest of
+      // the session even though every other track already unlocked fine.
+      if (el) el.play().catch(err => { if (err?.name === "NotAllowedError") armAutoplayRetry(); });
     }
   };
   document.addEventListener("pointerdown", retry, { once: true });
