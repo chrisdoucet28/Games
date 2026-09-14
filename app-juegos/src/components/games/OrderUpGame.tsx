@@ -239,8 +239,8 @@ const STYLE_TAG = (
     @keyframes ouCustomerIn{0%{opacity:0;transform:translateY(14px) scale(0.92)}100%{opacity:1;transform:translateY(0) scale(1)}}
     @keyframes ouBannerIn{0%{opacity:0;transform:translate(-50%,-16px) scale(0.9)}15%{opacity:1;transform:translate(-50%,0) scale(1.03)}25%{transform:translate(-50%,0) scale(1)}85%{opacity:1;transform:translate(-50%,0) scale(1)}100%{opacity:0;transform:translate(-50%,-10px) scale(0.96)}}
     @keyframes ouUrgentPulse{0%,100%{opacity:1}50%{opacity:0.5}}
-    .ou-btn:hover:not(:disabled){transform:translateY(-2px) scale(1.02);filter:brightness(1.08)}
-    .ou-btn:active:not(:disabled){transform:translateY(0) scale(0.97)}
+    .ou-btn:hover:not(:disabled){filter:brightness(1.08)}
+    .ou-btn:active:not(:disabled){transform:translate(4px,4px) !important;box-shadow:0 0 0 #1A1A2E !important}
   `}</style>
 );
 
@@ -331,8 +331,8 @@ function TicketCard({ ticket, teams, judging, isPhoneMode, answerMode, onClaim, 
             </div>
           )}
           <div style={{ display: "flex", gap: "6px", justifyContent: "center" }}>
-            <button onClick={onCorrect} className="ou-btn" style={{ display: "inline-flex", alignItems: "center", gap: "5px", background: "#22C55E", color: "white", border: "none", borderRadius: "10px", padding: "8px 12px", fontSize: "13px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease" }}><Icon name="check" size={13} /> Serve it!</button>
-            <button onClick={onWrong} className="ou-btn" style={{ display: "inline-flex", alignItems: "center", gap: "5px", background: "#EF4444", color: "white", border: "none", borderRadius: "10px", padding: "8px 12px", fontSize: "13px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease" }}><Icon name="close" size={12} /> Wrong</button>
+            <button onClick={onCorrect} className="ou-btn" style={{ display: "inline-flex", alignItems: "center", gap: "5px", background: "#22C55E", color: "white", border: "2px solid #1A1A2E", borderRadius: "10px", padding: "8px 12px", fontSize: "13px", fontWeight: "700", cursor: "pointer", boxShadow: "3px 3px 0 #1A1A2E" }}><Icon name="check" size={13} /> Serve it!</button>
+            <button onClick={onWrong} className="ou-btn" style={{ display: "inline-flex", alignItems: "center", gap: "5px", background: "#EF4444", color: "white", border: "2px solid #1A1A2E", borderRadius: "10px", padding: "8px 12px", fontSize: "13px", fontWeight: "700", cursor: "pointer", boxShadow: "3px 3px 0 #1A1A2E" }}><Icon name="close" size={12} /> Wrong</button>
           </div>
         </div>
       ) : claimedTeam ? (
@@ -355,7 +355,8 @@ function TicketCard({ ticket, teams, judging, isPhoneMode, answerMode, onClaim, 
                 className="ou-btn"
                 title={judgingBlocked ? "Finish judging the current order first" : undefined}
                 style={{
-                  background: judgingBlocked ? "#D1D5DB" : "linear-gradient(135deg,#BE185D,#F43F5E)", color: "white", border: "none",
+                  background: judgingBlocked ? "#D1D5DB" : "#F43F5E", color: "white", border: "2px solid #1A1A2E",
+                  boxShadow: judgingBlocked ? "none" : "3px 3px 0 #1A1A2E",
                   borderRadius: "10px", padding: "8px 12px", fontSize: "13px", fontWeight: "700",
                   display: "inline-flex", alignItems: "center", gap: "5px",
                   cursor: judgingBlocked ? "not-allowed" : "pointer", transition: "transform 0.15s ease",
@@ -858,7 +859,7 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
     <div style={{ ...arenaStyle, textAlign: "center" }}>
       {STYLE_TAG}
       <div style={{ position: "relative", zIndex: 1 }}>
-        <div style={{ background: "linear-gradient(135deg,#FFFFFF,#FFE4E6)", border: "2px solid #FBCFE8", borderRadius: "20px", padding: "28px 24px", marginBottom: "10px", color: "#831843", maxWidth: "560px", margin: "0 auto 10px", boxShadow: "0 6px 24px rgba(190,24,93,0.18)" }}>
+        <div style={{ background: "#FFE4E6", border: "3px solid #1A1A2E", borderRadius: "20px", padding: "28px 24px", marginBottom: "10px", color: "#831843", maxWidth: "560px", margin: "0 auto 10px", boxShadow: "5px 5px 0 #1A1A2E" }}>
           <div style={{ marginBottom: "10px" }}><Icon name="plate" size={36} /></div>
           <div style={{ fontWeight: "900", fontSize: "20px", marginBottom: "10px", color: "#BE185D" }}>Order Up Diner</div>
           <div style={{ fontSize: "15px", lineHeight: 1.7 }}>
@@ -985,7 +986,7 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
             onClose={() => setShowHowTo(false)}
           />
         )}
-        <button onClick={() => setPhase("playing")} className="ou-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg,#F43F5E,#FB7185)", color: "white", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(244,63,94,0.4)", transition: "transform 0.15s ease" }}><Icon name="bell" size={20} /> Open the Diner!</button>
+        <button onClick={() => setPhase("playing")} className="ou-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#F43F5E", color: "white", border: "3px solid #1A1A2E", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "6px 6px 0 #1A1A2E" }}><Icon name="bell" size={20} /> Open the Diner!</button>
       </div>
     </div>
   );
@@ -1014,7 +1015,7 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
               const served = totalDishes(counts);
               const dishEntries = Object.entries(counts ?? {});
               return (
-                <div key={t.id} style={{ background: "linear-gradient(160deg,#FFFFFF,#FFF1F2)", border: `2px solid ${t.color.bg}`, borderRadius: "14px", padding: "12px" }}>
+                <div key={t.id} style={{ background: "#FFF1F2", border: "2px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E", borderRadius: "14px", padding: "12px" }}>
                   <div><RankBadge rank={rank} size={20} /></div>
                   <div style={{ fontWeight: "800", color: "#831843", fontSize: "14px", marginTop: "4px" }}><TeamIcon team={t} /> {t.name}</div>
                   <div style={{ color: "#BE185D", fontWeight: "900", fontSize: "16px", marginTop: "4px" }}>{value} pts</div>
@@ -1033,7 +1034,7 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
               );
             })}
           </div>
-          <button onClick={onEnd} className="ou-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg,#BE185D,#F43F5E)", color: "white", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "800", cursor: "pointer", transition: "transform 0.15s ease" }}><Icon name="checkeredFlag" size={16} /> End Game</button>
+          <button onClick={onEnd} className="ou-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#F43F5E", color: "white", border: "3px solid #1A1A2E", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "800", cursor: "pointer", boxShadow: "4px 4px 0 #1A1A2E" }}><Icon name="checkeredFlag" size={16} /> End Game</button>
         </div>
       </div>
     );
@@ -1065,9 +1066,9 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
       {banner && (
         <div key={banner.key} style={{
           position: "absolute", top: "14px", left: "50%", zIndex: 20, whiteSpace: "nowrap",
-          background: banner.kind === "success" ? "linear-gradient(135deg,#15803D,#22C55E)" : "linear-gradient(135deg,#BE185D,#F43F5E)",
-          border: `2px solid ${banner.kind === "success" ? "#86EFAC" : "#FBCFE8"}`,
-          borderRadius: "14px", padding: "10px 22px", boxShadow: "0 8px 28px rgba(0,0,0,0.25)",
+          background: banner.kind === "success" ? "#22C55E" : "#F43F5E",
+          border: "3px solid #1A1A2E",
+          borderRadius: "14px", padding: "10px 22px", boxShadow: "4px 4px 0 #1A1A2E",
           animation: "ouBannerIn 2.4s ease-in-out forwards",
         }}>
           <span style={{ color: "white", fontWeight: "900", fontSize: "15px", textShadow: "0 1px 3px rgba(0,0,0,0.3)", display: "inline-flex", alignItems: "center", gap: "6px" }}>{banner.text}</span>

@@ -6,7 +6,7 @@ import type { GameProps, QuestionData, Team } from "../../types";
 import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
 import { denseRank } from "../../utils/ranking";
 import { RankBadge } from "../shared/RankBadge";
-import { makeTeacherTeam, TEACHER_ID } from "../../lib/soloOpponent";
+import { makeTeacherTeam } from "../../lib/soloOpponent";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
 import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
@@ -68,8 +68,9 @@ const STYLE_TAG = (
     @keyframes sauEject{0%{transform:translate(0,0) rotate(0deg);opacity:1}100%{transform:translate(180px,-140px) rotate(480deg);opacity:0}}
     @keyframes sauFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
     @keyframes sauPopIn{0%{transform:scale(0.7);opacity:0}60%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
-    .sau-btn:hover:not(:disabled){transform:translateY(-2px) scale(1.02);filter:brightness(1.1)}
-    .sau-btn:active:not(:disabled){transform:translateY(0) scale(0.97)}
+    .sau-btn:hover:not(:disabled){filter:brightness(1.08)}
+    .sau-btn:active:not(:disabled){transform:translate(3px,3px) !important;box-shadow:0 0 0 #1A1A2E !important}
+    .sau-btn:disabled{opacity:.5;cursor:not-allowed}
   `}</style>
 );
 
@@ -109,8 +110,8 @@ function Starfield() {
   );
 }
 
-const PANEL_BG = "linear-gradient(160deg,#1E293B,#0F172A)";
-const PANEL_BORDER = "1.5px solid #38BDF855";
+const PANEL_BG = "#0F172A";
+const PANEL_BORDER = "2px solid #1A1A2E";
 
 // What "Save & Exit" snapshots and "Resume" restores — which round we're on, who's currently the
 // spy, and the running cross-round tallies. Deliberately excludes in-round progress (who's peeked,
@@ -184,12 +185,15 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
   // A resumed mission skips the intro and re-peeks everyone for the same round/spy.
   const [phase, setPhase] = useState<Phase>(() => resumed ? "peek" : "intro");
   // Tension for the actual decision moments (voting who the spy is, the spy guessing the topic) —
-  // not "discuss"/"speak", which is free conversation, not an answer under pressure.
-  const isDeciding = phase === "vote" || phase === "spy-guess" || phase === "guess-2p";
+  // not "discuss"/"speak", which is free conversation, not an answer under pressure. Also covers
+  // "reveal"/"reveal-2p" (who the spy actually was) — teacher feedback: the reveal sting needs a
+  // quiet bed under it to actually land, not the more energetic gameplay track fighting it.
+  const wantsQuietMusic = phase === "vote" || phase === "spy-guess" || phase === "guess-2p"
+    || phase === "reveal" || phase === "reveal-2p";
   useEffect(() => {
-    if (isDeciding) setMusicContext("tension");
+    if (wantsQuietMusic) setMusicContext("tension");
     return () => setMusicContext("gameplay");
-  }, [isDeciding]);
+  }, [wantsQuietMusic]);
 
   useEffect(() => {
     if (phase === "final") { playSound("roundComplete"); stopMusic(); }
@@ -282,17 +286,18 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
           ? { role: "spy", prompt: currentRound?.spyPrompt ?? "" }
           : { role: "crew", prompt: currentRound?.crewmatePrompt ?? "" };
       });
-      // Only "intro" (not started) collapses to "lobby" — "peek" is a real, reachable phase now
-      // (solo play's teacher stand-in still peeks on-screen while the one real team's phone
-      // already has its role), so it's reported as-is.
+      // Only "intro" (not started) collapses to "lobby" — every other phase is reported as-is.
+      // "peek" itself is never reachable in phone mode (see enterRoundStartPhase), so phones only
+      // ever see "lobby", "speak-2p"/"discuss"/"vote"/"reveal", or "final".
       const rawPhase = phaseRef.current;
       const mappedPhase: SpyPhase = rawPhase === "intro" ? "lobby" : (rawPhase as SpyPhase);
       // 1v1's speak-2p tracks its own order/index (tp2SpeakOrder/tp2SpeakIdx) instead of the
       // group-mode speakOrder/speakIdx state.
       const usingTp2Order = rawPhase === "speak-2p";
-      // The teacher stand-in (solo play) never has a phone — never show it as a joinable/waiting
-      // team in the lobby.
-      const roster = teams.filter(t => t.id !== TEACHER_ID);
+      // The teacher stand-in (solo play) is a fully joinable phone team like any other — it needs
+      // its own phone to see its role privately, same as a real team would, since this broadcast
+      // and the shared/projected screen are visible to the whole class.
+      const roster = teams;
       const payload: SpyStatePayload = {
         phase: mappedPhase,
         ri: riRef.current,
@@ -359,28 +364,25 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
     setConnectedTeamIds(new Set());
   };
 
-  // Shared by the Start Mission button and nextRound() — decides which phase (and, for solo
-  // phone play, which peekIdx) a fresh round actually opens on:
+  // Shared by the Start Mission button and nextRound() — decides which phase a fresh round
+  // actually opens on:
   //   - screen mode: always "peek" from the top, unchanged.
   //   - group mode + phone: peek is skipped entirely (every real team already got its role via
   //     phone) straight to "discuss", unchanged from the group-mode-only version of this feature.
-  //   - solo + phone: the one real team already has its role; only the teacher stand-in
-  //     (always teams[1] in solo play) still needs their on-screen reveal, so peek starts at
-  //     index 1 instead of 0 — the existing "Okay, I've read it" advance logic already falls
-  //     straight into the isTwoPlayer branch (speak-2p) once that single reveal is acknowledged,
-  //     no other change needed.
-  //   - real 2-team 1v1 + phone: both teams already have their role via phone, so peek is
-  //     skipped entirely too — this replicates the same tp2SpeakOrder/tp2SpeakIdx reset the peek
-  //     flow's own advance handler does when it reaches this same transition normally.
+  //   - two-player + phone (solo's teacher stand-in is a normal joinable team now, see the
+  //     `roster` broadcast above and the intro QR panel below): both sides already have their
+  //     role via their own phone, so peek is skipped entirely too, straight into speak-2p. The
+  //     teacher's stand-in used to be excluded from
+  //     phone eligibility and had to peek on the shared screen instead — which meant their secret
+  //     role was displayed on a screen the whole class (including the one real team) could see,
+  //     the exact privacy the phone-mode feature exists to provide. Now that the teacher can claim
+  //     their own phone the same way any team does, solo behaves identically to a real 2-team 1v1.
   const enterRoundStartPhase = () => {
     if (inputMode !== "phone") {
       setPhase("peek");
       setPeekIdx(0);
     } else if (!isTwoPlayer) {
       setPhase("discuss");
-    } else if (isSolo) {
-      setPhase("peek");
-      setPeekIdx(1);
     } else {
       setTp2SpeakOrder([...teams].sort(() => Math.random() - 0.5));
       setTp2SpeakIdx(0);
@@ -651,7 +653,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
           <div
             style={{
               background: PANEL_BG,
-              border: PANEL_BORDER,
+              border: "4px solid #1A1A2E",
               borderRadius: "20px",
               padding: "28px 24px",
               marginBottom: "10px",
@@ -659,7 +661,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
               color: "white",
               maxWidth: "540px",
               margin: "0 auto 10px",
-              boxShadow: "0 0 50px rgba(56,189,248,0.25)",
+              boxShadow: "6px 6px 0 #1A1A2E",
             }}
           >
             <div style={{ marginBottom: "10px", animation: "sauFloat 3s ease-in-out infinite" }}><Icon name="ufo" size={36} /></div>
@@ -688,8 +690,9 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
               <div
                 key={team.id}
                 style={{
-                  background: `linear-gradient(160deg,${team.color.dark}55,#0F172A)`,
-                  border: `3px solid ${team.color.bg}`,
+                  background: team.color.dark,
+                  border: "3px solid #1A1A2E",
+                  boxShadow: "3px 3px 0 #1A1A2E",
                   borderRadius: "14px",
                   padding: "10px 18px",
                   fontWeight: "800",
@@ -725,17 +728,21 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
 
           {introStep === "qr" && sessionCode && (() => {
             const joinUrl = `${window.location.origin}${window.location.pathname}?join=${sessionCode}&game=spy`;
-            // The teacher stand-in (solo play) never has a phone — never list it as a joinable
-            // or "waiting to connect" team here.
-            const phoneEligibleTeams = teams.filter(t => t.id !== TEACHER_ID);
             return (
               <PhoneJoinPanel
-                sessionCode={sessionCode} joinUrl={joinUrl} teams={phoneEligibleTeams} connectedTeamIds={connectedTeamIds}
+                sessionCode={sessionCode} joinUrl={joinUrl} teams={teams} connectedTeamIds={connectedTeamIds}
                 accent="#38BDF8" panelBg="linear-gradient(160deg,#1E3A5F,#0F172A)" borderColor="#38BDF866"
                 footer={
-                  <button onClick={handlePickScreenMode} style={{ background: "none", border: "none", color: "#9CA3AF", fontSize: "12px", fontWeight: "700", cursor: "pointer", textDecoration: "underline" }}>
-                    Switch back to Play on Screen
-                  </button>
+                  <>
+                    {isSolo && (
+                      <div style={{ fontSize: "12px", color: "#FCD34D", fontWeight: "700", marginBottom: "10px", lineHeight: 1.5 }}>
+                        <Icon name="phone" size={12} /> Playing solo? Scan this with your own phone too and join as "Teacher" — that way your role stays hidden from the class, same as theirs.
+                      </div>
+                    )}
+                    <button onClick={handlePickScreenMode} style={{ background: "none", border: "none", color: "#9CA3AF", fontSize: "12px", fontWeight: "700", cursor: "pointer", textDecoration: "underline" }}>
+                      Switch back to Play on Screen
+                    </button>
+                  </>
                 }
               />
             );
@@ -745,7 +752,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
             className="sau-btn"
             style={{
               display: "inline-flex", alignItems: "center", gap: "6px", marginBottom: "14px",
-              background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)",
+              background: "white", color: GM.color, border: "3px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E",
               borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800",
               cursor: "pointer",
             }}
@@ -764,16 +771,15 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
             className="sau-btn"
             style={{
               display: "inline-flex", alignItems: "center", gap: "8px",
-              background: "linear-gradient(135deg,#0284C7,#38BDF8)",
+              background: "#38BDF8",
               color: "#0C1B2E",
-              border: "none",
+              border: "3px solid #1A1A2E",
               borderRadius: "16px",
               padding: "16px 48px",
               fontSize: "19px",
               fontWeight: "900",
               cursor: "pointer",
-              boxShadow: "0 6px 24px rgba(56,189,248,0.5)",
-              transition: "transform 0.15s ease",
+              boxShadow: "6px 6px 0 #1A1A2E",
             }}
           >
             <Icon name="ufo" size={20} /> Start Mission!
@@ -806,7 +812,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
               const spyWins = spyWinsByTeam[team.id] ?? 0;
               const crewWins = crewWinsByTeam[team.id] ?? 0;
               return (
-                <div key={team.id} style={{ background: `linear-gradient(160deg,${team.color.dark}55,#0F172A)`, border: `2px solid ${team.color.bg}`, borderRadius: "14px", padding: "12px" }}>
+                <div key={team.id} style={{ background: team.color.dark, border: "2px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E", borderRadius: "14px", padding: "12px" }}>
                   <div><RankBadge rank={rank} size={22} /></div>
                   <div style={{ fontWeight: "800", color: "white", fontSize: "14px", marginTop: "4px" }}><TeamIcon team={team} /> {team.name}</div>
                   <div style={{ color: "#38BDF8", fontWeight: "900", fontSize: "16px", marginTop: "4px" }}>{value} pts</div>
@@ -820,7 +826,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
           <button
             onClick={onEnd}
             className="sau-btn"
-            style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg,#0284C7,#38BDF8)", color: "#0C1B2E", border: "none", borderRadius: "14px", padding: "14px 36px", fontSize: "17px", fontWeight: "900", cursor: "pointer", transition: "transform 0.15s ease" }}
+            style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#38BDF8", color: "#0C1B2E", border: "3px solid #1A1A2E", borderRadius: "14px", padding: "14px 36px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "5px 5px 0 #1A1A2E" }}
           >
             <Icon name="checkeredFlag" size={18} /> End Game
           </button>
@@ -836,7 +842,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
       {inputMode === "phone" && sessionCode && (
         <PhoneReconnectBadge
           sessionCode={sessionCode} joinUrl={`${window.location.origin}${window.location.pathname}?join=${sessionCode}&game=spy`}
-          teams={teams.filter(t => t.id !== TEACHER_ID)} connectedTeamIds={connectedTeamIds}
+          teams={teams} connectedTeamIds={connectedTeamIds}
           accent="#38BDF8" panelBg="linear-gradient(160deg,#1E3A5F,#0F172A)" borderColor="#38BDF866"
         />
       )}
@@ -845,6 +851,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
           style={{
             background: PANEL_BG,
             border: PANEL_BORDER,
+            boxShadow: "3px 3px 0 #1A1A2E",
             borderRadius: "14px",
             padding: "12px 20px",
             marginBottom: "14px",
@@ -860,9 +867,9 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
           </span>
           <span
             style={{
-              background: "rgba(56,189,248,0.15)",
-              border: "1px solid #38BDF855",
-              color: "#7DD3FC",
+              background: "#38BDF8",
+              border: "2px solid #1A1A2E",
+              color: "#0C1B2E",
               padding: "4px 14px",
               borderRadius: "20px",
               fontWeight: "700",
@@ -876,8 +883,9 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
         {isTwoPlayer && phase === "peek" && peekIdx === 0 && (
           <div
             style={{
-              background: "linear-gradient(135deg,#1E3A8A,#1D4ED8)",
-              border: "2px solid #60A5FA",
+              background: "#1D4ED8",
+              border: "2px solid #1A1A2E",
+              boxShadow: "3px 3px 0 #1A1A2E",
               borderRadius: "12px",
               padding: "12px 16px",
               marginBottom: "14px",
@@ -896,8 +904,9 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
           <div style={{ textAlign: "center" }}>
             <div
               style={{
-                background: `linear-gradient(160deg,${peekTeam.color.dark}55,#0F172A)`,
-                border: `4px solid ${peekTeam.color.bg}`,
+                background: peekTeam.color.dark,
+                border: "4px solid #1A1A2E",
+                boxShadow: "6px 6px 0 #1A1A2E",
                 borderRadius: "20px",
                 padding: "24px",
                 maxWidth: "480px",
@@ -916,14 +925,13 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
                   style={{
                     background: peekTeam.color.bg,
                     color: "white",
-                    border: "none",
+                    border: "3px solid #1A1A2E",
                     borderRadius: "14px",
                     padding: "16px 40px",
                     fontSize: "18px",
                     fontWeight: "900",
                     cursor: "pointer",
-                    boxShadow: `0 4px 20px ${peekTeam.color.bg}60`,
-                    transition: "transform 0.15s ease",
+                    boxShadow: "5px 5px 0 #1A1A2E",
                     display: "inline-flex", alignItems: "center", gap: "8px",
                   }}
                 >
@@ -934,10 +942,9 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
                   <div
                     key={peekIdx}
                     style={{
-                      background: isSpy(peekTeam.id)
-                        ? "linear-gradient(135deg,#7F1D1D,#450A0A)"
-                        : "linear-gradient(135deg,#1E3A8A,#1D4ED8)",
-                      border: isSpy(peekTeam.id) ? "2px solid #EF4444" : "2px solid #60A5FA",
+                      background: isSpy(peekTeam.id) ? "#7F1D1D" : "#1D4ED8",
+                      border: "3px solid #1A1A2E",
+                      boxShadow: "4px 4px 0 #1A1A2E",
                       borderRadius: "16px",
                       padding: "20px",
                       marginBottom: "16px",
@@ -986,13 +993,13 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
                     style={{
                       background: "rgba(255,255,255,0.1)",
                       color: "white",
-                      border: "1.5px solid #38BDF855",
+                      border: "2px solid #1A1A2E",
+                      boxShadow: "3px 3px 0 #1A1A2E",
                       borderRadius: "12px",
                       padding: "12px 28px",
                       fontSize: "15px",
                       fontWeight: "800",
                       cursor: "pointer",
-                      transition: "transform 0.15s ease",
                     }}
                   >
                     Okay, I've read it - head down!
@@ -1023,7 +1030,8 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
             <div
               style={{
                 background: PANEL_BG,
-                border: "2px solid #38BDF8",
+                border: "2px solid #1A1A2E",
+                boxShadow: "3px 3px 0 #1A1A2E",
                 borderRadius: "14px",
                 padding: "18px",
                 marginBottom: "16px",
@@ -1069,15 +1077,15 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
                 onClick={startOrderRoll}
                 className="sau-btn"
                 style={{
-                  background: "linear-gradient(135deg,#0284C7,#38BDF8)",
+                  background: "#38BDF8",
                   color: "#0C1B2E",
-                  border: "none",
+                  border: "3px solid #1A1A2E",
+                  boxShadow: "4px 4px 0 #1A1A2E",
                   borderRadius: "12px",
                   padding: "12px 28px",
                   fontSize: "15px",
                   fontWeight: "800",
                   cursor: "pointer",
-                  transition: "transform 0.15s ease",
                 }}
               >
                 Ready - Roll for Speaking Order!
@@ -1096,8 +1104,9 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
                 <div
                   key={team.id}
                   style={{
-                    background: `linear-gradient(160deg,${team.color.dark}55,#0F172A)`,
-                    border: `3px solid ${team.color.bg}`,
+                    background: team.color.dark,
+                    border: "3px solid #1A1A2E",
+                    boxShadow: "3px 3px 0 #1A1A2E",
                     borderRadius: "16px",
                     padding: "12px 16px",
                     minWidth: "90px",
@@ -1124,7 +1133,8 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
                 <div
                   style={{
                     background: PANEL_BG,
-                    border: "2px solid #38BDF8",
+                    border: "2px solid #1A1A2E",
+                    boxShadow: "3px 3px 0 #1A1A2E",
                     borderRadius: "12px",
                     padding: "12px 20px",
                     marginBottom: "16px",
@@ -1160,15 +1170,15 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
                     onClick={() => setPhase("speak")}
                     className="sau-btn"
                     style={{
-                      background: "linear-gradient(135deg,#0284C7,#38BDF8)",
+                      background: "#38BDF8",
                       color: "#0C1B2E",
-                      border: "none",
+                      border: "3px solid #1A1A2E",
+                      boxShadow: "4px 4px 0 #1A1A2E",
                       borderRadius: "12px",
                       padding: "12px 28px",
                       fontSize: "15px",
                       fontWeight: "800",
                       cursor: "pointer",
-                      transition: "transform 0.15s ease",
                     }}
                   >
                     Start Speaking!
@@ -1183,8 +1193,9 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
           <div>
             <div
               style={{
-                background: `linear-gradient(160deg,${speakTeam.color.dark}55,#0F172A)`,
-                border: `3px solid ${speakTeam.color.bg}`,
+                background: speakTeam.color.dark,
+                border: "3px solid #1A1A2E",
+                boxShadow: "4px 4px 0 #1A1A2E",
                 borderRadius: "16px",
                 padding: "20px",
                 textAlign: "center",
@@ -1209,13 +1220,13 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
                 style={{
                   background: speakTeam.color.bg,
                   color: "white",
-                  border: "none",
+                  border: "3px solid #1A1A2E",
+                  boxShadow: "4px 4px 0 #1A1A2E",
                   borderRadius: "12px",
                   padding: "12px 28px",
                   fontSize: "15px",
                   fontWeight: "800",
                   cursor: "pointer",
-                  transition: "transform 0.15s ease",
                 }}
               >
                 Done - {speakIdx + 1 < speakOrder.length ? `Next: ${speakOrder[speakIdx + 1].name}` : "Go to vote!"}
@@ -1269,8 +1280,9 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
                 <div
                   key={voter.id}
                   style={{
-                    background: `linear-gradient(160deg,${voter.color.dark}44,#0F172A)`,
-                    border: `2px solid ${voter.color.bg}`,
+                    background: voter.color.dark,
+                    border: "2px solid #1A1A2E",
+                    boxShadow: "3px 3px 0 #1A1A2E",
                     borderRadius: "12px",
                     padding: "12px 14px",
                   }}
@@ -1289,13 +1301,13 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
                           style={{
                             background: votes[voter.id] === suspect.id ? suspect.color.bg : "rgba(255,255,255,0.06)",
                             color: votes[voter.id] === suspect.id ? "white" : "#E2E8F0",
-                            border: `2px solid ${suspect.color.bg}`,
+                            border: "2px solid #1A1A2E",
+                            boxShadow: "2px 2px 0 #1A1A2E",
                             borderRadius: "8px",
                             padding: "6px 14px",
                             fontWeight: "700",
                             fontSize: "13px",
                             cursor: "pointer",
-                            transition: "transform 0.15s ease",
                           }}
                         >
                           <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}><Icon name="warning" size={12} /> {suspect.name}</span>
@@ -1312,15 +1324,15 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
                 disabled={!allVoted}
                 className="sau-btn"
                 style={{
-                  background: allVoted ? "linear-gradient(135deg,#B91C1C,#EF4444)" : "#334155",
+                  background: allVoted ? "#EF4444" : "#334155",
                   color: "white",
-                  border: "none",
+                  border: "3px solid #1A1A2E",
+                  boxShadow: allVoted ? "4px 4px 0 #1A1A2E" : "none",
                   borderRadius: "12px",
                   padding: "12px 28px",
                   fontSize: "15px",
                   fontWeight: "800",
                   cursor: allVoted ? "pointer" : "not-allowed",
-                  transition: "transform 0.15s ease",
                   display: "inline-flex", alignItems: "center", gap: "8px",
                 }}
               >
@@ -1335,13 +1347,13 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
           <div style={{ textAlign: "center" }}>
             <div
               style={{
-                background: "linear-gradient(135deg,#7F1D1D,#450A0A)",
-                border: "2px solid #EF4444",
+                background: "#7F1D1D",
+                border: "3px solid #1A1A2E",
                 borderRadius: "16px",
                 padding: "24px",
                 marginBottom: "16px",
                 color: "white",
-                boxShadow: "0 0 30px rgba(239,68,68,0.35)",
+                boxShadow: "5px 5px 0 #1A1A2E",
               }}
             >
               <div style={{ marginBottom: "10px" }}><Icon name="search" size={36} /></div>
@@ -1358,13 +1370,13 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
                     style={{
                       background: spyGuess === option ? "#38BDF8" : "rgba(255,255,255,0.1)",
                       color: spyGuess === option ? "#0C1B2E" : "white",
-                      border: `2px solid ${spyGuess === option ? "#7DD3FC" : "rgba(255,255,255,0.2)"}`,
+                      border: "2px solid #1A1A2E",
+                      boxShadow: "3px 3px 0 #1A1A2E",
                       borderRadius: "10px",
                       padding: "10px 16px",
                       fontWeight: "800",
                       fontSize: "15px",
                       cursor: "pointer",
-                      transition: "transform 0.15s ease",
                     }}
                   >
                     {option}
@@ -1376,15 +1388,15 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
                 disabled={!spyGuess}
                 className="sau-btn"
                 style={{
-                  background: spyGuess ? "linear-gradient(135deg,#0284C7,#38BDF8)" : "#4B5563",
+                  background: spyGuess ? "#38BDF8" : "#4B5563",
                   color: spyGuess ? "#0C1B2E" : "white",
-                  border: "none",
+                  border: "3px solid #1A1A2E",
+                  boxShadow: spyGuess ? "4px 4px 0 #1A1A2E" : "none",
                   borderRadius: "12px",
                   padding: "12px 28px",
                   fontSize: "15px",
                   fontWeight: "900",
                   cursor: spyGuess ? "pointer" : "not-allowed",
-                  transition: "transform 0.15s ease",
                 }}
               >
                 Lock in my answer!
@@ -1403,19 +1415,19 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
             </div>
 
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "14px" }}>
-              <div style={{ background: "linear-gradient(160deg,#1E3A8A55,#0F172A)", border: "2px solid #3B82F6", borderRadius: "12px", padding: "14px" }}>
+              <div style={{ background: "#1E3A8A", border: "2px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E", borderRadius: "12px", padding: "14px" }}>
                 <div style={{ fontWeight: "800", fontSize: "12px", color: "#93C5FD", marginBottom: "8px" }}>CREWMATE TOPIC</div>
                 <div style={{ fontWeight: "900", fontSize: "16px", color: "white", marginBottom: "8px" }}>{round.crewmateTopic}</div>
                 <div style={{ fontSize: "13px", color: "#CBD5E1", lineHeight: 1.5, fontStyle: "italic" }}>"{round.crewmatePrompt}"</div>
               </div>
-              <div style={{ background: "linear-gradient(160deg,#7F1D1D55,#0F172A)", border: "2px solid #EF4444", borderRadius: "12px", padding: "14px" }}>
+              <div style={{ background: "#7F1D1D", border: "2px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E", borderRadius: "12px", padding: "14px" }}>
                 <div style={{ fontWeight: "800", fontSize: "12px", color: "#FCA5A5", marginBottom: "8px" }}>SPY TOPIC</div>
                 <div style={{ fontWeight: "900", fontSize: "16px", color: "white", marginBottom: "8px" }}>{round.spyTopic}</div>
                 <div style={{ fontSize: "13px", color: "#FECACA", lineHeight: 1.5, fontStyle: "italic" }}>"{round.spyPrompt}"</div>
               </div>
             </div>
 
-            <div style={{ position: "relative", background: "rgba(56,189,248,0.1)", border: "2px solid #38BDF8", borderRadius: "12px", padding: "12px", marginBottom: "14px" }}>
+            <div style={{ position: "relative", background: "rgba(56,189,248,0.1)", border: "2px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E", borderRadius: "12px", padding: "12px", marginBottom: "14px" }}>
               <div style={{ position: "absolute", top: "8px", right: "8px" }}>
                 <FlagPromptButton gameId="spy" questionData={round} />
               </div>
@@ -1428,6 +1440,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
                 style={{
                   background: spyGuess === round.crewmateTopic ? "rgba(239,68,68,0.12)" : "rgba(34,197,94,0.12)",
                   border: `2px solid ${spyGuess === round.crewmateTopic ? "#EF4444" : "#22C55E"}`,
+                  boxShadow: `3px 3px 0 ${spyGuess === round.crewmateTopic ? "#EF4444" : "#22C55E"}`,
                   borderRadius: "12px",
                   padding: "12px",
                   marginBottom: "14px",
@@ -1446,7 +1459,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
               </div>
             )}
 
-            <div style={{ background: "rgba(255,255,255,0.05)", border: "1px solid #334155", borderRadius: "12px", padding: "12px", marginBottom: "14px" }}>
+            <div style={{ background: "rgba(255,255,255,0.05)", border: "2px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E", borderRadius: "12px", padding: "12px", marginBottom: "14px" }}>
               <div style={{ fontWeight: "800", fontSize: "13px", color: "#94A3B8", marginBottom: "8px" }}>Vote results:</div>
               {teams.map((team) => {
                 const accused = teams.find((candidate) => candidate.id === votes[team.id]);
@@ -1467,15 +1480,15 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
                 onClick={nextRound}
                 className="sau-btn"
                 style={{
-                  background: "linear-gradient(135deg,#0284C7,#38BDF8)",
+                  background: "#38BDF8",
                   color: "#0C1B2E",
-                  border: "none",
+                  border: "3px solid #1A1A2E",
+                  boxShadow: "4px 4px 0 #1A1A2E",
                   borderRadius: "12px",
                   padding: "12px 28px",
                   fontSize: "15px",
                   fontWeight: "800",
                   cursor: "pointer",
-                  transition: "transform 0.15s ease",
                   display: "inline-flex", alignItems: "center", gap: "8px",
                 }}
               >
@@ -1493,8 +1506,9 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
               <div>
                 <div
                   style={{
-                    background: `linear-gradient(160deg,${speaker.color.dark}55,#0F172A)`,
-                    border: `3px solid ${speaker.color.bg}`,
+                    background: speaker.color.dark,
+                    border: "3px solid #1A1A2E",
+                    boxShadow: "4px 4px 0 #1A1A2E",
                     borderRadius: "16px",
                     padding: "22px",
                     textAlign: "center",
@@ -1521,13 +1535,13 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
                     style={{
                       background: speaker.color.bg,
                       color: "white",
-                      border: "none",
+                      border: "3px solid #1A1A2E",
+                      boxShadow: "4px 4px 0 #1A1A2E",
                       borderRadius: "12px",
                       padding: "12px 28px",
                       fontSize: "15px",
                       fontWeight: "800",
                       cursor: "pointer",
-                      transition: "transform 0.15s ease",
                     }}
                   >
                     Done - {isLast ? "Start guessing!" : `Next: ${tp2SpeakOrder[tp2SpeakIdx + 1].name}`}
@@ -1578,8 +1592,9 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
 
                 <div
                   style={{
-                    background: isSpyGuessing ? "linear-gradient(135deg,#7F1D1D,#450A0A)" : "linear-gradient(135deg,#1E3A8A,#1D4ED8)",
-                    border: isSpyGuessing ? "2px solid #EF4444" : "2px solid #60A5FA",
+                    background: isSpyGuessing ? "#7F1D1D" : "#1D4ED8",
+                    border: "3px solid #1A1A2E",
+                    boxShadow: "4px 4px 0 #1A1A2E",
                     borderRadius: "16px",
                     padding: "24px",
                     marginBottom: "16px",
@@ -1604,14 +1619,14 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
                         style={{
                           background: tp2Guesses[guesser.id] === option ? "#38BDF8" : "rgba(255,255,255,0.10)",
                           color: tp2Guesses[guesser.id] === option ? "#0C1B2E" : "white",
-                          border: `2px solid ${tp2Guesses[guesser.id] === option ? "#7DD3FC" : "rgba(255,255,255,0.2)"}`,
+                          border: "2px solid #1A1A2E",
+                          boxShadow: "3px 3px 0 #1A1A2E",
                           borderRadius: "10px",
                           padding: "10px 16px",
                           fontWeight: "800",
                           fontSize: "15px",
                           cursor: "pointer",
                           textAlign: "left",
-                          transition: "transform 0.15s ease",
                         }}
                       >
                         {tp2Guesses[guesser.id] === option ? "✓ " : "○ "}
@@ -1632,15 +1647,15 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
                     disabled={!tp2Guesses[guesser.id]}
                     className="sau-btn"
                     style={{
-                      background: tp2Guesses[guesser.id] ? "linear-gradient(135deg,#0284C7,#38BDF8)" : "#4B5563",
+                      background: tp2Guesses[guesser.id] ? "#38BDF8" : "#4B5563",
                       color: tp2Guesses[guesser.id] ? "#0C1B2E" : "white",
-                      border: "none",
+                      border: "3px solid #1A1A2E",
+                      boxShadow: tp2Guesses[guesser.id] ? "4px 4px 0 #1A1A2E" : "none",
                       borderRadius: "12px",
                       padding: "12px 28px",
                       fontSize: "15px",
                       fontWeight: "900",
                       cursor: tp2Guesses[guesser.id] ? "pointer" : "not-allowed",
-                      transition: "transform 0.15s ease",
                     }}
                   >
                     {isLastGuesser ? "Reveal answers!" : `Lock in - pass to ${guesserOrder[1].name}`}
@@ -1668,8 +1683,9 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "14px" }}>
                   <div
                     style={{
-                      background: `linear-gradient(160deg,${crewPlayer.color.dark}55,#0F172A)`,
-                      border: `3px solid ${crewPlayer.color.bg}`,
+                      background: crewPlayer.color.dark,
+                      border: "3px solid #1A1A2E",
+                      boxShadow: "4px 4px 0 #1A1A2E",
                       borderRadius: "14px",
                       padding: "14px",
                       textAlign: "center",
@@ -1696,8 +1712,9 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
                   <div
                     key={ri}
                     style={{
-                      background: "linear-gradient(160deg,#7F1D1D55,#0F172A)",
-                      border: "3px solid #EF4444",
+                      background: "#7F1D1D",
+                      border: "3px solid #1A1A2E",
+                      boxShadow: "4px 4px 0 #1A1A2E",
                       borderRadius: "14px",
                       padding: "14px",
                       textAlign: "center",
@@ -1727,6 +1744,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
                     style={{
                       background: spyGuessedRight ? "rgba(34,197,94,0.15)" : "rgba(239,68,68,0.15)",
                       border: `2px solid ${spyGuessedRight ? "#22C55E" : "#EF4444"}`,
+                      boxShadow: `3px 3px 0 ${spyGuessedRight ? "#22C55E" : "#EF4444"}`,
                       borderRadius: "12px",
                       padding: "14px",
                     }}
@@ -1754,6 +1772,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
                     style={{
                       background: crewGuessedRight ? "rgba(34,197,94,0.15)" : "rgba(239,68,68,0.15)",
                       border: `2px solid ${crewGuessedRight ? "#22C55E" : "#EF4444"}`,
+                      boxShadow: `3px 3px 0 ${crewGuessedRight ? "#22C55E" : "#EF4444"}`,
                       borderRadius: "12px",
                       padding: "14px",
                     }}
@@ -1778,7 +1797,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
                   </div>
                 </div>
 
-                <div style={{ background: "rgba(56,189,248,0.1)", border: "2px solid #38BDF8", borderRadius: "12px", padding: "12px", marginBottom: "14px" }}>
+                <div style={{ background: "rgba(56,189,248,0.1)", border: "2px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E", borderRadius: "12px", padding: "12px", marginBottom: "14px" }}>
                   <div style={{ fontWeight: "800", fontSize: "13px", color: "#7DD3FC", marginBottom: "4px" }}>The difference</div>
                   <div style={{ color: "#E2E8F0", fontSize: "14px" }}>{round.explanation}</div>
                 </div>
@@ -1788,15 +1807,15 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
                     onClick={nextRound}
                     className="sau-btn"
                     style={{
-                      background: "linear-gradient(135deg,#0284C7,#38BDF8)",
+                      background: "#38BDF8",
                       color: "#0C1B2E",
-                      border: "none",
+                      border: "3px solid #1A1A2E",
+                      boxShadow: "4px 4px 0 #1A1A2E",
                       borderRadius: "12px",
                       padding: "12px 28px",
                       fontSize: "15px",
                       fontWeight: "800",
                       cursor: "pointer",
-                      transition: "transform 0.15s ease",
                       display: "inline-flex", alignItems: "center", gap: "8px",
                     }}
                   >

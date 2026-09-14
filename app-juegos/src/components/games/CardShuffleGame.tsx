@@ -32,8 +32,8 @@ const STYLE_TAG = (
     @keyframes csMarquee{0%,100%{opacity:0.55}50%{opacity:1}}
     @keyframes csStarPulse{0%,100%{transform:scale(1);filter:brightness(1)}50%{transform:scale(1.12);filter:brightness(1.3)}}
     @keyframes csRevealPop{0%{transform:scale(0.85);opacity:0}60%{transform:scale(1.05)}100%{transform:scale(1);opacity:1}}
-    .cs-btn:hover:not(:disabled){transform:translateY(-2px) scale(1.02);filter:brightness(1.1)}
-    .cs-btn:active:not(:disabled){transform:translateY(0) scale(0.97)}
+    .cs-btn:hover:not(:disabled){filter:brightness(1.1)}
+    .cs-btn:active:not(:disabled){transform:translate(4px,4px) !important;box-shadow:0 0 0 #1A1A2E !important}
     .cs-card:hover{filter:brightness(1.1)}
   `}</style>
 );
@@ -359,9 +359,9 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
           </div>
         </div>
         <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "24px" }}>
-          {teams.map(t => (<div key={t.id} style={{ background: `linear-gradient(160deg,${t.color.dark}55,#450A0A)`, border: "3px solid " + t.color.bg, borderRadius: "14px", padding: "10px 18px", fontWeight: "800", fontSize: "14px", color: "white", display: "flex", alignItems: "center", gap: "6px" }}><TeamIcon team={t} color="white" /> {t.name}</div>))}
+          {teams.map(t => (<div key={t.id} style={{ background: t.color.dark, border: "2px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E", borderRadius: "14px", padding: "10px 18px", fontWeight: "800", fontSize: "14px", color: "white", display: "flex", alignItems: "center", gap: "6px" }}><TeamIcon team={t} color="white" /> {t.name}</div>))}
         </div>
-        <button onClick={() => setShowHowTo(true)} className="cs-btn" style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginBottom: "14px", background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
+        <button onClick={() => setShowHowTo(true)} className="cs-btn" style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginBottom: "14px", background: "white", color: GM.color, border: "3px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
           <Icon name="help" size={15} /> How to Play
         </button>
         {showHowTo && (
@@ -371,7 +371,7 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
             onClose={() => setShowHowTo(false)}
           />
         )}
-        <button onClick={() => setPhase("preview")} className="cs-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg,#B91C1C,#FCD34D)", color: "#450A0A", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(252,211,77,0.4)", transition: "transform 0.15s ease" }}>
+        <button onClick={() => setPhase("preview")} className="cs-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#FCD34D", color: "#450A0A", border: "3px solid #1A1A2E", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "6px 6px 0 #1A1A2E" }}>
           <Icon name="tent" size={20} /> Step Right Up!
         </button>
       </div>
@@ -398,7 +398,7 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
           <div style={{ fontWeight: "900", fontSize: "22px", color: "#FCD34D", marginBottom: "16px" }}>{headline}</div>
           <div style={{ display: "grid", gridTemplateColumns: teamsGridCols(teams.length), gap: "10px", margin: "0 auto 20px", maxWidth: "760px" }}>
             {ranking.map(({ item: t, rank, value }) => (
-              <div key={t.id} style={{ background: `linear-gradient(160deg,${t.color.dark}55,#450A0A)`, border: `2px solid ${t.color.bg}`, borderRadius: "14px", padding: "12px" }}>
+              <div key={t.id} style={{ background: t.color.dark, border: "2px solid #1A1A2E", boxShadow: "4px 4px 0 #1A1A2E", borderRadius: "14px", padding: "12px" }}>
                 <div><RankBadge rank={rank} size={22} /></div>
                 <div style={{ fontWeight: "800", color: "white", fontSize: "14px", marginTop: "4px" }}><TeamIcon team={t} /> {t.name}</div>
                 <div style={{ color: "#FCD34D", fontWeight: "900", fontSize: "16px", marginTop: "4px" }}>{value} pts</div>
@@ -406,7 +406,7 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
               </div>
             ))}
           </div>
-          <button onClick={onEnd} className="cs-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg,#B91C1C,#FCD34D)", color: "#450A0A", border: "none", borderRadius: "14px", padding: "14px 32px", fontSize: "16px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 20px rgba(252,211,77,0.4)", transition: "transform 0.15s ease" }}><Icon name="checkeredFlag" size={18} /> End Game</button>
+          <button onClick={onEnd} className="cs-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#FCD34D", color: "#450A0A", border: "3px solid #1A1A2E", borderRadius: "14px", padding: "14px 32px", fontSize: "16px", fontWeight: "900", cursor: "pointer", boxShadow: "5px 5px 0 #1A1A2E" }}><Icon name="checkeredFlag" size={18} /> End Game</button>
         </div>
       </div>
     );
@@ -420,14 +420,14 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
         <div style={TENT_STRIPES} />
         {STYLE_TAG}
         <div style={{ position: "relative", zIndex: 1 }}>
-          <div style={{ background: "linear-gradient(160deg,#991B1B,#450A0A)", border: "2px solid #FCD34D66", borderRadius: "20px", padding: "28px 24px", marginBottom: "20px", color: "white", maxWidth: "480px", margin: "0 auto 20px" }}>
+          <div style={{ background: "#450A0A", border: "4px solid #1A1A2E", boxShadow: "6px 6px 0 #1A1A2E", borderRadius: "20px", padding: "28px 24px", marginBottom: "20px", color: "white", maxWidth: "480px", margin: "0 auto 20px" }}>
             <div style={{ marginBottom: "10px" }}><Icon name="clock" size={36} /></div>
             <div style={{ fontWeight: "900", fontSize: "19px", marginBottom: "10px", color: "#FCD34D" }}><TeamIcon team={noticeTeam} /> {noticeTeam.name} ran out of time!</div>
             <div style={{ fontSize: "15px", lineHeight: 1.6, opacity: 0.95 }}>
               {timeoutNotice.retried ? "That's your one free retry for this game — watch the clock this time!" : "You've already used your free retry this game — the turn moves on."}
             </div>
           </div>
-          <button onClick={dismissTimeoutNotice} className="cs-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg,#B91C1C,#FCD34D)", color: "#450A0A", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(252,211,77,0.4)", transition: "transform 0.15s ease" }}>
+          <button onClick={dismissTimeoutNotice} className="cs-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#FCD34D", color: "#450A0A", border: "3px solid #1A1A2E", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "6px 6px 0 #1A1A2E" }}>
             {timeoutNotice.retried ? <><Icon name="refresh" size={18} /> Try Again!</> : <><Icon name="next" size={18} /> Next Team</>}
           </button>
         </div>
@@ -442,7 +442,7 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
       {(phase === "shuffling" || phase === "preview") && <SpotlightBackdrop />}
       {STYLE_TAG}
       <div style={{ position: "relative", zIndex: 1 }}>
-        <div style={{ background: "linear-gradient(90deg,#991B1B,#B91C1C)", border: "1.5px solid #FCD34D55", borderRadius: "14px", padding: "10px 16px", marginBottom: "14px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px", boxShadow: "0 4px 18px rgba(153,27,27,0.5)" }}>
+        <div style={{ background: "#B91C1C", border: "3px solid #1A1A2E", borderRadius: "14px", padding: "10px 16px", marginBottom: "14px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px", boxShadow: "4px 4px 0 #1A1A2E" }}>
           <span style={{ color: "white", fontWeight: "900", fontSize: "16px", textShadow: "0 1px 3px rgba(0,0,0,0.4)", display: "inline-flex", alignItems: "center", gap: "6px" }}>
             <Icon name="tent" size={15} /> Round {roundCount + 1}/{maxRounds} —{" "}
             {phase === "preview" && <><Icon name="star" size={14} /> Remember which card is the star — then we shuffle!</>}
@@ -530,7 +530,7 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
         {phase === "preview" && (
           <div style={{ textAlign: "center", marginTop: "20px" }}>
             <p style={{ color: "#FEF3C7", fontWeight: "700", fontSize: "14px", marginBottom: "10px", animation: "csMarquee 1.6s ease-in-out infinite" }}>One card has a <strong style={{ color: "#FCD34D", display: "inline-flex", alignItems: "center", gap: "3px" }}><Icon name="star" size={12} /> star</strong> — remember which one!</p>
-            <button onClick={runShuffle} className="cs-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg,#B91C1C,#FCD34D)", color: "#450A0A", border: "none", borderRadius: "14px", padding: "14px 36px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 20px rgba(252,211,77,0.4)", transition: "transform 0.15s ease" }}><Icon name="shuffle" size={18} /> Shuffle!</button>
+            <button onClick={runShuffle} className="cs-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#FCD34D", color: "#450A0A", border: "3px solid #1A1A2E", borderRadius: "14px", padding: "14px 36px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "5px 5px 0 #1A1A2E" }}><Icon name="shuffle" size={18} /> Shuffle!</button>
           </div>
         )}
 
@@ -542,7 +542,7 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
 
         {phase === "answering" && pickedCard && (
           <div style={{ marginTop: "8px" }}>
-            <div style={{ position: "relative", background: "linear-gradient(160deg,#FFFBEB,#FEF3C7)", border: "3px solid #F59E0B", borderRadius: "16px", padding: "20px", textAlign: "center", marginBottom: "14px" }}>
+            <div style={{ position: "relative", background: "#FEF3C7", border: "3px solid #1A1A2E", boxShadow: "4px 4px 0 #1A1A2E", borderRadius: "16px", padding: "20px", textAlign: "center", marginBottom: "14px" }}>
               <div style={{ position: "absolute", top: "10px", right: "10px" }}>
                 <FlagPromptButton gameId="cards" questionData={pickedCard} />
               </div>
@@ -551,12 +551,12 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
             </div>
             {!showAns ? (
               <div style={{ textAlign: "center" }}>
-                <button onClick={() => { stop(); setShowAns(true); }} className="cs-btn" style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "linear-gradient(135deg,#B91C1C,#DC2626)", color: "white", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "15px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease" }}><Icon name="hand" size={14} /> Performance complete!</button>
+                <button onClick={() => { stop(); setShowAns(true); }} className="cs-btn" style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "#DC2626", color: "white", border: "3px solid #1A1A2E", borderRadius: "12px", padding: "12px 28px", fontSize: "15px", fontWeight: "700", cursor: "pointer", boxShadow: "4px 4px 0 #1A1A2E" }}><Icon name="hand" size={14} /> Performance complete!</button>
               </div>
             ) : (
               <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
-                <button onClick={() => resolveAnswer(true)} className="cs-btn" style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "linear-gradient(135deg,#15803D,#22C55E)", color: "white", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease" }}><Icon name="check" size={14} /> Correct</button>
-                <button onClick={() => resolveAnswer(false)} className="cs-btn" style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "linear-gradient(135deg,#B91C1C,#EF4444)", color: "white", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease" }}><Icon name="close" size={14} /> Wrong</button>
+                <button onClick={() => resolveAnswer(true)} className="cs-btn" style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "#22C55E", color: "white", border: "3px solid #1A1A2E", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "700", cursor: "pointer", boxShadow: "4px 4px 0 #1A1A2E" }}><Icon name="check" size={14} /> Correct</button>
+                <button onClick={() => resolveAnswer(false)} className="cs-btn" style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "#EF4444", color: "white", border: "3px solid #1A1A2E", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "700", cursor: "pointer", boxShadow: "4px 4px 0 #1A1A2E" }}><Icon name="close" size={14} /> Wrong</button>
               </div>
             )}
           </div>
@@ -564,10 +564,10 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
 
         {phase === "reveal" && (
           <div style={{ textAlign: "center", marginTop: "70px" }}>
-            <div style={{ background: "linear-gradient(160deg,#FDE68A,#F59E0B)", border: "3px solid #FCD34D", borderRadius: "14px", padding: "14px", marginBottom: "14px", boxShadow: "0 0 24px rgba(245,158,11,0.5)" }}>
+            <div style={{ background: "#F59E0B", border: "3px solid #1A1A2E", borderRadius: "14px", padding: "14px", marginBottom: "14px", boxShadow: "4px 4px 0 #1A1A2E" }}>
               <div style={{ fontSize: "22px", marginBottom: "6px", color: "#450A0A", fontWeight: "900", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}><Icon name="star" size={20} /> Star card revealed!</div>
             </div>
-            <button onClick={nextRound} className="cs-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg,#B91C1C,#FCD34D)", color: "#450A0A", border: "none", borderRadius: "14px", padding: "14px 32px", fontSize: "16px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 20px rgba(252,211,77,0.4)", transition: "transform 0.15s ease" }}>
+            <button onClick={nextRound} className="cs-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#FCD34D", color: "#450A0A", border: "3px solid #1A1A2E", borderRadius: "14px", padding: "14px 32px", fontSize: "16px", fontWeight: "900", cursor: "pointer", boxShadow: "5px 5px 0 #1A1A2E" }}>
               {roundCount + 1 >= maxRounds ? <><Icon name="trophy" size={18} /> See Final Results</> : <><Icon name="next" size={18} /> Next Round</>}
             </button>
           </div>

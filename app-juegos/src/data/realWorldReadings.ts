@@ -597,12 +597,11 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   making_questions: {
     title: "The Job Interview",
-    audioUrl: "/audio/real-world/making_questions.mp3",
     passage: [
       "Thank you for coming in today. First, where do you currently work?",
       "I work at a small marketing agency downtown.",
-      "Great. How long have you been there?",
-      "About three years now.",
+      "Great. When did you start working there?",
+      "About three years ago.",
       "And why did you decide to apply for this position?",
       "I'm looking for a new challenge, and I really admire this company's work.",
       "Perfect. Do you have any questions for us?",
@@ -610,7 +609,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
     ],
     questions: [
       { type: "reading comprehension", question: "Where does the candidate currently work?", answer: "A small marketing agency downtown." },
-      { type: "reading comprehension", question: "How long have they worked there?", answer: "About three years." },
+      { type: "reading comprehension", question: "When did the candidate start working there?", answer: "About three years ago." },
       { type: "reading comprehension", question: "What question does the candidate ask at the end?", answer: "What a typical day looks like there." },
     ],
   },

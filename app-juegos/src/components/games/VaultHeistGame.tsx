@@ -561,8 +561,9 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
       @keyframes twinkle{0%,100%{opacity:0.12;transform:scale(0.8)}50%{opacity:0.7;transform:scale(1.3)}}
       @keyframes vaultDiceSpin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
       @keyframes vaultDoorSwing{0%{transform:scaleX(1)}100%{transform:scaleX(0.08)}}
-      .vault-next-btn:hover{transform:scale(1.04);filter:brightness(1.1)}
-      .vault-next-btn:active{transform:scale(0.97)}
+      .vault-next-btn:hover:not(:disabled){filter:brightness(1.08)}
+      .vault-next-btn:active:not(:disabled){transform:translate(3px,3px) !important;box-shadow:0 0 0 #1A1A2E !important}
+      .vault-next-btn:disabled{opacity:.5;cursor:not-allowed}
     `}</style>
   );
 
@@ -586,7 +587,7 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
         {styleTag}
         <div style={{ marginBottom: "10px" }}><Icon name="lock" size={40} /></div>
         <div style={{ fontWeight: "800", fontSize: "18px" }}>No rewrite-sentence content found for this topic selection.</div>
-        <button onClick={onEnd} className="vault-next-btn" style={{ marginTop: "16px", background: "#D4AF37", color: "#1F1608", border: "none", borderRadius: "14px", padding: "14px 32px", fontSize: "16px", fontWeight: "900", cursor: "pointer" }}><Icon name="checkeredFlag" size={15} /> End Game</button>
+        <button onClick={onEnd} className="vault-next-btn" style={{ marginTop: "16px", background: "#D4AF37", color: "#1F1608", border: "3px solid #1A1A2E", boxShadow: "4px 4px 0 #1A1A2E", borderRadius: "14px", padding: "14px 32px", fontSize: "16px", fontWeight: "900", cursor: "pointer" }}><Icon name="checkeredFlag" size={15} /> End Game</button>
       </div>
     );
   }
@@ -597,7 +598,7 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
       {ambientLayer}
       {styleTag}
       <div style={{ position: "relative", zIndex: 1 }}>
-        <div style={{ background: "linear-gradient(135deg,#3A2E12,#7A5C1E)", borderRadius: "20px", padding: "28px 24px", marginBottom: "10px", position: "relative", color: "white", maxWidth: "540px", margin: "0 auto 10px", boxShadow: "0 0 40px #D4AF3755" }}>
+        <div style={{ background: "#3A2E12", border: "4px solid #1A1A2E", borderRadius: "20px", padding: "28px 24px", marginBottom: "10px", position: "relative", color: "white", maxWidth: "540px", margin: "0 auto 10px", boxShadow: "6px 6px 0 #1A1A2E" }}>
           <div style={{ marginBottom: "10px" }}><Icon name="lock" size={36} /></div>
           <div style={{ fontWeight: "900", fontSize: "20px", marginBottom: "10px" }}>Vault Heist</div>
           <div style={{ fontSize: "15px", lineHeight: 1.7, opacity: 0.95 }}>
@@ -618,11 +619,11 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
                   onClick={() => setDifficulty(d)}
                   className="vault-next-btn"
                   style={{
-                    background: selected ? "linear-gradient(135deg,#7A5C1E,#D4AF37)" : "rgba(255,255,255,0.08)",
+                    background: selected ? "#D4AF37" : "rgba(255,255,255,0.08)",
                     color: selected ? "#1F1608" : "#E8D8AE",
-                    border: `2px solid ${selected ? "#D4AF37" : "#6B5B3A"}`,
+                    border: "2px solid #1A1A2E", boxShadow: selected ? "3px 3px 0 #1A1A2E" : "none",
                     borderRadius: "12px", padding: "10px 20px", fontWeight: "800", fontSize: "14px",
-                    cursor: "pointer", transition: "transform 0.15s ease",
+                    cursor: "pointer",
                     display: "inline-flex", alignItems: "center", gap: "6px",
                   }}
                 >
@@ -646,11 +647,11 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
                     onClick={() => setCpuDifficulty(d)}
                     className="vault-next-btn"
                     style={{
-                      background: selected ? "linear-gradient(135deg,#7A5C1E,#D4AF37)" : "rgba(255,255,255,0.08)",
+                      background: selected ? "#D4AF37" : "rgba(255,255,255,0.08)",
                       color: selected ? "#1F1608" : "#E8D8AE",
-                      border: `2px solid ${selected ? "#D4AF37" : "#6B5B3A"}`,
+                      border: "2px solid #1A1A2E", boxShadow: selected ? "3px 3px 0 #1A1A2E" : "none",
                       borderRadius: "12px", padding: "10px 20px", fontWeight: "800", fontSize: "14px",
-                      cursor: "pointer", transition: "transform 0.15s ease",
+                      cursor: "pointer",
                       display: "inline-flex", alignItems: "center", gap: "6px",
                     }}
                   >
@@ -664,7 +665,7 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
             </div>
           </div>
         )}
-        <button onClick={() => setShowHowTo(true)} className="vault-next-btn" style={{ display: "block", margin: "0 auto 14px", background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
+        <button onClick={() => setShowHowTo(true)} className="vault-next-btn" style={{ display: "block", margin: "0 auto 14px", background: "white", color: GM.color, border: "3px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
           <Icon name="help" size={14} /> How to Play
         </button>
         {showHowTo && (
@@ -674,7 +675,7 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
             onClose={() => setShowHowTo(false)}
           />
         )}
-        <button onClick={() => setPhase("rolling")} className="vault-next-btn" style={{ background: "linear-gradient(135deg,#7A5C1E,#D4AF37)", color: "#1F1608", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(212,175,55,0.5)", transition: "transform 0.15s ease" }}><Icon name="dice" size={18} /> Roll to Start!</button>
+        <button onClick={() => setPhase("rolling")} className="vault-next-btn" style={{ background: "#D4AF37", color: "#1F1608", border: "3px solid #1A1A2E", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "6px 6px 0 #1A1A2E" }}><Icon name="dice" size={18} /> Roll to Start!</button>
       </div>
     </div>
   );
@@ -687,7 +688,7 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
         <div style={{ fontWeight: "900", fontSize: "17px", marginBottom: "16px", color: "white", display: "inline-flex", alignItems: "center", gap: "6px" }}><Icon name="dice" size={16} /> Rolling to see who cracks first!</div>
         <div style={{ display: "flex", gap: "16px", justifyContent: "center", flexWrap: "wrap", marginBottom: "16px" }}>
           {teams.map((t, i) => (
-            <div key={t.id} style={{ background: `linear-gradient(160deg,${t.color.dark}55,#0F0B05)`, border: `3px solid ${t.color.bg}`, borderRadius: "16px", padding: "14px 20px", textAlign: "center" }}>
+            <div key={t.id} style={{ background: t.color.dark, border: "3px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E", borderRadius: "16px", padding: "14px 20px", textAlign: "center" }}>
               <div style={{ fontWeight: "800", fontSize: "13px", color: "white" }}>{t.name}</div>
               <div style={{ color: "#FCD34D", lineHeight: 1, marginTop: "4px" }}><DiceFace value={diceValues[i]} size={44} spinning={diceValues[i] != null && !rollDone} /></div>
               {rollDone && diceValues[i] != null && (
@@ -698,7 +699,7 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
         </div>
         {rollDone && finalOrder && (
           <div>
-            <div style={{ background: "rgba(255,255,255,0.08)", border: "2px solid #D4AF37", borderRadius: "12px", padding: "12px 20px", marginBottom: "14px", display: "inline-block" }}>
+            <div style={{ background: "rgba(255,255,255,0.08)", border: "2px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E", borderRadius: "12px", padding: "12px 20px", marginBottom: "14px", display: "inline-block" }}>
               <div style={{ fontWeight: "700", fontSize: "13px", color: "#FCD34D", marginBottom: "6px" }}>Crack order:</div>
               <div style={{ display: "flex", gap: "8px", justifyContent: "center", alignItems: "center", flexWrap: "wrap" }}>
                 {finalOrder.map((entry, pos) => {
@@ -714,7 +715,7 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
               </div>
             </div>
             <div>
-              <button onClick={() => beginReveal(0)} className="vault-next-btn" style={{ background: "linear-gradient(135deg,#7A5C1E,#D4AF37)", color: "#1F1608", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "800", cursor: "pointer", transition: "transform 0.15s ease" }}><Icon name="play" size={15} /> Begin the Heist!</button>
+              <button onClick={() => beginReveal(0)} className="vault-next-btn" style={{ background: "#D4AF37", color: "#1F1608", border: "3px solid #1A1A2E", boxShadow: "4px 4px 0 #1A1A2E", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "800", cursor: "pointer" }}><Icon name="play" size={15} /> Begin the Heist!</button>
             </div>
           </div>
         )}
@@ -745,8 +746,8 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
               return (
                 <div key={t.id} style={{
                   display: "flex", alignItems: "center", gap: "12px",
-                  background: isFirst ? `linear-gradient(160deg,${t.color.dark}66,#0F0B05)` : "linear-gradient(160deg,#2A2317,#0F0B05)",
-                  border: `2px solid ${isFirst ? t.color.bg : "#6B5B3A"}`, borderRadius: "14px", padding: isFirst ? "12px 16px" : "10px 16px",
+                  background: isFirst ? t.color.dark : "#2A2317",
+                  border: "2px solid #1A1A2E", boxShadow: isFirst ? "4px 4px 0 #1A1A2E" : "3px 3px 0 #1A1A2E", borderRadius: "14px", padding: isFirst ? "12px 16px" : "10px 16px",
                   opacity: isFirst ? 1 : 0.9,
                 }}>
                   <span><RankBadge rank={rank - 1} size={isFirst ? 24 : 20} /></span>
@@ -756,7 +757,7 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
               );
             })}
           </div>
-          <button onClick={onEnd} className="vault-next-btn" style={{ background: "linear-gradient(135deg,#7A5C1E,#D4AF37)", color: "#1F1608", border: "none", borderRadius: "14px", padding: "14px 32px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(212,175,55,0.5)", transition: "transform 0.15s ease" }}><Icon name="checkeredFlag" size={16} /> End Game</button>
+          <button onClick={onEnd} className="vault-next-btn" style={{ background: "#D4AF37", color: "#1F1608", border: "3px solid #1A1A2E", borderRadius: "14px", padding: "14px 32px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "6px 6px 0 #1A1A2E" }}><Icon name="checkeredFlag" size={16} /> End Game</button>
         </div>
       </div>
     );
@@ -784,8 +785,8 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
       {winBanner && (
         <div key={winBanner.key} style={{
           position: "absolute", top: "14px", left: "50%", zIndex: 20, whiteSpace: "nowrap",
-          background: `linear-gradient(135deg,${winBanner.color},#7A5C1E)`, border: "2px solid #FCD34D",
-          borderRadius: "14px", padding: "12px 24px", boxShadow: "0 8px 28px rgba(0,0,0,0.5)",
+          background: winBanner.color, border: "3px solid #1A1A2E",
+          borderRadius: "14px", padding: "12px 24px", boxShadow: "5px 5px 0 #1A1A2E",
           animation: "vaultBannerIn 3.2s ease-in-out forwards",
         }}>
           <span style={{ color: "white", fontWeight: "900", fontSize: "16px", textShadow: "0 1px 3px rgba(0,0,0,0.5)", display: "inline-flex", alignItems: "center", gap: "6px" }}>
@@ -821,7 +822,7 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
           })}
         </div>
 
-        <div style={{ background: `linear-gradient(90deg, ${activeTeam.color.bg}, ${activeTeam.color.dark})`, borderRadius: "14px", padding: "10px 16px", marginBottom: "12px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px", boxShadow: `0 4px 18px ${activeTeam.color.bg}55` }}>
+        <div style={{ background: activeTeam.color.bg, border: "3px solid #1A1A2E", borderRadius: "14px", padding: "10px 16px", marginBottom: "12px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px", boxShadow: "4px 4px 0 #1A1A2E" }}>
           <span style={{ color: "white", fontWeight: "900", fontSize: "16px", textShadow: "0 1px 3px rgba(0,0,0,0.4)", display: "inline-flex", alignItems: "center", gap: "6px" }}><Icon name="lock" size={15} /> <TeamIcon team={activeTeam} /> {activeTeam.name} — {phaseHeaderText()}</span>
           {phase === "answer" && <TurnTimerBar timeLeft={timeLeft} totalSeconds={turnSeconds} />}
         </div>
@@ -829,8 +830,8 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
         {phase === "reveal" && currentCategory && (
           <div style={{ textAlign: "center" }}>
             <div style={{
-              display: "inline-block", background: "linear-gradient(135deg,#3A2E12,#7A5C1E)", border: "3px solid #D4AF37",
-              borderRadius: "16px", padding: "20px 32px", boxShadow: "0 8px 28px rgba(212,175,55,0.4)",
+              display: "inline-block", background: "#3A2E12", border: "3px solid #1A1A2E",
+              borderRadius: "16px", padding: "20px 32px", boxShadow: "5px 5px 0 #1A1A2E",
               animation: "toolFlip 0.5s ease-out",
             }}>
               {/* The vault door the creak sound (playSound("vault") in beginReveal) is actually
@@ -859,7 +860,7 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
               <div style={{ fontSize: "13px", fontWeight: "700", color: "#E8D8AE", marginBottom: "6px", letterSpacing: "0.05em", display: "flex", alignItems: "center", justifyContent: "center", gap: "5px" }}><Icon name="wrench" size={13} /> THIS LOCK NEEDS</div>
               <div style={{ fontSize: "24px", fontWeight: "900", color: "#FCD34D" }}>{displayCategory(currentCategory)}</div>
               {currentQuestion?.form && (
-                <div style={{ marginTop: "10px", display: "inline-block", background: "#7F1D1D", border: "2px solid #FCA5A5", borderRadius: "10px", padding: "5px 14px" }}>
+                <div style={{ marginTop: "10px", display: "inline-block", background: "#7F1D1D", border: "2px solid #1A1A2E", boxShadow: "2px 2px 0 #1A1A2E", borderRadius: "10px", padding: "5px 14px" }}>
                   <span style={{ fontSize: "13px", fontWeight: "800", color: "#FCA5A5", display: "inline-flex", alignItems: "center", gap: "4px" }}>
                     {currentQuestion.form === "question" ? <><Icon name="help" size={13} /> ALSO NEEDS: A QUESTION</> : <><Icon name="forbidden" size={13} /> ALSO NEEDS: NEGATIVE</>}
                   </span>
@@ -878,7 +879,7 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
               <div style={{ textAlign: "center", marginBottom: "10px" }}>
                 <div style={{
                   display: "inline-flex", alignItems: "center", gap: "8px", flexWrap: "wrap", justifyContent: "center",
-                  background: "rgba(212,175,55,0.12)", border: "1px solid rgba(212,175,55,0.4)",
+                  background: "rgba(212,175,55,0.12)", border: "2px solid #1A1A2E",
                   borderRadius: "10px", padding: "6px 14px",
                 }}>
                   {topicLabel && (
@@ -897,8 +898,8 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
             <QuestionCard question={currentQuestion} showAnswer={showAns} onReveal={handleReveal} gameId="vault" />
             {currentQuestion && (showAns || currentQuestion?.type === "speaking task") && (
               <div style={{ display: "flex", gap: "10px", justifyContent: "center", marginTop: "12px" }}>
-                <button onClick={handleCorrect} className="vault-next-btn" style={{ background: "#22C55E", color: "white", border: "none", borderRadius: "12px", padding: "12px 24px", fontSize: "16px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease" }}><Icon name="check" size={15} /> Correct — Crack it!</button>
-                <button onClick={handleWrong} className="vault-next-btn" style={{ background: "#EF4444", color: "white", border: "none", borderRadius: "12px", padding: "12px 24px", fontSize: "16px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease" }}><Icon name="close" size={13} /> Wrong</button>
+                <button onClick={handleCorrect} className="vault-next-btn" style={{ background: "#22C55E", color: "white", border: "3px solid #1A1A2E", boxShadow: "4px 4px 0 #1A1A2E", borderRadius: "12px", padding: "12px 24px", fontSize: "16px", fontWeight: "700", cursor: "pointer" }}><Icon name="check" size={15} /> Correct — Crack it!</button>
+                <button onClick={handleWrong} className="vault-next-btn" style={{ background: "#EF4444", color: "white", border: "3px solid #1A1A2E", boxShadow: "4px 4px 0 #1A1A2E", borderRadius: "12px", padding: "12px 24px", fontSize: "16px", fontWeight: "700", cursor: "pointer" }}><Icon name="close" size={13} /> Wrong</button>
               </div>
             )}
           </>
@@ -937,9 +938,9 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
               )}
               {!allFinished && (
                 lastOutcome.correct && !justFinished ? (
-                  <button onClick={keepGoing} className="vault-next-btn" style={{ background: "#D4AF37", color: "#1F1608", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "800", cursor: "pointer", boxShadow: "0 4px 16px rgba(212,175,55,0.5)", transition: "transform 0.15s ease" }}><Icon name="unlocked" size={15} /> Keep Going!</button>
+                  <button onClick={keepGoing} className="vault-next-btn" style={{ background: "#D4AF37", color: "#1F1608", border: "3px solid #1A1A2E", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "800", cursor: "pointer", boxShadow: "4px 4px 0 #1A1A2E" }}><Icon name="unlocked" size={15} /> Keep Going!</button>
                 ) : (
-                  <button onClick={advanceTurn} className="vault-next-btn" style={{ background: "#6366F1", color: "white", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "800", cursor: "pointer", boxShadow: "0 4px 16px rgba(99,102,241,0.5)", transition: "transform 0.15s ease" }}><Icon name="next" size={15} /> Next Team</button>
+                  <button onClick={advanceTurn} className="vault-next-btn" style={{ background: "#6366F1", color: "white", border: "3px solid #1A1A2E", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "800", cursor: "pointer", boxShadow: "4px 4px 0 #1A1A2E" }}><Icon name="next" size={15} /> Next Team</button>
                 )
               )}
             </div>

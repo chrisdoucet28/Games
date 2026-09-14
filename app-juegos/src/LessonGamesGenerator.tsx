@@ -171,6 +171,12 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
   const [screen, setScreen] = useState<"welcome" | "classes" | "profile" | "learn" | "lessonplan" | "lessonplan-play" | "leaderboard" | "billing" | "topic-select" | "team-setup" | "game-select" | "game" | "results">(
     checkoutRedirect ? "billing" : initialScreen ?? "welcome"
   );
+  // The lesson a teacher is en route to play — set the moment a topic is picked (from the Lesson
+  // Plan index, or Learn's "Start Lesson Plan" button) and read once team-setup's CTA is clicked,
+  // so team-setup knows to route to "lessonplan-play" instead of "game-select". Every team-setup
+  // entry point that ISN'T a lesson explicitly clears this, so no path can misroute on stale state
+  // left over from a previous visit.
+  const [pendingLessonTopicId, setPendingLessonTopicId] = useState<string | null>(null);
   // Background music context: "gameplay" only for the actual game screen, "ambient" everywhere
   // else in the app (menus, setup, lesson plans, results...). The louder "tension" context is set
   // separately by useTurnTimer whenever a timed turn is actively running, and reverts to
@@ -178,20 +184,18 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
   useEffect(() => {
     if (screen === "game") setMusicContext("gameplay");
     // Lesson Plans is real reading/teaching content, not a menu — music under it (even the quiet
-    // ambient bed) competes with the teacher actually presenting, so it goes silent instead.
-    else if (screen === "lessonplan" || screen === "lessonplan-play") stopMusic();
+    // ambient bed) competes with the teacher actually presenting, so it goes silent instead. This
+    // also covers team-setup when it's reached via a lesson plan (pendingLessonTopicId set) rather
+    // than the normal game flow — team-setup is shared between both, and without this check the
+    // ambient bed would suddenly kick in there mid-lesson-plan before going silent again on
+    // "lessonplan-play".
+    else if (screen === "lessonplan" || screen === "lessonplan-play" || (screen === "team-setup" && pendingLessonTopicId)) stopMusic();
     else setMusicContext("ambient");
-  }, [screen]);
+  }, [screen, pendingLessonTopicId]);
   // Where Learn's own "Back" should return to — it can now be reached from 3 different places
   // (the welcome screen's own Learn button, game-select's "Review these topics", and results'
   // "Review these topics"), so a single learnFilter-based binary no longer captures it.
   const [learnReturnTo, setLearnReturnTo] = useState<"welcome" | "game-select" | "results">("welcome");
-  // The lesson a teacher is en route to play — set the moment a topic is picked (from the Lesson
-  // Plan index, or Learn's "Start Lesson Plan" button) and read once team-setup's CTA is clicked,
-  // so team-setup knows to route to "lessonplan-play" instead of "game-select". Every team-setup
-  // entry point that ISN'T a lesson explicitly clears this, so no path can misroute on stale state
-  // left over from a previous visit.
-  const [pendingLessonTopicId, setPendingLessonTopicId] = useState<string | null>(null);
   const isPaid = isPaidStatus(subscription.status);
   // The class this session is tied to, if any. Games started via "Start a Game" (not through "My
   // Classes") leave this null — but "Save & Exit" is still available; clicking it with no class
@@ -221,6 +225,17 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
   const [teamNames, setTeamNames] = useState(DEFAULT_TEAM_NAMES);
   const [teamColors, setTeamColors] = useState([0, 1, 2, 3, 4]);
   const [teamMascots, setTeamMascots] = useState<(string | null)[]>([null, null, null, null, null]);
+  // True only while every active team slot still holds its just-reset/just-linked default content
+  // — lets toggleRosterTeam tell "teacher hasn't set up teams yet" apart from "teacher's real teams
+  // just happen to be named Team Red/Team Blue" (a perfectly normal thing to actually want), which
+  // a name-string comparison alone can't. Also gates the roster autosave effect below, so clicking
+  // around without actually naming/recoloring/mascot-ing anything doesn't write junk placeholder
+  // entries into the class's saved-teams roster. Cleared the instant a slot's actual CONTENT is
+  // edited (rename, recolor, mascot, hydrating a class's real roster, or the first roster tap
+  // itself) — deliberately NOT by the "how many teams?" count buttons alone, since revealing or
+  // hiding a slot doesn't touch what's actually named. See every setter below for where it flips
+  // false, and resetTeamsToNormal for the one place it flips back to true.
+  const [teamsUntouched, setTeamsUntouched] = useState(true);
   const [teams, setTeams] = useState<Team[]>([]);
   // Every team ever played under the active class, for the tap-to-toggle "saved teams" picker —
   // empty (and the picker hidden) whenever no class is active or it has no roster yet.
@@ -308,6 +323,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     setTeamNames(DEFAULT_TEAM_NAMES.slice());
     setTeamColors([0, 1, 2, 3, 4]);
     setTeamMascots([null, null, null, null, null]);
+    setTeamsUntouched(true);
     setTeams(ts => ts.map((t, i) => ({
       ...t,
       name: DEFAULT_TEAM_NAMES[i] ?? t.name,
@@ -341,10 +357,15 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     const key = entry.name.trim().toLowerCase();
     const activeIdx = names.slice(0, count).findIndex(n => n.trim().toLowerCase() === key);
 
-    const nextNames = [...names];
-    const nextColors = [...colors];
-    const nextMascots = [...mascots];
+    let nextNames = [...names];
+    let nextColors = [...colors];
+    let nextMascots = [...mascots];
     let nextCount = count;
+    // Whether the result still counts as an untouched blank slate — true again only via the
+    // nextCount===0 fallback below (which lands back on the real defaults); every other outcome
+    // leaves at least one deliberately-chosen team in place, real even when it's a bare removal
+    // down to a single remaining team.
+    let nextUntouched = false;
 
     if (activeIdx !== -1) {
       for (let i = activeIdx; i < count - 1; i++) {
@@ -353,13 +374,52 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
         nextMascots[i] = nextMascots[i + 1];
       }
       nextCount = count - 1;
+      // The shift above leaves the now-unused trailing slot holding whatever it shifted down from
+      // (a duplicate of the team now sitting one slot earlier) — invisible while numTeams stays at
+      // nextCount, but it resurfaces as a duplicate-named team the moment "How many teams?" goes
+      // back up, since nothing else ever repopulates that slot. Reset it to its own untouched
+      // default so bumping the count back up always reveals a fresh slot, not stale data.
+      nextNames[nextCount] = DEFAULT_TEAM_NAMES[nextCount];
+      nextColors[nextCount] = nextCount;
+      nextMascots[nextCount] = null;
+      // Untapping a class's only real team would otherwise leave 0 active teams — a state the
+      // "how many teams?" buttons above can never produce themselves, and nothing downstream
+      // (handleSetup, game-select) expects. Land back on the normal untouched defaults instead of
+      // an empty roster.
+      if (nextCount === 0) {
+        nextNames = DEFAULT_TEAM_NAMES.slice();
+        nextColors = [0, 1, 2, 3, 4];
+        nextMascots = [null, null, null, null, null];
+        nextCount = 2;
+        nextUntouched = true;
+      }
     } else {
-      if (count >= cap) return;
-      nextNames[count] = entry.name;
-      const idx = TEAM_COLORS.findIndex(c => c.name === entry.color.name);
-      nextColors[count] = idx === -1 ? count : idx;
-      nextMascots[count] = entry.mascot;
-      nextCount = count + 1;
+      // Teacher feedback: tapping a saved team while the editor still shows the untouched "Team
+      // Red"/"Team Blue" placeholders should leave exactly that one team, not that team stacked
+      // behind the placeholders — the defaults were never a real choice to begin with, so a saved
+      // team replaces them outright instead of appending after them. Gated on teamsUntouched
+      // (tracked explicitly, not inferred from the names) rather than comparing names against
+      // DEFAULT_TEAM_NAMES directly — a teacher who deliberately kept "Team Red"/"Team Blue" as
+      // their actual team names (a perfectly normal choice) would otherwise have that real setup
+      // silently overwritten the first time they tapped a saved team to add a third. Once any real
+      // edit happens, further taps go back to the normal add/remove behavior below.
+      if (teamsUntouched) {
+        nextNames = DEFAULT_TEAM_NAMES.slice();
+        nextColors = [0, 1, 2, 3, 4];
+        nextMascots = [null, null, null, null, null];
+        nextNames[0] = entry.name;
+        const idx = TEAM_COLORS.findIndex(c => c.name === entry.color.name);
+        nextColors[0] = idx === -1 ? 0 : idx;
+        nextMascots[0] = entry.mascot;
+        nextCount = 1;
+      } else {
+        if (count >= cap) return;
+        nextNames[count] = entry.name;
+        const idx = TEAM_COLORS.findIndex(c => c.name === entry.color.name);
+        nextColors[count] = idx === -1 ? count : idx;
+        nextMascots[count] = entry.mascot;
+        nextCount = count + 1;
+      }
     }
 
     teamSlotsRef.current = { names: nextNames, colors: nextColors, mascots: nextMascots, count: nextCount };
@@ -367,6 +427,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     setTeamColors(nextColors);
     setTeamMascots(nextMascots);
     setNumTeams(nextCount);
+    setTeamsUntouched(nextUntouched);
   };
 
   // Forgets a saved team preset for next time — deliberately leaves today's active lineup alone
@@ -428,6 +489,12 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
 
   useEffect(() => {
     if (!activeClassId) return;
+    // Still the untouched "Team Red"/"Team Blue" blank slate — e.g. a teacher just clicking the
+    // "3" team-count button before naming anything, or hitting "Reset teams to normal" — nothing
+    // real to save yet. Without this, those generic placeholder names got permanently written into
+    // the class's saved-teams roster as if they were genuine picks, cluttering it with junk chips
+    // indistinguishable from teams the teacher actually named.
+    if (teamsUntouched) return;
     const baseline = autosaveBaselineRef.current;
     if (!baseline) return;
     const current = teamSlotsRef.current;
@@ -442,7 +509,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     }, 800);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeClassId, teamNames, teamColors, teamMascots, numTeams]);
+  }, [activeClassId, teamNames, teamColors, teamMascots, numTeams, teamsUntouched]);
 
   // Game-select equivalent — here `teams` already IS the live, scored session (unlike setup,
   // where scores are still keyed off the previous session by name until handleSetup runs), so
@@ -531,6 +598,9 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
         return next;
       });
       setTeams(cls.teams);
+      // A real class's own saved teams, not a blank slate — a later roster tap in team-setup
+      // should append to this lineup, not treat it as still-untouched placeholders to replace.
+      setTeamsUntouched(false);
     }
     setScreen("topic-select");
   };
@@ -1431,7 +1501,10 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
                 {teamRoster.map(entry => {
                   const isActive = isRosterTeamActive(entry);
                   const cap = isPaid ? 5 : FREE_PLAN_LIMITS.maxTeams;
-                  const locked = !isActive && numTeams >= cap;
+                  // Replacing the untouched defaults collapses down to 1 team rather than adding
+                  // on top of them, so it never actually needs extra capacity — only a genuine
+                  // append (teams already set up) should hit the plan cap.
+                  const locked = !isActive && numTeams >= cap && !teamsUntouched;
                   return (
                     <div key={entry.id} style={{ position: "relative" }}>
                       <button
@@ -1478,7 +1551,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
               return (
                 <button
                   key={n}
-                  onClick={() => locked ? setScreen("billing") : setNumTeams(n)}
+                  onClick={() => { if (locked) { setScreen("billing"); return; } setNumTeams(n); }}
                   title={locked ? `Free plan is limited to ${FREE_PLAN_LIMITS.maxTeams} teams — upgrade to unlock more` : undefined}
                   style={{ background: numTeams === n ? theme.accentSolid : "white", color: numTeams === n ? "white" : locked ? "#9CA3AF" : "#374151", border: `3px solid ${numTeams === n ? theme.accentSolid : "#D1D5DB"}`, borderRadius: "12px", padding: "10px 24px", fontSize: "18px", fontWeight: "800", cursor: "pointer", opacity: locked ? 0.6 : 1, display: "inline-flex", alignItems: "center", gap: "5px" }}
                 >
@@ -1506,6 +1579,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
                       const next = [...teamNames];
                       next[i] = e.target.value;
                       setTeamNames(next);
+                      setTeamsUntouched(false);
                     }}
                     style={{
                       width: "100%",
@@ -1530,6 +1604,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
                           const next = [...teamColors];
                           next[i] = swatchIndex;
                           setTeamColors(next);
+                          setTeamsUntouched(false);
                         }}
                         title={swatch.name}
                         aria-label={`${teamNames[i] || `Team ${i + 1}`} color ${swatch.name}`}
@@ -1553,13 +1628,13 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
                       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(44px,1fr))", gap: "8px", marginBottom: "8px" }}>
                         <button
                           type="button" title="No mascot"
-                          onClick={() => { const next = [...teamMascots]; next[i] = null; setTeamMascots(next); setExpandedMascotTeam(null); }}
+                          onClick={() => { const next = [...teamMascots]; next[i] = null; setTeamMascots(next); setTeamsUntouched(false); setExpandedMascotTeam(null); }}
                           style={{ width: "44px", height: "44px", borderRadius: "10px", color: "#9CA3AF", background: teamMascots[i] == null ? "#F3F4F6" : "transparent", border: teamMascots[i] == null ? `2px solid ${color.bg}` : "1px solid #E5E7EB", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
                         ><Icon name="close" size={16} /></button>
                         {MASCOT_OPTIONS.map(m => (
                           <button
                             key={m} type="button" title={m}
-                            onClick={() => { const next = [...teamMascots]; next[i] = m; setTeamMascots(next); setExpandedMascotTeam(null); }}
+                            onClick={() => { const next = [...teamMascots]; next[i] = m; setTeamMascots(next); setTeamsUntouched(false); setExpandedMascotTeam(null); }}
                             style={{
                               width: "44px", height: "44px", borderRadius: "10px", cursor: "pointer",
                               background: teamMascots[i] === m ? color.light : "transparent",

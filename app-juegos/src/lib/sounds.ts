@@ -10,9 +10,14 @@
 // category (Mixkit Sound Effects Free License — free for commercial use, no attribution required)
 // — a deliberate move away from the original kenney.nl arcade/sci-fi set after teacher feedback
 // that those read as "arcadey" rather than the Kahoot-style quiz-show tone this app wants. The
-// remaining Tier 2 entries (auction/battleship/cards/castle/hotseat/minefield/orderup/racetrack/
-// rocket/spy/vault/whack/zombie/tick) are still the original kenney.nl CC0 picks — not yet
-// revisited, since only correct/wrong/win/hill/hotpotato were flagged.
+// remaining Tier 2 entries (auction/cards/castle/rocket/vault/whack/tick) are still the original
+// kenney.nl CC0 picks. A full Web Audio API loudness pass (RMS/peak per file) later found
+// battleship/hotseat/minefield mixed considerably hotter than the rest of the set too — see the
+// volume comments below. orderup/zombie/spy/racetrack were also replaced with fresh mixkit.co
+// picks after teacher feedback flagged the originals as clipped/distorted (orderup.ogg), too short
+// to register (spy.ogg/zombie.ogg), or an outright broken sustained-drone loop (racetrack.ogg) —
+// see the per-sound comments below and each game's own call-site comments for how they're now
+// sequenced.
 const SOUND_FILES = {
   correct: "/sounds/correct.mp3",
   wrong: "/sounds/wrong.mp3",
@@ -39,13 +44,18 @@ const SOUND_FILES = {
   // starting, distinct from the hill's own capture/victory cue above.
   hillClash: "/sounds/hillclash.mp3",
   minefield: "/sounds/minefield.ogg",
-  orderup: "/sounds/orderup.ogg",
-  racetrack: "/sounds/racetrack.ogg",
+  orderup: "/sounds/orderup.mp3",
   rocket: "/sounds/rocket.ogg",
-  spy: "/sounds/spy.ogg",
+  // A quick, low-key engine rev — not a full "vroom" — for Race Track's "Start Race!" and
+  // finish-line (triggerWin) moments. Deliberately left off "Next Task →" since that fires on
+  // every single task, far too often for even a short cue not to get grating. Kept modest (see
+  // SOUND_VOLUME below) per teacher feedback: it should read as a nice touch, not a jump scare,
+  // after the original racetrack.ogg (a broken sustained drone) was pulled entirely.
+  racetrack: "/sounds/racetrack.mp3",
+  spy: "/sounds/spy.mp3",
   vault: "/sounds/vault.ogg",
   whack: "/sounds/whack.ogg",
-  zombie: "/sounds/zombie.ogg",
+  zombie: "/sounds/zombie.mp3",
 } as const;
 
 export type SoundName = keyof typeof SOUND_FILES;
@@ -62,8 +72,9 @@ const SOUND_VOLUME: Record<SoundName, number> = {
   // (once per turn, at expiry only). Same fix applied here for consistency, pending confirmation.
   wrong: 0.6,
   tick: 0.35,
-  // Teacher feedback: the buzzer read as way too loud/harsh next to everything else at 0.8.
-  timesUp: 0.45,
+  // Was 0.8, then 0.45 — teacher feedback flagged the buzzer as too loud a second time (this time
+  // specifically via Word Whack), so dropped again to match tick's already-settled level.
+  timesUp: 0.35,
   win: 0.55,
   roundComplete: 0.6,
   // Was 0.75 — louder than every Tier 2 signature sound (0.7) despite being a minor, frequent
@@ -71,21 +82,58 @@ const SOUND_VOLUME: Record<SoundName, number> = {
   // default instead.
   dice: 0.7,
   auction: DEFAULT_TIER2_VOLUME,
-  battleship: DEFAULT_TIER2_VOLUME,
+  // Web Audio API loudness pass: measured RMS well above the rest of the Tier 2 roster (close to
+  // "wrong"'s own hot mix). Brought down to land near the same effective loudness as a normally-
+  // mixed signature sound like "whack" or "hillClash".
+  battleship: 0.5,
   cards: DEFAULT_TIER2_VOLUME,
   castle: DEFAULT_TIER2_VOLUME,
   hotpotato: DEFAULT_TIER2_VOLUME,
-  hotseat: DEFAULT_TIER2_VOLUME,
-  hill: DEFAULT_TIER2_VOLUME,
+  // Web Audio API loudness pass: by far the hottest file in the entire roster — nearly double
+  // "wrong"'s own RMS, and "wrong" was already the loudest Tier 1 sound. Cut hard to land in the
+  // same range as everything else instead of dominating over it.
+  hotseat: 0.3,
+  // Teacher feedback: King of the Hill's capture fanfare read as way louder than every other
+  // moment in the game and dragged on for far too long for a routine, frequent event — measured
+  // RMS on this source file is on par with "wrong" (the hottest Tier 1 sound), so the default
+  // Tier 2 volume hits it much harder than a normally-mixed signature sound. Paired with the
+  // playback cap in SOUND_MAX_MS below.
+  hill: 0.4,
   hillClash: DEFAULT_TIER2_VOLUME,
-  minefield: DEFAULT_TIER2_VOLUME,
-  orderup: DEFAULT_TIER2_VOLUME,
-  racetrack: DEFAULT_TIER2_VOLUME,
+  // Web Audio API loudness pass: measured RMS well above the rest of the roster, on the same
+  // order as "wrong". Brought down to match.
+  minefield: 0.4,
+  // Replaced the clipped/distorted source file with a clean mixkit "positive notification" — no
+  // distortion to compensate for anymore. Web Audio API pass shows this file is mixed noticeably
+  // quieter overall than the rest of the roster (RMS ~0.07 vs. ~0.14 for a typical Tier 2 sound
+  // like whack/hillClash), so it's pushed above the Tier 2 default rather than below it to actually
+  // register.
+  orderup: 0.85,
   rocket: DEFAULT_TIER2_VOLUME,
-  spy: DEFAULT_TIER2_VOLUME,
+  // Kept deliberately quiet — teacher feedback explicitly warned against this landing like a jump
+  // scare (see RaceTrackGame.tsx's "Start Race!" button and triggerWin).
+  racetrack: 0.45,
+  // Replaced the near-inaudible 27ms original with a full "ominous drums" sting, meant to land
+  // over the quiet reveal bed (see SpyAmongUsGame.tsx's music-context effect). Web Audio API pass
+  // shows this file mixed quieter than a typical Tier 2 sound, so nudged above the Tier 2 default
+  // — it still doesn't need to fight a louder gameplay track since the bed underneath is quiet.
+  spy: 0.75,
   vault: DEFAULT_TIER2_VOLUME,
   whack: DEFAULT_TIER2_VOLUME,
+  // Replaced the near-inaudible 114ms original with a real "warfare horn" — it now plays into
+  // silence (see ZombieSiegeGame.tsx's music-context effect), so it doesn't need to compete with a
+  // bed underneath. Web Audio API pass shows it's mixed in line with a typical Tier 2 sound, so
+  // left at the default.
   zombie: DEFAULT_TIER2_VOLUME,
+};
+
+// Most one-shot SFX are short enough that letting the file simply finish is fine. A couple of the
+// Tier 2 source files run much longer than the single "moment" they're meant to mark (hill.mp3 is
+// a genuine 10 seconds for what should be a quick capture sting) — capped here rather than needing
+// a re-exported/re-trimmed audio file. Only add an entry when a sound is specifically flagged as
+// dragging on too long; most sounds should finish naturally.
+const SOUND_MAX_MS: Partial<Record<SoundName, number>> = {
+  hill: 3000,
 };
 
 const STORAGE_KEY = "classcade_sound_enabled";
@@ -136,6 +184,10 @@ function getPreloaded(name: SoundName): HTMLAudioElement {
   return el;
 }
 
+// Short fade-out (rather than an abrupt cut) when a capped sound hits its max duration — an
+// instant pause mid-note reads as a glitch, same reasoning as lib/music.ts's own fadeTo.
+const CUTOFF_FADE_MS = 200;
+
 export function playSound(name: SoundName): void {
   if (!enabled) return;
   const base = getPreloaded(name);
@@ -146,4 +198,19 @@ export function playSound(name: SoundName): void {
   // into the caller's own game logic, but do warn so a silently-broken sound is discoverable
   // instead of just "nobody heard it and nobody knew why".
   instance.play().catch(err => console.warn(`[sounds] "${name}" failed to play:`, err));
+
+  const maxMs = SOUND_MAX_MS[name];
+  if (maxMs === undefined) return;
+  setTimeout(() => {
+    if (instance.paused) return; // already finished naturally before the cap kicked in
+    const startVol = instance.volume;
+    const startTime = performance.now();
+    function step(now: number) {
+      const t = Math.min(1, Math.max(0, (now - startTime) / CUTOFF_FADE_MS));
+      instance.volume = Math.max(0, startVol * (1 - t));
+      if (t < 1) requestAnimationFrame(step);
+      else instance.pause();
+    }
+    requestAnimationFrame(step);
+  }, maxMs);
 }
