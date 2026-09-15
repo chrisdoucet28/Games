@@ -1,5 +1,5 @@
 import { LESSONS, type Lesson } from "./lessons";
-import { TOPIC_OPTIONS } from "./topics";
+import { TOPIC_OPTIONS } from "./topicOptions";
 
 export type LearnTopic = { id: string; lesson: Lesson; meta: (typeof TOPIC_OPTIONS)[number] };
 

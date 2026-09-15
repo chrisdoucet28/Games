@@ -15,7 +15,7 @@ import { readFileSync, writeFileSync, existsSync, unlinkSync, readdirSync } from
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import { REAL_WORLD_READINGS } from "../src/data/realWorldReadings.ts";
-import { TOPIC_OPTIONS } from "../src/data/topics.ts";
+import { TOPIC_OPTIONS } from "../src/data/topicOptions.ts";
 
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 const AUDIO_DIR = path.join(ROOT, "public", "audio", "real-world");

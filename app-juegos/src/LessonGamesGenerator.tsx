@@ -1,11 +1,16 @@
 import { useState, useEffect, useRef, useCallback, lazy, Suspense } from "react";
+import * as Sentry from "@sentry/react";
 import { TeamIcon, MASCOT_ICON_BY_EMOJI } from "./components/shared/TeamIcon";
 import type { Team, GameMode, QuestionData, SavedClass, Subscription, TeamRosterEntry } from "./types";
 import { TEAM_COLORS, GAME_MODES, GAME_ICONS, MASCOT_OPTIONS, LEVELS_META, FREE_PLAN_LIMITS, FREE_LAUNCH_ALL_PREMIUM } from "./data/constants";
 import { getGameTier } from "./data/pppTiers";
 import { PPPDiagram } from "./components/shared/PPPDiagram";
-// Asegúrate de que TOPIC_LIBRARY esté exportado desde tu archivo topics.ts junto con TOPIC_OPTIONS
-import { TOPIC_OPTIONS, TOPIC_LIBRARY } from "./data/topics";
+// TOPIC_OPTIONS (lightweight metadata, needed immediately for topic-select) lives in its own
+// module now, separate from topics.ts's TOPIC_LIBRARY (the ~5MB actual question content) — see
+// data/topicOptions.ts's header comment. TOPIC_LIBRARY itself is loaded via a dynamic import()
+// inside startGame() below, only once a teacher actually starts a game, instead of a static
+// top-level import that would put the whole content bank in every visitor's initial bundle.
+import { TOPIC_OPTIONS } from "./data/topicOptions";
 import { hexToRgba, type Theme } from "./data/themes";
 import { LESSONS } from "./data/lessons";
 import { matchesTopicSearch } from "./data/learnTopics";
@@ -15,7 +20,6 @@ import { Confetti } from "./components/shared/Confetti";
 import { ClassesScreen } from "./components/shared/ClassesScreen";
 import { ProfileScreen } from "./components/shared/ProfileScreen";
 import { LearnScreen } from "./components/shared/LearnScreen";
-import { LessonPlanScreen, LessonPlanSlideshow } from "./components/shared/LessonPlanScreen";
 import { LESSON_TOPICS } from "./data/learnTopics";
 import { LESSON_PLANS } from "./data/lessonPlans";
 import { LeaderboardScreen } from "./components/shared/LeaderboardScreen";
@@ -55,6 +59,12 @@ const RocketFuelGame = lazy(() => import("./components/games/RocketFuelGame").th
 const ZombieSiegeGame = lazy(() => import("./components/games/ZombieSiegeGame").then(m => ({ default: m.ZombieSiegeGame })));
 const OrderUpGame = lazy(() => import("./components/games/OrderUpGame").then(m => ({ default: m.OrderUpGame })));
 
+// Same treatment for Lesson Plans — LessonPlanScreen.tsx (and lessonPlans.ts, which it pulls in)
+// statically imports the full TOPIC_LIBRARY too. Both named exports below point at the same
+// module specifier, so this only ever fetches that one chunk once, regardless of which renders first.
+const LessonPlanScreen = lazy(() => import("./components/shared/LessonPlanScreen").then(m => ({ default: m.LessonPlanScreen })));
+const LessonPlanSlideshow = lazy(() => import("./components/shared/LessonPlanScreen").then(m => ({ default: m.LessonPlanSlideshow })));
+
 // Shown for the brief moment a lazily-loaded game's own chunk is still being fetched (see the
 // lazy() calls above) — matches the dark game-screen background it sits inside so it never reads
 // as a flash of unstyled content, and names the actual game so it's clear something is happening.
@@ -64,6 +74,29 @@ function GameLoadingFallback({ name }: { name: string }) {
       <style>{`@keyframes ccGameLoadSpin { to { transform: rotate(360deg); } }`}</style>
       <div style={{ width: "40px", height: "40px", borderRadius: "50%", border: "4px solid #E5E7EB", borderTopColor: "#0EA5E9", animation: "ccGameLoadSpin 0.8s linear infinite" }} />
       <span style={{ color: "#6B7280", fontWeight: "700", fontSize: "14px" }}>Loading {name}…</span>
+    </div>
+  );
+}
+
+// Scoped specifically to the one game actually on screen, separate from main.tsx's app-wide
+// Sentry.ErrorBoundary — without this, a crash inside any single game's own logic (an edge case
+// in one team's saved data, a bad question record, anything) would blow away the *entire* session
+// via the app-wide boundary: the teacher's whole class, scores, and team setup, gone to a bare
+// "reload the page" screen. This contains it to just the game area — everything else (teams,
+// scores, the class link) survives, and the teacher can pick a different game or retry this one
+// without losing the period's work. Still reported to Sentry exactly like the outer boundary.
+function GameCrashFallback({ name, message, buttonLabel, onBack }: { name: string; message: string; buttonLabel: string; onBack: () => void }) {
+  return (
+    <div style={{ minHeight: "320px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "12px", padding: "40px 20px", textAlign: "center" }}>
+      <Icon name="warning" size={36} color="#F59E0B" />
+      <div style={{ fontSize: "17px", fontWeight: "800", color: "#1F2937" }}>{name} hit a snag.</div>
+      <div style={{ color: "#6B7280", fontSize: "14px", maxWidth: "360px" }}>{message}</div>
+      <button
+        onClick={onBack}
+        style={{ marginTop: "4px", padding: "10px 22px", borderRadius: "10px", border: "none", background: "#4F46E5", color: "white", fontWeight: "700", fontSize: "14px", cursor: "pointer" }}
+      >
+        {buttonLabel}
+      </button>
     </div>
   );
 }
@@ -158,9 +191,12 @@ const getFilteredTopicOptions = (level: string, focus: string) =>
     .filter(o => (level === "all" || o.level === level) && (focus === "all" || o.focus === focus))
     .sort((a, b) => (a.order ?? Number.MAX_SAFE_INTEGER) - (b.order ?? Number.MAX_SAFE_INTEGER));
 
-const getSelectedTopicEntries = (selectedTopics: string[]) =>
+// Takes the topic library as a parameter (rather than closing over a module-level import) because
+// its only caller, startGame() below, loads TOPIC_LIBRARY via a dynamic import() right before
+// calling this — see the import comment near the top of this file for why.
+const getSelectedTopicEntries = (selectedTopics: string[], library: Record<string, unknown>) =>
   selectedTopics
-    .map(value => TOPIC_LIBRARY[value as keyof typeof TOPIC_LIBRARY] as TopicLibraryEntry | undefined)
+    .map(value => library[value] as TopicLibraryEntry | undefined)
     .filter((entry): entry is TopicLibraryEntry => Boolean(entry));
 
 const cardTasksAsQuestions = (tasks: { task: string }[]): QuestionData[] =>
@@ -898,7 +934,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     setSelectedTopics([]);
   };
 
-  const startGame = (mode: GameMode) => {
+  const startGame = async (mode: GameMode) => {
     setSelectedGame(mode);
     setLoadingGame(true);
     setLoadError("");
@@ -908,7 +944,10 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     setPaused(false);
 
     try {
-      const selectedEntries = getSelectedTopicEntries(selectedTopics);
+      // The one place this file ever needs the actual question content, not just topic metadata —
+      // loaded on demand right here instead of a top-level import (see the import comment above).
+      const { TOPIC_LIBRARY } = await import("./data/topics");
+      const selectedEntries = getSelectedTopicEntries(selectedTopics, TOPIC_LIBRARY);
       if (selectedEntries.length === 0) {
         setLoadError("Topic data not found.");
         setLoadingGame(false);
@@ -1244,12 +1283,16 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
   // every lesson) before the actual slideshow ("lessonplan-play" below) ever renders.
   if (screen === "lessonplan") return (
     <>
-      <LessonPlanScreen
-        onBack={() => setScreen("welcome")}
-        theme={theme}
-        onOpenLearn={() => { setLearnFilter(null); setLearnReturnTo("welcome"); setScreen("learn"); }}
-        onSelectTopic={topicId => { setPendingLessonTopicId(topicId); setScreen("team-setup"); }}
-      />
+      <Sentry.ErrorBoundary fallback={<GameCrashFallback name="Lesson Plans" message="We've been notified. Try again, or head back to the welcome screen." buttonLabel="Back to Welcome" onBack={() => setScreen("welcome")} />}>
+        <Suspense fallback={<GameLoadingFallback name="Lesson Plans" />}>
+          <LessonPlanScreen
+            onBack={() => setScreen("welcome")}
+            theme={theme}
+            onOpenLearn={() => { setLearnFilter(null); setLearnReturnTo("welcome"); setScreen("learn"); }}
+            onSelectTopic={topicId => { setPendingLessonTopicId(topicId); setScreen("team-setup"); }}
+          />
+        </Suspense>
+      </Sentry.ErrorBoundary>
       <FeedbackButton />
       <BrandBadge isPaid={isPaid} />
     </>
@@ -1264,23 +1307,30 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     if (!pendingTopic) { setScreen("lessonplan"); return null; }
     return (
       <>
-        <LessonPlanSlideshow
+        <Sentry.ErrorBoundary
           key={pendingTopic.id}
-          topic={pendingTopic}
-          theme={theme}
-          teams={teams}
-          onBack={() => { setPendingLessonTopicId(null); setScreen("lessonplan"); }}
-          onPlayGameForTopic={(topicId) => {
-            setSelectedTopics([topicId]);
-            const opt = getTopicOption(topicId);
-            if (opt?.level) setLevel(opt.level);
-            if (opt?.focus) setFocus(opt.focus);
-            // Teams were already picked for this lesson (team-setup ran on the way in) — carry
-            // them straight into game-select instead of asking again.
-            setPendingLessonTopicId(null);
-            setScreen("game-select");
-          }}
-        />
+          fallback={<GameCrashFallback name={pendingTopic.lesson.title} message="We've been notified. Your teams are still safe — head back to the Lesson Plans list." buttonLabel="Back to Lesson Plans" onBack={() => { setPendingLessonTopicId(null); setScreen("lessonplan"); }} />}
+        >
+          <Suspense fallback={<GameLoadingFallback name={pendingTopic.lesson.title} />}>
+            <LessonPlanSlideshow
+              key={pendingTopic.id}
+              topic={pendingTopic}
+              theme={theme}
+              teams={teams}
+              onBack={() => { setPendingLessonTopicId(null); setScreen("lessonplan"); }}
+              onPlayGameForTopic={(topicId) => {
+                setSelectedTopics([topicId]);
+                const opt = getTopicOption(topicId);
+                if (opt?.level) setLevel(opt.level);
+                if (opt?.focus) setFocus(opt.focus);
+                // Teams were already picked for this lesson (team-setup ran on the way in) — carry
+                // them straight into game-select instead of asking again.
+                setPendingLessonTopicId(null);
+                setScreen("game-select");
+              }}
+            />
+          </Suspense>
+        </Sentry.ErrorBoundary>
         <FeedbackButton />
         <BrandBadge isPaid={isPaid} />
       </>
@@ -1843,6 +1893,10 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
         <div style={{ padding: "16px", maxWidth: "900px", margin: "0 auto" }}>
           <ScoreBoard teams={teams} headingFont={theme.headingFont} />
           <div style={{ background: "white", borderRadius: "20px", padding: "20px", marginTop: "16px" }}>
+            <Sentry.ErrorBoundary
+              key={selectedGame.id}
+              fallback={<GameCrashFallback name={selectedGame.name} message="We've been notified. Your teams and scores are still safe — pick a game to keep going." buttonLabel="Back to Choose a Game" onBack={() => setScreen("game-select")} />}
+            >
             <Suspense fallback={<GameLoadingFallback name={selectedGame.name} />}>
               {selectedGame.id === "auction" && <AuctionGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
               {selectedGame.id === "minefield" && <MinefieldGame questions={[]} gridData={minefieldGridData} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
@@ -1860,6 +1914,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
               {selectedGame.id === "zombie" && <ZombieSiegeGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} paused={paused} onTogglePause={() => setPaused(p => !p)} />}
               {selectedGame.id === "orderup" && <OrderUpGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} level={orderUpLevel} paused={paused} onTogglePause={() => setPaused(p => !p)} />}
             </Suspense>
+            </Sentry.ErrorBoundary>
           </div>
         </div>
       </div>

@@ -8,7 +8,7 @@ import { TurnTimerBar } from "../shared/TurnTimerBar";
 import { QuestionCard } from "../shared/QuestionCard";
 import { Confetti } from "../shared/Confetti";
 import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
-import { TOPIC_OPTIONS } from "../../data/topics";
+import { TOPIC_OPTIONS } from "../../data/topicOptions";
 import { makeSoloCpuTeam } from "../../lib/soloOpponent";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { VAULT_TUTORIAL_STEPS } from "../../data/tutorials/vault";
