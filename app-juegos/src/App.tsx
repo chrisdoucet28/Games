@@ -12,6 +12,7 @@ import { PlanIntroScreen } from './components/shared/PlanIntroScreen';
 import { WelcomeIntroScreen } from './components/shared/WelcomeIntroScreen';
 import { PrivacyPolicyScreen } from './components/shared/PrivacyPolicyScreen';
 import { TermsOfServiceScreen } from './components/shared/TermsOfServiceScreen';
+import { OurStoryScreen } from './components/shared/OurStoryScreen';
 import { PublicLearnIndexScreen } from './components/shared/PublicLearnIndexScreen';
 import { PublicLearnLessonScreen } from './components/shared/PublicLearnLessonScreen';
 import { FREE_LAUNCH_ALL_PREMIUM } from './data/constants';
@@ -93,6 +94,7 @@ function App() {
   // actually make "/privacy" and "/terms" resolve to real content rather than the app shell.
   if (window.location.pathname === '/privacy') return <PrivacyPolicyScreen />;
   if (window.location.pathname === '/terms') return <TermsOfServiceScreen />;
+  if (window.location.pathname === '/about') return <OurStoryScreen />;
   // Public, no-login Learn pages — same pathname-check pattern as the two above, so they render
   // (and are Google-indexable) with no dependency on Supabase/auth state. /learn/<id> is a prefix
   // match (not exact) so it can carry the topic id as the rest of the path; an id that doesn't
