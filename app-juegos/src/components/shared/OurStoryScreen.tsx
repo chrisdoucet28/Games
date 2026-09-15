@@ -12,7 +12,7 @@ import { setMetaDescription } from "../../lib/pageMeta";
 export function OurStoryScreen() {
   useEffect(() => {
     document.title = "Our Story - ClassCade";
-    setMetaDescription("Why a teacher built ClassCade — the story behind the games, from classrooms in Korea to ESL classrooms everywhere.");
+    setMetaDescription("Why a teacher built ClassCade: the story behind the games, from classrooms in Korea to ESL classrooms everywhere.");
   }, []);
 
   return (
@@ -31,17 +31,17 @@ export function OurStoryScreen() {
           <h2 style={{ fontSize: "22px", fontWeight: "900", color: "#0C1E3D", margin: "0 0 18px" }}>Hi, I'm Teacher Chris.</h2>
 
           <p>
-            I picked up that name teaching English in Korea, where the classes I saw work best
-            weren't the ones drilling grammar off a worksheet — they were the ones that turned into
-            a game. Teams, points, a bit of competitive energy in the room, and suddenly a class
-            that could've felt like homework felt like play instead.
+            I picked up that name teaching English in Korea. The classes I saw work best weren't
+            the ones drilling grammar off a worksheet. They were the ones that turned into a game.
+            Teams, points, a bit of competitive energy in the room, and suddenly a class that
+            could've felt like homework felt like play instead.
           </p>
 
           <p>
             When I came back to teaching adults, I kept chasing that same feeling. Adults aren't
-            kids, but the instinct held up: people learn better when they're laughing, not
+            kids, but the instinct held up. People learn better when they're laughing, not
             memorizing. I wanted my classes to feel less like "here are ten rules to remember" and
-            more like "watch — you already know this, you just haven't noticed the pattern yet."
+            more like "you already know this, you just haven't noticed the pattern yet."
           </p>
 
           <div style={{ display: "flex", justifyContent: "center", gap: "8px", margin: "28px 0" }}>
@@ -51,30 +51,30 @@ export function OurStoryScreen() {
           </div>
 
           <p>
-            Over around seven years of teaching — kids of just about every age, and mostly adults
-            for a long stretch now — I built and rebuilt the games that became ClassCade, class by
-            class, correction by correction. The one rule I never let go of: it had to work the
-            same way no matter the grammar point, the topic, or who was in the room. A present
-            perfect lesson and a past simple lesson shouldn't need two different tools.
+            Over around seven years of teaching, with kids of just about every age and mostly
+            adults for a long stretch now, I built and rebuilt the games that became ClassCade,
+            class by class, correction by correction. The one rule I never let go of: it had to
+            work the same way no matter the grammar point, the topic, or who was in the room. A
+            present perfect lesson and a past simple lesson shouldn't need two different tools.
           </p>
 
           <div style={{ background: "linear-gradient(135deg,#FEF3C7,#FDE68A)", borderRadius: "16px", padding: "22px 24px", margin: "26px 0", display: "flex", gap: "14px", alignItems: "flex-start" }}>
             <Icon name="party" size={24} color="#92400E" style={{ flexShrink: 0, marginTop: "2px" }} />
             <p style={{ margin: 0, color: "#78350F", fontWeight: "600" }}>
               I know it works because of the students, not because of me. The real test has always
-              been simple: after a round, do they ask what the website is called? They do — over
-              and over, class after class. That's genuinely how ClassCade got built — hours and
-              hours of real use, watching what actually landed and throwing out what didn't.
+              been simple: after a round, do they ask what the website is called? They do, over and
+              over, class after class. That's genuinely how ClassCade got built. Hours and hours of
+              real use, watching what actually landed and throwing out what didn't.
             </p>
           </div>
 
           <p>
-            ClassCade is that game, opened up for any English teacher to use — any level, any class
+            ClassCade is that game, opened up for any English teacher to use. Any level, any class
             size, any topic. I hope it makes your classroom a little louder and a little more fun,
             the same way it did mine.
           </p>
 
-          <p style={{ fontWeight: "800", color: "#0C1E3D", marginTop: "24px" }}>— Teacher Chris</p>
+          <p style={{ fontWeight: "800", color: "#0C1E3D", marginTop: "24px" }}>Teacher Chris</p>
         </div>
 
         <div style={{ textAlign: "center", marginTop: "28px" }}>
