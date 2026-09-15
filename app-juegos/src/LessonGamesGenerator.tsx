@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, lazy, Suspense } from "react";
 import { TeamIcon, MASCOT_ICON_BY_EMOJI } from "./components/shared/TeamIcon";
 import type { Team, GameMode, QuestionData, SavedClass, Subscription, TeamRosterEntry } from "./types";
 import { TEAM_COLORS, GAME_MODES, GAME_ICONS, MASCOT_OPTIONS, LEVELS_META, FREE_PLAN_LIMITS, FREE_LAUNCH_ALL_PREMIUM } from "./data/constants";
@@ -32,21 +32,41 @@ import { playSound, isSoundEnabled, setSoundEnabled, onSoundEnabledChange } from
 import { setMusicContext, stopMusic } from "./lib/music";
 import { denseRank } from "./utils/ranking";
 import { RankBadge } from "./components/shared/RankBadge";
-import { AuctionGame } from "./components/games/AuctionGame";
-import { MinefieldGame } from "./components/games/MinefieldGame";
-import { HotSeatGame } from "./components/games/HotSeatGame";
-import { SpyAmongUsGame } from "./components/games/SpyAmongUsGame";
-import { BattleshipGame } from "./components/games/BattleshipGame";
-import { VaultHeistGame } from "./components/games/VaultHeistGame";
-import { CardShuffleGame } from "./components/games/CardShuffleGame";
-import { CastleGame } from "./components/games/CastleGame";
-import { KingOfHillGame } from "./components/games/KingOfHillGame";
-import { HotPotatoGame } from "./components/games/HotPotatoGame";
-import { RaceTrackGame } from "./components/games/RaceTrackGame";
-import { WordWhackGame } from "./components/games/WordWhackGame";
-import { RocketFuelGame } from "./components/games/RocketFuelGame";
-import { ZombieSiegeGame } from "./components/games/ZombieSiegeGame";
-import { OrderUpGame } from "./components/games/OrderUpGame";
+// Code-split: each game only ever needed once a teacher actually picks it, but the plain static
+// imports above put all 15 games (plus everything each one pulls in) into the one shared bundle
+// every visitor downloads before ever seeing a game — most of a 7MB chunk. lazy() defers each
+// game's own module (and its own subtree of imports) to a real network fetch triggered only by
+// selecting it; the .then(...) adapter is needed because these are named exports, not default
+// exports, which is all React.lazy() accepts directly. See the Suspense boundary around the
+// render site below for the loading fallback shown during that fetch.
+const AuctionGame = lazy(() => import("./components/games/AuctionGame").then(m => ({ default: m.AuctionGame })));
+const MinefieldGame = lazy(() => import("./components/games/MinefieldGame").then(m => ({ default: m.MinefieldGame })));
+const HotSeatGame = lazy(() => import("./components/games/HotSeatGame").then(m => ({ default: m.HotSeatGame })));
+const SpyAmongUsGame = lazy(() => import("./components/games/SpyAmongUsGame").then(m => ({ default: m.SpyAmongUsGame })));
+const BattleshipGame = lazy(() => import("./components/games/BattleshipGame").then(m => ({ default: m.BattleshipGame })));
+const VaultHeistGame = lazy(() => import("./components/games/VaultHeistGame").then(m => ({ default: m.VaultHeistGame })));
+const CardShuffleGame = lazy(() => import("./components/games/CardShuffleGame").then(m => ({ default: m.CardShuffleGame })));
+const CastleGame = lazy(() => import("./components/games/CastleGame").then(m => ({ default: m.CastleGame })));
+const KingOfHillGame = lazy(() => import("./components/games/KingOfHillGame").then(m => ({ default: m.KingOfHillGame })));
+const HotPotatoGame = lazy(() => import("./components/games/HotPotatoGame").then(m => ({ default: m.HotPotatoGame })));
+const RaceTrackGame = lazy(() => import("./components/games/RaceTrackGame").then(m => ({ default: m.RaceTrackGame })));
+const WordWhackGame = lazy(() => import("./components/games/WordWhackGame").then(m => ({ default: m.WordWhackGame })));
+const RocketFuelGame = lazy(() => import("./components/games/RocketFuelGame").then(m => ({ default: m.RocketFuelGame })));
+const ZombieSiegeGame = lazy(() => import("./components/games/ZombieSiegeGame").then(m => ({ default: m.ZombieSiegeGame })));
+const OrderUpGame = lazy(() => import("./components/games/OrderUpGame").then(m => ({ default: m.OrderUpGame })));
+
+// Shown for the brief moment a lazily-loaded game's own chunk is still being fetched (see the
+// lazy() calls above) — matches the dark game-screen background it sits inside so it never reads
+// as a flash of unstyled content, and names the actual game so it's clear something is happening.
+function GameLoadingFallback({ name }: { name: string }) {
+  return (
+    <div style={{ minHeight: "320px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "14px", padding: "40px 20px" }}>
+      <style>{`@keyframes ccGameLoadSpin { to { transform: rotate(360deg); } }`}</style>
+      <div style={{ width: "40px", height: "40px", borderRadius: "50%", border: "4px solid #E5E7EB", borderTopColor: "#0EA5E9", animation: "ccGameLoadSpin 0.8s linear infinite" }} />
+      <span style={{ color: "#6B7280", fontWeight: "700", fontSize: "14px" }}>Loading {name}…</span>
+    </div>
+  );
+}
 
 type TopicOption = {
   value: string;
@@ -1823,21 +1843,23 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
         <div style={{ padding: "16px", maxWidth: "900px", margin: "0 auto" }}>
           <ScoreBoard teams={teams} headingFont={theme.headingFont} />
           <div style={{ background: "white", borderRadius: "20px", padding: "20px", marginTop: "16px" }}>
-            {selectedGame.id === "auction" && <AuctionGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-            {selectedGame.id === "minefield" && <MinefieldGame questions={[]} gridData={minefieldGridData} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-            {selectedGame.id === "hotseat" && <HotSeatGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-            {selectedGame.id === "spy" && <SpyAmongUsGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-            {selectedGame.id === "battleship" && <BattleshipGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-            {selectedGame.id === "vault" && <VaultHeistGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-            {selectedGame.id === "cards" && <CardShuffleGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-            {selectedGame.id === "castle" && <CastleGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-            {selectedGame.id === "hill" && <KingOfHillGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-            {selectedGame.id === "hotpotato" && <HotPotatoGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} level={hotPotatoLevel} />}
-            {selectedGame.id === "racetrack" && <RaceTrackGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-            {selectedGame.id === "whack" && <WordWhackGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-            {selectedGame.id === "rocket" && <RocketFuelGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-            {selectedGame.id === "zombie" && <ZombieSiegeGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} paused={paused} onTogglePause={() => setPaused(p => !p)} />}
-            {selectedGame.id === "orderup" && <OrderUpGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} level={orderUpLevel} paused={paused} onTogglePause={() => setPaused(p => !p)} />}
+            <Suspense fallback={<GameLoadingFallback name={selectedGame.name} />}>
+              {selectedGame.id === "auction" && <AuctionGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
+              {selectedGame.id === "minefield" && <MinefieldGame questions={[]} gridData={minefieldGridData} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
+              {selectedGame.id === "hotseat" && <HotSeatGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
+              {selectedGame.id === "spy" && <SpyAmongUsGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
+              {selectedGame.id === "battleship" && <BattleshipGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
+              {selectedGame.id === "vault" && <VaultHeistGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
+              {selectedGame.id === "cards" && <CardShuffleGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
+              {selectedGame.id === "castle" && <CastleGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
+              {selectedGame.id === "hill" && <KingOfHillGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
+              {selectedGame.id === "hotpotato" && <HotPotatoGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} level={hotPotatoLevel} />}
+              {selectedGame.id === "racetrack" && <RaceTrackGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
+              {selectedGame.id === "whack" && <WordWhackGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
+              {selectedGame.id === "rocket" && <RocketFuelGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
+              {selectedGame.id === "zombie" && <ZombieSiegeGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} paused={paused} onTogglePause={() => setPaused(p => !p)} />}
+              {selectedGame.id === "orderup" && <OrderUpGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} level={orderUpLevel} paused={paused} onTogglePause={() => setPaused(p => !p)} />}
+            </Suspense>
           </div>
         </div>
       </div>
