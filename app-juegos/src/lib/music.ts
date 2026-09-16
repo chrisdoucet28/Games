@@ -368,3 +368,26 @@ export function stopMusic(): void {
     if (prevEl) fadeTo(prevEl, 0, FADE_MS);
   }
 }
+
+// Teacher feedback: switching to another tab to look something up shouldn't leave the ambient/
+// gameplay/tension loop playing under it — a fade-out is used everywhere else in this file, but a
+// backgrounded tab throttles requestAnimationFrame (what fadeTo runs on), so a fade started right
+// as the tab hides can visibly hang partway instead of actually reaching silence. A hard pause is
+// what reliably and immediately stops it. Coming back gets a normal fade back in (this tab is
+// foregrounded again by then, so RAF isn't throttled) rather than snapping straight to full
+// volume, which would read as a jump-scare after however long the teacher was away.
+// Deliberately scoped to this module's sustained loops only — lib/sounds.ts's SFX are short
+// one-shot cues (a correct/wrong ding), not something that can be left playing under another tab.
+document.addEventListener("visibilitychange", () => {
+  if (!currentSrc) return;
+  const el = players.get(currentSrc);
+  if (!el) return;
+  if (document.hidden) {
+    el.pause();
+  } else if (enabled && currentContext) {
+    el.volume = 0;
+    el.play()
+      .then(() => fadeTo(el, resolveVolume(currentContext as MusicContext, currentGameId), FADE_MS))
+      .catch(err => { if (err?.name === "NotAllowedError") armAutoplayRetry(); });
+  }
+});
