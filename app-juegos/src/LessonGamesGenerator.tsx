@@ -281,6 +281,17 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
   const [teamNames, setTeamNames] = useState(DEFAULT_TEAM_NAMES);
   const [teamColors, setTeamColors] = useState([0, 1, 2, 3, 4]);
   const [teamMascots, setTeamMascots] = useState<(string | null)[]>([null, null, null, null, null]);
+  // Which saved-roster entry (if any) each active slot maps to, parallel to teamNames/teamColors/
+  // teamMascots — lets the roster autosave below UPDATE that entry in place when a slot is renamed
+  // instead of leaving the old name behind as an orphaned chip and creating a fresh one under the
+  // new name every single edit (exactly what a name-only match does, and what teacher feedback
+  // flagged: "every time I make a change it creates another team"). Set when a roster chip is
+  // tapped into a slot (toggleRosterTeam) or when a save resolves a brand-new id for a
+  // previously-unknown slot (saveTeamsToRoster/handleSetup); cleared back to null anywhere the
+  // slot itself is cleared/replaced/shifted (resetTeamsToNormal, toggleRosterTeam's removal path).
+  // Deliberately NOT touched by the plain name/color/mascot edit handlers below — a manual rename
+  // of an already-linked slot should keep pointing at the same roster entry, not lose it.
+  const [teamRosterIds, setTeamRosterIds] = useState<(string | null)[]>([null, null, null, null, null]);
   // True only while every active team slot still holds its just-reset/just-linked default content
   // — lets toggleRosterTeam tell "teacher hasn't set up teams yet" apart from "teacher's real teams
   // just happen to be named Team Red/Team Blue" (a perfectly normal thing to actually want), which
@@ -379,6 +390,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     setTeamNames(DEFAULT_TEAM_NAMES.slice());
     setTeamColors([0, 1, 2, 3, 4]);
     setTeamMascots([null, null, null, null, null]);
+    setTeamRosterIds([null, null, null, null, null]);
     setTeamsUntouched(true);
     setTeams(ts => ts.map((t, i) => ({
       ...t,
@@ -402,20 +414,21 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
   // turnCorrectRef pattern. Needed because two roster cards tapped in quick succession fire
   // before React re-renders, so reading the plain state variables for index math in the second
   // call would see stale, pre-first-toggle values and corrupt the result.
-  const teamSlotsRef = useRef({ names: teamNames, colors: teamColors, mascots: teamMascots, count: numTeams });
+  const teamSlotsRef = useRef({ names: teamNames, colors: teamColors, mascots: teamMascots, rosterIds: teamRosterIds, count: numTeams });
   useEffect(() => {
-    teamSlotsRef.current = { names: teamNames, colors: teamColors, mascots: teamMascots, count: numTeams };
-  }, [teamNames, teamColors, teamMascots, numTeams]);
+    teamSlotsRef.current = { names: teamNames, colors: teamColors, mascots: teamMascots, rosterIds: teamRosterIds, count: numTeams };
+  }, [teamNames, teamColors, teamMascots, teamRosterIds, numTeams]);
 
   const toggleRosterTeam = (entry: TeamRosterEntry) => {
     const cap = isPaid ? 5 : FREE_PLAN_LIMITS.maxTeams;
-    const { names, colors, mascots, count } = teamSlotsRef.current;
+    const { names, colors, mascots, rosterIds, count } = teamSlotsRef.current;
     const key = entry.name.trim().toLowerCase();
     const activeIdx = names.slice(0, count).findIndex(n => n.trim().toLowerCase() === key);
 
     let nextNames = [...names];
     let nextColors = [...colors];
     let nextMascots = [...mascots];
+    let nextRosterIds = [...rosterIds];
     let nextCount = count;
     // Whether the result still counts as an untouched blank slate — true again only via the
     // nextCount===0 fallback below (which lands back on the real defaults); every other outcome
@@ -428,6 +441,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
         nextNames[i] = nextNames[i + 1];
         nextColors[i] = nextColors[i + 1];
         nextMascots[i] = nextMascots[i + 1];
+        nextRosterIds[i] = nextRosterIds[i + 1];
       }
       nextCount = count - 1;
       // The shift above leaves the now-unused trailing slot holding whatever it shifted down from
@@ -438,6 +452,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
       nextNames[nextCount] = DEFAULT_TEAM_NAMES[nextCount];
       nextColors[nextCount] = nextCount;
       nextMascots[nextCount] = null;
+      nextRosterIds[nextCount] = null;
       // Untapping a class's only real team would otherwise leave 0 active teams — a state the
       // "how many teams?" buttons above can never produce themselves, and nothing downstream
       // (handleSetup, game-select) expects. Land back on the normal untouched defaults instead of
@@ -446,6 +461,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
         nextNames = DEFAULT_TEAM_NAMES.slice();
         nextColors = [0, 1, 2, 3, 4];
         nextMascots = [null, null, null, null, null];
+        nextRosterIds = [null, null, null, null, null];
         nextCount = 2;
         nextUntouched = true;
       }
@@ -463,10 +479,12 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
         nextNames = DEFAULT_TEAM_NAMES.slice();
         nextColors = [0, 1, 2, 3, 4];
         nextMascots = [null, null, null, null, null];
+        nextRosterIds = [null, null, null, null, null];
         nextNames[0] = entry.name;
         const idx = TEAM_COLORS.findIndex(c => c.name === entry.color.name);
         nextColors[0] = idx === -1 ? 0 : idx;
         nextMascots[0] = entry.mascot;
+        nextRosterIds[0] = entry.id;
         nextCount = 1;
       } else {
         if (count >= cap) return;
@@ -474,14 +492,16 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
         const idx = TEAM_COLORS.findIndex(c => c.name === entry.color.name);
         nextColors[count] = idx === -1 ? count : idx;
         nextMascots[count] = entry.mascot;
+        nextRosterIds[count] = entry.id;
         nextCount = count + 1;
       }
     }
 
-    teamSlotsRef.current = { names: nextNames, colors: nextColors, mascots: nextMascots, count: nextCount };
+    teamSlotsRef.current = { names: nextNames, colors: nextColors, mascots: nextMascots, rosterIds: nextRosterIds, count: nextCount };
     setTeamNames(nextNames);
     setTeamColors(nextColors);
     setTeamMascots(nextMascots);
+    setTeamRosterIds(nextRosterIds);
     setNumTeams(nextCount);
     setTeamsUntouched(nextUntouched);
   };
@@ -510,10 +530,21 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
       id: i, name, color: TEAM_COLORS[teamColors[i] ?? i], mascot: teamMascots[i] ?? null,
       score: existingScores[name] ?? 0,
     }));
+    const currentRosterIds = teamRosterIds.slice(0, numTeams);
     setRosterSaveStatus("saving");
-    upsertTeamRoster(classId, currentTeams)
-      .then(merged => {
-        setTeamRoster(merged);
+    upsertTeamRoster(classId, currentTeams, currentRosterIds)
+      .then(({ roster, resolvedIds }) => {
+        setTeamRoster(roster);
+        // Write the resolved ids (including any freshly created for a slot that had none) back
+        // into per-slot state, so the NEXT edit updates these same rows instead of matching by
+        // name alone again — this is what stops a slot from drifting to a fresh duplicate entry
+        // every time it's renamed.
+        setTeamRosterIds(prev => {
+          const next = [...prev];
+          resolvedIds.forEach((id, i) => { next[i] = id; });
+          teamSlotsRef.current = { ...teamSlotsRef.current, rosterIds: next };
+          return next;
+        });
         setRosterSaveStatus("saved");
         setTimeout(() => setRosterSaveStatus("idle"), 1400);
       })
@@ -578,7 +609,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     setTeamsSaveStatus("saving");
     Promise.all([
       saveTeams(classId, teams),
-      upsertTeamRoster(classId, teams).then(setTeamRoster),
+      upsertTeamRoster(classId, teams).then(({ roster }) => setTeamRoster(roster)),
     ])
       .then(() => {
         setTeamsSaveStatus("saved");
@@ -696,7 +727,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
         minefieldGridData,
         gameState: serializeStateRef.current?.() ?? null,
       });
-      upsertTeamRoster(classId, teams).then(setTeamRoster).catch(() => {});
+      upsertTeamRoster(classId, teams).then(({ roster }) => setTeamRoster(roster)).catch(() => {});
       setSaveStatus("saved");
       setTimeout(() => { setSaveStatus("idle"); setScreen("classes"); }, 900);
     } catch {
@@ -906,7 +937,11 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
       score: existingScores[name] ?? 0,
     }));
     setTeams(builtTeams);
-    if (activeClassId) upsertTeamRoster(activeClassId, builtTeams).then(setTeamRoster).catch(() => {});
+    if (activeClassId) {
+      upsertTeamRoster(activeClassId, builtTeams, teamRosterIds.slice(0, numTeams))
+        .then(({ roster }) => setTeamRoster(roster))
+        .catch(() => {});
+    }
     // A pending lesson topic means the teacher arrived here via the Lesson Plan index (topic
     // already fixed before this screen was ever reached) — send them into that lesson's slideshow
     // instead of the usual game-select.
