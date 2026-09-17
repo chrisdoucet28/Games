@@ -141,7 +141,7 @@ function validateSpySnapshot(raw: unknown, teamCount: number, roundCount: number
   };
 }
 
-export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState }: GameProps) {
+export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState, presetPhoneSession }: GameProps) {
   const DISCUSS_SECONDS = 120;
   // Solo play makes the teacher the second live participant — Spy Among Us already has a
   // fully-built, fully-tested 2-player ruleset (isTwoPlayer below), so this just needs to make
@@ -237,9 +237,9 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
   // enterRoundStartPhase below for how each ruleset handles it). Always defaults to screen, even
   // on Resume: a resumed mission skips the intro screen entirely (see `phase` init above), same
   // intentional limitation as Auction's phone mode.
-  const [inputMode, setInputMode] = useState<"screen" | "phone">("screen");
+  const [inputMode, setInputMode] = useState<"screen" | "phone">(presetPhoneSession ? "phone" : "screen");
   const [introStep, setIntroStep] = useState<"setup" | "qr">("setup");
-  const [sessionCode, setSessionCode] = useState<string | null>(null);
+  const [sessionCode, setSessionCode] = useState<string | null>(presetPhoneSession?.code ?? null);
   const [connectedTeamIds, setConnectedTeamIds] = useState<Set<string | number>>(new Set());
   const channelRef = useRef<RealtimeChannel | null>(null);
 
@@ -704,6 +704,9 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
               </div>
             ))}
           </div>
+          {/* Skipped entirely for a Class Check-In sitting — presetPhoneSession already picked
+              phone mode and its code, and the class-level QR already covered joining. */}
+          {!presetPhoneSession && <>
           {introStep === "setup" && (
             <div style={{ marginBottom: "20px" }}>
               <div style={{ fontSize: "13px", color: "#94A3B8", fontWeight: "700", marginBottom: "10px" }}>How will teams see their secret role?</div>
@@ -747,6 +750,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
               />
             );
           })()}
+          </>}
           <button
             onClick={() => setShowHowTo(true)}
             className="sau-btn"

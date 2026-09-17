@@ -60,7 +60,7 @@ function validateRelaySnapshot(raw: unknown, teamCount: number): RelaySnapshot |
 
 type PassBanner = { fromName: string; toName: string; key: number } | null;
 
-export function RelayGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState }: GameProps) {
+export function RelayGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState, presetPhoneSession }: GameProps) {
   const resumed = useRef(validateRelaySnapshot(initialGameState, teams.length)).current;
 
   const [phase, setPhase] = useState<"welcome" | "playing" | "final">(resumed ? "playing" : "welcome");
@@ -68,9 +68,9 @@ export function RelayGame({ questions, teams, onUpdateScore, onEnd, forceFinalRe
 
   // "Play on Phones" — available whenever there's more than one team; true 1-team solo play has
   // the teacher personally giving clues, so there's no within-team secrecy problem phones solve.
-  const [inputMode, setInputMode] = useState<"screen" | "phone">("screen");
+  const [inputMode, setInputMode] = useState<"screen" | "phone">(presetPhoneSession ? "phone" : "screen");
   const [introStep, setIntroStep] = useState<"setup" | "qr">("setup");
-  const [sessionCode, setSessionCode] = useState<string | null>(null);
+  const [sessionCode, setSessionCode] = useState<string | null>(presetPhoneSession?.code ?? null);
   const [connectedTeamIds, setConnectedTeamIds] = useState<Set<string | number>>(new Set());
   const channelRef = useRef<RealtimeChannel | null>(null);
 
@@ -342,7 +342,9 @@ export function RelayGame({ questions, teams, onUpdateScore, onEnd, forceFinalRe
             ))}
           </div>
 
-          {teams.length > 1 && (
+          {/* Skipped entirely for a Class Check-In sitting — presetPhoneSession already picked
+              phone mode and its code, and the class-level QR already covered joining. */}
+          {teams.length > 1 && !presetPhoneSession && (
             <>
               {introStep === "setup" && (
                 <div style={{ marginBottom: "20px" }}>

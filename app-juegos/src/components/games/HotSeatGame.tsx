@@ -90,7 +90,7 @@ function validateHotSeatSnapshot(raw: unknown, teamCount: number): HotSeatSnapsh
   return { roundIndex: s.roundIndex, teamIndex: s.teamIndex, totalWordsByTeam: s.totalWordsByTeam ?? {} };
 }
 
-export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState }: GameProps) {
+export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState, presetPhoneSession }: GameProps) {
   const resumed = useRef(validateHotSeatSnapshot(initialGameState, teams.length)).current;
 
   const [phase, setPhase] = useState<"welcome" | "intro" | "play" | "turnend" | "final">(resumed ? "intro" : "welcome");
@@ -107,9 +107,9 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
   // 1-team solo play has the teacher personally describing for the one real team, so there's no
   // within-team secrecy problem phones would solve there. Always defaults to screen, even on
   // Resume: a resumed game skips the welcome screen entirely, same as the other phone-mode games.
-  const [inputMode, setInputMode] = useState<"screen" | "phone">("screen");
+  const [inputMode, setInputMode] = useState<"screen" | "phone">(presetPhoneSession ? "phone" : "screen");
   const [introStep, setIntroStep] = useState<"setup" | "qr">("setup");
-  const [sessionCode, setSessionCode] = useState<string | null>(null);
+  const [sessionCode, setSessionCode] = useState<string | null>(presetPhoneSession?.code ?? null);
   const [connectedTeamIds, setConnectedTeamIds] = useState<Set<string | number>>(new Set());
   // "groups": the active team's own phone shows the word (teammates describe, matching the
   // in-person rule). "solo": every *other* connected team's phone shows it instead, since a
@@ -477,7 +477,10 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
             ))}
           </div>
 
-          {teams.length > 1 && (
+          {/* Skipped entirely for a Class Check-In sitting — presetPhoneSession already picked
+              phone mode and its code (teamStructure defaults to "groups", the more common mode,
+              since there's no picker step left to choose it from). */}
+          {teams.length > 1 && !presetPhoneSession && (
             <>
               {introStep === "setup" && (
                 <div style={{ marginBottom: "20px" }}>

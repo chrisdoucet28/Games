@@ -211,7 +211,7 @@ function validateRaceSnapshot(raw: unknown, teamIds: (string | number)[]): RaceS
   };
 }
 
-export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState }: GameProps) {
+export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState, presetPhoneSession }: GameProps) {
   const resumed = useRef(validateRaceSnapshot(initialGameState, teams.map(t => t.id))).current;
   // A resumed race skips the intro and drops straight into a fresh task for the group.
   const [phase, setPhase] = useState<Phase>(() => resumed ? "task" : "intro");
@@ -238,9 +238,9 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
   // answered first by ear. Gated to teams.length > 1 below: with only one team there's no "who's
   // first" question to resolve, so unlike Order Up's typing mode this one has no standalone value
   // for solo play. Always defaults to screen, even on Resume, same as every other phone-mode game.
-  const [inputMode, setInputMode] = useState<"screen" | "phone">("screen");
+  const [inputMode, setInputMode] = useState<"screen" | "phone">(presetPhoneSession ? "phone" : "screen");
   const [introStep, setIntroStep] = useState<"setup" | "qr">("setup");
-  const [sessionCode, setSessionCode] = useState<string | null>(null);
+  const [sessionCode, setSessionCode] = useState<string | null>(presetPhoneSession?.code ?? null);
   const [connectedTeamIds, setConnectedTeamIds] = useState<Set<string | number>>(new Set());
   // This round's resolved buzz winner, or null while the buzzer is open.
   const [buzzedTeamId, setBuzzedTeamId] = useState<string | number | null>(null);
@@ -788,7 +788,9 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
           <div style={{ width: "14px", height: "14px", borderRadius: "50%", background: "#FBBF24", animation: "rtLightPulse 1.4s ease-in-out infinite 0.25s" }} />
           <div style={{ width: "14px", height: "14px", borderRadius: "50%", background: "#4ADE80", animation: "rtLightPulse 1.4s ease-in-out infinite 0.5s" }} />
         </div>
-        {teams.length > 1 && (
+        {/* Skipped entirely for a Class Check-In sitting — presetPhoneSession already picked
+            phone mode and its code, and the class-level QR already covered joining. */}
+        {teams.length > 1 && !presetPhoneSession && (
           <>
             {introStep === "setup" && (
               <div style={{ marginBottom: "20px" }}>

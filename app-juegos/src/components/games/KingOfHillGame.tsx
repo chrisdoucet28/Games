@@ -156,7 +156,7 @@ function validateHillSnapshot(raw: unknown, teamCount: number): HillSnapshot | u
   };
 }
 
-export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState }: GameProps) {
+export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState, presetPhoneSession }: GameProps) {
   const TURN_SECONDS = 20;
 
   // Solo play makes the second team a real dice-rolled turn participant — "just another team,"
@@ -238,9 +238,11 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
   // above) and !isTopicMode below: topic-mode duels are "teacher picks the stronger answer," an
   // explicit quality judgment with no "who's first" to resolve, so a buzzer has nothing to do
   // there. Always defaults to screen, even on Resume, same as every other phone-mode game.
-  const [inputMode, setInputMode] = useState<"screen" | "phone">("screen");
+  // Topic-mode duels are teacher-judged, no buzzing at all (see the !isTopicMode gate below) — a
+  // Class Check-In preset only applies when phone mode is actually meaningful for this instance.
+  const [inputMode, setInputMode] = useState<"screen" | "phone">(presetPhoneSession && !isTopicMode ? "phone" : "screen");
   const [introStep, setIntroStep] = useState<"setup" | "qr">("setup");
-  const [sessionCode, setSessionCode] = useState<string | null>(null);
+  const [sessionCode, setSessionCode] = useState<string | null>(presetPhoneSession && !isTopicMode ? presetPhoneSession.code : null);
   const [connectedTeamIds, setConnectedTeamIds] = useState<Set<string | number>>(new Set());
   // This duel's resolved buzz winner, or null while the buzzer is open. Purely informational — it
   // never gates resolveContest, which still takes the teacher's own Attacker/Defender/Neither click.
@@ -729,7 +731,9 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
             </div>
           ))}
         </div>
-        {propTeams.length > 1 && !isTopicMode && (
+        {/* Skipped entirely for a Class Check-In sitting — presetPhoneSession already picked
+            phone mode and its code, and the class-level QR already covered joining. */}
+        {propTeams.length > 1 && !isTopicMode && !presetPhoneSession && (
           <>
             {introStep === "setup" && (
               <div style={{ marginBottom: "20px" }}>

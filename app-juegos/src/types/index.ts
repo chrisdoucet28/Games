@@ -115,6 +115,12 @@ export interface TeamColor {
     // overlay should call onTogglePause to resume, matching the shared button.
     paused?: boolean;
     onTogglePause?: () => void;
+    // Set only when this game is being launched as part of an active Class Check-In sitting (see
+    // LessonGamesGenerator.tsx's classSessionCode) — the game should seed its own phone-mode
+    // session from this code instead of generating a fresh one, default straight into phone mode,
+    // and skip its own "Play on Screen vs Play on Phones" picker UI entirely (the class-level QR
+    // already covered joining; this game's own intro screen has nothing left to do).
+    presetPhoneSession?: { code: string };
   }
 
   // A teacher's own personalization — separate from auth.users, which only holds login info.

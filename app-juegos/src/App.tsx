@@ -3,6 +3,7 @@ import { Analytics } from '@vercel/analytics/react';
 import LessonGamesGenerator from './LessonGamesGenerator';
 import { AuthScreen } from './components/shared/AuthScreen';
 import { PhoneJoinScreen } from './components/phone/PhoneJoinScreen';
+import { ClassJoinScreen } from './components/shared/ClassJoinScreen';
 import { useAuth } from './hooks/useAuth';
 import { supabase, isSupabaseConfigured } from './lib/supabaseClient';
 import { getProfile } from './lib/profile';
@@ -105,6 +106,22 @@ function App() {
     return <PublicLearnLessonScreen topicId={window.location.pathname.slice('/learn/'.length)} />;
   }
   if (!isSupabaseConfigured) return <ConfigErrorScreen />;
+  const searchParams = new URLSearchParams(window.location.search);
+  // A separate param (not `join=&game=class`) deliberately — `gameParam` below has a silent
+  // fallback-to-Auction default for any unrecognized value (kept for old shared Auction links with
+  // no `game` param at all), and a class-join shouldn't inherit that footgun. ClassJoinScreen also
+  // has to dynamically swap which per-game channel it's driving over its lifetime, something
+  // PhoneJoinScreen is architecturally locked against — a fundamentally different render target,
+  // not just another value in that same ternary chain.
+  const classJoinCode = searchParams.get('classJoin');
+  if (classJoinCode) {
+    return (
+      <>
+        <ClassJoinScreen code={classJoinCode} />
+        <Analytics />
+      </>
+    );
+  }
   // Students joining a phone-controlled game (see AuctionGame.tsx / SpyAmongUsGame.tsx /
   // WordWhackGame.tsx / HotSeatGame.tsx's "Play on Phones" mode) have no teacher account — this
   // has to branch *before* AuthenticatedApp/useAuth ever runs, unlike the Stripe checkout-redirect
@@ -112,7 +129,6 @@ function App() {
   // scrubbed from the URL the way that one is: PhoneJoinScreen re-reads it on every mount, and it
   // needs to survive a phone-side refresh to auto-rejoin. `game` defaults to 'auction' so existing/
   // already-shared Auction join links (from before this param existed) keep working unchanged.
-  const searchParams = new URLSearchParams(window.location.search);
   const joinCode = searchParams.get('join');
   const gameParam = searchParams.get('game');
   const joinGame = gameParam === 'spy' ? 'spy' : gameParam === 'whack' ? 'whack' : gameParam === 'hotseat' ? 'hotseat' : gameParam === 'orderup' ? 'orderup' : gameParam === 'racetrack' ? 'racetrack' : gameParam === 'hill' ? 'hill' : gameParam === 'bounty' ? 'bounty' : gameParam === 'relay' ? 'relay' : 'auction';

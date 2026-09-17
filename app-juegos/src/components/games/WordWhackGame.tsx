@@ -136,7 +136,7 @@ function DisconnectedTurnOverride({ activeTeam, onSkip }: {
   );
 }
 
-export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState }: GameProps) {
+export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState, presetPhoneSession }: GameProps) {
   const resumed = useRef(validateWordWhackSnapshot(initialGameState, teams.length)).current;
 
   const pool = useRef((() => {
@@ -184,9 +184,9 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
   // "Play on Phones" — available at any team count, no structural restriction (unlike Spy Among
   // Us's 1v1 fork, Word Whack has one mechanic regardless of team count). Always defaults to
   // screen, even on Resume, same intentional limitation as every other phone-mode game.
-  const [inputMode, setInputMode] = useState<"screen" | "phone">("screen");
+  const [inputMode, setInputMode] = useState<"screen" | "phone">(presetPhoneSession ? "phone" : "screen");
   const [introStep, setIntroStep] = useState<"setup" | "qr">("setup");
-  const [sessionCode, setSessionCode] = useState<string | null>(null);
+  const [sessionCode, setSessionCode] = useState<string | null>(presetPhoneSession?.code ?? null);
   const [connectedTeamIds, setConnectedTeamIds] = useState<Set<string | number>>(new Set());
   const channelRef = useRef<RealtimeChannel | null>(null);
 
@@ -467,6 +467,9 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
             ))}
           </div>
         </div>
+        {/* Skipped entirely for a Class Check-In sitting — presetPhoneSession already picked
+            phone mode and its code, and the class-level QR already covered joining. */}
+        {!presetPhoneSession && <>
         {introStep === "setup" && (
           <div style={{ marginBottom: "20px" }}>
             <div style={{ fontSize: "13px", color: "#D9F99D", fontWeight: "700", marginBottom: "10px" }}>How will teams whack their moles?</div>
@@ -503,6 +506,7 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
             />
           );
         })()}
+        </>}
         <button onClick={() => setShowHowTo(true)} className="ww-btn" style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginBottom: "14px", background: "white", color: GM.color, border: "3px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
           <Icon name="help" size={15} /> How to Play
         </button>

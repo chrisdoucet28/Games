@@ -36,6 +36,9 @@ import { playSound, isSoundEnabled, setSoundEnabled, onSoundEnabledChange } from
 import { setMusicContext, stopMusic } from "./lib/music";
 import { denseRank } from "./utils/ranking";
 import { RankBadge } from "./components/shared/RankBadge";
+import { PhoneJoinPanel } from "./components/shared/PhoneJoinPanel";
+import { generateSessionCode, openClassSessionChannel, closeChannel, type ClassSessionStatePayload } from "./lib/liveSession";
+import type { RealtimeChannel } from "@supabase/supabase-js";
 // Code-split: each game only ever needed once a teacher actually picks it, but the plain static
 // imports above put all 15 games (plus everything each one pulls in) into the one shared bundle
 // every visitor downloads before ever seeing a game — most of a 7MB chunk. lazy() defers each
@@ -267,6 +270,18 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
   // already-active class (saveTeamsToRoster/saveTeamsToClass/saveToClass's own defaulted-classId
   // calls) doesn't need to touch it.
   const [activeClassName, setActiveClassName] = useState<string | null>(null);
+  // "Class Check-In" — one persistent join code/channel for a whole class-linked sitting, so a
+  // student scans once and their phone auto-follows every later game switch (see startGame/
+  // handleGameEnd below), instead of re-scanning a fresh per-game code every time. Only ever set
+  // while activeClassId is (see handleStartClassCheckIn), and reset alongside every place
+  // activeClassId itself gets cleared or switched to a different class.
+  const [classSessionCode, setClassSessionCode] = useState<string | null>(null);
+  const [classConnectedTeamIds, setClassConnectedTeamIds] = useState<Set<string | number>>(new Set());
+  const classChannelRef = useRef<RealtimeChannel | null>(null);
+  // Written synchronously by startGame/handleGameEnd/resumeClass (never by React state — this is
+  // read inside the broadcast effect's own closure, which must always see the LATEST active game,
+  // not whatever it was when the effect last ran) and read by the state-broadcast effect below.
+  const classActiveGameRef = useRef<string | null>(null);
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [showSavePicker, setShowSavePicker] = useState(false);
   // Which action the picker should run once a class is picked/created — "exit" (mid-game
@@ -707,6 +722,10 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     setQuestions(cls.questions_snapshot ?? []);
     setMinefieldGridData((cls.minefield_grid_data as MinefieldGridData | MinefieldGridData[] | null) ?? null);
     setResumeGameState(cls.game_state ?? null);
+    // Resume normally skips team-setup (where Class Check-In gets started) entirely, so there's
+    // usually no code yet to broadcast on — but if the teacher is already mid check-in for THIS
+    // same class and resumes a different saved game for it, a checked-in phone should still follow.
+    if (classSessionCode && cls.id === activeClassId) broadcastClassActiveGame(cls.selected_game ?? null);
     setScreen("game");
   };
 
@@ -781,6 +800,10 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     const action = pendingSaveAction;
     setPendingSaveAction(null);
     if (action === "link") {
+      // Switching to a different class mid-sitting — any check-in still active is for the OLD
+      // class and must not keep broadcasting under its old code (a teacher switching classes has
+      // to explicitly re-click "Start Class Check-In" for the new one).
+      if (classSessionCode) closeClassSession();
       setActiveClassId(cls.id);
       setActiveClassName(cls.name);
       setTeamRoster(cls.team_roster ?? []);
@@ -971,6 +994,74 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     setSelectedTopics([]);
   };
 
+  // Torn down at every place activeClassId itself gets cleared or switched to a different class
+  // (see the "Done with this class"/topic-select Back/Learn-lesson-plan-entry/"Switch class"
+  // sites below) — a stale channel left open would keep broadcasting the OLD class's roster/game
+  // state under a code nobody should still be using.
+  const closeClassSession = () => {
+    closeChannel(classChannelRef.current);
+    classChannelRef.current = null;
+    classActiveGameRef.current = null;
+    setClassSessionCode(null);
+    setClassConnectedTeamIds(new Set());
+  };
+
+  // Manual activation only (per the teacher's own explicit choice) — nothing about Class Check-In
+  // exists until this is clicked. Presence sync mirrors every other game's own channel-open effect
+  // (see e.g. OrderUpGame.tsx), just for the class-level roster instead of one game's tickets.
+  const handleStartClassCheckIn = () => {
+    const code = generateSessionCode();
+    setClassSessionCode(code);
+    const channel = openClassSessionChannel(code);
+    classChannelRef.current = channel;
+    channel.on("presence", { event: "sync" }, () => {
+      const presenceState = channel.presenceState<{ teamId: string | number }>();
+      const ids = new Set<string | number>();
+      Object.values(presenceState).forEach(entries => entries.forEach(entry => ids.add(entry.teamId)));
+      setClassConnectedTeamIds(ids);
+    });
+    channel.subscribe();
+  };
+
+  // Broadcasts the class channel's current state — called immediately on every relevant change
+  // (see the two call sites in startGame/handleGameEnd/resumeClass below) AND on a standing
+  // interval, same "resend regardless of change" liveness convention every other phone-mode game
+  // channel already uses (see e.g. OrderUpGame.tsx's own sendState/interval pair) — a phone that
+  // subscribes mid-sitting gets a fresh copy within one interval tick instead of waiting for the
+  // next actual game switch.
+  const sendClassSessionState = useCallback(() => {
+    const channel = classChannelRef.current;
+    if (!channel) return;
+    const payload: ClassSessionStatePayload = {
+      activeGame: classActiveGameRef.current,
+      roster: teams.map(t => ({ id: t.id, name: t.name, color: t.color, mascot: t.mascot })),
+      connectedTeamIds: Array.from(classConnectedTeamIds),
+      ts: Date.now(),
+    };
+    channel.send({ type: "broadcast", event: "state", payload });
+  }, [teams, classConnectedTeamIds]);
+
+  useEffect(() => {
+    if (!classSessionCode) return;
+    sendClassSessionState();
+    const interval = setInterval(sendClassSessionState, 4000);
+    return () => clearInterval(interval);
+  }, [classSessionCode, sendClassSessionState]);
+
+  // Unmount-only safety net — Supabase presence times out server-side on its own, but this keeps
+  // a hard navigation away from ever leaking the channel client-side.
+  useEffect(() => {
+    return () => closeChannel(classChannelRef.current);
+  }, []);
+
+  // The single hook point for "a new game (or no game) is now active" — sets the ref synchronously
+  // (read by sendClassSessionState's closure) and fires one broadcast right away rather than
+  // waiting for the next interval tick, so a checked-in phone switches the instant the teacher does.
+  const broadcastClassActiveGame = (gameId: string | null) => {
+    classActiveGameRef.current = gameId;
+    sendClassSessionState();
+  };
+
   const startGame = async (mode: GameMode) => {
     setSelectedGame(mode);
     setLoadingGame(true);
@@ -1001,6 +1092,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
 
         setMinefieldGridData(minefieldGrids.length === 1 ? minefieldGrids[0] : minefieldGrids);
         setQuestions([]);
+        if (classSessionCode) broadcastClassActiveGame(mode.id);
         setScreen("game");
         setLoadingGame(false);
         return;
@@ -1129,6 +1221,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
       }
 
       setQuestions(isMixedSelection ? qs : shuffle(qs));
+      if (classSessionCode) broadcastClassActiveGame(mode.id);
       setScreen("game");
     } catch {
       setLoadError("An error occurred loading the game.");
@@ -1164,6 +1257,9 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     // The class's running scores persist either way; a naturally-finished game just has nothing
     // left to resume, so the in-progress snapshot gets cleared rather than left stale.
     if (activeClassId) clearProgress(activeClassId, teams).catch(() => {});
+    // Nothing playable on a checked-in phone until the next game starts — falls back to the
+    // "watch the shared screen" placeholder the instant gameplay ends, symmetric with startGame.
+    if (classSessionCode) broadcastClassActiveGame(null);
     playSound("win");
     setConfetti(true);
     setScreen("results");
@@ -1308,7 +1404,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
         filterTopicIds={learnFilter ?? undefined}
         // Topic is already fixed (whatever lesson was open in Learn) before team-setup — same
         // ordering as picking one from the Lesson Plan index below.
-        onOpenLessonPlan={id => { setPendingLessonTopicId(id); setActiveClassId(null); setActiveClassName(null); setScreen("team-setup"); }}
+        onOpenLessonPlan={id => { setPendingLessonTopicId(id); if (classSessionCode) closeClassSession(); setActiveClassId(null); setActiveClassName(null); setScreen("team-setup"); }}
         onOpenLessonPlanIndex={() => { setPendingLessonTopicId(null); setScreen("lessonplan"); }}
       />
       <FeedbackButton />
@@ -1393,7 +1489,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
       <div style={{ minHeight: "100vh", background: "#F0F9FF", padding: "clamp(10px,4vw,20px)", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
         {renderSavePicker()}
         <div style={{ maxWidth: "720px", margin: "0 auto" }}>
-          <button onClick={() => { setActiveClassId(null); setActiveClassName(null); setScreen("welcome"); }} style={{ background: "none", border: `2px solid ${theme.accentSolid}`, color: theme.accentSolid, borderRadius: "10px", padding: "8px 16px", cursor: "pointer", fontWeight: "700", marginBottom: "20px", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px" }}><Icon name="back" size={13} /> Back</button>
+          <button onClick={() => { if (classSessionCode) closeClassSession(); setActiveClassId(null); setActiveClassName(null); setScreen("welcome"); }} style={{ background: "none", border: `2px solid ${theme.accentSolid}`, color: theme.accentSolid, borderRadius: "10px", padding: "8px 16px", cursor: "pointer", fontWeight: "700", marginBottom: "20px", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px" }}><Icon name="back" size={13} /> Back</button>
 
           <div style={{ textAlign: "center", marginBottom: "28px" }}>
             <h2 style={{ fontSize: "32px", fontWeight: "900", color: theme.heroBg[0], margin: 0, fontFamily: theme.headingFont, display: "flex", alignItems: "center", justifyContent: "center", gap: "10px" }}><Icon name="gear" size={28} /> Game Setup</h2>
@@ -1780,6 +1876,35 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
           </div>
         </div>
 
+        {/* Class-linked sittings only (see the plan) — one persistent code for the whole class
+            period so students scan once and auto-follow every later game switch, instead of
+            re-scanning per game. Manual activation, shown once here — never a persistent badge on
+            later screens (a deliberate choice, not a gap to "fix"). */}
+        {activeClassId && (
+          <div style={{ marginBottom: "20px" }}>
+            {!classSessionCode ? (
+              <button onClick={handleStartClassCheckIn} style={{ width: "100%", background: "rgba(15,23,42,0.92)", color: theme.accentSolid, border: `2px solid ${theme.accentSolid}`, borderRadius: "16px", padding: "16px", fontSize: "16px", fontWeight: "900", cursor: "pointer", fontFamily: theme.headingFont, display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+                <Icon name="phone" size={18} /> Start Class Check-In
+              </button>
+            ) : (
+              <div>
+                <div style={{ fontSize: "13px", fontWeight: "700", color: "#374151", marginBottom: "10px", textAlign: "center" }}>
+                  Today's class code — have students scan or enter this once. They'll automatically follow along as you move between games this period.
+                </div>
+                <PhoneJoinPanel
+                  sessionCode={classSessionCode}
+                  joinUrl={`${window.location.origin}${window.location.pathname}?classJoin=${classSessionCode}`}
+                  teams={teams}
+                  connectedTeamIds={classConnectedTeamIds}
+                  accent={theme.accentSolid}
+                  panelBg="linear-gradient(160deg,#1E293B,#0F172A)"
+                  borderColor={`${theme.accentSolid}66`}
+                />
+              </div>
+            )}
+          </div>
+        )}
+
         <button onClick={handleSetup} style={{ width: "100%", background: `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "16px", padding: "18px", fontSize: "20px", fontWeight: "900", cursor: "pointer", fontFamily: theme.headingFont, display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
           {pendingLessonTopicId ? <><Icon name="school" size={20} /> Start Lesson</> : <><Icon name="controller" size={20} /> Choose a Game!</>}
         </button>
@@ -1935,23 +2060,23 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
               fallback={<GameCrashFallback name={selectedGame.name} message="We've been notified. Your teams and scores are still safe — pick a game to keep going." buttonLabel="Back to Choose a Game" onBack={() => setScreen("game-select")} />}
             >
             <Suspense fallback={<GameLoadingFallback name={selectedGame.name} />}>
-              {selectedGame.id === "auction" && <AuctionGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
+              {selectedGame.id === "auction" && <AuctionGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} presetPhoneSession={classSessionCode ? { code: classSessionCode } : undefined} />}
               {selectedGame.id === "minefield" && <MinefieldGame questions={[]} gridData={minefieldGridData} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-              {selectedGame.id === "hotseat" && <HotSeatGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-              {selectedGame.id === "relay" && <RelayGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-              {selectedGame.id === "spy" && <SpyAmongUsGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
+              {selectedGame.id === "hotseat" && <HotSeatGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} presetPhoneSession={classSessionCode ? { code: classSessionCode } : undefined} />}
+              {selectedGame.id === "relay" && <RelayGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} presetPhoneSession={classSessionCode ? { code: classSessionCode } : undefined} />}
+              {selectedGame.id === "spy" && <SpyAmongUsGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} presetPhoneSession={classSessionCode ? { code: classSessionCode } : undefined} />}
               {selectedGame.id === "battleship" && <BattleshipGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
               {selectedGame.id === "vault" && <VaultHeistGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
               {selectedGame.id === "cards" && <CardShuffleGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
               {selectedGame.id === "castle" && <CastleGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-              {selectedGame.id === "hill" && <KingOfHillGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
+              {selectedGame.id === "hill" && <KingOfHillGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} presetPhoneSession={classSessionCode ? { code: classSessionCode } : undefined} />}
               {selectedGame.id === "hotpotato" && <HotPotatoGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} level={hotPotatoLevel} />}
-              {selectedGame.id === "racetrack" && <RaceTrackGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-              {selectedGame.id === "whack" && <WordWhackGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
+              {selectedGame.id === "racetrack" && <RaceTrackGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} presetPhoneSession={classSessionCode ? { code: classSessionCode } : undefined} />}
+              {selectedGame.id === "whack" && <WordWhackGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} presetPhoneSession={classSessionCode ? { code: classSessionCode } : undefined} />}
               {selectedGame.id === "rocket" && <RocketFuelGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
               {selectedGame.id === "zombie" && <ZombieSiegeGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} paused={paused} onTogglePause={() => setPaused(p => !p)} />}
-              {selectedGame.id === "orderup" && <OrderUpGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} level={orderUpLevel} paused={paused} onTogglePause={() => setPaused(p => !p)} />}
-              {selectedGame.id === "bounty" && <BountyBoardGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
+              {selectedGame.id === "orderup" && <OrderUpGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} level={orderUpLevel} paused={paused} onTogglePause={() => setPaused(p => !p)} presetPhoneSession={classSessionCode ? { code: classSessionCode } : undefined} />}
+              {selectedGame.id === "bounty" && <BountyBoardGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} presetPhoneSession={classSessionCode ? { code: classSessionCode } : undefined} />}
             </Suspense>
             </Sentry.ErrorBoundary>
           </div>
@@ -2002,7 +2127,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
             visual weight (plain text, not a filled button) since it's the "leave" action, not a
             "keep going" one. */}
         <button
-          onClick={() => { setActiveClassId(null); setActiveClassName(null); setScreen("welcome"); }}
+          onClick={() => { if (classSessionCode) closeClassSession(); setActiveClassId(null); setActiveClassName(null); setScreen("welcome"); }}
           style={{ background: "none", border: "none", color: "rgba(255,255,255,0.65)", fontWeight: "700", fontSize: "13px", cursor: "pointer", marginTop: "18px", textDecoration: "underline" }}
         >Done with this class — back to Home</button>
         <FeedbackButton />

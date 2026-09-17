@@ -181,7 +181,7 @@ function validateAuctionSnapshot(raw: unknown, questionCount: number): AuctionSn
   return { qi: s.qi, auctionBank: s.auctionBank, roundsWon: s.roundsWon ?? {} };
 }
 
-export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState }: GameProps) {
+export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState, presetPhoneSession }: GameProps) {
   const AUCTION_START = 200;
   const BET_AMOUNTS = [25, 50, 100];
 
@@ -216,9 +216,9 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
 
   // "Play on Phones" mode — always defaults to screen, even on Resume (see the note on the intro
   // toggle below for why a resumed game intentionally never reopens a phone session).
-  const [inputMode, setInputMode] = useState<"screen" | "phone">("screen");
+  const [inputMode, setInputMode] = useState<"screen" | "phone">(presetPhoneSession ? "phone" : "screen");
   const [introStep, setIntroStep] = useState<"setup" | "qr">("setup");
-  const [sessionCode, setSessionCode] = useState<string | null>(null);
+  const [sessionCode, setSessionCode] = useState<string | null>(presetPhoneSession?.code ?? null);
   const [connectedTeamIds, setConnectedTeamIds] = useState<Set<string | number>>(new Set());
   const channelRef = useRef<RealtimeChannel | null>(null);
 
@@ -481,6 +481,9 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
             </div>
           ))}
         </div>
+        {/* Skipped entirely for a Class Check-In sitting — presetPhoneSession already picked
+            phone mode and its code, and the class-level QR already covered joining. */}
+        {!presetPhoneSession && <>
         {introStep === "setup" && (
           <div style={{ marginBottom: "20px" }}>
             <div style={{ fontSize: "13px", color: "#C4B5FD", fontWeight: "700", marginBottom: "10px" }}>How will teams place their bets?</div>
@@ -517,6 +520,7 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
             />
           );
         })()}
+        </>}
 
         <button onClick={() => setShowHowTo(true)} style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginBottom: "14px", background: "white", color: GM.color, border: "3px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
           <Icon name="help" size={15} /> How to Play

@@ -429,7 +429,7 @@ function validateOrderUpSnapshot(raw: unknown): OrderUpSnapshot | undefined {
   };
 }
 
-export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef, paused, onTogglePause, serializeStateRef, initialGameState }: GameProps) {
+export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef, paused, onTogglePause, serializeStateRef, initialGameState, presetPhoneSession }: GameProps) {
   const resumed = useRef(validateOrderUpSnapshot(initialGameState)).current;
 
   // A ref (not just the `paused` prop) so the per-ticket countdown interval's closure always reads
@@ -467,9 +467,9 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
   // the sole team the instant it's generated (see the top-up effect below), so solo play still
   // gets everything phone mode offers except an actual claiming step, since there's nobody else to
   // claim against. Always defaults to screen, even on Resume, same as every other phone-mode game.
-  const [inputMode, setInputMode] = useState<"screen" | "phone">("screen");
+  const [inputMode, setInputMode] = useState<"screen" | "phone">(presetPhoneSession ? "phone" : "screen");
   const [introStep, setIntroStep] = useState<"setup" | "qr">("setup");
-  const [sessionCode, setSessionCode] = useState<string | null>(null);
+  const [sessionCode, setSessionCode] = useState<string | null>(presetPhoneSession?.code ?? null);
   const [connectedTeamIds, setConnectedTeamIds] = useState<Set<string | number>>(new Set());
   // "spoken": however a team wants to show the teacher their sentence in person (written down,
   // said aloud, whatever) — teacher taps "Ready to judge" once they've seen/heard it (today's only
@@ -915,7 +915,9 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
             </div>
           )}
         </div>
-        <>
+        {/* Skipped entirely for a Class Check-In sitting — presetPhoneSession already picked
+            phone mode and its code, and the class-level QR already covered joining. */}
+        {!presetPhoneSession && <>
           {introStep === "setup" && (
             <div style={{ marginBottom: "20px" }}>
               <div style={{ fontSize: "13px", color: "#9D174D", fontWeight: "700", marginBottom: "10px" }}>How will orders get answered?</div>
@@ -975,7 +977,7 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
               </PhoneJoinPanel>
             );
           })()}
-        </>
+        </>}
         <button onClick={() => setShowHowTo(true)} className="ou-btn" style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginBottom: "14px", background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
           <Icon name="help" size={15} /> How to Play
         </button>

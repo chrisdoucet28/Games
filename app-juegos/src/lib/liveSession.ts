@@ -483,3 +483,47 @@ export function openBountyBoardChannel(code: string): RealtimeChannel {
     config: { presence: { key: crypto.randomUUID() } },
   });
 }
+
+// --- Class Check-In ---
+//
+// Not a tenth "game" — a class-scoped meta-channel opened once per sitting (see
+// LessonGamesGenerator.tsx's "Start Class Check-In") that tells every checked-in phone WHICH
+// specific per-game channel to open next. Every per-game channel above is already prefixed by its
+// own game id (e.g. `orderup-${code}` vs `bounty-${code}`), so reusing the exact same code text
+// across every one of them for a whole sitting is safe — no collision risk, and it means this
+// payload only ever needs to say which game is active, never a new code. Purely a "here's what's
+// active" beacon: actual gameplay actions for whichever game is live still flow over THAT game's
+// own channel, opened separately by ClassJoinScreen.tsx — never over this one.
+export type ClassSessionRosterEntry = { id: string | number; name: string; color: TeamColor; mascot?: string | null };
+
+export type ClassSessionStatePayload = {
+  // Which GameMode.id is currently on screen, or null between games (game-select/results/
+  // topic-select) and during any non-phone-capable game — a checked-in phone shows the "watch the
+  // shared screen" placeholder whenever this is null or isn't in PHONE_CAPABLE_GAME_IDS below.
+  activeGame: string | null;
+  roster: ClassSessionRosterEntry[];
+  connectedTeamIds: (string | number)[];
+  ts: number;
+};
+
+// No phone -> screen action type here on purpose — a phone never sends anything on this channel,
+// it only ever reads `activeGame` to decide which per-game channel to open next. The team claim
+// itself travels as Presence (`track()`), exactly like every other game's join screen, not as a
+// broadcast event.
+
+function classSessionChannelName(code: string): string {
+  return `class-${code}`;
+}
+
+export function openClassSessionChannel(code: string): RealtimeChannel {
+  return supabase.channel(classSessionChannelName(code), {
+    config: { presence: { key: crypto.randomUUID() } },
+  });
+}
+
+// The 9 games whose own per-game channel a checked-in phone can actually open and drive — kept
+// here (not duplicated in LessonGamesGenerator.tsx or ClassJoinScreen.tsx) since this file is
+// already the single inventory of every phone-mode channel that exists.
+export const PHONE_CAPABLE_GAME_IDS: ReadonlySet<string> = new Set([
+  "auction", "spy", "whack", "hotseat", "orderup", "racetrack", "hill", "bounty", "relay",
+]);
