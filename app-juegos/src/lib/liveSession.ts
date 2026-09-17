@@ -219,6 +219,45 @@ export function openHotSeatChannel(code: string): RealtimeChannel {
   });
 }
 
+// --- Word Relay ---
+//
+// Hot Seat's sibling, not its clone — no teamStructure here, since the physical rule is always
+// the same one: the active team's own phone shows the word, and whoever's standing near it (their
+// own teammates, or in solo play anyone from another team) reads it and shouts clues. There's no
+// clock either — a correct guess passes the turn immediately, a skip just redraws for the same
+// team, so this payload carries no timer fields at all. See RelayGame.tsx for exactly where.
+export type RelayRosterEntry = { id: string | number; name: string; color: TeamColor; mascot?: string | null };
+
+export type RelayPhase = "lobby" | "playing" | "final";
+
+export type RelayStatePayload = {
+  phase: RelayPhase;
+  roster: RelayRosterEntry[];
+  activeTeamId: string | number | null;
+  currentWord: string;
+  wordsPerTeam: number;
+  // Words correctly guessed per team this game — the same quantity Hot Seat's own StatePayload
+  // calls "scores" (a slight misnomer there, since it's a word count, not a points total); named
+  // honestly here instead.
+  wordsByTeam: Record<string, number>;
+  connectedTeamIds: (string | number)[];
+  ts: number;
+};
+
+// Broadcast phone -> screen. teamId is validated against activeTeamId screen-side — only the
+// currently active team's own phone is allowed to act.
+export type RelayActionPayload = { teamId: string | number; action: "correct" | "skip" };
+
+function relayChannelName(code: string): string {
+  return `relay-${code}`;
+}
+
+export function openRelayChannel(code: string): RealtimeChannel {
+  return supabase.channel(relayChannelName(code), {
+    config: { presence: { key: crypto.randomUUID() } },
+  });
+}
+
 // --- Order Up ---
 //
 // Screen-authoritative, like Hot Seat — the shared floor's ticket queue, timers, and claim/expiry

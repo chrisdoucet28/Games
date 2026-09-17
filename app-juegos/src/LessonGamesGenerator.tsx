@@ -46,6 +46,7 @@ import { RankBadge } from "./components/shared/RankBadge";
 const AuctionGame = lazy(() => import("./components/games/AuctionGame").then(m => ({ default: m.AuctionGame })));
 const MinefieldGame = lazy(() => import("./components/games/MinefieldGame").then(m => ({ default: m.MinefieldGame })));
 const HotSeatGame = lazy(() => import("./components/games/HotSeatGame").then(m => ({ default: m.HotSeatGame })));
+const RelayGame = lazy(() => import("./components/games/RelayGame").then(m => ({ default: m.RelayGame })));
 const SpyAmongUsGame = lazy(() => import("./components/games/SpyAmongUsGame").then(m => ({ default: m.SpyAmongUsGame })));
 const BattleshipGame = lazy(() => import("./components/games/BattleshipGame").then(m => ({ default: m.BattleshipGame })));
 const VaultHeistGame = lazy(() => import("./components/games/VaultHeistGame").then(m => ({ default: m.VaultHeistGame })));
@@ -1069,7 +1070,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
             })),
           ];
         }));
-      } else if (mode.id === "hotseat") {
+      } else if (mode.id === "hotseat" || mode.id === "relay") {
         qs = mixByTopic(selectedEntries.map(entry => entry.hotSeatWords ?? []));
       } else if (mode.id === "hotpotato") {
         qs = mixByTopic(selectedEntries.map(entry => entry.hotPotatoPrompts ?? []));
@@ -1116,7 +1117,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
       // (e.g. Auction showing empty quotation marks, since `s.sentence` is undefined on a
       // speaking-task object) instead of a clear "no content" message. Confirmed live: this exact
       // bug hit Auction when a topic (comparatives_superlatives) had zero auctionSentences.
-      const CARDTASK_INCOMPATIBLE_MODES = new Set(["auction", "spy", "zombie", "hotseat", "hotpotato", "orderup"]);
+      const CARDTASK_INCOMPATIBLE_MODES = new Set(["auction", "spy", "zombie", "hotseat", "hotpotato", "orderup", "relay"]);
       if (qs.length === 0 && allCardTasks.length > 0 && !CARDTASK_INCOMPATIBLE_MODES.has(mode.id)) {
         qs = mixByTopic(cardTaskBuckets);
       }
@@ -1937,6 +1938,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
               {selectedGame.id === "auction" && <AuctionGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
               {selectedGame.id === "minefield" && <MinefieldGame questions={[]} gridData={minefieldGridData} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
               {selectedGame.id === "hotseat" && <HotSeatGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
+              {selectedGame.id === "relay" && <RelayGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
               {selectedGame.id === "spy" && <SpyAmongUsGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
               {selectedGame.id === "battleship" && <BattleshipGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
               {selectedGame.id === "vault" && <VaultHeistGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}

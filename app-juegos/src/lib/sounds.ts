@@ -48,6 +48,10 @@ const SOUND_FILES = {
   // Placeholder — no Western/bounty-themed asset exists yet, reusing Vault Heist's stakes/danger
   // cue (same DEFAULT_TIER2_VOLUME level below) until a dedicated sound is sourced.
   bounty: "/sounds/vault.ogg",
+  // Placeholder — no dedicated relay-handoff asset yet, reusing Hot Seat's own sting since both
+  // are word-guessing party games with a similar "got it!" beat (same tuned-down volume below,
+  // that file mixes hot relative to the rest of the Tier 2 set).
+  relay: "/sounds/hotseat.ogg",
   rocket: "/sounds/rocket.ogg",
   // A quick, low-key engine rev — not a full "vroom" — for Race Track's "Start Race!" and
   // finish-line (triggerWin) moments. Deliberately left off "Next Task →" since that fires on
@@ -96,6 +100,8 @@ const SOUND_VOLUME: Record<SoundName, number> = {
   // "wrong"'s own RMS, and "wrong" was already the loudest Tier 1 sound. Cut hard to land in the
   // same range as everything else instead of dominating over it.
   hotseat: 0.3,
+  // Reuses hotseat.ogg (see SOUND_FILES) — same tuned-down level as that entry.
+  relay: 0.3,
   // Teacher feedback: King of the Hill's capture fanfare read as way louder than every other
   // moment in the game and dragged on for far too long for a routine, frequent event — measured
   // RMS on this source file is on par with "wrong" (the hottest Tier 1 sound), so the default

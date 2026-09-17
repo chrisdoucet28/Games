@@ -42,7 +42,7 @@ export const PPP_TIERS: PPPTier[] = [
     // games in Production above. That puts it with Hot Seat/Spy/Zombie Siege, not with them.
     blurb: "Sustained, unscripted talking — full fluency practice.",
     color: "#EF4444",
-    gameIds: ["cards", "hotseat", "spy", "zombie"],
+    gameIds: ["cards", "hotseat", "relay", "spy", "zombie"],
   },
 ];
 
