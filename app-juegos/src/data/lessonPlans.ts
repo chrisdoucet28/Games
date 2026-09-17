@@ -1549,13 +1549,13 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
 
   memory_mind_psychology: {
     kind: "errorPassage",
-    text: "The patient said she forget things all the time, which worried her family. Rarely someone forgets such an important memory, according to her doctor. If she seek help sooner, she would have recovered faster, in his opinion. This bias must addressed before it gets worse, he explained.",
-    corrected: "The patient said she forgot things all the time, which worried her family. Rarely does someone forget such an important memory, according to her doctor. If she had sought help sooner, she would have recovered faster, in his opinion. This bias must be addressed before it gets worse, he explained.",
+    text: "The patient said she forget things all the time, which worried her family. Rarely someone forgets such an important memory, according to her doctor. If she seek help sooner, she would have recovered faster, in his opinion. Diagnosing with anxiety last year, she has struggled to manage her symptoms, he explained.",
+    corrected: "The patient said she forgot things all the time, which worried her family. Rarely does someone forget such an important memory, according to her doctor. If she had sought help sooner, she would have recovered faster, in his opinion. Diagnosed with anxiety last year, she has struggled to manage her symptoms, he explained.",
     fixes: [
       "'said she forget things' → 'said she forgot things' (reported speech backshifts the tense)",
       "'Rarely someone forgets' → 'Rarely does someone forget' (inversion needs 'does' before the subject)",
       "'If she seek help sooner' → 'If she had sought help sooner' (third conditional needs past perfect)",
-      "'This bias must addressed' → 'This bias must be addressed' (modal passive needs 'be' + past participle)",
+      "'Diagnosing with anxiety' → 'Diagnosed with anxiety' (past participle clause carries a passive meaning: 'who was diagnosed')",
     ],
   },
 
@@ -1566,7 +1566,7 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
       { situation: "Someone claims that companies rarely adapt to change this quickly.", instruction: "Make the same point using inversion for dramatic emphasis.", sample: "Rarely has an industry been reshaped so quickly by a single technology." },
       { situation: "A colleague didn't upskill in time and lost their job to automation — now they're struggling to find work.", instruction: "Say what would have happened if they had upskilled sooner, using the third conditional.", sample: "If she had upskilled sooner, she would have found a new job faster." },
       { situation: "Someone lost their job years ago, and that's exactly why they're a freelancer today.", instruction: "Connect the past cause to the present result, using a mixed conditional.", sample: "If he hadn't lost his job years ago, he wouldn't be a freelancer today." },
-      { situation: "You think job insecurity in the modern workplace is a serious problem that needs fixing.", instruction: "Say so, using a modal passive.", sample: "Job insecurity must be addressed." },
+      { situation: "A company failed to invest in staff training, and turnover shot up as a result.", instruction: "Say so, using a nominalization (turn the verb 'fail' into a noun).", sample: "The company's failure to invest in training led to high turnover." },
     ],
   },
 
@@ -1602,7 +1602,7 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
       { situation: "You think it's rare for a hospital to treat so many patients this efficiently.", instruction: "Say so, using inversion for emphasis.", sample: "Rarely has a clinic managed to cut waiting times so dramatically." },
       { situation: "A patient's illness wasn't caught early enough, and they didn't survive.", instruction: "Say what would have happened if doctors had diagnosed it sooner, using the third conditional.", sample: "If the doctors had diagnosed the illness sooner, they would have saved his life." },
       { situation: "A country never reformed its healthcare system, and waiting times are still very long today.", instruction: "Connect that past inaction to the present result, using a mixed conditional.", sample: "If they had reformed the system years ago, waiting times wouldn't be so long today." },
-      { situation: "You believe health inequality is a serious problem that needs to be fixed.", instruction: "Say so, using a modal passive.", sample: "Health inequality must be addressed." },
+      { situation: "Hospitals were completely overwhelmed, so doctors had to prioritise the most urgent cases.", instruction: "Combine that into one sentence using an absolute construction with 'with'.", sample: "With hospitals overwhelmed, doctors had to prioritise the most urgent cases." },
     ],
   },
 
