@@ -22,11 +22,14 @@ const TOTAL_ROUNDS = 5;
 // tunable is hold TIMING: how much pressure a fast, rarely-stumbling CPU keeps the student under
 // vs. how much breathing room a slow, often-stumbling one gives. Solo-only (`cpuDifficulty`);
 // unused whenever a real second team is playing instead of a CPU.
+// Scaled ~2.5x across the board (was 3500-7500/2000-6000/1000-3000 min/max) per teacher feedback
+// after a real classroom run — even on "medium" the CPU passed back way too fast for a student to
+// realistically get their answer out before it was already their turn again.
 type Difficulty = "easy" | "medium" | "hard";
 const CPU_HOLD_MS_BY_DIFFICULTY: Record<Difficulty, { min: number; max: number; stumbleChance: number; stumbleMsMin: number; stumbleMsMax: number }> = {
-  easy: { min: 3500, max: 7500, stumbleChance: 0.35, stumbleMsMin: 8000, stumbleMsMax: 12000 },
-  medium: { min: 2000, max: 6000, stumbleChance: 0.2, stumbleMsMin: 7000, stumbleMsMax: 10000 },
-  hard: { min: 1000, max: 3000, stumbleChance: 0.08, stumbleMsMin: 5000, stumbleMsMax: 6500 },
+  easy: { min: 8750, max: 18750, stumbleChance: 0.35, stumbleMsMin: 20000, stumbleMsMax: 30000 },
+  medium: { min: 5000, max: 15000, stumbleChance: 0.2, stumbleMsMin: 17500, stumbleMsMax: 25000 },
+  hard: { min: 2500, max: 7500, stumbleChance: 0.08, stumbleMsMin: 12500, stumbleMsMax: 16250 },
 };
 
 const AMBIENT_BITS = Array.from({ length: 12 }, (_, i) => ({
