@@ -372,3 +372,75 @@ export function openHillChannel(code: string): RealtimeChannel {
     config: { presence: { key: crypto.randomUUID() } },
   });
 }
+
+// --- Bounty Board ---
+//
+// Screen-authoritative, same family as Order Up/Hot Seat — a phone-driven submit/claim/fix is just
+// an "action" broadcast folded into the exact same functions the screen's own buttons call. Unlike
+// Order Up's independent per-ticket queue, every team answers the SAME shared prompt each round,
+// and a round can't advance until every entry (including every escalated re-claim) resolves
+// correctly — so the state payload carries one prompt plus two flat lists (this round's original
+// entries, and any bounties spawned from a wrong one) rather than a ticket board.
+export type BountyBoardRosterEntry = { id: string | number; name: string; color: TeamColor; mascot?: string | null };
+
+export type BountyBoardPhase = "lobby" | "playing" | "final";
+
+// One team's status against the CURRENT round's shared prompt. `text` is the typing-mode draft/
+// submission (unused in spoken mode until a Wrong judgment fills it in from what the teacher typed
+// in by hand — see BountyBoardGame.tsx). `resolved` covers BOTH ways a team's round obligation gets
+// satisfied: answered correctly immediately, or the bounty it spawned was eventually solved by
+// someone else — a round only advances once every entry reads resolved.
+export type BountyRoundEntry = {
+  teamId: string | number;
+  text: string;
+  submitted: boolean;
+  resolved: boolean;
+};
+
+// A currently-open (or just-resolved) bounty. The same `id` persists across every escalation —
+// fields mutate in place on each miss rather than spawning a new bounty per attempt, so nothing has
+// to chase an id chain to find "the current state of this team's original wrong answer."
+export type Bounty = {
+  id: number;
+  originalTeamId: string | number;   // whose round entry this traces back to — flipping THIS
+                                      // entry's resolved flag is what unblocks round advancement.
+  wrongText: string;                 // the most recent wrong attempt — what a claimant must fix.
+  value: number;                     // current payout if claimed correctly: BOUNTY_VALUE * (missCount + 1).
+  missCount: number;                 // consecutive wrong attempts so far, always >= 1 once it exists.
+  excludedTeamId: string | number;   // most recent team to fail this — cannot reclaim until someone
+                                      // else takes it over (then THAT team becomes excluded instead).
+  claimedBy?: string | number;       // undefined = open for claiming.
+  // Typing-mode only — the claiming team's current fix draft/submission, same role as Order Up's
+  // Ticket.submittedSentence. Unused (stays undefined) the whole game through in spoken mode.
+  fixText?: string;
+  resolved: boolean;
+};
+
+export type BountyBoardStatePayload = {
+  phase: BountyBoardPhase;
+  roster: BountyBoardRosterEntry[];
+  connectedTeamIds: (string | number)[];
+  roundNumber: number;
+  totalRounds: number;
+  promptText: string;
+  answerMode: "spoken" | "typing";
+  roundEntries: BountyRoundEntry[];
+  bounties: Bounty[];
+  scores: Record<string, number>;
+  ts: number;
+};
+
+export type BountyBoardActionPayload =
+  | { teamId: string | number; action: "submitRound"; text: string }
+  | { teamId: string | number; action: "claimBounty"; bountyId: number }
+  | { teamId: string | number; action: "submitBountyFix"; bountyId: number; text: string };
+
+function bountyBoardChannelName(code: string): string {
+  return `bounty-${code}`;
+}
+
+export function openBountyBoardChannel(code: string): RealtimeChannel {
+  return supabase.channel(bountyBoardChannelName(code), {
+    config: { presence: { key: crypto.randomUUID() } },
+  });
+}

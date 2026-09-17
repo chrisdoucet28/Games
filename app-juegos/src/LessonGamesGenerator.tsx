@@ -58,6 +58,7 @@ const WordWhackGame = lazy(() => import("./components/games/WordWhackGame").then
 const RocketFuelGame = lazy(() => import("./components/games/RocketFuelGame").then(m => ({ default: m.RocketFuelGame })));
 const ZombieSiegeGame = lazy(() => import("./components/games/ZombieSiegeGame").then(m => ({ default: m.ZombieSiegeGame })));
 const OrderUpGame = lazy(() => import("./components/games/OrderUpGame").then(m => ({ default: m.OrderUpGame })));
+const BountyBoardGame = lazy(() => import("./components/games/BountyBoardGame").then(m => ({ default: m.BountyBoardGame })));
 
 // Same treatment for Lesson Plans — LessonPlanScreen.tsx (and lessonPlans.ts, which it pulls in)
 // statically imports the full TOPIC_LIBRARY too. Both named exports below point at the same
@@ -1086,7 +1087,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
         // includes L1-interference-flavored mistakes for topic-focus content) with cardTasks,
         // rather than dropping grammar content entirely for topic-only selections.
         qs = mixByTopic(selectedEntries.map((entry, index) => [...(entry.questions ?? []), ...cardTaskBuckets[index]]));
-      } else if (mode.id === "castle" || mode.id === "racetrack" || mode.id === "whack" || mode.id === "rocket") {
+      } else if (mode.id === "castle" || mode.id === "racetrack" || mode.id === "whack" || mode.id === "rocket" || mode.id === "bounty") {
         qs = mixByTopic(selectedEntries.map((entry, index) => [...(entry.questions ?? []), ...cardTaskBuckets[index]]));
       } else if (mode.id === "vault") {
         // Tagged with which selected topic each question came from (by TOPIC_OPTIONS value, looked
@@ -1948,6 +1949,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
               {selectedGame.id === "rocket" && <RocketFuelGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
               {selectedGame.id === "zombie" && <ZombieSiegeGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} paused={paused} onTogglePause={() => setPaused(p => !p)} />}
               {selectedGame.id === "orderup" && <OrderUpGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} level={orderUpLevel} paused={paused} onTogglePause={() => setPaused(p => !p)} />}
+              {selectedGame.id === "bounty" && <BountyBoardGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
             </Suspense>
             </Sentry.ErrorBoundary>
           </div>

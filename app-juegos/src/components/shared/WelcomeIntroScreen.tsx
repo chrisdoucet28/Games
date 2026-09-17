@@ -3,6 +3,7 @@ import { updateProfile } from "../../lib/profile";
 import { hexToRgba, type Theme } from "../../data/themes";
 import { Icon, type IconName } from "./Icon";
 import { setMusicContext } from "../../lib/music";
+import { GAME_MODES } from "../../data/constants";
 
 // Shown once, the very first time an account clears the login gate — the one app-level "here's
 // how this works" moment that exists (every other explanation is scoped to a single game's own
@@ -22,7 +23,7 @@ type Props = {
 // screen's buttons show, since this is the very first thing a new teacher sees and shouldn't have
 // to guess how much class time either path actually takes before trying it.
 const PATHS: { icon: IconName; title: string; hint: string; body: string }[] = [
-  { icon: "rocket", title: "Start a Game", hint: "Perfect for the last 30 minutes of class!", body: "Pick a level and topic, set up teams (or use the ready-made defaults), and play — 15 competitive game modes, zero prep." },
+  { icon: "rocket", title: "Start a Game", hint: "Perfect for the last 30 minutes of class!", body: `Pick a level and topic, set up teams (or use the ready-made defaults), and play — ${GAME_MODES.length} competitive game modes, zero prep.` },
   { icon: "school", title: "Lesson Plans", hint: "~30 min lesson + ~30 min playing", body: "A full presentation-practice-production lesson on one topic, then a button at the end drops your class straight into a game on that same topic — no re-picking anything." },
 ];
 

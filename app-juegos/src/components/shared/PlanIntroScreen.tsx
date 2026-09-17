@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import type { Subscription } from "../../types";
 import { getSubscription, startCheckout, redeemPromoCode } from "../../lib/subscription";
 import { updateProfile } from "../../lib/profile";
-import { FREE_PLAN_LIMITS } from "../../data/constants";
+import { FREE_PLAN_LIMITS, GAME_MODES } from "../../data/constants";
 import { hexToRgba, type Theme } from "../../data/themes";
 import { Icon } from "./Icon";
 
@@ -17,7 +17,7 @@ type Props = {
 const FREE_FEATURES = [
   `${FREE_PLAN_LIMITS.maxClasses} class`,
   `Up to ${FREE_PLAN_LIMITS.maxTeams} teams per game`,
-  "All 15 game modes",
+  `All ${GAME_MODES.length} game modes`,
   "All 105 Learn lessons + printable handouts",
 ];
 

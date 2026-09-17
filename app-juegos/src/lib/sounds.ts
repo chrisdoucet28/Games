@@ -45,6 +45,9 @@ const SOUND_FILES = {
   hillClash: "/sounds/hillclash.mp3",
   minefield: "/sounds/minefield.ogg",
   orderup: "/sounds/orderup.mp3",
+  // Placeholder — no Western/bounty-themed asset exists yet, reusing Vault Heist's stakes/danger
+  // cue (same DEFAULT_TIER2_VOLUME level below) until a dedicated sound is sourced.
+  bounty: "/sounds/vault.ogg",
   rocket: "/sounds/rocket.ogg",
   // A quick, low-key engine rev — not a full "vroom" — for Race Track's "Start Race!" and
   // finish-line (triggerWin) moments. Deliberately left off "Next Task →" since that fires on
@@ -109,6 +112,7 @@ const SOUND_VOLUME: Record<SoundName, number> = {
   // like whack/hillClash), so it's pushed above the Tier 2 default rather than below it to actually
   // register.
   orderup: 0.85,
+  bounty: DEFAULT_TIER2_VOLUME,
   rocket: DEFAULT_TIER2_VOLUME,
   // Kept deliberately quiet — teacher feedback explicitly warned against this landing like a jump
   // scare (see RaceTrackGame.tsx's "Start Race!" button and triggerWin).

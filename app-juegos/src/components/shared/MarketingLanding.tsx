@@ -109,7 +109,7 @@ const PATHS: { icon: IconName; title: string; hint: string; body: string }[] = [
 
 const FEATURES: { icon: IconName; title: string; body: string }[] = [
   { icon: "school", title: "Lesson Plans that end in a game", body: "A full ~30-minute presentation-practice-production lesson for every topic, finishing with one click straight into a matching game." },
-  { icon: "controller", title: "15 competitive games", body: `From silent judgment calls to full free conversation — ${GAME_MODES.length} team-based formats.` },
+  { icon: "controller", title: `${GAME_MODES.length} competitive games`, body: `From silent judgment calls to full free conversation — ${GAME_MODES.length} team-based formats.` },
   { icon: "learn", title: "A matching Learn lesson for every topic", body: `${realTopicCount}+ lessons, one for every game topic, free to browse without an account.` },
   { icon: "books", title: "Classes & teams that save", body: "Set up a class once — teams, mascots, and scores carry over between lessons." },
   { icon: "phone", title: "Phone-controlled play modes", body: "Students buzz in, type answers, or claim tickets from their own phones for select games." },
@@ -165,7 +165,7 @@ export function MarketingLanding({ onSignUp, onLogIn }: Props) {
           teacher sees the same choice here before signing up as they'll see the moment they log
           in. Bigger and more prominent than a plain feature card, since this is the single most
           important thing a new teacher needs to understand about how the site works. */}
-      <Section title="Two ways to run a class" subtitle="Pick whichever fits today's lesson — both lead to the same 15 games.">
+      <Section title="Two ways to run a class" subtitle={`Pick whichever fits today's lesson — both lead to the same ${GAME_MODES.length} games.`}>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(240px,1fr))", gap: "16px" }}>
           {PATHS.map(p => (
             <div key={p.title} style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: "16px", padding: "22px 20px" }}>

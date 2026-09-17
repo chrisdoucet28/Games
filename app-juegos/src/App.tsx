@@ -115,7 +115,7 @@ function App() {
   const searchParams = new URLSearchParams(window.location.search);
   const joinCode = searchParams.get('join');
   const gameParam = searchParams.get('game');
-  const joinGame = gameParam === 'spy' ? 'spy' : gameParam === 'whack' ? 'whack' : gameParam === 'hotseat' ? 'hotseat' : gameParam === 'orderup' ? 'orderup' : gameParam === 'racetrack' ? 'racetrack' : gameParam === 'hill' ? 'hill' : 'auction';
+  const joinGame = gameParam === 'spy' ? 'spy' : gameParam === 'whack' ? 'whack' : gameParam === 'hotseat' ? 'hotseat' : gameParam === 'orderup' ? 'orderup' : gameParam === 'racetrack' ? 'racetrack' : gameParam === 'hill' ? 'hill' : gameParam === 'bounty' ? 'bounty' : 'auction';
   if (joinCode) {
     return (
       <>

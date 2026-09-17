@@ -32,7 +32,7 @@ export const PPP_TIERS: PPPTier[] = [
     label: "Production",
     blurb: "Full sentences, prompted — students build language, not just pick it.",
     color: "#F59E0B",
-    gameIds: ["minefield", "rocket", "orderup"],
+    gameIds: ["minefield", "rocket", "orderup", "bounty"],
   },
   {
     id: "free-production",

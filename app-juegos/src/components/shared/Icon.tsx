@@ -31,6 +31,9 @@ export type IconName =
   | "handshake" | "idea" | "sword" | "heart" | "crystalBall" | "apple"
   | "wind" | "eyeOff" | "unlocked" | "wrench" | "forbidden"
   | "options" | "mud" | "vortex" | "clover" | "banana" | "cart" | "fullscreen" | "robot"
+  // Bounty Board's sheriff-badge glyph (6-pointed star, distinct from the 5-pointed "star" used
+  // for ThemeAmbience decoration above) — its own game icon, no existing glyph fit the theme.
+  | "sheriffStar"
   // Phase 4 — ThemeAmbience's decorative floating background glyphs (one drift + one twinkle
   // per accent theme). Rendered at low opacity/small scale, so simpler silhouettes than the
   // functional icons above are fine here.
@@ -683,6 +686,12 @@ const ICONS: Record<IconName, React.ReactNode> = {
     </>
   ),
   gun: <path d="M3,13 H15 V10 H21 V15 H17 V19 H13 V15 H7 L5,19 H2 Z" fill="currentColor" />,
+  sheriffStar: (
+    <>
+      <polygon points="12,1 21,18.5 3,18.5" fill="currentColor" />
+      <polygon points="12,23 3,5.5 21,5.5" fill="currentColor" />
+    </>
+  ),
   axe: (
     <>
       <rect x="10.5" y="6" width="2" height="16" rx="1" fill="currentColor" transform="rotate(20 11.5 14)" />
