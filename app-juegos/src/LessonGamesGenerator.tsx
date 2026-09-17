@@ -37,6 +37,7 @@ import { setMusicContext, stopMusic } from "./lib/music";
 import { denseRank } from "./utils/ranking";
 import { RankBadge } from "./components/shared/RankBadge";
 import { PhoneJoinPanel } from "./components/shared/PhoneJoinPanel";
+import { PhoneReconnectBadge } from "./components/shared/PhoneReconnectBadge";
 import { generateSessionCode, openClassSessionChannel, closeChannel, type ClassSessionStatePayload } from "./lib/liveSession";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 // Code-split: each game only ever needed once a teacher actually picks it, but the plain static
@@ -1023,6 +1024,26 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     channel.subscribe();
   };
 
+  // A persistent, single floating badge for the whole class-linked sitting — shown on every
+  // screen a class session realistically spans (topic-select, game-select, game, results) EXCEPT
+  // team-setup, which already shows the QR inline (see the plan: one-time-only by the teacher's
+  // own choice, not a gap to patch over with a second copy here). Each of the 9 phone-capable
+  // games suppresses its OWN PhoneReconnectBadge whenever presetPhoneSession is set (see those
+  // files), so this is always the only floating "reconnect a phone" button on screen at once —
+  // never two competing ones, and never one pointing at the wrong (per-game, not class-level)
+  // join URL.
+  const renderClassCheckInBadge = () => classSessionCode ? (
+    <PhoneReconnectBadge
+      sessionCode={classSessionCode}
+      joinUrl={`${window.location.origin}${window.location.pathname}?classJoin=${classSessionCode}`}
+      teams={teams}
+      connectedTeamIds={classConnectedTeamIds}
+      accent={theme.accentSolid}
+      panelBg="linear-gradient(160deg,#1E293B,#0F172A)"
+      borderColor={`${theme.accentSolid}66`}
+    />
+  ) : null;
+
   // Broadcasts the class channel's current state — called immediately on every relevant change
   // (see the two call sites in startGame/handleGameEnd/resumeClass below) AND on a standing
   // interval, same "resend regardless of change" liveness convention every other phone-mode game
@@ -1488,6 +1509,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     return (
       <div style={{ minHeight: "100vh", background: "#F0F9FF", padding: "clamp(10px,4vw,20px)", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
         {renderSavePicker()}
+        {renderClassCheckInBadge()}
         <div style={{ maxWidth: "720px", margin: "0 auto" }}>
           <button onClick={() => { if (classSessionCode) closeClassSession(); setActiveClassId(null); setActiveClassName(null); setScreen("welcome"); }} style={{ background: "none", border: `2px solid ${theme.accentSolid}`, color: theme.accentSolid, borderRadius: "10px", padding: "8px 16px", cursor: "pointer", fontWeight: "700", marginBottom: "20px", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px" }}><Icon name="back" size={13} /> Back</button>
 
@@ -1917,6 +1939,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
   if (screen === "game-select") return (
     <div style={{ minHeight: "100vh", background: "#F0F9FF", padding: "20px", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
       {renderSavePicker()}
+      {renderClassCheckInBadge()}
       <div style={{ maxWidth: "760px", margin: "0 auto" }}>
 
         <div style={{ background: `linear-gradient(135deg,${theme.heroBg[0]},${theme.heroBg[2]})`, borderRadius: "20px", padding: "20px 24px", marginBottom: "20px", color: "white", position: "relative", overflow: "hidden" }}>
@@ -2033,6 +2056,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     return (
       <div ref={appRef} style={{ minHeight: "100vh", background: "#0F0A2E", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
         {renderSavePicker()}
+        {renderClassCheckInBadge()}
         <div style={{ background: `linear-gradient(90deg,${theme.accent[0]},${theme.accent[1]})`, padding: "12px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <h2 style={{ color: "white", margin: 0, fontSize: "20px", fontFamily: theme.headingFont, display: "flex", alignItems: "center", gap: "8px" }}><Icon name={GAME_ICONS[selectedGame.id]} size={20} color="white" /> {selectedGame.name}</h2>
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
@@ -2094,6 +2118,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     const headline = winners.length > 1 ? `${winners.map(w => w.name).join(" & ")} are tied for the lead!` : `${winners[0]?.name} is winning!`;
     return (
       <div style={{ minHeight: "100vh", background: `linear-gradient(135deg,${theme.heroBg[0]},${theme.heroBg[2]})`, padding: "20px", textAlign: "center", color: "white", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
+        {renderClassCheckInBadge()}
         <Confetti active={confetti} />
         <div style={{ fontSize: "80px", margin: "20px 0" }}>🏆</div>
         <h1 style={{ fontSize: "clamp(24px,5vw,40px)", fontWeight: "900", margin: "0 0 8px", fontFamily: theme.headingFont }}>Game Over!</h1>

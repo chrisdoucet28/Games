@@ -599,7 +599,10 @@ export function BountyBoardGame({ questions, teams, onUpdateScore, onEnd, forceF
   return (
     <div style={arenaStyle}>
       {STYLE_TAG}
-      {inputMode === "phone" && sessionCode && (
+      {/* Suppressed for a Class Check-In sitting — the class-level badge (LessonGamesGenerator.tsx's
+          renderClassCheckInBadge) is the only floating reconnect button shown then, and it's the
+          only one pointing at the right (class, not per-game) join URL. */}
+      {inputMode === "phone" && sessionCode && !presetPhoneSession && (
         <PhoneReconnectBadge
           sessionCode={sessionCode} joinUrl={`${window.location.origin}${window.location.pathname}?join=${sessionCode}&game=bounty`}
           teams={teams} connectedTeamIds={connectedTeamIds}

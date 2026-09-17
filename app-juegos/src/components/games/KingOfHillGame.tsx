@@ -898,7 +898,10 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
     <div style={arenaStyle}>
       <AmbientBackdrop />
       {STYLE_TAG}
-      {inputMode === "phone" && sessionCode && (
+      {/* Suppressed for a Class Check-In sitting — the class-level badge (LessonGamesGenerator.tsx's
+          renderClassCheckInBadge) is the only floating reconnect button shown then, and it's the
+          only one pointing at the right (class, not per-game) join URL. */}
+      {inputMode === "phone" && sessionCode && !presetPhoneSession && (
         <PhoneReconnectBadge
           sessionCode={sessionCode} joinUrl={`${window.location.origin}${window.location.pathname}?join=${sessionCode}&game=hill`}
           teams={propTeams} connectedTeamIds={connectedTeamIds}

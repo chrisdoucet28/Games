@@ -1046,7 +1046,10 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
     <div style={arenaStyle}>
       {STYLE_TAG}
       {floorStrip}
-      {inputMode === "phone" && sessionCode && (
+      {/* Suppressed for a Class Check-In sitting — the class-level badge (LessonGamesGenerator.tsx's
+          renderClassCheckInBadge) is the only floating reconnect button shown then, and it's the
+          only one pointing at the right (class, not per-game) join URL. */}
+      {inputMode === "phone" && sessionCode && !presetPhoneSession && (
         <PhoneReconnectBadge
           sessionCode={sessionCode} joinUrl={`${window.location.origin}${window.location.pathname}?join=${sessionCode}&game=orderup`}
           teams={teams} connectedTeamIds={connectedTeamIds}
