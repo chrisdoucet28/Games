@@ -217,8 +217,9 @@ export function MarketingLanding({ onSignUp, onLogIn }: Props) {
             </a>
           ))}
         </div>
-        <div style={{ textAlign: "center" }}>
-          <a href="/learn" style={{ color: "#FCD34D", fontWeight: "800", fontSize: "13px", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "4px" }}>Browse all free lessons <Icon name="next" size={12} /></a>
+        <div style={{ textAlign: "center", display: "flex", flexDirection: "column", gap: "8px" }}>
+          <a href="/learn" style={{ color: "#FCD34D", fontWeight: "800", fontSize: "13px", textDecoration: "none", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "4px" }}>Browse all free lessons <Icon name="next" size={12} /></a>
+          <a href="/practice" style={{ color: "#FCD34D", fontWeight: "800", fontSize: "13px", textDecoration: "none", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "4px" }}>Or try a self-check practice quiz <Icon name="next" size={12} /></a>
         </div>
       </Section>
 

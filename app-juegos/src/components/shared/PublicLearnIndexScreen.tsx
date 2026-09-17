@@ -55,7 +55,20 @@ export function PublicLearnIndexScreen() {
           </div>
         ))}
 
-        <div style={{ textAlign: "center", background: "white", border: "2px solid rgba(3,105,161,0.2)", borderRadius: "16px", padding: "28px 20px", marginTop: "12px" }}>
+        <div style={{ textAlign: "center", background: "white", border: "2px solid rgba(3,105,161,0.2)", borderRadius: "16px", padding: "24px 20px", marginTop: "12px", marginBottom: "16px" }}>
+          <div style={{ fontWeight: "900", fontSize: "16px", color: "#0C1E3D", marginBottom: "8px" }}>Ready to test yourself?</div>
+          <p style={{ color: "#4B5563", fontSize: "13px", margin: "0 0 14px", lineHeight: 1.5 }}>
+            Try a self-check practice quiz — pick a few topics and see how you do, no account needed.
+          </p>
+          <a
+            href="/practice"
+            style={{ display: "inline-block", background: "#0369A1", color: "white", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "900", textDecoration: "none" }}
+          >
+            Try a Practice Quiz
+          </a>
+        </div>
+
+        <div style={{ textAlign: "center", background: "white", border: "2px solid rgba(3,105,161,0.2)", borderRadius: "16px", padding: "28px 20px" }}>
           <div style={{ fontWeight: "900", fontSize: "17px", color: "#0C1E3D", marginBottom: "8px" }}>Want to turn these into a classroom game?</div>
           <p style={{ color: "#4B5563", fontSize: "14px", margin: "0 0 16px", lineHeight: 1.5 }}>
             ClassCade pairs every one of these lessons with a competitive team game. Free to start, no

@@ -16,6 +16,7 @@ import { TermsOfServiceScreen } from './components/shared/TermsOfServiceScreen';
 import { OurStoryScreen } from './components/shared/OurStoryScreen';
 import { PublicLearnIndexScreen } from './components/shared/PublicLearnIndexScreen';
 import { PublicLearnLessonScreen } from './components/shared/PublicLearnLessonScreen';
+import { PracticeScreen } from './components/shared/PracticeScreen';
 import { FREE_LAUNCH_ALL_PREMIUM } from './data/constants';
 import { Icon } from './components/shared/Icon';
 import { isMusicEnabled, setMusicEnabled, onMusicEnabledChange, stopMusic } from './lib/music';
@@ -105,6 +106,10 @@ function App() {
   if (window.location.pathname.startsWith('/learn/')) {
     return <PublicLearnLessonScreen topicId={window.location.pathname.slice('/learn/'.length)} />;
   }
+  // Public, no-login solo practice quiz — same pathname-check pattern as /learn above, so it needs
+  // no Supabase/auth state either. A single screen (no /practice/<id> sub-routes) since a practice
+  // session isn't standalone shareable content the way a /learn/<id> lesson page is.
+  if (window.location.pathname === '/practice') return <PracticeScreen />;
   if (!isSupabaseConfigured) return <ConfigErrorScreen />;
   const searchParams = new URLSearchParams(window.location.search);
   // A separate param (not `join=&game=class`) deliberately — `gameParam` below has a silent
