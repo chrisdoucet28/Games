@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { hexToRgba, type Theme } from "../../data/themes";
 import { LESSON_TOPICS, LEVEL_ORDER, LEVEL_COLOR, FOCUS_ORDER, FOCUS_LABEL, matchesTopicSearch, type LearnTopic } from "../../data/learnTopics";
-import { LESSON_PLANS, buildUnscrambleItems, type RoundOut, type UnscrambleItem } from "../../data/lessonPlans";
+import { LESSON_PLANS, type RoundOut } from "../../data/lessonPlans";
+import { buildUnscrambleItems, type UnscrambleItem } from "../../data/lessonPlanUnscramble";
 import { REAL_WORLD_READINGS, type RealWorldReading } from "../../data/realWorldReadings";
 import { TOPIC_LIBRARY } from "../../data/topics";
 import { getProfile } from "../../lib/profile";

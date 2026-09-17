@@ -77,10 +77,27 @@ export async function clearProgress(classId: string, teams: Team[]): Promise<voi
 
 // Auto-remembers every team actually played under this class — called whenever a class-linked
 // lineup gets finalized (setup completing, or a game only getting linked to a class later via
-// Save & Exit). Matches by name (trimmed, case-insensitive, same rule this app already uses for
-// score continuity in LessonGamesGenerator's handleSetup) so re-using a name updates that saved
-// team's color/mascot in place instead of piling up duplicates.
-export async function upsertTeamRoster(classId: string, teams: Team[]): Promise<TeamRosterEntry[]> {
+// Save & Exit), and also on every debounced autosave tick while a teacher is actively editing
+// team-setup (see LessonGamesGenerator's roster-autosave effect).
+//
+// `rosterIds[i]` (parallel to `teams[i]`, optional) is the roster entry a caller already knows
+// that slot maps to — e.g. it was hydrated from a tapped roster chip, or a previous call to this
+// function already created/matched an entry for it. When present and still valid, that id is
+// matched FIRST, so a rename updates the same row in place instead of leaving the old name behind
+// as an orphaned entry and creating a fresh one under the new name (this used to be name-only
+// matching, which broke exactly that way once autosave started calling this on every edit rather
+// than once at save time). Name matching (trimmed, case-insensitive) is the fallback, still used
+// when no id is known — the original "type the same name again" reuse path (e.g. handleSetup's
+// score-continuity lookup uses the same rule) still works for callers that don't track ids.
+//
+// Returns the resolved roster id for each input team (same order as `teams`) alongside the merged
+// roster, so a caller tracking ids per slot (team-setup's teamRosterIds) can save a freshly
+// created id back for next time instead of losing track of it.
+export async function upsertTeamRoster(
+  classId: string,
+  teams: Team[],
+  rosterIds: (string | null | undefined)[] = []
+): Promise<{ roster: TeamRosterEntry[]; resolvedIds: string[] }> {
   const { data, error: fetchError } = await supabase
     .from("classes")
     .select("team_roster")
@@ -90,19 +107,27 @@ export async function upsertTeamRoster(classId: string, teams: Team[]): Promise<
 
   const roster: TeamRosterEntry[] = (data?.team_roster as TeamRosterEntry[] | null) ?? [];
   const merged = [...roster];
-  teams.forEach(t => {
-    const key = t.name.trim().toLowerCase();
-    const idx = merged.findIndex(r => r.name.trim().toLowerCase() === key);
+  const resolvedIds: string[] = [];
+  teams.forEach((t, i) => {
+    const knownId = rosterIds[i];
+    let idx = knownId ? merged.findIndex(r => r.id === knownId) : -1;
+    if (idx === -1) {
+      const key = t.name.trim().toLowerCase();
+      idx = merged.findIndex(r => r.name.trim().toLowerCase() === key);
+    }
     if (idx !== -1) {
-      merged[idx] = { ...merged[idx], color: t.color, mascot: t.mascot ?? null };
+      merged[idx] = { ...merged[idx], name: t.name, color: t.color, mascot: t.mascot ?? null };
+      resolvedIds.push(merged[idx].id);
     } else {
-      merged.push({ id: crypto.randomUUID(), name: t.name, color: t.color, mascot: t.mascot ?? null });
+      const newId = crypto.randomUUID();
+      merged.push({ id: newId, name: t.name, color: t.color, mascot: t.mascot ?? null });
+      resolvedIds.push(newId);
     }
   });
 
   const { error } = await supabase.from("classes").update({ team_roster: merged }).eq("id", classId);
   if (error) throw error;
-  return merged;
+  return { roster: merged, resolvedIds };
 }
 
 // Checkpoints live team scores to the class without touching any in-progress-game bookkeeping

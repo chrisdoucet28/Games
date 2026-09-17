@@ -22,10 +22,17 @@
 // timer-based games use) — see GAME_OVERRIDES. A game with its own tracks calls
 // setMusicGame(gameId) on mount and setMusicGame(null) on unmount; every other game never calls
 // it at all; the shared defaults below still apply to any context that game doesn't override.
+//
+// Served from Vercel Blob storage rather than public/music/ — every deployment used to ship a
+// full copy of these files (44MB), which is what was driving the project's deployment storage
+// quota up on every single push. Re-upload via scripts/upload-media-to-blob.ts after adding or
+// replacing a track.
+const MEDIA_BASE = "https://es8h1nft4dvfmlmp.public.blob.vercel-storage.com";
+
 const MUSIC_FILES = {
-  ambient: "/music/ambient.mp3",
-  gameplay: "/music/gameplay.mp3",
-  tension: "/music/tension.mp3",
+  ambient: `${MEDIA_BASE}/music/ambient.mp3`,
+  gameplay: `${MEDIA_BASE}/music/gameplay.mp3`,
+  tension: `${MEDIA_BASE}/music/tension.mp3`,
 } as const;
 
 export type MusicContext = keyof typeof MUSIC_FILES;
@@ -35,95 +42,101 @@ export type MusicContext = keyof typeof MUSIC_FILES;
 // through to the shared track for that context — additive, never a replacement for the defaults.
 const GAME_OVERRIDES: Partial<Record<string, Partial<Record<MusicContext, string>>>> = {
   whack: {
-    gameplay: "/music/whack-gameplay.mp3",
-    tension: "/music/whack-tension.mp3",
+    gameplay: `${MEDIA_BASE}/music/whack-gameplay.mp3`,
+    tension: `${MEDIA_BASE}/music/whack-tension.mp3`,
   },
   // Teacher feedback: the shared tension track read as pure meditation, and the shared gameplay
   // track felt way too hyped/party for the between-round moments — Auction wants official/classy
   // bidding-hall energy for both, not chillout or funk.
   auction: {
-    gameplay: "/music/auction-gameplay.mp3",
-    tension: "/music/auction-tension.mp3",
+    gameplay: `${MEDIA_BASE}/music/auction-gameplay.mp3`,
+    tension: `${MEDIA_BASE}/music/auction-tension.mp3`,
   },
   // Reused rather than new tracks — Hot Potato's frantic, comedic-explosion energy is the same
   // "silly carnival frenzy" identity Word Whack's own tracks were made for, and it barely has a
   // calm moment of its own to need a distinct gameplay track.
   hotpotato: {
-    gameplay: "/music/whack-gameplay.mp3",
-    tension: "/music/whack-tension.mp3",
+    gameplay: `${MEDIA_BASE}/music/whack-gameplay.mp3`,
+    tension: `${MEDIA_BASE}/music/whack-tension.mp3`,
   },
   // Reused rather than new tracks — Vault Heist's high-stakes, no-partial-credit, suspense-before-
   // a-reveal shape is the same beat Auction's tracks were made for, just heist- instead of
   // auction-themed.
   vault: {
-    gameplay: "/music/auction-gameplay.mp3",
-    tension: "/music/auction-tension.mp3",
+    gameplay: `${MEDIA_BASE}/music/auction-gameplay.mp3`,
+    tension: `${MEDIA_BASE}/music/auction-tension.mp3`,
   },
   // Tension-only overrides — these three games spend almost their entire active playtime in the
   // timed/tension moment (a brief resolution/breather window is all "gameplay" ever covers for
   // them), so only that one context got a custom Suno track; the shared gameplay track fills the
   // rest, same tradeoff as Hot Potato before it needed a gameplay override too.
   castle: {
-    tension: "/music/castle-tension.mp3",
+    tension: `${MEDIA_BASE}/music/castle-tension.mp3`,
   },
   cards: {
-    tension: "/music/cards-tension.mp3",
+    tension: `${MEDIA_BASE}/music/cards-tension.mp3`,
   },
   // Reused rather than a new track — King of the Hill's zone-picking/contested-duel tension is
   // genuinely the same medieval-combat decision-under-pressure beat Castle Defense's track was
   // made for, just zone-conquest instead of siege-defense.
   hill: {
-    tension: "/music/castle-tension.mp3",
+    tension: `${MEDIA_BASE}/music/castle-tension.mp3`,
   },
-  // Tension-only — Zombie Siege's active wave defense is the whole game; the short post-wave
-  // breather before confirming the next wave keeps the shared gameplay track.
+  // Both contexts now custom — teacher feedback that the between-wave "preparing" moments (the
+  // read-pause before a new wave's zombies start spawning, and the "Wave Complete!" breather)
+  // were silently getting "Haunted House Chase" too, when that track is meant to mean "zombies are
+  // actually attacking right now." Reused rather than a new track — Rocket Fuel's "Misión Control"
+  // is already the house's build-to-a-climax countdown track (the fueling turn ramping up to
+  // launch), the same "something big is about to happen" shape a wave's incoming-horde countdown
+  // needs, just siege- instead of launch-themed.
   zombie: {
-    tension: "/music/zombie-tension.mp3",
+    gameplay: `${MEDIA_BASE}/music/rocket-tension.mp3`,
+    tension: `${MEDIA_BASE}/music/zombie-tension.mp3`,
   },
   // Tension-only — Rocket Fuel's 90s "fuel your rocket" turns dominate playtime; the shared
   // gameplay track covers the brief team-end transition and the launch spectacle.
   rocket: {
-    tension: "/music/rocket-tension.mp3",
+    tension: `${MEDIA_BASE}/music/rocket-tension.mp3`,
   },
   // Tension-only — Order Up's whole session runs on a shared clock, so it never really leaves
   // this context; the shared gameplay track would only ever show up in a sliver of transition time.
   orderup: {
-    tension: "/music/orderup-tension.mp3",
+    tension: `${MEDIA_BASE}/music/orderup-tension.mp3`,
   },
   // Tension-only — the "speaking phase" (building and saying the sentence) is Minefield's real
   // main event each turn; the shared gameplay track covers the brief pick/judging windows.
   minefield: {
-    tension: "/music/minefield-tension.mp3",
+    tension: `${MEDIA_BASE}/music/minefield-tension.mp3`,
   },
   battleship: {
     // Reused rather than a new track — the target-picking tension is the same medieval/
     // swashbuckling-adventure combat-decision energy Castle Defense's track already covers, per
     // teacher feedback that it reads as a "Pirates of the Caribbean" vibe at points — naval
     // instead of siege, same family as castle/hill.
-    tension: "/music/castle-tension.mp3",
+    tension: `${MEDIA_BASE}/music/castle-tension.mp3`,
     // The calm moment right after firing, while a team reads and discusses the grammar
     // correction — quiet nautical ambiance, deliberately the most background/least-in-your-face
     // track in the set (per teacher direction, worth remembering for any future moment that
     // needs to sit further back than usual).
-    gameplay: "/music/battleship-gameplay.mp3",
+    gameplay: `${MEDIA_BASE}/music/battleship-gameplay.mp3`,
   },
   // Tension-only — Hot Seat's 90s describe-and-guess turn is basically the whole game; the shared
   // gameplay track covers the brief intro/turn-end windows.
   hotseat: {
-    tension: "/music/hotseat-tension.mp3",
+    tension: `${MEDIA_BASE}/music/hotseat-tension.mp3`,
   },
   // Gameplay-only — Race Track barely ever leaves this context in normal team play (its timer-
   // driven tension is gated to solo mode), so this is the track that carries almost the entire
   // game; the shared tension track fills the rare solo-mode countdown instead.
   racetrack: {
-    gameplay: "/music/racetrack-gameplay.mp3",
+    gameplay: `${MEDIA_BASE}/music/racetrack-gameplay.mp3`,
   },
   // Genuinely dual-mood, same shape as Auction — a real calm/unhurried stretch (peeking at your
   // role, free discussion trying to spot the spy) and a real distinct tense moment (the vote, or
   // the spy's under-pressure guess), not one context dominating the other.
   spy: {
-    gameplay: "/music/spy-gameplay.mp3",
-    tension: "/music/spy-tension.mp3",
+    gameplay: `${MEDIA_BASE}/music/spy-gameplay.mp3`,
+    tension: `${MEDIA_BASE}/music/spy-tension.mp3`,
   },
 };
 
@@ -257,7 +270,12 @@ function armAutoplayRetry() {
     // moment play() is CALLED, independent of whether autoplay policy goes on to reject it.
     if (enabled && currentSrc) {
       const el = players.get(currentSrc);
-      if (el) el.play().catch(() => {});
+      // Re-arm on a second rejection instead of swallowing it — a stricter mobile browser (seen in
+      // practice on iOS) can reject this retry too, and a brand-new track that's never played
+      // before in this page session (e.g. the first time a game with its own override is entered)
+      // gets exactly one shot here; without re-arming, that track would stay silent for the rest of
+      // the session even though every other track already unlocked fine.
+      if (el) el.play().catch(err => { if (err?.name === "NotAllowedError") armAutoplayRetry(); });
     }
   };
   document.addEventListener("pointerdown", retry, { once: true });

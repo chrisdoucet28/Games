@@ -19,6 +19,7 @@ function isInAppBrowser(): boolean {
 const FOOTER_LINKS = (
   <div style={{ display: "flex", gap: "16px", justifyContent: "center", flexWrap: "wrap", marginTop: "20px" }}>
     <a href="/learn" style={{ color: "#7DB8DB", fontSize: "12px", textDecoration: "none" }}>Learn Lessons</a>
+    <a href="/about" style={{ color: "#7DB8DB", fontSize: "12px", textDecoration: "none" }}>Our Story</a>
     <a href="/privacy" style={{ color: "#7DB8DB", fontSize: "12px", textDecoration: "none" }}>Privacy Policy</a>
     <a href="/terms" style={{ color: "#7DB8DB", fontSize: "12px", textDecoration: "none" }}>Terms of Service</a>
   </div>

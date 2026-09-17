@@ -1,11 +1,16 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, lazy, Suspense } from "react";
+import * as Sentry from "@sentry/react";
 import { TeamIcon, MASCOT_ICON_BY_EMOJI } from "./components/shared/TeamIcon";
 import type { Team, GameMode, QuestionData, SavedClass, Subscription, TeamRosterEntry } from "./types";
 import { TEAM_COLORS, GAME_MODES, GAME_ICONS, MASCOT_OPTIONS, LEVELS_META, FREE_PLAN_LIMITS, FREE_LAUNCH_ALL_PREMIUM } from "./data/constants";
 import { getGameTier } from "./data/pppTiers";
 import { PPPDiagram } from "./components/shared/PPPDiagram";
-// Asegúrate de que TOPIC_LIBRARY esté exportado desde tu archivo topics.ts junto con TOPIC_OPTIONS
-import { TOPIC_OPTIONS, TOPIC_LIBRARY } from "./data/topics";
+// TOPIC_OPTIONS (lightweight metadata, needed immediately for topic-select) lives in its own
+// module now, separate from topics.ts's TOPIC_LIBRARY (the ~5MB actual question content) — see
+// data/topicOptions.ts's header comment. TOPIC_LIBRARY itself is loaded via a dynamic import()
+// inside startGame() below, only once a teacher actually starts a game, instead of a static
+// top-level import that would put the whole content bank in every visitor's initial bundle.
+import { TOPIC_OPTIONS } from "./data/topicOptions";
 import { hexToRgba, type Theme } from "./data/themes";
 import { LESSONS } from "./data/lessons";
 import { matchesTopicSearch } from "./data/learnTopics";
@@ -15,7 +20,6 @@ import { Confetti } from "./components/shared/Confetti";
 import { ClassesScreen } from "./components/shared/ClassesScreen";
 import { ProfileScreen } from "./components/shared/ProfileScreen";
 import { LearnScreen } from "./components/shared/LearnScreen";
-import { LessonPlanScreen, LessonPlanSlideshow } from "./components/shared/LessonPlanScreen";
 import { LESSON_TOPICS } from "./data/learnTopics";
 import { LESSON_PLANS } from "./data/lessonPlans";
 import { LeaderboardScreen } from "./components/shared/LeaderboardScreen";
@@ -32,21 +36,70 @@ import { playSound, isSoundEnabled, setSoundEnabled, onSoundEnabledChange } from
 import { setMusicContext, stopMusic } from "./lib/music";
 import { denseRank } from "./utils/ranking";
 import { RankBadge } from "./components/shared/RankBadge";
-import { AuctionGame } from "./components/games/AuctionGame";
-import { MinefieldGame } from "./components/games/MinefieldGame";
-import { HotSeatGame } from "./components/games/HotSeatGame";
-import { SpyAmongUsGame } from "./components/games/SpyAmongUsGame";
-import { BattleshipGame } from "./components/games/BattleshipGame";
-import { VaultHeistGame } from "./components/games/VaultHeistGame";
-import { CardShuffleGame } from "./components/games/CardShuffleGame";
-import { CastleGame } from "./components/games/CastleGame";
-import { KingOfHillGame } from "./components/games/KingOfHillGame";
-import { HotPotatoGame } from "./components/games/HotPotatoGame";
-import { RaceTrackGame } from "./components/games/RaceTrackGame";
-import { WordWhackGame } from "./components/games/WordWhackGame";
-import { RocketFuelGame } from "./components/games/RocketFuelGame";
-import { ZombieSiegeGame } from "./components/games/ZombieSiegeGame";
-import { OrderUpGame } from "./components/games/OrderUpGame";
+// Code-split: each game only ever needed once a teacher actually picks it, but the plain static
+// imports above put all 15 games (plus everything each one pulls in) into the one shared bundle
+// every visitor downloads before ever seeing a game — most of a 7MB chunk. lazy() defers each
+// game's own module (and its own subtree of imports) to a real network fetch triggered only by
+// selecting it; the .then(...) adapter is needed because these are named exports, not default
+// exports, which is all React.lazy() accepts directly. See the Suspense boundary around the
+// render site below for the loading fallback shown during that fetch.
+const AuctionGame = lazy(() => import("./components/games/AuctionGame").then(m => ({ default: m.AuctionGame })));
+const MinefieldGame = lazy(() => import("./components/games/MinefieldGame").then(m => ({ default: m.MinefieldGame })));
+const HotSeatGame = lazy(() => import("./components/games/HotSeatGame").then(m => ({ default: m.HotSeatGame })));
+const SpyAmongUsGame = lazy(() => import("./components/games/SpyAmongUsGame").then(m => ({ default: m.SpyAmongUsGame })));
+const BattleshipGame = lazy(() => import("./components/games/BattleshipGame").then(m => ({ default: m.BattleshipGame })));
+const VaultHeistGame = lazy(() => import("./components/games/VaultHeistGame").then(m => ({ default: m.VaultHeistGame })));
+const CardShuffleGame = lazy(() => import("./components/games/CardShuffleGame").then(m => ({ default: m.CardShuffleGame })));
+const CastleGame = lazy(() => import("./components/games/CastleGame").then(m => ({ default: m.CastleGame })));
+const KingOfHillGame = lazy(() => import("./components/games/KingOfHillGame").then(m => ({ default: m.KingOfHillGame })));
+const HotPotatoGame = lazy(() => import("./components/games/HotPotatoGame").then(m => ({ default: m.HotPotatoGame })));
+const RaceTrackGame = lazy(() => import("./components/games/RaceTrackGame").then(m => ({ default: m.RaceTrackGame })));
+const WordWhackGame = lazy(() => import("./components/games/WordWhackGame").then(m => ({ default: m.WordWhackGame })));
+const RocketFuelGame = lazy(() => import("./components/games/RocketFuelGame").then(m => ({ default: m.RocketFuelGame })));
+const ZombieSiegeGame = lazy(() => import("./components/games/ZombieSiegeGame").then(m => ({ default: m.ZombieSiegeGame })));
+const OrderUpGame = lazy(() => import("./components/games/OrderUpGame").then(m => ({ default: m.OrderUpGame })));
+
+// Same treatment for Lesson Plans — LessonPlanScreen.tsx (and lessonPlans.ts, which it pulls in)
+// statically imports the full TOPIC_LIBRARY too. Both named exports below point at the same
+// module specifier, so this only ever fetches that one chunk once, regardless of which renders first.
+const LessonPlanScreen = lazy(() => import("./components/shared/LessonPlanScreen").then(m => ({ default: m.LessonPlanScreen })));
+const LessonPlanSlideshow = lazy(() => import("./components/shared/LessonPlanScreen").then(m => ({ default: m.LessonPlanSlideshow })));
+
+// Shown for the brief moment a lazily-loaded game's own chunk is still being fetched (see the
+// lazy() calls above) — matches the dark game-screen background it sits inside so it never reads
+// as a flash of unstyled content, and names the actual game so it's clear something is happening.
+function GameLoadingFallback({ name }: { name: string }) {
+  return (
+    <div style={{ minHeight: "320px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "14px", padding: "40px 20px" }}>
+      <style>{`@keyframes ccGameLoadSpin { to { transform: rotate(360deg); } }`}</style>
+      <div style={{ width: "40px", height: "40px", borderRadius: "50%", border: "4px solid #E5E7EB", borderTopColor: "#0EA5E9", animation: "ccGameLoadSpin 0.8s linear infinite" }} />
+      <span style={{ color: "#6B7280", fontWeight: "700", fontSize: "14px" }}>Loading {name}…</span>
+    </div>
+  );
+}
+
+// Scoped specifically to the one game actually on screen, separate from main.tsx's app-wide
+// Sentry.ErrorBoundary — without this, a crash inside any single game's own logic (an edge case
+// in one team's saved data, a bad question record, anything) would blow away the *entire* session
+// via the app-wide boundary: the teacher's whole class, scores, and team setup, gone to a bare
+// "reload the page" screen. This contains it to just the game area — everything else (teams,
+// scores, the class link) survives, and the teacher can pick a different game or retry this one
+// without losing the period's work. Still reported to Sentry exactly like the outer boundary.
+function GameCrashFallback({ name, message, buttonLabel, onBack }: { name: string; message: string; buttonLabel: string; onBack: () => void }) {
+  return (
+    <div style={{ minHeight: "320px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "12px", padding: "40px 20px", textAlign: "center" }}>
+      <Icon name="warning" size={36} color="#F59E0B" />
+      <div style={{ fontSize: "17px", fontWeight: "800", color: "#1F2937" }}>{name} hit a snag.</div>
+      <div style={{ color: "#6B7280", fontSize: "14px", maxWidth: "360px" }}>{message}</div>
+      <button
+        onClick={onBack}
+        style={{ marginTop: "4px", padding: "10px 22px", borderRadius: "10px", border: "none", background: "#4F46E5", color: "white", fontWeight: "700", fontSize: "14px", cursor: "pointer" }}
+      >
+        {buttonLabel}
+      </button>
+    </div>
+  );
+}
 
 type TopicOption = {
   value: string;
@@ -138,9 +191,12 @@ const getFilteredTopicOptions = (level: string, focus: string) =>
     .filter(o => (level === "all" || o.level === level) && (focus === "all" || o.focus === focus))
     .sort((a, b) => (a.order ?? Number.MAX_SAFE_INTEGER) - (b.order ?? Number.MAX_SAFE_INTEGER));
 
-const getSelectedTopicEntries = (selectedTopics: string[]) =>
+// Takes the topic library as a parameter (rather than closing over a module-level import) because
+// its only caller, startGame() below, loads TOPIC_LIBRARY via a dynamic import() right before
+// calling this — see the import comment near the top of this file for why.
+const getSelectedTopicEntries = (selectedTopics: string[], library: Record<string, unknown>) =>
   selectedTopics
-    .map(value => TOPIC_LIBRARY[value as keyof typeof TOPIC_LIBRARY] as TopicLibraryEntry | undefined)
+    .map(value => library[value] as TopicLibraryEntry | undefined)
     .filter((entry): entry is TopicLibraryEntry => Boolean(entry));
 
 const cardTasksAsQuestions = (tasks: { task: string }[]): QuestionData[] =>
@@ -225,6 +281,17 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
   const [teamNames, setTeamNames] = useState(DEFAULT_TEAM_NAMES);
   const [teamColors, setTeamColors] = useState([0, 1, 2, 3, 4]);
   const [teamMascots, setTeamMascots] = useState<(string | null)[]>([null, null, null, null, null]);
+  // Which saved-roster entry (if any) each active slot maps to, parallel to teamNames/teamColors/
+  // teamMascots — lets the roster autosave below UPDATE that entry in place when a slot is renamed
+  // instead of leaving the old name behind as an orphaned chip and creating a fresh one under the
+  // new name every single edit (exactly what a name-only match does, and what teacher feedback
+  // flagged: "every time I make a change it creates another team"). Set when a roster chip is
+  // tapped into a slot (toggleRosterTeam) or when a save resolves a brand-new id for a
+  // previously-unknown slot (saveTeamsToRoster/handleSetup); cleared back to null anywhere the
+  // slot itself is cleared/replaced/shifted (resetTeamsToNormal, toggleRosterTeam's removal path).
+  // Deliberately NOT touched by the plain name/color/mascot edit handlers below — a manual rename
+  // of an already-linked slot should keep pointing at the same roster entry, not lose it.
+  const [teamRosterIds, setTeamRosterIds] = useState<(string | null)[]>([null, null, null, null, null]);
   // True only while every active team slot still holds its just-reset/just-linked default content
   // — lets toggleRosterTeam tell "teacher hasn't set up teams yet" apart from "teacher's real teams
   // just happen to be named Team Red/Team Blue" (a perfectly normal thing to actually want), which
@@ -323,6 +390,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     setTeamNames(DEFAULT_TEAM_NAMES.slice());
     setTeamColors([0, 1, 2, 3, 4]);
     setTeamMascots([null, null, null, null, null]);
+    setTeamRosterIds([null, null, null, null, null]);
     setTeamsUntouched(true);
     setTeams(ts => ts.map((t, i) => ({
       ...t,
@@ -346,20 +414,21 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
   // turnCorrectRef pattern. Needed because two roster cards tapped in quick succession fire
   // before React re-renders, so reading the plain state variables for index math in the second
   // call would see stale, pre-first-toggle values and corrupt the result.
-  const teamSlotsRef = useRef({ names: teamNames, colors: teamColors, mascots: teamMascots, count: numTeams });
+  const teamSlotsRef = useRef({ names: teamNames, colors: teamColors, mascots: teamMascots, rosterIds: teamRosterIds, count: numTeams });
   useEffect(() => {
-    teamSlotsRef.current = { names: teamNames, colors: teamColors, mascots: teamMascots, count: numTeams };
-  }, [teamNames, teamColors, teamMascots, numTeams]);
+    teamSlotsRef.current = { names: teamNames, colors: teamColors, mascots: teamMascots, rosterIds: teamRosterIds, count: numTeams };
+  }, [teamNames, teamColors, teamMascots, teamRosterIds, numTeams]);
 
   const toggleRosterTeam = (entry: TeamRosterEntry) => {
     const cap = isPaid ? 5 : FREE_PLAN_LIMITS.maxTeams;
-    const { names, colors, mascots, count } = teamSlotsRef.current;
+    const { names, colors, mascots, rosterIds, count } = teamSlotsRef.current;
     const key = entry.name.trim().toLowerCase();
     const activeIdx = names.slice(0, count).findIndex(n => n.trim().toLowerCase() === key);
 
     let nextNames = [...names];
     let nextColors = [...colors];
     let nextMascots = [...mascots];
+    let nextRosterIds = [...rosterIds];
     let nextCount = count;
     // Whether the result still counts as an untouched blank slate — true again only via the
     // nextCount===0 fallback below (which lands back on the real defaults); every other outcome
@@ -372,6 +441,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
         nextNames[i] = nextNames[i + 1];
         nextColors[i] = nextColors[i + 1];
         nextMascots[i] = nextMascots[i + 1];
+        nextRosterIds[i] = nextRosterIds[i + 1];
       }
       nextCount = count - 1;
       // The shift above leaves the now-unused trailing slot holding whatever it shifted down from
@@ -382,6 +452,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
       nextNames[nextCount] = DEFAULT_TEAM_NAMES[nextCount];
       nextColors[nextCount] = nextCount;
       nextMascots[nextCount] = null;
+      nextRosterIds[nextCount] = null;
       // Untapping a class's only real team would otherwise leave 0 active teams — a state the
       // "how many teams?" buttons above can never produce themselves, and nothing downstream
       // (handleSetup, game-select) expects. Land back on the normal untouched defaults instead of
@@ -390,6 +461,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
         nextNames = DEFAULT_TEAM_NAMES.slice();
         nextColors = [0, 1, 2, 3, 4];
         nextMascots = [null, null, null, null, null];
+        nextRosterIds = [null, null, null, null, null];
         nextCount = 2;
         nextUntouched = true;
       }
@@ -407,10 +479,12 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
         nextNames = DEFAULT_TEAM_NAMES.slice();
         nextColors = [0, 1, 2, 3, 4];
         nextMascots = [null, null, null, null, null];
+        nextRosterIds = [null, null, null, null, null];
         nextNames[0] = entry.name;
         const idx = TEAM_COLORS.findIndex(c => c.name === entry.color.name);
         nextColors[0] = idx === -1 ? 0 : idx;
         nextMascots[0] = entry.mascot;
+        nextRosterIds[0] = entry.id;
         nextCount = 1;
       } else {
         if (count >= cap) return;
@@ -418,14 +492,16 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
         const idx = TEAM_COLORS.findIndex(c => c.name === entry.color.name);
         nextColors[count] = idx === -1 ? count : idx;
         nextMascots[count] = entry.mascot;
+        nextRosterIds[count] = entry.id;
         nextCount = count + 1;
       }
     }
 
-    teamSlotsRef.current = { names: nextNames, colors: nextColors, mascots: nextMascots, count: nextCount };
+    teamSlotsRef.current = { names: nextNames, colors: nextColors, mascots: nextMascots, rosterIds: nextRosterIds, count: nextCount };
     setTeamNames(nextNames);
     setTeamColors(nextColors);
     setTeamMascots(nextMascots);
+    setTeamRosterIds(nextRosterIds);
     setNumTeams(nextCount);
     setTeamsUntouched(nextUntouched);
   };
@@ -454,10 +530,21 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
       id: i, name, color: TEAM_COLORS[teamColors[i] ?? i], mascot: teamMascots[i] ?? null,
       score: existingScores[name] ?? 0,
     }));
+    const currentRosterIds = teamRosterIds.slice(0, numTeams);
     setRosterSaveStatus("saving");
-    upsertTeamRoster(classId, currentTeams)
-      .then(merged => {
-        setTeamRoster(merged);
+    upsertTeamRoster(classId, currentTeams, currentRosterIds)
+      .then(({ roster, resolvedIds }) => {
+        setTeamRoster(roster);
+        // Write the resolved ids (including any freshly created for a slot that had none) back
+        // into per-slot state, so the NEXT edit updates these same rows instead of matching by
+        // name alone again — this is what stops a slot from drifting to a fresh duplicate entry
+        // every time it's renamed.
+        setTeamRosterIds(prev => {
+          const next = [...prev];
+          resolvedIds.forEach((id, i) => { next[i] = id; });
+          teamSlotsRef.current = { ...teamSlotsRef.current, rosterIds: next };
+          return next;
+        });
         setRosterSaveStatus("saved");
         setTimeout(() => setRosterSaveStatus("idle"), 1400);
       })
@@ -522,7 +609,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     setTeamsSaveStatus("saving");
     Promise.all([
       saveTeams(classId, teams),
-      upsertTeamRoster(classId, teams).then(setTeamRoster),
+      upsertTeamRoster(classId, teams).then(({ roster }) => setTeamRoster(roster)),
     ])
       .then(() => {
         setTeamsSaveStatus("saved");
@@ -640,7 +727,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
         minefieldGridData,
         gameState: serializeStateRef.current?.() ?? null,
       });
-      upsertTeamRoster(classId, teams).then(setTeamRoster).catch(() => {});
+      upsertTeamRoster(classId, teams).then(({ roster }) => setTeamRoster(roster)).catch(() => {});
       setSaveStatus("saved");
       setTimeout(() => { setSaveStatus("idle"); setScreen("classes"); }, 900);
     } catch {
@@ -850,7 +937,11 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
       score: existingScores[name] ?? 0,
     }));
     setTeams(builtTeams);
-    if (activeClassId) upsertTeamRoster(activeClassId, builtTeams).then(setTeamRoster).catch(() => {});
+    if (activeClassId) {
+      upsertTeamRoster(activeClassId, builtTeams, teamRosterIds.slice(0, numTeams))
+        .then(({ roster }) => setTeamRoster(roster))
+        .catch(() => {});
+    }
     // A pending lesson topic means the teacher arrived here via the Lesson Plan index (topic
     // already fixed before this screen was ever reached) — send them into that lesson's slideshow
     // instead of the usual game-select.
@@ -878,7 +969,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     setSelectedTopics([]);
   };
 
-  const startGame = (mode: GameMode) => {
+  const startGame = async (mode: GameMode) => {
     setSelectedGame(mode);
     setLoadingGame(true);
     setLoadError("");
@@ -888,7 +979,10 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     setPaused(false);
 
     try {
-      const selectedEntries = getSelectedTopicEntries(selectedTopics);
+      // The one place this file ever needs the actual question content, not just topic metadata —
+      // loaded on demand right here instead of a top-level import (see the import comment above).
+      const { TOPIC_LIBRARY } = await import("./data/topics");
+      const selectedEntries = getSelectedTopicEntries(selectedTopics, TOPIC_LIBRARY);
       if (selectedEntries.length === 0) {
         setLoadError("Topic data not found.");
         setLoadingGame(false);
@@ -1224,12 +1318,16 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
   // every lesson) before the actual slideshow ("lessonplan-play" below) ever renders.
   if (screen === "lessonplan") return (
     <>
-      <LessonPlanScreen
-        onBack={() => setScreen("welcome")}
-        theme={theme}
-        onOpenLearn={() => { setLearnFilter(null); setLearnReturnTo("welcome"); setScreen("learn"); }}
-        onSelectTopic={topicId => { setPendingLessonTopicId(topicId); setScreen("team-setup"); }}
-      />
+      <Sentry.ErrorBoundary fallback={<GameCrashFallback name="Lesson Plans" message="We've been notified. Try again, or head back to the welcome screen." buttonLabel="Back to Welcome" onBack={() => setScreen("welcome")} />}>
+        <Suspense fallback={<GameLoadingFallback name="Lesson Plans" />}>
+          <LessonPlanScreen
+            onBack={() => setScreen("welcome")}
+            theme={theme}
+            onOpenLearn={() => { setLearnFilter(null); setLearnReturnTo("welcome"); setScreen("learn"); }}
+            onSelectTopic={topicId => { setPendingLessonTopicId(topicId); setScreen("team-setup"); }}
+          />
+        </Suspense>
+      </Sentry.ErrorBoundary>
       <FeedbackButton />
       <BrandBadge isPaid={isPaid} />
     </>
@@ -1244,23 +1342,30 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     if (!pendingTopic) { setScreen("lessonplan"); return null; }
     return (
       <>
-        <LessonPlanSlideshow
+        <Sentry.ErrorBoundary
           key={pendingTopic.id}
-          topic={pendingTopic}
-          theme={theme}
-          teams={teams}
-          onBack={() => { setPendingLessonTopicId(null); setScreen("lessonplan"); }}
-          onPlayGameForTopic={(topicId) => {
-            setSelectedTopics([topicId]);
-            const opt = getTopicOption(topicId);
-            if (opt?.level) setLevel(opt.level);
-            if (opt?.focus) setFocus(opt.focus);
-            // Teams were already picked for this lesson (team-setup ran on the way in) — carry
-            // them straight into game-select instead of asking again.
-            setPendingLessonTopicId(null);
-            setScreen("game-select");
-          }}
-        />
+          fallback={<GameCrashFallback name={pendingTopic.lesson.title} message="We've been notified. Your teams are still safe — head back to the Lesson Plans list." buttonLabel="Back to Lesson Plans" onBack={() => { setPendingLessonTopicId(null); setScreen("lessonplan"); }} />}
+        >
+          <Suspense fallback={<GameLoadingFallback name={pendingTopic.lesson.title} />}>
+            <LessonPlanSlideshow
+              key={pendingTopic.id}
+              topic={pendingTopic}
+              theme={theme}
+              teams={teams}
+              onBack={() => { setPendingLessonTopicId(null); setScreen("lessonplan"); }}
+              onPlayGameForTopic={(topicId) => {
+                setSelectedTopics([topicId]);
+                const opt = getTopicOption(topicId);
+                if (opt?.level) setLevel(opt.level);
+                if (opt?.focus) setFocus(opt.focus);
+                // Teams were already picked for this lesson (team-setup ran on the way in) — carry
+                // them straight into game-select instead of asking again.
+                setPendingLessonTopicId(null);
+                setScreen("game-select");
+              }}
+            />
+          </Suspense>
+        </Sentry.ErrorBoundary>
         <FeedbackButton />
         <BrandBadge isPaid={isPaid} />
       </>
@@ -1823,21 +1928,28 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
         <div style={{ padding: "16px", maxWidth: "900px", margin: "0 auto" }}>
           <ScoreBoard teams={teams} headingFont={theme.headingFont} />
           <div style={{ background: "white", borderRadius: "20px", padding: "20px", marginTop: "16px" }}>
-            {selectedGame.id === "auction" && <AuctionGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-            {selectedGame.id === "minefield" && <MinefieldGame questions={[]} gridData={minefieldGridData} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-            {selectedGame.id === "hotseat" && <HotSeatGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-            {selectedGame.id === "spy" && <SpyAmongUsGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-            {selectedGame.id === "battleship" && <BattleshipGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-            {selectedGame.id === "vault" && <VaultHeistGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-            {selectedGame.id === "cards" && <CardShuffleGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-            {selectedGame.id === "castle" && <CastleGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-            {selectedGame.id === "hill" && <KingOfHillGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-            {selectedGame.id === "hotpotato" && <HotPotatoGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} level={hotPotatoLevel} />}
-            {selectedGame.id === "racetrack" && <RaceTrackGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-            {selectedGame.id === "whack" && <WordWhackGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-            {selectedGame.id === "rocket" && <RocketFuelGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-            {selectedGame.id === "zombie" && <ZombieSiegeGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} paused={paused} onTogglePause={() => setPaused(p => !p)} />}
-            {selectedGame.id === "orderup" && <OrderUpGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} level={orderUpLevel} paused={paused} onTogglePause={() => setPaused(p => !p)} />}
+            <Sentry.ErrorBoundary
+              key={selectedGame.id}
+              fallback={<GameCrashFallback name={selectedGame.name} message="We've been notified. Your teams and scores are still safe — pick a game to keep going." buttonLabel="Back to Choose a Game" onBack={() => setScreen("game-select")} />}
+            >
+            <Suspense fallback={<GameLoadingFallback name={selectedGame.name} />}>
+              {selectedGame.id === "auction" && <AuctionGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
+              {selectedGame.id === "minefield" && <MinefieldGame questions={[]} gridData={minefieldGridData} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
+              {selectedGame.id === "hotseat" && <HotSeatGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
+              {selectedGame.id === "spy" && <SpyAmongUsGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
+              {selectedGame.id === "battleship" && <BattleshipGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
+              {selectedGame.id === "vault" && <VaultHeistGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
+              {selectedGame.id === "cards" && <CardShuffleGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
+              {selectedGame.id === "castle" && <CastleGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
+              {selectedGame.id === "hill" && <KingOfHillGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
+              {selectedGame.id === "hotpotato" && <HotPotatoGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} level={hotPotatoLevel} />}
+              {selectedGame.id === "racetrack" && <RaceTrackGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
+              {selectedGame.id === "whack" && <WordWhackGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
+              {selectedGame.id === "rocket" && <RocketFuelGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
+              {selectedGame.id === "zombie" && <ZombieSiegeGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} paused={paused} onTogglePause={() => setPaused(p => !p)} />}
+              {selectedGame.id === "orderup" && <OrderUpGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} level={orderUpLevel} paused={paused} onTogglePause={() => setPaused(p => !p)} />}
+            </Suspense>
+            </Sentry.ErrorBoundary>
           </div>
         </div>
       </div>
