@@ -60,7 +60,11 @@ export function AuthScreen() {
         const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
         if (signInError) throw signInError;
       } else {
-        const { data, error: signUpError } = await supabase.auth.signUp({ email, password });
+        // emailRedirectTo sends the confirmation link back to the site the person signed up on (same
+        // as the Google button below) instead of always using the dashboard's Site URL — which also
+        // means signing up on a preview/branch site doesn't land on the live one. Supabase falls back
+        // to the Site URL if this origin isn't in the dashboard's Redirect URLs allow-list.
+        const { data, error: signUpError } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin } });
         if (signUpError) throw signUpError;
         // A project with email confirmation on won't return a session yet — let the teacher know
         // to check their inbox instead of silently doing nothing.
