@@ -270,7 +270,7 @@ export function LessonPlanSlideshow({ topic, theme, teams, onBack, onPlayGameFor
     const production = sampleByType(topicData.questions, "use vocabulary in a sentence", scaledCount(4, teamCount, 20));
     const speakingCount = scaledCount(3, teamCount, 20);
     const speakingTasks = (topicData.cardTasks?.length
-      ? topicData.cardTasks.slice(0, speakingCount).map(t => t.task)
+      ? [...topicData.cardTasks].sort(() => Math.random() - 0.5).slice(0, speakingCount).map(t => t.task)
       : sampleByType(topicData.questions, "speaking task", speakingCount).map(q => q.question ?? "").filter(Boolean)
     ).map(text => ({ text }));
 

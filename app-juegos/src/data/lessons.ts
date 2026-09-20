@@ -4953,7 +4953,7 @@ export const LESSONS: Record<string, Lesson> = {
 
   memory_mind_psychology: {
     title: "Memory, Mind & Psychology",
-    intro: "Talking about the mind and psychology at an advanced level combines five things: reporting what someone said (reported speech), emphasising a point with dramatic word order (inversion), imagining how a different past would have changed things (third conditional), mixing a past cause with a present result or vice versa (mixed conditional), and describing what should or must be done about the mind (modal passive).",
+    intro: "Talking about the mind and psychology at an advanced level combines five things: reporting what someone said (reported speech), emphasising a point with dramatic word order (inversion), imagining how a different past would have changed things (third conditional), mixing a past cause with a present result or vice versa (mixed conditional), and trimming a clause down to a participle (participle clauses).",
     sections: [
       {
         heading: "Useful psychology vocabulary",
@@ -5010,14 +5010,15 @@ export const LESSONS: Record<string, Lesson> = {
         ],
       },
       {
-        heading: "Describing what should be done about the mind (modal passive)",
+        heading: "Trimming a clause down to a participle (participle clauses)",
         body: [
-          "modal + be + past participle (present/future); modal + have been + past participle (past); need + gerund is a semi-passive shortcut.",
+          "Present participle (-ing) replaces a clause happening at the same time as the main action; past participle carries a passive meaning ('who was...'); 'having' + past participle (perfect participle) shows an action completed before the main one; 'not' + -ing negates a participle clause.",
         ],
         examples: [
-          "**This bias must be addressed.**",
-          "**The relapse could have been prevented** by the therapist.",
-          "**The outdated theory needs updating.**",
+          "**Feeling** very anxious, he decided to see a therapist.",
+          "**Diagnosed** with anxiety, he began treatment immediately.",
+          "**Not realising** the pattern, he repeated the same mistake.",
+          "**Having struggled** with anxiety for years, she finally found relief in therapy.",
         ],
       },
     ],
@@ -5025,13 +5026,13 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ The patient said she forget things all the time. → ✅ ...she forgot things all the time. (reported speech backshifts the tense)",
       "❌ Rarely someone forgets such a memory. → ✅ Rarely does someone forget such a memory. (inversion needs 'does' before the subject)",
       "❌ If she seek help sooner, she would have recovered faster. → ✅ If she had sought help sooner... (third conditional needs past perfect)",
-      "❌ This bias must addressed. → ✅ This bias must be addressed. (modal passive needs 'be' + past participle)",
+      "❌ Diagnosing with anxiety, he began treatment immediately. → ✅ Diagnosed with anxiety... (a passive meaning needs the past participle, not '-ing')",
     ],
   },
 
   future_of_work: {
     title: "The Future of Work",
-    intro: "Talking about the future of work at an advanced level combines five things: reporting what someone said (reported speech), emphasising a point with dramatic word order (inversion), imagining how a different past would have changed things (third conditional), mixing a past cause with a present result or vice versa (mixed conditional), and describing what should or must be done about work (modal passive).",
+    intro: "Talking about the future of work at an advanced level combines five things: reporting what someone said (reported speech), emphasising a point with dramatic word order (inversion), imagining how a different past would have changed things (third conditional), mixing a past cause with a present result or vice versa (mixed conditional), and turning a verb into a formal noun (nominalization).",
     sections: [
       {
         heading: "Useful future-of-work vocabulary",
@@ -5088,14 +5089,14 @@ export const LESSONS: Record<string, Lesson> = {
         ],
       },
       {
-        heading: "Describing what should be done about work (modal passive)",
+        heading: "Turning a verb into a formal noun (nominalization)",
         body: [
-          "modal + be + past participle (present/future); modal + have been + past participle (past); need + gerund is a semi-passive shortcut.",
+          "Many verbs have a related abstract noun that reads as more formal — common after a possessive ('s or 'of') in written or academic English about causes and effects: fail → failure, decide → decision, resist → resistance, adopt → adoption, introduce → introduction.",
         ],
         examples: [
-          "**Job insecurity must be addressed.**",
-          "**The redundancies could have been prevented** by the manager.",
-          "**The outdated system needs replacing.**",
+          "The company's **failure** to invest in training led to high turnover.",
+          "The board's **decision** to expand overseas surprised investors.",
+          "Employees' **resistance** to the new software delayed the rollout.",
         ],
       },
     ],
@@ -5103,13 +5104,13 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ The CEO said AI is transforming their industry. → ✅ ...AI was transforming their industry. (reported speech backshifts the tense)",
       "❌ Rarely a company adapts this quickly. → ✅ Rarely does a company adapt this quickly. (inversion needs 'does' before the subject)",
       "❌ If she upskill sooner, she would have found a job faster. → ✅ If she had upskilled sooner... (third conditional needs past perfect)",
-      "❌ Job insecurity must addressed. → ✅ Job insecurity must be addressed. (modal passive needs 'be' + past participle)",
+      "❌ The company's fail to invest in training led to high turnover. → ✅ ...failure to invest... (nominalization needs the noun 'failure', not the verb 'fail')",
     ],
   },
 
   relationships_modern_life: {
     title: "Relationships in Modern Life",
-    intro: "Talking about relationships in modern life at an advanced level combines five things: reporting what someone said (reported speech), emphasising a point with dramatic word order (inversion), imagining how a different past would have changed things (third conditional), mixing a past cause with a present result or vice versa (mixed conditional), and describing what should or must be done in a relationship (modal passive).",
+    intro: "Talking about relationships in modern life at an advanced level combines five things: reporting what someone said (reported speech), emphasising a point with dramatic word order (inversion), imagining how a different past would have changed things (third conditional), mixing a past cause with a present result or vice versa (mixed conditional), and avoiding repetition with short agreement phrases (ellipsis & substitution).",
     sections: [
       {
         heading: "Useful relationships vocabulary",
@@ -5166,14 +5167,14 @@ export const LESSONS: Record<string, Lesson> = {
         ],
       },
       {
-        heading: "Describing what should be done in a relationship (modal passive)",
+        heading: "Avoiding repetition with short agreement phrases (ellipsis & substitution)",
         body: [
-          "modal + be + past participle (present/future); modal + have been + past participle (past); need + gerund is a semi-passive shortcut.",
+          "'So' + auxiliary + subject agrees with an affirmative statement; 'neither' + auxiliary + subject agrees with a negative one; an auxiliary alone (did/does/is) can stand in for a verb phrase already mentioned, instead of repeating it.",
         ],
         examples: [
-          "**This issue must be addressed.**",
-          "**The breakup could have been prevented** by the counsellor.",
-          "**The old pattern needs breaking.**",
+          "He wanted to talk it through, and **so did** she.",
+          "She hadn't forgiven him, and **neither had** he.",
+          "He said he'd change, and he **did**.",
         ],
       },
     ],
@@ -5181,13 +5182,13 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ James admitted he is not ready to commit. → ✅ James admitted he was not ready to commit. (reported speech backshifts the tense)",
       "❌ Rarely a relationship survives such distance. → ✅ Rarely does a relationship survive such distance. (inversion needs 'does' before the subject)",
       "❌ If they communicate better, they would have avoided the breakup. → ✅ If they had communicated better... (third conditional needs past perfect)",
-      "❌ This issue must addressed. → ✅ This issue must be addressed. (modal passive needs 'be' + past participle)",
+      "❌ She wants a serious relationship, and so is he. → ✅ ...and so does he. (present simple substitution needs 'does', not 'is')",
     ],
   },
 
   crime_and_justice: {
     title: "Crime & Justice",
-    intro: "Talking about crime and justice at an advanced level combines five things: reporting what someone said (reported speech), emphasising a point with dramatic word order (inversion), imagining how a different past would have changed things (third conditional), mixing a past cause with a present result or vice versa (mixed conditional), and describing what should or must be done about the justice system (modal passive).",
+    intro: "Talking about crime and justice at an advanced level combines five things: reporting what someone said (reported speech), emphasising a point with dramatic word order (inversion), imagining how a different past would have changed things (third conditional), mixing a past cause with a present result or vice versa (mixed conditional), and conceding a point before contradicting it (concessive clauses).",
     sections: [
       {
         heading: "Useful crime & justice vocabulary",
@@ -5244,14 +5245,14 @@ export const LESSONS: Record<string, Lesson> = {
         ],
       },
       {
-        heading: "Describing what should be done about justice (modal passive)",
+        heading: "Conceding a point before contradicting it (concessive clauses)",
         body: [
-          "modal + be + past participle (present/future); modal + have been + past participle (past); need + gerund is a semi-passive shortcut.",
+          "'However' + adjective + subject + verb; 'Despite' + gerund or noun (never a full clause); 'Even though' + a full clause; 'No matter how' + adverb + subject + verb — all set up a fact that makes the main clause surprising.",
         ],
         examples: [
-          "**Systemic bias must be addressed.**",
-          "**The wrongful conviction could have been prevented** by the defence.",
-          "**The old system needs reforming.**",
+          "**However** thorough the investigation was, key evidence was overlooked.",
+          "**Despite having** a strong alibi, he was still convicted.",
+          "**Even though** the evidence was weak, the jury found him guilty.",
         ],
       },
     ],
@@ -5259,13 +5260,13 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ The lawyer claimed the system is failing young offenders. → ✅ ...the system was failing young offenders. (reported speech backshifts the tense)",
       "❌ Rarely a court overturns a conviction this quickly. → ✅ Rarely does a court overturn a conviction this quickly. (inversion needs 'does' before the subject)",
       "❌ If the police investigate more carefully, they would have avoided the wrongful conviction. → ✅ If the police had investigated... (third conditional needs past perfect)",
-      "❌ Systemic bias must addressed. → ✅ Systemic bias must be addressed. (modal passive needs 'be' + past participle)",
+      "❌ Despite he had a strong alibi, he was still convicted. → ✅ Despite having a strong alibi... ('despite' takes a gerund/noun, not a full clause)",
     ],
   },
 
   health_healthcare_systems: {
     title: "Health & Healthcare Systems",
-    intro: "Talking about healthcare systems at an advanced level combines five things: reporting what someone said (reported speech), emphasising a point with dramatic word order (inversion), imagining how a different past would have changed things (third conditional), mixing a past cause with a present result or vice versa (mixed conditional), and describing what should or must be done about healthcare (modal passive).",
+    intro: "Talking about healthcare systems at an advanced level combines five things: reporting what someone said (reported speech), emphasising a point with dramatic word order (inversion), imagining how a different past would have changed things (third conditional), mixing a past cause with a present result or vice versa (mixed conditional), and packing a reason into a phrase with 'with' (absolute constructions).",
     sections: [
       {
         heading: "Useful healthcare-systems vocabulary",
@@ -5322,14 +5323,14 @@ export const LESSONS: Record<string, Lesson> = {
         ],
       },
       {
-        heading: "Describing what should be done about healthcare (modal passive)",
+        heading: "Packing a reason into a phrase with 'with' (absolute constructions)",
         body: [
-          "modal + be + past participle (present/future); modal + have been + past participle (past); need + gerund is a semi-passive shortcut.",
+          "'With' + noun + past participle/present participle/adjective packs a reason or accompanying circumstance into one phrase, replacing a full 'because' or 'as' clause — the past participle carries a passive meaning ('which was...').",
         ],
         examples: [
-          "**Health inequality must be addressed.**",
-          "**The complication could have been prevented** by the surgeon.",
-          "**The old system needs reforming.**",
+          "**With** hospitals **overwhelmed**, doctors had to prioritise the most urgent cases.",
+          "**With** funding **cut**, the hospital struggled to hire staff.",
+          "**With** no beds **available**, patients were sent to other hospitals.",
         ],
       },
     ],
@@ -5337,7 +5338,7 @@ export const LESSONS: Record<string, Lesson> = {
       "❌ The doctor claimed the system is failing rural patients. → ✅ ...the system was failing rural patients. (reported speech backshifts the tense)",
       "❌ Rarely a hospital treats so many patients this efficiently. → ✅ Rarely does a hospital treat so many patients this efficiently. (inversion needs 'does' before the subject)",
       "❌ If the doctors diagnose the illness sooner, they would have saved his life. → ✅ If the doctors had diagnosed... (third conditional needs past perfect)",
-      "❌ Health inequality must addressed. → ✅ Health inequality must be addressed. (modal passive needs 'be' + past participle)",
+      "❌ With hospitals overwhelming, doctors had to prioritise the most urgent cases. → ✅ With hospitals overwhelmed... (a passive meaning needs the past participle, not '-ing')",
     ],
   },
 
@@ -7412,12 +7413,12 @@ export const LESSONS: Record<string, Lesson> = {
         ],
       },
       {
-        heading: "Advanced passive — modal and modal perfect passive",
-        body: ["modal + be + past participle (present/future obligation or possibility); modal + have been + past participle (a judgement or guess about the past)."],
+        heading: "Softening a claim without naming who holds it — hedging language",
+        body: ["'It is/was + adjective or participle + that...', 'There is a tendency/reason for X to...', and modal + 'be argued/believed/thought' all distance the writer from a claim — common in cautious, academic-style writing about something unverified."],
         examples: [
-          "Fake accounts **must be removed** by platforms.",
-          "The spread of misinformation **could have been prevented** by the platform.",
-          "The outdated policy **needs reforming**.",
+          "**It is often assumed that** headlines are accurate.",
+          "**It could be argued that** regulation is overdue.",
+          "**It is widely believed that** the platform knew about the problem.",
         ],
       },
     ],
