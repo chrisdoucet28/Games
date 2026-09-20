@@ -138,6 +138,17 @@ const GAME_OVERRIDES: Partial<Record<string, Partial<Record<MusicContext, string
     gameplay: `${MEDIA_BASE}/music/spy-gameplay.mp3`,
     tension: `${MEDIA_BASE}/music/spy-tension.mp3`,
   },
+  // Tension-only — Bounty Board's Western "Saloon Standoff" track plays once the round is live
+  // (teams writing, bounties being claimed); the shared gameplay track covers the intro, so the
+  // music audibly changes when play starts.
+  bounty: {
+    tension: `${MEDIA_BASE}/music/bounty-tension.mp3`,
+  },
+  // Tension-only — Word Relay's "Curious Case" detective-style track runs for the whole question-
+  // asking stretch (every phase between the welcome screen and the final results).
+  relay: {
+    tension: `${MEDIA_BASE}/music/relay-tension.mp3`,
+  },
 };
 
 function resolveSrc(ctx: MusicContext, gameId: string | null): string {
