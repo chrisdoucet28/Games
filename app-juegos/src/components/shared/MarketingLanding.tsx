@@ -1,6 +1,6 @@
 import { GAME_MODES, GAME_ICONS } from "../../data/constants";
 import { LESSON_TOPICS } from "../../data/learnTopics";
-import { PPPDiagram } from "./PPPDiagram";
+import { GameCategoryGuide } from "./GameCategoryGuide";
 import { Icon, type IconName } from "./Icon";
 
 type Props = { onSignUp: () => void; onLogIn: () => void };
@@ -180,9 +180,9 @@ export function MarketingLanding({ onSignUp, onLogIn }: Props) {
         </div>
       </Section>
 
-      {/* PPP diagram */}
-      <Section title="Ordered by how much speaking they ask for" subtitle="Pre-teach with a Learn lesson, then play left to right.">
-        <PPPDiagram variant="full" />
+      {/* Games grouped by what a teacher needs (same blocks as the in-app game-select page) */}
+      <Section title="Pick a game by what you need" subtitle="Every game is filed under the job it does — no guessing which one fits today's lesson.">
+        <GameCategoryGuide />
       </Section>
 
       {/* Feature grid */}

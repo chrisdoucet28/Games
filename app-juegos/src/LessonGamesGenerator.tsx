@@ -3,8 +3,8 @@ import * as Sentry from "@sentry/react";
 import { TeamIcon, MASCOT_ICON_BY_EMOJI } from "./components/shared/TeamIcon";
 import type { Team, GameMode, QuestionData, SavedClass, Subscription, TeamRosterEntry } from "./types";
 import { TEAM_COLORS, GAME_MODES, GAME_ICONS, MASCOT_OPTIONS, LEVELS_META, FREE_PLAN_LIMITS, FREE_LAUNCH_ALL_PREMIUM } from "./data/constants";
-import { getGameTier } from "./data/pppTiers";
-import { PPPDiagram } from "./components/shared/PPPDiagram";
+import { orderedGameModes } from "./data/gameCategories";
+import { GameSelectPanel } from "./components/shared/GameSelectPanel";
 // TOPIC_OPTIONS (lightweight metadata, needed immediately for topic-select) lives in its own
 // module now, separate from topics.ts's TOPIC_LIBRARY (the ~5MB actual question content) — see
 // data/topicOptions.ts's header comment. TOPIC_LIBRARY itself is loaded via a dynamic import()
@@ -28,7 +28,6 @@ import { ThemeAmbience } from "./components/shared/ThemeAmbience";
 import { FeedbackButton } from "./components/shared/FeedbackButton";
 import { BrandBadge } from "./components/shared/BrandBadge";
 import { Icon, type IconName } from "./components/shared/Icon";
-import { IconBadge } from "./components/shared/IconBadge";
 import { MascotIcon } from "./components/shared/MascotArt";
 import { saveProgress, clearProgress, listClasses, createClass, upsertTeamRoster, deleteFromTeamRoster, saveTeams } from "./lib/classes";
 import { isPaidStatus } from "./lib/subscription";
@@ -651,16 +650,19 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
   const playRandomGame = () => {
     if (loadingGame || randomSpinIndex !== null) return;
 
-    const targetIndex = Math.floor(Math.random() * GAME_MODES.length);
-    const totalSteps = GAME_MODES.length * 3 + targetIndex;
+    // Steps through the games in on-screen order (grouped by block), not GAME_MODES order — the
+    // highlight index is compared against that same order in GameSelectPanel.
+    const games = orderedGameModes();
+    const targetIndex = Math.floor(Math.random() * games.length);
+    const totalSteps = games.length * 3 + targetIndex;
 
     const runStep = (step: number) => {
-      setRandomSpinIndex(step % GAME_MODES.length);
+      setRandomSpinIndex(step % games.length);
 
       if (step >= totalSteps) {
         randomSpinTimeoutRef.current = window.setTimeout(() => {
           setRandomSpinIndex(null);
-          startGame(GAME_MODES[targetIndex]);
+          startGame(games[targetIndex]);
         }, 500);
         return;
       }
@@ -2010,39 +2012,17 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
           </button>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: "14px", marginTop: "20px" }}>
-          {GAME_MODES.map((g, i) => {
-            const isSpinLit = randomSpinIndex === i;
-            const tier = getGameTier(g.id);
-            return (
-              <div
-                key={g.id}
-                onClick={() => !loadingGame && randomSpinIndex === null && startGame(g)}
-                style={{
-                  background: isSpinLit ? `${g.color}1A` : "white",
-                  border: `3px solid ${g.color}`,
-                  borderRadius: "18px",
-                  padding: "20px",
-                  cursor: randomSpinIndex === null ? "pointer" : "default",
-                  transition: "transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease",
-                  transform: isSpinLit ? "scale(1.06)" : "scale(1)",
-                  boxShadow: isSpinLit ? `0 0 0 4px ${g.color}55, 0 10px 24px ${g.color}55` : "none"
-                }}
-              >
-                <div style={{ marginBottom: "10px" }}><IconBadge icon={GAME_ICONS[g.id]} color={g.color} size={52} /></div>
-                <div style={{ fontWeight: "900", fontSize: "17px", color: theme.heroBg[0], marginBottom: "4px", fontFamily: theme.headingFont }}>{g.name}</div>
-                <div style={{ fontSize: "13px", color: "#6B7280", marginBottom: "8px" }}>{g.desc}</div>
-                <div style={{ fontSize: "12px", color: g.color, fontWeight: "700", lineHeight: 1.4, borderTop: `1px solid ${g.color}33`, paddingTop: "8px", display: "flex", alignItems: "center", gap: "6px" }}>
-                  {tier && <span title={tier.label} style={{ width: "8px", height: "8px", borderRadius: "50%", background: tier.color, flexShrink: 0 }} />}
-                  <Icon name="mic" size={13} /> {g.tag}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        <PPPDiagram variant="compact" />
       </div>
+
+      {/* Games grouped by the job a teacher needs done (data/gameCategories.ts), with a checklist
+          beside them — wider than the 760px column above so the sidebar has room. */}
+      <div style={{ maxWidth: "1120px", margin: "28px auto 0" }}>
+        <GameSelectPanel
+          theme={theme} loadingGame={loadingGame} randomSpinIndex={randomSpinIndex}
+          onPick={g => startGame(g)}
+        />
+      </div>
+      <div style={{ height: "50px" }} />
       <FeedbackButton />
       <BrandBadge isPaid={isPaid} />
     </div>
