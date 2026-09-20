@@ -16,6 +16,44 @@ function isInAppBrowser(): boolean {
   return /FBAN|FBAV|Instagram/i.test(navigator.userAgent || "");
 }
 
+// Supabase's own error text is sometimes empty, a raw "{}", or aimed at developers ("Error sending
+// confirmation email" as a 500). This turns whatever came back into something a teacher or student
+// can act on; readable messages ("Invalid login credentials", "Password should be at least 6
+// characters") pass through unchanged.
+function friendlyAuthError(err: unknown, mode: Mode): string {
+  const e = (err ?? {}) as { message?: unknown; status?: unknown; code?: unknown };
+  const msg = typeof e.message === "string" ? e.message.trim() : "";
+  const code = typeof e.code === "string" ? e.code : "";
+  const status = typeof e.status === "number" ? e.status : 0;
+  if (code === "over_email_send_rate_limit" || /rate limit/i.test(msg)) {
+    return "Too many emails were requested. Please wait a few minutes and try again.";
+  }
+  if (/email not confirmed/i.test(msg)) {
+    return "This email hasn't been confirmed yet. Check your inbox (and spam folder) for the confirmation link.";
+  }
+  if (mode === "sign-up" && (status >= 500 || code === "unexpected_failure" || /error sending/i.test(msg))) {
+    return "We couldn't send your confirmation email right now. Please try again in a few minutes.";
+  }
+  if (!msg || msg.startsWith("{") || status >= 500) return "Something went wrong. Please try again in a moment.";
+  return msg;
+}
+
+// A confirmation (or any email) link that can't be used comes back to the site as
+// "#error=access_denied&error_code=otp_expired&…" in the address — most often because the link was
+// already clicked once (it's single-use, and the first click already signed the person in) or is
+// old. Supabase's sign-in handling ignores it, so without this the person just lands on the plain
+// signed-out page with no idea what happened. Captured once when this file loads (before anything
+// can tidy the address) and shown by the first AuthScreen that mounts.
+function readLinkProblem(): string | null {
+  if (typeof window === "undefined") return null;
+  const params = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+  if (!params.get("error") && !params.get("error_code")) return null;
+  return params.get("error_code") === "otp_expired"
+    ? "That confirmation link was already used or has expired. If you've already confirmed your email, log in below. If not, sign up again and we'll send you a fresh link."
+    : "That link didn't work. Try logging in below with your email and password.";
+}
+let pendingLinkProblem: string | null = readLinkProblem();
+
 const FOOTER_LINKS = (
   <div style={{ display: "flex", gap: "16px", justifyContent: "center", flexWrap: "wrap", marginTop: "20px" }}>
     <a href="/learn" style={{ color: "#7DB8DB", fontSize: "12px", textDecoration: "none" }}>Learn Lessons</a>
@@ -31,22 +69,38 @@ export function AuthScreen() {
   // verification flags a homepage whose dominant visible content is credential input fields as
   // "behind a login page" even when descriptive text sits above them; the actual email/password
   // form (and the Google button) only renders once "Log In" or "Sign Up" is clicked below.
-  const [showForm, setShowForm] = useState(false);
+  // Someone arriving from a used/expired email link goes straight to the log-in form with the
+  // explanation showing, instead of the marketing landing with no clue why they aren't signed in.
+  const [notice, setNotice] = useState<string | null>(pendingLinkProblem);
+  const [showForm, setShowForm] = useState(pendingLinkProblem !== null);
   const [mode, setMode] = useState<Mode>("sign-in");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [confirmSent, setConfirmSent] = useState(false);
+  // Set when a sign-up used an email that already has a confirmed account — the notice then offers
+  // a one-tap switch to Log In.
+  const [existingAccount, setExistingAccount] = useState(false);
   const [inAppBrowser] = useState(() => isInAppBrowser());
 
   useEffect(() => {
     document.title = !showForm ? "ClassCade" : mode === "sign-in" ? "Log In - ClassCade" : "Sign Up - ClassCade";
   }, [showForm, mode]);
 
+  // Consumed once per page load: clear the error out of the address bar (a refresh shouldn't show
+  // it again) and make sure a later logout → AuthScreen doesn't replay the old notice.
+  useEffect(() => {
+    if (pendingLinkProblem === null) return;
+    pendingLinkProblem = null;
+    window.history.replaceState(null, "", window.location.pathname + window.location.search);
+  }, []);
+
   const openForm = (m: Mode) => {
     setMode(m);
     setError(null);
+    setNotice(null);
+    setExistingAccount(false);
     setConfirmSent(false);
     setShowForm(true);
   };
@@ -54,6 +108,8 @@ export function AuthScreen() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setNotice(null);
+    setExistingAccount(false);
     setLoading(true);
     try {
       if (mode === "sign-in") {
@@ -66,12 +122,21 @@ export function AuthScreen() {
         // to the Site URL if this origin isn't in the dashboard's Redirect URLs allow-list.
         const { data, error: signUpError } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin } });
         if (signUpError) throw signUpError;
-        // A project with email confirmation on won't return a session yet — let the teacher know
-        // to check their inbox instead of silently doing nothing.
-        if (data.user && !data.session) setConfirmSent(true);
+        if (data.user && data.user.identities && data.user.identities.length === 0) {
+          // Supabase deliberately answers "success" for an email that already has an account (so
+          // sign-up can't be used to probe who's registered) but sends no email — the only tell is
+          // an empty identities list. Say so, instead of "check your email" for an email that never
+          // comes.
+          setExistingAccount(true);
+          setNotice("You already have a ClassCade account with this email.");
+        } else if (data.user && !data.session) {
+          // A project with email confirmation on won't return a session yet — let the person know
+          // to check their inbox instead of silently doing nothing.
+          setConfirmSent(true);
+        }
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+      setError(friendlyAuthError(err, mode));
     } finally {
       setLoading(false);
     }
@@ -115,7 +180,7 @@ export function AuthScreen() {
                 <button
                   key={m}
                   type="button"
-                  onClick={() => { setMode(m); setError(null); setConfirmSent(false); }}
+                  onClick={() => { setMode(m); setError(null); setNotice(null); setExistingAccount(false); setConfirmSent(false); }}
                   style={{
                     flex: 1, padding: "10px", borderRadius: "9px", border: "none", cursor: "pointer",
                     fontWeight: "800", fontSize: "14px",
@@ -128,9 +193,33 @@ export function AuthScreen() {
               ))}
             </div>
 
+            {notice && (
+              <div role="status" style={{ background: "rgba(252,211,77,0.14)", border: "1px solid rgba(252,211,77,0.4)", borderRadius: "12px", padding: "12px 14px", marginBottom: "16px", color: "#FDE68A", fontSize: "13.5px", lineHeight: 1.55 }}>
+                {notice}
+                {existingAccount && (
+                  <>
+                    <div style={{ marginTop: "4px", color: "#FEF3C7" }}>If you signed up with Google before, use the Continue with Google button below.</div>
+                    <button
+                      type="button"
+                      onClick={() => { setMode("sign-in"); setNotice(null); setExistingAccount(false); setPassword(""); }}
+                      style={{ marginTop: "10px", background: "linear-gradient(135deg,#F59E0B,#D97706)", color: "white", border: "none", borderRadius: "10px", padding: "9px 16px", fontSize: "13px", fontWeight: 800, cursor: "pointer" }}
+                    >
+                      Log in instead
+                    </button>
+                  </>
+                )}
+              </div>
+            )}
+
             {confirmSent ? (
-              <div style={{ color: "#BEF264", fontSize: "14px", lineHeight: 1.6, textAlign: "center", padding: "12px 0", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}>
-                <Icon name="check" size={16} /> Check your email to confirm your account, then log in.
+              <div style={{ color: "#BEF264", fontSize: "14px", lineHeight: 1.6, textAlign: "center", padding: "12px 0" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", fontWeight: 800 }}>
+                  <Icon name="check" size={16} /> Check your email
+                </div>
+                <div style={{ marginTop: "6px", color: "#D9F99D" }}>
+                  We sent a confirmation link to <strong>{email}</strong>. Click it and you'll be signed straight in.
+                </div>
+                <div style={{ marginTop: "6px", fontSize: "12.5px", color: "#BAE6FD" }}>Can't find it? Check your spam folder.</div>
               </div>
             ) : (
               <form onSubmit={submit}>
