@@ -16,6 +16,11 @@ const INK = "#0C1E3D";
 const SKY = "#0369A1";
 const BG = "#F0F9FF";
 
+// A round is a short lesson check, not the topic's whole question bank (a single topic can hold
+// well over 100 items) — the student picks 10, 15 or 25 and can always start another round.
+const SESSION_LENGTHS = [10, 15, 25];
+const DEFAULT_SESSION_LENGTH = 15;
+
 const FOCUS_FILTERS = [{ id: "all", label: "All" }, ...FOCUS_ORDER.map(f => ({ id: f, label: FOCUS_LABEL[f] }))];
 const TOPIC_LABEL_BY_ID: Record<string, string> = Object.fromEntries(TOPIC_OPTIONS.map(t => [t.value, t.label]));
 const SELECTABLE_TOPICS = TOPIC_OPTIONS.filter(t => t.value !== "ai");
@@ -39,6 +44,7 @@ export function PracticeScreen() {
   const [levelFilter, setLevelFilter] = useState("all");
   const [focusFilter, setFocusFilter] = useState("all");
   const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
+  const [sessionLength, setSessionLength] = useState(DEFAULT_SESSION_LENGTH);
 
   const [items, setItems] = useState<PracticeItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -56,7 +62,9 @@ export function PracticeScreen() {
   const startQuiz = async () => {
     setLoading(true);
     setScreen("quiz");
-    const pool = await getPracticeQuestions(selectedTopics);
+    // The pool is already shuffled (and interleaved across topics), so the first N is a fair random
+    // sample — a session is a quick lesson check, not the topic's entire question bank.
+    const pool = (await getPracticeQuestions(selectedTopics)).slice(0, sessionLength);
     setItems(pool);
     setCurrentIndex(0);
     setCorrectCount(0);
@@ -93,6 +101,7 @@ export function PracticeScreen() {
             focusFilter={focusFilter} setFocusFilter={setFocusFilter}
             filteredTopics={filteredTopics}
             selectedTopics={selectedTopics} toggleTopic={toggleTopic}
+            sessionLength={sessionLength} setSessionLength={setSessionLength}
             onStart={startQuiz}
           />
         )}
@@ -131,10 +140,11 @@ interface PracticePickerProps {
   focusFilter: string; setFocusFilter: (v: string) => void;
   filteredTopics: typeof TOPIC_OPTIONS;
   selectedTopics: string[]; toggleTopic: (v: string) => void;
+  sessionLength: number; setSessionLength: (n: number) => void;
   onStart: () => void;
 }
 
-function PracticePicker({ levelFilter, setLevelFilter, focusFilter, setFocusFilter, filteredTopics, selectedTopics, toggleTopic, onStart }: PracticePickerProps) {
+function PracticePicker({ levelFilter, setLevelFilter, focusFilter, setFocusFilter, filteredTopics, selectedTopics, toggleTopic, sessionLength, setSessionLength, onStart }: PracticePickerProps) {
   return (
     <div>
       <div style={{ marginBottom: "16px" }}>
@@ -155,6 +165,15 @@ function PracticePicker({ levelFilter, setLevelFilter, focusFilter, setFocusFilt
             <button key={f.id} onClick={() => setFocusFilter(f.id)} style={chipStyle(focusFilter === f.id, SKY)}>
               {f.label}
             </button>
+          ))}
+        </div>
+      </div>
+
+      <div style={{ marginBottom: "20px" }}>
+        <div style={{ color: "#6B7280", fontSize: "12px", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: "8px" }}>Questions per round</div>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+          {SESSION_LENGTHS.map(n => (
+            <button key={n} onClick={() => setSessionLength(n)} style={chipStyle(sessionLength === n, SKY)}>{n}</button>
           ))}
         </div>
       </div>
