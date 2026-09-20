@@ -42,9 +42,11 @@ export function helpLevelColor(level: HelpLevel): string {
   return HELP_LEVEL_COLORS[level];
 }
 
-// Listed in the order they appear on the page. helpLevel for the two skill-specific blocks
-// (writing, vocabulary) is a judgment call about how much the game hands students to work from —
-// change it here if it doesn't match how you run them.
+// Blocks always appear from the MOST help (dial 1) to the LEAST (dial 5) — getGameBlocks sorts by
+// helpLevel, so changing a block's level moves it automatically everywhere (game-select page,
+// checklist, homepage guide, Surprise Me). Blocks at the same level keep the order listed here.
+// helpLevel for the two skill-specific blocks (writing, vocabulary) is a judgment call about how
+// much the game hands students to work from — change it here if it doesn't match how you run them.
 export const GAME_CATEGORIES: GameCategory[] = [
   {
     id: "understand",
@@ -68,6 +70,13 @@ export const GAME_CATEGORIES: GameCategory[] = [
     gameIds: ["hotpotato", "castle", "racetrack"],
   },
   {
+    id: "vocabulary",
+    need: "To practice vocabulary specifically",
+    blurb: "Word-focused games that get students describing and asking about words.",
+    helpLevel: 3,
+    gameIds: ["hotseat", "relay"],
+  },
+  {
     id: "handicap",
     need: "To practice making sentences, but with a handicap",
     blurb: "Students build sentences, but the game gives them something to build from.",
@@ -80,13 +89,6 @@ export const GAME_CATEGORIES: GameCategory[] = [
     blurb: "Students put sentences in writing, so everyone can see and check them.",
     helpLevel: 4,
     gameIds: ["bounty", "orderup"],
-  },
-  {
-    id: "vocabulary",
-    need: "To practice vocabulary specifically",
-    blurb: "Word-focused games that get students describing and asking about words.",
-    helpLevel: 3,
-    gameIds: ["hotseat", "relay"],
   },
   {
     id: "no_help",
@@ -131,15 +133,18 @@ let cachedBlocks: GameBlock[] | null = null;
 export function getGameBlocks(): GameBlock[] {
   if (cachedBlocks) return cachedBlocks;
   const listed = new Set<string>();
-  const blocks: GameBlock[] = GAME_CATEGORIES.map(category => ({
-    category,
-    games: category.gameIds
-      .map(id => GAME_MODES.find(g => g.id === id))
-      .filter((g): g is GameMode => {
-        if (g) listed.add(g.id);
-        return !!g;
-      }),
-  }));
+  // Array.prototype.sort is stable, so blocks sharing a help level stay in their listed order.
+  const blocks: GameBlock[] = [...GAME_CATEGORIES]
+    .sort((a, b) => a.helpLevel - b.helpLevel)
+    .map(category => ({
+      category,
+      games: category.gameIds
+        .map(id => GAME_MODES.find(g => g.id === id))
+        .filter((g): g is GameMode => {
+          if (g) listed.add(g.id);
+          return !!g;
+        }),
+    }));
 
   const uncategorized = GAME_MODES.filter(g => !listed.has(g.id));
   if (uncategorized.length > 0) {
