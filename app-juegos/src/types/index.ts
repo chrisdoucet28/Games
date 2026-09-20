@@ -141,6 +141,12 @@ export interface TeamColor {
     // teacher's own picture; org_logo_url is their school/organization's logo.
     avatar_url: string | null;
     org_logo_url: string | null;
+    // Teacher or student account. Optional only because the columns come from the student_accounts
+    // migration — a database that doesn't have it yet returns neither, and the app then treats every
+    // account as an already-decided teacher. role_chosen is false until the account has answered the
+    // one-time "teacher or student?" question; it can only be changed through the set_my_role RPC.
+    role?: "teacher" | "student";
+    role_chosen?: boolean;
     created_at: string;
     updated_at: string;
   }

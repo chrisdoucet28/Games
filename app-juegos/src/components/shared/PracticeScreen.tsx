@@ -1,9 +1,12 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { TOPIC_OPTIONS } from "../../data/topicOptions";
 import { LEVELS_META } from "../../data/constants";
 import { FOCUS_ORDER, FOCUS_LABEL } from "../../data/learnTopics";
 import { getPracticeQuestions, type PracticeItem } from "../../lib/practiceContent";
 import { setMetaDescription } from "../../lib/pageMeta";
+import { useStudentSession } from "../../hooks/useStudentSession";
+import { getStudentStats, recordPracticeRound } from "../../lib/studentProgress";
+import { BADGES, earnedBadgeIds, levelInfo, xpForRound, xpFromStats, type StudentStats } from "../../data/studentRewards";
 import { PracticeQuizCard } from "./PracticeQuizCard";
 import { Icon } from "./Icon";
 
@@ -34,16 +37,38 @@ function scoreMessage(correct: number, total: number): string {
   return "Keep practicing, you've got this!";
 }
 
+// What a signed-in student gets back after a finished round — computed by comparing their totals
+// from just before and just after it was recorded.
+type RoundReward =
+  | { status: "saving" }
+  | { status: "error" }
+  | { status: "saved"; xp: number; level: number; leveledUp: boolean; newBadgeNames: string[] };
+
 export function PracticeScreen() {
   useEffect(() => {
     document.title = "Practice — Self-Check Quiz | ClassCade";
     setMetaDescription("Practice English grammar and vocabulary on your own with an instant self-check quiz — no account needed, works great on your phone.");
   }, []);
 
+  // Everything student-specific is additive: logged out (and for teachers) this screen behaves
+  // exactly as it always has. `?topic=<id>` (used by the lesson page's "Practice this topic" link)
+  // just preselects that topic.
+  const { isStudent, loggedIn } = useStudentSession();
+  const [statsBefore, setStatsBefore] = useState<StudentStats | null>(null);
+  const [reward, setReward] = useState<RoundReward | null>(null);
+  const roundIdRef = useRef("");
+  useEffect(() => {
+    if (!isStudent) return;
+    getStudentStats().then(setStatsBefore).catch(() => {});
+  }, [isStudent]);
+
   const [screen, setScreen] = useState<"picker" | "quiz" | "summary">("picker");
   const [levelFilter, setLevelFilter] = useState("all");
   const [focusFilter, setFocusFilter] = useState("all");
-  const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
+  const [selectedTopics, setSelectedTopics] = useState<string[]>(() => {
+    const topic = new URLSearchParams(window.location.search).get("topic");
+    return topic && SELECTABLE_TOPICS.some(t => t.value === topic) ? [topic] : [];
+  });
   const [sessionLength, setSessionLength] = useState(DEFAULT_SESSION_LENGTH);
 
   const [items, setItems] = useState<PracticeItem[]>([]);
@@ -62,6 +87,9 @@ export function PracticeScreen() {
   const startQuiz = async () => {
     setLoading(true);
     setScreen("quiz");
+    setReward(null);
+    // Generated when the round STARTS so recording it twice (a re-render, a retry) can't double the XP.
+    roundIdRef.current = crypto.randomUUID();
     // The pool is already shuffled (and interleaved across topics), so the first N is a fair random
     // sample — a session is a quick lesson check, not the topic's entire question bank.
     const pool = (await getPracticeQuestions(selectedTopics)).slice(0, sessionLength);
@@ -75,11 +103,40 @@ export function PracticeScreen() {
     if (correct) setCorrectCount(c => c + 1);
   };
 
+  // Called from handleNext (not an effect on the summary screen) because React StrictMode runs
+  // effects twice in dev — this must fire exactly once per finished round. Topics come from the
+  // questions actually asked, since the round is a random slice and may not touch every topic picked.
+  const reportRound = async () => {
+    const topics = [...new Set(items.map(i => i.sourceTopic))];
+    setReward({ status: "saving" });
+    try {
+      const before = statsBefore ?? (await getStudentStats());
+      await recordPracticeRound({ id: roundIdRef.current, topics, correct: correctCount, total: items.length });
+      const after = await getStudentStats();
+      const beforeBadges = new Set(earnedBadgeIds(before));
+      const beforeLevel = levelInfo(xpFromStats(before)).level;
+      const afterLevel = levelInfo(xpFromStats(after)).level;
+      setStatsBefore(after);
+      setReward({
+        status: "saved",
+        xp: xpForRound(correctCount, items.length),
+        level: afterLevel,
+        leveledUp: afterLevel > beforeLevel,
+        newBadgeNames: BADGES.filter(b => earnedBadgeIds(after).includes(b.id) && !beforeBadges.has(b.id)).map(b => b.name),
+      });
+    } catch {
+      setReward({ status: "error" });
+    }
+  };
+
   const handleNext = () => {
     if (currentIndex + 1 >= items.length) {
       setScreen("summary");
+      if (isStudent) void reportRound();
     } else {
-      setCurrentIndex(i => i + 1);
+      // Absolute (not `i => i + 1`) so two taps landing on the same stale button set the same
+      // question instead of skipping one — or running past the end of the round.
+      setCurrentIndex(currentIndex + 1);
     }
   };
 
@@ -122,6 +179,9 @@ export function PracticeScreen() {
           <PracticeSummary
             correctCount={correctCount}
             total={items.length}
+            isStudent={isStudent}
+            loggedIn={loggedIn}
+            reward={reward}
             onPracticeAgain={startQuiz}
             onChangeTopics={() => setScreen("picker")}
           />
@@ -274,14 +334,43 @@ function PracticeQuiz({ loading, items, currentIndex, correctCount, onAnswered, 
   );
 }
 
-function PracticeSummary({ correctCount, total, onPracticeAgain, onChangeTopics }: { correctCount: number; total: number; onPracticeAgain: () => void; onChangeTopics: () => void }) {
+interface PracticeSummaryProps {
+  correctCount: number; total: number;
+  isStudent: boolean; loggedIn: boolean; reward: RoundReward | null;
+  onPracticeAgain: () => void; onChangeTopics: () => void;
+}
+
+function PracticeSummary({ correctCount, total, isStudent, loggedIn, reward, onPracticeAgain, onChangeTopics }: PracticeSummaryProps) {
   const pct = total === 0 ? 0 : Math.round((correctCount / total) * 100);
   return (
     <div style={{ textAlign: "center", background: "white", border: `3px solid ${INK}`, borderRadius: "18px", boxShadow: `5px 5px 0 ${INK}`, padding: "32px 24px" }}>
       <Icon name="trophy" size={40} color="#F59E0B" style={{ marginBottom: "10px" }} />
       <div style={{ fontSize: "32px", fontWeight: 900, color: INK }}>{correctCount} / {total}</div>
       <div style={{ fontSize: "14px", color: "#6B7280", fontWeight: 700, marginBottom: "6px" }}>{pct}% correct</div>
-      <p style={{ fontSize: "16px", fontWeight: 800, color: SKY, margin: "10px 0 24px" }}>{scoreMessage(correctCount, total)}</p>
+      <p style={{ fontSize: "16px", fontWeight: 800, color: SKY, margin: "10px 0 16px" }}>{scoreMessage(correctCount, total)}</p>
+
+      {isStudent && reward && (
+        <div style={{ background: "#FEF3C7", border: "2px solid #F59E0B", borderRadius: "14px", padding: "12px 14px", margin: "0 0 20px", fontSize: "14px", color: INK }}>
+          {reward.status === "saving" && <span style={{ fontWeight: 700 }}>Saving your progress…</span>}
+          {reward.status === "error" && <span style={{ fontWeight: 700, color: "#991B1B" }}>Couldn't save this round's progress — check your connection and try another round.</span>}
+          {reward.status === "saved" && (
+            <>
+              <div style={{ fontSize: "20px", fontWeight: 900, color: "#B45309" }}>+{reward.xp} XP</div>
+              <div style={{ fontWeight: 800, marginTop: "2px" }}>{reward.leveledUp ? `Level up! You're now level ${reward.level}` : `Level ${reward.level}`}</div>
+              {reward.newBadgeNames.map(name => (
+                <div key={name} style={{ fontWeight: 800, color: "#15803D", marginTop: "6px" }}>New badge: {name}</div>
+              ))}
+              <a href="/" style={{ display: "inline-block", marginTop: "8px", color: SKY, fontWeight: 800, fontSize: "13px", textDecoration: "none" }}>See my progress →</a>
+            </>
+          )}
+        </div>
+      )}
+      {!loggedIn && (
+        <p style={{ fontSize: "13px", color: "#4B5563", margin: "0 0 20px", lineHeight: 1.5 }}>
+          Want to earn XP, levels and badges? <a href="/" style={{ color: SKY, fontWeight: 800 }}>Log in as a student</a> to keep track of your progress.
+        </p>
+      )}
+      {loggedIn && !isStudent && <div style={{ marginBottom: "8px" }} />}
       <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
         <button onClick={onPracticeAgain} style={{ background: "linear-gradient(135deg,#F59E0B,#D97706)", color: "white", border: `3px solid ${INK}`, borderRadius: "14px", padding: "14px", fontSize: "15px", fontWeight: 900, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", minHeight: "50px" }}>
           <Icon name="shuffle" size={16} color="white" /> Practice Again

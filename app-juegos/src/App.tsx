@@ -17,6 +17,8 @@ import { OurStoryScreen } from './components/shared/OurStoryScreen';
 import { PublicLearnIndexScreen } from './components/shared/PublicLearnIndexScreen';
 import { PublicLearnLessonScreen } from './components/shared/PublicLearnLessonScreen';
 import { PracticeScreen } from './components/shared/PracticeScreen';
+import { RoleChooserScreen } from './components/shared/RoleChooserScreen';
+import { StudentHome } from './components/student/StudentHome';
 import { FREE_LAUNCH_ALL_PREMIUM } from './data/constants';
 import { Icon } from './components/shared/Icon';
 import { isMusicEnabled, setMusicEnabled, onMusicEnabledChange, stopMusic } from './lib/music';
@@ -183,6 +185,23 @@ function AuthenticatedApp() {
     return null;
   });
 
+  // Whether this account is a teacher or a student, and whether it has answered that question yet.
+  // null = the profile hasn't loaded, so nothing role-specific renders (a student never gets a
+  // flash of the teacher app). Keyed on the user id, not the session object, so a token refresh
+  // doesn't put the loading splash back up. A profile with no role columns at all (a database
+  // without the student_accounts migration) or a failed fetch both fall back to today's behavior:
+  // an already-decided teacher.
+  const userId = session?.user.id ?? null;
+  const [roleInfo, setRoleInfo] = useState<{ role: 'teacher' | 'student'; chosen: boolean } | null>(null);
+  useEffect(() => {
+    if (!userId) { setRoleInfo(null); return; }
+    let cancelled = false;
+    getProfile()
+      .then(p => { if (!cancelled) setRoleInfo({ role: p.role ?? 'teacher', chosen: p.role_chosen ?? true }); })
+      .catch(() => { if (!cancelled) setRoleInfo({ role: 'teacher', chosen: true }); });
+    return () => { cancelled = true; };
+  }, [userId]);
+
   useEffect(() => {
     if (!session) {
       // Nothing else ever silences the music on its own here — the AuthScreen/MarketingLanding
@@ -208,6 +227,32 @@ function AuthenticatedApp() {
 
   if (!session) {
     return <AuthScreen />;
+  }
+
+  if (!roleInfo) {
+    return (
+      <div style={{ minHeight: '100vh', background: '#1E1B4B', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ color: 'white', fontFamily: "'Segoe UI',system-ui,sans-serif", fontSize: '16px' }}>Loading…</div>
+      </div>
+    );
+  }
+
+  // Both the one-time chooser and the student home get the same slim top bar (log out + music
+  // mute) as the teacher app — a student never sees the teacher's welcome/plan screens.
+  if (!roleInfo.chosen || roleInfo.role === 'student') {
+    return (
+      <div>
+        <StatusBadge action="Log Out" onAction={() => supabase.auth.signOut()} theme={theme}>
+          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#22C55E', display: 'inline-block', marginRight: '6px' }} />
+          Logged in as {session.user.email}
+        </StatusBadge>
+        {!roleInfo.chosen ? (
+          <RoleChooserScreen onChosen={role => setRoleInfo({ role, chosen: true })} />
+        ) : (
+          <StudentHome onSwitchToTeacher={() => window.location.reload()} />
+        )}
+      </div>
+    );
   }
 
   // See FREE_LAUNCH_ALL_PREMIUM's comment in data/constants.ts — while it's on, this same

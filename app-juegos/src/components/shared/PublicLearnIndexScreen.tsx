@@ -1,6 +1,8 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { LESSON_TOPICS, LEVEL_ORDER, LEVEL_COLOR, FOCUS_ORDER, FOCUS_LABEL } from "../../data/learnTopics";
 import { setMetaDescription } from "../../lib/pageMeta";
+import { useStudentSession } from "../../hooks/useStudentSession";
+import { getLessonsDone } from "../../lib/studentProgress";
 import { Icon } from "./Icon";
 
 // Public, no-login-required index of every Learn lesson — reachable at /learn, linked from the
@@ -13,6 +15,15 @@ export function PublicLearnIndexScreen() {
     document.title = "Learn English — Free Grammar & Vocabulary Lessons | ClassCade";
     setMetaDescription("Free ESL lessons covering grammar, vocabulary, and themes from A1 to C1 — the same topics used in ClassCade's classroom games.");
   }, []);
+
+  // Extra UI only for a signed-in student — everyone else (and Google) sees the page exactly as
+  // before. The done-set is fetched once here and passed down, not per card.
+  const { isStudent } = useStudentSession();
+  const [doneIds, setDoneIds] = useState<Set<string>>(new Set());
+  useEffect(() => {
+    if (!isStudent) return;
+    getLessonsDone().then(m => setDoneIds(new Set(m.keys()))).catch(() => {});
+  }, [isStudent]);
 
   const byLevel = LEVEL_ORDER
     .map(level => ({ level, topics: LESSON_TOPICS.filter(t => t.meta.level === level) }))
@@ -35,7 +46,11 @@ export function PublicLearnIndexScreen() {
           <div key={group.level} style={{ marginBottom: "28px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "14px" }}>
               <span style={{ background: LEVEL_COLOR[group.level], color: "white", borderRadius: "999px", padding: "3px 12px", fontSize: "13px", fontWeight: "800" }}>{group.level}</span>
-              <span style={{ color: "#9CA3AF", fontSize: "12px", fontWeight: "700" }}>{group.topics.length} lesson{group.topics.length === 1 ? "" : "s"}</span>
+              <span style={{ color: "#9CA3AF", fontSize: "12px", fontWeight: "700" }}>
+                {isStudent
+                  ? `${group.topics.filter(t => doneIds.has(t.id)).length}/${group.topics.length} finished`
+                  : `${group.topics.length} lesson${group.topics.length === 1 ? "" : "s"}`}
+              </span>
             </div>
             {FOCUS_ORDER.filter(focus => group.topics.some(t => (t.meta.focus ?? "grammar") === focus)).map(focus => (
               <div key={focus} style={{ marginBottom: "16px" }}>
@@ -44,9 +59,14 @@ export function PublicLearnIndexScreen() {
                   {group.topics.filter(t => (t.meta.focus ?? "grammar") === focus).map(t => (
                     <a
                       key={t.id} href={`/learn/${t.id}`}
-                      style={{ textAlign: "left", background: "white", border: "2px solid rgba(3,105,161,0.2)", borderRadius: "12px", padding: "14px 16px", textDecoration: "none", display: "block" }}
+                      style={{ position: "relative", textAlign: "left", background: doneIds.has(t.id) ? "#F0FDF4" : "white", border: `2px solid ${doneIds.has(t.id) ? "#86EFAC" : "rgba(3,105,161,0.2)"}`, borderRadius: "12px", padding: "14px 16px", textDecoration: "none", display: "block" }}
                     >
-                      <div style={{ fontWeight: "800", color: "#0C1E3D", fontSize: "14px" }}>{t.lesson.title}</div>
+                      {doneIds.has(t.id) && (
+                        <span title="Finished" style={{ position: "absolute", top: "8px", right: "8px", width: "20px", height: "20px", borderRadius: "50%", background: "#22C55E", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          <Icon name="check" size={11} color="white" />
+                        </span>
+                      )}
+                      <div style={{ fontWeight: "800", color: "#0C1E3D", fontSize: "14px", paddingRight: doneIds.has(t.id) ? "22px" : 0 }}>{t.lesson.title}</div>
                     </a>
                   ))}
                 </div>
@@ -82,7 +102,7 @@ export function PublicLearnIndexScreen() {
           </a>
         </div>
 
-        <a href="/" style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginTop: "24px", color: "#0369A1", fontWeight: "700", textDecoration: "none" }}><Icon name="back" size={13} /> Back to ClassCade</a>
+        <a href="/" style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginTop: "24px", color: "#0369A1", fontWeight: "700", textDecoration: "none" }}><Icon name="back" size={13} /> {isStudent ? "Back to my progress" : "Back to ClassCade"}</a>
       </div>
     </div>
   );
