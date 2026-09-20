@@ -59,7 +59,8 @@ function formatValue(v: number): string {
   return `💰 ${v} pts`;
 }
 
-// Spoken mode only: the teacher types what the team said so the WHOLE class can read it on the
+// Hand-in-to-the-teacher mode only: teams write their sentence down (still a writing game), tell it
+// to the teacher, and the teacher types what the team wrote so the WHOLE class can read it on the
 // board, and only then rules right or wrong — the same order typing mode already gets for free
 // (the phone's submission is on screen before Correct/Wrong appear). Posting an empty field is
 // blocked so a wrong answer never becomes a bounty with nothing for the next team to correct.
@@ -112,7 +113,7 @@ function RoundEntryCard({ entry, team, answerMode, isPhoneMode, onPost, onCorrec
 
       {!ready ? (
         spoken
-          ? <PostToBoardPrompt value={draft} onChange={setDraft} onPost={() => onPost(draft.trim())} placeholder="Type what they said, so the class can read it…" />
+          ? <PostToBoardPrompt value={draft} onChange={setDraft} onPost={() => onPost(draft.trim())} placeholder="Type what the team wrote, so the class can read it…" />
           : isPhoneMode
             ? <div style={{ fontSize: "11px", fontWeight: "700", color: "#92400E", padding: "8px 0", display: "inline-flex", alignItems: "center", gap: "4px" }}><Icon name="pencil" size={11} /> Typing on their phone…</div>
             : <div style={{ fontSize: "11px", fontWeight: "700", color: "#92400E", padding: "8px 0" }}>Waiting…</div>
@@ -186,7 +187,7 @@ function BountyCard({ bounty, team, claimableTeams, answerMode, isPhoneMode, onC
           <div style={{ fontSize: "11px", fontWeight: "800", color: team?.color.dark ?? "#7F1D1D", marginBottom: "6px" }}><TeamIcon team={team} /> {team?.name} is fixing it</div>
           {!ready ? (
             spoken
-              ? <PostToBoardPrompt value={draft} onChange={setDraft} onPost={() => onPostFix(draft.trim())} placeholder="Type their fixed sentence, so the class can read it…" />
+              ? <PostToBoardPrompt value={draft} onChange={setDraft} onPost={() => onPostFix(draft.trim())} placeholder="Type the fixed sentence they wrote, so the class can read it…" />
               : isPhoneMode
                 ? <div style={{ fontSize: "11px", fontWeight: "700", color: "#991B1B", padding: "4px 0", display: "inline-flex", alignItems: "center", gap: "4px" }}><Icon name="pencil" size={11} /> Typing a fix…</div>
                 : <div style={{ fontSize: "11px", fontWeight: "700", color: "#991B1B", padding: "4px 0" }}>Waiting…</div>
@@ -495,7 +496,7 @@ export function BountyBoardGame({ questions, teams, onUpdateScore, onEnd, forceF
           <div style={{ marginBottom: "10px" }}><Icon name="sheriffStar" size={36} /></div>
           <div style={{ fontWeight: "900", fontSize: "20px", marginBottom: "10px", color: "#92400E" }}>Bounty Board</div>
           <div style={{ fontSize: "15px", lineHeight: 1.7 }}>
-            Every round, one word goes up on the board — every team writes <strong style={{ color: "#92400E" }}>their own sentence</strong> for it, at the same time.<br />
+            Every round, one word goes up on the board — every team writes <strong style={{ color: "#92400E" }}>their own sentence</strong> for it, at the same time, then hands it in for the teacher to post.<br />
             Get it wrong and it becomes a <strong style={{ color: "#B91C1C" }}>bounty</strong>: a different team can claim it and fix your exact sentence for double the points — miss it again and it's worth even more!
           </div>
         </div>
@@ -537,7 +538,7 @@ export function BountyBoardGame({ questions, teams, onUpdateScore, onEnd, forceF
                 }
               >
                 <div style={{ marginBottom: "14px" }}>
-                  <div style={{ fontSize: "12px", color: "#92400E", fontWeight: "700", marginBottom: "8px" }}>How will answers be judged?</div>
+                  <div style={{ fontSize: "12px", color: "#92400E", fontWeight: "700", marginBottom: "8px" }}>How do teams hand in their sentence?</div>
                   <div style={{ display: "flex", gap: "8px", justifyContent: "center" }}>
                     <button onClick={() => setAnswerMode("spoken")} className="bb-btn" style={{
                       padding: "6px 14px", borderRadius: "10px", fontWeight: "800", fontSize: "12px", cursor: "pointer",
@@ -545,7 +546,7 @@ export function BountyBoardGame({ questions, teams, onUpdateScore, onEnd, forceF
                       background: answerMode === "spoken" ? "rgba(146,64,14,0.15)" : "rgba(255,255,255,0.6)",
                       color: answerMode === "spoken" ? "#92400E" : "#78350F",
                       display: "inline-flex", alignItems: "center", gap: "5px",
-                    }}><Icon name="hand" size={12} /> Show your teacher</button>
+                    }}><Icon name="hand" size={12} /> Write it down, tell the teacher</button>
                     <button onClick={() => setAnswerMode("typing")} className="bb-btn" style={{
                       padding: "6px 14px", borderRadius: "10px", fontWeight: "800", fontSize: "12px", cursor: "pointer",
                       border: `2px solid ${answerMode === "typing" ? "#92400E" : "rgba(0,0,0,0.1)"}`,

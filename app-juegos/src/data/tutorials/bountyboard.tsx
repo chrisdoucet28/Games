@@ -3,7 +3,7 @@ import type { TutorialStep } from "../../types";
 
 export const BOUNTYBOARD_TUTORIAL_STEPS: TutorialStep[] = [
   {
-    narration: "Every round, ONE word goes up on the board. Every team writes their own sentence using it, all at the same time.",
+    narration: "Every round, ONE word goes up on the board. Every team WRITES their own sentence using it, all at the same time — then the teacher posts what each team wrote for the whole class to check.",
     visual: (
       <div style={{ textAlign: "center" }}>
         <div style={{ background: "#FEF3C7", border: "2px solid #D97706", borderRadius: "10px", padding: "8px 14px", display: "inline-block", fontSize: "13px", fontWeight: 700, color: "#78350F" }}>

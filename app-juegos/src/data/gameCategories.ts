@@ -105,7 +105,7 @@ export const GAME_MODALITY: Record<string, GameModality> = {
   whack: "tap", auction: "tap",
   battleship: "speak", vault: "speak", hill: "speak", hotpotato: "speak", castle: "speak", racetrack: "speak",
   minefield: "speak", rocket: "speak",
-  orderup: "write", bounty: "speak-or-write",
+  orderup: "write", bounty: "write",
   hotseat: "speak", relay: "speak",
   cards: "speak", spy: "speak", zombie: "speak",
 };
