@@ -12,7 +12,7 @@ import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
 import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
 import { RELAY_TUTORIAL_STEPS } from "../../data/tutorials/relay";
 import { playSound } from "../../lib/sounds";
-import { setMusicGame, stopMusic } from "../../lib/music";
+import { setMusicGame, setMusicContext, stopMusic } from "../../lib/music";
 import {
   generateSessionCode, openRelayChannel, closeChannel,
   type RelayPhase, type RelayStatePayload, type RelayActionPayload,
@@ -81,6 +81,12 @@ export function RelayGame({ questions, teams, onUpdateScore, onEnd, forceFinalRe
     setMusicGame("relay");
     return () => setMusicGame(null);
   }, []);
+  // Welcome screen rides the shared gameplay track; play switches to "tension" so a different
+  // track starts when the game actually begins (same idiom as Hot Seat / Bounty Board).
+  useEffect(() => {
+    if (phase === "playing") setMusicContext("tension");
+    return () => setMusicContext("gameplay");
+  }, [phase]);
 
   useEffect(() => {
     if (!forceFinalRef) return;

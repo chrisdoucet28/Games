@@ -67,7 +67,7 @@ export function PhoneBountyBoardView({ state, teamId, onAction }: Props) {
         ) : myEntry?.resolved ? (
           <div style={{ background: "#DCFCE7", border: "1px solid #86EFAC", borderRadius: "10px", padding: "10px 12px", fontSize: "12px", fontWeight: "700", color: "#166534" }}>✅ Correct! Waiting for the round to finish.</div>
         ) : state.answerMode !== "typing" ? (
-          <div style={{ fontSize: "12px", fontWeight: "700", color: "#92400E", padding: "6px 0" }}>Show your teacher your sentence when you're ready.</div>
+          <div style={{ fontSize: "12px", fontWeight: "700", color: "#92400E", padding: "6px 0" }}>Say your sentence out loud — your teacher will write it on the board.</div>
         ) : (
           <>
             <textarea
@@ -105,7 +105,7 @@ export function PhoneBountyBoardView({ state, teamId, onAction }: Props) {
                   <div style={{ fontSize: "11px", fontWeight: "800", color: "#B91C1C", marginBottom: "6px" }}>💰 {b.value} pts</div>
                   <div style={{ background: "#FEE2E2", border: "1px solid #FCA5A5", borderRadius: "8px", padding: "6px 8px", fontSize: "12px", fontWeight: "700", color: "#7F1D1D", marginBottom: "8px" }}>“{b.wrongText}”</div>
                   {state.answerMode !== "typing" ? (
-                    <div style={{ fontSize: "11px", fontWeight: "700", color: "#7F1D1D" }}>Show your teacher your fixed sentence.</div>
+                    <div style={{ fontSize: "11px", fontWeight: "700", color: "#7F1D1D" }}>Say your fixed sentence out loud — your teacher will write it on the board.</div>
                   ) : (
                     <>
                       <textarea

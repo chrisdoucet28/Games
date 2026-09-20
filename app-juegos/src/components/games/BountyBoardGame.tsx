@@ -12,7 +12,7 @@ import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
 import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
 import { BOUNTYBOARD_TUTORIAL_STEPS } from "../../data/tutorials/bountyboard";
 import { playSound } from "../../lib/sounds";
-import { setMusicGame, stopMusic } from "../../lib/music";
+import { setMusicGame, setMusicContext, stopMusic } from "../../lib/music";
 import {
   generateSessionCode, openBountyBoardChannel, closeChannel,
   type BountyBoardPhase, type BountyBoardStatePayload, type BountyBoardActionPayload,
@@ -59,24 +59,22 @@ function formatValue(v: number): string {
   return `💰 ${v} pts`;
 }
 
-// Teacher-typed record of what a team actually said/wrote — only shown in spoken mode, since
-// typing mode already has the real text on hand (the phone submission itself). Confirming with an
-// empty field is blocked so a bounty/fix never loses its whole point (nothing for the next team to
-// read and correct).
-function WrongTextPrompt({ onConfirm, onCancel }: { onConfirm: (text: string) => void; onCancel: () => void }) {
-  const [text, setText] = useState("");
+// Spoken mode only: the teacher types what the team said so the WHOLE class can read it on the
+// board, and only then rules right or wrong — the same order typing mode already gets for free
+// (the phone's submission is on screen before Correct/Wrong appear). Posting an empty field is
+// blocked so a wrong answer never becomes a bounty with nothing for the next team to correct.
+function PostToBoardPrompt({ value, onChange, onPost, placeholder }: { value: string; onChange: (text: string) => void; onPost: () => void; placeholder: string }) {
   return (
-    <div style={{ background: "white", border: "1px dashed #B45309", borderRadius: "8px", padding: "8px", marginTop: "6px" }}>
+    <div style={{ background: "white", border: "1px dashed #B45309", borderRadius: "8px", padding: "8px" }}>
       <textarea
-        value={text}
-        onChange={e => setText(e.target.value)}
-        placeholder="What did they actually say? (the next team needs this to fix it)"
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        placeholder={placeholder}
         rows={2}
         style={{ width: "100%", boxSizing: "border-box", border: "1px solid #FDE68A", borderRadius: "6px", padding: "6px 8px", fontSize: "12px", fontFamily: "inherit", resize: "vertical" }}
       />
-      <div style={{ display: "flex", gap: "6px", justifyContent: "flex-end", marginTop: "6px" }}>
-        <button onClick={onCancel} className="bb-btn" style={{ background: "none", color: "#9CA3AF", border: "1px solid #E5E7EB", borderRadius: "8px", padding: "5px 10px", fontSize: "11px", fontWeight: "700", cursor: "pointer" }}>Cancel</button>
-        <button onClick={() => onConfirm(text.trim())} disabled={!text.trim()} className="bb-btn" style={{ background: text.trim() ? "#EF4444" : "#D1D5DB", color: "white", border: "2px solid #1A1A2E", borderRadius: "8px", padding: "5px 12px", fontSize: "11px", fontWeight: "800", cursor: text.trim() ? "pointer" : "not-allowed" }}>Confirm Wrong</button>
+      <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "6px" }}>
+        <button onClick={onPost} disabled={!value.trim()} className="bb-btn" style={{ background: value.trim() ? "#B45309" : "#D1D5DB", color: "white", border: "2px solid #1A1A2E", borderRadius: "8px", padding: "5px 12px", fontSize: "11px", fontWeight: "800", cursor: value.trim() ? "pointer" : "not-allowed" }}>Post to board</button>
       </div>
     </div>
   );
@@ -86,16 +84,18 @@ function WrongTextPrompt({ onConfirm, onCancel }: { onConfirm: (text: string) =>
 // round (unlike a Bounty card, there's no claiming step here, it's always that team's own attempt).
 // Disappears once resolved OR once it's spawned an open bounty (from that point on, the Bounty
 // section is the live thing to look at for this team's entry).
-function RoundEntryCard({ entry, team, answerMode, isPhoneMode, onCorrect, onWrong }: {
+function RoundEntryCard({ entry, team, answerMode, isPhoneMode, onPost, onCorrect, onWrong }: {
   entry: BountyRoundEntry;
   team: GameProps["teams"][number] | undefined;
   answerMode: "spoken" | "typing";
   isPhoneMode: boolean;
+  onPost: (text: string) => void;
   onCorrect: () => void;
   onWrong: (text: string) => void;
 }) {
-  const [confirmingWrong, setConfirmingWrong] = useState(false);
-  const ready = answerMode === "spoken" || entry.text.trim() !== "";
+  const [draft, setDraft] = useState("");
+  const spoken = answerMode === "spoken";
+  const ready = entry.text.trim() !== "";
 
   return (
     <div style={{
@@ -111,28 +111,27 @@ function RoundEntryCard({ entry, team, answerMode, isPhoneMode, onCorrect, onWro
       </div>
 
       {!ready ? (
-        isPhoneMode
-          ? <div style={{ fontSize: "11px", fontWeight: "700", color: "#92400E", padding: "8px 0", display: "inline-flex", alignItems: "center", gap: "4px" }}><Icon name="pencil" size={11} /> Typing on their phone…</div>
-          : <div style={{ fontSize: "11px", fontWeight: "700", color: "#92400E", padding: "8px 0" }}>Waiting…</div>
+        spoken
+          ? <PostToBoardPrompt value={draft} onChange={setDraft} onPost={() => onPost(draft.trim())} placeholder="Type what they said, so the class can read it…" />
+          : isPhoneMode
+            ? <div style={{ fontSize: "11px", fontWeight: "700", color: "#92400E", padding: "8px 0", display: "inline-flex", alignItems: "center", gap: "4px" }}><Icon name="pencil" size={11} /> Typing on their phone…</div>
+            : <div style={{ fontSize: "11px", fontWeight: "700", color: "#92400E", padding: "8px 0" }}>Waiting…</div>
       ) : (
         <>
-          {answerMode === "typing" && (
-            <div style={{ background: "white", border: "1px solid #FDE68A", borderRadius: "8px", padding: "6px 10px", margin: "0 0 8px", fontSize: "13px", fontWeight: "700", color: "#78350F" }}>
-              “{entry.text}”
-            </div>
+          <div style={{ background: "white", border: "1px solid #FDE68A", borderRadius: "8px", padding: "8px 10px", margin: "0 0 8px", fontSize: "16px", fontWeight: "800", color: "#78350F", lineHeight: 1.35 }}>
+            “{entry.text}”
+          </div>
+          {spoken && (
+            <button onClick={() => { setDraft(entry.text); onPost(""); }} className="bb-btn" style={{ background: "none", border: "none", color: "#9CA3AF", fontSize: "11px", fontWeight: "700", cursor: "pointer", marginBottom: "6px", textDecoration: "underline" }}>Edit</button>
           )}
-          {confirmingWrong ? (
-            <WrongTextPrompt onConfirm={t => { setConfirmingWrong(false); onWrong(t); }} onCancel={() => setConfirmingWrong(false)} />
-          ) : (
-            <div style={{ display: "flex", gap: "6px", justifyContent: "center" }}>
-              <button onClick={onCorrect} className="bb-btn" style={{ display: "inline-flex", alignItems: "center", gap: "5px", background: "#22C55E", color: "white", border: "2px solid #1A1A2E", borderRadius: "10px", padding: "8px 12px", fontSize: "13px", fontWeight: "700", cursor: "pointer", boxShadow: "3px 3px 0 #1A1A2E" }}><Icon name="check" size={13} /> Correct</button>
-              <button
-                onClick={() => (answerMode === "spoken" ? setConfirmingWrong(true) : onWrong(entry.text))}
-                className="bb-btn"
-                style={{ display: "inline-flex", alignItems: "center", gap: "5px", background: "#EF4444", color: "white", border: "2px solid #1A1A2E", borderRadius: "10px", padding: "8px 12px", fontSize: "13px", fontWeight: "700", cursor: "pointer", boxShadow: "3px 3px 0 #1A1A2E" }}
-              ><Icon name="close" size={12} /> Wrong</button>
-            </div>
-          )}
+          <div style={{ display: "flex", gap: "6px", justifyContent: "center" }}>
+            <button onClick={onCorrect} className="bb-btn" style={{ display: "inline-flex", alignItems: "center", gap: "5px", background: "#22C55E", color: "white", border: "2px solid #1A1A2E", borderRadius: "10px", padding: "8px 12px", fontSize: "13px", fontWeight: "700", cursor: "pointer", boxShadow: "3px 3px 0 #1A1A2E" }}><Icon name="check" size={13} /> Correct</button>
+            <button
+              onClick={() => onWrong(entry.text)}
+              className="bb-btn"
+              style={{ display: "inline-flex", alignItems: "center", gap: "5px", background: "#EF4444", color: "white", border: "2px solid #1A1A2E", borderRadius: "10px", padding: "8px 12px", fontSize: "13px", fontWeight: "700", cursor: "pointer", boxShadow: "3px 3px 0 #1A1A2E" }}
+            ><Icon name="close" size={12} /> Wrong</button>
+          </div>
         </>
       )}
     </div>
@@ -142,19 +141,21 @@ function RoundEntryCard({ entry, team, answerMode, isPhoneMode, onCorrect, onWro
 // A wanted poster for an open (or being-fixed) bounty. `claimableTeams` already has the exclusion
 // rule (and the solo-play fallback) baked in by the caller — this component just renders whatever
 // list it's handed.
-function BountyCard({ bounty, team, claimableTeams, answerMode, isPhoneMode, onClaim, onCorrect, onWrong }: {
+function BountyCard({ bounty, team, claimableTeams, answerMode, isPhoneMode, onClaim, onPostFix, onCorrect, onWrong }: {
   bounty: Bounty;
   team: GameProps["teams"][number] | undefined; // the claiming team, once claimed
   claimableTeams: GameProps["teams"];
   answerMode: "spoken" | "typing";
   isPhoneMode: boolean;
   onClaim: (teamId: string | number) => void;
+  onPostFix: (text: string) => void;
   onCorrect: () => void;
   onWrong: (text: string) => void;
 }) {
-  const [confirmingWrong, setConfirmingWrong] = useState(false);
+  const [draft, setDraft] = useState("");
+  const spoken = answerMode === "spoken";
   const claimed = bounty.claimedBy !== undefined;
-  const ready = claimed && (answerMode === "spoken" || (bounty.fixText ?? "").trim() !== "");
+  const ready = claimed && (bounty.fixText ?? "").trim() !== "";
 
   return (
     <div style={{
@@ -184,28 +185,27 @@ function BountyCard({ bounty, team, claimableTeams, answerMode, isPhoneMode, onC
         <>
           <div style={{ fontSize: "11px", fontWeight: "800", color: team?.color.dark ?? "#7F1D1D", marginBottom: "6px" }}><TeamIcon team={team} /> {team?.name} is fixing it</div>
           {!ready ? (
-            isPhoneMode
-              ? <div style={{ fontSize: "11px", fontWeight: "700", color: "#991B1B", padding: "4px 0", display: "inline-flex", alignItems: "center", gap: "4px" }}><Icon name="pencil" size={11} /> Typing a fix…</div>
-              : <div style={{ fontSize: "11px", fontWeight: "700", color: "#991B1B", padding: "4px 0" }}>Waiting…</div>
+            spoken
+              ? <PostToBoardPrompt value={draft} onChange={setDraft} onPost={() => onPostFix(draft.trim())} placeholder="Type their fixed sentence, so the class can read it…" />
+              : isPhoneMode
+                ? <div style={{ fontSize: "11px", fontWeight: "700", color: "#991B1B", padding: "4px 0", display: "inline-flex", alignItems: "center", gap: "4px" }}><Icon name="pencil" size={11} /> Typing a fix…</div>
+                : <div style={{ fontSize: "11px", fontWeight: "700", color: "#991B1B", padding: "4px 0" }}>Waiting…</div>
           ) : (
             <>
-              {answerMode === "typing" && (
-                <div style={{ background: "white", border: "1px solid #FCA5A5", borderRadius: "8px", padding: "6px 10px", margin: "0 0 8px", fontSize: "12px", fontWeight: "700", color: "#7F1D1D" }}>
-                  “{bounty.fixText}”
-                </div>
+              <div style={{ background: "white", border: "1px solid #FCA5A5", borderRadius: "8px", padding: "8px 10px", margin: "0 0 8px", fontSize: "15px", fontWeight: "800", color: "#7F1D1D", lineHeight: 1.35 }}>
+                “{bounty.fixText}”
+              </div>
+              {spoken && (
+                <button onClick={() => { setDraft(bounty.fixText ?? ""); onPostFix(""); }} className="bb-btn" style={{ background: "none", border: "none", color: "#9CA3AF", fontSize: "11px", fontWeight: "700", cursor: "pointer", marginBottom: "6px", textDecoration: "underline" }}>Edit</button>
               )}
-              {confirmingWrong ? (
-                <WrongTextPrompt onConfirm={t => { setConfirmingWrong(false); onWrong(t); }} onCancel={() => setConfirmingWrong(false)} />
-              ) : (
-                <div style={{ display: "flex", gap: "6px", justifyContent: "center" }}>
-                  <button onClick={onCorrect} className="bb-btn" style={{ display: "inline-flex", alignItems: "center", gap: "5px", background: "#22C55E", color: "white", border: "2px solid #1A1A2E", borderRadius: "10px", padding: "8px 12px", fontSize: "13px", fontWeight: "700", cursor: "pointer", boxShadow: "3px 3px 0 #1A1A2E" }}><Icon name="check" size={13} /> Correct</button>
-                  <button
-                    onClick={() => (answerMode === "spoken" ? setConfirmingWrong(true) : onWrong(bounty.fixText ?? ""))}
-                    className="bb-btn"
-                    style={{ display: "inline-flex", alignItems: "center", gap: "5px", background: "#EF4444", color: "white", border: "2px solid #1A1A2E", borderRadius: "10px", padding: "8px 12px", fontSize: "13px", fontWeight: "700", cursor: "pointer", boxShadow: "3px 3px 0 #1A1A2E" }}
-                  ><Icon name="close" size={12} /> Wrong</button>
-                </div>
-              )}
+              <div style={{ display: "flex", gap: "6px", justifyContent: "center" }}>
+                <button onClick={onCorrect} className="bb-btn" style={{ display: "inline-flex", alignItems: "center", gap: "5px", background: "#22C55E", color: "white", border: "2px solid #1A1A2E", borderRadius: "10px", padding: "8px 12px", fontSize: "13px", fontWeight: "700", cursor: "pointer", boxShadow: "3px 3px 0 #1A1A2E" }}><Icon name="check" size={13} /> Correct</button>
+                <button
+                  onClick={() => onWrong(bounty.fixText ?? "")}
+                  className="bb-btn"
+                  style={{ display: "inline-flex", alignItems: "center", gap: "5px", background: "#EF4444", color: "white", border: "2px solid #1A1A2E", borderRadius: "10px", padding: "8px 12px", fontSize: "13px", fontWeight: "700", cursor: "pointer", boxShadow: "3px 3px 0 #1A1A2E" }}
+                ><Icon name="close" size={12} /> Wrong</button>
+              </div>
             </>
           )}
         </>
@@ -285,6 +285,13 @@ export function BountyBoardGame({ questions, teams, onUpdateScore, onEnd, forceF
     setMusicGame("bounty");
     return () => setMusicGame(null);
   }, []);
+  // The intro screen rides the shared gameplay track; play switches to the "tension" context so a
+  // different track starts the moment the game actually begins (same idiom as Hot Seat). Once a
+  // Western track is uploaded, add a `bounty: { tension }` entry in music.ts's GAME_OVERRIDES.
+  useEffect(() => {
+    if (phase === "playing") setMusicContext("tension");
+    return () => setMusicContext("gameplay");
+  }, [phase]);
 
   useEffect(() => {
     if (!forceFinalRef) return;
@@ -647,6 +654,7 @@ export function BountyBoardGame({ questions, teams, onUpdateScore, onEnd, forceF
                 team={teams.find(t => t.id === e.teamId)}
                 answerMode={answerMode}
                 isPhoneMode={inputMode === "phone"}
+                onPost={text => submitRoundEntry(e.teamId, text)}
                 onCorrect={() => resolveRoundCorrect(e.teamId)}
                 onWrong={text => resolveRoundWrong(e.teamId, text)}
               />
@@ -673,6 +681,7 @@ export function BountyBoardGame({ questions, teams, onUpdateScore, onEnd, forceF
                     answerMode={answerMode}
                     isPhoneMode={inputMode === "phone"}
                     onClaim={teamId => claimBounty(b.id, teamId)}
+                    onPostFix={text => { if (b.claimedBy !== undefined) submitBountyFix(b.id, b.claimedBy, text); }}
                     onCorrect={() => resolveBountyCorrect(b.id)}
                     onWrong={text => resolveBountyWrong(b.id, text)}
                   />
