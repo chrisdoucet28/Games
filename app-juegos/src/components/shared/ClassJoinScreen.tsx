@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { TeamIcon } from "./TeamIcon";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 import {
-  openClassSessionChannel, closeChannel, PHONE_CAPABLE_GAME_IDS,
+  openClassSessionChannel, closeChannel, getDeviceId, PHONE_CAPABLE_GAME_IDS,
   type ClassSessionStatePayload,
   openAuctionChannel, openSpyChannel, openWhackChannel, openHotSeatChannel, openOrderUpChannel, openRaceTrackChannel, openHillChannel, openBountyBoardChannel, openRelayChannel,
   type AuctionStatePayload, type AuctionBetPayload, type SpyStatePayload,
@@ -122,7 +122,7 @@ export function ClassJoinScreen({ code }: Props) {
       // Re-announces this phone's claim on every (re)connect — covers a wifi drop reconnecting
       // cleanly without the student needing to re-tap their team, same as every per-game join.
       if (status === "SUBSCRIBED" && claimedTeamIdRef.current !== null) {
-        channel.track({ teamId: claimedTeamIdRef.current });
+        channel.track({ teamId: claimedTeamIdRef.current, deviceId: getDeviceId() });
       }
     });
 
@@ -145,7 +145,7 @@ export function ClassJoinScreen({ code }: Props) {
     claimedTeamIdRef.current = teamId;
     setClaimedTeamId(teamId);
     saveClaimedTeamId(code, teamId);
-    classChannelRef.current?.track({ teamId });
+    classChannelRef.current?.track({ teamId, deviceId: getDeviceId() });
   };
 
   // --- Inner per-game channel (opened/closed every time activeGame changes) ---
@@ -165,7 +165,7 @@ export function ClassJoinScreen({ code }: Props) {
     channel.subscribe(status => {
       // The "auto-forward the remembered claim, zero user action" step — this is the entire
       // mechanism that lets a student never re-tap their team for the rest of the class period.
-      if (status === "SUBSCRIBED") channel.track({ teamId: claimedTeamId });
+      if (status === "SUBSCRIBED") channel.track({ teamId: claimedTeamId, deviceId: getDeviceId() });
     });
 
     return () => {
@@ -214,27 +214,24 @@ export function ClassJoinScreen({ code }: Props) {
         <div style={{ fontSize: "36px", marginBottom: "6px" }}>🎒</div>
         <div style={{ fontWeight: "900", fontSize: "18px", color: "#FCD34D", marginBottom: "18px" }}>Tap your team</div>
         <div style={{ display: "flex", flexDirection: "column", gap: "10px", width: "100%", maxWidth: "360px" }}>
-          {classState.roster.map(t => {
-            const takenByOther = classState.connectedTeamIds.includes(t.id) && t.id !== claimedTeamIdRef.current;
-            return (
-              <button
-                key={t.id}
-                onClick={() => !takenByOther && handleClaim(t.id)}
-                disabled={takenByOther}
-                style={{
-                  display: "flex", alignItems: "center", gap: "12px", padding: "16px 18px",
-                  borderRadius: "16px", border: `2px solid ${t.color.bg}`,
-                  background: takenByOther ? "rgba(255,255,255,0.04)" : `linear-gradient(160deg,${t.color.dark}55,#1E1033)`,
-                  color: "white", fontWeight: "800", fontSize: "16px", cursor: takenByOther ? "not-allowed" : "pointer",
-                  opacity: takenByOther ? 0.5 : 1,
-                }}
-              >
-                <span style={{ fontSize: "24px" }}><TeamIcon team={t} size={24} /></span>
-                <span style={{ flex: 1, textAlign: "left" }}>{t.name}</span>
-                {takenByOther && <span style={{ fontSize: "12px", color: "#9CA3AF", fontWeight: "700" }}>Already joined</span>}
-              </button>
-            );
-          })}
+          {/* No "already joined" lock here: several phones can share a team (Word Relay treats each
+              phone as one person in a rotation). Games with one phone per team just mirror that
+              team's view on every phone that claimed it. */}
+          {classState.roster.map(t => (
+            <button
+              key={t.id}
+              onClick={() => handleClaim(t.id)}
+              style={{
+                display: "flex", alignItems: "center", gap: "12px", padding: "16px 18px",
+                borderRadius: "16px", border: `2px solid ${t.color.bg}`,
+                background: `linear-gradient(160deg,${t.color.dark}55,#1E1033)`,
+                color: "white", fontWeight: "800", fontSize: "16px", cursor: "pointer",
+              }}
+            >
+              <span style={{ fontSize: "24px" }}><TeamIcon team={t} size={24} /></span>
+              <span style={{ flex: 1, textAlign: "left" }}>{t.name}</span>
+            </button>
+          ))}
         </div>
         <div style={{ color: "#93C5FD99", fontSize: "12px", marginTop: "18px", lineHeight: 1.6 }}>
           You'll only need to do this once — your phone will automatically follow along for the rest of class.
@@ -281,7 +278,7 @@ export function ClassJoinScreen({ code }: Props) {
     return <PhoneBountyBoardView state={innerState as BountyBoardStatePayload} teamId={claimedTeamId} onAction={sendBountyBoardAction} />;
   }
   if (activeGame === "relay") {
-    return <PhoneRelayView state={innerState as RelayStatePayload} teamId={claimedTeamId} onAction={sendRelayAction} />;
+    return <PhoneRelayView state={innerState as RelayStatePayload} teamId={claimedTeamId} deviceId={getDeviceId()} onAction={sendRelayAction} />;
   }
   return <PhoneAuctionView state={innerState as AuctionStatePayload} teamId={claimedTeamId} onBet={sendBet} />;
 }

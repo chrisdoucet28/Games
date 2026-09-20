@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { TeamIcon } from "../shared/TeamIcon";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 import {
-  openAuctionChannel, openSpyChannel, openWhackChannel, openHotSeatChannel, openOrderUpChannel, openRaceTrackChannel, openHillChannel, openBountyBoardChannel, openRelayChannel, closeChannel,
+  openAuctionChannel, openSpyChannel, openWhackChannel, openHotSeatChannel, openOrderUpChannel, openRaceTrackChannel, openHillChannel, openBountyBoardChannel, openRelayChannel, closeChannel, getDeviceId,
   type AuctionStatePayload, type AuctionBetPayload, type SpyStatePayload,
   type WhackStatePayload, type WhackTurnReportPayload,
   type HotSeatStatePayload, type HotSeatActionPayload,
@@ -211,7 +211,7 @@ export function PhoneJoinScreen({ code, game }: Props) {
       // Re-announces this phone's claim on every (re)connect, not just the first — covers a wifi
       // drop reconnecting cleanly without the student needing to re-tap their team.
       if (status === "SUBSCRIBED" && claimedTeamIdRef.current !== null) {
-        channel.track({ teamId: claimedTeamIdRef.current });
+        channel.track({ teamId: claimedTeamIdRef.current, deviceId: getDeviceId() });
       }
     });
 
@@ -234,7 +234,7 @@ export function PhoneJoinScreen({ code, game }: Props) {
     claimedTeamIdRef.current = teamId;
     setClaimedTeamId(teamId);
     saveClaimedTeamId(code, teamId);
-    channelRef.current?.track({ teamId });
+    channelRef.current?.track({ teamId, deviceId: getDeviceId() });
   };
 
   const sendBet = (payload: AuctionBetPayload) => {
@@ -311,7 +311,9 @@ export function PhoneJoinScreen({ code, game }: Props) {
         <div style={{ fontWeight: "900", fontSize: "18px", color: "#FCD34D", marginBottom: "18px" }}>Tap your team</div>
         <div style={{ display: "flex", flexDirection: "column", gap: "10px", width: "100%", maxWidth: "360px" }}>
           {state.roster.map(t => {
-            const takenByOther = state.connectedTeamIds.includes(t.id) && t.id !== claimedTeamIdRef.current;
+            // Word Relay is the one game where several phones share a team (each is one person in
+            // the asker rotation), so a team someone already joined stays open to claim there.
+            const takenByOther = game !== "relay" && state.connectedTeamIds.includes(t.id) && t.id !== claimedTeamIdRef.current;
             return (
               <button
                 key={t.id}
@@ -372,7 +374,7 @@ export function PhoneJoinScreen({ code, game }: Props) {
     return <PhoneBountyBoardView state={state as BountyBoardStatePayload} teamId={claimedTeamId} onAction={sendBountyBoardAction} />;
   }
   if (game === "relay") {
-    return <PhoneRelayView state={state as RelayStatePayload} teamId={claimedTeamId} onAction={sendRelayAction} />;
+    return <PhoneRelayView state={state as RelayStatePayload} teamId={claimedTeamId} deviceId={getDeviceId()} onAction={sendRelayAction} />;
   }
   return <PhoneAuctionView state={state as AuctionStatePayload} teamId={claimedTeamId} onBet={sendBet} />;
 }

@@ -221,32 +221,71 @@ export function openHotSeatChannel(code: string): RealtimeChannel {
 
 // --- Word Relay ---
 //
-// Hot Seat's sibling, not its clone — no teamStructure here, since the physical rule is always
-// the same one: the active team's own phone shows the word, and whoever's standing near it (their
-// own teammates, or in solo play anyone from another team) reads it and shouts clues. There's no
-// clock either — a correct guess passes the turn immediately, a skip just redraws for the same
-// team, so this payload carries no timer fields at all. See RelayGame.tsx for exactly where.
+// Twenty-questions style: each team has its own hidden word, and one person at a time (the
+// "asker") has to ask yes/no questions to find it out while everyone else who knows the word
+// answers. This is the only game whose phones are individual PEOPLE rather than one phone per
+// team — several phones can join the same team, each identified by a per-device id (see
+// getDeviceId), and the screen rotates the asker through them. The word itself is only ever shown
+// to the "answerer" phones (never the asker's), and never on the main screen while any answerer
+// phone is connected. See RelayGame.tsx for exactly where.
 export type RelayRosterEntry = { id: string | number; name: string; color: TeamColor; mascot?: string | null };
 
-export type RelayPhase = "lobby" | "playing" | "final";
+export type RelayPhase = "lobby" | "ready" | "asking" | "reveal" | "final";
 
 export type RelayStatePayload = {
   phase: RelayPhase;
   roster: RelayRosterEntry[];
+  // The team whose turn it is — during "reveal", the team that just guessed.
   activeTeamId: string | number | null;
+  // The active team's current asker phone, or null when that team plays physically (no phones).
+  askerDeviceId: string | null;
+  // Connected device ids per team, current asker first, so a phone can say "you're #2 in line".
+  askerQueueByTeam: Record<string, string[]>;
+  // Phones allowed to see the word and press the controls this turn.
+  answererDeviceIds: string[];
+  // Only sent while a word is live (asking/reveal); the phone UI shows it to answerers only.
   currentWord: string;
-  wordsPerTeam: number;
-  // Words correctly guessed per team this game — the same quantity Hot Seat's own StatePayload
-  // calls "scores" (a slight misnomer there, since it's a word count, not a points total); named
-  // honestly here instead.
+  // True when no answerer phone is connected, so the main screen must show the word itself.
+  screenShowsWord: boolean;
+  phoneCountByTeam: Record<string, number>;
+  questionsLeftByTeam: Record<string, number>;
+  questionsPerTeam: number;
+  // Words correctly guessed per team this game.
   wordsByTeam: Record<string, number>;
   connectedTeamIds: (string | number)[];
   ts: number;
 };
 
-// Broadcast phone -> screen. teamId is validated against activeTeamId screen-side — only the
-// currently active team's own phone is allowed to act.
-export type RelayActionPayload = { teamId: string | number; action: "correct" | "skip" };
+// Broadcast phone -> screen. Validated screen-side: right phase, and the sender's deviceId must be
+// one of the current answerers.
+export type RelayActionPayload = {
+  teamId: string | number;
+  deviceId: string;
+  action: "guessed" | "missed" | "next" | "changeWord";
+};
+
+const DEVICE_ID_KEY = "classcade-device-id";
+
+// A stable id for THIS phone/tab, sent along with the team claim so a game that cares about
+// individual people (Word Relay) can tell two phones on the same team apart. sessionStorage, not
+// localStorage: it survives a refresh of the same tab (so a phone doesn't turn into a "new person"
+// mid-game) but a second tab is a second device, which is exactly what a phone-per-student setup
+// looks like.
+let memoryDeviceId: string | null = null;
+export function getDeviceId(): string {
+  if (memoryDeviceId) return memoryDeviceId;
+  try {
+    const existing = sessionStorage.getItem(DEVICE_ID_KEY);
+    if (existing) { memoryDeviceId = existing; return existing; }
+    const created = crypto.randomUUID();
+    sessionStorage.setItem(DEVICE_ID_KEY, created);
+    memoryDeviceId = created;
+    return created;
+  } catch {
+    memoryDeviceId = crypto.randomUUID();
+    return memoryDeviceId;
+  }
+}
 
 function relayChannelName(code: string): string {
   return `relay-${code}`;

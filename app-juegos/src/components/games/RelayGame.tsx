@@ -20,12 +20,15 @@ import {
 
 const GM = GAME_MODES.find(g => g.id === "relay")!;
 
-const WORDS_PER_TEAM = 5;
+// Each team gets this many question turns (one question or guess per turn, teams take turns in
+// order). Guessing a word early is what earns more words — a team that wastes questions runs out.
+const QUESTIONS_PER_TEAM = 10;
 const POINTS_PER_WORD = 10;
+
+type Phase = "welcome" | "ready" | "asking" | "reveal" | "final";
 
 const STYLE_TAG = (
   <style>{`
-    @keyframes rlBannerIn{0%{opacity:0;transform:translate(-50%,-16px) scale(0.9)}15%{opacity:1;transform:translate(-50%,0) scale(1.03)}25%{transform:translate(-50%,0) scale(1)}85%{opacity:1;transform:translate(-50%,0) scale(1)}100%{opacity:0;transform:translate(-50%,-10px) scale(0.96)}}
     @keyframes rlWordPop{0%{transform:scale(0.85);opacity:0}100%{transform:scale(1);opacity:1}}
     .rl-btn:hover:not(:disabled){filter:brightness(1.1)}
     .rl-btn:active:not(:disabled){transform:translate(4px,4px) !important;box-shadow:0 0 0 #1A1A2E !important}
@@ -41,9 +44,9 @@ const shuffle = <T,>(items: T[]) => {
   return shuffled;
 };
 
-// What "Save & Exit" snapshots and "Resume" restores — the round/team turn cursor and each team's
-// running word total. Resuming skips straight back into live play for whoever's turn it was,
-// drawing a fresh word rather than trying to restore the exact one that was live when saved.
+// What "Save & Exit" snapshots and "Resume" restores — the turn cursor and each team's running word
+// total. Resuming lands on the "ready" screen for whoever's turn it was, with fresh words for every
+// team rather than trying to restore the exact hidden words that were live when saved.
 type RelaySnapshot = {
   roundIndex: number;
   teamIndex: number;
@@ -54,24 +57,29 @@ function validateRelaySnapshot(raw: unknown, teamCount: number): RelaySnapshot |
   const s = raw as Partial<RelaySnapshot> | null | undefined;
   if (!s || typeof s.roundIndex !== "number" || s.roundIndex < 0) return undefined;
   if (typeof s.teamIndex !== "number" || s.teamIndex < 0 || s.teamIndex >= teamCount) return undefined;
-  if (s.roundIndex >= WORDS_PER_TEAM) return undefined;
+  if (s.roundIndex >= QUESTIONS_PER_TEAM) return undefined;
   return { roundIndex: s.roundIndex, teamIndex: s.teamIndex, wordsByTeam: s.wordsByTeam ?? {} };
 }
-
-type PassBanner = { fromName: string; toName: string; key: number } | null;
 
 export function RelayGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState, presetPhoneSession }: GameProps) {
   const resumed = useRef(validateRelaySnapshot(initialGameState, teams.length)).current;
 
-  const [phase, setPhase] = useState<"welcome" | "playing" | "final">(resumed ? "playing" : "welcome");
+  const [phase, setPhase] = useState<Phase>(resumed ? "ready" : "welcome");
   const [showHowTo, setShowHowTo] = useState(false);
 
-  // "Play on Phones" — available whenever there's more than one team; true 1-team solo play has
-  // the teacher personally giving clues, so there's no within-team secrecy problem phones solve.
+  // "Play on Phones" — available whenever there's more than one team. Each phone is one PERSON:
+  // several phones can join the same team, and the screen rotates which one is the asker.
   const [inputMode, setInputMode] = useState<"screen" | "phone">(presetPhoneSession ? "phone" : "screen");
   const [introStep, setIntroStep] = useState<"setup" | "qr">("setup");
   const [sessionCode, setSessionCode] = useState<string | null>(presetPhoneSession?.code ?? null);
   const [connectedTeamIds, setConnectedTeamIds] = useState<Set<string | number>>(new Set());
+  // Connected phone (device) ids per team, in the order each was first seen — stable, so the asker
+  // rotation doesn't reshuffle when someone reconnects. Only phones that report a deviceId appear.
+  const [connectedByTeam, setConnectedByTeam] = useState<Record<string, string[]>>({});
+  const deviceRosterRef = useRef<Record<string, string[]>>({});
+  // Each team's current asker (a device id). Falls back to the first connected phone whenever the
+  // stored one isn't connected any more.
+  const [askerByTeam, setAskerByTeam] = useState<Record<string, string>>({});
   const channelRef = useRef<RealtimeChannel | null>(null);
 
   useEffect(() => {
@@ -84,9 +92,9 @@ export function RelayGame({ questions, teams, onUpdateScore, onEnd, forceFinalRe
   // Welcome screen rides the shared gameplay track; play switches to "tension" so a different
   // track starts when the game actually begins (same idiom as Hot Seat / Bounty Board).
   useEffect(() => {
-    if (phase === "playing") setMusicContext("tension");
+    if (phase !== "welcome" && phase !== "final") setMusicContext("tension");
     return () => setMusicContext("gameplay");
-  }, [phase]);
+  }, [phase === "welcome" || phase === "final"]);
 
   useEffect(() => {
     if (!forceFinalRef) return;
@@ -98,8 +106,8 @@ export function RelayGame({ questions, teams, onUpdateScore, onEnd, forceFinalRe
   const [teamIndex, setTeamIndex] = useState(() => resumed?.teamIndex ?? 0);
   const [wordsByTeam, setWordsByTeam] = useState<Record<string | number, number>>(() => resumed?.wordsByTeam ?? {});
   const [showWordList, setShowWordList] = useState(false);
-  const [passBanner, setPassBanner] = useState<PassBanner>(null);
-  const bannerIdRef = useRef(0);
+  // The word a team just guessed, shown on the reveal card — teamWords already holds their NEXT word.
+  const [revealWord, setRevealWord] = useState("");
 
   useEffect(() => {
     if (!serializeStateRef) return;
@@ -136,69 +144,126 @@ export function RelayGame({ questions, teams, onUpdateScore, onEnd, forceFinalRe
     lastWordRef.current = word;
     return word;
   }, [words]);
-  const [currentWord, setCurrentWord] = useState<string>(() => (words.length > 0 ? drawWord() : ""));
+  // Every team has its own hidden word at all times.
+  const [teamWords, setTeamWords] = useState<Record<string, string>>(() => {
+    const initial: Record<string, string> = {};
+    if (words.length > 0) teams.forEach(t => { initial[String(t.id)] = drawWord(); });
+    return initial;
+  });
 
   const currentTeam = teams[teamIndex];
-  const turnNumber = roundIndex * teams.length + teamIndex + 1;
-  const totalTurns = WORDS_PER_TEAM * teams.length;
-  const isLastTurn = roundIndex === WORDS_PER_TEAM - 1 && teamIndex === teams.length - 1;
+  const currentKey = String(currentTeam?.id);
+  const isLastTurn = roundIndex === QUESTIONS_PER_TEAM - 1 && teamIndex === teams.length - 1;
 
-  // The shared/screen arena hides the word whenever the active team's own phone is connected —
-  // no teamStructure branch needed (unlike Hot Seat), since the rule is always the same one: the
-  // active team's own device shows it, everyone else nearby reads it off that same screen.
-  const wordHiddenOnScreen = inputMode === "phone" && !!currentTeam && connectedTeamIds.has(currentTeam.id);
+  // --- Who is asking, and who answers (phone mode) ---
+  const rotatedDevices = (teamKey: string): string[] => {
+    const list = connectedByTeam[teamKey] ?? [];
+    const stored = askerByTeam[teamKey];
+    const at = stored ? list.indexOf(stored) : 0;
+    return at <= 0 ? list : [...list.slice(at), ...list.slice(0, at)];
+  };
+  const teamDevices = connectedByTeam[currentKey] ?? [];
+  const askerDeviceId = inputMode === "phone" ? (rotatedDevices(currentKey)[0] ?? null) : null;
+  const allDevices = Object.values(connectedByTeam).flat();
+  const otherDevices = allDevices.filter(d => !teamDevices.includes(d));
+  // Answerers hold the word and the controls: the asking team's other phones, or — if there are
+  // none (a one-phone team, or every team is a single student) — everyone else's phones. During the
+  // reveal the whole guessing team can move things along. With no answerer phone connected at all,
+  // the teacher's screen shows the word and holds the controls instead.
+  let answererDeviceIds: string[] = [];
+  if (inputMode === "phone") {
+    const own = phase === "reveal" ? teamDevices : teamDevices.filter(d => d !== askerDeviceId);
+    answererDeviceIds = own.length > 0 ? own : otherDevices;
+  }
+  const screenShowsWord = inputMode !== "phone" || answererDeviceIds.length === 0;
+  const phoneFlow = inputMode === "phone" && allDevices.length > 0;
 
-  const pushPassBanner = useCallback((fromName: string, toName: string) => {
-    const key = bannerIdRef.current++;
-    setPassBanner({ fromName, toName, key });
-    setTimeout(() => setPassBanner(prev => (prev?.key === key ? null : prev)), 1600);
-  }, []);
+  const questionsLeftFor = (teamI: number) => Math.max(0, QUESTIONS_PER_TEAM - roundIndex - (teamI < teamIndex ? 1 : 0));
 
-  const markGotIt = () => {
+  // --- Turn actions ---
+  const advanceAskerFor = (teamKey: string) => {
+    const list = connectedByTeam[teamKey] ?? [];
+    if (list.length === 0) return;
+    const current = rotatedDevices(teamKey)[0];
+    const next = list[(list.indexOf(current) + 1) % list.length];
+    setAskerByTeam(prev => ({ ...prev, [teamKey]: next }));
+  };
+
+  const advanceTurn = (afterReveal: boolean) => {
+    if (isLastTurn) { setPhase("final"); return; }
+    const nextTeamIndex = teamIndex < teams.length - 1 ? teamIndex + 1 : 0;
+    const nextRoundIndex = teamIndex < teams.length - 1 ? roundIndex : roundIndex + 1;
+    setTeamIndex(nextTeamIndex);
+    setRoundIndex(nextRoundIndex);
+    // A lone team that just missed keeps the same asker at the front, so straight back to the
+    // word; any other change of team (or a swap after a guess) gets the "ready" beat first.
+    setPhase(phoneFlow || (teams.length === 1 && !afterReveal) ? "asking" : "ready");
+  };
+
+  const markGuessed = () => {
     if (!currentTeam) return;
     onUpdateScore(currentTeam.id, POINTS_PER_WORD);
     setWordsByTeam(prev => ({ ...prev, [currentTeam.id]: (prev[currentTeam.id] ?? 0) + 1 }));
     playSound("relay");
-    if (isLastTurn) {
-      setPhase("final");
-      return;
-    }
-    const nextTeamIndex = teamIndex < teams.length - 1 ? teamIndex + 1 : 0;
-    const nextRoundIndex = teamIndex < teams.length - 1 ? roundIndex : roundIndex + 1;
-    const nextTeam = teams[nextTeamIndex];
-    setTeamIndex(nextTeamIndex);
-    setRoundIndex(nextRoundIndex);
-    setCurrentWord(drawWord());
-    pushPassBanner(currentTeam.name, nextTeam.name);
+    setRevealWord(teamWords[currentKey] ?? "");
+    const fresh = drawWord();
+    setTeamWords(prev => ({ ...prev, [currentKey]: fresh }));
+    advanceAskerFor(currentKey);
+    setPhase("reveal");
   };
 
-  const skipWord = () => {
-    setCurrentWord(drawWord());
+  const markMissed = () => advanceTurn(false);
+  const changeWord = () => {
+    const fresh = drawWord();
+    setTeamWords(prev => ({ ...prev, [currentKey]: fresh }));
+  };
+  const continueFromReveal = () => advanceTurn(true);
+
+  const wordForPayload = phase === "asking" ? (teamWords[currentKey] ?? "") : phase === "reveal" ? revealWord : "";
+
+  const buildPayload = (): RelayStatePayload => {
+    const mapped: RelayPhase = phase === "welcome" ? "lobby" : phase;
+    const wordsOut: Record<string, number> = {};
+    const leftOut: Record<string, number> = {};
+    const countOut: Record<string, number> = {};
+    const queueOut: Record<string, string[]> = {};
+    teams.forEach((t, i) => {
+      const k = String(t.id);
+      wordsOut[k] = wordsByTeam[t.id] ?? 0;
+      leftOut[k] = phase === "final" ? 0 : questionsLeftFor(i);
+      countOut[k] = (connectedByTeam[k] ?? []).length;
+      queueOut[k] = rotatedDevices(k);
+    });
+    const inPlay = phase === "ready" || phase === "asking" || phase === "reveal";
+    return {
+      phase: mapped,
+      roster: teams.map(t => ({ id: t.id, name: t.name, color: t.color, mascot: t.mascot })),
+      activeTeamId: inPlay ? (currentTeam?.id ?? null) : null,
+      askerDeviceId: inPlay ? askerDeviceId : null,
+      askerQueueByTeam: queueOut,
+      answererDeviceIds: inPlay ? answererDeviceIds : [],
+      currentWord: wordForPayload,
+      screenShowsWord,
+      phoneCountByTeam: countOut,
+      questionsLeftByTeam: leftOut,
+      questionsPerTeam: QUESTIONS_PER_TEAM,
+      wordsByTeam: wordsOut,
+      connectedTeamIds: Array.from(connectedTeamIds),
+      ts: Date.now(),
+    };
   };
 
-  // Refs the phone-mode broadcaster reads synchronously, so opening/closing the realtime channel
-  // only happens when phone mode itself toggles on/off, not on every word/turn change — same
-  // pattern as every other phone-mode game. markGotIt/skipWord refreshed every render (no
-  // dependency array) so an incoming phone action always calls the latest closure.
-  const phaseRef = useRef(phase);
-  const currentWordRef = useRef(currentWord);
-  const teamIndexRef = useRef(teamIndex);
-  const wordsByTeamRef = useRef(wordsByTeam);
-  const connectedTeamIdsRef = useRef<Set<string | number>>(new Set());
+  // Refs the phone-mode channel reads synchronously, so opening/closing the realtime channel only
+  // happens when phone mode itself toggles on/off, not on every state change — same pattern as every
+  // other phone-mode game. Refreshed every render (no dependency array) so an incoming phone action
+  // always calls the latest closure.
+  const buildPayloadRef = useRef(buildPayload);
   const sendStateRef = useRef<(() => void) | null>(null);
-  const markGotItRef = useRef(markGotIt);
-  const skipWordRef = useRef(skipWord);
-  // A fast double-tap (or a screen click racing a phone tap) landing within the same instant is
-  // the one real risk here — unlike Hot Seat's solo mode, only the active team's own phone can
-  // ever act, so there's no cross-team race to guard against, just this simple same-source case.
+  const liveRef = useRef({ phase, answererDeviceIds, markGuessed, markMissed, changeWord, continueFromReveal });
   const lastActionAtRef = useRef(0);
   useEffect(() => {
-    phaseRef.current = phase;
-    currentWordRef.current = currentWord;
-    teamIndexRef.current = teamIndex;
-    wordsByTeamRef.current = wordsByTeam;
-    markGotItRef.current = markGotIt;
-    skipWordRef.current = skipWord;
+    buildPayloadRef.current = buildPayload;
+    liveRef.current = { phase, answererDeviceIds, markGuessed, markMissed, changeWord, continueFromReveal };
   });
 
   useEffect(() => {
@@ -207,46 +272,45 @@ export function RelayGame({ questions, teams, onUpdateScore, onEnd, forceFinalRe
     channelRef.current = channel;
 
     const sendState = () => {
-      const rawPhase = phaseRef.current;
-      const mappedPhase: RelayPhase = rawPhase === "welcome" ? "lobby" : rawPhase === "final" ? "final" : "playing";
-      const activeTeam = teams[teamIndexRef.current];
-      const wordsByTeamOut: Record<string, number> = {};
-      teams.forEach(t => { wordsByTeamOut[String(t.id)] = wordsByTeamRef.current[t.id] ?? 0; });
-      const payload: RelayStatePayload = {
-        phase: mappedPhase,
-        roster: teams.map(t => ({ id: t.id, name: t.name, color: t.color, mascot: t.mascot })),
-        activeTeamId: rawPhase === "playing" ? (activeTeam?.id ?? null) : null,
-        currentWord: currentWordRef.current,
-        wordsPerTeam: WORDS_PER_TEAM,
-        wordsByTeam: wordsByTeamOut,
-        connectedTeamIds: Array.from(connectedTeamIdsRef.current),
-        ts: Date.now(),
-      };
-      channel.send({ type: "broadcast", event: "state", payload });
+      channel.send({ type: "broadcast", event: "state", payload: buildPayloadRef.current() });
     };
     sendStateRef.current = sendState;
 
     channel.on("presence", { event: "sync" }, () => {
-      const presenceState = channel.presenceState<{ teamId: string | number }>();
-      const ids = new Set<string | number>();
-      Object.values(presenceState).forEach(entries => entries.forEach(entry => ids.add(entry.teamId)));
-      connectedTeamIdsRef.current = ids;
-      setConnectedTeamIds(ids);
-      sendState();
+      const presenceState = channel.presenceState<{ teamId: string | number; deviceId?: string }>();
+      const teamIds = new Set<string | number>();
+      const live: Record<string, Set<string>> = {};
+      Object.values(presenceState).forEach(entries => entries.forEach(entry => {
+        teamIds.add(entry.teamId);
+        if (!entry.deviceId) return;
+        const key = String(entry.teamId);
+        if (!live[key]) live[key] = new Set();
+        live[key].add(entry.deviceId);
+        if (!deviceRosterRef.current[key]) deviceRosterRef.current[key] = [];
+        if (!deviceRosterRef.current[key].includes(entry.deviceId)) deviceRosterRef.current[key].push(entry.deviceId);
+      }));
+      const byTeam: Record<string, string[]> = {};
+      Object.keys(deviceRosterRef.current).forEach(key => {
+        byTeam[key] = deviceRosterRef.current[key].filter(id => live[key]?.has(id));
+      });
+      setConnectedTeamIds(teamIds);
+      setConnectedByTeam(byTeam);
     });
 
-    // The only place phone input actually touches game logic — only the currently active team's
-    // own phone is allowed to act, then the exact same functions a screen-mode click would call.
+    // The only place phone input touches game logic — only a current answerer's phone is allowed
+    // to act, then the exact same functions a screen click would call.
     channel.on("broadcast", { event: "action" }, ({ payload }) => {
       const action = payload as RelayActionPayload;
-      if (phaseRef.current !== "playing") return;
-      const activeTeamId = teams[teamIndexRef.current]?.id;
-      if (action.teamId !== activeTeamId) return;
+      const live = liveRef.current;
+      if (!live.answererDeviceIds.includes(action.deviceId)) return;
       const now = Date.now();
       if (now - lastActionAtRef.current < 500) return;
+      if (action.action === "guessed" && live.phase === "asking") live.markGuessed();
+      else if (action.action === "missed" && live.phase === "asking") live.markMissed();
+      else if (action.action === "changeWord" && live.phase === "asking") live.changeWord();
+      else if (action.action === "next" && live.phase === "reveal") live.continueFromReveal();
+      else return;
       lastActionAtRef.current = now;
-      if (action.action === "correct") markGotItRef.current();
-      else if (action.action === "skip") skipWordRef.current();
     });
 
     channel.subscribe(status => {
@@ -266,7 +330,7 @@ export function RelayGame({ questions, teams, onUpdateScore, onEnd, forceFinalRe
 
   useEffect(() => {
     sendStateRef.current?.();
-  }, [phase, currentWord, teamIndex, roundIndex]);
+  }, [phase, teamIndex, roundIndex, teamWords, revealWord, connectedByTeam, askerByTeam, wordsByTeam]);
 
   useEffect(() => {
     if (phase === "final" && channelRef.current) {
@@ -285,6 +349,8 @@ export function RelayGame({ questions, teams, onUpdateScore, onEnd, forceFinalRe
     setIntroStep("setup");
     setSessionCode(null);
     setConnectedTeamIds(new Set());
+    setConnectedByTeam({});
+    deviceRosterRef.current = {};
   };
 
   const arenaStyle: React.CSSProperties = {
@@ -329,15 +395,14 @@ export function RelayGame({ questions, teams, onUpdateScore, onEnd, forceFinalRe
             <div style={{ marginBottom: "10px" }}><Icon name="megaphone" size={36} /></div>
             <div style={{ fontWeight: "900", fontSize: "20px", marginBottom: "10px", color: "#5EEAD4" }}>Word Relay</div>
             <div style={{ fontSize: "15px", lineHeight: 1.7, opacity: 0.95 }}>
-              {teams.length === 1
-                ? "The teacher holds the word — your team shouts guesses."
-                : inputMode === "phone"
-                ? "The active team's own phone shows the word — held facing away from them, so everyone nearby can read it and shout clues."
-                : "One player on the active team turns away from the screen — everyone else gives clues."}
+              {teams.length === 1 ? "Your team has a hidden word. " : "Every team has its own hidden word. "}
+              <strong style={{ color: "#5EEAD4" }}>One person at a time comes to the front and asks yes/no questions</strong> to work out what it is — no peeking!
               <br />
-              Guess it and the turn passes <strong style={{ color: "#5EEAD4" }}>instantly</strong> to the next team — no clock, no waiting.
+              {inputMode === "phone"
+                ? "Everyone joins on their own phone. Teammates' phones show the word and answer; the asker's phone never does."
+                : "The teacher sees the word and answers each question, then taps whether they guessed it."}
               <br />
-              Each correct word is worth <strong style={{ color: "#5EEAD4" }}>{POINTS_PER_WORD} points</strong>, and every team gets <strong style={{ color: "#5EEAD4" }}>{WORDS_PER_TEAM} turns</strong> — most points wins.
+              Guess it and that person sits down — <strong style={{ color: "#5EEAD4" }}>a teammate swaps in</strong> with a brand new word. Each word is worth <strong style={{ color: "#5EEAD4" }}>{POINTS_PER_WORD} points</strong>, and every team gets <strong style={{ color: "#5EEAD4" }}>{QUESTIONS_PER_TEAM} questions</strong> in total — most words wins.
             </div>
           </div>
           <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "24px" }}>
@@ -354,7 +419,7 @@ export function RelayGame({ questions, teams, onUpdateScore, onEnd, forceFinalRe
             <>
               {introStep === "setup" && (
                 <div style={{ marginBottom: "20px" }}>
-                  <div style={{ fontSize: "13px", color: "#99F6E4", fontWeight: "700", marginBottom: "10px" }}>How will the word be shown?</div>
+                  <div style={{ fontSize: "13px", color: "#99F6E4", fontWeight: "700", marginBottom: "10px" }}>How will you play?</div>
                   <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
                     <button onClick={handlePickScreenMode} className="rl-btn" style={{
                       padding: "10px 20px", borderRadius: "12px", fontWeight: "800", fontSize: "14px", cursor: "pointer",
@@ -376,14 +441,22 @@ export function RelayGame({ questions, teams, onUpdateScore, onEnd, forceFinalRe
 
               {introStep === "qr" && sessionCode && (() => {
                 const joinUrl = `${window.location.origin}${window.location.pathname}?join=${sessionCode}&game=relay`;
+                const phoneCountByTeam: Record<string, number> = {};
+                teams.forEach(t => { phoneCountByTeam[String(t.id)] = (connectedByTeam[String(t.id)] ?? []).length; });
                 return (
                   <PhoneJoinPanel
                     sessionCode={sessionCode} joinUrl={joinUrl} teams={teams} connectedTeamIds={connectedTeamIds}
+                    phoneCountByTeam={phoneCountByTeam}
                     accent="#5EEAD4" panelBg="linear-gradient(160deg,#0F766E,#022C22)" borderColor="#2DD4BF66"
                     footer={
-                      <button onClick={handlePickScreenMode} style={{ background: "none", border: "none", color: "#99F6E499", fontSize: "12px", fontWeight: "700", cursor: "pointer", textDecoration: "underline" }}>
-                        Switch back to Play on Screen
-                      </button>
+                      <>
+                        <div style={{ fontSize: "12px", color: "#99F6E4", marginBottom: "8px", lineHeight: 1.5 }}>
+                          Every student can join on their own phone — pick the same team to share it.
+                        </div>
+                        <button onClick={handlePickScreenMode} style={{ background: "none", border: "none", color: "#99F6E499", fontSize: "12px", fontWeight: "700", cursor: "pointer", textDecoration: "underline" }}>
+                          Switch back to Play on Screen
+                        </button>
+                      </>
                     }
                   />
                 );
@@ -402,7 +475,7 @@ export function RelayGame({ questions, teams, onUpdateScore, onEnd, forceFinalRe
               onClose={() => setShowHowTo(false)}
             />
           )}
-          <button onClick={() => setPhase("playing")} className="rl-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#0D9488", color: "white", border: "3px solid #1A1A2E", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "6px 6px 0 #1A1A2E" }}>
+          <button onClick={() => setPhase(phoneFlow ? "asking" : "ready")} className="rl-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#0D9488", color: "white", border: "3px solid #1A1A2E", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "6px 6px 0 #1A1A2E" }}>
             <Icon name="megaphone" size={20} /> Let's Play!
           </button>
         </div>
@@ -439,6 +512,27 @@ export function RelayGame({ questions, teams, onUpdateScore, onEnd, forceFinalRe
     );
   }
 
+  const bigBtn = (bg: string, color = "white"): React.CSSProperties => ({
+    background: bg, color, border: "3px solid #1A1A2E", borderRadius: "14px", padding: "16px", fontSize: "18px",
+    fontWeight: "900", cursor: "pointer", boxShadow: "4px 4px 0 #1A1A2E",
+  });
+
+  const scoreStrip = (
+    <div style={{ display: "flex", gap: "8px", justifyContent: "center", flexWrap: "wrap", marginTop: "16px" }}>
+      {teams.map((t, i) => (
+        <div key={t.id} style={{ background: t.color.dark, border: `2px solid ${t.id === currentTeam.id ? "#5EEAD4" : "#1A1A2E"}`, borderRadius: "12px", padding: "8px 14px", color: "white", fontSize: "12px", fontWeight: "800", textAlign: "center" }}>
+          <div><TeamIcon team={t} color="white" /> {t.name}</div>
+          <div style={{ color: "#5EEAD4", fontSize: "14px" }}>{wordsByTeam[t.id] ?? 0} words</div>
+          <div style={{ opacity: 0.8, fontWeight: "700" }}>{questionsLeftFor(i)} questions left</div>
+        </div>
+      ))}
+    </div>
+  );
+
+  const askerLabel = inputMode === "phone" && askerDeviceId
+    ? `Asker: phone ${teamDevices.indexOf(askerDeviceId) + 1} of ${teamDevices.length}`
+    : null;
+
   return (
     <div style={arenaStyle}>
       {STYLE_TAG}
@@ -449,53 +543,79 @@ export function RelayGame({ questions, teams, onUpdateScore, onEnd, forceFinalRe
         <PhoneReconnectBadge
           sessionCode={sessionCode} joinUrl={`${window.location.origin}${window.location.pathname}?join=${sessionCode}&game=relay`}
           teams={teams} connectedTeamIds={connectedTeamIds}
+          phoneCountByTeam={Object.fromEntries(teams.map(t => [String(t.id), (connectedByTeam[String(t.id)] ?? []).length]))}
           accent="#5EEAD4" panelBg="linear-gradient(160deg,#0F766E,#022C22)" borderColor="#2DD4BF66"
         />
-      )}
-      {passBanner && (
-        <div key={passBanner.key} style={{
-          position: "absolute", top: "14px", left: "50%", zIndex: 20, whiteSpace: "nowrap",
-          background: "#22C55E", border: "3px solid #1A1A2E",
-          borderRadius: "14px", padding: "10px 22px", boxShadow: "4px 4px 0 #1A1A2E",
-          animation: "rlBannerIn 1.6s ease-in-out forwards",
-        }}>
-          <span style={{ color: "white", fontWeight: "900", fontSize: "15px", textShadow: "0 1px 3px rgba(0,0,0,0.3)", display: "inline-flex", alignItems: "center", gap: "6px" }}>
-            <Icon name="check" size={14} /> +{POINTS_PER_WORD} — Now up: {passBanner.toName}!
-          </span>
-        </div>
       )}
       <div style={{ position: "relative", zIndex: 1 }}>
         <div style={{ background: "#134E4A", border: "3px solid #1A1A2E", borderRadius: "14px", padding: "14px 16px", marginBottom: "16px", textAlign: "center", color: "white", boxShadow: "4px 4px 0 #1A1A2E" }}>
           <div style={{ fontWeight: "900", fontSize: "18px" }}><TeamIcon team={currentTeam} /> {currentTeam.name}'s turn</div>
-          <div style={{ fontWeight: "800", fontSize: "13px", opacity: 0.9, marginTop: "4px" }}>Turn {turnNumber} of {totalTurns}</div>
+          <div style={{ fontWeight: "800", fontSize: "13px", opacity: 0.9, marginTop: "4px" }}>
+            Question {roundIndex + 1} of {QUESTIONS_PER_TEAM}{askerLabel ? ` · ${askerLabel}` : ""}
+          </div>
         </div>
 
-        {wordHiddenOnScreen ? (
-          <div style={{ background: "#022C22", border: "3px dashed #0D9488", borderRadius: "22px", padding: "34px 18px", textAlign: "center" }}>
-            <div style={{ marginBottom: "10px" }}><Icon name="phone" size={34} /></div>
-            <div style={{ fontWeight: "900", fontSize: "17px", color: "#5EEAD4", marginBottom: "6px" }}>{currentTeam.name}'s phone has the word!</div>
-            <div style={{ color: "#99F6E4", fontSize: "13px", fontWeight: "600" }}>Held facing away — everyone nearby can see it and shout clues.</div>
+        {phase === "ready" && (
+          <div style={{ background: "#022C22", border: "4px solid #1A1A2E", borderRadius: "22px", padding: "32px 18px", textAlign: "center", boxShadow: "6px 6px 0 #1A1A2E" }}>
+            <div style={{ fontSize: "40px", marginBottom: "8px" }}>🙋</div>
+            <div style={{ fontWeight: "900", fontSize: "22px", color: "#5EEAD4", marginBottom: "8px" }}>{currentTeam.name}: send someone up!</div>
+            <div style={{ color: "#CCFBF1", fontSize: "15px", fontWeight: "600", lineHeight: 1.6, maxWidth: "460px", margin: "0 auto 20px" }}>
+              Whoever is asking steps to the front and <strong>faces away from the screen</strong>. When they're ready, show the word to the teacher and the class.
+            </div>
+            <button onClick={() => setPhase("asking")} className="rl-btn" style={bigBtn("#0D9488")}>Show the word</button>
           </div>
-        ) : (
+        )}
+
+        {phase === "asking" && (screenShowsWord ? (
           <>
             <div style={{ position: "relative", background: "#022C22", border: "4px solid #1A1A2E", borderRadius: "22px", padding: "26px 18px", textAlign: "center", marginBottom: "16px", boxShadow: "6px 6px 0 #1A1A2E" }}>
               <div style={{ position: "absolute", top: "10px", right: "10px" }}>
-                <FlagPromptButton gameId="relay" questionData={{ raw: currentWord }} />
+                <FlagPromptButton gameId="relay" questionData={{ raw: teamWords[currentKey] }} />
               </div>
-              <div style={{ color: "#5EEAD4", fontWeight: "800", fontSize: "13px", textTransform: "uppercase", marginBottom: "10px" }}>Shout clues for this word</div>
-              <div key={currentWord} style={{ background: "rgba(0,0,0,0.35)", borderRadius: "18px", border: "3px solid #14B8A655", padding: "24px 12px", color: "#F0FDFA", fontWeight: "900", fontSize: "clamp(36px,9vw,72px)", lineHeight: 1.05, minHeight: "120px", display: "flex", alignItems: "center", justifyContent: "center", overflowWrap: "anywhere", textShadow: "0 0 18px rgba(45,212,191,0.6)", animation: "rlWordPop 0.25s ease-out" }}>
-                {currentWord}
+              <div style={{ color: "#5EEAD4", fontWeight: "800", fontSize: "13px", textTransform: "uppercase", marginBottom: "10px" }}>The hidden word — asker faces away!</div>
+              <div key={teamWords[currentKey]} style={{ background: "rgba(0,0,0,0.35)", borderRadius: "18px", border: "3px solid #14B8A655", padding: "24px 12px", color: "#F0FDFA", fontWeight: "900", fontSize: "clamp(36px,9vw,72px)", lineHeight: 1.05, minHeight: "120px", display: "flex", alignItems: "center", justifyContent: "center", overflowWrap: "anywhere", textShadow: "0 0 18px rgba(45,212,191,0.6)", animation: "rlWordPop 0.25s ease-out" }}>
+                {teamWords[currentKey]}
               </div>
             </div>
-
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(160px,1fr))", gap: "12px" }}>
-              <button onClick={markGotIt} className="rl-btn" style={{ background: "#22C55E", color: "white", border: "3px solid #1A1A2E", borderRadius: "14px", padding: "16px", fontSize: "18px", fontWeight: "900", cursor: "pointer", boxShadow: "4px 4px 0 #1A1A2E" }}>Got it! +{POINTS_PER_WORD}</button>
-              <button onClick={skipWord} className="rl-btn" style={{ background: "rgba(0,0,0,0.3)", color: "#5EEAD4", border: "3px solid #1A1A2E", borderRadius: "14px", padding: "16px", fontSize: "18px", fontWeight: "900", cursor: "pointer", boxShadow: "4px 4px 0 #1A1A2E" }}>Skip</button>
+              <button onClick={markGuessed} className="rl-btn" style={bigBtn("#22C55E")}>Guessed it! +{POINTS_PER_WORD}</button>
+              <button onClick={markMissed} className="rl-btn" style={bigBtn("rgba(0,0,0,0.3)", "#5EEAD4")}>Not yet →</button>
+            </div>
+            <div style={{ textAlign: "center", marginTop: "10px" }}>
+              <button onClick={changeWord} style={{ background: "none", border: "none", color: "#99F6E499", fontSize: "12px", fontWeight: "700", cursor: "pointer", textDecoration: "underline" }}>Change this word</button>
             </div>
           </>
+        ) : (
+          <div style={{ background: "#022C22", border: "3px dashed #0D9488", borderRadius: "22px", padding: "34px 18px", textAlign: "center" }}>
+            <div style={{ marginBottom: "10px" }}><Icon name="phone" size={34} /></div>
+            <div style={{ fontWeight: "900", fontSize: "18px", color: "#5EEAD4", marginBottom: "6px" }}>Asking time!</div>
+            <div style={{ color: "#99F6E4", fontSize: "14px", fontWeight: "600", lineHeight: 1.5 }}>
+              The asker is at the front asking yes/no questions. The word is on the answering phones — it isn't shown here.
+            </div>
+          </div>
+        ))}
+
+        {phase === "reveal" && (
+          <div style={{ background: "#022C22", border: "4px solid #22C55E", borderRadius: "22px", padding: "28px 18px", textAlign: "center", boxShadow: "6px 6px 0 #1A1A2E" }}>
+            <div style={{ fontSize: "40px", marginBottom: "6px" }}>🎉</div>
+            <div style={{ color: "#5EEAD4", fontWeight: "800", fontSize: "13px", textTransform: "uppercase", marginBottom: "8px" }}>{currentTeam.name} guessed it! +{POINTS_PER_WORD}</div>
+            {screenShowsWord && (
+              <div style={{ fontWeight: "900", fontSize: "clamp(32px,8vw,60px)", color: "#F0FDFA", lineHeight: 1.1, marginBottom: "10px", overflowWrap: "anywhere" }}>{revealWord}</div>
+            )}
+            <div style={{ color: "#CCFBF1", fontSize: "16px", fontWeight: "800", marginBottom: "18px" }}>
+              {inputMode === "phone" && askerDeviceId
+                ? "Time to swap — the next phone in line takes over next turn!"
+                : `Time to swap — someone new from ${currentTeam.name} takes over next turn!`}
+            </div>
+            {screenShowsWord ? (
+              <button onClick={continueFromReveal} className="rl-btn" style={bigBtn("#0D9488")}>{isLastTurn ? "See final results" : "Next team →"}</button>
+            ) : (
+              <div style={{ color: "#99F6E4", fontSize: "13px", fontWeight: "600" }}>A teammate taps "Next team" on their phone to keep going.</div>
+            )}
+          </div>
         )}
 
-        {wordListToggle}
+        {scoreStrip}
       </div>
     </div>
   );

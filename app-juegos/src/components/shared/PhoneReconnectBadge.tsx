@@ -17,9 +17,10 @@ interface PhoneReconnectBadgeProps {
   accent: string;
   panelBg: string;
   borderColor: string;
+  phoneCountByTeam?: Record<string, number>;
 }
 
-export function PhoneReconnectBadge({ sessionCode, joinUrl, teams, connectedTeamIds, accent, panelBg, borderColor }: PhoneReconnectBadgeProps) {
+export function PhoneReconnectBadge({ sessionCode, joinUrl, teams, connectedTeamIds, accent, panelBg, borderColor, phoneCountByTeam }: PhoneReconnectBadgeProps) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -48,7 +49,7 @@ export function PhoneReconnectBadge({ sessionCode, joinUrl, teams, connectedTeam
             </button>
             <PhoneJoinPanel
               sessionCode={sessionCode} joinUrl={joinUrl} teams={teams} connectedTeamIds={connectedTeamIds}
-              accent={accent} panelBg={panelBg} borderColor={borderColor}
+              accent={accent} panelBg={panelBg} borderColor={borderColor} phoneCountByTeam={phoneCountByTeam}
             />
           </div>
         </div>
