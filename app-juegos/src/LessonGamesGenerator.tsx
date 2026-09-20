@@ -2014,8 +2014,9 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
 
       </div>
 
-      {/* Games grouped by the job a teacher needs done (data/gameCategories.ts), with a checklist
-          beside them — wider than the 760px column above so the sidebar has room. */}
+      {/* Games grouped by the job a teacher needs done (data/gameCategories.ts), each group with its
+          help-level dial in a box beside the cards — wider than the 760px column above so that box
+          has room. */}
       <div style={{ maxWidth: "1120px", margin: "28px auto 0" }}>
         <GameSelectPanel
           theme={theme} loadingGame={loadingGame} randomSpinIndex={randomSpinIndex}

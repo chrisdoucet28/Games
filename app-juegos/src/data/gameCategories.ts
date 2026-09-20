@@ -13,7 +13,7 @@ export type HelpLevel = 1 | 2 | 3 | 4 | 5;
 
 export type GameCategory = {
   id: string;
-  // Finishes the sentence "I need:" on the teacher's checklist.
+  // Finishes the sentence "I need:" in the block's info box.
   need: string;
   blurb: string;
   helpLevel: HelpLevel;
@@ -44,7 +44,7 @@ export function helpLevelColor(level: HelpLevel): string {
 
 // Blocks always appear from the MOST help (dial 1) to the LEAST (dial 5) — getGameBlocks sorts by
 // helpLevel, so changing a block's level moves it automatically everywhere (game-select page,
-// checklist, homepage guide, Surprise Me). Blocks at the same level keep the order listed here.
+// homepage guide, Surprise Me). Blocks at the same level keep the order listed here.
 // helpLevel for the two skill-specific blocks (writing, vocabulary) is a judgment call about how
 // much the game hands students to work from — change it here if it doesn't match how you run them.
 export const GAME_CATEGORIES: GameCategory[] = [
