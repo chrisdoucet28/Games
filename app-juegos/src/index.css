@@ -1,3 +1,9 @@
+/* Same opt-out as the color-scheme meta tag in index.html, for browsers that only honour the CSS form:
+   no automatic dark mode — every screen brings its own colours. */
+:root {
+    color-scheme: only light;
+  }
+
 body {
     margin: 0;
     padding: 0;
