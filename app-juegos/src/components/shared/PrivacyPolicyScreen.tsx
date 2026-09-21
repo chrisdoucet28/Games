@@ -79,10 +79,11 @@ export function PrivacyPolicyScreen() {
 
         <h2 style={sectionHeading}>Children's privacy</h2>
         <p>
-          ClassCade accounts, both teacher and student accounts, are for adults aged 18 and over, and
-          we ask you to confirm this when you first log in. We don't knowingly collect information
-          from anyone under 18. Students joining a class game through the "Play on Phones" feature
-          never create an account or submit personal information of any kind.
+          ClassCade accounts, both teacher and student accounts, are intended for adults aged 18 and
+          over. We don't knowingly collect information from anyone under 18, and if we learn that an
+          account belongs to someone under 18 we will delete it. Students joining a class game through
+          the "Play on Phones" feature never create an account or submit personal information of any
+          kind.
         </p>
 
         <h2 style={sectionHeading}>Cookies and local storage</h2>

@@ -18,12 +18,11 @@ const OPTIONS: { role: Choice; icon: IconName; title: string; body: string }[] =
 
 export function RoleChooserScreen({ onChosen }: { onChosen: (role: Choice) => void }) {
   const [selected, setSelected] = useState<Choice | null>(null);
-  const [isAdult, setIsAdult] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
   const confirm = async () => {
-    if (!selected || !isAdult) return;
+    if (!selected) return;
     setSaving(true);
     setError("");
     try {
@@ -35,7 +34,7 @@ export function RoleChooserScreen({ onChosen }: { onChosen: (role: Choice) => vo
     }
   };
 
-  const ready = selected !== null && isAdult && !saving;
+  const ready = selected !== null && !saving;
 
   return (
     <div style={{ minHeight: "100vh", background: "#F0F9FF", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
@@ -71,11 +70,6 @@ export function RoleChooserScreen({ onChosen }: { onChosen: (role: Choice) => vo
             );
           })}
         </div>
-
-        <label style={{ display: "flex", alignItems: "flex-start", gap: "10px", fontSize: "13px", color: "#374151", lineHeight: 1.5, marginBottom: "18px", cursor: "pointer" }}>
-          <input id="role-adult-confirm" type="checkbox" checked={isAdult} onChange={e => setIsAdult(e.target.checked)} style={{ marginTop: "3px", width: "18px", height: "18px" }} />
-          <span>I confirm I'm 18 or older. ClassCade accounts are for adults.</span>
-        </label>
 
         {error && <div role="alert" style={{ background: "#FEE2E2", color: "#991B1B", borderRadius: "10px", padding: "10px 12px", fontSize: "13px", marginBottom: "14px" }}>{error}</div>}
 
