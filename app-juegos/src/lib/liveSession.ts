@@ -533,9 +533,17 @@ export function openBountyBoardChannel(code: string): RealtimeChannel {
 // payload only ever needs to say which game is active, never a new code. Purely a "here's what's
 // active" beacon: actual gameplay actions for whichever game is live still flow over THAT game's
 // own channel, opened separately by ClassJoinScreen.tsx — never over this one.
-export type ClassSessionRosterEntry = { id: string | number; name: string; color: TeamColor; mascot?: string | null };
+// `rosterId` is the team's stable id in the class's saved-team list (classes.team_roster) — how a
+// logged-in student's account remembers "my team" between sittings (see ClassJoinScreen). Optional
+// on purpose: a teacher screen older than this, or a team never saved to the class, just omits it and
+// every phone behaves exactly as before.
+export type ClassSessionRosterEntry = { id: string | number; name: string; color: TeamColor; mascot?: string | null; rosterId?: string | null };
 
 export type ClassSessionStatePayload = {
+  // The saved class this sitting belongs to (null when the check-in isn't linked to one). Only used
+  // by optional student accounts to look up their own membership; ids are unguessable and every
+  // database function still checks who is asking.
+  classId?: string | null;
   // Which GameMode.id is currently on screen, or null between games (game-select/results/
   // topic-select) and during any non-phone-capable game — a checked-in phone shows the "watch the
   // shared screen" placeholder whenever this is null or isn't in PHONE_CAPABLE_GAME_IDS below.

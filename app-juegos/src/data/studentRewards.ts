@@ -11,9 +11,12 @@ export type StudentStats = {
   correctAnswers: number;
   perfectRounds: number;
   streakDays: number;
+  // Days the student checked in to a class (once per class per day) — see lib/classMembership.ts.
+  classCheckins: number;
 };
 
 export const XP_PER_LESSON = 20;
+export const XP_PER_CLASS_CHECKIN = 10;
 export const XP_PER_CORRECT_ANSWER = 2;
 export const XP_PER_PERFECT_ROUND = 10;
 // A "perfect round" needs at least this many questions, so a 1-question lucky guess doesn't count.
@@ -29,7 +32,8 @@ export function xpForRound(correct: number, total: number): number {
 }
 
 export function xpFromStats(s: StudentStats): number {
-  return s.lessonsDone * XP_PER_LESSON + s.correctAnswers * XP_PER_CORRECT_ANSWER + s.perfectRounds * XP_PER_PERFECT_ROUND;
+  return s.lessonsDone * XP_PER_LESSON + s.correctAnswers * XP_PER_CORRECT_ANSWER + s.perfectRounds * XP_PER_PERFECT_ROUND
+    + s.classCheckins * XP_PER_CLASS_CHECKIN;
 }
 
 // Level n starts at 50·n·(n−1) XP: level 2 at 100, 3 at 300, 4 at 600, 5 at 1000 — each level asks
@@ -77,6 +81,7 @@ export const BADGES: BadgeDef[] = [
   { id: "sharpshooter", name: "Sharpshooter", description: "Get every answer right in a round of 10 or more", icon: "bolt", earned: s => s.perfectRounds >= 1 },
   { id: "century", name: "Century", description: "Answer 100 practice questions correctly", icon: "medal", earned: s => s.correctAnswers >= 100 },
   { id: "on_a_roll", name: "On a Roll", description: "Learn or practice 3 days in a row", icon: "flame", earned: s => s.streakDays >= 3 },
+  { id: "class_regular", name: "Class Regular", description: "Check in to your class 5 times", icon: "controller", earned: s => s.classCheckins >= 5 },
   { id: "level_5", name: "Level 5", description: "Reach level 5", icon: "crown", earned: (_s, level) => level >= 5 },
 ];
 

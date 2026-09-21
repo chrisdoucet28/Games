@@ -3,6 +3,7 @@ import { supabase } from "../../lib/supabaseClient";
 import { ThemeAmbience } from "./ThemeAmbience";
 import { MarketingLanding } from "./MarketingLanding";
 import { Icon } from "./Icon";
+import { peekPendingJoinCode } from "../../lib/pendingJoin";
 
 type Mode = "sign-in" | "sign-up";
 
@@ -71,8 +72,13 @@ export function AuthScreen() {
   // form (and the Google button) only renders once "Log In" or "Sign Up" is clicked below.
   // Someone arriving from a used/expired email link goes straight to the log-in form with the
   // explanation showing, instead of the marketing landing with no clue why they aren't signed in.
-  const [notice, setNotice] = useState<string | null>(pendingLinkProblem);
-  const [showForm, setShowForm] = useState(pendingLinkProblem !== null);
+  // Someone who opened a teacher's class link ("/?joinClass=CODE") is told what to do next — the code
+  // itself is already parked for the student home (lib/pendingJoin.ts).
+  const [joiningClass] = useState(() => peekPendingJoinCode() !== null);
+  const [notice, setNotice] = useState<string | null>(
+    pendingLinkProblem ?? (joiningClass ? "You're joining a class. Log in, or sign up, with a student account to continue." : null)
+  );
+  const [showForm, setShowForm] = useState(pendingLinkProblem !== null || joiningClass);
   const [mode, setMode] = useState<Mode>("sign-in");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

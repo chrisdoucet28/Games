@@ -4,6 +4,7 @@ import { BADGES, earnedBadgeIds, levelInfo, xpFromStats, type StudentStats } fro
 import { getLessonsDone, getStudentStats } from "../../lib/studentProgress";
 import { chooseRole } from "../../lib/profile";
 import { Icon } from "../shared/Icon";
+import { MyClassesSection } from "./MyClassesSection";
 
 // What a logged-in student sees instead of the teacher app — their level, streak, badges and
 // lesson progress, with two big doors into the public Learn and Practice pages (which recognise a
@@ -12,7 +13,7 @@ import { Icon } from "../shared/Icon";
 const INK = "#0C1E3D";
 const SKY = "#0369A1";
 
-const EMPTY_STATS: StudentStats = { lessonsDone: 0, rounds: 0, correctAnswers: 0, perfectRounds: 0, streakDays: 0 };
+const EMPTY_STATS: StudentStats = { lessonsDone: 0, rounds: 0, correctAnswers: 0, perfectRounds: 0, streakDays: 0, classCheckins: 0 };
 
 export function StudentHome({ onSwitchToTeacher }: { onSwitchToTeacher: () => void }) {
   const [stats, setStats] = useState<StudentStats | null>(null);
@@ -83,6 +84,8 @@ export function StudentHome({ onSwitchToTeacher }: { onSwitchToTeacher: () => vo
             <Icon name="learn" size={18} /> Browse lessons
           </a>
         </div>
+
+        <MyClassesSection cardStyle={card} />
 
         <div style={card}>
           <div style={{ fontWeight: 900, fontSize: "16px", color: INK, marginBottom: "12px" }}>Badges · {earned.size}/{BADGES.length}</div>

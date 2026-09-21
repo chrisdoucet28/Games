@@ -5,6 +5,7 @@ import { TEAM_COLORS, GAME_MODES, LEVELS_META, FREE_PLAN_LIMITS } from "../../da
 import { listClasses, createClass, deleteClass, setLeaderboardVisibility } from "../../lib/classes";
 import { hexToRgba, type Theme } from "../../data/themes";
 import { Icon } from "./Icon";
+import { ClassStudentsPanel } from "./ClassStudentsPanel";
 
 type Props = {
   onBack: () => void;
@@ -212,6 +213,8 @@ export function ClassesScreen({ onBack, onResumeClass, onStartWithClass, theme, 
                     <Icon name="plus" size={12} /> Start New Game
                   </button>
                 </div>
+
+                <ClassStudentsPanel classId={cls.id} theme={theme} />
               </div>
             ))}
           </div>

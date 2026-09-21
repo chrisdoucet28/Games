@@ -23,6 +23,8 @@ import { PhoneRaceTrackView } from "../phone/PhoneRaceTrackView";
 import { PhoneKingOfHillView } from "../phone/PhoneKingOfHillView";
 import { PhoneBountyBoardView } from "../phone/PhoneBountyBoardView";
 import { PhoneRelayView } from "../phone/PhoneRelayView";
+import { useAuth } from "../../hooks/useAuth";
+import { getMyClassLink, linkMyTeam, recordClassAttendance, type MyClass } from "../../lib/classMembership";
 
 type Props = { code: string };
 
@@ -52,6 +54,14 @@ function loadClaimedTeamId(code: string): string | number | null {
     return parsed.code === code && parsed.teamId !== undefined ? parsed.teamId : null;
   } catch {
     return null;
+  }
+}
+
+function clearClaimedTeamId(code: string) {
+  try {
+    localStorage.removeItem(STORAGE_PREFIX + code);
+  } catch {
+    // Best-effort, same as saveClaimedTeamId.
   }
 }
 
@@ -148,6 +158,64 @@ export function ClassJoinScreen({ code }: Props) {
     classChannelRef.current?.track({ teamId, deviceId: getDeviceId() });
   };
 
+  // --- Optional student account ---
+  // Nothing in this block is ever required: a phone with no logged-in student skips all of it and
+  // behaves exactly as before, and every call here fails silently. A logged-in student who is an
+  // approved member of this class gets their saved team auto-picked, the team they pick remembered,
+  // and today's check-in counted (see lib/classMembership.ts and the class_membership migration).
+  const { session } = useAuth();
+  const userId = session?.user.id ?? null;
+  const classId = classState?.classId ?? null;
+  const [link, setLink] = useState<MyClass | null>(null);
+  const [checkinCounted, setCheckinCounted] = useState(false);
+  // Set when the student taps "Not your team? Change", so their remembered team isn't instantly re-picked.
+  const suppressAutoClaimRef = useRef(false);
+  const checkinDoneRef = useRef(false);
+  const lastLinkAttemptRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    setLink(null);
+    if (!userId || !classId) return;
+    let cancelled = false;
+    getMyClassLink(classId).then(l => {
+      if (cancelled) return;
+      setLink(l);
+      lastLinkAttemptRef.current = l?.team?.id ?? null;
+    });
+    return () => { cancelled = true; };
+  }, [userId, classId]);
+
+  // Auto-pick the remembered team, if it's in today's line-up.
+  useEffect(() => {
+    if (!link?.team || claimedTeamId !== null || !classState || suppressAutoClaimRef.current) return;
+    const rememberedId = link.team.id;
+    const match = classState.roster.find(t => t.rosterId === rememberedId);
+    if (match) handleClaim(match.id);
+  }, [link, claimedTeamId, classState]);
+
+  // Once on a team: remember it on the account (when it changed) and count today's check-in.
+  useEffect(() => {
+    if (!link || !classId || claimedTeamId === null || !classState) return;
+    const team = classState.roster.find(t => t.id === claimedTeamId);
+    const rosterId = team?.rosterId ?? null;
+    if (rosterId && rosterId !== lastLinkAttemptRef.current) {
+      lastLinkAttemptRef.current = rosterId;
+      linkMyTeam(classId, rosterId);
+    }
+    if (!checkinDoneRef.current) {
+      checkinDoneRef.current = true;
+      recordClassAttendance(classId).then(isNew => { if (isNew) setCheckinCounted(true); });
+    }
+  }, [link, classId, claimedTeamId, classState]);
+
+  const handleChangeTeam = () => {
+    suppressAutoClaimRef.current = true;
+    claimedTeamIdRef.current = null;
+    setClaimedTeamId(null);
+    clearClaimedTeamId(code);
+    classChannelRef.current?.untrack();
+  };
+
   // --- Inner per-game channel (opened/closed every time activeGame changes) ---
   const innerChannelRef = useRef<RealtimeChannel | null>(null);
   const [innerState, setInnerState] = useState<InnerStatePayload | null>(null);
@@ -236,6 +304,11 @@ export function ClassJoinScreen({ code }: Props) {
         <div style={{ color: "#93C5FD99", fontSize: "12px", marginTop: "18px", lineHeight: 1.6 }}>
           You'll only need to do this once — your phone will automatically follow along for the rest of class.
         </div>
+        {link && (
+          <div style={{ color: "#86EFAC", fontSize: "12px", marginTop: "8px", lineHeight: 1.5 }}>
+            Signed in to your class — we'll remember your team for next time.
+          </div>
+        )}
       </div>
     );
   }
@@ -252,6 +325,19 @@ export function ClassJoinScreen({ code }: Props) {
         <div style={{ fontSize: "40px", marginBottom: "10px" }}>📺</div>
         <div style={{ fontWeight: "900", fontSize: "18px", color: "#FCD34D", marginBottom: "8px" }}>Watch the shared screen</div>
         <div style={{ color: "#93C5FD", fontSize: "14px", lineHeight: 1.6 }}>Nothing to do on your phone right now — it'll switch on its own the moment your teacher starts a phone-friendly game.</div>
+        {checkinCounted ? (
+          <div style={{ marginTop: "16px", background: "rgba(134,239,172,0.12)", border: "1px solid rgba(134,239,172,0.4)", color: "#86EFAC", borderRadius: "12px", padding: "8px 14px", fontSize: "13px", fontWeight: 700 }}>
+            ✓ Check-in counted today · +10 XP
+          </div>
+        ) : link ? (
+          <div style={{ marginTop: "16px", color: "#86EFAC", fontSize: "12.5px" }}>Signed in — your team is saved to your account.</div>
+        ) : null}
+        <button
+          onClick={handleChangeTeam}
+          style={{ marginTop: "22px", background: "none", border: "none", color: "#93C5FD99", fontSize: "12px", textDecoration: "underline", cursor: "pointer" }}
+        >
+          Not your team? Change
+        </button>
       </div>
     );
   }

@@ -5,6 +5,7 @@ import { AuthScreen } from './components/shared/AuthScreen';
 import { PhoneJoinScreen } from './components/phone/PhoneJoinScreen';
 import { ClassJoinScreen } from './components/shared/ClassJoinScreen';
 import { useAuth } from './hooks/useAuth';
+import { capturePendingJoinCode } from './lib/pendingJoin';
 import { supabase, isSupabaseConfigured } from './lib/supabaseClient';
 import { getProfile } from './lib/profile';
 import { getSubscription, FREE_SUBSCRIPTION } from './lib/subscription';
@@ -173,6 +174,10 @@ function AuthenticatedApp() {
   // LessonGamesGenerator as a one-time initial-screen override, same idea as checkoutRedirect
   // below (both only ever matter on the very first render after this gate clears).
   const [initialScreen, setInitialScreen] = useState<'learn' | null>(null);
+  // A teacher's shared class link ("/?joinClass=CODE"): parked in sessionStorage and stripped from the
+  // address before any screen renders, so the code survives logging in or signing up and then
+  // prefills the student home's "Join a class" form (see lib/pendingJoin.ts). Teachers ignore it.
+  useState(() => capturePendingJoinCode());
   // Stripe's checkout success/cancel URLs redirect back to "/?checkout=success|cancel" — read
   // that once on load, then strip it from the URL so a refresh doesn't re-trigger it.
   const [checkoutRedirect] = useState<'success' | 'cancel' | null>(() => {

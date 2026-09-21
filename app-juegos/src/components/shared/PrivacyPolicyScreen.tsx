@@ -34,6 +34,7 @@ export function PrivacyPolicyScreen() {
           <li><strong>Class and game data</strong> — class names, school name, class level, team names/colors/mascots, scores, saved in-progress games, and which topics you've selected.</li>
           <li><strong>Account type</strong> — whether you told us you're a teacher or a student.</li>
           <li><strong>Student progress</strong> — if you use a student account, which lessons you've marked finished and the results of your practice quiz rounds (the topics practiced, and how many answers were correct). Your level, XP and badges are worked out from this.</li>
+          <li><strong>Class membership</strong> — if you use a student account to join a teacher's class, the name you type when you ask to join, whether the teacher has approved you, the saved team you pick during a Class Check-In, and the days you checked in. Only your teacher's view of the class shows your typed name (never your email address); your team and check-in days are visible only to you. Joining a class is always optional.</li>
           <li><strong>Feedback</strong> — anything you submit through the in-app Feedback button or a game's flag button.</li>
           <li><strong>Billing status</strong> — if you subscribe to a paid plan, we store your subscription status and plan (active, plan type, renewal date). Your card details go directly to our payment processor, Stripe — we never see or store them.</li>
           <li><strong>Basic usage analytics</strong> — anonymized page-visit data (via Vercel Analytics) to understand how the app is used. This isn't tied to your personal profile.</li>
@@ -45,7 +46,8 @@ export function PrivacyPolicyScreen() {
           on Phones" feature, a student's phone only ever sends which team they tapped to join — no
           name, email, or other personal data is collected. The public Learn lessons and Practice quiz
           also work without any account, and nothing is stored about you unless you choose to log in
-          with a student account.
+          with a student account. Even then, a student who never joins a teacher's class shares nothing
+          with any teacher.
         </p>
 
         <h2 style={sectionHeading}>Why we collect it</h2>
@@ -62,6 +64,10 @@ export function PrivacyPolicyScreen() {
           <li><strong>Google</strong> — provides the optional "Sign in with Google" login method.</li>
           <li><strong>Vercel</strong> — hosts the website and provides anonymized usage analytics.</li>
         </ul>
+        <p>
+          If you're a student and choose to join a teacher's class, that teacher can see the name you
+          typed to join (and remove you from the class). Nobody else does.
+        </p>
         <p>We never sell your data, and we never share it with anyone for advertising purposes.</p>
 
         <h2 style={sectionHeading}>How long we keep it, and deleting your data</h2>

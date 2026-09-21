@@ -35,14 +35,17 @@ export async function recordPracticeRound(round: { id: string; topics: string[];
 }
 
 export async function getStudentStats(): Promise<StudentStats> {
-  const [lessons, totals, recent] = await Promise.all([
+  const [lessons, totals, recent, attendance] = await Promise.all([
     supabase.from("lesson_completions").select("completed_at"),
     supabase.from("my_practice_totals").select("*").maybeSingle(),
     supabase.from("practice_rounds").select("created_at").order("created_at", { ascending: false }).limit(120),
+    supabase.from("class_attendance").select("day"),
   ]);
   if (lessons.error) throw lessons.error;
   if (totals.error) throw totals.error;
   if (recent.error) throw recent.error;
+  // Deliberately NOT thrown: on a database without the class_membership migration this table doesn't
+  // exist, and progress from lessons/practice must keep working — check-ins just count as zero.
 
   const activityDates = [
     ...(lessons.data ?? []).map(r => r.completed_at as string),
@@ -54,5 +57,6 @@ export async function getStudentStats(): Promise<StudentStats> {
     correctAnswers: (totals.data?.correct_answers as number | undefined) ?? 0,
     perfectRounds: (totals.data?.perfect_rounds as number | undefined) ?? 0,
     streakDays: streakFromDates(activityDates),
+    classCheckins: attendance.error ? 0 : (attendance.data ?? []).length,
   };
 }

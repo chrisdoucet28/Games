@@ -195,6 +195,10 @@ export interface TeamColor {
     // synced to public.leaderboard_entries the moment this flips true, via a Postgres trigger on
     // this table (see lib/leaderboard.ts). Never toggled by the client for any other reason.
     hide_from_leaderboard: boolean;
+    // The persistent code students use to ask to join this class. Absent until the teacher first
+    // opens the Students panel (created then, in the database) — and on a database that doesn't have
+    // the class_membership migration yet.
+    join_code?: string | null;
     created_at: string;
     updated_at: string;
   }

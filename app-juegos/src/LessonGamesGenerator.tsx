@@ -967,7 +967,16 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     setTeams(builtTeams);
     if (activeClassId) {
       upsertTeamRoster(activeClassId, builtTeams, teamRosterIds.slice(0, numTeams))
-        .then(({ roster }) => setTeamRoster(roster))
+        .then(({ roster, resolvedIds }) => {
+          setTeamRoster(roster);
+          // Same write-back saveTeamsToRoster does, so a Class Check-In started right after Continue
+          // already knows each team's saved id (used to link student accounts to their team).
+          setTeamRosterIds(prev => {
+            const next = [...prev];
+            resolvedIds.forEach((id, i) => { next[i] = id; });
+            return next;
+          });
+        })
         .catch(() => {});
     }
     // A pending lesson topic means the teacher arrived here via the Lesson Plan index (topic
@@ -1055,14 +1064,26 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
   const sendClassSessionState = useCallback(() => {
     const channel = classChannelRef.current;
     if (!channel) return;
+    // Which saved team (classes.team_roster entry) each on-screen team is, so a logged-in student's
+    // phone can remember/auto-pick "my team". Team ids are slot indexes, parallel to teamRosterIds;
+    // when a slot never got its id written back (a quick Continue before the autosave ran) the same
+    // name match upsertTeamRoster itself falls back to is used instead. Purely additive — phones
+    // without accounts ignore it.
+    const rosterIdFor = (t: Team): string | null => {
+      const bySlot = typeof t.id === "number" ? teamRosterIds[t.id] : null;
+      if (bySlot) return bySlot;
+      const key = t.name.trim().toLowerCase();
+      return teamRoster.find(r => r.name.trim().toLowerCase() === key)?.id ?? null;
+    };
     const payload: ClassSessionStatePayload = {
       activeGame: classActiveGameRef.current,
-      roster: teams.map(t => ({ id: t.id, name: t.name, color: t.color, mascot: t.mascot })),
+      classId: activeClassId,
+      roster: teams.map(t => ({ id: t.id, name: t.name, color: t.color, mascot: t.mascot, rosterId: rosterIdFor(t) })),
       connectedTeamIds: Array.from(classConnectedTeamIds),
       ts: Date.now(),
     };
     channel.send({ type: "broadcast", event: "state", payload });
-  }, [teams, classConnectedTeamIds]);
+  }, [teams, classConnectedTeamIds, activeClassId, teamRosterIds, teamRoster]);
 
   useEffect(() => {
     if (!classSessionCode) return;
