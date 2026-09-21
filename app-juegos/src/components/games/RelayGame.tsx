@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { TeamIcon } from "../shared/TeamIcon";
 import { Icon } from "../shared/Icon";
 import type { RealtimeChannel } from "@supabase/supabase-js";
@@ -10,6 +10,8 @@ import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
 import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
 import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
+import { CustomWordsPanel } from "../shared/CustomWordsPanel";
+import { useWordDeck } from "../../hooks/useWordDeck";
 import { RELAY_TUTORIAL_STEPS } from "../../data/tutorials/relay";
 import { playSound } from "../../lib/sounds";
 import { setMusicGame, setMusicContext, stopMusic } from "../../lib/music";
@@ -35,15 +37,6 @@ const STYLE_TAG = (
   `}</style>
 );
 
-const shuffle = <T,>(items: T[]) => {
-  const shuffled = [...items];
-  for (let i = shuffled.length - 1; i > 0; i -= 1) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-  }
-  return shuffled;
-};
-
 // What "Save & Exit" snapshots and "Resume" restores — the turn cursor and each team's running word
 // total. Resuming lands on the "ready" screen for whoever's turn it was, with fresh words for every
 // team rather than trying to restore the exact hidden words that were live when saved.
@@ -51,6 +44,8 @@ type RelaySnapshot = {
   roundIndex: number;
   teamIndex: number;
   wordsByTeam: Record<string | number, number>;
+  // The teacher's own word list, if they used one — a resumed game keeps playing it.
+  customWords?: string[] | null;
 };
 
 function validateRelaySnapshot(raw: unknown, teamCount: number): RelaySnapshot | undefined {
@@ -58,7 +53,10 @@ function validateRelaySnapshot(raw: unknown, teamCount: number): RelaySnapshot |
   if (!s || typeof s.roundIndex !== "number" || s.roundIndex < 0) return undefined;
   if (typeof s.teamIndex !== "number" || s.teamIndex < 0 || s.teamIndex >= teamCount) return undefined;
   if (s.roundIndex >= QUESTIONS_PER_TEAM) return undefined;
-  return { roundIndex: s.roundIndex, teamIndex: s.teamIndex, wordsByTeam: s.wordsByTeam ?? {} };
+  const customWords = Array.isArray(s.customWords)
+    ? s.customWords.filter((w): w is string => typeof w === "string" && w.trim() !== "").slice(0, 200)
+    : null;
+  return { roundIndex: s.roundIndex, teamIndex: s.teamIndex, wordsByTeam: s.wordsByTeam ?? {}, customWords };
 }
 
 export function RelayGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState, presetPhoneSession }: GameProps) {
@@ -109,47 +107,39 @@ export function RelayGame({ questions, teams, onUpdateScore, onEnd, forceFinalRe
   // The word a team just guessed, shown on the reveal card — teamWords already holds their NEXT word.
   const [revealWord, setRevealWord] = useState("");
 
+  // The word pool and its shuffled deck (every word once per lap, reshuffled when exhausted, no repeat
+  // across a lap boundary) live in the shared hook, along with the teacher's own-words mode — see
+  // hooks/useWordDeck.ts.
+  const { words, customWords, drawWord, applyCustomWords, resetToTopicWords } = useWordDeck(questions, resumed?.customWords);
+
   useEffect(() => {
     if (!serializeStateRef) return;
-    serializeStateRef.current = (): RelaySnapshot => ({ roundIndex, teamIndex, wordsByTeam });
+    serializeStateRef.current = (): RelaySnapshot => ({ roundIndex, teamIndex, wordsByTeam, customWords });
     return () => { if (serializeStateRef) serializeStateRef.current = null; };
-  }, [serializeStateRef, roundIndex, teamIndex, wordsByTeam]);
+  }, [serializeStateRef, roundIndex, teamIndex, wordsByTeam, customWords]);
 
-  const words = useMemo(() => {
-    const uniqueWords = new Map<string, string>();
-    questions.forEach(q => {
-      const word = q.word?.trim();
-      if (word) uniqueWords.set(word.toLowerCase(), word);
-    });
-    return Array.from(uniqueWords.values());
-  }, [questions]);
-
-  // Shuffled deck with reshuffle-on-exhaustion, same pattern as Hot Seat — every word appears
-  // exactly once per lap, in a fresh order each lap, and the one-item swap after reshuffling
-  // stops the last word of one lap immediately reappearing as the first of the next.
-  const deckRef = useRef<string[]>(shuffle(words));
-  const deckPosRef = useRef(0);
-  const lastWordRef = useRef<string | undefined>(undefined);
-  const drawWord = useCallback(() => {
-    if (deckPosRef.current >= deckRef.current.length) {
-      const next = shuffle(words);
-      if (next.length > 1 && next[0] === lastWordRef.current) {
-        [next[0], next[1]] = [next[1], next[0]];
-      }
-      deckRef.current = next;
-      deckPosRef.current = 0;
-    }
-    const word = deckRef.current[deckPosRef.current];
-    deckPosRef.current += 1;
-    lastWordRef.current = word;
-    return word;
-  }, [words]);
   // Every team has its own hidden word at all times.
   const [teamWords, setTeamWords] = useState<Record<string, string>>(() => {
     const initial: Record<string, string> = {};
     if (words.length > 0) teams.forEach(t => { initial[String(t.id)] = drawWord(); });
     return initial;
   });
+
+  // Applied from the welcome screen (nothing has been played yet): swap the pool, then re-deal every
+  // team a hidden word from the new list.
+  const redealTeamWords = () => {
+    const fresh: Record<string, string> = {};
+    teams.forEach(t => { fresh[String(t.id)] = drawWord(); });
+    setTeamWords(fresh);
+  };
+  const handleApplyCustomWords = (list: string[]) => {
+    applyCustomWords(list);
+    redealTeamWords();
+  };
+  const handleResetWords = () => {
+    resetToTopicWords();
+    redealTeamWords();
+  };
 
   const currentTeam = teams[teamIndex];
   const currentKey = String(currentTeam?.id);
@@ -411,6 +401,17 @@ export function RelayGame({ questions, teams, onUpdateScore, onEnd, forceFinalRe
                 {i + 1}. <TeamIcon team={t} color="white" /> {t.name}
               </div>
             ))}
+          </div>
+
+          {/* The teacher's own words instead of the topic's — e.g. "which celebrity am I?" (see
+              hooks/useWordDeck.ts). Only here on the one-time welcome screen, before anything has
+              been played. Each team gets its own word from the list. */}
+          <div style={{ maxWidth: "540px", margin: "0 auto" }}>
+            <CustomWordsPanel
+              theme={{ accent: "#5EEAD4", accentSolid: "#0D9488" }}
+              teamCount={teams.length} tipBelow={Math.max(10, teams.length * 4)}
+              active={customWords} onApply={handleApplyCustomWords} onReset={handleResetWords}
+            />
           </div>
 
           {/* Skipped entirely for a Class Check-In sitting — presetPhoneSession already picked

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { TeamIcon } from "../shared/TeamIcon";
 import { Icon } from "../shared/Icon";
 import type { RealtimeChannel } from "@supabase/supabase-js";
@@ -10,6 +10,8 @@ import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
 import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
 import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
+import { CustomWordsPanel } from "../shared/CustomWordsPanel";
+import { useWordDeck } from "../../hooks/useWordDeck";
 import { HOTSEAT_TUTORIAL_STEPS } from "../../data/tutorials/hotseat";
 import { playSound } from "../../lib/sounds";
 import { setMusicContext, setMusicGame, stopMusic } from "../../lib/music";
@@ -61,17 +63,6 @@ function LavaGlow() {
   );
 }
 
-const shuffle = <T,>(items: T[]) => {
-  const shuffled = [...items];
-
-  for (let i = shuffled.length - 1; i > 0; i -= 1) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-  }
-
-  return shuffled;
-};
-
 // What "Save & Exit" snapshots and "Resume" restores — the round/team turn cursor and each team's
 // running word total. Resuming skips straight to the per-turn "pass the device" intro for the
 // team whose turn it was, rather than replaying the one-time welcome screen or the exact word/
@@ -80,6 +71,8 @@ type HotSeatSnapshot = {
   roundIndex: number;
   teamIndex: number;
   totalWordsByTeam: Record<string | number, number>;
+  // The teacher's own word list, if they used one — a resumed game keeps playing it.
+  customWords?: string[] | null;
 };
 
 function validateHotSeatSnapshot(raw: unknown, teamCount: number): HotSeatSnapshot | undefined {
@@ -87,7 +80,10 @@ function validateHotSeatSnapshot(raw: unknown, teamCount: number): HotSeatSnapsh
   if (!s || typeof s.roundIndex !== "number" || s.roundIndex < 0) return undefined;
   if (typeof s.teamIndex !== "number" || s.teamIndex < 0 || s.teamIndex >= teamCount) return undefined;
   if (s.roundIndex >= TOTAL_ROUNDS) return undefined;
-  return { roundIndex: s.roundIndex, teamIndex: s.teamIndex, totalWordsByTeam: s.totalWordsByTeam ?? {} };
+  const customWords = Array.isArray(s.customWords)
+    ? s.customWords.filter((w): w is string => typeof w === "string" && w.trim() !== "").slice(0, 200)
+    : null;
+  return { roundIndex: s.roundIndex, teamIndex: s.teamIndex, totalWordsByTeam: s.totalWordsByTeam ?? {}, customWords };
 }
 
 export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState, presetPhoneSession }: GameProps) {
@@ -139,51 +135,33 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
   // each turn, so this is the one thing that needs to survive to the final results screen.
   const [totalWordsByTeam, setTotalWordsByTeam] = useState<Record<string | number, number>>(() => resumed?.totalWordsByTeam ?? {});
 
+  // The word pool and its shuffled deck (every word once per lap, reshuffled when exhausted, no repeat
+  // across a lap boundary) live in the shared hook, along with the teacher's own-words mode — see
+  // hooks/useWordDeck.ts.
+  const { words, customWords, drawWord, applyCustomWords, resetToTopicWords } = useWordDeck(questions, resumed?.customWords);
+
   useEffect(() => {
     if (!serializeStateRef) return;
-    serializeStateRef.current = (): HotSeatSnapshot => ({ roundIndex, teamIndex, totalWordsByTeam });
+    serializeStateRef.current = (): HotSeatSnapshot => ({ roundIndex, teamIndex, totalWordsByTeam, customWords });
     return () => { if (serializeStateRef) serializeStateRef.current = null; };
-  }, [serializeStateRef, roundIndex, teamIndex, totalWordsByTeam]);
+  }, [serializeStateRef, roundIndex, teamIndex, totalWordsByTeam, customWords]);
   const [timeLeft, setTimeLeft] = useState(TURN_SECONDS);
   const [showWordList, setShowWordList] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const turnCorrectRef = useRef(0);
 
-  const words = useMemo(() => {
-    const uniqueWords = new Map<string, string>();
-
-    questions.forEach(q => {
-      const word = q.word?.trim();
-      if (word) uniqueWords.set(word.toLowerCase(), word);
-    });
-
-    return Array.from(uniqueWords.values());
-  }, [questions]);
-
-  // A shuffled deck rather than a fixed shuffled list drawn via a plain modulo cursor — a small
-  // word pool gets cycled through more than once in a single game, and a modulo cursor would
-  // repeat the exact same order every lap. Reshuffling only once the deck is exhausted (not on
-  // every draw) keeps every word appearing exactly once per lap, same as before, just in a fresh
-  // order each time — and the one-item swap after reshuffling stops the last word of one lap from
-  // immediately reappearing as the first word of the next.
-  const deckRef = useRef<string[]>(shuffle(words));
-  const deckPosRef = useRef(0);
-  const lastWordRef = useRef<string | undefined>(undefined);
-  const drawWord = useCallback(() => {
-    if (deckPosRef.current >= deckRef.current.length) {
-      const next = shuffle(words);
-      if (next.length > 1 && next[0] === lastWordRef.current) {
-        [next[0], next[1]] = [next[1], next[0]];
-      }
-      deckRef.current = next;
-      deckPosRef.current = 0;
-    }
-    const word = deckRef.current[deckPosRef.current];
-    deckPosRef.current += 1;
-    lastWordRef.current = word;
-    return word;
-  }, [words]);
   const [currentWord, setCurrentWord] = useState<string>(() => (words.length > 0 ? drawWord() : ""));
+
+  // Applied from the welcome screen (nothing has been played yet): swap the pool, then deal a first
+  // word from the new list.
+  const handleApplyCustomWords = (list: string[]) => {
+    applyCustomWords(list);
+    setCurrentWord(drawWord());
+  };
+  const handleResetWords = () => {
+    resetToTopicWords();
+    setCurrentWord(drawWord());
+  };
 
   const currentTeam = teams[teamIndex];
   const turnNumber = roundIndex * teams.length + teamIndex + 1;
@@ -475,6 +453,16 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
                 {i + 1}. <TeamIcon team={t} color="white" /> {t.name}
               </div>
             ))}
+          </div>
+
+          {/* The teacher's own words instead of the topic's (see hooks/useWordDeck.ts). Only here on the
+              one-time welcome screen, before anything has been played. */}
+          <div style={{ maxWidth: "520px", margin: "0 auto" }}>
+            <CustomWordsPanel
+              theme={{ accent: "#FDBA74", accentSolid: "#EA580C" }}
+              teamCount={teams.length} tipBelow={10}
+              active={customWords} onApply={handleApplyCustomWords} onReset={handleResetWords}
+            />
           </div>
 
           {/* Skipped entirely for a Class Check-In sitting — presetPhoneSession already picked
