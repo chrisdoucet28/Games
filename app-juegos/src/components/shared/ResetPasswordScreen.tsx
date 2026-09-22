@@ -87,6 +87,16 @@ export function ResetPasswordScreen({ onDone }: { onDone: () => void }) {
               >
                 {loading ? "Please wait…" : "Set new password"}
               </button>
+
+              {/* The "mid-recovery" flag this screen gates on now survives a reload (see useAuth.ts)
+                  — without a way to bail out here, changing your mind and closing this screen would
+                  mean reseeing it, stuck, on every future visit with no path into the app at all. */}
+              <button
+                type="button" onClick={onDone}
+                style={{ display: "block", width: "100%", textAlign: "center", background: "none", border: "none", color: "#7DB8DB", fontSize: "12.5px", fontWeight: "700", cursor: "pointer", padding: 0, marginTop: "14px" }}
+              >
+                Skip for now, keep my current password
+              </button>
             </form>
           )}
         </div>
