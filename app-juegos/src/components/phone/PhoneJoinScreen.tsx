@@ -21,6 +21,7 @@ import { PhoneRaceTrackView } from "./PhoneRaceTrackView";
 import { PhoneKingOfHillView } from "./PhoneKingOfHillView";
 import { PhoneBountyBoardView } from "./PhoneBountyBoardView";
 import { PhoneRelayView } from "./PhoneRelayView";
+import { isSoloCpu } from "../../lib/soloOpponent";
 
 type Game = "auction" | "spy" | "whack" | "hotseat" | "orderup" | "racetrack" | "hill" | "bounty" | "relay";
 type Props = { code: string; game: Game };
@@ -310,7 +311,10 @@ export function PhoneJoinScreen({ code, game }: Props) {
         <div style={{ fontSize: "36px", marginBottom: "6px" }}>{copy.joinEmoji}</div>
         <div style={{ fontWeight: "900", fontSize: "18px", color: "#FCD34D", marginBottom: "18px" }}>Tap your team</div>
         <div style={{ display: "flex", flexDirection: "column", gap: "10px", width: "100%", maxWidth: "360px" }}>
-          {state.roster.map(t => {
+          {/* A solo (1-team) game's roster carries a synthetic CPU team (King of Hill, Race Track,
+              Bounty Board, Word Relay all do this) so it shows up in scoreboards/rankings — but it
+              has no real student behind it, so it's never an option a phone can actually claim. */}
+          {state.roster.filter(t => !isSoloCpu(t.id)).map(t => {
             // Word Relay is the one game where several phones share a team (each is one person in
             // the asker rotation), so a team someone already joined stays open to claim there.
             const takenByOther = game !== "relay" && state.connectedTeamIds.includes(t.id) && t.id !== claimedTeamIdRef.current;

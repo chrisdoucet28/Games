@@ -60,7 +60,25 @@ export function PhoneBountyBoardView({ state, teamId, onAction }: Props) {
         <div style={{ fontSize: "12px", fontWeight: "800", color: "#92400E", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: "8px" }}>This round's word</div>
         <div style={{ background: "white", border: "2px solid #D97706", borderRadius: "12px", padding: "10px 12px", fontSize: "14px", fontWeight: "700", marginBottom: "10px" }}>{state.promptText}</div>
 
-        {myOpenBounty ? (
+        {myOpenBounty && state.isSolo && myOpenBounty.claimedBy === undefined ? (
+          // Solo: there's no other real team to steal it, only the CPU racing a countdown on the
+          // big screen — this is the only place the human can claim their own bounty from, since
+          // openBounties (below) deliberately excludes a team's own bounty for every OTHER mode.
+          <div style={{ background: "#FEE2E2", border: "2px dashed #B91C1C", borderRadius: "10px", padding: "10px 12px" }}>
+            <div style={{ fontSize: "12px", fontWeight: "700", color: "#7F1D1D", marginBottom: "8px" }}>
+              Your sentence was wrong — the CPU is racing to steal it! Claim it before time runs out.
+            </div>
+            <button
+              onClick={() => onAction({ teamId, action: "claimBounty", bountyId: myOpenBounty.id })}
+              style={{ background: "linear-gradient(135deg,#991B1B,#B91C1C)", color: "white", border: "none", borderRadius: "8px", padding: "8px 16px", fontSize: "13px", fontWeight: "800", cursor: "pointer", width: "100%" }}
+            >Claim it now!</button>
+          </div>
+        ) : myOpenBounty && state.isSolo ? (
+          // Solo, already self-claimed — the CPU's countdown is paused while you're claimed (it
+          // only resumes if the fix comes back wrong), and myClaimedBounties below already renders
+          // the real fix-writing card, so this is just a pointer down to it, not a duplicate.
+          <div style={{ fontSize: "12px", fontWeight: "700", color: "#92400E", padding: "6px 0" }}>You claimed it — write your fix below.</div>
+        ) : myOpenBounty ? (
           <div style={{ background: "#FEE2E2", border: "1px dashed #FCA5A5", borderRadius: "10px", padding: "10px 12px", fontSize: "12px", fontWeight: "700", color: "#7F1D1D" }}>
             Your sentence was wrong — it's now an open bounty another team can claim.
           </div>

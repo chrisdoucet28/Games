@@ -505,6 +505,10 @@ export type BountyBoardStatePayload = {
   roundEntries: BountyRoundEntry[];
   bounties: Bounty[];
   scores: Record<string, number>;
+  // Solo (1 real team + a CPU) — the phone view needs this because the normal "you can't claim
+  // your own bounty" rule inverts in solo: the CPU is racing to steal it instead, so the human is
+  // the ONLY one who ever can claim it (see PhoneBountyBoardView's own use of this flag).
+  isSolo: boolean;
   ts: number;
 };
 

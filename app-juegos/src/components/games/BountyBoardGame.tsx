@@ -516,6 +516,7 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
         roundEntries: roundEntriesRef.current,
         bounties: bountiesRef.current,
         scores,
+        isSolo,
         ts: Date.now(),
       };
       channel.send({ type: "broadcast", event: "state", payload });
@@ -627,7 +628,7 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
             const joinUrl = `${window.location.origin}${window.location.pathname}?join=${sessionCode}&game=bounty`;
             return (
               <PhoneJoinPanel
-                sessionCode={sessionCode} joinUrl={joinUrl} teams={teams} connectedTeamIds={connectedTeamIds}
+                sessionCode={sessionCode} joinUrl={joinUrl} teams={propTeams} connectedTeamIds={connectedTeamIds}
                 accent="#92400E" panelBg="linear-gradient(160deg,#FFFFFF,#FEF3C7)" borderColor="#FDE68A"
                 footer={
                   <button onClick={handlePickScreenMode} style={{ background: "none", border: "none", color: "#9CA3AF", fontSize: "12px", fontWeight: "700", cursor: "pointer", textDecoration: "underline" }}>
@@ -736,7 +737,7 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
       {inputMode === "phone" && sessionCode && !presetPhoneSession && (
         <PhoneReconnectBadge
           sessionCode={sessionCode} joinUrl={`${window.location.origin}${window.location.pathname}?join=${sessionCode}&game=bounty`}
-          teams={teams} connectedTeamIds={connectedTeamIds}
+          teams={propTeams} connectedTeamIds={connectedTeamIds}
           accent="#92400E" panelBg="linear-gradient(160deg,#FFFFFF,#FEF3C7)" borderColor="#FDE68A"
         />
       )}
