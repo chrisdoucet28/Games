@@ -114,24 +114,35 @@ export function PublicLearnLessonScreen({ topicId }: Props) {
         </div>
 
         {isStudent && (
+          // Practice is the button now, Mark-finished a small link — swapped at the owner's request:
+          // practicing a topic is the thing a student actually comes here to do next; marking a
+          // lesson finished is bookkeeping, not the main action.
           <div style={{ textAlign: "center", background: "white", border: "2px solid rgba(3,105,161,0.2)", borderRadius: "16px", padding: "20px", marginTop: "20px" }}>
-            <button
-              onClick={toggleDone}
-              disabled={done === null}
+            <a
+              href={`/practice?topic=${topic.id}`}
               style={{
                 display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "8px", minHeight: "48px", padding: "12px 26px",
-                borderRadius: "12px", fontSize: "15px", fontWeight: "900", cursor: done === null ? "wait" : "pointer",
-                background: done ? "#DCFCE7" : "linear-gradient(135deg,#F59E0B,#D97706)", color: done ? "#15803D" : "white",
-                border: done ? "2px solid #22C55E" : "2px solid #0C1E3D",
+                borderRadius: "12px", fontSize: "15px", fontWeight: "900", textDecoration: "none",
+                background: "linear-gradient(135deg,#F59E0B,#D97706)", color: "white", border: "2px solid #0C1E3D",
               }}
             >
-              {done ? <><Icon name="check" size={15} /> Lesson finished — tap to undo</> : "Mark lesson as finished"}
-            </button>
-            {progressError && <div role="alert" style={{ color: "#991B1B", fontSize: "12px", marginTop: "8px" }}>Couldn't save that — please try again.</div>}
+              <Icon name="target" size={16} color="white" /> Practice this topic
+            </a>
             <div style={{ marginTop: "12px" }}>
-              <a href={`/practice?topic=${topic.id}`} style={{ color: "#0369A1", fontWeight: "800", fontSize: "13px", textDecoration: "none" }}>Practice this topic →</a>
+              <button
+                onClick={toggleDone}
+                disabled={done === null}
+                style={{
+                  background: "none", border: "none", padding: 0, fontFamily: "inherit",
+                  color: done ? "#15803D" : "#0369A1", fontWeight: "800", fontSize: "13px", cursor: done === null ? "wait" : "pointer",
+                  display: "inline-flex", alignItems: "center", gap: "5px",
+                }}
+              >
+                {done ? <><Icon name="check" size={13} /> Lesson finished — tap to undo</> : "Mark lesson as finished"}
+              </button>
               <span style={{ color: "#9CA3AF", margin: "0 10px" }}>·</span>
               <a href="/" style={{ color: "#0369A1", fontWeight: "800", fontSize: "13px", textDecoration: "none" }}>My progress</a>
+              {progressError && <div role="alert" style={{ color: "#991B1B", fontSize: "12px", marginTop: "8px" }}>Couldn't save that — please try again.</div>}
             </div>
           </div>
         )}

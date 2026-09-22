@@ -146,8 +146,13 @@ export function PracticeScreen() {
         <Icon name="target" size={36} color="white" style={{ marginBottom: "8px" }} />
         <h1 style={{ color: "white", fontSize: "26px", fontWeight: "900", margin: 0 }}>Practice on Your Own</h1>
         <p style={{ color: "#BAE6FD", fontSize: "14px", maxWidth: "480px", margin: "10px auto 0", lineHeight: 1.6 }}>
-          Pick a few topics and check yourself with an instant quiz — no account needed, works great
-          on your phone.
+          {/* "No account needed" is only true — and only worth saying — to someone who doesn't have
+              one yet; a signed-in visitor has already logged in to see whatever page sent them here
+              (or is logged in from earlier), so telling them the opposite of what's now true reads
+              as a leftover from the logged-out version of this page, not a real message. */}
+          {loggedIn
+            ? "Pick a few topics and check yourself with an instant quiz — great practice any time, right from your phone."
+            : "Pick a few topics and check yourself with an instant quiz — no account needed, works great on your phone."}
         </p>
       </div>
 
