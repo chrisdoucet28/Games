@@ -329,8 +329,16 @@ export function BountyBoardGame({ questions, teams, onUpdateScore, onEnd, forceF
 
   // Guarded inside the functional updater (not a separate read beforehand) — a screen click racing
   // a phone broadcast for the same bounty can't both succeed, same idiom as Order Up's claimTicket.
+  // The exclusion only holds while some OTHER team could still claim it — solo play (or any state
+  // where the excluded team is the only one left) has to let that same team claim its own bounty,
+  // matching the claimableTeams fallback rendered above, or the round soft-locks forever.
   const claimBounty = (bountyId: number, teamId: string | number) => {
-    setBounties(prev => prev.map(b => (b.id === bountyId && b.claimedBy === undefined && b.excludedTeamId !== teamId ? { ...b, claimedBy: teamId } : b)));
+    setBounties(prev => prev.map(b => {
+      if (b.id !== bountyId || b.claimedBy !== undefined) return b;
+      const otherTeamEligible = teams.some(t => t.id !== b.excludedTeamId);
+      if (b.excludedTeamId === teamId && otherTeamEligible) return b;
+      return { ...b, claimedBy: teamId };
+    }));
   };
 
   const submitBountyFix = (bountyId: number, teamId: string | number, text: string) => {
@@ -448,7 +456,9 @@ export function BountyBoardGame({ questions, teams, onUpdateScore, onEnd, forceF
         submitRoundEntry(action.teamId, action.text);
       } else if (action.action === "claimBounty") {
         const bounty = bountiesRef.current.find(b => b.id === action.bountyId);
-        if (!bounty || bounty.claimedBy !== undefined || bounty.excludedTeamId === action.teamId) return;
+        if (!bounty || bounty.claimedBy !== undefined) return;
+        const otherTeamEligible = teams.some(t => t.id !== bounty.excludedTeamId);
+        if (bounty.excludedTeamId === action.teamId && otherTeamEligible) return;
         claimBounty(action.bountyId, action.teamId);
       } else if (action.action === "submitBountyFix") {
         const bounty = bountiesRef.current.find(b => b.id === action.bountyId);
