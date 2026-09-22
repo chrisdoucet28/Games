@@ -142,19 +142,31 @@ export function PracticeScreen() {
 
   return (
     <div style={{ minHeight: "100vh", background: BG, fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
-      <div style={{ background: "linear-gradient(160deg,#0C1E3D 0%,#0369A1 45%,#0EA5E9 100%)", padding: "40px 20px 32px", textAlign: "center" }}>
-        <Icon name="target" size={36} color="white" style={{ marginBottom: "8px" }} />
-        <h1 style={{ color: "white", fontSize: "26px", fontWeight: "900", margin: 0 }}>Practice on Your Own</h1>
-        <p style={{ color: "#BAE6FD", fontSize: "14px", maxWidth: "480px", margin: "10px auto 0", lineHeight: 1.6 }}>
-          {/* "No account needed" is only true — and only worth saying — to someone who doesn't have
-              one yet; a signed-in visitor has already logged in to see whatever page sent them here
-              (or is logged in from earlier), so telling them the opposite of what's now true reads
-              as a leftover from the logged-out version of this page, not a real message. */}
-          {loggedIn
-            ? "Pick a few topics and check yourself with an instant quiz — great practice any time, right from your phone."
-            : "Pick a few topics and check yourself with an instant quiz — no account needed, works great on your phone."}
-        </p>
-      </div>
+      {/* Full-height intro hero only on the picker — it's a one-time "here's what this page is"
+          moment. On a phone, keeping it at full size through the quiz and summary too ate roughly a
+          third of the screen on every single question for chrome that had already done its job (and
+          on the summary, its own "pick a few topics" copy sits oddly right above a finished score).
+          A slim bar during quiz/summary keeps the branding and back-to-picker link without the tax. */}
+      {screen === "picker" ? (
+        <div style={{ background: "linear-gradient(160deg,#0C1E3D 0%,#0369A1 45%,#0EA5E9 100%)", padding: "40px 20px 32px", textAlign: "center" }}>
+          <Icon name="target" size={36} color="white" style={{ marginBottom: "8px" }} />
+          <h1 style={{ color: "white", fontSize: "26px", fontWeight: "900", margin: 0 }}>Practice on Your Own</h1>
+          <p style={{ color: "#BAE6FD", fontSize: "14px", maxWidth: "480px", margin: "10px auto 0", lineHeight: 1.6 }}>
+            {/* "No account needed" is only true — and only worth saying — to someone who doesn't have
+                one yet; a signed-in visitor has already logged in to see whatever page sent them here
+                (or is logged in from earlier), so telling them the opposite of what's now true reads
+                as a leftover from the logged-out version of this page, not a real message. */}
+            {loggedIn
+              ? "Pick a few topics and check yourself with an instant quiz — great practice any time, right from your phone."
+              : "Pick a few topics and check yourself with an instant quiz — no account needed, works great on your phone."}
+          </p>
+        </div>
+      ) : (
+        <div style={{ background: "linear-gradient(160deg,#0C1E3D 0%,#0369A1 45%,#0EA5E9 100%)", padding: "14px 20px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+          <Icon name="target" size={16} color="white" />
+          <span style={{ color: "white", fontSize: "15px", fontWeight: "900" }}>Practice on Your Own</span>
+        </div>
+      )}
 
       <div style={{ maxWidth: "480px", margin: "0 auto", padding: "24px 20px 100px" }}>
         {screen === "picker" && (
