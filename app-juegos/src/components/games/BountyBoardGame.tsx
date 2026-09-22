@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import { TeamIcon } from "../shared/TeamIcon";
 import { Icon } from "../shared/Icon";
 import type { RealtimeChannel } from "@supabase/supabase-js";
@@ -13,6 +13,9 @@ import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
 import { BOUNTYBOARD_TUTORIAL_STEPS } from "../../data/tutorials/bountyboard";
 import { playSound } from "../../lib/sounds";
 import { setMusicGame, setMusicContext, stopMusic } from "../../lib/music";
+import { makeSoloCpuTeam } from "../../lib/soloOpponent";
+import { useTurnTimer } from "../../hooks/useTurnTimer";
+import { TurnTimerBar } from "../shared/TurnTimerBar";
 import {
   generateSessionCode, openBountyBoardChannel, closeChannel,
   type BountyBoardPhase, type BountyBoardStatePayload, type BountyBoardActionPayload,
@@ -28,6 +31,14 @@ const BOUNTY_VALUE = 10;
 // Bounded by however many distinct "use vocabulary in a sentence" prompts the selected topics
 // actually yield — a narrow topic selection shouldn't force 8 rounds out of a 3-item pool.
 const MAX_ROUNDS = 8;
+
+// Solo only — how long an open bounty sits unclaimed before the CPU steals it (see the steal-timer
+// effect below). Generous compared to every other game's CPU delay constants on purpose: this
+// window has to cover a player noticing the bounty and deciding to claim it, not a quick zone-pick
+// or dice roll — Vault Heist's own CPU_ANSWER_MS_BY_DIFFICULTY is milliseconds for the same reason
+// those games' CPU turns are near-instant, which this one deliberately isn't.
+type Difficulty = "easy" | "medium" | "hard";
+const CPU_STEAL_SECONDS_BY_DIFFICULTY: Record<Difficulty, number> = { easy: 20, medium: 12, hard: 6 };
 
 type Phase = "intro" | "playing" | "final";
 type Banner = { text: React.ReactNode; kind: "success" | "wrong"; key: number };
@@ -142,7 +153,7 @@ function RoundEntryCard({ entry, team, answerMode, isPhoneMode, onPost, onCorrec
 // A wanted poster for an open (or being-fixed) bounty. `claimableTeams` already has the exclusion
 // rule (and the solo-play fallback) baked in by the caller — this component just renders whatever
 // list it's handed.
-function BountyCard({ bounty, team, claimableTeams, answerMode, isPhoneMode, onClaim, onPostFix, onCorrect, onWrong }: {
+function BountyCard({ bounty, team, claimableTeams, answerMode, isPhoneMode, onClaim, onPostFix, onCorrect, onWrong, cpuSteal }: {
   bounty: Bounty;
   team: GameProps["teams"][number] | undefined; // the claiming team, once claimed
   claimableTeams: GameProps["teams"];
@@ -152,6 +163,9 @@ function BountyCard({ bounty, team, claimableTeams, answerMode, isPhoneMode, onC
   onPostFix: (text: string) => void;
   onCorrect: () => void;
   onWrong: (text: string) => void;
+  // Solo only — the CPU's own countdown to steal THIS bounty, shown so the threat is visible
+  // rather than a silent trap. Absent once claimed (the race is over either way by then).
+  cpuSteal?: { timeLeft: number; totalSeconds: number };
 }) {
   const [draft, setDraft] = useState("");
   const spoken = answerMode === "spoken";
@@ -173,14 +187,24 @@ function BountyCard({ bounty, team, claimableTeams, answerMode, isPhoneMode, onC
       {!claimed ? (
         isPhoneMode ? (
           <div style={{ fontSize: "11px", fontWeight: "700", color: "#991B1B", padding: "6px 0" }}>Waiting for a team to claim on their phone…</div>
-        ) : claimableTeams.length === 0 ? (
-          <div style={{ fontSize: "11px", fontWeight: "700", color: "#991B1B", padding: "6px 0" }}>No eligible team yet</div>
         ) : (
-          <div style={{ display: "flex", gap: "4px", justifyContent: "center", flexWrap: "wrap" }}>
-            {claimableTeams.map(t => (
-              <button key={t.id} onClick={() => onClaim(t.id)} className="bb-btn" style={{ background: t.color.bg, color: "white", border: "none", borderRadius: "8px", padding: "5px 9px", fontSize: "11px", fontWeight: "800", cursor: "pointer" }}><TeamIcon team={t} color="white" /> {t.name}</button>
-            ))}
-          </div>
+          <>
+            {claimableTeams.length > 0 ? (
+              <div style={{ display: "flex", gap: "4px", justifyContent: "center", flexWrap: "wrap" }}>
+                {claimableTeams.map(t => (
+                  <button key={t.id} onClick={() => onClaim(t.id)} className="bb-btn" style={{ background: t.color.bg, color: "white", border: "none", borderRadius: "8px", padding: "5px 9px", fontSize: "11px", fontWeight: "800", cursor: "pointer" }}><TeamIcon team={t} color="white" /> {t.name}</button>
+                ))}
+              </div>
+            ) : !cpuSteal ? (
+              <div style={{ fontSize: "11px", fontWeight: "700", color: "#991B1B", padding: "6px 0" }}>No eligible team yet</div>
+            ) : null}
+            {cpuSteal && (
+              <div style={{ marginTop: claimableTeams.length > 0 ? "8px" : 0 }}>
+                <div style={{ fontSize: "10px", fontWeight: "800", color: "#991B1B", marginBottom: "4px" }}><Icon name="robot" size={10} /> CPU is closing in…</div>
+                <TurnTimerBar timeLeft={cpuSteal.timeLeft} totalSeconds={cpuSteal.totalSeconds} />
+              </div>
+            )}
+          </>
         )
       ) : (
         <>
@@ -222,6 +246,9 @@ type BountyBoardSnapshot = {
   answerMode: "spoken" | "typing";
   roundNumber: number;
   gameScoreByTeam: Record<string | number, number>;
+  // Solo only.
+  cpuScore?: number;
+  difficulty?: Difficulty;
 };
 
 function validateBountyBoardSnapshot(raw: unknown): BountyBoardSnapshot | undefined {
@@ -229,11 +256,32 @@ function validateBountyBoardSnapshot(raw: unknown): BountyBoardSnapshot | undefi
   if (!s) return undefined;
   if (s.answerMode !== "spoken" && s.answerMode !== "typing") return undefined;
   if (typeof s.roundNumber !== "number" || s.roundNumber < 0) return undefined;
-  return { answerMode: s.answerMode, roundNumber: s.roundNumber, gameScoreByTeam: s.gameScoreByTeam ?? {} };
+  const difficulty = s.difficulty === "easy" || s.difficulty === "hard" ? s.difficulty : "medium";
+  return { answerMode: s.answerMode, roundNumber: s.roundNumber, gameScoreByTeam: s.gameScoreByTeam ?? {}, cpuScore: s.cpuScore ?? 0, difficulty };
 }
 
-export function BountyBoardGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState, presetPhoneSession }: GameProps) {
+export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState, presetPhoneSession }: GameProps) {
   const resumed = useRef(validateBountyBoardSnapshot(initialGameState)).current;
+  const isSolo = propTeams.length === 1;
+  // Constructed unconditionally so its identity never changes across renders regardless of
+  // `isSolo` (a useRef initializer only runs once at mount) — same idiom as King of Hill's cpuRef.
+  const cpuRef = useRef(isSolo ? makeSoloCpuTeam() : null);
+  const [cpuScore, setCpuScore] = useState(() => resumed?.cpuScore ?? 0);
+  const [difficulty, setDifficulty] = useState<Difficulty>(() => resumed?.difficulty ?? "medium");
+  // Every render/ranking/scoring codepath below reads `teams`, not `propTeams` — this is the one
+  // change that makes the CPU show up everywhere (team grid, scoreboard, final ranking, and the
+  // claimableTeams exclusion logic, which already treats the CPU as a genuine second team with no
+  // further changes needed).
+  const teams = useMemo(
+    () => (isSolo ? [propTeams[0], { ...cpuRef.current!, score: cpuScore }] : propTeams),
+    [isSolo, propTeams, cpuScore]
+  );
+  // Routes a score change to the CPU's own local state instead of the real onUpdateScore prop —
+  // callers must never pass the CPU's id to onUpdateScore directly (see soloOpponent.ts).
+  const updateScore = (teamId: string | number, delta: number) => {
+    if (isSolo && teamId === cpuRef.current?.id) setCpuScore(s => s + delta);
+    else onUpdateScore(teamId, delta);
+  };
 
   // Rocket Fuel's content-pool pattern, not Order Up's — one content type, filtered with a
   // graceful fallback to the full pool if a topic selection has none.
@@ -271,10 +319,12 @@ export function BountyBoardGame({ questions, teams, onUpdateScore, onEnd, forceF
   const currentPrompt = pool[roundNumber % pool.length];
 
   // Seeds the very first round (fresh start OR resume, both start with an empty roundEntries) the
-  // moment play begins — every LATER round is seeded by goToNextRound below instead.
+  // moment play begins — every LATER round is seeded by goToNextRound below instead. Always from
+  // propTeams, never the CPU-augmented `teams` — the CPU never submits a round entry of its own
+  // (see cpuStealBounty above), only real teams get one.
   useEffect(() => {
     if (phase !== "playing" || roundEntries.length > 0) return;
-    setRoundEntries(teams.map(t => ({ teamId: t.id, text: "", submitted: answerMode === "spoken", resolved: false })));
+    setRoundEntries(propTeams.map(t => ({ teamId: t.id, text: "", submitted: answerMode === "spoken", resolved: false })));
     setBounties([]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase]);
@@ -302,16 +352,16 @@ export function BountyBoardGame({ questions, teams, onUpdateScore, onEnd, forceF
 
   useEffect(() => {
     if (!serializeStateRef) return;
-    serializeStateRef.current = (): BountyBoardSnapshot => ({ answerMode, roundNumber, gameScoreByTeam });
+    serializeStateRef.current = (): BountyBoardSnapshot => ({ answerMode, roundNumber, gameScoreByTeam, cpuScore, difficulty });
     return () => { if (serializeStateRef) serializeStateRef.current = null; };
-  }, [serializeStateRef, answerMode, roundNumber, gameScoreByTeam]);
+  }, [serializeStateRef, answerMode, roundNumber, gameScoreByTeam, cpuScore, difficulty]);
 
   const submitRoundEntry = (teamId: string | number, text: string) => {
     setRoundEntries(prev => prev.map(e => (e.teamId === teamId ? { ...e, text, submitted: true } : e)));
   };
 
   const resolveRoundCorrect = (teamId: string | number) => {
-    onUpdateScore(teamId, BOUNTY_VALUE);
+    updateScore(teamId, BOUNTY_VALUE);
     setGameScoreByTeam(prev => ({ ...prev, [teamId]: (prev[teamId] ?? 0) + BOUNTY_VALUE }));
     setRoundEntries(prev => prev.map(e => (e.teamId === teamId ? { ...e, resolved: true } : e)));
     playSound("bounty");
@@ -329,12 +379,14 @@ export function BountyBoardGame({ questions, teams, onUpdateScore, onEnd, forceF
 
   // Guarded inside the functional updater (not a separate read beforehand) — a screen click racing
   // a phone broadcast for the same bounty can't both succeed, same idiom as Order Up's claimTicket.
-  // The exclusion only holds while some OTHER team could still claim it — solo play (or any state
-  // where the excluded team is the only one left) has to let that same team claim its own bounty,
-  // matching the claimableTeams fallback rendered above, or the round soft-locks forever.
+  // Solo always allows the human to claim their own bounty here — the CPU is the only "other team"
+  // in that mode, it never manually claims through this function (it steals through cpuStealBounty
+  // above instead), so the exclusion rule that keeps a real multi-team game honest would otherwise
+  // leave the human with no claim button at all and hand every bounty to the CPU by default.
   const claimBounty = (bountyId: number, teamId: string | number) => {
     setBounties(prev => prev.map(b => {
       if (b.id !== bountyId || b.claimedBy !== undefined) return b;
+      if (isSolo) return { ...b, claimedBy: teamId };
       const otherTeamEligible = teams.some(t => t.id !== b.excludedTeamId);
       if (b.excludedTeamId === teamId && otherTeamEligible) return b;
       return { ...b, claimedBy: teamId };
@@ -349,7 +401,7 @@ export function BountyBoardGame({ questions, teams, onUpdateScore, onEnd, forceF
     const bounty = bounties.find(b => b.id === bountyId);
     if (!bounty || bounty.claimedBy === undefined) return;
     const teamId = bounty.claimedBy;
-    onUpdateScore(teamId, bounty.value);
+    updateScore(teamId, bounty.value);
     setGameScoreByTeam(prev => ({ ...prev, [teamId]: (prev[teamId] ?? 0) + bounty.value }));
     setBounties(prev => prev.map(b => (b.id === bountyId ? { ...b, resolved: true } : b)));
     setRoundEntries(prev => prev.map(e => (e.teamId === bounty.originalTeamId ? { ...e, resolved: true } : e)));
@@ -368,6 +420,34 @@ export function BountyBoardGame({ questions, teams, onUpdateScore, onEnd, forceF
     pushBanner(<><Icon name="warning" size={14} /> Still wrong — the bounty is now {formatValue(value)}!</>, "wrong");
   };
 
+  // The CPU's whole role in this game: it never writes a real sentence (there's no legitimate wrong
+  // text to fabricate for it), it only races the clock against the human's OWN open bounty. Claim
+  // and resolve happen together here (not via claimBounty + resolveBountyCorrect back to back) —
+  // those are both async state setters, so calling them sequentially would have resolveBountyCorrect
+  // read the bounty's still-stale, still-unclaimed state from the same render.
+  const cpuStealBounty = (bountyId: number) => {
+    const bounty = bounties.find(b => b.id === bountyId);
+    const cpuId = cpuRef.current?.id;
+    if (!bounty || bounty.claimedBy !== undefined || cpuId === undefined) return;
+    updateScore(cpuId, bounty.value);
+    setGameScoreByTeam(prev => ({ ...prev, [cpuId]: (prev[cpuId] ?? 0) + bounty.value }));
+    setBounties(prev => prev.map(b => (b.id === bountyId ? { ...b, claimedBy: cpuId, resolved: true } : b)));
+    setRoundEntries(prev => prev.map(e => (e.teamId === bounty.originalTeamId ? { ...e, resolved: true } : e)));
+    playSound("bounty");
+    pushBanner(<><Icon name="robot" size={14} /> CPU beat you to it! +{bounty.value} pts</>, "wrong");
+  };
+
+  // Solo only — there's at most one open (unresolved, unclaimed) bounty at a time (a round can't
+  // advance while its sole entry is unresolved), so one countdown is always enough.
+  const openBounty = bounties.find(b => !b.resolved && b.claimedBy === undefined);
+  const cpuStealSeconds = CPU_STEAL_SECONDS_BY_DIFFICULTY[difficulty];
+  const { timeLeft: cpuStealTimeLeft } = useTurnTimer(
+    cpuStealSeconds,
+    isSolo && phase === "playing" && !!openBounty,
+    () => { if (openBounty) cpuStealBounty(openBounty.id); },
+    openBounty?.id ?? "none"
+  );
+
   const roundComplete = roundEntries.length > 0 && roundEntries.every(e => e.resolved);
   const isLastRound = roundNumber >= totalRounds - 1;
 
@@ -375,7 +455,7 @@ export function BountyBoardGame({ questions, teams, onUpdateScore, onEnd, forceF
     if (isLastRound) { setPhase("final"); return; }
     const next = roundNumber + 1;
     setRoundNumber(next);
-    setRoundEntries(teams.map(t => ({ teamId: t.id, text: "", submitted: answerMode === "spoken", resolved: false })));
+    setRoundEntries(propTeams.map(t => ({ teamId: t.id, text: "", submitted: answerMode === "spoken", resolved: false })));
     setBounties([]);
   };
 
@@ -402,12 +482,18 @@ export function BountyBoardGame({ questions, teams, onUpdateScore, onEnd, forceF
   const answerModeRef = useRef(answerMode);
   const connectedTeamIdsRef = useRef<Set<string | number>>(new Set());
   const sendStateRef = useRef<(() => void) | null>(null);
+  // Solo's `teams` array gets a new identity every time cpuScore changes — kept out of the channel
+  // effect's own dependency array below (which uses the stable `propTeams` instead) so a CPU steal
+  // doesn't tear down and reopen the realtime channel; sendState reads the current teams through
+  // this ref instead, so phone clients still see live CPU scores without that reconnect.
+  const teamsRef = useRef(teams);
   useEffect(() => { phaseRef.current = phase; }, [phase]);
   useEffect(() => { roundNumberRef.current = roundNumber; }, [roundNumber]);
   useEffect(() => { currentPromptRef.current = currentPrompt; }, [currentPrompt]);
   useEffect(() => { roundEntriesRef.current = roundEntries; }, [roundEntries]);
   useEffect(() => { bountiesRef.current = bounties; }, [bounties]);
   useEffect(() => { answerModeRef.current = answerMode; }, [answerMode]);
+  useEffect(() => { teamsRef.current = teams; }, [teams]);
 
   useEffect(() => {
     if (inputMode !== "phone" || !sessionCode) return;
@@ -418,10 +504,10 @@ export function BountyBoardGame({ questions, teams, onUpdateScore, onEnd, forceF
       const rawPhase = phaseRef.current;
       const mappedPhase: BountyBoardPhase = rawPhase === "intro" ? "lobby" : rawPhase === "final" ? "final" : "playing";
       const scores: Record<string, number> = {};
-      teams.forEach(t => { scores[String(t.id)] = t.score; });
+      teamsRef.current.forEach(t => { scores[String(t.id)] = t.score; });
       const payload: BountyBoardStatePayload = {
         phase: mappedPhase,
-        roster: teams.map(t => ({ id: t.id, name: t.name, color: t.color, mascot: t.mascot })),
+        roster: teamsRef.current.map(t => ({ id: t.id, name: t.name, color: t.color, mascot: t.mascot })),
         connectedTeamIds: Array.from(connectedTeamIdsRef.current),
         roundNumber: roundNumberRef.current,
         totalRounds,
@@ -457,8 +543,10 @@ export function BountyBoardGame({ questions, teams, onUpdateScore, onEnd, forceF
       } else if (action.action === "claimBounty") {
         const bounty = bountiesRef.current.find(b => b.id === action.bountyId);
         if (!bounty || bounty.claimedBy !== undefined) return;
-        const otherTeamEligible = teams.some(t => t.id !== bounty.excludedTeamId);
-        if (bounty.excludedTeamId === action.teamId && otherTeamEligible) return;
+        if (!isSolo) {
+          const otherTeamEligible = teamsRef.current.some(t => t.id !== bounty.excludedTeamId);
+          if (bounty.excludedTeamId === action.teamId && otherTeamEligible) return;
+        }
         claimBounty(action.bountyId, action.teamId);
       } else if (action.action === "submitBountyFix") {
         const bounty = bountiesRef.current.find(b => b.id === action.bountyId);
@@ -480,11 +568,11 @@ export function BountyBoardGame({ questions, teams, onUpdateScore, onEnd, forceF
       sendStateRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [inputMode, sessionCode, teams, totalRounds]);
+  }, [inputMode, sessionCode, propTeams, totalRounds]);
 
   useEffect(() => {
     sendStateRef.current?.();
-  }, [phase, roundNumber, roundEntries, bounties]);
+  }, [phase, roundNumber, roundEntries, bounties, teams]);
 
   useEffect(() => {
     if (phase === "final" && channelRef.current) {
@@ -570,6 +658,31 @@ export function BountyBoardGame({ questions, teams, onUpdateScore, onEnd, forceF
             );
           })()}
         </>}
+        {/* Solo only — the CPU's own steal-countdown speed. Same picker idiom as Race Track's own
+            solo difficulty row. */}
+        {isSolo && (
+          <div style={{ marginBottom: "20px" }}>
+            <div style={{ fontSize: "13px", color: "#92400E", fontWeight: "700", marginBottom: "10px" }}><Icon name="robot" size={13} /> How fast should the CPU steal a missed bounty?</div>
+            <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap" }}>
+              {(["easy", "medium", "hard"] as const).map(d => {
+                const selected = difficulty === d;
+                const dotColor = d === "easy" ? "#22C55E" : d === "medium" ? "#EAB308" : "#EF4444";
+                const label = d[0].toUpperCase() + d.slice(1);
+                return (
+                  <button key={d} onClick={() => setDifficulty(d)} className="bb-btn" style={{
+                    padding: "10px 20px", borderRadius: "12px", fontWeight: "800", fontSize: "14px", cursor: "pointer",
+                    border: `2px solid ${selected ? "#B91C1C" : "rgba(0,0,0,0.1)"}`,
+                    background: selected ? "rgba(185,28,28,0.1)" : "rgba(255,255,255,0.6)",
+                    color: selected ? "#B91C1C" : "#78350F",
+                    display: "inline-flex", alignItems: "center", gap: "6px",
+                  }}>
+                    <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: dotColor, display: "inline-block" }} /> {label} · {CPU_STEAL_SECONDS_BY_DIFFICULTY[d]}s
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
         <button onClick={() => setShowHowTo(true)} className="bb-btn" style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginBottom: "14px", background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
           <Icon name="help" size={15} /> How to Play
         </button>
@@ -679,16 +792,23 @@ export function BountyBoardGame({ questions, teams, onUpdateScore, onEnd, forceF
             </div>
             <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap", marginBottom: "10px" }}>
               {bounties.filter(b => !b.resolved).map(b => {
-                const eligible = teams.filter(t => t.id !== b.excludedTeamId);
-                // Solo play (or, in principle, an exclusion that would leave nobody eligible) falls
-                // back to allowing anyone rather than soft-locking the round forever.
-                const claimableTeams = eligible.length > 0 ? eligible : teams;
+                // Solo is its own case, not a variant of the exclusion rule below: the human is
+                // always the manual-claim button (catching their own mistake before the CPU does),
+                // and the CPU is never one — it only ever claims automatically via the steal
+                // countdown, through cpuStealBounty, never through this button. A real multi-team
+                // exclusion still falls back to allowing anyone rather than soft-locking forever.
+                const claimableTeams = isSolo ? [propTeams[0]] : (() => {
+                  const eligible = teams.filter(t => t.id !== b.excludedTeamId);
+                  return eligible.length > 0 ? eligible : teams;
+                })();
+                const isOpenBounty = b.id === openBounty?.id;
                 return (
                   <BountyCard
                     key={b.id}
                     bounty={b}
                     team={b.claimedBy !== undefined ? teams.find(t => t.id === b.claimedBy) : undefined}
                     claimableTeams={claimableTeams}
+                    cpuSteal={isSolo && isOpenBounty ? { timeLeft: cpuStealTimeLeft, totalSeconds: cpuStealSeconds } : undefined}
                     answerMode={answerMode}
                     isPhoneMode={inputMode === "phone"}
                     onClaim={teamId => claimBounty(b.id, teamId)}
