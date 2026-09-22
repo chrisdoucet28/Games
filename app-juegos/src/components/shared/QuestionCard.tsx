@@ -2,6 +2,17 @@ import type { QuestionData } from "../../types";
 import { FlagPromptButton } from "./FlagPromptButton";
 import { Icon } from "./Icon";
 
+// A printed answer like "digital / technical" or "fired / let go" means either one is accepted —
+// an established authoring convention (~460 answers use it), not something specific to one game.
+// Without this note it reads as one odd literal answer instead of a choice, for anyone comparing
+// their own wording against it: a student self-checking in Practice Mode, or a teacher reading it
+// aloud to judge a live answer. Answers starting "(free" are a different, open-ended convention
+// (any reasonable answer at all) that already says so in its own visible text — a slash inside one
+// of those is illustrating examples, not offering a literal either/or, so it's excluded here.
+function hasAlternateAnswers(answer: string | undefined): boolean {
+  return !!answer && answer.includes("/") && !answer.trim().startsWith("(free");
+}
+
 interface QuestionCardProps {
   question: QuestionData | null;
   showAnswer: boolean;
@@ -82,6 +93,11 @@ export function QuestionCard({ question, showAnswer, onReveal, gameId }: Questio
             </span>
             <span style={{ fontWeight: "900", fontSize: "20px", color: GREEN_DEEP }}>{question.answer}</span>
           </div>
+          {hasAlternateAnswers(question.answer) && (
+            <div style={{ color: GREEN_DEEP, fontSize: "12px", fontStyle: "italic", marginTop: "6px", opacity: 0.85 }}>
+              (any of these are correct)
+            </div>
+          )}
           {question.hint && (
             <div style={{ color: GREEN_DEEP, fontSize: "13px", marginTop: "9px", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}>
               <Icon name="idea" size={13} color={GREEN_DEEP} /> {question.hint}
