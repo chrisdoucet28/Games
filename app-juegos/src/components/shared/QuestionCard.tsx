@@ -45,15 +45,7 @@ export function QuestionCard({ question, showAnswer, onReveal, gameId }: Questio
           than a solid fill for the same reason one layer down: several games' own badges right
           next to this card are already brightly colored, and a solid block here read as sitting
           on top of them rather than beside them. */}
-      {/* `question.form` ("question" or "negative", stacked on top of the base grammar — e.g. a
-          rewrite item whose fragment alone gives no clue it must become a question) is otherwise
-          only ever shown to the player inside Vault Heist's own lock-reveal card. Every other game
-          — and Practice Mode's self-graded honor system, where there's no teacher to say "actually
-          that's fine too" — rendered the exact same content with this cue silently dropped, leaving
-          the player no way to know their grammatically-correct-but-differently-shaped answer wasn't
-          the one being marked against. Shown here (the one shared card) fixes it everywhere at
-          once, same wording/icons as Vault Heist's own badge for a familiar look. */}
-      <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "flex-start", gap: "8px", marginBottom: "14px" }}>
+      <div style={{ display: "flex", justifyContent: "flex-start", marginBottom: "14px" }}>
         <span style={{
           background: "white", border: `3px solid ${INK}`, borderRadius: "8px", padding: "4px 12px",
           color: accent, fontWeight: 900, fontSize: "12px", textTransform: "uppercase", letterSpacing: "0.08em",
@@ -61,17 +53,6 @@ export function QuestionCard({ question, showAnswer, onReveal, gameId }: Questio
         }}>
           {isSpeaking ? <><Icon name="mic" size={12} color={accent} /> Speaking Prompt</> : question.type}
         </span>
-        {question.form && (
-          <span style={{
-            background: "white", border: `3px solid ${INK}`, borderRadius: "8px", padding: "4px 12px",
-            color: "#DC2626", fontWeight: 900, fontSize: "12px", textTransform: "uppercase", letterSpacing: "0.08em",
-            display: "inline-flex", alignItems: "center", gap: "6px",
-          }}>
-            {question.form === "question"
-              ? <><Icon name="help" size={12} color="#DC2626" /> + Question</>
-              : <><Icon name="forbidden" size={12} color="#DC2626" /> + Negative</>}
-          </span>
-        )}
       </div>
 
       <p style={{ fontSize: "22px", fontWeight: "800", color: INK, margin: "0 0 18px", lineHeight: 1.4 }}>

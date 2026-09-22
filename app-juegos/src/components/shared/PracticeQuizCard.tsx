@@ -167,9 +167,22 @@ function AuctionCard({ item, onResolve }: { item: Extract<PracticeItem, { kind: 
 
 function RevealCard({ item, answered, onResolve }: { item: Extract<PracticeItem, { kind: "reveal" }>; answered: boolean; onResolve: (correct: boolean) => void }) {
   const [revealed, setRevealed] = useState(false);
+  const form = item.question.form;
 
   return (
     <div>
+      {/* Practice-only, not a change to the shared QuestionCard (which every live, teacher-judged
+          game also renders): there a wrong-shaped answer gets sorted out in the room, but here the
+          player is comparing their own answer against one printed "correct" answer with nobody to
+          say "that's fine too" — so if the source data says this particular rewrite needs a
+          question or the negative form (a call the fragment alone doesn't make), they need to know
+          before they commit to an answer, not after. */}
+      {form && (
+        <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "white", border: `2px solid ${RED}`, borderRadius: "999px", padding: "4px 12px", fontSize: "12px", fontWeight: 800, color: RED_DEEP, marginBottom: "10px" }}>
+          <Icon name={form === "question" ? "help" : "forbidden"} size={12} color={RED_DEEP} />
+          {form === "question" ? "Needs to be a question" : "Needs the negative form"}
+        </div>
+      )}
       <QuestionCard question={item.question} showAnswer={revealed} onReveal={() => setRevealed(true)} gameId="practice" />
       {revealed && !answered && (
         <div style={{ display: "flex", gap: "10px", marginTop: "14px" }}>
