@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Analytics } from '@vercel/analytics/react';
 import LessonGamesGenerator from './LessonGamesGenerator';
 import { AuthScreen } from './components/shared/AuthScreen';
+import { ResetPasswordScreen } from './components/shared/ResetPasswordScreen';
 import { PhoneJoinScreen } from './components/phone/PhoneJoinScreen';
 import { ClassJoinScreen } from './components/shared/ClassJoinScreen';
 import { useAuth } from './hooks/useAuth';
@@ -157,7 +158,7 @@ function App() {
 }
 
 function AuthenticatedApp() {
-  const { session, loading } = useAuth();
+  const { session, loading, passwordRecovery, clearPasswordRecovery } = useAuth();
   // The single source of truth for the teacher's chosen accent theme — fetched here (not inside
   // LessonGamesGenerator) so the top status bar can use it too, not just the screens below it.
   const [theme, setTheme] = useState<Theme>(DEFAULT_THEME);
@@ -232,6 +233,12 @@ function AuthenticatedApp() {
 
   if (!session) {
     return <AuthScreen />;
+  }
+
+  // A recovery-link session — parked here before role/plan/app state matters at all, since the
+  // point of this session is only to let them set a new password, not to use the app yet.
+  if (passwordRecovery) {
+    return <ResetPasswordScreen onDone={clearPasswordRecovery} />;
   }
 
   if (!roleInfo) {

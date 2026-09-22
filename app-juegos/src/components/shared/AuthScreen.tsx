@@ -20,8 +20,10 @@ function isInAppBrowser(): boolean {
 // Supabase's own error text is sometimes empty, a raw "{}", or aimed at developers ("Error sending
 // confirmation email" as a 500). This turns whatever came back into something a teacher or student
 // can act on; readable messages ("Invalid login credentials", "Password should be at least 6
-// characters") pass through unchanged.
-function friendlyAuthError(err: unknown, mode: Mode): string {
+// characters") pass through unchanged. Exported so ResetPasswordScreen.tsx (a different auth-adjacent
+// moment — setting a new password after clicking a recovery link, not signing in/up) can reuse the
+// same rate-limit/500/empty-message handling instead of duplicating it.
+export function friendlyAuthError(err: unknown, mode: Mode | "reset"): string {
   const e = (err ?? {}) as { message?: unknown; status?: unknown; code?: unknown };
   const msg = typeof e.message === "string" ? e.message.trim() : "";
   const code = typeof e.code === "string" ? e.code : "";
@@ -89,6 +91,12 @@ export function AuthScreen() {
   // a one-tap switch to Log In.
   const [existingAccount, setExistingAccount] = useState(false);
   const [inAppBrowser] = useState(() => isInAppBrowser());
+  // "Forgot password?" swaps the sign-in/sign-up tabs out for a single email-only request form —
+  // a third mode rather than a tab, since there's nothing to toggle between once you're in it (only
+  // a "back to log in" link out). Shares `email`/`loading`/`error` with the tab form above it so
+  // whatever was already typed in carries over instead of resetting.
+  const [resetMode, setResetMode] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
 
   useEffect(() => {
     document.title = !showForm ? "ClassCade" : mode === "sign-in" ? "Log In - ClassCade" : "Sign Up - ClassCade";
@@ -148,6 +156,39 @@ export function AuthScreen() {
     }
   };
 
+  const openResetMode = () => {
+    setResetMode(true);
+    setResetSent(false);
+    setError(null);
+    setNotice(null);
+    setExistingAccount(false);
+  };
+
+  const closeResetMode = () => {
+    setResetMode(false);
+    setResetSent(false);
+    setError(null);
+  };
+
+  const submitReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+    try {
+      // redirectTo matches the signUp/OAuth pattern above — sends the recovery link back to
+      // whatever origin the request came from. Supabase answers success either way (an unknown
+      // email sends nothing, same anti-enumeration behavior as sign-up's "already has an account"
+      // case), so there's no separate "no account with that email" branch to handle here.
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin });
+      if (resetError) throw resetError;
+      setResetSent(true);
+    } catch (err) {
+      setError(friendlyAuthError(err, "reset"));
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const signInWithGoogle = async () => {
     setError(null);
     const { error: oauthError } = await supabase.auth.signInWithOAuth({
@@ -181,25 +222,42 @@ export function AuthScreen() {
               <Icon name="back" size={12} /> Back
             </button>
 
-            <div style={{ display: "flex", gap: "8px", marginBottom: "20px", background: "rgba(0,0,0,0.2)", borderRadius: "12px", padding: "4px" }}>
-              {(["sign-in", "sign-up"] as Mode[]).map(m => (
-                <button
-                  key={m}
-                  type="button"
-                  onClick={() => { setMode(m); setError(null); setNotice(null); setExistingAccount(false); setConfirmSent(false); }}
-                  style={{
-                    flex: 1, padding: "10px", borderRadius: "9px", border: "none", cursor: "pointer",
-                    fontWeight: "800", fontSize: "14px",
-                    background: mode === m ? "linear-gradient(135deg,#F59E0B,#D97706)" : "transparent",
-                    color: mode === m ? "white" : "#BAE6FD",
-                  }}
-                >
-                  {m === "sign-in" ? "Log In" : "Sign Up"}
-                </button>
-              ))}
-            </div>
+            {!resetMode && (
+              <div style={{ display: "flex", gap: "8px", marginBottom: "20px", background: "rgba(0,0,0,0.2)", borderRadius: "12px", padding: "4px" }}>
+                {(["sign-in", "sign-up"] as Mode[]).map(m => (
+                  <button
+                    key={m}
+                    type="button"
+                    onClick={() => { setMode(m); setError(null); setNotice(null); setExistingAccount(false); setConfirmSent(false); }}
+                    style={{
+                      flex: 1, padding: "10px", borderRadius: "9px", border: "none", cursor: "pointer",
+                      fontWeight: "800", fontSize: "14px",
+                      background: mode === m ? "linear-gradient(135deg,#F59E0B,#D97706)" : "transparent",
+                      color: mode === m ? "white" : "#BAE6FD",
+                    }}
+                  >
+                    {m === "sign-in" ? "Log In" : "Sign Up"}
+                  </button>
+                ))}
+              </div>
+            )}
 
-            {notice && (
+            {resetMode && (
+              <div style={{ marginBottom: "20px" }}>
+                <button
+                  type="button" onClick={closeResetMode}
+                  style={{ background: "none", border: "none", color: "#7DB8DB", fontSize: "12px", fontWeight: "700", cursor: "pointer", padding: 0, display: "flex", alignItems: "center", gap: "4px" }}
+                >
+                  <Icon name="back" size={12} /> Back to log in
+                </button>
+                <h2 style={{ color: "white", fontSize: "18px", fontWeight: 900, margin: "14px 0 4px" }}>Reset your password</h2>
+                {!resetSent && (
+                  <p style={{ color: "#BAE6FD", fontSize: "13px", lineHeight: 1.5, margin: 0 }}>Enter your email and we'll send you a link to set a new password.</p>
+                )}
+              </div>
+            )}
+
+            {!resetMode && notice && (
               <div role="status" style={{ background: "rgba(252,211,77,0.14)", border: "1px solid rgba(252,211,77,0.4)", borderRadius: "12px", padding: "12px 14px", marginBottom: "16px", color: "#FDE68A", fontSize: "13.5px", lineHeight: 1.55 }}>
                 {notice}
                 {existingAccount && (
@@ -217,7 +275,39 @@ export function AuthScreen() {
               </div>
             )}
 
-            {confirmSent ? (
+            {resetMode ? (
+              resetSent ? (
+                <div style={{ color: "#BEF264", fontSize: "14px", lineHeight: 1.6, textAlign: "center", padding: "12px 0" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", fontWeight: 800 }}>
+                    <Icon name="check" size={16} /> Check your email
+                  </div>
+                  <div style={{ marginTop: "6px", color: "#D9F99D" }}>
+                    If <strong>{email}</strong> has a ClassCade account, we sent a link to reset its password.
+                  </div>
+                  <div style={{ marginTop: "6px", fontSize: "12.5px", color: "#BAE6FD" }}>Can't find it? Check your spam folder.</div>
+                </div>
+              ) : (
+                <form onSubmit={submitReset}>
+                  <label style={{ display: "block", color: "#BAE6FD", fontSize: "13px", fontWeight: "700", marginBottom: "6px" }}>Email</label>
+                  <input
+                    type="email" required value={email} onChange={e => setEmail(e.target.value)}
+                    autoComplete="email"
+                    style={{ width: "100%", boxSizing: "border-box", padding: "10px 12px", borderRadius: "10px", border: "1px solid rgba(255,255,255,0.2)", background: "rgba(0,0,0,0.25)", color: "white", fontSize: "14px", marginBottom: "16px" }}
+                  />
+
+                  {error && (
+                    <div style={{ color: "#FCA5A5", fontSize: "13px", marginBottom: "14px", lineHeight: 1.5 }}>{error}</div>
+                  )}
+
+                  <button
+                    type="submit" disabled={loading}
+                    style={{ width: "100%", background: "linear-gradient(135deg,#F59E0B,#D97706)", color: "white", border: "none", borderRadius: "12px", padding: "13px", fontSize: "15px", fontWeight: "900", cursor: loading ? "default" : "pointer", opacity: loading ? 0.7 : 1 }}
+                  >
+                    {loading ? "Please wait…" : "Send reset link"}
+                  </button>
+                </form>
+              )
+            ) : confirmSent ? (
               <div style={{ color: "#BEF264", fontSize: "14px", lineHeight: 1.6, textAlign: "center", padding: "12px 0" }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", fontWeight: 800 }}>
                   <Icon name="check" size={16} /> Check your email
@@ -239,8 +329,15 @@ export function AuthScreen() {
                 <input
                   type="password" required minLength={6} value={password} onChange={e => setPassword(e.target.value)}
                   autoComplete={mode === "sign-in" ? "current-password" : "new-password"}
-                  style={{ width: "100%", boxSizing: "border-box", padding: "10px 12px", borderRadius: "10px", border: "1px solid rgba(255,255,255,0.2)", background: "rgba(0,0,0,0.25)", color: "white", fontSize: "14px", marginBottom: "16px" }}
+                  style={{ width: "100%", boxSizing: "border-box", padding: "10px 12px", borderRadius: "10px", border: "1px solid rgba(255,255,255,0.2)", background: "rgba(0,0,0,0.25)", color: "white", fontSize: "14px", marginBottom: mode === "sign-in" ? "8px" : "16px" }}
                 />
+                {mode === "sign-in" && (
+                  <div style={{ textAlign: "right", marginBottom: "16px" }}>
+                    <button type="button" onClick={openResetMode} style={{ background: "none", border: "none", color: "#7DB8DB", fontSize: "12.5px", fontWeight: "700", cursor: "pointer", padding: 0 }}>
+                      Forgot password?
+                    </button>
+                  </div>
+                )}
 
                 {error && (
                   <div style={{ color: "#FCA5A5", fontSize: "13px", marginBottom: "14px", lineHeight: 1.5 }}>{error}</div>
@@ -255,6 +352,8 @@ export function AuthScreen() {
               </form>
             )}
 
+            {!resetMode && (
+            <>
             <div style={{ display: "flex", alignItems: "center", gap: "10px", margin: "18px 0" }}>
               <div style={{ flex: 1, height: "1px", background: "rgba(255,255,255,0.15)" }} />
               <span style={{ color: "#7DB8DB", fontSize: "12px" }}>or</span>
@@ -273,6 +372,8 @@ export function AuthScreen() {
               >
                 <span aria-hidden="true" style={{ width: "10px", height: "10px", borderRadius: "50%", background: "#4285F4", display: "inline-block" }} /> Continue with Google
               </button>
+            )}
+            </>
             )}
           </div>
           </>
