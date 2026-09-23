@@ -12703,7 +12703,7 @@ export const TOPIC_LIBRARY = {
       {prompt:"Complete: 'If I ___ more confident, I would have spoken up yesterday.'", answer:"were / was"},
       {prompt:"'If only I ___ left sooner...' — regret form?", answer:"had left"},
       {prompt:"Choose: 'I would be happier now' or 'I would have been happier yesterday' for a present result.", answer:"I would be happier now."},
-      {prompt:"'If they had moved, they ___ the opportunity.' (would have missed)", answer:"would have missed"},
+      {prompt:"Complete: 'If they had moved, they ___ the opportunity.'", answer:"would have missed"},
       {prompt:"'If I weren't lazy, I ___ finished it by now.' (would have)", answer:"would have"},
       {prompt:"Make a mixed conditional about a career choice.", answer:"(free — If I had studied X, I would be… now)"},
       {prompt:"Fix: 'If she would have saved money, she would be fine now.'", answer:"If she had saved money, she would be fine now."},
