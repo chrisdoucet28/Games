@@ -40,6 +40,18 @@ const MAX_ROUNDS = 8;
 type Difficulty = "easy" | "medium" | "hard";
 const CPU_STEAL_SECONDS_BY_DIFFICULTY: Record<Difficulty, number> = { easy: 20, medium: 12, hard: 6 };
 
+// Solo only — the CPU now also submits its own round entry every round, same as a real second
+// team would (previously it only ever reacted to the human's mistakes, which read as a watered-
+// down version of the real game per direct teacher feedback). Higher = CPU gets it wrong more
+// often, same "easy is more generous" direction as every other difficulty tunable in this file.
+// Its wrong entries reuse real "correct grammar mistakes" content (question = the broken
+// sentence, answer = the fix) rather than fabricating language — the exact content type
+// Battleship already draws from, not a new authoring project.
+const CPU_WRONG_CHANCE_BY_DIFFICULTY: Record<Difficulty, number> = { easy: 0.45, medium: 0.3, hard: 0.15 };
+// Random spread before the CPU's own entry resolves each round — writes "at the same time" as the
+// student per the game's own flavor text, not instantly, so it doesn't read as a scripted reveal.
+const CPU_ENTRY_DELAY_MS = { min: 3000, max: 8000 };
+
 type Phase = "intro" | "playing" | "final";
 type Banner = { text: React.ReactNode; kind: "success" | "wrong"; key: number };
 
@@ -146,6 +158,28 @@ function RoundEntryCard({ entry, team, answerMode, isPhoneMode, onPost, onCorrec
           </div>
         </>
       )}
+    </div>
+  );
+}
+
+// Solo only — the CPU's own round entry, alongside the human's RoundEntryCard. Purely a "writing"
+// poster with no interaction: resolution happens automatically (see the effect in the main
+// component, right after resolveRoundWrong) via a hidden dice roll, never a teacher click, since
+// there's no real CPU sentence for anyone to judge — just a wait, then this card disappears the
+// same way a resolved human entry does (correct) or turns into a real bounty (wrong).
+function CpuRoundEntryCard({ team }: { team: GameProps["teams"][number] | undefined }) {
+  return (
+    <div style={{
+      position: "relative", width: "230px", background: "linear-gradient(160deg,#FFFBEB,#FEF3C7)", border: "2px solid #D97706",
+      borderRadius: "12px", padding: "12px", textAlign: "center", animation: "bbPosterIn 0.4s ease-out",
+      boxShadow: "0 4px 14px rgba(180,83,9,0.18)",
+    }}>
+      <div style={{ fontSize: "12px", fontWeight: "800", color: team?.color.dark ?? "#78350F", marginBottom: "8px" }}>
+        <TeamIcon team={team} /> {team?.name ?? "CPU"}
+      </div>
+      <div style={{ fontSize: "11px", fontWeight: "700", color: "#92400E", padding: "8px 0", display: "inline-flex", alignItems: "center", gap: "4px" }}>
+        <Icon name="robot" size={11} /> Writing…
+      </div>
     </div>
   );
 }
@@ -291,6 +325,14 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
     return [...finalPool].sort(() => Math.random() - 0.5);
   })()).current;
   const totalRounds = Math.min(MAX_ROUNDS, Math.max(1, pool.length));
+  // Solo only — same idiom as `pool` above, but for the CPU's own round entries (see
+  // CPU_WRONG_CHANCE_BY_DIFFICULTY). Empty for a topic selection with no "correct grammar
+  // mistakes" content at all (rare) — the CPU simply never rolls wrong in that case, same
+  // graceful-fallback spirit as `pool`'s own empty-uvs case.
+  const cgmPool = useRef((() => {
+    const cgm = questions.filter((q): q is typeof q & { question: string } => q.type === "correct grammar mistakes" && !!q.question);
+    return [...cgm].sort(() => Math.random() - 0.5);
+  })()).current;
 
   const [phase, setPhase] = useState<Phase>(resumed ? "playing" : "intro");
   const [showHowTo, setShowHowTo] = useState(false);
@@ -318,13 +360,20 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
 
   const currentPrompt = pool[roundNumber % pool.length];
 
+  // The CPU's own round entry, alongside every real team's — see CPU_WRONG_CHANCE_BY_DIFFICULTY.
+  // `submitted`/`text` are irrelevant for it (a dedicated card renders it, never RoundEntryCard),
+  // only `resolved` matters, for `roundComplete` to correctly wait on it like any other entry.
+  const seedRoundEntries = (): BountyRoundEntry[] => {
+    const entries = propTeams.map(t => ({ teamId: t.id, text: "", submitted: answerMode === "spoken", resolved: false }));
+    if (isSolo && cpuRef.current) entries.push({ teamId: cpuRef.current.id, text: "", submitted: true, resolved: false });
+    return entries;
+  };
+
   // Seeds the very first round (fresh start OR resume, both start with an empty roundEntries) the
-  // moment play begins — every LATER round is seeded by goToNextRound below instead. Always from
-  // propTeams, never the CPU-augmented `teams` — the CPU never submits a round entry of its own
-  // (see cpuStealBounty above), only real teams get one.
+  // moment play begins — every LATER round is seeded by goToNextRound below instead.
   useEffect(() => {
     if (phase !== "playing" || roundEntries.length > 0) return;
-    setRoundEntries(propTeams.map(t => ({ teamId: t.id, text: "", submitted: answerMode === "spoken", resolved: false })));
+    setRoundEntries(seedRoundEntries());
     setBounties([]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase]);
@@ -376,6 +425,32 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
     const team = teams.find(t => t.id === teamId);
     pushBanner(<><Icon name="warning" size={14} /> {team?.name ?? "That"}'s sentence is now a bounty — {formatValue(value)}!</>, "wrong");
   };
+
+  // Resolves the CPU's own round entry after a short delay — the exact same resolveRoundCorrect/
+  // resolveRoundWrong a human's Correct/Wrong click already uses, just triggered by a hidden dice
+  // roll instead. The ref (not just checking entry.resolved) guards against double-scheduling if
+  // this effect re-runs mid-delay for an unrelated reason (e.g. a difficulty change mid-round).
+  const cpuEntryScheduledRoundRef = useRef<number | null>(null);
+  useEffect(() => {
+    if (!isSolo || phase !== "playing" || !cpuRef.current) return;
+    const cpuId = cpuRef.current.id;
+    const entry = roundEntries.find(e => e.teamId === cpuId);
+    if (!entry || entry.resolved) return;
+    if (cpuEntryScheduledRoundRef.current === roundNumber) return;
+    cpuEntryScheduledRoundRef.current = roundNumber;
+    const delay = CPU_ENTRY_DELAY_MS.min + Math.random() * (CPU_ENTRY_DELAY_MS.max - CPU_ENTRY_DELAY_MS.min);
+    const goWrong = cgmPool.length > 0 && Math.random() < CPU_WRONG_CHANCE_BY_DIFFICULTY[difficulty];
+    const timer = setTimeout(() => {
+      if (goWrong) {
+        const item = cgmPool[Math.floor(Math.random() * cgmPool.length)];
+        resolveRoundWrong(cpuId, item.question);
+      } else {
+        resolveRoundCorrect(cpuId);
+      }
+    }, delay);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSolo, phase, roundNumber, roundEntries, difficulty]);
 
   // Guarded inside the functional updater (not a separate read beforehand) — a screen click racing
   // a phone broadcast for the same bounty can't both succeed, same idiom as Order Up's claimTicket.
@@ -437,9 +512,12 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
     pushBanner(<><Icon name="robot" size={14} /> CPU beat you to it! +{bounty.value} pts</>, "wrong");
   };
 
-  // Solo only — there's at most one open (unresolved, unclaimed) bounty at a time (a round can't
-  // advance while its sole entry is unresolved), so one countdown is always enough.
-  const openBounty = bounties.find(b => !b.resolved && b.claimedBy === undefined);
+  // Solo only — the bounty the CPU is racing to steal. Explicitly excludes the CPU's own bounty
+  // (originalTeamId === cpuId) now that the CPU submits a round entry of its own too — otherwise
+  // it would eventually "steal" its own mistake, which makes no sense and would quietly award it
+  // points for fixing itself. The human's own bounty and the CPU's own bounty CAN be open at the
+  // same time now (both entries went wrong the same round); this only ever targets the human's.
+  const openBounty = bounties.find(b => !b.resolved && b.claimedBy === undefined && b.originalTeamId !== cpuRef.current?.id);
   const cpuStealSeconds = CPU_STEAL_SECONDS_BY_DIFFICULTY[difficulty];
   const { timeLeft: cpuStealTimeLeft } = useTurnTimer(
     cpuStealSeconds,
@@ -455,7 +533,7 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
     if (isLastRound) { setPhase("final"); return; }
     const next = roundNumber + 1;
     setRoundNumber(next);
-    setRoundEntries(propTeams.map(t => ({ teamId: t.id, text: "", submitted: answerMode === "spoken", resolved: false })));
+    setRoundEntries(seedRoundEntries());
     setBounties([]);
   };
 
@@ -773,16 +851,20 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
           {roundEntries
             .filter(e => !e.resolved && !bounties.some(b => b.originalTeamId === e.teamId && !b.resolved))
             .map(e => (
-              <RoundEntryCard
-                key={e.teamId}
-                entry={e}
-                team={teams.find(t => t.id === e.teamId)}
-                answerMode={answerMode}
-                isPhoneMode={inputMode === "phone"}
-                onPost={text => submitRoundEntry(e.teamId, text)}
-                onCorrect={() => resolveRoundCorrect(e.teamId)}
-                onWrong={text => resolveRoundWrong(e.teamId, text)}
-              />
+              e.teamId === cpuRef.current?.id ? (
+                <CpuRoundEntryCard key={e.teamId} team={teams.find(t => t.id === e.teamId)} />
+              ) : (
+                <RoundEntryCard
+                  key={e.teamId}
+                  entry={e}
+                  team={teams.find(t => t.id === e.teamId)}
+                  answerMode={answerMode}
+                  isPhoneMode={inputMode === "phone"}
+                  onPost={text => submitRoundEntry(e.teamId, text)}
+                  onCorrect={() => resolveRoundCorrect(e.teamId)}
+                  onWrong={text => resolveRoundWrong(e.teamId, text)}
+                />
+              )
             ))}
         </div>
 
