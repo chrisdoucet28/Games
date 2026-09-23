@@ -2626,7 +2626,7 @@ export const TOPIC_LIBRARY = {
     minefieldGrid: {
       topic: "I'd prefer / I'd rather",
       instructions: "Students combine the preference starter (top) with the situation (side) to make a full preference sentence, conjugating the verb as needed.",
-      colLabels: ["I'd rather …", "I'd prefer to …", "I'd rather not …", "I'd really rather …", "I'd rather you …"],
+      colLabels: ["I'd rather …", "I'd prefer to …", "I prefer (+ing) …", "I'd rather not …", "I'd rather you …"],
       rowLabels: ["… (stay) in and watch a movie.", "… (relax) at home this afternoon.", "… (go) out in this weather.", "… (take) the scenic route.", "… (say) something honest for once."],
     },
     cardTasks: [
@@ -12628,7 +12628,7 @@ export const TOPIC_LIBRARY = {
       { type:"fill in the blank", question:"'If I ___ (take) that job, I would be in Paris now.'", answer:"had taken", hint:"Past-to-present mixed: if + past perfect, would + infinitive", difficulty:"easy" },
       { type:"fill in the blank", question:"'If I ___ (be) more confident, I would have applied for that position.'", answer:"were", hint:"Present-to-past mixed: if + were (hypothetical present)", difficulty:"medium" },
       { type:"fill in the blank", question:"'If she hadn't missed that flight, she ___ (be) here with us now.'", answer:"would be", hint:"Mixed result clause needs 'would be', not present simple", difficulty:"medium" },
-      { type:"fill in the blank", question:"'If he ___ (be) more careful last night, the accident wouldn't have happened.'", answer:"had been", hint:"Past hypothetical: past perfect in the if-clause", difficulty:"hard" },
+      { type:"fill in the blank", question:"'If he ___ (be) more careful last night, he wouldn't be in the hospital now.'", answer:"had been", hint:"Past cause → present result: past perfect in the if-clause, 'would be' in the result", difficulty:"hard" },
       { type:"fill in the blank", question:"'If she ___ (be) a native speaker, she would have got that job easily.'", answer:"were", hint:"Hypothetical present → past consequence: 'were' in formal usage", difficulty:"medium" },
       { type:"fill in the blank", question:"'If I ___ (not/be) allergic to cats, I would have adopted one by now.'", answer:"weren't", hint:"Hypothetical present state stopping a past action: if + weren't", difficulty:"hard" },
       { type:"fill in the blank", question:"'If the company ___ (expand), it would be the market leader today.'", answer:"had expanded", hint:"Past decision → present position: past perfect + would + be", difficulty:"medium" },
@@ -26846,7 +26846,7 @@ export const TOPIC_LIBRARY = {
       { type:"use vocabulary in a sentence", question:"zero conditional: a habit, with 'when'", answer:"When I feel stressed, I go for a walk to calm down.", hint:"'When' + present simple describes something that happens regularly", difficulty:"medium" },
       { type:"use vocabulary in a sentence", question:"zero conditional: a fact about money and spending", answer:"If you spend more than you earn, you get into debt.", hint:"Zero conditional describes a general truth, present simple in both clauses", difficulty:"medium" },
       { type:"use vocabulary in a sentence", question:"zero conditional (if-clause second): a habit about phones before bed", answer:"You sleep worse if you look at your phone before bed.", hint:"The if-clause can come after the result clause too — no comma needed then", difficulty:"hard" },
-      { type:"use vocabulary in a sentence", question:"zero conditional — cause and effect in technology", answer:"If the battery runs low, the phone switches to power-saving mode automatically.", hint:"Use present simple throughout to describe how a device generally behaves", difficulty:"hard" },
+      { type:"use vocabulary in a sentence", question:"zero conditional — cause and effect in technology", answer:"If you drop your phone, the screen cracks.", hint:"Present simple in both clauses — a general truth, not a one-time event", difficulty:"easy" },
       { type:"correct grammar mistakes", question:"'If you don't water a plant, it wilt.'", answer:"If you don't water a plant, it wilts.", hint:"Third person singular ('it') needs -s", difficulty:"easy" },
       { type:"correct grammar mistakes", question:"'If metal get hot, it expands.'", answer:"If metal gets hot, it expands.", hint:"'Metal' is singular, so the verb needs -s", difficulty:"easy" },
       { type:"correct grammar mistakes", question:"'When the temperature drop below zero, water freezes.'", answer:"When the temperature drops below zero, water freezes.", hint:"Singular subject 'temperature' needs -s", difficulty:"easy" },
