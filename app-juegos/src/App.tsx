@@ -21,6 +21,7 @@ import { PublicLearnLessonScreen } from './components/shared/PublicLearnLessonSc
 import { PracticeScreen } from './components/shared/PracticeScreen';
 import { RoleChooserScreen } from './components/shared/RoleChooserScreen';
 import { StudentHome } from './components/student/StudentHome';
+import { AdminScreen } from './components/shared/AdminScreen';
 import { FREE_LAUNCH_ALL_PREMIUM } from './data/constants';
 import { Icon } from './components/shared/Icon';
 import { isMusicEnabled, setMusicEnabled, onMusicEnabledChange, stopMusic } from './lib/music';
@@ -199,12 +200,17 @@ function AuthenticatedApp() {
   // an already-decided teacher.
   const userId = session?.user.id ?? null;
   const [roleInfo, setRoleInfo] = useState<{ role: 'teacher' | 'student'; chosen: boolean } | null>(null);
+  // Gates the hidden /admin panel — true only for the app owner's own account (see the
+  // admin_access migration). Fetched in the same getProfile() call as role/chosen above rather
+  // than a second request; defaults to false on a database that doesn't have the column yet or on
+  // a failed fetch, same defensive posture as roleInfo's own catch below.
+  const [isAdmin, setIsAdmin] = useState(false);
   useEffect(() => {
-    if (!userId) { setRoleInfo(null); return; }
+    if (!userId) { setRoleInfo(null); setIsAdmin(false); return; }
     let cancelled = false;
     getProfile()
-      .then(p => { if (!cancelled) setRoleInfo({ role: p.role ?? 'teacher', chosen: p.role_chosen ?? true }); })
-      .catch(() => { if (!cancelled) setRoleInfo({ role: 'teacher', chosen: true }); });
+      .then(p => { if (!cancelled) { setRoleInfo({ role: p.role ?? 'teacher', chosen: p.role_chosen ?? true }); setIsAdmin(p.is_admin ?? false); } })
+      .catch(() => { if (!cancelled) { setRoleInfo({ role: 'teacher', chosen: true }); setIsAdmin(false); } });
     return () => { cancelled = true; };
   }, [userId]);
 
@@ -247,6 +253,12 @@ function AuthenticatedApp() {
         <div style={{ color: 'white', fontFamily: "'Segoe UI',system-ui,sans-serif", fontSize: '16px' }}>Loading…</div>
       </div>
     );
+  }
+
+  // A hidden, non-linked route — falls through silently (no hint the route exists) for anyone
+  // whose profile isn't flagged is_admin, same "just don't render it" gate as everywhere else here.
+  if (window.location.pathname === '/admin' && isAdmin) {
+    return <AdminScreen userEmail={session.user.email ?? null} onExit={() => { window.location.pathname = '/'; }} />;
   }
 
   // Both the one-time chooser and the student home get the same slim top bar (log out + music

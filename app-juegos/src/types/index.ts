@@ -147,6 +147,10 @@ export interface TeamColor {
     // one-time "teacher or student?" question; it can only be changed through the set_my_role RPC.
     role?: "teacher" | "student";
     role_chosen?: boolean;
+    // True only for the app owner's own account, flipped on directly in the database (never
+    // settable from the client). Gates the /admin panel. Optional for the same reason as role —
+    // a database that doesn't have the admin_access migration yet returns neither.
+    is_admin?: boolean;
     created_at: string;
     updated_at: string;
   }
