@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { ADMIN_COLORS as C } from "./adminColors";
 import { GAME_MODES } from "../../data/constants";
 import type { FeedbackRow } from "../../lib/adminFeedback";
+import { AdminAutoFixActivity } from "./AdminAutoFixActivity";
 
 type Tab = "all" | "flag" | "general";
 
@@ -115,6 +116,8 @@ export function AdminFeedbackPanel({ rows, error, onMarkReviewed }: Props) {
 
   return (
     <>
+      <AdminAutoFixActivity />
+
       <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
         <span style={{ ...pillStyle, background: C.dangerBg, borderColor: "rgba(239,68,68,0.4)", color: "#FCA5A5" }}>
           <span style={{ width: 6, height: 6, borderRadius: "50%", background: "currentColor" }} />

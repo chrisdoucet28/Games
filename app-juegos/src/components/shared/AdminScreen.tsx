@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import { AdminFeedbackPanel } from "./AdminFeedbackPanel";
 import { AdminContentPanel } from "./AdminContentPanel";
 import { AdminAssetsPanel } from "./AdminAssetsPanel";
+import { AdminGrowthPanel } from "./AdminGrowthPanel";
+import { AdminBillingPanel } from "./AdminBillingPanel";
+import { AdminTeachersPanel } from "./AdminTeachersPanel";
 import { ADMIN_COLORS } from "./adminColors";
 import { listFeedback, markFeedbackReviewed, type FeedbackRow } from "../../lib/adminFeedback";
 
@@ -22,9 +25,9 @@ const NAV_GROUPS: { label: string; items: { key: View; icon: string; label: stri
 
 const TOPBAR: Record<View, { title: string; sub: string }> = {
   feedback: { title: "Feedback Inbox", sub: "Flagged prompts + general notes teachers send from inside the app" },
-  growth: { title: "Growth", sub: "Not sketched yet — next up if this is worth building for real" },
-  billing: { title: "Billing", sub: "Not sketched yet — next up if this is worth building for real" },
-  classes: { title: "Teachers & Classes", sub: "Not sketched yet — next up if this is worth building for real" },
+  growth: { title: "Growth", sub: "How ClassCade is actually being used, pulled straight from Supabase" },
+  billing: { title: "Billing", sub: "Real Stripe subscription data — see the launch-phase note before trusting the free/paid split" },
+  classes: { title: "Teachers & Classes", sub: "Every teacher account and how many classes they've saved" },
   content: { title: "Content & Topics", sub: "Every topic in the game/Learn library, with live Learn-parity check" },
   assets: { title: "Assets", sub: "Every mascot and game icon, rendered live — plus marketing artifact links" },
 };
@@ -121,13 +124,9 @@ export function AdminScreen({ userEmail, onExit }: Props) {
               )}
               {view === "content" && <AdminContentPanel />}
               {view === "assets" && <AdminAssetsPanel />}
-              {(view === "growth" || view === "billing" || view === "classes") && (
-                <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, color: ADMIN_COLORS.inkFaint }}>
-                  <div style={{ fontSize: 34, opacity: 0.6 }}>🧭</div>
-                  <b style={{ color: ADMIN_COLORS.inkDim, fontSize: 14 }}>Not sketched yet</b>
-                  <div>This is just a first look at the pieces that were worth building for real.</div>
-                </div>
-              )}
+              {view === "growth" && <AdminGrowthPanel />}
+              {view === "billing" && <AdminBillingPanel />}
+              {view === "classes" && <AdminTeachersPanel />}
             </div>
           </div>
         </div>
