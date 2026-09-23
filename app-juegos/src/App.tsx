@@ -48,7 +48,7 @@ function ConfigErrorScreen() {
 // Progress/Fullscreen/End Game) whenever a game was in progress. A plain top strip in normal
 // document flow just pushes the rest of the page down instead, so it can never overlap anything
 // regardless of which screen is showing.
-function StatusBadge({ children, action, onAction, theme }: { children: React.ReactNode; action: string; onAction: () => void; theme: Theme }) {
+function StatusBadge({ children, action, onAction, theme, isAdmin }: { children: React.ReactNode; action: string; onAction: () => void; theme: Theme; isAdmin?: boolean }) {
   // The one spot rendered on every logged-in screen, so it's the only place a persistent
   // background-music mute control can live — the per-game sound toggle in LessonGamesGenerator's
   // game header only covers the actual game screen, but music now plays everywhere.
@@ -68,6 +68,19 @@ function StatusBadge({ children, action, onAction, theme }: { children: React.Re
       }}
     >
       <span style={{ color: 'white', fontSize: '12px', fontWeight: 700, fontFamily: theme.headingFont }}>{children}</span>
+      {isAdmin && (
+        <button
+          onClick={() => { window.location.pathname = '/admin'; }}
+          title="Admin panel"
+          style={{
+            background: 'rgba(255,255,255,0.15)', color: 'white', border: 'none',
+            borderRadius: '14px', padding: '6px 12px', fontSize: '12px', fontWeight: 700, cursor: 'pointer',
+            fontFamily: theme.headingFont,
+          }}
+        >
+          Admin
+        </button>
+      )}
       <button
         onClick={() => setMusicEnabled(!musicOn)}
         title={musicOn ? 'Mute background music' : 'Unmute background music'}
@@ -266,7 +279,7 @@ function AuthenticatedApp() {
   if (!roleInfo.chosen || roleInfo.role === 'student') {
     return (
       <div>
-        <StatusBadge action="Log Out" onAction={() => supabase.auth.signOut()} theme={theme}>
+        <StatusBadge action="Log Out" onAction={() => supabase.auth.signOut()} theme={theme} isAdmin={isAdmin}>
           <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#22C55E', display: 'inline-block', marginRight: '6px' }} />
           Logged in as {session.user.email}
         </StatusBadge>
@@ -286,7 +299,7 @@ function AuthenticatedApp() {
   if (!planIntroSeen) {
     return (
       <div>
-        <StatusBadge action="Log Out" onAction={() => supabase.auth.signOut()} theme={theme}>
+        <StatusBadge action="Log Out" onAction={() => supabase.auth.signOut()} theme={theme} isAdmin={isAdmin}>
           <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#22C55E', display: 'inline-block', marginRight: '6px' }} />
           Logged in as {session.user.email}
         </StatusBadge>
@@ -301,7 +314,7 @@ function AuthenticatedApp() {
 
   return (
     <div>
-      <StatusBadge action="Log Out" onAction={() => supabase.auth.signOut()} theme={theme}>
+      <StatusBadge action="Log Out" onAction={() => supabase.auth.signOut()} theme={theme} isAdmin={isAdmin}>
         <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#22C55E', display: 'inline-block', marginRight: '6px' }} />
         Logged in as {session.user.email}
       </StatusBadge>
