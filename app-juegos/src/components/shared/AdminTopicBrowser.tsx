@@ -23,7 +23,11 @@ const SECTION_LABELS: Record<string, string> = {
 const KNOWN_META_KEYS = new Set(["label", "level", "category", "focus", "order", "minefieldGrid", ...ARRAY_SECTIONS]);
 
 function itemSummary(item: Record<string, unknown>): string {
-  for (const key of ["question", "task", "sentence", "starter", "crewmatePrompt", "topic"]) {
+  // "prompt" is hotPotatoPrompts' own field name (HotPotatoGame.tsx reads .prompt, not
+  // .question) despite the shared TopicLibraryEntry type calling it QuestionData[] like every
+  // other question-shaped pool — every hotPotatoPrompts item rendered as a raw JSON dump here
+  // until this was added.
+  for (const key of ["question", "task", "sentence", "starter", "crewmatePrompt", "prompt", "topic"]) {
     if (typeof item[key] === "string") return item[key] as string;
   }
   return JSON.stringify(item).slice(0, 100);
