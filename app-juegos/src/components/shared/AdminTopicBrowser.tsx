@@ -111,13 +111,43 @@ function EditItemForm({ topicId, section, itemIndex, item, onDone, onCancel }: {
   );
 }
 
+// minefieldGrid is the one item shape where the "primary text" isn't the whole story — its two
+// label arrays (the actual grid content teachers care about reviewing, see CLAUDE.md's Minefield
+// rules) would otherwise stay invisible behind itemSummary()'s single-line pick, only showing up
+// once someone opens the edit form and notices a joined-by-" | " string in a plain text input.
+function MinefieldGridDetail({ item }: { item: Record<string, unknown> }) {
+  const colLabels = Array.isArray(item.colLabels) ? (item.colLabels as unknown[]) : [];
+  const rowLabels = Array.isArray(item.rowLabels) ? (item.rowLabels as unknown[]) : [];
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 4, marginBottom: 6 }}>
+      {typeof item.instructions === "string" && item.instructions && (
+        <div style={{ fontSize: 11.5, color: C.inkDim, fontStyle: "italic" }}>{item.instructions}</div>
+      )}
+      <div style={{ fontSize: 11, color: C.inkFaint, fontWeight: 800 }}>Column Labels ({colLabels.length})</div>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+        {colLabels.map((label, i) => (
+          <span key={i} style={{ fontSize: 11.5, color: C.ink, background: C.surface2, border: `1px solid ${C.border}`, borderRadius: 6, padding: "3px 8px" }}>{String(label)}</span>
+        ))}
+      </div>
+      <div style={{ fontSize: 11, color: C.inkFaint, fontWeight: 800 }}>Row Labels ({rowLabels.length})</div>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+        {rowLabels.map((label, i) => (
+          <span key={i} style={{ fontSize: 11.5, color: C.ink, background: C.surface2, border: `1px solid ${C.border}`, borderRadius: 6, padding: "3px 8px" }}>{String(label)}</span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function ItemRow({ topicId, section, itemIndex, item }: { topicId: string; section: string; itemIndex: number | null; item: Record<string, unknown> }) {
   const [editing, setEditing] = useState(false);
   const [done, setDone] = useState(false);
+  const isMinefieldGrid = Array.isArray(item.colLabels) || Array.isArray(item.rowLabels);
   return (
     <div style={{ padding: "8px 10px", borderBottom: `1px solid ${C.border}` }}>
+      {isMinefieldGrid && <MinefieldGridDetail item={item} />}
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-        <div style={{ flex: 1, fontSize: 12.5, color: C.ink, fontWeight: 600 }}>{itemSummary(item)}</div>
+        <div style={{ flex: 1, fontSize: 12.5, color: C.ink, fontWeight: 600 }}>{isMinefieldGrid ? null : itemSummary(item)}</div>
         {done ? (
           <span style={{ fontSize: 11, fontWeight: 800, color: "#86EFAC", flexShrink: 0 }}>Suggested ✓</span>
         ) : (
