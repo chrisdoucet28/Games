@@ -8,6 +8,9 @@ type Tab = "all" | "flag" | "general";
 const gameLabel = (gameId: string | null) => {
   if (!gameId) return null;
   if (gameId === "lessonplan") return "Lesson Plan";
+  // Not a game at all — FlagLessonButton.tsx (the Learn screen's own flag button) always submits
+  // this literal id, with question_data shaped as { topicId, title } instead of { question, answer }.
+  if (gameId === "learn") return "Learn";
   return GAME_MODES.find(g => g.id === gameId)?.name ?? gameId;
 };
 
@@ -36,6 +39,9 @@ function formatQuestionData(data: unknown): string | null {
   const answer = typeof d.answer === "string" ? d.answer : null;
   if (question && answer) return `${question} → ${answer}`;
   if (question) return question;
+  // FlagLessonButton.tsx's shape (game_id "learn") — no question/answer, just which lesson.
+  const title = typeof d.title === "string" ? d.title : null;
+  if (title) return `Lesson: ${title}`;
   return null;
 }
 

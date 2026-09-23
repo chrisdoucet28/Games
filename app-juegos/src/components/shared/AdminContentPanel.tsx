@@ -3,6 +3,8 @@ import { ADMIN_COLORS as C } from "./adminColors";
 import { TOPIC_OPTIONS } from "../../data/topicOptions";
 import { LESSONS } from "../../data/lessons";
 import { LEVEL_ORDER, LEVEL_COLOR, FOCUS_ORDER, FOCUS_LABEL, matchesTopicSearch } from "../../data/learnTopics";
+import { AdminTopicBrowser } from "./AdminTopicBrowser";
+import { AdminContentSuggestions } from "./AdminContentSuggestions";
 
 // Purely client-side over data already bundled into the app (topicOptions.ts's lightweight
 // metadata + lessons.ts) — deliberately never imports the full topics.ts (~25k lines / ~5MB of
@@ -14,6 +16,7 @@ export function AdminContentPanel() {
   const [level, setLevel] = useState<string>("all");
   const [focus, setFocus] = useState<string>("all");
   const [search, setSearch] = useState("");
+  const [openTopic, setOpenTopic] = useState<string | null>(null);
 
   // Lessons that exist but point at a topic id no longer in TOPIC_OPTIONS — the other direction of
   // drift the per-row ✓/✗ column below can't show on its own.
@@ -43,6 +46,8 @@ export function AdminContentPanel() {
 
   return (
     <>
+      <AdminContentSuggestions />
+
       <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
         <span style={{ fontSize: 11.5, fontWeight: 800, padding: "6px 11px", borderRadius: 999, border: `1px solid ${C.border}`, color: C.inkDim }}>
           {REAL_TOPICS.length} topics
@@ -87,21 +92,39 @@ export function AdminContentPanel() {
       </div>
 
       <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 13, overflow: "hidden" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "2fr 80px 120px 90px", padding: "10px 16px", fontSize: 10.5, fontWeight: 800, color: C.inkFaint, textTransform: "uppercase", letterSpacing: "0.05em", borderBottom: `1px solid ${C.border}` }}>
-          <div>Topic</div><div>Level</div><div>Focus</div><div>Learn</div>
+        <div style={{ display: "grid", gridTemplateColumns: "2fr 80px 120px 90px 110px", padding: "10px 16px", fontSize: 10.5, fontWeight: 800, color: C.inkFaint, textTransform: "uppercase", letterSpacing: "0.05em", borderBottom: `1px solid ${C.border}` }}>
+          <div>Topic</div><div>Level</div><div>Focus</div><div>Learn</div><div>Content</div>
         </div>
-        {filtered.map(t => (
-          <div key={t.value} style={{ display: "grid", gridTemplateColumns: "2fr 80px 120px 90px", padding: "10px 16px", fontSize: 12.5, fontWeight: 700, borderBottom: `1px solid ${C.border}`, alignItems: "center" }}>
-            <div style={{ color: C.ink }}>{t.label}</div>
-            <div>
-              <span style={{ fontSize: 10.5, fontWeight: 800, color: LEVEL_COLOR[t.level ?? ""] ?? C.inkDim, border: `1px solid ${LEVEL_COLOR[t.level ?? ""] ?? C.border}55`, borderRadius: 6, padding: "2px 7px" }}>
-                {t.level}
-              </span>
+        {filtered.map(t => {
+          const open = openTopic === t.value;
+          return (
+            <div key={t.value} style={{ borderBottom: `1px solid ${C.border}` }}>
+              <div style={{ display: "grid", gridTemplateColumns: "2fr 80px 120px 90px 110px", padding: "10px 16px", fontSize: 12.5, fontWeight: 700, alignItems: "center" }}>
+                <div style={{ color: C.ink }}>{t.label}</div>
+                <div>
+                  <span style={{ fontSize: 10.5, fontWeight: 800, color: LEVEL_COLOR[t.level ?? ""] ?? C.inkDim, border: `1px solid ${LEVEL_COLOR[t.level ?? ""] ?? C.border}55`, borderRadius: 6, padding: "2px 7px" }}>
+                    {t.level}
+                  </span>
+                </div>
+                <div style={{ color: C.inkDim }}>{FOCUS_LABEL[t.focus ?? ""] ?? t.focus}</div>
+                <div>{LESSONS[t.value] ? <span style={{ color: "#86EFAC" }}>✓ Yes</span> : <span style={{ color: "#FCA5A5" }}>✗ Missing</span>}</div>
+                <div>
+                  <button
+                    onClick={() => setOpenTopic(open ? null : t.value)}
+                    style={{ border: `1px solid ${C.border}`, borderRadius: 7, padding: "5px 10px", fontSize: 11, fontWeight: 800, cursor: "pointer", background: open ? C.surface3 : C.surface2, color: open ? C.ink : C.inkDim, fontFamily: "inherit" }}
+                  >
+                    {open ? "Close" : "Browse"}
+                  </button>
+                </div>
+              </div>
+              {open && (
+                <div style={{ padding: "0 16px 16px" }}>
+                  <AdminTopicBrowser topicId={t.value} />
+                </div>
+              )}
             </div>
-            <div style={{ color: C.inkDim }}>{FOCUS_LABEL[t.focus ?? ""] ?? t.focus}</div>
-            <div>{LESSONS[t.value] ? <span style={{ color: "#86EFAC" }}>✓ Yes</span> : <span style={{ color: "#FCA5A5" }}>✗ Missing</span>}</div>
-          </div>
-        ))}
+          );
+        })}
         {filtered.length === 0 && (
           <div style={{ color: C.inkFaint, fontSize: 13, fontWeight: 700, textAlign: "center", padding: "30px 0" }}>No topics match.</div>
         )}
