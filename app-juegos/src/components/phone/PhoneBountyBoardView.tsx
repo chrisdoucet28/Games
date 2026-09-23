@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { TeamIcon } from "../shared/TeamIcon";
 import type { BountyBoardStatePayload, BountyBoardActionPayload } from "../../lib/liveSession";
 
@@ -13,7 +13,16 @@ type Props = {
 // a one-shot action.
 export function PhoneBountyBoardView({ state, teamId, onAction }: Props) {
   const team = state.roster.find(t => t.id === teamId);
-  const [roundDraft, setRoundDraft] = useState("");
+  // null = "nothing typed yet this round" (fall back to the server's own entry text, e.g. on
+  // reconnect); a real string, including "", means the student has actually touched the box, so it
+  // must never fall back to anything else. Caught live: this used to be `useState("")` with `||`
+  // fallbacks, which (a) never reset between rounds, so a previous round's leftover draft answer
+  // silently persisted into the next round's box, and (b) treated a deliberately-cleared "" as
+  // falsy, snapping back to old submitted text the instant the student finished erasing it — so a
+  // student who cleared the box to retype could end up submitting a stale answer from the round
+  // before without ever meaning to.
+  const [roundDraft, setRoundDraft] = useState<string | null>(null);
+  useEffect(() => { setRoundDraft(null); }, [state.roundNumber]);
   // Keyed by bounty id — a team could in principle hold more than one fix draft across bounties
   // that opened up in quick succession.
   const [fixDrafts, setFixDrafts] = useState<Record<number, string>>({});
@@ -89,7 +98,7 @@ export function PhoneBountyBoardView({ state, teamId, onAction }: Props) {
         ) : (
           <>
             <textarea
-              value={roundDraft || myEntry?.text || ""}
+              value={roundDraft ?? myEntry?.text ?? ""}
               onChange={e => setRoundDraft(e.target.value)}
               maxLength={300}
               rows={2}
@@ -97,14 +106,14 @@ export function PhoneBountyBoardView({ state, teamId, onAction }: Props) {
               style={{ width: "100%", boxSizing: "border-box", border: "1px solid #FDE68A", borderRadius: "8px", padding: "6px 8px", fontSize: "13px", fontFamily: "inherit", resize: "vertical" }}
             />
             <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "8px", marginTop: "6px" }}>
-              {myEntry?.submitted && (roundDraft || myEntry.text) === myEntry.text && <span style={{ fontSize: "11px", fontWeight: "800", color: "#22C55E" }}>✅ Submitted</span>}
+              {myEntry?.submitted && (roundDraft ?? myEntry.text) === myEntry.text && <span style={{ fontSize: "11px", fontWeight: "800", color: "#22C55E" }}>✅ Submitted</span>}
               <button
-                onClick={() => onAction({ teamId, action: "submitRound", text: (roundDraft || myEntry?.text || "").trim() })}
-                disabled={(roundDraft || myEntry?.text || "").trim() === ""}
+                onClick={() => onAction({ teamId, action: "submitRound", text: (roundDraft ?? myEntry?.text ?? "").trim() })}
+                disabled={(roundDraft ?? myEntry?.text ?? "").trim() === ""}
                 style={{
-                  background: (roundDraft || myEntry?.text || "").trim() === "" ? "#D1D5DB" : "linear-gradient(135deg,#92400E,#B45309)", color: "white", border: "none",
+                  background: (roundDraft ?? myEntry?.text ?? "").trim() === "" ? "#D1D5DB" : "linear-gradient(135deg,#92400E,#B45309)", color: "white", border: "none",
                   borderRadius: "8px", padding: "6px 14px", fontSize: "12px", fontWeight: "800",
-                  cursor: (roundDraft || myEntry?.text || "").trim() === "" ? "not-allowed" : "pointer",
+                  cursor: (roundDraft ?? myEntry?.text ?? "").trim() === "" ? "not-allowed" : "pointer",
                 }}
               >Submit</button>
             </div>
@@ -117,7 +126,13 @@ export function PhoneBountyBoardView({ state, teamId, onAction }: Props) {
           <div style={{ fontSize: "12px", fontWeight: "800", color: "#7F1D1D", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: "8px" }}>Bounties you're fixing</div>
           <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
             {myClaimedBounties.map(b => {
-              const draftValue = fixDrafts[b.id] ?? b.fixText ?? "";
+              // Pre-filled with the wrong sentence itself (not blank) — a teacher's own live
+              // feedback: fixing a bounty is almost always a small edit to what's already there
+              // (swap one word, add "not"), so starting from the wrong text and letting the
+              // student edit it in place is much faster than retyping the whole sentence from
+              // scratch, and matches the same "give them something to build from" pattern already
+              // used elsewhere (e.g. Minefield).
+              const draftValue = fixDrafts[b.id] ?? b.fixText ?? b.wrongText;
               return (
                 <div key={b.id} style={{ background: "white", border: "2px solid #B91C1C", borderRadius: "14px", padding: "10px 12px" }}>
                   <div style={{ fontSize: "11px", fontWeight: "800", color: "#B91C1C", marginBottom: "6px" }}>💰 {b.value} pts</div>
