@@ -6983,6 +6983,92 @@ export const LESSONS: Record<string, Lesson> = {
     ],
   },
 
+  numbers_and_colours: {
+    title: "Numbers & Colours",
+    intro: "Numbers and colours are among the first words you need in English: to say your age, count people and things, describe what you see, and ask about it. This lesson also shows how they behave in a sentence — numbers change the noun after them, and colours go before the noun.",
+    sections: [
+      {
+        heading: "Numbers 0–20",
+        body: [
+          "0 zero, 1 one, 2 two, 3 three, 4 four, 5 five, 6 six, 7 seven, 8 eight, 9 nine, 10 ten, 11 eleven, 12 twelve, 13 thirteen, 14 fourteen, 15 fifteen, 16 sixteen, 17 seventeen, 18 eighteen, 19 nineteen, 20 twenty.",
+          "The numbers 13–19 end in -teen.",
+        ],
+        examples: [
+          "I am **fifteen** years old.",
+          "There are **twelve** months in a year.",
+        ],
+      },
+      {
+        heading: "Tens and big numbers",
+        body: [
+          "The tens end in -ty: 20 twenty, 30 thirty, 40 forty, 50 fifty, 60 sixty, 70 seventy, 80 eighty, 90 ninety, 100 a/one hundred, 1,000 a/one thousand.",
+          "Careful: -teen and -ty sound similar (fifteen / fifty) — in -teen the last part is stressed. Also careful with spelling: fourteen has a 'u', but forty does not.",
+          "For 21–99, join the tens and the unit with a hyphen: twenty-one, forty-five.",
+          "After a number, hundred and thousand never take -s: two hundred, five thousand.",
+        ],
+        examples: [
+          "My father is **forty-five**.",
+          "The book costs **one hundred** euros.",
+          "About **fifty thousand** fans are here.",
+        ],
+      },
+      {
+        heading: "Counting things: number + plural noun",
+        body: [
+          "One = singular noun. Any number above one = plural noun (usually add -s).",
+          "To ask how many, use How many + plural noun: How many brothers do you have?",
+        ],
+        examples: [
+          "I have **one** brother and **two** sisters.",
+          "There are **twenty students** in my class.",
+          "**How many** pens do you have?",
+        ],
+      },
+      {
+        heading: "Colours",
+        body: [
+          "red, blue, green, yellow, orange, purple, pink, black, white, brown, grey.",
+          "Make a colour lighter or darker by putting light or dark before it: light blue, dark green.",
+        ],
+        examples: [
+          "The sky is **blue**.",
+          "Bananas are **yellow**.",
+          "My bag is **dark green**.",
+        ],
+      },
+      {
+        heading: "Colours in a sentence",
+        body: [
+          "A colour goes before the noun, and it never takes -s, even when the noun is plural.",
+          "After 'be', use the colour word alone.",
+        ],
+        examples: [
+          "I have a **black bag**.",
+          "She has two **red bags**.",
+          "The flag is **red and white**.",
+        ],
+      },
+      {
+        heading: "Asking about colours",
+        body: [
+          "Use What colour + is/are + subject? Use 'is' for one thing and 'are' for more than one.",
+        ],
+        examples: [
+          "**What colour is** your bag?",
+          "**What colour are** your shoes?",
+          "What's your favourite colour?",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ I have two brother. → ✅ I have two brothers. (a number above one needs a plural noun)",
+      "❌ She has a bag black. → ✅ She has a black bag. (the colour goes before the noun)",
+      "❌ The sky is blues. → ✅ The sky is blue. (colours never take -s)",
+      "❌ My father is fourty. → ✅ My father is forty. (forty has no 'u')",
+      "❌ How many student are there? → ✅ How many students are there? (after 'how many', use a plural noun)",
+    ],
+  },
+
   clothes: {
     title: "I Am Wearing... (Clothes)",
     intro: "Talking about clothes uses different tenses depending on when — present continuous for right now, present simple for habits, past simple for something already finished — and several clothing words are always plural, with no article before them.",

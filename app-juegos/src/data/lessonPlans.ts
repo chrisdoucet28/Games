@@ -180,6 +180,20 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
     ],
   },
 
+  numbers_and_colours: {
+    kind: "errorPassage",
+    text: "A: Hi! How many brother do you have?\nB: I have three brother. And you?\nA: I have one sister. She has a bag black.\nB: What colour is her bag?\nA: It is blues. My father is fourty years old, and he has a car red.\nB: My class is big. There are twenty student.",
+    corrected: "A: Hi! How many brothers do you have?\nB: I have three brothers. And you?\nA: I have one sister. She has a black bag.\nB: What colour is her bag?\nA: It is blue. My father is forty years old, and he has a red car.\nB: My class is big. There are twenty students.",
+    fixes: [
+      "'How many brother' → 'How many brothers' (after 'how many', the noun is plural)",
+      "'three brother' → 'three brothers' (a number above one needs a plural noun)",
+      "'a bag black' → 'a black bag' (the colour goes before the noun)",
+      "'It is blues' → 'It is blue' (colours never take -s)",
+      "'fourty' → 'forty' (forty has no 'u')",
+      "'a car red' → 'a red car' (the colour goes before the noun)",
+      "'twenty student' → 'twenty students' (a number above one needs a plural noun)",
+    ],
+  },
   clothes: { kind: "unscramble" },
   what_time_is_it: { kind: "unscramble" },
   basic_word_order: { kind: "unscramble" },

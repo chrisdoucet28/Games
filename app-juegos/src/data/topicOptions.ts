@@ -42,6 +42,7 @@ export const TOPIC_OPTIONS: { value: string; label: string; level: string | null
   { value: "third_conditional",     label: "Third Conditional",            level: "B2",  focus: "grammar"  , order: 9 },
   { value: "giving_opinions",       label: "Giving Opinions",              level: "B1",  focus: "vocabulary", order: 5 },
   { value: "greetings_introductions",label:"Greetings & Introductions",    level: "A1",  focus: "vocabulary", order: 1},
+  { value: "numbers_and_colours",   label: "Numbers & Colours",            level: "A1",  focus: "vocabulary", order: 3},
   { value: "introducing_others",    label: "Introducing Other People",     level: "A1",  focus: "vocabulary", order: 4},
   { value: "days_dates_prepositions_time", label: "Days and Dates + Prepositions of Time", level: "A1", focus: "grammar", order: 11 },
   { value: "what_time_is_it", label: "What Time is It?", level: "A1", focus: "grammar", order: 12 },

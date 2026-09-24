@@ -344,6 +344,21 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
     ],
   },
 
+  numbers_and_colours: {
+    title: "My Bedroom",
+    passage: [
+      "This is my bedroom. It is small, but I love it.",
+      "I have two windows and one door. The walls are light blue.",
+      "I have a big bed. It has a green blanket and three white pillows.",
+      "There are twenty books on my desk. My favourite book is red.",
+    ],
+    questions: [
+      { type: "reading comprehension", question: "How many windows are in the bedroom?", answer: "Two." },
+      { type: "reading comprehension", question: "What colour are the walls?", answer: "Light blue." },
+      { type: "reading comprehension", question: "How many pillows are on the bed?", answer: "Three." },
+    ],
+  },
+
   clothes: {
     title: "Packing for the Trip",
     audioUrl: `${MEDIA_BASE}/audio/real-world/clothes.mp3`,
