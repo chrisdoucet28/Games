@@ -180,18 +180,32 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
   // every time that round came up. There the spy's own prompt/topic comes from an independently
   // drawn round of the same source topic (same grammar, different scenario, so it's never a
   // different-topic leak). Groups of 3+ keep the pairing: the spy role rotates across teams there.
-  const pickSpyRi = (crewRi: number) => {
+  // Spy rounds already used this game, so a spy round doesn't come back until every other round in
+  // that topic has had its turn (marked by the effect below, once a draw is actually committed).
+  const usedSpyRisRef = useRef<Set<number>>(new Set());
+  const pickSpyRi = (crewRi: number, lastSpyRi?: number) => {
     if (!isTwoPlayer) return crewRi;
     const crewRound = questions[crewRi] as SpyRound | undefined;
     // Untagged rounds have no same-topic pool to draw from (and the guess list would then only
     // contain this round's own two topics), so they keep the authored pairing.
     if (!crewRound?.spySourceTopic) return crewRi;
-    const pool = questions
+    // Never the crew's own round either — that would just be the authored pairing again.
+    const others = questions
       .map((q, i) => ({ q: q as SpyRound, i }))
-      .filter(({ q }) => q.spySourceTopic === crewRound.spySourceTopic);
-    return pool.length ? pool[Math.floor(Math.random() * pool.length)].i : crewRi;
+      .filter(({ q, i }) => i !== crewRi && q.spySourceTopic === crewRound.spySourceTopic)
+      .map(({ i }) => i);
+    if (!others.length) return crewRi;
+    let fresh = others.filter(i => !usedSpyRisRef.current.has(i));
+    if (!fresh.length) {
+      // Every other round has been used once — start a new cycle, but not on the one just played.
+      usedSpyRisRef.current.clear();
+      fresh = others.filter(i => i !== lastSpyRi);
+      if (!fresh.length) fresh = others;
+    }
+    return fresh[Math.floor(Math.random() * fresh.length)];
   };
   const [spyRi, setSpyRi] = useState(() => pickSpyRi(resumed?.ri ?? 0));
+  useEffect(() => { usedSpyRisRef.current.add(spyRi); }, [spyRi]);
   const [spyTeamIdx, setSpyTeamIdx] = useState(() => resumed?.spyTeamIdx ?? randomTeamIndex());
   // Cross-round tallies for the final results screen — everything else here (votes, guesses) resets
   // every round. "Spy wins" = escaped the vote outright or guessed the real topic after being
@@ -538,7 +552,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
     }
 
     setRi((value) => value + 1);
-    setSpyRi(pickSpyRi(ri + 1));
+    setSpyRi(pickSpyRi(ri + 1, spyRi));
     const newSpyIdx = randomTeamIndex();
     setSpyTeamIdx(newSpyIdx);
     const newSpyId = teams[newSpyIdx]?.id;
