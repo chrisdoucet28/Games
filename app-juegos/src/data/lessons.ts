@@ -642,6 +642,66 @@ export const LESSONS: Record<string, Lesson> = {
     ],
   },
 
+  equatives_non_equatives: {
+    title: "Equative & Non-Equative Adjectives",
+    intro: "Sometimes you don't want to say one thing has more of a quality than another — you want to say two things are equal, or that one has a little less. Three structures do this: 'as ... as' (equal), 'not as ... as' (less) and 'less ... than' (less). All three use the plain adjective — never an -er ending and never 'more'.",
+    sections: [
+      {
+        heading: "Equative: as + adjective + as",
+        body: [
+          "Use as + adjective + as to say two things are equal. The adjective stays in its plain form, even when it is long.",
+          "After the second 'as' you can use a noun, a pronoun (me, him, her) or a short clause (I am, he looks).",
+        ],
+        examples: [
+          "My brother is **as tall as** me.",
+          "This road is **as dangerous as** the motorway.",
+          "Is your car **as old as** mine?",
+        ],
+      },
+      {
+        heading: "Non-equative: not as + adjective + as",
+        body: [
+          "Put 'not' before the first 'as' to say the first thing has less of the quality than the second. This is the most natural way to say it with short adjectives.",
+        ],
+        examples: [
+          "My phone **isn't as expensive as** yours. (yours costs more)",
+          "Today is **not as cold as** yesterday.",
+          "He **isn't as friendly as** he looks.",
+        ],
+      },
+      {
+        heading: "Non-equative: less + adjective + than",
+        body: [
+          "Less + adjective + than means the same as 'not as ... as', but it ends with 'than', not 'as'. It sounds especially natural with longer adjectives.",
+        ],
+        examples: [
+          "This exam was **less difficult than** the last one.",
+          "My new job is **less stressful than** my old one.",
+          "The train is **less expensive than** the plane.",
+        ],
+      },
+      {
+        heading: "Small words that change the meaning",
+        body: [
+          "'Just' before 'as' makes the equality exact; 'almost' means very nearly equal; 'not quite' means a little less than. Before 'less', 'much' makes the difference bigger and 'a bit' makes it smaller.",
+        ],
+        examples: [
+          "This restaurant is **just as good as** the last one.",
+          "This phone is **almost as fast as** the new model.",
+          "She isn't **quite as tall as** her mother yet.",
+          "Football is **much less popular than** basketball here.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ She is as tall than her brother. → ✅ She is as tall as her brother. ('as ... as', not 'than')",
+      "❌ This bag is as heavier as that one. → ✅ This bag is as heavy as that one. (plain adjective between the two 'as' words)",
+      "❌ She is as tall her sister. → ✅ She is as tall as her sister. (don't forget the second 'as')",
+      "❌ This flat is not big as my old one. → ✅ This flat is not as big as my old one. (don't forget the first 'as')",
+      "❌ This shop is less expensive as that one. → ✅ This shop is less expensive than that one. ('less' goes with 'than')",
+    ],
+  },
+
   superlatives: {
     title: "Superlatives",
     intro: "Superlatives pick out the number one in a group of three or more — the ending or word you add depends on how long the adjective is.",

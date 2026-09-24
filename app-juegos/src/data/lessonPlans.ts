@@ -436,6 +436,20 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
     ],
   },
 
+  equatives_non_equatives: {
+    kind: "paragraphCloze",
+    segments: [
+      "My brother Leo and I look similar, but we are different in many ways. Leo is ",
+      { blank: "as tall as", base: "tall (as…as)" }, " me — we're both 1.80 metres. But he isn't ",
+      { blank: "as fast as", base: "fast (not as…as)" }, " me at running. Our new flat is ",
+      { blank: "less expensive than", base: "expensive (less…than)" }, " our old one, so we're saving money. It's ",
+      { blank: "as big as", base: "big (as…as)" }, " the old one too, so we didn't lose any space. The neighbourhood isn't ",
+      { blank: "as quiet as", base: "quiet (not as…as)" }, " before, though — it's ",
+      { blank: "less peaceful than", base: "peaceful (less…than)" }, " our old street. Still, Leo says the new place is ",
+      { blank: "just as comfortable as", base: "comfortable (just as…as)" }, " a hotel!",
+    ],
+  },
+
   superlatives: {
     kind: "paragraphCloze",
     segments: [

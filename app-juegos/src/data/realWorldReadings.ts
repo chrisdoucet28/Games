@@ -667,6 +667,20 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
     ],
   },
 
+  equatives_non_equatives: {
+    title: "Choosing a Gym",
+    passage: [
+      "I visited two gyms today! Gym A is as big as Gym B, but it isn't as modern.",
+      "Gym B has newer machines, and it's less crowded than Gym A in the evening. The classes at Gym A are just as good, though — my friend says the teachers are friendlier.",
+      "Gym A is also cheaper than Gym B, but it isn't quite as cheap as the gym near my office. I think I'll choose Gym B. What do you think?",
+    ],
+    questions: [
+      { type: "reading comprehension", question: "Are the two gyms the same size?", answer: "Yes — Gym A is as big as Gym B." },
+      { type: "reading comprehension", question: "Are the classes at Gym A as good as the classes at Gym B?", answer: "Yes, they are just as good." },
+      { type: "reading comprehension", question: "Which gym does the writer think they will choose?", answer: "Gym B." },
+    ],
+  },
+
   superlatives: {
     title: "Visiting the City",
     audioUrl: `${MEDIA_BASE}/audio/real-world/superlatives.mp3`,

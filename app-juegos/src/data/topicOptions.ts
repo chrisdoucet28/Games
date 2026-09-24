@@ -92,6 +92,7 @@ export const TOPIC_OPTIONS: { value: string; label: string; level: string | null
   { value: "comparatives_superlatives", label: "Comparatives & Superlatives", level: "A2", focus: "grammar" , order: 21 },
   { value: "comparatives",           label: "Comparatives",                 level: "A2",  focus: "grammar"  , order: 19 },
   { value: "superlatives",           label: "Superlatives",                 level: "A2",  focus: "grammar"  , order: 20 },
+  { value: "equatives_non_equatives", label: "Equative & Non-Equative Adjectives", level: "A2", focus: "grammar", order: 22 },
   { value: "there_is_are",          label: "There is / There are",           level: "A1",  focus: "grammar", order: 22   },
   { value: "daily_life_a2",         label: "Daily Life & Routines",          level: "A2",  focus: "topic"     , order: 6 },
   { value: "school_and_study",      label: "School and Study",               level: "A2",  focus: "topic"     , order: 10 },
