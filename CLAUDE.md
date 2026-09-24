@@ -191,15 +191,22 @@ handout) with no guarantee they've seen any other specific lesson first.
   let the spy's prompt use a genuinely different tense/structure (e.g. crewmate in present simple,
   spy in present continuous) — that turns the spy into an instant-obvious "different verb form"
   giveaway a listening student catches by ear before the content even registers, which defeats the
-  actual "spot the odd one out by listening" mechanic. The one test that matters: **does the spy's
-  alternate content belong to a genuinely different topic in the library, or is it one of the
-  sub-skills this exact topic exists to teach?** Only the former is a bug. A topic explicitly built
-  around contrasting two related forms (e.g. `auxiliary_verbs_be_do`'s be- vs do-questions,
-  `subject_object_questions`'s subject- vs object-questions, `modal_verbs`'s multi-sense survey,
-  `understanding_get`'s multi-sense bundle) is *supposed* to contrast those two things in its
-  spyRounds — normalizing those to one structure would undermine the topic's own purpose, so check
-  first whether the topic's whole declared scope already is that contrast before treating two
-  different-looking prompts as a leak. Two more rules, both non-negotiable:
+  actual "spot the odd one out by listening" mechanic. **There is no contrast exception.** The
+  game is "catch the spy because they're talking about a different *subject*" — never because they
+  used a different grammar form, tense, word-set or register. That holds even for topics whose whole
+  lesson is a contrast (`auxiliary_verbs_be_do`, `subject_object_questions`,
+  `present_simple_vs_continuous`, `modal_verbs`, `understanding_get`, `articles`...): both prompts
+  must ask for the SAME grammar (for a contrast topic, ask both sides to use *both* forms) and
+  differ only by real-world scenario. The same goes for vocabulary topics — both sides must be asked
+  to use the topic's own vocabulary (never idioms-vs-plain-wording, formal-vs-informal,
+  professional-vs-casual, or a neighbouring vocabulary domain for the spy) — and for any pair that
+  would differ by person or tense ("you" vs "someone else", present vs childhood). A theme topic
+  whose two sides simply take different angles on the subject (advantages vs disadvantages, city vs
+  country) is fine — that *is* a different subject. Test every round: if the two prompts were
+  swapped between players, could a listener tell who has which one from the *language* alone? If
+  yes, rewrite it. History: this rule used to allow "sub-skills this topic exists to teach" as
+  contrasts; the teacher removed that exemption (2026-09) after noticing students still caught the
+  spy by grammar. Two more rules, both non-negotiable:
   1. **`spyPrompt` must be fully self-contained**, exactly like `crewmatePrompt` — the player
      controlling the spy only ever sees their own prompt during play, never the crewmate's, until
      the post-round reveal. Never phrase it as "…instead", "the same kind of claim", or anything
