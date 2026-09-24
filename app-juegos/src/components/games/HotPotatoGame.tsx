@@ -53,6 +53,7 @@ const STYLE_TAG = (
     @keyframes figureThrow{0%{transform:rotate(0deg) scale(1)}30%{transform:rotate(-18deg) scale(1.05)}60%{transform:rotate(22deg) scale(1.15)}100%{transform:rotate(0deg) scale(1)}}
     @keyframes figureCatch{0%{transform:scale(1)}40%{transform:scale(1.35) rotate(-8deg)}70%{transform:scale(0.9) rotate(6deg)}100%{transform:scale(1) rotate(0deg)}}
     @keyframes sweatDrop{0%{opacity:0;transform:translateY(-4px)}30%{opacity:1}100%{opacity:0;transform:translateY(10px)}}
+    @keyframes cpuThinkPulse{0%,100%{opacity:0.5;transform:scale(0.9)}50%{opacity:1;transform:scale(1.15)}}
     @keyframes cardShake{0%,100%{transform:translateX(0)}20%{transform:translateX(-3px) rotate(-0.4deg)}40%{transform:translateX(3px) rotate(0.4deg)}60%{transform:translateX(-2px)}80%{transform:translateX(2px)}}
     @keyframes roundPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.09)}}
     @keyframes burstPop{0%{transform:translate(-50%,-50%) scale(0.3);opacity:1}60%{transform:translate(-50%,-50%) scale(1.4);opacity:1}100%{transform:translate(-50%,-50%) scale(1.8);opacity:0}}
@@ -326,6 +327,7 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
   const qColor = qTimeLeft > 6 ? "#22C55E" : qTimeLeft > 3 ? "#F59E0B" : "#EF4444";
   const potatoWobble = qTimeLeft > 6 ? "potatoWobbleCalm 1.8s ease-in-out infinite" : qTimeLeft > 3 ? "potatoWobbleWarn 0.6s ease-in-out infinite" : "potatoWobbleCritical 0.15s linear infinite";
   const holder = teams[holderIdx];
+  const cpuIsHolding = isSolo && holder?.id === cpuRef.current?.id;
   const q = questions[qi % Math.max(questions.length, 1)];
 
   const [showQPreview, setShowQPreview] = useState(false);
@@ -611,7 +613,11 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
                         "Team R…" before, on every device, not just narrow screens. */}
                     {(() => { const max = isHolder ? 9 : 7; return t.name.length > max ? t.name.slice(0, max - 1).trimEnd() + "…" : t.name; })()}
                   </text>
-                  {isHolder && <text x={pos.x} y={pos.y + 10} textAnchor="middle" fontSize="8" fill="rgba(255,255,255,0.85)" fontWeight="700" style={{ userSelect: "none" }}>HOLDING</text>}
+                  {isHolder && (
+                    <text x={pos.x} y={pos.y + 10} textAnchor="middle" fontSize="8" fill="rgba(255,255,255,0.85)" fontWeight="700" style={{ userSelect: "none" }}>
+                      {cpuIsHolding ? "THINKING…" : "HOLDING"}
+                    </text>
+                  )}
                   {/* little figure below each position */}
                   <text
                     x={pos.x} y={pos.y + (isHolder ? 52 : 44)} textAnchor="middle" fontSize="18"
@@ -667,9 +673,11 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
                 <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "900", fontSize: "15px", color: qColor }}>{qTimeLeft}</div>
               </div>
               <div style={{ flex: 1, fontWeight: "700", color: "#374151", fontSize: "13px" }}>
-                <TeamIcon team={holder} /> <strong>{holder.name}</strong> — answer now!<br />
-                <span style={{ color: qColor, fontSize: "12px", display: "inline-flex", alignItems: "center", gap: "4px" }}>
-                  {qTimeLeft > 6 ? <><Icon name="clock" size={11} /> Take your time…</> : qTimeLeft > 3 ? <><Icon name="bolt" size={11} /> Hurry!</> : <><span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#EF4444", display: "inline-block" }} /> Last seconds!</>}
+                <TeamIcon team={holder} /> <strong>{holder.name}</strong> {cpuIsHolding ? "is thinking…" : "— answer now!"}<br />
+                <span style={{ color: cpuIsHolding ? "#7C2D12" : qColor, fontSize: "12px", display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                  {cpuIsHolding
+                    ? <><Icon name="robot" size={11} style={{ animation: "cpuThinkPulse 1.1s ease-in-out infinite" }} /> Still deciding — it will pass when ready</>
+                    : qTimeLeft > 6 ? <><Icon name="clock" size={11} /> Take your time…</> : qTimeLeft > 3 ? <><Icon name="bolt" size={11} /> Hurry!</> : <><span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#EF4444", display: "inline-block" }} /> Last seconds!</>}
                 </span>
               </div>
             </div>
