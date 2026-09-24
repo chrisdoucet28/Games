@@ -25,12 +25,23 @@ const KNOWN_META_KEYS = new Set(["label", "level", "category", "focus", "order",
 function itemSummary(item: Record<string, unknown>): string {
   // "prompt" is hotPotatoPrompts' own field name (HotPotatoGame.tsx reads .prompt, not
   // .question) despite the shared TopicLibraryEntry type calling it QuestionData[] like every
-  // other question-shaped pool — every hotPotatoPrompts item rendered as a raw JSON dump here
-  // until this was added.
-  for (const key of ["question", "task", "sentence", "starter", "crewmatePrompt", "prompt", "topic"]) {
-    if (typeof item[key] === "string") return item[key] as string;
+  // other question-shaped pool. "word" is hotSeatWords' own field name — both rendered as a raw
+  // JSON dump here until this was added.
+  let primary: string | null = null;
+  for (const key of ["question", "task", "sentence", "starter", "crewmatePrompt", "prompt", "topic", "word"]) {
+    if (typeof item[key] === "string") { primary = item[key] as string; break; }
   }
-  return JSON.stringify(item).slice(0, 100);
+  if (primary === null) return JSON.stringify(item).slice(0, 100);
+  // Vault Heist "rewrite sentences" items deliberately reuse the same short `question` fragment
+  // across several `transform` variants (e.g. "'wear a uniform'" → obligation/no-obligation/
+  // prohibition, each a genuinely different item with a different answer) — showing only
+  // `question` made those look like exact duplicates instead of three distinct items. Appending
+  // the answer (what actually differs between them) disambiguates without a special case just
+  // for this one type, since it helps any other question-shaped item too.
+  if (typeof item.answer === "string" && item.answer && item.answer !== primary) {
+    primary += ` → ${item.answer}`;
+  }
+  return primary;
 }
 
 function valueToInputValue(v: unknown): string {
@@ -143,15 +154,44 @@ function MinefieldGridDetail({ item }: { item: Record<string, unknown> }) {
   );
 }
 
+// spyRounds items carry TWO separate prompts (the crewmate's real content and the spy's decoy),
+// only one of which (crewmatePrompt) itemSummary() can show on a single line — without this, the
+// spy's whole prompt was invisible in the admin panel no matter which topic you opened, making it
+// impossible to review the "is the spy caught by topic, not by a different tense" rule from
+// CLAUDE.md.
+function SpyRoundDetail({ item }: { item: Record<string, unknown> }) {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 4, marginBottom: 6 }}>
+      <div>
+        <div style={{ fontSize: 10.5, color: "#86EFAC", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.04em" }}>
+          Crewmate — {String(item.crewmateTopic ?? "")}
+        </div>
+        <div style={{ fontSize: 12.5, color: C.ink }}>{String(item.crewmatePrompt ?? "")}</div>
+      </div>
+      <div>
+        <div style={{ fontSize: 10.5, color: "#FCA5A5", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.04em" }}>
+          Spy — {String(item.spyTopic ?? "")}
+        </div>
+        <div style={{ fontSize: 12.5, color: C.ink }}>{String(item.spyPrompt ?? "")}</div>
+      </div>
+      {typeof item.explanation === "string" && item.explanation && (
+        <div style={{ fontSize: 11.5, color: C.inkDim, fontStyle: "italic" }}>{item.explanation}</div>
+      )}
+    </div>
+  );
+}
+
 function ItemRow({ topicId, section, itemIndex, item }: { topicId: string; section: string; itemIndex: number | null; item: Record<string, unknown> }) {
   const [editing, setEditing] = useState(false);
   const [done, setDone] = useState(false);
   const isMinefieldGrid = Array.isArray(item.colLabels) || Array.isArray(item.rowLabels);
+  const isSpyRound = typeof item.crewmatePrompt === "string" && typeof item.spyPrompt === "string";
   return (
     <div style={{ padding: "8px 10px", borderBottom: `1px solid ${C.border}` }}>
       {isMinefieldGrid && <MinefieldGridDetail item={item} />}
+      {isSpyRound && <SpyRoundDetail item={item} />}
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-        <div style={{ flex: 1, fontSize: 12.5, color: C.ink, fontWeight: 600 }}>{isMinefieldGrid ? null : itemSummary(item)}</div>
+        <div style={{ flex: 1, fontSize: 12.5, color: C.ink, fontWeight: 600 }}>{isMinefieldGrid || isSpyRound ? null : itemSummary(item)}</div>
         {done ? (
           <span style={{ fontSize: 11, fontWeight: 800, color: "#86EFAC", flexShrink: 0 }}>Suggested ✓</span>
         ) : (
@@ -226,11 +266,35 @@ export function AdminTopicBrowser({ topicId }: { topicId: string }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
       {allArraySections.map(section => {
-        const items = entry[section] as unknown[];
+        const items = (entry[section] as unknown[]).map((item, i) => ({ item: item as Record<string, unknown>, i }));
+        // "questions" is the one pool every game reads by filtering on its own `type` (Battleship
+        // wants "correct grammar mistakes", Vault Heist wants "rewrite sentences", etc.) — the
+        // SAME design every game already relies on, not a storage mistake. Flat-listing it here
+        // read as a jumble of unrelated content types; grouping by that same `type` field mirrors
+        // how the games themselves already split it.
+        if (section === "questions") {
+          const groups = new Map<string, { item: Record<string, unknown>; i: number }[]>();
+          for (const entryItem of items) {
+            const type = typeof entryItem.item.type === "string" && entryItem.item.type ? entryItem.item.type : "other";
+            if (!groups.has(type)) groups.set(type, []);
+            groups.get(type)!.push(entryItem);
+          }
+          return [...groups.entries()].map(([type, groupItems]) => {
+            const key = `questions:${type}`;
+            const label = `Questions — ${type[0].toUpperCase()}${type.slice(1)}`;
+            return (
+              <CollapsibleSection key={key} label={label} count={groupItems.length} open={expanded.has(key)} onToggle={() => toggle(key)}>
+                {groupItems.map(({ item, i }) => (
+                  <ItemRow key={i} topicId={topicId} section={section} itemIndex={i} item={item} />
+                ))}
+              </CollapsibleSection>
+            );
+          });
+        }
         return (
           <CollapsibleSection key={section} label={SECTION_LABELS[section] ?? section} count={items.length} open={expanded.has(section)} onToggle={() => toggle(section)}>
-            {items.map((item, i) => (
-              <ItemRow key={i} topicId={topicId} section={section} itemIndex={i} item={item as Record<string, unknown>} />
+            {items.map(({ item, i }) => (
+              <ItemRow key={i} topicId={topicId} section={section} itemIndex={i} item={item} />
             ))}
           </CollapsibleSection>
         );
