@@ -50,6 +50,7 @@ export const TOPIC_OPTIONS: { value: string; label: string; level: string | null
   { value: "house_objects_rooms_there_is_are", label: "Objects and Rooms in the House", level: "A1", focus: "vocabulary", order: 23 },
   { value: "possessive_adjectives_pronouns", label: "Possessive Adjectives vs Pronouns", level: "A1", focus: "grammar", order: 5 },
   { value: "present_simple",        label: "Present Simple",               level: "A1",  focus: "grammar", order: 9  },
+  { value: "to_be",                 label: "To Be (am / is / are)",        level: "A1",  focus: "grammar", order: 1  },
   { value: "auxiliary_verbs_be_do", label: "Auxiliary Verbs (Be vs Do)",   level: "A1",  focus: "grammar", order: 3  },
   { value: "can_cant",              label: "Can / Can't (Ability & Permission)", level: "A1", focus: "grammar", order: 20 },
   { value: "present_continuous_a1", label: "Present Continuous (What are you doing?)", level: "A1", focus: "grammar", order: 15 },

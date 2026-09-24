@@ -5441,6 +5441,91 @@ export const LESSONS: Record<string, Lesson> = {
     ],
   },
 
+  to_be: {
+    title: "To Be (am / is / are)",
+    intro: "'Be' is the most important verb in English. It has three present forms — am, is and are — and you choose the form by the subject. Use it to say who or what someone is: name, age, job, nationality, feelings and places.",
+    sections: [
+      {
+        heading: "The three forms: am / is / are",
+        body: [
+          "I → am.  He / she / it → is.  You / we / they → are.",
+          "A singular noun (my brother, my name, the bag) works like he/she/it and takes 'is'. A plural noun (my parents, my keys) works like 'they' and takes 'are'.",
+        ],
+        examples: [
+          "**I am** a student.",
+          "**She is** from Spain.",
+          "**They are** at home.",
+          "**My parents are** teachers.",
+        ],
+      },
+      {
+        heading: "Short forms (contractions)",
+        body: [
+          "In speaking and informal writing we shorten the subject + be: I'm, you're, he's, she's, it's, we're, they're.",
+        ],
+        examples: [
+          "**I'm** 25 years old.",
+          "**She's** a nurse.",
+          "**We're** in the same class.",
+        ],
+      },
+      {
+        heading: "Negatives: not",
+        body: [
+          "Add 'not' after 'be': am not, is not (isn't), are not (aren't).",
+          "There is no 'amn't' — say 'I am not' or 'I'm not'.",
+        ],
+        examples: [
+          "I **am not** hungry.",
+          "He **isn't** tired.",
+          "They **aren't** at school.",
+        ],
+      },
+      {
+        heading: "Questions: swap the subject and 'be'",
+        body: [
+          "For yes/no questions, put 'be' before the subject: Are you...? Is she...? Am I...?",
+          "For information questions, put the question word first: Where is...? How old are...? What is...?",
+        ],
+        examples: [
+          "**Are you** a teacher?",
+          "**Is she** your sister?",
+          "**Where are** your keys?",
+          "**How old are** you?",
+        ],
+      },
+      {
+        heading: "Short answers",
+        body: [
+          "Answer a 'be' question by repeating 'be'. In a 'Yes' answer never shorten it. In a 'No' answer use isn't/aren't (or I'm not).",
+        ],
+        examples: [
+          "Are you a student? — **Yes, I am.**",
+          "Is he a doctor? — **No, he isn't.**",
+          "Are they at home? — **No, they aren't.**",
+        ],
+      },
+      {
+        heading: "What we use 'be' for",
+        body: [
+          "Name, age, job, nationality, feelings, description and place all use 'be' — in English we never use 'have' for age.",
+        ],
+        examples: [
+          "My name **is** Ana. I **am** 20 years old.",
+          "He **is** a doctor. They **are** Spanish.",
+          "She **is** happy. The keys **are** on the table.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ She are from Spain. → ✅ She is from Spain. ('she' takes 'is')",
+      "❌ He a teacher. → ✅ He is a teacher. (don't forget 'be' — every sentence needs a verb)",
+      "❌ I have 20 years old. → ✅ I am 20 years old. (age uses 'be', not 'have')",
+      "❌ Is you a teacher? → ✅ Are you a teacher? ('you' takes 'are', even in questions)",
+      "❌ I amn't hungry. → ✅ I am not hungry. (there is no 'amn't')",
+    ],
+  },
+
   auxiliary_verbs_be_do: {
     title: "Auxiliary Verbs (Be vs Do)",
     intro: "English has two different 'helper' patterns for negatives and questions, and beginners often mix them up. The trick is simple: look at what comes after the subject. An adjective, a job, or a place needs 'be' (am/is/are). An action verb needs 'do/does'.",

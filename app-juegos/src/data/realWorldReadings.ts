@@ -189,6 +189,21 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
     ],
   },
 
+  to_be: {
+    title: "A New Friend",
+    passage: [
+      "Hi! I am Sara. I am 22 years old.",
+      "I am from Mexico, but now I am in Madrid. I am a student.",
+      "My roommate is Lucia. She is from Italy. She isn't a student — she is a nurse.",
+      "We are good friends. Our flat is small, but it is very nice!",
+    ],
+    questions: [
+      { type: "reading comprehension", question: "Where is Sara from?", answer: "Mexico." },
+      { type: "reading comprehension", question: "What is Lucia's job?", answer: "She is a nurse." },
+      { type: "reading comprehension", question: "Is their flat big?", answer: "No, it is small." },
+    ],
+  },
+
   auxiliary_verbs_be_do: {
     title: "Joining the Club",
     audioUrl: `${MEDIA_BASE}/audio/real-world/auxiliary_verbs_be_do.mp3`,

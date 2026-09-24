@@ -66,6 +66,21 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
     ],
   },
 
+  to_be: {
+    kind: "errorPassage",
+    text: "A: Hello! What is your name?\nB: I am Marta. And you?\nA: My name are Tom. How old you are?\nB: I have 20 years old. Are you a student?\nA: Yes, I'm. My sister is a student too, but she not is here today.\nB: Where is your parents?\nA: They is at work.",
+    corrected: "A: Hello! What is your name?\nB: I am Marta. And you?\nA: My name is Tom. How old are you?\nB: I am 20 years old. Are you a student?\nA: Yes, I am. My sister is a student too, but she isn't here today.\nB: Where are your parents?\nA: They are at work.",
+    fixes: [
+      "'My name are Tom' → 'My name is Tom' ('my name' is one thing — use 'is')",
+      "'How old you are?' → 'How old are you?' (in questions, 'be' goes before the subject)",
+      "'I have 20 years old' → 'I am 20 years old' (age uses 'be', not 'have')",
+      "'Yes, I'm.' → 'Yes, I am.' (don't shorten 'am' in a 'Yes' short answer)",
+      "'she not is here' → 'she isn't here' ('not' goes after 'is' — isn't)",
+      "'Where is your parents?' → 'Where are your parents?' ('parents' is plural — use 'are')",
+      "'They is at work' → 'They are at work' ('they' takes 'are')",
+    ],
+  },
+
   auxiliary_verbs_be_do: {
     kind: "errorPassage",
     text: "A: Hi! Are you a new student here?\nB: Yes, I am! I are very excited to start.\nA: Great! Do you like the school so far?\nB: Yes, I does! Everyone is really friendly.\nA: Is you free this weekend? We're all going to the park.\nB: I don't sure yet — I need to check with my family first.\nA: No problem! Does you have my phone number?\nB: No, I doesn't. Can you give it to me?",
