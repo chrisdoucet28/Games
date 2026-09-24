@@ -175,6 +175,23 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
   const randomTeamIndex = () => Math.floor(Math.random() * Math.max(teams.length, 1));
 
   const [ri, setRi] = useState(() => resumed?.ri ?? 0);
+  // Exactly-2-team games (real 1v1 and solo-vs-teacher) always have one crew and one spy, so
+  // pairing both prompts from the same spyRounds entry meant the identical crew-vs-spy mismatch
+  // every time that round came up. There the spy's own prompt/topic comes from an independently
+  // drawn round of the same source topic (same grammar, different scenario, so it's never a
+  // different-topic leak). Groups of 3+ keep the pairing: the spy role rotates across teams there.
+  const pickSpyRi = (crewRi: number) => {
+    if (!isTwoPlayer) return crewRi;
+    const crewRound = questions[crewRi] as SpyRound | undefined;
+    // Untagged rounds have no same-topic pool to draw from (and the guess list would then only
+    // contain this round's own two topics), so they keep the authored pairing.
+    if (!crewRound?.spySourceTopic) return crewRi;
+    const pool = questions
+      .map((q, i) => ({ q: q as SpyRound, i }))
+      .filter(({ q }) => q.spySourceTopic === crewRound.spySourceTopic);
+    return pool.length ? pool[Math.floor(Math.random() * pool.length)].i : crewRi;
+  };
+  const [spyRi, setSpyRi] = useState(() => pickSpyRi(resumed?.ri ?? 0));
   const [spyTeamIdx, setSpyTeamIdx] = useState(() => resumed?.spyTeamIdx ?? randomTeamIndex());
   // Cross-round tallies for the final results screen — everything else here (votes, guesses) resets
   // every round. "Spy wins" = escaped the vote outright or guessed the real topic after being
@@ -247,6 +264,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
   // only happens when phone mode itself toggles on/off, not on every round/phase/speaker change —
   // same pattern as AuctionGame.tsx's qiRef/sentenceRef/phaseRef.
   const riRef = useRef(ri);
+  const spyRiRef = useRef(spyRi);
   const spyTeamIdxRef = useRef(spyTeamIdx);
   const phaseRef = useRef(phase);
   const speakOrderRef = useRef(speakOrder);
@@ -259,13 +277,14 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
   const sendStateRef = useRef<(() => void) | null>(null);
   useEffect(() => {
     riRef.current = ri;
+    spyRiRef.current = spyRi;
     spyTeamIdxRef.current = spyTeamIdx;
     phaseRef.current = phase;
     speakOrderRef.current = speakOrder;
     speakIdxRef.current = speakIdx;
     tp2SpeakOrderRef.current = tp2SpeakOrder;
     tp2SpeakIdxRef.current = tp2SpeakIdx;
-  }, [ri, spyTeamIdx, phase, speakOrder, speakIdx, tp2SpeakOrder, tp2SpeakIdx]);
+  }, [ri, spyRi, spyTeamIdx, phase, speakOrder, speakIdx, tp2SpeakOrder, tp2SpeakIdx]);
 
   // Opens/closes the realtime channel only when phone mode itself is toggled on/off. Unlike
   // Auction, phones here never send anything back — this channel only ever broadcasts `state`
@@ -279,11 +298,12 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
 
     const sendState = () => {
       const currentRound = questions[riRef.current] as SpyRound | undefined;
+      const currentSpyRound = questions[spyRiRef.current] as SpyRound | undefined;
       const spyId = teams[spyTeamIdxRef.current]?.id;
       const roles: Record<string, SpyRoleInfo> = {};
       teams.forEach(t => {
         roles[String(t.id)] = t.id === spyId
-          ? { role: "spy", prompt: currentRound?.spyPrompt ?? "" }
+          ? { role: "spy", prompt: currentSpyRound?.spyPrompt ?? "" }
           : { role: "crew", prompt: currentRound?.crewmatePrompt ?? "" };
       });
       // Only "intro" (not started) collapses to "lobby" — every other phase is reported as-is.
@@ -340,7 +360,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
   // phone's "is it my turn to speak" indicator must update the moment the teacher advances it.
   useEffect(() => {
     sendStateRef.current?.();
-  }, [phase, ri, speakIdx]);
+  }, [phase, ri, spyRi, speakIdx]);
 
   // Tells every connected phone the mission is over the moment it actually ends, same reasoning
   // as Auction's identical effect — without this, a closed channel looks identical to a dropped
@@ -399,6 +419,8 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
     );
   }
 
+  // The round the spy's own prompt/topic come from — identical to `round` except in 2-team games.
+  const spyRound = (questions[spyRi] as SpyRound | undefined) ?? round;
   const spyTeam = teams[spyTeamIdx];
   const peekTeam = teams[peekIdx];
   const speakTeam = speakOrder[speakIdx] ?? speakOrder[0] ?? teams[0];
@@ -516,6 +538,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
     }
 
     setRi((value) => value + 1);
+    setSpyRi(pickSpyRi(ri + 1));
     const newSpyIdx = randomTeamIndex();
     setSpyTeamIdx(newSpyIdx);
     const newSpyId = teams[newSpyIdx]?.id;
@@ -596,7 +619,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
     const spyPlayer = teams[spyTeamIdx];
     const crewPlayer = teams.find((team) => team.id !== spyPlayer.id) ?? teams[0];
     const spyGuessedRight = tp2Guesses[spyPlayer.id] === round.crewmateTopic;
-    const crewGuessedRight = tp2Guesses[crewPlayer.id] === round.spyTopic;
+    const crewGuessedRight = tp2Guesses[crewPlayer.id] === spyRound.spyTopic;
 
     if (spyGuessedRight) {
       updateScore(spyPlayer.id, 100);
@@ -974,7 +997,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
                         marginBottom: "6px",
                       }}
                     >
-                      {isSpy(peekTeam.id) ? round.spyPrompt : round.crewmatePrompt}
+                      {isSpy(peekTeam.id) ? spyRound.spyPrompt : round.crewmatePrompt}
                     </div>
                     {isSpy(peekTeam.id) && (
                       <div style={{ fontSize: "12px", opacity: 0.8, marginTop: "6px" }}>
@@ -1677,7 +1700,11 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
             const spyPlayer = teams[spyTeamIdx];
             const crewPlayer = teams.find((team) => team.id !== spyPlayer.id) ?? teams[0];
             const spyGuessedRight = tp2Guesses[spyPlayer.id] === round.crewmateTopic;
-            const crewGuessedRight = tp2Guesses[crewPlayer.id] === round.spyTopic;
+            const crewGuessedRight = tp2Guesses[crewPlayer.id] === spyRound.spyTopic;
+            // round.explanation describes the authored crew/spy pair — wrong once the spy's round was drawn independently.
+            const explanation = spyRi === ri
+              ? round.explanation
+              : `Crewmates talked about ${round.crewmateTopic}. The spy talked about ${spyRound.spyTopic}.`;
 
             return (
               <div style={{ position: "relative" }}>
@@ -1741,7 +1768,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
                         color: "#FECACA",
                       }}
                     >
-                      Topic: {round.spyTopic}
+                      Topic: {spyRound.spyTopic}
                     </div>
                   </div>
                 </div>
@@ -1794,7 +1821,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
                       Guessed: <strong>"{tp2Guesses[crewPlayer.id] || "-"}"</strong>
                     </div>
                     <div style={{ fontSize: "13px", color: "#E2E8F0" }}>
-                      Correct answer: <strong>"{round.spyTopic}"</strong>
+                      Correct answer: <strong>"{spyRound.spyTopic}"</strong>
                     </div>
                     {crewGuessedRight && (
                       <div style={{ marginTop: "6px", fontWeight: "700", fontSize: "13px", color: "#86EFAC" }}>
@@ -1806,7 +1833,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
 
                 <div style={{ background: "rgba(56,189,248,0.1)", border: "2px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E", borderRadius: "12px", padding: "12px", marginBottom: "14px" }}>
                   <div style={{ fontWeight: "800", fontSize: "13px", color: "#7DD3FC", marginBottom: "4px" }}>The difference</div>
-                  <div style={{ color: "#E2E8F0", fontSize: "14px" }}>{round.explanation}</div>
+                  <div style={{ color: "#E2E8F0", fontSize: "14px" }}>{explanation}</div>
                 </div>
 
                 <div style={{ textAlign: "center" }}>
