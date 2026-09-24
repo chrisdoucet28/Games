@@ -2,13 +2,15 @@ import { useEffect, useRef, useState } from "react";
 import { TeamIcon } from "../shared/TeamIcon";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 import {
-  openAuctionChannel, openSpyChannel, openWhackChannel, openHotSeatChannel, openOrderUpChannel, openRaceTrackChannel, openHillChannel, closeChannel,
+  openAuctionChannel, openSpyChannel, openWhackChannel, openHotSeatChannel, openOrderUpChannel, openRaceTrackChannel, openHillChannel, openBountyBoardChannel, openRelayChannel, closeChannel, getDeviceId,
   type AuctionStatePayload, type AuctionBetPayload, type SpyStatePayload,
   type WhackStatePayload, type WhackTurnReportPayload,
   type HotSeatStatePayload, type HotSeatActionPayload,
   type OrderUpStatePayload, type OrderUpActionPayload,
   type RaceTrackStatePayload, type RaceTrackActionPayload,
   type HillStatePayload, type HillActionPayload,
+  type BountyBoardStatePayload, type BountyBoardActionPayload,
+  type RelayStatePayload, type RelayActionPayload,
 } from "../../lib/liveSession";
 import { PhoneAuctionView } from "./PhoneAuctionView";
 import { PhoneSpyView } from "./PhoneSpyView";
@@ -17,8 +19,11 @@ import { PhoneHotSeatView } from "./PhoneHotSeatView";
 import { PhoneOrderUpView } from "./PhoneOrderUpView";
 import { PhoneRaceTrackView } from "./PhoneRaceTrackView";
 import { PhoneKingOfHillView } from "./PhoneKingOfHillView";
+import { PhoneBountyBoardView } from "./PhoneBountyBoardView";
+import { PhoneRelayView } from "./PhoneRelayView";
+import { isSoloCpu } from "../../lib/soloOpponent";
 
-type Game = "auction" | "spy" | "whack" | "hotseat" | "orderup" | "racetrack" | "hill";
+type Game = "auction" | "spy" | "whack" | "hotseat" | "orderup" | "racetrack" | "hill" | "bounty" | "relay";
 type Props = { code: string; game: Game };
 
 // No state broadcast for this long means the teacher's tab is gone (refreshed, closed the game,
@@ -100,6 +105,22 @@ const GAME_COPY: Record<Game, {
     endedTitle: "The game is over!",
     endedBody: "Thanks for playing — check the big screen for final results.",
   },
+  bounty: {
+    joinEmoji: "🤠",
+    arenaBg: "radial-gradient(ellipse at 50% -10%,#B45309 0%,#78350F 55%,#1C0A00 100%)",
+    startingBody: "Get ready — waiting for your teacher to open the board…",
+    endedEmoji: "⭐",
+    endedTitle: "The board is cleared!",
+    endedBody: "Thanks for playing — check the big screen for final results.",
+  },
+  relay: {
+    joinEmoji: "📱",
+    arenaBg: "radial-gradient(ellipse at 50% -10%,#0D9488 0%,#134E4A 55%,#042F2E 100%)",
+    startingBody: "Get ready — waiting for your teacher to start the relay…",
+    endedEmoji: "🏁",
+    endedTitle: "That's a wrap!",
+    endedBody: "Thanks for playing — check the big screen for final results.",
+  },
 };
 
 function loadClaimedTeamId(code: string): string | number | null {
@@ -130,6 +151,8 @@ const GAME_TITLES: Record<Game, string> = {
   orderup: "Order Up",
   racetrack: "Race Track",
   hill: "King of the Hill",
+  bounty: "Bounty Board",
+  relay: "Word Relay",
 };
 
 export function PhoneJoinScreen({ code, game }: Props) {
@@ -150,7 +173,7 @@ export function PhoneJoinScreen({ code, game }: Props) {
   // when the effect first ran.
   const claimedTeamIdRef = useRef<string | number | null>(loadClaimedTeamId(code));
   const [claimedTeamId, setClaimedTeamId] = useState<string | number | null>(claimedTeamIdRef.current);
-  const [state, setState] = useState<AuctionStatePayload | SpyStatePayload | WhackStatePayload | HotSeatStatePayload | OrderUpStatePayload | RaceTrackStatePayload | HillStatePayload | null>(null);
+  const [state, setState] = useState<AuctionStatePayload | SpyStatePayload | WhackStatePayload | HotSeatStatePayload | OrderUpStatePayload | RaceTrackStatePayload | HillStatePayload | BountyBoardStatePayload | RelayStatePayload | null>(null);
   const [lastStateAt, setLastStateAt] = useState<number | null>(null);
   // Once true, stays true regardless of what happens to the connection afterward — a phone that
   // learns the game is over shouldn't ever fall back to "lost connection" messaging just because
@@ -166,11 +189,13 @@ export function PhoneJoinScreen({ code, game }: Props) {
       : game === "orderup" ? openOrderUpChannel(code)
       : game === "racetrack" ? openRaceTrackChannel(code)
       : game === "hill" ? openHillChannel(code)
+      : game === "bounty" ? openBountyBoardChannel(code)
+      : game === "relay" ? openRelayChannel(code)
       : openAuctionChannel(code);
     channelRef.current = channel;
 
     channel.on("broadcast", { event: "state" }, ({ payload }) => {
-      const statePayload = payload as AuctionStatePayload | SpyStatePayload | WhackStatePayload | HotSeatStatePayload | OrderUpStatePayload | RaceTrackStatePayload | HillStatePayload;
+      const statePayload = payload as AuctionStatePayload | SpyStatePayload | WhackStatePayload | HotSeatStatePayload | OrderUpStatePayload | RaceTrackStatePayload | HillStatePayload | BountyBoardStatePayload | RelayStatePayload;
       setState(statePayload);
       setLastStateAt(Date.now());
       // Covers a phone that only joins/reconnects after the game already ended — it'll never see
@@ -187,7 +212,7 @@ export function PhoneJoinScreen({ code, game }: Props) {
       // Re-announces this phone's claim on every (re)connect, not just the first — covers a wifi
       // drop reconnecting cleanly without the student needing to re-tap their team.
       if (status === "SUBSCRIBED" && claimedTeamIdRef.current !== null) {
-        channel.track({ teamId: claimedTeamIdRef.current });
+        channel.track({ teamId: claimedTeamIdRef.current, deviceId: getDeviceId() });
       }
     });
 
@@ -210,7 +235,7 @@ export function PhoneJoinScreen({ code, game }: Props) {
     claimedTeamIdRef.current = teamId;
     setClaimedTeamId(teamId);
     saveClaimedTeamId(code, teamId);
-    channelRef.current?.track({ teamId });
+    channelRef.current?.track({ teamId, deviceId: getDeviceId() });
   };
 
   const sendBet = (payload: AuctionBetPayload) => {
@@ -234,6 +259,14 @@ export function PhoneJoinScreen({ code, game }: Props) {
   };
 
   const sendHillAction = (payload: HillActionPayload) => {
+    channelRef.current?.send({ type: "broadcast", event: "action", payload });
+  };
+
+  const sendBountyBoardAction = (payload: BountyBoardActionPayload) => {
+    channelRef.current?.send({ type: "broadcast", event: "action", payload });
+  };
+
+  const sendRelayAction = (payload: RelayActionPayload) => {
     channelRef.current?.send({ type: "broadcast", event: "action", payload });
   };
 
@@ -278,8 +311,13 @@ export function PhoneJoinScreen({ code, game }: Props) {
         <div style={{ fontSize: "36px", marginBottom: "6px" }}>{copy.joinEmoji}</div>
         <div style={{ fontWeight: "900", fontSize: "18px", color: "#FCD34D", marginBottom: "18px" }}>Tap your team</div>
         <div style={{ display: "flex", flexDirection: "column", gap: "10px", width: "100%", maxWidth: "360px" }}>
-          {state.roster.map(t => {
-            const takenByOther = state.connectedTeamIds.includes(t.id) && t.id !== claimedTeamIdRef.current;
+          {/* A solo (1-team) game's roster carries a synthetic CPU team (King of Hill, Race Track,
+              Bounty Board, Word Relay all do this) so it shows up in scoreboards/rankings — but it
+              has no real student behind it, so it's never an option a phone can actually claim. */}
+          {state.roster.filter(t => !isSoloCpu(t.id)).map(t => {
+            // Word Relay is the one game where several phones share a team (each is one person in
+            // the asker rotation), so a team someone already joined stays open to claim there.
+            const takenByOther = game !== "relay" && state.connectedTeamIds.includes(t.id) && t.id !== claimedTeamIdRef.current;
             return (
               <button
                 key={t.id}
@@ -335,6 +373,12 @@ export function PhoneJoinScreen({ code, game }: Props) {
   }
   if (game === "hill") {
     return <PhoneKingOfHillView state={state as HillStatePayload} teamId={claimedTeamId} onAction={sendHillAction} />;
+  }
+  if (game === "bounty") {
+    return <PhoneBountyBoardView state={state as BountyBoardStatePayload} teamId={claimedTeamId} onAction={sendBountyBoardAction} />;
+  }
+  if (game === "relay") {
+    return <PhoneRelayView state={state as RelayStatePayload} teamId={claimedTeamId} deviceId={getDeviceId()} onAction={sendRelayAction} />;
   }
   return <PhoneAuctionView state={state as AuctionStatePayload} teamId={claimedTeamId} onBet={sendBet} />;
 }

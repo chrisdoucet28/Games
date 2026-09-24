@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import type { QuestionData } from "../types";
+import { playSound } from "../lib/sounds";
 
 // Extracted out of WordWhackGame.tsx so the exact same mole-spawn/duck/hit loop can run
 // standalone on a phone during a phone-controlled turn (see PhoneWordWhackView.tsx) as well as
@@ -157,6 +158,10 @@ export function useMoleGame({ pool, difficulty, startRoundIdx, active, resetKey,
 
   const hitMole = (mole: Mole) => {
     if (!active) return;
+    // The mallet thwack — fires for the physical whack itself, right or wrong, since scoring here
+    // only reaches onUpdateScore once at the end of the whole turn (see WordWhackGame's
+    // finalTurnScore), too late to double as the game's own hit/miss feedback.
+    playSound("whack");
     if (mole.isCorrect) {
       if (roundTimerRef.current) clearTimeout(roundTimerRef.current);
       const bonus = Math.min(MAX_COMBO_BONUS, comboRef.current * COMBO_STEP);

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { TeamIcon } from "../shared/TeamIcon";
 import { Icon } from "../shared/Icon";
 import type { RealtimeChannel } from "@supabase/supabase-js";
@@ -10,7 +10,11 @@ import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
 import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
 import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
+import { CustomWordsPanel } from "../shared/CustomWordsPanel";
+import { useWordDeck } from "../../hooks/useWordDeck";
 import { HOTSEAT_TUTORIAL_STEPS } from "../../data/tutorials/hotseat";
+import { playSound } from "../../lib/sounds";
+import { setMusicContext, setMusicGame, stopMusic } from "../../lib/music";
 import {
   generateSessionCode, openHotSeatChannel, closeChannel,
   type HotSeatPhase, type HotSeatStatePayload, type HotSeatActionPayload,
@@ -34,8 +38,8 @@ const STYLE_TAG = (
     @keyframes hsEmberRise{0%{transform:translateY(0) scale(1);opacity:0}15%{opacity:0.9}100%{transform:translateY(-280px) scale(0.4);opacity:0}}
     @keyframes hsLavaGlow{0%,100%{opacity:0.5}50%{opacity:0.85}}
     @keyframes hsPulseDanger{0%,100%{box-shadow:0 0 0px rgba(239,68,68,0)}50%{box-shadow:0 0 24px rgba(239,68,68,0.85)}}
-    .hs-btn:hover:not(:disabled){transform:translateY(-2px) scale(1.02);filter:brightness(1.12)}
-    .hs-btn:active:not(:disabled){transform:translateY(0) scale(0.97)}
+    .hs-btn:hover:not(:disabled){filter:brightness(1.12)}
+    .hs-btn:active:not(:disabled){transform:translate(4px,4px) !important;box-shadow:0 0 0 #1A1A2E !important}
   `}</style>
 );
 
@@ -59,17 +63,6 @@ function LavaGlow() {
   );
 }
 
-const shuffle = <T,>(items: T[]) => {
-  const shuffled = [...items];
-
-  for (let i = shuffled.length - 1; i > 0; i -= 1) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-  }
-
-  return shuffled;
-};
-
 // What "Save & Exit" snapshots and "Resume" restores — the round/team turn cursor and each team's
 // running word total. Resuming skips straight to the per-turn "pass the device" intro for the
 // team whose turn it was, rather than replaying the one-time welcome screen or the exact word/
@@ -78,6 +71,8 @@ type HotSeatSnapshot = {
   roundIndex: number;
   teamIndex: number;
   totalWordsByTeam: Record<string | number, number>;
+  // The teacher's own word list, if they used one — a resumed game keeps playing it.
+  customWords?: string[] | null;
 };
 
 function validateHotSeatSnapshot(raw: unknown, teamCount: number): HotSeatSnapshot | undefined {
@@ -85,28 +80,47 @@ function validateHotSeatSnapshot(raw: unknown, teamCount: number): HotSeatSnapsh
   if (!s || typeof s.roundIndex !== "number" || s.roundIndex < 0) return undefined;
   if (typeof s.teamIndex !== "number" || s.teamIndex < 0 || s.teamIndex >= teamCount) return undefined;
   if (s.roundIndex >= TOTAL_ROUNDS) return undefined;
-  return { roundIndex: s.roundIndex, teamIndex: s.teamIndex, totalWordsByTeam: s.totalWordsByTeam ?? {} };
+  const customWords = Array.isArray(s.customWords)
+    ? s.customWords.filter((w): w is string => typeof w === "string" && w.trim() !== "").slice(0, 200)
+    : null;
+  return { roundIndex: s.roundIndex, teamIndex: s.teamIndex, totalWordsByTeam: s.totalWordsByTeam ?? {}, customWords };
 }
 
-export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState }: GameProps) {
+export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState, presetPhoneSession }: GameProps) {
   const resumed = useRef(validateHotSeatSnapshot(initialGameState, teams.length)).current;
 
   const [phase, setPhase] = useState<"welcome" | "intro" | "play" | "turnend" | "final">(resumed ? "intro" : "welcome");
+  // This game's own 60s turn timer isn't the shared useTurnTimer hook, so "play" (the describer
+  // actively racing the clock) needs its own tension cue, same as every other game's answering
+  // window.
+  useEffect(() => {
+    if (phase === "play") setMusicContext("tension");
+    return () => setMusicContext("gameplay");
+  }, [phase === "play"]);
   const [showHowTo, setShowHowTo] = useState(false);
 
   // "Play on Phones" mode — available whenever there's more than one team (gated below); true
   // 1-team solo play has the teacher personally describing for the one real team, so there's no
   // within-team secrecy problem phones would solve there. Always defaults to screen, even on
   // Resume: a resumed game skips the welcome screen entirely, same as the other phone-mode games.
-  const [inputMode, setInputMode] = useState<"screen" | "phone">("screen");
+  const [inputMode, setInputMode] = useState<"screen" | "phone">(presetPhoneSession ? "phone" : "screen");
   const [introStep, setIntroStep] = useState<"setup" | "qr">("setup");
-  const [sessionCode, setSessionCode] = useState<string | null>(null);
+  const [sessionCode, setSessionCode] = useState<string | null>(presetPhoneSession?.code ?? null);
   const [connectedTeamIds, setConnectedTeamIds] = useState<Set<string | number>>(new Set());
   // "groups": the active team's own phone shows the word (teammates describe, matching the
   // in-person rule). "solo": every *other* connected team's phone shows it instead, since a
   // 1-person "team" has no teammate of its own to describe for it — see PhoneHotSeatView.tsx.
   const [teamStructure, setTeamStructure] = useState<"groups" | "solo">("groups");
   const channelRef = useRef<RealtimeChannel | null>(null);
+
+  useEffect(() => {
+    if (phase === "final") { playSound("roundComplete"); stopMusic(); }
+  }, [phase]);
+  // Custom Suno tension track — see GAME_OVERRIDES in lib/music.ts.
+  useEffect(() => {
+    setMusicGame("hotseat");
+    return () => setMusicGame(null);
+  }, []);
 
   useEffect(() => {
     if (!forceFinalRef) return;
@@ -121,51 +135,33 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
   // each turn, so this is the one thing that needs to survive to the final results screen.
   const [totalWordsByTeam, setTotalWordsByTeam] = useState<Record<string | number, number>>(() => resumed?.totalWordsByTeam ?? {});
 
+  // The word pool and its shuffled deck (every word once per lap, reshuffled when exhausted, no repeat
+  // across a lap boundary) live in the shared hook, along with the teacher's own-words mode — see
+  // hooks/useWordDeck.ts.
+  const { words, customWords, drawWord, applyCustomWords, resetToTopicWords } = useWordDeck(questions, resumed?.customWords);
+
   useEffect(() => {
     if (!serializeStateRef) return;
-    serializeStateRef.current = (): HotSeatSnapshot => ({ roundIndex, teamIndex, totalWordsByTeam });
+    serializeStateRef.current = (): HotSeatSnapshot => ({ roundIndex, teamIndex, totalWordsByTeam, customWords });
     return () => { if (serializeStateRef) serializeStateRef.current = null; };
-  }, [serializeStateRef, roundIndex, teamIndex, totalWordsByTeam]);
+  }, [serializeStateRef, roundIndex, teamIndex, totalWordsByTeam, customWords]);
   const [timeLeft, setTimeLeft] = useState(TURN_SECONDS);
   const [showWordList, setShowWordList] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const turnCorrectRef = useRef(0);
 
-  const words = useMemo(() => {
-    const uniqueWords = new Map<string, string>();
-
-    questions.forEach(q => {
-      const word = q.word?.trim();
-      if (word) uniqueWords.set(word.toLowerCase(), word);
-    });
-
-    return Array.from(uniqueWords.values());
-  }, [questions]);
-
-  // A shuffled deck rather than a fixed shuffled list drawn via a plain modulo cursor — a small
-  // word pool gets cycled through more than once in a single game, and a modulo cursor would
-  // repeat the exact same order every lap. Reshuffling only once the deck is exhausted (not on
-  // every draw) keeps every word appearing exactly once per lap, same as before, just in a fresh
-  // order each time — and the one-item swap after reshuffling stops the last word of one lap from
-  // immediately reappearing as the first word of the next.
-  const deckRef = useRef<string[]>(shuffle(words));
-  const deckPosRef = useRef(0);
-  const lastWordRef = useRef<string | undefined>(undefined);
-  const drawWord = useCallback(() => {
-    if (deckPosRef.current >= deckRef.current.length) {
-      const next = shuffle(words);
-      if (next.length > 1 && next[0] === lastWordRef.current) {
-        [next[0], next[1]] = [next[1], next[0]];
-      }
-      deckRef.current = next;
-      deckPosRef.current = 0;
-    }
-    const word = deckRef.current[deckPosRef.current];
-    deckPosRef.current += 1;
-    lastWordRef.current = word;
-    return word;
-  }, [words]);
   const [currentWord, setCurrentWord] = useState<string>(() => (words.length > 0 ? drawWord() : ""));
+
+  // Applied from the welcome screen (nothing has been played yet): swap the pool, then deal a first
+  // word from the new list.
+  const handleApplyCustomWords = (list: string[]) => {
+    applyCustomWords(list);
+    setCurrentWord(drawWord());
+  };
+  const handleResetWords = () => {
+    resetToTopicWords();
+    setCurrentWord(drawWord());
+  };
 
   const currentTeam = teams[teamIndex];
   const turnNumber = roundIndex * teams.length + teamIndex + 1;
@@ -182,6 +178,7 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
 
   const endTurn = () => {
     if (timerRef.current) clearInterval(timerRef.current);
+    playSound("hotseat");
     setLastTurnCorrect(turnCorrectRef.current);
     setPhase("turnend");
   };
@@ -199,6 +196,7 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
       setTimeLeft(t => {
         if (t <= 1) {
           if (timerRef.current) clearInterval(timerRef.current);
+          playSound("hotseat");
           setLastTurnCorrect(turnCorrectRef.current);
           setPhase("turnend");
           return 0;
@@ -402,7 +400,7 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
         {STYLE_TAG}
         <div style={{ position: "relative", zIndex: 1 }}>
           <div style={{ fontWeight: "900", fontSize: "20px", color: "white", marginBottom: "10px" }}>Hot Seat needs words to play.</div>
-          <button onClick={onEnd} className="hs-btn" style={{ background: "linear-gradient(135deg,#B91C1C,#F97316)", color: "white", border: "none", borderRadius: "14px", padding: "12px 28px", fontWeight: "900", cursor: "pointer", transition: "transform 0.15s ease" }}>End Game</button>
+          <button onClick={onEnd} className="hs-btn" style={{ background: "#F97316", color: "white", border: "3px solid #1A1A2E", borderRadius: "14px", padding: "12px 28px", fontWeight: "900", cursor: "pointer", boxShadow: "4px 4px 0 #1A1A2E" }}>End Game</button>
         </div>
       </div>
     );
@@ -440,6 +438,8 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
             <div style={{ fontSize: "15px", lineHeight: 1.7, opacity: 0.95 }}>
               {teams.length === 1
                 ? "The teacher will describe each word out loud for your team to guess."
+                : inputMode === "phone"
+                ? "The describer(s) see the word privately on their own phone — no one needs to turn away from the screen."
                 : "One player on the team turns away from the screen — everyone else on their team gives clues."}
               <br />
               Guess as many words as you can in <strong style={{ color: "#FDBA74" }}>{TURN_SECONDS} seconds</strong> — no spelling, and no saying the word itself!
@@ -449,13 +449,26 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
           </div>
           <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "24px" }}>
             {teams.map((t, i) => (
-              <div key={t.id} style={{ background: `linear-gradient(160deg,${t.color.dark}55,#1C0701)`, border: `3px solid ${t.color.bg}`, borderRadius: "14px", padding: "10px 18px", fontWeight: "800", fontSize: "14px", color: "white", display: "flex", alignItems: "center", gap: "6px" }}>
+              <div key={t.id} style={{ background: t.color.dark, border: "2px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E", borderRadius: "14px", padding: "10px 18px", fontWeight: "800", fontSize: "14px", color: "white", display: "flex", alignItems: "center", gap: "6px" }}>
                 {i + 1}. <TeamIcon team={t} color="white" /> {t.name}
               </div>
             ))}
           </div>
 
-          {teams.length > 1 && (
+          {/* The teacher's own words instead of the topic's (see hooks/useWordDeck.ts). Only here on the
+              one-time welcome screen, before anything has been played. */}
+          <div style={{ maxWidth: "520px", margin: "0 auto" }}>
+            <CustomWordsPanel
+              theme={{ accent: "#FDBA74", accentSolid: "#EA580C" }}
+              teamCount={teams.length} tipBelow={10}
+              active={customWords} onApply={handleApplyCustomWords} onReset={handleResetWords}
+            />
+          </div>
+
+          {/* Skipped entirely for a Class Check-In sitting — presetPhoneSession already picked
+              phone mode and its code (teamStructure defaults to "groups", the more common mode,
+              since there's no picker step left to choose it from). */}
+          {teams.length > 1 && !presetPhoneSession && (
             <>
               {introStep === "setup" && (
                 <div style={{ marginBottom: "20px" }}>
@@ -530,7 +543,7 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
               onClose={() => setShowHowTo(false)}
             />
           )}
-          <button onClick={() => setPhase("intro")} className="hs-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg,#B91C1C,#F97316)", color: "white", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(249,115,22,0.5)", transition: "transform 0.15s ease" }}>
+          <button onClick={() => setPhase("intro")} className="hs-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#F97316", color: "white", border: "3px solid #1A1A2E", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "6px 6px 0 #1A1A2E" }}>
             <Icon name="flame" size={20} /> Let's Play!
           </button>
         </div>
@@ -545,7 +558,7 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
         <LavaGlow />
         {STYLE_TAG}
         <div style={{ position: "relative", zIndex: 1 }}>
-          <div style={{ background: "linear-gradient(160deg,#7C2D12,#1C0701)", border: "2px solid #FDBA7455", borderRadius: "20px", padding: "28px 24px", marginBottom: "16px", color: "white" }}>
+          <div style={{ background: "#7C2D12", border: "4px solid #1A1A2E", boxShadow: "6px 6px 0 #1A1A2E", borderRadius: "20px", padding: "28px 24px", marginBottom: "16px", color: "white" }}>
             <div style={{ fontWeight: "900", fontSize: "clamp(22px,4vw,32px)", marginBottom: "8px", color: "#FDBA74" }}>Hot Seat</div>
             <div style={{ fontWeight: "900", fontSize: "18px", marginBottom: "14px" }}>
               Round {roundIndex + 1} of {TOTAL_ROUNDS} - Turn {turnNumber} of {totalTurns}
@@ -563,7 +576,7 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
 
           {wordListToggle}
 
-          <button onClick={startTurn} className="hs-btn" style={{ background: "linear-gradient(135deg,#B91C1C,#F97316)", color: "white", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(249,115,22,0.5)", transition: "transform 0.15s ease" }}>
+          <button onClick={startTurn} className="hs-btn" style={{ background: "#F97316", color: "white", border: "3px solid #1A1A2E", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "6px 6px 0 #1A1A2E" }}>
             Start {currentTeam.name}'s Turn
           </button>
         </div>
@@ -592,7 +605,7 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
           <div style={{ fontWeight: "900", fontSize: "22px", color: "#FDBA74", marginBottom: "16px" }}>{headline}</div>
           <div style={{ display: "grid", gridTemplateColumns: teamsGridCols(teams.length), gap: "10px", margin: "0 auto 20px", maxWidth: "760px" }}>
             {ranking.map(({ item: t, rank, value }) => (
-              <div key={t.id} style={{ background: `linear-gradient(160deg,${t.color.dark}55,#1C0701)`, border: `2px solid ${t.color.bg}`, borderRadius: "14px", padding: "12px" }}>
+              <div key={t.id} style={{ background: t.color.dark, border: "2px solid #1A1A2E", boxShadow: "4px 4px 0 #1A1A2E", borderRadius: "14px", padding: "12px" }}>
                 <div><RankBadge rank={rank} size={22} /></div>
                 <div style={{ fontWeight: "800", color: "white", fontSize: "14px", marginTop: "4px" }}><TeamIcon team={t} /> {t.name}</div>
                 <div style={{ color: "#FDBA74", fontWeight: "900", fontSize: "16px", marginTop: "4px" }}>{value} pts</div>
@@ -600,7 +613,7 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
               </div>
             ))}
           </div>
-          <button onClick={onEnd} className="hs-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg,#B91C1C,#F97316)", color: "white", border: "none", borderRadius: "14px", padding: "13px 34px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 20px rgba(249,115,22,0.4)", transition: "transform 0.15s ease" }}><Icon name="checkeredFlag" size={18} /> End Game</button>
+          <button onClick={onEnd} className="hs-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#F97316", color: "white", border: "3px solid #1A1A2E", borderRadius: "14px", padding: "13px 34px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "5px 5px 0 #1A1A2E" }}><Icon name="checkeredFlag" size={18} /> End Game</button>
         </div>
       </div>
     );
@@ -613,7 +626,10 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
       <EmberField />
       <LavaGlow />
       {STYLE_TAG}
-      {inputMode === "phone" && sessionCode && (
+      {/* Suppressed for a Class Check-In sitting — the class-level badge (LessonGamesGenerator.tsx's
+          renderClassCheckInBadge) is the only floating reconnect button shown then, and it's the
+          only one pointing at the right (class, not per-game) join URL. */}
+      {inputMode === "phone" && sessionCode && !presetPhoneSession && (
         <PhoneReconnectBadge
           sessionCode={sessionCode} joinUrl={`${window.location.origin}${window.location.pathname}?join=${sessionCode}&game=hotseat`}
           teams={teams} connectedTeamIds={connectedTeamIds}
@@ -621,7 +637,7 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
         />
       )}
       <div style={{ position: "relative", zIndex: 1 }}>
-        <div style={{ background: "linear-gradient(90deg,#7C2D12,#9A3412)", border: "1.5px solid #FDBA7455", borderRadius: "14px", padding: "14px 16px", marginBottom: "16px", textAlign: "center", color: "white", boxShadow: "0 4px 18px rgba(154,52,18,0.5)" }}>
+        <div style={{ background: "#9A3412", border: "3px solid #1A1A2E", borderRadius: "14px", padding: "14px 16px", marginBottom: "16px", textAlign: "center", color: "white", boxShadow: "4px 4px 0 #1A1A2E" }}>
           <div style={{ fontWeight: "900", fontSize: "18px" }}>Round {roundIndex + 1} of {TOTAL_ROUNDS} - {currentTeam.name}</div>
           <div style={{ fontWeight: "800", fontSize: "13px", opacity: 0.9, marginTop: "4px" }}>Turn {turnNumber} of {totalTurns}</div>
         </div>
@@ -646,7 +662,7 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
         </div>
 
         {phase === "play" && describersOnPhone && (
-          <div style={{ background: "linear-gradient(160deg,#1C0701,#2D0A00)", border: "3px dashed #F9731688", borderRadius: "22px", padding: "34px 18px", textAlign: "center" }}>
+          <div style={{ background: "#1C0701", border: "3px dashed #F97316", borderRadius: "22px", padding: "34px 18px", textAlign: "center" }}>
             <div style={{ marginBottom: "10px" }}><Icon name="phone" size={34} /></div>
             <div style={{ fontWeight: "900", fontSize: "17px", color: "#FDBA74", marginBottom: "6px" }}>
               {teamStructure === "groups"
@@ -659,7 +675,7 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
 
         {phase === "play" && !describersOnPhone && (
           <>
-            <div style={{ position: "relative", background: "linear-gradient(160deg,#1C0701,#2D0A00)", border: "4px solid #F97316", borderRadius: "22px", padding: "26px 18px", textAlign: "center", marginBottom: "16px", boxShadow: "0 0 30px rgba(249,115,22,0.35)" }}>
+            <div style={{ position: "relative", background: "#1C0701", border: "4px solid #1A1A2E", borderRadius: "22px", padding: "26px 18px", textAlign: "center", marginBottom: "16px", boxShadow: "6px 6px 0 #1A1A2E" }}>
               <div style={{ position: "absolute", top: "10px", right: "10px" }}>
                 <FlagPromptButton gameId="hotseat" questionData={{ raw: currentWord }} />
               </div>
@@ -670,21 +686,21 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
             </div>
 
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(160px,1fr))", gap: "12px" }}>
-              <button onClick={markCorrect} className="hs-btn" style={{ background: "linear-gradient(135deg,#15803D,#22C55E)", color: "white", border: "none", borderRadius: "14px", padding: "16px", fontSize: "18px", fontWeight: "900", cursor: "pointer", transition: "transform 0.15s ease" }}>Correct +{POINTS_PER_WORD}</button>
-              <button onClick={skipWord} className="hs-btn" style={{ background: "rgba(0,0,0,0.3)", color: "#FDBA74", border: "3px solid #F59E0B", borderRadius: "14px", padding: "16px", fontSize: "18px", fontWeight: "900", cursor: "pointer", transition: "transform 0.15s ease" }}>Skip</button>
-              <button onClick={endTurn} className="hs-btn" style={{ background: "rgba(0,0,0,0.3)", color: "#FCA5A5", border: "3px solid #EF4444", borderRadius: "14px", padding: "16px", fontSize: "18px", fontWeight: "900", cursor: "pointer", transition: "transform 0.15s ease" }}>End Turn</button>
+              <button onClick={markCorrect} className="hs-btn" style={{ background: "#22C55E", color: "white", border: "3px solid #1A1A2E", borderRadius: "14px", padding: "16px", fontSize: "18px", fontWeight: "900", cursor: "pointer", boxShadow: "4px 4px 0 #1A1A2E" }}>Correct +{POINTS_PER_WORD}</button>
+              <button onClick={skipWord} className="hs-btn" style={{ background: "rgba(0,0,0,0.3)", color: "#FDBA74", border: "3px solid #1A1A2E", borderRadius: "14px", padding: "16px", fontSize: "18px", fontWeight: "900", cursor: "pointer", boxShadow: "4px 4px 0 #1A1A2E" }}>Skip</button>
+              <button onClick={endTurn} className="hs-btn" style={{ background: "rgba(0,0,0,0.3)", color: "#FCA5A5", border: "3px solid #1A1A2E", borderRadius: "14px", padding: "16px", fontSize: "18px", fontWeight: "900", cursor: "pointer", boxShadow: "4px 4px 0 #1A1A2E" }}>End Turn</button>
             </div>
           </>
         )}
 
         {phase === "turnend" && (
           <div style={{ textAlign: "center" }}>
-            <div style={{ background: "linear-gradient(160deg,#1C0701,#2D0A00)", border: "2px solid #22C55E", borderRadius: "16px", padding: "18px", marginBottom: "16px" }}>
+            <div style={{ background: "#1C0701", border: "3px solid #22C55E", boxShadow: "4px 4px 0 #22C55E", borderRadius: "16px", padding: "18px", marginBottom: "16px" }}>
               <div style={{ fontWeight: "900", fontSize: "22px", color: "white", marginBottom: "6px" }}>{currentTeam.name} guessed {lastTurnCorrect} word{lastTurnCorrect === 1 ? "" : "s"}.</div>
               <div style={{ color: "#86EFAC", fontWeight: "900", fontSize: "18px", marginBottom: "4px" }}>+{lastTurnCorrect * POINTS_PER_WORD} pts</div>
               <div style={{ color: "#FED7AA", fontWeight: "700" }}>Those points have been added to the scoreboard.</div>
             </div>
-            <button onClick={goToNextTurn} className="hs-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg,#B91C1C,#F97316)", color: "white", border: "none", borderRadius: "14px", padding: "13px 34px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 20px rgba(249,115,22,0.4)", transition: "transform 0.15s ease" }}>
+            <button onClick={goToNextTurn} className="hs-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#F97316", color: "white", border: "3px solid #1A1A2E", borderRadius: "14px", padding: "13px 34px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "5px 5px 0 #1A1A2E" }}>
               {isLastTurn ? <><Icon name="trophy" size={18} /> See Final Results</> : teamIndex < teams.length - 1 ? "Next Team" : "Start Next Round"}
             </button>
           </div>

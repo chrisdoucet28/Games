@@ -1,11 +1,16 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, lazy, Suspense } from "react";
+import * as Sentry from "@sentry/react";
 import { TeamIcon, MASCOT_ICON_BY_EMOJI } from "./components/shared/TeamIcon";
 import type { Team, GameMode, QuestionData, SavedClass, Subscription, TeamRosterEntry } from "./types";
 import { TEAM_COLORS, GAME_MODES, GAME_ICONS, MASCOT_OPTIONS, LEVELS_META, FREE_PLAN_LIMITS, FREE_LAUNCH_ALL_PREMIUM } from "./data/constants";
-import { getGameTier } from "./data/pppTiers";
-import { PPPDiagram } from "./components/shared/PPPDiagram";
-// Asegúrate de que TOPIC_LIBRARY esté exportado desde tu archivo topics.ts junto con TOPIC_OPTIONS
-import { TOPIC_OPTIONS, TOPIC_LIBRARY } from "./data/topics";
+import { orderedGameModes } from "./data/gameCategories";
+import { GameSelectPanel } from "./components/shared/GameSelectPanel";
+// TOPIC_OPTIONS (lightweight metadata, needed immediately for topic-select) lives in its own
+// module now, separate from topics.ts's TOPIC_LIBRARY (the ~5MB actual question content) — see
+// data/topicOptions.ts's header comment. TOPIC_LIBRARY itself is loaded via a dynamic import()
+// inside startGame() below, only once a teacher actually starts a game, instead of a static
+// top-level import that would put the whole content bank in every visitor's initial bundle.
+import { TOPIC_OPTIONS } from "./data/topicOptions";
 import { hexToRgba, type Theme } from "./data/themes";
 import { LESSONS } from "./data/lessons";
 import { matchesTopicSearch } from "./data/learnTopics";
@@ -15,34 +20,91 @@ import { Confetti } from "./components/shared/Confetti";
 import { ClassesScreen } from "./components/shared/ClassesScreen";
 import { ProfileScreen } from "./components/shared/ProfileScreen";
 import { LearnScreen } from "./components/shared/LearnScreen";
-import { LessonPlanScreen } from "./components/shared/LessonPlanScreen";
+import { LESSON_TOPICS } from "./data/learnTopics";
+import { LESSON_PLANS } from "./data/lessonPlans";
 import { LeaderboardScreen } from "./components/shared/LeaderboardScreen";
 import { BillingScreen } from "./components/shared/BillingScreen";
 import { ThemeAmbience } from "./components/shared/ThemeAmbience";
 import { FeedbackButton } from "./components/shared/FeedbackButton";
 import { BrandBadge } from "./components/shared/BrandBadge";
 import { Icon, type IconName } from "./components/shared/Icon";
-import { IconBadge } from "./components/shared/IconBadge";
 import { MascotIcon } from "./components/shared/MascotArt";
 import { saveProgress, clearProgress, listClasses, createClass, upsertTeamRoster, deleteFromTeamRoster, saveTeams } from "./lib/classes";
 import { isPaidStatus } from "./lib/subscription";
+import { playSound, isSoundEnabled, setSoundEnabled, onSoundEnabledChange } from "./lib/sounds";
+import { setMusicContext, stopMusic } from "./lib/music";
 import { denseRank } from "./utils/ranking";
 import { RankBadge } from "./components/shared/RankBadge";
-import { AuctionGame } from "./components/games/AuctionGame";
-import { MinefieldGame } from "./components/games/MinefieldGame";
-import { HotSeatGame } from "./components/games/HotSeatGame";
-import { SpyAmongUsGame } from "./components/games/SpyAmongUsGame";
-import { BattleshipGame } from "./components/games/BattleshipGame";
-import { VaultHeistGame } from "./components/games/VaultHeistGame";
-import { CardShuffleGame } from "./components/games/CardShuffleGame";
-import { CastleGame } from "./components/games/CastleGame";
-import { KingOfHillGame } from "./components/games/KingOfHillGame";
-import { HotPotatoGame } from "./components/games/HotPotatoGame";
-import { RaceTrackGame } from "./components/games/RaceTrackGame";
-import { WordWhackGame } from "./components/games/WordWhackGame";
-import { RocketFuelGame } from "./components/games/RocketFuelGame";
-import { ZombieSiegeGame } from "./components/games/ZombieSiegeGame";
-import { OrderUpGame } from "./components/games/OrderUpGame";
+import { PhoneJoinPanel } from "./components/shared/PhoneJoinPanel";
+import { PhoneReconnectBadge } from "./components/shared/PhoneReconnectBadge";
+import { generateSessionCode, openClassSessionChannel, closeChannel, type ClassSessionStatePayload } from "./lib/liveSession";
+import type { RealtimeChannel } from "@supabase/supabase-js";
+// Code-split: each game only ever needed once a teacher actually picks it, but the plain static
+// imports above put all 15 games (plus everything each one pulls in) into the one shared bundle
+// every visitor downloads before ever seeing a game — most of a 7MB chunk. lazy() defers each
+// game's own module (and its own subtree of imports) to a real network fetch triggered only by
+// selecting it; the .then(...) adapter is needed because these are named exports, not default
+// exports, which is all React.lazy() accepts directly. See the Suspense boundary around the
+// render site below for the loading fallback shown during that fetch.
+const AuctionGame = lazy(() => import("./components/games/AuctionGame").then(m => ({ default: m.AuctionGame })));
+const MinefieldGame = lazy(() => import("./components/games/MinefieldGame").then(m => ({ default: m.MinefieldGame })));
+const HotSeatGame = lazy(() => import("./components/games/HotSeatGame").then(m => ({ default: m.HotSeatGame })));
+const RelayGame = lazy(() => import("./components/games/RelayGame").then(m => ({ default: m.RelayGame })));
+const SpyAmongUsGame = lazy(() => import("./components/games/SpyAmongUsGame").then(m => ({ default: m.SpyAmongUsGame })));
+const BattleshipGame = lazy(() => import("./components/games/BattleshipGame").then(m => ({ default: m.BattleshipGame })));
+const VaultHeistGame = lazy(() => import("./components/games/VaultHeistGame").then(m => ({ default: m.VaultHeistGame })));
+const CardShuffleGame = lazy(() => import("./components/games/CardShuffleGame").then(m => ({ default: m.CardShuffleGame })));
+const CastleGame = lazy(() => import("./components/games/CastleGame").then(m => ({ default: m.CastleGame })));
+const KingOfHillGame = lazy(() => import("./components/games/KingOfHillGame").then(m => ({ default: m.KingOfHillGame })));
+const HotPotatoGame = lazy(() => import("./components/games/HotPotatoGame").then(m => ({ default: m.HotPotatoGame })));
+const RaceTrackGame = lazy(() => import("./components/games/RaceTrackGame").then(m => ({ default: m.RaceTrackGame })));
+const WordWhackGame = lazy(() => import("./components/games/WordWhackGame").then(m => ({ default: m.WordWhackGame })));
+const RocketFuelGame = lazy(() => import("./components/games/RocketFuelGame").then(m => ({ default: m.RocketFuelGame })));
+const ZombieSiegeGame = lazy(() => import("./components/games/ZombieSiegeGame").then(m => ({ default: m.ZombieSiegeGame })));
+const OrderUpGame = lazy(() => import("./components/games/OrderUpGame").then(m => ({ default: m.OrderUpGame })));
+const BountyBoardGame = lazy(() => import("./components/games/BountyBoardGame").then(m => ({ default: m.BountyBoardGame })));
+
+// Same treatment for Lesson Plans — LessonPlanScreen.tsx (and lessonPlans.ts, which it pulls in)
+// statically imports the full TOPIC_LIBRARY too. Both named exports below point at the same
+// module specifier, so this only ever fetches that one chunk once, regardless of which renders first.
+const LessonPlanScreen = lazy(() => import("./components/shared/LessonPlanScreen").then(m => ({ default: m.LessonPlanScreen })));
+const LessonPlanSlideshow = lazy(() => import("./components/shared/LessonPlanScreen").then(m => ({ default: m.LessonPlanSlideshow })));
+
+// Shown for the brief moment a lazily-loaded game's own chunk is still being fetched (see the
+// lazy() calls above) — matches the dark game-screen background it sits inside so it never reads
+// as a flash of unstyled content, and names the actual game so it's clear something is happening.
+function GameLoadingFallback({ name }: { name: string }) {
+  return (
+    <div style={{ minHeight: "320px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "14px", padding: "40px 20px" }}>
+      <style>{`@keyframes ccGameLoadSpin { to { transform: rotate(360deg); } }`}</style>
+      <div style={{ width: "40px", height: "40px", borderRadius: "50%", border: "4px solid #E5E7EB", borderTopColor: "#0EA5E9", animation: "ccGameLoadSpin 0.8s linear infinite" }} />
+      <span style={{ color: "#6B7280", fontWeight: "700", fontSize: "14px" }}>Loading {name}…</span>
+    </div>
+  );
+}
+
+// Scoped specifically to the one game actually on screen, separate from main.tsx's app-wide
+// Sentry.ErrorBoundary — without this, a crash inside any single game's own logic (an edge case
+// in one team's saved data, a bad question record, anything) would blow away the *entire* session
+// via the app-wide boundary: the teacher's whole class, scores, and team setup, gone to a bare
+// "reload the page" screen. This contains it to just the game area — everything else (teams,
+// scores, the class link) survives, and the teacher can pick a different game or retry this one
+// without losing the period's work. Still reported to Sentry exactly like the outer boundary.
+function GameCrashFallback({ name, message, buttonLabel, onBack }: { name: string; message: string; buttonLabel: string; onBack: () => void }) {
+  return (
+    <div style={{ minHeight: "320px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "12px", padding: "40px 20px", textAlign: "center" }}>
+      <Icon name="warning" size={36} color="#F59E0B" />
+      <div style={{ fontSize: "17px", fontWeight: "800", color: "#1F2937" }}>{name} hit a snag.</div>
+      <div style={{ color: "#6B7280", fontSize: "14px", maxWidth: "360px" }}>{message}</div>
+      <button
+        onClick={onBack}
+        style={{ marginTop: "4px", padding: "10px 22px", borderRadius: "10px", border: "none", background: "#4F46E5", color: "white", fontWeight: "700", fontSize: "14px", cursor: "pointer" }}
+      >
+        {buttonLabel}
+      </button>
+    </div>
+  );
+}
 
 type TopicOption = {
   value: string;
@@ -134,9 +196,12 @@ const getFilteredTopicOptions = (level: string, focus: string) =>
     .filter(o => (level === "all" || o.level === level) && (focus === "all" || o.focus === focus))
     .sort((a, b) => (a.order ?? Number.MAX_SAFE_INTEGER) - (b.order ?? Number.MAX_SAFE_INTEGER));
 
-const getSelectedTopicEntries = (selectedTopics: string[]) =>
+// Takes the topic library as a parameter (rather than closing over a module-level import) because
+// its only caller, startGame() below, loads TOPIC_LIBRARY via a dynamic import() right before
+// calling this — see the import comment near the top of this file for why.
+const getSelectedTopicEntries = (selectedTopics: string[], library: Record<string, unknown>) =>
   selectedTopics
-    .map(value => TOPIC_LIBRARY[value as keyof typeof TOPIC_LIBRARY] as TopicLibraryEntry | undefined)
+    .map(value => library[value] as TopicLibraryEntry | undefined)
     .filter((entry): entry is TopicLibraryEntry => Boolean(entry));
 
 const cardTasksAsQuestions = (tasks: { task: string }[]): QuestionData[] =>
@@ -164,30 +229,65 @@ type LessonGamesGeneratorProps = {
 };
 
 export default function LessonGamesGenerator({ theme, onThemeChange, subscription, onSubscriptionChange, checkoutRedirect, initialScreen }: LessonGamesGeneratorProps) {
-  const [screen, setScreen] = useState<"welcome" | "classes" | "profile" | "learn" | "lessonplan" | "leaderboard" | "billing" | "topic-select" | "team-setup" | "game-select" | "game" | "results">(
+  const [screen, setScreen] = useState<"welcome" | "classes" | "profile" | "learn" | "lessonplan" | "lessonplan-play" | "leaderboard" | "billing" | "topic-select" | "team-setup" | "game-select" | "game" | "results">(
     checkoutRedirect ? "billing" : initialScreen ?? "welcome"
   );
+  // The lesson a teacher is en route to play — set the moment a topic is picked (from the Lesson
+  // Plan index, or Learn's "Start Lesson Plan" button) and read once team-setup's CTA is clicked,
+  // so team-setup knows to route to "lessonplan-play" instead of "game-select". Every team-setup
+  // entry point that ISN'T a lesson explicitly clears this, so no path can misroute on stale state
+  // left over from a previous visit.
+  const [pendingLessonTopicId, setPendingLessonTopicId] = useState<string | null>(null);
+  // Background music context: "gameplay" only for the actual game screen, "ambient" everywhere
+  // else in the app (menus, setup, lesson plans, results...). The louder "tension" context is set
+  // separately by useTurnTimer whenever a timed turn is actively running, and reverts to
+  // "gameplay" (not this effect) once that timer stops — see its own comment.
+  useEffect(() => {
+    if (screen === "game") setMusicContext("gameplay");
+    // Lesson Plans is real reading/teaching content, not a menu — music under it (even the quiet
+    // ambient bed) competes with the teacher actually presenting, so it goes silent instead. This
+    // also covers team-setup when it's reached via a lesson plan (pendingLessonTopicId set) rather
+    // than the normal game flow — team-setup is shared between both, and without this check the
+    // ambient bed would suddenly kick in there mid-lesson-plan before going silent again on
+    // "lessonplan-play".
+    else if (screen === "lessonplan" || screen === "lessonplan-play" || (screen === "team-setup" && pendingLessonTopicId)) stopMusic();
+    else setMusicContext("ambient");
+  }, [screen, pendingLessonTopicId]);
   // Where Learn's own "Back" should return to — it can now be reached from 3 different places
   // (the welcome screen's own Learn button, game-select's "Review these topics", and results'
   // "Review these topics"), so a single learnFilter-based binary no longer captures it.
   const [learnReturnTo, setLearnReturnTo] = useState<"welcome" | "game-select" | "results">("welcome");
-  // Set right before switching to "lessonplan" when arriving from a specific Learn lesson's
-  // "Start Lesson Plan" button — null when arriving from Learn's own "Lesson Plans" toggle
-  // instead, so LessonPlanScreen opens on its browsable index.
-  const [lessonPlanTopicId, setLessonPlanTopicId] = useState<string | null>(null);
   const isPaid = isPaidStatus(subscription.status);
   // The class this session is tied to, if any. Games started via "Start a Game" (not through "My
   // Classes") leave this null — but "Save & Exit" is still available; clicking it with no class
   // linked opens showSavePicker so the teacher can pick/create one on the spot instead of losing
   // the save entirely.
   const [activeClassId, setActiveClassId] = useState<string | null>(null);
+  // Display-only companion to activeClassId — team-setup's Saved Teams panel names which class is
+  // linked (not just an "Autosaved" pill with no context), so a teacher can actually tell whether
+  // they're still on last period's class before naming new teams into it. Kept in sync everywhere
+  // activeClassId itself changes to a genuinely different class (or clears); re-affirming the same
+  // already-active class (saveTeamsToRoster/saveTeamsToClass/saveToClass's own defaulted-classId
+  // calls) doesn't need to touch it.
+  const [activeClassName, setActiveClassName] = useState<string | null>(null);
+  // "Class Check-In" — one persistent join code/channel for a whole class-linked sitting, so a
+  // student scans once and their phone auto-follows every later game switch (see startGame/
+  // handleGameEnd below), instead of re-scanning a fresh per-game code every time. Only ever set
+  // while activeClassId is (see handleStartClassCheckIn), and reset alongside every place
+  // activeClassId itself gets cleared or switched to a different class.
+  const [classSessionCode, setClassSessionCode] = useState<string | null>(null);
+  const [classConnectedTeamIds, setClassConnectedTeamIds] = useState<Set<string | number>>(new Set());
+  const classChannelRef = useRef<RealtimeChannel | null>(null);
+  // Written synchronously by startGame/handleGameEnd/resumeClass (never by React state — this is
+  // read inside the broadcast effect's own closure, which must always see the LATEST active game,
+  // not whatever it was when the effect last ran) and read by the state-broadcast effect below.
+  const classActiveGameRef = useRef<string | null>(null);
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [showSavePicker, setShowSavePicker] = useState(false);
-  // Which save action the picker should run once a class is picked/created — "exit" (mid-game
-  // Save & Exit), "roster" (setup screen's "Save teams to class"), or "teams" (game-select
-  // screen's "Save teams to class"). All three used to just no-op with no class linked yet; now
-  // they all fall back to this same picker, matching the fallback Save & Exit already had.
-  const [pendingSaveAction, setPendingSaveAction] = useState<"exit" | "roster" | "teams" | null>(null);
+  // Which action the picker should run once a class is picked/created — "exit" (mid-game
+  // Save & Exit), "teams" (game-select screen's "Save teams to class"), or "link" (team-setup's
+  // "Load saved teams" — just links the picked class and hydrates its roster in place, no save).
+  const [pendingSaveAction, setPendingSaveAction] = useState<"exit" | "link" | "teams" | null>(null);
   const [pickerClasses, setPickerClasses] = useState<SavedClass[] | null>(null);
   const [pickerNewName, setPickerNewName] = useState("");
   const [pickerNewSchool, setPickerNewSchool] = useState("");
@@ -198,6 +298,28 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
   const [teamNames, setTeamNames] = useState(DEFAULT_TEAM_NAMES);
   const [teamColors, setTeamColors] = useState([0, 1, 2, 3, 4]);
   const [teamMascots, setTeamMascots] = useState<(string | null)[]>([null, null, null, null, null]);
+  // Which saved-roster entry (if any) each active slot maps to, parallel to teamNames/teamColors/
+  // teamMascots — lets the roster autosave below UPDATE that entry in place when a slot is renamed
+  // instead of leaving the old name behind as an orphaned chip and creating a fresh one under the
+  // new name every single edit (exactly what a name-only match does, and what teacher feedback
+  // flagged: "every time I make a change it creates another team"). Set when a roster chip is
+  // tapped into a slot (toggleRosterTeam) or when a save resolves a brand-new id for a
+  // previously-unknown slot (saveTeamsToRoster/handleSetup); cleared back to null anywhere the
+  // slot itself is cleared/replaced/shifted (resetTeamsToNormal, toggleRosterTeam's removal path).
+  // Deliberately NOT touched by the plain name/color/mascot edit handlers below — a manual rename
+  // of an already-linked slot should keep pointing at the same roster entry, not lose it.
+  const [teamRosterIds, setTeamRosterIds] = useState<(string | null)[]>([null, null, null, null, null]);
+  // True only while every active team slot still holds its just-reset/just-linked default content
+  // — lets toggleRosterTeam tell "teacher hasn't set up teams yet" apart from "teacher's real teams
+  // just happen to be named Team Red/Team Blue" (a perfectly normal thing to actually want), which
+  // a name-string comparison alone can't. Also gates the roster autosave effect below, so clicking
+  // around without actually naming/recoloring/mascot-ing anything doesn't write junk placeholder
+  // entries into the class's saved-teams roster. Cleared the instant a slot's actual CONTENT is
+  // edited (rename, recolor, mascot, hydrating a class's real roster, or the first roster tap
+  // itself) — deliberately NOT by the "how many teams?" count buttons alone, since revealing or
+  // hiding a slot doesn't touch what's actually named. See every setter below for where it flips
+  // false, and resetTeamsToNormal for the one place it flips back to true.
+  const [teamsUntouched, setTeamsUntouched] = useState(true);
   const [teams, setTeams] = useState<Team[]>([]);
   // Every team ever played under the active class, for the tap-to-toggle "saved teams" picker —
   // empty (and the picker hidden) whenever no class is active or it has no roster yet.
@@ -249,6 +371,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
       profile: "My Profile - ClassCade",
       learn: "Learn - ClassCade",
       lessonplan: "Lesson Plans - ClassCade",
+      "lessonplan-play": "Lesson Plan - ClassCade",
       leaderboard: "Leaderboard - ClassCade",
       billing: "Billing - ClassCade",
     };
@@ -265,7 +388,15 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     }
   };
 
-  const updateScore = useCallback((teamId: string | number, delta: number) => {
+  const updateScore = useCallback((teamId: string | number, delta: number, opts?: { silent?: boolean }) => {
+    // Every one of the 15 games routes every score change through this one function, so it's the
+    // single chokepoint for "points gained/lost" feedback sounds rather than something wired into
+    // each game individually. `silent` opts out for a game whose own Tier 2 sound already covers
+    // this exact moment (see the GameProps.onUpdateScore comment).
+    if (!opts?.silent) {
+      if (delta > 0) playSound("correct");
+      else if (delta < 0) playSound("wrong");
+    }
     setTeams(ts => ts.map(t => t.id === teamId ? { ...t, score: Math.max(0, t.score + delta) } : t));
   }, []);
 
@@ -276,6 +407,8 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     setTeamNames(DEFAULT_TEAM_NAMES.slice());
     setTeamColors([0, 1, 2, 3, 4]);
     setTeamMascots([null, null, null, null, null]);
+    setTeamRosterIds([null, null, null, null, null]);
+    setTeamsUntouched(true);
     setTeams(ts => ts.map((t, i) => ({
       ...t,
       name: DEFAULT_TEAM_NAMES[i] ?? t.name,
@@ -298,43 +431,96 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
   // turnCorrectRef pattern. Needed because two roster cards tapped in quick succession fire
   // before React re-renders, so reading the plain state variables for index math in the second
   // call would see stale, pre-first-toggle values and corrupt the result.
-  const teamSlotsRef = useRef({ names: teamNames, colors: teamColors, mascots: teamMascots, count: numTeams });
+  const teamSlotsRef = useRef({ names: teamNames, colors: teamColors, mascots: teamMascots, rosterIds: teamRosterIds, count: numTeams });
   useEffect(() => {
-    teamSlotsRef.current = { names: teamNames, colors: teamColors, mascots: teamMascots, count: numTeams };
-  }, [teamNames, teamColors, teamMascots, numTeams]);
+    teamSlotsRef.current = { names: teamNames, colors: teamColors, mascots: teamMascots, rosterIds: teamRosterIds, count: numTeams };
+  }, [teamNames, teamColors, teamMascots, teamRosterIds, numTeams]);
 
   const toggleRosterTeam = (entry: TeamRosterEntry) => {
     const cap = isPaid ? 5 : FREE_PLAN_LIMITS.maxTeams;
-    const { names, colors, mascots, count } = teamSlotsRef.current;
+    const { names, colors, mascots, rosterIds, count } = teamSlotsRef.current;
     const key = entry.name.trim().toLowerCase();
     const activeIdx = names.slice(0, count).findIndex(n => n.trim().toLowerCase() === key);
 
-    const nextNames = [...names];
-    const nextColors = [...colors];
-    const nextMascots = [...mascots];
+    let nextNames = [...names];
+    let nextColors = [...colors];
+    let nextMascots = [...mascots];
+    let nextRosterIds = [...rosterIds];
     let nextCount = count;
+    // Whether the result still counts as an untouched blank slate — true again only via the
+    // nextCount===0 fallback below (which lands back on the real defaults); every other outcome
+    // leaves at least one deliberately-chosen team in place, real even when it's a bare removal
+    // down to a single remaining team.
+    let nextUntouched = false;
 
     if (activeIdx !== -1) {
       for (let i = activeIdx; i < count - 1; i++) {
         nextNames[i] = nextNames[i + 1];
         nextColors[i] = nextColors[i + 1];
         nextMascots[i] = nextMascots[i + 1];
+        nextRosterIds[i] = nextRosterIds[i + 1];
       }
       nextCount = count - 1;
+      // The shift above leaves the now-unused trailing slot holding whatever it shifted down from
+      // (a duplicate of the team now sitting one slot earlier) — invisible while numTeams stays at
+      // nextCount, but it resurfaces as a duplicate-named team the moment "How many teams?" goes
+      // back up, since nothing else ever repopulates that slot. Reset it to its own untouched
+      // default so bumping the count back up always reveals a fresh slot, not stale data.
+      nextNames[nextCount] = DEFAULT_TEAM_NAMES[nextCount];
+      nextColors[nextCount] = nextCount;
+      nextMascots[nextCount] = null;
+      nextRosterIds[nextCount] = null;
+      // Untapping a class's only real team would otherwise leave 0 active teams — a state the
+      // "how many teams?" buttons above can never produce themselves, and nothing downstream
+      // (handleSetup, game-select) expects. Land back on the normal untouched defaults instead of
+      // an empty roster.
+      if (nextCount === 0) {
+        nextNames = DEFAULT_TEAM_NAMES.slice();
+        nextColors = [0, 1, 2, 3, 4];
+        nextMascots = [null, null, null, null, null];
+        nextRosterIds = [null, null, null, null, null];
+        nextCount = 2;
+        nextUntouched = true;
+      }
     } else {
-      if (count >= cap) return;
-      nextNames[count] = entry.name;
-      const idx = TEAM_COLORS.findIndex(c => c.name === entry.color.name);
-      nextColors[count] = idx === -1 ? count : idx;
-      nextMascots[count] = entry.mascot;
-      nextCount = count + 1;
+      // Teacher feedback: tapping a saved team while the editor still shows the untouched "Team
+      // Red"/"Team Blue" placeholders should leave exactly that one team, not that team stacked
+      // behind the placeholders — the defaults were never a real choice to begin with, so a saved
+      // team replaces them outright instead of appending after them. Gated on teamsUntouched
+      // (tracked explicitly, not inferred from the names) rather than comparing names against
+      // DEFAULT_TEAM_NAMES directly — a teacher who deliberately kept "Team Red"/"Team Blue" as
+      // their actual team names (a perfectly normal choice) would otherwise have that real setup
+      // silently overwritten the first time they tapped a saved team to add a third. Once any real
+      // edit happens, further taps go back to the normal add/remove behavior below.
+      if (teamsUntouched) {
+        nextNames = DEFAULT_TEAM_NAMES.slice();
+        nextColors = [0, 1, 2, 3, 4];
+        nextMascots = [null, null, null, null, null];
+        nextRosterIds = [null, null, null, null, null];
+        nextNames[0] = entry.name;
+        const idx = TEAM_COLORS.findIndex(c => c.name === entry.color.name);
+        nextColors[0] = idx === -1 ? 0 : idx;
+        nextMascots[0] = entry.mascot;
+        nextRosterIds[0] = entry.id;
+        nextCount = 1;
+      } else {
+        if (count >= cap) return;
+        nextNames[count] = entry.name;
+        const idx = TEAM_COLORS.findIndex(c => c.name === entry.color.name);
+        nextColors[count] = idx === -1 ? count : idx;
+        nextMascots[count] = entry.mascot;
+        nextRosterIds[count] = entry.id;
+        nextCount = count + 1;
+      }
     }
 
-    teamSlotsRef.current = { names: nextNames, colors: nextColors, mascots: nextMascots, count: nextCount };
+    teamSlotsRef.current = { names: nextNames, colors: nextColors, mascots: nextMascots, rosterIds: nextRosterIds, count: nextCount };
     setTeamNames(nextNames);
     setTeamColors(nextColors);
     setTeamMascots(nextMascots);
+    setTeamRosterIds(nextRosterIds);
     setNumTeams(nextCount);
+    setTeamsUntouched(nextUntouched);
   };
 
   // Forgets a saved team preset for next time — deliberately leaves today's active lineup alone
@@ -361,15 +547,73 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
       id: i, name, color: TEAM_COLORS[teamColors[i] ?? i], mascot: teamMascots[i] ?? null,
       score: existingScores[name] ?? 0,
     }));
+    const currentRosterIds = teamRosterIds.slice(0, numTeams);
     setRosterSaveStatus("saving");
-    upsertTeamRoster(classId, currentTeams)
-      .then(merged => {
-        setTeamRoster(merged);
+    upsertTeamRoster(classId, currentTeams, currentRosterIds)
+      .then(({ roster, resolvedIds }) => {
+        setTeamRoster(roster);
+        // Write the resolved ids (including any freshly created for a slot that had none) back
+        // into per-slot state, so the NEXT edit updates these same rows instead of matching by
+        // name alone again — this is what stops a slot from drifting to a fresh duplicate entry
+        // every time it's renamed.
+        setTeamRosterIds(prev => {
+          const next = [...prev];
+          resolvedIds.forEach((id, i) => { next[i] = id; });
+          teamSlotsRef.current = { ...teamSlotsRef.current, rosterIds: next };
+          return next;
+        });
         setRosterSaveStatus("saved");
         setTimeout(() => setRosterSaveStatus("idle"), 1400);
       })
       .catch(() => setRosterSaveStatus("idle"));
   };
+
+  // Auto-save once a class is linked — teams named/edited on team-setup should feel automatically
+  // saved (like a video game's autosave), not require an explicit button. A baseline snapshot is
+  // captured any time activeClassId actually CHANGES to a different class (covers both the first
+  // link and later switching to a different one via "Switch" — see dispatchPendingSave's "link"
+  // branch, which resets the editing slots to blank defaults on every link so a switch can never
+  // leave the previous class's team names sitting in the editor about to be autosaved into the new
+  // class's roster). Reads teamSlotsRef, already kept in sync a few lines above this — its own
+  // effect runs first in the same commit, so it reflects whatever the same click handler that
+  // changed activeClassId also set in that same batch (startWithClass's pre-fill, or the reset on
+  // link/switch) — so that hydration/reset never itself counts as an edit. Any later change that
+  // actually differs from the baseline debounces a write via saveTeamsToRoster.
+  const autosaveBaselineRef = useRef<{ names: string[]; colors: number[]; mascots: (string | null)[]; count: number } | null>(null);
+  const prevActiveClassIdRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (activeClassId && activeClassId !== prevActiveClassIdRef.current) {
+      const { names, colors, mascots, count } = teamSlotsRef.current;
+      autosaveBaselineRef.current = { names: [...names], colors: [...colors], mascots: [...mascots], count };
+    } else if (!activeClassId) {
+      autosaveBaselineRef.current = null;
+    }
+    prevActiveClassIdRef.current = activeClassId;
+  }, [activeClassId]);
+
+  useEffect(() => {
+    if (!activeClassId) return;
+    // Still the untouched "Team Red"/"Team Blue" blank slate — e.g. a teacher just clicking the
+    // "3" team-count button before naming anything, or hitting "Reset teams to normal" — nothing
+    // real to save yet. Without this, those generic placeholder names got permanently written into
+    // the class's saved-teams roster as if they were genuine picks, cluttering it with junk chips
+    // indistinguishable from teams the teacher actually named.
+    if (teamsUntouched) return;
+    const baseline = autosaveBaselineRef.current;
+    if (!baseline) return;
+    const current = teamSlotsRef.current;
+    const changed = current.count !== baseline.count
+      || current.names.slice(0, current.count).some((n, i) => n !== baseline.names[i])
+      || current.colors.slice(0, current.count).some((c, i) => c !== baseline.colors[i])
+      || current.mascots.slice(0, current.count).some((m, i) => m !== baseline.mascots[i]);
+    if (!changed) return;
+    const timer = setTimeout(() => {
+      saveTeamsToRoster(activeClassId);
+      autosaveBaselineRef.current = { names: [...current.names], colors: [...current.colors], mascots: [...current.mascots], count: current.count };
+    }, 800);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeClassId, teamNames, teamColors, teamMascots, numTeams, teamsUntouched]);
 
   // Game-select equivalent — here `teams` already IS the live, scored session (unlike setup,
   // where scores are still keyed off the previous session by name until handleSetup runs), so
@@ -382,7 +626,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     setTeamsSaveStatus("saving");
     Promise.all([
       saveTeams(classId, teams),
-      upsertTeamRoster(classId, teams).then(setTeamRoster),
+      upsertTeamRoster(classId, teams).then(({ roster }) => setTeamRoster(roster)),
     ])
       .then(() => {
         setTeamsSaveStatus("saved");
@@ -406,16 +650,19 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
   const playRandomGame = () => {
     if (loadingGame || randomSpinIndex !== null) return;
 
-    const targetIndex = Math.floor(Math.random() * GAME_MODES.length);
-    const totalSteps = GAME_MODES.length * 3 + targetIndex;
+    // Steps through the games in on-screen order (grouped by block), not GAME_MODES order — the
+    // highlight index is compared against that same order in GameSelectPanel.
+    const games = orderedGameModes();
+    const targetIndex = Math.floor(Math.random() * games.length);
+    const totalSteps = games.length * 3 + targetIndex;
 
     const runStep = (step: number) => {
-      setRandomSpinIndex(step % GAME_MODES.length);
+      setRandomSpinIndex(step % games.length);
 
       if (step >= totalSteps) {
         randomSpinTimeoutRef.current = window.setTimeout(() => {
           setRandomSpinIndex(null);
-          startGame(GAME_MODES[targetIndex]);
+          startGame(games[targetIndex]);
         }, 500);
         return;
       }
@@ -432,6 +679,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
   // normal setup flow, same as if the teacher had typed those names in themselves.
   const startWithClass = (cls: SavedClass) => {
     setActiveClassId(cls.id);
+    setActiveClassName(cls.name);
     // Pre-selects step 1 of Game Setup with this class's own level, so a teacher who already told
     // us "this is my B2 class" doesn't have to re-pick it every single time they start a game.
     setLevel(cls.default_level ?? "all");
@@ -457,6 +705,9 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
         return next;
       });
       setTeams(cls.teams);
+      // A real class's own saved teams, not a blank slate — a later roster tap in team-setup
+      // should append to this lineup, not treat it as still-untouched placeholders to replace.
+      setTeamsUntouched(false);
     }
     setScreen("topic-select");
   };
@@ -465,6 +716,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
   // the exact game, teams, topics, and question pool that were in play when it was saved.
   const resumeClass = (cls: SavedClass) => {
     setActiveClassId(cls.id);
+    setActiveClassName(cls.name);
     setTeams(cls.teams);
     setSelectedTopics(cls.selected_topics ?? []);
     setLevel(cls.level ?? "all");
@@ -473,6 +725,10 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     setQuestions(cls.questions_snapshot ?? []);
     setMinefieldGridData((cls.minefield_grid_data as MinefieldGridData | MinefieldGridData[] | null) ?? null);
     setResumeGameState(cls.game_state ?? null);
+    // Resume normally skips team-setup (where Class Check-In gets started) entirely, so there's
+    // usually no code yet to broadcast on — but if the teacher is already mid check-in for THIS
+    // same class and resumes a different saved game for it, a checked-in phone should still follow.
+    if (classSessionCode && cls.id === activeClassId) broadcastClassActiveGame(cls.selected_game ?? null);
     setScreen("game");
   };
 
@@ -495,7 +751,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
         minefieldGridData,
         gameState: serializeStateRef.current?.() ?? null,
       });
-      upsertTeamRoster(classId, teams).then(setTeamRoster).catch(() => {});
+      upsertTeamRoster(classId, teams).then(({ roster }) => setTeamRoster(roster)).catch(() => {});
       setSaveStatus("saved");
       setTimeout(() => { setSaveStatus("idle"); setScreen("classes"); }, 900);
     } catch {
@@ -507,10 +763,10 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
   // Games started directly (not via "My Classes") have no activeClassId yet — instead of hiding
   // a save button entirely in that case, open a quick pick-or-create prompt so the save still
   // lands somewhere, then behaves exactly like a class-linked save from then on. Shared by all
-  // three save actions (mid-game Save & Exit, setup's "Save teams to class", game-select's
-  // "Save teams to class") — pendingSaveAction remembers which one to actually run once a class
+  // pending actions (mid-game Save & Exit, game-select's "Save teams to class", team-setup's
+  // "Load saved teams") — pendingSaveAction remembers which one to actually run once a class
   // comes back from the picker.
-  const openSavePicker = (action: "exit" | "roster" | "teams") => {
+  const openSavePicker = (action: "exit" | "link" | "teams") => {
     setPendingSaveAction(action);
     setPickerError(null);
     setPickerClasses(null);
@@ -529,15 +785,6 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     openSavePicker("exit");
   };
 
-  // Setup screen's "Save teams to class" — see openSavePicker above.
-  const handleSaveTeamsToRoster = () => {
-    if (activeClassId) {
-      saveTeamsToRoster(activeClassId);
-      return;
-    }
-    openSavePicker("roster");
-  };
-
   // Game-select screen's "Save teams to class" — see openSavePicker above.
   const handleSaveTeamsToClass = () => {
     if (activeClassId) {
@@ -547,20 +794,35 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     openSavePicker("teams");
   };
 
-  // Runs whichever save action was pending once a class has actually been picked/created — an
-  // explicit classId (not the activeClassId closure, which won't have updated yet) so each save
-  // function links the class and acts in the same call.
-  const dispatchPendingSave = (classId: string) => {
+  // Runs whichever action was pending once a class has actually been picked/created — takes the
+  // full class row (not just an id) since "link" needs its team_roster right away, with no round
+  // trip back through listClasses. "link" just hydrates state in place (same data startWithClass
+  // loads) rather than running a save — that's what turns this picker into a "which save file"
+  // prompt instead of a one-way save action.
+  const dispatchPendingSave = (cls: SavedClass) => {
     const action = pendingSaveAction;
     setPendingSaveAction(null);
-    if (action === "roster") saveTeamsToRoster(classId);
-    else if (action === "teams") saveTeamsToClass(classId);
-    else saveToClass(classId);
+    if (action === "link") {
+      // Switching to a different class mid-sitting — any check-in still active is for the OLD
+      // class and must not keep broadcasting under its old code (a teacher switching classes has
+      // to explicitly re-click "Start Class Check-In" for the new one).
+      if (classSessionCode) closeClassSession();
+      setActiveClassId(cls.id);
+      setActiveClassName(cls.name);
+      setTeamRoster(cls.team_roster ?? []);
+      // Blanks the live editor to this class's own clean slate — without this, switching from an
+      // already-linked class straight to a different one would leave the FIRST class's team names
+      // sitting in the editor, about to autosave into the SECOND class's roster the moment anything
+      // else changes. The teacher taps chips below to bring in whichever of this class's own saved
+      // teams they want, same as any other link.
+      resetTeamsToNormal();
+    } else if (action === "teams") saveTeamsToClass(cls.id);
+    else saveToClass(cls.id);
   };
 
   const handlePickClassForSave = (cls: SavedClass) => {
     setShowSavePicker(false);
-    dispatchPendingSave(cls.id);
+    dispatchPendingSave(cls);
   };
 
   const handleCreateClassForSave = async () => {
@@ -573,7 +835,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
       setPickerNewSchool("");
       setPickerNewLevel("all");
       setShowSavePicker(false);
-      dispatchPendingSave(created.id);
+      dispatchPendingSave(created);
     } catch (err) {
       setPickerError(err instanceof Error ? err.message : "Couldn't create the class.");
     } finally {
@@ -581,93 +843,118 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     }
   };
 
-  // The picker can now be triggered from setup, game-select, or mid-game (see openSavePicker
-  // above) — each of those screens is its own early-return render branch (not shared JSX), so
-  // this has to be called from all three rather than living inline in just one of them.
+  // Shared between the modal picker (mid-game Save & Exit, game-select's "Save teams to class")
+  // and team-setup's inline slide-out drawer (see renderClassLinkDrawer below) — same list-or-
+  // create-a-class body, just mounted in two different containers. `listMaxHeight` lets the drawer
+  // cap the class list to a scrollable region instead of growing the whole page.
+  const renderClassPickerBody = (listMaxHeight?: string) => (
+    <>
+      {pickerError && <div style={{ background: "#FEE2E2", color: "#991B1B", padding: "8px 12px", borderRadius: "8px", fontSize: "13px", marginBottom: "12px" }}>{pickerError}</div>}
+
+      {pickerClasses === null ? (
+        <div style={{ textAlign: "center", color: "#6B7280", padding: "16px 0" }}>Loading your classes…</div>
+      ) : pickerClasses.length > 0 ? (
+        <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginBottom: "16px", maxHeight: listMaxHeight, overflowY: listMaxHeight ? "auto" : undefined, paddingRight: listMaxHeight ? "4px" : undefined }}>
+          {pickerClasses.map(cls => (
+            <button
+              key={cls.id} onClick={() => handlePickClassForSave(cls)}
+              style={{ textAlign: "left", background: "#F0F9FF", border: "2px solid #E5E7EB", borderRadius: "10px", padding: "10px 14px", cursor: "pointer", fontWeight: 700, color: theme.heroBg[0], fontSize: "14px", flexShrink: 0 }}
+            >
+              {cls.name}
+              {cls.in_progress && pendingSaveAction !== "link" && <span style={{ display: "flex", alignItems: "center", gap: "4px", fontWeight: 500, fontSize: "12px", color: "#B45309", marginTop: "2px" }}><Icon name="warning" size={11} /> Has a game in progress — saving here will replace it</span>}
+            </button>
+          ))}
+        </div>
+      ) : null}
+
+      {!isPaid && pickerClasses !== null && pickerClasses.length >= FREE_PLAN_LIMITS.maxClasses ? (
+        <div style={{ background: "#F0F9FF", border: "2px dashed #93C5FD", borderRadius: "10px", padding: "14px", textAlign: "center" }}>
+          <div style={{ fontSize: "13px", color: "#374151", fontWeight: "700", marginBottom: "8px" }}>Free plan is limited to {FREE_PLAN_LIMITS.maxClasses} class. Upgrade for unlimited classes.</div>
+          <button
+            onClick={() => { setShowSavePicker(false); setScreen("billing"); }}
+            style={{ background: `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "10px", padding: "8px 16px", fontWeight: 800, cursor: "pointer", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px" }}
+          >
+            <Icon name="gem" size={14} /> Upgrade
+          </button>
+        </div>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+          <input
+            value={pickerNewName} onChange={e => setPickerNewName(e.target.value)} placeholder="e.g. Tuesday B2 Advanced"
+            style={{ padding: "10px 12px", borderRadius: "10px", border: "2px solid #E5E7EB", fontSize: "14px", boxSizing: "border-box" }}
+          />
+          <input
+            value={pickerNewSchool} onChange={e => setPickerNewSchool(e.target.value)} placeholder="School (optional)"
+            style={{ padding: "10px 12px", borderRadius: "10px", border: "2px solid #E5E7EB", fontSize: "14px", boxSizing: "border-box" }}
+          />
+          <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
+            <span style={{ fontSize: "12px", color: "#6B7280", fontWeight: "700", marginRight: "2px" }}>Level:</span>
+            {LEVELS_META.map(l => (
+              <button
+                key={l.id} type="button" onClick={() => setPickerNewLevel(l.id)}
+                style={{
+                  background: pickerNewLevel === l.id ? l.color : "white",
+                  color: pickerNewLevel === l.id ? "white" : "#374151",
+                  border: `2px solid ${pickerNewLevel === l.id ? l.color : "#E5E7EB"}`,
+                  borderRadius: "8px", padding: "5px 10px", cursor: "pointer", fontWeight: "700", fontSize: "12px",
+                }}
+              >
+                {l.id === "all" ? "Any" : l.id}
+              </button>
+            ))}
+          </div>
+          <button
+            onClick={handleCreateClassForSave} disabled={pickerBusy || !pickerNewName.trim()}
+            style={{ background: `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "10px", padding: "10px 16px", fontWeight: 800, cursor: pickerBusy ? "default" : "pointer", opacity: pickerBusy || !pickerNewName.trim() ? 0.6 : 1, fontFamily: theme.headingFont }}
+          >
+            + New
+          </button>
+        </div>
+      )}
+    </>
+  );
+
+  // The modal picker — still used for mid-game Save & Exit and game-select's "Save teams to
+  // class", where there's no "Saved Teams" panel to slide a drawer out of. Team-setup's own
+  // "link"/"switch" action uses renderClassLinkDrawer below instead (see openSavePicker's callers).
   const renderSavePicker = () => (
-    showSavePicker && (
+    showSavePicker && pendingSaveAction !== "link" && (
       <div style={{ position: "fixed", inset: 0, background: "rgba(15,10,46,0.75)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 2000, padding: "20px" }}>
         <div style={{ background: "white", borderRadius: "20px", padding: "24px", maxWidth: "420px", width: "100%", maxHeight: "80vh", overflowY: "auto", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
           <h3 style={{ margin: "0 0 6px", fontSize: "18px", fontWeight: 900, color: theme.heroBg[0], fontFamily: theme.headingFont }}>Save to which class?</h3>
           <p style={{ margin: "0 0 16px", fontSize: "13px", color: "#6B7280" }}>Pick an existing class, or create a new one — you'll return to it later from "My Classes."</p>
-
-          {pickerError && <div style={{ background: "#FEE2E2", color: "#991B1B", padding: "8px 12px", borderRadius: "8px", fontSize: "13px", marginBottom: "12px" }}>{pickerError}</div>}
-
-          {pickerClasses === null ? (
-            <div style={{ textAlign: "center", color: "#6B7280", padding: "16px 0" }}>Loading your classes…</div>
-          ) : pickerClasses.length > 0 ? (
-            <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginBottom: "16px" }}>
-              {pickerClasses.map(cls => (
-                <button
-                  key={cls.id} onClick={() => handlePickClassForSave(cls)}
-                  style={{ textAlign: "left", background: "#F0F9FF", border: "2px solid #E5E7EB", borderRadius: "10px", padding: "10px 14px", cursor: "pointer", fontWeight: 700, color: theme.heroBg[0], fontSize: "14px" }}
-                >
-                  {cls.name}
-                  {cls.in_progress && <span style={{ display: "flex", alignItems: "center", gap: "4px", fontWeight: 500, fontSize: "12px", color: "#B45309", marginTop: "2px" }}><Icon name="warning" size={11} /> Has a game in progress — saving here will replace it</span>}
-                </button>
-              ))}
-            </div>
-          ) : null}
-
-          {!isPaid && pickerClasses !== null && pickerClasses.length >= FREE_PLAN_LIMITS.maxClasses ? (
-            <div style={{ background: "#F0F9FF", border: "2px dashed #93C5FD", borderRadius: "10px", padding: "14px", textAlign: "center" }}>
-              <div style={{ fontSize: "13px", color: "#374151", fontWeight: "700", marginBottom: "8px" }}>Free plan is limited to {FREE_PLAN_LIMITS.maxClasses} class. Upgrade for unlimited classes.</div>
-              <button
-                onClick={() => { setShowSavePicker(false); setScreen("billing"); }}
-                style={{ background: `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "10px", padding: "8px 16px", fontWeight: 800, cursor: "pointer", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px" }}
-              >
-                <Icon name="gem" size={14} /> Upgrade
-              </button>
-            </div>
-          ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-              <input
-                value={pickerNewName} onChange={e => setPickerNewName(e.target.value)} placeholder="e.g. Tuesday B2 Advanced"
-                style={{ padding: "10px 12px", borderRadius: "10px", border: "2px solid #E5E7EB", fontSize: "14px" }}
-              />
-              <input
-                value={pickerNewSchool} onChange={e => setPickerNewSchool(e.target.value)} placeholder="School (optional)"
-                style={{ padding: "10px 12px", borderRadius: "10px", border: "2px solid #E5E7EB", fontSize: "14px" }}
-              />
-              <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
-                <span style={{ fontSize: "12px", color: "#6B7280", fontWeight: "700", marginRight: "2px" }}>Level:</span>
-                {LEVELS_META.map(l => (
-                  <button
-                    key={l.id} type="button" onClick={() => setPickerNewLevel(l.id)}
-                    style={{
-                      background: pickerNewLevel === l.id ? l.color : "white",
-                      color: pickerNewLevel === l.id ? "white" : "#374151",
-                      border: `2px solid ${pickerNewLevel === l.id ? l.color : "#E5E7EB"}`,
-                      borderRadius: "8px", padding: "5px 10px", cursor: "pointer", fontWeight: "700", fontSize: "12px",
-                    }}
-                  >
-                    {l.id === "all" ? "Any" : l.id}
-                  </button>
-                ))}
-              </div>
-              <button
-                onClick={handleCreateClassForSave} disabled={pickerBusy || !pickerNewName.trim()}
-                style={{ background: `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "10px", padding: "10px 16px", fontWeight: 800, cursor: pickerBusy ? "default" : "pointer", opacity: pickerBusy || !pickerNewName.trim() ? 0.6 : 1, fontFamily: theme.headingFont }}
-              >
-                + New
-              </button>
-            </div>
-          )}
-
+          {renderClassPickerBody()}
           <button onClick={() => setShowSavePicker(false)} style={{ marginTop: "16px", background: "none", border: "none", color: "#9CA3AF", fontWeight: 700, cursor: "pointer" }}>Cancel</button>
         </div>
       </div>
     )
   );
 
+  // Team-setup's "Load saved teams…"/"Switch" — expands in place under the Saved Teams panel
+  // instead of a modal dialog, so picking a class reads as part of that panel rather than an
+  // interruption. The class list itself scrolls within a fixed height once there are more than a
+  // handful, rather than the drawer (or the whole page) growing indefinitely.
+  const renderClassLinkDrawer = () => (
+    showSavePicker && pendingSaveAction === "link" && (
+      <div className="cc-slide-drawer" style={{ marginTop: "10px", border: `2px solid ${hexToRgba(theme.accentSolid, 0.3)}`, borderRadius: "12px", padding: "14px", background: "#F8FAFF" }}>
+        <p style={{ margin: "0 0 12px", fontSize: "12.5px", color: "#6B7280" }}>Pick an existing class to load its saved teams, or create a new one — teams you name below will be saved to it automatically.</p>
+        {renderClassPickerBody("220px")}
+        <button onClick={() => setShowSavePicker(false)} style={{ marginTop: "12px", background: "none", border: "none", color: "#9CA3AF", fontWeight: 700, cursor: "pointer", fontSize: "13px" }}>Cancel</button>
+      </div>
+    )
+  );
+
   // Topic-select's "Continue" — the only validation that ever belonged to topic selection, not
-  // team setup, so it moves with the split rather than staying on handleSetup below.
+  // team setup, so it moves with the split rather than staying on handleSetup below. This path
+  // never carries a pending lesson (that's picked from the Lesson Plan index instead), but clears
+  // it defensively so team-setup's CTA can never misroute on state left over from a prior visit.
   const handleContinueToTeamSetup = () => {
     setLoadError("");
     if (selectedTopics.length === 0) {
       setLoadError("Choose at least one topic.");
       return;
     }
+    setPendingLessonTopicId(null);
     setScreen("team-setup");
   };
 
@@ -678,8 +965,24 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
       score: existingScores[name] ?? 0,
     }));
     setTeams(builtTeams);
-    if (activeClassId) upsertTeamRoster(activeClassId, builtTeams).then(setTeamRoster).catch(() => {});
-    setScreen("game-select");
+    if (activeClassId) {
+      upsertTeamRoster(activeClassId, builtTeams, teamRosterIds.slice(0, numTeams))
+        .then(({ roster, resolvedIds }) => {
+          setTeamRoster(roster);
+          // Same write-back saveTeamsToRoster does, so a Class Check-In started right after Continue
+          // already knows each team's saved id (used to link student accounts to their team).
+          setTeamRosterIds(prev => {
+            const next = [...prev];
+            resolvedIds.forEach((id, i) => { next[i] = id; });
+            return next;
+          });
+        })
+        .catch(() => {});
+    }
+    // A pending lesson topic means the teacher arrived here via the Lesson Plan index (topic
+    // already fixed before this screen was ever reached) — send them into that lesson's slideshow
+    // instead of the usual game-select.
+    setScreen(pendingLessonTopicId ? "lessonplan-play" : "game-select");
   };
 
   const toggleTopicSelection = (topicValue: string) => {
@@ -703,7 +1006,107 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     setSelectedTopics([]);
   };
 
-  const startGame = (mode: GameMode) => {
+  // Torn down at every place activeClassId itself gets cleared or switched to a different class
+  // (see the "Done with this class"/topic-select Back/Learn-lesson-plan-entry/"Switch class"
+  // sites below) — a stale channel left open would keep broadcasting the OLD class's roster/game
+  // state under a code nobody should still be using.
+  const closeClassSession = () => {
+    closeChannel(classChannelRef.current);
+    classChannelRef.current = null;
+    classActiveGameRef.current = null;
+    setClassSessionCode(null);
+    setClassConnectedTeamIds(new Set());
+  };
+
+  // Manual activation only (per the teacher's own explicit choice) — nothing about Class Check-In
+  // exists until this is clicked. Presence sync mirrors every other game's own channel-open effect
+  // (see e.g. OrderUpGame.tsx), just for the class-level roster instead of one game's tickets.
+  const handleStartClassCheckIn = () => {
+    const code = generateSessionCode();
+    setClassSessionCode(code);
+    const channel = openClassSessionChannel(code);
+    classChannelRef.current = channel;
+    channel.on("presence", { event: "sync" }, () => {
+      const presenceState = channel.presenceState<{ teamId: string | number }>();
+      const ids = new Set<string | number>();
+      Object.values(presenceState).forEach(entries => entries.forEach(entry => ids.add(entry.teamId)));
+      setClassConnectedTeamIds(ids);
+    });
+    channel.subscribe();
+  };
+
+  // A persistent, single floating badge for the whole class-linked sitting — shown on every
+  // screen a class session realistically spans (topic-select, game-select, game, results) EXCEPT
+  // team-setup, which already shows the QR inline (see the plan: one-time-only by the teacher's
+  // own choice, not a gap to patch over with a second copy here). Each of the 9 phone-capable
+  // games suppresses its OWN PhoneReconnectBadge whenever presetPhoneSession is set (see those
+  // files), so this is always the only floating "reconnect a phone" button on screen at once —
+  // never two competing ones, and never one pointing at the wrong (per-game, not class-level)
+  // join URL.
+  const renderClassCheckInBadge = () => classSessionCode ? (
+    <PhoneReconnectBadge
+      sessionCode={classSessionCode}
+      joinUrl={`${window.location.origin}${window.location.pathname}?classJoin=${classSessionCode}`}
+      teams={teams}
+      connectedTeamIds={classConnectedTeamIds}
+      accent={theme.accentSolid}
+      panelBg="linear-gradient(160deg,#1E293B,#0F172A)"
+      borderColor={`${theme.accentSolid}66`}
+    />
+  ) : null;
+
+  // Broadcasts the class channel's current state — called immediately on every relevant change
+  // (see the two call sites in startGame/handleGameEnd/resumeClass below) AND on a standing
+  // interval, same "resend regardless of change" liveness convention every other phone-mode game
+  // channel already uses (see e.g. OrderUpGame.tsx's own sendState/interval pair) — a phone that
+  // subscribes mid-sitting gets a fresh copy within one interval tick instead of waiting for the
+  // next actual game switch.
+  const sendClassSessionState = useCallback(() => {
+    const channel = classChannelRef.current;
+    if (!channel) return;
+    // Which saved team (classes.team_roster entry) each on-screen team is, so a logged-in student's
+    // phone can remember/auto-pick "my team". Team ids are slot indexes, parallel to teamRosterIds;
+    // when a slot never got its id written back (a quick Continue before the autosave ran) the same
+    // name match upsertTeamRoster itself falls back to is used instead. Purely additive — phones
+    // without accounts ignore it.
+    const rosterIdFor = (t: Team): string | null => {
+      const bySlot = typeof t.id === "number" ? teamRosterIds[t.id] : null;
+      if (bySlot) return bySlot;
+      const key = t.name.trim().toLowerCase();
+      return teamRoster.find(r => r.name.trim().toLowerCase() === key)?.id ?? null;
+    };
+    const payload: ClassSessionStatePayload = {
+      activeGame: classActiveGameRef.current,
+      classId: activeClassId,
+      roster: teams.map(t => ({ id: t.id, name: t.name, color: t.color, mascot: t.mascot, rosterId: rosterIdFor(t) })),
+      connectedTeamIds: Array.from(classConnectedTeamIds),
+      ts: Date.now(),
+    };
+    channel.send({ type: "broadcast", event: "state", payload });
+  }, [teams, classConnectedTeamIds, activeClassId, teamRosterIds, teamRoster]);
+
+  useEffect(() => {
+    if (!classSessionCode) return;
+    sendClassSessionState();
+    const interval = setInterval(sendClassSessionState, 4000);
+    return () => clearInterval(interval);
+  }, [classSessionCode, sendClassSessionState]);
+
+  // Unmount-only safety net — Supabase presence times out server-side on its own, but this keeps
+  // a hard navigation away from ever leaking the channel client-side.
+  useEffect(() => {
+    return () => closeChannel(classChannelRef.current);
+  }, []);
+
+  // The single hook point for "a new game (or no game) is now active" — sets the ref synchronously
+  // (read by sendClassSessionState's closure) and fires one broadcast right away rather than
+  // waiting for the next interval tick, so a checked-in phone switches the instant the teacher does.
+  const broadcastClassActiveGame = (gameId: string | null) => {
+    classActiveGameRef.current = gameId;
+    sendClassSessionState();
+  };
+
+  const startGame = async (mode: GameMode) => {
     setSelectedGame(mode);
     setLoadingGame(true);
     setLoadError("");
@@ -713,7 +1116,10 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     setPaused(false);
 
     try {
-      const selectedEntries = getSelectedTopicEntries(selectedTopics);
+      // The one place this file ever needs the actual question content, not just topic metadata —
+      // loaded on demand right here instead of a top-level import (see the import comment above).
+      const { TOPIC_LIBRARY } = await import("./data/topics");
+      const selectedEntries = getSelectedTopicEntries(selectedTopics, TOPIC_LIBRARY);
       if (selectedEntries.length === 0) {
         setLoadError("Topic data not found.");
         setLoadingGame(false);
@@ -730,6 +1136,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
 
         setMinefieldGridData(minefieldGrids.length === 1 ? minefieldGrids[0] : minefieldGrids);
         setQuestions([]);
+        if (classSessionCode) broadcastClassActiveGame(mode.id);
         setScreen("game");
         setLoadingGame(false);
         return;
@@ -799,7 +1206,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
             })),
           ];
         }));
-      } else if (mode.id === "hotseat") {
+      } else if (mode.id === "hotseat" || mode.id === "relay") {
         qs = mixByTopic(selectedEntries.map(entry => entry.hotSeatWords ?? []));
       } else if (mode.id === "hotpotato") {
         qs = mixByTopic(selectedEntries.map(entry => entry.hotPotatoPrompts ?? []));
@@ -817,7 +1224,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
         // includes L1-interference-flavored mistakes for topic-focus content) with cardTasks,
         // rather than dropping grammar content entirely for topic-only selections.
         qs = mixByTopic(selectedEntries.map((entry, index) => [...(entry.questions ?? []), ...cardTaskBuckets[index]]));
-      } else if (mode.id === "castle" || mode.id === "racetrack" || mode.id === "whack" || mode.id === "rocket") {
+      } else if (mode.id === "castle" || mode.id === "racetrack" || mode.id === "whack" || mode.id === "rocket" || mode.id === "bounty") {
         qs = mixByTopic(selectedEntries.map((entry, index) => [...(entry.questions ?? []), ...cardTaskBuckets[index]]));
       } else if (mode.id === "vault") {
         // Tagged with which selected topic each question came from (by TOPIC_OPTIONS value, looked
@@ -846,7 +1253,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
       // (e.g. Auction showing empty quotation marks, since `s.sentence` is undefined on a
       // speaking-task object) instead of a clear "no content" message. Confirmed live: this exact
       // bug hit Auction when a topic (comparatives_superlatives) had zero auctionSentences.
-      const CARDTASK_INCOMPATIBLE_MODES = new Set(["auction", "spy", "zombie", "hotseat", "hotpotato", "orderup"]);
+      const CARDTASK_INCOMPATIBLE_MODES = new Set(["auction", "spy", "zombie", "hotseat", "hotpotato", "orderup", "relay"]);
       if (qs.length === 0 && allCardTasks.length > 0 && !CARDTASK_INCOMPATIBLE_MODES.has(mode.id)) {
         qs = mixByTopic(cardTaskBuckets);
       }
@@ -858,6 +1265,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
       }
 
       setQuestions(isMixedSelection ? qs : shuffle(qs));
+      if (classSessionCode) broadcastClassActiveGame(mode.id);
       setScreen("game");
     } catch {
       setLoadError("An error occurred loading the game.");
@@ -886,11 +1294,17 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
   // GameProps.paused. Every other game is turn-based and has nothing running that needs a pause,
   // so the header button below only ever appears for those two.
   const [paused, setPaused] = useState(false);
+  const [soundEnabled, setSoundEnabledState] = useState(isSoundEnabled);
+  useEffect(() => onSoundEnabledChange(setSoundEnabledState), []);
 
   const handleGameEnd = () => {
     // The class's running scores persist either way; a naturally-finished game just has nothing
     // left to resume, so the in-progress snapshot gets cleared rather than left stale.
     if (activeClassId) clearProgress(activeClassId, teams).catch(() => {});
+    // Nothing playable on a checked-in phone until the next game starts — falls back to the
+    // "watch the shared screen" placeholder the instant gameplay ends, symmetric with startGame.
+    if (classSessionCode) broadcastClassActiveGame(null);
+    playSound("win");
     setConfetti(true);
     setScreen("results");
     setTimeout(() => setConfetti(false), 4000);
@@ -945,10 +1359,19 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
         </div>
         {/* Primary fork: "games or lesson plans" is the first real decision after login — both
             equally weighted (same size/padding/font-weight), distinguished only by which gradient
-            each uses, so neither reads as the "default" choice over the other. */}
+            each uses, so neither reads as the "default" choice over the other. Each gets a short
+            hint underneath (not on the button itself, so the button label stays scannable) telling
+            a new teacher what to actually expect time-wise before they click — the two paths take
+            genuinely different amounts of class time and this is the one place that says so. */}
         <div style={{ display: "flex", gap: "16px", justifyContent: "center", flexWrap: "wrap", marginBottom: "18px" }}>
-          <button onClick={() => { setActiveClassId(null); setScreen("topic-select"); }} style={{ background: `linear-gradient(135deg,${theme.cta[0]},${theme.cta[1]})`, color: "white", border: "none", borderRadius: "16px", padding: "18px 48px", fontSize: "20px", fontWeight: "900", cursor: "pointer", boxShadow: `0 8px 32px ${hexToRgba(theme.cta[1], 0.45)}`, letterSpacing: "0.01em", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "8px" }}><Icon name="rocket" size={20} /> Start a Game</button>
-          <button onClick={() => { setLessonPlanTopicId(null); setScreen("lessonplan"); }} style={{ background: `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "16px", padding: "18px 48px", fontSize: "20px", fontWeight: "900", cursor: "pointer", boxShadow: `0 8px 32px ${hexToRgba(theme.accent[1], 0.45)}`, letterSpacing: "0.01em", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "8px" }}><Icon name="school" size={20} /> Lesson Plans</button>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
+            <button onClick={() => { setActiveClassId(null); setActiveClassName(null); setPendingLessonTopicId(null); setScreen("topic-select"); }} style={{ background: `linear-gradient(135deg,${theme.cta[0]},${theme.cta[1]})`, color: "white", border: "none", borderRadius: "16px", padding: "18px 48px", fontSize: "20px", fontWeight: "900", cursor: "pointer", boxShadow: `0 8px 32px ${hexToRgba(theme.cta[1], 0.45)}`, letterSpacing: "0.01em", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "8px" }}><Icon name="rocket" size={20} /> Start a Game</button>
+            <span style={{ color: "rgba(255,255,255,0.65)", fontSize: "12.5px", fontWeight: "700" }}>Perfect for the last 30 minutes of class!</span>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
+            <button onClick={() => setScreen("lessonplan")} style={{ background: `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "16px", padding: "18px 48px", fontSize: "20px", fontWeight: "900", cursor: "pointer", boxShadow: `0 8px 32px ${hexToRgba(theme.accent[1], 0.45)}`, letterSpacing: "0.01em", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "8px" }}><Icon name="school" size={20} /> Lesson Plans</button>
+            <span style={{ color: "rgba(255,255,255,0.65)", fontSize: "12.5px", fontWeight: "700" }}>~30 min lesson + ~30 min playing</span>
+          </div>
         </div>
 
         {/* Secondary toolbar: one shared quiet pill (not 4-5 independent bordered buttons) so this
@@ -1023,34 +1446,73 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
         onBack={() => setScreen(learnReturnTo)}
         theme={theme}
         filterTopicIds={learnFilter ?? undefined}
-        onOpenLessonPlan={id => { setLessonPlanTopicId(id); setScreen("lessonplan"); }}
-        onOpenLessonPlanIndex={() => { setLessonPlanTopicId(null); setScreen("lessonplan"); }}
+        // Topic is already fixed (whatever lesson was open in Learn) before team-setup — same
+        // ordering as picking one from the Lesson Plan index below.
+        onOpenLessonPlan={id => { setPendingLessonTopicId(id); if (classSessionCode) closeClassSession(); setActiveClassId(null); setActiveClassName(null); setScreen("team-setup"); }}
+        onOpenLessonPlanIndex={() => { setPendingLessonTopicId(null); setScreen("lessonplan"); }}
       />
       <FeedbackButton />
       <BrandBadge isPaid={isPaid} />
     </>
   );
 
+  // Browsable index only — picking a topic here routes through team-setup (teams are required for
+  // every lesson) before the actual slideshow ("lessonplan-play" below) ever renders.
   if (screen === "lessonplan") return (
     <>
-      <LessonPlanScreen
-        onBack={() => setScreen("welcome")}
-        theme={theme}
-        initialTopicId={lessonPlanTopicId}
-        onOpenLearn={() => { setLearnFilter(null); setLearnReturnTo("welcome"); setScreen("learn"); }}
-        onPlayGameForTopic={(topicId) => {
-          setSelectedTopics([topicId]);
-          const opt = getTopicOption(topicId);
-          if (opt?.level) setLevel(opt.level);
-          if (opt?.focus) setFocus(opt.focus);
-          setActiveClassId(null);
-          setScreen("team-setup");
-        }}
-      />
+      <Sentry.ErrorBoundary fallback={<GameCrashFallback name="Lesson Plans" message="We've been notified. Try again, or head back to the welcome screen." buttonLabel="Back to Welcome" onBack={() => setScreen("welcome")} />}>
+        <Suspense fallback={<GameLoadingFallback name="Lesson Plans" />}>
+          <LessonPlanScreen
+            onBack={() => setScreen("welcome")}
+            theme={theme}
+            onOpenLearn={() => { setLearnFilter(null); setLearnReturnTo("welcome"); setScreen("learn"); }}
+            onSelectTopic={topicId => { setPendingLessonTopicId(topicId); setScreen("team-setup"); }}
+          />
+        </Suspense>
+      </Sentry.ErrorBoundary>
       <FeedbackButton />
       <BrandBadge isPaid={isPaid} />
     </>
   );
+
+  if (screen === "lessonplan-play") {
+    const pendingTopic = pendingLessonTopicId
+      ? LESSON_TOPICS.find(t => t.id === pendingLessonTopicId && LESSON_PLANS[t.id])
+      : undefined;
+    // Shouldn't normally happen (this screen is only ever reached via a topic already picked from
+    // the index or Learn), but stale/refreshed state should recover to the index rather than crash.
+    if (!pendingTopic) { setScreen("lessonplan"); return null; }
+    return (
+      <>
+        <Sentry.ErrorBoundary
+          key={pendingTopic.id}
+          fallback={<GameCrashFallback name={pendingTopic.lesson.title} message="We've been notified. Your teams are still safe — head back to the Lesson Plans list." buttonLabel="Back to Lesson Plans" onBack={() => { setPendingLessonTopicId(null); setScreen("lessonplan"); }} />}
+        >
+          <Suspense fallback={<GameLoadingFallback name={pendingTopic.lesson.title} />}>
+            <LessonPlanSlideshow
+              key={pendingTopic.id}
+              topic={pendingTopic}
+              theme={theme}
+              teams={teams}
+              onBack={() => { setPendingLessonTopicId(null); setScreen("lessonplan"); }}
+              onPlayGameForTopic={(topicId) => {
+                setSelectedTopics([topicId]);
+                const opt = getTopicOption(topicId);
+                if (opt?.level) setLevel(opt.level);
+                if (opt?.focus) setFocus(opt.focus);
+                // Teams were already picked for this lesson (team-setup ran on the way in) — carry
+                // them straight into game-select instead of asking again.
+                setPendingLessonTopicId(null);
+                setScreen("game-select");
+              }}
+            />
+          </Suspense>
+        </Sentry.ErrorBoundary>
+        <FeedbackButton />
+        <BrandBadge isPaid={isPaid} />
+      </>
+    );
+  }
 
   if (screen === "topic-select") {
     const filteredTopics = getFilteredTopicOptions(level, focus).filter(o => matchesTopicSearch(o.label, topicSearch));
@@ -1070,8 +1532,9 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     return (
       <div style={{ minHeight: "100vh", background: "#F0F9FF", padding: "clamp(10px,4vw,20px)", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
         {renderSavePicker()}
+        {renderClassCheckInBadge()}
         <div style={{ maxWidth: "720px", margin: "0 auto" }}>
-          <button onClick={() => { setActiveClassId(null); setScreen("welcome"); }} style={{ background: "none", border: `2px solid ${theme.accentSolid}`, color: theme.accentSolid, borderRadius: "10px", padding: "8px 16px", cursor: "pointer", fontWeight: "700", marginBottom: "20px", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px" }}><Icon name="back" size={13} /> Back</button>
+          <button onClick={() => { if (classSessionCode) closeClassSession(); setActiveClassId(null); setActiveClassName(null); setScreen("welcome"); }} style={{ background: "none", border: `2px solid ${theme.accentSolid}`, color: theme.accentSolid, borderRadius: "10px", padding: "8px 16px", cursor: "pointer", fontWeight: "700", marginBottom: "20px", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px" }}><Icon name="back" size={13} /> Back</button>
 
           <div style={{ textAlign: "center", marginBottom: "28px" }}>
             <h2 style={{ fontSize: "32px", fontWeight: "900", color: theme.heroBg[0], margin: 0, fontFamily: theme.headingFont, display: "flex", alignItems: "center", justifyContent: "center", gap: "10px" }}><Icon name="gear" size={28} /> Game Setup</h2>
@@ -1227,43 +1690,69 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
   if (screen === "team-setup") return (
     <div style={{ minHeight: "100vh", background: "#F0F9FF", padding: "clamp(10px,4vw,20px)", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
       {renderSavePicker()}
-      <div style={{ maxWidth: "900px", margin: "0 auto" }}>
-        <button onClick={() => setScreen("topic-select")} style={{ background: "none", border: `2px solid ${theme.accentSolid}`, color: theme.accentSolid, borderRadius: "10px", padding: "8px 16px", cursor: "pointer", fontWeight: "700", marginBottom: "20px", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px" }}><Icon name="back" size={13} /> Back</button>
+      <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
+        <button
+          onClick={() => setScreen(pendingLessonTopicId ? "lessonplan" : "topic-select")}
+          style={{ background: "none", border: `2px solid ${theme.accentSolid}`, color: theme.accentSolid, borderRadius: "10px", padding: "8px 16px", cursor: "pointer", fontWeight: "700", marginBottom: "20px", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px" }}
+        ><Icon name="back" size={13} /> Back</button>
 
         <div style={{ textAlign: "center", marginBottom: "28px" }}>
           <h2 style={{ fontSize: "32px", fontWeight: "900", color: theme.heroBg[0], margin: 0, fontFamily: theme.headingFont, display: "flex", alignItems: "center", justifyContent: "center", gap: "10px" }}><Icon name="people" size={28} /> Team Setup</h2>
           <p style={{ color: "#6B7280", marginTop: "8px" }}>Names, colors, and mascots for each team</p>
         </div>
 
-        <div style={{ background: "white", border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, borderRadius: "16px", padding: "clamp(14px,4vw,20px)", marginBottom: "16px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px", flexWrap: "wrap" }}>
-            <div style={{ fontWeight: "800", color: theme.heroBg[0], fontSize: "16px", fontFamily: theme.headingFont, flex: 1, minWidth: "140px" }}>How many teams?</div>
-            <button
-              onClick={handleSaveTeamsToRoster} disabled={rosterSaveStatus === "saving"}
-              title={activeClassId ? "Save these team names/colors/mascots to this class, without picking a topic or game" : "Pick or create a class to save these teams to"}
-              style={{
-                background: rosterSaveStatus === "saved" ? "#DCFCE7" : "none",
-                border: `2px solid ${rosterSaveStatus === "saved" ? "#22C55E" : "#D1D5DB"}`,
-                borderRadius: "20px", padding: "4px 14px", fontWeight: "700", fontSize: "12px",
-                color: rosterSaveStatus === "saved" ? "#166534" : "#9CA3AF",
-                cursor: rosterSaveStatus === "saving" ? "default" : "pointer", flexShrink: 0,
-                display: "inline-flex", alignItems: "center", gap: "5px",
-              }}
-            >
-              {rosterSaveStatus === "saving" ? "Saving…" : rosterSaveStatus === "saved" ? <><Icon name="check" size={12} /> Saved!</> : <><Icon name="save" size={12} /> Save teams to class</>}
-            </button>
-            <button onClick={() => resetTeamsToNormal()} title="0 points, no mascots, original colors and names" style={{ background: "none", border: "2px solid #D1D5DB", borderRadius: "20px", padding: "4px 14px", fontWeight: "700", fontSize: "12px", color: "#9CA3AF", cursor: "pointer", flexShrink: 0, display: "inline-flex", alignItems: "center", gap: "5px" }}><Icon name="refresh" size={12} /> Reset teams to normal</button>
-          </div>
-          {activeClassId && teamRoster.length > 0 && (
-            <div style={{ marginBottom: "14px" }}>
-              <div style={{ fontSize: "12px", fontWeight: "700", color: "#6B7280", marginBottom: "6px", display: "flex", alignItems: "center", gap: "5px" }}>
-                <Icon name="folder" size={13} /> Saved teams for this class — tap to bring in today
+        <style>{`
+          @keyframes ccSlideDown { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+          .cc-slide-drawer { animation: ccSlideDown 0.18s ease-out; transform-origin: top; }
+        `}</style>
+        <div style={{ display: "flex", gap: "16px", flexWrap: "wrap", marginBottom: "16px", alignItems: "flex-start" }}>
+          {/* Saved Teams panel — its own visually distinct section rather than a strip squeezed
+              into the top of the team-editor card. Three states: no class linked yet (a "start new
+              game vs. load game" style CTA), linked with an empty roster, or linked with saved
+              teams to tap in. */}
+          <div style={{ flex: "1 1 260px", minWidth: "240px", background: "white", border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, borderRadius: "16px", padding: "clamp(14px,4vw,20px)" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: activeClassId ? "2px" : "12px" }}>
+              <Icon name="folder" size={16} color={theme.accentSolid} />
+              <span style={{ fontWeight: "800", color: theme.heroBg[0], fontSize: "15px", fontFamily: theme.headingFont, flex: 1 }}>Saved Teams</span>
+              {activeClassId && (
+                <span style={{ fontSize: "11px", fontWeight: "700", color: rosterSaveStatus === "saving" ? "#9CA3AF" : "#166534", display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                  {rosterSaveStatus === "saving" ? "Saving…" : <><Icon name="check" size={10} /> Autosaved</>}
+                </span>
+              )}
+            </div>
+            {activeClassId && (
+              // Names which class is actually linked — otherwise a teacher moving fast between
+              // back-to-back classes has no way to tell (from this screen alone) whether they're
+              // still on the previous period's class before naming new teams into it. "Switch"
+              // reopens the same link picker so this isn't a one-way door once linked.
+              <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "12px", fontSize: "12px", color: "#6B7280" }}>
+                <span>Linked to <strong style={{ color: theme.heroBg[0] }}>{activeClassName ?? "this class"}</strong></span>
+                <button
+                  type="button"
+                  onClick={() => openSavePicker("link")}
+                  style={{ background: "none", border: "none", color: theme.accentSolid, fontWeight: "800", fontSize: "12px", cursor: "pointer", padding: 0, textDecoration: "underline" }}
+                >Switch</button>
               </div>
+            )}
+            {!activeClassId ? (
+              <div style={{ border: "2px dashed #93C5FD", borderRadius: "12px", padding: "16px", textAlign: "center" }}>
+                <p style={{ color: "#6B7280", fontSize: "13px", margin: "0 0 12px" }}>Link this session to a class to load its saved teams — like picking a save file.</p>
+                <button
+                  onClick={() => openSavePicker("link")}
+                  style={{ background: theme.accentSolid, color: "white", border: "none", borderRadius: "10px", padding: "9px 16px", fontWeight: "800", fontSize: "13px", cursor: "pointer", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px" }}
+                ><Icon name="folder" size={13} /> Load saved teams…</button>
+              </div>
+            ) : teamRoster.length === 0 ? (
+              <p style={{ color: "#9CA3AF", fontSize: "13px", fontStyle: "italic", margin: 0 }}>No saved teams yet for this class — name a team on the right and it'll be saved here automatically.</p>
+            ) : (
               <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
                 {teamRoster.map(entry => {
                   const isActive = isRosterTeamActive(entry);
                   const cap = isPaid ? 5 : FREE_PLAN_LIMITS.maxTeams;
-                  const locked = !isActive && numTeams >= cap;
+                  // Replacing the untouched defaults collapses down to 1 team rather than adding
+                  // on top of them, so it never actually needs extra capacity — only a genuine
+                  // append (teams already set up) should hit the plan cap.
+                  const locked = !isActive && numTeams >= cap && !teamsUntouched;
                   return (
                     <div key={entry.id} style={{ position: "relative" }}>
                       <button
@@ -1294,15 +1783,23 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
                   );
                 })}
               </div>
-            </div>
-          )}
+            )}
+            {renderClassLinkDrawer()}
+          </div>
+
+          {/* Team Editor panel */}
+          <div style={{ flex: "2 1 480px", minWidth: "280px", background: "white", border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, borderRadius: "16px", padding: "clamp(14px,4vw,20px)" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px", flexWrap: "wrap" }}>
+            <div style={{ fontWeight: "800", color: theme.heroBg[0], fontSize: "16px", fontFamily: theme.headingFont, flex: 1, minWidth: "140px" }}>How many teams?</div>
+            <button onClick={() => resetTeamsToNormal()} title="0 points, no mascots, original colors and names" style={{ background: "none", border: "2px solid #D1D5DB", borderRadius: "20px", padding: "4px 14px", fontWeight: "700", fontSize: "12px", color: "#9CA3AF", cursor: "pointer", flexShrink: 0, display: "inline-flex", alignItems: "center", gap: "5px" }}><Icon name="refresh" size={12} /> Reset teams to normal</button>
+          </div>
           <div style={{ display: "flex", gap: "10px", marginBottom: "16px", flexWrap: "wrap", alignItems: "center" }}>
             {[1, 2, 3, 4, 5].map(n => {
               const locked = !isPaid && n > FREE_PLAN_LIMITS.maxTeams;
               return (
                 <button
                   key={n}
-                  onClick={() => locked ? setScreen("billing") : setNumTeams(n)}
+                  onClick={() => { if (locked) { setScreen("billing"); return; } setNumTeams(n); }}
                   title={locked ? `Free plan is limited to ${FREE_PLAN_LIMITS.maxTeams} teams — upgrade to unlock more` : undefined}
                   style={{ background: numTeams === n ? theme.accentSolid : "white", color: numTeams === n ? "white" : locked ? "#9CA3AF" : "#374151", border: `3px solid ${numTeams === n ? theme.accentSolid : "#D1D5DB"}`, borderRadius: "12px", padding: "10px 24px", fontSize: "18px", fontWeight: "800", cursor: "pointer", opacity: locked ? 0.6 : 1, display: "inline-flex", alignItems: "center", gap: "5px" }}
                 >
@@ -1330,6 +1827,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
                       const next = [...teamNames];
                       next[i] = e.target.value;
                       setTeamNames(next);
+                      setTeamsUntouched(false);
                     }}
                     style={{
                       width: "100%",
@@ -1354,6 +1852,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
                           const next = [...teamColors];
                           next[i] = swatchIndex;
                           setTeamColors(next);
+                          setTeamsUntouched(false);
                         }}
                         title={swatch.name}
                         aria-label={`${teamNames[i] || `Team ${i + 1}`} color ${swatch.name}`}
@@ -1377,13 +1876,13 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
                       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(44px,1fr))", gap: "8px", marginBottom: "8px" }}>
                         <button
                           type="button" title="No mascot"
-                          onClick={() => { const next = [...teamMascots]; next[i] = null; setTeamMascots(next); setExpandedMascotTeam(null); }}
+                          onClick={() => { const next = [...teamMascots]; next[i] = null; setTeamMascots(next); setTeamsUntouched(false); setExpandedMascotTeam(null); }}
                           style={{ width: "44px", height: "44px", borderRadius: "10px", color: "#9CA3AF", background: teamMascots[i] == null ? "#F3F4F6" : "transparent", border: teamMascots[i] == null ? `2px solid ${color.bg}` : "1px solid #E5E7EB", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
                         ><Icon name="close" size={16} /></button>
                         {MASCOT_OPTIONS.map(m => (
                           <button
                             key={m} type="button" title={m}
-                            onClick={() => { const next = [...teamMascots]; next[i] = m; setTeamMascots(next); setExpandedMascotTeam(null); }}
+                            onClick={() => { const next = [...teamMascots]; next[i] = m; setTeamMascots(next); setTeamsUntouched(false); setExpandedMascotTeam(null); }}
                             style={{
                               width: "44px", height: "44px", borderRadius: "10px", cursor: "pointer",
                               background: teamMascots[i] === m ? color.light : "transparent",
@@ -1403,9 +1902,14 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
                       onClick={() => setExpandedMascotTeam(i)}
                       style={{ width: "100%", boxSizing: "border-box", background: "white", padding: "10px 12px", borderTop: `1px solid ${color.bg}20`, borderLeft: "none", borderRight: "none", borderBottom: "none", display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", textAlign: "left" }}
                     >
-                      {teamMascots[i] ? <MascotIcon name={MASCOT_ICON_BY_EMOJI[teamMascots[i]!]} size={24} /> : <Icon name="close" size={16} color="#9CA3AF" />}
+                      {/* teamMascots[i] can hold an emoji that's no longer a real key in
+                          MASCOT_ICON_BY_EMOJI (retired from MASCOT_OPTIONS with no compat entry
+                          added, or a roster entry saved under an older option set) — a teacher's
+                          already-saved data is never something to trust blindly, so this falls
+                          through to "No mascot" rather than crashing on an undefined lookup. */}
+                      {teamMascots[i] && MASCOT_ICON_BY_EMOJI[teamMascots[i]!] ? <MascotIcon name={MASCOT_ICON_BY_EMOJI[teamMascots[i]!]} size={24} /> : <Icon name="close" size={16} color="#9CA3AF" />}
                       <span style={{ fontSize: "13px", fontWeight: "700", color: "#374151", flex: 1 }}>
-                        {teamMascots[i] ? MASCOT_ICON_BY_EMOJI[teamMascots[i]!].replace(/^./, c => c.toUpperCase()) : "No mascot"}
+                        {teamMascots[i] && MASCOT_ICON_BY_EMOJI[teamMascots[i]!] ? MASCOT_ICON_BY_EMOJI[teamMascots[i]!].replace(/^./, c => c.toUpperCase()) : "No mascot"}
                       </span>
                       <span style={{ fontSize: "13px", fontWeight: "800", color: color.bg }}>Change</span>
                     </button>
@@ -1414,10 +1918,40 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
               );
             })}
           </div>
+          </div>
         </div>
 
+        {/* Class-linked sittings only (see the plan) — one persistent code for the whole class
+            period so students scan once and auto-follow every later game switch, instead of
+            re-scanning per game. Manual activation, shown once here — never a persistent badge on
+            later screens (a deliberate choice, not a gap to "fix"). */}
+        {activeClassId && (
+          <div style={{ marginBottom: "20px" }}>
+            {!classSessionCode ? (
+              <button onClick={handleStartClassCheckIn} style={{ width: "100%", background: "rgba(15,23,42,0.92)", color: theme.accentSolid, border: `2px solid ${theme.accentSolid}`, borderRadius: "16px", padding: "16px", fontSize: "16px", fontWeight: "900", cursor: "pointer", fontFamily: theme.headingFont, display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+                <Icon name="phone" size={18} /> Start Class Check-In
+              </button>
+            ) : (
+              <div>
+                <div style={{ fontSize: "13px", fontWeight: "700", color: "#374151", marginBottom: "10px", textAlign: "center" }}>
+                  Today's class code — have students scan or enter this once. They'll automatically follow along as you move between games this period.
+                </div>
+                <PhoneJoinPanel
+                  sessionCode={classSessionCode}
+                  joinUrl={`${window.location.origin}${window.location.pathname}?classJoin=${classSessionCode}`}
+                  teams={teams}
+                  connectedTeamIds={classConnectedTeamIds}
+                  accent={theme.accentSolid}
+                  panelBg="linear-gradient(160deg,#1E293B,#0F172A)"
+                  borderColor={`${theme.accentSolid}66`}
+                />
+              </div>
+            )}
+          </div>
+        )}
+
         <button onClick={handleSetup} style={{ width: "100%", background: `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "16px", padding: "18px", fontSize: "20px", fontWeight: "900", cursor: "pointer", fontFamily: theme.headingFont, display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
-          <Icon name="controller" size={20} /> Choose a Game!
+          {pendingLessonTopicId ? <><Icon name="school" size={20} /> Start Lesson</> : <><Icon name="controller" size={20} /> Choose a Game!</>}
         </button>
       </div>
       <FeedbackButton />
@@ -1428,6 +1962,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
   if (screen === "game-select") return (
     <div style={{ minHeight: "100vh", background: "#F0F9FF", padding: "20px", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
       {renderSavePicker()}
+      {renderClassCheckInBadge()}
       <div style={{ maxWidth: "760px", margin: "0 auto" }}>
 
         <div style={{ background: `linear-gradient(135deg,${theme.heroBg[0]},${theme.heroBg[2]})`, borderRadius: "20px", padding: "20px 24px", marginBottom: "20px", color: "white", position: "relative", overflow: "hidden" }}>
@@ -1498,39 +2033,18 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
           </button>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: "14px", marginTop: "20px" }}>
-          {GAME_MODES.map((g, i) => {
-            const isSpinLit = randomSpinIndex === i;
-            const tier = getGameTier(g.id);
-            return (
-              <div
-                key={g.id}
-                onClick={() => !loadingGame && randomSpinIndex === null && startGame(g)}
-                style={{
-                  background: isSpinLit ? `${g.color}1A` : "white",
-                  border: `3px solid ${g.color}`,
-                  borderRadius: "18px",
-                  padding: "20px",
-                  cursor: randomSpinIndex === null ? "pointer" : "default",
-                  transition: "transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease",
-                  transform: isSpinLit ? "scale(1.06)" : "scale(1)",
-                  boxShadow: isSpinLit ? `0 0 0 4px ${g.color}55, 0 10px 24px ${g.color}55` : "none"
-                }}
-              >
-                <div style={{ marginBottom: "10px" }}><IconBadge icon={GAME_ICONS[g.id]} color={g.color} size={52} /></div>
-                <div style={{ fontWeight: "900", fontSize: "17px", color: theme.heroBg[0], marginBottom: "4px", fontFamily: theme.headingFont }}>{g.name}</div>
-                <div style={{ fontSize: "13px", color: "#6B7280", marginBottom: "8px" }}>{g.desc}</div>
-                <div style={{ fontSize: "12px", color: g.color, fontWeight: "700", lineHeight: 1.4, borderTop: `1px solid ${g.color}33`, paddingTop: "8px", display: "flex", alignItems: "center", gap: "6px" }}>
-                  {tier && <span title={tier.label} style={{ width: "8px", height: "8px", borderRadius: "50%", background: tier.color, flexShrink: 0 }} />}
-                  <Icon name="mic" size={13} /> {g.tag}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        <PPPDiagram variant="compact" />
       </div>
+
+      {/* Games grouped by the job a teacher needs done (data/gameCategories.ts), each group with its
+          help-level dial in a box beside the cards — wider than the 760px column above so that box
+          has room. */}
+      <div style={{ maxWidth: "1120px", margin: "28px auto 0" }}>
+        <GameSelectPanel
+          theme={theme} loadingGame={loadingGame} randomSpinIndex={randomSpinIndex}
+          onPick={g => startGame(g)}
+        />
+      </div>
+      <div style={{ height: "50px" }} />
       <FeedbackButton />
       <BrandBadge isPaid={isPaid} />
     </div>
@@ -1544,6 +2058,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     return (
       <div ref={appRef} style={{ minHeight: "100vh", background: "#0F0A2E", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
         {renderSavePicker()}
+        {renderClassCheckInBadge()}
         <div style={{ background: `linear-gradient(90deg,${theme.accent[0]},${theme.accent[1]})`, padding: "12px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <h2 style={{ color: "white", margin: 0, fontSize: "20px", fontFamily: theme.headingFont, display: "flex", alignItems: "center", gap: "8px" }}><Icon name={GAME_ICONS[selectedGame.id]} size={20} color="white" /> {selectedGame.name}</h2>
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
@@ -1554,6 +2069,11 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
             >
               {saveStatus === "saving" ? "Saving…" : saveStatus === "saved" ? <><Icon name="check" size={13} /> Saved!</> : saveStatus === "error" ? <><Icon name="warning" size={13} /> Failed — try again</> : <><Icon name="save" size={13} /> Save & Exit</>}
             </button>
+            <button
+              onClick={() => setSoundEnabled(!soundEnabled)}
+              title={soundEnabled ? "Mute sound effects" : "Unmute sound effects"}
+              style={{ background: "rgba(255,255,255,0.15)", color: "white", border: "none", borderRadius: "8px", padding: "6px 12px", cursor: "pointer", fontWeight: "700", fontFamily: theme.headingFont }}
+            ><Icon name={soundEnabled ? "soundOn" : "soundOff"} size={13} /></button>
             <button onClick={toggleFullscreen} style={{ background: "rgba(255,255,255,0.15)", color: "white", border: "none", borderRadius: "8px", padding: "6px 12px", cursor: "pointer", fontWeight: "700", fontFamily: theme.headingFont }}><Icon name="fullscreen" size={13} /> Fullscreen</button>
             <button onClick={handleTopBarEndGame} style={{ background: "rgba(255,255,255,0.15)", color: "white", border: "none", borderRadius: "8px", padding: "6px 12px", cursor: "pointer", fontWeight: "700", fontFamily: theme.headingFont }}><Icon name="checkeredFlag" size={13} /> End Game</button>
           </div>
@@ -1561,21 +2081,30 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
         <div style={{ padding: "16px", maxWidth: "900px", margin: "0 auto" }}>
           <ScoreBoard teams={teams} headingFont={theme.headingFont} />
           <div style={{ background: "white", borderRadius: "20px", padding: "20px", marginTop: "16px" }}>
-            {selectedGame.id === "auction" && <AuctionGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-            {selectedGame.id === "minefield" && <MinefieldGame questions={[]} gridData={minefieldGridData} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-            {selectedGame.id === "hotseat" && <HotSeatGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-            {selectedGame.id === "spy" && <SpyAmongUsGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-            {selectedGame.id === "battleship" && <BattleshipGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-            {selectedGame.id === "vault" && <VaultHeistGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-            {selectedGame.id === "cards" && <CardShuffleGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-            {selectedGame.id === "castle" && <CastleGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-            {selectedGame.id === "hill" && <KingOfHillGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-            {selectedGame.id === "hotpotato" && <HotPotatoGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} level={hotPotatoLevel} />}
-            {selectedGame.id === "racetrack" && <RaceTrackGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-            {selectedGame.id === "whack" && <WordWhackGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-            {selectedGame.id === "rocket" && <RocketFuelGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-            {selectedGame.id === "zombie" && <ZombieSiegeGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} paused={paused} onTogglePause={() => setPaused(p => !p)} />}
-            {selectedGame.id === "orderup" && <OrderUpGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} level={orderUpLevel} paused={paused} onTogglePause={() => setPaused(p => !p)} />}
+            <Sentry.ErrorBoundary
+              key={selectedGame.id}
+              fallback={<GameCrashFallback name={selectedGame.name} message="We've been notified. Your teams and scores are still safe — pick a game to keep going." buttonLabel="Back to Choose a Game" onBack={() => setScreen("game-select")} />}
+            >
+            <Suspense fallback={<GameLoadingFallback name={selectedGame.name} />}>
+              {selectedGame.id === "auction" && <AuctionGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} presetPhoneSession={classSessionCode ? { code: classSessionCode } : undefined} />}
+              {selectedGame.id === "minefield" && <MinefieldGame questions={[]} gridData={minefieldGridData} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
+              {selectedGame.id === "hotseat" && <HotSeatGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} presetPhoneSession={classSessionCode ? { code: classSessionCode } : undefined} />}
+              {selectedGame.id === "relay" && <RelayGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} presetPhoneSession={classSessionCode ? { code: classSessionCode } : undefined} />}
+              {selectedGame.id === "spy" && <SpyAmongUsGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} presetPhoneSession={classSessionCode ? { code: classSessionCode } : undefined} />}
+              {selectedGame.id === "battleship" && <BattleshipGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
+              {selectedGame.id === "vault" && <VaultHeistGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
+              {selectedGame.id === "cards" && <CardShuffleGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
+              {selectedGame.id === "castle" && <CastleGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
+              {selectedGame.id === "hill" && <KingOfHillGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} presetPhoneSession={classSessionCode ? { code: classSessionCode } : undefined} />}
+              {selectedGame.id === "hotpotato" && <HotPotatoGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} level={hotPotatoLevel} />}
+              {selectedGame.id === "racetrack" && <RaceTrackGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} presetPhoneSession={classSessionCode ? { code: classSessionCode } : undefined} />}
+              {selectedGame.id === "whack" && <WordWhackGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} presetPhoneSession={classSessionCode ? { code: classSessionCode } : undefined} />}
+              {selectedGame.id === "rocket" && <RocketFuelGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
+              {selectedGame.id === "zombie" && <ZombieSiegeGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} paused={paused} onTogglePause={() => setPaused(p => !p)} />}
+              {selectedGame.id === "orderup" && <OrderUpGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} level={orderUpLevel} paused={paused} onTogglePause={() => setPaused(p => !p)} presetPhoneSession={classSessionCode ? { code: classSessionCode } : undefined} />}
+              {selectedGame.id === "bounty" && <BountyBoardGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} presetPhoneSession={classSessionCode ? { code: classSessionCode } : undefined} />}
+            </Suspense>
+            </Sentry.ErrorBoundary>
           </div>
         </div>
       </div>
@@ -1591,6 +2120,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     const headline = winners.length > 1 ? `${winners.map(w => w.name).join(" & ")} are tied for the lead!` : `${winners[0]?.name} is winning!`;
     return (
       <div style={{ minHeight: "100vh", background: `linear-gradient(135deg,${theme.heroBg[0]},${theme.heroBg[2]})`, padding: "20px", textAlign: "center", color: "white", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
+        {renderClassCheckInBadge()}
         <Confetti active={confetti} />
         <div style={{ fontSize: "80px", margin: "20px 0" }}>🏆</div>
         <h1 style={{ fontSize: "clamp(24px,5vw,40px)", fontWeight: "900", margin: "0 0 8px", fontFamily: theme.headingFont }}>Game Over!</h1>
@@ -1618,6 +2148,15 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
           )}
           <button onClick={() => setScreen("topic-select")} style={{ background: `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "14px", padding: "14px 28px", fontSize: "17px", fontWeight: "800", cursor: "pointer", fontFamily: theme.headingFont }}>📚 New Lesson</button>
         </div>
+        {/* Every other button here continues WITH whatever class is currently linked — nothing on
+            this screen otherwise gets a teacher back to "no class linked" once one is, so a
+            back-to-back class right after this one would otherwise have to go through it. Lower
+            visual weight (plain text, not a filled button) since it's the "leave" action, not a
+            "keep going" one. */}
+        <button
+          onClick={() => { if (classSessionCode) closeClassSession(); setActiveClassId(null); setActiveClassName(null); setScreen("welcome"); }}
+          style={{ background: "none", border: "none", color: "rgba(255,255,255,0.65)", fontWeight: "700", fontSize: "13px", cursor: "pointer", marginTop: "18px", textDecoration: "underline" }}
+        >Done with this class — back to Home</button>
         <FeedbackButton />
         <BrandBadge isPaid={isPaid} />
       </div>

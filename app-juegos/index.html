@@ -5,12 +5,31 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="google-site-verification" content="fNBUsLKoXxZfqDxV6hgIYE6xnbUry8LmT3c0FIeF7Ck" />
-    <meta name="description" content="ClassCade is a free classroom game website for English teachers. Pick a level (A1-C1) and topic, then play one of 15 competitive team-based games built around grammar, vocabulary, and theme content — with matching Learn lessons for every topic." />
+    <meta name="theme-color" content="#0C1E3D" />
+    <!-- Every screen has its own fixed colours (white cards, navy/sky gradients, amber buttons). Without
+         this, a phone browser's automatic dark mode inverts them into dark grey cards and dark red
+         buttons. "only light" opts the whole site out of that. -->
+    <meta name="color-scheme" content="only light" />
+    <link rel="canonical" href="https://www.playclasscade.com/" />
+    <meta name="description" content="ClassCade is a free classroom game website for English teachers. Pick a level (A1-C1) and topic, then play one of 17 competitive team-based games built around grammar, vocabulary, and theme content — with matching Learn lessons for every topic." />
     <meta property="og:title" content="ClassCade — Classroom English Games" />
     <meta property="og:description" content="Free competitive team games for ESL classrooms, built around grammar, vocabulary, and theme topics from A1 to C1." />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://www.playclasscade.com/" />
-    <title>ClassCade</title>
+    <meta property="og:site_name" content="ClassCade" />
+    <!-- Static and shared across every route — this is a client-rendered SPA with no server-side
+         templating, so link-preview crawlers (Facebook, Slack, Discord, iMessage...) that don't
+         execute JS always see this one image/title/description, whichever page was actually
+         shared. Per-route <title> and meta description DO update at runtime (see lib/pageMeta.ts
+         and the document.title-per-screen pattern) for Google's own crawler, which does run JS. -->
+    <meta property="og:image" content="https://www.playclasscade.com/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="ClassCade — Classroom English Games" />
+    <meta name="twitter:description" content="Free competitive team games for ESL classrooms, built around grammar, vocabulary, and theme topics from A1 to C1." />
+    <meta name="twitter:image" content="https://www.playclasscade.com/og-image.png" />
+    <title>ClassCade — ESL Classroom Games & Grammar Lessons (A1-C1)</title>
   </head>
   <body>
     <div id="root"></div>

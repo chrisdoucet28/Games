@@ -1,21 +1,26 @@
 // One-off batch script: generates any Lesson Plans "Real-World Reading" audio clip that doesn't
-// already exist at public/audio/real-world/, via the ElevenLabs text-to-speech API. Not run
+// already have an audioUrl in REAL_WORLD_READINGS, via the ElevenLabs text-to-speech API. Not run
 // automatically (no npm lifecycle hook) — costs API quota, so run manually only when adding new
 // real-world-reading content:
 //   npx tsx scripts/generate-real-world-audio.ts
 // Pass --force to regenerate every clip instead (e.g. after changing a voice), even ones that
-// already exist — otherwise existing clips are left untouched, so it's safe to re-run repeatedly
-// as more topics get authored, or after switching to a different ELEVENLABS_API_KEY (e.g. a
-// second account) partway through a big batch, without re-spending quota on what's already done.
-// Processes earlier levels before later ones, and within a level, grammar-focus topics before
-// vocabulary/theme ones (see priorityKey) — so a partial run driven by limited quota always
-// covers the most-used content first, not just whatever happens to sit earliest in the file.
-// Needs an ELEVENLABS_API_KEY in app-juegos/.env (git-ignored, never commit it).
-import { readFileSync, writeFileSync, existsSync, unlinkSync, readdirSync } from "node:fs";
+// already have an audioUrl — otherwise existing clips are left untouched, so it's safe to re-run
+// repeatedly as more topics get authored, or after switching to a different ELEVENLABS_API_KEY
+// (e.g. a second account) partway through a big batch, without re-spending quota on what's
+// already done. Processes earlier levels before later ones, and within a level, grammar-focus
+// topics before vocabulary/theme ones (see priorityKey) — so a partial run driven by limited
+// quota always covers the most-used content first, not just whatever happens to sit earliest in
+// the file. Needs an ELEVENLABS_API_KEY in app-juegos/.env (git-ignored, never commit it).
+//
+// Writes clips to public/audio/real-world/ (git-ignored — transient local staging only). After a
+// run, upload the new clips with scripts/upload-media-to-blob.ts and paste the printed URLs into
+// the matching audioUrl fields in src/data/realWorldReadings.ts by hand — same two-step flow as
+// adding a new music track (see the MEDIA_BASE comment in src/lib/music.ts).
+import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import { REAL_WORLD_READINGS } from "../src/data/realWorldReadings.ts";
-import { TOPIC_OPTIONS } from "../src/data/topics.ts";
+import { TOPIC_OPTIONS } from "../src/data/topicOptions.ts";
 
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 const AUDIO_DIR = path.join(ROOT, "public", "audio", "real-world");
@@ -89,7 +94,7 @@ async function main() {
   const force = process.argv.includes("--force");
   const apiKey = loadApiKey();
   const allEntries = Object.entries(REAL_WORLD_READINGS);
-  const entries = force ? allEntries : allEntries.filter(([id]) => !existsSync(path.join(AUDIO_DIR, `${id}.mp3`)));
+  const entries = force ? allEntries : allEntries.filter(([, r]) => !r.audioUrl);
   entries.sort((a, b) => {
     const [al, af] = priorityKey(a[0]);
     const [bl, bf] = priorityKey(b[0]);
@@ -115,15 +120,7 @@ async function main() {
     await new Promise(res => setTimeout(res, 250));
   }
 
-  // Clean up any stale file (e.g. a topic renamed/removed since the last run) — only on a full run.
-  if (force || skipped === 0) {
-    const validNames = new Set(Object.keys(REAL_WORLD_READINGS).map(id => `${id}.mp3`));
-    for (const file of readdirSync(AUDIO_DIR)) {
-      if (!validNames.has(file)) unlinkSync(path.join(AUDIO_DIR, file));
-    }
-  }
-
-  console.log("Done.");
+  console.log(`Done. Now run: npx tsx scripts/upload-media-to-blob.ts`);
 }
 
 main().catch(err => {

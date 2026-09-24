@@ -234,6 +234,23 @@ handout) with no guarantee they've seen any other specific lesson first.
   in-game UI showed "SPEAKING PROMPT" / "Open response — teacher listens and judges" — neither
   belonged there. Same fix as the Minefield rule above: this conversation authors every new
   topic's `cardTasks`, so check every single task against both rules before moving on, every time.
+- **`choose correct grammar` items must end in a trailing `(option1/option2)` group — non-
+  negotiable, check on every single new topic**: Word Whack (`useMoleGame.ts`'s `parseChoices`)
+  extracts a topic's mole-whacking choices by regex from the very end of the `question` string —
+  it requires the text to end with a parenthesized, slash-separated list of 2-4 options (e.g.
+  `"'The homework must ___ finished by Friday.' (must be/must been/must being)"`), with `answer`
+  matching one of those options exactly (case-insensitive). Every other game that reads this same
+  question type (RaceTrack, Castle, LessonPlanScreen) just displays it as plain text for a teacher
+  to judge aloud, so a topic authored with a different phrasing (e.g. `"Which is correct? 'X.' /
+  'Y.'"`, answer = the full sentence) looks completely fine everywhere else in the app — the
+  breakage only surfaces the moment a teacher picks that topic for Word Whack specifically, where
+  it silently yields zero parseable items and the game shows "No multiple-choice content found for
+  this topic selection." Caught live: `basic_word_order` had all 20 of its `choose correct
+  grammar` items in the alternate full-sentence format, so Word Whack couldn't spawn a single mole
+  for it. Fixed by rewriting every item to the blank + `(a/b)` convention; a scripted sweep of all
+  135 topics against Word Whack's actual parsing logic confirmed it was the only offender — but
+  since nothing else in the app would ever catch a repeat of this, verify the format by eye (or
+  with a quick parse check) for every new topic's `choose correct grammar` pool before moving on.
 - **"How to Play" tutorials (`data/tutorials/*.tsx`)**: each game's intro screen has a How to
   Play button opening a scripted walkthrough (`components/shared/HowToPlayModal.tsx`) — hand-authored
   mockups, not driven by real game state, so nothing keeps them in sync with the actual game

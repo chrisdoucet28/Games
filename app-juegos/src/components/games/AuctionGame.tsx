@@ -12,6 +12,8 @@ import { MASCOT_ICON_BY_EMOJI } from "../shared/TeamIcon";
 import { MascotIcon } from "../shared/MascotArt";
 import { Icon, type IconName } from "../shared/Icon";
 import { AUCTION_TUTORIAL_STEPS } from "../../data/tutorials/auction";
+import { playSound } from "../../lib/sounds";
+import { setMusicContext, setMusicGame, stopMusic } from "../../lib/music";
 import {
   generateSessionCode, openAuctionChannel, closeChannel,
   type AuctionStatePayload, type AuctionBetPayload, type AuctionResultInfo,
@@ -52,8 +54,8 @@ const STYLE_TAG = (
     @keyframes coinFall{0%{transform:translateY(-6px) rotate(0deg);opacity:1}100%{transform:translateY(64px) rotate(200deg);opacity:0}}
     @keyframes ribbonPop{0%{transform:rotate(35deg) scale(0)}70%{transform:rotate(35deg) scale(1.15)}100%{transform:rotate(35deg) scale(1)}}
     @keyframes cardIn{0%{opacity:0;transform:translateY(10px) scale(0.96)}100%{opacity:1;transform:translateY(0) scale(1)}}
-    .auction-btn:hover:not(:disabled){transform:translateY(-2px) scale(1.02);filter:brightness(1.08)}
-    .auction-btn:active:not(:disabled){transform:translateY(0) scale(0.97)}
+    .auction-btn:hover:not(:disabled){filter:brightness(1.08)}
+    .auction-btn:active:not(:disabled){transform:translate(4px,4px) !important;box-shadow:0 0 0 #1A1A2E !important}
     .auction-allin:hover{box-shadow:0 0 14px #F9731688}
   `}</style>
 );
@@ -129,7 +131,7 @@ function PhoneModeWaitingRoom({ teams, bets, connectedTeamIds, isBroke, allBetsP
           else if (!connected) { statusLabel = <><Icon name="sleep" size={12} /> Not connected</>; statusColor = "#6B7280"; }
           else if (locked) { statusLabel = <><Icon name="lock" size={12} /> Locked in</>; statusColor = "#4ADE80"; }
           return (
-            <div key={t.id} style={{ background: `linear-gradient(160deg,${t.color.dark}44,#150C28)`, border: `2px solid ${t.color.bg}`, borderRadius: "16px", padding: "14px", textAlign: "center" }}>
+            <div key={t.id} style={{ background: t.color.dark, border: "2px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E", borderRadius: "16px", padding: "14px", textAlign: "center" }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", marginBottom: "8px" }}>
                 <MascotAvatar mascot={t.mascot} color={t.color.bg} />
                 <span style={{ fontWeight: "900", color: "white", fontSize: "15px" }}>{t.name}</span>
@@ -143,17 +145,17 @@ function PhoneModeWaitingRoom({ teams, bets, connectedTeamIds, isBroke, allBetsP
         {activeTeamsEmpty ? (
           <button onClick={onReveal} className="auction-btn" style={{
             display: "inline-flex", alignItems: "center", gap: "8px",
-            background: "linear-gradient(135deg,#4C1D95,#7C3AED)", color: "white", border: "none", borderRadius: "14px",
-            padding: "14px 36px", fontSize: "17px", fontWeight: "900", cursor: "pointer", transition: "transform 0.15s ease"
+            background: "#7C3AED", color: "white", border: "3px solid #1A1A2E", borderRadius: "14px",
+            padding: "14px 36px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "5px 5px 0 #1A1A2E"
           }}><Icon name="next" size={18} /> Skip to Revival Round</button>
         ) : (
           <>
             <button onClick={onReveal} disabled={!allBetsPlaced} className="auction-btn" style={{
               display: "inline-flex", alignItems: "center", gap: "8px",
-              background: allBetsPlaced ? "linear-gradient(135deg,#78350F,#F7C948)" : "#4B5563",
-              color: allBetsPlaced ? "#150F00" : "#9CA3AF", border: "none", borderRadius: "14px",
-              padding: "14px 36px", fontSize: "17px", fontWeight: "900", transition: "transform 0.15s ease",
-              cursor: allBetsPlaced ? "pointer" : "not-allowed"
+              background: allBetsPlaced ? "#F7C948" : "#4B5563",
+              color: allBetsPlaced ? "#150F00" : "#9CA3AF", border: "3px solid #1A1A2E", borderRadius: "14px",
+              padding: "14px 36px", fontSize: "17px", fontWeight: "900",
+              cursor: allBetsPlaced ? "pointer" : "not-allowed", boxShadow: allBetsPlaced ? "5px 5px 0 #1A1A2E" : "none"
             }}><Icon name="hammer" size={18} /> Reveal Answer</button>
             {!allBetsPlaced && <p style={{ color: "#9CA3AF", fontSize: "13px", marginTop: "8px" }}>Waiting for all connected teams to lock in their bet</p>}
           </>
@@ -179,7 +181,7 @@ function validateAuctionSnapshot(raw: unknown, questionCount: number): AuctionSn
   return { qi: s.qi, auctionBank: s.auctionBank, roundsWon: s.roundsWon ?? {} };
 }
 
-export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState }: GameProps) {
+export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState, presetPhoneSession }: GameProps) {
   const AUCTION_START = 200;
   const BET_AMOUNTS = [25, 50, 100];
 
@@ -187,6 +189,19 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
 
   const [qi, setQi] = useState(() => resumed?.qi ?? 0);
   const [phase, setPhase] = useState<"intro" | "betting" | "result" | "final">(resumed ? "betting" : "intro");
+  // No shared countdown hook here (Auction runs its own betting-window timing per phone/screen
+  // mode), so this game needs its own tension cue for "teams are actively deciding" — same
+  // context useTurnTimer sets for the games that do use it.
+  useEffect(() => {
+    if (phase === "betting") setMusicContext("tension");
+    return () => setMusicContext("gameplay");
+  }, [phase === "betting"]);
+  // Auction has its own Suno-made gameplay/tension tracks (official bidding-hall energy, not the
+  // shared chillout/funk pair) — see GAME_OVERRIDES in lib/music.ts.
+  useEffect(() => {
+    setMusicGame("auction");
+    return () => setMusicGame(null);
+  }, []);
   const [showHowTo, setShowHowTo] = useState(false);
   const [bets, setBets] = useState<Record<string | number, Bet>>({});
   const [resultMsg, setResultMsg] = useState<ResultMsg[]>([]);
@@ -201,9 +216,9 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
 
   // "Play on Phones" mode — always defaults to screen, even on Resume (see the note on the intro
   // toggle below for why a resumed game intentionally never reopens a phone session).
-  const [inputMode, setInputMode] = useState<"screen" | "phone">("screen");
+  const [inputMode, setInputMode] = useState<"screen" | "phone">(presetPhoneSession ? "phone" : "screen");
   const [introStep, setIntroStep] = useState<"setup" | "qr">("setup");
-  const [sessionCode, setSessionCode] = useState<string | null>(null);
+  const [sessionCode, setSessionCode] = useState<string | null>(presetPhoneSession?.code ?? null);
   const [connectedTeamIds, setConnectedTeamIds] = useState<Set<string | number>>(new Set());
   const channelRef = useRef<RealtimeChannel | null>(null);
 
@@ -318,7 +333,10 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
     hasFlushedBankRef.current = true;
     teams.forEach(t => {
       const bank = auctionBankRef.current[t.id] ?? 0;
-      if (bank > 0) onUpdateScore(t.id, bank);
+      // Silent: this is a final bank tally, not a single correct answer — each round's own bet
+      // already resolved with the gavel-bang reveal. Unsilenced, every team's flush stacked a
+      // "correct" chime right on top of the roundComplete sting that follows immediately after.
+      if (bank > 0) onUpdateScore(t.id, bank, { silent: true });
     });
   }, [teams, onUpdateScore]);
 
@@ -327,6 +345,13 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
     if (forceFinalRef) forceFinalRef.current = null;
     onEnd();
   }, [flushBankToScores, forceFinalRef, onEnd]);
+
+  // The game's own final screen deserves the same celebratory cue as the shared app-level results
+  // screen — a teacher sees this one first, and reaching it is just as much "the game is over" as
+  // the later shared screen is.
+  useEffect(() => {
+    if (phase === "final") { playSound("roundComplete"); stopMusic(); }
+  }, [phase]);
 
   useEffect(() => {
     if (!forceFinalRef) return;
@@ -369,6 +394,9 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
   });
 
   const resolveRound = () => {
+    // The gavel bang — every other Tier 2 sound fires on a single team's moment, but this is the
+    // one shared "the sentence is revealed" beat every team is watching for at once.
+    playSound("auction");
     const msgs: ResultMsg[] = [];
     const brokeThisRound = new Set<string | number>();
     const newBank = { ...auctionBank };
@@ -447,12 +475,15 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
         </div>
         <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "24px" }}>
           {teams.map(t => (
-            <div key={t.id} style={{ display: "flex", alignItems: "center", gap: "8px", background: `linear-gradient(160deg,${t.color.dark}55,#1E1033)`, border: `2px solid ${t.color.bg}`, borderRadius: "14px", padding: "8px 18px 8px 10px", fontWeight: "800", fontSize: "14px", color: "white" }}>
+            <div key={t.id} style={{ display: "flex", alignItems: "center", gap: "8px", background: t.color.dark, border: "2px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E", borderRadius: "14px", padding: "8px 18px 8px 10px", fontWeight: "800", fontSize: "14px", color: "white" }}>
               <MascotAvatar mascot={t.mascot} color={t.color.bg} />
               {t.name}
             </div>
           ))}
         </div>
+        {/* Skipped entirely for a Class Check-In sitting — presetPhoneSession already picked
+            phone mode and its code, and the class-level QR already covered joining. */}
+        {!presetPhoneSession && <>
         {introStep === "setup" && (
           <div style={{ marginBottom: "20px" }}>
             <div style={{ fontSize: "13px", color: "#C4B5FD", fontWeight: "700", marginBottom: "10px" }}>How will teams place their bets?</div>
@@ -489,8 +520,9 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
             />
           );
         })()}
+        </>}
 
-        <button onClick={() => setShowHowTo(true)} style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginBottom: "14px", background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
+        <button onClick={() => setShowHowTo(true)} style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginBottom: "14px", background: "white", color: GM.color, border: "3px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
           <Icon name="help" size={15} /> How to Play
         </button>
         {showHowTo && (
@@ -500,7 +532,7 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
             onClose={() => setShowHowTo(false)}
           />
         )}
-        <button onClick={() => setPhase("betting")} className="auction-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg,#78350F,#F7C948)", color: "#150F00", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(247,201,72,0.4)", transition: "transform 0.15s ease" }}>
+        <button onClick={() => setPhase("betting")} className="auction-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#F7C948", color: "#150F00", border: "3px solid #1A1A2E", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "6px 6px 0 #1A1A2E" }}>
           <Icon name="hammer" size={20} /> Start the Auction!
         </button>
       </div>
@@ -528,7 +560,7 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
           <div style={{ fontWeight: "900", fontSize: "22px", color: "#FCD34D", marginBottom: "16px" }}>{headline}</div>
           <div style={{ display: "grid", gridTemplateColumns: teamsGridCols(teams.length), gap: "10px", margin: "0 auto 20px", maxWidth: "760px" }}>
             {ranking.map(({ item: t, rank, value }) => (
-              <div key={t.id} style={{ background: `linear-gradient(160deg,${t.color.dark}55,#1E1033)`, border: `2px solid ${t.color.bg}`, borderRadius: "14px", padding: "12px" }}>
+              <div key={t.id} style={{ background: t.color.dark, border: "2px solid #1A1A2E", boxShadow: "4px 4px 0 #1A1A2E", borderRadius: "14px", padding: "12px" }}>
                 <div><RankBadge rank={rank} size={22} /></div>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", marginTop: "4px" }}>
                   <MascotAvatar mascot={t.mascot} color={t.color.bg} size={24} />
@@ -542,7 +574,7 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
               </div>
             ))}
           </div>
-          <button onClick={flushAndEnd} className="auction-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg,#78350F,#F7C948)", color: "#150F00", border: "none", borderRadius: "14px", padding: "14px 36px", fontSize: "17px", fontWeight: "900", cursor: "pointer", transition: "transform 0.15s ease" }}><Icon name="checkeredFlag" size={18} /> End Game</button>
+          <button onClick={flushAndEnd} className="auction-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#F7C948", color: "#150F00", border: "3px solid #1A1A2E", borderRadius: "14px", padding: "14px 36px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "5px 5px 0 #1A1A2E" }}><Icon name="checkeredFlag" size={18} /> End Game</button>
         </div>
       </div>
     );
@@ -552,7 +584,10 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
     <div style={arenaStyle}>
       <AmbientBackdrop />
       {STYLE_TAG}
-      {inputMode === "phone" && sessionCode && (
+      {/* Suppressed for a Class Check-In sitting — the class-level badge (LessonGamesGenerator.tsx's
+          renderClassCheckInBadge) is the only floating reconnect button shown then, and it's the
+          only one pointing at the right (class, not per-game) join URL. */}
+      {inputMode === "phone" && sessionCode && !presetPhoneSession && (
         <PhoneReconnectBadge
           sessionCode={sessionCode} joinUrl={`${window.location.origin}${window.location.pathname}?join=${sessionCode}`}
           teams={teams} connectedTeamIds={connectedTeamIds}
@@ -560,7 +595,7 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
         />
       )}
       <div style={{ position: "relative", zIndex: 1 }}>
-        <div style={{ position: "relative", background: "linear-gradient(160deg,#3B0764,#1E1033)", border: "2px solid #FCD34D55", borderRadius: "18px", padding: "22px 24px", marginBottom: "18px", textAlign: "center", boxShadow: "0 0 40px rgba(124,58,237,0.35)", overflow: "hidden" }}>
+        <div style={{ position: "relative", background: "#3B0764", border: "3px solid #1A1A2E", borderRadius: "18px", padding: "22px 24px", marginBottom: "18px", textAlign: "center", boxShadow: "5px 5px 0 #1A1A2E", overflow: "hidden" }}>
           <div style={{ position: "absolute", top: "-60px", left: "50%", transform: "translateX(-50%)", width: "260px", height: "200px", background: "radial-gradient(ellipse at 50% 0%,rgba(253,224,71,0.22),transparent 70%)", animation: "spotlightPulse 3s ease-in-out infinite" }} />
           <div style={{ position: "relative", display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
             <span style={{ background: "rgba(253,224,71,0.15)", border: "1px solid #FCD34D55", color: "#FCD34D", padding: "3px 12px", borderRadius: "20px", fontSize: "12px", fontWeight: "700", display: "inline-flex", alignItems: "center", gap: "5px" }}><Icon name="hammer" size={12} /> Lot №{qi + 1} of {questions.length}</span>
@@ -663,18 +698,18 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
                   <p style={{ color: "#C4B5FD", fontSize: "13px", marginBottom: "8px" }}>All teams are out — proceed to next round!</p>
                   <button onClick={resolveRound} className="auction-btn" style={{
                     display: "inline-flex", alignItems: "center", gap: "8px",
-                    background: "linear-gradient(135deg,#4C1D95,#7C3AED)", color: "white", border: "none", borderRadius: "14px",
-                    padding: "14px 36px", fontSize: "17px", fontWeight: "900", cursor: "pointer", transition: "transform 0.15s ease"
+                    background: "#7C3AED", color: "white", border: "3px solid #1A1A2E", borderRadius: "14px",
+                    padding: "14px 36px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "5px 5px 0 #1A1A2E"
                   }}><Icon name="next" size={18} /> Skip to Revival Round</button>
                 </>
               ) : (
                 <>
                   <button onClick={resolveRound} disabled={!allBetsPlaced} className="auction-btn" style={{
                     display: "inline-flex", alignItems: "center", gap: "8px",
-                    background: allBetsPlaced ? "linear-gradient(135deg,#78350F,#F7C948)" : "#4B5563",
-                    color: allBetsPlaced ? "#150F00" : "#9CA3AF", border: "none", borderRadius: "14px",
-                    padding: "14px 36px", fontSize: "17px", fontWeight: "900", transition: "transform 0.15s ease",
-                    cursor: allBetsPlaced ? "pointer" : "not-allowed"
+                    background: allBetsPlaced ? "#F7C948" : "#4B5563",
+                    color: allBetsPlaced ? "#150F00" : "#9CA3AF", border: "3px solid #1A1A2E", borderRadius: "14px",
+                    padding: "14px 36px", fontSize: "17px", fontWeight: "900",
+                    cursor: allBetsPlaced ? "pointer" : "not-allowed", boxShadow: allBetsPlaced ? "5px 5px 0 #1A1A2E" : "none"
                   }}><Icon name="hammer" size={18} /> Reveal Answer</button>
                   {!allBetsPlaced && <p style={{ color: "#9CA3AF", fontSize: "13px", marginTop: "8px" }}>All active teams must pick TRUE/FALSE and a bet amount</p>}
                 </>
@@ -686,10 +721,10 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
         {phase === "result" && (
           <div key={qi}>
             <div style={{
-              position: "relative", background: s.isCorrect ? "linear-gradient(160deg,#052E16,#0A0A18)" : "linear-gradient(160deg,#450A0A,#0A0A18)",
+              position: "relative", background: s.isCorrect ? "#052E16" : "#450A0A",
               border: `3px solid ${s.isCorrect ? "#22C55E" : "#EF4444"}`,
               borderRadius: "18px", padding: "18px 20px", textAlign: "center", marginBottom: "16px", overflow: "hidden",
-              boxShadow: `0 0 30px ${s.isCorrect ? "#22C55E33" : "#EF444433"}`,
+              boxShadow: `5px 5px 0 ${s.isCorrect ? "#22C55E" : "#EF4444"}`,
             }}>
               <div style={{ display: "inline-block", transformOrigin: "80% 90%", animation: "gavelSwing 0.6s ease-out" }}><Icon name="hammer" size={40} /></div>
               <div>
@@ -719,7 +754,7 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
 
                 if (r.satOut) {
                   return (
-                    <div key={r.teamId} style={{ background: "linear-gradient(160deg,#1F1B2E,#120E1E)", border: "3px solid #4B5563", borderRadius: "14px", padding: "12px", textAlign: "center", opacity: 0.85 }}>
+                    <div key={r.teamId} style={{ background: "#1F1B2E", border: "3px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E", borderRadius: "14px", padding: "12px", textAlign: "center", opacity: 0.85 }}>
                       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", marginBottom: "6px" }}>
                         <MascotAvatar mascot={t.mascot} color="#6B7280" size={24} />
                         <span style={{ fontWeight: "900", fontSize: "15px", color: "#D1D5DB" }}>{t.name}</span>
@@ -734,8 +769,9 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
                 return (
                   <div key={r.teamId} style={{
                     position: "relative", overflow: "hidden",
-                    background: r.won ? "linear-gradient(160deg,#052E16,#0A0A18)" : "linear-gradient(160deg,#450A0A,#0A0A18)",
+                    background: r.won ? "#052E16" : "#450A0A",
                     border: `3px solid ${r.won ? "#22C55E" : "#EF4444"}`,
+                    boxShadow: `3px 3px 0 ${r.won ? "#22C55E" : "#EF4444"}`,
                     borderRadius: "14px", padding: "12px", textAlign: "center",
                   }}>
                     {r.won && Array.from({ length: 5 }).map((_, i) => (
@@ -764,8 +800,8 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
             <div style={{ textAlign: "center" }}>
               <button onClick={nextRound} className="auction-btn" style={{
                 display: "inline-flex", alignItems: "center", gap: "8px",
-                background: "linear-gradient(135deg,#78350F,#F7C948)", color: "#150F00", border: "none",
-                borderRadius: "14px", padding: "14px 36px", fontSize: "17px", fontWeight: "900", cursor: "pointer", transition: "transform 0.15s ease"
+                background: "#F7C948", color: "#150F00", border: "3px solid #1A1A2E",
+                borderRadius: "14px", padding: "14px 36px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "5px 5px 0 #1A1A2E"
               }}>{qi + 1 >= questions.length ? <><Icon name="trophy" size={18} /> See Final Results</> : <><Icon name="next" size={18} /> Next Sentence</>}</button>
             </div>
           </div>

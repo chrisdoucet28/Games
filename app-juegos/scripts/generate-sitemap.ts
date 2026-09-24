@@ -14,6 +14,8 @@ const SITE = "https://www.playclasscade.com";
 const STATIC_URLS: { loc: string; changefreq: string; priority: string }[] = [
   { loc: "/", changefreq: "weekly", priority: "1.0" },
   { loc: "/learn", changefreq: "weekly", priority: "0.8" },
+  { loc: "/practice", changefreq: "weekly", priority: "0.7" },
+  { loc: "/about", changefreq: "monthly", priority: "0.5" },
   { loc: "/privacy", changefreq: "yearly", priority: "0.3" },
   { loc: "/terms", changefreq: "yearly", priority: "0.3" },
 ];

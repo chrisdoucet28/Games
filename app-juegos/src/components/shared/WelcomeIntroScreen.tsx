@@ -2,6 +2,8 @@ import { useEffect } from "react";
 import { updateProfile } from "../../lib/profile";
 import { hexToRgba, type Theme } from "../../data/themes";
 import { Icon, type IconName } from "./Icon";
+import { setMusicContext } from "../../lib/music";
+import { GAME_MODES } from "../../data/constants";
 
 // Shown once, the very first time an account clears the login gate — the one app-level "here's
 // how this works" moment that exists (every other explanation is scoped to a single game's own
@@ -15,15 +17,22 @@ type Props = {
   onDismiss: (goTo?: "learn") => void;
 };
 
-const STEPS: { icon: IconName; title: string; body: string }[] = [
-  { icon: "chart", title: "Pick a level & topic", body: "Filter by A1-C1 and grammar, vocabulary, or themes, then choose one or more topics to play with." },
-  { icon: "trophy", title: "Set up teams", body: "Name your teams, or just use the ready-made defaults — no setup required to jump straight in." },
-  { icon: "controller", title: "Play a game", body: "15 competitive game modes, from silent judgment calls to full spoken sentences — every one built around your chosen topics." },
+// Two genuinely different entry points, not sequential steps — a teacher picks whichever fits
+// today's lesson, so this is framed as a fork (mirroring the welcome screen's own two-tier CTA)
+// rather than a numbered flow. Each carries the same short time-expectation hint the welcome
+// screen's buttons show, since this is the very first thing a new teacher sees and shouldn't have
+// to guess how much class time either path actually takes before trying it.
+const PATHS: { icon: IconName; title: string; hint: string; body: string }[] = [
+  { icon: "rocket", title: "Start a Game", hint: "Perfect for the last 30 minutes of class!", body: `Pick a level and topic, set up teams (or use the ready-made defaults), and play — ${GAME_MODES.length} competitive game modes, zero prep.` },
+  { icon: "school", title: "Lesson Plans", hint: "~30 min lesson + ~30 min playing", body: "A full presentation-practice-production lesson on one topic, then a button at the end drops your class straight into a game on that same topic — no re-picking anything." },
 ];
 
 export function WelcomeIntroScreen({ theme, onDismiss }: Props) {
   useEffect(() => {
     document.title = "Welcome - ClassCade";
+    // Shown before LessonGamesGenerator ever mounts, so its own screen-based music effect can't
+    // reach this one moment — set the same "ambient" default here so there's no silent gap.
+    setMusicContext("ambient");
   }, []);
 
   // Best-effort, same as PlanIntroScreen's markSeen — a failed write shouldn't trap anyone here.
@@ -40,37 +49,37 @@ export function WelcomeIntroScreen({ theme, onDismiss }: Props) {
         <div style={{ textAlign: "center", marginBottom: "28px" }}>
           <Icon name="joystick" size={44} color={theme.accentSolid} style={{ marginBottom: "8px" }} />
           <h2 style={{ fontSize: "32px", fontWeight: "900", color: theme.heroBg[0], margin: 0, fontFamily: theme.headingFont, display: "flex", alignItems: "center", justifyContent: "center", gap: "10px" }}><Icon name="party" size={26} /> Welcome to ClassCade!</h2>
-          <p style={{ color: "#6B7280", marginTop: "10px", fontSize: "15px" }}>Here's the whole flow, in three steps.</p>
+          <p style={{ color: "#6B7280", marginTop: "10px", fontSize: "15px" }}>There are two ways to start a class — pick whichever fits today's lesson.</p>
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginBottom: "24px" }}>
-          {STEPS.map((s, i) => (
-            <div key={s.title} style={{ display: "flex", gap: "16px", alignItems: "flex-start", background: "white", border: `2px solid ${hexToRgba(theme.accentSolid, 0.15)}`, borderRadius: "16px", padding: "18px 20px" }}>
-              <div style={{ flexShrink: 0, width: "40px", height: "40px", borderRadius: "50%", background: theme.accentSolid, color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "900", fontSize: "17px" }}>{i + 1}</div>
-              <div>
-                <div style={{ fontWeight: "800", fontSize: "16px", color: "#1F2937", marginBottom: "3px", display: "flex", alignItems: "center", gap: "6px" }}><Icon name={s.icon} size={16} color={theme.accentSolid} /> {s.title}</div>
-                <div style={{ fontSize: "14px", color: "#6B7280", lineHeight: 1.5 }}>{s.body}</div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(260px,1fr))", gap: "14px", marginBottom: "24px" }}>
+          {PATHS.map(p => (
+            <div key={p.title} style={{ background: "white", border: `2px solid ${hexToRgba(theme.accentSolid, 0.15)}`, borderRadius: "16px", padding: "20px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "8px" }}>
+                <div style={{ flexShrink: 0, width: "40px", height: "40px", borderRadius: "50%", background: theme.accentSolid, color: "white", display: "flex", alignItems: "center", justifyContent: "center" }}><Icon name={p.icon} size={18} /></div>
+                <div style={{ fontWeight: "900", fontSize: "17px", color: "#1F2937", fontFamily: theme.headingFont }}>{p.title}</div>
               </div>
+              <div style={{ color: theme.accentSolid, fontWeight: "800", fontSize: "13px", marginBottom: "8px" }}>{p.hint}</div>
+              <div style={{ fontSize: "14px", color: "#6B7280", lineHeight: 1.5 }}>{p.body}</div>
             </div>
           ))}
         </div>
 
-        <div style={{ background: `linear-gradient(135deg,${hexToRgba(theme.accentSolid, 0.1)},${hexToRgba(theme.accentSolid, 0.04)})`, border: `2px solid ${theme.accentSolid}`, borderRadius: "16px", padding: "22px", marginBottom: "24px" }}>
-          <div style={{ display: "flex", gap: "14px", alignItems: "flex-start" }}>
-            <Icon name="learn" size={30} color={theme.accentSolid} style={{ flexShrink: 0 }} />
-            <div>
-              <div style={{ fontWeight: "900", fontSize: "17px", color: theme.heroBg[0], marginBottom: "4px", fontFamily: theme.headingFont }}>Don't miss the Learn section</div>
-              <div style={{ fontSize: "14px", color: "#374151", lineHeight: 1.6, marginBottom: "14px" }}>
-                Every topic in the games has a matching Learn lesson — the exact same grammar and vocabulary, explained clearly with examples and common mistakes. Use it to pre-teach a topic before playing, review afterward, or print a handout straight from the page.
-              </div>
-              <button
-                onClick={() => finish("learn")}
-                style={{ background: theme.accentSolid, color: "white", border: "none", borderRadius: "12px", padding: "10px 20px", fontWeight: "800", fontSize: "14px", cursor: "pointer", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px" }}
-              >
-                <Icon name="learn" size={14} /> Explore Learn
-              </button>
-            </div>
-          </div>
+        {/* Demoted from a big highlighted callout to one quiet line, deliberately — with the
+            two-path fork right above it, giving Learn the same visual weight risked reading as a
+            competing third option ("wait, is this a third way to start a class?") instead of what
+            it actually is: a quick-reference/printable resource either path can use, not a
+            separate path of its own. Still gets a real, clickable mention on the one screen every
+            new teacher is guaranteed to see, just without competing with the fork above. */}
+        <div style={{ textAlign: "center", color: "#6B7280", fontSize: "13px", marginBottom: "24px" }}>
+          Every topic also has a matching{" "}
+          <button
+            onClick={() => finish("learn")}
+            style={{ background: "none", border: "none", color: theme.accentSolid, fontWeight: "800", cursor: "pointer", padding: 0, fontSize: "13px", textDecoration: "underline", fontFamily: "inherit" }}
+          >
+            Learn lesson
+          </button>{" "}
+          for quick reference or a printable handout.
         </div>
 
         <div style={{ textAlign: "center" }}>

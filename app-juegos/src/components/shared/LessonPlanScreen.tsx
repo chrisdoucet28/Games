@@ -1,27 +1,26 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { hexToRgba, type Theme } from "../../data/themes";
 import { LESSON_TOPICS, LEVEL_ORDER, LEVEL_COLOR, FOCUS_ORDER, FOCUS_LABEL, matchesTopicSearch, type LearnTopic } from "../../data/learnTopics";
-import { LESSON_PLANS, buildUnscrambleItems, type RoundOut, type UnscrambleItem } from "../../data/lessonPlans";
+import { LESSON_PLANS, type RoundOut } from "../../data/lessonPlans";
+import { buildUnscrambleItems, type UnscrambleItem } from "../../data/lessonPlanUnscramble";
 import { REAL_WORLD_READINGS, type RealWorldReading } from "../../data/realWorldReadings";
 import { TOPIC_LIBRARY } from "../../data/topics";
 import { getProfile } from "../../lib/profile";
 import { LessonSectionBlock, CommonMistakesBlock } from "./LessonContent";
 import { QuestionCard } from "./QuestionCard";
+import { TeamIcon } from "./TeamIcon";
 import { Icon, type IconName } from "./Icon";
-import type { QuestionData } from "../../types";
+import type { QuestionData, Team } from "../../types";
 
 type Props = {
   onBack: () => void;
   theme: Theme;
-  // Set when arriving directly from a specific Learn lesson's "Start Lesson Plan" button — skips
-  // the index and drops straight into that topic's slideshow.
-  initialTopicId?: string | null;
   // Switches to the Learn screen (the "Learn" pill in the mode toggle below, shown on the index).
   onOpenLearn: () => void;
-  // Set by the top-level screen orchestrator so a finished lesson can hand off straight into game
-  // team setup for the same topic, skipping topic re-selection. Undefined in any context that
-  // doesn't support that handoff (there isn't one today, but the button only renders when set).
-  onPlayGameForTopic?: (topicId: string) => void;
+  // Picking a topic here no longer drops straight into its slideshow — the orchestrator routes
+  // through team-setup first (teams are required for every lesson, so prompts can be assigned to
+  // them), then renders LessonPlanSlideshow itself on a separate top-level screen.
+  onSelectTopic: (topicId: string) => void;
 };
 
 const PRINT_CSS = `
@@ -39,21 +38,48 @@ function sampleByType(questions: QuestionData[], type: string, count: number): Q
   return [...pool].sort(() => Math.random() - 0.5).slice(0, count);
 }
 
-export function LessonPlanScreen({ onBack, theme, initialTopicId, onOpenLearn, onPlayGameForTopic }: Props) {
+// Rounds a section's base prompt count up to the next multiple of the team count, so every team
+// gets an equal, fair number of turns in that section instead of some teams getting shorted (or
+// the last team's turn falling on a partial round). Capped well above anything the app's team
+// limits (max 5) could actually produce — a defensive backstop, not a real constraint — since
+// `sampleByType` already truncates gracefully if a topic's pool is ever thinner than requested.
+function scaledCount(base: number, teamCount: number, cap: number): number {
+  if (teamCount <= 1) return base;
+  return Math.min(cap, Math.ceil(base / teamCount) * teamCount);
+}
+
+// A small team-colored pill showing whose turn a prompt is — reused above each assignable
+// question, scenario prompt, and speaking task once teams are involved. Renders nothing when a
+// slide/prompt has no assignment yet (shouldn't normally happen now that teams are required
+// before this screen is ever reached, but harmless either way).
+function AssignedTeamBadge({ team }: { team?: Team }) {
+  if (!team) return null;
+  return (
+    <span style={{ display: "inline-flex", alignItems: "center", gap: "5px", background: team.color.bg, color: "white", borderRadius: "999px", padding: "4px 12px 4px 8px", fontSize: "12.5px", fontWeight: "800", marginBottom: "10px" }}>
+      <TeamIcon team={team} size={15} color="white" /> {team.name}'s turn
+    </span>
+  );
+}
+
+// Compact sibling of AssignedTeamBadge — for assignments that sit inline inside running text or a
+// tight list (a paragraph-cloze blank, a matching term) rather than above a whole card, where the
+// full badge would overwhelm the line it's attached to.
+function InlineTeamTag({ team }: { team?: Team }) {
+  if (!team) return null;
+  return (
+    <span style={{ display: "inline-flex", alignItems: "center", gap: "3px", background: team.color.bg, color: "white", borderRadius: "999px", padding: "1px 7px 1px 4px", fontSize: "10px", fontWeight: "800", verticalAlign: "middle", whiteSpace: "nowrap", flexShrink: 0 }}>
+      <TeamIcon team={team} size={10} color="white" /> {team.name}
+    </span>
+  );
+}
+
+export function LessonPlanScreen({ onBack, theme, onOpenLearn, onSelectTopic }: Props) {
   const availableTopics = useMemo(() => LESSON_TOPICS.filter(t => LESSON_PLANS[t.id]), []);
-  const [selectedId, setSelectedId] = useState<string | null>(initialTopicId ?? null);
   const [searchTerm, setSearchTerm] = useState("");
   // "type" (default) keeps the Grammar/Vocabulary/Themes sections; "order" flattens each level into
   // one single teaching sequence instead — only meaningful for levels that actually have `order`
   // values assigned (A1 so far), but harmless (falls back to existing array order) elsewhere.
   const [viewMode, setViewMode] = useState<"type" | "order">("type");
-  const selected = selectedId ? availableTopics.find(t => t.id === selectedId) : null;
-
-  if (selected) {
-    // Keyed on the topic id so picking a different topic from the index (rather than unmounting
-    // the whole screen) still gets a fresh sampling of practice items and a reset slide position.
-    return <LessonPlanSlideshow key={selected.id} topic={selected} theme={theme} onBack={() => setSelectedId(null)} onPlayGameForTopic={onPlayGameForTopic} />;
-  }
 
   const searchedTopics = availableTopics.filter(t => matchesTopicSearch(t.lesson.title, searchTerm));
   const byLevel = LEVEL_ORDER
@@ -152,7 +178,7 @@ export function LessonPlanScreen({ onBack, theme, initialTopicId, onOpenLearn, o
                       .sort((a, b) => (a.meta.order ?? Number.MAX_SAFE_INTEGER) - (b.meta.order ?? Number.MAX_SAFE_INTEGER))
                       .map((t, i) => (
                         <button
-                          key={t.id} onClick={() => setSelectedId(t.id)}
+                          key={t.id} onClick={() => onSelectTopic(t.id)}
                           style={{ textAlign: "left", background: "white", border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, borderRadius: "12px", padding: "14px 16px", cursor: "pointer", fontFamily: "inherit", display: "flex", alignItems: "flex-start", gap: "10px" }}
                         >
                           <span style={{ background: hexToRgba(theme.accentSolid, 0.12), color: theme.accentSolid, borderRadius: "50%", width: "22px", height: "22px", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "11px", fontWeight: "800" }}>{i + 1}</span>
@@ -174,7 +200,7 @@ export function LessonPlanScreen({ onBack, theme, initialTopicId, onOpenLearn, o
                         .sort((a, b) => (a.meta.order ?? Number.MAX_SAFE_INTEGER) - (b.meta.order ?? Number.MAX_SAFE_INTEGER))
                         .map((t, i) => (
                           <button
-                            key={t.id} onClick={() => setSelectedId(t.id)}
+                            key={t.id} onClick={() => onSelectTopic(t.id)}
                             style={{ textAlign: "left", background: "white", border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, borderRadius: "12px", padding: "14px 16px", cursor: "pointer", fontFamily: "inherit", display: "flex", alignItems: "flex-start", gap: "10px" }}
                           >
                             {t.meta.order != null && (
@@ -208,36 +234,45 @@ type Slide =
   | { kind: "intro" }
   | { kind: "presentation"; sectionIndex: number }
   | { kind: "commonMistakes" }
-  | { kind: "question"; sectionLabel: string; sectionIcon: IconName; question: QuestionData; progress: string }
+  | { kind: "question"; sectionLabel: string; sectionIcon: IconName; question: QuestionData; progress: string; assignedTeam?: Team }
   | { kind: "roundOut" }
   | { kind: "realWorld"; reading: RealWorldReading }
-  | { kind: "speaking"; tasks: string[] }
+  | { kind: "speaking"; tasks: { text: string; assignedTeam?: Team }[] }
   | { kind: "done" };
 
-function LessonPlanSlideshow({ topic, theme, onBack, onPlayGameForTopic }: { topic: LearnTopic; theme: Theme; onBack: () => void; onPlayGameForTopic?: (topicId: string) => void }) {
+// Teams are required before this screen is ever reached (see the orchestrator's team-setup gate),
+// so `teams` is always non-empty in practice — the `teams.length === 0` guards below just keep the
+// component from crashing if that invariant is ever violated, rendering with no badges instead.
+export function LessonPlanSlideshow({ topic, theme, teams, onBack, onPlayGameForTopic }: { topic: LearnTopic; theme: Theme; teams: Team[]; onBack: () => void; onPlayGameForTopic?: (topicId: string) => void }) {
   const topicData = TOPIC_LIBRARY[topic.id as keyof typeof TOPIC_LIBRARY] as { questions: QuestionData[]; cardTasks?: { task: string }[] };
   const roundOut = LESSON_PLANS[topic.id];
 
-  const slides = useMemo<Slide[]>(() => {
+  // Content sampling only — deliberately excludes `teams` from its deps (see the eslint-disable
+  // below) so a bigger/smaller team count never re-shuffles which questions were already drawn,
+  // only how many. Team ASSIGNMENT (below) is a separate memoized pass over this fixed list.
+  const rawSlides = useMemo<Slide[]>(() => {
+    const teamCount = Math.max(1, teams.length);
     // Prefers "choose correct grammar" for the warm-up; falls back to "fill in the blank" for any
     // topic whose pool is thin on that type. Practice B then picks whichever of the two remaining
     // controlled-practice types actually has enough content, so the two steps never draw from the
     // same pool.
-    const mcq = sampleByType(topicData.questions, "choose correct grammar", 6);
+    const mcq = sampleByType(topicData.questions, "choose correct grammar", scaledCount(6, teamCount, 20));
     const practiceA = mcq.length >= 4 ? { type: "choose correct grammar", icon: "options" as IconName, items: mcq }
-      : { type: "fill in the blank", icon: "options" as IconName, items: sampleByType(topicData.questions, "fill in the blank", 6) };
+      : { type: "fill in the blank", icon: "options" as IconName, items: sampleByType(topicData.questions, "fill in the blank", scaledCount(6, teamCount, 20)) };
 
     const practiceBCandidates = ["fill in the blank", "correct grammar mistakes"].filter(t => t !== practiceA.type);
-    let practiceB = { type: practiceBCandidates[0], icon: "pencil" as IconName, items: sampleByType(topicData.questions, practiceBCandidates[0], 6) };
+    let practiceB = { type: practiceBCandidates[0], icon: "pencil" as IconName, items: sampleByType(topicData.questions, practiceBCandidates[0], scaledCount(6, teamCount, 20)) };
     if (practiceB.items.length < 4 && practiceBCandidates[1]) {
-      const alt = sampleByType(topicData.questions, practiceBCandidates[1], 6);
+      const alt = sampleByType(topicData.questions, practiceBCandidates[1], scaledCount(6, teamCount, 20));
       if (alt.length > practiceB.items.length) practiceB = { type: practiceBCandidates[1], icon: "pencil" as IconName, items: alt };
     }
 
-    const production = sampleByType(topicData.questions, "use vocabulary in a sentence", 4);
-    const speakingTasks = topicData.cardTasks?.length
-      ? topicData.cardTasks.slice(0, 3).map(t => t.task)
-      : sampleByType(topicData.questions, "speaking task", 3).map(q => q.question ?? "").filter(Boolean);
+    const production = sampleByType(topicData.questions, "use vocabulary in a sentence", scaledCount(4, teamCount, 20));
+    const speakingCount = scaledCount(3, teamCount, 20);
+    const speakingTasks = (topicData.cardTasks?.length
+      ? [...topicData.cardTasks].sort(() => Math.random() - 0.5).slice(0, speakingCount).map(t => t.task)
+      : sampleByType(topicData.questions, "speaking task", speakingCount).map(q => q.question ?? "").filter(Boolean)
+    ).map(text => ({ text }));
 
     const list: Slide[] = [{ kind: "intro" }];
     topic.lesson.sections.forEach((_, i) => list.push({ kind: "presentation", sectionIndex: i }));
@@ -253,6 +288,46 @@ function LessonPlanSlideshow({ topic, theme, onBack, onPlayGameForTopic }: { top
     return list;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // How many unscramble items to show — same team-scaling as every other section, computed here
+  // (not inside UnscrambleRoundOut) so the assignment pass below knows exactly how many ticks to
+  // reserve for it. Only the COUNT needs to be known up front; buildUnscrambleItems is still called
+  // again for the actual (freshly re-shuffled) content where it's rendered — safe, since the pool
+  // size (and therefore the length after slicing to this count) doesn't depend on the shuffle.
+  const unscrambleCount = roundOut.kind === "unscramble" ? scaledCount(4, Math.max(1, teams.length), 20) : 0;
+
+  // Assignment pass: a single running counter walked across the WHOLE lesson in document order —
+  // not reset per section — so rotation stays smooth class-wide instead of every section starting
+  // back on team 1. Covers every genuinely assignable unit in the lesson, not just questions:
+  // roundOut prompts/blanks/pairs/items and realWorld's comprehension questions aren't their own
+  // Slide entries (there's one "roundOut"/"realWorld" slide regardless of how many sub-items it
+  // has), so they're consumed at that exact point in the walk and returned separately rather than
+  // attached to the Slide itself. errorPassage has no discrete sub-items — the whole exercise gets
+  // one team, still wrapped in a one-element array so every roundOut kind shares the same prop
+  // shape downstream. Skipped entirely for a solo team (<=1) — with nobody to rotate to, every
+  // single badge would just say the same one team's name over and over, which is noise, not
+  // information; a solo class plays through with no badges at all, same as before this feature.
+  const { slides, roundOutAssignedTeams, realWorldAssignedTeams } = useMemo(() => {
+    if (teams.length <= 1) return { slides: rawSlides, roundOutAssignedTeams: [] as Team[], realWorldAssignedTeams: [] as Team[] };
+    let turn = 0;
+    const nextTeam = () => teams[turn++ % teams.length];
+    let roundOutAssignedTeams: Team[] = [];
+    let realWorldAssignedTeams: Team[] = [];
+    const assigned = rawSlides.map((s): Slide => {
+      if (s.kind === "question") return { ...s, assignedTeam: nextTeam() };
+      if (s.kind === "speaking") return { ...s, tasks: s.tasks.map(t => ({ ...t, assignedTeam: nextTeam() })) };
+      if (s.kind === "roundOut") {
+        if (roundOut.kind === "scenario") roundOutAssignedTeams = roundOut.prompts.map(() => nextTeam());
+        else if (roundOut.kind === "paragraphCloze") roundOutAssignedTeams = roundOut.segments.filter(seg => typeof seg !== "string").map(() => nextTeam());
+        else if (roundOut.kind === "matching") roundOutAssignedTeams = roundOut.pairs.map(() => nextTeam());
+        else if (roundOut.kind === "unscramble") roundOutAssignedTeams = Array.from({ length: unscrambleCount }, () => nextTeam());
+        else if (roundOut.kind === "errorPassage") roundOutAssignedTeams = [nextTeam()];
+      }
+      if (s.kind === "realWorld") realWorldAssignedTeams = s.reading.questions.map(() => nextTeam());
+      return s;
+    });
+    return { slides: assigned, roundOutAssignedTeams, realWorldAssignedTeams };
+  }, [rawSlides, teams, roundOut, unscrambleCount]);
 
   const [slideIndex, setSlideIndex] = useState(0);
   const [showAnswer, setShowAnswer] = useState(false);
@@ -342,16 +417,17 @@ function LessonPlanSlideshow({ topic, theme, onBack, onPlayGameForTopic }: { top
 
           {slide.kind === "question" && (
             <div>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", marginBottom: "14px", color: theme.accentSolid, fontWeight: "800", fontSize: "13px", textTransform: "uppercase", letterSpacing: "0.04em" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", marginBottom: "10px", color: theme.accentSolid, fontWeight: "800", fontSize: "13px", textTransform: "uppercase", letterSpacing: "0.04em" }}>
                 <Icon name={slide.sectionIcon} size={14} /> {slide.sectionLabel} <span style={{ color: "#9CA3AF", fontWeight: "700" }}>· {slide.progress}</span>
               </div>
+              <div style={{ textAlign: "center" }}><AssignedTeamBadge team={slide.assignedTeam} /></div>
               <QuestionCard question={slide.question} showAnswer={showAnswer} onReveal={() => setShowAnswer(true)} gameId="lessonplan" />
             </div>
           )}
 
-          {slide.kind === "roundOut" && <RoundOutStep roundOut={roundOut} topicId={topic.id} theme={theme} onDone={goNext} />}
+          {slide.kind === "roundOut" && <RoundOutStep roundOut={roundOut} topicId={topic.id} theme={theme} onDone={goNext} assignedTeams={roundOutAssignedTeams} unscrambleCount={unscrambleCount} />}
 
-          {slide.kind === "realWorld" && <RealWorldReadingStep reading={slide.reading} theme={theme} onDone={goNext} backRef={realWorldBackRef} />}
+          {slide.kind === "realWorld" && <RealWorldReadingStep reading={slide.reading} theme={theme} onDone={goNext} backRef={realWorldBackRef} assignedTeams={realWorldAssignedTeams} />}
 
           {slide.kind === "speaking" && (
             <div>
@@ -360,7 +436,10 @@ function LessonPlanSlideshow({ topic, theme, onBack, onPlayGameForTopic }: { top
               </div>
               <p style={{ textAlign: "center", color: "#6B7280", fontSize: "13px", marginBottom: "14px" }}>Open response — the student speaks, the teacher listens and judges.</p>
               {slide.tasks.map((t, i) => (
-                <div key={i} style={{ background: "#FFFBEB", border: "2px solid #F59E0B", borderRadius: "12px", padding: "12px 16px", marginBottom: "10px", fontSize: "14px", color: "#92400E", fontWeight: "600" }}>{t}</div>
+                <div key={i} style={{ background: "#FFFBEB", border: "2px solid #F59E0B", borderRadius: "12px", padding: "12px 16px", marginBottom: "10px", fontSize: "14px", color: "#92400E", fontWeight: "600" }}>
+                  <div><AssignedTeamBadge team={t.assignedTeam} /></div>
+                  {t.text}
+                </div>
               ))}
             </div>
           )}
@@ -409,38 +488,42 @@ function roundOutStyles(theme: Theme) {
 // Dispatches to one fully separate component per kind (rather than branching with early returns in
 // one function body) so each kind's hooks are called unconditionally — mixing different hook calls
 // across branches of a single component body would break React's rules of hooks.
-function RoundOutStep({ roundOut, topicId, theme, onDone }: { roundOut: RoundOut; topicId: string; theme: Theme; onDone: () => void }) {
-  if (roundOut.kind === "paragraphCloze") return <ParagraphClozeRoundOut roundOut={roundOut} theme={theme} onDone={onDone} />;
-  if (roundOut.kind === "matching") return <MatchingRoundOut roundOut={roundOut} theme={theme} onDone={onDone} />;
-  if (roundOut.kind === "errorPassage") return <ErrorPassageRoundOut roundOut={roundOut} theme={theme} onDone={onDone} />;
-  if (roundOut.kind === "scenario") return <ScenarioRoundOut roundOut={roundOut} theme={theme} onDone={onDone} />;
-  return <UnscrambleRoundOut topicId={topicId} theme={theme} onDone={onDone} />;
+function RoundOutStep({ roundOut, topicId, theme, onDone, assignedTeams, unscrambleCount }: { roundOut: RoundOut; topicId: string; theme: Theme; onDone: () => void; assignedTeams?: Team[]; unscrambleCount: number }) {
+  if (roundOut.kind === "paragraphCloze") return <ParagraphClozeRoundOut roundOut={roundOut} theme={theme} onDone={onDone} assignedTeams={assignedTeams} />;
+  if (roundOut.kind === "matching") return <MatchingRoundOut roundOut={roundOut} theme={theme} onDone={onDone} assignedTeams={assignedTeams} />;
+  if (roundOut.kind === "errorPassage") return <ErrorPassageRoundOut roundOut={roundOut} theme={theme} onDone={onDone} assignedTeam={assignedTeams?.[0]} />;
+  if (roundOut.kind === "scenario") return <ScenarioRoundOut roundOut={roundOut} theme={theme} onDone={onDone} assignedTeams={assignedTeams} />;
+  return <UnscrambleRoundOut topicId={topicId} theme={theme} onDone={onDone} count={unscrambleCount} assignedTeams={assignedTeams} />;
 }
 
-function ParagraphClozeRoundOut({ roundOut, theme, onDone }: { roundOut: Extract<RoundOut, { kind: "paragraphCloze" }>; theme: Theme; onDone: () => void }) {
+function ParagraphClozeRoundOut({ roundOut, theme, onDone, assignedTeams }: { roundOut: Extract<RoundOut, { kind: "paragraphCloze" }>; theme: Theme; onDone: () => void; assignedTeams?: Team[] }) {
   const { headerStyle, nextBtnStyle } = roundOutStyles(theme);
   const [revealed, setRevealed] = useState<Set<number>>(new Set());
   let blankIdx = 0;
   return (
     <div>
       <div style={headerStyle}><Icon name="clipboard" size={14} /> Fill in the Story</div>
-      <p style={{ textAlign: "center", color: "#6B7280", fontSize: "13px", marginBottom: "14px" }}>Click each gap to check your answer.</p>
-      <p style={{ fontSize: "16px", lineHeight: 2, color: "#1F2937" }}>
+      <p style={{ textAlign: "center", color: "#6B7280", fontSize: "13px", marginBottom: "14px" }}>Click each gap to check your answer — the color/name shows whose turn each one is.</p>
+      <p style={{ fontSize: "16px", lineHeight: 2.4, color: "#1F2937" }}>
         {roundOut.segments.map((seg, i) => {
           if (typeof seg === "string") return <span key={i}>{seg}</span>;
           const idx = blankIdx++;
           const isRevealed = revealed.has(idx);
+          const assignedTeam = assignedTeams?.[idx];
           return (
-            <button
-              key={i}
-              onClick={() => setRevealed(prev => new Set(prev).add(idx))}
-              style={{
-                display: "inline-block", margin: "0 2px", padding: "2px 10px", borderRadius: "8px", border: `2px solid ${theme.accentSolid}`, cursor: isRevealed ? "default" : "pointer",
-                background: isRevealed ? "#ECFDF5" : "white", color: isRevealed ? "#14532D" : "#9CA3AF", fontWeight: "800", fontSize: "15px",
-              }}
-            >
-              {isRevealed ? seg.blank : `___ (${seg.base})`}
-            </button>
+            <span key={i}>
+              <InlineTeamTag team={assignedTeam} />{" "}
+              <button
+                onClick={() => setRevealed(prev => new Set(prev).add(idx))}
+                style={{
+                  display: "inline-block", margin: "0 2px", padding: "2px 10px", borderRadius: "8px",
+                  border: `2px solid ${assignedTeam ? assignedTeam.color.bg : theme.accentSolid}`, cursor: isRevealed ? "default" : "pointer",
+                  background: isRevealed ? "#ECFDF5" : "white", color: isRevealed ? "#14532D" : "#9CA3AF", fontWeight: "800", fontSize: "15px",
+                }}
+              >
+                {isRevealed ? seg.blank : `___ (${seg.base})`}
+              </button>
+            </span>
           );
         })}
       </p>
@@ -449,7 +532,7 @@ function ParagraphClozeRoundOut({ roundOut, theme, onDone }: { roundOut: Extract
   );
 }
 
-function MatchingRoundOut({ roundOut, theme, onDone }: { roundOut: Extract<RoundOut, { kind: "matching" }>; theme: Theme; onDone: () => void }) {
+function MatchingRoundOut({ roundOut, theme, onDone, assignedTeams }: { roundOut: Extract<RoundOut, { kind: "matching" }>; theme: Theme; onDone: () => void; assignedTeams?: Team[] }) {
   const { headerStyle, nextBtnStyle } = roundOutStyles(theme);
   const terms = useMemo(() => [...roundOut.pairs.map(p => p.term)].sort(() => Math.random() - 0.5), [roundOut]);
   const defs = useMemo(() => [...roundOut.pairs.map(p => p.definition)].sort(() => Math.random() - 0.5), [roundOut]);
@@ -457,6 +540,10 @@ function MatchingRoundOut({ roundOut, theme, onDone }: { roundOut: Extract<Round
   const [matched, setMatched] = useState<Set<string>>(new Set());
   const [wrong, setWrong] = useState<string | null>(null);
   const defFor = (term: string) => roundOut.pairs.find(p => p.term === term)?.definition;
+  // Assignment is per PAIR (its position in the original, unshuffled roundOut.pairs), not per
+  // shuffled display position — looked up by term so the badge stays attached to the right pair
+  // regardless of where the shuffle happened to place it in the terms column.
+  const teamForTerm = (term: string) => assignedTeams?.[roundOut.pairs.findIndex(p => p.term === term)];
 
   const tryMatch = (def: string) => {
     if (!selectedTerm) return;
@@ -474,7 +561,7 @@ function MatchingRoundOut({ roundOut, theme, onDone }: { roundOut: Extract<Round
   return (
     <div>
       <div style={headerStyle}><Icon name="handshake" size={14} /> Match the Word to Its Meaning</div>
-      <p style={{ textAlign: "center", color: "#6B7280", fontSize: "13px", marginBottom: "14px" }}>Tap a word, then tap its meaning.</p>
+      <p style={{ textAlign: "center", color: "#6B7280", fontSize: "13px", marginBottom: "14px" }}>Tap a word, then tap its meaning — each word shows whose pair it is.</p>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
         <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
           {terms.map(term => {
@@ -484,7 +571,8 @@ function MatchingRoundOut({ roundOut, theme, onDone }: { roundOut: Extract<Round
                 padding: "10px 12px", borderRadius: "10px", border: `2px solid ${done ? "#22C55E" : selectedTerm === term ? theme.accentSolid : "#E5E7EB"}`,
                 background: done ? "#ECFDF5" : selectedTerm === term ? hexToRgba(theme.accentSolid, 0.1) : "white",
                 color: done ? "#14532D" : "#1F2937", fontWeight: "700", fontSize: "13px", cursor: done ? "default" : "pointer", textAlign: "left",
-              }}>{term}</button>
+                display: "flex", alignItems: "center", gap: "6px",
+              }}><InlineTeamTag team={teamForTerm(term)} /> {term}</button>
             );
           })}
         </div>
@@ -506,12 +594,13 @@ function MatchingRoundOut({ roundOut, theme, onDone }: { roundOut: Extract<Round
   );
 }
 
-function ErrorPassageRoundOut({ roundOut, theme, onDone }: { roundOut: Extract<RoundOut, { kind: "errorPassage" }>; theme: Theme; onDone: () => void }) {
+function ErrorPassageRoundOut({ roundOut, theme, onDone, assignedTeam }: { roundOut: Extract<RoundOut, { kind: "errorPassage" }>; theme: Theme; onDone: () => void; assignedTeam?: Team }) {
   const { headerStyle, nextBtnStyle, revealBtnStyle } = roundOutStyles(theme);
   const [showFixed, setShowFixed] = useState(false);
   return (
     <div>
       <div style={headerStyle}><Icon name="warning" size={14} /> Find the Mistakes</div>
+      <div style={{ textAlign: "center" }}><AssignedTeamBadge team={assignedTeam} /></div>
       <div style={{ background: "#FEF2F2", border: "2px solid #FCA5A5", borderRadius: "12px", padding: "14px 16px", whiteSpace: "pre-line", fontSize: "14px", lineHeight: 1.7, color: "#7F1D1D" }}>{roundOut.text}</div>
       {!showFixed ? (
         <div style={{ textAlign: "center" }}><button onClick={() => setShowFixed(true)} style={revealBtnStyle}><Icon name="eye" size={13} /> Show corrected version</button></div>
@@ -528,7 +617,7 @@ function ErrorPassageRoundOut({ roundOut, theme, onDone }: { roundOut: Extract<R
   );
 }
 
-function ScenarioRoundOut({ roundOut, theme, onDone }: { roundOut: Extract<RoundOut, { kind: "scenario" }>; theme: Theme; onDone: () => void }) {
+function ScenarioRoundOut({ roundOut, theme, onDone, assignedTeams }: { roundOut: Extract<RoundOut, { kind: "scenario" }>; theme: Theme; onDone: () => void; assignedTeams?: Team[] }) {
   const { headerStyle, nextBtnStyle, revealBtnStyle } = roundOutStyles(theme);
   const [i, setI] = useState(0);
   const [show, setShow] = useState(false);
@@ -537,6 +626,7 @@ function ScenarioRoundOut({ roundOut, theme, onDone }: { roundOut: Extract<Round
   return (
     <div>
       <div style={headerStyle}><Icon name="chat" size={14} /> What Would You Say? <span style={{ color: "#9CA3AF", fontWeight: "700" }}>· {i + 1}/{roundOut.prompts.length}</span></div>
+      <div style={{ textAlign: "center" }}><AssignedTeamBadge team={assignedTeams?.[i]} /></div>
       <div style={{ background: "#EEF2FF", border: "2px solid #C7D2FE", borderRadius: "12px", padding: "14px 16px", marginBottom: "10px" }}>
         <p style={{ margin: "0 0 6px", fontSize: "15px", color: "#312E81", fontWeight: "600" }}>{p.situation}</p>
         <p style={{ margin: 0, fontSize: "13px", color: "#4338CA", fontWeight: "700" }}>{p.instruction}</p>
@@ -555,9 +645,9 @@ function ScenarioRoundOut({ roundOut, theme, onDone }: { roundOut: Extract<Round
   );
 }
 
-function UnscrambleRoundOut({ topicId, theme, onDone }: { topicId: string; theme: Theme; onDone: () => void }) {
+function UnscrambleRoundOut({ topicId, theme, onDone, count, assignedTeams }: { topicId: string; theme: Theme; onDone: () => void; count: number; assignedTeams?: Team[] }) {
   const { headerStyle, nextBtnStyle, revealBtnStyle } = roundOutStyles(theme);
-  const items = useMemo(() => buildUnscrambleItems(topicId, 4), [topicId]);
+  const items = useMemo(() => buildUnscrambleItems(topicId, count), [topicId, count]);
   const [i, setI] = useState(0);
   const [show, setShow] = useState(false);
   if (!items.length) return <div style={{ textAlign: "center" }}><button onClick={onDone} style={nextBtnStyle}>Continue</button></div>;
@@ -566,6 +656,7 @@ function UnscrambleRoundOut({ topicId, theme, onDone }: { topicId: string; theme
   return (
     <div>
       <div style={headerStyle}><Icon name="shuffle" size={14} /> Put the Words in Order <span style={{ color: "#9CA3AF", fontWeight: "700" }}>· {i + 1}/{items.length}</span></div>
+      <div style={{ textAlign: "center" }}><AssignedTeamBadge team={assignedTeams?.[i]} /></div>
       <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", justifyContent: "center", marginBottom: "14px" }}>
         {current.words.map((w, wi) => (
           <span key={wi} style={{ background: "white", border: `2px solid ${theme.accentSolid}`, borderRadius: "8px", padding: "6px 12px", fontWeight: "700", fontSize: "15px", color: "#1F2937" }}>{w}</span>
@@ -641,7 +732,7 @@ function AudioPlayer({ src, theme }: { src: string; theme: Theme }) {
 // buttons, calling onDone() once the student's worked through it. Mode select only appears when
 // there's audio to choose between; a reading with no audioUrl goes straight to "reading" mode
 // (text always visible), matching the graceful degradation used everywhere else in this file.
-function RealWorldReadingStep({ reading, theme, onDone, backRef }: { reading: RealWorldReading; theme: Theme; onDone: () => void; backRef: React.MutableRefObject<(() => boolean) | null> }) {
+function RealWorldReadingStep({ reading, theme, onDone, backRef, assignedTeams }: { reading: RealWorldReading; theme: Theme; onDone: () => void; backRef: React.MutableRefObject<(() => boolean) | null>; assignedTeams?: Team[] }) {
   const { headerStyle, nextBtnStyle } = roundOutStyles(theme);
   const [mode, setMode] = useState<"reading" | "listening" | null>(reading.audioUrl ? null : "reading");
   const [phase, setPhase] = useState<"content" | "questions" | "reveal">("content");
@@ -700,6 +791,7 @@ function RealWorldReadingStep({ reading, theme, onDone, backRef }: { reading: Re
     return (
       <div>
         <div style={headerStyle}><Icon name="books" size={14} /> Real-World Check <span style={{ color: "#9CA3AF", fontWeight: "700" }}>· {qIndex + 1}/{reading.questions.length}</span></div>
+        <div style={{ textAlign: "center" }}><AssignedTeamBadge team={assignedTeams?.[qIndex]} /></div>
         <QuestionCard question={q} showAnswer={showAnswer} onReveal={() => setShowAnswer(true)} gameId="lessonplan" />
         {showAnswer && (
           <div style={{ textAlign: "center" }}>
@@ -810,7 +902,7 @@ function PrintableLessonPlan({ topic, slides, roundOut, logoUrl }: { topic: Lear
           <hr style={printDividerStyle} />
           <div style={printSectionHeadingStyle}>Speaking</div>
           <ul style={{ margin: "3px 0 0", paddingLeft: "16px" }}>
-            {speakingSlide.tasks.map((t, i) => <li key={i} style={{ fontSize: "11px", marginBottom: "2px" }}>{t}</li>)}
+            {speakingSlide.tasks.map((t, i) => <li key={i} style={{ fontSize: "11px", marginBottom: "2px" }}>{t.text}</li>)}
           </ul>
         </div>
       )}

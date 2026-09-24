@@ -31,10 +31,17 @@ export type IconName =
   | "handshake" | "idea" | "sword" | "heart" | "crystalBall" | "apple"
   | "wind" | "eyeOff" | "unlocked" | "wrench" | "forbidden"
   | "options" | "mud" | "vortex" | "clover" | "banana" | "cart" | "fullscreen" | "robot"
+  // Bounty Board's sheriff-badge glyph (6-pointed star, distinct from the 5-pointed "star" used
+  // for ThemeAmbience decoration above) — its own game icon, no existing glyph fit the theme.
+  | "sheriffStar"
   // Phase 4 — ThemeAmbience's decorative floating background glyphs (one drift + one twinkle
   // per accent theme). Rendered at low opacity/small scale, so simpler silhouettes than the
   // functional icons above are fine here.
-  | "cloud" | "sparkle" | "moon" | "star" | "dove" | "bubble" | "leaf" | "blossom";
+  | "cloud" | "sparkle" | "moon" | "star" | "dove" | "bubble" | "leaf" | "blossom"
+  // Sound effects mute toggle (game screen header).
+  | "soundOn" | "soundOff"
+  // Background music mute toggle (global top bar).
+  | "musicOn" | "musicOff";
 
 const ICONS: Record<IconName, React.ReactNode> = {
   learn: (
@@ -679,6 +686,12 @@ const ICONS: Record<IconName, React.ReactNode> = {
     </>
   ),
   gun: <path d="M3,13 H15 V10 H21 V15 H17 V19 H13 V15 H7 L5,19 H2 Z" fill="currentColor" />,
+  sheriffStar: (
+    <>
+      <polygon points="12,1 21,18.5 3,18.5" fill="currentColor" />
+      <polygon points="12,23 3,5.5 21,5.5" fill="currentColor" />
+    </>
+  ),
   axe: (
     <>
       <rect x="10.5" y="6" width="2" height="16" rx="1" fill="currentColor" transform="rotate(20 11.5 14)" />
@@ -790,6 +803,35 @@ const ICONS: Record<IconName, React.ReactNode> = {
       <circle cx="16.5" cy="18" r="4.2" fill="currentColor" />
       <circle cx="7.5" cy="18" r="4.2" fill="currentColor" />
       <circle cx="5" cy="10" r="4.2" fill="currentColor" />
+    </>
+  ),
+  soundOn: (
+    <>
+      <polygon points="3,9 7,9 12,4 12,20 7,15 3,15" fill="currentColor" />
+      <path d="M15 9 Q18 12 15 15" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" />
+      <path d="M17.5 6.5 Q22 12 17.5 17.5" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" />
+    </>
+  ),
+  soundOff: (
+    <>
+      <polygon points="3,9 7,9 12,4 12,20 7,15 3,15" fill="currentColor" />
+      <line x1="15.5" y1="9" x2="21.5" y2="15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <line x1="21.5" y1="9" x2="15.5" y2="15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </>
+  ),
+  musicOn: (
+    <>
+      <circle cx="8" cy="18" r="3.5" fill="currentColor" />
+      <rect x="10.5" y="4" width="2" height="14.5" fill="currentColor" />
+      <path d="M12.5,4 C17,4 18,7 18,9 L16,9 C16,7.5 15,6 12.5,6 Z" fill="currentColor" />
+    </>
+  ),
+  musicOff: (
+    <>
+      <circle cx="8" cy="18" r="3.5" fill="currentColor" />
+      <rect x="10.5" y="4" width="2" height="14.5" fill="currentColor" />
+      <path d="M12.5,4 C17,4 18,7 18,9 L16,9 C16,7.5 15,6 12.5,6 Z" fill="currentColor" />
+      <line x1="3" y1="3" x2="21" y2="21" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
     </>
   ),
 };

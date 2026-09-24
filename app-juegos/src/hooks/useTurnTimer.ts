@@ -1,4 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { playSound } from "../lib/sounds";
+import { setMusicContext } from "../lib/music";
+
+// Last few seconds of any timed turn get an audible tick — 5 seconds gives players enough warning
+// without turning every short turn (some are only 15-20s total) into mostly-tick.
+const TICK_STARTS_AT = 5;
 
 // `paused` freezes the countdown in place (no tick, no reset) without tearing down the interval —
 // for turns that span several questions in a row (e.g. Rocket Fuel's "prompt after prompt" turn,
@@ -18,6 +24,14 @@ export function useTurnTimer(seconds: number, active: boolean, onExpire: () => v
   useEffect(() => {
     pausedRef.current = paused;
   }, [paused]);
+
+  // The tension music bed while this timer is actually counting down — reverts to "gameplay"
+  // (never "ambient") on stop/cleanup, safe because this hook only ever runs while a game screen
+  // is already showing.
+  useEffect(() => {
+    if (active) setMusicContext("tension");
+    return () => setMusicContext("gameplay");
+  }, [active]);
 
   const stop = useCallback(() => {
     if (timerRef.current) clearInterval(timerRef.current);
@@ -40,6 +54,7 @@ export function useTurnTimer(seconds: number, active: boolean, onExpire: () => v
       remaining -= 1;
       if (remaining <= 0) {
         if (timerRef.current) clearInterval(timerRef.current);
+        playSound("timesUp");
         // Call onExpire as a plain statement here, not from inside the setTimeLeft updater above —
         // React can invoke updater functions during its own render pass, and onExpire often triggers
         // state updates on ancestor components (e.g. onUpdateScore), which then throws "Cannot update
@@ -47,6 +62,7 @@ export function useTurnTimer(seconds: number, active: boolean, onExpire: () => v
         setTimeLeft(seconds);
         onExpireRef.current?.();
       } else {
+        if (remaining <= TICK_STARTS_AT) playSound("tick");
         setTimeLeft(remaining);
       }
     }, 1000);

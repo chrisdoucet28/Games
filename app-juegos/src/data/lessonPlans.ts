@@ -1,12 +1,12 @@
-import { TOPIC_LIBRARY } from "./topics";
-import { LESSONS } from "./lessons";
-
 // Round-out exercise content for the Lesson Plans feature (see LessonPlanScreen.tsx) — the one
 // deliberately-chosen extra practice format per topic that rounds out a ~30-minute PPP sequence,
 // sitting right before the speaking wrap-up. Everything else in a lesson plan (Presentation,
 // controlled practice, open production, speaking) is assembled live from lessons.ts/topics.ts —
-// this file holds only the piece that can't be, plus a helper for the one format (Unscramble)
-// that's generated at render time instead of hand-authored.
+// this file holds only the piece that can't be. The Unscramble-building helper that used to live
+// at the bottom of this file moved to lessonPlanUnscramble.ts: it needs TOPIC_LIBRARY (topics.ts's
+// ~5MB question bank), and this file's own LESSON_PLANS export is needed eagerly by the always-
+// loaded main app shell — keeping them apart means that eager need doesn't drag TOPIC_LIBRARY
+// along with it into the same bundle.
 //
 // Scope: all 5 CEFR levels — every topic in topics.ts/lessons.ts has a Lesson Plan.
 // Every key here must match a topics.ts / lessons.ts topic id (both already required to match
@@ -227,12 +227,12 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
     segments: [
       "My English class is ", { blank: "on", base: "day" }, " Monday, and it starts ",
       { blank: "at", base: "time" }, " six o'clock ", { blank: "in", base: "part of day" },
-      " the evening. My birthday is ", { blank: "in", base: "month" }, " July, ",
-      { blank: "on", base: "date" }, " the 15th (the fifteenth). This year, my birthday party is ",
+      " the evening. My birthday is ", { blank: "in", base: "month" }, " August, ",
+      { blank: "on", base: "date" }, " the 20th (the twentieth). This year, my birthday party is ",
       { blank: "on", base: "day" }, " Saturday, and it starts ", { blank: "at", base: "time" },
       " midday. We usually meet ", { blank: "in", base: "part of day" },
       " the morning for coffee, but the final exam is ", { blank: "on", base: "date" },
-      " June 3rd (the third), and it starts ", { blank: "at", base: "time" }, " nine o'clock.",
+      " October 12th (the twelfth), and it starts ", { blank: "at", base: "time" }, " nine o'clock.",
     ],
   },
 
@@ -244,7 +244,7 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
       { term: "That is her jacket.", definition: "That jacket is hers." },
       { term: "This is our house.", definition: "This house is ours." },
       { term: "That is their car.", definition: "That car is theirs." },
-      { term: "Whose bag is this?", definition: "It's mine." },
+      { term: "Whose keys are these?", definition: "They're his." },
     ],
   },
 
@@ -295,7 +295,7 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
   giving_directions: {
     kind: "scenario",
     prompts: [
-      { situation: "A tourist stops you and asks: “Excuse me, how do I get to the train station?” It's straight ahead, then left at the lights.", instruction: "Give them directions.", sample: "Go straight ahead, then turn left at the traffic lights. It's just around the corner." },
+      { situation: "A tourist stops you and asks: “Excuse me, how do I get to the train station?” It's straight ahead, then left at the lights.", instruction: "Give them directions.", sample: "Go straight ahead, then turn left at the church. You can't miss it." },
       { situation: "Someone asks if the museum is far from where you're standing — it's about a five-minute walk.", instruction: "Answer their question about distance.", sample: "No, it isn't far — it's about a five-minute walk from here." },
       { situation: "A driver at a roundabout asks you which way to go for the hospital — they need the second exit.", instruction: "Tell them which exit to take.", sample: "Go round the roundabout and take the second exit." },
       { situation: "Someone describes a place to you: “The café is on your left, right here.” Your friend then asks you what to do.", instruction: "Turn their description into an instruction for your friend.", sample: "Turn left for the café." },
@@ -378,23 +378,23 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
   first_conditional: {
     kind: "scenario",
     prompts: [
-      { situation: "You're planning a picnic tomorrow, but the forecast looks uncertain.", instruction: "Say what will happen if it rains, using the first conditional.", sample: "If it rains, we'll cancel the trip." },
-      { situation: "Your friend keeps putting off leaving for the station.", instruction: "Warn them about being late, using the first conditional.", sample: "If you don't leave now, you'll miss the train." },
+      { situation: "You're planning a picnic tomorrow, but the forecast looks uncertain.", instruction: "Say what will happen if it rains, using the first conditional.", sample: "If it rains, we'll have the picnic indoors instead." },
+      { situation: "Your friend keeps putting off leaving for the station.", instruction: "Warn them about being late, using the first conditional.", sample: "If you don't get a move on, you'll miss your train." },
       { situation: "Your friend is nervous about an upcoming exam.", instruction: "Reassure them about what will happen if they study hard, using the first conditional.", sample: "If you study hard, you'll pass the exam." },
-      { situation: "A friend offers to help you move house if you buy them dinner in return.", instruction: "Make the same offer to another friend, using the first conditional.", sample: "If you help me move, I'll buy you dinner." },
-      { situation: "You want to say a friend can go out only if they finish their homework first.", instruction: "Say it, using 'as long as'.", sample: "You can go out as long as you finish your homework." },
+      { situation: "A friend offers to help you move house if you buy them dinner in return.", instruction: "Make the same offer to another friend, using the first conditional.", sample: "If you help me move this weekend, I'll cook you dinner." },
+      { situation: "You want to say a friend can go out only if they finish their homework first.", instruction: "Say it, using 'as long as'.", sample: "You can go out and play as long as you finish your homework first." },
     ],
   },
 
   making_questions: {
     kind: "errorPassage",
-    text: "A: Where does she works?\nB: She works at a hospital in the city centre.\nA: What you did yesterday?\nB: I stayed home and watched a film.\nA: How long does it takes to get there?\nB: About twenty minutes by bus.\nA: Where you are going on holiday this year?\nB: We're going to Portugal in July.",
-    corrected: "A: Where does she work?\nB: She works at a hospital in the city centre.\nA: What did you do yesterday?\nB: I stayed home and watched a film.\nA: How long does it take to get there?\nB: About twenty minutes by bus.\nA: Where are you going on holiday this year?\nB: We're going to Portugal in July.",
+    text: "A: Where does she works?\nB: She works at a hospital in the city centre.\nA: What she did yesterday?\nB: She stayed home and watched a film.\nA: How long does it takes to get there?\nB: About twenty minutes by bus.\nA: Where she is going on holiday this year?\nB: She's going to Portugal in July.",
+    corrected: "A: Where does she work?\nB: She works at a hospital in the city centre.\nA: What did she do yesterday?\nB: She stayed home and watched a film.\nA: How long does it take to get there?\nB: About twenty minutes by bus.\nA: Where is she going on holiday this year?\nB: She's going to Portugal in July.",
     fixes: [
       "'Where does she works?' → 'Where does she work?' (base verb after 'does')",
-      "'What you did yesterday?' → 'What did you do yesterday?' (need 'did' before the subject)",
+      "'What she did yesterday?' → 'What did she do yesterday?' (need 'did' before the subject)",
       "'How long does it takes?' → 'How long does it take?' (base verb after 'does')",
-      "'Where you are going...?' → 'Where are you going...?' (auxiliary before the subject)",
+      "'Where she is going...?' → 'Where is she going...?' (auxiliary before the subject)",
     ],
   },
 
@@ -464,11 +464,11 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
   modals_obligation: {
     kind: "scenario",
     prompts: [
-      { situation: "Your school requires all students to wear a uniform — there's no choice.", instruction: "Say it using 'must' or 'have to'.", sample: "Students must wear a uniform." },
+      { situation: "Your school requires all students to wear a uniform — there's no choice.", instruction: "Say it using 'must' or 'have to'.", sample: "Students have to wear a uniform every day." },
       { situation: "Smoking is completely forbidden inside your office building.", instruction: "Say it using 'mustn't'.", sample: "You mustn't smoke here." },
-      { situation: "The museum is free, so visitors don't need to pay.", instruction: "Say it using 'don't have to'.", sample: "You don't have to pay — it's free." },
-      { situation: "You want to ask a colleague whether booking a table in advance is necessary at a restaurant.", instruction: "Ask, using 'have to'.", sample: "Do you have to book in advance?" },
-      { situation: "Your report is due by Friday — there's no way around it.", instruction: "Say it using 'have to'.", sample: "I have to finish this by Friday." },
+      { situation: "The museum is free, so visitors don't need to pay.", instruction: "Say it using 'don't have to'.", sample: "Visitors don't have to pay any entry fee." },
+      { situation: "You want to ask a colleague whether booking a table in advance is necessary at a restaurant.", instruction: "Ask, using 'have to'.", sample: "Do we have to reserve a table ahead of time?" },
+      { situation: "Your report is due by Friday — there's no way around it.", instruction: "Say it using 'have to'.", sample: "I have to hand in my project by Friday." },
     ],
   },
 
@@ -487,18 +487,18 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
   invitations: {
     kind: "scenario",
     prompts: [
-      { situation: "You want to invite a friend to your birthday party this weekend.", instruction: "Invite them, using 'would you like to'.", sample: "Would you like to come to my party?" },
+      { situation: "You want to invite a friend to your birthday party this weekend.", instruction: "Invite them, using 'would you like to'.", sample: "Would you like to come to my party this weekend?" },
       { situation: "A friend invites you to the cinema, and you're excited to go.", instruction: "Accept enthusiastically.", sample: "I'd love to! That sounds great." },
       { situation: "A friend invites you to dinner, but you already have plans that evening.", instruction: "Decline politely, without closing the door completely.", sample: "I'm afraid I can't make it — I already have plans. Maybe another time?" },
-      { situation: "You want to suggest going bowling tonight, in a casual way.", instruction: "Suggest it, using 'how about'.", sample: "How about going bowling tonight?" },
-      { situation: "You're organizing a formal work event and inviting a business partner.", instruction: "Invite them formally.", sample: "We would be delighted if you could attend." },
+      { situation: "You want to suggest going bowling tonight, in a casual way.", instruction: "Suggest it, using 'how about'.", sample: "How about we go bowling this evening?" },
+      { situation: "You're organizing a formal work event and inviting a business partner.", instruction: "Invite them formally.", sample: "We would be delighted if you could attend our annual conference." },
     ],
   },
 
   telling_stories: {
     kind: "paragraphCloze",
     segments: [
-      "", { blank: "One day", base: "story opener" }, ", I was walking home from work when something strange happened. I ",
+      "", { blank: "One day", base: "story opener" }, ", I was walking home from work when I heard a strange noise behind me. I ",
       { blank: "saw", base: "see" }, " a small dog sitting outside a shop, completely alone. ",
       { blank: "First", base: "sequence word" }, ", I looked around for its owner, but nobody was there. ",
       { blank: "Then", base: "sequence word" }, ", I decided to take the dog to the police station. ",
@@ -526,11 +526,11 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
   ordering_food: {
     kind: "scenario",
     prompts: [
-      { situation: "The waiter asks if you're ready to order.", instruction: "Order politely, using 'I'd like' or 'could I have'.", sample: "Could I have the pasta, please?" },
-      { situation: "You want to know if your dish comes with rice before you order.", instruction: "Ask the waiter.", sample: "Does it come with rice?" },
-      { situation: "You'd prefer a salad instead of the chips that come with your meal.", instruction: "Ask to swap them.", sample: "Could I swap the chips for a salad?" },
-      { situation: "You're allergic to nuts and want to check the soup is safe.", instruction: "Ask the waiter.", sample: "Could you tell me if the soup contains nuts?" },
-      { situation: "You've finished eating and want to pay.", instruction: "Ask for the bill.", sample: "Could we have the bill, please?" },
+      { situation: "The waiter asks if you're ready to order.", instruction: "Order politely, using 'I'd like' or 'could I have'.", sample: "I'd like the grilled chicken, please." },
+      { situation: "You want to know if your dish comes with rice before you order.", instruction: "Ask the waiter.", sample: "Does it come with a side salad?" },
+      { situation: "You'd prefer a salad instead of the chips that come with your meal.", instruction: "Ask to swap them.", sample: "Could I swap the fries for a side salad instead?" },
+      { situation: "You're allergic to nuts and want to check the soup is safe.", instruction: "Ask the waiter.", sample: "Could you tell me if this dish contains any nuts?" },
+      { situation: "You've finished eating and want to pay.", instruction: "Ask for the bill.", sample: "Excuse me, could we get the check, please?" },
     ],
   },
 
@@ -577,7 +577,7 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
   food_and_eating: {
     kind: "scenario",
     prompts: [
-      { situation: "A friend asks what you ate for dinner last night.", instruction: "Answer using the past simple.", sample: "I had pasta for dinner last night." },
+      { situation: "A friend asks what you ate for dinner last night.", instruction: "Answer using the past simple.", sample: "I cooked a chicken curry for dinner last night." },
       { situation: "Someone offers you a dish that contains nuts, and you're allergic to them.", instruction: "Explain politely why you can't eat it.", sample: "I'm allergic to nuts, so I can't eat that, sorry." },
       { situation: "You're at a restaurant and want to know if a dish is suitable for vegetarians.", instruction: "Ask the waiter.", sample: "Is this dish suitable for vegetarians?" },
       { situation: "Your friend is trying to eat healthier and asks for your advice about breakfast.", instruction: "Give advice using 'shouldn't'.", sample: "You shouldn't skip breakfast." },
@@ -790,8 +790,8 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
   second_conditional: {
     kind: "scenario",
     prompts: [
-      { situation: "Someone asks what you would do if you won the lottery.", instruction: "Answer using the second conditional.", sample: "If I won the lottery, I would travel the world." },
-      { situation: "A friend can't decide what to do and asks for your advice.", instruction: "Give advice, using 'if I were you'.", sample: "If I were you, I would apologise." },
+      { situation: "Someone asks what you would do if you won the lottery.", instruction: "Answer using the second conditional.", sample: "If I won the lottery, I would buy a house by the sea." },
+      { situation: "A friend can't decide what to do and asks for your advice.", instruction: "Give advice, using 'if I were you'.", sample: "If I were you, I would talk to your manager about it." },
       { situation: "Someone asks what you'd do if you could live anywhere in the world.", instruction: "Answer using the second conditional.", sample: "If I could live anywhere, I would live by the sea." },
       { situation: "A friend asks what would happen if you lost your phone right now.", instruction: "Answer using the second conditional.", sample: "If I lost my phone, I would panic." },
       { situation: "Someone asks you to imagine having no work or school tomorrow.", instruction: "Say what you would do, using the second conditional.", sample: "If I had no work tomorrow, I would sleep all day." },
@@ -801,11 +801,11 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
   modal_verbs: {
     kind: "scenario",
     prompts: [
-      { situation: "You want to ask your teacher, very politely, if you can leave the room.", instruction: "Ask permission, using 'may'.", sample: "May I leave the room?" },
-      { situation: "A friend has had a bad cough for two weeks.", instruction: "Give advice, using 'should'.", sample: "You should see a doctor." },
-      { situation: "Your friend is about to miss their train if they don't hurry.", instruction: "Warn them, using 'had better'.", sample: "You had better hurry up." },
+      { situation: "You want to ask your teacher, very politely, if you can leave the room.", instruction: "Ask permission, using 'may'.", sample: "May I be excused for a few minutes?" },
+      { situation: "A friend has had a bad cough for two weeks.", instruction: "Give advice, using 'should'.", sample: "You should get that cough checked out." },
+      { situation: "Your friend is about to miss their train if they don't hurry.", instruction: "Warn them, using 'had better'.", sample: "You had better get moving or you'll miss it." },
       { situation: "Someone asks if you can speak any other languages.", instruction: "Answer using 'can' for present ability.", sample: "I can speak a little French." },
-      { situation: "Someone asks about a specific achievement — running a marathon after months of training.", instruction: "Answer using 'was able to' for one specific past achievement.", sample: "After months of training, I was able to run a marathon." },
+      { situation: "Someone asks about a specific achievement — running a marathon after months of training.", instruction: "Answer using 'was able to' for one specific past achievement.", sample: "After six months of training, I was able to finish my first marathon." },
     ],
   },
 
@@ -870,8 +870,8 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
   giving_opinions: {
     kind: "scenario",
     prompts: [
-      { situation: "Someone asks your opinion on whether social media is good or bad for society.", instruction: "Give your opinion, using a fixed opinion-opener.", sample: "In my opinion, social media has both positive and negative effects." },
-      { situation: "You want to give a cautious, softened opinion about working from home.", instruction: "Give your opinion, using a softened phrase.", sample: "I tend to think that working from home is more productive." },
+      { situation: "Someone asks your opinion on whether social media is good or bad for society.", instruction: "Give your opinion, using a fixed opinion-opener.", sample: "In my opinion, social media does more harm than good for teenagers." },
+      { situation: "You want to give a cautious, softened opinion about working from home.", instruction: "Give your opinion, using a softened phrase.", sample: "I tend to think that a hybrid schedule works best for most people." },
       { situation: "You feel very strongly that every child deserves a good education.", instruction: "Give a strong, confident opinion.", sample: "I strongly believe that every child deserves a good education." },
       { situation: "Someone asks: “Do you think homework is useless?”", instruction: "Answer with your own opinion.", sample: "If you ask me, homework does have some value, but not too much of it." },
       { situation: "You want to ask a classmate for their opinion about banning phones in schools.", instruction: "Ask them, using 'do you think that'.", sample: "Do you think that phones should be banned in schools?" },
@@ -881,11 +881,11 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
   asking_for_clarification: {
     kind: "scenario",
     prompts: [
-      { situation: "Someone speaks too quickly and you didn't catch what they said.", instruction: "Ask them to repeat it.", sample: "Sorry, could you repeat that, please?" },
-      { situation: "A colleague uses the phrase 'flexible working hours' and you're not sure exactly what it means.", instruction: "Ask them to explain.", sample: "What do you mean by 'flexible working hours'?" },
-      { situation: "Someone gives you complicated instructions and you want to check you understood before they continue.", instruction: "Confirm what you think they meant.", sample: "Just to clarify, are we meeting at nine or ten?" },
-      { situation: "You didn't hear a name properly and need it spelled out.", instruction: "Ask them to spell it.", sample: "Could you spell that for me? I've never heard that surname before." },
-      { situation: "Someone explains something quickly and you lost track partway through.", instruction: "Ask them to slow down or clarify.", sample: "I'm not sure I follow — could you go back to your first point?" },
+      { situation: "Someone speaks too quickly and you didn't catch what they said.", instruction: "Ask them to repeat it.", sample: "Sorry, I missed that — could you say it again?" },
+      { situation: "A colleague uses the phrase 'work-life balance' and you're not sure exactly what it means.", instruction: "Ask them to explain.", sample: "What do you mean by 'work-life balance'?" },
+      { situation: "Someone gives you complicated instructions and you want to check you understood before they continue.", instruction: "Confirm what you think they meant.", sample: "Just to clarify, are we submitting the report on Thursday or Friday?" },
+      { situation: "You didn't hear a name properly and need it spelled out.", instruction: "Ask them to spell it.", sample: "Could you spell that for me? I want to get the company name right." },
+      { situation: "Someone explains something quickly and you lost track partway through.", instruction: "Ask them to slow down or clarify.", sample: "Sorry, I lost you halfway through — could you start again from the second step?" },
     ],
   },
 
@@ -959,12 +959,12 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
 
   career_choices: {
     kind: "errorPassage",
-    text: "I am agree that soft skills are important in any job, and I learned that the hard way this year. Your success depends of how hard you work, in my experience — I studied for weeks before my interview. Unfortunately, I couldn't assist the job interview last week because I was sick, so I had to reschedule it. My brother is engineer at a tech company, and he helped me prepare — I have started my new job last Monday thanks to his advice, and if you will update your CV like he showed me, you'll have a better chance next time.",
-    corrected: "I agree that soft skills are important in any job, and I learned that the hard way this year. Your success depends on how hard you work, in my experience — I studied for weeks before my interview. Unfortunately, I couldn't attend the job interview last week because I was sick, so I had to reschedule it. My brother is an engineer at a tech company, and he helped me prepare — I started my new job last Monday thanks to his advice, and if you update your CV like he showed me, you'll have a better chance next time.",
+    text: "I am agree that soft skills are important in any job, and I learned that the hard way this year. Your success depends of how hard you work, in my experience — I studied for weeks before my interview. Unfortunately, I couldn't assist a similar interview last year because I was sick, so I missed my chance that time. My brother is engineer at a tech company, and he helped me prepare properly this time — I have started my new job last Monday thanks to his advice, and if you will update your CV like he showed me, you'll have a better chance next time.",
+    corrected: "I agree that soft skills are important in any job, and I learned that the hard way this year. Your success depends on how hard you work, in my experience — I studied for weeks before my interview. Unfortunately, I couldn't attend a similar interview last year because I was sick, so I missed my chance that time. My brother is an engineer at a tech company, and he helped me prepare properly this time — I started my new job last Monday thanks to his advice, and if you update your CV like he showed me, you'll have a better chance next time.",
     fixes: [
       "'I am agree' → 'I agree' ('agree' is a verb, no 'am')",
       "'depends of how hard you work' → 'depends on how hard you work' ('depend on', not 'depend of')",
-      "'I couldn't assist the job interview' → 'I couldn't attend the job interview' ('assist' means to help; 'attend' means to go to')",
+      "'I couldn't assist a similar interview' → 'I couldn't attend a similar interview' ('assist' means to help; 'attend' means to go to')",
       "'My brother is engineer' → 'My brother is an engineer' (article needed before a profession)",
       "'I have started my new job last Monday' → 'I started my new job last Monday' (specific past time → past simple)",
       "'if you will update your CV' → 'if you update your CV' (no 'will' in the if-clause)",
@@ -1034,9 +1034,9 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
     kind: "scenario",
     prompts: [
       { situation: "A travel agent asks if you've ever been to South America.", instruction: "Answer using the present perfect.", sample: "No, I've never been to South America, but I'd love to go." },
-      { situation: "Someone asks about your last holiday specifically.", instruction: "Answer using the past simple.", sample: "We went to Spain last summer." },
-      { situation: "A friend asks what happens if you book your flights early.", instruction: "Answer using the first conditional.", sample: "If you book early, you'll save money." },
-      { situation: "You're excited about an upcoming trip to see the pyramids.", instruction: "Say so, using 'look forward to'.", sample: "I'm looking forward to seeing the pyramids." },
+      { situation: "Someone asks about your last holiday specifically.", instruction: "Answer using the past simple.", sample: "We drove down the coast of Portugal last April." },
+      { situation: "A friend asks what happens if you book your flights early.", instruction: "Answer using the first conditional.", sample: "If you book early, you'll get the window seat." },
+      { situation: "You're excited about an upcoming trip to see the pyramids.", instruction: "Say so, using 'look forward to'.", sample: "I'm looking forward to trying the street food there." },
       { situation: "Someone asks how your flight was arranged.", instruction: "Answer using the passive voice.", sample: "The whole trip was organized by a travel agency." },
     ],
   },
@@ -1089,8 +1089,8 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
       { situation: "Someone asks why you were late to the meeting.", instruction: "Explain the reason, using 'because'.", sample: "I was late because I missed the bus." },
       { situation: "You need to explain a flight delay in a formal announcement.", instruction: "Explain it, using 'due to'.", sample: "The flight was delayed due to bad weather." },
       { situation: "Your friend is already at the café, so there's no need to explain why you're going there too.", instruction: "Say it, using 'as' or 'since' (a reason they already expect).", sample: "As you're already there, I'll join you." },
-      { situation: "You want to explain that, taking the circumstances into account, everything actually went well.", instruction: "Say it, using 'considering'.", sample: "Considering the weather, the event went really well." },
-      { situation: "A match got cancelled because of heavy rain.", instruction: "Explain the cancellation, using 'because of'.", sample: "The match was cancelled because of the heavy rain." },
+      { situation: "You want to explain that, taking the circumstances into account, everything actually went well.", instruction: "Say it, using 'considering'.", sample: "Considering how last-minute it was, the party turned out great." },
+      { situation: "A match got cancelled because of heavy rain.", instruction: "Explain the cancellation, using 'because of'.", sample: "The concert was cancelled because of a power outage." },
     ],
   },
 
@@ -1162,11 +1162,11 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
   sport_and_fitness: {
     kind: "scenario",
     prompts: [
-      { situation: "Someone asks if you've ever run a marathon.", instruction: "Answer using the present perfect.", sample: "I have never run a marathon, but I'd like to try one day." },
-      { situation: "A friend asks what will happen if they train every day.", instruction: "Answer using the first conditional.", sample: "If you train every day, you will get fitter." },
-      { situation: "Someone asks how the championship is organised each year.", instruction: "Answer using the passive voice.", sample: "The championship is held every year in a different city." },
-      { situation: "Someone asks you to compare your fitness now to last year.", instruction: "Compare using a comparative.", sample: "I'm fitter than I was last year." },
-      { situation: "A friend didn't warm up before a game and got hurt.", instruction: "Explain what happens if you don't warm up, using the first conditional.", sample: "If you don't warm up, you will injure yourself." },
+      { situation: "Someone asks if you've ever run a marathon.", instruction: "Answer using the present perfect.", sample: "I've never done a triathlon, but I'm training for one now." },
+      { situation: "A friend asks what will happen if they train every day.", instruction: "Answer using the first conditional.", sample: "If you train every day, you'll build up more stamina." },
+      { situation: "Someone asks how the championship is organised each year.", instruction: "Answer using the passive voice.", sample: "The tournament is sponsored by a different company each season." },
+      { situation: "Someone asks you to compare your fitness now to last year.", instruction: "Compare using a comparative.", sample: "I can run much further than I could a year ago." },
+      { situation: "A friend didn't warm up before a game and got hurt.", instruction: "Explain what happens if you don't warm up, using the first conditional.", sample: "If you skip your warm-up, you'll risk pulling a muscle." },
     ],
   },
 
@@ -1225,10 +1225,10 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
   future_in_past: {
     kind: "scenario",
     prompts: [
-      { situation: "You had planned to go for a run, but it started raining just as you were about to leave.", instruction: "Describe your interrupted plan, using 'was going to'.", sample: "I was going to go for a run, but it started raining." },
-      { situation: "You were right at the door, ready to leave the house, when the phone suddenly rang.", instruction: "Describe it, using 'was about to'.", sample: "I was about to leave the house when the phone rang." },
-      { situation: "A friend told you last week she would call you back later that day.", instruction: "Report what she said, using reported speech.", sample: "She said she would call me back later." },
-      { situation: "As a child, you never thought you'd end up living in another country — but you do now.", instruction: "Describe that surprise, using 'would'.", sample: "I never thought I would live abroad one day." },
+      { situation: "You had planned to go for a run, but it started raining just as you were about to leave.", instruction: "Describe your interrupted plan, using 'was going to'.", sample: "I was going to go jogging in the park, but it started pouring." },
+      { situation: "You were right at the door, ready to leave the house, when the phone suddenly rang.", instruction: "Describe it, using 'was about to'.", sample: "I was about to head out the door when my phone buzzed." },
+      { situation: "A friend told you last week she would call you back later that day.", instruction: "Report what she said, using reported speech.", sample: "She told me she'd call me back before dinner." },
+      { situation: "As a child, you never thought you'd end up living in another country — but you do now.", instruction: "Describe that surprise, using 'would'.", sample: "I never imagined I'd end up settling down in another city." },
       { situation: "You had big plans for the weekend, but everything changed at the last minute.", instruction: "Describe your original plan and what actually happened.", sample: "I was going to visit my parents, but I got sick instead." },
     ],
   },
@@ -1237,9 +1237,9 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
     kind: "scenario",
     prompts: [
       { situation: "You failed an exam because you didn't study.", instruction: "Say what would have happened if you had studied, using the third conditional.", sample: "If I had studied, I would have passed." },
-      { situation: "A friend wasn't careful and had an accident.", instruction: "Say what would have happened if they'd been more careful.", sample: "If you had been more careful, the accident wouldn't have happened." },
-      { situation: "The fire alarm went off just in time, and everyone escaped.", instruction: "Say what might not have happened without the alarm, using 'might not have'.", sample: "If the fire alarm hadn't gone off, we might not have escaped in time." },
-      { situation: "A friend didn't tell you about a problem, so you couldn't help.", instruction: "Say what you could have done if they'd told you, using 'could have'.", sample: "If you had told me, I could have helped." },
+      { situation: "A friend wasn't careful and had an accident.", instruction: "Say what would have happened if they'd been more careful.", sample: "If you had watched the road, you wouldn't have hit the curb." },
+      { situation: "The fire alarm went off just in time, and everyone escaped.", instruction: "Say what might not have happened without the alarm, using 'might not have'.", sample: "If someone hadn't smelled the smoke, the fire might not have been caught in time." },
+      { situation: "A friend didn't tell you about a problem, so you couldn't help.", instruction: "Say what you could have done if they'd told you, using 'could have'.", sample: "If you had mentioned it sooner, I could have lent you the money." },
       { situation: "Someone missed a great opportunity because they were too nervous to apply.", instruction: "Say what would have happened if they'd applied, using the third conditional.", sample: "If she had applied, she would have gotten the job." },
     ],
   },
@@ -1284,11 +1284,11 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
   past_modals_deduction: {
     kind: "scenario",
     prompts: [
-      { situation: "The lights in your friend's house are off and her car is gone.", instruction: "Make a confident guess about where she is, using 'must have'.", sample: "She must have left already." },
-      { situation: "Your friend wasn't at the party, and you're not sure why.", instruction: "Make an uncertain guess, using 'might have'.", sample: "He might have forgotten about it." },
-      { situation: "Someone claims to have known about a surprise party in advance, but they looked completely shocked when it happened.", instruction: "Say it's impossible, using 'can't have'.", sample: "She can't have known about the surprise — she looked so shocked." },
-      { situation: "You failed an exam because you didn't study enough.", instruction: "Express regret, using 'should have'.", sample: "I should have studied harder." },
-      { situation: "A friend drove dangerously fast and nearly crashed.", instruction: "Criticize their choice, using 'shouldn't have'.", sample: "You shouldn't have driven so fast." },
+      { situation: "The lights in your friend's house are off and her car is gone.", instruction: "Make a confident guess about where she is, using 'must have'.", sample: "She must have gone out for the evening." },
+      { situation: "Your friend wasn't at the party, and you're not sure why.", instruction: "Make an uncertain guess, using 'might have'.", sample: "He might have gotten stuck at work." },
+      { situation: "Someone claims to have known about a surprise party in advance, but they looked completely shocked when it happened.", instruction: "Say it's impossible, using 'can't have'.", sample: "He can't have known — his reaction was completely genuine." },
+      { situation: "You failed an exam because you didn't study enough.", instruction: "Express regret, using 'should have'.", sample: "I should have reviewed my notes the night before." },
+      { situation: "A friend drove dangerously fast and nearly crashed.", instruction: "Criticize their choice, using 'shouldn't have'.", sample: "You shouldn't have taken that corner so fast." },
     ],
   },
 
@@ -1344,11 +1344,11 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
   persuading_disagreeing_advanced: {
     kind: "scenario",
     prompts: [
-      { situation: "You want to present a formal argument that remote work has made teams more productive.", instruction: "Introduce your argument formally.", sample: "I'd argue that remote work has made teams more productive." },
-      { situation: "You want to present both sides of a debate about a new policy.", instruction: "Weigh both sides using 'on the one hand... on the other hand'.", sample: "On the one hand, it saves money; on the other hand, it risks quality." },
-      { situation: "A colleague makes a valid point, but you still think you should wait before deciding.", instruction: "Concede politely, then disagree.", sample: "That's a fair point, but it doesn't account for long-term costs." },
-      { situation: "You strongly disagree with someone's data-based conclusion.", instruction: "Disagree formally, using 'I beg to differ'.", sample: "I beg to differ — the data suggests the opposite." },
-      { situation: "After a long debate, you and a colleague still don't agree, and you want to end it politely.", instruction: "Suggest ending the disagreement peacefully.", sample: "Let's just agree to disagree on this one." },
+      { situation: "You want to present a formal argument that remote work has made teams more productive.", instruction: "Introduce your argument formally.", sample: "I'd argue that shorter meetings have made our team far more efficient." },
+      { situation: "You want to present both sides of a debate about a new policy.", instruction: "Weigh both sides using 'on the one hand... on the other hand'.", sample: "On the one hand, it speeds things up; on the other hand, it cuts corners on safety." },
+      { situation: "A colleague makes a valid point, but you still think you should wait before deciding.", instruction: "Concede politely, then disagree.", sample: "That's a fair point, but I don't think we have enough data to commit yet." },
+      { situation: "You strongly disagree with someone's data-based conclusion.", instruction: "Disagree formally, using 'I beg to differ'.", sample: "I beg to differ — our own numbers tell a completely different story." },
+      { situation: "After a long debate, you and a colleague still don't agree, and you want to end it politely.", instruction: "Suggest ending the disagreement peacefully.", sample: "I don't think we're going to see eye to eye on this, so let's leave it there." },
     ],
   },
 
@@ -1383,11 +1383,11 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
   work_life_balance: {
     kind: "scenario",
     prompts: [
-      { situation: "You've been working overtime every weekend and feel completely exhausted.", instruction: "Give advice to someone in the same situation, using 'should'.", sample: "You should take regular breaks to avoid burnout." },
-      { situation: "A friend keeps checking work emails late at night and can never relax.", instruction: "Tell them what they need to do, using 'switch off'.", sample: "You need to switch off at the end of the day." },
-      { situation: "Someone asks what would happen if companies offered more flexible hours.", instruction: "Answer using the second conditional.", sample: "If companies offered more flexibility, employees would feel less stressed." },
-      { situation: "A colleague's manager never takes a lunch break and always seems stressed.", instruction: "Describe them, using a relative clause with 'who'.", sample: "Her manager, who never takes a lunch break, seems constantly stressed." },
-      { situation: "You want to politely ask a colleague whether their company offers mental health support.", instruction: "Ask an indirect, polite question.", sample: "Do you know if your company offers mental health support?" },
+      { situation: "You've been working overtime every weekend and feel completely exhausted.", instruction: "Give advice to someone in the same situation, using 'should'.", sample: "You should set a firm limit on your working hours." },
+      { situation: "A friend keeps checking work emails late at night and can never relax.", instruction: "Tell them what they need to do, using 'switch off'.", sample: "You need to turn off notifications after dinner and switch off properly." },
+      { situation: "Someone asks what would happen if companies offered more flexible hours.", instruction: "Answer using the second conditional.", sample: "If more workplaces allowed remote days, parents would find things much easier." },
+      { situation: "A colleague's manager never takes a lunch break and always seems stressed.", instruction: "Describe them, using a relative clause with 'who'.", sample: "My last boss, who answered emails at midnight, burned out within a year." },
+      { situation: "You want to politely ask a colleague whether their company offers mental health support.", instruction: "Ask an indirect, polite question.", sample: "Do you know if there's an employee wellness program at your workplace?" },
     ],
   },
 
@@ -1417,11 +1417,11 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
   climate_change: {
     kind: "scenario",
     prompts: [
-      { situation: "Someone asks what would happen if governments invested more in renewable energy.", instruction: "Answer using the second conditional.", sample: "If governments invested more in renewable energy, emissions would fall." },
-      { situation: "A friend asks why deforestation causes biodiversity loss, but doesn't want a lecture — just a quick, polite answer.", instruction: "Ask them back politely if they'd like to know why, using an embedded question.", sample: "Could you tell me why deforestation causes biodiversity loss? I've always wondered." },
-      { situation: "Someone asks who is most responsible for greenhouse gas emissions.", instruction: "Give your opinion.", sample: "Factories are responsible for a large percentage of emissions, in my opinion." },
-      { situation: "A friend says they never recycle and asks if it really matters.", instruction: "Explain why it matters, describing people who do using a relative clause.", sample: "People who recycle their waste help protect the environment." },
-      { situation: "Someone asks what would happen if more people used public transport.", instruction: "Answer using the second conditional.", sample: "If people used public transport more, air quality would improve." },
+      { situation: "Someone asks what would happen if governments invested more in renewable energy.", instruction: "Answer using the second conditional.", sample: "If the government subsidized solar panels, more households would switch over." },
+      { situation: "A friend asks why deforestation causes biodiversity loss, but doesn't want a lecture — just a quick, polite answer.", instruction: "Ask them back politely if they'd like to know why, using an embedded question.", sample: "Do you know why so many species depend on the rainforest to survive?" },
+      { situation: "Someone asks who is most responsible for greenhouse gas emissions.", instruction: "Give your opinion.", sample: "In my view, heavy industry bears most of the responsibility for emissions." },
+      { situation: "A friend says they never recycle and asks if it really matters.", instruction: "Explain why it matters, describing people who do using a relative clause.", sample: "Households that sort their rubbish properly cut down a lot of landfill waste." },
+      { situation: "Someone asks what would happen if more people used public transport.", instruction: "Answer using the second conditional.", sample: "If fewer people drove to work, traffic congestion would ease considerably." },
     ],
   },
 
@@ -1453,10 +1453,10 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
   crime_and_law: {
     kind: "scenario",
     prompts: [
-      { situation: "The police have spent weeks working on a difficult case.", instruction: "Describe their ongoing effort, using the present perfect continuous.", sample: "The police have been investigating the crime for weeks." },
-      { situation: "Someone asks what you'd do if you witnessed a crime.", instruction: "Answer using the second conditional.", sample: "If you witnessed a crime, you would call the police." },
-      { situation: "You want to ask a lawyer, politely and indirectly, what the punishment for a crime usually is.", instruction: "Ask an embedded question.", sample: "Do you know what the punishment usually is for this kind of crime?" },
-      { situation: "A man robbed a bank and escaped on foot before anyone could stop him.", instruction: "Describe him, using a relative clause with 'who'.", sample: "The man who robbed the bank escaped on foot." },
+      { situation: "The police have spent weeks working on a difficult case.", instruction: "Describe their ongoing effort, using the present perfect continuous.", sample: "Detectives have been piecing together the evidence for over a month." },
+      { situation: "Someone asks what you'd do if you witnessed a crime.", instruction: "Answer using the second conditional.", sample: "If I saw a robbery happen, I would try to get a description of the suspect." },
+      { situation: "You want to ask a lawyer, politely and indirectly, what the punishment for a crime usually is.", instruction: "Ask an embedded question.", sample: "Could you tell me what sentence someone usually gets for this kind of offence?" },
+      { situation: "A man robbed a bank and escaped on foot before anyone could stop him.", instruction: "Describe him, using a relative clause with 'who'.", sample: "The thief who stole her purse ran off down the alley." },
       { situation: "Someone asks what would happen if someone broke into your house.", instruction: "Answer using the second conditional.", sample: "If someone broke into my house, I would call the police immediately." },
     ],
   },
@@ -1502,9 +1502,9 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
   mixed_conditionals: {
     kind: "scenario",
     prompts: [
-      { situation: "Someone chose a different career path years ago and now works in a completely different field.", instruction: "Say what would be true today if they'd made a different choice, using a mixed conditional.", sample: "If she had studied medicine, she would be a doctor today." },
-      { situation: "A shy colleague never speaks up in meetings, and missed a chance to share a good idea last week.", instruction: "Say what would have happened if they weren't so shy, using a mixed conditional.", sample: "If he weren't so shy, he would have spoken up at the meeting." },
-      { situation: "Someone took a scholarship years ago and it changed where they live now.", instruction: "Say what's true today because of that past decision.", sample: "If I had taken that scholarship, I would be studying in London now." },
+      { situation: "Someone chose a different career path years ago and now works in a completely different field.", instruction: "Say what would be true today if they'd made a different choice, using a mixed conditional.", sample: "If he had pursued music instead of law, he'd be touring the world today." },
+      { situation: "A shy colleague never speaks up in meetings, and missed a chance to share a good idea last week.", instruction: "Say what would have happened if they weren't so shy, using a mixed conditional.", sample: "If she weren't so nervous around the boss, she would have pitched her idea last week." },
+      { situation: "Someone took a scholarship years ago and it changed where they live now.", instruction: "Say what's true today because of that past decision.", sample: "If he hadn't accepted that transfer, he wouldn't be living overseas now." },
       { situation: "A friend missed a flight, and as a result isn't with everyone now.", instruction: "Say what would be true now if they hadn't missed it.", sample: "If she hadn't missed that flight, she would be here with us now." },
       { situation: "Someone isn't a native speaker, and you think that's why they didn't get a certain job.", instruction: "Say what would have happened if they were a native speaker.", sample: "If she were a native speaker, she would have gotten that job." },
     ],
@@ -1539,34 +1539,34 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
   business_professional_vocabulary: {
     kind: "scenario",
     prompts: [
-      { situation: "You want to briefly reconnect with a colleague once the figures are ready next week.", instruction: "Suggest it, using 'touch base'.", sample: "Let's touch base next week once the figures are in." },
-      { situation: "Your project needs someone to lead a new company initiative.", instruction: "Say who was chosen for the role, using 'spearhead'.", sample: "She was chosen to spearhead the new initiative." },
-      { situation: "Your team's process is too slow and needs simplifying to cut costs.", instruction: "Say what needs to happen, using 'streamline'.", sample: "We need to streamline our processes to cut costs." },
-      { situation: "A new project failed testing and the whole design needs to be redone.", instruction: "Describe the situation, using 'back to the drawing board'.", sample: "The design failed testing, so it's back to the drawing board." },
-      { situation: "Your assistant is overloaded, so you decide to reduce her workload.", instruction: "Describe what you did, using 'take something off someone's plate'.", sample: "The manager took some tasks off her assistant's plate." },
+      { situation: "You want to briefly reconnect with a colleague once the figures are ready next week.", instruction: "Suggest it, using 'touch base'.", sample: "Let's touch base after the client call on Thursday." },
+      { situation: "Your project needs someone to lead a new company initiative.", instruction: "Say who was chosen for the role, using 'spearhead'.", sample: "He was asked to spearhead the merger negotiations." },
+      { situation: "Your team's process is too slow and needs simplifying to cut costs.", instruction: "Say what needs to happen, using 'streamline'.", sample: "The board wants us to streamline the approval process by next quarter." },
+      { situation: "A new project failed testing and the whole design needs to be redone.", instruction: "Describe the situation, using 'back to the drawing board'.", sample: "The prototype didn't meet safety standards, so it's back to the drawing board." },
+      { situation: "Your assistant is overloaded, so you decide to reduce her workload.", instruction: "Describe what you did, using 'take something off someone's plate'.", sample: "I took the reporting duties off his plate so he could focus on the launch." },
     ],
   },
 
   memory_mind_psychology: {
     kind: "errorPassage",
-    text: "The patient said she forget things all the time, which worried her family. Rarely someone forgets such an important memory, according to her doctor. If she seek help sooner, she would have recovered faster, in his opinion. This bias must addressed before it gets worse, he explained.",
-    corrected: "The patient said she forgot things all the time, which worried her family. Rarely does someone forget such an important memory, according to her doctor. If she had sought help sooner, she would have recovered faster, in his opinion. This bias must be addressed before it gets worse, he explained.",
+    text: "The patient said she forget things all the time, which worried her family. Rarely someone forgets such an important memory, according to her doctor. If she seek help sooner, she would have recovered faster, in his opinion. Diagnosing with anxiety last year, she has struggled to manage her symptoms, he explained.",
+    corrected: "The patient said she forgot things all the time, which worried her family. Rarely does someone forget such an important memory, according to her doctor. If she had sought help sooner, she would have recovered faster, in his opinion. Diagnosed with anxiety last year, she has struggled to manage her symptoms, he explained.",
     fixes: [
       "'said she forget things' → 'said she forgot things' (reported speech backshifts the tense)",
       "'Rarely someone forgets' → 'Rarely does someone forget' (inversion needs 'does' before the subject)",
       "'If she seek help sooner' → 'If she had sought help sooner' (third conditional needs past perfect)",
-      "'This bias must addressed' → 'This bias must be addressed' (modal passive needs 'be' + past participle)",
+      "'Diagnosing with anxiety' → 'Diagnosed with anxiety' (past participle clause carries a passive meaning: 'who was diagnosed')",
     ],
   },
 
   future_of_work: {
     kind: "scenario",
     prompts: [
-      { situation: "A CEO recently announced that AI is transforming their industry.", instruction: "Report what the CEO said, using reported speech.", sample: "The CEO said that AI was transforming their industry." },
-      { situation: "Someone claims that companies rarely adapt to change this quickly.", instruction: "Make the same point using inversion for dramatic emphasis.", sample: "Rarely does a company adapt this quickly." },
+      { situation: "A CEO recently announced that AI is transforming their industry.", instruction: "Report what the CEO said, using reported speech.", sample: "The CEO announced that the company would be cutting a third of its workforce." },
+      { situation: "Someone claims that companies rarely adapt to change this quickly.", instruction: "Make the same point using inversion for dramatic emphasis.", sample: "Rarely has an industry been reshaped so quickly by a single technology." },
       { situation: "A colleague didn't upskill in time and lost their job to automation — now they're struggling to find work.", instruction: "Say what would have happened if they had upskilled sooner, using the third conditional.", sample: "If she had upskilled sooner, she would have found a new job faster." },
       { situation: "Someone lost their job years ago, and that's exactly why they're a freelancer today.", instruction: "Connect the past cause to the present result, using a mixed conditional.", sample: "If he hadn't lost his job years ago, he wouldn't be a freelancer today." },
-      { situation: "You think job insecurity in the modern workplace is a serious problem that needs fixing.", instruction: "Say so, using a modal passive.", sample: "Job insecurity must be addressed." },
+      { situation: "A company failed to invest in staff training, and turnover shot up as a result.", instruction: "Say so, using a nominalization (turn the verb 'fail' into a noun).", sample: "The company's failure to invest in training led to high turnover." },
     ],
   },
 
@@ -1598,11 +1598,11 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
   health_healthcare_systems: {
     kind: "scenario",
     prompts: [
-      { situation: "A doctor recently claimed that the healthcare system is failing rural patients.", instruction: "Report what the doctor said, using reported speech.", sample: "The doctor claimed that the system was failing rural patients." },
-      { situation: "You think it's rare for a hospital to treat so many patients this efficiently.", instruction: "Say so, using inversion for emphasis.", sample: "Rarely does a hospital treat so many patients this efficiently." },
+      { situation: "A doctor recently claimed that the healthcare system is failing rural patients.", instruction: "Report what the doctor said, using reported speech.", sample: "The nurse warned that the ward was understaffed for the night shift." },
+      { situation: "You think it's rare for a hospital to treat so many patients this efficiently.", instruction: "Say so, using inversion for emphasis.", sample: "Rarely has a clinic managed to cut waiting times so dramatically." },
       { situation: "A patient's illness wasn't caught early enough, and they didn't survive.", instruction: "Say what would have happened if doctors had diagnosed it sooner, using the third conditional.", sample: "If the doctors had diagnosed the illness sooner, they would have saved his life." },
       { situation: "A country never reformed its healthcare system, and waiting times are still very long today.", instruction: "Connect that past inaction to the present result, using a mixed conditional.", sample: "If they had reformed the system years ago, waiting times wouldn't be so long today." },
-      { situation: "You believe health inequality is a serious problem that needs to be fixed.", instruction: "Say so, using a modal passive.", sample: "Health inequality must be addressed." },
+      { situation: "Hospitals were completely overwhelmed, so doctors had to prioritise the most urgent cases.", instruction: "Combine that into one sentence using an absolute construction with 'with'.", sample: "With hospitals overwhelmed, doctors had to prioritise the most urgent cases." },
     ],
   },
 
@@ -1619,46 +1619,3 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
   },
 };
 
-// A short, real sentence pool used only by "unscramble" topics — pulled live from data that
-// already exists (a topic's own question answers, filtered to clean single sentences), never
-// hand-authored. Deliberately conservative filtering: no embedded quotes/dialogue (rules out
-// question-and-reply answers like "'What's your name?' 'I'm Ana.'"), no bracket placeholders
-// (rules out free-answer items like "(free - e.g. ...)"), no "..." template fragments (rules out
-// a fill-in-the-blank answer field like "The richer...the more" — half a sentence, not a whole
-// one), a plain 3-9 word sentence.
-function isCleanSentence(s: string): boolean {
-  if (!s || s.includes("'") || s.includes("’") || s.includes('"') || s.includes("(") || s.includes("/") || s.includes("...")) return false;
-  const wordCount = s.trim().split(/\s+/).length;
-  return wordCount >= 3 && wordCount <= 9;
-}
-
-export type UnscrambleItem = { words: string[]; answer: string };
-
-// Builds `count` unscramble items for a topic by shuffling the words of real sentences already in
-// that topic's own data (its question-bank answers, falling back to its Lesson's own example
-// sentences) — nothing here is hand-written. Re-shuffles fresh on every call, so replaying the
-// same lesson plan doesn't always show the same word order.
-export function buildUnscrambleItems(topicId: string, count: number): UnscrambleItem[] {
-  const topic = (TOPIC_LIBRARY as Record<string, { questions: { answer?: string }[] }>)[topicId];
-  const fromQuestions = (topic?.questions ?? [])
-    .map(q => q.answer)
-    .filter((a): a is string => !!a && isCleanSentence(a));
-  const fromLesson = (LESSONS[topicId]?.sections ?? [])
-    .flatMap(s => s.examples ?? [])
-    .map(ex => ex.replace(/\*\*/g, ""))
-    .filter(isCleanSentence);
-
-  const pool = [...new Set([...fromQuestions, ...fromLesson])];
-  const chosen = [...pool].sort(() => Math.random() - 0.5).slice(0, count);
-
-  return chosen.map(answer => {
-    const words = answer.replace(/[.!?]$/, "").split(/\s+/);
-    let shuffled = words;
-    // Reshuffle if it happens to land back in the original order (only matters for very short
-    // sentences) so the exercise never accidentally hands the student the answer already solved.
-    do {
-      shuffled = [...words].sort(() => Math.random() - 0.5);
-    } while (words.length > 1 && shuffled.join(" ") === words.join(" "));
-    return { words: shuffled, answer };
-  });
-}

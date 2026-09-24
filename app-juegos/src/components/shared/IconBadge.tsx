@@ -4,7 +4,7 @@ import { Icon, type IconName } from "./Icon";
 // outline, drop-shadow "button" edge, a corner pixel-dot signature) wrapping the same glyph paths
 // Phase 1 already built. Reserved for large showcase contexts (game-select cards, the homepage's
 // game grid, How-to-Play headers) where the badge chrome actually reads at scale; small inline
-// contexts (PPP diagram chips, the welcome-screen teaser grid) still use a plain <Icon/>.
+// contexts (the homepage's game-block chips, the welcome-screen teaser grid) still use a plain <Icon/>.
 type Props = { icon: IconName; color: string; size?: number };
 
 export function IconBadge({ icon, color, size = 64 }: Props) {

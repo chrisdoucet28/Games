@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getProfile, updateProfile, uploadAvatar, uploadOrgLogo, removeAvatar, removeOrgLogo } from "../../lib/profile";
+import { getProfile, updateProfile, uploadAvatar, uploadOrgLogo, removeAvatar, removeOrgLogo, chooseRole } from "../../lib/profile";
 import { THEMES, hexToRgba, type Theme } from "../../data/themes";
 import { Icon } from "./Icon";
 
@@ -51,6 +51,11 @@ export function ProfileScreen({ onBack, theme, onThemeChange, isPaid, onUpgrade 
   const [avatarBusy, setAvatarBusy] = useState(false);
   const [logoBusy, setLogoBusy] = useState(false);
   const [brandingError, setBrandingError] = useState<string | null>(null);
+  // Only shown when the database actually has account types (the student_accounts migration) — a
+  // profile without a `role` at all hides the whole section rather than offering a switch that
+  // can't work.
+  const [roleSupported, setRoleSupported] = useState(false);
+  const [roleError, setRoleError] = useState<string | null>(null);
 
   useEffect(() => {
     getProfile()
@@ -59,6 +64,7 @@ export function ProfileScreen({ onBack, theme, onThemeChange, isPaid, onUpgrade 
         setSelectedThemeId(p.theme_id);
         setAvatarUrl(p.avatar_url);
         setOrgLogoUrl(p.org_logo_url);
+        setRoleSupported(p.role !== undefined);
       })
       .catch(err => setError(err instanceof Error ? err.message : "Couldn't load your profile."))
       .finally(() => setLoading(false));
@@ -90,6 +96,18 @@ export function ProfileScreen({ onBack, theme, onThemeChange, isPaid, onUpgrade 
       setBrandingError(err instanceof Error ? err.message : "Couldn't remove that image.");
     } finally {
       (kind === "avatar" ? setAvatarBusy : setLogoBusy)(false);
+    }
+  };
+
+  // A reload (rather than patching App's role state from here) is deliberate: this is a rare,
+  // one-off action, and it lands the person cleanly on whichever home their new account type gets.
+  const handleSwitchToStudent = async () => {
+    setRoleError(null);
+    try {
+      await chooseRole("student");
+      window.location.reload();
+    } catch (err) {
+      setRoleError(err instanceof Error ? err.message : "Couldn't switch your account type.");
     }
   };
 
@@ -193,6 +211,22 @@ export function ProfileScreen({ onBack, theme, onThemeChange, isPaid, onUpgrade 
             </form>
           )}
         </div>
+
+        {roleSupported && !loading && (
+          <div style={{ background: "white", border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, borderRadius: "16px", padding: "16px 20px", marginTop: "16px" }}>
+            <div style={{ color: "#4B5563", fontSize: "13px", fontWeight: "700", marginBottom: "6px" }}>Account type: Teacher</div>
+            <div style={{ color: "#6B7280", fontSize: "12px", lineHeight: 1.5, marginBottom: "10px" }}>
+              Signed up by mistake, or actually here to study? A student account is free and tracks lessons, badges and levels.
+            </div>
+            <button
+              type="button" onClick={handleSwitchToStudent}
+              style={{ background: "none", border: "none", color: theme.accentSolid, fontSize: "13px", fontWeight: "700", cursor: "pointer", padding: 0, textDecoration: "underline" }}
+            >
+              I'm actually a student — switch my account type
+            </button>
+            {roleError && <div role="alert" style={{ color: "#991B1B", fontSize: "12px", marginTop: "8px" }}>{roleError}</div>}
+          </div>
+        )}
       </div>
     </div>
   );

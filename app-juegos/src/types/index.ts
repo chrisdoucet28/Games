@@ -80,7 +80,10 @@ export interface TeamColor {
   export interface GameProps {
     questions: QuestionData[];
     teams: Team[];
-    onUpdateScore: (teamId: string | number, delta: number) => void;
+    // `silent` skips the shared correct/wrong feedback sound — for a game whose own Tier 2 sound
+    // already covers this exact moment (e.g. Battleship's explosion on a landed hit) and would
+    // otherwise play on top of it every time, regardless of which team is affected or by how much.
+    onUpdateScore: (teamId: string | number, delta: number, opts?: { silent?: boolean }) => void;
     onEnd: () => void;
     // Lets the top-bar "End Game" button push a game into its own internal final/results phase
     // (where one exists) instead of jumping straight to the app-level results screen. The
@@ -112,6 +115,12 @@ export interface TeamColor {
     // overlay should call onTogglePause to resume, matching the shared button.
     paused?: boolean;
     onTogglePause?: () => void;
+    // Set only when this game is being launched as part of an active Class Check-In sitting (see
+    // LessonGamesGenerator.tsx's classSessionCode) — the game should seed its own phone-mode
+    // session from this code instead of generating a fresh one, default straight into phone mode,
+    // and skip its own "Play on Screen vs Play on Phones" picker UI entirely (the class-level QR
+    // already covered joining; this game's own intro screen has nothing left to do).
+    presetPhoneSession?: { code: string };
   }
 
   // A teacher's own personalization — separate from auth.users, which only holds login info.
@@ -132,6 +141,16 @@ export interface TeamColor {
     // teacher's own picture; org_logo_url is their school/organization's logo.
     avatar_url: string | null;
     org_logo_url: string | null;
+    // Teacher or student account. Optional only because the columns come from the student_accounts
+    // migration — a database that doesn't have it yet returns neither, and the app then treats every
+    // account as an already-decided teacher. role_chosen is false until the account has answered the
+    // one-time "teacher or student?" question; it can only be changed through the set_my_role RPC.
+    role?: "teacher" | "student";
+    role_chosen?: boolean;
+    // True only for the app owner's own account, flipped on directly in the database (never
+    // settable from the client). Gates the /admin panel. Optional for the same reason as role —
+    // a database that doesn't have the admin_access migration yet returns neither.
+    is_admin?: boolean;
     created_at: string;
     updated_at: string;
   }
@@ -180,6 +199,10 @@ export interface TeamColor {
     // synced to public.leaderboard_entries the moment this flips true, via a Postgres trigger on
     // this table (see lib/leaderboard.ts). Never toggled by the client for any other reason.
     hide_from_leaderboard: boolean;
+    // The persistent code students use to ask to join this class. Absent until the teacher first
+    // opens the Students panel (created then, in the database) — and on a database that doesn't have
+    // the class_membership migration yet.
+    join_code?: string | null;
     created_at: string;
     updated_at: string;
   }
