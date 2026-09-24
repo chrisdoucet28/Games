@@ -25,11 +25,17 @@ const TOTAL_ROUNDS = 5;
 // Scaled ~2.5x across the board (was 3500-7500/2000-6000/1000-3000 min/max) per teacher feedback
 // after a real classroom run — even on "medium" the CPU passed back way too fast for a student to
 // realistically get their answer out before it was already their turn again.
+// Expressed as a MULTIPLE of the teacher's chosen answer time (Q_SECONDS/turnSeconds) rather than
+// a fixed number of seconds — a flat absolute range meant the stumble case (up to 30s) could run
+// twice as long as a 15s turn, which read as the CPU being stuck rather than "occasionally slow."
+// These fractions reproduce the original hand-tuned absolute values above exactly at the 15s
+// default (e.g. easy min 8750ms / 15000ms = 7/12), so behavior at 15s is unchanged; other turn
+// lengths now scale proportionally instead of staying fixed.
 type Difficulty = "easy" | "medium" | "hard";
-const CPU_HOLD_MS_BY_DIFFICULTY: Record<Difficulty, { min: number; max: number; stumbleChance: number; stumbleMsMin: number; stumbleMsMax: number }> = {
-  easy: { min: 8750, max: 18750, stumbleChance: 0.35, stumbleMsMin: 20000, stumbleMsMax: 30000 },
-  medium: { min: 5000, max: 15000, stumbleChance: 0.2, stumbleMsMin: 17500, stumbleMsMax: 25000 },
-  hard: { min: 2500, max: 7500, stumbleChance: 0.08, stumbleMsMin: 12500, stumbleMsMax: 16250 },
+const CPU_HOLD_FRACTION_BY_DIFFICULTY: Record<Difficulty, { min: number; max: number; stumbleChance: number; stumbleMin: number; stumbleMax: number }> = {
+  easy: { min: 7 / 12, max: 5 / 4, stumbleChance: 0.35, stumbleMin: 4 / 3, stumbleMax: 2 },
+  medium: { min: 1 / 3, max: 1, stumbleChance: 0.2, stumbleMin: 7 / 6, stumbleMax: 5 / 3 },
+  hard: { min: 1 / 6, max: 1 / 2, stumbleChance: 0.08, stumbleMin: 5 / 6, stumbleMax: 13 / 12 },
 };
 
 const AMBIENT_BITS = Array.from({ length: 12 }, (_, i) => ({
@@ -201,16 +207,17 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
   // Hooks).
   useEffect(() => {
     if (!isSolo || phase !== "play" || teams[holderIdx]?.id !== cpuRef.current?.id) return;
-    const t = CPU_HOLD_MS_BY_DIFFICULTY[cpuDifficulty];
+    const t = CPU_HOLD_FRACTION_BY_DIFFICULTY[cpuDifficulty];
+    const qSecMs = Q_SECONDS * 1000;
     const holdMs = Math.random() < t.stumbleChance
-      ? t.stumbleMsMin + Math.random() * (t.stumbleMsMax - t.stumbleMsMin)
-      : t.min + Math.random() * (t.max - t.min);
+      ? qSecMs * (t.stumbleMin + Math.random() * (t.stumbleMax - t.stumbleMin))
+      : qSecMs * (t.min + Math.random() * (t.max - t.min));
     const timer = setTimeout(() => {
       if (!roundEndedRef.current) confirmPass();
     }, holdMs);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isSolo, phase, holderIdx, cpuDifficulty]);
+  }, [isSolo, phase, holderIdx, cpuDifficulty, Q_SECONDS]);
 
   useEffect(() => {
     roundTimeRef.current = ROUND_SECONDS;
