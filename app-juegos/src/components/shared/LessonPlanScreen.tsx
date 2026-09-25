@@ -844,8 +844,16 @@ function PrintableLessonPlan({ topic, slides, roundOut, logoUrl }: { topic: Lear
   const questionSlides = slides.filter((s): s is Extract<Slide, { kind: "question" }> => s.kind === "question");
   const realWorldSlide = slides.find((s): s is Extract<Slide, { kind: "realWorld" }> => s.kind === "realWorld");
   const speakingSlide = slides.find((s): s is Extract<Slide, { kind: "speaking" }> => s.kind === "speaking");
-  let currentSection = "";
-  let numberInSection = 0;
+  // Grouped by consecutive sectionLabel so the whole labeled set of questions (e.g. every "YOUR
+  // TURN" item) prints as one unbreakable block — keeping only each individual question+blank
+  // together wasn't enough: a 4-item group could still split 2-and-2 across a page boundary with
+  // no heading on the continuation page to say what it belonged to.
+  const questionGroups: { label: string; items: typeof questionSlides }[] = [];
+  for (const s of questionSlides) {
+    const lastGroup = questionGroups[questionGroups.length - 1];
+    if (lastGroup && lastGroup.label === s.sectionLabel) lastGroup.items.push(s);
+    else questionGroups.push({ label: s.sectionLabel, items: [s] });
+  }
 
   return (
     <div>
@@ -871,18 +879,17 @@ function PrintableLessonPlan({ topic, slides, roundOut, logoUrl }: { topic: Lear
       ))}
       <hr style={printDividerStyle} />
 
-      {questionSlides.map((s, i) => {
-        const showHeading = s.sectionLabel !== currentSection;
-        currentSection = s.sectionLabel;
-        numberInSection = showHeading ? 1 : numberInSection + 1;
-        return (
-          <div key={i} style={{ marginTop: showHeading && i > 0 ? "12px" : "4px", ...printAvoidBreakStyle }}>
-            {showHeading && <div style={printSectionHeadingStyle}>{s.sectionLabel}</div>}
-            <div style={{ fontSize: "11.5px", margin: "4px 0" }}>{numberInSection}. {s.question.question}</div>
-            <div style={{ borderBottom: "1px solid #9CA3AF", height: "16px" }} />
-          </div>
-        );
-      })}
+      {questionGroups.map((g, gi) => (
+        <div key={gi} style={{ marginTop: gi > 0 ? "12px" : "4px", ...printAvoidBreakStyle }}>
+          <div style={printSectionHeadingStyle}>{g.label}</div>
+          {g.items.map((s, i) => (
+            <div key={i} style={{ marginTop: i > 0 ? "4px" : "0" }}>
+              <div style={{ fontSize: "11.5px", margin: "4px 0" }}>{i + 1}. {s.question.question}</div>
+              <div style={{ borderBottom: "1px solid #9CA3AF", height: "16px" }} />
+            </div>
+          ))}
+        </div>
+      ))}
       <hr style={printDividerStyle} />
 
       <div style={printSectionHeadingStyle}>Exercise</div>
