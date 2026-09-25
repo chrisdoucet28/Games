@@ -8,6 +8,10 @@ import { DaysDatesPrepositionsTimeDiagram } from "./DaysDatesPrepositionsTimeDia
 import { PossessiveAdjectivesPronounsDiagram } from "./PossessiveAdjectivesPronounsDiagram";
 import { ToBeDiagram } from "./ToBeDiagram";
 import { AuxiliaryVerbsBeDoDiagram } from "./AuxiliaryVerbsBeDoDiagram";
+import { ThereIsAreDiagram } from "./ThereIsAreDiagram";
+import { CanCantDiagram } from "./CanCantDiagram";
+import { PresentContinuousA1Diagram } from "./PresentContinuousA1Diagram";
+import { PossessiveSDiagram } from "./PossessiveSDiagram";
 
 export type DiagramProps = { variant: "screen" | "print"; accentColor?: string };
 
@@ -27,6 +31,10 @@ const TOPIC_DIAGRAMS: Record<string, ComponentType<DiagramProps>> = {
   possessive_adjectives_pronouns: PossessiveAdjectivesPronounsDiagram,
   to_be: ToBeDiagram,
   auxiliary_verbs_be_do: AuxiliaryVerbsBeDoDiagram,
+  there_is_are: ThereIsAreDiagram,
+  can_cant: CanCantDiagram,
+  present_continuous_a1: PresentContinuousA1Diagram,
+  possessive_s: PossessiveSDiagram,
 };
 
 export function TopicDiagram({ topicId, variant, accentColor }: { topicId: string; variant: "screen" | "print"; accentColor?: string }) {
