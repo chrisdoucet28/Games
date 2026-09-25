@@ -7,6 +7,7 @@ import { renderBold, renderMistake } from "../../data/learnTopicsRender";
 import { LESSON_PLANS } from "../../data/lessonPlans";
 import { LessonContent } from "./LessonContent";
 import { Icon } from "./Icon";
+import { TopicDiagram } from "./diagrams/GrammarDiagram";
 
 type Props = {
   onBack: () => void;
@@ -52,6 +53,8 @@ function PrintableLesson({ t, logoUrl }: { t: (typeof LESSON_TOPICS)[number]; lo
       <span style={{ background: LEVEL_COLOR[t.meta.level ?? "A2"], color: "white", borderRadius: "999px", padding: "2px 10px", fontSize: "10.5px", fontWeight: "800" }}>{t.meta.level}</span>
       <h2 style={{ fontSize: "19px", fontWeight: "900", color: "#111827", margin: "6px 0 5px" }}>{t.lesson.title}</h2>
       <p style={{ color: "#374151", fontSize: "12px", lineHeight: 1.4, margin: "0 0 10px" }}>{t.lesson.intro}</p>
+
+      <TopicDiagram topicId={t.id} variant="print" />
 
       {t.lesson.sections.map((section, i) => (
         <div key={i} style={{ marginBottom: "9px" }}>
@@ -137,6 +140,7 @@ export function LearnScreen({ onBack, theme, filterTopicIds, onOpenLessonPlan, o
             <LessonContent
               lesson={selected.lesson}
               theme={theme}
+              topicId={selected.id}
               levelBadge={<span style={{ background: LEVEL_COLOR[selected.meta.level ?? "A2"], color: "white", borderRadius: "999px", padding: "3px 12px", fontSize: "12px", fontWeight: "800" }}>{selected.meta.level}</span>}
             />
           </div>

@@ -5,6 +5,7 @@ import { setMetaDescription } from "../../lib/pageMeta";
 import { useStudentSession } from "../../hooks/useStudentSession";
 import { getLessonsDone, markLessonDone, unmarkLessonDone } from "../../lib/studentProgress";
 import { Icon } from "./Icon";
+import { TopicDiagram } from "./diagrams/GrammarDiagram";
 
 type Props = { topicId: string };
 
@@ -81,6 +82,8 @@ export function PublicLearnLessonScreen({ topicId }: Props) {
           <span style={{ background: LEVEL_COLOR[topic.meta.level ?? "A2"], color: "white", borderRadius: "999px", padding: "3px 12px", fontSize: "12px", fontWeight: "800" }}>{topic.meta.level}</span>
           <h1 style={{ fontSize: "26px", fontWeight: "900", color: "#0C1E3D", margin: "10px 0 8px" }}>{topic.lesson.title}</h1>
           <p style={{ color: "#4B5563", fontSize: "15px", lineHeight: 1.6, margin: "0 0 20px" }}>{topic.lesson.intro}</p>
+
+          <TopicDiagram topicId={topic.id} variant="screen" accentColor="#0369A1" />
 
           {topic.lesson.sections.map((section, i) => (
             <div key={i} style={{ marginBottom: "18px" }}>
