@@ -4,6 +4,10 @@ import { PrepositionsOfPlaceDiagram } from "./PrepositionsOfPlaceDiagram";
 import { BasicWordOrderDiagram } from "./BasicWordOrderDiagram";
 import { WhatTimeIsItDiagram } from "./WhatTimeIsItDiagram";
 import { PresentSimpleDiagram } from "./PresentSimpleDiagram";
+import { DaysDatesPrepositionsTimeDiagram } from "./DaysDatesPrepositionsTimeDiagram";
+import { PossessiveAdjectivesPronounsDiagram } from "./PossessiveAdjectivesPronounsDiagram";
+import { ToBeDiagram } from "./ToBeDiagram";
+import { AuxiliaryVerbsBeDoDiagram } from "./AuxiliaryVerbsBeDoDiagram";
 
 export type DiagramProps = { variant: "screen" | "print"; accentColor?: string };
 
@@ -19,6 +23,10 @@ const TOPIC_DIAGRAMS: Record<string, ComponentType<DiagramProps>> = {
   basic_word_order: BasicWordOrderDiagram,
   what_time_is_it: WhatTimeIsItDiagram,
   present_simple: PresentSimpleDiagram,
+  days_dates_prepositions_time: DaysDatesPrepositionsTimeDiagram,
+  possessive_adjectives_pronouns: PossessiveAdjectivesPronounsDiagram,
+  to_be: ToBeDiagram,
+  auxiliary_verbs_be_do: AuxiliaryVerbsBeDoDiagram,
 };
 
 export function TopicDiagram({ topicId, variant, accentColor }: { topicId: string; variant: "screen" | "print"; accentColor?: string }) {
