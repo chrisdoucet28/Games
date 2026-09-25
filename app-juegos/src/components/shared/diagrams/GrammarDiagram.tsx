@@ -1,5 +1,9 @@
 import type { ComponentType } from "react";
 import { PresentPerfectVsPastSimpleDiagram } from "./PresentPerfectVsPastSimpleDiagram";
+import { PrepositionsOfPlaceDiagram } from "./PrepositionsOfPlaceDiagram";
+import { BasicWordOrderDiagram } from "./BasicWordOrderDiagram";
+import { WhatTimeIsItDiagram } from "./WhatTimeIsItDiagram";
+import { PresentSimpleDiagram } from "./PresentSimpleDiagram";
 
 export type DiagramProps = { variant: "screen" | "print"; accentColor?: string };
 
@@ -11,6 +15,10 @@ export type DiagramProps = { variant: "screen" | "print"; accentColor?: string }
 // slideshow and print) needs to change.
 const TOPIC_DIAGRAMS: Record<string, ComponentType<DiagramProps>> = {
   present_perfect_vs_past_simple: PresentPerfectVsPastSimpleDiagram,
+  prepositions_place: PrepositionsOfPlaceDiagram,
+  basic_word_order: BasicWordOrderDiagram,
+  what_time_is_it: WhatTimeIsItDiagram,
+  present_simple: PresentSimpleDiagram,
 };
 
 export function TopicDiagram({ topicId, variant, accentColor }: { topicId: string; variant: "screen" | "print"; accentColor?: string }) {
