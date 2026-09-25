@@ -832,7 +832,13 @@ function RealWorldReadingStep({ reading, theme, onDone, backRef, assignedTeams }
 // go back to. FeedbackButton/BrandBadge are hidden from every print via the global .cc-no-print rule
 // (index.css) rather than needing their own line here.
 const printDividerStyle: React.CSSProperties = { border: "none", borderTop: "1px solid #D1D5DB", margin: "10px 0" };
-const printSectionHeadingStyle: React.CSSProperties = { fontWeight: "800", fontSize: "11px", textTransform: "uppercase", letterSpacing: "0.03em", color: "#374151", marginBottom: "4px" };
+const printSectionHeadingStyle: React.CSSProperties = { fontWeight: "800", fontSize: "11px", textTransform: "uppercase", letterSpacing: "0.03em", color: "#374151", marginBottom: "4px", breakAfter: "avoid", pageBreakAfter: "avoid" };
+// Keeps one logical chunk (a section, a question + its answer line, a round-out item) from being
+// sliced across a page boundary when printed — without this, the browser paginates purely by
+// vertical position and can leave a heading on one page with its content starting on the next.
+// Spread onto the wrapper div of anything that should move to the next page as a whole rather
+// than split mid-way through.
+const printAvoidBreakStyle: React.CSSProperties = { breakInside: "avoid", pageBreakInside: "avoid" };
 
 function PrintableLessonPlan({ topic, slides, roundOut, logoUrl }: { topic: LearnTopic; slides: Slide[]; roundOut: RoundOut; logoUrl?: string | null }) {
   const questionSlides = slides.filter((s): s is Extract<Slide, { kind: "question" }> => s.kind === "question");
@@ -856,7 +862,7 @@ function PrintableLessonPlan({ topic, slides, roundOut, logoUrl }: { topic: Lear
       <hr style={printDividerStyle} />
 
       {topic.lesson.sections.map((section, i) => (
-        <div key={i} style={{ marginBottom: "9px" }}>
+        <div key={i} style={{ marginBottom: "9px", ...printAvoidBreakStyle }}>
           <div style={printSectionHeadingStyle}>{section.heading}</div>
           <ul style={{ margin: 0, paddingLeft: "16px", color: "#1F2937" }}>
             {section.body.map((line, j) => <li key={j} style={{ marginBottom: "2px", lineHeight: 1.3, fontSize: "11.5px" }}>{line.replace(/\*\*/g, "")}</li>)}
@@ -870,7 +876,7 @@ function PrintableLessonPlan({ topic, slides, roundOut, logoUrl }: { topic: Lear
         currentSection = s.sectionLabel;
         numberInSection = showHeading ? 1 : numberInSection + 1;
         return (
-          <div key={i} style={{ marginTop: showHeading && i > 0 ? "12px" : "4px" }}>
+          <div key={i} style={{ marginTop: showHeading && i > 0 ? "12px" : "4px", ...printAvoidBreakStyle }}>
             {showHeading && <div style={printSectionHeadingStyle}>{s.sectionLabel}</div>}
             <div style={{ fontSize: "11.5px", margin: "4px 0" }}>{numberInSection}. {s.question.question}</div>
             <div style={{ borderBottom: "1px solid #9CA3AF", height: "16px" }} />
@@ -885,11 +891,13 @@ function PrintableLessonPlan({ topic, slides, roundOut, logoUrl }: { topic: Lear
       {realWorldSlide && (
         <div style={{ marginTop: "10px" }}>
           <hr style={printDividerStyle} />
-          <div style={printSectionHeadingStyle}>Real-World Reading — {realWorldSlide.reading.title}</div>
-          {realWorldSlide.reading.passage.map((p, i) => <div key={i} style={{ fontSize: "11.5px", color: "#1F2937", margin: "3px 0" }}>{p}</div>)}
+          <div style={{ ...printAvoidBreakStyle }}>
+            <div style={printSectionHeadingStyle}>Real-World Reading — {realWorldSlide.reading.title}</div>
+            {realWorldSlide.reading.passage.map((p, i) => <div key={i} style={{ fontSize: "11.5px", color: "#1F2937", margin: "3px 0" }}>{p}</div>)}
+          </div>
           <div style={{ ...printSectionHeadingStyle, marginTop: "8px" }}>Real-World Check</div>
           {realWorldSlide.reading.questions.map((q, i) => (
-            <div key={i} style={{ marginTop: "4px" }}>
+            <div key={i} style={{ marginTop: "4px", ...printAvoidBreakStyle }}>
               <div style={{ fontSize: "11.5px", margin: "3px 0" }}>{i + 1}. {q.question}</div>
               <div style={{ borderBottom: "1px solid #9CA3AF", height: "16px" }} />
             </div>
@@ -898,7 +906,7 @@ function PrintableLessonPlan({ topic, slides, roundOut, logoUrl }: { topic: Lear
       )}
 
       {speakingSlide && (
-        <div style={{ marginTop: "10px" }}>
+        <div style={{ marginTop: "10px", ...printAvoidBreakStyle }}>
           <hr style={printDividerStyle} />
           <div style={printSectionHeadingStyle}>Speaking</div>
           <ul style={{ margin: "3px 0 0", paddingLeft: "16px" }}>
@@ -922,7 +930,7 @@ function PrintableLessonPlan({ topic, slides, roundOut, logoUrl }: { topic: Lear
 function PrintRoundOut({ roundOut, topicId }: { roundOut: RoundOut; topicId: string }) {
   if (roundOut.kind === "paragraphCloze") {
     return (
-      <p style={{ fontSize: "12px", lineHeight: 1.9, color: "#1F2937", margin: "4px 0 0" }}>
+      <p style={{ fontSize: "12px", lineHeight: 1.9, color: "#1F2937", margin: "4px 0 0", ...printAvoidBreakStyle }}>
         {roundOut.segments.map((seg, i) => typeof seg === "string" ? <span key={i}>{seg}</span> : <span key={i} style={{ fontWeight: "700" }}>___ ({seg.base})</span>)}
       </p>
     );
@@ -932,7 +940,7 @@ function PrintRoundOut({ roundOut, topicId }: { roundOut: RoundOut; topicId: str
     const offset = Math.max(1, Math.floor(roundOut.pairs.length / 2));
     const shuffledDefs = roundOut.pairs.map((_, i) => roundOut.pairs[(i + offset) % roundOut.pairs.length].definition);
     return (
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginTop: "4px" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginTop: "4px", ...printAvoidBreakStyle }}>
         <div>
           {roundOut.pairs.map((p, i) => (
             <div key={i} style={{ fontSize: "11.5px", margin: "4px 0", color: "#1F2937" }}>___ &nbsp; {i + 1}. {p.term}</div>
@@ -949,7 +957,7 @@ function PrintRoundOut({ roundOut, topicId }: { roundOut: RoundOut; topicId: str
 
   if (roundOut.kind === "errorPassage") {
     return (
-      <div>
+      <div style={printAvoidBreakStyle}>
         <p style={{ fontSize: "11px", color: "#4B5563", margin: "4px 0 6px" }}>Find and correct the mistakes below.</p>
         <div style={{ border: "1px solid #9CA3AF", borderRadius: "6px", padding: "10px 12px", whiteSpace: "pre-line", fontSize: "11.5px", lineHeight: 1.7, color: "#1F2937" }}>{roundOut.text}</div>
       </div>
@@ -960,7 +968,7 @@ function PrintRoundOut({ roundOut, topicId }: { roundOut: RoundOut; topicId: str
     return (
       <div>
         {roundOut.prompts.map((p, i) => (
-          <div key={i} style={{ marginTop: i > 0 ? "10px" : "4px" }}>
+          <div key={i} style={{ marginTop: i > 0 ? "10px" : "4px", ...printAvoidBreakStyle }}>
             <div style={{ fontSize: "11.5px", color: "#1F2937", margin: "3px 0" }}>{i + 1}. {p.situation} — <span style={{ fontWeight: "700" }}>{p.instruction}</span></div>
             <div style={{ borderBottom: "1px solid #9CA3AF", height: "16px" }} />
             <div style={{ borderBottom: "1px solid #9CA3AF", height: "16px" }} />
@@ -977,7 +985,7 @@ function PrintRoundOut({ roundOut, topicId }: { roundOut: RoundOut; topicId: str
     <div>
       <p style={{ fontSize: "11px", color: "#4B5563", margin: "4px 0 6px" }}>Put the words in the correct order.</p>
       {items.map((item, i) => (
-        <div key={i} style={{ marginTop: i > 0 ? "8px" : 0 }}>
+        <div key={i} style={{ marginTop: i > 0 ? "8px" : 0, ...printAvoidBreakStyle }}>
           <div style={{ fontSize: "11.5px", color: "#1F2937", margin: "3px 0" }}>{i + 1}. {item.words.join(" / ")}</div>
           <div style={{ borderBottom: "1px solid #9CA3AF", height: "16px" }} />
         </div>
