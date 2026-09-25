@@ -25,18 +25,27 @@ export function PresentPerfectVsPastSimpleDiagram({ variant, accentColor = "#256
         borderRadius: "14px",
         background: isScreen ? hexToRgba(accentColor, 0.05) : "white",
         padding: isScreen ? "16px 18px 12px" : "10px 12px 8px",
-        margin: isScreen ? "0 0 20px" : "0 0 8px",
+        margin: isScreen ? "0 0 26px" : "0 0 8px",
       }}
     >
       {isScreen && (
-        <div
-          style={{
-            position: "absolute", top: "-12px", right: "16px", width: "28px", height: "28px", borderRadius: "50%",
-            background: accentColor, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 6px rgba(0,0,0,0.18)",
-          }}
-        >
-          <Icon name="hourglass" size={14} color="white" />
-        </div>
+        <>
+          <div
+            style={{
+              position: "absolute", top: "-12px", right: "16px", width: "28px", height: "28px", borderRadius: "50%",
+              background: accentColor, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 6px rgba(0,0,0,0.18)",
+            }}
+          >
+            <Icon name="hourglass" size={14} color="white" />
+          </div>
+          {/* Two of the app's own team mascots (data/constants.ts MASCOT_OPTIONS) hanging out on
+              the card edge — reusing characters ClassCade already has, rather than inventing new
+              art, so the diagram reads as "ours" rather than a generic grammar-site graphic. */}
+          <div style={{ position: "absolute", bottom: "-15px", right: "20px", display: "flex", alignItems: "flex-end", pointerEvents: "none" }}>
+            <span style={{ fontSize: "21px", transform: "rotate(-10deg)", filter: "drop-shadow(0 2px 3px rgba(0,0,0,0.18))" }}>🦉</span>
+            <span style={{ fontSize: "26px", marginLeft: "-7px", transform: "rotate(7deg)", filter: "drop-shadow(0 2px 3px rgba(0,0,0,0.18))" }}>🤖</span>
+          </div>
+        </>
       )}
       <div style={{ fontWeight: "800", fontSize: isScreen ? "11.5px" : "10px", textTransform: "uppercase", letterSpacing: "0.04em", color: isScreen ? accentColor : "#374151", marginBottom: "6px" }}>
         On the timeline
