@@ -12,6 +12,24 @@ import { ThereIsAreDiagram } from "./ThereIsAreDiagram";
 import { CanCantDiagram } from "./CanCantDiagram";
 import { PresentContinuousA1Diagram } from "./PresentContinuousA1Diagram";
 import { PossessiveSDiagram } from "./PossessiveSDiagram";
+import { PastSimpleDiagram } from "./PastSimpleDiagram";
+import { PresentSimpleVsContinuousDiagram } from "./PresentSimpleVsContinuousDiagram";
+import { FutureWillGoingToDiagram } from "./FutureWillGoingToDiagram";
+import { FirstConditionalDiagram } from "./FirstConditionalDiagram";
+import { IrregularVerbsDiagram } from "./IrregularVerbsDiagram";
+import { ZeroConditionalDiagram } from "./ZeroConditionalDiagram";
+import { UsedToPastDiagram } from "./UsedToPastDiagram";
+import { MakingQuestionsDiagram } from "./MakingQuestionsDiagram";
+import { PresentContinuousA2Diagram } from "./PresentContinuousA2Diagram";
+import { ComparativesSuperlativesDiagram } from "./ComparativesSuperlativesDiagram";
+import { ComparativesDiagram } from "./ComparativesDiagram";
+import { SuperlativesDiagram } from "./SuperlativesDiagram";
+import { EquativesNonEquativesDiagram } from "./EquativesNonEquativesDiagram";
+import { ConjunctionsDiagram } from "./ConjunctionsDiagram";
+import { TooMuchManyDiagram } from "./TooMuchManyDiagram";
+import { QuantifiersDiagram } from "./QuantifiersDiagram";
+import { ModalsObligationDiagram } from "./ModalsObligationDiagram";
+import { ModalsPossibilityDiagram } from "./ModalsPossibilityDiagram";
 
 export type DiagramProps = { variant: "screen" | "print"; accentColor?: string };
 
@@ -35,6 +53,24 @@ const TOPIC_DIAGRAMS: Record<string, ComponentType<DiagramProps>> = {
   can_cant: CanCantDiagram,
   present_continuous_a1: PresentContinuousA1Diagram,
   possessive_s: PossessiveSDiagram,
+  past_simple: PastSimpleDiagram,
+  present_simple_vs_continuous: PresentSimpleVsContinuousDiagram,
+  future_will_going_to: FutureWillGoingToDiagram,
+  first_conditional: FirstConditionalDiagram,
+  irregular_verbs: IrregularVerbsDiagram,
+  zero_conditional: ZeroConditionalDiagram,
+  used_to_past: UsedToPastDiagram,
+  making_questions: MakingQuestionsDiagram,
+  present_continuous_a2: PresentContinuousA2Diagram,
+  comparatives_superlatives: ComparativesSuperlativesDiagram,
+  comparatives: ComparativesDiagram,
+  superlatives: SuperlativesDiagram,
+  equatives_non_equatives: EquativesNonEquativesDiagram,
+  conjunctions: ConjunctionsDiagram,
+  too_much_many: TooMuchManyDiagram,
+  quantifiers: QuantifiersDiagram,
+  modals_obligation: ModalsObligationDiagram,
+  modals_possibility: ModalsPossibilityDiagram,
 };
 
 export function TopicDiagram({ topicId, variant, accentColor }: { topicId: string; variant: "screen" | "print"; accentColor?: string }) {

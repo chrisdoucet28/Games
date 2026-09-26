@@ -6,7 +6,7 @@ import { useStudentSession } from "../../hooks/useStudentSession";
 import { getLessonsDone, markLessonDone, unmarkLessonDone } from "../../lib/studentProgress";
 import { Icon } from "./Icon";
 import { TopicDiagram } from "./diagrams/GrammarDiagram";
-import { MascotDuo } from "./MascotDuo";
+import { MascotDuo, pickMascotPair } from "./MascotDuo";
 
 type Props = { topicId: string };
 
@@ -80,7 +80,7 @@ export function PublicLearnLessonScreen({ topicId }: Props) {
 
       <div style={{ maxWidth: "640px", margin: "0 auto", padding: "24px 20px 60px" }}>
         <div style={{ position: "relative", background: "white", border: "2px solid rgba(3,105,161,0.2)", borderRadius: "16px", padding: "24px" }}>
-          <MascotDuo variant="header" mascots={["🦊", "🐸"]} />
+          <MascotDuo variant="header" mascots={pickMascotPair(topic.id, "header")} />
           <span style={{ background: LEVEL_COLOR[topic.meta.level ?? "A2"], color: "white", borderRadius: "999px", padding: "3px 12px", fontSize: "12px", fontWeight: "800" }}>{topic.meta.level}</span>
           <h1 style={{ fontSize: "26px", fontWeight: "900", color: "#0C1E3D", margin: "10px 0 8px" }}>{topic.lesson.title}</h1>
           <p style={{ color: "#4B5563", fontSize: "15px", lineHeight: 1.6, margin: "0 0 20px" }}>{topic.lesson.intro}</p>
@@ -123,7 +123,7 @@ export function PublicLearnLessonScreen({ topicId }: Props) {
           // practicing a topic is the thing a student actually comes here to do next; marking a
           // lesson finished is bookkeeping, not the main action.
           <div style={{ textAlign: "center", background: "white", border: "2px solid rgba(3,105,161,0.2)", borderRadius: "16px", padding: "20px", marginTop: "20px" }}>
-            <MascotDuo variant="cta" mascots={["🦄", "🐉"]} />
+            <MascotDuo variant="cta" mascots={pickMascotPair(topic.id, "cta")} />
             <a
               href={`/practice?topic=${topic.id}`}
               style={{
@@ -155,7 +155,7 @@ export function PublicLearnLessonScreen({ topicId }: Props) {
 
         {!isStudent && (
         <div style={{ textAlign: "center", background: "white", border: "2px solid rgba(3,105,161,0.2)", borderRadius: "16px", padding: "24px 20px", marginTop: "20px" }}>
-          <MascotDuo variant="cta" mascots={["🦄", "🐉"]} />
+          <MascotDuo variant="cta" mascots={pickMascotPair(topic.id, "cta")} />
           <div style={{ fontWeight: "900", fontSize: "16px", color: "#0C1E3D", marginBottom: "8px" }}>Practice this with a classroom game</div>
           <p style={{ color: "#4B5563", fontSize: "13px", margin: "0 0 14px", lineHeight: 1.5 }}>
             ClassCade turns this exact lesson into a competitive team game. Free to start.
