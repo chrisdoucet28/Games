@@ -1,12 +1,11 @@
 import { hexToRgba } from "../../../data/themes";
 import { Icon } from "../Icon";
 
-// Too Much/Too Many already covers the countable-vs-uncountable fork, so repeating it here would
-// waste the space. What's actually new — and easy to miss — is that "much/many" mostly live in
-// negatives and questions; affirmative sentences normally reach for "a lot of" instead, and THAT
-// structure brings its own trap ("of" is required before a noun but dropped when "a lot" stands
-// alone). That sentence-type fork plus the "a lot of" trap covers three of this lesson's four
-// common mistakes, so it's the diagram's whole focus.
+// This lesson packs in five separate quantity words across two axes (countable/uncountable ×
+// large/small/zero amount), so a single fork isn't specific enough — the diagram is a full
+// lookup grid mirroring exactly how the lesson itself is organized, with "a few"/"a little"
+// given their own row rather than being dropped. The much/many-vs-a-lot-of sentence-type split
+// and the "a lot of" + "of" trap (three of four common mistakes) get the footer's full attention.
 export function QuantifiersDiagram({ variant, accentColor = "#2563EB" }: { variant: "screen" | "print"; accentColor?: string }) {
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
@@ -38,30 +37,46 @@ export function QuantifiersDiagram({ variant, accentColor = "#2563EB" }: { varia
         </div>
       )}
       <div style={{ fontWeight: "800", fontSize: isScreen ? "11.5px" : "10px", textTransform: "uppercase", letterSpacing: "0.04em", color: isScreen ? accentColor : "#374151", marginBottom: "6px" }}>
-        Much/many live in negatives &amp; questions
+        Amount and noun type both decide the word
       </div>
-      <svg viewBox="0 0 460 222" style={{ width: "100%", height: "auto", display: "block" }}>
-        <rect x="20" y="12" width="195" height="76" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
-        <text x="117" y="30" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={ink}>NEGATIVE / QUESTION</text>
-        <text x="117" y="47" textAnchor="middle" fontSize="12" fontWeight="800" fill={accent}>much · many</text>
-        <text x="40" y="66" fontSize="9" fontStyle="italic" fill={caption}>How much water is left?</text>
-        <text x="40" y="80" fontSize="9" fontStyle="italic" fill={caption}>I don't have many friends.</text>
+      <svg viewBox="0 0 460 280" style={{ width: "100%", height: "auto", display: "block" }}>
+        <text x="173" y="16" textAnchor="middle" fontSize="10" fontWeight="800" fill={caption}>COUNTABLE</text>
+        <text x="356" y="16" textAnchor="middle" fontSize="10" fontWeight="800" fill={caption}>UNCOUNTABLE</text>
 
-        <rect x="245" y="12" width="195" height="76" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
-        <text x="342" y="30" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={ink}>AFFIRMATIVE</text>
-        <text x="342" y="47" textAnchor="middle" fontSize="12" fontWeight="800" fill={accent}>a lot of</text>
-        <text x="262" y="66" fontSize="9" fontStyle="italic" fill={caption}>I have a lot of friends.</text>
-        <text x="262" y="80" fontSize="9" fontStyle="italic" fill={caption}>She drinks a lot of water.</text>
+        <text x="45" y="63" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={ink}>LARGE</text>
+        <rect x="88" y="26" width="170" height="66" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
+        <text x="173" y="46" textAnchor="middle" fontSize="12" fontWeight="800" fill={accent}>many</text>
+        <text x="173" y="58" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>(question / negative)</text>
+        <text x="173" y="75" textAnchor="middle" fontSize="12" fontWeight="800" fill={accent}>a lot of</text>
+        <text x="173" y="87" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>(affirmative)</text>
 
-        <text x="230" y="108" textAnchor="middle" fontSize="10.5" fontWeight="700" fill={ink}>"a lot of" needs "of" before a noun — drop "of" only when "a lot" stands alone</text>
-        <text x="230" y="124" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>"Do you have pets?" "Yes, a lot!" (no "of" — no noun follows)</text>
+        <rect x="266" y="26" width="180" height="66" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
+        <text x="356" y="46" textAnchor="middle" fontSize="12" fontWeight="800" fill={accent}>much</text>
+        <text x="356" y="58" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>(question / negative)</text>
+        <text x="356" y="75" textAnchor="middle" fontSize="12" fontWeight="800" fill={accent}>a lot of</text>
+        <text x="356" y="87" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>(affirmative)</text>
 
-        <line x1="20" y1="136" x2="440" y2="136" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
+        <text x="45" y="130" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={ink}>SMALL</text>
+        <rect x="88" y="100" width="170" height="52" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
+        <text x="173" y="124" textAnchor="middle" fontSize="13" fontWeight="800" fill={accent}>a few</text>
+        <text x="173" y="140" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>a few things</text>
 
-        <text x="230" y="156" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ She spends a lot time watching TV.</text>
-        <text x="230" y="174" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ She spends a lot of time watching TV.</text>
-        <text x="230" y="196" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>never double up: "I don't have no time" → "I don't have any time"</text>
-        <text x="230" y="211" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>underneath it's still countable vs uncountable</text>
+        <rect x="266" y="100" width="180" height="52" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
+        <text x="356" y="124" textAnchor="middle" fontSize="13" fontWeight="800" fill={accent}>a little</text>
+        <text x="356" y="140" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>a little milk</text>
+
+        <text x="45" y="184" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={ink}>ZERO</text>
+        <rect x="88" y="160" width="358" height="40" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
+        <text x="267" y="178" textAnchor="middle" fontSize="12" fontWeight="800" fill={accent}>no / not any</text>
+        <text x="267" y="193" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>same for both types · "none" alone in short answers</text>
+
+        <text x="230" y="218" textAnchor="middle" fontSize="10" fontWeight="700" fill={ink}>much/many: negatives &amp; questions. Affirmative: a lot of.</text>
+
+        <line x1="20" y1="228" x2="440" y2="228" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
+
+        <text x="230" y="247" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ She spends a lot time watching TV.</text>
+        <text x="230" y="263" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ She spends a lot of time watching TV.</text>
+        <text x="230" y="277" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>never double up: "I don't have no time" → "I don't have any time"</text>
       </svg>
     </div>
   );
