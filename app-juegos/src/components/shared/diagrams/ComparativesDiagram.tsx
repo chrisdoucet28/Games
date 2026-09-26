@@ -1,11 +1,10 @@
 import { hexToRgba } from "../../../data/themes";
 import { Icon } from "../Icon";
 
-// The short/long -er-vs-more fork is the same content as Comparatives & Superlatives (minus the
-// superlative half) — what actually earns this diagram its own space is the thing that lesson
-// doesn't cover at all: "as...as" for equality, a genuinely third option alongside ranking two
-// things against each other. Drawn as three branches, not two, with the "plain adjective, never
-// -er" rule on the equality branch called out directly since that's its own common mistake.
+// The "as...as" equality structure belongs to its own lesson (Equative & Non-Equative
+// Adjectives) — this diagram stays scoped to what this lesson actually teaches: the short/long
+// -er-vs-more fork, filled with enough real examples per side to actually be useful as a reference,
+// plus the irregular forms this lesson's own "Irregular forms" section covers.
 export function ComparativesDiagram({ variant, accentColor = "#2563EB" }: { variant: "screen" | "print"; accentColor?: string }) {
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
@@ -37,34 +36,30 @@ export function ComparativesDiagram({ variant, accentColor = "#2563EB" }: { vari
         </div>
       )}
       <div style={{ fontWeight: "800", fontSize: isScreen ? "11.5px" : "10px", textTransform: "uppercase", letterSpacing: "0.04em", color: isScreen ? accentColor : "#374151", marginBottom: "6px" }}>
-        Not every comparison ranks one above the other
+        Word length decides -er or more
       </div>
-      <svg viewBox="0 0 460 210" style={{ width: "100%", height: "auto", display: "block" }}>
-        <rect x="10" y="12" width="140" height="46" rx="7" fill={fill} stroke={accent} strokeWidth="2" />
-        <text x="80" y="30" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={ink}>SHORT adjective</text>
-        <text x="80" y="48" textAnchor="middle" fontSize="12" fontWeight="800" fill={accent}>-er than</text>
+      <svg viewBox="0 0 460 205" style={{ width: "100%", height: "auto", display: "block" }}>
+        <rect x="20" y="12" width="195" height="112" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
+        <text x="117" y="30" textAnchor="middle" fontSize="11" fontWeight="800" fill={ink}>SHORT adjective</text>
+        <text x="117" y="47" textAnchor="middle" fontSize="12.5" fontWeight="800" fill={accent}>-er than</text>
+        <text x="40" y="67" fontSize="10" fontStyle="italic" fill={caption}>tall → taller than</text>
+        <text x="40" y="83" fontSize="10" fontStyle="italic" fill={caption}>big → bigger than</text>
+        <text x="40" y="99" fontSize="10" fontStyle="italic" fill={caption}>happy → happier than</text>
+        <text x="40" y="115" fontSize="10" fontStyle="italic" fill={caption}>nice → nicer than</text>
 
-        <rect x="160" y="12" width="140" height="46" rx="7" fill={fill} stroke={accent} strokeWidth="2" />
-        <text x="230" y="30" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={ink}>LONG adjective</text>
-        <text x="230" y="48" textAnchor="middle" fontSize="12" fontWeight="800" fill={accent}>more ___ than</text>
+        <rect x="245" y="12" width="195" height="112" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
+        <text x="342" y="30" textAnchor="middle" fontSize="11" fontWeight="800" fill={ink}>LONG adjective</text>
+        <text x="342" y="47" textAnchor="middle" fontSize="12.5" fontWeight="800" fill={accent}>more ___ than</text>
+        <text x="262" y="67" fontSize="10" fontStyle="italic" fill={caption}>more interesting than</text>
+        <text x="262" y="83" fontSize="10" fontStyle="italic" fill={caption}>more expensive than</text>
+        <text x="262" y="99" fontSize="10" fontStyle="italic" fill={caption}>more difficult than</text>
 
-        <rect x="310" y="12" width="140" height="46" rx="7" fill={fill} stroke={accent} strokeWidth="2" />
-        <text x="380" y="30" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={ink}>EQUAL, not ranked</text>
-        <text x="380" y="48" textAnchor="middle" fontSize="12" fontWeight="800" fill={accent}>as ___ as</text>
+        <text x="230" y="148" textAnchor="middle" fontSize="10.5" fontWeight="700" fill={ink}>irregular: good → better · bad → worse · far → further/farther</text>
 
-        <text x="80" y="76" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>taller than</text>
-        <text x="230" y="76" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>more interesting than</text>
-        <text x="380" y="76" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>as tall as</text>
+        <line x1="20" y1="160" x2="440" y2="160" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 
-        <text x="230" y="100" textAnchor="middle" fontSize="10" fontWeight="700" fill={ink}>as...as always uses the plain adjective — no -er, ever</text>
-
-        <line x1="20" y1="116" x2="440" y2="116" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
-
-        <text x="230" y="138" textAnchor="middle" fontSize="11" fontWeight="800" fill={wrong}>✗ as heavier as that one</text>
-        <text x="230" y="156" textAnchor="middle" fontSize="11" fontWeight="800" fill={right}>✓ as heavy as that one</text>
-
-        <text x="230" y="180" textAnchor="middle" fontSize="11" fontWeight="800" fill={wrong}>✗ as tall than her brother</text>
-        <text x="230" y="198" textAnchor="middle" fontSize="11" fontWeight="800" fill={right}>✓ as tall as her brother</text>
+        <text x="230" y="180" textAnchor="middle" fontSize="11" fontWeight="800" fill={wrong}>✗ more tall · This is more big than that one.</text>
+        <text x="230" y="198" textAnchor="middle" fontSize="11" fontWeight="800" fill={right}>✓ taller · This is bigger than that one.</text>
       </svg>
     </div>
   );
