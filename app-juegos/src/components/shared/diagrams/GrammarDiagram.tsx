@@ -12,6 +12,10 @@ import { ThereIsAreDiagram } from "./ThereIsAreDiagram";
 import { CanCantDiagram } from "./CanCantDiagram";
 import { PresentContinuousA1Diagram } from "./PresentContinuousA1Diagram";
 import { PossessiveSDiagram } from "./PossessiveSDiagram";
+import { PastSimpleDiagram } from "./PastSimpleDiagram";
+import { PresentSimpleVsContinuousDiagram } from "./PresentSimpleVsContinuousDiagram";
+import { FutureWillGoingToDiagram } from "./FutureWillGoingToDiagram";
+import { FirstConditionalDiagram } from "./FirstConditionalDiagram";
 
 export type DiagramProps = { variant: "screen" | "print"; accentColor?: string };
 
@@ -35,6 +39,10 @@ const TOPIC_DIAGRAMS: Record<string, ComponentType<DiagramProps>> = {
   can_cant: CanCantDiagram,
   present_continuous_a1: PresentContinuousA1Diagram,
   possessive_s: PossessiveSDiagram,
+  past_simple: PastSimpleDiagram,
+  present_simple_vs_continuous: PresentSimpleVsContinuousDiagram,
+  future_will_going_to: FutureWillGoingToDiagram,
+  first_conditional: FirstConditionalDiagram,
 };
 
 export function TopicDiagram({ topicId, variant, accentColor }: { topicId: string; variant: "screen" | "print"; accentColor?: string }) {
