@@ -7,6 +7,7 @@ import { REAL_WORLD_READINGS, type RealWorldReading } from "../../data/realWorld
 import { TOPIC_LIBRARY } from "../../data/topics";
 import { getProfile } from "../../lib/profile";
 import { LessonSectionBlock, CommonMistakesBlock } from "./LessonContent";
+import { TopicDiagram } from "./diagrams/GrammarDiagram";
 import { QuestionCard } from "./QuestionCard";
 import { TeamIcon } from "./TeamIcon";
 import { Icon, type IconName } from "./Icon";
@@ -399,6 +400,7 @@ export function LessonPlanSlideshow({ topic, theme, teams, onBack, onPlayGameFor
                   <>
                     <h2 style={{ fontSize: "22px", fontWeight: "900", color: theme.heroBg[0], margin: "0 0 8px", fontFamily: theme.headingFont }}>{topic.lesson.title}</h2>
                     <p style={{ color: "#4B5563", fontSize: "14px", lineHeight: 1.6, margin: "0 0 18px" }}>{topic.lesson.intro}</p>
+                    <TopicDiagram topicId={topic.id} variant="screen" accentColor={theme.accentSolid} />
                   </>
                 )}
                 <LessonSectionBlock section={topic.lesson.sections[slide.sectionIndex]} theme={theme} />
@@ -867,6 +869,9 @@ function PrintableLessonPlan({ topic, slides, roundOut, logoUrl }: { topic: Lear
         <span>Date: ______________</span>
       </div>
       <p style={{ color: "#374151", fontSize: "12px", lineHeight: 1.4, margin: "0 0 8px" }}>{topic.lesson.intro}</p>
+      <div style={printAvoidBreakStyle}>
+        <TopicDiagram topicId={topic.id} variant="print" />
+      </div>
       <hr style={printDividerStyle} />
 
       {topic.lesson.sections.map((section, i) => (
