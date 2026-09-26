@@ -28,6 +28,8 @@ import { EquativesNonEquativesDiagram } from "./EquativesNonEquativesDiagram";
 import { ConjunctionsDiagram } from "./ConjunctionsDiagram";
 import { TooMuchManyDiagram } from "./TooMuchManyDiagram";
 import { QuantifiersDiagram } from "./QuantifiersDiagram";
+import { ModalsObligationDiagram } from "./ModalsObligationDiagram";
+import { ModalsPossibilityDiagram } from "./ModalsPossibilityDiagram";
 
 export type DiagramProps = { variant: "screen" | "print"; accentColor?: string };
 
@@ -67,6 +69,8 @@ const TOPIC_DIAGRAMS: Record<string, ComponentType<DiagramProps>> = {
   conjunctions: ConjunctionsDiagram,
   too_much_many: TooMuchManyDiagram,
   quantifiers: QuantifiersDiagram,
+  modals_obligation: ModalsObligationDiagram,
+  modals_possibility: ModalsPossibilityDiagram,
 };
 
 export function TopicDiagram({ topicId, variant, accentColor }: { topicId: string; variant: "screen" | "print"; accentColor?: string }) {
