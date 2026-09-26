@@ -24,6 +24,10 @@ import { PresentContinuousA2Diagram } from "./PresentContinuousA2Diagram";
 import { ComparativesSuperlativesDiagram } from "./ComparativesSuperlativesDiagram";
 import { ComparativesDiagram } from "./ComparativesDiagram";
 import { SuperlativesDiagram } from "./SuperlativesDiagram";
+import { EquativesNonEquativesDiagram } from "./EquativesNonEquativesDiagram";
+import { ConjunctionsDiagram } from "./ConjunctionsDiagram";
+import { TooMuchManyDiagram } from "./TooMuchManyDiagram";
+import { QuantifiersDiagram } from "./QuantifiersDiagram";
 
 export type DiagramProps = { variant: "screen" | "print"; accentColor?: string };
 
@@ -59,6 +63,10 @@ const TOPIC_DIAGRAMS: Record<string, ComponentType<DiagramProps>> = {
   comparatives_superlatives: ComparativesSuperlativesDiagram,
   comparatives: ComparativesDiagram,
   superlatives: SuperlativesDiagram,
+  equatives_non_equatives: EquativesNonEquativesDiagram,
+  conjunctions: ConjunctionsDiagram,
+  too_much_many: TooMuchManyDiagram,
+  quantifiers: QuantifiersDiagram,
 };
 
 export function TopicDiagram({ topicId, variant, accentColor }: { topicId: string; variant: "screen" | "print"; accentColor?: string }) {
