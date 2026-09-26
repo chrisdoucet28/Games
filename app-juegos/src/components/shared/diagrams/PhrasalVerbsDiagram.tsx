@@ -38,26 +38,28 @@ export function PhrasalVerbsDiagram({ variant, accentColor = "#2563EB" }: { vari
       <div style={{ fontWeight: "800", fontSize: isScreen ? "11.5px" : "10px", textTransform: "uppercase", letterSpacing: "0.04em", color: isScreen ? accentColor : "#374151", marginBottom: "6px" }}>
         A pronoun forces the split — or forbids it
       </div>
-      <svg viewBox="0 0 460 190" style={{ width: "100%", height: "auto", display: "block" }}>
-        <rect x="20" y="12" width="195" height="80" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
+      <svg viewBox="0 0 460 200" style={{ width: "100%", height: "auto", display: "block" }}>
+        <rect x="20" y="12" width="195" height="88" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="117" y="30" textAnchor="middle" fontSize="11" fontWeight="800" fill={accent}>SEPARABLE</text>
-        <text x="117" y="46" textAnchor="middle" fontSize="9" fontWeight="700" fill={ink}>pronoun MUST go in the middle</text>
-        <text x="117" y="64" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>pick me up</text>
-        <text x="117" y="80" textAnchor="middle" fontSize="8" fontStyle="italic" fill={wrong}>not "pick up me"</text>
+        <text x="117" y="45" textAnchor="middle" fontSize="9" fontWeight="700" fill={ink}>verb + PRONOUN + particle</text>
+        <text x="117" y="60" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>(a noun object could go either side —</text>
+        <text x="117" y="72" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>a pronoun can't)</text>
+        <text x="117" y="86" textAnchor="middle" fontSize="9" fontStyle="italic" fill={ink}>pick me up (not "pick up me")</text>
 
-        <rect x="245" y="12" width="195" height="80" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
+        <rect x="245" y="12" width="195" height="88" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="342" y="30" textAnchor="middle" fontSize="11" fontWeight="800" fill={accent}>INSEPARABLE</text>
-        <text x="342" y="46" textAnchor="middle" fontSize="9" fontWeight="700" fill={ink}>never splits, no extra preposition</text>
-        <text x="342" y="64" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>look after my dog</text>
-        <text x="342" y="80" textAnchor="middle" fontSize="8" fontStyle="italic" fill={wrong}>not "look after for my dog"</text>
+        <text x="342" y="45" textAnchor="middle" fontSize="9" fontWeight="700" fill={ink}>verb + particle + object</text>
+        <text x="342" y="60" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>(the pronoun/noun never moves</text>
+        <text x="342" y="72" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>in front of the particle)</text>
+        <text x="342" y="86" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>look after my dog</text>
 
-        <line x1="20" y1="104" x2="440" y2="104" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
+        <line x1="20" y1="112" x2="440" y2="112" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 
-        <text x="230" y="124" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ Could you pick up me? · Can you look after for my dog?</text>
-        <text x="230" y="140" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ Could you pick me up? · Can you look after my dog?</text>
+        <text x="230" y="132" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ Could you pick up me? · Can you look after for my dog?</text>
+        <text x="230" y="148" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ Could you pick me up? · Can you look after my dog?</text>
 
-        <text x="230" y="160" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ cut down of sugar · come up an excuse</text>
-        <text x="230" y="176" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ cut down on sugar · come up with an excuse</text>
+        <text x="230" y="168" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ cut down of sugar · come up an excuse</text>
+        <text x="230" y="184" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ cut down on sugar · come up with an excuse</text>
       </svg>
     </div>
   );

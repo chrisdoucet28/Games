@@ -2,8 +2,9 @@ import { hexToRgba } from "../../../data/themes";
 import { Icon } from "../Icon";
 
 // The lesson's own intro names the trap: mixing up which word each one takes and in what order.
-// Two of six mistakes are the exact same reversal — "enough" flips position depending on what it
-// modifies (before a noun, after an adjective) — so that flip gets equal weight to the so/such fork.
+// Two of six mistakes are the exact same reversal — "enough" sits BEFORE a noun but AFTER an
+// adjective. Saying it "flips position" without showing both positions leaves the actual rule
+// unstated, so the box shows both patterns side by side instead of just naming the flip.
 export function IntensifiersDiagram({ variant, accentColor = "#2563EB" }: { variant: "screen" | "print"; accentColor?: string }) {
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
@@ -49,11 +50,13 @@ export function IntensifiersDiagram({ variant, accentColor = "#2563EB" }: { vari
         <text x="230" y="62" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>such an amazing concert</text>
 
         <rect x="310" y="12" width="140" height="62" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
-        <text x="380" y="30" textAnchor="middle" fontSize="12" fontWeight="800" fill={accent}>ENOUGH</text>
-        <text x="380" y="45" textAnchor="middle" fontSize="8" fontWeight="700" fill={ink}>flips position!</text>
-        <text x="380" y="62" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>enough money / old enough</text>
+        <text x="380" y="27" textAnchor="middle" fontSize="12" fontWeight="800" fill={accent}>ENOUGH</text>
+        <text x="380" y="40" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>enough + NOUN (before)</text>
+        <text x="380" y="50" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>enough money</text>
+        <text x="380" y="61" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>ADJECTIVE + enough (after)</text>
+        <text x="380" y="71" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>old enough</text>
 
-        <text x="230" y="94" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>enough + NOUN (before) · adjective + enough (after) — never reversed</text>
+        <text x="230" y="94" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>the position never reverses — this order is fixed</text>
 
         <line x1="20" y1="106" x2="440" y2="106" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 
