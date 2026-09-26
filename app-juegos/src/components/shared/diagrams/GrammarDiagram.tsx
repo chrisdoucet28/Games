@@ -57,6 +57,20 @@ import { PastContinuousDiagram } from "./PastContinuousDiagram";
 import { PastPerfectDiagram } from "./PastPerfectDiagram";
 import { QuestionTagsDiagram } from "./QuestionTagsDiagram";
 import { FutureContinuousDiagram } from "./FutureContinuousDiagram";
+import { PresentPerfectContinuousDiagram } from "./PresentPerfectContinuousDiagram";
+import { PastModalsDeductionDiagram } from "./PastModalsDeductionDiagram";
+import { FutureInPastDiagram } from "./FutureInPastDiagram";
+import { ThirdConditionalDiagram } from "./ThirdConditionalDiagram";
+import { FuturePerfectDiagram } from "./FuturePerfectDiagram";
+import { WishIfOnlyDiagram } from "./WishIfOnlyDiagram";
+import { GerundsInfinitivesDiagram } from "./GerundsInfinitivesDiagram";
+import { EmbeddedQuestionsDiagram } from "./EmbeddedQuestionsDiagram";
+import { MixedConditionalsDiagram } from "./MixedConditionalsDiagram";
+import { PassiveComplexDiagram } from "./PassiveComplexDiagram";
+import { CausativeVerbsDiagram } from "./CausativeVerbsDiagram";
+import { InversionDiagram } from "./InversionDiagram";
+import { PassiveReportingStructuresDiagram } from "./PassiveReportingStructuresDiagram";
+import { CleftSentencesDiagram } from "./CleftSentencesDiagram";
 
 export type DiagramProps = { variant: "screen" | "print"; accentColor?: string };
 
@@ -125,6 +139,20 @@ const TOPIC_DIAGRAMS: Record<string, ComponentType<DiagramProps>> = {
   past_perfect: PastPerfectDiagram,
   question_tags: QuestionTagsDiagram,
   future_continuous: FutureContinuousDiagram,
+  present_perfect_continuous: PresentPerfectContinuousDiagram,
+  past_modals_deduction: PastModalsDeductionDiagram,
+  future_in_past: FutureInPastDiagram,
+  third_conditional: ThirdConditionalDiagram,
+  future_perfect: FuturePerfectDiagram,
+  wish_if_only: WishIfOnlyDiagram,
+  gerunds_infinitives: GerundsInfinitivesDiagram,
+  embedded_questions: EmbeddedQuestionsDiagram,
+  mixed_conditionals: MixedConditionalsDiagram,
+  passive_complex: PassiveComplexDiagram,
+  causative_verbs: CausativeVerbsDiagram,
+  inversion: InversionDiagram,
+  passive_reporting_structures: PassiveReportingStructuresDiagram,
+  cleft_sentences: CleftSentencesDiagram,
 };
 
 export function TopicDiagram({ topicId, variant, accentColor }: { topicId: string; variant: "screen" | "print"; accentColor?: string }) {
