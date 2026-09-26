@@ -30,6 +30,33 @@ import { TooMuchManyDiagram } from "./TooMuchManyDiagram";
 import { QuantifiersDiagram } from "./QuantifiersDiagram";
 import { ModalsObligationDiagram } from "./ModalsObligationDiagram";
 import { ModalsPossibilityDiagram } from "./ModalsPossibilityDiagram";
+import { SubjectObjectQuestionsDiagram } from "./SubjectObjectQuestionsDiagram";
+import { PresentPerfectDiagram } from "./PresentPerfectDiagram";
+import { PhrasalVerbsDiagram } from "./PhrasalVerbsDiagram";
+import { SoNeitherDiagram } from "./SoNeitherDiagram";
+import { ModalVerbsDiagram } from "./ModalVerbsDiagram";
+import { UnderstandingGetDiagram } from "./UnderstandingGetDiagram";
+import { PreferRatherDiagram } from "./PreferRatherDiagram";
+import { PassiveSimpleDiagram } from "./PassiveSimpleDiagram";
+import { GetUsedToDiagram } from "./GetUsedToDiagram";
+import { ReportedSpeechDiagram } from "./ReportedSpeechDiagram";
+import { IndefinitePronounsDiagram } from "./IndefinitePronounsDiagram";
+import { RelativeClausesDiagram } from "./RelativeClausesDiagram";
+import { ClausesOfReasonDiagram } from "./ClausesOfReasonDiagram";
+import { ClausesOfPurposeDiagram } from "./ClausesOfPurposeDiagram";
+import { ClausesOfContrastDiagram } from "./ClausesOfContrastDiagram";
+import { DependentPrepositionsDiagram } from "./DependentPrepositionsDiagram";
+import { GerundsDiagram } from "./GerundsDiagram";
+import { EdIngAdjectivesDiagram } from "./EdIngAdjectivesDiagram";
+import { ArticlesDiagram } from "./ArticlesDiagram";
+import { AdverbsDiagram } from "./AdverbsDiagram";
+import { IntensifiersDiagram } from "./IntensifiersDiagram";
+import { DoubleComparativesDiagram } from "./DoubleComparativesDiagram";
+import { SecondConditionalDiagram } from "./SecondConditionalDiagram";
+import { PastContinuousDiagram } from "./PastContinuousDiagram";
+import { PastPerfectDiagram } from "./PastPerfectDiagram";
+import { QuestionTagsDiagram } from "./QuestionTagsDiagram";
+import { FutureContinuousDiagram } from "./FutureContinuousDiagram";
 
 export type DiagramProps = { variant: "screen" | "print"; accentColor?: string };
 
@@ -71,6 +98,33 @@ const TOPIC_DIAGRAMS: Record<string, ComponentType<DiagramProps>> = {
   quantifiers: QuantifiersDiagram,
   modals_obligation: ModalsObligationDiagram,
   modals_possibility: ModalsPossibilityDiagram,
+  subject_object_questions: SubjectObjectQuestionsDiagram,
+  present_perfect: PresentPerfectDiagram,
+  phrasal_verbs: PhrasalVerbsDiagram,
+  so_neither: SoNeitherDiagram,
+  modal_verbs: ModalVerbsDiagram,
+  understanding_get: UnderstandingGetDiagram,
+  prefer_rather: PreferRatherDiagram,
+  passive_simple: PassiveSimpleDiagram,
+  get_used_to: GetUsedToDiagram,
+  reported_speech: ReportedSpeechDiagram,
+  indefinite_pronouns: IndefinitePronounsDiagram,
+  relative_clauses: RelativeClausesDiagram,
+  clauses_of_reason: ClausesOfReasonDiagram,
+  clauses_of_purpose: ClausesOfPurposeDiagram,
+  clauses_of_contrast: ClausesOfContrastDiagram,
+  dependent_prepositions: DependentPrepositionsDiagram,
+  gerunds: GerundsDiagram,
+  ed_ing_adjectives: EdIngAdjectivesDiagram,
+  articles: ArticlesDiagram,
+  adverbs: AdverbsDiagram,
+  intensifiers_so_such_enough: IntensifiersDiagram,
+  double_comparatives: DoubleComparativesDiagram,
+  second_conditional: SecondConditionalDiagram,
+  past_continuous: PastContinuousDiagram,
+  past_perfect: PastPerfectDiagram,
+  question_tags: QuestionTagsDiagram,
+  future_continuous: FutureContinuousDiagram,
 };
 
 export function TopicDiagram({ topicId, variant, accentColor }: { topicId: string; variant: "screen" | "print"; accentColor?: string }) {
