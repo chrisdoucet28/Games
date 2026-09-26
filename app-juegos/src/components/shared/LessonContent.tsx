@@ -2,7 +2,7 @@ import { hexToRgba, type Theme } from "../../data/themes";
 import { renderBold, renderMistake } from "../../data/learnTopicsRender";
 import type { Lesson, LessonSection } from "../../data/lessons";
 import { TopicDiagram } from "./diagrams/GrammarDiagram";
-import { MascotDuo } from "./MascotDuo";
+import { MascotDuo, pickMascotPair } from "./MascotDuo";
 
 // The on-screen rendering of one Lesson's content (title/intro/rule sections/common mistakes) —
 // extracted out of LearnScreen.tsx so both LearnScreen and LessonPlanScreen render a topic's
@@ -49,7 +49,7 @@ export function CommonMistakesBlock({ commonMistakes }: { commonMistakes: string
 export function LessonContent({ lesson, theme, levelBadge, topicId }: { lesson: Lesson; theme: Theme; levelBadge?: React.ReactNode; topicId?: string }) {
   return (
     <div style={{ position: "relative", background: "white", border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, borderRadius: "16px", padding: "24px" }}>
-      <MascotDuo variant="header" mascots={["🦊", "🐸"]} />
+      {topicId && <MascotDuo variant="header" mascots={pickMascotPair(topicId, "header")} />}
       {levelBadge}
       <h2 style={{ fontSize: "26px", fontWeight: "900", color: theme.heroBg[0], margin: "10px 0 8px", fontFamily: theme.headingFont }}>{lesson.title}</h2>
       <p style={{ color: "#4B5563", fontSize: "15px", lineHeight: 1.6, margin: "0 0 20px" }}>{lesson.intro}</p>

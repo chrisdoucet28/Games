@@ -8,6 +8,7 @@ import { TOPIC_LIBRARY } from "../../data/topics";
 import { getProfile } from "../../lib/profile";
 import { LessonSectionBlock, CommonMistakesBlock } from "./LessonContent";
 import { TopicDiagram } from "./diagrams/GrammarDiagram";
+import { MascotDuo, pickMascotPair } from "./MascotDuo";
 import { QuestionCard } from "./QuestionCard";
 import { TeamIcon } from "./TeamIcon";
 import { Icon, type IconName } from "./Icon";
@@ -353,7 +354,7 @@ export function LessonPlanSlideshow({ topic, theme, teams, onBack, onPlayGameFor
     if (slideIndex === 0) onBack(); else { setSlideIndex(i => i - 1); setShowAnswer(false); }
   };
 
-  const cardStyle: React.CSSProperties = { background: "white", border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, borderRadius: "16px", padding: "24px", minHeight: "320px" };
+  const cardStyle: React.CSSProperties = { position: "relative", background: "white", border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, borderRadius: "16px", padding: "24px", minHeight: "320px" };
   const nextBtnStyle: React.CSSProperties = { background: `linear-gradient(135deg,${theme.cta[0]},${theme.cta[1]})`, color: "white", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "800", cursor: "pointer", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px" };
 
   return (
@@ -380,6 +381,7 @@ export function LessonPlanSlideshow({ topic, theme, teams, onBack, onPlayGameFor
         <div className="lp-no-print" style={cardStyle}>
           {slide.kind === "intro" && (
             <div style={{ textAlign: "center" }}>
+              <MascotDuo variant="header" mascots={pickMascotPair(topic.id, "header")} />
               <span style={{ background: LEVEL_COLOR[topic.meta.level ?? "A1"], color: "white", borderRadius: "999px", padding: "3px 12px", fontSize: "12px", fontWeight: "800" }}>{topic.meta.level}</span>
               <h2 style={{ fontSize: "26px", fontWeight: "900", color: theme.heroBg[0], margin: "12px 0 10px", fontFamily: theme.headingFont }}>{topic.lesson.title}</h2>
               <p style={{ color: "#6B7280", fontSize: "14px", marginBottom: "6px" }}><Icon name="hourglass" size={13} /> About 30 minutes</p>
