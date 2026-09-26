@@ -20,6 +20,10 @@ import { IrregularVerbsDiagram } from "./IrregularVerbsDiagram";
 import { ZeroConditionalDiagram } from "./ZeroConditionalDiagram";
 import { UsedToPastDiagram } from "./UsedToPastDiagram";
 import { MakingQuestionsDiagram } from "./MakingQuestionsDiagram";
+import { PresentContinuousA2Diagram } from "./PresentContinuousA2Diagram";
+import { ComparativesSuperlativesDiagram } from "./ComparativesSuperlativesDiagram";
+import { ComparativesDiagram } from "./ComparativesDiagram";
+import { SuperlativesDiagram } from "./SuperlativesDiagram";
 
 export type DiagramProps = { variant: "screen" | "print"; accentColor?: string };
 
@@ -51,6 +55,10 @@ const TOPIC_DIAGRAMS: Record<string, ComponentType<DiagramProps>> = {
   zero_conditional: ZeroConditionalDiagram,
   used_to_past: UsedToPastDiagram,
   making_questions: MakingQuestionsDiagram,
+  present_continuous_a2: PresentContinuousA2Diagram,
+  comparatives_superlatives: ComparativesSuperlativesDiagram,
+  comparatives: ComparativesDiagram,
+  superlatives: SuperlativesDiagram,
 };
 
 export function TopicDiagram({ topicId, variant, accentColor }: { topicId: string; variant: "screen" | "print"; accentColor?: string }) {
