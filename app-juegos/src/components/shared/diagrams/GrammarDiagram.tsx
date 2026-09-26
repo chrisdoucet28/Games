@@ -16,6 +16,10 @@ import { PastSimpleDiagram } from "./PastSimpleDiagram";
 import { PresentSimpleVsContinuousDiagram } from "./PresentSimpleVsContinuousDiagram";
 import { FutureWillGoingToDiagram } from "./FutureWillGoingToDiagram";
 import { FirstConditionalDiagram } from "./FirstConditionalDiagram";
+import { IrregularVerbsDiagram } from "./IrregularVerbsDiagram";
+import { ZeroConditionalDiagram } from "./ZeroConditionalDiagram";
+import { UsedToPastDiagram } from "./UsedToPastDiagram";
+import { MakingQuestionsDiagram } from "./MakingQuestionsDiagram";
 
 export type DiagramProps = { variant: "screen" | "print"; accentColor?: string };
 
@@ -43,6 +47,10 @@ const TOPIC_DIAGRAMS: Record<string, ComponentType<DiagramProps>> = {
   present_simple_vs_continuous: PresentSimpleVsContinuousDiagram,
   future_will_going_to: FutureWillGoingToDiagram,
   first_conditional: FirstConditionalDiagram,
+  irregular_verbs: IrregularVerbsDiagram,
+  zero_conditional: ZeroConditionalDiagram,
+  used_to_past: UsedToPastDiagram,
+  making_questions: MakingQuestionsDiagram,
 };
 
 export function TopicDiagram({ topicId, variant, accentColor }: { topicId: string; variant: "screen" | "print"; accentColor?: string }) {
