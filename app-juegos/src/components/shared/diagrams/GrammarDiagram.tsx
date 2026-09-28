@@ -76,6 +76,11 @@ import { WhatDoYouDoDiagram } from "./WhatDoYouDoDiagram";
 import { NumbersAndColoursDiagram } from "./NumbersAndColoursDiagram";
 import { FamilyMembersDiagram } from "./FamilyMembersDiagram";
 import { DailyRoutinesFrequencyDiagram } from "./DailyRoutinesFrequencyDiagram";
+import { LikesDislikesDiagram } from "./LikesDislikesDiagram";
+import { GreetingsIntroductionsDiagram } from "./GreetingsIntroductionsDiagram";
+import { WeatherTemperatureSeasonsDiagram } from "./WeatherTemperatureSeasonsDiagram";
+import { HouseObjectsRoomsDiagram } from "./HouseObjectsRoomsDiagram";
+import { HobbiesDiagram } from "./HobbiesDiagram";
 
 export type DiagramProps = { variant: "screen" | "print"; accentColor?: string };
 
@@ -163,6 +168,11 @@ const TOPIC_DIAGRAMS: Record<string, ComponentType<DiagramProps>> = {
   numbers_and_colours: NumbersAndColoursDiagram,
   family_members: FamilyMembersDiagram,
   daily_routines_frequency: DailyRoutinesFrequencyDiagram,
+  likes_dislikes: LikesDislikesDiagram,
+  greetings_introductions: GreetingsIntroductionsDiagram,
+  weather_temperature_seasons: WeatherTemperatureSeasonsDiagram,
+  house_objects_rooms_there_is_are: HouseObjectsRoomsDiagram,
+  hobbies: HobbiesDiagram,
 };
 
 export function TopicDiagram({ topicId, variant, accentColor }: { topicId: string; variant: "screen" | "print"; accentColor?: string }) {
