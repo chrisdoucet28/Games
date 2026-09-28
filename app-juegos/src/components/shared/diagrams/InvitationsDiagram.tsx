@@ -1,16 +1,27 @@
 import { hexToRgba } from "../../../data/themes";
 import { Icon } from "../Icon";
 
-// MOCK / exploratory — not registered in GrammarDiagram.tsx yet. Vocabulary topics have no
-// commonMistakes array to ground a "hardest idea" the way grammar diagrams do, so the shape here is
-// different: a phrase bank organized around the natural flow of the interaction (ask → accept or
-// decline) rather than a single grammar contrast.
+const PATTERNS = [
+  { phrase: "Would you like to", form: "come" },
+  { phrase: "Do you fancy", form: "going" },
+  { phrase: "I can't", form: "make it" },
+  { phrase: "Why don't we", form: "meet" },
+  { phrase: "I already", form: "have plans" },
+];
+
+// Every one of the lesson's own commonMistakes is the same shape — the right fixed phrase, wrong
+// verb form after it — so that pairing becomes the main reference grid, mirroring the Feelings
+// preposition grid. The ask/accept/decline phrase bank below it drops the earlier register labels
+// ("enthusiastic", "casual", "soften") since those words sat above this lesson's own A2 level; the
+// box order alone now carries that. All chrome text kept to plain A2 words.
 export function InvitationsDiagram({ variant, accentColor = "#2563EB" }: { variant: "screen" | "print"; accentColor?: string }) {
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
   const caption = "#6B7280";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
+  const wrong = isScreen ? "#DC2626" : "#1F2937";
+  const right = isScreen ? "#16A34A" : "#1F2937";
 
   return (
     <div
@@ -34,40 +45,46 @@ export function InvitationsDiagram({ variant, accentColor = "#2563EB" }: { varia
         </div>
       )}
       <div style={{ fontWeight: "800", fontSize: isScreen ? "11.5px" : "10px", textTransform: "uppercase", letterSpacing: "0.04em", color: isScreen ? accentColor : "#374151", marginBottom: "6px" }}>
-        Three stages, three phrase banks
+        Each phrase has its own next word
       </div>
-      <svg viewBox="0 0 460 275" style={{ width: "100%", height: "auto", display: "block" }}>
-        <rect x="90" y="12" width="280" height="72" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
-        <text x="230" y="30" textAnchor="middle" fontSize="11.5" fontWeight="800" fill={accent}>ASKING</text>
-        <text x="230" y="46" textAnchor="middle" fontSize="8" fontStyle="italic" fill={ink}>Would you like to...? · Are you free...?</text>
-        <text x="230" y="60" textAnchor="middle" fontSize="8" fontStyle="italic" fill={ink}>Do you fancy + -ing? · How about + -ing?</text>
-        <text x="230" y="74" textAnchor="middle" fontSize="8" fontStyle="italic" fill={ink}>Why don't we...? · Shall we...?</text>
+      <svg viewBox="0 0 460 236" style={{ width: "100%", height: "auto", display: "block" }}>
+        {PATTERNS.map((p, i) => {
+          const colWidth = 420 / PATTERNS.length;
+          const x = 20 + i * colWidth + 5;
+          const cx = x + 37;
+          return (
+            <g key={p.phrase}>
+              <rect x={x} y="16" width="74" height="58" rx="6" fill={fill} stroke={accent} strokeWidth="1.5" />
+              <text x={cx} y="34" textAnchor="middle" fontSize="7.5" fontWeight="800" fill={accent}>{p.phrase}</text>
+              <text x={cx} y="50" textAnchor="middle" fontSize="10" fill={caption}>↓</text>
+              <text x={cx} y="66" textAnchor="middle" fontSize="8" fontStyle="italic" fill={ink}>{p.form}</text>
+            </g>
+          );
+        })}
 
-        <line x1="230" y1="84" x2="230" y2="98" stroke={caption} strokeWidth="1.5" />
-        <line x1="120" y1="98" x2="340" y2="98" stroke={caption} strokeWidth="1.5" />
-        <line x1="120" y1="98" x2="120" y2="110" stroke={caption} strokeWidth="1.5" />
-        <line x1="340" y1="98" x2="340" y2="110" stroke={caption} strokeWidth="1.5" />
+        <rect x="10" y="86" width="140" height="88" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
+        <text x="80" y="104" textAnchor="middle" fontSize="10" fontWeight="800" fill={accent}>ASKING</text>
+        <text x="80" y="120" textAnchor="middle" fontSize="7.6" fontStyle="italic" fill={ink}>Would you like to...?</text>
+        <text x="80" y="134" textAnchor="middle" fontSize="7.6" fontStyle="italic" fill={ink}>Are you free...?</text>
+        <text x="80" y="148" textAnchor="middle" fontSize="7.6" fontStyle="italic" fill={ink}>Shall we...?</text>
 
-        <rect x="20" y="112" width="200" height="94" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
-        <text x="120" y="130" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={accent}>ACCEPTING</text>
-        <text x="120" y="147" textAnchor="middle" fontSize="8" fontStyle="italic" fill={ink}>That sounds great!</text>
-        <text x="120" y="162" textAnchor="middle" fontSize="8" fontStyle="italic" fill={ink}>I'd love to! · Count me in!</text>
-        <text x="120" y="177" textAnchor="middle" fontSize="8" fontStyle="italic" fill={ink}>I'm in! · Sounds like a plan!</text>
-        <text x="120" y="196" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>enthusiastic → casual</text>
+        <rect x="160" y="86" width="140" height="88" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
+        <text x="230" y="104" textAnchor="middle" fontSize="10" fontWeight="800" fill={accent}>ACCEPTING</text>
+        <text x="230" y="120" textAnchor="middle" fontSize="7.6" fontStyle="italic" fill={ink}>That sounds great!</text>
+        <text x="230" y="134" textAnchor="middle" fontSize="7.6" fontStyle="italic" fill={ink}>I'd love to!</text>
+        <text x="230" y="148" textAnchor="middle" fontSize="7.6" fontStyle="italic" fill={ink}>Count me in!</text>
 
-        <rect x="240" y="112" width="200" height="94" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
-        <text x="340" y="130" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={accent}>DECLINING POLITELY</text>
-        <text x="340" y="147" textAnchor="middle" fontSize="8" fontStyle="italic" fill={ink}>I'm afraid I can't make it —</text>
-        <text x="340" y="161" textAnchor="middle" fontSize="8" fontStyle="italic" fill={ink}>I have other plans.</text>
-        <text x="340" y="177" textAnchor="middle" fontSize="8" fontStyle="italic" fill={ink}>Thanks for the invite, but...</text>
-        <text x="340" y="191" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>always soften + leave the door open</text>
+        <rect x="310" y="86" width="140" height="88" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
+        <text x="380" y="104" textAnchor="middle" fontSize="10" fontWeight="800" fill={accent}>DECLINING</text>
+        <text x="380" y="120" textAnchor="middle" fontSize="7.6" fontStyle="italic" fill={ink}>I'm afraid I can't make it.</text>
+        <text x="380" y="134" textAnchor="middle" fontSize="7.6" fontStyle="italic" fill={ink}>I already have plans.</text>
+        <text x="380" y="148" textAnchor="middle" fontSize="7.6" fontStyle="italic" fill={ink}>Maybe another time?</text>
+        <text x="380" y="165" textAnchor="middle" fontSize="6.8" fontStyle="italic" fill={caption}>be kind, then give a reason</text>
 
-        <text x="230" y="228" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>"make it" = attend · note the word order: "I already have plans" (not "I have already")</text>
+        <line x1="20" y1="186" x2="440" y2="186" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 
-        <line x1="20" y1="240" x2="440" y2="240" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
-
-        <text x="230" y="260" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>a decline always pairs a soft opener with a reason or an alternative —</text>
-        <text x="230" y="273" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>never just "No."</text>
+        <text x="230" y="206" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ Would you like come? · Do you fancy to go hiking?</text>
+        <text x="230" y="222" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ Would you like to come? · Do you fancy going hiking?</text>
       </svg>
     </div>
   );

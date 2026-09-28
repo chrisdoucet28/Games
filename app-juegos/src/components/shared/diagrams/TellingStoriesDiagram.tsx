@@ -1,9 +1,9 @@
 import { hexToRgba } from "../../../data/themes";
 import { Icon } from "../Icon";
 
-// MOCK / exploratory — not registered. A third vocabulary shape: a left-to-right narrative
-// timeline (setup → events → twist → ending), distinct from Invitations' branching flow and
-// Likes & Dislikes' intensity spread — this lesson's own structure is inherently sequential.
+// A left-to-right narrative timeline (setup → events → twist → ending), since this lesson's own
+// structure is inherently sequential rather than built around one grammar contrast. All chrome
+// text kept to plain A2 words.
 export function TellingStoriesDiagram({ variant, accentColor = "#2563EB" }: { variant: "screen" | "print"; accentColor?: string }) {
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
@@ -37,7 +37,7 @@ export function TellingStoriesDiagram({ variant, accentColor = "#2563EB" }: { va
       <div style={{ fontWeight: "800", fontSize: isScreen ? "11.5px" : "10px", textTransform: "uppercase", letterSpacing: "0.04em", color: isScreen ? accentColor : "#374151", marginBottom: "6px" }}>
         A story's shape, left to right
       </div>
-      <svg viewBox="0 0 460 225" style={{ width: "100%", height: "auto", display: "block" }}>
+      <svg viewBox="0 0 460 256" style={{ width: "100%", height: "auto", display: "block" }}>
         <line x1="20" y1="45" x2="440" y2="45" stroke={caption} strokeWidth="2" markerEnd="url(#story-arrow)" />
         <defs>
           <marker id="story-arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
@@ -74,14 +74,16 @@ export function TellingStoriesDiagram({ variant, accentColor = "#2563EB" }: { va
         <text x="410" y="101" textAnchor="middle" fontSize="7" fontStyle="italic" fill={ink}>As a result...</text>
         <text x="410" y="117" textAnchor="middle" fontSize="6.5" fontStyle="italic" fill={caption}>the outcome</text>
 
-        <text x="230" y="150" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>drama also needs a full clause after: so + adj + that... / such a + adj + noun + that...</text>
+        <line x1="20" y1="140" x2="440" y2="140" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 
-        <line x1="20" y1="162" x2="440" y2="162" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
+        <text x="230" y="160" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ One day, I am walking when I heard a noise.</text>
+        <text x="230" y="176" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ One day, I was walking when I heard a noise.</text>
 
-        <text x="230" y="182" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ One day, I am walking when I heard a noise.</text>
-        <text x="230" y="198" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ One day, I was walking when I heard a noise.</text>
+        <text x="230" y="194" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ All of sudden... · To make things worst...</text>
+        <text x="230" y="210" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ All of a sudden... · To make things worse...</text>
 
-        <text x="230" y="218" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ All of sudden, the lights went off. · To make things worst...</text>
+        <text x="230" y="228" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ Despite the rain was heavy... · It was so a scary film.</text>
+        <text x="230" y="244" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ Despite the heavy rain... · It was such a scary film.</text>
       </svg>
     </div>
   );
