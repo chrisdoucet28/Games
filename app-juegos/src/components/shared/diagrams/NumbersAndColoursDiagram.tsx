@@ -15,7 +15,7 @@ const COLOURS: { name: string; hex: string; border?: boolean }[] = [
   { name: "grey", hex: "#9CA3AF" },
 ];
 
-const NUMBERS: { n: number; word: string }[] = [
+const NUMBERS_0_10: { n: number | string; word: string }[] = [
   { n: 0, word: "zero" },
   { n: 1, word: "one" },
   { n: 2, word: "two" },
@@ -29,13 +29,37 @@ const NUMBERS: { n: number; word: string }[] = [
   { n: 10, word: "ten" },
 ];
 
+const NUMBERS_11_20: { n: number | string; word: string }[] = [
+  { n: 11, word: "eleven" },
+  { n: 12, word: "twelve" },
+  { n: 13, word: "thirteen" },
+  { n: 14, word: "fourteen" },
+  { n: 15, word: "fifteen" },
+  { n: 16, word: "sixteen" },
+  { n: 17, word: "seventeen" },
+  { n: 18, word: "eighteen" },
+  { n: 19, word: "nineteen" },
+  { n: 20, word: "twenty" },
+];
+
+const NUMBERS_TENS: { n: number | string; word: string }[] = [
+  { n: 30, word: "thirty" },
+  { n: 40, word: "forty" },
+  { n: 50, word: "fifty" },
+  { n: 60, word: "sixty" },
+  { n: 70, word: "seventy" },
+  { n: 80, word: "eighty" },
+  { n: 90, word: "ninety" },
+  { n: 100, word: "hundred" },
+];
+
 const GRID_X = 20;
 const GRID_WIDTH = 420;
-const COL_WIDTH = GRID_WIDTH / 11;
 const BOX_SIZE = 30;
 
-function colX(i: number) {
-  return GRID_X + i * COL_WIDTH + (COL_WIDTH - BOX_SIZE) / 2;
+function rowX(i: number, count: number) {
+  const colWidth = GRID_WIDTH / count;
+  return GRID_X + i * colWidth + (colWidth - BOX_SIZE) / 2;
 }
 
 // User feedback: nowhere in the app does a colour word actually get shown next to its real
@@ -78,10 +102,10 @@ export function NumbersAndColoursDiagram({ variant, accentColor = "#2563EB" }: {
       <div style={{ fontWeight: "800", fontSize: isScreen ? "11.5px" : "10px", textTransform: "uppercase", letterSpacing: "0.04em", color: isScreen ? accentColor : "#374151", marginBottom: "6px" }}>
         Colours and Numbers
       </div>
-      <svg viewBox="0 0 460 306" style={{ width: "100%", height: "auto", display: "block" }}>
+      <svg viewBox="0 0 460 412" style={{ width: "100%", height: "auto", display: "block" }}>
         <text x="20" y="10" fontSize="8" fontWeight="800" letterSpacing="0.04em" fill={caption}>COLOURS</text>
         {COLOURS.map((c, i) => {
-          const x = colX(i);
+          const x = rowX(i, COLOURS.length);
           return (
             <g key={c.name}>
               <rect
@@ -96,8 +120,8 @@ export function NumbersAndColoursDiagram({ variant, accentColor = "#2563EB" }: {
         })}
 
         <text x="20" y="72" fontSize="8" fontWeight="800" letterSpacing="0.04em" fill={caption}>NUMBERS</text>
-        {NUMBERS.map((num, i) => {
-          const x = colX(i);
+        {NUMBERS_0_10.map((num, i) => {
+          const x = rowX(i, NUMBERS_0_10.length);
           return (
             <g key={num.n}>
               <rect x={x} y="78" width={BOX_SIZE} height={BOX_SIZE} rx="5" fill={fill} stroke={accent} strokeWidth="1.5" />
@@ -106,28 +130,48 @@ export function NumbersAndColoursDiagram({ variant, accentColor = "#2563EB" }: {
             </g>
           );
         })}
+        {NUMBERS_11_20.map((num, i) => {
+          const x = rowX(i, NUMBERS_11_20.length);
+          return (
+            <g key={num.n}>
+              <rect x={x} y="132" width={BOX_SIZE} height={BOX_SIZE} rx="5" fill={fill} stroke={accent} strokeWidth="1.5" />
+              <text x={x + BOX_SIZE / 2} y="152" textAnchor="middle" fontSize="13" fontWeight="800" fill={ink}>{num.n}</text>
+              <text x={x + BOX_SIZE / 2} y="172" textAnchor="middle" fontSize="7" fill={ink}>{num.word}</text>
+            </g>
+          );
+        })}
+        {NUMBERS_TENS.map((num, i) => {
+          const x = rowX(i, NUMBERS_TENS.length);
+          return (
+            <g key={num.n}>
+              <rect x={x} y="186" width={BOX_SIZE} height={BOX_SIZE} rx="5" fill={fill} stroke={accent} strokeWidth="1.5" />
+              <text x={x + BOX_SIZE / 2} y="206" textAnchor="middle" fontSize="13" fontWeight="800" fill={ink}>{num.n}</text>
+              <text x={x + BOX_SIZE / 2} y="226" textAnchor="middle" fontSize="7.3" fill={ink}>{num.word}</text>
+            </g>
+          );
+        })}
 
-        <text x="230" y="136" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>watch the spelling: forty has no "u" (not "fourty")</text>
+        <text x="230" y="244" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>watch the spelling: forty has no "u" (not "fourty")</text>
 
-        <line x1="20" y1="148" x2="440" y2="148" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
+        <line x1="20" y1="256" x2="440" y2="256" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 
-        <rect x="20" y="158" width="195" height="52" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
-        <text x="117" y="176" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={accent}>COLOUR + NOUN</text>
-        <text x="117" y="189" textAnchor="middle" fontSize="7.8" fill={caption}>never takes -s</text>
-        <text x="117" y="202" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={ink}>a black bag</text>
+        <rect x="20" y="266" width="195" height="52" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
+        <text x="117" y="284" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={accent}>COLOUR + NOUN</text>
+        <text x="117" y="297" textAnchor="middle" fontSize="7.8" fill={caption}>never takes -s</text>
+        <text x="117" y="310" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={ink}>a black bag</text>
 
-        <rect x="245" y="158" width="195" height="52" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
-        <text x="342" y="176" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={accent}>NUMBER + NOUN + S</text>
-        <text x="342" y="189" textAnchor="middle" fontSize="7.8" fill={caption}>2 or more? add -s</text>
-        <text x="342" y="202" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={ink}>two red bags</text>
+        <rect x="245" y="266" width="195" height="52" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
+        <text x="342" y="284" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={accent}>NUMBER + NOUN + S</text>
+        <text x="342" y="297" textAnchor="middle" fontSize="7.8" fill={caption}>2 or more? add -s</text>
+        <text x="342" y="310" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={ink}>two red bags</text>
 
-        <line x1="20" y1="222" x2="440" y2="222" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
+        <line x1="20" y1="330" x2="440" y2="330" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 
-        <text x="230" y="242" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ a bag black · The sky is blues.</text>
-        <text x="230" y="258" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ a black bag · The sky is blue.</text>
+        <text x="230" y="350" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ a bag black · The sky is blues.</text>
+        <text x="230" y="366" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ a black bag · The sky is blue.</text>
 
-        <text x="230" y="276" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ I have two brother. · How many student are there?</text>
-        <text x="230" y="292" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ I have two brothers. · How many students are there?</text>
+        <text x="230" y="384" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ I have two brother. · How many student are there?</text>
+        <text x="230" y="400" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ I have two brothers. · How many students are there?</text>
       </svg>
     </div>
   );
