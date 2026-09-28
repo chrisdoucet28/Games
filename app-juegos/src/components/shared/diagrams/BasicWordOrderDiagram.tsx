@@ -37,7 +37,7 @@ export function BasicWordOrderDiagram({ variant, accentColor = "#2563EB" }: { va
         </div>
       )}
       <div style={{ fontWeight: "800", fontSize: isScreen ? "11.5px" : "10px", textTransform: "uppercase", letterSpacing: "0.04em", color: isScreen ? accentColor : "#374151", marginBottom: "6px" }}>
-        A fixed, locked order
+        The order never changes
       </div>
       <svg viewBox="0 0 460 190" style={{ width: "100%", height: "auto", display: "block" }}>
         <rect x="20" y="34" width="110" height="44" rx="8" fill={blockFill} stroke={accent} strokeWidth="2" />
@@ -68,7 +68,7 @@ export function BasicWordOrderDiagram({ variant, accentColor = "#2563EB" }: { va
         <text x="230" y="100" textAnchor="middle" fontSize="11.5" fontStyle="italic" fill={caption}>often calls</text>
         <text x="385" y="100" textAnchor="middle" fontSize="11.5" fontStyle="italic" fill={caption}>her mother</text>
 
-        <text x="230" y="126" textAnchor="middle" fontSize="10" fontStyle="italic" fill={caption}>never drop the subject or object — even when there's no real "thing" doing the action</text>
+        <text x="230" y="126" textAnchor="middle" fontSize="10" fontStyle="italic" fill={caption}>always use a subject — even for weather: It's raining.</text>
 
         <text x="115" y="160" textAnchor="end" fontSize="12" fontWeight="800" fill={wrong}>✗ Is raining.</text>
         <text x="135" y="160" fontSize="12" fontWeight="800" fill={right}>✓ It's raining.</text>

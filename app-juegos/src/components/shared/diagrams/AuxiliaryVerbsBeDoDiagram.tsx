@@ -65,7 +65,7 @@ export function AuxiliaryVerbsBeDoDiagram({ variant, accentColor = "#2563EB" }: 
         <text x="350" y="163" textAnchor="middle" fontSize="10" fontStyle="italic" fill={ink}>Do you like pizza? · He doesn't eat meat.</text>
 
         <text x="230" y="185" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ She is has a car. · He don't is tired.</text>
-        <text x="230" y="198" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={right}>never combine BE and DO/DOES in the same sentence</text>
+        <text x="230" y="198" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={right}>never use BE and DO/DOES together</text>
       </svg>
     </div>
   );

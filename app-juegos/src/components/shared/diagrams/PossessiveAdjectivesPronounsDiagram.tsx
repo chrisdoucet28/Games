@@ -47,7 +47,7 @@ export function PossessiveAdjectivesPronounsDiagram({ variant, accentColor = "#2
         <rect x="240" y="15" width="200" height="70" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="340" y="38" textAnchor="middle" fontSize="12" fontWeight="800" fill={ink}>POSSESSIVE PRONOUN</text>
         <text x="340" y="65" textAnchor="middle" fontSize="13" fontWeight="700" fill={accent}>mine.</text>
-        <text x="340" y="78" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>complete — nothing after it</text>
+        <text x="340" y="78" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>nothing after it</text>
 
         <text x="120" y="105" textAnchor="middle" fontSize="10.5" fontStyle="italic" fill={ink}>This is my book.</text>
         <text x="340" y="105" textAnchor="middle" fontSize="10.5" fontStyle="italic" fill={ink}>This book is mine.</text>
