@@ -13,7 +13,7 @@ export function PresentContinuousA1Diagram({ variant, accentColor = "#2563EB" }:
 
   const cards = [
     { ruleLine1: "most verbs:", ruleLine2: "just add -ing", before: "watch", after: "watching" },
-    { ruleLine1: "short vowel + consonant:", ruleLine2: "double it", before: "run", after: "running" },
+    { ruleLine1: "short verbs:", ruleLine2: "double the last letter", before: "run", after: "running" },
     { ruleLine1: "ends in -e:", ruleLine2: "drop it, add -ing", before: "dance", after: "dancing" },
     { ruleLine1: "ends in -y:", ruleLine2: "keep it, add -ing", before: "cry", after: "crying" },
   ];

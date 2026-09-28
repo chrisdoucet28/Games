@@ -56,7 +56,7 @@ export function ThereIsAreDiagram({ variant, accentColor = "#2563EB" }: { varian
 
         <text x="230" y="172" textAnchor="middle" fontSize="11" fontWeight="800" fill={wrong}>✗ It is a nice park near the school.</text>
         <text x="230" y="190" textAnchor="middle" fontSize="11" fontWeight="800" fill={right}>✓ There is a nice park near the school.</text>
-        <text x="230" y="204" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>use "there is/are" to say something exists — not "it is"</text>
+        <text x="230" y="204" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>say "there is/are" here — not "it is"</text>
       </svg>
     </div>
   );

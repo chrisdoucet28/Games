@@ -39,14 +39,14 @@ export function DaysDatesPrepositionsTimeDiagram({ variant, accentColor = "#2563
         </div>
       )}
       <div style={{ fontWeight: "800", fontSize: isScreen ? "11.5px" : "10px", textTransform: "uppercase", letterSpacing: "0.04em", color: isScreen ? accentColor : "#374151", marginBottom: "6px" }}>
-        Zooming out: point → day → period
+        Small time, big time: AT → ON → IN
       </div>
       <svg viewBox="0 0 460 290" style={{ width: "100%", height: "auto", display: "block" }}>
         <line x1="40" y1="90" x2="420" y2="90" stroke={caption} strokeWidth="1.5" markerEnd="url(#ddArrow)" />
 
         <circle cx="80" cy="90" r="6" fill={accent} />
         <text x="80" y="65" textAnchor="middle" fontSize="13" fontWeight="800" fill={accent}>AT</text>
-        <text x="80" y="115" textAnchor="middle" fontSize="10" fontStyle="italic" fill={caption}>a precise point</text>
+        <text x="80" y="115" textAnchor="middle" fontSize="10" fontStyle="italic" fill={caption}>one clock time</text>
         <text x="80" y="130" textAnchor="middle" fontSize="10" fontStyle="italic" fill={ink}>at 6 o'clock</text>
 
         <rect x="205" y="75" width="30" height="30" rx="4" fill={fill} stroke={accent} strokeWidth="2" />
@@ -65,11 +65,11 @@ export function DaysDatesPrepositionsTimeDiagram({ variant, accentColor = "#2563
           </marker>
         </defs>
 
-        <text x="230" y="184" textAnchor="middle" fontSize="10" fontStyle="italic" fill={ink}>exception: a part of day tied to one day still uses ON — "on Saturday morning"</text>
+        <text x="230" y="184" textAnchor="middle" fontSize="10" fontStyle="italic" fill={ink}>but: "on Saturday morning" — still ON, because it names one day</text>
 
         <line x1="20" y1="202" x2="440" y2="202" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 
-        <text x="230" y="222" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={ink}>dates use ordinal numbers — the irregular pattern repeats after 20</text>
+        <text x="230" y="222" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={ink}>dates: 1st, 2nd, 3rd... then it starts again after 20</text>
 
         <rect x="15" y="234" width="118" height="24" rx="5" fill={highlightFill} stroke={accent} strokeWidth="1.5" />
         <text x="30" y="250" fontSize="12" fontWeight="800" fill={accent}>1st</text>
