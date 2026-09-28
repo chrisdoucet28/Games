@@ -68,7 +68,12 @@ const CPU_CORRECT_REVEAL_MS = 5000;
 const CPU_WRONG_CHANCE_BY_DIFFICULTY: Record<Difficulty, number> = { easy: 0.45, medium: 0.3, hard: 0.15 };
 // Random spread before the CPU's own entry resolves each round — writes "at the same time" as the
 // student per the game's own flavor text, not instantly, so it doesn't read as a scripted reveal.
-const CPU_ENTRY_DELAY_MS = { min: 3000, max: 8000 };
+// Teacher feedback from a real class: real students take 2-3 minutes to actually write a sentence,
+// so the original 3-8s made the CPU look done before anyone had even picked up a pen. Not scaled
+// all the way to match real writing time (that would drag every round out for the whole class just
+// waiting on the CPU) — 30-50s is enough to feel like real thinking time without becoming the
+// bottleneck.
+const CPU_ENTRY_DELAY_MS = { min: 30000, max: 50000 };
 
 type Phase = "intro" | "playing" | "final";
 type Banner = { text: React.ReactNode; kind: "success" | "wrong"; key: number };
