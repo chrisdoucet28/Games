@@ -71,6 +71,11 @@ import { CausativeVerbsDiagram } from "./CausativeVerbsDiagram";
 import { InversionDiagram } from "./InversionDiagram";
 import { PassiveReportingStructuresDiagram } from "./PassiveReportingStructuresDiagram";
 import { CleftSentencesDiagram } from "./CleftSentencesDiagram";
+import { IntroducingOthersDiagram } from "./IntroducingOthersDiagram";
+import { WhatDoYouDoDiagram } from "./WhatDoYouDoDiagram";
+import { NumbersAndColoursDiagram } from "./NumbersAndColoursDiagram";
+import { FamilyMembersDiagram } from "./FamilyMembersDiagram";
+import { DailyRoutinesFrequencyDiagram } from "./DailyRoutinesFrequencyDiagram";
 
 export type DiagramProps = { variant: "screen" | "print"; accentColor?: string };
 
@@ -153,6 +158,11 @@ const TOPIC_DIAGRAMS: Record<string, ComponentType<DiagramProps>> = {
   inversion: InversionDiagram,
   passive_reporting_structures: PassiveReportingStructuresDiagram,
   cleft_sentences: CleftSentencesDiagram,
+  introducing_others: IntroducingOthersDiagram,
+  what_do_you_do: WhatDoYouDoDiagram,
+  numbers_and_colours: NumbersAndColoursDiagram,
+  family_members: FamilyMembersDiagram,
+  daily_routines_frequency: DailyRoutinesFrequencyDiagram,
 };
 
 export function TopicDiagram({ topicId, variant, accentColor }: { topicId: string; variant: "screen" | "print"; accentColor?: string }) {
