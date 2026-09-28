@@ -32,13 +32,31 @@ const BOUNTY_VALUE = 10;
 // actually yield — a narrow topic selection shouldn't force 8 rounds out of a 3-item pool.
 const MAX_ROUNDS = 8;
 
-// Solo only — how long an open bounty sits unclaimed before the CPU steals it (see the steal-timer
-// effect below). Generous compared to every other game's CPU delay constants on purpose: this
-// window has to cover a player noticing the bounty and deciding to claim it, not a quick zone-pick
-// or dice roll — Vault Heist's own CPU_ANSWER_MS_BY_DIFFICULTY is milliseconds for the same reason
-// those games' CPU turns are near-instant, which this one deliberately isn't.
+// Solo only — how long an open bounty sits unclaimed before the CPU jumps in and attempts a fix
+// (see the steal-timer effect below). Flat, not difficulty-scaled — with only one other "team" in
+// solo play, there's nothing else competing for this bounty, so varying the SPEED by difficulty
+// modeled nothing real. It's generous compared to every other game's CPU delay constants on
+// purpose: this window has to cover a player noticing the bounty and deciding to claim it, not a
+// quick zone-pick or dice roll — Vault Heist's own CPU_ANSWER_MS_BY_DIFFICULTY is milliseconds for
+// the same reason those games' CPU turns are near-instant, which this one deliberately isn't.
 type Difficulty = "easy" | "medium" | "hard";
-const CPU_STEAL_SECONDS_BY_DIFFICULTY: Record<Difficulty, number> = { easy: 20, medium: 12, hard: 6 };
+const CPU_STEAL_SECONDS = 15;
+
+// Solo only — how often the CPU's own attempt to fix a stolen bounty is itself wrong, escalating
+// the bounty's value and sending it back to the original team, same as a human's own failed fix
+// (see resolveCpuFixFailure). Replaces varying the steal SPEED by difficulty (above) with the
+// thing difficulty should actually mean here, same direction as CPU_WRONG_CHANCE_BY_DIFFICULTY
+// below: how often the CPU messes up, not how fast it moves.
+const CPU_FIX_FAIL_CHANCE_BY_DIFFICULTY: Record<Difficulty, number> = { easy: 0.5, medium: 0.25, hard: 0.08 };
+// Short "processing" pause before a fix attempt's outcome lands, so it reads as the CPU doing
+// something rather than an instant teleport — much shorter than CPU_ENTRY_DELAY_MS below since the
+// steal-timer itself already provided the suspense; this is just enough to not feel instantaneous.
+const CPU_FIX_WORKING_MS = { min: 1200, max: 2600 };
+// How long the CPU's real-but-uninteractable "correct" sentence stays on screen before it clears
+// itself — see cpuCorrectReveal's own comment and CpuCorrectRevealCard below, which both share
+// this single constant so the ring's drain animation and the timeout that actually clears the
+// state can never drift apart.
+const CPU_CORRECT_REVEAL_MS = 5000;
 
 // Solo only — the CPU now also submits its own round entry every round, same as a real second
 // team would (previously it only ever reacted to the human's mistakes, which read as a watered-
@@ -60,6 +78,8 @@ const STYLE_TAG = (
     @keyframes bbPosterIn{0%{opacity:0;transform:translateY(14px) scale(0.94)}100%{opacity:1;transform:translateY(0) scale(1)}}
     @keyframes bbBannerIn{0%{opacity:0;transform:translate(-50%,-16px) scale(0.9)}15%{opacity:1;transform:translate(-50%,0) scale(1.03)}25%{transform:translate(-50%,0) scale(1)}85%{opacity:1;transform:translate(-50%,0) scale(1)}100%{opacity:0;transform:translate(-50%,-10px) scale(0.96)}}
     @keyframes bbUrgentPulse{0%,100%{opacity:1}50%{opacity:0.6}}
+    @keyframes bbCpuThinkPulse{0%,100%{opacity:0.5;transform:scale(0.9)}50%{opacity:1;transform:scale(1.15)}}
+    @keyframes bbRevealDrain{from{stroke-dashoffset:0}to{stroke-dashoffset:56.5}}
     .bb-btn:hover:not(:disabled){filter:brightness(1.08)}
     .bb-btn:active:not(:disabled){transform:translate(3px,3px) !important;box-shadow:0 0 0 #1A1A2E !important}
   `}</style>
@@ -184,10 +204,42 @@ function CpuRoundEntryCard({ team }: { team: GameProps["teams"][number] | undefi
   );
 }
 
+// Solo only — takes CpuRoundEntryCard's place once the CPU's entry resolves correct, for exactly
+// CPU_CORRECT_REVEAL_MS: a real sentence (never fabricated — see cpuCorrectReveal's own comment),
+// with a small ring that drains over that same window so it's obvious the card will disappear on
+// its own. No buttons, no claim/fix controls — purely informational, matching the "the viewer can
+// see everything the CPU does, but never touches any of it" principle this whole thing is for.
+function CpuCorrectRevealCard({ team, text }: { team: GameProps["teams"][number] | undefined; text: string }) {
+  return (
+    <div style={{
+      position: "relative", width: "230px", background: "linear-gradient(160deg,#F0FDF4,#DCFCE7)", border: "2px solid #22C55E",
+      borderRadius: "12px", padding: "12px", textAlign: "center", animation: "bbPosterIn 0.4s ease-out",
+      boxShadow: "0 4px 14px rgba(34,197,94,0.18)",
+    }}>
+      <div style={{ position: "absolute", top: "8px", right: "8px" }}>
+        <svg width="22" height="22" style={{ transform: "rotate(-90deg)" }}>
+          <circle cx="11" cy="11" r="9" fill="none" stroke="#BBF7D0" strokeWidth="3" />
+          <circle cx="11" cy="11" r="9" fill="none" stroke="#16A34A" strokeWidth="3" strokeLinecap="round"
+            strokeDasharray="56.5" style={{ animation: `bbRevealDrain ${CPU_CORRECT_REVEAL_MS / 1000}s linear forwards` }} />
+        </svg>
+      </div>
+      <div style={{ fontSize: "12px", fontWeight: "800", color: team?.color.dark ?? "#166534", marginBottom: "8px" }}>
+        <TeamIcon team={team} /> {team?.name ?? "CPU"}
+      </div>
+      <div style={{ background: "white", border: "1px solid #BBF7D0", borderRadius: "8px", padding: "8px 10px", fontSize: "14px", fontWeight: "800", color: "#166534", lineHeight: 1.35 }}>
+        “{text}”
+      </div>
+      <div style={{ fontSize: "10px", fontWeight: "800", color: "#16A34A", marginTop: "6px", display: "inline-flex", alignItems: "center", gap: "4px" }}>
+        <Icon name="check" size={10} /> Correct!
+      </div>
+    </div>
+  );
+}
+
 // A wanted poster for an open (or being-fixed) bounty. `claimableTeams` already has the exclusion
 // rule (and the solo-play fallback) baked in by the caller — this component just renders whatever
 // list it's handed.
-function BountyCard({ bounty, team, claimableTeams, answerMode, isPhoneMode, onClaim, onPostFix, onCorrect, onWrong, cpuSteal }: {
+function BountyCard({ bounty, team, claimableTeams, answerMode, isPhoneMode, onClaim, onPostFix, onCorrect, onWrong, cpuSteal, isCpuFixing, humanExcluded }: {
   bounty: Bounty;
   team: GameProps["teams"][number] | undefined; // the claiming team, once claimed
   claimableTeams: GameProps["teams"];
@@ -200,6 +252,16 @@ function BountyCard({ bounty, team, claimableTeams, answerMode, isPhoneMode, onC
   // Solo only — the CPU's own countdown to steal THIS bounty, shown so the threat is visible
   // rather than a silent trap. Absent once claimed (the race is over either way by then).
   cpuSteal?: { timeLeft: number; totalSeconds: number };
+  // Solo only — true once the CPU has claimed this bounty and is mid-attempt (see
+  // cpuBeginFixAttempt). There's no real fix text to show here (unlike the CPU's own round entry,
+  // the human's original mistake has no answer key for the CPU to draw a real fix from), so this
+  // is a working indicator only, not a text-reveal — same "never fabricate" boundary as everywhere
+  // else the CPU appears, just with nothing honest to show instead of a fabricated fix.
+  isCpuFixing?: boolean;
+  // Solo only — true when claimableTeams is empty specifically because the human just failed their
+  // own fix attempt (as opposed to no team existing yet at all) — the one case worth a sentence of
+  // explanation, since a claim button silently disappearing otherwise reads as a bug, not a rule.
+  humanExcluded?: boolean;
 }) {
   const [draft, setDraft] = useState("");
   const spoken = answerMode === "spoken";
@@ -232,6 +294,9 @@ function BountyCard({ bounty, team, claimableTeams, answerMode, isPhoneMode, onC
             ) : !cpuSteal ? (
               <div style={{ fontSize: "11px", fontWeight: "700", color: "#991B1B", padding: "6px 0" }}>No eligible team yet</div>
             ) : null}
+            {humanExcluded && (
+              <div style={{ fontSize: "10.5px", fontWeight: "700", color: "#991B1B", padding: "4px 0 0" }}>You can't fix your own mistake twice in a row — the CPU goes first.</div>
+            )}
             {cpuSteal && (
               <div style={{ marginTop: claimableTeams.length > 0 ? "8px" : 0 }}>
                 <div style={{ fontSize: "10px", fontWeight: "800", color: "#991B1B", marginBottom: "4px" }}><Icon name="robot" size={10} /> CPU is closing in…</div>
@@ -243,7 +308,11 @@ function BountyCard({ bounty, team, claimableTeams, answerMode, isPhoneMode, onC
       ) : (
         <>
           <div style={{ fontSize: "11px", fontWeight: "800", color: team?.color.dark ?? "#7F1D1D", marginBottom: "6px" }}><TeamIcon team={team} /> {team?.name} is fixing it</div>
-          {!ready ? (
+          {isCpuFixing ? (
+            <div style={{ fontSize: "11px", fontWeight: "700", color: "#991B1B", padding: "6px 0", display: "inline-flex", alignItems: "center", gap: "4px" }}>
+              <Icon name="robot" size={11} style={{ animation: "bbCpuThinkPulse 1.1s ease-in-out infinite" }} /> Trying to fix it…
+            </div>
+          ) : !ready ? (
             spoken
               ? <PostToBoardPrompt value={draft} onChange={setDraft} onPost={() => onPostFix(draft.trim())} placeholder="Type the fixed sentence they wrote, so the class can read it…" />
               : isPhoneMode
@@ -330,7 +399,7 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
   // mistakes" content at all (rare) — the CPU simply never rolls wrong in that case, same
   // graceful-fallback spirit as `pool`'s own empty-uvs case.
   const cgmPool = useRef((() => {
-    const cgm = questions.filter((q): q is typeof q & { question: string } => q.type === "correct grammar mistakes" && !!q.question);
+    const cgm = questions.filter((q): q is typeof q & { question: string; answer: string } => q.type === "correct grammar mistakes" && !!q.question && !!q.answer);
     return [...cgm].sort(() => Math.random() - 0.5);
   })()).current;
 
@@ -341,6 +410,13 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
   const [bounties, setBounties] = useState<Bounty[]>([]);
   const [gameScoreByTeam, setGameScoreByTeam] = useState<Record<string | number, number>>(() => resumed?.gameScoreByTeam ?? {});
   const [banner, setBanner] = useState<Banner | null>(null);
+  // Solo only — a real correct sentence (reused from cgmPool's own `answer` field, never
+  // fabricated) shown for a few seconds after the CPU's own round entry resolves correct, then
+  // clears itself. Teacher feedback: a silent resolution gave no sense of what the CPU was doing,
+  // while every human entry stays visible on screen the whole time (the teacher has to read it to
+  // rule correct/wrong) — this closes that gap without handing the viewer any control over it.
+  const [cpuCorrectReveal, setCpuCorrectReveal] = useState<{ text: string; key: number } | null>(null);
+  const cpuCorrectRevealIdRef = useRef(0);
 
   const [inputMode, setInputMode] = useState<"screen" | "phone">(presetPhoneSession ? "phone" : "screen");
   const [introStep, setIntroStep] = useState<"setup" | "qr">("setup");
@@ -375,6 +451,7 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
     if (phase !== "playing" || roundEntries.length > 0) return;
     setRoundEntries(seedRoundEntries());
     setBounties([]);
+    setCpuCorrectReveal(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase]);
 
@@ -446,6 +523,16 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
         resolveRoundWrong(cpuId, item.question);
       } else {
         resolveRoundCorrect(cpuId);
+        // Reuses a random item's real `answer` (the fixed sentence), not the same item the wrong
+        // branch would have used — this is a genuinely correct sentence, never fabricated. Skipped
+        // entirely if the topic has no "correct grammar mistakes" content, same graceful fallback
+        // as the wrong branch above.
+        if (cgmPool.length > 0) {
+          const item = cgmPool[Math.floor(Math.random() * cgmPool.length)];
+          const key = cpuCorrectRevealIdRef.current++;
+          setCpuCorrectReveal({ text: item.answer, key });
+          setTimeout(() => setCpuCorrectReveal(prev => (prev?.key === key ? null : prev)), CPU_CORRECT_REVEAL_MS);
+        }
       }
     }, delay);
     return () => clearTimeout(timer);
@@ -454,14 +541,22 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
 
   // Guarded inside the functional updater (not a separate read beforehand) — a screen click racing
   // a phone broadcast for the same bounty can't both succeed, same idiom as Order Up's claimTicket.
-  // Solo always allows the human to claim their own bounty here — the CPU is the only "other team"
-  // in that mode, it never manually claims through this function (it steals through cpuStealBounty
-  // above instead), so the exclusion rule that keeps a real multi-team game honest would otherwise
-  // leave the human with no claim button at all and hand every bounty to the CPU by default.
+  // Solo's only carve-out from the exclusion rule below is the VERY FIRST claim on a bounty
+  // (missCount === 1, i.e. still the original mistake, nobody has attempted a fix yet) — the CPU is
+  // the only "other team" in that mode, so without this carve-out the exclusion rule would leave
+  // the human with no claim button at all and hand every fresh mistake straight to the CPU. Once
+  // either side has actually attempted a fix and gotten it wrong, though, the same rule as every
+  // other mode applies in full: whoever just failed can't immediately re-claim it themselves — the
+  // CPU never manually claims through this function at all (it claims through cpuBeginFixAttempt
+  // above instead, which has no such carve-out), so this only ever gates the human's own re-claim.
   const claimBounty = (bountyId: number, teamId: string | number) => {
     setBounties(prev => prev.map(b => {
       if (b.id !== bountyId || b.claimedBy !== undefined) return b;
-      if (isSolo) return { ...b, claimedBy: teamId };
+      if (isSolo) {
+        if (b.missCount === 1) return { ...b, claimedBy: teamId };
+        if (b.excludedTeamId === teamId) return b;
+        return { ...b, claimedBy: teamId };
+      }
       const otherTeamEligible = teams.some(t => t.id !== b.excludedTeamId);
       if (b.excludedTeamId === teamId && otherTeamEligible) return b;
       return { ...b, claimedBy: teamId };
@@ -495,21 +590,45 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
     pushBanner(<><Icon name="warning" size={14} /> Still wrong — the bounty is now {formatValue(value)}!</>, "wrong");
   };
 
-  // The CPU's whole role in this game: it never writes a real sentence (there's no legitimate wrong
-  // text to fabricate for it), it only races the clock against the human's OWN open bounty. Claim
-  // and resolve happen together here (not via claimBounty + resolveBountyCorrect back to back) —
-  // those are both async state setters, so calling them sequentially would have resolveBountyCorrect
-  // read the bounty's still-stale, still-unclaimed state from the same render.
-  const cpuStealBounty = (bountyId: number) => {
+  // The CPU's role in this game: it never writes a real fix for the human's own freely-typed
+  // mistake (there's no answer key for it to draw on, unlike its own round entries above), it only
+  // races the clock against the human's OWN open bounty and then either fixes it or doesn't. This
+  // only CLAIMS the bounty — the actual success/failure roll happens in the effect below, after a
+  // short "working" delay, via resolveCpuFixSuccess/resolveCpuFixFailure. Splitting claim from
+  // resolve (rather than doing both atomically) is what makes the CPU's attempt visible on screen,
+  // the same way a human claim shows "Team X is fixing it" before they submit anything.
+  const cpuBeginFixAttempt = (bountyId: number) => {
     const bounty = bounties.find(b => b.id === bountyId);
     const cpuId = cpuRef.current?.id;
     if (!bounty || bounty.claimedBy !== undefined || cpuId === undefined) return;
+    setBounties(prev => prev.map(b => (b.id === bountyId ? { ...b, claimedBy: cpuId } : b)));
+  };
+
+  const resolveCpuFixSuccess = (bountyId: number, cpuId: string | number) => {
+    const bounty = bounties.find(b => b.id === bountyId);
+    if (!bounty) return;
     updateScore(cpuId, bounty.value);
     setGameScoreByTeam(prev => ({ ...prev, [cpuId]: (prev[cpuId] ?? 0) + bounty.value }));
-    setBounties(prev => prev.map(b => (b.id === bountyId ? { ...b, claimedBy: cpuId, resolved: true } : b)));
+    setBounties(prev => prev.map(b => (b.id === bountyId ? { ...b, resolved: true } : b)));
     setRoundEntries(prev => prev.map(e => (e.teamId === bounty.originalTeamId ? { ...e, resolved: true } : e)));
     playSound("bounty");
-    pushBanner(<><Icon name="robot" size={14} /> CPU beat you to it! +{bounty.value} pts</>, "wrong");
+    pushBanner(<><Icon name="robot" size={14} /> CPU fixed it! +{bounty.value} pts</>, "wrong");
+  };
+
+  // Mirrors resolveBountyWrong exactly (missCount/value escalate the same way a human's failed fix
+  // would) except for the banner text — the CPU is the one who just failed here, not a human team.
+  // Critically, this sets excludedTeamId to the CPU's own id, same mechanism every other "wrong
+  // fix" in this file already uses to keep whoever just failed from immediately re-claiming their
+  // own failure — without it, the CPU would reopen this bounty only to steal-attempt it again a
+  // few seconds later, forever, since nothing else was stopping it from retrying its own mistake.
+  const resolveCpuFixFailure = (bountyId: number) => {
+    const bounty = bounties.find(b => b.id === bountyId);
+    const cpuId = cpuRef.current?.id;
+    if (!bounty || bounty.claimedBy === undefined || cpuId === undefined) return;
+    const missCount = bounty.missCount + 1;
+    const value = BOUNTY_VALUE * (missCount + 1);
+    setBounties(prev => prev.map(b => (b.id === bountyId ? { ...b, missCount, value, excludedTeamId: cpuId, claimedBy: undefined, fixText: undefined } : b)));
+    pushBanner(<><Icon name="robot" size={14} /> The CPU couldn't fix it correctly — it's back to you, now worth {formatValue(value)}!</>, "wrong");
   };
 
   // Solo only — the bounty the CPU is racing to steal. Explicitly excludes the CPU's own bounty
@@ -517,14 +636,37 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
   // it would eventually "steal" its own mistake, which makes no sense and would quietly award it
   // points for fixing itself. The human's own bounty and the CPU's own bounty CAN be open at the
   // same time now (both entries went wrong the same round); this only ever targets the human's.
-  const openBounty = bounties.find(b => !b.resolved && b.claimedBy === undefined && b.originalTeamId !== cpuRef.current?.id);
-  const cpuStealSeconds = CPU_STEAL_SECONDS_BY_DIFFICULTY[difficulty];
+  // Also excludes a bounty the CPU itself was just excluded from (see resolveCpuFixFailure) — the
+  // same "whoever just failed can't immediately retry" rule applied to the CPU's own attempts, not
+  // just the human's.
+  const openBounty = bounties.find(b => !b.resolved && b.claimedBy === undefined && b.originalTeamId !== cpuRef.current?.id && b.excludedTeamId !== cpuRef.current?.id);
   const { timeLeft: cpuStealTimeLeft } = useTurnTimer(
-    cpuStealSeconds,
+    CPU_STEAL_SECONDS,
     isSolo && phase === "playing" && !!openBounty,
-    () => { if (openBounty) cpuStealBounty(openBounty.id); },
+    () => { if (openBounty) cpuBeginFixAttempt(openBounty.id); },
     openBounty?.id ?? "none"
   );
+
+  // Resolves the CPU's fix attempt (success or failure, see CPU_FIX_FAIL_CHANCE_BY_DIFFICULTY)
+  // after a short working delay — same guarded-ref idiom as the round-entry effect above, keyed on
+  // bounty id since a new attempt only ever starts once the previous one has resolved.
+  const cpuFixScheduledBountyRef = useRef<number | null>(null);
+  useEffect(() => {
+    if (!isSolo || phase !== "playing" || !cpuRef.current) return;
+    const cpuId = cpuRef.current.id;
+    const attempting = bounties.find(b => b.claimedBy === cpuId && !b.resolved);
+    if (!attempting) { cpuFixScheduledBountyRef.current = null; return; }
+    if (cpuFixScheduledBountyRef.current === attempting.id) return;
+    cpuFixScheduledBountyRef.current = attempting.id;
+    const succeeds = Math.random() >= CPU_FIX_FAIL_CHANCE_BY_DIFFICULTY[difficulty];
+    const delay = CPU_FIX_WORKING_MS.min + Math.random() * (CPU_FIX_WORKING_MS.max - CPU_FIX_WORKING_MS.min);
+    const timer = setTimeout(() => {
+      if (succeeds) resolveCpuFixSuccess(attempting.id, cpuId);
+      else resolveCpuFixFailure(attempting.id);
+    }, delay);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSolo, phase, bounties, difficulty]);
 
   const roundComplete = roundEntries.length > 0 && roundEntries.every(e => e.resolved);
   const isLastRound = roundNumber >= totalRounds - 1;
@@ -535,6 +677,7 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
     setRoundNumber(next);
     setRoundEntries(seedRoundEntries());
     setBounties([]);
+    setCpuCorrectReveal(null);
   };
 
   const handlePickPhoneMode = () => {
@@ -737,11 +880,12 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
             );
           })()}
         </>}
-        {/* Solo only — the CPU's own steal-countdown speed. Same picker idiom as Race Track's own
-            solo difficulty row. */}
+        {/* Solo only — how many mistakes the CPU makes, both in its own sentences (writing wrong
+            ones more often) and in fixing yours (more likely to fail and hand it back to you).
+            Same three-way picker idiom as Hot Potato's "CPU pass speed" row. */}
         {isSolo && (
           <div style={{ marginBottom: "20px" }}>
-            <div style={{ fontSize: "13px", color: "#92400E", fontWeight: "700", marginBottom: "10px" }}><Icon name="robot" size={13} /> How fast should the CPU steal a missed bounty?</div>
+            <div style={{ fontSize: "13px", color: "#92400E", fontWeight: "700", marginBottom: "10px" }}><Icon name="robot" size={13} /> How good is the CPU?</div>
             <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap" }}>
               {(["easy", "medium", "hard"] as const).map(d => {
                 const selected = difficulty === d;
@@ -755,10 +899,13 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
                     color: selected ? "#B91C1C" : "#78350F",
                     display: "inline-flex", alignItems: "center", gap: "6px",
                   }}>
-                    <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: dotColor, display: "inline-block" }} /> {label} · {CPU_STEAL_SECONDS_BY_DIFFICULTY[d]}s
+                    <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: dotColor, display: "inline-block" }} /> {label}
                   </button>
                 );
               })}
+            </div>
+            <div style={{ fontSize: "11px", color: "#9A3412", marginTop: "6px" }}>
+              Hard means a sharper CPU — it writes fewer wrong sentences and rarely fails to fix yours. Easy makes more of both kinds of mistakes.
             </div>
           </div>
         )}
@@ -866,6 +1013,9 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
                 />
               )
             ))}
+          {cpuCorrectReveal && (
+            <CpuCorrectRevealCard team={teams.find(t => t.id === cpuRef.current?.id)} text={cpuCorrectReveal.text} />
+          )}
         </div>
 
         {bounties.some(b => !b.resolved) && (
@@ -876,22 +1026,28 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
             <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap", marginBottom: "10px" }}>
               {bounties.filter(b => !b.resolved).map(b => {
                 // Solo is its own case, not a variant of the exclusion rule below: the human is
-                // always the manual-claim button (catching their own mistake before the CPU does),
-                // and the CPU is never one — it only ever claims automatically via the steal
-                // countdown, through cpuStealBounty, never through this button. A real multi-team
-                // exclusion still falls back to allowing anyone rather than soft-locking forever.
-                const claimableTeams = isSolo ? [propTeams[0]] : (() => {
+                // the manual-claim button for the ORIGINAL mistake (catching it before the CPU
+                // does, missCount === 1), same carve-out claimBounty itself makes. Once the human
+                // has actually attempted and failed their own fix, though, they're excluded exactly
+                // like everyone else until the CPU's had its turn — same rule as multi-team. The
+                // CPU is never a claimableTeams entry — it only ever claims automatically via the
+                // steal countdown, through cpuBeginFixAttempt, never through this button.
+                const humanExcluded = isSolo && b.missCount > 1 && b.excludedTeamId === propTeams[0]?.id;
+                const claimableTeams = isSolo ? (humanExcluded ? [] : [propTeams[0]]) : (() => {
                   const eligible = teams.filter(t => t.id !== b.excludedTeamId);
                   return eligible.length > 0 ? eligible : teams;
                 })();
                 const isOpenBounty = b.id === openBounty?.id;
+                const isCpuFixing = isSolo && !b.resolved && b.claimedBy === cpuRef.current?.id;
                 return (
                   <BountyCard
                     key={b.id}
                     bounty={b}
                     team={b.claimedBy !== undefined ? teams.find(t => t.id === b.claimedBy) : undefined}
                     claimableTeams={claimableTeams}
-                    cpuSteal={isSolo && isOpenBounty ? { timeLeft: cpuStealTimeLeft, totalSeconds: cpuStealSeconds } : undefined}
+                    cpuSteal={isSolo && isOpenBounty ? { timeLeft: cpuStealTimeLeft, totalSeconds: CPU_STEAL_SECONDS } : undefined}
+                    isCpuFixing={isCpuFixing}
+                    humanExcluded={humanExcluded}
                     answerMode={answerMode}
                     isPhoneMode={inputMode === "phone"}
                     onClaim={teamId => claimBounty(b.id, teamId)}
