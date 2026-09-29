@@ -104,6 +104,7 @@ import { PersuadingDisagreeingAdvancedDiagram } from "./PersuadingDisagreeingAdv
 import { PrefixesSuffixesAdjectivesDiagram } from "./PrefixesSuffixesAdjectivesDiagram";
 import { AdvancedVocabularyDiagram } from "./AdvancedVocabularyDiagram";
 import { BusinessProfessionalVocabularyDiagram } from "./BusinessProfessionalVocabularyDiagram";
+import { DailyLifeA2Diagram } from "./DailyLifeA2Diagram";
 
 export type DiagramProps = { variant: "screen" | "print"; accentColor?: string };
 
@@ -219,6 +220,7 @@ const TOPIC_DIAGRAMS: Record<string, ComponentType<DiagramProps>> = {
   prefixes_suffixes_adjectives: PrefixesSuffixesAdjectivesDiagram,
   advanced_vocabulary: AdvancedVocabularyDiagram,
   business_professional_vocabulary: BusinessProfessionalVocabularyDiagram,
+  daily_life_a2: DailyLifeA2Diagram,
 };
 
 export function TopicDiagram({ topicId, variant, accentColor }: { topicId: string; variant: "screen" | "print"; accentColor?: string }) {
