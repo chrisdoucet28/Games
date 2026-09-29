@@ -97,6 +97,13 @@ import { AskingForClarificationDiagram } from "./AskingForClarificationDiagram";
 import { AgreeingDisagreeingDiagram } from "./AgreeingDisagreeingDiagram";
 import { DescribingLocationsDiagram } from "./DescribingLocationsDiagram";
 import { CommonIdiomsDiagram } from "./CommonIdiomsDiagram";
+import { DescribingTrendsDataDiagram } from "./DescribingTrendsDataDiagram";
+import { WorkplaceProfessionalVocabularyDiagram } from "./WorkplaceProfessionalVocabularyDiagram";
+import { AdvancedIdiomsExpressionsDiagram } from "./AdvancedIdiomsExpressionsDiagram";
+import { PersuadingDisagreeingAdvancedDiagram } from "./PersuadingDisagreeingAdvancedDiagram";
+import { PrefixesSuffixesAdjectivesDiagram } from "./PrefixesSuffixesAdjectivesDiagram";
+import { AdvancedVocabularyDiagram } from "./AdvancedVocabularyDiagram";
+import { BusinessProfessionalVocabularyDiagram } from "./BusinessProfessionalVocabularyDiagram";
 
 export type DiagramProps = { variant: "screen" | "print"; accentColor?: string };
 
@@ -205,6 +212,13 @@ const TOPIC_DIAGRAMS: Record<string, ComponentType<DiagramProps>> = {
   agreeing_disagreeing: AgreeingDisagreeingDiagram,
   describing_locations: DescribingLocationsDiagram,
   common_idioms: CommonIdiomsDiagram,
+  describing_trends_data: DescribingTrendsDataDiagram,
+  workplace_professional_vocabulary: WorkplaceProfessionalVocabularyDiagram,
+  advanced_idioms_expressions: AdvancedIdiomsExpressionsDiagram,
+  persuading_disagreeing_advanced: PersuadingDisagreeingAdvancedDiagram,
+  prefixes_suffixes_adjectives: PrefixesSuffixesAdjectivesDiagram,
+  advanced_vocabulary: AdvancedVocabularyDiagram,
+  business_professional_vocabulary: BusinessProfessionalVocabularyDiagram,
 };
 
 export function TopicDiagram({ topicId, variant, accentColor }: { topicId: string; variant: "screen" | "print"; accentColor?: string }) {
