@@ -1,9 +1,10 @@
 import { hexToRgba } from "../../../data/themes";
 import { Icon } from "../Icon";
 
-// Topic identity: the lesson's own hobby vocabulary, each captioned in the "enjoy + -ing" pattern
-// it teaches (never "enjoy to swim") — a reference row like the vocabulary-diagram pattern, but
-// with a real grammar anchor baked into every caption instead of being a bare word list.
+// Topic identity: the lesson's own hobby vocabulary as a plain reference row (not every box
+// captioned "enjoy ___" — the lesson actually teaches three different patterns for talking about
+// a hobby: enjoy/like + -ing, prefer X to Y, would like to try). The three example lines below the
+// row spread those patterns across the same hobby words instead of hammering just one of them.
 function HobbyIcon({ hobby, cx, cy, ink }: { hobby: string; cx: number; cy: number; ink: string }) {
   switch (hobby) {
     case "swimming":
@@ -47,10 +48,16 @@ function HobbyIcon({ hobby, cx, cy, ink }: { hobby: string; cx: number; cy: numb
 }
 
 const HOBBIES = [
-  { id: "swimming", label: "enjoy swimming" },
-  { id: "reading", label: "enjoy reading" },
-  { id: "gaming", label: "enjoy gaming" },
-  { id: "cooking", label: "enjoy cooking" },
+  { id: "swimming", label: "swimming" },
+  { id: "reading", label: "reading" },
+  { id: "gaming", label: "gaming" },
+  { id: "cooking", label: "cooking" },
+];
+
+const EXAMPLES = [
+  "I enjoy cooking.",
+  "I prefer swimming to gaming.",
+  "I would like to try reading more.",
 ];
 
 export function FreeTimeA2Diagram({ variant, accentColor = "#2563EB" }: { variant: "screen" | "print"; accentColor?: string }) {
@@ -87,8 +94,8 @@ export function FreeTimeA2Diagram({ variant, accentColor = "#2563EB" }: { varian
       <div style={{ fontWeight: "800", fontSize: isScreen ? "11.5px" : "10px", textTransform: "uppercase", letterSpacing: "0.04em", color: isScreen ? accentColor : "#374151", marginBottom: "6px" }}>
         In My Free Time...
       </div>
-      <svg viewBox="0 0 460 256" style={{ width: "100%", height: "auto", display: "block" }}>
-        <text x="20" y="14" fontSize="8" fontWeight="800" letterSpacing="0.04em" fill={caption}>ENJOY / LIKE + -ING (NEVER "TO")</text>
+      <svg viewBox="0 0 460 308" style={{ width: "100%", height: "auto", display: "block" }}>
+        <text x="20" y="14" fontSize="8" fontWeight="800" letterSpacing="0.04em" fill={caption}>MY HOBBIES</text>
 
         {HOBBIES.map((h, i) => {
           const boxX = 20 + i * colWidth + (colWidth - 90) / 2;
@@ -97,30 +104,34 @@ export function FreeTimeA2Diagram({ variant, accentColor = "#2563EB" }: { varian
             <g key={h.id}>
               <rect x={boxX} y="20" width="90" height="90" rx="8" fill={fill} stroke={accent} strokeWidth="1.5" />
               <HobbyIcon hobby={h.id} cx={cx} cy={52} ink={ink} />
-              <text x={cx} y="94" textAnchor="middle" fontSize="8" fontWeight="700" fill={ink}>{h.label}</text>
+              <text x={cx} y="94" textAnchor="middle" fontSize="8.5" fontWeight="700" fill={ink}>{h.label}</text>
             </g>
           );
         })}
 
-        <text x="20" y="124" fontSize="8" fontWeight="800" letterSpacing="0.04em" fill={caption}>USEFUL PHRASES</text>
+        {EXAMPLES.map((line, i) => (
+          <text key={line} x="230" y={128 + i * 15} textAnchor="middle" fontSize="9" fontStyle="italic" fill={ink}>{line}</text>
+        ))}
+
+        <text x="20" y="184" fontSize="8" fontWeight="800" letterSpacing="0.04em" fill={caption}>USEFUL PHRASES</text>
         {["join a club", "take up a hobby", "practise a skill"].map((w, i) => {
           const pillColWidth = 420 / 3;
           const boxX = 20 + i * pillColWidth + (pillColWidth - 130) / 2;
           return (
             <g key={w}>
-              <rect x={boxX} y="130" width="130" height="24" rx="12" fill={fill} stroke={accent} strokeWidth="1.3" />
-              <text x={boxX + 65} y="146" textAnchor="middle" fontSize="8" fontWeight="700" fill={ink}>{w}</text>
+              <rect x={boxX} y="190" width="130" height="24" rx="12" fill={fill} stroke={accent} strokeWidth="1.3" />
+              <text x={boxX + 65} y="206" textAnchor="middle" fontSize="8" fontWeight="700" fill={ink}>{w}</text>
             </g>
           );
         })}
 
-        <line x1="20" y1="168" x2="440" y2="168" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
+        <line x1="20" y1="228" x2="440" y2="228" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 
-        <text x="230" y="188" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ I am boring when I have nothing to do.</text>
-        <text x="230" y="204" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ I am bored when I have nothing to do.</text>
+        <text x="230" y="248" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ I am boring when I have nothing to do.</text>
+        <text x="230" y="264" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ I am bored when I have nothing to do.</text>
 
-        <text x="230" y="226" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ I make sport every weekend.</text>
-        <text x="230" y="242" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ I do sport every weekend.</text>
+        <text x="230" y="286" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ I make sport every weekend.</text>
+        <text x="230" y="302" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ I do sport every weekend.</text>
       </svg>
     </div>
   );
