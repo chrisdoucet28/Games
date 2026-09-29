@@ -8140,10 +8140,10 @@ export const TOPIC_LIBRARY = {
     ],
   },
 
-  // ── SPEAKING TOPICS ────────────────────────────────────────────────────────
+  // ── SPEAKING THEMES ─────────────────────────────────────────────────────────
   working_from_home: {
     label: "Working from Home",
-    level: "B1", category: "topic",
+    level: "B1", category: "theme",
     questions: [
       { type:"fill in the blank", question:"One advantage of working from home is saving time on ___.", answer:"commuting / travel", hint:"Getting to the office", difficulty:"easy" },
       { type:"fill in the blank", question:"Many people find it hard to ___ when working from home.", answer:"focus / concentrate", hint:"Staying on task", difficulty:"easy" },
@@ -8385,7 +8385,7 @@ export const TOPIC_LIBRARY = {
 
   learning_language: {
     label: "Learning a Foreign Language",
-    level: "B1", category: "topic",
+    level: "B1", category: "theme",
     questions: [
       { type:"fill in the blank", question:"Learning a language helps you ___ with more people around the world.", answer:"communicate / connect", hint:"The main purpose of language", difficulty:"easy" },
       { type:"fill in the blank", question:"One of the best ways to practise is to ___ with native speakers.", answer:"speak / talk", hint:"Using the language in real life", difficulty:"easy" },
@@ -8642,7 +8642,7 @@ export const TOPIC_LIBRARY = {
 
   education_systems: {
     label: "Education Systems",
-    level: "B2", category: "topic",
+    level: "B2", category: "theme",
     questions: [
       { type:"fill in the blank", question:"Education helps people develop skills and ___ for their future.", answer:"knowledge / opportunities", hint:"What education prepares you for", difficulty:"easy" },
       { type:"fill in the blank", question:"In many countries, education is ___ for children between certain ages.", answer:"compulsory / mandatory", hint:"You have no choice", difficulty:"medium" },
@@ -8916,7 +8916,7 @@ export const TOPIC_LIBRARY = {
 
   career_choices: {
     label: "Career Choices",
-    level: "B1", category: "topic",
+    level: "B1", category: "theme",
     questions: [
       { type:"fill in the blank", question:"When choosing a career, consider both your ___ and your interests.", answer:"skills / strengths", hint:"What you are good at", difficulty:"easy" },
       { type:"fill in the blank", question:"A job you are passionate about leads to greater ___ at work.", answer:"satisfaction / motivation", hint:"Feeling good about your work", difficulty:"easy" },
@@ -9173,7 +9173,7 @@ export const TOPIC_LIBRARY = {
 
   work_life_balance: {
     label: "Work-Life Balance",
-    level: "B2", category: "topic",
+    level: "B2", category: "theme",
     questions: [
       { type:"fill in the blank", question:"Work-life balance means finding a healthy ___ between your job and personal life.", answer:"balance / equilibrium", hint:"An equal split", difficulty:"easy" },
       { type:"fill in the blank", question:"Burnout happens when someone is too ___ with no time to rest.", answer:"stressed / overworked", hint:"Working too much", difficulty:"easy" },
@@ -9447,7 +9447,7 @@ export const TOPIC_LIBRARY = {
 
   success_motivation: {
     label: "Success and Motivation",
-    level: "B2", category: "topic",
+    level: "B2", category: "theme",
     questions: [
       { type:"fill in the blank", question:"Success means different things to different people — for some it's wealth, for others it's ___.", answer:"happiness / family / freedom", hint:"What else people value", difficulty:"easy" },
       { type:"fill in the blank", question:"Setting clear ___ helps you stay focused and measure your progress.", answer:"goals / targets", hint:"What you aim for", difficulty:"easy" },
@@ -9721,7 +9721,7 @@ export const TOPIC_LIBRARY = {
 
   time_management: {
     label: "Time Management",
-    level: "B1", category: "topic",
+    level: "B1", category: "theme",
     questions: [
       { type:"fill in the blank", question:"Time management means organising your time so you can ___ your tasks efficiently.", answer:"complete / finish / do", hint:"Getting things done", difficulty:"easy" },
       { type:"fill in the blank", question:"A to-do list helps you ___ which tasks need to be done first.", answer:"prioritise / decide", hint:"Putting the most important first", difficulty:"easy" },
@@ -9978,7 +9978,7 @@ export const TOPIC_LIBRARY = {
 
   free_time_hobbies: {
     label: "Free Time and Hobbies",
-    level: "B1", category: "topic",
+    level: "B1", category: "theme",
     questions: [
       { type:"fill in the blank", question:"Hobbies give people a way to ___ after a long day of work or study.", answer:"relax / unwind / switch off", hint:"What hobbies help you do", difficulty:"easy" },
       { type:"fill in the blank", question:"Creative hobbies like painting or writing help you ___ your feelings.", answer:"express", hint:"Show what is inside", difficulty:"easy" },
@@ -10235,7 +10235,7 @@ export const TOPIC_LIBRARY = {
 
   social_media: {
     label: "Social Media",
-    level: "B1", category: "topic",
+    level: "B1", category: "theme",
     questions: [
       { type:"fill in the blank", question:"Social media allows people to ___ with friends and family across the world.", answer:"connect / communicate", hint:"Keeping in contact", difficulty:"easy" },
       { type:"fill in the blank", question:"One major concern is the ___ of fake news and misinformation.", answer:"spread / sharing", hint:"Untrue information travelling fast", difficulty:"medium" },
@@ -11626,7 +11626,7 @@ export const TOPIC_LIBRARY = {
 
   reading: {
     label: "Reading",
-    level: "B1", category: "topic",
+    level: "B1", category: "theme",
     questions: [
       { type:"fill in the blank", question:"Reading regularly helps to expand your ___ and improve your writing.", answer:"vocabulary", hint:"Words you know", difficulty:"easy" },
       { type:"fill in the blank", question:"Fiction allows readers to ___ into other people's lives and perspectives.", answer:"escape / step / gain insight", hint:"Seeing through another's eyes", difficulty:"easy" },
@@ -11883,7 +11883,7 @@ export const TOPIC_LIBRARY = {
 
   cultural_differences: {
     label: "Cultural Differences",
-    level: "B2", category: "topic",
+    level: "B2", category: "theme",
     questions: [
       { type:"fill in the blank", question:"Culture shock is the feeling of ___ and confusion people experience in a new culture.", answer:"disorientation / surprise / discomfort", hint:"Feeling lost in a new place", difficulty:"easy" },
       { type:"fill in the blank", question:"Body language and ___ can mean very different things in different cultures.", answer:"gestures", hint:"What your hands and body do", difficulty:"easy" },
@@ -12157,7 +12157,7 @@ export const TOPIC_LIBRARY = {
 
   climate_change: {
     label: "Climate Change",
-    level: "B2", category: "topic",
+    level: "B2", category: "theme",
     questions: [
       { type:"fill in the blank", question:"The ___ effect is the process by which certain gases trap heat in the Earth's atmosphere.", answer:"greenhouse", hint:"The main cause of global warming", difficulty:"easy" },
       { type:"fill in the blank", question:"Carbon dioxide and methane are both examples of ___ gases.", answer:"greenhouse", hint:"Gases that warm the planet", difficulty:"easy" },
@@ -12430,7 +12430,7 @@ export const TOPIC_LIBRARY = {
 
   city_vs_country: {
     label: "City Life vs. Country Life",
-    level: "B1", category: "topic",
+    level: "B1", category: "theme",
     questions: [
       { type:"fill in the blank", question:"City life offers greater access to jobs, culture, and ___ than rural areas.", answer:"entertainment / services / opportunities", hint:"Things cities have more of", difficulty:"easy" },
       { type:"fill in the blank", question:"Country life is often associated with cleaner air, more ___, and a slower pace.", answer:"space / nature / greenery / peace", hint:"What the countryside has", difficulty:"easy" },
@@ -13388,7 +13388,7 @@ export const TOPIC_LIBRARY = {
 
   technology_daily_life: {
     label: "Technology in Daily Life",
-    level: "B2", category: "topic",
+    level: "B2", category: "theme",
     questions: [
       { type:"fill in the blank", question:"Technology has made many everyday tasks ___ and more convenient.", answer:"easier / faster / simpler", hint:"Making life better", difficulty:"easy" },
       { type:"fill in the blank", question:"Smartphones allow people to access the internet, take photos, and ___ all in one device.", answer:"communicate / connect / message", hint:"Staying in touch", difficulty:"easy" },
@@ -13646,7 +13646,7 @@ export const TOPIC_LIBRARY = {
 
   money_and_economy: {
     label: "Money & the Economy",
-    level: "B2", category: "topic",
+    level: "B2", category: "theme",
     questions: [
       { type:"choose correct grammar", question:"'Prices ___ rising for months.' (have been/has been/were)", answer:"have been", hint:"Present perfect continuous, plural subject", difficulty:"easy" },
       { type:"choose correct grammar", question:"'She ___ been saving money since she got her new job.' (have/has/had)", answer:"has", hint:"Present perfect continuous, third person", difficulty:"easy" },
@@ -13890,7 +13890,7 @@ export const TOPIC_LIBRARY = {
 
   crime_and_law: {
     label: "Crime & the Law",
-    level: "B2", category: "topic",
+    level: "B2", category: "theme",
     questions: [
       { type:"choose correct grammar", question:"'The police ___ investigating the crime for weeks.' (have been/has been/were)", answer:"have been", hint:"Present perfect continuous, plural subject", difficulty:"easy" },
       { type:"choose correct grammar", question:"'She ___ been working on this case since it started.' (have/has/had)", answer:"has", hint:"Present perfect continuous, third person", difficulty:"easy" },
@@ -14134,7 +14134,7 @@ export const TOPIC_LIBRARY = {
 
   arts_and_entertainment: {
     label: "Arts & Entertainment",
-    level: "B2", category: "topic",
+    level: "B2", category: "theme",
     questions: [
       { type:"choose correct grammar", question:"'The museum ___ been planning this exhibition for months.' (have/has/had)", answer:"has", hint:"Present perfect continuous, singular", difficulty:"easy" },
       { type:"choose correct grammar", question:"'Critics ___ been praising the new film all week.' (have/has/had)", answer:"have", hint:"Present perfect continuous, plural", difficulty:"easy" },
@@ -14378,7 +14378,7 @@ export const TOPIC_LIBRARY = {
 
   memory_mind_psychology: {
     label: "Memory, Mind & Psychology",
-    level: "C1", category: "topic",
+    level: "C1", category: "theme",
     questions: [
       { type:"choose correct grammar", question:"'Rarely ___ someone forget such an important memory.' (does/do/did)", answer:"does", hint:"Inversion: rarely + does + subject + base verb", difficulty:"medium" },
       { type:"choose correct grammar", question:"'If she had sought help sooner, she ___ have recovered faster.' (will/would/had)", answer:"would", hint:"Third conditional", difficulty:"easy" },
@@ -14622,7 +14622,7 @@ export const TOPIC_LIBRARY = {
 
   future_of_work: {
     label: "The Future of Work",
-    level: "C1", category: "topic",
+    level: "C1", category: "theme",
     questions: [
       { type:"choose correct grammar", question:"'Rarely ___ a company adapt this quickly.' (does/do/did)", answer:"does", hint:"Inversion: rarely + does + subject + base verb", difficulty:"medium" },
       { type:"choose correct grammar", question:"'If she had upskilled sooner, she ___ have found a new job faster.' (will/would/had)", answer:"would", hint:"Third conditional", difficulty:"easy" },
@@ -14866,7 +14866,7 @@ export const TOPIC_LIBRARY = {
 
   relationships_modern_life: {
     label: "Relationships in Modern Life",
-    level: "C1", category: "topic",
+    level: "C1", category: "theme",
     questions: [
       { type:"choose correct grammar", question:"'Rarely ___ a relationship survive such distance.' (does/do/did)", answer:"does", hint:"Inversion: rarely + does + subject + base verb", difficulty:"medium" },
       { type:"choose correct grammar", question:"'If they had communicated better, they ___ have avoided the breakup.' (will/would/had)", answer:"would", hint:"Third conditional", difficulty:"easy" },
@@ -15110,7 +15110,7 @@ export const TOPIC_LIBRARY = {
 
   crime_and_justice: {
     label: "Crime & Justice",
-    level: "C1", category: "topic",
+    level: "C1", category: "theme",
     questions: [
       { type:"choose correct grammar", question:"'Rarely ___ a court overturn a conviction this quickly.' (does/do/did)", answer:"does", hint:"Inversion: rarely + does + subject + base verb", difficulty:"medium" },
       { type:"choose correct grammar", question:"'If the police had investigated more carefully, they ___ have avoided the wrongful conviction.' (will/would/had)", answer:"would", hint:"Third conditional", difficulty:"easy" },
@@ -15354,7 +15354,7 @@ export const TOPIC_LIBRARY = {
 
   health_healthcare_systems: {
     label: "Health & Healthcare Systems",
-    level: "C1", category: "topic",
+    level: "C1", category: "theme",
     questions: [
       { type:"choose correct grammar", question:"'Rarely ___ a hospital treat so many patients this efficiently.' (does/do/did)", answer:"does", hint:"Inversion: rarely + does + subject + base verb", difficulty:"medium" },
       { type:"choose correct grammar", question:"'If the doctors had diagnosed the illness sooner, they ___ have saved his life.' (will/would/had)", answer:"would", hint:"Third conditional", difficulty:"easy" },
@@ -16101,7 +16101,7 @@ export const TOPIC_LIBRARY = {
 
   daily_life_a2: {
     label: "Daily Life & Routines",
-    level: "A2", category: "topic",
+    level: "A2", category: "theme",
     questions: [
       { type:"fill in the blank", question:"Every morning I ___ up, have a shower, and eat breakfast.", answer:"wake / get", hint:"Start of the day", difficulty:"easy" },
       { type:"fill in the blank", question:"A ___ is a regular pattern of activities you do every day.", answer:"routine", hint:"The keyword for everyday habits", difficulty:"easy" },
@@ -16340,7 +16340,7 @@ export const TOPIC_LIBRARY = {
 
   food_and_eating: {
     label: "Food & Eating",
-    level: "A2", category: "topic",
+    level: "A2", category: "theme",
     questions: [
       { type:"fill in the blank", question:"In my country, the main ___ of the day is eaten in the evening.", answer:"meal", hint:"A time when you eat food", difficulty:"easy" },
       { type:"fill in the blank", question:"I am a ___ — I don't eat any meat or fish.", answer:"vegetarian", hint:"A person who doesn't eat meat", difficulty:"easy" },
@@ -17298,7 +17298,7 @@ export const TOPIC_LIBRARY = {
 
   travel_and_holidays: {
     label: "Travel & Holidays",
-    level: "B1", category: "topic",
+    level: "B1", category: "theme",
     questions: [
       { type:"fill in the blank", question:"We ___ our holiday six months in advance to get a better price.", answer:"booked / planned / reserved", hint:"Arranging a holiday early", difficulty:"easy" },
       { type:"fill in the blank", question:"I always ___ my bags the night before so I am not rushed.", answer:"pack", hint:"Putting things in a suitcase", difficulty:"easy" },
@@ -17555,7 +17555,7 @@ export const TOPIC_LIBRARY = {
 
   sport_and_fitness: {
     label: "Sport & Fitness",
-    level: "B1", category: "topic",
+    level: "B1", category: "theme",
     questions: [
       { type:"choose correct grammar", question:"'I ___ never run a marathon.' (have/has/had)", answer:"have", hint:"Present perfect, first person", difficulty:"easy" },
       { type:"choose correct grammar", question:"'She ___ just won the championship.' (have/has/had)", answer:"has", hint:"Present perfect, third person", difficulty:"easy" },
@@ -17789,7 +17789,7 @@ export const TOPIC_LIBRARY = {
 
   relationships_and_socialising: {
     label: "Relationships & Socialising",
-    level: "B1", category: "topic",
+    level: "B1", category: "theme",
     questions: [
       { type:"choose correct grammar", question:"'I ___ known my best friend for ten years.' (have/has/had)", answer:"have", hint:"Present perfect, first person", difficulty:"easy" },
       { type:"choose correct grammar", question:"'She ___ just apologised to her friend.' (have/has/had)", answer:"has", hint:"Present perfect, third person", difficulty:"easy" },
@@ -20811,7 +20811,7 @@ export const TOPIC_LIBRARY = {
 
   school_and_study: {
     label: "School and Study",
-    level: "A2", category: "topic",
+    level: "A2", category: "theme",
     questions: [
       { type:"fill in the blank", question:"My favourite ___ at school is English.", answer:"subject / lesson", hint:"A thing you study", difficulty:"easy" },
       { type:"fill in the blank", question:"I have a big ___ next week, so I need to study.", answer:"exam / test", hint:"A formal school check", difficulty:"easy" },
@@ -21087,7 +21087,7 @@ export const TOPIC_LIBRARY = {
 
   friends_and_family: {
     label: "Friends and Family",
-    level: "A2", category: "topic",
+    level: "A2", category: "theme",
     questions: [
       { type:"fill in the blank", question:"My best friend and I ___ since primary school.", answer:"have been friends / have known each other", hint:"A long friendship", difficulty:"easy" },
       { type:"fill in the blank", question:"I get ___ with my sister very well.", answer:"on / along", hint:"To have a good relationship", difficulty:"easy" },
@@ -21341,7 +21341,7 @@ export const TOPIC_LIBRARY = {
 
   free_time_a2: {
     label: "Free Time and Interests",
-    level: "A2", category: "topic",
+    level: "A2", category: "theme",
     questions: [
       { type:"fill in the blank", question:"In my free time, I usually ___ after work.", answer:"read / watch TV / go for a walk / play games", hint:"A leisure activity", difficulty:"easy" },
       { type:"fill in the blank", question:"My favourite hobby is ___ because it helps me relax.", answer:"reading / cooking / drawing / running", hint:"Something you enjoy doing", difficulty:"easy" },
@@ -21601,7 +21601,7 @@ export const TOPIC_LIBRARY = {
 
   my_town_city: {
     label: "My Town and City",
-    level: "A2", category: "topic",
+    level: "A2", category: "theme",
     questions: [
       { type:"fill in the blank", question:"My town has a beautiful ___ in the centre.", answer:"park / square / market", hint:"A place in town", difficulty:"easy" },
       { type:"fill in the blank", question:"There are lots of ___ near my home.", answer:"shops / cafés / restaurants", hint:"Places you can visit", difficulty:"easy" },
@@ -21855,7 +21855,7 @@ export const TOPIC_LIBRARY = {
 
   money_and_shopping: {
     label: "Money & Shopping",
-    level: "A2", category: "topic",
+    level: "A2", category: "theme",
     questions: [
       { type:"choose correct grammar", question:"'I ___ this jacket for $40 last week.' (buy/bought/buying)", answer:"bought", hint:"Past simple: irregular verb buy→bought", difficulty:"easy" },
       { type:"choose correct grammar", question:"'She ___ for a new pair of shoes right now.' (look/looks/is looking)", answer:"is looking", hint:"Present continuous for an action happening now", difficulty:"easy" },
@@ -23184,7 +23184,8 @@ export const TOPIC_LIBRARY = {
         "answer": "The train leaves at 7 o'clock.",
         "hint": "'At' + clock time",
         "difficulty": "easy"
-      },
+      }
+,
       {
         "type": "choose correct grammar",
         "question": "'I have English class ___ Monday.' (on/in/at)",
@@ -24323,7 +24324,8 @@ export const TOPIC_LIBRARY = {
         "answer": "It often snows in winter.",
         "hint": "'In' + season",
         "difficulty": "easy"
-      },
+      }
+,
       {
         "type": "choose correct grammar",
         "question": "'It ___ raining outside right now.' (is/are/be)",
@@ -25085,7 +25087,7 @@ export const TOPIC_LIBRARY = {
   daily_routines_frequency: {
     "label": "Daily Routines, Times and Frequency",
     "level": "A1",
-    "category": "topic",
+    "category": "theme",
     "questions": [
       {
         "type": "choose correct grammar",
@@ -25226,7 +25228,8 @@ export const TOPIC_LIBRARY = {
         "answer": "I never skip breakfast.",
         "hint": "Frequency adverb goes before the main verb",
         "difficulty": "easy"
-      },
+      }
+,
       {
         "type": "choose correct grammar",
         "question": "'He ___ up at six every day.' (get/gets/getting)",
@@ -26367,7 +26370,8 @@ export const TOPIC_LIBRARY = {
         "answer": "Their house is very big.",
         "hint": "Possessive adjective + noun",
         "difficulty": "easy"
-      },
+      }
+,
       {
         "type": "choose correct grammar",
         "question": "'This is ___ book.' (I/my/mine)",
@@ -33868,7 +33872,7 @@ export const TOPIC_LIBRARY = {
 
   media_misinformation: {
     label: "Media & Misinformation",
-    level: "C1", category: "topic",
+    level: "C1", category: "theme",
     questions: [
       { type:"fill in the blank", question:"Social media algorithms often trap users inside a ___ bubble of similar opinions.", answer:"filter", hint:"Fixed phrase: 'filter bubble'", difficulty:"easy" },
       { type:"fill in the blank", question:"An ___ chamber occurs when people only hear opinions that match their own.", answer:"echo", hint:"Fixed phrase: 'echo chamber'", difficulty:"easy" },

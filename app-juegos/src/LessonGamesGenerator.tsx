@@ -1147,7 +1147,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
       const allCardTasks = selectedEntries.flatMap(entry => entry.cardTasks ?? []);
       const selectedFocuses = uniqueValues(selectedTopics.map(value => getTopicOption(value)?.focus).filter((value): value is string => Boolean(value)));
       const isMixedSelection = selectedTopics.length > 1;
-      const isTopicOnlySelection = selectedFocuses.length === 1 && selectedFocuses[0] === "topic";
+      const isThemeOnlySelection = selectedFocuses.length === 1 && selectedFocuses[0] === "theme";
       const mixByTopic = (buckets: QuestionData[][]) => isMixedSelection ? buildBalancedMixedPool(buckets) : shuffle(buckets.flat());
 
       let qs: QuestionData[] = [];
@@ -1221,8 +1221,8 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
         ]));
       } else if (mode.id === "battleship") {
         // Battleship's identity is error-hunting: always merge entry.questions (which now
-        // includes L1-interference-flavored mistakes for topic-focus content) with cardTasks,
-        // rather than dropping grammar content entirely for topic-only selections.
+        // includes L1-interference-flavored mistakes for theme content) with cardTasks,
+        // rather than dropping grammar content entirely for theme-only selections.
         qs = mixByTopic(selectedEntries.map((entry, index) => [...(entry.questions ?? []), ...cardTaskBuckets[index]]));
       } else if (mode.id === "castle" || mode.id === "racetrack" || mode.id === "whack" || mode.id === "rocket" || mode.id === "bounty") {
         qs = mixByTopic(selectedEntries.map((entry, index) => [...(entry.questions ?? []), ...cardTaskBuckets[index]]));
@@ -1236,7 +1236,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
           const entry = TOPIC_LIBRARY[value as keyof typeof TOPIC_LIBRARY] as TopicLibraryEntry | undefined;
           return [...(entry?.questions ?? []), ...cardTasksAsQuestions(entry?.cardTasks ?? [])].map(q => ({ ...q, sourceTopic: value }));
         }));
-      } else if (isTopicOnlySelection && allCardTasks.length > 0) {
+      } else if (isThemeOnlySelection && allCardTasks.length > 0) {
         qs = mixByTopic(cardTaskBuckets);
       } else {
         qs = isMixedSelection
@@ -1526,7 +1526,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
       { id: "all", icon: "*", label: "All", desc: "Grammar, words & themes" },
       { id: "grammar", icon: "G", label: "Grammar", desc: "Structures & rules" },
       { id: "vocabulary", icon: "V", label: "Vocabulary", desc: "Words in context" },
-      { id: "topic", icon: "T", label: "Themes", desc: "Real-world subjects" },
+      { id: "theme", icon: "T", label: "Themes", desc: "Real-world subjects" },
     ];
 
     return (

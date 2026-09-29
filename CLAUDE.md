@@ -80,10 +80,19 @@ handout) with no guarantee they've seen any other specific lesson first.
   core-identity icon (e.g. Rocket Fuel's rocket, Vault Heist's vault), add the mascot *alongside*
   it — don't replace it. Generic stand-in icons (a missile, an attack animation) are fine to
   replace outright.
-- **Themes**: `data/themes.ts` presets only skin the shared chrome (welcome/setup/game-select/
+- **Themes (visual)**: `data/themes.ts` presets only skin the shared chrome (welcome/setup/game-select/
   results/My Classes/My Profile/Billing) — individual games keep their own fixed visual identity
   and are never themed. Colors that carry meaning (A1-C1 difficulty rainbow, correct/wrong
   feedback, destructive red) are also never themed.
+- **Themes (lesson focus)** — do not call this category "topics": every topic in `topics.ts`/
+  `topicOptions.ts` has a `focus` of `"grammar"`, `"vocabulary"`, or `"theme"` — never say or write
+  "topic-focus" for this third category, since "topic" is also the generic word for any lesson at
+  all (grammar, vocabulary, or theme) and using it for one specific category is what confused
+  things the first time. The stored value is literally `"theme"` (code, `topics.ts`'s `category`
+  field, and the `classes.focus` column in Supabase all use it), matching what the Setup screen and
+  Learn library already show teachers ("Grammar, Vocabulary, or Themes?"). If a change ever
+  reintroduces `"topic"` as a `focus`/`category` value, that's a regression of this exact rule —
+  fix it back to `"theme"`.
 - **Test accounts**: never sign up through the real `AuthScreen` form (sends real emails to
   whatever address is used). Create disposable test accounts via direct SQL insert into
   `auth.users`/`auth.identities` (see any recent Supabase-touching work for the exact template),

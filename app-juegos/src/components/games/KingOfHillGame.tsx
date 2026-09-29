@@ -13,7 +13,7 @@ import { makeSoloCpuTeam, makeTeacherTeam } from "../../lib/soloOpponent";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
 import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
-import { HILL_TOPIC_STEPS, HILL_GRAMMAR_STEPS } from "../../data/tutorials/hill";
+import { HILL_THEME_STEPS, HILL_GRAMMAR_STEPS } from "../../data/tutorials/hill";
 import { playSound } from "../../lib/sounds";
 import { setMusicGame, stopMusic } from "../../lib/music";
 import {
@@ -52,11 +52,11 @@ const HILL_ZONES_GRAMMAR: ZoneDef[] = [
   { id: "Center", icon: "crown", pts: 5 },
 ];
 
-// Topic-focus mode: zones are reflavored as discourse moves. Claiming zones across a round
-// literally assembles a class conversation about the topic — opinion, question, example,
+// Theme mode: zones are reflavored as discourse moves. Claiming zones across a round
+// literally assembles a class conversation about the theme — opinion, question, example,
 // pushback, alternative — instead of five disconnected one-liners. Each zone wraps whatever
 // speaking prompt comes up with a move-specific prefix, so no new content is needed.
-const HILL_ZONES_TOPIC: ZoneDef[] = [
+const HILL_ZONES_THEME: ZoneDef[] = [
   { id: "North", icon: "help", pts: 3, label: "Question", prefix: "Ask a follow-up question about: " },
   { id: "South", icon: "chat", pts: 3, label: "Example", prefix: "Give a personal example about: " },
   { id: "East", icon: "handshake", pts: 2, label: "Agree/Disagree", prefix: "Agree or disagree, and say why: " },
@@ -194,8 +194,8 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
       : propTeams),
     [isSolo, propTeams, opponentType, cpuScore, teacherScore]
   );
-  const isTopicMode = questions.length > 0 && questions.every(q => q.type === "speaking task");
-  const ZONES = isTopicMode ? HILL_ZONES_TOPIC : HILL_ZONES_GRAMMAR;
+  const isThemeMode = questions.length > 0 && questions.every(q => q.type === "speaking task");
+  const ZONES = isThemeMode ? HILL_ZONES_THEME : HILL_ZONES_GRAMMAR;
   // Points earned in THIS game only — team.score is the cross-game running total, so the "final"
   // screen below ranking by it declared whoever was ahead overall the winner of this specific
   // King of the Hill match, even when another team scored more zone-control/duel points here.
@@ -211,7 +211,7 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
     // Grammar mode is "fill in the blank" only — never "correct grammar mistakes", even as a
     // fallback. Every topic's content pool is kept deep enough (see topics.ts) that this never
     // needs a top-up.
-    const base = isTopicMode
+    const base = isThemeMode
       ? questions
       : (() => {
           const finish = questions.filter(q => q.type === "fill in the blank");
@@ -235,14 +235,14 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
   // "Play on Phones" — lets the attacker/defender in a contested duel buzz in from their seats
   // instead of the teacher guessing who answered first by ear. Gated to propTeams.length > 1 (not
   // teams.length — teams always includes a synthetic CPU teammate in solo play, see the useMemo
-  // above) and !isTopicMode below: topic-mode duels are "teacher picks the stronger answer," an
+  // above) and !isThemeMode below: theme-mode duels are "teacher picks the stronger answer," an
   // explicit quality judgment with no "who's first" to resolve, so a buzzer has nothing to do
   // there. Always defaults to screen, even on Resume, same as every other phone-mode game.
-  // Topic-mode duels are teacher-judged, no buzzing at all (see the !isTopicMode gate below) — a
+  // Theme-mode duels are teacher-judged, no buzzing at all (see the !isThemeMode gate below) — a
   // Class Check-In preset only applies when phone mode is actually meaningful for this instance.
-  const [inputMode, setInputMode] = useState<"screen" | "phone">(presetPhoneSession && !isTopicMode ? "phone" : "screen");
+  const [inputMode, setInputMode] = useState<"screen" | "phone">(presetPhoneSession && !isThemeMode ? "phone" : "screen");
   const [introStep, setIntroStep] = useState<"setup" | "qr">("setup");
-  const [sessionCode, setSessionCode] = useState<string | null>(presetPhoneSession && !isTopicMode ? presetPhoneSession.code : null);
+  const [sessionCode, setSessionCode] = useState<string | null>(presetPhoneSession && !isThemeMode ? presetPhoneSession.code : null);
   const [connectedTeamIds, setConnectedTeamIds] = useState<Set<string | number>>(new Set());
   // This duel's resolved buzz winner, or null while the buzzer is open. Purely informational — it
   // never gates resolveContest, which still takes the teacher's own Attacker/Defender/Neither click.
@@ -384,7 +384,7 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
   const activeZoneId = phase === "contested" ? contest?.zoneId : chosenZone;
   const activeZoneDef = ZONES.find(z => z.id === activeZoneId);
   const baseQ = pool[qi % Math.max(pool.length, 1)];
-  const q = isTopicMode && activeZoneDef?.prefix
+  const q = isThemeMode && activeZoneDef?.prefix
     ? { ...baseQ, question: activeZoneDef.prefix + (baseQ.question || (baseQ as any).task || "") }
     : baseQ;
 
@@ -710,11 +710,11 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
           <div style={{ fontWeight: "900", fontSize: "20px", marginBottom: "10px", color: "#F9A8D4" }}>King of the Hill</div>
           <div style={{ fontSize: "15px", lineHeight: 1.7 }}>
             A map of <strong style={{ color: "#F9A8D4" }}>5 zones</strong> is up for grabs — answer to <strong style={{ color: "#F9A8D4" }}>claim one</strong>.{" "}
-            {isTopicMode
+            {isThemeMode
               ? "Each zone is a different conversation move — claiming zones builds a full class discussion."
               : "Every zone is a quick grammar challenge."}<br />
             Attack a zone someone already owns and it's <strong style={{ color: "#F9A8D4" }}>head-to-head</strong> —{" "}
-            {isTopicMode
+            {isThemeMode
               ? <>the teacher picks the stronger answer</>
               : <>the fastest correct answer wins</>
             }.<br />
@@ -722,7 +722,7 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
           </div>
         </div>
         <div style={{ marginTop: "18px", marginBottom: "20px", fontSize: "14px", color: "#F9A8D4", fontWeight: "600", display: "inline-flex", alignItems: "center", gap: "5px" }}>
-          The <Icon name="crown" size={14} /> {isTopicMode ? "Opinion" : "Center"} zone scores the most — expect fierce competition for it every round!
+          The <Icon name="crown" size={14} /> {isThemeMode ? "Opinion" : "Center"} zone scores the most — expect fierce competition for it every round!
         </div>
         <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "24px" }}>
           {teams.map(t => (
@@ -733,7 +733,7 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
         </div>
         {/* Skipped entirely for a Class Check-In sitting — presetPhoneSession already picked
             phone mode and its code, and the class-level QR already covered joining. */}
-        {propTeams.length > 1 && !isTopicMode && !presetPhoneSession && (
+        {propTeams.length > 1 && !isThemeMode && !presetPhoneSession && (
           <>
             {introStep === "setup" && (
               <div style={{ marginBottom: "20px" }}>
@@ -799,7 +799,7 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
         {showHowTo && (
           <HowToPlayModal
             gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color}
-            steps={isTopicMode ? HILL_TOPIC_STEPS : HILL_GRAMMAR_STEPS}
+            steps={isThemeMode ? HILL_THEME_STEPS : HILL_GRAMMAR_STEPS}
             onClose={() => setShowHowTo(false)}
           />
         )}
@@ -1048,7 +1048,7 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
                 ) : (
                   <>
                     <div style={{ textAlign: "center", fontWeight: "700", fontSize: "13px", color: "#F9A8D4", marginTop: "10px" }}>
-                      {isTopicMode || q?.type === "speaking task"
+                      {isThemeMode || q?.type === "speaking task"
                         ? "Teacher judges which team gave the better answer."
                         : "Judge which team answered correctly first."}
                     </div>
@@ -1063,7 +1063,7 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
                     {(showAns || q?.type === "speaking task") && (
                       <div style={{ marginTop: "14px" }}>
                         <div style={{ textAlign: "center", fontWeight: "700", fontSize: "13px", color: "#F9A8D4", marginBottom: "10px" }}>
-                          {isTopicMode || q?.type === "speaking task"
+                          {isThemeMode || q?.type === "speaking task"
                             ? "Teacher judges - whose answer was better?"
                             : "Who answered correctly first?"}
                         </div>

@@ -3,7 +3,7 @@ import type { TutorialStep } from "../../types";
 
 type ZoneDef = { id: string; icon: string; pts: number; label: string };
 
-// Mirrors KingOfHillGame.tsx's real HILL_ZONES_GRAMMAR/HILL_ZONES_TOPIC and the plus-shaped
+// Mirrors KingOfHillGame.tsx's real HILL_ZONES_GRAMMAR/HILL_ZONES_THEME and the plus-shaped
 // 3-column grid layout it renders them in (empty, North, empty / West, Center, East / empty,
 // South, empty) — kept in sync by hand, same as every other tutorial mockup.
 const ZONES_GRAMMAR: ZoneDef[] = [
@@ -14,7 +14,7 @@ const ZONES_GRAMMAR: ZoneDef[] = [
   { id: "Center", icon: "👑", pts: 5, label: "Center" },
 ];
 
-const ZONES_TOPIC: ZoneDef[] = [
+const ZONES_THEME: ZoneDef[] = [
   { id: "North", icon: "❓", pts: 3, label: "Question" },
   { id: "South", icon: "💭", pts: 3, label: "Example" },
   { id: "East", icon: "🤝", pts: 2, label: "Agree/Disagree" },
@@ -87,11 +87,11 @@ const CLAIM_STEP_GRAMMAR: TutorialStep = {
   ),
 };
 
-const CLAIM_STEP_TOPIC: TutorialStep = {
+const CLAIM_STEP_THEME: TutorialStep = {
   narration: "If you pick a FREE zone: you get a speaking prompt for that zone's move (like Question or Example). Give your answer. If your team's answer counts, the zone is yours now!",
   visual: (
     <div style={{ textAlign: "center" }}>
-      <ZoneMap zones={ZONES_TOPIC} owners={{ North: { name: "Red", color: "#DC2626" } }} highlight="North" />
+      <ZoneMap zones={ZONES_THEME} owners={{ North: { name: "Red", color: "#DC2626" } }} highlight="North" />
       <div style={{ fontSize: "11px", color: "#166534", fontWeight: 800, marginTop: "6px" }}>✅ Team Red now owns the Question zone.</div>
     </div>
   ),
@@ -107,11 +107,11 @@ const ATTACK_STEP_GRAMMAR: TutorialStep = {
   ),
 };
 
-const ATTACK_STEP_TOPIC: TutorialStep = {
+const ATTACK_STEP_THEME: TutorialStep = {
   narration: "If you pick a zone another team OWNS: this is an attack! Both teams speak on the same prompt. The teacher decides which answer was better. The winner takes the zone (attacker: +30 pts) or keeps it (defender: +20 pts).",
   visual: (
     <div style={{ textAlign: "center" }}>
-      <ZoneMap zones={ZONES_TOPIC} owners={{ North: { name: "Red", color: "#DC2626" } }} attacker={{ zoneId: "North", name: "Blue", color: "#2563EB" }} />
+      <ZoneMap zones={ZONES_THEME} owners={{ North: { name: "Red", color: "#DC2626" } }} attacker={{ zoneId: "North", name: "Blue", color: "#2563EB" }} />
       <div style={{ fontSize: "10px", color: "#831843", fontWeight: 700, marginTop: "4px" }}>Blue is attacking Red's Question zone!</div>
     </div>
   ),
@@ -139,9 +139,9 @@ const SCORING_STEP_GRAMMAR: TutorialStep = {
   visual: <ScoringVisual zones={ZONES_GRAMMAR} />,
 };
 
-const SCORING_STEP_TOPIC: TutorialStep = {
+const SCORING_STEP_THEME: TutorialStep = {
   narration: "Every zone shows its own points, like +5/rnd. At the end of EVERY round, each team gets points for every zone they still own — again and again, round after round. Keeping the Opinion zone (👑) the whole game is worth a lot!",
-  visual: <ScoringVisual zones={ZONES_TOPIC} />,
+  visual: <ScoringVisual zones={ZONES_THEME} />,
 };
 
 const FINAL_STEP: TutorialStep = {
@@ -154,19 +154,19 @@ const FINAL_STEP: TutorialStep = {
   ),
 };
 
-export const HILL_TOPIC_STEPS: TutorialStep[] = [
+export const HILL_THEME_STEPS: TutorialStep[] = [
   {
-    narration: "This is the board. It has 5 zones. In topic mode, each zone is a different move in a conversation: Question, Example, Agree/Disagree, Alternative, and Opinion. Right now, every zone is Free — no team owns any of them yet.",
-    visual: <ZoneMap zones={ZONES_TOPIC} />,
+    narration: "This is the board. It has 5 zones. In theme mode, each zone is a different move in a conversation: Question, Example, Agree/Disagree, Alternative, and Opinion. Right now, every zone is Free — no team owns any of them yet.",
+    visual: <ZoneMap zones={ZONES_THEME} />,
   },
   ROLL_DICE_STEP,
   {
     narration: "On your turn, pick ONE zone on the board. You can pick a Free zone, or you can attack a zone another team already owns.",
-    visual: <ZoneMap zones={ZONES_TOPIC} highlight="North" />,
+    visual: <ZoneMap zones={ZONES_THEME} highlight="North" />,
   },
-  CLAIM_STEP_TOPIC,
-  ATTACK_STEP_TOPIC,
-  SCORING_STEP_TOPIC,
+  CLAIM_STEP_THEME,
+  ATTACK_STEP_THEME,
+  SCORING_STEP_THEME,
   FINAL_STEP,
 ];
 

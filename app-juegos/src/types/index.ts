@@ -104,7 +104,7 @@ export interface TeamColor {
     initialGameState?: unknown;
     lessonContent?: string;
     level?: string;
-    isTopic?: boolean;
+    isTheme?: boolean;
     gridData?: any; // Específico para el Minefield
     // Only wired up for the two games driven by a continuous real-time clock that never stops on
     // its own even between turns (Zombie Siege, Order Up) — every other game is turn-based, so its

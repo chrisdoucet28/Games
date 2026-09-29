@@ -21,8 +21,8 @@ export const LEVEL_ORDER = ["A1", "A2", "B1", "B2", "C1"];
 export const LEVEL_COLOR: Record<string, string> = {
   A1: "#22C55E", A2: "#84CC16", B1: "#F59E0B", B2: "#F97316", C1: "#EF4444",
 };
-export const FOCUS_ORDER = ["grammar", "vocabulary", "topic"];
-export const FOCUS_LABEL: Record<string, string> = { grammar: "Grammar", vocabulary: "Vocabulary", topic: "Themes" };
+export const FOCUS_ORDER = ["grammar", "vocabulary", "theme"];
+export const FOCUS_LABEL: Record<string, string> = { grammar: "Grammar", vocabulary: "Vocabulary", theme: "Themes" };
 
 // Shared by the game-setup topic picker and the Lesson Plans index — both search a list of
 // human-readable labels the same simple way, so this lives here once instead of twice.
