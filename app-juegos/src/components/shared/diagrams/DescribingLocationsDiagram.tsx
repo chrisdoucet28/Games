@@ -1,7 +1,14 @@
 import { hexToRgba } from "../../../data/themes";
 import { Icon } from "../Icon";
 
-const PHRASES = ["situated in", "surrounded by", "walking distance", "known for", "home to", "famous for"];
+const PHRASES: { lines: string[] }[] = [
+  { lines: ["situated in"] },
+  { lines: ["surrounded by"] },
+  { lines: ["within walking", "distance"] },
+  { lines: ["known for"] },
+  { lines: ["home to"] },
+  { lines: ["famous for"] },
+];
 const ADJECTIVES = ["remote", "cosmopolitan", "historic", "peaceful", "crowded", "touristy"];
 
 function Pin({ cx, cy, ink }: { cx: number; cy: number; ink: string }) {
@@ -50,41 +57,49 @@ export function DescribingLocationsDiagram({ variant, accentColor = "#2563EB" }:
       <div style={{ fontWeight: "800", fontSize: isScreen ? "11.5px" : "10px", textTransform: "uppercase", letterSpacing: "0.04em", color: isScreen ? accentColor : "#374151", marginBottom: "6px" }}>
         Location vocabulary
       </div>
-      <svg viewBox="0 0 460 220" style={{ width: "100%", height: "auto", display: "block" }}>
+      <svg viewBox="0 0 460 228" style={{ width: "100%", height: "auto", display: "block" }}>
         <text x="20" y="10" fontSize="8" fontWeight="800" letterSpacing="0.04em" fill={caption}>LOCATION PHRASES</text>
         {PHRASES.map((p, i) => {
           const colWidth = 420 / PHRASES.length;
           const boxX = 20 + i * colWidth + (colWidth - 60) / 2;
           const cx = boxX + 30;
+          const oneLine = p.lines.length === 1;
           return (
-            <g key={p}>
-              <rect x={boxX} y="16" width="60" height="54" rx="6" fill={fill} stroke={accent} strokeWidth="1.5" />
+            <g key={p.lines.join(" ")}>
+              <rect x={boxX} y="16" width="60" height="62" rx="6" fill={fill} stroke={accent} strokeWidth="1.5" />
               <Pin cx={cx} cy={32} ink={ink} />
-              <text x={cx} y="58" textAnchor="middle" fontSize="6.6" fontWeight="700" fill={ink}>{p}</text>
+              {oneLine ? (
+                <text x={cx} y="64" textAnchor="middle" fontSize="6.6" fontWeight="700" fill={ink}>{p.lines[0]}</text>
+              ) : (
+                <>
+                  <text x={cx} y="57" textAnchor="middle" fontSize="6.6" fontWeight="700" fill={ink}>{p.lines[0]}</text>
+                  <text x={cx} y="66" textAnchor="middle" fontSize="6.6" fontWeight="700" fill={ink}>{p.lines[1]}</text>
+                </>
+              )}
             </g>
           );
         })}
 
-        <text x="20" y="86" fontSize="8" fontWeight="800" letterSpacing="0.04em" fill={caption}>DESCRIBING A PLACE</text>
+        <text x="20" y="94" fontSize="8" fontWeight="800" letterSpacing="0.04em" fill={caption}>DESCRIBING A PLACE</text>
         {ADJECTIVES.map((a, i) => {
           const colWidth = 420 / ADJECTIVES.length;
           const boxX = 20 + i * colWidth + (colWidth - 62) / 2;
           const cx = boxX + 31;
           return (
             <g key={a}>
-              <rect x={boxX} y="92" width="62" height="30" rx="6" fill={fill} stroke={accent} strokeWidth="1.5" />
-              <text x={cx} y="111" textAnchor="middle" fontSize="7.4" fontWeight="700" fill={ink}>{a}</text>
+              <rect x={boxX} y="100" width="62" height="30" rx="6" fill={fill} stroke={accent} strokeWidth="1.5" />
+              <text x={cx} y="119" textAnchor="middle" fontSize="7.4" fontWeight="700" fill={ink}>{a}</text>
             </g>
           );
         })}
 
-        <line x1="20" y1="134" x2="440" y2="134" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
+        <line x1="20" y1="142" x2="440" y2="142" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 
-        <text x="230" y="154" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ situate in the mountains · famous of its vineyards</text>
-        <text x="230" y="170" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ situated in the mountains · famous for its vineyards</text>
+        <text x="230" y="162" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ situate in the mountains · famous of its vineyards</text>
+        <text x="230" y="178" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ situated in the mountains · famous for its vineyards</text>
 
-        <text x="230" y="188" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ house to twenty museums · good connected by trains</text>
-        <text x="230" y="204" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ home to twenty museums · well connected by trains</text>
+        <text x="230" y="196" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ house to twenty museums · good connected by trains</text>
+        <text x="230" y="212" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ home to twenty museums · well connected by trains</text>
       </svg>
     </div>
   );

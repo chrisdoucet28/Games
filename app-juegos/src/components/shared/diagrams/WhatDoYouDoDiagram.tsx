@@ -37,29 +37,29 @@ export function WhatDoYouDoDiagram({ variant, accentColor = "#2563EB" }: { varia
       <div style={{ fontWeight: "800", fontSize: isScreen ? "11.5px" : "10px", textTransform: "uppercase", letterSpacing: "0.04em", color: isScreen ? accentColor : "#374151", marginBottom: "6px" }}>
         Always A or AN before the job
       </div>
-      <svg viewBox="0 0 460 205" style={{ width: "100%", height: "auto", display: "block" }}>
-        <rect x="20" y="12" width="195" height="70" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
-        <text x="117" y="34" textAnchor="middle" fontSize="14" fontWeight="800" fill={accent}>A</text>
-        <text x="117" y="52" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={ink}>a teacher · a doctor</text>
-        <text x="117" y="66" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={ink}>a nurse · a lawyer</text>
-        <text x="117" y="80" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>I'm a teacher.</text>
+      <svg viewBox="0 0 460 213" style={{ width: "100%", height: "auto", display: "block" }}>
+        <rect x="20" y="12" width="195" height="78" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
+        <text x="117" y="32" textAnchor="middle" fontSize="14" fontWeight="800" fill={accent}>A</text>
+        <text x="117" y="50" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={ink}>a teacher · a doctor</text>
+        <text x="117" y="64" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={ink}>a nurse · a lawyer</text>
+        <text x="117" y="82" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>I'm a teacher.</text>
 
-        <rect x="245" y="12" width="195" height="70" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
-        <text x="342" y="34" textAnchor="middle" fontSize="14" fontWeight="800" fill={accent}>AN</text>
-        <text x="342" y="52" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={ink}>an engineer · an actor</text>
-        <text x="342" y="66" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={ink}>an artist</text>
-        <text x="342" y="80" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>She's an actor.</text>
+        <rect x="245" y="12" width="195" height="78" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
+        <text x="342" y="32" textAnchor="middle" fontSize="14" fontWeight="800" fill={accent}>AN</text>
+        <text x="342" y="50" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={ink}>an engineer · an actor</text>
+        <text x="342" y="64" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={ink}>an artist</text>
+        <text x="342" y="82" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>She's an actor.</text>
 
-        <text x="230" y="106" textAnchor="middle" fontSize="9.5" fontWeight="800" fill={ink}>only ONE "does" in the question</text>
-        <text x="230" y="120" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>What does she do? (not "does she does")</text>
+        <text x="230" y="114" textAnchor="middle" fontSize="9.5" fontWeight="800" fill={ink}>only ONE "does" in the question</text>
+        <text x="230" y="128" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>What does she do? (not "does she does")</text>
 
-        <line x1="20" y1="132" x2="440" y2="132" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
+        <line x1="20" y1="140" x2="440" y2="140" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 
-        <text x="230" y="152" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ He is doctor. · What does she does?</text>
-        <text x="230" y="168" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ He is a doctor. · What does she do?</text>
+        <text x="230" y="160" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ He is doctor. · What does she does?</text>
+        <text x="230" y="176" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ He is a doctor. · What does she do?</text>
 
-        <text x="230" y="188" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ She works on a hospital.</text>
-        <text x="230" y="204" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ She works in a hospital.</text>
+        <text x="230" y="196" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ She works on a hospital.</text>
+        <text x="230" y="212" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ She works in a hospital.</text>
       </svg>
     </div>
   );

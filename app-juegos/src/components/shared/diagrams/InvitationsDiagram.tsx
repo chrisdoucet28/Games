@@ -55,7 +55,7 @@ export function InvitationsDiagram({ variant, accentColor = "#2563EB" }: { varia
           return (
             <g key={p.phrase}>
               <rect x={x} y="16" width="74" height="58" rx="6" fill={fill} stroke={accent} strokeWidth="1.5" />
-              <text x={cx} y="34" textAnchor="middle" fontSize="7.5" fontWeight="800" fill={accent}>{p.phrase}</text>
+              <text x={cx} y="34" textAnchor="middle" fontSize="6.8" fontWeight="800" fill={accent}>{p.phrase}</text>
               <text x={cx} y="50" textAnchor="middle" fontSize="10" fill={caption}>↓</text>
               <text x={cx} y="66" textAnchor="middle" fontSize="8" fontStyle="italic" fill={ink}>{p.form}</text>
             </g>

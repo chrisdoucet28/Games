@@ -106,7 +106,7 @@ export function MakingExcusesDiagram({ variant, accentColor = "#2563EB" }: { var
             <g key={e.word}>
               <rect x={boxX} y="16" width="74" height="60" rx="6" fill={fill} stroke={accent} strokeWidth="1.5" />
               <ExcuseIcon icon={e.icon} cx={cx} cy={40} ink={ink} accent={accent} />
-              <text x={cx} y="68" textAnchor="middle" fontSize="7.2" fontWeight="700" fill={ink}>{e.word}</text>
+              <text x={cx} y="68" textAnchor="middle" fontSize="6.4" fontWeight="700" fill={ink}>{e.word}</text>
             </g>
           );
         })}

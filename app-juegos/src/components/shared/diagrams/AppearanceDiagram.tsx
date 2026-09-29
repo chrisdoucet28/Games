@@ -226,7 +226,7 @@ export function AppearanceDiagram({ variant, accentColor = "#2563EB" }: { varian
             <g key={w}>
               <rect x={boxX} y="186" width="46" height="60" rx="6" fill={fill} stroke={accent} strokeWidth="1.5" />
               <HairIcon word={w} cx={cx} cy={210} ink={ink} caption={caption} />
-              <text x={cx} y="238" textAnchor="middle" fontSize="6.8" fontWeight="700" fill={ink}>{w}</text>
+              <text x={cx} y="238" textAnchor="middle" fontSize="6.1" fontWeight="700" fill={ink}>{w}</text>
             </g>
           );
         })}
