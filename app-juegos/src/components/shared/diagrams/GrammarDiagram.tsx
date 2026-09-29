@@ -105,6 +105,12 @@ import { PrefixesSuffixesAdjectivesDiagram } from "./PrefixesSuffixesAdjectivesD
 import { AdvancedVocabularyDiagram } from "./AdvancedVocabularyDiagram";
 import { BusinessProfessionalVocabularyDiagram } from "./BusinessProfessionalVocabularyDiagram";
 import { DailyLifeA2Diagram } from "./DailyLifeA2Diagram";
+import { SchoolAndStudyDiagram } from "./SchoolAndStudyDiagram";
+import { FriendsAndFamilyDiagram } from "./FriendsAndFamilyDiagram";
+import { FreeTimeA2Diagram } from "./FreeTimeA2Diagram";
+import { MyTownCityDiagram } from "./MyTownCityDiagram";
+import { MoneyAndShoppingDiagram } from "./MoneyAndShoppingDiagram";
+import { FoodAndEatingDiagram } from "./FoodAndEatingDiagram";
 
 export type DiagramProps = { variant: "screen" | "print"; accentColor?: string };
 
@@ -221,6 +227,12 @@ const TOPIC_DIAGRAMS: Record<string, ComponentType<DiagramProps>> = {
   advanced_vocabulary: AdvancedVocabularyDiagram,
   business_professional_vocabulary: BusinessProfessionalVocabularyDiagram,
   daily_life_a2: DailyLifeA2Diagram,
+  school_and_study: SchoolAndStudyDiagram,
+  friends_and_family: FriendsAndFamilyDiagram,
+  free_time_a2: FreeTimeA2Diagram,
+  my_town_city: MyTownCityDiagram,
+  money_and_shopping: MoneyAndShoppingDiagram,
+  food_and_eating: FoodAndEatingDiagram,
 };
 
 export function TopicDiagram({ topicId, variant, accentColor }: { topicId: string; variant: "screen" | "print"; accentColor?: string }) {
