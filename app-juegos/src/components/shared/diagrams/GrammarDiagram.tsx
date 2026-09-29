@@ -111,6 +111,17 @@ import { FreeTimeA2Diagram } from "./FreeTimeA2Diagram";
 import { MyTownCityDiagram } from "./MyTownCityDiagram";
 import { MoneyAndShoppingDiagram } from "./MoneyAndShoppingDiagram";
 import { FoodAndEatingDiagram } from "./FoodAndEatingDiagram";
+import { WorkingFromHomeDiagram } from "./WorkingFromHomeDiagram";
+import { LearningLanguageDiagram } from "./LearningLanguageDiagram";
+import { CareerChoicesDiagram } from "./CareerChoicesDiagram";
+import { TimeManagementDiagram } from "./TimeManagementDiagram";
+import { FreeTimeHobbiesDiagram } from "./FreeTimeHobbiesDiagram";
+import { SocialMediaDiagram } from "./SocialMediaDiagram";
+import { ReadingDiagram } from "./ReadingDiagram";
+import { CityVsCountryDiagram } from "./CityVsCountryDiagram";
+import { TravelAndHolidaysDiagram } from "./TravelAndHolidaysDiagram";
+import { SportAndFitnessDiagram } from "./SportAndFitnessDiagram";
+import { RelationshipsAndSocialisingDiagram } from "./RelationshipsAndSocialisingDiagram";
 
 export type DiagramProps = { variant: "screen" | "print"; accentColor?: string };
 
@@ -233,6 +244,17 @@ const TOPIC_DIAGRAMS: Record<string, ComponentType<DiagramProps>> = {
   my_town_city: MyTownCityDiagram,
   money_and_shopping: MoneyAndShoppingDiagram,
   food_and_eating: FoodAndEatingDiagram,
+  working_from_home: WorkingFromHomeDiagram,
+  learning_language: LearningLanguageDiagram,
+  career_choices: CareerChoicesDiagram,
+  time_management: TimeManagementDiagram,
+  free_time_hobbies: FreeTimeHobbiesDiagram,
+  social_media: SocialMediaDiagram,
+  reading: ReadingDiagram,
+  city_vs_country: CityVsCountryDiagram,
+  travel_and_holidays: TravelAndHolidaysDiagram,
+  sport_and_fitness: SportAndFitnessDiagram,
+  relationships_and_socialising: RelationshipsAndSocialisingDiagram,
 };
 
 export function TopicDiagram({ topicId, variant, accentColor }: { topicId: string; variant: "screen" | "print"; accentColor?: string }) {
