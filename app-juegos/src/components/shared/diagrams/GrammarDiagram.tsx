@@ -122,6 +122,15 @@ import { CityVsCountryDiagram } from "./CityVsCountryDiagram";
 import { TravelAndHolidaysDiagram } from "./TravelAndHolidaysDiagram";
 import { SportAndFitnessDiagram } from "./SportAndFitnessDiagram";
 import { RelationshipsAndSocialisingDiagram } from "./RelationshipsAndSocialisingDiagram";
+import { EducationSystemsDiagram } from "./EducationSystemsDiagram";
+import { WorkLifeBalanceDiagram } from "./WorkLifeBalanceDiagram";
+import { SuccessMotivationDiagram } from "./SuccessMotivationDiagram";
+import { CulturalDifferencesDiagram } from "./CulturalDifferencesDiagram";
+import { ClimateChangeDiagram } from "./ClimateChangeDiagram";
+import { TechnologyDailyLifeDiagram } from "./TechnologyDailyLifeDiagram";
+import { MoneyAndEconomyDiagram } from "./MoneyAndEconomyDiagram";
+import { CrimeAndLawDiagram } from "./CrimeAndLawDiagram";
+import { ArtsAndEntertainmentDiagram } from "./ArtsAndEntertainmentDiagram";
 
 export type DiagramProps = { variant: "screen" | "print"; accentColor?: string };
 
@@ -255,6 +264,15 @@ const TOPIC_DIAGRAMS: Record<string, ComponentType<DiagramProps>> = {
   travel_and_holidays: TravelAndHolidaysDiagram,
   sport_and_fitness: SportAndFitnessDiagram,
   relationships_and_socialising: RelationshipsAndSocialisingDiagram,
+  education_systems: EducationSystemsDiagram,
+  work_life_balance: WorkLifeBalanceDiagram,
+  success_motivation: SuccessMotivationDiagram,
+  cultural_differences: CulturalDifferencesDiagram,
+  climate_change: ClimateChangeDiagram,
+  technology_daily_life: TechnologyDailyLifeDiagram,
+  money_and_economy: MoneyAndEconomyDiagram,
+  crime_and_law: CrimeAndLawDiagram,
+  arts_and_entertainment: ArtsAndEntertainmentDiagram,
 };
 
 export function TopicDiagram({ topicId, variant, accentColor }: { topicId: string; variant: "screen" | "print"; accentColor?: string }) {
