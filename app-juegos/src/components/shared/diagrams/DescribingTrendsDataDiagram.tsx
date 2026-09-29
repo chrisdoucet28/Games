@@ -1,10 +1,41 @@
 import { hexToRgba } from "../../../data/themes";
 import { Icon } from "../Icon";
 
-// The lesson's own core trap — rise (no object) vs raise (needs an object) — leads as the main
-// fork, with the by/to/from prepositions as a small reference row since that's the other concrete,
-// groundable pattern (one of the commonMistakes is exactly this preposition swap). All chrome text
-// kept to plain B2 words.
+const TRENDS = [
+  { word: "rise", shape: "rise" },
+  { word: "soar", shape: "soar" },
+  { word: "fall", shape: "fall" },
+  { word: "plummet", shape: "plummet" },
+  { word: "fluctuate", shape: "fluctuate" },
+  { word: "level off", shape: "leveloff" },
+];
+
+function TrendIcon({ shape, cx, cy, accent }: { shape: string; cx: number; cy: number; accent: string }) {
+  const arrow = "url(#dtdArrow)";
+  switch (shape) {
+    case "rise":
+      return <line x1={cx - 10} y1={cy + 7} x2={cx + 10} y2={cy - 7} stroke={accent} strokeWidth="1.8" markerEnd={arrow} />;
+    case "fall":
+      return <line x1={cx - 10} y1={cy - 7} x2={cx + 10} y2={cy + 7} stroke={accent} strokeWidth="1.8" markerEnd={arrow} />;
+    case "soar":
+      return <line x1={cx - 7} y1={cy + 10} x2={cx + 7} y2={cy - 12} stroke={accent} strokeWidth="1.8" markerEnd={arrow} />;
+    case "plummet":
+      return <line x1={cx - 7} y1={cy - 12} x2={cx + 7} y2={cy + 10} stroke={accent} strokeWidth="1.8" markerEnd={arrow} />;
+    case "fluctuate":
+      return <path d={`M ${cx - 11} ${cy} L ${cx - 4} ${cy - 8} L ${cx + 3} ${cy + 7} L ${cx + 11} ${cy - 6}`} fill="none" stroke={accent} strokeWidth="1.8" markerEnd={arrow} />;
+    case "leveloff":
+      return <path d={`M ${cx - 11} ${cy + 8} L ${cx - 1} ${cy - 7} L ${cx + 11} ${cy - 7}`} fill="none" stroke={accent} strokeWidth="1.8" markerEnd={arrow} />;
+    default:
+      return null;
+  }
+}
+
+// User feedback: this topic is literally about reading graphs, and the first version had no
+// graphs at all — just text. This rebuild leads with a small line-graph icon for each verb of
+// change (rise/soar/fall/plummet/fluctuate/level off), and the by/to/from-to prepositions now each
+// annotate the SAME small rising graph — a bracket for the amount (by), an end point for the new
+// figure (to), and two labelled points for the full range (from...to) — instead of three bare
+// example sentences. All chrome text kept to plain B2 words.
 export function DescribingTrendsDataDiagram({ variant, accentColor = "#2563EB" }: { variant: "screen" | "print"; accentColor?: string }) {
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
@@ -13,6 +44,12 @@ export function DescribingTrendsDataDiagram({ variant, accentColor = "#2563EB" }
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
+
+  const prepBoxes = [
+    { x: 20, x1: 35, x2: 101 },
+    { x: 165, x1: 180, x2: 246 },
+    { x: 310, x1: 325, x2: 391 },
+  ];
 
   return (
     <div
@@ -36,41 +73,69 @@ export function DescribingTrendsDataDiagram({ variant, accentColor = "#2563EB" }
         </div>
       )}
       <div style={{ fontWeight: "800", fontSize: isScreen ? "11.5px" : "10px", textTransform: "uppercase", letterSpacing: "0.04em", color: isScreen ? accentColor : "#374151", marginBottom: "6px" }}>
-        Rise (no object), or raise (needs one)?
+        Trends, drawn
       </div>
-      <svg viewBox="0 0 460 244" style={{ width: "100%", height: "auto", display: "block" }}>
-        <rect x="20" y="16" width="195" height="70" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
-        <text x="117" y="34" textAnchor="middle" fontSize="11" fontWeight="800" fill={accent}>RISE / FALL</text>
-        <text x="117" y="48" textAnchor="middle" fontSize="7.6" fill={caption}>no object after it</text>
-        <text x="117" y="64" textAnchor="middle" fontSize="8.3" fontStyle="italic" fill={ink}>Prices rose sharply.</text>
-        <text x="117" y="78" textAnchor="middle" fontSize="8.3" fontStyle="italic" fill={ink}>(past participle: risen)</text>
+      <svg viewBox="0 0 460 326" style={{ width: "100%", height: "auto", display: "block" }}>
+        <defs>
+          <marker id="dtdArrow" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto">
+            <path d="M0,0 L7,3.5 L0,7 Z" fill={accent} />
+          </marker>
+        </defs>
 
-        <rect x="245" y="16" width="195" height="70" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
-        <text x="342" y="34" textAnchor="middle" fontSize="11" fontWeight="800" fill={accent}>RAISE</text>
-        <text x="342" y="48" textAnchor="middle" fontSize="7.6" fill={caption}>needs an object</text>
-        <text x="342" y="64" textAnchor="middle" fontSize="8.3" fontStyle="italic" fill={ink}>The government raised taxes.</text>
-        <text x="342" y="78" textAnchor="middle" fontSize="8.3" fontStyle="italic" fill={ink}>(taxes = the object)</text>
+        <text x="20" y="10" fontSize="8" fontWeight="800" letterSpacing="0.04em" fill={caption}>SHAPES OF A TREND</text>
+        {TRENDS.map((t, i) => {
+          const colWidth = 420 / TRENDS.length;
+          const boxX = 20 + i * colWidth + (colWidth - 60) / 2;
+          const cx = boxX + 30;
+          return (
+            <g key={t.word}>
+              <rect x={boxX} y="16" width="60" height="54" rx="6" fill={fill} stroke={accent} strokeWidth="1.5" />
+              <TrendIcon shape={t.shape} cx={cx} cy={34} accent={accent} />
+              <text x={cx} y="60" textAnchor="middle" fontSize="7.2" fontWeight="700" fill={ink}>{t.word}</text>
+            </g>
+          );
+        })}
 
-        <text x="20" y="104" fontSize="8" fontWeight="800" letterSpacing="0.04em" fill={caption}>PREPOSITIONS WITH NUMBERS</text>
-        <rect x="20" y="110" width="130" height="46" rx="6" fill={fill} stroke={accent} strokeWidth="1.5" />
-        <text x="85" y="128" textAnchor="middle" fontSize="10" fontWeight="800" fill={accent}>BY</text>
-        <text x="85" y="142" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={ink}>rose by 15%</text>
+        <rect x="20" y="80" width="195" height="58" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
+        <text x="117" y="98" textAnchor="middle" fontSize="11" fontWeight="800" fill={accent}>RISE / FALL</text>
+        <text x="117" y="112" textAnchor="middle" fontSize="7.6" fill={caption}>no object after it</text>
+        <text x="117" y="128" textAnchor="middle" fontSize="8.3" fontStyle="italic" fill={ink}>Prices rose sharply.</text>
 
-        <rect x="165" y="110" width="130" height="46" rx="6" fill={fill} stroke={accent} strokeWidth="1.5" />
-        <text x="230" y="128" textAnchor="middle" fontSize="10" fontWeight="800" fill={accent}>TO</text>
-        <text x="230" y="142" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={ink}>rose to $50</text>
+        <rect x="245" y="80" width="195" height="58" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
+        <text x="342" y="98" textAnchor="middle" fontSize="11" fontWeight="800" fill={accent}>RAISE</text>
+        <text x="342" y="112" textAnchor="middle" fontSize="7.6" fill={caption}>needs an object</text>
+        <text x="342" y="128" textAnchor="middle" fontSize="8.3" fontStyle="italic" fill={ink}>The government raised taxes.</text>
 
-        <rect x="310" y="110" width="130" height="46" rx="6" fill={fill} stroke={accent} strokeWidth="1.5" />
-        <text x="375" y="128" textAnchor="middle" fontSize="10" fontWeight="800" fill={accent}>FROM ... TO</text>
-        <text x="375" y="142" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={ink}>grew from $2m to $5m</text>
+        <text x="20" y="150" fontSize="8" fontWeight="800" letterSpacing="0.04em" fill={caption}>PREPOSITIONS WITH NUMBERS — SAME TREND</text>
 
-        <line x1="20" y1="168" x2="440" y2="168" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
+        <rect x={prepBoxes[0].x} y="156" width="130" height="74" rx="6" fill={fill} stroke={accent} strokeWidth="1.5" />
+        <text x={prepBoxes[0].x + 65} y="172" textAnchor="middle" fontSize="10" fontWeight="800" fill={accent}>BY</text>
+        <line x1={prepBoxes[0].x1} y1="218" x2={prepBoxes[0].x2} y2="188" stroke={ink} strokeWidth="1.6" />
+        <line x1={prepBoxes[0].x2 + 10} y1="188" x2={prepBoxes[0].x2 + 10} y2="218" stroke={accent} strokeWidth="1.3" />
+        <line x1={prepBoxes[0].x2 + 6} y1="188" x2={prepBoxes[0].x2 + 14} y2="188" stroke={accent} strokeWidth="1.3" />
+        <line x1={prepBoxes[0].x2 + 6} y1="218" x2={prepBoxes[0].x2 + 14} y2="218" stroke={accent} strokeWidth="1.3" />
+        <text x={prepBoxes[0].x + 65} y="212" textAnchor="middle" fontSize="7.3" fontStyle="italic" fill={ink}>the amount: 15%</text>
 
-        <text x="230" y="188" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ Prices raised sharply. · Sales increased of 10%.</text>
-        <text x="230" y="204" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ Prices rose sharply. · Sales increased by 10%.</text>
+        <rect x={prepBoxes[1].x} y="156" width="130" height="74" rx="6" fill={fill} stroke={accent} strokeWidth="1.5" />
+        <text x={prepBoxes[1].x + 65} y="172" textAnchor="middle" fontSize="10" fontWeight="800" fill={accent}>TO</text>
+        <line x1={prepBoxes[1].x1} y1="218" x2={prepBoxes[1].x2} y2="188" stroke={ink} strokeWidth="1.6" />
+        <circle cx={prepBoxes[1].x2} cy="188" r="3" fill={accent} />
+        <text x={prepBoxes[1].x + 65} y="212" textAnchor="middle" fontSize="7.3" fontStyle="italic" fill={ink}>the new figure: $50</text>
 
-        <text x="230" y="222" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ There was a rise sharp in prices. · Prices have rose.</text>
-        <text x="230" y="238" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ There was a sharp rise in prices. · Prices have risen.</text>
+        <rect x={prepBoxes[2].x} y="156" width="130" height="74" rx="6" fill={fill} stroke={accent} strokeWidth="1.5" />
+        <text x={prepBoxes[2].x + 65} y="172" textAnchor="middle" fontSize="10" fontWeight="800" fill={accent}>FROM ... TO</text>
+        <line x1={prepBoxes[2].x1} y1="218" x2={prepBoxes[2].x2} y2="188" stroke={ink} strokeWidth="1.6" />
+        <circle cx={prepBoxes[2].x1} cy="218" r="3" fill={accent} />
+        <circle cx={prepBoxes[2].x2} cy="188" r="3" fill={accent} />
+        <text x={prepBoxes[2].x + 65} y="212" textAnchor="middle" fontSize="7.3" fontStyle="italic" fill={ink}>$2m ... $5m</text>
+
+        <line x1="20" y1="240" x2="440" y2="240" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
+
+        <text x="230" y="260" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ Prices raised sharply. · Sales increased of 10%.</text>
+        <text x="230" y="276" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ Prices rose sharply. · Sales increased by 10%.</text>
+
+        <text x="230" y="294" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ There was a rise sharp in prices. · Prices have rose.</text>
+        <text x="230" y="310" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ There was a sharp rise in prices. · Prices have risen.</text>
       </svg>
     </div>
   );
