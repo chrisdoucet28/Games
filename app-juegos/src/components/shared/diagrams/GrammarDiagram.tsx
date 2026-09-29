@@ -92,6 +92,11 @@ import { HealthAndBodyDiagram } from "./HealthAndBodyDiagram";
 import { OrderingFoodDiagram } from "./OrderingFoodDiagram";
 import { MakingExcusesDiagram } from "./MakingExcusesDiagram";
 import { MakingSuggestionsDiagram } from "./MakingSuggestionsDiagram";
+import { GivingOpinionsDiagram } from "./GivingOpinionsDiagram";
+import { AskingForClarificationDiagram } from "./AskingForClarificationDiagram";
+import { AgreeingDisagreeingDiagram } from "./AgreeingDisagreeingDiagram";
+import { DescribingLocationsDiagram } from "./DescribingLocationsDiagram";
+import { CommonIdiomsDiagram } from "./CommonIdiomsDiagram";
 
 export type DiagramProps = { variant: "screen" | "print"; accentColor?: string };
 
@@ -195,6 +200,11 @@ const TOPIC_DIAGRAMS: Record<string, ComponentType<DiagramProps>> = {
   ordering_food: OrderingFoodDiagram,
   making_excuses: MakingExcusesDiagram,
   making_suggestions: MakingSuggestionsDiagram,
+  giving_opinions: GivingOpinionsDiagram,
+  asking_for_clarification: AskingForClarificationDiagram,
+  agreeing_disagreeing: AgreeingDisagreeingDiagram,
+  describing_locations: DescribingLocationsDiagram,
+  common_idioms: CommonIdiomsDiagram,
 };
 
 export function TopicDiagram({ topicId, variant, accentColor }: { topicId: string; variant: "screen" | "print"; accentColor?: string }) {
