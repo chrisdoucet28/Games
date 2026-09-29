@@ -1,10 +1,18 @@
 import { hexToRgba } from "../../../data/themes";
 import { Icon } from "../Icon";
 
-// The lesson's own intro names this directly: "mixing up 'mustn't' and 'don't have to' is the
-// classic trap" — both are negative-looking structures but mean opposite things (forbidden vs
-// optional), so that contrast is the whole diagram's focus, with the must/have to conjugation
-// difference as a secondary strip since it's a separate, smaller trap in its own right.
+// Four forms, one 2x2 grid, equal visual weight — must/have to (obligation) get their own boxes
+// alongside mustn't/don't have to (prohibition/no obligation) rather than being folded into a
+// caption strip under a negatives-only contrast. The lesson's own intro still names "mixing up
+// 'mustn't' and 'don't have to'" as the classic trap, so those two stay diagonally adjacent for
+// an easy side-by-side read, with must/have to placed above them.
+const BOXES = [
+  { id: "must", label: "MUST", sub: "OBLIGATION — a rule", example: "Students must wear a uniform.", note: "(often the speaker's own rule)" },
+  { id: "haveto", label: "HAVE TO", sub: "OBLIGATION — a rule", example: "I have to finish this by Friday.", note: "(often comes from someone else)" },
+  { id: "mustnt", label: "MUSTN'T", sub: "FORBIDDEN — not allowed", example: "You mustn't smoke here.", note: "(there IS a rule against it)" },
+  { id: "donthaveto", label: "DON'T HAVE TO", sub: "NOT NECESSARY — optional", example: "You don't have to pay — it's free.", note: "(no rule either way)" },
+];
+
 export function ModalsObligationDiagram({ variant, accentColor = "#2563EB" }: { variant: "screen" | "print"; accentColor?: string }) {
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
@@ -36,31 +44,36 @@ export function ModalsObligationDiagram({ variant, accentColor = "#2563EB" }: { 
         </div>
       )}
       <div style={{ fontWeight: "800", fontSize: isScreen ? "11.5px" : "10px", textTransform: "uppercase", letterSpacing: "0.04em", color: isScreen ? accentColor : "#374151", marginBottom: "6px" }}>
-        Two negatives, two opposite meanings
+        Four forms, four meanings
       </div>
-      <svg viewBox="0 0 460 222" style={{ width: "100%", height: "auto", display: "block" }}>
-        <rect x="20" y="12" width="195" height="78" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
-        <text x="117" y="32" textAnchor="middle" fontSize="12.5" fontWeight="800" fill={accent}>MUSTN'T</text>
-        <text x="117" y="48" textAnchor="middle" fontSize="9.5" fontWeight="700" fill={ink}>FORBIDDEN — not allowed</text>
-        <text x="117" y="65" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>You mustn't smoke here.</text>
-        <text x="117" y="78" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>(there IS a rule against it)</text>
+      <svg viewBox="0 0 460 306" style={{ width: "100%", height: "auto", display: "block" }}>
+        {BOXES.map((b, i) => {
+          const col = i % 2;
+          const row = Math.floor(i / 2);
+          const boxX = 20 + col * 220;
+          const boxY = 12 + row * 92;
+          const cx = boxX + 100;
+          return (
+            <g key={b.id}>
+              <rect x={boxX} y={boxY} width="200" height="80" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
+              <text x={cx} y={boxY + 20} textAnchor="middle" fontSize="12" fontWeight="800" fill={accent}>{b.label}</text>
+              <text x={cx} y={boxY + 36} textAnchor="middle" fontSize="9" fontWeight="700" fill={ink}>{b.sub}</text>
+              <text x={cx} y={boxY + 53} textAnchor="middle" fontSize="8.3" fontStyle="italic" fill={caption}>{b.example}</text>
+              <text x={cx} y={boxY + 66} textAnchor="middle" fontSize="7.8" fontStyle="italic" fill={caption}>{b.note}</text>
+            </g>
+          );
+        })}
 
-        <rect x="245" y="12" width="195" height="78" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
-        <text x="342" y="32" textAnchor="middle" fontSize="12.5" fontWeight="800" fill={accent}>DON'T HAVE TO</text>
-        <text x="342" y="48" textAnchor="middle" fontSize="9.5" fontWeight="700" fill={ink}>NOT NECESSARY — optional</text>
-        <text x="342" y="65" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>You don't have to pay — it's free.</text>
-        <text x="342" y="78" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>(no rule either way)</text>
+        <text x="230" y="212" textAnchor="middle" fontSize="9.7" fontWeight="700" fill={ink}>must never changes — no "to", no "-s", no question form</text>
+        <text x="230" y="226" textAnchor="middle" fontSize="9.7" fontWeight="700" fill={ink}>have to conjugates like a normal verb: has to · do you have to?</text>
 
-        <text x="230" y="106" textAnchor="middle" fontSize="10" fontWeight="700" fill={ink}>must never changes — no "to", no "-s", no question form</text>
-        <text x="230" y="122" textAnchor="middle" fontSize="10" fontWeight="700" fill={ink}>have to conjugates like a normal verb: has to · do you have to?</text>
+        <line x1="20" y1="236" x2="440" y2="236" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 
-        <line x1="20" y1="134" x2="440" y2="134" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
+        <text x="230" y="252" textAnchor="middle" fontSize="9.4" fontWeight="800" fill={wrong}>✗ We mustn't bring food. (meaning: it's optional)</text>
+        <text x="230" y="266" textAnchor="middle" fontSize="9.4" fontWeight="800" fill={right}>✓ We don't have to bring food.</text>
 
-        <text x="230" y="154" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ We mustn't bring food. (meaning: it's optional)</text>
-        <text x="230" y="170" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ We don't have to bring food.</text>
-
-        <text x="230" y="190" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ Do you must arrive early? · Students must to wear a uniform.</text>
-        <text x="230" y="206" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ Do you have to arrive early? · Students must wear a uniform.</text>
+        <text x="230" y="284" textAnchor="middle" fontSize="9.2" fontWeight="800" fill={wrong}>✗ Do you must arrive early? · Students must to wear a uniform.</text>
+        <text x="230" y="298" textAnchor="middle" fontSize="9.2" fontWeight="800" fill={right}>✓ Do you have to arrive early? · Students must wear a uniform.</text>
       </svg>
     </div>
   );
