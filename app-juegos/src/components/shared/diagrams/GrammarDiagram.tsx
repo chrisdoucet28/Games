@@ -88,9 +88,6 @@ import { ClothesDiagram } from "./ClothesDiagram";
 import { GivingDirectionsDiagram } from "./GivingDirectionsDiagram";
 import { InvitationsDiagram } from "./InvitationsDiagram";
 import { TellingStoriesDiagram } from "./TellingStoriesDiagram";
-import { DailyLifeA2Diagram } from "./DailyLifeA2Diagram";
-import { SchoolAndStudyDiagram } from "./SchoolAndStudyDiagram";
-import { FriendsAndFamilyDiagram } from "./FriendsAndFamilyDiagram";
 
 export type DiagramProps = { variant: "screen" | "print"; accentColor?: string };
 
@@ -190,9 +187,6 @@ const TOPIC_DIAGRAMS: Record<string, ComponentType<DiagramProps>> = {
   giving_directions: GivingDirectionsDiagram,
   invitations: InvitationsDiagram,
   telling_stories: TellingStoriesDiagram,
-  daily_life_a2: DailyLifeA2Diagram,
-  school_and_study: SchoolAndStudyDiagram,
-  friends_and_family: FriendsAndFamilyDiagram,
 };
 
 export function TopicDiagram({ topicId, variant, accentColor }: { topicId: string; variant: "screen" | "print"; accentColor?: string }) {
