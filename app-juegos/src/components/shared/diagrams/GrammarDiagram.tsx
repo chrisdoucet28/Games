@@ -131,6 +131,12 @@ import { TechnologyDailyLifeDiagram } from "./TechnologyDailyLifeDiagram";
 import { MoneyAndEconomyDiagram } from "./MoneyAndEconomyDiagram";
 import { CrimeAndLawDiagram } from "./CrimeAndLawDiagram";
 import { ArtsAndEntertainmentDiagram } from "./ArtsAndEntertainmentDiagram";
+import { MemoryMindPsychologyDiagram } from "./MemoryMindPsychologyDiagram";
+import { FutureOfWorkDiagram } from "./FutureOfWorkDiagram";
+import { RelationshipsModernLifeDiagram } from "./RelationshipsModernLifeDiagram";
+import { CrimeAndJusticeDiagram } from "./CrimeAndJusticeDiagram";
+import { HealthHealthcareSystemsDiagram } from "./HealthHealthcareSystemsDiagram";
+import { MediaMisinformationDiagram } from "./MediaMisinformationDiagram";
 
 export type DiagramProps = { variant: "screen" | "print"; accentColor?: string };
 
@@ -273,6 +279,12 @@ const TOPIC_DIAGRAMS: Record<string, ComponentType<DiagramProps>> = {
   money_and_economy: MoneyAndEconomyDiagram,
   crime_and_law: CrimeAndLawDiagram,
   arts_and_entertainment: ArtsAndEntertainmentDiagram,
+  memory_mind_psychology: MemoryMindPsychologyDiagram,
+  future_of_work: FutureOfWorkDiagram,
+  relationships_modern_life: RelationshipsModernLifeDiagram,
+  crime_and_justice: CrimeAndJusticeDiagram,
+  health_healthcare_systems: HealthHealthcareSystemsDiagram,
+  media_misinformation: MediaMisinformationDiagram,
 };
 
 export function TopicDiagram({ topicId, variant, accentColor }: { topicId: string; variant: "screen" | "print"; accentColor?: string }) {
