@@ -60,13 +60,22 @@ export function TimeManagementDiagram({ variant, accentColor = "#2563EB" }: { va
         <line x1="152" y1="138" x2="308" y2="138" stroke={caption} strokeWidth="1" strokeDasharray="2 3" />
         <text x="230" y="150" textAnchor="middle" fontSize="8" fill={wrong}>✗ procrastination</text>
 
-        <rect x="165" y="176" width="130" height="24" rx="12" fill={fill} stroke={accent} strokeWidth="1.3" />
-        <text x="230" y="192" textAnchor="middle" fontSize="8" fontWeight="700" fill={ink}>to-do list</text>
+        <text x="20" y="172" fontSize="8" fontWeight="800" letterSpacing="0.04em" fill={caption}>USEFUL WORDS</text>
+        {["to-do list", "procrastination", "prioritise", "switch off"].map((w, i) => {
+          const pillColWidth = 420 / 4;
+          const boxX = 20 + i * pillColWidth + (pillColWidth - 96) / 2;
+          return (
+            <g key={w}>
+              <rect x={boxX} y="178" width="96" height="24" rx="12" fill={fill} stroke={accent} strokeWidth="1.3" />
+              <text x={boxX + 48} y="194" textAnchor="middle" fontSize="7.4" fontWeight="700" fill={ink}>{w}</text>
+            </g>
+          );
+        })}
 
-        <line x1="20" y1="220" x2="440" y2="220" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
+        <line x1="20" y1="216" x2="440" y2="216" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 
-        <text x="230" y="240" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ The team meeting has place every Monday.</text>
-        <text x="230" y="256" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ The team meeting takes place every Monday.</text>
+        <text x="230" y="236" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ The team meeting has place every Monday.</text>
+        <text x="230" y="252" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ The team meeting takes place every Monday.</text>
 
         <text x="230" y="272" textAnchor="middle" fontSize="9.4" fontWeight="800" fill={wrong}>✗ I eventually check my emails two or three times.</text>
         <text x="230" y="288" textAnchor="middle" fontSize="9.4" fontWeight="800" fill={right}>✓ I occasionally check my emails two or three times.</text>

@@ -83,7 +83,7 @@ export function RelationshipsAndSocialisingDiagram({ variant, accentColor = "#25
       <div style={{ fontWeight: "800", fontSize: isScreen ? "11.5px" : "10px", textTransform: "uppercase", letterSpacing: "0.04em", color: isScreen ? accentColor : "#374151", marginBottom: "6px" }}>
         The Ups and Downs of Friendship
       </div>
-      <svg viewBox="0 0 460 258" style={{ width: "100%", height: "auto", display: "block" }}>
+      <svg viewBox="0 0 460 288" style={{ width: "100%", height: "auto", display: "block" }}>
         <defs>
           <marker id="rasArrow" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto">
             <path d="M0,0 L7,3.5 L0,7 Z" fill={accent} />
@@ -103,24 +103,26 @@ export function RelationshipsAndSocialisingDiagram({ variant, accentColor = "#25
         })}
 
         <text x="20" y="128" fontSize="8" fontWeight="800" letterSpacing="0.04em" fill={caption}>USEFUL WORDS</text>
-        {["trust", "support", "bond"].map((w, i) => {
+        {["trust", "support", "bond", "friendship", "forgive", "acquaintance"].map((w, i) => {
           const pillColWidth = 420 / 3;
-          const boxX = 20 + i * pillColWidth + (pillColWidth - 130) / 2;
+          const row = Math.floor(i / 3);
+          const col = i % 3;
+          const boxX = 20 + col * pillColWidth + (pillColWidth - 130) / 2;
           return (
             <g key={w}>
-              <rect x={boxX} y="134" width="130" height="24" rx="12" fill={fill} stroke={accent} strokeWidth="1.3" />
-              <text x={boxX + 65} y="150" textAnchor="middle" fontSize="8" fontWeight="700" fill={ink}>{w}</text>
+              <rect x={boxX} y={134 + row * 30} width="130" height="24" rx="12" fill={fill} stroke={accent} strokeWidth="1.3" />
+              <text x={boxX + 65} y={150 + row * 30} textAnchor="middle" fontSize="8" fontWeight="700" fill={ink}>{w}</text>
             </g>
           );
         })}
 
-        <line x1="20" y1="172" x2="440" y2="172" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
+        <line x1="20" y1="202" x2="440" y2="202" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 
-        <text x="230" y="192" textAnchor="middle" fontSize="10" fontWeight="800" fill={wrong}>✗ She has just apologise to her friend.</text>
-        <text x="230" y="208" textAnchor="middle" fontSize="10" fontWeight="800" fill={right}>✓ She has just apologised to her friend.</text>
+        <text x="230" y="222" textAnchor="middle" fontSize="10" fontWeight="800" fill={wrong}>✗ She has just apologise to her friend.</text>
+        <text x="230" y="238" textAnchor="middle" fontSize="10" fontWeight="800" fill={right}>✓ She has just apologised to her friend.</text>
 
-        <text x="230" y="230" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ She is more close to her sister.</text>
-        <text x="230" y="246" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ She is closer to her sister.</text>
+        <text x="230" y="260" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ She is more close to her sister.</text>
+        <text x="230" y="276" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ She is closer to her sister.</text>
       </svg>
     </div>
   );

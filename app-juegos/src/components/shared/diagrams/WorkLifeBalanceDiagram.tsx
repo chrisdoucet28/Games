@@ -56,13 +56,13 @@ export function WorkLifeBalanceDiagram({ variant, accentColor = "#2563EB" }: { v
         <text x="320" y="78" textAnchor="middle" fontSize="7.2" fontStyle="italic" fill={caption}>switch off</text>
 
         <text x="20" y="132" fontSize="8" fontWeight="800" letterSpacing="0.04em" fill={caption}>USEFUL WORDS</text>
-        {["set boundaries", "flexible hours", "hustle culture"].map((w, i) => {
-          const pillColWidth = 420 / 3;
-          const boxX = 20 + i * pillColWidth + (pillColWidth - 130) / 2;
+        {["set boundaries", "flexible hours", "hustle culture", "four-day working week"].map((w, i) => {
+          const pillColWidth = 420 / 4;
+          const boxX = 20 + i * pillColWidth + (pillColWidth - 96) / 2;
           return (
             <g key={w}>
-              <rect x={boxX} y="138" width="130" height="24" rx="12" fill={fill} stroke={accent} strokeWidth="1.3" />
-              <text x={boxX + 65} y="154" textAnchor="middle" fontSize="7.6" fontWeight="700" fill={ink}>{w}</text>
+              <rect x={boxX} y="138" width="96" height="24" rx="12" fill={fill} stroke={accent} strokeWidth="1.3" />
+              <text x={boxX + 48} y="154" textAnchor="middle" fontSize="6.6" fontWeight="700" fill={ink}>{w}</text>
             </g>
           );
         })}

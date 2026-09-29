@@ -86,7 +86,7 @@ export function SportAndFitnessDiagram({ variant, accentColor = "#2563EB" }: { v
       <div style={{ fontWeight: "800", fontSize: isScreen ? "11.5px" : "10px", textTransform: "uppercase", letterSpacing: "0.04em", color: isScreen ? accentColor : "#374151", marginBottom: "6px" }}>
         Talking About Sport
       </div>
-      <svg viewBox="0 0 460 276" style={{ width: "100%", height: "auto", display: "block" }}>
+      <svg viewBox="0 0 460 314" style={{ width: "100%", height: "auto", display: "block" }}>
         {ITEMS.map((it, i) => {
           const boxX = 20 + i * colWidth + (colWidth - 90) / 2;
           const cx = boxX + 45;
@@ -102,24 +102,26 @@ export function SportAndFitnessDiagram({ variant, accentColor = "#2563EB" }: { v
         <text x="230" y="128" textAnchor="middle" fontSize="9.3" fontStyle="italic" fill={ink}>He <tspan fontWeight="800">hasn't played</tspan> football <tspan fontWeight="800">since</tspan> his injury.</text>
 
         <text x="20" y="150" fontSize="8" fontWeight="800" letterSpacing="0.04em" fill={caption}>USEFUL WORDS</text>
-        {["stamina", "coach", "personal best"].map((w, i) => {
+        {["stamina", "coach", "personal best", "muscle", "opponent", "recover"].map((w, i) => {
           const pillColWidth = 420 / 3;
-          const boxX = 20 + i * pillColWidth + (pillColWidth - 130) / 2;
+          const row = Math.floor(i / 3);
+          const col = i % 3;
+          const boxX = 20 + col * pillColWidth + (pillColWidth - 130) / 2;
           return (
             <g key={w}>
-              <rect x={boxX} y="156" width="130" height="24" rx="12" fill={fill} stroke={accent} strokeWidth="1.3" />
-              <text x={boxX + 65} y="172" textAnchor="middle" fontSize="8" fontWeight="700" fill={ink}>{w}</text>
+              <rect x={boxX} y={156 + row * 30} width="130" height="24" rx="12" fill={fill} stroke={accent} strokeWidth="1.3" />
+              <text x={boxX + 65} y={172 + row * 30} textAnchor="middle" fontSize="8" fontWeight="700" fill={ink}>{w}</text>
             </g>
           );
         })}
 
-        <line x1="20" y1="194" x2="440" y2="194" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
+        <line x1="20" y1="224" x2="440" y2="224" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 
-        <text x="230" y="214" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ She has just win the championship.</text>
-        <text x="230" y="230" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ She has just won the championship.</text>
+        <text x="230" y="244" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ She has just win the championship.</text>
+        <text x="230" y="260" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ She has just won the championship.</text>
 
-        <text x="230" y="248" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ Running is gooder than walking.</text>
-        <text x="230" y="264" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ Running is better than walking.</text>
+        <text x="230" y="282" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ Running is gooder than walking.</text>
+        <text x="230" y="298" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ Running is better than walking.</text>
       </svg>
     </div>
   );

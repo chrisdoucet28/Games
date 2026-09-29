@@ -18,7 +18,7 @@ const ITEMS = [
   { name: "Maths", verb: "good at" },
 ];
 
-const VOCAB = ["timetable", "classmate", "library", "grade"];
+const VOCAB = ["subject", "timetable", "classmate", "library", "grade", "homework"];
 
 export function SchoolAndStudyDiagram({ variant, accentColor = "#2563EB" }: { variant: "screen" | "print"; accentColor?: string }) {
   const isScreen = variant === "screen";
@@ -53,7 +53,7 @@ export function SchoolAndStudyDiagram({ variant, accentColor = "#2563EB" }: { va
       <div style={{ fontWeight: "800", fontSize: isScreen ? "11.5px" : "10px", textTransform: "uppercase", letterSpacing: "0.04em", color: isScreen ? accentColor : "#374151", marginBottom: "6px" }}>
         My School Week
       </div>
-      <svg viewBox="0 0 460 276" style={{ width: "100%", height: "auto", display: "block" }}>
+      <svg viewBox="0 0 460 304" style={{ width: "100%", height: "auto", display: "block" }}>
         <path d={paperPath(140, 12, 180, 104)} fill={fill} stroke={accent} strokeWidth="1.5" />
         <text x="230" y="32" textAnchor="middle" fontSize="9.5" fontWeight="800" letterSpacing="0.04em" fill={accent}>HOMEWORK</text>
         <line x1="152" y1="40" x2="308" y2="40" stroke={caption} strokeWidth="1" strokeDasharray="2 3" />
@@ -67,23 +67,25 @@ export function SchoolAndStudyDiagram({ variant, accentColor = "#2563EB" }: { va
 
         <text x="20" y="146" fontSize="8" fontWeight="800" letterSpacing="0.04em" fill={caption}>USEFUL WORDS</text>
         {VOCAB.map((w, i) => {
-          const colWidth = 420 / VOCAB.length;
-          const boxX = 20 + i * colWidth + (colWidth - 90) / 2;
+          const colWidth = 420 / 3;
+          const row = Math.floor(i / 3);
+          const col = i % 3;
+          const boxX = 20 + col * colWidth + (colWidth - 130) / 2;
           return (
             <g key={w}>
-              <rect x={boxX} y="152" width="90" height="24" rx="12" fill={fill} stroke={accent} strokeWidth="1.3" />
-              <text x={boxX + 45} y="168" textAnchor="middle" fontSize="8" fontWeight="700" fill={ink}>{w}</text>
+              <rect x={boxX} y={152 + row * 30} width="130" height="24" rx="12" fill={fill} stroke={accent} strokeWidth="1.3" />
+              <text x={boxX + 65} y={168 + row * 30} textAnchor="middle" fontSize="8" fontWeight="700" fill={ink}>{w}</text>
             </g>
           );
         })}
 
-        <line x1="20" y1="192" x2="440" y2="192" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
+        <line x1="20" y1="220" x2="440" y2="220" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 
-        <text x="230" y="212" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ I have to assist my classes.</text>
-        <text x="230" y="228" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ I have to attend my classes.</text>
+        <text x="230" y="240" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ I have to assist my classes.</text>
+        <text x="230" y="256" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ I have to attend my classes.</text>
 
-        <text x="230" y="250" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ I always avoid to talk in class.</text>
-        <text x="230" y="266" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ I always avoid talking in class.</text>
+        <text x="230" y="278" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ I always avoid to talk in class.</text>
+        <text x="230" y="294" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ I always avoid talking in class.</text>
       </svg>
     </div>
   );

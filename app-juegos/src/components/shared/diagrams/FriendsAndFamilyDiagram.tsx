@@ -85,7 +85,7 @@ export function FriendsAndFamilyDiagram({ variant, accentColor = "#2563EB" }: { 
       <div style={{ fontWeight: "800", fontSize: isScreen ? "11.5px" : "10px", textTransform: "uppercase", letterSpacing: "0.04em", color: isScreen ? accentColor : "#374151", marginBottom: "6px" }}>
         Talking About Family
       </div>
-      <svg viewBox="0 0 460 224" style={{ width: "100%", height: "auto", display: "block" }}>
+      <svg viewBox="0 0 460 306" style={{ width: "100%", height: "auto", display: "block" }}>
         <defs>
           <marker id="fafTakeArrow" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
             <path d="M0,0 L6,3 L0,6 Z" fill={ink} />
@@ -104,13 +104,27 @@ export function FriendsAndFamilyDiagram({ variant, accentColor = "#2563EB" }: { 
           );
         })}
 
-        <line x1="20" y1="128" x2="440" y2="128" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
+        <text x="20" y="146" fontSize="8" fontWeight="800" letterSpacing="0.04em" fill={caption}>USEFUL PHRASES</text>
+        {["rely on someone", "get on with someone", "close-knit family", "take after someone"].map((w, i) => {
+          const pillColWidth = 420 / 2;
+          const row = Math.floor(i / 2);
+          const col = i % 2;
+          const boxX = 20 + col * pillColWidth + (pillColWidth - 190) / 2;
+          return (
+            <g key={w}>
+              <rect x={boxX} y={152 + row * 30} width="190" height="24" rx="12" fill={fill} stroke={accent} strokeWidth="1.3" />
+              <text x={boxX + 95} y={168 + row * 30} textAnchor="middle" fontSize="8" fontWeight="700" fill={ink}>{w}</text>
+            </g>
+          );
+        })}
 
-        <text x="230" y="148" textAnchor="middle" fontSize="9.6" fontWeight="800" fill={wrong}>✗ I know my best friend since we were children.</text>
-        <text x="230" y="164" textAnchor="middle" fontSize="9.6" fontWeight="800" fill={right}>✓ I have known my best friend since we were children.</text>
+        <line x1="20" y1="216" x2="440" y2="216" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 
-        <text x="230" y="184" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ My cousin is married with a doctor.</text>
-        <text x="230" y="200" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ My cousin is married to a doctor.</text>
+        <text x="230" y="236" textAnchor="middle" fontSize="9.6" fontWeight="800" fill={wrong}>✗ I know my best friend since we were children.</text>
+        <text x="230" y="252" textAnchor="middle" fontSize="9.6" fontWeight="800" fill={right}>✓ I have known my best friend since we were children.</text>
+
+        <text x="230" y="274" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ My cousin is married with a doctor.</text>
+        <text x="230" y="290" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ My cousin is married to a doctor.</text>
       </svg>
     </div>
   );

@@ -95,13 +95,13 @@ export function SuccessMotivationDiagram({ variant, accentColor = "#2563EB" }: {
         <text x="230" y="128" textAnchor="middle" fontSize="9.3" fontStyle="italic" fill={ink}>Success often <tspan fontWeight="800">depends on</tspan> persistence.</text>
 
         <text x="20" y="150" fontSize="8" fontWeight="800" letterSpacing="0.04em" fill={caption}>USEFUL WORDS</text>
-        {["procrastination", "stepping stone"].map((w, i) => {
-          const pillColWidth = 420 / 2;
-          const boxX = 20 + i * pillColWidth + (pillColWidth - 180) / 2;
+        {["procrastination", "stepping stone", "goals", "resilience"].map((w, i) => {
+          const pillColWidth = 420 / 4;
+          const boxX = 20 + i * pillColWidth + (pillColWidth - 96) / 2;
           return (
             <g key={w}>
-              <rect x={boxX} y="156" width="180" height="24" rx="12" fill={fill} stroke={accent} strokeWidth="1.3" />
-              <text x={boxX + 90} y="172" textAnchor="middle" fontSize="8" fontWeight="700" fill={ink}>{w}</text>
+              <rect x={boxX} y="156" width="96" height="24" rx="12" fill={fill} stroke={accent} strokeWidth="1.3" />
+              <text x={boxX + 48} y="172" textAnchor="middle" fontSize="7.2" fontWeight="700" fill={ink}>{w}</text>
             </g>
           );
         })}

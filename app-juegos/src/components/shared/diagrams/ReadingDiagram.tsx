@@ -39,7 +39,7 @@ export function ReadingDiagram({ variant, accentColor = "#2563EB" }: { variant: 
       <div style={{ fontWeight: "800", fontSize: isScreen ? "11.5px" : "10px", textTransform: "uppercase", letterSpacing: "0.04em", color: isScreen ? accentColor : "#374151", marginBottom: "6px" }}>
         Talking About a Book
       </div>
-      <svg viewBox="0 0 460 258" style={{ width: "100%", height: "auto", display: "block" }}>
+      <svg viewBox="0 0 460 288" style={{ width: "100%", height: "auto", display: "block" }}>
         <path d={`M ${cx} ${cy - 16} Q ${cx - 20} ${cy - 20} ${cx - 34} ${cy - 10} L ${cx - 30} ${cy + 14} Q ${cx - 16} ${cy + 18} ${cx} ${cy + 16} Z`} fill="none" stroke={ink} strokeWidth="1.4" />
         <path d={`M ${cx} ${cy - 16} Q ${cx + 20} ${cy - 20} ${cx + 34} ${cy - 10} L ${cx + 30} ${cy + 14} Q ${cx + 16} ${cy + 18} ${cx} ${cy + 16} Z`} fill="none" stroke={ink} strokeWidth="1.4" />
         {[-6, 0, 6].map((dy) => (
@@ -49,26 +49,29 @@ export function ReadingDiagram({ variant, accentColor = "#2563EB" }: { variant: 
           </g>
         ))}
 
-        {["protagonist", "plot", "genre", "bestseller"].map((w, i) => {
-          const colWidth = 420 / 4;
-          const boxX = 20 + i * colWidth + (colWidth - 96) / 2;
+        <text x="20" y="98" fontSize="8" fontWeight="800" letterSpacing="0.04em" fill={caption}>USEFUL WORDS</text>
+        {["protagonist", "plot", "genre", "gripping", "bookworm", "bestseller"].map((w, i) => {
+          const colWidth = 420 / 3;
+          const row = Math.floor(i / 3);
+          const col = i % 3;
+          const boxX = 20 + col * colWidth + (colWidth - 130) / 2;
           return (
             <g key={w}>
-              <rect x={boxX} y="108" width="96" height="24" rx="12" fill={fill} stroke={accent} strokeWidth="1.3" />
-              <text x={boxX + 48} y="124" textAnchor="middle" fontSize="7.6" fontWeight="700" fill={ink}>{w}</text>
+              <rect x={boxX} y={104 + row * 30} width="130" height="24" rx="12" fill={fill} stroke={accent} strokeWidth="1.3" />
+              <text x={boxX + 65} y={120 + row * 30} textAnchor="middle" fontSize="8" fontWeight="700" fill={ink}>{w}</text>
             </g>
           );
         })}
 
-        <text x="230" y="156" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={ink}>This novel <tspan fontWeight="800">is based on</tspan> a true story.</text>
+        <text x="230" y="180" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={ink}>This novel <tspan fontWeight="800">is based on</tspan> a true story.</text>
 
-        <line x1="20" y1="174" x2="440" y2="174" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
+        <line x1="20" y1="198" x2="440" y2="198" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 
-        <text x="230" y="194" textAnchor="middle" fontSize="9.6" fontWeight="800" fill={wrong}>✗ She is avid reader who finishes a book every week.</text>
-        <text x="230" y="210" textAnchor="middle" fontSize="9.6" fontWeight="800" fill={right}>✓ She is an avid reader who finishes a book every week.</text>
+        <text x="230" y="218" textAnchor="middle" fontSize="9.6" fontWeight="800" fill={wrong}>✗ She is avid reader who finishes a book every week.</text>
+        <text x="230" y="234" textAnchor="middle" fontSize="9.6" fontWeight="800" fill={right}>✓ She is an avid reader who finishes a book every week.</text>
 
-        <text x="230" y="232" textAnchor="middle" fontSize="9.6" fontWeight="800" fill={wrong}>✗ I bought this novel at the library.</text>
-        <text x="230" y="248" textAnchor="middle" fontSize="9.6" fontWeight="800" fill={right}>✓ I bought this novel at the bookshop.</text>
+        <text x="230" y="256" textAnchor="middle" fontSize="9.6" fontWeight="800" fill={wrong}>✗ I bought this novel at the library.</text>
+        <text x="230" y="272" textAnchor="middle" fontSize="9.6" fontWeight="800" fill={right}>✓ I bought this novel at the bookshop.</text>
       </svg>
     </div>
   );

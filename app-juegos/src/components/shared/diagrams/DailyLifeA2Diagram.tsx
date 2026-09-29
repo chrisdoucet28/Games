@@ -102,7 +102,7 @@ export function DailyLifeA2Diagram({ variant, accentColor = "#2563EB" }: { varia
       <div style={{ fontWeight: "800", fontSize: isScreen ? "11.5px" : "10px", textTransform: "uppercase", letterSpacing: "0.04em", color: isScreen ? accentColor : "#374151", marginBottom: "6px" }}>
         A Day, Step by Step
       </div>
-      <svg viewBox="0 0 460 224" style={{ width: "100%", height: "auto", display: "block" }}>
+      <svg viewBox="0 0 460 266" style={{ width: "100%", height: "auto", display: "block" }}>
         <text x="20" y="14" fontSize="8" fontWeight="800" letterSpacing="0.04em" fill={caption}>HE / SHE — ADD -S</text>
 
         {STAGES.map((s, i) => {
@@ -131,13 +131,25 @@ export function DailyLifeA2Diagram({ variant, accentColor = "#2563EB" }: { varia
           </marker>
         </defs>
 
-        <line x1="20" y1="134" x2="440" y2="134" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
+        <text x="20" y="146" fontSize="8" fontWeight="800" letterSpacing="0.04em" fill={caption}>USEFUL WORDS</text>
+        {["free time", "spare time", "unwind", "fall asleep"].map((w, i) => {
+          const pillColWidth = 420 / 4;
+          const boxX = 20 + i * pillColWidth + (pillColWidth - 96) / 2;
+          return (
+            <g key={w}>
+              <rect x={boxX} y="152" width="96" height="24" rx="12" fill={fill} stroke={accent} strokeWidth="1.3" />
+              <text x={boxX + 48} y="168" textAnchor="middle" fontSize="7.6" fontWeight="700" fill={ink}>{w}</text>
+            </g>
+          );
+        })}
 
-        <text x="230" y="154" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ I have 20 years old.</text>
-        <text x="230" y="170" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ I am 20 years old.</text>
+        <line x1="20" y1="188" x2="440" y2="188" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 
-        <text x="230" y="192" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ She goed to the gym yesterday.</text>
-        <text x="230" y="208" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ She went to the gym yesterday.</text>
+        <text x="230" y="208" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ I have 20 years old.</text>
+        <text x="230" y="224" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ I am 20 years old.</text>
+
+        <text x="230" y="246" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ She goed to the gym yesterday.</text>
+        <text x="230" y="262" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ She went to the gym yesterday.</text>
       </svg>
     </div>
   );

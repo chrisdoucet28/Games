@@ -24,7 +24,7 @@ const ITEMS = [
   { name: "Big sale", verb: "had" },
 ];
 
-const VOCAB = ["discount", "refund", "bargain", "budget"];
+const VOCAB = ["discount", "refund", "bargain", "budget", "afford", "checkout"];
 
 export function MoneyAndShoppingDiagram({ variant, accentColor = "#2563EB" }: { variant: "screen" | "print"; accentColor?: string }) {
   const isScreen = variant === "screen";
@@ -59,7 +59,7 @@ export function MoneyAndShoppingDiagram({ variant, accentColor = "#2563EB" }: { 
       <div style={{ fontWeight: "800", fontSize: isScreen ? "11.5px" : "10px", textTransform: "uppercase", letterSpacing: "0.04em", color: isScreen ? accentColor : "#374151", marginBottom: "6px" }}>
         Last Week's Shopping
       </div>
-      <svg viewBox="0 0 460 284" style={{ width: "100%", height: "auto", display: "block" }}>
+      <svg viewBox="0 0 460 312" style={{ width: "100%", height: "auto", display: "block" }}>
         <path d={receiptPath(140, 12, 180, 116)} fill={fill} stroke={accent} strokeWidth="1.5" />
         <text x="230" y="30" textAnchor="middle" fontSize="9.5" fontWeight="800" letterSpacing="0.06em" fill={accent}>RECEIPT</text>
         <line x1="152" y1="38" x2="308" y2="38" stroke={caption} strokeWidth="1" strokeDasharray="2 3" />
@@ -74,23 +74,25 @@ export function MoneyAndShoppingDiagram({ variant, accentColor = "#2563EB" }: { 
 
         <text x="20" y="152" fontSize="8" fontWeight="800" letterSpacing="0.04em" fill={caption}>USEFUL WORDS</text>
         {VOCAB.map((w, i) => {
-          const colWidth = 420 / VOCAB.length;
-          const boxX = 20 + i * colWidth + (colWidth - 90) / 2;
+          const colWidth = 420 / 3;
+          const row = Math.floor(i / 3);
+          const col = i % 3;
+          const boxX = 20 + col * colWidth + (colWidth - 130) / 2;
           return (
             <g key={w}>
-              <rect x={boxX} y="158" width="90" height="24" rx="12" fill={fill} stroke={accent} strokeWidth="1.3" />
-              <text x={boxX + 45} y="174" textAnchor="middle" fontSize="8" fontWeight="700" fill={ink}>{w}</text>
+              <rect x={boxX} y={158 + row * 30} width="130" height="24" rx="12" fill={fill} stroke={accent} strokeWidth="1.3" />
+              <text x={boxX + 65} y={174 + row * 30} textAnchor="middle" fontSize="8" fontWeight="700" fill={ink}>{w}</text>
             </g>
           );
         })}
 
-        <line x1="20" y1="198" x2="440" y2="198" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
+        <line x1="20" y1="226" x2="440" y2="226" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 
-        <text x="230" y="218" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ I buyed this jacket last week.</text>
-        <text x="230" y="234" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ I bought this jacket last week.</text>
+        <text x="230" y="246" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ I buyed this jacket last week.</text>
+        <text x="230" y="262" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ I bought this jacket last week.</text>
 
-        <text x="230" y="256" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ You must to show your receipt.</text>
-        <text x="230" y="272" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ You must show your receipt.</text>
+        <text x="230" y="284" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ You must to show your receipt.</text>
+        <text x="230" y="300" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ You must show your receipt.</text>
       </svg>
     </div>
   );

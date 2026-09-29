@@ -80,7 +80,7 @@ export function LearningLanguageDiagram({ variant, accentColor = "#2563EB" }: { 
       <div style={{ fontWeight: "800", fontSize: isScreen ? "11.5px" : "10px", textTransform: "uppercase", letterSpacing: "0.04em", color: isScreen ? accentColor : "#374151", marginBottom: "6px" }}>
         Your Language Journey
       </div>
-      <svg viewBox="0 0 460 280" style={{ width: "100%", height: "auto", display: "block" }}>
+      <svg viewBox="0 0 460 310" style={{ width: "100%", height: "auto", display: "block" }}>
         <defs>
           <marker id="llArrow" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto">
             <path d="M0,0 L7,3.5 L0,7 Z" fill={accent} />
@@ -102,24 +102,26 @@ export function LearningLanguageDiagram({ variant, accentColor = "#2563EB" }: { 
         <text x="230" y="128" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={ink}>I try to <tspan fontWeight="800">practise with</tspan> native speakers every week.</text>
 
         <text x="20" y="150" fontSize="8" fontWeight="800" letterSpacing="0.04em" fill={caption}>USEFUL PHRASES</text>
-        {["immerse yourself in", "become fluent"].map((w, i) => {
+        {["immerse yourself in", "mother tongue", "pick up new words", "become fluent"].map((w, i) => {
           const pillColWidth = 420 / 2;
-          const boxX = 20 + i * pillColWidth + (pillColWidth - 190) / 2;
+          const row = Math.floor(i / 2);
+          const col = i % 2;
+          const boxX = 20 + col * pillColWidth + (pillColWidth - 190) / 2;
           return (
             <g key={w}>
-              <rect x={boxX} y="156" width="190" height="24" rx="12" fill={fill} stroke={accent} strokeWidth="1.3" />
-              <text x={boxX + 95} y="172" textAnchor="middle" fontSize="8" fontWeight="700" fill={ink}>{w}</text>
+              <rect x={boxX} y={156 + row * 30} width="190" height="24" rx="12" fill={fill} stroke={accent} strokeWidth="1.3" />
+              <text x={boxX + 95} y={172 + row * 30} textAnchor="middle" fontSize="8" fontWeight="700" fill={ink}>{w}</text>
             </g>
           );
         })}
 
-        <line x1="20" y1="194" x2="440" y2="194" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
+        <line x1="20" y1="224" x2="440" y2="224" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 
-        <text x="230" y="212" textAnchor="middle" fontSize="10" fontWeight="800" fill={wrong}>✗ I assisted to an English class.</text>
-        <text x="230" y="228" textAnchor="middle" fontSize="10" fontWeight="800" fill={right}>✓ I attended an English class.</text>
+        <text x="230" y="242" textAnchor="middle" fontSize="10" fontWeight="800" fill={wrong}>✗ I assisted to an English class.</text>
+        <text x="230" y="258" textAnchor="middle" fontSize="10" fontWeight="800" fill={right}>✓ I attended an English class.</text>
 
-        <text x="230" y="248" textAnchor="middle" fontSize="10" fontWeight="800" fill={wrong}>✗ Don't be afraid to make questions.</text>
-        <text x="230" y="264" textAnchor="middle" fontSize="10" fontWeight="800" fill={right}>✓ Don't be afraid to ask questions.</text>
+        <text x="230" y="278" textAnchor="middle" fontSize="10" fontWeight="800" fill={wrong}>✗ Don't be afraid to make questions.</text>
+        <text x="230" y="294" textAnchor="middle" fontSize="10" fontWeight="800" fill={right}>✓ Don't be afraid to ask questions.</text>
       </svg>
     </div>
   );

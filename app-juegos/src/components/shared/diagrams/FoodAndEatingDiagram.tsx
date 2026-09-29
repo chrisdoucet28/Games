@@ -85,7 +85,7 @@ export function FoodAndEatingDiagram({ variant, accentColor = "#2563EB" }: { var
       <div style={{ fontWeight: "800", fontSize: isScreen ? "11.5px" : "10px", textTransform: "uppercase", letterSpacing: "0.04em", color: isScreen ? accentColor : "#374151", marginBottom: "6px" }}>
         Yesterday's Meal
       </div>
-      <svg viewBox="0 0 460 224" style={{ width: "100%", height: "auto", display: "block" }}>
+      <svg viewBox="0 0 460 278" style={{ width: "100%", height: "auto", display: "block" }}>
         {COURSES.map((c, i) => {
           const boxX = 20 + i * colWidth + (colWidth - 90) / 2;
           const cx = boxX + 45;
@@ -99,13 +99,25 @@ export function FoodAndEatingDiagram({ variant, accentColor = "#2563EB" }: { var
           );
         })}
 
-        <line x1="20" y1="134" x2="440" y2="134" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
+        <text x="20" y="146" fontSize="8" fontWeight="800" letterSpacing="0.04em" fill={caption}>USEFUL WORDS</text>
+        {["menu", "bill", "waiter", "portion"].map((w, i) => {
+          const pillColWidth = 420 / 4;
+          const boxX = 20 + i * pillColWidth + (pillColWidth - 96) / 2;
+          return (
+            <g key={w}>
+              <rect x={boxX} y="152" width="96" height="24" rx="12" fill={fill} stroke={accent} strokeWidth="1.3" />
+              <text x={boxX + 48} y="168" textAnchor="middle" fontSize="8" fontWeight="700" fill={ink}>{w}</text>
+            </g>
+          );
+        })}
 
-        <text x="230" y="154" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ We arrived to the restaurant late.</text>
-        <text x="230" y="170" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ We arrived at the restaurant late.</text>
+        <line x1="20" y1="188" x2="440" y2="188" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 
-        <text x="230" y="192" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ I have eaten paella yesterday.</text>
-        <text x="230" y="208" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ I ate paella yesterday.</text>
+        <text x="230" y="208" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ We arrived to the restaurant late.</text>
+        <text x="230" y="224" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ We arrived at the restaurant late.</text>
+
+        <text x="230" y="246" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ I have eaten paella yesterday.</text>
+        <text x="230" y="262" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ I ate paella yesterday.</text>
       </svg>
     </div>
   );

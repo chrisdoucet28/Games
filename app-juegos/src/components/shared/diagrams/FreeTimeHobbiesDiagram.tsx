@@ -80,7 +80,7 @@ export function FreeTimeHobbiesDiagram({ variant, accentColor = "#2563EB" }: { v
       <div style={{ fontWeight: "800", fontSize: isScreen ? "11.5px" : "10px", textTransform: "uppercase", letterSpacing: "0.04em", color: isScreen ? accentColor : "#374151", marginBottom: "6px" }}>
         Why Have a Hobby?
       </div>
-      <svg viewBox="0 0 460 272" style={{ width: "100%", height: "auto", display: "block" }}>
+      <svg viewBox="0 0 460 284" style={{ width: "100%", height: "auto", display: "block" }}>
         {BENEFITS.map((b, i) => {
           const boxX = 20 + i * colWidth + (colWidth - 90) / 2;
           const cx = boxX + 45;
@@ -95,16 +95,25 @@ export function FreeTimeHobbiesDiagram({ variant, accentColor = "#2563EB" }: { v
 
         <text x="230" y="128" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={ink}>She's <tspan fontWeight="800">been collecting</tspan> stamps <tspan fontWeight="800">since</tspan> she was a child.</text>
 
-        <rect x="165" y="140" width="130" height="24" rx="12" fill={fill} stroke={accent} strokeWidth="1.3" />
-        <text x="230" y="156" textAnchor="middle" fontSize="8" fontWeight="700" fill={ink}>fulfilling</text>
+        <text x="20" y="146" fontSize="8" fontWeight="800" letterSpacing="0.04em" fill={caption}>USEFUL WORDS</text>
+        {["fulfilling", "take up a hobby", "unwind", "recharge"].map((w, i) => {
+          const pillColWidth = 420 / 4;
+          const boxX = 20 + i * pillColWidth + (pillColWidth - 96) / 2;
+          return (
+            <g key={w}>
+              <rect x={boxX} y="152" width="96" height="24" rx="12" fill={fill} stroke={accent} strokeWidth="1.3" />
+              <text x={boxX + 48} y="168" textAnchor="middle" fontSize="7.2" fontWeight="700" fill={ink}>{w}</text>
+            </g>
+          );
+        })}
 
-        <line x1="20" y1="182" x2="440" y2="182" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
+        <line x1="20" y1="194" x2="440" y2="194" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 
-        <text x="230" y="202" textAnchor="middle" fontSize="9.6" fontWeight="800" fill={wrong}>✗ I realized a painting course last year.</text>
-        <text x="230" y="218" textAnchor="middle" fontSize="9.6" fontWeight="800" fill={right}>✓ I did a painting course last year.</text>
+        <text x="230" y="214" textAnchor="middle" fontSize="9.6" fontWeight="800" fill={wrong}>✗ I realized a painting course last year.</text>
+        <text x="230" y="230" textAnchor="middle" fontSize="9.6" fontWeight="800" fill={right}>✓ I did a painting course last year.</text>
 
-        <text x="230" y="240" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ I am painter in my free time.</text>
-        <text x="230" y="256" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ I am a painter in my free time.</text>
+        <text x="230" y="252" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ I am painter in my free time.</text>
+        <text x="230" y="268" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ I am a painter in my free time.</text>
       </svg>
     </div>
   );

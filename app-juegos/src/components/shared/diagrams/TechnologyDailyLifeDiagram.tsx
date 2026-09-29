@@ -99,8 +99,16 @@ export function TechnologyDailyLifeDiagram({ variant, accentColor = "#2563EB" }:
         <text x="230" y="140" textAnchor="middle" fontSize="6.8" fill={caption}>(one thing, one idea — not "have changed")</text>
 
         <text x="20" y="158" fontSize="8" fontWeight="800" letterSpacing="0.04em" fill={caption}>USEFUL WORDS</text>
-        <rect x="165" y="164" width="130" height="24" rx="12" fill={fill} stroke={accent} strokeWidth="1.3" />
-        <text x="230" y="180" textAnchor="middle" fontSize="8" fontWeight="700" fill={ink}>digital divide</text>
+        {["digital divide", "streaming", "cybersecurity", "work remotely"].map((w, i) => {
+          const pillColWidth = 420 / 4;
+          const boxX = 20 + i * pillColWidth + (pillColWidth - 96) / 2;
+          return (
+            <g key={w}>
+              <rect x={boxX} y="164" width="96" height="24" rx="12" fill={fill} stroke={accent} strokeWidth="1.3" />
+              <text x={boxX + 48} y="180" textAnchor="middle" fontSize="7" fontWeight="700" fill={ink}>{w}</text>
+            </g>
+          );
+        })}
 
         <line x1="20" y1="202" x2="440" y2="202" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 
