@@ -87,7 +87,7 @@ export function FreeTimeA2Diagram({ variant, accentColor = "#2563EB" }: { varian
       <div style={{ fontWeight: "800", fontSize: isScreen ? "11.5px" : "10px", textTransform: "uppercase", letterSpacing: "0.04em", color: isScreen ? accentColor : "#374151", marginBottom: "6px" }}>
         In My Free Time...
       </div>
-      <svg viewBox="0 0 460 224" style={{ width: "100%", height: "auto", display: "block" }}>
+      <svg viewBox="0 0 460 256" style={{ width: "100%", height: "auto", display: "block" }}>
         <text x="20" y="14" fontSize="8" fontWeight="800" letterSpacing="0.04em" fill={caption}>ENJOY / LIKE + -ING (NEVER "TO")</text>
 
         {HOBBIES.map((h, i) => {
@@ -102,13 +102,25 @@ export function FreeTimeA2Diagram({ variant, accentColor = "#2563EB" }: { varian
           );
         })}
 
-        <line x1="20" y1="128" x2="440" y2="128" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
+        <text x="20" y="124" fontSize="8" fontWeight="800" letterSpacing="0.04em" fill={caption}>USEFUL PHRASES</text>
+        {["join a club", "take up a hobby", "practise a skill"].map((w, i) => {
+          const pillColWidth = 420 / 3;
+          const boxX = 20 + i * pillColWidth + (pillColWidth - 130) / 2;
+          return (
+            <g key={w}>
+              <rect x={boxX} y="130" width="130" height="24" rx="12" fill={fill} stroke={accent} strokeWidth="1.3" />
+              <text x={boxX + 65} y="146" textAnchor="middle" fontSize="8" fontWeight="700" fill={ink}>{w}</text>
+            </g>
+          );
+        })}
 
-        <text x="230" y="148" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ I am boring when I have nothing to do.</text>
-        <text x="230" y="164" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ I am bored when I have nothing to do.</text>
+        <line x1="20" y1="168" x2="440" y2="168" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 
-        <text x="230" y="184" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ I make sport every weekend.</text>
-        <text x="230" y="200" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ I do sport every weekend.</text>
+        <text x="230" y="188" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ I am boring when I have nothing to do.</text>
+        <text x="230" y="204" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ I am bored when I have nothing to do.</text>
+
+        <text x="230" y="226" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ I make sport every weekend.</text>
+        <text x="230" y="242" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ I do sport every weekend.</text>
       </svg>
     </div>
   );

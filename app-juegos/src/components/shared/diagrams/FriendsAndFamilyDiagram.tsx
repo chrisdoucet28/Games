@@ -1,17 +1,65 @@
 import { hexToRgba } from "../../../data/themes";
 import { Icon } from "../Icon";
 
-// Topic identity: present perfect + since is this topic's own grammar throughline ("have been
-// friends since primary school") — no other A2 theme topic leans on it. A single timeline from a
-// past point to NOW is the real visual device; the bracket underneath shows the relationship
-// staying true the whole way, not just starting in the past. All chrome text kept to plain A2 words.
+// Rebuilt per feedback: present perfect + since was a real point in the lesson but not its core —
+// the lesson's own opening section is a vocabulary bank of fixed relationship phrases (keep in
+// touch, close-knit family, only child, take after someone). A row of those phrases, each with a
+// small drawn icon, is now the main visual; "since" survives only as one of the two mistake
+// reinforcements below, not the whole diagram.
+function PhraseIcon({ id, cx, cy, ink }: { id: string; cx: number; cy: number; ink: string }) {
+  switch (id) {
+    case "touch":
+      return (
+        <g>
+          <path d={`M ${cx - 10} ${cy - 7} L ${cx + 10} ${cy - 7} L ${cx + 10} ${cy + 5} L ${cx - 2} ${cy + 5} L ${cx - 6} ${cy + 9} L ${cx - 6} ${cy + 5} L ${cx - 10} ${cy + 5} Z`} fill="none" stroke={ink} strokeWidth="1.3" />
+          <path d={`M ${cx - 8} ${cy - 3} L ${cx} ${cy + 2} L ${cx + 8} ${cy - 3}`} fill="none" stroke={ink} strokeWidth="1.1" />
+        </g>
+      );
+    case "closeknit":
+      return (
+        <g>
+          <circle cx={cx - 6} cy={cy - 3} r="5.5" fill="none" stroke={ink} strokeWidth="1.3" />
+          <circle cx={cx + 6} cy={cy - 3} r="5.5" fill="none" stroke={ink} strokeWidth="1.3" />
+          <circle cx={cx} cy={cy + 7} r="5.5" fill="none" stroke={ink} strokeWidth="1.3" />
+        </g>
+      );
+    case "onlychild":
+      return (
+        <g>
+          <circle cx={cx} cy={cy - 4} r="5" fill="none" stroke={ink} strokeWidth="1.3" />
+          <path d={`M ${cx - 7} ${cy + 10} Q ${cx - 7} ${cy + 2} ${cx} ${cy + 2} Q ${cx + 7} ${cy + 2} ${cx + 7} ${cy + 10}`} fill="none" stroke={ink} strokeWidth="1.3" />
+          <circle cx={cx} cy={cy} r="14" fill="none" stroke={ink} strokeWidth="1" strokeDasharray="2 2" />
+        </g>
+      );
+    case "takeafter":
+      return (
+        <g>
+          <circle cx={cx - 8} cy={cy - 2} r="5" fill="none" stroke={ink} strokeWidth="1.3" />
+          <circle cx={cx + 8} cy={cy - 2} r="7" fill="none" stroke={ink} strokeWidth="1.3" />
+          <path d={`M ${cx - 2} ${cy - 2} L ${cx + 1} ${cy - 2}`} fill="none" stroke={ink} strokeWidth="1.2" markerEnd="url(#fafTakeArrow)" />
+        </g>
+      );
+    default:
+      return null;
+  }
+}
+
+const PHRASES = [
+  { id: "touch", label: "keep in touch" },
+  { id: "closeknit", label: "close-knit family" },
+  { id: "onlychild", label: "only child" },
+  { id: "takeafter", label: "take after someone" },
+];
+
 export function FriendsAndFamilyDiagram({ variant, accentColor = "#2563EB" }: { variant: "screen" | "print"; accentColor?: string }) {
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
   const caption = "#6B7280";
+  const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
+  const colWidth = 420 / PHRASES.length;
 
   return (
     <div
@@ -35,28 +83,31 @@ export function FriendsAndFamilyDiagram({ variant, accentColor = "#2563EB" }: { 
         </div>
       )}
       <div style={{ fontWeight: "800", fontSize: isScreen ? "11.5px" : "10px", textTransform: "uppercase", letterSpacing: "0.04em", color: isScreen ? accentColor : "#374151", marginBottom: "6px" }}>
-        Friends Since When?
+        Talking About Family
       </div>
-      <svg viewBox="0 0 460 210" style={{ width: "100%", height: "auto", display: "block" }}>
-        <text x="230" y="32" textAnchor="middle" fontSize="9.5" fontWeight="800" fill={ink}>We have been friends since primary school.</text>
-
-        <line x1="40" y1="60" x2="420" y2="60" stroke={accent} strokeWidth="2" markerEnd="url(#fafArrow)" />
-        <circle cx="40" cy="60" r="4" fill={accent} />
+      <svg viewBox="0 0 460 224" style={{ width: "100%", height: "auto", display: "block" }}>
         <defs>
-          <marker id="fafArrow" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto">
-            <path d="M0,0 L7,3.5 L0,7 Z" fill={accent} />
+          <marker id="fafTakeArrow" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6 Z" fill={ink} />
           </marker>
         </defs>
-        <text x="40" y="78" textAnchor="middle" fontSize="7.2" fontWeight="800" fill={caption}>PRIMARY SCHOOL</text>
-        <text x="420" y="78" textAnchor="middle" fontSize="7.2" fontWeight="800" fill={caption}>NOW</text>
 
-        <path d="M 40 90 L 40 96 L 420 96 L 420 90" fill="none" stroke={caption} strokeWidth="1.2" />
-        <text x="230" y="112" textAnchor="middle" fontSize="7.6" fontStyle="italic" fill={caption}>started then — still true now</text>
+        {PHRASES.map((p, i) => {
+          const boxX = 20 + i * colWidth + (colWidth - 90) / 2;
+          const cx = boxX + 45;
+          return (
+            <g key={p.id}>
+              <rect x={boxX} y="20" width="90" height="90" rx="8" fill={fill} stroke={accent} strokeWidth="1.5" />
+              <PhraseIcon id={p.id} cx={cx} cy={52} ink={ink} />
+              <text x={cx} y="94" textAnchor="middle" fontSize="7.6" fontWeight="700" fill={ink}>{p.label}</text>
+            </g>
+          );
+        })}
 
         <line x1="20" y1="128" x2="440" y2="128" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 
-        <text x="230" y="148" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ I know my best friend since we were children.</text>
-        <text x="230" y="164" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ I have known my best friend since we were children.</text>
+        <text x="230" y="148" textAnchor="middle" fontSize="9.6" fontWeight="800" fill={wrong}>✗ I know my best friend since we were children.</text>
+        <text x="230" y="164" textAnchor="middle" fontSize="9.6" fontWeight="800" fill={right}>✓ I have known my best friend since we were children.</text>
 
         <text x="230" y="184" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ My cousin is married with a doctor.</text>
         <text x="230" y="200" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ My cousin is married to a doctor.</text>

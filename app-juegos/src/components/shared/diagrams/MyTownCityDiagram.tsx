@@ -85,7 +85,7 @@ export function MyTownCityDiagram({ variant, accentColor = "#2563EB" }: { varian
       <div style={{ fontWeight: "800", fontSize: isScreen ? "11.5px" : "10px", textTransform: "uppercase", letterSpacing: "0.04em", color: isScreen ? accentColor : "#374151", marginBottom: "6px" }}>
         Describing My Town
       </div>
-      <svg viewBox="0 0 460 224" style={{ width: "100%", height: "auto", display: "block" }}>
+      <svg viewBox="0 0 460 264" style={{ width: "100%", height: "auto", display: "block" }}>
         {LANDMARKS.map((l, i) => {
           const boxX = 20 + i * colWidth + (colWidth - 90) / 2;
           const cx = boxX + 45;
@@ -99,13 +99,25 @@ export function MyTownCityDiagram({ variant, accentColor = "#2563EB" }: { varian
           );
         })}
 
-        <line x1="20" y1="134" x2="440" y2="134" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
+        <text x="20" y="132" fontSize="8" fontWeight="800" letterSpacing="0.04em" fill={caption}>USEFUL PHRASES</text>
+        {["famous for", "quieter than", "busier than", "the most beautiful"].map((w, i) => {
+          const pillColWidth = 420 / 4;
+          const boxX = 20 + i * pillColWidth + (pillColWidth - 96) / 2;
+          return (
+            <g key={w}>
+              <rect x={boxX} y="138" width="96" height="24" rx="12" fill={fill} stroke={accent} strokeWidth="1.3" />
+              <text x={boxX + 48} y="154" textAnchor="middle" fontSize="7.4" fontWeight="700" fill={ink}>{w}</text>
+            </g>
+          );
+        })}
 
-        <text x="230" y="154" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ I like to make photos of old buildings.</text>
-        <text x="230" y="170" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ I like to take photos of old buildings.</text>
+        <line x1="20" y1="174" x2="440" y2="174" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 
-        <text x="230" y="192" textAnchor="middle" fontSize="9.2" fontWeight="800" fill={wrong}>✗ There is a good library where you can buy books.</text>
-        <text x="230" y="208" textAnchor="middle" fontSize="9.2" fontWeight="800" fill={right}>✓ There is a good bookshop where you can buy books.</text>
+        <text x="230" y="194" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ I like to make photos of old buildings.</text>
+        <text x="230" y="210" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ I like to take photos of old buildings.</text>
+
+        <text x="230" y="232" textAnchor="middle" fontSize="9.2" fontWeight="800" fill={wrong}>✗ There is a good library where you can buy books.</text>
+        <text x="230" y="248" textAnchor="middle" fontSize="9.2" fontWeight="800" fill={right}>✓ There is a good bookshop where you can buy books.</text>
       </svg>
     </div>
   );

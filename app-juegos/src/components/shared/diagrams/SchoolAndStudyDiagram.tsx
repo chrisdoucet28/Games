@@ -1,10 +1,25 @@
 import { hexToRgba } from "../../../data/themes";
 import { Icon } from "../Icon";
 
-// Topic identity: school's own obligation grammar is distinctive among the A2 theme set — must/
-// have to shows up active AND passive ("must be handed in"), which no other A2 theme topic does.
-// Two rule cards carry that contrast; the middle callout isolates the "no to after must" trap
-// (a genuine, separate slip from the passive form itself). All chrome text kept to plain A2 words.
+// Rebuilt per feedback: the obligation grammar (must/passive) was a real point in the lesson but
+// not its core — the lesson's own opening section is a vocabulary bank (subject, exam, homework,
+// grade, library, classmate, timetable) plus three fixed phrases (hand in, pass/fail, take notes)
+// and "be good at + subject". Follows the money_and_shopping pattern: a real school object (a
+// homework paper) carries that vocab as line items, each paired with its natural verb — including
+// "good at" — instead of a grammar rule taking the whole diagram.
+function paperPath(x: number, y: number, w: number, h: number) {
+  const fold = 16;
+  return `M ${x} ${y} L ${x + w - fold} ${y} L ${x + w} ${y + fold} L ${x + w} ${y + h} L ${x} ${y + h} Z`;
+}
+
+const ITEMS = [
+  { name: "Essay", verb: "handed in" },
+  { name: "Exam", verb: "passed" },
+  { name: "Maths", verb: "good at" },
+];
+
+const VOCAB = ["timetable", "classmate", "library", "grade"];
+
 export function SchoolAndStudyDiagram({ variant, accentColor = "#2563EB" }: { variant: "screen" | "print"; accentColor?: string }) {
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
@@ -36,30 +51,39 @@ export function SchoolAndStudyDiagram({ variant, accentColor = "#2563EB" }: { va
         </div>
       )}
       <div style={{ fontWeight: "800", fontSize: isScreen ? "11.5px" : "10px", textTransform: "uppercase", letterSpacing: "0.04em", color: isScreen ? accentColor : "#374151", marginBottom: "6px" }}>
-        School Rules: MUST + Verb
+        My School Week
       </div>
-      <svg viewBox="0 0 460 224" style={{ width: "100%", height: "auto", display: "block" }}>
-        <rect x="20" y="12" width="195" height="56" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
-        <text x="117" y="30" textAnchor="middle" fontSize="9.5" fontWeight="800" fill={accent}>ACTIVE — MUST + VERB</text>
-        <text x="117" y="46" textAnchor="middle" fontSize="8.3" fontStyle="italic" fill={ink}>Students must arrive on time.</text>
-        <text x="117" y="60" textAnchor="middle" fontSize="6.6" fill={caption}>who does it? the student</text>
+      <svg viewBox="0 0 460 276" style={{ width: "100%", height: "auto", display: "block" }}>
+        <path d={paperPath(140, 12, 180, 104)} fill={fill} stroke={accent} strokeWidth="1.5" />
+        <text x="230" y="32" textAnchor="middle" fontSize="9.5" fontWeight="800" letterSpacing="0.04em" fill={accent}>HOMEWORK</text>
+        <line x1="152" y1="40" x2="308" y2="40" stroke={caption} strokeWidth="1" strokeDasharray="2 3" />
 
-        <rect x="245" y="12" width="195" height="56" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
-        <text x="342" y="30" textAnchor="middle" fontSize="9.5" fontWeight="800" fill={accent}>PASSIVE — MUST BE + DONE</text>
-        <text x="342" y="46" textAnchor="middle" fontSize="7.4" fontStyle="italic" fill={ink}>The essay must be handed in.</text>
-        <text x="342" y="60" textAnchor="middle" fontSize="6.6" fill={caption}>who does it? doesn't matter</text>
+        {ITEMS.map((it, i) => (
+          <g key={it.name}>
+            <text x="152" y={58 + i * 18} fontSize="8.3" fill={ink}>{it.name}</text>
+            <text x="308" y={58 + i * 18} textAnchor="end" fontSize="8.3" fontWeight="800" fill={accent}>{it.verb}</text>
+          </g>
+        ))}
 
-        <rect x="130" y="82" width="200" height="36" rx="8" fill={fill} stroke={accent} strokeWidth="1.5" />
-        <text x="230" y="98" textAnchor="middle" fontSize="9.5" fontWeight="800" fill={ink}>NO "TO" AFTER MUST</text>
-        <text x="230" y="112" textAnchor="middle" fontSize="8" fill={caption}><tspan fill={wrong}>✗ must to arrive</tspan> · <tspan fill={right}>✓ must arrive</tspan></text>
+        <text x="20" y="146" fontSize="8" fontWeight="800" letterSpacing="0.04em" fill={caption}>USEFUL WORDS</text>
+        {VOCAB.map((w, i) => {
+          const colWidth = 420 / VOCAB.length;
+          const boxX = 20 + i * colWidth + (colWidth - 90) / 2;
+          return (
+            <g key={w}>
+              <rect x={boxX} y="152" width="90" height="24" rx="12" fill={fill} stroke={accent} strokeWidth="1.3" />
+              <text x={boxX + 45} y="168" textAnchor="middle" fontSize="8" fontWeight="700" fill={ink}>{w}</text>
+            </g>
+          );
+        })}
 
-        <line x1="20" y1="134" x2="440" y2="134" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
+        <line x1="20" y1="192" x2="440" y2="192" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 
-        <text x="230" y="154" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ I have to assist my classes.</text>
-        <text x="230" y="170" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ I have to attend my classes.</text>
+        <text x="230" y="212" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ I have to assist my classes.</text>
+        <text x="230" y="228" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ I have to attend my classes.</text>
 
-        <text x="230" y="192" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ I always avoid to talk in class.</text>
-        <text x="230" y="208" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ I always avoid talking in class.</text>
+        <text x="230" y="250" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ I always avoid to talk in class.</text>
+        <text x="230" y="266" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ I always avoid talking in class.</text>
       </svg>
     </div>
   );
