@@ -75,7 +75,7 @@ export function DescribingTrendsDataDiagram({ variant, accentColor = "#2563EB" }
       <div style={{ fontWeight: "800", fontSize: isScreen ? "11.5px" : "10px", textTransform: "uppercase", letterSpacing: "0.04em", color: isScreen ? accentColor : "#374151", marginBottom: "6px" }}>
         Trends, drawn
       </div>
-      <svg viewBox="0 0 460 326" style={{ width: "100%", height: "auto", display: "block" }}>
+      <svg viewBox="0 0 460 340" style={{ width: "100%", height: "auto", display: "block" }}>
         <defs>
           <marker id="dtdArrow" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto">
             <path d="M0,0 L7,3.5 L0,7 Z" fill={accent} />
@@ -108,34 +108,34 @@ export function DescribingTrendsDataDiagram({ variant, accentColor = "#2563EB" }
 
         <text x="20" y="150" fontSize="8" fontWeight="800" letterSpacing="0.04em" fill={caption}>PREPOSITIONS WITH NUMBERS — SAME TREND</text>
 
-        <rect x={prepBoxes[0].x} y="156" width="130" height="74" rx="6" fill={fill} stroke={accent} strokeWidth="1.5" />
+        <rect x={prepBoxes[0].x} y="156" width="130" height="88" rx="6" fill={fill} stroke={accent} strokeWidth="1.5" />
         <text x={prepBoxes[0].x + 65} y="172" textAnchor="middle" fontSize="10" fontWeight="800" fill={accent}>BY</text>
-        <line x1={prepBoxes[0].x1} y1="218" x2={prepBoxes[0].x2} y2="188" stroke={ink} strokeWidth="1.6" />
-        <line x1={prepBoxes[0].x2 + 10} y1="188" x2={prepBoxes[0].x2 + 10} y2="218" stroke={accent} strokeWidth="1.3" />
-        <line x1={prepBoxes[0].x2 + 6} y1="188" x2={prepBoxes[0].x2 + 14} y2="188" stroke={accent} strokeWidth="1.3" />
-        <line x1={prepBoxes[0].x2 + 6} y1="218" x2={prepBoxes[0].x2 + 14} y2="218" stroke={accent} strokeWidth="1.3" />
-        <text x={prepBoxes[0].x + 65} y="212" textAnchor="middle" fontSize="7.3" fontStyle="italic" fill={ink}>the amount: 15%</text>
+        <line x1={prepBoxes[0].x1} y1="204" x2={prepBoxes[0].x2} y2="182" stroke={ink} strokeWidth="1.6" />
+        <line x1={prepBoxes[0].x2 + 10} y1="182" x2={prepBoxes[0].x2 + 10} y2="204" stroke={accent} strokeWidth="1.3" />
+        <line x1={prepBoxes[0].x2 + 6} y1="182" x2={prepBoxes[0].x2 + 14} y2="182" stroke={accent} strokeWidth="1.3" />
+        <line x1={prepBoxes[0].x2 + 6} y1="204" x2={prepBoxes[0].x2 + 14} y2="204" stroke={accent} strokeWidth="1.3" />
+        <text x={prepBoxes[0].x + 65} y="230" textAnchor="middle" fontSize="7.3" fontStyle="italic" fill={ink}>the amount: 15%</text>
 
-        <rect x={prepBoxes[1].x} y="156" width="130" height="74" rx="6" fill={fill} stroke={accent} strokeWidth="1.5" />
+        <rect x={prepBoxes[1].x} y="156" width="130" height="88" rx="6" fill={fill} stroke={accent} strokeWidth="1.5" />
         <text x={prepBoxes[1].x + 65} y="172" textAnchor="middle" fontSize="10" fontWeight="800" fill={accent}>TO</text>
-        <line x1={prepBoxes[1].x1} y1="218" x2={prepBoxes[1].x2} y2="188" stroke={ink} strokeWidth="1.6" />
-        <circle cx={prepBoxes[1].x2} cy="188" r="3" fill={accent} />
-        <text x={prepBoxes[1].x + 65} y="212" textAnchor="middle" fontSize="7.3" fontStyle="italic" fill={ink}>the new figure: $50</text>
+        <line x1={prepBoxes[1].x1} y1="204" x2={prepBoxes[1].x2} y2="182" stroke={ink} strokeWidth="1.6" />
+        <circle cx={prepBoxes[1].x2} cy="182" r="3" fill={accent} />
+        <text x={prepBoxes[1].x + 65} y="230" textAnchor="middle" fontSize="7.3" fontStyle="italic" fill={ink}>the new figure: $50</text>
 
-        <rect x={prepBoxes[2].x} y="156" width="130" height="74" rx="6" fill={fill} stroke={accent} strokeWidth="1.5" />
+        <rect x={prepBoxes[2].x} y="156" width="130" height="88" rx="6" fill={fill} stroke={accent} strokeWidth="1.5" />
         <text x={prepBoxes[2].x + 65} y="172" textAnchor="middle" fontSize="10" fontWeight="800" fill={accent}>FROM ... TO</text>
-        <line x1={prepBoxes[2].x1} y1="218" x2={prepBoxes[2].x2} y2="188" stroke={ink} strokeWidth="1.6" />
-        <circle cx={prepBoxes[2].x1} cy="218" r="3" fill={accent} />
-        <circle cx={prepBoxes[2].x2} cy="188" r="3" fill={accent} />
-        <text x={prepBoxes[2].x + 65} y="212" textAnchor="middle" fontSize="7.3" fontStyle="italic" fill={ink}>$2m ... $5m</text>
+        <line x1={prepBoxes[2].x1} y1="204" x2={prepBoxes[2].x2} y2="182" stroke={ink} strokeWidth="1.6" />
+        <circle cx={prepBoxes[2].x1} cy="204" r="3" fill={accent} />
+        <circle cx={prepBoxes[2].x2} cy="182" r="3" fill={accent} />
+        <text x={prepBoxes[2].x + 65} y="230" textAnchor="middle" fontSize="7.3" fontStyle="italic" fill={ink}>$2m ... $5m</text>
 
-        <line x1="20" y1="240" x2="440" y2="240" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
+        <line x1="20" y1="254" x2="440" y2="254" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 
-        <text x="230" y="260" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ Prices raised sharply. · Sales increased of 10%.</text>
-        <text x="230" y="276" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ Prices rose sharply. · Sales increased by 10%.</text>
+        <text x="230" y="274" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ Prices raised sharply. · Sales increased of 10%.</text>
+        <text x="230" y="290" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ Prices rose sharply. · Sales increased by 10%.</text>
 
-        <text x="230" y="294" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ There was a rise sharp in prices. · Prices have rose.</text>
-        <text x="230" y="310" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ There was a sharp rise in prices. · Prices have risen.</text>
+        <text x="230" y="308" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ There was a rise sharp in prices. · Prices have rose.</text>
+        <text x="230" y="324" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ There was a sharp rise in prices. · Prices have risen.</text>
       </svg>
     </div>
   );
