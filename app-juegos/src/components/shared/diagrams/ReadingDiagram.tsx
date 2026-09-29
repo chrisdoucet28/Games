@@ -40,12 +40,14 @@ export function ReadingDiagram({ variant, accentColor = "#2563EB" }: { variant: 
         Talking About a Book
       </div>
       <svg viewBox="0 0 460 258" style={{ width: "100%", height: "auto", display: "block" }}>
-        <path d={`M ${cx} ${cy - 22} Q ${cx - 34} ${cy - 28} ${cx - 34} ${cy - 12} Q ${cx - 34} ${cy + 20} ${cx} ${cy + 14} Q ${cx} ${cy + 14} ${cx} ${cy - 22} Z`} fill="none" stroke={ink} strokeWidth="1.4" />
-        <path d={`M ${cx} ${cy - 22} Q ${cx + 34} ${cy - 28} ${cx + 34} ${cy - 12} Q ${cx + 34} ${cy + 20} ${cx} ${cy + 14} Q ${cx} ${cy + 14} ${cx} ${cy - 22} Z`} fill="none" stroke={ink} strokeWidth="1.4" />
-        <line x1={cx - 24} y1={cy - 14} x2={cx - 6} y2={cy - 11} stroke={caption} strokeWidth="1" />
-        <line x1={cx - 24} y1={cy - 6} x2={cx - 6} y2={cy - 3} stroke={caption} strokeWidth="1" />
-        <line x1={cx + 24} y1={cy - 14} x2={cx + 6} y2={cy - 11} stroke={caption} strokeWidth="1" />
-        <line x1={cx + 24} y1={cy - 6} x2={cx + 6} y2={cy - 3} stroke={caption} strokeWidth="1" />
+        <path d={`M ${cx} ${cy - 16} Q ${cx - 20} ${cy - 20} ${cx - 34} ${cy - 10} L ${cx - 30} ${cy + 14} Q ${cx - 16} ${cy + 18} ${cx} ${cy + 16} Z`} fill="none" stroke={ink} strokeWidth="1.4" />
+        <path d={`M ${cx} ${cy - 16} Q ${cx + 20} ${cy - 20} ${cx + 34} ${cy - 10} L ${cx + 30} ${cy + 14} Q ${cx + 16} ${cy + 18} ${cx} ${cy + 16} Z`} fill="none" stroke={ink} strokeWidth="1.4" />
+        {[-6, 0, 6].map((dy) => (
+          <g key={dy}>
+            <line x1={cx - 26} y1={cy + dy} x2={cx - 6} y2={cy + dy} stroke={caption} strokeWidth="1" />
+            <line x1={cx + 6} y1={cy + dy} x2={cx + 26} y2={cy + dy} stroke={caption} strokeWidth="1" />
+          </g>
+        ))}
 
         {["protagonist", "plot", "genre", "bestseller"].map((w, i) => {
           const colWidth = 420 / 4;

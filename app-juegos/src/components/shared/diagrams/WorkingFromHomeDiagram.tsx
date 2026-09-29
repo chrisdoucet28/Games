@@ -81,7 +81,7 @@ export function WorkingFromHomeDiagram({ variant, accentColor = "#2563EB" }: { v
       <div style={{ fontWeight: "800", fontSize: isScreen ? "11.5px" : "10px", textTransform: "uppercase", letterSpacing: "0.04em", color: isScreen ? accentColor : "#374151", marginBottom: "6px" }}>
         A Remote Work Day
       </div>
-      <svg viewBox="0 0 460 256" style={{ width: "100%", height: "auto", display: "block" }}>
+      <svg viewBox="0 0 460 276" style={{ width: "100%", height: "auto", display: "block" }}>
         {ITEMS.map((it, i) => {
           const boxX = 20 + i * colWidth + (colWidth - 90) / 2;
           const cx = boxX + 45;
@@ -94,25 +94,28 @@ export function WorkingFromHomeDiagram({ variant, accentColor = "#2563EB" }: { v
           );
         })}
 
-        <text x="20" y="124" fontSize="8" fontWeight="800" letterSpacing="0.04em" fill={caption}>USEFUL WORDS</text>
+        <text x="230" y="122" textAnchor="middle" fontSize="9" fontStyle="italic" fill={ink}>She has a <tspan fontWeight="800">home office</tspan> in the spare bedroom.</text>
+        <text x="230" y="134" textAnchor="middle" fontSize="6.6" fill={caption}>("home office" = the room, not the practice of working from home)</text>
+
+        <text x="20" y="152" fontSize="8" fontWeight="800" letterSpacing="0.04em" fill={caption}>USEFUL WORDS</text>
         {["distraction", "isolated", "concentrate on"].map((w, i) => {
           const pillColWidth = 420 / 3;
           const boxX = 20 + i * pillColWidth + (pillColWidth - 130) / 2;
           return (
             <g key={w}>
-              <rect x={boxX} y="130" width="130" height="24" rx="12" fill={fill} stroke={accent} strokeWidth="1.3" />
-              <text x={boxX + 65} y="146" textAnchor="middle" fontSize="8" fontWeight="700" fill={ink}>{w}</text>
+              <rect x={boxX} y="158" width="130" height="24" rx="12" fill={fill} stroke={accent} strokeWidth="1.3" />
+              <text x={boxX + 65} y="174" textAnchor="middle" fontSize="8" fontWeight="700" fill={ink}>{w}</text>
             </g>
           );
         })}
 
-        <line x1="20" y1="168" x2="440" y2="168" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
+        <line x1="20" y1="196" x2="440" y2="196" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 
-        <text x="230" y="188" textAnchor="middle" fontSize="9.6" fontWeight="800" fill={wrong}>✗ I am agree that working from home saves time.</text>
-        <text x="230" y="204" textAnchor="middle" fontSize="9.6" fontWeight="800" fill={right}>✓ I agree that working from home saves time.</text>
+        <text x="230" y="216" textAnchor="middle" fontSize="9.6" fontWeight="800" fill={wrong}>✗ I am agree that working from home saves time.</text>
+        <text x="230" y="232" textAnchor="middle" fontSize="9.6" fontWeight="800" fill={right}>✓ I agree that working from home saves time.</text>
 
-        <text x="230" y="226" textAnchor="middle" fontSize="9.6" fontWeight="800" fill={wrong}>✗ She is remote worker who manages her own schedule.</text>
-        <text x="230" y="242" textAnchor="middle" fontSize="9.6" fontWeight="800" fill={right}>✓ She is a remote worker who manages her own schedule.</text>
+        <text x="230" y="254" textAnchor="middle" fontSize="9.6" fontWeight="800" fill={wrong}>✗ She is remote worker who manages her own schedule.</text>
+        <text x="230" y="270" textAnchor="middle" fontSize="9.6" fontWeight="800" fill={right}>✓ She is a remote worker who manages her own schedule.</text>
       </svg>
     </div>
   );
