@@ -1147,8 +1147,17 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
         return;
       }
 
-      const questionBuckets = selectedEntries.map(entry => entry.questions ?? []);
-      const cardTaskBuckets = selectedEntries.map(entry => cardTasksAsQuestions(entry.cardTasks ?? []));
+      // Parallel to selectedEntries (same filter as getSelectedTopicEntries, same order) -- safe to
+      // zip by index, unlike selectedTopics itself, which may contain a topic id that never
+      // resolved in TOPIC_LIBRARY and would misalign a direct zip (same reasoning the vault/spy/
+      // zombie branches below already rely on, just via their own per-topic lookup instead).
+      // Used to tag every question with sourceTopic so a flagged prompt (FlagPromptButton) can
+      // always be traced back to which topic it came from, even out of a mixed selection -- before
+      // this, only vault/spy/zombie tagged anything, so every other game's flags had no topic at
+      // all for the admin feedback queue to show.
+      const survivingTopicValues = selectedTopics.filter(value => Boolean(TOPIC_LIBRARY[value as keyof typeof TOPIC_LIBRARY]));
+      const questionBuckets = selectedEntries.map((entry, i) => (entry.questions ?? []).map(q => ({ ...q, sourceTopic: survivingTopicValues[i] })));
+      const cardTaskBuckets = selectedEntries.map((entry, i) => cardTasksAsQuestions(entry.cardTasks ?? []).map(q => ({ ...q, sourceTopic: survivingTopicValues[i] })));
       const allCardTasks = selectedEntries.flatMap(entry => entry.cardTasks ?? []);
       const selectedFocuses = uniqueValues(selectedTopics.map(value => getTopicOption(value)?.focus).filter((value): value is string => Boolean(value)));
       const isMixedSelection = selectedTopics.length > 1;
@@ -1158,7 +1167,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
       let qs: QuestionData[] = [];
 
       if (mode.id === "auction") {
-        qs = mixByTopic(selectedEntries.map(entry => entry.auctionSentences ?? []));
+        qs = mixByTopic(selectedEntries.map((entry, i) => (entry.auctionSentences ?? []).map(s => ({ ...s, sourceTopic: survivingTopicValues[i] }))));
       } else if (mode.id === "cards") {
         qs = mixByTopic(cardTaskBuckets);
       } else if (mode.id === "spy") {
@@ -1212,25 +1221,25 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
           ];
         }));
       } else if (mode.id === "hotseat" || mode.id === "relay") {
-        qs = mixByTopic(selectedEntries.map(entry => entry.hotSeatWords ?? []));
+        qs = mixByTopic(selectedEntries.map((entry, i) => (entry.hotSeatWords ?? []).map(w => ({ ...w, sourceTopic: survivingTopicValues[i] }))));
       } else if (mode.id === "hotpotato") {
-        qs = mixByTopic(selectedEntries.map(entry => entry.hotPotatoPrompts ?? []));
+        qs = mixByTopic(selectedEntries.map((entry, i) => (entry.hotPotatoPrompts ?? []).map(p => ({ ...p, sourceTopic: survivingTopicValues[i] }))));
       } else if (mode.id === "orderup") {
         // Merges two source arrays no other branch combines: transform-tagged rewrite-sentence
         // items (grammar targets) and hotSeatWords (vocab targets) — OrderUpGame splits this back
         // into its two pools by shape (q.transform vs q.word), same "merge upstream, filter-by-
         // shape downstream" pattern Battleship/Castle already use for questions+cardTasks.
-        qs = mixByTopic(selectedEntries.map(entry => [
-          ...(entry.questions ?? []).filter(q => q.type === "rewrite sentences" && q.transform),
-          ...(entry.hotSeatWords ?? []),
+        qs = mixByTopic(selectedEntries.map((entry, i) => [
+          ...questionBuckets[i].filter(q => q.type === "rewrite sentences" && q.transform),
+          ...(entry.hotSeatWords ?? []).map(w => ({ ...w, sourceTopic: survivingTopicValues[i] })),
         ]));
       } else if (mode.id === "battleship") {
         // Battleship's identity is error-hunting: always merge entry.questions (which now
         // includes L1-interference-flavored mistakes for theme content) with cardTasks,
         // rather than dropping grammar content entirely for theme-only selections.
-        qs = mixByTopic(selectedEntries.map((entry, index) => [...(entry.questions ?? []), ...cardTaskBuckets[index]]));
+        qs = mixByTopic(selectedEntries.map((_entry, index) => [...questionBuckets[index], ...cardTaskBuckets[index]]));
       } else if (mode.id === "castle" || mode.id === "racetrack" || mode.id === "whack" || mode.id === "rocket" || mode.id === "bounty") {
-        qs = mixByTopic(selectedEntries.map((entry, index) => [...(entry.questions ?? []), ...cardTaskBuckets[index]]));
+        qs = mixByTopic(selectedEntries.map((_entry, index) => [...questionBuckets[index], ...cardTaskBuckets[index]]));
       } else if (mode.id === "vault") {
         // Tagged with which selected topic each question came from (by TOPIC_OPTIONS value, looked
         // up per-topic rather than zipped by index against selectedEntries — same reasoning as
@@ -1245,7 +1254,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
         qs = mixByTopic(cardTaskBuckets);
       } else {
         qs = isMixedSelection
-          ? mixByTopic(selectedEntries.map((entry, index) => [...(entry.questions ?? []), ...cardTaskBuckets[index]]))
+          ? mixByTopic(selectedEntries.map((_entry, index) => [...questionBuckets[index], ...cardTaskBuckets[index]]))
           : mixByTopic(questionBuckets);
       }
 

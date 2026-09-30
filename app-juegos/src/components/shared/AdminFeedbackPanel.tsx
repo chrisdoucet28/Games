@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { ADMIN_COLORS as C } from "./adminColors";
 import { GAME_MODES } from "../../data/constants";
+import { TOPIC_OPTIONS } from "../../data/topicOptions";
 import type { FeedbackRow } from "../../lib/adminFeedback";
 import { AdminAutoFixActivity } from "./AdminAutoFixActivity";
 
@@ -33,6 +34,18 @@ function relativeTime(iso: string): string {
   return `${years} year${years === 1 ? "" : "s"} ago`;
 }
 
+// LessonGamesGenerator.tsx tags every question with sourceTopic (spySourceTopic for Spy Among Us/
+// Zombie Siege's own content) before mixing selected topics together, precisely so a flagged
+// question can be traced back here — without this, only the game mode was ever known, never which
+// of the teacher's selected topics the flagged content actually came from.
+function topicLabel(data: unknown): string | null {
+  if (!data || typeof data !== "object") return null;
+  const d = data as Record<string, unknown>;
+  const value = (typeof d.sourceTopic === "string" ? d.sourceTopic : null) ?? (typeof d.spySourceTopic === "string" ? d.spySourceTopic : null);
+  if (!value) return null;
+  return TOPIC_OPTIONS.find(t => t.value === value)?.label ?? value;
+}
+
 function formatQuestionData(data: unknown): string | null {
   if (!data || typeof data !== "object") return null;
   const d = data as Record<string, unknown>;
@@ -49,6 +62,7 @@ function formatQuestionData(data: unknown): string | null {
 function copyDetails(row: FeedbackRow) {
   const parts = [
     `Game: ${gameLabel(row.game_id) ?? "—"}`,
+    `Topic: ${topicLabel(row.question_data) ?? "—"}`,
     `Message: ${row.message}`,
   ];
   const q = formatQuestionData(row.question_data);
@@ -99,7 +113,7 @@ export function AdminFeedbackPanel({ rows, error, onMarkReviewed }: Props) {
     return all.filter(r => {
       if (tab !== "all" && r.kind !== tab) return false;
       if (!term) return true;
-      const haystack = [r.message, gameLabel(r.game_id) ?? "", r.display_name ?? "", formatQuestionData(r.question_data) ?? ""].join(" ").toLowerCase();
+      const haystack = [r.message, gameLabel(r.game_id) ?? "", topicLabel(r.question_data) ?? "", r.display_name ?? "", formatQuestionData(r.question_data) ?? ""].join(" ").toLowerCase();
       return haystack.includes(term);
     });
   }, [rows, tab, search]);
@@ -158,6 +172,7 @@ export function AdminFeedbackPanel({ rows, error, onMarkReviewed }: Props) {
       )}
       {newRows.map(row => {
         const q = formatQuestionData(row.question_data);
+        const topic = topicLabel(row.question_data);
         return (
           <div key={row.id} style={{ background: "linear-gradient(180deg,rgba(239,68,68,0.05),transparent 40%)", border: "1px solid rgba(239,68,68,0.35)", borderRadius: 13, padding: "14px 16px", display: "flex", gap: 14 }}>
             <div style={{ width: 34, height: 34, borderRadius: 9, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, border: "1px solid rgba(245,158,11,0.3)", background: "rgba(245,158,11,0.12)" }}>
@@ -169,6 +184,17 @@ export function AdminFeedbackPanel({ rows, error, onMarkReviewed }: Props) {
                   <span style={{ fontSize: 10.5, fontWeight: 800, color: C.warn, background: "rgba(245,158,11,0.12)", border: "1px solid rgba(245,158,11,0.3)", borderRadius: 6, padding: "2px 7px" }}>
                     {gameLabel(row.game_id)}
                   </span>
+                )}
+                {topic ? (
+                  <span style={{ fontSize: 10.5, fontWeight: 800, color: "#93C5FD", background: "rgba(59,130,246,0.12)", border: "1px solid rgba(59,130,246,0.3)", borderRadius: 6, padding: "2px 7px" }}>
+                    {topic}
+                  </span>
+                ) : row.kind === "flag" && (
+                  // No sourceTopic on this row -- either a topic later removed from TOPIC_OPTIONS,
+                  // or content type this game doesn't tag (Minefield has no per-question content at
+                  // all to tag). Surfaced rather than just omitted, so it reads as "unknown", not
+                  // "this game has no topic concept."
+                  <span style={{ fontSize: 10.5, fontWeight: 700, color: C.inkFaint, fontStyle: "italic" }}>Topic unknown</span>
                 )}
                 <span style={{ fontSize: 11.5, color: C.inkDim, fontWeight: 700 }}>{row.display_name ?? "Unknown teacher"}</span>
                 <span style={{ width: 3, height: 3, borderRadius: "50%", background: C.inkFaint }} />
