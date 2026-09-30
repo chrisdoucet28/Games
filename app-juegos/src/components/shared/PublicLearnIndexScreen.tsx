@@ -18,7 +18,7 @@ export function PublicLearnIndexScreen() {
 
   // Extra UI only for a signed-in student — everyone else (and Google) sees the page exactly as
   // before. The done-set is fetched once here and passed down, not per card.
-  const { isStudent } = useStudentSession();
+  const { isStudent, loggedIn } = useStudentSession();
   const [doneIds, setDoneIds] = useState<Set<string>>(new Set());
   useEffect(() => {
     if (!isStudent) return;
@@ -112,7 +112,11 @@ export function PublicLearnIndexScreen() {
         <div style={{ textAlign: "center", background: "white", border: "2px solid rgba(3,105,161,0.2)", borderRadius: "16px", padding: "24px 20px", marginTop: "12px", marginBottom: "16px" }}>
           <div style={{ fontWeight: "900", fontSize: "16px", color: "#0C1E3D", marginBottom: "8px" }}>Ready to test yourself?</div>
           <p style={{ color: "#4B5563", fontSize: "13px", margin: "0 0 14px", lineHeight: 1.5 }}>
-            Try a self-check practice quiz — pick a few topics and see how you do, no account needed.
+            {/* "no account needed" is only true -- and only worth saying -- to someone who
+                doesn't have one yet, same reasoning as PracticeScreen's own picker intro. */}
+            {loggedIn
+              ? "Try a self-check practice quiz — pick a few topics and see how you do."
+              : "Try a self-check practice quiz — pick a few topics and see how you do, no account needed."}
           </p>
           <a
             href="/practice"
@@ -122,19 +126,23 @@ export function PublicLearnIndexScreen() {
           </a>
         </div>
 
-        <div style={{ textAlign: "center", background: "white", border: "2px solid rgba(3,105,161,0.2)", borderRadius: "16px", padding: "28px 20px" }}>
-          <div style={{ fontWeight: "900", fontSize: "17px", color: "#0C1E3D", marginBottom: "8px" }}>Want to turn these into a classroom game?</div>
-          <p style={{ color: "#4B5563", fontSize: "14px", margin: "0 0 16px", lineHeight: 1.5 }}>
-            ClassCade pairs every one of these lessons with a competitive team game. Free to start, no
-            credit card needed.
-          </p>
-          <a
-            href="/"
-            style={{ display: "inline-block", background: "linear-gradient(135deg,#F59E0B,#D97706)", color: "white", borderRadius: "12px", padding: "12px 28px", fontSize: "15px", fontWeight: "900", textDecoration: "none" }}
-          >
-            Sign Up Free
-          </a>
-        </div>
+        {/* Only pitched at someone who isn't already logged in -- a signed-in student or teacher
+            has already signed up, so "Sign Up Free" makes no sense to show them. */}
+        {!loggedIn && (
+          <div style={{ textAlign: "center", background: "white", border: "2px solid rgba(3,105,161,0.2)", borderRadius: "16px", padding: "28px 20px" }}>
+            <div style={{ fontWeight: "900", fontSize: "17px", color: "#0C1E3D", marginBottom: "8px" }}>Want to turn these into a classroom game?</div>
+            <p style={{ color: "#4B5563", fontSize: "14px", margin: "0 0 16px", lineHeight: 1.5 }}>
+              ClassCade pairs every one of these lessons with a competitive team game. Free to start, no
+              credit card needed.
+            </p>
+            <a
+              href="/"
+              style={{ display: "inline-block", background: "linear-gradient(135deg,#F59E0B,#D97706)", color: "white", borderRadius: "12px", padding: "12px 28px", fontSize: "15px", fontWeight: "900", textDecoration: "none" }}
+            >
+              Sign Up Free
+            </a>
+          </div>
+        )}
 
         <a href="/" style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginTop: "24px", color: "#0369A1", fontWeight: "700", textDecoration: "none" }}><Icon name="back" size={13} /> {isStudent ? "Back to my progress" : "Back to ClassCade"}</a>
       </div>
