@@ -176,6 +176,13 @@ export function ClassStudentsPanel({ classId, theme }: Props) {
                       </span>
                     ))}
                   </div>
+                  {/* Only shown once a teacher actually has an approved student -- nobody who never
+                      touches student accounts should be told about a feature that doesn't apply to
+                      them. This is the one place on the whole site that tells a teacher this is
+                      possible at all; nothing else mentions it. */}
+                  <div style={{ marginTop: "10px", background: "#EFF6FF", border: "1px solid #BFDBFE", borderRadius: "10px", padding: "8px 10px", fontSize: "12px", color: "#1E3A8A", lineHeight: 1.5 }}>
+                    💡 Your approved students can browse Learn and take practice quizzes on their own, anytime — no assignment needed. "Topics Covered" below shows what your class has actually worked on.
+                  </div>
                 </div>
               )}
 
