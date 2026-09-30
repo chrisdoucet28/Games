@@ -178,15 +178,32 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
     }, duration);
   });
 
-  const buildShuffleSequence = () => {
+  // Round-by-round escalation, not a random pick every time — teacher feedback live in class: the
+  // old version picked one of 4 fixed "styles" at random each round with zero tie to round number,
+  // so round 1 could land on the most chaotic preset purely by chance and the final round on the
+  // mildest one. Nothing was actually "starting approachable and getting crazier" the way the game
+  // wants to feel. `round` is 0-indexed (round 1 = 0); `t` is 0 on round 1 and 1 on the final round,
+  // and every tier's swap COUNT and DURATION is interpolated between an easy and a chaotic endpoint
+  // across that range — round 1 is almost entirely slow/medium swaps (genuinely trackable by eye),
+  // the final round is dominated by fast/blur swaps at a quicker pace than before. Small ±1 jitter
+  // keeps repeat plays of the same round from feeling identical without ever letting an early round
+  // out-chaos a later one.
+  const buildShuffleSequence = (round: number) => {
     const allPairs = [[0, 1], [0, 2], [0, 3], [1, 2], [1, 3], [2, 3]];
     const rng = () => Math.random();
-    const style = Math.floor(rng() * 4);
-    let slowCount, medCount, fastCount, blurCount;
-    if (style === 0) { slowCount = 3; medCount = 4; fastCount = 5; blurCount = 7; }
-    else if (style === 1) { slowCount = 2; medCount = 3; fastCount = 7; blurCount = 8; }
-    else if (style === 2) { slowCount = 4; medCount = 5; fastCount = 4; blurCount = 6; }
-    else { slowCount = 3; medCount = 6; fastCount = 6; blurCount = 5; }
+    const t = maxRounds > 1 ? round / (maxRounds - 1) : 0;
+    const lerp = (a: number, b: number) => Math.round(a + (b - a) * t);
+    const jitter = () => Math.floor(rng() * 3) - 1; // -1, 0, or 1
+
+    const slowDur = lerp(620, 500);
+    const medDur = lerp(380, 300);
+    const fastDur = lerp(280, 150);
+    const blurDur = lerp(160, 85);
+
+    const slowCount = Math.max(1, lerp(6, 2) + jitter());
+    const medCount = Math.max(1, lerp(4, 2) + jitter());
+    const fastCount = Math.max(0, lerp(1, 6) + jitter());
+    const blurCount = Math.max(0, lerp(0, 9) + jitter());
 
     const pickPair = (exclude: number[] | null) => {
       const choices = allPairs.filter(p => !exclude || !(p[0] === exclude[0] && p[1] === exclude[1]));
@@ -208,10 +225,10 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
       return { seq, durs };
     };
 
-    const slow = maybeCycle(slowCount, 620);
-    const medium = maybeCycle(medCount, 370);
-    const fast = maybeCycle(fastCount, 170);
-    const blur = maybeCycle(blurCount, 95);
+    const slow = maybeCycle(slowCount, slowDur);
+    const medium = maybeCycle(medCount, medDur);
+    const fast = maybeCycle(fastCount, fastDur);
+    const blur = maybeCycle(blurCount, blurDur);
 
     const addBurst = rng() < 0.5;
     const burstPos = Math.floor(rng() * medium.seq.length);
@@ -230,7 +247,7 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
     setCardSlots([0, 1, 2, 3]);
     setCardPos([0, 1, 2, 3].map(slotPos));
     await new Promise(r => setTimeout(r, 500));
-    const { seq, dur, pauseAfter } = buildShuffleSequence();
+    const { seq, dur, pauseAfter } = buildShuffleSequence(roundCount);
     for (let i = 0; i < seq.length; i++) {
       const [cA, cB] = seq[i];
       await animateSwap(cA, cB, dur[i]);
