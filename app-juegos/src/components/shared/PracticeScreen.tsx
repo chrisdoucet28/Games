@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { TOPIC_OPTIONS } from "../../data/topicOptions";
 import { LEVELS_META } from "../../data/constants";
-import { FOCUS_ORDER, FOCUS_LABEL } from "../../data/learnTopics";
+import { FOCUS_ORDER, FOCUS_LABEL, matchesTopicSearch } from "../../data/learnTopics";
 import { getPracticeQuestions, type PracticeItem } from "../../lib/practiceContent";
 import { setMetaDescription } from "../../lib/pageMeta";
 import { useStudentSession } from "../../hooks/useStudentSession";
@@ -65,6 +65,7 @@ export function PracticeScreen() {
   const [screen, setScreen] = useState<"picker" | "quiz" | "summary">("picker");
   const [levelFilter, setLevelFilter] = useState("all");
   const [focusFilter, setFocusFilter] = useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
   const [selectedTopics, setSelectedTopics] = useState<string[]>(() => {
     const topic = new URLSearchParams(window.location.search).get("topic");
     return topic && SELECTABLE_TOPICS.some(t => t.value === topic) ? [topic] : [];
@@ -77,8 +78,12 @@ export function PracticeScreen() {
   const [correctCount, setCorrectCount] = useState(0);
 
   const filteredTopics = useMemo(() => {
-    return SELECTABLE_TOPICS.filter(t => (levelFilter === "all" || t.level === levelFilter) && (focusFilter === "all" || t.focus === focusFilter));
-  }, [levelFilter, focusFilter]);
+    return SELECTABLE_TOPICS.filter(t =>
+      (levelFilter === "all" || t.level === levelFilter) &&
+      (focusFilter === "all" || t.focus === focusFilter) &&
+      matchesTopicSearch(t.label, searchTerm)
+    );
+  }, [levelFilter, focusFilter, searchTerm]);
 
   const toggleTopic = (value: string) => {
     setSelectedTopics(prev => prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value]);
@@ -173,6 +178,7 @@ export function PracticeScreen() {
           <PracticePicker
             levelFilter={levelFilter} setLevelFilter={setLevelFilter}
             focusFilter={focusFilter} setFocusFilter={setFocusFilter}
+            searchTerm={searchTerm} setSearchTerm={setSearchTerm}
             filteredTopics={filteredTopics}
             selectedTopics={selectedTopics} toggleTopic={toggleTopic}
             sessionLength={sessionLength} setSessionLength={setSessionLength}
@@ -215,13 +221,14 @@ export function PracticeScreen() {
 interface PracticePickerProps {
   levelFilter: string; setLevelFilter: (v: string) => void;
   focusFilter: string; setFocusFilter: (v: string) => void;
+  searchTerm: string; setSearchTerm: (v: string) => void;
   filteredTopics: typeof TOPIC_OPTIONS;
   selectedTopics: string[]; toggleTopic: (v: string) => void;
   sessionLength: number; setSessionLength: (n: number) => void;
   onStart: () => void;
 }
 
-function PracticePicker({ levelFilter, setLevelFilter, focusFilter, setFocusFilter, filteredTopics, selectedTopics, toggleTopic, sessionLength, setSessionLength, onStart }: PracticePickerProps) {
+function PracticePicker({ levelFilter, setLevelFilter, focusFilter, setFocusFilter, searchTerm, setSearchTerm, filteredTopics, selectedTopics, toggleTopic, sessionLength, setSessionLength, onStart }: PracticePickerProps) {
   return (
     <div>
       <div style={{ marginBottom: "16px" }}>
@@ -255,6 +262,31 @@ function PracticePicker({ levelFilter, setLevelFilter, focusFilter, setFocusFilt
         </div>
       </div>
 
+      <div style={{ position: "relative", marginBottom: "14px" }}>
+        <Icon name="search" size={14} color="#9CA3AF" style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
+        <input
+          type="text"
+          value={searchTerm}
+          onChange={e => setSearchTerm(e.target.value)}
+          placeholder="Search topics..."
+          style={{
+            width: "100%", boxSizing: "border-box", padding: "9px 34px 9px 32px",
+            border: "2px solid #E5E7EB", borderRadius: "10px", fontSize: "13px",
+            fontWeight: "600", color: INK, outline: "none",
+          }}
+        />
+        {searchTerm !== "" && (
+          <button
+            type="button"
+            onClick={() => setSearchTerm("")}
+            aria-label="Clear search"
+            style={{ position: "absolute", right: "8px", top: "50%", transform: "translateY(-50%)", background: "#F3F4F6", border: "none", borderRadius: "50%", width: "18px", height: "18px", color: "#6B7280", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
+          >
+            <Icon name="close" size={9} />
+          </button>
+        )}
+      </div>
+
       <div style={{ color: "#6B7280", fontSize: "12px", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: "8px" }}>
         Topics ({filteredTopics.length})
       </div>
@@ -266,7 +298,7 @@ function PracticePicker({ levelFilter, setLevelFilter, focusFilter, setFocusFilt
           </button>
         ))}
         {filteredTopics.length === 0 && (
-          <p style={{ color: "#6B7280", fontSize: "13px" }}>No topics match this filter combination — try a different level or focus.</p>
+          <p style={{ color: "#6B7280", fontSize: "13px" }}>No topics match this filter — try a different search, level, or focus.</p>
         )}
       </div>
 
