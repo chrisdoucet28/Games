@@ -31,7 +31,7 @@ export function PublicLearnLessonScreen({ topicId }: Props) {
 
   // Only a signed-in student ever sees anything extra — a logged-out visitor (and Google) get the
   // exact same page as always. `done` is null until the student's saved progress has loaded.
-  const { isStudent } = useStudentSession();
+  const { isStudent, loggedIn } = useStudentSession();
   const [done, setDone] = useState<boolean | null>(null);
   const [progressError, setProgressError] = useState(false);
   useEffect(() => {
@@ -153,7 +153,10 @@ export function PublicLearnLessonScreen({ topicId }: Props) {
           </div>
         )}
 
-        {!isStudent && (
+        {/* Gated on loggedIn, not isStudent — a logged-in teacher who lands here (a shared link,
+            Google, etc.) already has an account, so "Sign Up Free" would be just as wrong for
+            them as for a signed-in student. They simply see neither card. */}
+        {!loggedIn && (
         <div style={{ textAlign: "center", background: "white", border: "2px solid rgba(3,105,161,0.2)", borderRadius: "16px", padding: "24px 20px", marginTop: "20px" }}>
           <MascotDuo variant="cta" mascots={pickMascotPair(topic.id, "cta")} />
           <div style={{ fontWeight: "900", fontSize: "16px", color: "#0C1E3D", marginBottom: "8px" }}>Practice this with a classroom game</div>
