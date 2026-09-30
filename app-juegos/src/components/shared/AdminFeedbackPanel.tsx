@@ -6,7 +6,7 @@ import type { FeedbackRow } from "../../lib/adminFeedback";
 import { AdminAutoFixActivity } from "./AdminAutoFixActivity";
 import { getArraySections, itemsMatch, primaryText } from "./AdminTopicBrowser";
 
-type Tab = "all" | "flag" | "general";
+type Tab = "all" | "flag" | "general" | "pattern";
 
 const gameLabel = (gameId: string | null) => {
   if (!gameId) return null;
@@ -88,6 +88,7 @@ function copyDetails(row: FeedbackRow) {
   const parts = [
     `Game: ${gameLabel(row.game_id) ?? "—"}`,
     `Topic: ${topicLabel(row.question_data) ?? "—"}`,
+    ...(row.is_pattern_issue ? ["⚠ Flagged as a pattern issue, not just this one prompt"] : []),
     `Message: ${row.message}`,
   ];
   const q = formatQuestionData(row.question_data);
@@ -148,6 +149,7 @@ export function AdminFeedbackPanel({ rows, error, onMarkReviewed, onFixTopic }: 
       all: all.length,
       flag: all.filter(r => r.kind === "flag").length,
       general: all.filter(r => r.kind === "general").length,
+      pattern: all.filter(r => r.is_pattern_issue).length,
       newCount: all.filter(r => r.status === "new").length,
       reviewedFlags: all.filter(r => r.kind === "flag" && r.status === "reviewed").length,
       reviewedGeneral: all.filter(r => r.kind === "general" && r.status === "reviewed").length,
@@ -158,14 +160,17 @@ export function AdminFeedbackPanel({ rows, error, onMarkReviewed, onFixTopic }: 
     const all = rows ?? [];
     const term = search.trim().toLowerCase();
     return all.filter(r => {
-      if (tab !== "all" && r.kind !== tab) return false;
+      if (tab === "pattern" ? !r.is_pattern_issue : tab !== "all" && r.kind !== tab) return false;
       if (!term) return true;
       const haystack = [r.message, gameLabel(r.game_id) ?? "", topicLabel(r.question_data) ?? "", r.display_name ?? "", formatQuestionData(r.question_data) ?? ""].join(" ").toLowerCase();
       return haystack.includes(term);
     });
   }, [rows, tab, search]);
 
-  const newRows = filtered.filter(r => r.status === "new");
+  // Pattern-flagged items surface first within "new" -- they're a signal about the topic as a
+  // whole, worth a look before routine one-off flags. Array.prototype.sort is stable, so relative
+  // order (already created_at desc from listFeedback) is otherwise preserved within each group.
+  const newRows = filtered.filter(r => r.status === "new").sort((a, b) => Number(b.is_pattern_issue) - Number(a.is_pattern_issue));
   const reviewedRows = filtered.filter(r => r.status === "reviewed");
 
   if (error) {
@@ -194,18 +199,18 @@ export function AdminFeedbackPanel({ rows, error, onMarkReviewed, onFixTopic }: 
           style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 10, padding: "7px 12px", fontSize: 12, color: C.ink, width: 200, fontFamily: "inherit" }}
         />
         <div style={{ display: "flex", gap: 6 }}>
-          {(["all", "flag", "general"] as Tab[]).map(t => (
+          {(["all", "flag", "general", "pattern"] as Tab[]).map(t => (
             <button
               key={t}
               onClick={() => setTab(t)}
               style={{
                 padding: "8px 14px", borderRadius: 9, fontSize: 12, fontWeight: 800, cursor: "pointer", fontFamily: "inherit",
-                color: tab === t ? C.ink : C.inkDim,
-                background: tab === t ? C.surface2 : "none",
-                border: `1px solid ${tab === t ? C.border : "transparent"}`,
+                color: tab === t ? (t === "pattern" ? "#C4B5FD" : C.ink) : C.inkDim,
+                background: tab === t ? (t === "pattern" ? "rgba(139,92,246,0.14)" : C.surface2) : "none",
+                border: `1px solid ${tab === t ? (t === "pattern" ? "rgba(139,92,246,0.4)" : C.border) : "transparent"}`,
               }}
             >
-              {t === "all" ? "All" : t === "flag" ? "Flags" : "General"}{" "}
+              {t === "all" ? "All" : t === "flag" ? "Flags" : t === "general" ? "General" : "Patterns"}{" "}
               <span style={{ opacity: 0.7, fontWeight: 700, marginLeft: 3 }}>{counts[t]}</span>
             </button>
           ))}
@@ -223,12 +228,24 @@ export function AdminFeedbackPanel({ rows, error, onMarkReviewed, onFixTopic }: 
         const topic = topicLabel(row.question_data);
         const canSearchContent = Boolean(!topicId && row.question_data && typeof row.question_data === "object" && primaryText(row.question_data as Record<string, unknown>) !== null);
         return (
-          <div key={row.id} style={{ background: "linear-gradient(180deg,rgba(239,68,68,0.05),transparent 40%)", border: "1px solid rgba(239,68,68,0.35)", borderRadius: 13, padding: "14px 16px", display: "flex", gap: 14 }}>
+          <div
+            key={row.id}
+            style={{
+              background: row.is_pattern_issue ? "linear-gradient(180deg,rgba(139,92,246,0.08),transparent 40%)" : "linear-gradient(180deg,rgba(239,68,68,0.05),transparent 40%)",
+              border: `1px solid ${row.is_pattern_issue ? "rgba(139,92,246,0.45)" : "rgba(239,68,68,0.35)"}`,
+              borderRadius: 13, padding: "14px 16px", display: "flex", gap: 14,
+            }}
+          >
             <div style={{ width: 34, height: 34, borderRadius: 9, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, border: "1px solid rgba(245,158,11,0.3)", background: "rgba(245,158,11,0.12)" }}>
               {row.kind === "flag" ? "🚩" : "💬"}
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 5, flexWrap: "wrap" }}>
+                {row.is_pattern_issue && (
+                  <span style={{ fontSize: 10.5, fontWeight: 800, color: "#C4B5FD", background: "rgba(139,92,246,0.16)", border: "1px solid rgba(139,92,246,0.45)", borderRadius: 6, padding: "2px 7px" }}>
+                    ⚠ Pattern issue
+                  </span>
+                )}
                 {gameLabel(row.game_id) && (
                   <span style={{ fontSize: 10.5, fontWeight: 800, color: C.warn, background: "rgba(245,158,11,0.12)", border: "1px solid rgba(245,158,11,0.3)", borderRadius: 6, padding: "2px 7px" }}>
                     {gameLabel(row.game_id)}

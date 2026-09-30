@@ -9,6 +9,10 @@ export interface FeedbackRow {
   question_data: unknown;
   status: "new" | "reviewed";
   created_at: string;
+  // Set via FlagPromptButton's own checkbox -- "this is a bigger pattern, not just this one
+  // prompt" (e.g. a topic's whole mistake-pool testing only one underlying rule). Always false
+  // for general feedback and for any flag from before this field existed.
+  is_pattern_issue: boolean;
   // Joined in client-side from profiles — null if the account was since deleted, or (defensively)
   // if RLS ever blocks the profiles read even though it shouldn't for an admin.
   display_name: string | null;
@@ -19,7 +23,7 @@ export interface FeedbackRow {
 export async function listFeedback(): Promise<FeedbackRow[]> {
   const { data: feedback, error } = await supabase
     .from("feedback")
-    .select("id, user_id, kind, message, game_id, question_data, status, created_at")
+    .select("id, user_id, kind, message, game_id, question_data, status, created_at, is_pattern_issue")
     .order("created_at", { ascending: false });
   if (error) throw error;
   const rows = (feedback ?? []) as Omit<FeedbackRow, "display_name">[];
