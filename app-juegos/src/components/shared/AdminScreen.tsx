@@ -6,7 +6,9 @@ import { AdminGrowthPanel } from "./AdminGrowthPanel";
 import { AdminBillingPanel } from "./AdminBillingPanel";
 import { AdminTeachersPanel } from "./AdminTeachersPanel";
 import { ADMIN_COLORS } from "./adminColors";
-import { listFeedback, markFeedbackReviewed, type FeedbackRow } from "../../lib/adminFeedback";
+import { listFeedback, setFeedbackStatus, setFeedbackPatternIssue, setFeedbackAdminNote, type FeedbackRow, type FeedbackStatus } from "../../lib/adminFeedback";
+import { listContentSuggestions } from "../../lib/adminContent";
+import { formatQueueForClaude } from "./adminQueueExport";
 
 type View = "feedback" | "growth" | "content" | "assets" | "billing" | "classes";
 
@@ -55,17 +57,71 @@ export function AdminScreen({ userEmail, onExit }: Props) {
   };
   useEffect(refreshFeedback, []);
 
-  const handleMarkReviewed = async (id: string) => {
-    setFeedback(prev => prev?.map(f => (f.id === id ? { ...f, status: "reviewed" as const } : f)) ?? prev);
+  // Just for the "Copy queue for Claude" button's own count badge -- AdminContentSuggestions
+  // keeps its own copy of this data for its actual UI, so this is a second, independent read
+  // rather than threading shared state through AdminContentPanel.
+  const [contentQueuedCount, setContentQueuedCount] = useState(0);
+  useEffect(() => {
+    listContentSuggestions()
+      .then(rows => setContentQueuedCount(rows.filter(r => r.status === "queued").length))
+      .catch(() => {});
+  }, []);
+
+  const handleSetStatus = async (id: string, status: FeedbackStatus) => {
+    setFeedback(prev => prev?.map(f => (f.id === id ? { ...f, status } : f)) ?? prev);
     try {
-      await markFeedbackReviewed(id);
+      await setFeedbackStatus(id, status);
     } catch (err) {
       setFeedbackError(err instanceof Error ? err.message : "Couldn't update that item.");
       refreshFeedback();
     }
   };
 
+  const handleSetPatternIssue = async (id: string, isPatternIssue: boolean) => {
+    setFeedback(prev => prev?.map(f => (f.id === id ? { ...f, is_pattern_issue: isPatternIssue } : f)) ?? prev);
+    try {
+      await setFeedbackPatternIssue(id, isPatternIssue);
+    } catch (err) {
+      setFeedbackError(err instanceof Error ? err.message : "Couldn't update that item.");
+      refreshFeedback();
+    }
+  };
+
+  const handleSetAdminNote = async (id: string, note: string) => {
+    setFeedback(prev => prev?.map(f => (f.id === id ? { ...f, admin_note: note || null } : f)) ?? prev);
+    try {
+      await setFeedbackAdminNote(id, note);
+    } catch (err) {
+      setFeedbackError(err instanceof Error ? err.message : "Couldn't save that note.");
+      refreshFeedback();
+    }
+  };
+
+  // Combines "queued" items from both feedback and content_suggestions into one paste-ready
+  // block for a fresh Claude Code session -- fetched fresh on click rather than kept as
+  // continuously-synced duplicate state, since this is an occasional export action, not something
+  // the rest of the screen needs to react to.
+  const [copyQueueState, setCopyQueueState] = useState<"idle" | "copying" | "copied" | "empty" | "error">("idle");
+  const handleCopyQueue = async () => {
+    setCopyQueueState("copying");
+    try {
+      const suggestions = await listContentSuggestions();
+      setContentQueuedCount(suggestions.filter(r => r.status === "queued").length);
+      const text = formatQueueForClaude(feedback ?? [], suggestions);
+      if (!text) {
+        setCopyQueueState("empty");
+      } else {
+        await navigator.clipboard.writeText(text);
+        setCopyQueueState("copied");
+      }
+    } catch {
+      setCopyQueueState("error");
+    }
+    setTimeout(() => setCopyQueueState("idle"), 1800);
+  };
+
   const newCount = feedback?.filter(f => f.status === "new").length ?? 0;
+  const queuedCount = (feedback?.filter(f => f.status === "queued").length ?? 0) + contentQueuedCount;
   const topbar = TOPBAR[view];
 
   return (
@@ -125,11 +181,35 @@ export function AdminScreen({ userEmail, onExit }: Props) {
                 <h1 style={{ margin: 0, fontSize: 20, fontWeight: 900, letterSpacing: "-0.01em" }}>{topbar.title}</h1>
                 <p style={{ margin: "3px 0 0", fontSize: 12, color: ADMIN_COLORS.inkDim, fontWeight: 600 }}>{topbar.sub}</p>
               </div>
+              <button
+                onClick={handleCopyQueue}
+                disabled={copyQueueState === "copying"}
+                title="Copy every item queued for Claude (feedback + content suggestions) as one paste-ready block"
+                style={{
+                  border: `1px solid ${copyQueueState === "copied" ? "rgba(34,197,94,0.4)" : ADMIN_COLORS.border}`,
+                  borderRadius: 10, padding: "9px 15px", fontSize: 12, fontWeight: 800, cursor: "pointer", fontFamily: "inherit",
+                  background: copyQueueState === "copied" ? "rgba(34,197,94,0.12)" : ADMIN_COLORS.surface2,
+                  color: copyQueueState === "copied" ? "#86EFAC" : ADMIN_COLORS.inkDim, flexShrink: 0,
+                }}
+              >
+                {copyQueueState === "copying" ? "Copying…"
+                  : copyQueueState === "copied" ? "Copied!"
+                  : copyQueueState === "empty" ? "Nothing queued"
+                  : copyQueueState === "error" ? "Couldn't copy"
+                  : `📋 Copy queue for Claude${queuedCount > 0 ? ` (${queuedCount})` : ""}`}
+              </button>
             </div>
 
             <div style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: "20px 28px", display: "flex", flexDirection: "column", gap: 14 }}>
               {view === "feedback" && (
-                <AdminFeedbackPanel rows={feedback} error={feedbackError} onMarkReviewed={handleMarkReviewed} onFixTopic={handleFixTopic} />
+                <AdminFeedbackPanel
+                  rows={feedback}
+                  error={feedbackError}
+                  onSetStatus={handleSetStatus}
+                  onSetPatternIssue={handleSetPatternIssue}
+                  onSetAdminNote={handleSetAdminNote}
+                  onFixTopic={handleFixTopic}
+                />
               )}
               {view === "content" && <AdminContentPanel jump={contentJump} />}
               {view === "assets" && <AdminAssetsPanel />}

@@ -7,6 +7,9 @@ import { Icon } from "./Icon";
 // gameId matches GAME_MODES ids in data/constants.ts. questionData is whatever raw object (or
 // { raw: "..." } wrapper for plain-string prompts) identifies the flagged content — stored as-is
 // in Supabase jsonb for later review, never read back by the app itself.
+// Deliberately just a message, nothing more — triage (is this a one-off or a bigger pattern, does
+// it need code work) is the app owner's job in /admin, not something to ask a teacher to judge
+// mid-class. See AdminFeedbackPanel.tsx's own is_pattern_issue toggle, which is admin-only.
 interface FlagPromptButtonProps {
   gameId: string;
   questionData: unknown;
@@ -17,25 +20,18 @@ type Status = "idle" | "expanded" | "sending" | "sent" | "error";
 export function FlagPromptButton({ gameId, questionData }: FlagPromptButtonProps) {
   const [status, setStatus] = useState<Status>("idle");
   const [message, setMessage] = useState("");
-  // For "this whole type of content is too narrow/repetitive," not "this one prompt's wording is
-  // wrong" — e.g. a topic's mistake-pool always testing the exact same underlying rule in a few
-  // surface variations. Admin side treats this as a signal about the topic as a whole, not the one
-  // flagged item (see AdminFeedbackPanel.tsx's "Pattern issue" badge).
-  const [isPatternIssue, setIsPatternIssue] = useState(false);
 
   const cancel = () => {
     setStatus("idle");
     setMessage("");
-    setIsPatternIssue(false);
   };
 
   const submit = async () => {
     setStatus("sending");
     try {
-      await submitFlag(gameId, questionData, message.trim(), isPatternIssue);
+      await submitFlag(gameId, questionData, message.trim());
       setStatus("sent");
       setMessage("");
-      setIsPatternIssue(false);
       setTimeout(() => setStatus("idle"), 1400);
     } catch {
       setStatus("error");
@@ -81,17 +77,6 @@ export function FlagPromptButton({ gameId, questionData }: FlagPromptButtonProps
         placeholder="What's wrong with this prompt? (optional)"
         style={{ width: "100%", boxSizing: "border-box", border: "1px solid #E5E7EB", borderRadius: "6px", padding: "5px 7px", fontSize: "11px", fontFamily: "inherit", resize: "vertical" }}
       />
-      <label style={{ display: "flex", alignItems: "flex-start", gap: "5px", marginTop: "6px", cursor: "pointer" }}>
-        <input
-          type="checkbox"
-          checked={isPatternIssue}
-          onChange={e => setIsPatternIssue(e.target.checked)}
-          style={{ marginTop: "2px", flexShrink: 0 }}
-        />
-        <span style={{ fontSize: "10px", color: "#4B5563", lineHeight: 1.4 }}>
-          This is a bigger pattern, not just this one prompt (e.g. this whole topic's mistakes are all too similar)
-        </span>
-      </label>
       {status === "error" && (
         <div style={{ color: "#B91C1C", fontSize: "10px", fontWeight: 700, marginTop: "4px" }}>Couldn't send — try again.</div>
       )}

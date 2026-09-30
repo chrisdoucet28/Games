@@ -7,13 +7,12 @@ export async function submitGeneralFeedback(message: string): Promise<void> {
   if (error) throw error;
 }
 
-export async function submitFlag(gameId: string, questionData: unknown, message: string, isPatternIssue = false): Promise<void> {
+export async function submitFlag(gameId: string, questionData: unknown, message: string): Promise<void> {
   const { error } = await supabase.from("feedback").insert({
     kind: "flag",
     game_id: gameId,
     question_data: questionData ?? null,
     message,
-    is_pattern_issue: isPatternIssue,
   });
   if (error) throw error;
 }

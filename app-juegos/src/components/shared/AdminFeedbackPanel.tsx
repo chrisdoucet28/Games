@@ -2,13 +2,13 @@ import { useMemo, useState } from "react";
 import { ADMIN_COLORS as C } from "./adminColors";
 import { GAME_MODES } from "../../data/constants";
 import { TOPIC_OPTIONS } from "../../data/topicOptions";
-import type { FeedbackRow } from "../../lib/adminFeedback";
+import type { FeedbackRow, FeedbackStatus } from "../../lib/adminFeedback";
 import { AdminAutoFixActivity } from "./AdminAutoFixActivity";
 import { getArraySections, itemsMatch, primaryText } from "./AdminTopicBrowser";
 
 type Tab = "all" | "flag" | "general" | "pattern";
 
-const gameLabel = (gameId: string | null) => {
+export const gameLabel = (gameId: string | null) => {
   if (!gameId) return null;
   if (gameId === "lessonplan") return "Lesson Plan";
   // Not a game at all — FlagLessonButton.tsx (the Learn screen's own flag button) always submits
@@ -44,13 +44,13 @@ function topicValue(data: unknown): string | null {
   const d = data as Record<string, unknown>;
   return (typeof d.sourceTopic === "string" ? d.sourceTopic : null) ?? (typeof d.spySourceTopic === "string" ? d.spySourceTopic : null);
 }
-function topicLabel(data: unknown): string | null {
+export function topicLabel(data: unknown): string | null {
   const value = topicValue(data);
   if (!value) return null;
   return TOPIC_OPTIONS.find(t => t.value === value)?.label ?? value;
 }
 
-function formatQuestionData(data: unknown): string | null {
+export function formatQuestionData(data: unknown): string | null {
   if (!data || typeof data !== "object") return null;
   const d = data as Record<string, unknown>;
   const question = typeof d.question === "string" ? d.question : null;
@@ -93,6 +93,7 @@ function copyDetails(row: FeedbackRow) {
   ];
   const q = formatQuestionData(row.question_data);
   if (q) parts.push(`Question: ${q}`);
+  if (row.admin_note) parts.push(`Admin note: ${row.admin_note}`);
   navigator.clipboard.writeText(parts.join("\n")).catch(() => {});
 }
 
@@ -104,6 +105,10 @@ const pillStyle: React.CSSProperties = {
 const btnPrimary: React.CSSProperties = {
   border: "none", borderRadius: 9, padding: "7px 13px", fontSize: 11.5, fontWeight: 800, cursor: "pointer",
   whiteSpace: "nowrap", fontFamily: "inherit", background: "linear-gradient(135deg,#F59E0B,#D97706)", color: "white",
+};
+const btnSuccess: React.CSSProperties = {
+  border: "none", borderRadius: 9, padding: "7px 13px", fontSize: 11.5, fontWeight: 800, cursor: "pointer",
+  whiteSpace: "nowrap", fontFamily: "inherit", background: "linear-gradient(135deg,#22C55E,#16A34A)", color: "white",
 };
 const btnGhost: React.CSSProperties = {
   border: `1px solid ${C.border}`, borderRadius: 9, padding: "7px 13px", fontSize: 11.5, fontWeight: 800, cursor: "pointer",
@@ -117,13 +122,37 @@ const btnFix: React.CSSProperties = {
 type Props = {
   rows: FeedbackRow[] | null;
   error: string | null;
-  onMarkReviewed: (id: string) => void;
+  onSetStatus: (id: string, status: FeedbackStatus) => void;
+  onSetPatternIssue: (id: string, isPatternIssue: boolean) => void;
+  onSetAdminNote: (id: string, note: string) => void;
   // Jumps to Content & Topics, opens the flagged item's topic, and highlights/scrolls to the
   // exact matching item there (see AdminScreen.tsx/AdminContentPanel.tsx/AdminTopicBrowser.tsx).
   onFixTopic: (topicId: string, questionData: unknown) => void;
 };
 
-export function AdminFeedbackPanel({ rows, error, onMarkReviewed, onFixTopic }: Props) {
+// Admin-only note editor -- a teacher never sees this field. It exists so the app owner (who
+// triages here but doesn't write the code himself) can leave context a future Claude Code session
+// with no memory of this review actually needs, instead of a bare status having to carry that.
+function AdminNoteEditor({ row, onSave }: { row: FeedbackRow; onSave: (note: string) => void }) {
+  const [draft, setDraft] = useState(row.admin_note ?? "");
+  const dirty = draft !== (row.admin_note ?? "");
+  return (
+    <div style={{ marginTop: 8 }}>
+      <textarea
+        value={draft}
+        onChange={e => setDraft(e.target.value)}
+        placeholder="Admin note for whoever codes this (optional)…"
+        rows={2}
+        style={{ width: "100%", boxSizing: "border-box", background: "#0B1425", border: `1px solid ${C.border}`, borderRadius: 8, padding: "7px 9px", fontSize: 12, color: C.ink, fontFamily: "inherit", resize: "vertical" }}
+      />
+      {dirty && (
+        <button style={{ ...btnGhost, marginTop: 6, padding: "5px 11px" }} onClick={() => onSave(draft.trim())}>Save note</button>
+      )}
+    </div>
+  );
+}
+
+export function AdminFeedbackPanel({ rows, error, onSetStatus, onSetPatternIssue, onSetAdminNote, onFixTopic }: Props) {
   const [tab, setTab] = useState<Tab>("all");
   const [search, setSearch] = useState("");
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -151,8 +180,9 @@ export function AdminFeedbackPanel({ rows, error, onMarkReviewed, onFixTopic }: 
       general: all.filter(r => r.kind === "general").length,
       pattern: all.filter(r => r.is_pattern_issue).length,
       newCount: all.filter(r => r.status === "new").length,
-      reviewedFlags: all.filter(r => r.kind === "flag" && r.status === "reviewed").length,
-      reviewedGeneral: all.filter(r => r.kind === "general" && r.status === "reviewed").length,
+      queuedCount: all.filter(r => r.status === "queued").length,
+      doneCount: all.filter(r => r.status === "done").length,
+      dismissedCount: all.filter(r => r.status === "dismissed").length,
     };
   }, [rows]);
 
@@ -167,11 +197,13 @@ export function AdminFeedbackPanel({ rows, error, onMarkReviewed, onFixTopic }: 
     });
   }, [rows, tab, search]);
 
-  // Pattern-flagged items surface first within "new" -- they're a signal about the topic as a
-  // whole, worth a look before routine one-off flags. Array.prototype.sort is stable, so relative
-  // order (already created_at desc from listFeedback) is otherwise preserved within each group.
-  const newRows = filtered.filter(r => r.status === "new").sort((a, b) => Number(b.is_pattern_issue) - Number(a.is_pattern_issue));
-  const reviewedRows = filtered.filter(r => r.status === "reviewed");
+  // Pattern-flagged items surface first within each open section -- they're a signal about the
+  // topic as a whole, worth a look before routine one-off flags. Array.prototype.sort is stable,
+  // so relative order (already created_at desc from listFeedback) is otherwise preserved.
+  const byPatternFirst = (a: FeedbackRow, b: FeedbackRow) => Number(b.is_pattern_issue) - Number(a.is_pattern_issue);
+  const newRows = filtered.filter(r => r.status === "new").sort(byPatternFirst);
+  const queuedRows = filtered.filter(r => r.status === "queued").sort(byPatternFirst);
+  const resolvedRows = filtered.filter(r => r.status === "done" || r.status === "dismissed");
 
   if (error) {
     return <div style={{ color: C.danger, fontSize: 13, fontWeight: 700 }}>{error}</div>;
@@ -180,6 +212,95 @@ export function AdminFeedbackPanel({ rows, error, onMarkReviewed, onFixTopic }: 
     return <div style={{ color: C.inkDim, fontSize: 13, fontWeight: 700 }}>Loading feedback…</div>;
   }
 
+  const renderRow = (row: FeedbackRow, variant: "new" | "queued") => {
+    const q = formatQuestionData(row.question_data);
+    const topicId = topicValue(row.question_data);
+    const topic = topicLabel(row.question_data);
+    const canSearchContent = Boolean(!topicId && row.question_data && typeof row.question_data === "object" && primaryText(row.question_data as Record<string, unknown>) !== null);
+    return (
+      <div
+        key={row.id}
+        style={{
+          background: row.is_pattern_issue ? "linear-gradient(180deg,rgba(139,92,246,0.08),transparent 40%)" : variant === "queued" ? "linear-gradient(180deg,rgba(245,158,11,0.06),transparent 40%)" : "linear-gradient(180deg,rgba(239,68,68,0.05),transparent 40%)",
+          border: `1px solid ${row.is_pattern_issue ? "rgba(139,92,246,0.45)" : variant === "queued" ? "rgba(245,158,11,0.35)" : "rgba(239,68,68,0.35)"}`,
+          borderRadius: 13, padding: "14px 16px", display: "flex", gap: 14,
+        }}
+      >
+        <div style={{ width: 34, height: 34, borderRadius: 9, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, border: "1px solid rgba(245,158,11,0.3)", background: "rgba(245,158,11,0.12)" }}>
+          {row.kind === "flag" ? "🚩" : "💬"}
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 5, flexWrap: "wrap" }}>
+            <button
+              onClick={() => onSetPatternIssue(row.id, !row.is_pattern_issue)}
+              title={row.is_pattern_issue ? "Unmark as a pattern issue" : "Mark this as a pattern affecting the whole topic/pool, not just this one prompt"}
+              style={{
+                fontSize: 10.5, fontWeight: 800, cursor: "pointer", fontFamily: "inherit", borderRadius: 6, padding: "2px 7px",
+                color: row.is_pattern_issue ? "#C4B5FD" : C.inkFaint,
+                background: row.is_pattern_issue ? "rgba(139,92,246,0.16)" : "transparent",
+                border: `1px solid ${row.is_pattern_issue ? "rgba(139,92,246,0.45)" : C.border}`,
+              }}
+            >
+              ⚠ {row.is_pattern_issue ? "Pattern issue" : "Mark as pattern"}
+            </button>
+            {gameLabel(row.game_id) && (
+              <span style={{ fontSize: 10.5, fontWeight: 800, color: C.warn, background: "rgba(245,158,11,0.12)", border: "1px solid rgba(245,158,11,0.3)", borderRadius: 6, padding: "2px 7px" }}>
+                {gameLabel(row.game_id)}
+              </span>
+            )}
+            {topic ? (
+              <span style={{ fontSize: 10.5, fontWeight: 800, color: "#93C5FD", background: "rgba(59,130,246,0.12)", border: "1px solid rgba(59,130,246,0.3)", borderRadius: 6, padding: "2px 7px" }}>
+                {topic}
+              </span>
+            ) : row.kind === "flag" && (
+              // No sourceTopic on this row -- either a topic later removed from TOPIC_OPTIONS,
+              // or content type this game doesn't tag (Minefield has no per-question content at
+              // all to tag). Surfaced rather than just omitted, so it reads as "unknown", not
+              // "this game has no topic concept."
+              <span style={{ fontSize: 10.5, fontWeight: 700, color: C.inkFaint, fontStyle: "italic" }}>Topic unknown</span>
+            )}
+            <span style={{ fontSize: 11.5, color: C.inkDim, fontWeight: 700 }}>{row.display_name ?? "Unknown teacher"}</span>
+            <span style={{ width: 3, height: 3, borderRadius: "50%", background: C.inkFaint }} />
+            <span style={{ fontSize: 11.5, color: C.inkFaint, fontWeight: 600 }}>{relativeTime(row.created_at)}</span>
+          </div>
+          <p style={{ fontSize: 13.5, fontWeight: 700, color: C.ink, margin: "0 0 7px", lineHeight: 1.4 }}>"{row.message}"</p>
+          {q && <div style={{ background: "#0B1425", border: `1px solid ${C.border}`, borderRadius: 9, padding: "9px 11px", fontSize: 12, color: C.inkDim, lineHeight: 1.6 }}>{q}</div>}
+          <AdminNoteEditor row={row} onSave={note => onSetAdminNote(row.id, note)} />
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 7, flexShrink: 0, justifyContent: "center" }}>
+          {topicId && (
+            <button style={btnFix} onClick={() => onFixTopic(topicId, row.question_data)}>Fix this</button>
+          )}
+          {canSearchContent && (
+            <button
+              style={btnFix}
+              disabled={searchState[row.id] === "busy"}
+              onClick={() => handleFindInContent(row)}
+            >
+              {searchState[row.id] === "busy" ? "Searching…" : searchState[row.id] === "notfound" ? "Not found — try again?" : "Find in content"}
+            </button>
+          )}
+          {variant === "new" ? (
+            <button style={btnPrimary} onClick={() => onSetStatus(row.id, "queued")}>Queue for Claude</button>
+          ) : (
+            <button style={btnSuccess} onClick={() => onSetStatus(row.id, "done")}>Mark done</button>
+          )}
+          <button style={btnGhost} onClick={() => onSetStatus(row.id, "dismissed")}>Dismiss</button>
+          <button
+            style={btnGhost}
+            onClick={() => {
+              copyDetails(row);
+              setCopiedId(row.id);
+              setTimeout(() => setCopiedId(prev => (prev === row.id ? null : prev)), 1500);
+            }}
+          >
+            {copiedId === row.id ? "Copied!" : "Copy details"}
+          </button>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <>
       <AdminAutoFixActivity />
@@ -187,10 +308,13 @@ export function AdminFeedbackPanel({ rows, error, onMarkReviewed, onFixTopic }: 
       <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
         <span style={{ ...pillStyle, background: C.dangerBg, borderColor: "rgba(239,68,68,0.4)", color: "#FCA5A5" }}>
           <span style={{ width: 6, height: 6, borderRadius: "50%", background: "currentColor" }} />
-          {counts.newCount} new, unreviewed
+          {counts.newCount} new
         </span>
-        <span style={pillStyle}>{counts.reviewedFlags} flags reviewed</span>
-        <span style={pillStyle}>{counts.reviewedGeneral} general reviewed</span>
+        <span style={{ ...pillStyle, background: "rgba(245,158,11,0.12)", borderColor: "rgba(245,158,11,0.4)", color: "#FCD34D" }}>
+          {counts.queuedCount} queued for Claude
+        </span>
+        <span style={pillStyle}>{counts.doneCount} done</span>
+        <span style={pillStyle}>{counts.dismissedCount} dismissed</span>
         <div style={{ flex: 1 }} />
         <input
           value={search}
@@ -222,92 +346,35 @@ export function AdminFeedbackPanel({ rows, error, onMarkReviewed, onFixTopic }: 
           New — needs a look<div style={{ flex: 1, height: 1, background: C.border }} />
         </div>
       )}
-      {newRows.map(row => {
-        const q = formatQuestionData(row.question_data);
-        const topicId = topicValue(row.question_data);
-        const topic = topicLabel(row.question_data);
-        const canSearchContent = Boolean(!topicId && row.question_data && typeof row.question_data === "object" && primaryText(row.question_data as Record<string, unknown>) !== null);
-        return (
-          <div
-            key={row.id}
-            style={{
-              background: row.is_pattern_issue ? "linear-gradient(180deg,rgba(139,92,246,0.08),transparent 40%)" : "linear-gradient(180deg,rgba(239,68,68,0.05),transparent 40%)",
-              border: `1px solid ${row.is_pattern_issue ? "rgba(139,92,246,0.45)" : "rgba(239,68,68,0.35)"}`,
-              borderRadius: 13, padding: "14px 16px", display: "flex", gap: 14,
-            }}
-          >
-            <div style={{ width: 34, height: 34, borderRadius: 9, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, border: "1px solid rgba(245,158,11,0.3)", background: "rgba(245,158,11,0.12)" }}>
-              {row.kind === "flag" ? "🚩" : "💬"}
-            </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 5, flexWrap: "wrap" }}>
-                {row.is_pattern_issue && (
-                  <span style={{ fontSize: 10.5, fontWeight: 800, color: "#C4B5FD", background: "rgba(139,92,246,0.16)", border: "1px solid rgba(139,92,246,0.45)", borderRadius: 6, padding: "2px 7px" }}>
-                    ⚠ Pattern issue
-                  </span>
-                )}
-                {gameLabel(row.game_id) && (
-                  <span style={{ fontSize: 10.5, fontWeight: 800, color: C.warn, background: "rgba(245,158,11,0.12)", border: "1px solid rgba(245,158,11,0.3)", borderRadius: 6, padding: "2px 7px" }}>
-                    {gameLabel(row.game_id)}
-                  </span>
-                )}
-                {topic ? (
-                  <span style={{ fontSize: 10.5, fontWeight: 800, color: "#93C5FD", background: "rgba(59,130,246,0.12)", border: "1px solid rgba(59,130,246,0.3)", borderRadius: 6, padding: "2px 7px" }}>
-                    {topic}
-                  </span>
-                ) : row.kind === "flag" && (
-                  // No sourceTopic on this row -- either a topic later removed from TOPIC_OPTIONS,
-                  // or content type this game doesn't tag (Minefield has no per-question content at
-                  // all to tag). Surfaced rather than just omitted, so it reads as "unknown", not
-                  // "this game has no topic concept."
-                  <span style={{ fontSize: 10.5, fontWeight: 700, color: C.inkFaint, fontStyle: "italic" }}>Topic unknown</span>
-                )}
-                <span style={{ fontSize: 11.5, color: C.inkDim, fontWeight: 700 }}>{row.display_name ?? "Unknown teacher"}</span>
-                <span style={{ width: 3, height: 3, borderRadius: "50%", background: C.inkFaint }} />
-                <span style={{ fontSize: 11.5, color: C.inkFaint, fontWeight: 600 }}>{relativeTime(row.created_at)}</span>
-              </div>
-              <p style={{ fontSize: 13.5, fontWeight: 700, color: C.ink, margin: "0 0 7px", lineHeight: 1.4 }}>"{row.message}"</p>
-              {q && <div style={{ background: "#0B1425", border: `1px solid ${C.border}`, borderRadius: 9, padding: "9px 11px", fontSize: 12, color: C.inkDim, lineHeight: 1.6 }}>{q}</div>}
-            </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 7, flexShrink: 0, justifyContent: "center" }}>
-              {topicId && (
-                <button style={btnFix} onClick={() => onFixTopic(topicId, row.question_data)}>Fix this</button>
-              )}
-              {canSearchContent && (
-                <button
-                  style={btnFix}
-                  disabled={searchState[row.id] === "busy"}
-                  onClick={() => handleFindInContent(row)}
-                >
-                  {searchState[row.id] === "busy" ? "Searching…" : searchState[row.id] === "notfound" ? "Not found — try again?" : "Find in content"}
-                </button>
-              )}
-              <button style={btnPrimary} onClick={() => onMarkReviewed(row.id)}>Mark reviewed</button>
-              <button
-                style={btnGhost}
-                onClick={() => {
-                  copyDetails(row);
-                  setCopiedId(row.id);
-                  setTimeout(() => setCopiedId(prev => (prev === row.id ? null : prev)), 1500);
-                }}
-              >
-                {copiedId === row.id ? "Copied!" : "Copy details"}
-              </button>
-            </div>
-          </div>
-        );
-      })}
+      {newRows.map(row => renderRow(row, "new"))}
 
-      {reviewedRows.length > 0 && (
+      {queuedRows.length > 0 && (
         <div style={{ fontSize: 11, fontWeight: 800, color: C.inkFaint, textTransform: "uppercase", letterSpacing: "0.06em", margin: "4px 0 -2px", display: "flex", alignItems: "center", gap: 8 }}>
-          Reviewed<div style={{ flex: 1, height: 1, background: C.border }} />
+          Queued — waiting on a Claude session<div style={{ flex: 1, height: 1, background: C.border }} />
         </div>
       )}
-      {reviewedRows.map(row => (
+      {queuedRows.map(row => renderRow(row, "queued"))}
+
+      {resolvedRows.length > 0 && (
+        <div style={{ fontSize: 11, fontWeight: 800, color: C.inkFaint, textTransform: "uppercase", letterSpacing: "0.06em", margin: "4px 0 -2px", display: "flex", alignItems: "center", gap: 8 }}>
+          Resolved<div style={{ flex: 1, height: 1, background: C.border }} />
+        </div>
+      )}
+      {resolvedRows.map(row => (
         <div key={row.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 14px", background: C.surface, border: `1px solid ${C.border}`, borderRadius: 10, opacity: 0.75 }}>
-          <div style={{ width: 18, height: 18, borderRadius: 6, background: "#12241C", border: "1px solid rgba(34,197,94,0.4)", color: C.success, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, flexShrink: 0 }}>✓</div>
+          <div style={{
+            width: 18, height: 18, borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, flexShrink: 0,
+            background: row.status === "done" ? "#12241C" : "#241414",
+            border: `1px solid ${row.status === "done" ? "rgba(34,197,94,0.4)" : "rgba(239,68,68,0.3)"}`,
+            color: row.status === "done" ? C.success : C.inkFaint,
+          }}>
+            {row.status === "done" ? "✓" : "✕"}
+          </div>
           <div style={{ flex: 1, fontSize: 12.5, fontWeight: 700, color: C.inkDim }}>
             {gameLabel(row.game_id) ?? (row.kind === "general" ? "General" : "Feedback")} — <b style={{ color: C.ink, fontWeight: 800 }}>"{row.message}"</b>
+            <span style={{ marginLeft: 8, fontWeight: 800, color: row.status === "done" ? C.success : C.inkFaint, fontSize: 11 }}>
+              {row.status === "done" ? "Done" : "Dismissed"}
+            </span>
           </div>
         </div>
       ))}

@@ -1,5 +1,10 @@
 import { supabase } from "./supabaseClient";
 
+// new: not yet triaged. queued: confirmed real, waiting for a Claude Code session to actually
+// apply it (the owner doesn't edit topics.ts themselves). applied: actually shipped. dismissed:
+// not a real change, or a duplicate. See the 20260930020000_admin_review_workflow migration.
+export type ContentSuggestionStatus = "new" | "queued" | "applied" | "dismissed";
+
 export interface ContentSuggestion {
   id: string;
   user_id: string;
@@ -9,8 +14,10 @@ export interface ContentSuggestion {
   original: unknown;
   proposed: unknown;
   note: string | null;
-  status: "new" | "applied" | "dismissed";
+  status: ContentSuggestionStatus;
   created_at: string;
+  // Admin-only free-text context left while triaging — same idea as feedback.admin_note.
+  admin_note: string | null;
 }
 
 export async function listContentSuggestions(): Promise<ContentSuggestion[]> {
@@ -41,7 +48,12 @@ export async function createContentSuggestion(input: {
   if (error) throw error;
 }
 
-export async function setContentSuggestionStatus(id: string, status: "applied" | "dismissed" | "new"): Promise<void> {
+export async function setContentSuggestionStatus(id: string, status: ContentSuggestionStatus): Promise<void> {
   const { error } = await supabase.from("content_suggestions").update({ status }).eq("id", id);
+  if (error) throw error;
+}
+
+export async function setContentSuggestionAdminNote(id: string, note: string): Promise<void> {
+  const { error } = await supabase.from("content_suggestions").update({ admin_note: note || null }).eq("id", id);
   if (error) throw error;
 }
