@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { AdminFeedbackPanel } from "./AdminFeedbackPanel";
-import { AdminContentPanel } from "./AdminContentPanel";
+import { AdminContentPanel, type ContentJump } from "./AdminContentPanel";
 import { AdminAssetsPanel } from "./AdminAssetsPanel";
 import { AdminGrowthPanel } from "./AdminGrowthPanel";
 import { AdminBillingPanel } from "./AdminBillingPanel";
@@ -38,6 +38,15 @@ export function AdminScreen({ userEmail, onExit }: Props) {
   const [view, setView] = useState<View>("feedback");
   const [feedback, setFeedback] = useState<FeedbackRow[] | null>(null);
   const [feedbackError, setFeedbackError] = useState<string | null>(null);
+  // Set by the Feedback Inbox's "Fix this" button -- switches straight to Content & Topics and
+  // hands the target topic (plus the exact flagged item, for AdminTopicBrowser's own highlight)
+  // down to AdminContentPanel. A fresh object every click, even for the same topic twice, so
+  // re-clicking always re-triggers the jump.
+  const [contentJump, setContentJump] = useState<ContentJump | null>(null);
+  const handleFixTopic = (topicId: string, questionData: unknown) => {
+    setContentJump({ topicId, questionData });
+    setView("content");
+  };
 
   const refreshFeedback = () => {
     listFeedback()
@@ -120,9 +129,9 @@ export function AdminScreen({ userEmail, onExit }: Props) {
 
             <div style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: "20px 28px", display: "flex", flexDirection: "column", gap: 14 }}>
               {view === "feedback" && (
-                <AdminFeedbackPanel rows={feedback} error={feedbackError} onMarkReviewed={handleMarkReviewed} />
+                <AdminFeedbackPanel rows={feedback} error={feedbackError} onMarkReviewed={handleMarkReviewed} onFixTopic={handleFixTopic} />
               )}
-              {view === "content" && <AdminContentPanel />}
+              {view === "content" && <AdminContentPanel jump={contentJump} />}
               {view === "assets" && <AdminAssetsPanel />}
               {view === "growth" && <AdminGrowthPanel />}
               {view === "billing" && <AdminBillingPanel />}

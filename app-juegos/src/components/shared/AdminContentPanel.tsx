@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ADMIN_COLORS as C } from "./adminColors";
 import { TOPIC_OPTIONS } from "../../data/topicOptions";
 import { LESSONS } from "../../data/lessons";
@@ -6,17 +6,35 @@ import { LEVEL_ORDER, LEVEL_COLOR, FOCUS_ORDER, FOCUS_LABEL, matchesTopicSearch 
 import { AdminTopicBrowser } from "./AdminTopicBrowser";
 import { AdminContentSuggestions } from "./AdminContentSuggestions";
 
+// Set by the Feedback Inbox's "Fix this" button (see AdminScreen.tsx) -- a fresh object each time,
+// even for the same topic clicked twice, so re-clicking always re-triggers the jump below.
+export type ContentJump = { topicId: string; questionData: unknown };
+
 // Purely client-side over data already bundled into the app (topicOptions.ts's lightweight
 // metadata + lessons.ts) — deliberately never imports the full topics.ts (~25k lines / ~5MB of
 // question content) just to show this list. See the Learn/game content parity rule in CLAUDE.md —
 // this view exists to make that gap visible without running a script.
 const REAL_TOPICS = TOPIC_OPTIONS.filter(t => t.level && t.focus);
 
-export function AdminContentPanel() {
+export function AdminContentPanel({ jump }: { jump?: ContentJump | null }) {
   const [level, setLevel] = useState<string>("all");
   const [focus, setFocus] = useState<string>("all");
   const [search, setSearch] = useState("");
   const [openTopic, setOpenTopic] = useState<string | null>(null);
+  const rowRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+
+  // Clears the filters that would otherwise hide the target topic's row (a level/focus filter left
+  // over from earlier browsing, or leftover search text), opens it, and scrolls its row into view
+  // -- landing squarely on it regardless of whatever state this panel was already in.
+  useEffect(() => {
+    if (!jump) return;
+    setLevel("all");
+    setFocus("all");
+    setSearch("");
+    setOpenTopic(jump.topicId);
+    const id = requestAnimationFrame(() => rowRefs.current.get(jump.topicId)?.scrollIntoView({ behavior: "smooth", block: "start" }));
+    return () => cancelAnimationFrame(id);
+  }, [jump]);
 
   // Lessons that exist but point at a topic id no longer in TOPIC_OPTIONS — the other direction of
   // drift the per-row ✓/✗ column below can't show on its own.
@@ -98,7 +116,11 @@ export function AdminContentPanel() {
         {filtered.map(t => {
           const open = openTopic === t.value;
           return (
-            <div key={t.value} style={{ borderBottom: `1px solid ${C.border}` }}>
+            <div
+              key={t.value}
+              ref={el => { if (el) rowRefs.current.set(t.value, el); else rowRefs.current.delete(t.value); }}
+              style={{ borderBottom: `1px solid ${C.border}` }}
+            >
               <div style={{ display: "grid", gridTemplateColumns: "2fr 80px 120px 90px 110px", padding: "10px 16px", fontSize: 12.5, fontWeight: 700, alignItems: "center" }}>
                 <div style={{ color: C.ink }}>{t.label}</div>
                 <div>
@@ -119,7 +141,7 @@ export function AdminContentPanel() {
               </div>
               {open && (
                 <div style={{ padding: "0 16px 16px" }}>
-                  <AdminTopicBrowser topicId={t.value} />
+                  <AdminTopicBrowser topicId={t.value} highlightItem={jump?.topicId === t.value ? jump.questionData : undefined} />
                 </div>
               )}
             </div>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ADMIN_COLORS as C } from "./adminColors";
 import { createContentSuggestion } from "../../lib/adminContent";
 
@@ -42,6 +42,49 @@ function itemSummary(item: Record<string, unknown>): string {
     primary += ` → ${item.answer}`;
   }
   return primary;
+}
+
+// Same field priority as itemSummary() -- used to recognize "this is the same item the admin
+// feedback queue flagged" even though the flagged copy carries an extra sourceTopic field that
+// was only ever added at runtime (LessonGamesGenerator.tsx), never present on the item as stored
+// in topics.ts itself.
+const PRIMARY_KEYS = ["question", "task", "sentence", "starter", "crewmatePrompt", "prompt", "topic", "word"];
+function primaryText(item: Record<string, unknown>): string | null {
+  for (const key of PRIMARY_KEYS) {
+    if (typeof item[key] === "string" && item[key]) return item[key] as string;
+  }
+  return null;
+}
+function itemsMatch(a: Record<string, unknown>, b: Record<string, unknown> | null): boolean {
+  if (!b) return false;
+  const pa = primaryText(a);
+  const pb = primaryText(b);
+  if (!pa || !pb || pa !== pb) return false;
+  // Vault Heist deliberately reuses the same question fragment across several distinct items
+  // (see itemSummary's own comment) -- when both sides have an answer, it has to match too.
+  if (typeof a.answer === "string" && typeof b.answer === "string") return a.answer === b.answer;
+  return true;
+}
+
+// Walks every array-valued content section looking for the one item that matches a flagged
+// question from the admin feedback queue ("Fix this" button) -- returns the expanded-section key
+// ("cardTasks", or "questions:<type>" for the type-grouped Questions sections) and a stable rowKey
+// (section + its original array index) used to scroll to and highlight that exact ItemRow. Returns
+// null (no crash, just no highlight) if the content has since changed enough that nothing matches.
+function findHighlightMatch(entry: TopicEntry, sections: string[], highlightItem: Record<string, unknown> | null): { expandKey: string; rowKey: string } | null {
+  if (!highlightItem) return null;
+  for (const section of sections) {
+    const arr = entry[section];
+    if (!Array.isArray(arr)) continue;
+    for (let i = 0; i < arr.length; i++) {
+      const item = arr[i] as Record<string, unknown>;
+      if (itemsMatch(item, highlightItem)) {
+        const expandKey = section === "questions" && typeof item.type === "string" && item.type ? `questions:${item.type}` : section;
+        return { expandKey, rowKey: `${section}:${i}` };
+      }
+    }
+  }
+  return null;
 }
 
 function valueToInputValue(v: unknown): string {
@@ -181,13 +224,23 @@ function SpyRoundDetail({ item }: { item: Record<string, unknown> }) {
   );
 }
 
-function ItemRow({ topicId, section, itemIndex, item }: { topicId: string; section: string; itemIndex: number | null; item: Record<string, unknown> }) {
+function ItemRow({ topicId, section, itemIndex, item, highlighted, onRef }: {
+  topicId: string; section: string; itemIndex: number | null; item: Record<string, unknown>;
+  highlighted?: boolean; onRef?: (el: HTMLDivElement | null) => void;
+}) {
   const [editing, setEditing] = useState(false);
   const [done, setDone] = useState(false);
   const isMinefieldGrid = Array.isArray(item.colLabels) || Array.isArray(item.rowLabels);
   const isSpyRound = typeof item.crewmatePrompt === "string" && typeof item.spyPrompt === "string";
   return (
-    <div style={{ padding: "8px 10px", borderBottom: `1px solid ${C.border}` }}>
+    <div
+      ref={onRef}
+      style={{
+        padding: "8px 10px", borderBottom: `1px solid ${C.border}`,
+        background: highlighted ? "rgba(59,130,246,0.14)" : undefined,
+        boxShadow: highlighted ? "inset 0 0 0 2px rgba(59,130,246,0.5)" : undefined,
+      }}
+    >
       {isMinefieldGrid && <MinefieldGridDetail item={item} />}
       {isSpyRound && <SpyRoundDetail item={item} />}
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -231,9 +284,16 @@ function CollapsibleSection({ label, count, open, onToggle, children }: {
   );
 }
 
-export function AdminTopicBrowser({ topicId }: { topicId: string }) {
+// Optional highlightItem: the flagged question_data from the admin feedback queue's "Fix this"
+// button. When it matches a real item here, that item's section auto-expands, scrolls into view,
+// and gets a visible highlight -- landing the admin exactly on the flagged content instead of just
+// the right topic. All hooks below run unconditionally every render (entry/allArraySections/match
+// are computed defensively for the null/"error" states too) so the loading/error early returns
+// further down never skip a hook.
+export function AdminTopicBrowser({ topicId, highlightItem }: { topicId: string; highlightItem?: unknown }) {
   const [entry, setEntry] = useState<TopicEntry | null | "error">(null);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const rowRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
   useEffect(() => {
     setEntry(null);
@@ -246,18 +306,32 @@ export function AdminTopicBrowser({ topicId }: { topicId: string }) {
       .catch(() => setEntry("error"));
   }, [topicId]);
 
-  if (entry === null) return <div style={{ color: C.inkDim, fontSize: 13, fontWeight: 700, padding: "10px 0" }}>Loading topic content…</div>;
-  if (entry === "error") return <div style={{ color: C.danger, fontSize: 13, fontWeight: 700, padding: "10px 0" }}>Couldn't load that topic's content.</div>;
+  const validEntry = entry !== null && entry !== "error" ? entry : null;
+  const extraArraySections = validEntry ? Object.keys(validEntry).filter(k => !KNOWN_META_KEYS.has(k) && Array.isArray(validEntry[k])) : [];
+  const allArraySections = validEntry ? [...ARRAY_SECTIONS, ...extraArraySections].filter(s => Array.isArray(validEntry[s]) && (validEntry[s] as unknown[]).length > 0) : [];
+  const hasMinefield = validEntry ? validEntry.minefieldGrid != null && typeof validEntry.minefieldGrid === "object" : false;
 
-  const extraArraySections = Object.keys(entry).filter(k => !KNOWN_META_KEYS.has(k) && Array.isArray(entry[k]));
-  const allArraySections = [...ARRAY_SECTIONS, ...extraArraySections].filter(s => Array.isArray(entry[s]) && (entry[s] as unknown[]).length > 0);
-  const hasMinefield = entry.minefieldGrid != null && typeof entry.minefieldGrid === "object";
+  const highlightObj = highlightItem && typeof highlightItem === "object" ? highlightItem as Record<string, unknown> : null;
+  const match = validEntry ? findHighlightMatch(validEntry, allArraySections, highlightObj) : null;
+
+  useEffect(() => {
+    if (match) setExpanded(prev => (prev.has(match.expandKey) ? prev : new Set(prev).add(match.expandKey)));
+  }, [match?.expandKey]);
+
+  useEffect(() => {
+    if (!match) return;
+    const id = requestAnimationFrame(() => rowRefs.current.get(match.rowKey)?.scrollIntoView({ behavior: "smooth", block: "center" }));
+    return () => cancelAnimationFrame(id);
+  }, [match?.rowKey]);
 
   const toggle = (section: string) => setExpanded(prev => {
     const next = new Set(prev);
     if (next.has(section)) next.delete(section); else next.add(section);
     return next;
   });
+
+  if (entry === null) return <div style={{ color: C.inkDim, fontSize: 13, fontWeight: 700, padding: "10px 0" }}>Loading topic content…</div>;
+  if (entry === "error") return <div style={{ color: C.danger, fontSize: 13, fontWeight: 700, padding: "10px 0" }}>Couldn't load that topic's content.</div>;
 
   if (allArraySections.length === 0 && !hasMinefield) {
     return <div style={{ color: C.inkFaint, fontSize: 13, fontWeight: 700, padding: "10px 0" }}>No recognizable content sections on this topic.</div>;
@@ -284,18 +358,32 @@ export function AdminTopicBrowser({ topicId }: { topicId: string }) {
             const label = `Questions — ${type[0].toUpperCase()}${type.slice(1)}`;
             return (
               <CollapsibleSection key={key} label={label} count={groupItems.length} open={expanded.has(key)} onToggle={() => toggle(key)}>
-                {groupItems.map(({ item, i }) => (
-                  <ItemRow key={i} topicId={topicId} section={section} itemIndex={i} item={item} />
-                ))}
+                {groupItems.map(({ item, i }) => {
+                  const rowKey = `${section}:${i}`;
+                  return (
+                    <ItemRow
+                      key={i} topicId={topicId} section={section} itemIndex={i} item={item}
+                      highlighted={match?.rowKey === rowKey}
+                      onRef={el => { if (el) rowRefs.current.set(rowKey, el); else rowRefs.current.delete(rowKey); }}
+                    />
+                  );
+                })}
               </CollapsibleSection>
             );
           });
         }
         return (
           <CollapsibleSection key={section} label={SECTION_LABELS[section] ?? section} count={items.length} open={expanded.has(section)} onToggle={() => toggle(section)}>
-            {items.map(({ item, i }) => (
-              <ItemRow key={i} topicId={topicId} section={section} itemIndex={i} item={item} />
-            ))}
+            {items.map(({ item, i }) => {
+              const rowKey = `${section}:${i}`;
+              return (
+                <ItemRow
+                  key={i} topicId={topicId} section={section} itemIndex={i} item={item}
+                  highlighted={match?.rowKey === rowKey}
+                  onRef={el => { if (el) rowRefs.current.set(rowKey, el); else rowRefs.current.delete(rowKey); }}
+                />
+              );
+            })}
           </CollapsibleSection>
         );
       })}

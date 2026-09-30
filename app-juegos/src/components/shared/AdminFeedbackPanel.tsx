@@ -38,10 +38,13 @@ function relativeTime(iso: string): string {
 // Zombie Siege's own content) before mixing selected topics together, precisely so a flagged
 // question can be traced back here — without this, only the game mode was ever known, never which
 // of the teacher's selected topics the flagged content actually came from.
-function topicLabel(data: unknown): string | null {
+function topicValue(data: unknown): string | null {
   if (!data || typeof data !== "object") return null;
   const d = data as Record<string, unknown>;
-  const value = (typeof d.sourceTopic === "string" ? d.sourceTopic : null) ?? (typeof d.spySourceTopic === "string" ? d.spySourceTopic : null);
+  return (typeof d.sourceTopic === "string" ? d.sourceTopic : null) ?? (typeof d.spySourceTopic === "string" ? d.spySourceTopic : null);
+}
+function topicLabel(data: unknown): string | null {
+  const value = topicValue(data);
   if (!value) return null;
   return TOPIC_OPTIONS.find(t => t.value === value)?.label ?? value;
 }
@@ -83,14 +86,21 @@ const btnGhost: React.CSSProperties = {
   border: `1px solid ${C.border}`, borderRadius: 9, padding: "7px 13px", fontSize: 11.5, fontWeight: 800, cursor: "pointer",
   whiteSpace: "nowrap", fontFamily: "inherit", background: C.surface2, color: C.inkDim,
 };
+const btnFix: React.CSSProperties = {
+  border: "1px solid rgba(59,130,246,0.4)", borderRadius: 9, padding: "7px 13px", fontSize: 11.5, fontWeight: 800, cursor: "pointer",
+  whiteSpace: "nowrap", fontFamily: "inherit", background: "rgba(59,130,246,0.14)", color: "#93C5FD",
+};
 
 type Props = {
   rows: FeedbackRow[] | null;
   error: string | null;
   onMarkReviewed: (id: string) => void;
+  // Jumps to Content & Topics, opens the flagged item's topic, and highlights/scrolls to the
+  // exact matching item there (see AdminScreen.tsx/AdminContentPanel.tsx/AdminTopicBrowser.tsx).
+  onFixTopic: (topicId: string, questionData: unknown) => void;
 };
 
-export function AdminFeedbackPanel({ rows, error, onMarkReviewed }: Props) {
+export function AdminFeedbackPanel({ rows, error, onMarkReviewed, onFixTopic }: Props) {
   const [tab, setTab] = useState<Tab>("all");
   const [search, setSearch] = useState("");
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -172,6 +182,7 @@ export function AdminFeedbackPanel({ rows, error, onMarkReviewed }: Props) {
       )}
       {newRows.map(row => {
         const q = formatQuestionData(row.question_data);
+        const topicId = topicValue(row.question_data);
         const topic = topicLabel(row.question_data);
         return (
           <div key={row.id} style={{ background: "linear-gradient(180deg,rgba(239,68,68,0.05),transparent 40%)", border: "1px solid rgba(239,68,68,0.35)", borderRadius: 13, padding: "14px 16px", display: "flex", gap: 14 }}>
@@ -204,6 +215,9 @@ export function AdminFeedbackPanel({ rows, error, onMarkReviewed }: Props) {
               {q && <div style={{ background: "#0B1425", border: `1px solid ${C.border}`, borderRadius: 9, padding: "9px 11px", fontSize: 12, color: C.inkDim, lineHeight: 1.6 }}>{q}</div>}
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 7, flexShrink: 0, justifyContent: "center" }}>
+              {topicId && (
+                <button style={btnFix} onClick={() => onFixTopic(topicId, row.question_data)}>Fix this</button>
+              )}
               <button style={btnPrimary} onClick={() => onMarkReviewed(row.id)}>Mark reviewed</button>
               <button
                 style={btnGhost}
