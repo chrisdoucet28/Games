@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { LESSON_TOPICS, LEVEL_ORDER, LEVEL_COLOR } from "../../data/learnTopics";
+import { LESSON_TOPICS, LEVEL_ORDER, LEVEL_COLOR, FOCUS_ORDER } from "../../data/learnTopics";
 import { BADGES, earnedBadgeIds, levelInfo, xpFromStats, type StudentStats } from "../../data/studentRewards";
 import { getLessonsDone, getStudentStats } from "../../lib/studentProgress";
 import { chooseRole } from "../../lib/profile";
@@ -35,6 +35,24 @@ export function StudentHome({ onSwitchToTeacher }: { onSwitchToTeacher: () => vo
     const topics = LESSON_TOPICS.filter(t => t.meta.level === lv);
     return { level: lv, total: topics.length, done: topics.filter(t => doneIds.has(t.id)).length };
   }).filter(g => g.total > 0), [doneIds]);
+
+  // The first not-yet-finished lesson, walking the library in the same level -> focus -> topic
+  // order the Learn pages themselves display it in (LEVEL_ORDER then FOCUS_ORDER) -- there's no
+  // per-class teacher pacing tracked anywhere in this app, so this is "pick up where you left off
+  // in the whole library," not "what your teacher covered last," which is an honest thing to not
+  // overclaim in the copy below.
+  const nextTopic = useMemo(() => {
+    for (const lv of LEVEL_ORDER) {
+      for (const focus of FOCUS_ORDER) {
+        // Captured from the loop, not re-read off match.meta.level -- that field is typed
+        // `string | null` (only the unrelated "AI Generated" entry ever uses null), while `lv`
+        // here is already known non-null.
+        const match = LESSON_TOPICS.find(t => t.meta.level === lv && (t.meta.focus ?? "grammar") === focus && !doneIds.has(t.id));
+        if (match) return { topic: match, level: lv };
+      }
+    }
+    return null;
+  }, [doneIds]);
 
   const switchToTeacher = async () => {
     setSwitchError("");
@@ -74,6 +92,30 @@ export function StudentHome({ onSwitchToTeacher }: { onSwitchToTeacher: () => vo
           <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "12px", fontSize: "14px", fontWeight: 800, color: (stats?.streakDays ?? 0) > 0 ? "#B45309" : "#9CA3AF" }}>
             <Icon name="flame" size={16} /> {stats?.streakDays ?? 0}-day streak
           </div>
+        </div>
+
+        <div style={card}>
+          <div style={{ fontWeight: 900, fontSize: "13px", color: "#9CA3AF", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: "10px" }}>Continue Learning</div>
+          {nextTopic ? (
+            <>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px", flexWrap: "wrap" }}>
+                <span style={{ background: LEVEL_COLOR[nextTopic.level], color: "white", borderRadius: "999px", padding: "2px 10px", fontSize: "12px", fontWeight: 800 }}>{nextTopic.level}</span>
+                <span style={{ fontWeight: 900, fontSize: "16px", color: INK }}>{nextTopic.topic.lesson.title}</span>
+              </div>
+              <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+                <a href={`/learn/${nextTopic.topic.id}`} style={{ ...doorButton, flex: "1 1 160px", fontSize: "14px", padding: "12px", background: "linear-gradient(135deg,#F59E0B,#D97706)", color: "white", border: `3px solid ${INK}` }}>
+                  <Icon name="learn" size={16} color="white" /> Start This Lesson
+                </a>
+                <a href={`/practice?topic=${nextTopic.topic.id}`} style={{ ...doorButton, flex: "1 1 160px", fontSize: "14px", padding: "12px", background: "white", color: SKY, border: `3px solid ${SKY}` }}>
+                  <Icon name="target" size={16} /> Practice It
+                </a>
+              </div>
+            </>
+          ) : (
+            <div style={{ textAlign: "center", color: "#6B7280", fontSize: "14px", fontWeight: 700, padding: "8px 0" }}>
+              You've finished every lesson in the library — amazing work! 🎉
+            </div>
+          )}
         </div>
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: "12px" }}>
