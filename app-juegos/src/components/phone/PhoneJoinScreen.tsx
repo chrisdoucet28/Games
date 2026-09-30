@@ -291,6 +291,9 @@ export function PhoneJoinScreen({ code, game }: Props) {
           Code: <strong style={{ color: "white" }}>{code}</strong><br />
           Ask your teacher to check the game is still open, or for a new code.
         </div>
+        <a href="/" style={{ display: "inline-block", marginTop: "20px", color: "#C4B5FD", fontWeight: "700", fontSize: "13px", textDecoration: "none", border: "2px solid #C4B5FD55", borderRadius: "10px", padding: "8px 16px" }}>
+          ← Back to ClassCade
+        </a>
       </div>
     );
   }

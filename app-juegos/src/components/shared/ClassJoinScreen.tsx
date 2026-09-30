@@ -262,6 +262,9 @@ export function ClassJoinScreen({ code }: Props) {
           Code: <strong style={{ color: "white" }}>{code}</strong><br />
           Ask your teacher to check today's class check-in is still open, or for a new code.
         </div>
+        <a href="/" style={{ display: "inline-block", marginTop: "20px", color: "#93C5FD", fontWeight: "700", fontSize: "13px", textDecoration: "none", border: "2px solid #93C5FD55", borderRadius: "10px", padding: "8px 16px" }}>
+          ← Back to ClassCade
+        </a>
       </div>
     );
   }
