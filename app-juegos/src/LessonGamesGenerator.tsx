@@ -30,6 +30,7 @@ import { BrandBadge } from "./components/shared/BrandBadge";
 import { Icon, type IconName } from "./components/shared/Icon";
 import { MascotIcon } from "./components/shared/MascotArt";
 import { saveProgress, clearProgress, listClasses, createClass, upsertTeamRoster, deleteFromTeamRoster, saveTeams } from "./lib/classes";
+import { recordClassCoverage } from "./lib/classMembership";
 import { isPaidStatus } from "./lib/subscription";
 import { playSound, isSoundEnabled, setSoundEnabled, onSoundEnabledChange } from "./lib/sounds";
 import { setMusicContext, stopMusic } from "./lib/music";
@@ -1305,6 +1306,8 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     // The class's running scores persist either way; a naturally-finished game just has nothing
     // left to resume, so the in-progress snapshot gets cleared rather than left stale.
     if (activeClassId) clearProgress(activeClassId, teams).catch(() => {});
+    // Reaching Results (not just starting) is "actually taught" — see the migration's own comment.
+    if (activeClassId && selectedTopics.length > 0) void recordClassCoverage(activeClassId, selectedTopics);
     // Nothing playable on a checked-in phone until the next game starts — falls back to the
     // "watch the shared screen" placeholder the instant gameplay ends, symmetric with startGame.
     if (classSessionCode) broadcastClassActiveGame(null);

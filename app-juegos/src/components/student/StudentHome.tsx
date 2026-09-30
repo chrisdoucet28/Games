@@ -127,7 +127,7 @@ export function StudentHome({ onSwitchToTeacher }: { onSwitchToTeacher: () => vo
           </a>
         </div>
 
-        <MyClassesSection cardStyle={card} />
+        <MyClassesSection cardStyle={card} doneIds={doneIds} />
 
         <div style={card}>
           <div style={{ fontWeight: 900, fontSize: "16px", color: INK, marginBottom: "12px" }}>Badges · {earned.size}/{BADGES.length}</div>

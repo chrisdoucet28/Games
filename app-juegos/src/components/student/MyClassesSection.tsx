@@ -3,6 +3,7 @@ import { getMyClasses, requestJoinClass, leaveClass, type MyClass } from "../../
 import { peekPendingJoinCode, clearPendingJoinCode } from "../../lib/pendingJoin";
 import { TeamIcon } from "../shared/TeamIcon";
 import { Icon } from "../shared/Icon";
+import { ClassCoverageSummary } from "../shared/ClassCoverageSummary";
 
 // "My classes" on the student home — join a teacher's class with its code, and see each class with
 // the team you picked in Class Check-In and your check-ins. Entirely optional: a student who never
@@ -17,7 +18,7 @@ function formatDay(iso: string | null): string {
   return Number.isNaN(d.getTime()) ? iso : d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
 }
 
-export function MyClassesSection({ cardStyle }: { cardStyle: React.CSSProperties }) {
+export function MyClassesSection({ cardStyle, doneIds }: { cardStyle: React.CSSProperties; doneIds?: Set<string> }) {
   const [classes, setClasses] = useState<MyClass[] | null>(null);
   const [available, setAvailable] = useState(true);
   const [code, setCode] = useState(() => peekPendingJoinCode() ?? "");
@@ -110,6 +111,8 @@ export function MyClassesSection({ cardStyle }: { cardStyle: React.CSSProperties
                   </span>
                 </div>
               )}
+
+              {c.status === "approved" && <ClassCoverageSummary classId={c.class_id} accentColor={SKY} doneIds={doneIds} />}
 
               <div style={{ marginTop: "8px" }}>
                 <button type="button" onClick={() => leave(c)} style={{ background: "none", border: "none", padding: 0, color: "#9CA3AF", fontSize: "12px", fontWeight: 700, cursor: "pointer", textDecoration: "underline" }}>

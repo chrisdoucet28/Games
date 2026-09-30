@@ -6,6 +6,7 @@ import { listClasses, createClass, deleteClass, setLeaderboardVisibility } from 
 import { hexToRgba, type Theme } from "../../data/themes";
 import { Icon } from "./Icon";
 import { ClassStudentsPanel } from "./ClassStudentsPanel";
+import { ClassCoverageSummary } from "./ClassCoverageSummary";
 import { RoleRestricted } from "./RoleRestricted";
 
 type Props = {
@@ -222,6 +223,7 @@ export function ClassesScreen({ onBack, onResumeClass, onStartWithClass, theme, 
                 </div>
 
                 <ClassStudentsPanel classId={cls.id} theme={theme} />
+                <ClassCoverageSummary classId={cls.id} accentColor={theme.accentSolid} />
               </div>
             ))}
           </div>

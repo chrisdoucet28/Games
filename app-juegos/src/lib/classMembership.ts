@@ -117,3 +117,28 @@ export async function getMyClassLink(classId: string): Promise<MyClass | null> {
     return null;
   }
 }
+
+// --- Shared (teacher + student) ------------------------------------------------------------------
+// Backed by the 20260930000000_class_topic_coverage migration — see its own comment for why this
+// exists (classes.selected_topics only ever reflects whatever game is currently in progress).
+
+export type ClassCoverageEntry = { topicId: string; firstCoveredAt: string };
+
+// Called right when a game reaches its Results screen for a class-linked session (see
+// LessonGamesGenerator's handleGameEnd) — never throws, same "don't disrupt the moment a game ends
+// over a best-effort write" posture as recordClassAttendance's own caller.
+export async function recordClassCoverage(classId: string, topicIds: string[]): Promise<void> {
+  if (topicIds.length === 0) return;
+  try {
+    await supabase.rpc("record_class_coverage", { p_class_id: classId, p_topic_ids: topicIds });
+  } catch {
+    // Best-effort — a missed write just means that one game's topics won't show up in either
+    // side's coverage view; nothing else in the app depends on it.
+  }
+}
+
+export async function getClassCoverage(classId: string): Promise<ClassCoverageEntry[]> {
+  const { data, error } = await supabase.rpc("get_class_coverage", { p_class_id: classId });
+  if (error) throw error;
+  return ((data ?? []) as { topic_id: string; first_covered_at: string }[]).map(row => ({ topicId: row.topic_id, firstCoveredAt: row.first_covered_at }));
+}
