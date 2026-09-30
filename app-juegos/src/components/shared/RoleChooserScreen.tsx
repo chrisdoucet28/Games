@@ -84,7 +84,11 @@ export function RoleChooserScreen({ onChosen }: { onChosen: (role: Choice) => vo
         >
           {saving ? "Saving…" : "Continue"}
         </button>
-        <p style={{ textAlign: "center", color: "#6B7280", fontSize: "12px", marginTop: "12px" }}>You can switch this later from your profile.</p>
+        <p style={{ textAlign: "center", color: "#6B7280", fontSize: "12px", marginTop: "12px" }}>
+          {selected === "student"
+            ? "You can switch this later from the bottom of your home screen."
+            : "You can switch this later from your profile."}
+        </p>
       </div>
     </div>
   );

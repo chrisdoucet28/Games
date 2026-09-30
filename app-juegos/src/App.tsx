@@ -209,23 +209,30 @@ function AuthenticatedApp() {
   // null = the profile hasn't loaded, so nothing role-specific renders (a student never gets a
   // flash of the teacher app). Keyed on the user id, not the session object, so a token refresh
   // doesn't put the loading splash back up. A profile with no role columns at all (a database
-  // without the student_accounts migration) or a failed fetch both fall back to today's behavior:
-  // an already-decided teacher.
+  // without the student_accounts migration) falls back to today's behavior: an already-decided
+  // teacher. A genuinely FAILED fetch (bad connection, server error) is different and does NOT get
+  // that same fallback — silently guessing "teacher" there would drop a student with a flaky
+  // connection into the full teacher app with no indication anything went wrong. See roleLoadError.
   const userId = session?.user.id ?? null;
   const [roleInfo, setRoleInfo] = useState<{ role: 'teacher' | 'student'; chosen: boolean } | null>(null);
   // Gates the hidden /admin panel — true only for the app owner's own account (see the
   // admin_access migration). Fetched in the same getProfile() call as role/chosen above rather
-  // than a second request; defaults to false on a database that doesn't have the column yet or on
-  // a failed fetch, same defensive posture as roleInfo's own catch below.
+  // than a second request; defaults to false on a database that doesn't have the column yet, or
+  // while roleLoadError is true.
   const [isAdmin, setIsAdmin] = useState(false);
+  // True only when the profile fetch itself failed — drives a real retry screen instead of a
+  // silent role guess. Bumping roleReloadKey re-runs the effect below for the "Try again" button.
+  const [roleLoadError, setRoleLoadError] = useState(false);
+  const [roleReloadKey, setRoleReloadKey] = useState(0);
   useEffect(() => {
-    if (!userId) { setRoleInfo(null); setIsAdmin(false); return; }
+    if (!userId) { setRoleInfo(null); setIsAdmin(false); setRoleLoadError(false); return; }
     let cancelled = false;
+    setRoleLoadError(false);
     getProfile()
       .then(p => { if (!cancelled) { setRoleInfo({ role: p.role ?? 'teacher', chosen: p.role_chosen ?? true }); setIsAdmin(p.is_admin ?? false); } })
-      .catch(() => { if (!cancelled) { setRoleInfo({ role: 'teacher', chosen: true }); setIsAdmin(false); } });
+      .catch(() => { if (!cancelled) setRoleLoadError(true); });
     return () => { cancelled = true; };
-  }, [userId]);
+  }, [userId, roleReloadKey]);
 
   useEffect(() => {
     if (!session) {
@@ -262,8 +269,18 @@ function AuthenticatedApp() {
 
   if (!roleInfo) {
     return (
-      <div style={{ minHeight: '100vh', background: '#1E1B4B', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ color: 'white', fontFamily: "'Segoe UI',system-ui,sans-serif", fontSize: '16px' }}>Loading…</div>
+      <div style={{ minHeight: '100vh', background: '#1E1B4B', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '14px', padding: '20px', textAlign: 'center' }}>
+        <div style={{ color: 'white', fontFamily: "'Segoe UI',system-ui,sans-serif", fontSize: '16px' }}>
+          {roleLoadError ? "Couldn't load your account — check your connection." : "Loading…"}
+        </div>
+        {roleLoadError && (
+          <button
+            onClick={() => setRoleReloadKey(k => k + 1)}
+            style={{ background: 'white', color: '#1E1B4B', border: 'none', borderRadius: '10px', padding: '10px 20px', fontWeight: 800, cursor: 'pointer', fontFamily: "'Segoe UI',system-ui,sans-serif", fontSize: '14px' }}
+          >
+            Try again
+          </button>
+        )}
       </div>
     );
   }
