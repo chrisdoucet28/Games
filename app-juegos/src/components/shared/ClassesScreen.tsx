@@ -6,6 +6,7 @@ import { listClasses, createClass, deleteClass, setLeaderboardVisibility } from 
 import { hexToRgba, type Theme } from "../../data/themes";
 import { Icon } from "./Icon";
 import { ClassStudentsPanel } from "./ClassStudentsPanel";
+import { RoleRestricted } from "./RoleRestricted";
 
 type Props = {
   onBack: () => void;
@@ -14,11 +15,15 @@ type Props = {
   theme: Theme;
   isPaid: boolean;
   onUpgrade: () => void;
+  // Defense-in-depth only -- see RoleRestricted's own comment. Undefined (an old database without
+  // the student_accounts migration, or a caller that hasn't been updated to pass it) is treated as
+  // authorized, same as every other role check in this codebase.
+  role?: "teacher" | "student";
 };
 
 const gameLabel = (gameId: string | null) => GAME_MODES.find(g => g.id === gameId)?.name ?? gameId ?? "a game";
 
-export function ClassesScreen({ onBack, onResumeClass, onStartWithClass, theme, isPaid, onUpgrade }: Props) {
+export function ClassesScreen({ onBack, onResumeClass, onStartWithClass, theme, isPaid, onUpgrade, role }: Props) {
   const [classes, setClasses] = useState<SavedClass[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [newName, setNewName] = useState("");
@@ -72,6 +77,8 @@ export function ClassesScreen({ onBack, onResumeClass, onStartWithClass, theme, 
       refresh();
     }
   };
+
+  if (role === "student") return <RoleRestricted onBack={onBack} theme={theme} />;
 
   return (
     <div style={{ minHeight: "100vh", background: "#F0F9FF", padding: "20px", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>

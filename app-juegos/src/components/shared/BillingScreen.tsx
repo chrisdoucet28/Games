@@ -3,6 +3,7 @@ import type { Subscription } from "../../types";
 import { getSubscription, isPaidStatus, startCheckout, openBillingPortal, redeemPromoCode } from "../../lib/subscription";
 import { hexToRgba, type Theme } from "../../data/themes";
 import { Icon } from "./Icon";
+import { RoleRestricted } from "./RoleRestricted";
 
 type Props = {
   onBack: () => void;
@@ -11,9 +12,13 @@ type Props = {
   onSubscriptionChange: (s: Subscription) => void;
   // Set once, right after a Stripe checkout redirect lands here — see App.tsx's checkoutRedirect.
   justReturnedFrom?: "success" | "cancel" | null;
+  // Defense-in-depth only -- see RoleRestricted's own comment. Undefined (an old database without
+  // the student_accounts migration, or a caller that hasn't been updated to pass it) is treated as
+  // authorized, same as every other role check in this codebase.
+  role?: "teacher" | "student";
 };
 
-export function BillingScreen({ onBack, theme, subscription, onSubscriptionChange, justReturnedFrom }: Props) {
+export function BillingScreen({ onBack, theme, subscription, onSubscriptionChange, justReturnedFrom, role }: Props) {
   const [selectedPlan, setSelectedPlan] = useState<"monthly" | "annual">("monthly");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -70,6 +75,8 @@ export function BillingScreen({ onBack, theme, subscription, onSubscriptionChang
       setPromoBusy(false);
     }
   };
+
+  if (role === "student") return <RoleRestricted onBack={onBack} theme={theme} />;
 
   return (
     <div style={{ minHeight: "100vh", background: "#F0F9FF", padding: "20px", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>

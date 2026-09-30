@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { getProfile, updateProfile, uploadAvatar, uploadOrgLogo, removeAvatar, removeOrgLogo, chooseRole } from "../../lib/profile";
 import { THEMES, hexToRgba, type Theme } from "../../data/themes";
 import { Icon } from "./Icon";
+import { RoleRestricted } from "./RoleRestricted";
 
 type Props = {
   onBack: () => void;
@@ -56,6 +57,10 @@ export function ProfileScreen({ onBack, theme, onThemeChange, isPaid, onUpgrade 
   // can't work.
   const [roleSupported, setRoleSupported] = useState(false);
   const [roleError, setRoleError] = useState<string | null>(null);
+  // Defense-in-depth, not the real gate (App.tsx never mounts this screen for a student) — see
+  // RoleRestricted's own comment. Sourced from this screen's own fetch, not a prop, so it stays
+  // correct even if this screen is ever reached through a path that doesn't thread role down.
+  const [role, setRole] = useState<"teacher" | "student" | undefined>(undefined);
 
   useEffect(() => {
     getProfile()
@@ -65,6 +70,7 @@ export function ProfileScreen({ onBack, theme, onThemeChange, isPaid, onUpgrade 
         setAvatarUrl(p.avatar_url);
         setOrgLogoUrl(p.org_logo_url);
         setRoleSupported(p.role !== undefined);
+        setRole(p.role);
       })
       .catch(err => setError(err instanceof Error ? err.message : "Couldn't load your profile."))
       .finally(() => setLoading(false));
@@ -128,6 +134,8 @@ export function ProfileScreen({ onBack, theme, onThemeChange, isPaid, onUpgrade 
       setSaving(false);
     }
   };
+
+  if (!loading && role === "student") return <RoleRestricted onBack={onBack} theme={theme} />;
 
   return (
     <div style={{ minHeight: "100vh", background: "#F0F9FF", padding: "20px", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
@@ -214,7 +222,7 @@ export function ProfileScreen({ onBack, theme, onThemeChange, isPaid, onUpgrade 
 
         {roleSupported && !loading && (
           <div style={{ background: "white", border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, borderRadius: "16px", padding: "16px 20px", marginTop: "16px" }}>
-            <div style={{ color: "#4B5563", fontSize: "13px", fontWeight: "700", marginBottom: "6px" }}>Account type: Teacher</div>
+            <div style={{ color: "#4B5563", fontSize: "13px", fontWeight: "700", marginBottom: "6px" }}>Account type: {role === "student" ? "Student" : "Teacher"}</div>
             <div style={{ color: "#6B7280", fontSize: "12px", lineHeight: 1.5, marginBottom: "10px" }}>
               Signed up by mistake, or actually here to study? A student account is free and tracks lessons, badges and levels.
             </div>

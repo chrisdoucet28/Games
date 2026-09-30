@@ -226,9 +226,13 @@ type LessonGamesGeneratorProps = {
   // Set once, when the first-login welcome screen's "Explore Learn" button was used instead of
   // the plain "Let's go!" — see App.tsx and WelcomeIntroScreen.tsx.
   initialScreen?: "learn" | null;
+  // App.tsx's own confirmed roleInfo.role — this component is only ever mounted once that's
+  // already 'teacher', so this is defense-in-depth for ClassesScreen/BillingScreen (see
+  // RoleRestricted's comment), not the real gate.
+  role: "teacher" | "student";
 };
 
-export default function LessonGamesGenerator({ theme, onThemeChange, subscription, onSubscriptionChange, checkoutRedirect, initialScreen }: LessonGamesGeneratorProps) {
+export default function LessonGamesGenerator({ theme, onThemeChange, subscription, onSubscriptionChange, checkoutRedirect, initialScreen, role }: LessonGamesGeneratorProps) {
   const [screen, setScreen] = useState<"welcome" | "classes" | "profile" | "learn" | "lessonplan" | "lessonplan-play" | "leaderboard" | "billing" | "topic-select" | "team-setup" | "game-select" | "game" | "results">(
     checkoutRedirect ? "billing" : initialScreen ?? "welcome"
   );
@@ -1404,6 +1408,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
         theme={theme}
         isPaid={isPaid}
         onUpgrade={() => setScreen("billing")}
+        role={role}
       />
       <FeedbackButton />
       <BrandBadge isPaid={isPaid} />
@@ -1434,6 +1439,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
         subscription={subscription}
         onSubscriptionChange={onSubscriptionChange}
         justReturnedFrom={checkoutRedirect}
+        role={role}
       />
       <FeedbackButton />
       <BrandBadge isPaid={isPaid} />

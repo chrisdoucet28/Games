@@ -323,6 +323,7 @@ function AuthenticatedApp() {
         subscription={subscription} onSubscriptionChange={setSubscription}
         checkoutRedirect={checkoutRedirect}
         initialScreen={initialScreen}
+        role={roleInfo.role}
       />
     </div>
   );
