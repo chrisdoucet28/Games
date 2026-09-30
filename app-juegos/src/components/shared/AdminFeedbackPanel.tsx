@@ -4,6 +4,7 @@ import { GAME_MODES } from "../../data/constants";
 import { TOPIC_OPTIONS } from "../../data/topicOptions";
 import type { FeedbackRow } from "../../lib/adminFeedback";
 import { AdminAutoFixActivity } from "./AdminAutoFixActivity";
+import { getArraySections, itemsMatch, primaryText } from "./AdminTopicBrowser";
 
 type Tab = "all" | "flag" | "general";
 
@@ -62,6 +63,27 @@ function formatQuestionData(data: unknown): string | null {
   return null;
 }
 
+// Fallback for a flag with no sourceTopic at all -- every flag submitted before that field started
+// being recorded (see the previous fix's commit; confirmed against the live feedback table that
+// this covers the entire existing backlog, not just a few rows). Rather than leaving those stuck at
+// "Topic unknown" forever, this searches every topic's content for an item matching the flagged
+// question's own text (the same itemsMatch() comparison AdminTopicBrowser uses to highlight a
+// known topic's item) and reports back whichever topic actually contains it, if any.
+async function findTopicByContent(questionData: unknown): Promise<string | null> {
+  if (!questionData || typeof questionData !== "object") return null;
+  const target = questionData as Record<string, unknown>;
+  const { TOPIC_LIBRARY } = await import("../../data/topics");
+  for (const [topicId, entry] of Object.entries(TOPIC_LIBRARY as Record<string, Record<string, unknown>>)) {
+    for (const section of getArraySections(entry)) {
+      const arr = entry[section] as unknown[];
+      for (const item of arr) {
+        if (itemsMatch(item as Record<string, unknown>, target)) return topicId;
+      }
+    }
+  }
+  return null;
+}
+
 function copyDetails(row: FeedbackRow) {
   const parts = [
     `Game: ${gameLabel(row.game_id) ?? "—"}`,
@@ -104,6 +126,21 @@ export function AdminFeedbackPanel({ rows, error, onMarkReviewed, onFixTopic }: 
   const [tab, setTab] = useState<Tab>("all");
   const [search, setSearch] = useState("");
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  // Per-row state for the "Find in content" fallback (findTopicByContent) -- "busy" while
+  // scanning, "notfound" once a full scan comes back with nothing to show that outcome distinctly
+  // from a row that's simply never been searched yet.
+  const [searchState, setSearchState] = useState<Record<string, "busy" | "notfound" | undefined>>({});
+
+  const handleFindInContent = async (row: FeedbackRow) => {
+    setSearchState(prev => ({ ...prev, [row.id]: "busy" }));
+    const foundTopicId = await findTopicByContent(row.question_data);
+    if (foundTopicId) {
+      setSearchState(prev => { const next = { ...prev }; delete next[row.id]; return next; });
+      onFixTopic(foundTopicId, row.question_data);
+    } else {
+      setSearchState(prev => ({ ...prev, [row.id]: "notfound" }));
+    }
+  };
 
   const counts = useMemo(() => {
     const all = rows ?? [];
@@ -184,6 +221,7 @@ export function AdminFeedbackPanel({ rows, error, onMarkReviewed, onFixTopic }: 
         const q = formatQuestionData(row.question_data);
         const topicId = topicValue(row.question_data);
         const topic = topicLabel(row.question_data);
+        const canSearchContent = Boolean(!topicId && row.question_data && typeof row.question_data === "object" && primaryText(row.question_data as Record<string, unknown>) !== null);
         return (
           <div key={row.id} style={{ background: "linear-gradient(180deg,rgba(239,68,68,0.05),transparent 40%)", border: "1px solid rgba(239,68,68,0.35)", borderRadius: 13, padding: "14px 16px", display: "flex", gap: 14 }}>
             <div style={{ width: 34, height: 34, borderRadius: 9, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, border: "1px solid rgba(245,158,11,0.3)", background: "rgba(245,158,11,0.12)" }}>
@@ -217,6 +255,15 @@ export function AdminFeedbackPanel({ rows, error, onMarkReviewed, onFixTopic }: 
             <div style={{ display: "flex", flexDirection: "column", gap: 7, flexShrink: 0, justifyContent: "center" }}>
               {topicId && (
                 <button style={btnFix} onClick={() => onFixTopic(topicId, row.question_data)}>Fix this</button>
+              )}
+              {canSearchContent && (
+                <button
+                  style={btnFix}
+                  disabled={searchState[row.id] === "busy"}
+                  onClick={() => handleFindInContent(row)}
+                >
+                  {searchState[row.id] === "busy" ? "Searching…" : searchState[row.id] === "notfound" ? "Not found — try again?" : "Find in content"}
+                </button>
               )}
               <button style={btnPrimary} onClick={() => onMarkReviewed(row.id)}>Mark reviewed</button>
               <button

@@ -22,6 +22,16 @@ const SECTION_LABELS: Record<string, string> = {
 };
 const KNOWN_META_KEYS = new Set(["label", "level", "category", "focus", "order", "minefieldGrid", ...ARRAY_SECTIONS]);
 
+// Every array-valued content section a given entry actually has (the fixed list plus any extra
+// array-valued key, same rule KNOWN_META_KEYS documents above) -- factored out so the full-library
+// "find this question's topic" search in AdminFeedbackPanel.tsx (for a flag with no sourceTopic at
+// all, e.g. everything flagged before that field started being recorded) searches exactly the same
+// sections this browser would ever show, never more or less.
+export function getArraySections(entry: TopicEntry): string[] {
+  const extra = Object.keys(entry).filter(k => !KNOWN_META_KEYS.has(k) && Array.isArray(entry[k]));
+  return [...ARRAY_SECTIONS, ...extra].filter(s => Array.isArray(entry[s]) && (entry[s] as unknown[]).length > 0);
+}
+
 function itemSummary(item: Record<string, unknown>): string {
   // "prompt" is hotPotatoPrompts' own field name (HotPotatoGame.tsx reads .prompt, not
   // .question) despite the shared TopicLibraryEntry type calling it QuestionData[] like every
@@ -49,13 +59,13 @@ function itemSummary(item: Record<string, unknown>): string {
 // was only ever added at runtime (LessonGamesGenerator.tsx), never present on the item as stored
 // in topics.ts itself.
 const PRIMARY_KEYS = ["question", "task", "sentence", "starter", "crewmatePrompt", "prompt", "topic", "word"];
-function primaryText(item: Record<string, unknown>): string | null {
+export function primaryText(item: Record<string, unknown>): string | null {
   for (const key of PRIMARY_KEYS) {
     if (typeof item[key] === "string" && item[key]) return item[key] as string;
   }
   return null;
 }
-function itemsMatch(a: Record<string, unknown>, b: Record<string, unknown> | null): boolean {
+export function itemsMatch(a: Record<string, unknown>, b: Record<string, unknown> | null): boolean {
   if (!b) return false;
   const pa = primaryText(a);
   const pb = primaryText(b);
@@ -307,8 +317,7 @@ export function AdminTopicBrowser({ topicId, highlightItem }: { topicId: string;
   }, [topicId]);
 
   const validEntry = entry !== null && entry !== "error" ? entry : null;
-  const extraArraySections = validEntry ? Object.keys(validEntry).filter(k => !KNOWN_META_KEYS.has(k) && Array.isArray(validEntry[k])) : [];
-  const allArraySections = validEntry ? [...ARRAY_SECTIONS, ...extraArraySections].filter(s => Array.isArray(validEntry[s]) && (validEntry[s] as unknown[]).length > 0) : [];
+  const allArraySections = validEntry ? getArraySections(validEntry) : [];
   const hasMinefield = validEntry ? validEntry.minefieldGrid != null && typeof validEntry.minefieldGrid === "object" : false;
 
   const highlightObj = highlightItem && typeof highlightItem === "object" ? highlightItem as Record<string, unknown> : null;
