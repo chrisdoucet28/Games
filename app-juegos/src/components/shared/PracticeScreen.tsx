@@ -67,7 +67,16 @@ export function PracticeScreen() {
   const [focusFilter, setFocusFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedTopics, setSelectedTopics] = useState<string[]>(() => {
-    const topic = new URLSearchParams(window.location.search).get("topic");
+    const params = new URLSearchParams(window.location.search);
+    // ?topics=a,b,c (comma-separated) -- used by "Practice everything covered" on a class's
+    // coverage panel. Checked first; ?topic=<id> (singular, the lesson page's own "Practice this
+    // topic" link) still works unchanged for backward compatibility.
+    const topics = params.get("topics");
+    if (topics) {
+      const ids = topics.split(",").map(s => s.trim()).filter(id => SELECTABLE_TOPICS.some(t => t.value === id));
+      if (ids.length > 0) return ids;
+    }
+    const topic = params.get("topic");
     return topic && SELECTABLE_TOPICS.some(t => t.value === topic) ? [topic] : [];
   });
   const [sessionLength, setSessionLength] = useState(DEFAULT_SESSION_LENGTH);

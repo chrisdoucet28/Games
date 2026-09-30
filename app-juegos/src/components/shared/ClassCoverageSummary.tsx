@@ -92,6 +92,19 @@ export function ClassCoverageSummary({ classId, accentColor, doneIds }: Props) {
                   </div>
                 </div>
               ))}
+
+              {/* Student side only (doneIds is only ever passed there) -- pools every covered topic
+                  into one Practice round via PracticeScreen's ?topics= preselect. Self-check only,
+                  same instant-feedback style Practice already has; no score is reported anywhere,
+                  same as every other Practice round. */}
+              {doneIds && (
+                <a
+                  href={`/practice?topics=${known.map(t => t.id).join(",")}`}
+                  style={{ display: "inline-flex", alignItems: "center", gap: "6px", alignSelf: "flex-start", background: accentColor, color: "white", borderRadius: "10px", padding: "8px 14px", fontSize: "12.5px", fontWeight: 800, textDecoration: "none" }}
+                >
+                  <Icon name="target" size={13} color="white" /> Practice everything covered
+                </a>
+              )}
             </div>
           )}
         </div>
