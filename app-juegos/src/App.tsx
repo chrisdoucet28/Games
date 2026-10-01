@@ -315,7 +315,12 @@ function AuthenticatedApp() {
   // existing student-role account stays 'student' in the database untouched (per the owner's
   // explicit instruction — "they can stay student"), it just isn't acted on while paused. Flipping
   // the flag back to false instantly restores the real chooser/StudentHome branch below with no
-  // further changes needed here.
+  // further changes needed here — BUT: the owner wants every account re-asked for its role one
+  // more time when that happens ("we can ask every account again one more time"), not just
+  // resumed silently. This flip alone does NOT do that — it only skips the chooser for accounts
+  // that already have `role_chosen=true`. Raise this with the owner before actually flipping the
+  // flag back; a real fix needs a separate re-prompt step (e.g. a `role_reconfirmed_at` column, or
+  // resetting `role_chosen=false` for every account) rather than guessing at one here.
   if (!STUDENT_ACCOUNTS_PAUSED && (!roleInfo.chosen || roleInfo.role === 'student')) {
     return (
       <div>
