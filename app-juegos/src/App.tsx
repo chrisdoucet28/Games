@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Analytics } from '@vercel/analytics/react';
 import LessonGamesGenerator from './LessonGamesGenerator';
 import { AuthScreen } from './components/shared/AuthScreen';
@@ -22,9 +22,38 @@ import { PracticeScreen } from './components/shared/PracticeScreen';
 import { RoleChooserScreen } from './components/shared/RoleChooserScreen';
 import { StudentHome } from './components/student/StudentHome';
 import { AdminScreen } from './components/shared/AdminScreen';
-import { FREE_LAUNCH_ALL_PREMIUM } from './data/constants';
+import { StudentAccountsPausedScreen } from './components/shared/StudentAccountsPausedScreen';
+import { FREE_LAUNCH_ALL_PREMIUM, STUDENT_ACCOUNTS_PAUSED } from './data/constants';
+import { chooseRole } from './lib/profile';
 import { Icon } from './components/shared/Icon';
 import { isMusicEnabled, setMusicEnabled, onMusicEnabledChange, stopMusic } from './lib/music';
+
+// Width-based, not user-agent sniffing (fragile/spoofable, and already has one narrow legitimate
+// use elsewhere for a different purpose — see AuthScreen.tsx's isInAppBrowser) — same ~768px
+// phone/tablet boundary used for responsive layout throughout the app. This decides which
+// EXPERIENCE someone gets once, not a live-resizing layout concern, so it doesn't track resizes.
+function isPhoneWidth(): boolean {
+  return window.innerWidth < 768;
+}
+
+// Only reachable while STUDENT_ACCOUNTS_PAUSED is true, for a brand new account on a computer —
+// persists 'teacher' automatically so RoleChooserScreen's "I'm a student" option is never even
+// shown. The ref guards against firing twice if the parent re-renders (e.g. the theme/subscription
+// fetches elsewhere in AuthenticatedApp resolving) while this is still in flight; a failure resets
+// the guard so it retries on the next render instead of getting stuck.
+function AutoAssignTeacherRole({ onDone }: { onDone: () => void }) {
+  const firedRef = useRef(false);
+  useEffect(() => {
+    if (firedRef.current) return;
+    firedRef.current = true;
+    chooseRole('teacher').then(onDone).catch(() => { firedRef.current = false; });
+  }, [onDone]);
+  return (
+    <div style={{ minHeight: '100vh', background: '#1E1B4B', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ color: 'white', fontFamily: "'Segoe UI',system-ui,sans-serif", fontSize: '16px' }}>Loading…</div>
+    </div>
+  );
+}
 
 function ConfigErrorScreen() {
   return (
@@ -249,6 +278,14 @@ function AuthenticatedApp() {
     getSubscription().then(setSubscription).catch(() => {});
   }, [session]);
 
+  // STUDENT_ACCOUNTS_PAUSED: see its own comment in data/constants.ts. Checked before `loading`/
+  // `session` even resolve (window.innerWidth is available synchronously, no fetch needed) so a
+  // phone visitor never sees a flash of AuthScreen or the real app first — this applies regardless
+  // of login state or role, including the owner's own teacher account on their own phone.
+  if (STUDENT_ACCOUNTS_PAUSED && isPhoneWidth()) {
+    return <StudentAccountsPausedScreen />;
+  }
+
   if (loading) {
     return (
       <div style={{ minHeight: '100vh', background: '#1E1B4B', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -289,6 +326,17 @@ function AuthenticatedApp() {
   // whose profile isn't flagged is_admin, same "just don't render it" gate as everywhere else here.
   if (window.location.pathname === '/admin' && isAdmin) {
     return <AdminScreen userEmail={session.user.email ?? null} onExit={() => { window.location.pathname = '/'; }} />;
+  }
+
+  // STUDENT_ACCOUNTS_PAUSED, the computer-side half (the phone-width check above already caught
+  // every phone visitor regardless of role). Short-circuits ahead of the real chooser/StudentHome
+  // branch below, which is left completely untouched — flipping the flag back to false instantly
+  // restores it with no further changes needed here.
+  if (STUDENT_ACCOUNTS_PAUSED && roleInfo.role === 'student') {
+    return <StudentAccountsPausedScreen />;
+  }
+  if (STUDENT_ACCOUNTS_PAUSED && !roleInfo.chosen) {
+    return <AutoAssignTeacherRole onDone={() => setRoleInfo({ role: 'teacher', chosen: true })} />;
   }
 
   // Both the one-time chooser and the student home get the same slim top bar (log out + music
