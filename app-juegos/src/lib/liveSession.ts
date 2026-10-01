@@ -219,6 +219,84 @@ export function openHotSeatChannel(code: string): RealtimeChannel {
   });
 }
 
+// --- Word Relay ---
+//
+// Twenty-questions style: each team has its own hidden word, and one person at a time (the
+// "asker") has to ask yes/no questions to find it out while everyone else who knows the word
+// answers. This is the only game whose phones are individual PEOPLE rather than one phone per
+// team — several phones can join the same team, each identified by a per-device id (see
+// getDeviceId), and the screen rotates the asker through them. The word itself is only ever shown
+// to the "answerer" phones (never the asker's), and never on the main screen while any answerer
+// phone is connected. See RelayGame.tsx for exactly where.
+export type RelayRosterEntry = { id: string | number; name: string; color: TeamColor; mascot?: string | null };
+
+export type RelayPhase = "lobby" | "ready" | "asking" | "reveal" | "final";
+
+export type RelayStatePayload = {
+  phase: RelayPhase;
+  roster: RelayRosterEntry[];
+  // The team whose turn it is — during "reveal", the team that just guessed.
+  activeTeamId: string | number | null;
+  // The active team's current asker phone, or null when that team plays physically (no phones).
+  askerDeviceId: string | null;
+  // Connected device ids per team, current asker first, so a phone can say "you're #2 in line".
+  askerQueueByTeam: Record<string, string[]>;
+  // Phones allowed to see the word and press the controls this turn.
+  answererDeviceIds: string[];
+  // Only sent while a word is live (asking/reveal); the phone UI shows it to answerers only.
+  currentWord: string;
+  // True when no answerer phone is connected, so the main screen must show the word itself.
+  screenShowsWord: boolean;
+  phoneCountByTeam: Record<string, number>;
+  questionsLeftByTeam: Record<string, number>;
+  questionsPerTeam: number;
+  // Words correctly guessed per team this game.
+  wordsByTeam: Record<string, number>;
+  connectedTeamIds: (string | number)[];
+  ts: number;
+};
+
+// Broadcast phone -> screen. Validated screen-side: right phase, and the sender's deviceId must be
+// one of the current answerers.
+export type RelayActionPayload = {
+  teamId: string | number;
+  deviceId: string;
+  action: "guessed" | "missed" | "next" | "changeWord";
+};
+
+const DEVICE_ID_KEY = "classcade-device-id";
+
+// A stable id for THIS phone/tab, sent along with the team claim so a game that cares about
+// individual people (Word Relay) can tell two phones on the same team apart. sessionStorage, not
+// localStorage: it survives a refresh of the same tab (so a phone doesn't turn into a "new person"
+// mid-game) but a second tab is a second device, which is exactly what a phone-per-student setup
+// looks like.
+let memoryDeviceId: string | null = null;
+export function getDeviceId(): string {
+  if (memoryDeviceId) return memoryDeviceId;
+  try {
+    const existing = sessionStorage.getItem(DEVICE_ID_KEY);
+    if (existing) { memoryDeviceId = existing; return existing; }
+    const created = crypto.randomUUID();
+    sessionStorage.setItem(DEVICE_ID_KEY, created);
+    memoryDeviceId = created;
+    return created;
+  } catch {
+    memoryDeviceId = crypto.randomUUID();
+    return memoryDeviceId;
+  }
+}
+
+function relayChannelName(code: string): string {
+  return `relay-${code}`;
+}
+
+export function openRelayChannel(code: string): RealtimeChannel {
+  return supabase.channel(relayChannelName(code), {
+    config: { presence: { key: crypto.randomUUID() } },
+  });
+}
+
 // --- Order Up ---
 //
 // Screen-authoritative, like Hot Seat — the shared floor's ticket queue, timers, and claim/expiry
@@ -372,3 +450,131 @@ export function openHillChannel(code: string): RealtimeChannel {
     config: { presence: { key: crypto.randomUUID() } },
   });
 }
+
+// --- Bounty Board ---
+//
+// Screen-authoritative, same family as Order Up/Hot Seat — a phone-driven submit/claim/fix is just
+// an "action" broadcast folded into the exact same functions the screen's own buttons call. Unlike
+// Order Up's independent per-ticket queue, every team answers the SAME shared prompt each round,
+// and a round can't advance until every entry (including every escalated re-claim) resolves
+// correctly — so the state payload carries one prompt plus two flat lists (this round's original
+// entries, and any bounties spawned from a wrong one) rather than a ticket board.
+export type BountyBoardRosterEntry = { id: string | number; name: string; color: TeamColor; mascot?: string | null };
+
+export type BountyBoardPhase = "lobby" | "playing" | "final";
+
+// One team's status against the CURRENT round's shared prompt. `text` is the typing-mode draft/
+// submission (unused in spoken mode until a Wrong judgment fills it in from what the teacher typed
+// in by hand — see BountyBoardGame.tsx). `resolved` covers BOTH ways a team's round obligation gets
+// satisfied: answered correctly immediately, or the bounty it spawned was eventually solved by
+// someone else — a round only advances once every entry reads resolved.
+export type BountyRoundEntry = {
+  teamId: string | number;
+  text: string;
+  submitted: boolean;
+  resolved: boolean;
+};
+
+// A currently-open (or just-resolved) bounty. The same `id` persists across every escalation —
+// fields mutate in place on each miss rather than spawning a new bounty per attempt, so nothing has
+// to chase an id chain to find "the current state of this team's original wrong answer."
+export type Bounty = {
+  id: number;
+  originalTeamId: string | number;   // whose round entry this traces back to — flipping THIS
+                                      // entry's resolved flag is what unblocks round advancement.
+  wrongText: string;                 // the most recent wrong attempt — what a claimant must fix.
+  value: number;                     // current payout if claimed correctly: BOUNTY_VALUE * (missCount + 1).
+  missCount: number;                 // consecutive wrong attempts so far, always >= 1 once it exists.
+  excludedTeamId: string | number;   // most recent team to fail this — cannot reclaim until someone
+                                      // else takes it over (then THAT team becomes excluded instead).
+  claimedBy?: string | number;       // undefined = open for claiming.
+  // Typing-mode only — the claiming team's current fix draft/submission, same role as Order Up's
+  // Ticket.submittedSentence. Unused (stays undefined) the whole game through in spoken mode.
+  fixText?: string;
+  resolved: boolean;
+};
+
+export type BountyBoardStatePayload = {
+  phase: BountyBoardPhase;
+  roster: BountyBoardRosterEntry[];
+  connectedTeamIds: (string | number)[];
+  roundNumber: number;
+  totalRounds: number;
+  promptText: string;
+  answerMode: "spoken" | "typing";
+  roundEntries: BountyRoundEntry[];
+  bounties: Bounty[];
+  scores: Record<string, number>;
+  // Solo (1 real team + a CPU) — the phone view needs this because the normal "you can't claim
+  // your own bounty" rule inverts in solo: the CPU is racing to steal it instead, so the human is
+  // the ONLY one who ever can claim it (see PhoneBountyBoardView's own use of this flag).
+  isSolo: boolean;
+  ts: number;
+};
+
+export type BountyBoardActionPayload =
+  | { teamId: string | number; action: "submitRound"; text: string }
+  | { teamId: string | number; action: "claimBounty"; bountyId: number }
+  | { teamId: string | number; action: "submitBountyFix"; bountyId: number; text: string };
+
+function bountyBoardChannelName(code: string): string {
+  return `bounty-${code}`;
+}
+
+export function openBountyBoardChannel(code: string): RealtimeChannel {
+  return supabase.channel(bountyBoardChannelName(code), {
+    config: { presence: { key: crypto.randomUUID() } },
+  });
+}
+
+// --- Class Check-In ---
+//
+// Not a tenth "game" — a class-scoped meta-channel opened once per sitting (see
+// LessonGamesGenerator.tsx's "Start Class Check-In") that tells every checked-in phone WHICH
+// specific per-game channel to open next. Every per-game channel above is already prefixed by its
+// own game id (e.g. `orderup-${code}` vs `bounty-${code}`), so reusing the exact same code text
+// across every one of them for a whole sitting is safe — no collision risk, and it means this
+// payload only ever needs to say which game is active, never a new code. Purely a "here's what's
+// active" beacon: actual gameplay actions for whichever game is live still flow over THAT game's
+// own channel, opened separately by ClassJoinScreen.tsx — never over this one.
+// `rosterId` is the team's stable id in the class's saved-team list (classes.team_roster) — how a
+// logged-in student's account remembers "my team" between sittings (see ClassJoinScreen). Optional
+// on purpose: a teacher screen older than this, or a team never saved to the class, just omits it and
+// every phone behaves exactly as before.
+export type ClassSessionRosterEntry = { id: string | number; name: string; color: TeamColor; mascot?: string | null; rosterId?: string | null };
+
+export type ClassSessionStatePayload = {
+  // The saved class this sitting belongs to (null when the check-in isn't linked to one). Only used
+  // by optional student accounts to look up their own membership; ids are unguessable and every
+  // database function still checks who is asking.
+  classId?: string | null;
+  // Which GameMode.id is currently on screen, or null between games (game-select/results/
+  // topic-select) and during any non-phone-capable game — a checked-in phone shows the "watch the
+  // shared screen" placeholder whenever this is null or isn't in PHONE_CAPABLE_GAME_IDS below.
+  activeGame: string | null;
+  roster: ClassSessionRosterEntry[];
+  connectedTeamIds: (string | number)[];
+  ts: number;
+};
+
+// No phone -> screen action type here on purpose — a phone never sends anything on this channel,
+// it only ever reads `activeGame` to decide which per-game channel to open next. The team claim
+// itself travels as Presence (`track()`), exactly like every other game's join screen, not as a
+// broadcast event.
+
+function classSessionChannelName(code: string): string {
+  return `class-${code}`;
+}
+
+export function openClassSessionChannel(code: string): RealtimeChannel {
+  return supabase.channel(classSessionChannelName(code), {
+    config: { presence: { key: crypto.randomUUID() } },
+  });
+}
+
+// The 9 games whose own per-game channel a checked-in phone can actually open and drive — kept
+// here (not duplicated in LessonGamesGenerator.tsx or ClassJoinScreen.tsx) since this file is
+// already the single inventory of every phone-mode channel that exists.
+export const PHONE_CAPABLE_GAME_IDS: ReadonlySet<string> = new Set([
+  "auction", "spy", "whack", "hotseat", "orderup", "racetrack", "hill", "bounty", "relay",
+]);

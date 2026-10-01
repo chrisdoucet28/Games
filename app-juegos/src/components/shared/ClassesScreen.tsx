@@ -2,9 +2,12 @@ import { useEffect, useState } from "react";
 import { TeamIcon } from "./TeamIcon";
 import type { SavedClass } from "../../types";
 import { TEAM_COLORS, GAME_MODES, LEVELS_META, FREE_PLAN_LIMITS } from "../../data/constants";
-import { listClasses, createClass, deleteClass } from "../../lib/classes";
+import { listClasses, createClass, deleteClass, setLeaderboardVisibility } from "../../lib/classes";
 import { hexToRgba, type Theme } from "../../data/themes";
 import { Icon } from "./Icon";
+import { ClassStudentsPanel } from "./ClassStudentsPanel";
+import { ClassCoverageSummary } from "./ClassCoverageSummary";
+import { RoleRestricted } from "./RoleRestricted";
 
 type Props = {
   onBack: () => void;
@@ -13,11 +16,15 @@ type Props = {
   theme: Theme;
   isPaid: boolean;
   onUpgrade: () => void;
+  // Defense-in-depth only -- see RoleRestricted's own comment. Undefined (an old database without
+  // the student_accounts migration, or a caller that hasn't been updated to pass it) is treated as
+  // authorized, same as every other role check in this codebase.
+  role?: "teacher" | "student";
 };
 
 const gameLabel = (gameId: string | null) => GAME_MODES.find(g => g.id === gameId)?.name ?? gameId ?? "a game";
 
-export function ClassesScreen({ onBack, onResumeClass, onStartWithClass, theme, isPaid, onUpgrade }: Props) {
+export function ClassesScreen({ onBack, onResumeClass, onStartWithClass, theme, isPaid, onUpgrade, role }: Props) {
   const [classes, setClasses] = useState<SavedClass[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [newName, setNewName] = useState("");
@@ -60,6 +67,19 @@ export function ClassesScreen({ onBack, onResumeClass, onStartWithClass, theme, 
       refresh();
     }
   };
+
+  const handleToggleLeaderboard = async (cls: SavedClass) => {
+    const nextHidden = !cls.hide_from_leaderboard;
+    setClasses(prev => prev?.map(c => (c.id === cls.id ? { ...c, hide_from_leaderboard: nextHidden } : c)) ?? prev);
+    try {
+      await setLeaderboardVisibility(cls.id, nextHidden);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Couldn't update Leaderboard visibility.");
+      refresh();
+    }
+  };
+
+  if (role === "student") return <RoleRestricted onBack={onBack} theme={theme} />;
 
   return (
     <div style={{ minHeight: "100vh", background: "#F0F9FF", padding: "20px", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
@@ -139,12 +159,21 @@ export function ClassesScreen({ onBack, onResumeClass, onStartWithClass, theme, 
                       </div>
                     )}
                   </div>
-                  <button
-                    onClick={() => handleDelete(cls.id)} title="Delete class"
-                    style={{ background: "none", border: "none", color: "#9CA3AF", cursor: "pointer", padding: "2px 4px", display: "inline-flex" }}
-                  >
-                    <Icon name="trash" size={15} />
-                  </button>
+                  <div style={{ display: "flex", gap: "4px" }}>
+                    <button
+                      onClick={() => handleToggleLeaderboard(cls)}
+                      title={cls.hide_from_leaderboard ? "Hidden from Leaderboard — click to show" : "Visible on Leaderboard — click to hide"}
+                      style={{ background: "none", border: "none", color: cls.hide_from_leaderboard ? "#D1D5DB" : "#9CA3AF", cursor: "pointer", padding: "2px 4px", display: "inline-flex" }}
+                    >
+                      <Icon name={cls.hide_from_leaderboard ? "eyeOff" : "eye"} size={15} />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(cls.id)} title="Delete class"
+                      style={{ background: "none", border: "none", color: "#9CA3AF", cursor: "pointer", padding: "2px 4px", display: "inline-flex" }}
+                    >
+                      <Icon name="trash" size={15} />
+                    </button>
+                  </div>
                 </div>
 
                 {cls.teams.length > 0 && (
@@ -192,6 +221,9 @@ export function ClassesScreen({ onBack, onResumeClass, onStartWithClass, theme, 
                     <Icon name="plus" size={12} /> Start New Game
                   </button>
                 </div>
+
+                <ClassStudentsPanel classId={cls.id} theme={theme} />
+                <ClassCoverageSummary classId={cls.id} accentColor={theme.accentSolid} />
               </div>
             ))}
           </div>

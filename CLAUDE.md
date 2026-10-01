@@ -80,10 +80,19 @@ handout) with no guarantee they've seen any other specific lesson first.
   core-identity icon (e.g. Rocket Fuel's rocket, Vault Heist's vault), add the mascot *alongside*
   it — don't replace it. Generic stand-in icons (a missile, an attack animation) are fine to
   replace outright.
-- **Themes**: `data/themes.ts` presets only skin the shared chrome (welcome/setup/game-select/
+- **Themes (visual)**: `data/themes.ts` presets only skin the shared chrome (welcome/setup/game-select/
   results/My Classes/My Profile/Billing) — individual games keep their own fixed visual identity
   and are never themed. Colors that carry meaning (A1-C1 difficulty rainbow, correct/wrong
   feedback, destructive red) are also never themed.
+- **Themes (lesson focus)** — do not call this category "topics": every topic in `topics.ts`/
+  `topicOptions.ts` has a `focus` of `"grammar"`, `"vocabulary"`, or `"theme"` — never say or write
+  "topic-focus" for this third category, since "topic" is also the generic word for any lesson at
+  all (grammar, vocabulary, or theme) and using it for one specific category is what confused
+  things the first time. The stored value is literally `"theme"` (code, `topics.ts`'s `category`
+  field, and the `classes.focus` column in Supabase all use it), matching what the Setup screen and
+  Learn library already show teachers ("Grammar, Vocabulary, or Themes?"). If a change ever
+  reintroduces `"topic"` as a `focus`/`category` value, that's a regression of this exact rule —
+  fix it back to `"theme"`.
 - **Test accounts**: never sign up through the real `AuthScreen` form (sends real emails to
   whatever address is used). Create disposable test accounts via direct SQL insert into
   `auth.users`/`auth.identities` (see any recent Supabase-touching work for the exact template),
@@ -146,6 +155,118 @@ handout) with no guarantee they've seen any other specific lesson first.
   words, not just the variable content (event/time/reason) — otherwise the player has no way to
   know which of several correct phrasings the answer key actually expects, and a different, equally
   valid response gets marked wrong purely because nothing ever cued which one to use.
+- **Minefield's `minefieldGrid` — non-negotiable, check on every single new topic**:
+  `MinefieldGame.tsx` hard-codes a 5x5 board (`ROWS = 5, COLS = 5`) and indexes `colLabels`/
+  `rowLabels` by that fixed size regardless of how many entries the arrays actually have — a topic
+  with fewer than 5 of either isn't a smaller grid, it's tiles rendering `undefined` text to a
+  player. **Every `minefieldGrid` must have exactly 5 `colLabels` and exactly 5 `rowLabels`, always
+  — count them before moving on, every time, no exceptions.** And both arrays must be real,
+  half-sentence-shaped ideas — a genuine sentence opener/subject and a genuine verb-phrase/blank
+  continuation — never abstract category labels ("Get = Obtain") or bare topic words. The game
+  shows a picked tile's col label + row label side by side plus "+ your idea"; the student builds
+  one full sentence combining all three aloud, and the teacher judges it live — there's no
+  auto-graded correct/incorrect pairing, so never frame a grid as "match the correct pairs,
+  mismatched pairs are the mines" (the mines are random hidden tiles, unrelated to grammar).
+  Follow the established shape: `colLabels` = a subject or sentence-opener (e.g. `["I", "She",
+  "They", "We", "He"]` or `["I always …", "She needs to …", ...]`), `rowLabels` = a verb-phrase or
+  blank-templated continuation (e.g. `["___ (go) to…", ...]` or `["… give up …", ...]`) that reads
+  as one coherent sentence stem when combined with any column — see `irregular_verbs`,
+  `present_perfect`, or `phrasal_verbs` for the pattern. It's fine for a row's base-form word to
+  need student-supplied conjugation depending on the column (that's the actual speaking practice).
+  This conversation (`new-topics`) is where every new topic in this repo is authored, so this check
+  belongs in the build checklist for every single topic from here on — not something to catch on
+  a later audit. Three more things the game-lesson-changes audit found breaking this rule, so check
+  all of them together:
+  1. **The opener always goes in `colLabels`, never `rowLabels`.** A grid with complete independent
+     sentences in `colLabels` and the actual sentence-opener sitting in `rowLabels` has the axes
+     backwards — verify the column really is what starts the sentence, not what finishes it.
+  2. **Every column must combine grammatically with every row**, including plural/singular
+     agreement — e.g. a "One of the…" column needs plural nouns on every row, not a mix of
+     singular ones; a linking-verb column needs a predicate adjective on every row, not a bare
+     noun that doesn't attach to it.
+  3. **Leave a real gap to fill, never a pre-completed sentence.** A column/row that's already a
+     fully-formed correct sentence ("My hometown is bigger than most other cities") gives the
+     player nothing to produce — just something to read aloud. Use a bracketed base form the
+     player must transform themselves (`"___ (big) than…"` → bigger), matching the blank-templated
+     convention already required above, applied strictly: if a native speaker could read the cell
+     text aloud without changing a single word, it's not testing production.
+  4. **`minefieldGrid.instructions` is a real field rendered live to players**, describing which
+     axis is "top" vs "side" and how to combine them — not just internal documentation. Any fix
+     that swaps or reshapes an axis must update this text too, not just the two label arrays.
+- **Spy Among Us `spyRounds` — non-negotiable, check on every single new grammar topic**: for a
+  grammar-category topic that teaches ONE target structure, `crewmatePrompt` and `spyPrompt` must
+  use that SAME structure, differing only by real-world scenario/topic (e.g. crewmate talks about
+  their morning routine, spy talks about their weekend routine — both in present simple). Never
+  let the spy's prompt use a genuinely different tense/structure (e.g. crewmate in present simple,
+  spy in present continuous) — that turns the spy into an instant-obvious "different verb form"
+  giveaway a listening student catches by ear before the content even registers, which defeats the
+  actual "spot the odd one out by listening" mechanic. **There is no contrast exception.** The
+  game is "catch the spy because they're talking about a different *subject*" — never because they
+  used a different grammar form, tense, word-set or register. That holds even for topics whose whole
+  lesson is a contrast (`auxiliary_verbs_be_do`, `subject_object_questions`,
+  `present_simple_vs_continuous`, `modal_verbs`, `understanding_get`, `articles`...): both prompts
+  must ask for the SAME grammar (for a contrast topic, ask both sides to use *both* forms) and
+  differ only by real-world scenario. The same goes for vocabulary topics — both sides must be asked
+  to use the topic's own vocabulary (never idioms-vs-plain-wording, formal-vs-informal,
+  professional-vs-casual, or a neighbouring vocabulary domain for the spy) — and for any pair that
+  would differ by person or tense ("you" vs "someone else", present vs childhood). A theme topic
+  whose two sides simply take different angles on the subject (advantages vs disadvantages, city vs
+  country) is fine — that *is* a different subject. Test every round: if the two prompts were
+  swapped between players, could a listener tell who has which one from the *language* alone? If
+  yes, rewrite it. History: this rule used to allow "sub-skills this topic exists to teach" as
+  contrasts; the teacher removed that exemption (2026-09) after noticing students still caught the
+  spy by grammar. Two more rules, both non-negotiable:
+  1. **`spyPrompt` must be fully self-contained**, exactly like `crewmatePrompt` — the player
+     controlling the spy only ever sees their own prompt during play, never the crewmate's, until
+     the post-round reveal. Never phrase it as "…instead", "the same kind of claim", or anything
+     else that assumes the reader has also seen the crewmate's prompt.
+  2. **Don't hand-author `spyGuessOptions`.** The game builds the guess list itself at runtime by
+     pooling every `crewmateTopic`/`spyTopic` string used across that topic's own `spyRounds` (no
+     fabricated decoys) — the field is unused now. What actually matters instead: give each round
+     genuinely distinct `crewmateTopic`/`spyTopic` label strings (even when two rounds share the
+     same grammar, label them differently, e.g. `"...(Duration, Studying)"` vs
+     `"...(Duration, Exercising)"`) so the topic has at least 4 rounds contributing 8 distinct
+     labels between them — otherwise the auto-built guess pool degenerates into a near-binary
+     coin flip.
+- **`cardTasks` — non-negotiable, check on every single new topic**: every game that reads
+  `cardTasks` (`CastleGame.tsx`, `CardShuffleGame.tsx`, `ZombieSiegeGame.tsx`,
+  `BattleshipGame.tsx`, `KingOfHillGame.tsx`, `RaceTrackGame.tsx`) renders it as `type: "speaking
+  task"` — always an open, out-loud response the teacher listens to and judges live, never a typed
+  or written one. Two rules follow directly from that and both are non-negotiable:
+  1. **Never write a task whose verb implies writing** ("Write a paragraph...", "Write five
+     sentences...") — every task is spoken aloud, so use a speaking verb (Say/Describe/Explain/
+     Tell/Ask/Talk about/Make a sentence...). "Turn this into formal *writing*" has the same
+     problem even without the verb "write" — say "a more formal *sentence*" instead.
+  2. **Never dictate the entire expected utterance**, leaving the student nothing to actually
+     produce. "Answer this question with 'None': 'How many pets do you have?'" hands over the
+     complete answer — there's nothing left to speak except a memorized word. This is different
+     from constraining the *form* while leaving the *content* open (a legitimate, common pattern:
+     "Say a sentence with 'X'...", "Answer using 'because'...", "Correct this mistake: '...'" —
+     all of these require the student to actually construct something). The test: could two
+     different students genuinely produce two different, both-correct answers to this exact task?
+     If not, it's not a speaking prompt, it's a script.
+  Caught live in gameplay: a `quantifiers` task read "Answer this question with 'None': 'How many
+  pets do you have?'" and another read "Write a short paragraph about your city..." while the
+  in-game UI showed "SPEAKING PROMPT" / "Open response — teacher listens and judges" — neither
+  belonged there. Same fix as the Minefield rule above: this conversation authors every new
+  topic's `cardTasks`, so check every single task against both rules before moving on, every time.
+- **`choose correct grammar` items must end in a trailing `(option1/option2)` group — non-
+  negotiable, check on every single new topic**: Word Whack (`useMoleGame.ts`'s `parseChoices`)
+  extracts a topic's mole-whacking choices by regex from the very end of the `question` string —
+  it requires the text to end with a parenthesized, slash-separated list of 2-4 options (e.g.
+  `"'The homework must ___ finished by Friday.' (must be/must been/must being)"`), with `answer`
+  matching one of those options exactly (case-insensitive). Every other game that reads this same
+  question type (RaceTrack, Castle, LessonPlanScreen) just displays it as plain text for a teacher
+  to judge aloud, so a topic authored with a different phrasing (e.g. `"Which is correct? 'X.' /
+  'Y.'"`, answer = the full sentence) looks completely fine everywhere else in the app — the
+  breakage only surfaces the moment a teacher picks that topic for Word Whack specifically, where
+  it silently yields zero parseable items and the game shows "No multiple-choice content found for
+  this topic selection." Caught live: `basic_word_order` had all 20 of its `choose correct
+  grammar` items in the alternate full-sentence format, so Word Whack couldn't spawn a single mole
+  for it. Fixed by rewriting every item to the blank + `(a/b)` convention; a scripted sweep of all
+  135 topics against Word Whack's actual parsing logic confirmed it was the only offender — but
+  since nothing else in the app would ever catch a repeat of this, verify the format by eye (or
+  with a quick parse check) for every new topic's `choose correct grammar` pool before moving on.
 - **"How to Play" tutorials (`data/tutorials/*.tsx`)**: each game's intro screen has a How to
   Play button opening a scripted walkthrough (`components/shared/HowToPlayModal.tsx`) — hand-authored
   mockups, not driven by real game state, so nothing keeps them in sync with the actual game

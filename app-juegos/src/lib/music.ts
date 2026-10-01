@@ -1,0 +1,404 @@
+// Background music — separate from lib/sounds.ts (SFX) on purpose: its own mute toggle/volume,
+// so a teacher can keep the correct/wrong dings but kill the music bed, or vice versa. Three
+// looping tracks crossfade based on where the class currently is:
+//  - ambient: menus, setup, results — anywhere that isn't active gameplay or a Lesson Plan.
+//    Custom-made for ClassCade (the repo owner's own Suno generation), not stock — swapped in
+//    after two rounds of stock-library picks ("Smile", then a 4-way audition) both missed the
+//    mark on tone.
+//  - gameplay: playing a game, between timed/thinking moments — the fallback for any game that
+//    hasn't earned its own override for this context (a brief intro/setup window is often all it
+//    ever covers, once a game's dominant context has its own track). Custom Suno track ("Smooth
+//    Learning Groove", same file as Order Up's own tension track) — replaced the original Mixkit
+//    "Light It Up Boy" after teacher feedback that it "didn't work with really any moment."
+//  - tension: a timed turn is actively running (see useTurnTimer) — swapped back to gameplay the
+//    moment that timer stops, since it only ever runs while a game is already on screen. Mixkit
+//    Stock Music Free License (free for commercial use, no attribution required) — "Serene View".
+// Plus true silence via stopMusic() (not a context) for the moments nothing should play at all —
+// a Lesson Plan's own reading/teaching content, and a game's own final screen (cut off the moment
+// that screen appears, rather than let gameplay music run under it).
+//
+// Per-game overrides: the shared gameplay/tension identity above doesn't fit every game (a
+// whack-a-mole frenzy needs carnival energy, not the same "someone is quietly thinking" bed most
+// timer-based games use) — see GAME_OVERRIDES. A game with its own tracks calls
+// setMusicGame(gameId) on mount and setMusicGame(null) on unmount; every other game never calls
+// it at all; the shared defaults below still apply to any context that game doesn't override.
+//
+// Served from Vercel Blob storage rather than public/music/ — every deployment used to ship a
+// full copy of these files (44MB), which is what was driving the project's deployment storage
+// quota up on every single push. Re-upload via scripts/upload-media-to-blob.ts after adding or
+// replacing a track.
+const MEDIA_BASE = "https://es8h1nft4dvfmlmp.public.blob.vercel-storage.com";
+
+const MUSIC_FILES = {
+  ambient: `${MEDIA_BASE}/music/ambient.mp3`,
+  gameplay: `${MEDIA_BASE}/music/gameplay.mp3`,
+  tension: `${MEDIA_BASE}/music/tension.mp3`,
+} as const;
+
+export type MusicContext = keyof typeof MUSIC_FILES;
+
+// Custom Suno tracks for one specific game's own gameplay/tension moments, in place of the shared
+// defaults above. A game with no entry here (or missing one of the two contexts) just falls
+// through to the shared track for that context — additive, never a replacement for the defaults.
+const GAME_OVERRIDES: Partial<Record<string, Partial<Record<MusicContext, string>>>> = {
+  whack: {
+    gameplay: `${MEDIA_BASE}/music/whack-gameplay.mp3`,
+    tension: `${MEDIA_BASE}/music/whack-tension.mp3`,
+  },
+  // Teacher feedback: the shared tension track read as pure meditation, and the shared gameplay
+  // track felt way too hyped/party for the between-round moments — Auction wants official/classy
+  // bidding-hall energy for both, not chillout or funk.
+  auction: {
+    gameplay: `${MEDIA_BASE}/music/auction-gameplay.mp3`,
+    tension: `${MEDIA_BASE}/music/auction-tension.mp3`,
+  },
+  // Reused rather than new tracks — Hot Potato's frantic, comedic-explosion energy is the same
+  // "silly carnival frenzy" identity Word Whack's own tracks were made for, and it barely has a
+  // calm moment of its own to need a distinct gameplay track.
+  hotpotato: {
+    gameplay: `${MEDIA_BASE}/music/whack-gameplay.mp3`,
+    tension: `${MEDIA_BASE}/music/whack-tension.mp3`,
+  },
+  // Reused rather than new tracks — Vault Heist's high-stakes, no-partial-credit, suspense-before-
+  // a-reveal shape is the same beat Auction's tracks were made for, just heist- instead of
+  // auction-themed.
+  vault: {
+    gameplay: `${MEDIA_BASE}/music/auction-gameplay.mp3`,
+    tension: `${MEDIA_BASE}/music/auction-tension.mp3`,
+  },
+  // Tension-only overrides — these three games spend almost their entire active playtime in the
+  // timed/tension moment (a brief resolution/breather window is all "gameplay" ever covers for
+  // them), so only that one context got a custom Suno track; the shared gameplay track fills the
+  // rest, same tradeoff as Hot Potato before it needed a gameplay override too.
+  castle: {
+    tension: `${MEDIA_BASE}/music/castle-tension.mp3`,
+  },
+  cards: {
+    tension: `${MEDIA_BASE}/music/cards-tension.mp3`,
+  },
+  // Reused rather than a new track — King of the Hill's zone-picking/contested-duel tension is
+  // genuinely the same medieval-combat decision-under-pressure beat Castle Defense's track was
+  // made for, just zone-conquest instead of siege-defense.
+  hill: {
+    tension: `${MEDIA_BASE}/music/castle-tension.mp3`,
+  },
+  // Both contexts now custom — teacher feedback that the between-wave "preparing" moments (the
+  // read-pause before a new wave's zombies start spawning, and the "Wave Complete!" breather)
+  // were silently getting "Haunted House Chase" too, when that track is meant to mean "zombies are
+  // actually attacking right now." Reused rather than a new track — Rocket Fuel's "Misión Control"
+  // is already the house's build-to-a-climax countdown track (the fueling turn ramping up to
+  // launch), the same "something big is about to happen" shape a wave's incoming-horde countdown
+  // needs, just siege- instead of launch-themed.
+  zombie: {
+    gameplay: `${MEDIA_BASE}/music/rocket-tension.mp3`,
+    tension: `${MEDIA_BASE}/music/zombie-tension.mp3`,
+  },
+  // Tension-only — Rocket Fuel's 90s "fuel your rocket" turns dominate playtime; the shared
+  // gameplay track covers the brief team-end transition and the launch spectacle.
+  rocket: {
+    tension: `${MEDIA_BASE}/music/rocket-tension.mp3`,
+  },
+  // Tension-only — Order Up's whole session runs on a shared clock, so it never really leaves
+  // this context; the shared gameplay track would only ever show up in a sliver of transition time.
+  orderup: {
+    tension: `${MEDIA_BASE}/music/orderup-tension.mp3`,
+  },
+  // Tension-only — the "speaking phase" (building and saying the sentence) is Minefield's real
+  // main event each turn; the shared gameplay track covers the brief pick/judging windows.
+  minefield: {
+    tension: `${MEDIA_BASE}/music/minefield-tension.mp3`,
+  },
+  battleship: {
+    // Reused rather than a new track — the target-picking tension is the same medieval/
+    // swashbuckling-adventure combat-decision energy Castle Defense's track already covers, per
+    // teacher feedback that it reads as a "Pirates of the Caribbean" vibe at points — naval
+    // instead of siege, same family as castle/hill.
+    tension: `${MEDIA_BASE}/music/castle-tension.mp3`,
+    // The calm moment right after firing, while a team reads and discusses the grammar
+    // correction — quiet nautical ambiance, deliberately the most background/least-in-your-face
+    // track in the set (per teacher direction, worth remembering for any future moment that
+    // needs to sit further back than usual).
+    gameplay: `${MEDIA_BASE}/music/battleship-gameplay.mp3`,
+  },
+  // Tension-only — Hot Seat's 90s describe-and-guess turn is basically the whole game; the shared
+  // gameplay track covers the brief intro/turn-end windows.
+  hotseat: {
+    tension: `${MEDIA_BASE}/music/hotseat-tension.mp3`,
+  },
+  // Gameplay-only — Race Track barely ever leaves this context in normal team play (its timer-
+  // driven tension is gated to solo mode), so this is the track that carries almost the entire
+  // game; the shared tension track fills the rare solo-mode countdown instead.
+  racetrack: {
+    gameplay: `${MEDIA_BASE}/music/racetrack-gameplay.mp3`,
+  },
+  // Genuinely dual-mood, same shape as Auction — a real calm/unhurried stretch (peeking at your
+  // role, free discussion trying to spot the spy) and a real distinct tense moment (the vote, or
+  // the spy's under-pressure guess), not one context dominating the other.
+  spy: {
+    gameplay: `${MEDIA_BASE}/music/spy-gameplay.mp3`,
+    tension: `${MEDIA_BASE}/music/spy-tension.mp3`,
+  },
+  // Tension-only — Bounty Board's Western "Saloon Standoff" track plays once the round is live
+  // (teams writing, bounties being claimed); the shared gameplay track covers the intro, so the
+  // music audibly changes when play starts.
+  bounty: {
+    tension: `${MEDIA_BASE}/music/bounty-tension.mp3`,
+  },
+  // Tension-only — Word Relay's "Curious Case" detective-style track runs for the whole question-
+  // asking stretch (every phase between the welcome screen and the final results).
+  relay: {
+    tension: `${MEDIA_BASE}/music/relay-tension.mp3`,
+  },
+};
+
+function resolveSrc(ctx: MusicContext, gameId: string | null): string {
+  return (gameId && GAME_OVERRIDES[gameId]?.[ctx]) || MUSIC_FILES[ctx];
+}
+
+// Kept low relative to SFX — this plays continuously under everything else, including a
+// teacher's own voice, so it should always read as background, never foreground. Applies
+// regardless of which actual file plays for a context (shared default or a game's own override).
+const MUSIC_VOLUME: Record<MusicContext, number> = {
+  ambient: 0.22,
+  gameplay: 0.25,
+  // Teacher feedback: this was too loud relative to the other two — it's the one context that
+  // overlaps with a team actively trying to think/speak/write, so it needs to sit further back,
+  // not stand out more.
+  tension: 0.14,
+};
+
+// Most games' tension track is a genuinely calmer variant of their gameplay track, so dropping to
+// the shared tension volume above reads as a natural dip. A couple of games' tension override is
+// mixed at a much bigger contrast to their own gameplay track than that — for those, the sudden
+// switch itself (not just the volume) reads as jarring. Scales tension's volume up for just that
+// game; every other game (no entry, scale 1) is unaffected.
+const TENSION_VOLUME_SCALE: Partial<Record<string, number>> = {
+  // Teacher feedback: "the switch up is crazy" the moment a lock's question appears — auction-
+  // tension.mp3 reads as way calmer than auction-gameplay.mp3, a much bigger contrast than the
+  // shared gameplay/tension pair. Narrows the gap rather than eliminating it — Vault Heist's
+  // answer phase is still a team reading/discussing/answering out loud, so it should stay quieter
+  // than full gameplay energy, just not this big a cliff.
+  vault: 1.6,
+};
+
+function resolveVolume(ctx: MusicContext, gameId: string | null): number {
+  const base = MUSIC_VOLUME[ctx];
+  if (ctx !== "tension" || !gameId) return base;
+  const scale = TENSION_VOLUME_SCALE[gameId] ?? 1;
+  return Math.min(1, base * scale);
+}
+
+const FADE_MS = 700;
+const STORAGE_KEY = "classcade_music_enabled";
+
+let enabled = readEnabledFromStorage();
+let currentContext: MusicContext | null = null;
+let currentGameId: string | null = null;
+// The actual file path behind currentContext right now — tracked separately from currentContext
+// because the same context can resolve to a different file depending on currentGameId (e.g.
+// "tension" is whack-tension.mp3 while Word Whack is mounted, tension.mp3 for every other game).
+let currentSrc: string | null = null;
+const listeners = new Set<(enabled: boolean) => void>();
+
+function readEnabledFromStorage(): boolean {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw === null ? true : raw === "true";
+  } catch {
+    return true;
+  }
+}
+
+export function isMusicEnabled(): boolean {
+  return enabled;
+}
+
+export function onMusicEnabledChange(fn: (enabled: boolean) => void): () => void {
+  listeners.add(fn);
+  return () => listeners.delete(fn);
+}
+
+// Keyed by resolved file path (not MusicContext): the same context can point at different files
+// depending on currentGameId, so a context-keyed cache would mix up two games' tracks.
+const players = new Map<string, HTMLAudioElement>();
+
+function getPlayer(src: string): HTMLAudioElement {
+  let el = players.get(src);
+  if (!el) {
+    el = new Audio(src);
+    el.loop = true;
+    el.volume = 0;
+    players.set(src, el);
+  }
+  return el;
+}
+
+// Plain RAF-driven volume ramp — good enough for a ~0.7s crossfade between two loops, no need
+// for Web Audio API gain nodes at this scale.
+function fadeTo(el: HTMLAudioElement, target: number, ms: number) {
+  const start = el.volume;
+  const startTime = performance.now();
+  function step(now: number) {
+    // Clamped on both ends, not just the upper one — requestAnimationFrame's timestamp isn't
+    // guaranteed to come from the exact same clock reading as the performance.now() captured
+    // above (seen in practice on mobile browsers, especially right after a backgrounded tab
+    // resumes), so `now` can land a hair before `startTime` on the very first frame. That makes
+    // t go slightly negative, which (e.g. fading in from a near-zero start) computes a volume a
+    // hair below 0 — Sentry caught this crashing with "IndexSizeError: volume outside [0,1]".
+    // The final Math.max/Math.min on the assignment itself is a second, independent guard so an
+    // out-of-range value can never reach el.volume regardless of how t was computed.
+    const t = Math.min(1, Math.max(0, (now - startTime) / ms));
+    el.volume = Math.max(0, Math.min(1, start + (target - start) * t));
+    if (t < 1) {
+      requestAnimationFrame(step);
+    } else if (target === 0) {
+      el.pause();
+    }
+  }
+  requestAnimationFrame(step);
+}
+
+// Browsers refuse to start audio before the page has seen a real user gesture (click/key/tap) —
+// harmless for every OTHER call to this function, since by then a login click or a game-select tap
+// already happened on this same page, but the very first ambient track on a page load that's
+// already authenticated (session restored from storage, no click yet) hits this and gets silently
+// rejected. Rather than leave that first track dead until the teacher happens to click the mute
+// toggle, arm a one-time listener for the next real interaction anywhere on the page and retry
+// whatever should currently be playing then.
+let autoplayRetryArmed = false;
+
+function armAutoplayRetry() {
+  if (autoplayRetryArmed) return;
+  autoplayRetryArmed = true;
+  const retry = () => {
+    autoplayRetryArmed = false;
+    document.removeEventListener("pointerdown", retry);
+    document.removeEventListener("keydown", retry);
+    // Re-read current state rather than closing over the original src/context — the teacher may
+    // have already navigated somewhere else by the time this first gesture actually happens.
+    // Not gated on el.paused: calling play() on an already-playing element is a harmless no-op,
+    // and .paused is NOT a reliable signal here — the browser sets it false synchronously the
+    // moment play() is CALLED, independent of whether autoplay policy goes on to reject it.
+    if (enabled && currentSrc) {
+      const el = players.get(currentSrc);
+      // Re-arm on a second rejection instead of swallowing it — a stricter mobile browser (seen in
+      // practice on iOS) can reject this retry too, and a brand-new track that's never played
+      // before in this page session (e.g. the first time a game with its own override is entered)
+      // gets exactly one shot here; without re-arming, that track would stay silent for the rest of
+      // the session even though every other track already unlocked fine.
+      if (el) el.play().catch(err => { if (err?.name === "NotAllowedError") armAutoplayRetry(); });
+    }
+  };
+  document.addEventListener("pointerdown", retry, { once: true });
+  document.addEventListener("keydown", retry, { once: true });
+}
+
+function fadeInSrc(src: string, volume: number) {
+  const el = getPlayer(src);
+  el.play().catch(err => {
+    console.warn(`[music] "${src}" failed to play:`, err);
+    // DOMException (what play() actually rejects with) does NOT satisfy `instanceof Error` in
+    // browsers — it has its own separate WebIDL prototype chain, not the ECMAScript Error one —
+    // so check `.name` directly rather than gating on an Error-instance test first.
+    if (err?.name === "NotAllowedError") armAutoplayRetry();
+  });
+  fadeTo(el, volume, FADE_MS);
+}
+
+export function setMusicEnabled(next: boolean): void {
+  enabled = next;
+  try {
+    localStorage.setItem(STORAGE_KEY, String(next));
+  } catch {
+    // Best-effort — a private/incognito window shouldn't crash the toggle, just not persist it.
+  }
+  if (!enabled) {
+    players.forEach(el => {
+      if (!el.paused) fadeTo(el, 0, FADE_MS);
+    });
+  } else if (currentSrc && currentContext) {
+    fadeInSrc(currentSrc, resolveVolume(currentContext, currentGameId));
+  }
+  listeners.forEach(fn => fn(enabled));
+}
+
+// Idempotent — safe to call every render/effect run without retriggering the fade. Re-resolves
+// against currentGameId every time, so the same ctx can still trigger a real crossfade if the
+// active game (and therefore the actual file behind that context) changed since the last call.
+export function setMusicContext(ctx: MusicContext): void {
+  const nextSrc = resolveSrc(ctx, currentGameId);
+  if (currentContext === ctx && currentSrc === nextSrc) {
+    // Same context/track by our own bookkeeping — but that bookkeeping updates the moment
+    // fadeInSrc is CALLED, regardless of whether the browser actually let it play. A page load
+    // that already had a session restored (no click yet) hits exactly this: the very first
+    // ambient attempt gets silently blocked, currentContext/currentSrc still record "ambient" as
+    // if it worked, and every later screen change (My Classes, Learn, Leaderboard, back to the
+    // welcome screen — all "ambient" too) would otherwise no-op here forever, never once
+    // rechecking whether the element is actually playing. Every one of those navigations is a
+    // real click, so use it to notice and recover instead of trusting the stale bookkeeping.
+    // Not gated on el.paused: confirmed live that it reads false here even when nothing is
+    // actually audible (the browser sets it false synchronously the moment play() is CALLED,
+    // independent of whether autoplay policy goes on to reject it) — and calling play() on an
+    // already-playing element is a harmless no-op, so there's no cost to just always trying.
+    const el = players.get(nextSrc);
+    if (el && enabled) el.play().catch(() => {});
+    return;
+  }
+  const prevSrc = currentSrc;
+  currentContext = ctx;
+  currentSrc = nextSrc;
+  if (!enabled) return;
+  if (prevSrc && prevSrc !== nextSrc) {
+    const prevEl = players.get(prevSrc);
+    if (prevEl) fadeTo(prevEl, 0, FADE_MS);
+  }
+  if (prevSrc !== nextSrc) fadeInSrc(nextSrc, resolveVolume(ctx, currentGameId));
+}
+
+// Called by a game's own component (mount → its id, unmount → null) only when that game has a
+// GAME_OVERRIDES entry — every other game never calls this, since the default (no override) is
+// already correct for them. Re-resolves whatever context is currently playing so an override for
+// the game just entered (or the shared default for the game just left) takes effect immediately,
+// without that game needing to also call setMusicContext itself.
+export function setMusicGame(gameId: string | null): void {
+  if (currentGameId === gameId) return;
+  currentGameId = gameId;
+  if (currentContext) setMusicContext(currentContext);
+}
+
+// True silence, not another context — for the moments music shouldn't be playing at all (a
+// Lesson Plan's own reading/teaching content, a game's own final screen). A later setMusicContext
+// call starts fresh from here rather than no-op'ing (currentContext is null, not some old value).
+export function stopMusic(): void {
+  if (currentContext === null) return;
+  const prevSrc = currentSrc;
+  currentContext = null;
+  currentSrc = null;
+  if (prevSrc) {
+    const prevEl = players.get(prevSrc);
+    if (prevEl) fadeTo(prevEl, 0, FADE_MS);
+  }
+}
+
+// Teacher feedback: switching to another tab to look something up shouldn't leave the ambient/
+// gameplay/tension loop playing under it — a fade-out is used everywhere else in this file, but a
+// backgrounded tab throttles requestAnimationFrame (what fadeTo runs on), so a fade started right
+// as the tab hides can visibly hang partway instead of actually reaching silence. A hard pause is
+// what reliably and immediately stops it. Coming back gets a normal fade back in (this tab is
+// foregrounded again by then, so RAF isn't throttled) rather than snapping straight to full
+// volume, which would read as a jump-scare after however long the teacher was away.
+// Deliberately scoped to this module's sustained loops only — lib/sounds.ts's SFX are short
+// one-shot cues (a correct/wrong ding), not something that can be left playing under another tab.
+document.addEventListener("visibilitychange", () => {
+  if (!currentSrc) return;
+  const el = players.get(currentSrc);
+  if (!el) return;
+  if (document.hidden) {
+    el.pause();
+  } else if (enabled && currentContext) {
+    el.volume = 0;
+    el.play()
+      .then(() => fadeTo(el, resolveVolume(currentContext as MusicContext, currentGameId), FADE_MS))
+      .catch(err => { if (err?.name === "NotAllowedError") armAutoplayRetry(); });
+  }
+});

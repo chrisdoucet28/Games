@@ -1,0 +1,1009 @@
+import { useEffect, useMemo, useRef, useState } from "react";
+import { hexToRgba, type Theme } from "../../data/themes";
+import { LESSON_TOPICS, LEVEL_ORDER, LEVEL_COLOR, FOCUS_ORDER, FOCUS_LABEL, matchesTopicSearch, type LearnTopic } from "../../data/learnTopics";
+import { LESSON_PLANS, type RoundOut } from "../../data/lessonPlans";
+import { buildUnscrambleItems, type UnscrambleItem } from "../../data/lessonPlanUnscramble";
+import { REAL_WORLD_READINGS, type RealWorldReading } from "../../data/realWorldReadings";
+import { TOPIC_LIBRARY } from "../../data/topics";
+import { getProfile } from "../../lib/profile";
+import { LessonSectionBlock, CommonMistakesBlock } from "./LessonContent";
+import { TopicDiagram } from "./diagrams/GrammarDiagram";
+import { MascotDuo, pickMascotPair } from "./MascotDuo";
+import { QuestionCard } from "./QuestionCard";
+import { TeamIcon } from "./TeamIcon";
+import { Icon, type IconName } from "./Icon";
+import type { QuestionData, Team } from "../../types";
+
+type Props = {
+  onBack: () => void;
+  theme: Theme;
+  // Switches to the Learn screen (the "Learn" pill in the mode toggle below, shown on the index).
+  onOpenLearn: () => void;
+  // Picking a topic here no longer drops straight into its slideshow — the orchestrator routes
+  // through team-setup first (teams are required for every lesson, so prompts can be assigned to
+  // them), then renders LessonPlanSlideshow itself on a separate top-level screen.
+  onSelectTopic: (topicId: string) => void;
+};
+
+const PRINT_CSS = `
+  @page { margin: 12mm 15mm; }
+  @media print {
+    .lp-no-print { display: none !important; }
+    .lp-print-only { display: block !important; }
+    .lp-print-bg { background: white !important; padding: 0 !important; }
+  }
+  .lp-print-only { display: none; }
+`;
+
+function sampleByType(questions: QuestionData[], type: string, count: number): QuestionData[] {
+  const pool = questions.filter(q => q.type === type);
+  return [...pool].sort(() => Math.random() - 0.5).slice(0, count);
+}
+
+// Rounds a section's base prompt count up to the next multiple of the team count, so every team
+// gets an equal, fair number of turns in that section instead of some teams getting shorted (or
+// the last team's turn falling on a partial round). Capped well above anything the app's team
+// limits (max 5) could actually produce — a defensive backstop, not a real constraint — since
+// `sampleByType` already truncates gracefully if a topic's pool is ever thinner than requested.
+function scaledCount(base: number, teamCount: number, cap: number): number {
+  if (teamCount <= 1) return base;
+  return Math.min(cap, Math.ceil(base / teamCount) * teamCount);
+}
+
+// A small team-colored pill showing whose turn a prompt is — reused above each assignable
+// question, scenario prompt, and speaking task once teams are involved. Renders nothing when a
+// slide/prompt has no assignment yet (shouldn't normally happen now that teams are required
+// before this screen is ever reached, but harmless either way).
+function AssignedTeamBadge({ team }: { team?: Team }) {
+  if (!team) return null;
+  return (
+    <span style={{ display: "inline-flex", alignItems: "center", gap: "5px", background: team.color.bg, color: "white", borderRadius: "999px", padding: "4px 12px 4px 8px", fontSize: "12.5px", fontWeight: "800", marginBottom: "10px" }}>
+      <TeamIcon team={team} size={15} color="white" /> {team.name}'s turn
+    </span>
+  );
+}
+
+// Compact sibling of AssignedTeamBadge — for assignments that sit inline inside running text or a
+// tight list (a paragraph-cloze blank, a matching term) rather than above a whole card, where the
+// full badge would overwhelm the line it's attached to.
+function InlineTeamTag({ team }: { team?: Team }) {
+  if (!team) return null;
+  return (
+    <span style={{ display: "inline-flex", alignItems: "center", gap: "3px", background: team.color.bg, color: "white", borderRadius: "999px", padding: "1px 7px 1px 4px", fontSize: "10px", fontWeight: "800", verticalAlign: "middle", whiteSpace: "nowrap", flexShrink: 0 }}>
+      <TeamIcon team={team} size={10} color="white" /> {team.name}
+    </span>
+  );
+}
+
+export function LessonPlanScreen({ onBack, theme, onOpenLearn, onSelectTopic }: Props) {
+  const availableTopics = useMemo(() => LESSON_TOPICS.filter(t => LESSON_PLANS[t.id]), []);
+  const [searchTerm, setSearchTerm] = useState("");
+  // "type" (default) keeps the Grammar/Vocabulary/Themes sections; "order" flattens each level into
+  // one single teaching sequence instead — only meaningful for levels that actually have `order`
+  // values assigned (A1 so far), but harmless (falls back to existing array order) elsewhere.
+  const [viewMode, setViewMode] = useState<"type" | "order">("type");
+
+  const searchedTopics = availableTopics.filter(t => matchesTopicSearch(t.lesson.title, searchTerm));
+  const byLevel = LEVEL_ORDER
+    .map(level => ({ level, topics: searchedTopics.filter(t => t.meta.level === level) }))
+    .filter(g => g.topics.length > 0);
+
+  return (
+    <div style={{ minHeight: "100vh", background: "#F0F9FF", padding: "20px", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
+      <div style={{ maxWidth: "720px", margin: "0 auto" }}>
+        <button onClick={onBack} style={{ background: "none", border: `2px solid ${theme.accentSolid}`, color: theme.accentSolid, borderRadius: "10px", padding: "8px 16px", cursor: "pointer", fontWeight: "700", marginBottom: "20px", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px" }}><Icon name="back" size={13} /> Back</button>
+
+        <div style={{ textAlign: "center", marginBottom: "24px" }}>
+          <h2 style={{ fontSize: "30px", fontWeight: "900", color: theme.heroBg[0], margin: 0, fontFamily: theme.headingFont, display: "flex", alignItems: "center", justifyContent: "center", gap: "10px" }}>
+            <Icon name="school" size={26} /> Lesson Plans
+          </h2>
+          <p style={{ color: "#6B7280", marginTop: "8px" }}>
+            Traditional, ~30-minute class activities for one topic — presentation, practice, and production, no game pressure. Covers every level, A1 to C1.
+          </p>
+          <div style={{ display: "inline-flex", background: "white", border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, borderRadius: "999px", padding: "4px", marginTop: "14px" }}>
+            <button
+              onClick={onOpenLearn}
+              style={{ background: "none", border: "none", color: theme.accentSolid, borderRadius: "999px", padding: "8px 18px", fontWeight: "800", fontSize: "13px", fontFamily: theme.headingFont, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "6px" }}
+            >
+              <Icon name="learn" size={14} /> Learn
+            </button>
+            <div style={{ background: theme.accentSolid, color: "white", borderRadius: "999px", padding: "8px 18px", fontWeight: "800", fontSize: "13px", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px" }}>
+              <Icon name="school" size={14} /> Lesson Plans
+            </div>
+          </div>
+        </div>
+
+        {availableTopics.length > 0 && (
+          <div style={{ position: "relative", marginBottom: "20px" }}>
+            <Icon name="search" size={15} color="#9CA3AF" style={{ position: "absolute", left: "14px", top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+              placeholder="Search lesson plans..."
+              style={{
+                width: "100%", boxSizing: "border-box", padding: "11px 40px 11px 38px",
+                border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, borderRadius: "12px", fontSize: "14px",
+                fontWeight: "600", color: theme.heroBg[0], outline: "none",
+              }}
+            />
+            {searchTerm !== "" && (
+              <button
+                type="button"
+                onClick={() => setSearchTerm("")}
+                aria-label="Clear search"
+                style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", background: hexToRgba(theme.accentSolid, 0.12), border: "none", borderRadius: "50%", width: "22px", height: "22px", color: theme.accentSolid, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
+              >
+                <Icon name="close" size={10} />
+              </button>
+            )}
+          </div>
+        )}
+
+        {availableTopics.length > 0 && (
+          <div style={{ display: "inline-flex", background: "white", border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, borderRadius: "999px", padding: "4px", marginBottom: "20px" }}>
+            <button
+              onClick={() => setViewMode("type")}
+              style={{ background: viewMode === "type" ? theme.accentSolid : "none", color: viewMode === "type" ? "white" : theme.accentSolid, border: "none", borderRadius: "999px", padding: "7px 16px", fontWeight: "800", fontSize: "13px", fontFamily: theme.headingFont, cursor: "pointer" }}
+            >
+              By Type
+            </button>
+            <button
+              onClick={() => setViewMode("order")}
+              style={{ background: viewMode === "order" ? theme.accentSolid : "none", color: viewMode === "order" ? "white" : theme.accentSolid, border: "none", borderRadius: "999px", padding: "7px 16px", fontWeight: "800", fontSize: "13px", fontFamily: theme.headingFont, cursor: "pointer" }}
+            >
+              Recommended Order
+            </button>
+          </div>
+        )}
+
+        {availableTopics.length === 0 ? (
+          <div style={{ textAlign: "center", color: "#6B7280", padding: "40px 0" }}>No lesson plans yet — check back soon.</div>
+        ) : searchedTopics.length === 0 ? (
+          <div style={{ textAlign: "center", color: "#6B7280", padding: "40px 0" }}>No topics match "{searchTerm.trim()}"</div>
+        ) : (
+          byLevel.map(group => (
+            <div key={group.level} style={{ marginBottom: "24px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "14px" }}>
+                <span style={{ background: LEVEL_COLOR[group.level], color: "white", borderRadius: "999px", padding: "3px 12px", fontSize: "13px", fontWeight: "800" }}>{group.level}</span>
+                <span style={{ color: "#9CA3AF", fontSize: "12px", fontWeight: "700" }}>{group.topics.length} lesson plan{group.topics.length === 1 ? "" : "s"}</span>
+              </div>
+              {viewMode === "order" ? (
+                <div>
+                  {!group.topics.some(t => t.meta.order != null) && (
+                    <div style={{ color: "#9CA3AF", fontSize: "12px", fontStyle: "italic", marginBottom: "8px" }}>
+                      No recommended order set for {group.level} yet — showing default order.
+                    </div>
+                  )}
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(200px,1fr))", gap: "10px" }}>
+                    {[...group.topics]
+                      .sort((a, b) => (a.meta.order ?? Number.MAX_SAFE_INTEGER) - (b.meta.order ?? Number.MAX_SAFE_INTEGER))
+                      .map((t, i) => (
+                        <button
+                          key={t.id} onClick={() => onSelectTopic(t.id)}
+                          style={{ textAlign: "left", background: "white", border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, borderRadius: "12px", padding: "14px 16px", cursor: "pointer", fontFamily: "inherit", display: "flex", alignItems: "flex-start", gap: "10px" }}
+                        >
+                          <span style={{ background: hexToRgba(theme.accentSolid, 0.12), color: theme.accentSolid, borderRadius: "50%", width: "22px", height: "22px", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "11px", fontWeight: "800" }}>{i + 1}</span>
+                          <div>
+                            <div style={{ fontWeight: "800", color: theme.heroBg[0], fontSize: "14px", fontFamily: theme.headingFont }}>{t.lesson.title}</div>
+                            <div style={{ color: "#9CA3AF", fontSize: "11px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.03em", marginTop: "3px" }}>{FOCUS_LABEL[t.meta.focus ?? "grammar"]}</div>
+                          </div>
+                        </button>
+                      ))}
+                  </div>
+                </div>
+              ) : (
+                FOCUS_ORDER.filter(focus => group.topics.some(t => (t.meta.focus ?? "grammar") === focus)).map(focus => (
+                  <div key={focus} style={{ marginBottom: "16px" }}>
+                    <div style={{ color: "#6B7280", fontSize: "12px", fontWeight: "800", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: "8px" }}>{FOCUS_LABEL[focus]}</div>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(200px,1fr))", gap: "10px" }}>
+                      {group.topics
+                        .filter(t => (t.meta.focus ?? "grammar") === focus)
+                        .sort((a, b) => (a.meta.order ?? Number.MAX_SAFE_INTEGER) - (b.meta.order ?? Number.MAX_SAFE_INTEGER))
+                        .map((t, i) => (
+                          <button
+                            key={t.id} onClick={() => onSelectTopic(t.id)}
+                            style={{ textAlign: "left", background: "white", border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, borderRadius: "12px", padding: "14px 16px", cursor: "pointer", fontFamily: "inherit", display: "flex", alignItems: "flex-start", gap: "10px" }}
+                          >
+                            {t.meta.order != null && (
+                              <span style={{ background: hexToRgba(theme.accentSolid, 0.12), color: theme.accentSolid, borderRadius: "50%", width: "22px", height: "22px", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "11px", fontWeight: "800" }}>{i + 1}</span>
+                            )}
+                            <div style={{ fontWeight: "800", color: theme.heroBg[0], fontSize: "14px", fontFamily: theme.headingFont }}>{t.lesson.title}</div>
+                          </button>
+                        ))}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
+
+// One flat slide per screen the class sees — built once from whatever's already in scope for this
+// topic (existing lesson content + sampled question-bank items), plus the one authored round-out
+// exercise. "question" slides reuse QuestionCard exactly as every game already does. "presentation"
+// is split one slide per Lesson section — the same blue-header divisions the Learn page shows all
+// at once on one scrolling card — so the explanation reads like the rest of the slideshow instead
+// of a wall of text; "commonMistakes" is its own trailing slide, shown only when the lesson has
+// any. "realWorld" is likewise shown only when REAL_WORLD_READINGS has an entry for this topic
+// (currently the A1 pilot only) — like "roundOut", it's one step with its own internal phases
+// (mode select, content, comprehension questions, optional reveal), rendered by RealWorldReadingStep.
+type Slide =
+  | { kind: "intro" }
+  | { kind: "presentation"; sectionIndex: number }
+  | { kind: "commonMistakes" }
+  | { kind: "question"; sectionLabel: string; sectionIcon: IconName; question: QuestionData; progress: string; assignedTeam?: Team }
+  | { kind: "roundOut" }
+  | { kind: "realWorld"; reading: RealWorldReading }
+  | { kind: "speaking"; tasks: { text: string; assignedTeam?: Team }[] }
+  | { kind: "done" };
+
+// Teams are required before this screen is ever reached (see the orchestrator's team-setup gate),
+// so `teams` is always non-empty in practice — the `teams.length === 0` guards below just keep the
+// component from crashing if that invariant is ever violated, rendering with no badges instead.
+export function LessonPlanSlideshow({ topic, theme, teams, onBack, onPlayGameForTopic }: { topic: LearnTopic; theme: Theme; teams: Team[]; onBack: () => void; onPlayGameForTopic?: (topicId: string) => void }) {
+  const topicData = TOPIC_LIBRARY[topic.id as keyof typeof TOPIC_LIBRARY] as { questions: QuestionData[]; cardTasks?: { task: string }[] };
+  const roundOut = LESSON_PLANS[topic.id];
+
+  // Content sampling only — deliberately excludes `teams` from its deps (see the eslint-disable
+  // below) so a bigger/smaller team count never re-shuffles which questions were already drawn,
+  // only how many. Team ASSIGNMENT (below) is a separate memoized pass over this fixed list.
+  const rawSlides = useMemo<Slide[]>(() => {
+    const teamCount = Math.max(1, teams.length);
+    // Prefers "choose correct grammar" for the warm-up; falls back to "fill in the blank" for any
+    // topic whose pool is thin on that type. Practice B then picks whichever of the two remaining
+    // controlled-practice types actually has enough content, so the two steps never draw from the
+    // same pool.
+    const mcq = sampleByType(topicData.questions, "choose correct grammar", scaledCount(6, teamCount, 20));
+    const practiceA = mcq.length >= 4 ? { type: "choose correct grammar", icon: "options" as IconName, items: mcq }
+      : { type: "fill in the blank", icon: "options" as IconName, items: sampleByType(topicData.questions, "fill in the blank", scaledCount(6, teamCount, 20)) };
+
+    const practiceBCandidates = ["fill in the blank", "correct grammar mistakes"].filter(t => t !== practiceA.type);
+    let practiceB = { type: practiceBCandidates[0], icon: "pencil" as IconName, items: sampleByType(topicData.questions, practiceBCandidates[0], scaledCount(6, teamCount, 20)) };
+    if (practiceB.items.length < 4 && practiceBCandidates[1]) {
+      const alt = sampleByType(topicData.questions, practiceBCandidates[1], scaledCount(6, teamCount, 20));
+      if (alt.length > practiceB.items.length) practiceB = { type: practiceBCandidates[1], icon: "pencil" as IconName, items: alt };
+    }
+
+    const production = sampleByType(topicData.questions, "use vocabulary in a sentence", scaledCount(4, teamCount, 20));
+    const speakingCount = scaledCount(3, teamCount, 20);
+    const speakingTasks = (topicData.cardTasks?.length
+      ? [...topicData.cardTasks].sort(() => Math.random() - 0.5).slice(0, speakingCount).map(t => t.task)
+      : sampleByType(topicData.questions, "speaking task", speakingCount).map(q => q.question ?? "").filter(Boolean)
+    ).map(text => ({ text }));
+
+    const list: Slide[] = [{ kind: "intro" }];
+    topic.lesson.sections.forEach((_, i) => list.push({ kind: "presentation", sectionIndex: i }));
+    if (topic.lesson.commonMistakes.length > 0) list.push({ kind: "commonMistakes" });
+    practiceA.items.forEach((q, i) => list.push({ kind: "question", sectionLabel: "Warm-Up Practice", sectionIcon: practiceA.icon, question: q, progress: `${i + 1}/${practiceA.items.length}` }));
+    practiceB.items.forEach((q, i) => list.push({ kind: "question", sectionLabel: "More Practice", sectionIcon: practiceB.icon, question: q, progress: `${i + 1}/${practiceB.items.length}` }));
+    list.push({ kind: "roundOut" });
+    production.forEach((q, i) => list.push({ kind: "question", sectionLabel: "Your Turn", sectionIcon: "star", question: q, progress: `${i + 1}/${production.length}` }));
+    const realWorld = REAL_WORLD_READINGS[topic.id];
+    if (realWorld) list.push({ kind: "realWorld", reading: realWorld });
+    if (speakingTasks.length) list.push({ kind: "speaking", tasks: speakingTasks });
+    list.push({ kind: "done" });
+    return list;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // How many unscramble items to show — same team-scaling as every other section, computed here
+  // (not inside UnscrambleRoundOut) so the assignment pass below knows exactly how many ticks to
+  // reserve for it. Only the COUNT needs to be known up front; buildUnscrambleItems is still called
+  // again for the actual (freshly re-shuffled) content where it's rendered — safe, since the pool
+  // size (and therefore the length after slicing to this count) doesn't depend on the shuffle.
+  const unscrambleCount = roundOut.kind === "unscramble" ? scaledCount(4, Math.max(1, teams.length), 20) : 0;
+
+  // Assignment pass: a single running counter walked across the WHOLE lesson in document order —
+  // not reset per section — so rotation stays smooth class-wide instead of every section starting
+  // back on team 1. Covers every genuinely assignable unit in the lesson, not just questions:
+  // roundOut prompts/blanks/pairs/items and realWorld's comprehension questions aren't their own
+  // Slide entries (there's one "roundOut"/"realWorld" slide regardless of how many sub-items it
+  // has), so they're consumed at that exact point in the walk and returned separately rather than
+  // attached to the Slide itself. errorPassage has no discrete sub-items — the whole exercise gets
+  // one team, still wrapped in a one-element array so every roundOut kind shares the same prop
+  // shape downstream. Skipped entirely for a solo team (<=1) — with nobody to rotate to, every
+  // single badge would just say the same one team's name over and over, which is noise, not
+  // information; a solo class plays through with no badges at all, same as before this feature.
+  const { slides, roundOutAssignedTeams, realWorldAssignedTeams } = useMemo(() => {
+    if (teams.length <= 1) return { slides: rawSlides, roundOutAssignedTeams: [] as Team[], realWorldAssignedTeams: [] as Team[] };
+    let turn = 0;
+    const nextTeam = () => teams[turn++ % teams.length];
+    let roundOutAssignedTeams: Team[] = [];
+    let realWorldAssignedTeams: Team[] = [];
+    const assigned = rawSlides.map((s): Slide => {
+      if (s.kind === "question") return { ...s, assignedTeam: nextTeam() };
+      if (s.kind === "speaking") return { ...s, tasks: s.tasks.map(t => ({ ...t, assignedTeam: nextTeam() })) };
+      if (s.kind === "roundOut") {
+        if (roundOut.kind === "scenario") roundOutAssignedTeams = roundOut.prompts.map(() => nextTeam());
+        else if (roundOut.kind === "paragraphCloze") roundOutAssignedTeams = roundOut.segments.filter(seg => typeof seg !== "string").map(() => nextTeam());
+        else if (roundOut.kind === "matching") roundOutAssignedTeams = roundOut.pairs.map(() => nextTeam());
+        else if (roundOut.kind === "unscramble") roundOutAssignedTeams = Array.from({ length: unscrambleCount }, () => nextTeam());
+        else if (roundOut.kind === "errorPassage") roundOutAssignedTeams = [nextTeam()];
+      }
+      if (s.kind === "realWorld") realWorldAssignedTeams = s.reading.questions.map(() => nextTeam());
+      return s;
+    });
+    return { slides: assigned, roundOutAssignedTeams, realWorldAssignedTeams };
+  }, [rawSlides, teams, roundOut, unscrambleCount]);
+
+  const [slideIndex, setSlideIndex] = useState(0);
+  const [showAnswer, setShowAnswer] = useState(false);
+  const slide = slides[slideIndex];
+
+  // The realWorld slide manages its own internal phases (mode select → content → questions →
+  // reveal) — Previous should step back through those before exiting to the prior outer slide.
+  // RealWorldReadingStep assigns its own handler here every render (same pattern as
+  // MinefieldGame.tsx's pickTileRef); it returns true when it handled the back-navigation
+  // internally, false when there's nowhere further back to go inside the step.
+  const realWorldBackRef = useRef<(() => boolean) | null>(null);
+
+  // Paid-only branding perk (see ProfileScreen/BrandBadge), same as Learn's own printable handout.
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  useEffect(() => {
+    getProfile().then(p => setLogoUrl(p.org_logo_url)).catch(() => {});
+  }, []);
+
+  const goNext = () => { setSlideIndex(i => Math.min(i + 1, slides.length - 1)); setShowAnswer(false); };
+  const goPrev = () => {
+    if (slide.kind === "realWorld" && realWorldBackRef.current?.()) return;
+    if (slideIndex === 0) onBack(); else { setSlideIndex(i => i - 1); setShowAnswer(false); }
+  };
+
+  const cardStyle: React.CSSProperties = { position: "relative", background: "white", border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, borderRadius: "16px", padding: "24px", minHeight: "320px" };
+  const nextBtnStyle: React.CSSProperties = { background: `linear-gradient(135deg,${theme.cta[0]},${theme.cta[1]})`, color: "white", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "800", cursor: "pointer", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px" };
+
+  return (
+    <div className="lp-print-bg" style={{ minHeight: "100vh", background: "#F0F9FF", padding: "20px", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
+      <style>{PRINT_CSS}</style>
+      <div style={{ maxWidth: "640px", margin: "0 auto" }}>
+        <div className="lp-no-print" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px" }}>
+          <button onClick={goPrev} style={{ background: "none", border: `2px solid ${theme.accentSolid}`, color: theme.accentSolid, borderRadius: "10px", padding: "8px 14px", cursor: "pointer", fontWeight: "700", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px" }}>
+            <Icon name="back" size={13} /> {slideIndex === 0 ? "Back" : "Previous"}
+          </button>
+          <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+            <span style={{ color: "#9CA3AF", fontSize: "12px", fontWeight: "700" }}>Step {slideIndex + 1} of {slides.length}</span>
+            {/* Previous only steps back one slide at a time — with up to 20+ steps, leaving the
+                lesson mid-way otherwise means clicking it that many times. Skips straight to the
+                index regardless of progress; nothing here is saved, so there's nothing to lose. */}
+            {slideIndex > 0 && (
+              <button onClick={onBack} style={{ background: "none", border: "none", color: "#9CA3AF", cursor: "pointer", fontWeight: "700", fontFamily: theme.headingFont, fontSize: "12px", display: "inline-flex", alignItems: "center", gap: "4px", padding: 0 }}>
+                <Icon name="close" size={11} /> Exit
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div className="lp-no-print" style={cardStyle}>
+          {slide.kind === "intro" && (
+            <div style={{ textAlign: "center" }}>
+              <MascotDuo variant="header" mascots={pickMascotPair(topic.id, "header")} />
+              <span style={{ background: LEVEL_COLOR[topic.meta.level ?? "A1"], color: "white", borderRadius: "999px", padding: "3px 12px", fontSize: "12px", fontWeight: "800" }}>{topic.meta.level}</span>
+              <h2 style={{ fontSize: "26px", fontWeight: "900", color: theme.heroBg[0], margin: "12px 0 10px", fontFamily: theme.headingFont }}>{topic.lesson.title}</h2>
+              <p style={{ color: "#6B7280", fontSize: "14px", marginBottom: "6px" }}><Icon name="hourglass" size={13} /> About 30 minutes</p>
+              <p style={{ color: "#4B5563", fontSize: "15px", lineHeight: 1.6, maxWidth: "440px", margin: "0 auto" }}>
+                A full presentation-practice-production lesson: the rule explained, controlled practice, one focused exercise, open production, and a speaking task to finish.
+              </p>
+            </div>
+          )}
+
+          {slide.kind === "presentation" && (() => {
+            const sectionCount = topic.lesson.sections.length;
+            return (
+              <div>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", marginBottom: "14px", color: theme.accentSolid, fontWeight: "800", fontSize: "13px", textTransform: "uppercase", letterSpacing: "0.04em" }}>
+                  <Icon name="bookOpen" size={14} /> Explanation {sectionCount > 1 && <span style={{ color: "#9CA3AF", fontWeight: "700" }}>· {slide.sectionIndex + 1}/{sectionCount}</span>}
+                </div>
+                {slide.sectionIndex === 0 && (
+                  <>
+                    <h2 style={{ fontSize: "22px", fontWeight: "900", color: theme.heroBg[0], margin: "0 0 8px", fontFamily: theme.headingFont }}>{topic.lesson.title}</h2>
+                    <p style={{ color: "#4B5563", fontSize: "14px", lineHeight: 1.6, margin: "0 0 18px" }}>{topic.lesson.intro}</p>
+                    <TopicDiagram topicId={topic.id} variant="screen" accentColor={theme.accentSolid} />
+                  </>
+                )}
+                <LessonSectionBlock section={topic.lesson.sections[slide.sectionIndex]} theme={theme} />
+              </div>
+            );
+          })()}
+
+          {slide.kind === "commonMistakes" && (
+            <div>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", marginBottom: "14px", color: theme.accentSolid, fontWeight: "800", fontSize: "13px", textTransform: "uppercase", letterSpacing: "0.04em" }}>
+                <Icon name="warning" size={14} /> Explanation <span style={{ color: "#9CA3AF", fontWeight: "700" }}>· Common Mistakes</span>
+              </div>
+              <CommonMistakesBlock commonMistakes={topic.lesson.commonMistakes} />
+            </div>
+          )}
+
+          {slide.kind === "question" && (
+            <div>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", marginBottom: "10px", color: theme.accentSolid, fontWeight: "800", fontSize: "13px", textTransform: "uppercase", letterSpacing: "0.04em" }}>
+                <Icon name={slide.sectionIcon} size={14} /> {slide.sectionLabel} <span style={{ color: "#9CA3AF", fontWeight: "700" }}>· {slide.progress}</span>
+              </div>
+              <div style={{ textAlign: "center" }}><AssignedTeamBadge team={slide.assignedTeam} /></div>
+              <QuestionCard question={slide.question} showAnswer={showAnswer} onReveal={() => setShowAnswer(true)} gameId="lessonplan" />
+            </div>
+          )}
+
+          {slide.kind === "roundOut" && <RoundOutStep roundOut={roundOut} topicId={topic.id} theme={theme} onDone={goNext} assignedTeams={roundOutAssignedTeams} unscrambleCount={unscrambleCount} />}
+
+          {slide.kind === "realWorld" && <RealWorldReadingStep reading={slide.reading} theme={theme} onDone={goNext} backRef={realWorldBackRef} assignedTeams={realWorldAssignedTeams} />}
+
+          {slide.kind === "speaking" && (
+            <div>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", marginBottom: "14px", color: theme.accentSolid, fontWeight: "800", fontSize: "13px", textTransform: "uppercase", letterSpacing: "0.04em" }}>
+                <Icon name="mic" size={14} /> Speaking
+              </div>
+              <p style={{ textAlign: "center", color: "#6B7280", fontSize: "13px", marginBottom: "14px" }}>Open response — the student speaks, the teacher listens and judges.</p>
+              {slide.tasks.map((t, i) => (
+                <div key={i} style={{ background: "#FFFBEB", border: "2px solid #F59E0B", borderRadius: "12px", padding: "12px 16px", marginBottom: "10px", fontSize: "14px", color: "#92400E", fontWeight: "600" }}>
+                  <div><AssignedTeamBadge team={t.assignedTeam} /></div>
+                  {t.text}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {slide.kind === "done" && (
+            <div style={{ textAlign: "center" }}>
+              <div style={{ marginBottom: "10px" }}><Icon name="checkeredFlag" size={40} color={theme.accentSolid} /></div>
+              <h2 style={{ fontSize: "22px", fontWeight: "900", color: theme.heroBg[0], marginBottom: "10px", fontFamily: theme.headingFont }}>Lesson complete!</h2>
+              <p style={{ color: "#6B7280", fontSize: "14px", marginBottom: "20px" }}>Print this as a worksheet, or head back to try another topic.</p>
+              <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap" }}>
+                {onPlayGameForTopic && (
+                  <button onClick={() => onPlayGameForTopic(topic.id)} style={nextBtnStyle}><Icon name="rocket" size={15} /> Play a Game on This Topic</button>
+                )}
+                <button onClick={() => window.print()} style={nextBtnStyle}><Icon name="printer" size={15} /> Print this lesson</button>
+                <button onClick={onBack} style={{ background: "none", border: `2px solid ${theme.accentSolid}`, color: theme.accentSolid, borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "800", cursor: "pointer", fontFamily: theme.headingFont }}>Back to Lesson Plans</button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {slide.kind !== "done" && slide.kind !== "roundOut" && slide.kind !== "realWorld" && (
+          <div className="lp-no-print" style={{ textAlign: "center", marginTop: "16px" }}>
+            <button onClick={goNext} style={nextBtnStyle}><Icon name="next" size={15} /> {slideIndex === slides.length - 2 ? "Finish" : "Next"}</button>
+          </div>
+        )}
+
+        <div className="lp-print-only">
+          <PrintableLessonPlan topic={topic} slides={slides} roundOut={roundOut} logoUrl={logoUrl} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Shared style objects for every round-out sub-component below — a plain function, not a hook,
+// since it's called from several different components that each need their own copy.
+function roundOutStyles(theme: Theme) {
+  const headerStyle: React.CSSProperties = { display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", marginBottom: "14px", color: theme.accentSolid, fontWeight: "800", fontSize: "13px", textTransform: "uppercase", letterSpacing: "0.04em" };
+  const nextBtnStyle: React.CSSProperties = { background: `linear-gradient(135deg,${theme.cta[0]},${theme.cta[1]})`, color: "white", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "800", cursor: "pointer", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px", marginTop: "16px" };
+  const revealBtnStyle: React.CSSProperties = { background: theme.accentSolid, color: "white", border: "none", borderRadius: "12px", padding: "10px 22px", fontSize: "14px", fontWeight: "700", cursor: "pointer", marginTop: "8px" };
+  return { headerStyle, nextBtnStyle, revealBtnStyle };
+}
+
+// The one step with its own internal interaction (multiple prompts/pairs/blanks), rendered per
+// `roundOut.kind` — calls onDone() once the student's worked through it, advancing the outer slide.
+// Dispatches to one fully separate component per kind (rather than branching with early returns in
+// one function body) so each kind's hooks are called unconditionally — mixing different hook calls
+// across branches of a single component body would break React's rules of hooks.
+function RoundOutStep({ roundOut, topicId, theme, onDone, assignedTeams, unscrambleCount }: { roundOut: RoundOut; topicId: string; theme: Theme; onDone: () => void; assignedTeams?: Team[]; unscrambleCount: number }) {
+  if (roundOut.kind === "paragraphCloze") return <ParagraphClozeRoundOut roundOut={roundOut} theme={theme} onDone={onDone} assignedTeams={assignedTeams} />;
+  if (roundOut.kind === "matching") return <MatchingRoundOut roundOut={roundOut} theme={theme} onDone={onDone} assignedTeams={assignedTeams} />;
+  if (roundOut.kind === "errorPassage") return <ErrorPassageRoundOut roundOut={roundOut} theme={theme} onDone={onDone} assignedTeam={assignedTeams?.[0]} />;
+  if (roundOut.kind === "scenario") return <ScenarioRoundOut roundOut={roundOut} theme={theme} onDone={onDone} assignedTeams={assignedTeams} />;
+  return <UnscrambleRoundOut topicId={topicId} theme={theme} onDone={onDone} count={unscrambleCount} assignedTeams={assignedTeams} />;
+}
+
+function ParagraphClozeRoundOut({ roundOut, theme, onDone, assignedTeams }: { roundOut: Extract<RoundOut, { kind: "paragraphCloze" }>; theme: Theme; onDone: () => void; assignedTeams?: Team[] }) {
+  const { headerStyle, nextBtnStyle } = roundOutStyles(theme);
+  const [revealed, setRevealed] = useState<Set<number>>(new Set());
+  let blankIdx = 0;
+  return (
+    <div>
+      <div style={headerStyle}><Icon name="clipboard" size={14} /> Fill in the Story</div>
+      <p style={{ textAlign: "center", color: "#6B7280", fontSize: "13px", marginBottom: "14px" }}>Click each gap to check your answer — the color/name shows whose turn each one is.</p>
+      <p style={{ fontSize: "16px", lineHeight: 2.4, color: "#1F2937" }}>
+        {roundOut.segments.map((seg, i) => {
+          if (typeof seg === "string") return <span key={i}>{seg}</span>;
+          const idx = blankIdx++;
+          const isRevealed = revealed.has(idx);
+          const assignedTeam = assignedTeams?.[idx];
+          return (
+            <span key={i}>
+              <InlineTeamTag team={assignedTeam} />{" "}
+              <button
+                onClick={() => setRevealed(prev => new Set(prev).add(idx))}
+                style={{
+                  display: "inline-block", margin: "0 2px", padding: "2px 10px", borderRadius: "8px",
+                  border: `2px solid ${assignedTeam ? assignedTeam.color.bg : theme.accentSolid}`, cursor: isRevealed ? "default" : "pointer",
+                  background: isRevealed ? "#ECFDF5" : "white", color: isRevealed ? "#14532D" : "#9CA3AF", fontWeight: "800", fontSize: "15px",
+                }}
+              >
+                {isRevealed ? seg.blank : `___ (${seg.base})`}
+              </button>
+            </span>
+          );
+        })}
+      </p>
+      <div style={{ textAlign: "center" }}><button onClick={onDone} style={nextBtnStyle}><Icon name="next" size={15} /> Continue</button></div>
+    </div>
+  );
+}
+
+function MatchingRoundOut({ roundOut, theme, onDone, assignedTeams }: { roundOut: Extract<RoundOut, { kind: "matching" }>; theme: Theme; onDone: () => void; assignedTeams?: Team[] }) {
+  const { headerStyle, nextBtnStyle } = roundOutStyles(theme);
+  const terms = useMemo(() => [...roundOut.pairs.map(p => p.term)].sort(() => Math.random() - 0.5), [roundOut]);
+  const defs = useMemo(() => [...roundOut.pairs.map(p => p.definition)].sort(() => Math.random() - 0.5), [roundOut]);
+  const [selectedTerm, setSelectedTerm] = useState<string | null>(null);
+  const [matched, setMatched] = useState<Set<string>>(new Set());
+  const [wrong, setWrong] = useState<string | null>(null);
+  const defFor = (term: string) => roundOut.pairs.find(p => p.term === term)?.definition;
+  // Assignment is per PAIR (its position in the original, unshuffled roundOut.pairs), not per
+  // shuffled display position — looked up by term so the badge stays attached to the right pair
+  // regardless of where the shuffle happened to place it in the terms column.
+  const teamForTerm = (term: string) => assignedTeams?.[roundOut.pairs.findIndex(p => p.term === term)];
+
+  const tryMatch = (def: string) => {
+    if (!selectedTerm) return;
+    if (defFor(selectedTerm) === def) {
+      setMatched(prev => new Set(prev).add(selectedTerm));
+      setSelectedTerm(null);
+    } else {
+      setWrong(def);
+      setTimeout(() => setWrong(null), 500);
+      setSelectedTerm(null);
+    }
+  };
+
+  const allMatched = matched.size === roundOut.pairs.length;
+  return (
+    <div>
+      <div style={headerStyle}><Icon name="handshake" size={14} /> Match the Word to Its Meaning</div>
+      <p style={{ textAlign: "center", color: "#6B7280", fontSize: "13px", marginBottom: "14px" }}>Tap a word, then tap its meaning — each word shows whose pair it is.</p>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+          {terms.map(term => {
+            const done = matched.has(term);
+            return (
+              <button key={term} disabled={done} onClick={() => setSelectedTerm(term)} style={{
+                padding: "10px 12px", borderRadius: "10px", border: `2px solid ${done ? "#22C55E" : selectedTerm === term ? theme.accentSolid : "#E5E7EB"}`,
+                background: done ? "#ECFDF5" : selectedTerm === term ? hexToRgba(theme.accentSolid, 0.1) : "white",
+                color: done ? "#14532D" : "#1F2937", fontWeight: "700", fontSize: "13px", cursor: done ? "default" : "pointer", textAlign: "left",
+                display: "flex", alignItems: "center", gap: "6px",
+              }}><InlineTeamTag team={teamForTerm(term)} /> {term}</button>
+            );
+          })}
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+          {defs.map(def => {
+            const isMatchedDef = [...matched].some(t => defFor(t) === def);
+            return (
+              <button key={def} disabled={isMatchedDef} onClick={() => tryMatch(def)} style={{
+                padding: "10px 12px", borderRadius: "10px", border: `2px solid ${isMatchedDef ? "#22C55E" : wrong === def ? "#EF4444" : "#E5E7EB"}`,
+                background: isMatchedDef ? "#ECFDF5" : wrong === def ? "#FEF2F2" : "white",
+                color: isMatchedDef ? "#14532D" : "#1F2937", fontSize: "12.5px", cursor: isMatchedDef ? "default" : "pointer", textAlign: "left",
+              }}>{def}</button>
+            );
+          })}
+        </div>
+      </div>
+      {allMatched && <div style={{ textAlign: "center" }}><button onClick={onDone} style={nextBtnStyle}><Icon name="next" size={15} /> Continue</button></div>}
+    </div>
+  );
+}
+
+function ErrorPassageRoundOut({ roundOut, theme, onDone, assignedTeam }: { roundOut: Extract<RoundOut, { kind: "errorPassage" }>; theme: Theme; onDone: () => void; assignedTeam?: Team }) {
+  const { headerStyle, nextBtnStyle, revealBtnStyle } = roundOutStyles(theme);
+  const [showFixed, setShowFixed] = useState(false);
+  return (
+    <div>
+      <div style={headerStyle}><Icon name="warning" size={14} /> Find the Mistakes</div>
+      <div style={{ textAlign: "center" }}><AssignedTeamBadge team={assignedTeam} /></div>
+      <div style={{ background: "#FEF2F2", border: "2px solid #FCA5A5", borderRadius: "12px", padding: "14px 16px", whiteSpace: "pre-line", fontSize: "14px", lineHeight: 1.7, color: "#7F1D1D" }}>{roundOut.text}</div>
+      {!showFixed ? (
+        <div style={{ textAlign: "center" }}><button onClick={() => setShowFixed(true)} style={revealBtnStyle}><Icon name="eye" size={13} /> Show corrected version</button></div>
+      ) : (
+        <>
+          <div style={{ background: "#ECFDF5", border: "2px solid #86EFAC", borderRadius: "12px", padding: "14px 16px", whiteSpace: "pre-line", fontSize: "14px", lineHeight: 1.7, color: "#14532D", marginTop: "12px" }}>{roundOut.corrected}</div>
+          <ul style={{ marginTop: "10px", paddingLeft: "20px", color: "#374151", fontSize: "13px" }}>
+            {roundOut.fixes.map((f, i) => <li key={i} style={{ marginBottom: "4px" }}>{f}</li>)}
+          </ul>
+          <div style={{ textAlign: "center" }}><button onClick={onDone} style={nextBtnStyle}><Icon name="next" size={15} /> Continue</button></div>
+        </>
+      )}
+    </div>
+  );
+}
+
+function ScenarioRoundOut({ roundOut, theme, onDone, assignedTeams }: { roundOut: Extract<RoundOut, { kind: "scenario" }>; theme: Theme; onDone: () => void; assignedTeams?: Team[] }) {
+  const { headerStyle, nextBtnStyle, revealBtnStyle } = roundOutStyles(theme);
+  const [i, setI] = useState(0);
+  const [show, setShow] = useState(false);
+  const p = roundOut.prompts[i];
+  const isLast = i === roundOut.prompts.length - 1;
+  return (
+    <div>
+      <div style={headerStyle}><Icon name="chat" size={14} /> What Would You Say? <span style={{ color: "#9CA3AF", fontWeight: "700" }}>· {i + 1}/{roundOut.prompts.length}</span></div>
+      <div style={{ textAlign: "center" }}><AssignedTeamBadge team={assignedTeams?.[i]} /></div>
+      <div style={{ background: "#EEF2FF", border: "2px solid #C7D2FE", borderRadius: "12px", padding: "14px 16px", marginBottom: "10px" }}>
+        <p style={{ margin: "0 0 6px", fontSize: "15px", color: "#312E81", fontWeight: "600" }}>{p.situation}</p>
+        <p style={{ margin: 0, fontSize: "13px", color: "#4338CA", fontWeight: "700" }}>{p.instruction}</p>
+      </div>
+      {show ? (
+        <div style={{ background: "#ECFDF5", border: "2px solid #86EFAC", borderRadius: "12px", padding: "12px 16px", fontSize: "14px", color: "#14532D" }}>{p.sample}</div>
+      ) : (
+        <div style={{ textAlign: "center" }}><button onClick={() => setShow(true)} style={revealBtnStyle}><Icon name="eye" size={13} /> Show a sample answer</button></div>
+      )}
+      {show && (
+        <div style={{ textAlign: "center" }}>
+          <button onClick={() => { if (isLast) onDone(); else { setI(i + 1); setShow(false); } }} style={nextBtnStyle}><Icon name="next" size={15} /> {isLast ? "Continue" : "Next"}</button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function UnscrambleRoundOut({ topicId, theme, onDone, count, assignedTeams }: { topicId: string; theme: Theme; onDone: () => void; count: number; assignedTeams?: Team[] }) {
+  const { headerStyle, nextBtnStyle, revealBtnStyle } = roundOutStyles(theme);
+  const items = useMemo(() => buildUnscrambleItems(topicId, count), [topicId, count]);
+  const [i, setI] = useState(0);
+  const [show, setShow] = useState(false);
+  if (!items.length) return <div style={{ textAlign: "center" }}><button onClick={onDone} style={nextBtnStyle}>Continue</button></div>;
+  const current: UnscrambleItem = items[i];
+  const isLast = i === items.length - 1;
+  return (
+    <div>
+      <div style={headerStyle}><Icon name="shuffle" size={14} /> Put the Words in Order <span style={{ color: "#9CA3AF", fontWeight: "700" }}>· {i + 1}/{items.length}</span></div>
+      <div style={{ textAlign: "center" }}><AssignedTeamBadge team={assignedTeams?.[i]} /></div>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", justifyContent: "center", marginBottom: "14px" }}>
+        {current.words.map((w, wi) => (
+          <span key={wi} style={{ background: "white", border: `2px solid ${theme.accentSolid}`, borderRadius: "8px", padding: "6px 12px", fontWeight: "700", fontSize: "15px", color: "#1F2937" }}>{w}</span>
+        ))}
+      </div>
+      {show ? (
+        <div style={{ background: "#ECFDF5", border: "2px solid #86EFAC", borderRadius: "12px", padding: "12px 16px", fontSize: "15px", color: "#14532D", textAlign: "center", fontWeight: "700" }}>{current.answer}</div>
+      ) : (
+        <div style={{ textAlign: "center" }}><button onClick={() => setShow(true)} style={revealBtnStyle}><Icon name="eye" size={13} /> Show the correct order</button></div>
+      )}
+      {show && (
+        <div style={{ textAlign: "center" }}>
+          <button onClick={() => { if (isLast) onDone(); else { setI(i + 1); setShow(false); } }} style={nextBtnStyle}><Icon name="next" size={15} /> {isLast ? "Continue" : "Next"}</button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Custom-styled play/pause + seek bar, built around a plain <audio> element kept out of the
+// visible layout (display:none) — reused for every real-world reading with audio, and will keep
+// working unchanged once `src` points at real ElevenLabs narration instead of the temporary
+// placeholder voice.
+function AudioPlayer({ src, theme }: { src: string; theme: Theme }) {
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const [playing, setPlaying] = useState(false);
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    const onTime = () => setProgress(audio.duration ? audio.currentTime / audio.duration : 0);
+    const onEnd = () => setPlaying(false);
+    audio.addEventListener("timeupdate", onTime);
+    audio.addEventListener("ended", onEnd);
+    return () => {
+      audio.removeEventListener("timeupdate", onTime);
+      audio.removeEventListener("ended", onEnd);
+    };
+  }, []);
+
+  const toggle = () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    if (playing) { audio.pause(); setPlaying(false); }
+    else { audio.play(); setPlaying(true); }
+  };
+
+  const seek = (fraction: number) => {
+    const audio = audioRef.current;
+    if (!audio || !audio.duration) return;
+    audio.currentTime = fraction * audio.duration;
+    setProgress(fraction);
+  };
+
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: "10px", background: "white", border: `2px solid ${theme.accentSolid}`, borderRadius: "999px", padding: "8px 14px", marginBottom: "14px" }}>
+      <audio ref={audioRef} src={src} preload="metadata" style={{ display: "none" }} />
+      <button onClick={toggle} style={{ background: theme.accentSolid, color: "white", border: "none", borderRadius: "50%", width: "36px", height: "36px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, padding: 0 }}>
+        <Icon name={playing ? "pause" : "play"} size={16} />
+      </button>
+      <input
+        type="range" min={0} max={1} step={0.001} value={progress}
+        onChange={e => seek(Number(e.target.value))}
+        style={{ flex: 1, accentColor: theme.accentSolid }}
+      />
+    </div>
+  );
+}
+
+// The Real-World Reading step, self-contained like RoundOutStep — its own internal phases (mode
+// select, content, comprehension questions, optional transcript reveal) advance with their own
+// buttons, calling onDone() once the student's worked through it. Mode select only appears when
+// there's audio to choose between; a reading with no audioUrl goes straight to "reading" mode
+// (text always visible), matching the graceful degradation used everywhere else in this file.
+function RealWorldReadingStep({ reading, theme, onDone, backRef, assignedTeams }: { reading: RealWorldReading; theme: Theme; onDone: () => void; backRef: React.MutableRefObject<(() => boolean) | null>; assignedTeams?: Team[] }) {
+  const { headerStyle, nextBtnStyle } = roundOutStyles(theme);
+  const [mode, setMode] = useState<"reading" | "listening" | null>(reading.audioUrl ? null : "reading");
+  const [phase, setPhase] = useState<"content" | "questions" | "reveal">("content");
+  const [qIndex, setQIndex] = useState(0);
+  const [showAnswer, setShowAnswer] = useState(false);
+
+  // Steps back through this component's own internal phases before handing control back to the
+  // outer slideshow's Previous button. Returns false only when there's nowhere further back to go
+  // in here (mode select, or content with no mode-select step to return to).
+  backRef.current = () => {
+    if (phase === "reveal") { setPhase("questions"); setQIndex(reading.questions.length - 1); setShowAnswer(false); return true; }
+    if (phase === "questions") {
+      if (qIndex > 0) { setQIndex(i => i - 1); setShowAnswer(false); return true; }
+      setPhase("content");
+      return true;
+    }
+    if (reading.audioUrl && mode !== null) { setMode(null); return true; }
+    return false;
+  };
+
+  const articleCardStyle: React.CSSProperties = { background: "#FFFBEB", border: "2px solid #FDE68A", borderRadius: "12px", padding: "16px 18px" };
+  const modeBtnStyle: React.CSSProperties = { flex: 1, background: "white", border: `2px solid ${theme.accentSolid}`, color: theme.accentSolid, borderRadius: "12px", padding: "16px", cursor: "pointer", fontWeight: "800", fontSize: "14px", fontFamily: theme.headingFont };
+
+  if (mode === null) {
+    return (
+      <div>
+        <div style={headerStyle}><Icon name="books" size={14} /> Real-World Reading</div>
+        <p style={{ textAlign: "center", color: "#6B7280", fontSize: "13px", marginBottom: "16px" }}>How should students experience this text? Choose before revealing it.</p>
+        <div style={{ display: "flex", gap: "12px" }}>
+          <button onClick={() => setMode("reading")} style={modeBtnStyle}><Icon name="bookOpen" size={16} /><br />Reading<br /><span style={{ fontWeight: "600", fontSize: "11.5px", color: "#6B7280" }}>Text visible from the start</span></button>
+          <button onClick={() => setMode("listening")} style={modeBtnStyle}><Icon name="mic" size={16} /><br />Listening<br /><span style={{ fontWeight: "600", fontSize: "11.5px", color: "#6B7280" }}>Text hidden until after the questions</span></button>
+        </div>
+      </div>
+    );
+  }
+
+  if (phase === "content") {
+    return (
+      <div>
+        <div style={headerStyle}><Icon name="books" size={14} /> Real-World {mode === "listening" ? "Listening" : "Reading"}</div>
+        <div style={articleCardStyle}>
+          <h3 style={{ margin: "0 0 10px", fontSize: "16px", fontWeight: "800", color: "#92400E", fontFamily: theme.headingFont }}>{reading.title}</h3>
+          {reading.audioUrl && <AudioPlayer src={reading.audioUrl} theme={theme} />}
+          {mode === "reading"
+            ? reading.passage.map((p, i) => <p key={i} style={{ margin: "0 0 8px", fontSize: "14.5px", lineHeight: 1.6, color: "#78350F" }}>{p}</p>)
+            : <p style={{ margin: 0, fontSize: "13.5px", lineHeight: 1.6, color: "#92400E", fontStyle: "italic" }}>Listen carefully — the text will be revealed after the questions.</p>}
+        </div>
+        <div style={{ textAlign: "center" }}><button onClick={() => setPhase("questions")} style={nextBtnStyle}><Icon name="next" size={15} /> Continue</button></div>
+      </div>
+    );
+  }
+
+  if (phase === "questions") {
+    const q = reading.questions[qIndex];
+    const isLast = qIndex === reading.questions.length - 1;
+    return (
+      <div>
+        <div style={headerStyle}><Icon name="books" size={14} /> Real-World Check <span style={{ color: "#9CA3AF", fontWeight: "700" }}>· {qIndex + 1}/{reading.questions.length}</span></div>
+        <div style={{ textAlign: "center" }}><AssignedTeamBadge team={assignedTeams?.[qIndex]} /></div>
+        <QuestionCard question={q} showAnswer={showAnswer} onReveal={() => setShowAnswer(true)} gameId="lessonplan" />
+        {showAnswer && (
+          <div style={{ textAlign: "center" }}>
+            <button
+              onClick={() => {
+                if (!isLast) { setQIndex(i => i + 1); setShowAnswer(false); return; }
+                if (mode === "listening") { setPhase("reveal"); return; }
+                onDone();
+              }}
+              style={nextBtnStyle}
+            >
+              <Icon name="next" size={15} /> {!isLast ? "Next" : mode === "listening" ? "See the Text" : "Continue"}
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <div style={headerStyle}><Icon name="eye" size={14} /> Here's the Text</div>
+      <div style={articleCardStyle}>
+        <h3 style={{ margin: "0 0 10px", fontSize: "16px", fontWeight: "800", color: "#92400E", fontFamily: theme.headingFont }}>{reading.title}</h3>
+        {reading.passage.map((p, i) => <p key={i} style={{ margin: "0 0 8px", fontSize: "14.5px", lineHeight: 1.6, color: "#78350F" }}>{p}</p>)}
+      </div>
+      <p style={{ textAlign: "center", color: "#6B7280", fontSize: "13px", margin: "10px 0" }}>Check your answers against the text.</p>
+      <div style={{ textAlign: "center" }}><button onClick={onDone} style={nextBtnStyle}><Icon name="next" size={15} /> Continue</button></div>
+    </div>
+  );
+}
+
+// Ink-economical, single flowing worksheet — mirrors LearnScreen's PrintableLesson pattern (same
+// paid-org-logo perk, same B&W-friendly borders-not-fills approach). Practice/production questions
+// get blank space instead of the on-screen reveal interaction and are numbered per section so this
+// reads as a real worksheet; the round-out exercise prints its actual content (PrintRoundOut) rather
+// than a "see screen version" placeholder, since a parent/student holding the paper has no screen to
+// go back to. FeedbackButton/BrandBadge are hidden from every print via the global .cc-no-print rule
+// (index.css) rather than needing their own line here.
+const printDividerStyle: React.CSSProperties = { border: "none", borderTop: "1px solid #D1D5DB", margin: "10px 0" };
+const printSectionHeadingStyle: React.CSSProperties = { fontWeight: "800", fontSize: "11px", textTransform: "uppercase", letterSpacing: "0.03em", color: "#374151", marginBottom: "4px", breakAfter: "avoid", pageBreakAfter: "avoid" };
+// Keeps one logical chunk (a section, a question + its answer line, a round-out item) from being
+// sliced across a page boundary when printed — without this, the browser paginates purely by
+// vertical position and can leave a heading on one page with its content starting on the next.
+// Spread onto the wrapper div of anything that should move to the next page as a whole rather
+// than split mid-way through.
+const printAvoidBreakStyle: React.CSSProperties = { breakInside: "avoid", pageBreakInside: "avoid" };
+
+function PrintableLessonPlan({ topic, slides, roundOut, logoUrl }: { topic: LearnTopic; slides: Slide[]; roundOut: RoundOut; logoUrl?: string | null }) {
+  const questionSlides = slides.filter((s): s is Extract<Slide, { kind: "question" }> => s.kind === "question");
+  const realWorldSlide = slides.find((s): s is Extract<Slide, { kind: "realWorld" }> => s.kind === "realWorld");
+  const speakingSlide = slides.find((s): s is Extract<Slide, { kind: "speaking" }> => s.kind === "speaking");
+  // Grouped by consecutive sectionLabel so the whole labeled set of questions (e.g. every "YOUR
+  // TURN" item) prints as one unbreakable block — keeping only each individual question+blank
+  // together wasn't enough: a 4-item group could still split 2-and-2 across a page boundary with
+  // no heading on the continuation page to say what it belonged to.
+  const questionGroups: { label: string; items: typeof questionSlides }[] = [];
+  for (const s of questionSlides) {
+    const lastGroup = questionGroups[questionGroups.length - 1];
+    if (lastGroup && lastGroup.label === s.sectionLabel) lastGroup.items.push(s);
+    else questionGroups.push({ label: s.sectionLabel, items: [s] });
+  }
+
+  return (
+    <div>
+      {logoUrl && (
+        <img src={logoUrl} alt="" style={{ display: "block", maxHeight: "34px", maxWidth: "160px", objectFit: "contain", marginBottom: "8px" }} />
+      )}
+      <span style={{ background: LEVEL_COLOR[topic.meta.level ?? "A1"], color: "white", borderRadius: "999px", padding: "2px 10px", fontSize: "10.5px", fontWeight: "800" }}>{topic.meta.level}</span>
+      <h2 style={{ fontSize: "20px", fontWeight: "900", color: "#111827", margin: "7px 0 6px" }}>{topic.lesson.title} — Lesson Plan</h2>
+      <div style={{ display: "flex", gap: "24px", fontSize: "11.5px", color: "#374151", fontWeight: "700", margin: "0 0 10px" }}>
+        <span>Name: ________________________</span>
+        <span>Date: ______________</span>
+      </div>
+      <p style={{ color: "#374151", fontSize: "12px", lineHeight: 1.4, margin: "0 0 8px" }}>{topic.lesson.intro}</p>
+      <div style={printAvoidBreakStyle}>
+        <TopicDiagram topicId={topic.id} variant="print" />
+      </div>
+      <hr style={printDividerStyle} />
+
+      {topic.lesson.sections.map((section, i) => (
+        <div key={i} style={{ marginBottom: "9px", ...printAvoidBreakStyle }}>
+          <div style={printSectionHeadingStyle}>{section.heading}</div>
+          <ul style={{ margin: 0, paddingLeft: "16px", color: "#1F2937" }}>
+            {section.body.map((line, j) => <li key={j} style={{ marginBottom: "2px", lineHeight: 1.3, fontSize: "11.5px" }}>{line.replace(/\*\*/g, "")}</li>)}
+          </ul>
+        </div>
+      ))}
+      <hr style={printDividerStyle} />
+
+      {questionGroups.map((g, gi) => (
+        <div key={gi} style={{ marginTop: gi > 0 ? "12px" : "4px", ...printAvoidBreakStyle }}>
+          <div style={printSectionHeadingStyle}>{g.label}</div>
+          {g.items.map((s, i) => (
+            <div key={i} style={{ marginTop: i > 0 ? "4px" : "0" }}>
+              <div style={{ fontSize: "11.5px", margin: "4px 0" }}>{i + 1}. {s.question.question}</div>
+              <div style={{ borderBottom: "1px solid #9CA3AF", height: "16px" }} />
+            </div>
+          ))}
+        </div>
+      ))}
+      <hr style={printDividerStyle} />
+
+      <div style={printSectionHeadingStyle}>Exercise</div>
+      <PrintRoundOut roundOut={roundOut} topicId={topic.id} />
+
+      {realWorldSlide && (
+        <div style={{ marginTop: "10px" }}>
+          <hr style={printDividerStyle} />
+          <div style={{ ...printAvoidBreakStyle }}>
+            <div style={printSectionHeadingStyle}>Real-World Reading — {realWorldSlide.reading.title}</div>
+            {realWorldSlide.reading.passage.map((p, i) => <div key={i} style={{ fontSize: "11.5px", color: "#1F2937", margin: "3px 0" }}>{p}</div>)}
+          </div>
+          <div style={{ ...printSectionHeadingStyle, marginTop: "8px" }}>Real-World Check</div>
+          {realWorldSlide.reading.questions.map((q, i) => (
+            <div key={i} style={{ marginTop: "4px", ...printAvoidBreakStyle }}>
+              <div style={{ fontSize: "11.5px", margin: "3px 0" }}>{i + 1}. {q.question}</div>
+              <div style={{ borderBottom: "1px solid #9CA3AF", height: "16px" }} />
+            </div>
+          ))}
+        </div>
+      )}
+
+      {speakingSlide && (
+        <div style={{ marginTop: "10px", ...printAvoidBreakStyle }}>
+          <hr style={printDividerStyle} />
+          <div style={printSectionHeadingStyle}>Speaking</div>
+          <ul style={{ margin: "3px 0 0", paddingLeft: "16px" }}>
+            {speakingSlide.tasks.map((t, i) => <li key={i} style={{ fontSize: "11px", marginBottom: "2px" }}>{t.text}</li>)}
+          </ul>
+        </div>
+      )}
+
+      <hr style={printDividerStyle} />
+      <p style={{ textAlign: "center", color: "#9CA3AF", fontSize: "10px", fontStyle: "italic", margin: "6px 0 0" }}>
+        Made with ClassCade — spot an issue with this lesson? Open the app and tap Feedback to let us know.
+      </p>
+    </div>
+  );
+}
+
+// Real, fillable content per round-out kind instead of a one-line summary — a printed page has no
+// screen to fall back to, so this mirrors each kind's on-screen *unrevealed* state (blanks shown as
+// "___ (base)", scrambled words, situations without their sample answer, etc.) rather than leaking
+// the answer key onto a student handout.
+function PrintRoundOut({ roundOut, topicId }: { roundOut: RoundOut; topicId: string }) {
+  if (roundOut.kind === "paragraphCloze") {
+    return (
+      <p style={{ fontSize: "12px", lineHeight: 1.9, color: "#1F2937", margin: "4px 0 0", ...printAvoidBreakStyle }}>
+        {roundOut.segments.map((seg, i) => typeof seg === "string" ? <span key={i}>{seg}</span> : <span key={i} style={{ fontWeight: "700" }}>___ ({seg.base})</span>)}
+      </p>
+    );
+  }
+
+  if (roundOut.kind === "matching") {
+    const offset = Math.max(1, Math.floor(roundOut.pairs.length / 2));
+    const shuffledDefs = roundOut.pairs.map((_, i) => roundOut.pairs[(i + offset) % roundOut.pairs.length].definition);
+    return (
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginTop: "4px", ...printAvoidBreakStyle }}>
+        <div>
+          {roundOut.pairs.map((p, i) => (
+            <div key={i} style={{ fontSize: "11.5px", margin: "4px 0", color: "#1F2937" }}>___ &nbsp; {i + 1}. {p.term}</div>
+          ))}
+        </div>
+        <div>
+          {shuffledDefs.map((def, i) => (
+            <div key={i} style={{ fontSize: "11.5px", margin: "4px 0", color: "#1F2937" }}>{String.fromCharCode(65 + i)}. {def}</div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (roundOut.kind === "errorPassage") {
+    return (
+      <div style={printAvoidBreakStyle}>
+        <p style={{ fontSize: "11px", color: "#4B5563", margin: "4px 0 6px" }}>Find and correct the mistakes below.</p>
+        <div style={{ border: "1px solid #9CA3AF", borderRadius: "6px", padding: "10px 12px", whiteSpace: "pre-line", fontSize: "11.5px", lineHeight: 1.7, color: "#1F2937" }}>{roundOut.text}</div>
+      </div>
+    );
+  }
+
+  if (roundOut.kind === "scenario") {
+    return (
+      <div>
+        {roundOut.prompts.map((p, i) => (
+          <div key={i} style={{ marginTop: i > 0 ? "10px" : "4px", ...printAvoidBreakStyle }}>
+            <div style={{ fontSize: "11.5px", color: "#1F2937", margin: "3px 0" }}>{i + 1}. {p.situation} — <span style={{ fontWeight: "700" }}>{p.instruction}</span></div>
+            <div style={{ borderBottom: "1px solid #9CA3AF", height: "16px" }} />
+            <div style={{ borderBottom: "1px solid #9CA3AF", height: "16px" }} />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  // unscramble
+  const items = buildUnscrambleItems(topicId, 4);
+  if (!items.length) return null;
+  return (
+    <div>
+      <p style={{ fontSize: "11px", color: "#4B5563", margin: "4px 0 6px" }}>Put the words in the correct order.</p>
+      {items.map((item, i) => (
+        <div key={i} style={{ marginTop: i > 0 ? "8px" : 0, ...printAvoidBreakStyle }}>
+          <div style={{ fontSize: "11.5px", color: "#1F2937", margin: "3px 0" }}>{i + 1}. {item.words.join(" / ")}</div>
+          <div style={{ borderBottom: "1px solid #9CA3AF", height: "16px" }} />
+        </div>
+      ))}
+    </div>
+  );
+}

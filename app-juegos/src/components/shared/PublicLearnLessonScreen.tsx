@@ -1,8 +1,12 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { LESSON_TOPICS, FOCUS_LABEL, LEVEL_COLOR } from "../../data/learnTopics";
 import { renderBold, renderMistake } from "../../data/learnTopicsRender";
 import { setMetaDescription } from "../../lib/pageMeta";
+import { useStudentSession } from "../../hooks/useStudentSession";
+import { getLessonsDone, markLessonDone, unmarkLessonDone } from "../../lib/studentProgress";
 import { Icon } from "./Icon";
+import { TopicDiagram } from "./diagrams/GrammarDiagram";
+import { MascotDuo, pickMascotPair } from "./MascotDuo";
 
 type Props = { topicId: string };
 
@@ -24,6 +28,30 @@ export function PublicLearnLessonScreen({ topicId }: Props) {
       setMetaDescription("This lesson could not be found. Browse the full ClassCade Learn library instead.");
     }
   }, [topic]);
+
+  // Only a signed-in student ever sees anything extra — a logged-out visitor (and Google) get the
+  // exact same page as always. `done` is null until the student's saved progress has loaded.
+  const { isStudent, loggedIn } = useStudentSession();
+  const [done, setDone] = useState<boolean | null>(null);
+  const [progressError, setProgressError] = useState(false);
+  useEffect(() => {
+    if (!isStudent || !topic) return;
+    getLessonsDone().then(m => setDone(m.has(topic.id))).catch(() => setDone(false));
+  }, [isStudent, topic]);
+
+  const toggleDone = async () => {
+    if (!topic || done === null) return;
+    const next = !done;
+    setDone(next);
+    setProgressError(false);
+    try {
+      if (next) await markLessonDone(topic.id);
+      else await unmarkLessonDone(topic.id);
+    } catch {
+      setDone(!next);
+      setProgressError(true);
+    }
+  };
 
   if (!topic) {
     return (
@@ -51,10 +79,13 @@ export function PublicLearnLessonScreen({ topicId }: Props) {
       </div>
 
       <div style={{ maxWidth: "640px", margin: "0 auto", padding: "24px 20px 60px" }}>
-        <div style={{ background: "white", border: "2px solid rgba(3,105,161,0.2)", borderRadius: "16px", padding: "24px" }}>
+        <div style={{ position: "relative", background: "white", border: "2px solid rgba(3,105,161,0.2)", borderRadius: "16px", padding: "24px" }}>
+          <MascotDuo variant="header" mascots={pickMascotPair(topic.id, "header")} />
           <span style={{ background: LEVEL_COLOR[topic.meta.level ?? "A2"], color: "white", borderRadius: "999px", padding: "3px 12px", fontSize: "12px", fontWeight: "800" }}>{topic.meta.level}</span>
           <h1 style={{ fontSize: "26px", fontWeight: "900", color: "#0C1E3D", margin: "10px 0 8px" }}>{topic.lesson.title}</h1>
           <p style={{ color: "#4B5563", fontSize: "15px", lineHeight: 1.6, margin: "0 0 20px" }}>{topic.lesson.intro}</p>
+
+          <TopicDiagram topicId={topic.id} variant="screen" accentColor="#0369A1" />
 
           {topic.lesson.sections.map((section, i) => (
             <div key={i} style={{ marginBottom: "18px" }}>
@@ -87,7 +118,47 @@ export function PublicLearnLessonScreen({ topicId }: Props) {
           )}
         </div>
 
+        {isStudent && (
+          // Practice is the button now, Mark-finished a small link — swapped at the owner's request:
+          // practicing a topic is the thing a student actually comes here to do next; marking a
+          // lesson finished is bookkeeping, not the main action.
+          <div style={{ textAlign: "center", background: "white", border: "2px solid rgba(3,105,161,0.2)", borderRadius: "16px", padding: "20px", marginTop: "20px" }}>
+            <MascotDuo variant="cta" mascots={pickMascotPair(topic.id, "cta")} />
+            <a
+              href={`/practice?topic=${topic.id}`}
+              style={{
+                display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "8px", minHeight: "48px", padding: "12px 26px",
+                borderRadius: "12px", fontSize: "15px", fontWeight: "900", textDecoration: "none",
+                background: "linear-gradient(135deg,#F59E0B,#D97706)", color: "white", border: "2px solid #0C1E3D",
+              }}
+            >
+              <Icon name="target" size={16} color="white" /> Practice this topic
+            </a>
+            <div style={{ marginTop: "12px" }}>
+              <button
+                onClick={toggleDone}
+                disabled={done === null}
+                style={{
+                  background: "none", border: "none", padding: 0, fontFamily: "inherit",
+                  color: done ? "#15803D" : "#0369A1", fontWeight: "800", fontSize: "13px", cursor: done === null ? "wait" : "pointer",
+                  display: "inline-flex", alignItems: "center", gap: "5px",
+                }}
+              >
+                {done ? <><Icon name="check" size={13} /> Lesson finished — tap to undo</> : "Mark lesson as finished"}
+              </button>
+              <span style={{ color: "#9CA3AF", margin: "0 10px" }}>·</span>
+              <a href="/" style={{ color: "#0369A1", fontWeight: "800", fontSize: "13px", textDecoration: "none" }}>My progress</a>
+              {progressError && <div role="alert" style={{ color: "#991B1B", fontSize: "12px", marginTop: "8px" }}>Couldn't save that — please try again.</div>}
+            </div>
+          </div>
+        )}
+
+        {/* Gated on loggedIn, not isStudent — a logged-in teacher who lands here (a shared link,
+            Google, etc.) already has an account, so "Sign Up Free" would be just as wrong for
+            them as for a signed-in student. They simply see neither card. */}
+        {!loggedIn && (
         <div style={{ textAlign: "center", background: "white", border: "2px solid rgba(3,105,161,0.2)", borderRadius: "16px", padding: "24px 20px", marginTop: "20px" }}>
+          <MascotDuo variant="cta" mascots={pickMascotPair(topic.id, "cta")} />
           <div style={{ fontWeight: "900", fontSize: "16px", color: "#0C1E3D", marginBottom: "8px" }}>Practice this with a classroom game</div>
           <p style={{ color: "#4B5563", fontSize: "13px", margin: "0 0 14px", lineHeight: 1.5 }}>
             ClassCade turns this exact lesson into a competitive team game. Free to start.
@@ -99,6 +170,7 @@ export function PublicLearnLessonScreen({ topicId }: Props) {
             Sign Up Free
           </a>
         </div>
+        )}
       </div>
     </div>
   );

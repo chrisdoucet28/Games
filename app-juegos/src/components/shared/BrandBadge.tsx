@@ -18,6 +18,7 @@ export function BrandBadge({ isPaid }: { isPaid: boolean }) {
   return (
     <img
       src={logoUrl} alt="School logo"
+      className="cc-no-print"
       style={{
         position: "fixed", right: "16px", bottom: "16px", zIndex: 1500,
         maxHeight: "88px", maxWidth: "260px", objectFit: "contain",

@@ -8,7 +8,9 @@ import { TurnTimerBar } from "../shared/TurnTimerBar";
 import { QuestionCard } from "../shared/QuestionCard";
 import { denseRank } from "../../utils/ranking";
 import { RankBadge } from "../shared/RankBadge";
-import { makeSoloCpuTeam } from "../../lib/soloOpponent";
+import { playSound } from "../../lib/sounds";
+import { setMusicGame, stopMusic } from "../../lib/music";
+import { makeSoloCpuTeam, makeTeacherTeam } from "../../lib/soloOpponent";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { BATTLESHIP_TUTORIAL_STEPS } from "../../data/tutorials/battleship";
 
@@ -108,8 +110,8 @@ const STYLE_TAG = (
     @keyframes missileTrail{0%{opacity:0.6;transform:translateY(0) scaleY(1)}100%{opacity:0;transform:translateY(-18px) scaleY(0.4)}}
     @keyframes bshipToastIn{0%{opacity:0;transform:translate(-50%,10px)}12%{opacity:1;transform:translate(-50%,0)}88%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,-6px)}}
     @keyframes bshipBannerIn{0%{opacity:0;transform:translate(-50%,-16px) scale(0.9)}15%{opacity:1;transform:translate(-50%,0) scale(1.03)}25%{transform:translate(-50%,0) scale(1)}85%{opacity:1;transform:translate(-50%,0) scale(1)}100%{opacity:0;transform:translate(-50%,-10px) scale(0.96)}}
-    .bship-btn:hover:not(:disabled){transform:translateY(-2px) scale(1.02);filter:brightness(1.1)}
-    .bship-btn:active:not(:disabled){transform:translateY(0) scale(0.97)}
+    .bship-btn:hover:not(:disabled){filter:brightness(1.1)}
+    .bship-btn:active:not(:disabled){transform:translate(4px,4px) !important;box-shadow:0 0 0 #1A1A2E !important}
     .bship-cell:hover{filter:brightness(1.25)}
   `}</style>
 );
@@ -154,12 +156,19 @@ type BattleshipSnapshot = {
   activeTeamIdx: number;
   eliminationOrder: (string | number)[];
   fleets: Record<string | number, string[]>;
+  // Solo-only; defaults for saves made before this field existed.
+  opponentType: "cpu" | "teacher";
 };
 
-function validateBattleshipSnapshot(raw: unknown, teamIds: (string | number)[]): BattleshipSnapshot | undefined {
+// `teamIds` is checked for fleet completeness (the full solo id set — student + BOTH synthetic
+// opponents — not just whichever one was actually chosen, since fleets is always seeded for both;
+// see allPossibleTeamIds at the call site). `activeTeamCount` bounds activeTeamIdx separately,
+// since it must reflect how many participants are actually IN a turn (always 2 in solo — student
+// + whichever one opponentType selects — never 3, unlike teamIds.length).
+function validateBattleshipSnapshot(raw: unknown, teamIds: (string | number)[], activeTeamCount: number): BattleshipSnapshot | undefined {
   const s = raw as Partial<BattleshipSnapshot> | null | undefined;
   if (!s || typeof s.fleets !== "object" || s.fleets === null) return undefined;
-  if (typeof s.activeTeamIdx !== "number" || s.activeTeamIdx < 0 || s.activeTeamIdx >= teamIds.length) return undefined;
+  if (typeof s.activeTeamIdx !== "number" || s.activeTeamIdx < 0 || s.activeTeamIdx >= activeTeamCount) return undefined;
   if (!teamIds.every(id => Array.isArray(s.fleets![id]))) return undefined;
   return {
     fleets: s.fleets,
@@ -167,6 +176,7 @@ function validateBattleshipSnapshot(raw: unknown, teamIds: (string | number)[]):
     misses: s.misses ?? {},
     activeTeamIdx: s.activeTeamIdx,
     eliminationOrder: s.eliminationOrder ?? [],
+    opponentType: s.opponentType === "teacher" ? "teacher" : "cpu",
   };
 }
 
@@ -174,34 +184,50 @@ export function BattleshipGame({ questions, teams: propTeams, onUpdateScore, onE
   const TURN_SECONDS = 25;
   const gameTitle = "Battleship";
 
-  // Solo play makes the CPU a real second fleet — a genuine alternating-turn participant that
-  // fires back on its own turn, not a passive target. This reuses the existing 2-team fast path
-  // (board size, skip target-picking) unchanged, since `teams` is now genuinely length 2.
+  // Solo play makes the second fleet a real alternating-turn participant — either a CPU or a live
+  // teacher — that fires back on its own turn, not a passive target. This reuses the existing
+  // 2-team fast path (board size, skip target-picking) unchanged, since `teams` is now genuinely
+  // length 2. Neither opponent type ever actually answers a question — only the student does —
+  // so a teacher's own "answer" phase always auto-succeeds with no prompt, same as the CPU's
+  // random-chance roll but guaranteed; the teacher still picks their own real target square,
+  // exactly like the CPU's random pick, just via an actual click.
   const isSolo = propTeams.length === 1;
+  const teamCount = isSolo ? 2 : propTeams.length;
   const cpuRef = useRef(isSolo ? makeSoloCpuTeam() : null);
+  const teacherRef = useRef(isSolo ? makeTeacherTeam() : null);
+  // Every per-team dictionary below (coordMap/fleets/hits/misses, and the snapshot validator) is
+  // seeded against BOTH synthetic solo opponents up front, not just whichever one `opponentType`
+  // currently selects — the initializers below only ever run once, at mount, before the
+  // intro-screen picker can switch away from the default. Same bug (and fix) as Castle Defense's
+  // rpg state: an id with no dictionary entry crashes the instant anything reads it.
+  const allPossibleTeamIds = isSolo ? [propTeams[0].id, cpuRef.current!.id, teacherRef.current!.id] : propTeams.map(t => t.id);
+  const resumed = useRef(validateBattleshipSnapshot(initialGameState, allPossibleTeamIds, teamCount)).current;
+  const [opponentType, setOpponentType] = useState<"cpu" | "teacher">(() => resumed?.opponentType ?? "cpu");
   const [cpuScore, setCpuScore] = useState(0);
+  const [teacherScore, setTeacherScore] = useState(0);
   // Memoized so `teams` is referentially stable across renders when nothing has actually
   // changed — effects/callbacks in this file depend on `teams` by reference, and a fresh array
   // literal every render would make them re-fire (and re-setState) forever.
   const teams = useMemo(
-    () => (isSolo ? [propTeams[0], { ...cpuRef.current!, score: cpuScore }] : propTeams),
-    [isSolo, propTeams, cpuScore]
+    () => (isSolo
+      ? [propTeams[0], opponentType === "teacher" ? { ...teacherRef.current!, score: teacherScore } : { ...cpuRef.current!, score: cpuScore }]
+      : propTeams),
+    [isSolo, propTeams, opponentType, cpuScore, teacherScore]
   );
-  const updateScore = (id: string | number, delta: number) => {
+  const updateScore = (id: string | number, delta: number, opts?: { silent?: boolean }) => {
     if (isSolo && id === cpuRef.current?.id) { setCpuScore(s => s + delta); }
-    else { onUpdateScore(id, delta); }
+    else if (isSolo && id === teacherRef.current?.id) { setTeacherScore(s => s + delta); }
+    else { onUpdateScore(id, delta, opts); }
   };
 
-  const COLS = teams.length === 2 ? BATTLESHIP_COLS_5 : BATTLESHIP_COLS_4;
+  const COLS = teamCount === 2 ? BATTLESHIP_COLS_5 : BATTLESHIP_COLS_4;
   const ROWS = COLS.map((_, i) => i + 1);
 
-  const resumed = useRef(validateBattleshipSnapshot(initialGameState, teams.map(t => t.id))).current;
+  const coordMap = useRef(buildCoordMap(questions, COLS, allPossibleTeamIds)).current;
+  const fleets = useRef(resumed?.fleets ?? Object.fromEntries(allPossibleTeamIds.map(id => [id, [...generateShipsNxN(COLS)]]))).current;
 
-  const coordMap = useRef(buildCoordMap(questions, COLS, teams.map(t => t.id))).current;
-  const fleets = useRef(resumed?.fleets ?? Object.fromEntries(teams.map(t => [t.id, [...generateShipsNxN(COLS)]]))).current;
-
-  const [hits, setHits] = useState<Record<string | number, string[]>>(() => resumed?.hits ?? Object.fromEntries(teams.map(t => [t.id, []])));
-  const [misses, setMisses] = useState<Record<string | number, string[]>>(() => resumed?.misses ?? Object.fromEntries(teams.map(t => [t.id, []])));
+  const [hits, setHits] = useState<Record<string | number, string[]>>(() => resumed?.hits ?? Object.fromEntries(allPossibleTeamIds.map(id => [id, []])));
+  const [misses, setMisses] = useState<Record<string | number, string[]>>(() => resumed?.misses ?? Object.fromEntries(allPossibleTeamIds.map(id => [id, []])));
 
   const [activeTeamIdx, setActiveTeamIdx] = useState(() => resumed?.activeTeamIdx ?? 0);
   // A resumed battle skips the intro screen and drops straight into target/coordinate selection
@@ -257,6 +283,17 @@ export function BattleshipGame({ questions, teams: propTeams, onUpdateScore, onE
   }, [hits, fleets]);
 
   useEffect(() => {
+    if (phase === "gameover") { playSound("roundComplete"); stopMusic(); }
+  }, [phase]);
+  // Reuses Castle Defense's tension track (see GAME_OVERRIDES in lib/music.ts) — teacher feedback
+  // that its medieval/adventure energy reads as a "Pirates of the Caribbean" vibe that fits the
+  // target-picking moment here too.
+  useEffect(() => {
+    setMusicGame("battleship");
+    return () => setMusicGame(null);
+  }, []);
+
+  useEffect(() => {
     if (!forceFinalRef) return;
     if (phase === "gameover") { forceFinalRef.current = null; return; }
     forceFinalRef.current = () => {
@@ -274,10 +311,10 @@ export function BattleshipGame({ questions, teams: propTeams, onUpdateScore, onE
   useEffect(() => {
     if (!serializeStateRef) return;
     serializeStateRef.current = (): BattleshipSnapshot => ({
-      hits, misses, activeTeamIdx, eliminationOrder: eliminationOrderRef.current, fleets,
+      hits, misses, activeTeamIdx, eliminationOrder: eliminationOrderRef.current, fleets, opponentType,
     });
     return () => { if (serializeStateRef) serializeStateRef.current = null; };
-  }, [serializeStateRef, hits, misses, activeTeamIdx, fleets]);
+  }, [serializeStateRef, hits, misses, activeTeamIdx, fleets, opponentType]);
 
   const advanceTurn = useCallback((hitsOverride?: Record<string | number, string[]>) => {
     setShowAns(false);
@@ -364,7 +401,12 @@ export function BattleshipGame({ questions, teams: propTeams, onUpdateScore, onE
       newHits = { ...hits, [targetTeamId]: [...(hits[targetTeamId] || []), pendingCoord] };
       setHits(newHits);
       spawnCellFx(targetTeamId, pendingCoord, "hit");
-      updateScore(activeTeam.id, correct ? 60 : 30);
+      // The signature "found a ship" boom — a real hit lands either way (right or wrong answer),
+      // so this fires regardless of correctness. Silences the Tier 1 correct/wrong chime here
+      // specifically (teacher feedback: the two overlapped and read as cluttered) — the explosion
+      // itself is the feedback for a hit; correct/wrong still plays normally on a miss below.
+      playSound("battleship");
+      updateScore(activeTeam.id, correct ? 60 : 30, { silent: true });
       showToast(
         <><Icon name="explosion" size={16} /> {correct
           ? `${activeTeam.name} HIT ${targetTeam.name}'s ship at ${pendingCoord}!`
@@ -432,6 +474,18 @@ export function BattleshipGame({ questions, teams: propTeams, onUpdateScore, onE
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSolo, phase, activeTeam.id]);
 
+  // A teacher picks their own target square for real (the click handler is already ungated by
+  // team identity), but never answers a real question — only the student ever does. There's no
+  // real opponent to lose to, so it always hits.
+  useEffect(() => {
+    if (!isSolo || phase !== "answer" || activeTeam.id !== teacherRef.current?.id) return;
+    const timer = setTimeout(() => {
+      launchMissile(true);
+    }, CPU_FIRE_MS);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSolo, phase, activeTeam.id]);
+
   const isSpeakingTask = currentQ?.type === "speaking task";
   const colColor = (letter: string) => {
     const idx = COLS.findIndex(c => c.letter === letter);
@@ -460,8 +514,27 @@ export function BattleshipGame({ questions, teams: propTeams, onUpdateScore, onE
           </div>
         </div>
         <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "24px" }}>
-          {teams.map(t => (<div key={t.id} style={{ background: `linear-gradient(160deg,${t.color.dark}55,#0C1B3A)`, border: "3px solid " + t.color.bg, borderRadius: "14px", padding: "10px 18px", fontWeight: "800", fontSize: "14px", color: "white", display: "flex", alignItems: "center", gap: "6px" }}><TeamIcon team={t} color="white" /> {t.name}</div>))}
+          {teams.map(t => (<div key={t.id} style={{ background: t.color.dark, border: "2px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E", borderRadius: "14px", padding: "10px 18px", fontWeight: "800", fontSize: "14px", color: "white", display: "flex", alignItems: "center", gap: "6px" }}><TeamIcon team={t} color="white" /> {t.name}</div>))}
         </div>
+        {isSolo && (
+          <div style={{ marginBottom: "20px" }}>
+            <div style={{ fontSize: "13px", color: "#93C5FD", fontWeight: "700", marginBottom: "10px" }}>Who do you want to play against?</div>
+            <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
+              <button onClick={() => setOpponentType("cpu")} className="bship-btn" style={{
+                padding: "10px 20px", borderRadius: "12px", fontWeight: "800", fontSize: "14px", cursor: "pointer",
+                border: `2px solid ${opponentType === "cpu" ? "#2563EB" : "rgba(255,255,255,0.2)"}`,
+                background: opponentType === "cpu" ? "rgba(37,99,235,0.15)" : "rgba(255,255,255,0.05)",
+                color: opponentType === "cpu" ? "#93C5FD" : "#93C5FD88",
+              }}><Icon name="robot" size={14} /> CPU</button>
+              <button onClick={() => setOpponentType("teacher")} className="bship-btn" style={{
+                padding: "10px 20px", borderRadius: "12px", fontWeight: "800", fontSize: "14px", cursor: "pointer",
+                border: `2px solid ${opponentType === "teacher" ? "#2563EB" : "rgba(255,255,255,0.2)"}`,
+                background: opponentType === "teacher" ? "rgba(37,99,235,0.15)" : "rgba(255,255,255,0.05)",
+                color: opponentType === "teacher" ? "#93C5FD" : "#93C5FD88",
+              }}><Icon name="person" size={14} /> Teacher</button>
+            </div>
+          </div>
+        )}
         <button onClick={() => setShowHowTo(true)} className="bship-btn" style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginBottom: "14px", background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
           <Icon name="help" size={15} /> How to Play
         </button>
@@ -481,7 +554,7 @@ export function BattleshipGame({ questions, teams: propTeams, onUpdateScore, onE
           } else {
             setPhase("pick-target");
           }
-        }} className="bship-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg,#1E3A8A,#2563EB)", color: "white", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(37,99,235,0.5)", transition: "transform 0.15s ease" }}>
+        }} className="bship-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#2563EB", color: "white", border: "3px solid #1A1A2E", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "6px 6px 0 #1A1A2E" }}>
           <Icon name="anchor" size={20} /> Battle Stations!
         </button>
       </div>
@@ -509,8 +582,9 @@ export function BattleshipGame({ questions, teams: propTeams, onUpdateScore, onE
               {ranking.map(({ item: t, rank, value }) => (
                 <div key={t.id} style={{
                   display: "flex", alignItems: "center", gap: "12px",
-                  background: rank === 0 ? `linear-gradient(160deg,${t.color.dark}66,#0C1B3A)` : "linear-gradient(160deg,#1F2937,#0B0F17)",
-                  border: `2px solid ${rank === 0 ? t.color.bg : "#4B5563"}`, borderRadius: "14px", padding: rank === 0 ? "12px 16px" : "10px 16px",
+                  background: rank === 0 ? t.color.dark : "#1F2937",
+                  border: "2px solid #1A1A2E", boxShadow: rank === 0 ? "4px 4px 0 #1A1A2E" : "3px 3px 0 #1A1A2E",
+                  borderRadius: "14px", padding: rank === 0 ? "12px 16px" : "10px 16px",
                   opacity: rank === 0 ? 1 : 0.85,
                 }}>
                   <span><RankBadge rank={rank} size={rank === 0 ? 24 : 20} /></span>
@@ -519,7 +593,7 @@ export function BattleshipGame({ questions, teams: propTeams, onUpdateScore, onE
                 </div>
               ))}
             </div>
-            <button onClick={onEnd} className="bship-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg,#1E3A8A,#2563EB)", color: "white", border: "none", borderRadius: "14px", padding: "14px 32px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(37,99,235,0.5)", transition: "transform 0.15s ease" }}><Icon name="checkeredFlag" size={18} /> End Game</button>
+            <button onClick={onEnd} className="bship-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#2563EB", color: "white", border: "3px solid #1A1A2E", borderRadius: "14px", padding: "14px 32px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "5px 5px 0 #1A1A2E" }}><Icon name="checkeredFlag" size={18} /> End Game</button>
           </div>
         </div>
       );
@@ -539,20 +613,20 @@ export function BattleshipGame({ questions, teams: propTeams, onUpdateScore, onE
           </div>
           <div style={{ color: "#94A3B8", fontSize: "14px", marginBottom: "20px" }}>Last fleet still afloat — every other team was sunk.</div>
           <div style={{ display: "flex", flexDirection: "column", gap: "8px", maxWidth: "420px", margin: "0 auto 24px" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "12px", background: `linear-gradient(160deg,${winnerTeam.color.dark}66,#0C1B3A)`, border: `2px solid ${winnerTeam.color.bg}`, borderRadius: "14px", padding: "12px 16px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "12px", background: winnerTeam.color.dark, border: "2px solid #1A1A2E", boxShadow: "4px 4px 0 #1A1A2E", borderRadius: "14px", padding: "12px 16px" }}>
               <span><Icon name="medal" size={24} color="#FCD34D" /></span>
               <span style={{ flex: 1, textAlign: "left", fontWeight: "900", color: "white", fontSize: "16px" }}><TeamIcon team={winnerTeam} /> {winnerTeam.name}</span>
               <span style={{ fontWeight: "800", color: "#93C5FD", fontSize: "13px" }}>SURVIVED</span>
             </div>
             {rankedLosers.map((t) => (
-              <div key={t.id} style={{ display: "flex", alignItems: "center", gap: "12px", background: "linear-gradient(160deg,#1F2937,#0B0F17)", border: "2px solid #4B5563", borderRadius: "14px", padding: "10px 16px", opacity: 0.85 }}>
+              <div key={t.id} style={{ display: "flex", alignItems: "center", gap: "12px", background: "#1F2937", border: "2px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E", borderRadius: "14px", padding: "10px 16px", opacity: 0.85 }}>
                 <span><Icon name="skull" size={20} color="#9CA3AF" /></span>
                 <span style={{ flex: 1, textAlign: "left", fontWeight: "800", color: "#D1D5DB", fontSize: "15px" }}><TeamIcon team={t} /> {t.name}</span>
                 <span style={{ fontWeight: "700", color: "#6B7280", fontSize: "12px" }}>SUNK</span>
               </div>
             ))}
           </div>
-          <button onClick={onEnd} className="bship-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg,#1E3A8A,#2563EB)", color: "white", border: "none", borderRadius: "14px", padding: "14px 32px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(37,99,235,0.5)", transition: "transform 0.15s ease" }}><Icon name="checkeredFlag" size={18} /> End Game</button>
+          <button onClick={onEnd} className="bship-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#2563EB", color: "white", border: "3px solid #1A1A2E", borderRadius: "14px", padding: "14px 32px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "5px 5px 0 #1A1A2E" }}><Icon name="checkeredFlag" size={18} /> End Game</button>
         </div>
       </div>
     );
@@ -566,14 +640,14 @@ export function BattleshipGame({ questions, teams: propTeams, onUpdateScore, onE
         <RadarBackdrop />
         {STYLE_TAG}
         <div style={{ position: "relative", zIndex: 1 }}>
-          <div style={{ background: "linear-gradient(160deg,#1E3A8A,#0C1B3A)", border: "2px solid #60A5FA55", borderRadius: "20px", padding: "28px 24px", marginBottom: "20px", color: "white", maxWidth: "480px", margin: "0 auto 20px" }}>
+          <div style={{ background: "#0C1B3A", border: "4px solid #1A1A2E", boxShadow: "6px 6px 0 #1A1A2E", borderRadius: "20px", padding: "28px 24px", marginBottom: "20px", color: "white", maxWidth: "480px", margin: "0 auto 20px" }}>
             <div style={{ marginBottom: "10px" }}><Icon name="clock" size={36} /></div>
             <div style={{ fontWeight: "900", fontSize: "19px", marginBottom: "10px", color: "#93C5FD" }}><TeamIcon team={noticeTeam} /> {noticeTeam.name} ran out of time!</div>
             <div style={{ fontSize: "15px", lineHeight: 1.6, opacity: 0.95 }}>
               {timeoutNotice.retried ? "That's your one free retry for this game — watch the clock this time!" : "You've already used your free retry this game — the turn moves on."}
             </div>
           </div>
-          <button onClick={dismissTimeoutNotice} className="bship-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg,#1E3A8A,#2563EB)", color: "white", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(37,99,235,0.5)", transition: "transform 0.15s ease" }}>
+          <button onClick={dismissTimeoutNotice} className="bship-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#2563EB", color: "white", border: "3px solid #1A1A2E", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "6px 6px 0 #1A1A2E" }}>
             {timeoutNotice.retried ? <><Icon name="refresh" size={18} /> Try Again!</> : <><Icon name="next" size={18} /> Next Team</>}
           </button>
         </div>
@@ -589,8 +663,8 @@ export function BattleshipGame({ questions, teams: propTeams, onUpdateScore, onE
       {elimBanner && (
         <div key={elimBanner.key} style={{
           position: "absolute", top: "14px", left: "50%", zIndex: 20, whiteSpace: "nowrap",
-          background: `linear-gradient(135deg,${elimBanner.color},#7F1D1D)`, border: "2px solid #FCA5A5",
-          borderRadius: "14px", padding: "12px 24px", boxShadow: "0 8px 28px rgba(0,0,0,0.5)",
+          background: elimBanner.color, border: "3px solid #1A1A2E",
+          borderRadius: "14px", padding: "12px 24px", boxShadow: "4px 4px 0 #1A1A2E",
           animation: "bshipBannerIn 3.2s ease-in-out forwards",
         }}>
           <span style={{ color: "white", fontWeight: "900", fontSize: "16px", textShadow: "0 1px 3px rgba(0,0,0,0.5)", display: "inline-flex", alignItems: "center", gap: "6px" }}>
@@ -616,7 +690,7 @@ export function BattleshipGame({ questions, teams: propTeams, onUpdateScore, onE
           </div>
         </div>
 
-        <div style={{ background: `linear-gradient(90deg,${activeTeam.color.dark},${activeTeam.color.bg})`, borderRadius: "14px", padding: "10px 16px", marginBottom: "14px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px", boxShadow: `0 4px 18px ${activeTeam.color.bg}55` }}>
+        <div style={{ background: activeTeam.color.bg, border: "3px solid #1A1A2E", borderRadius: "14px", padding: "10px 16px", marginBottom: "14px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px", boxShadow: "4px 4px 0 #1A1A2E" }}>
           <span style={{ color: "white", fontWeight: "900", fontSize: "17px", textShadow: "0 1px 3px rgba(0,0,0,0.4)", display: "inline-flex", alignItems: "center", gap: "6px" }}>
             <Icon name="anchor" size={16} /> <TeamIcon team={activeTeam} color="white" /> {activeTeam.name} —{" "}
             {phase === "pick-target" && "Choose a team to attack!"}

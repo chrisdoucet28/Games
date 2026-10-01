@@ -55,6 +55,23 @@ export const FREE_PLAN_LIMITS = { maxClasses: 1, maxTeams: 2 };
 // to actually charge.
 export const FREE_LAUNCH_ALL_PREMIUM = true;
 
+// 🛑 TEMPORARY PAUSE on student accounts — the owner's own decision (not a bug, not leftover test
+// code) to hold off on any real student-account activity while they sort out an unrelated conflict
+// at their day job and haven't yet turned on billing. While this is true, in App.tsx:
+// - A phone-width visitor (any login state, any role, including the owner's own teacher account)
+//   never reaches login/signup or the real app at all — just a plain "this is a demo, use a
+//   computer" message pointing at the public /practice quiz. Device is read from screen width, not
+//   user-agent sniffing.
+// - A brand new account on a computer is auto-assigned 'teacher' with no choice ever shown
+//   (RoleChooserScreen's "I'm a student" option never renders while this is on).
+// - Any account already on role 'student' (from before this flag existed, or chosen since) sees
+//   the same demo message instead of StudentHome, on any device.
+// None of this touches data — no account is deleted, no class membership is removed, nothing in
+// Supabase changes. It's purely a client-side gate, so flipping this back to false (planned for
+// the same time Stripe/billing goes live) instantly restores every existing student account and
+// the normal teacher/student choice with zero migration needed.
+export const STUDENT_ACCOUNTS_PAUSED = true;
+
 export function teamsGridCols(n: number): string {
   if (n <= 3) return `repeat(${n},1fr)`;
   if (n === 4) return "repeat(2,1fr)";
@@ -74,7 +91,9 @@ export const GAME_MODES: GameMode[] = [
   { id: "minefield", name: "Minefield", icon: "💣",  desc: "Combine sentence fragments to speak — and dodge the mines", color: "#EF4444", tag: "Full sentences, spoken aloud" },
   { id: "rocket",    name: "Rocket Fuel", icon: "🚀",  desc: "Use the given word in a sentence to fuel your team's rocket", color: "#6366F1", tag: "Original sentences, prompt after prompt" },
   { id: "orderup",   name: "Order Up", icon: "🍽️",  desc: "Customers order food tied to grammar or vocabulary targets — write one sentence that satisfies every item on the ticket before their patience runs out", color: "#F43F5E", tag: "Full sentences, written — not spoken · shared floor" },
+  { id: "bounty",    name: "Bounty Board", icon: "🤠",  desc: "One wanted sentence per round — get it wrong and it becomes an open bounty any OTHER team can claim by fixing it, worth more every time it's missed", color: "#B45309", tag: "Full sentences, written · escalating stakes" },
   { id: "hotseat",   name: "Hot Seat", icon: "🔥",  desc: "Describe words to your teammate — no spelling allowed", color: "#EF4444", tag: "Nonstop improvised talking" },
+  { id: "relay",     name: "Word Relay", icon: "📱",  desc: "Every team has a hidden word — one person at a time comes up and asks yes/no questions to work it out. Guess it and a teammate swaps in with a new word", color: "#0D9488", tag: "Asking questions aloud · most words wins" },
   { id: "cards",     name: "Card Shuffle", icon: "🃏",  desc: "Pick a card and complete an open speaking or writing task", color: "#F59E0B", tag: "One open speaking prompt" },
   { id: "spy",       name: "Spy Among Us", icon: "🕵️",  desc: "Speak freely, listen carefully, find who has a different topic", color: "#374151", tag: "Sustained free conversation" },
   { id: "zombie",    name: "Zombie Siege", icon: "🧟",  desc: "Add sentences to a shared prompt to barricade the house — clear each wave of zombies before the next, bigger one arrives", color: "#65A30D", tag: "Free-for-all sentence-throwing · wave-based pressure" },
@@ -96,7 +115,9 @@ export const GAME_ICONS: Record<string, IconName> = {
   minefield: "mine",
   rocket: "rocket",
   orderup: "plate",
+  bounty: "sheriffStar",
   hotseat: "flame",
+  relay: "megaphone",
   cards: "cardTilt",
   spy: "search",
   zombie: "skull",

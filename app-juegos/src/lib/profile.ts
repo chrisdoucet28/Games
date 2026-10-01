@@ -36,6 +36,14 @@ export async function updateProfile(patch: { displayName?: string; themeId?: str
   return data as Profile;
 }
 
+// The only way an account's type changes — a database trigger blocks a direct UPDATE of role. The
+// function itself refuses to turn an account that already has classes into a student account, and
+// its error message is written to be shown to the person as-is.
+export async function chooseRole(role: "teacher" | "student"): Promise<void> {
+  const { error } = await supabase.rpc("set_my_role", { new_role: role });
+  if (error) throw error;
+}
+
 const BRANDING_BUCKET = "branding";
 type BrandingKind = "avatar" | "logo";
 const BRANDING_COLUMN: Record<BrandingKind, "avatar_url" | "org_logo_url"> = { avatar: "avatar_url", logo: "org_logo_url" };

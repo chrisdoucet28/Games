@@ -7,6 +7,8 @@ import { makeSoloCpuTeam } from "../../lib/soloOpponent";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
 import { HOTPOTATO_TUTORIAL_STEPS } from "../../data/tutorials/hotpotato";
+import { playSound } from "../../lib/sounds";
+import { setMusicContext, setMusicGame, stopMusic } from "../../lib/music";
 
 const GM = GAME_MODES.find(g => g.id === "hotpotato")!;
 
@@ -14,14 +16,27 @@ const TURN_SECONDS_OPTIONS = [15, 20, 25, 30];
 const ROUND_SECONDS_MULT = 4;
 const TOTAL_ROUNDS = 5;
 // How long the CPU realistically "holds" the potato before passing it back — standing in for
-// the fact it can't actually answer a real question out loud. Most passes land in the normal
-// range below; occasionally the CPU "stumbles" and takes noticeably longer, giving the lone
-// player a real breather instead of the potato coming right back almost every single time.
-const CPU_HOLD_MS_MIN = 2000;
-const CPU_HOLD_MS_MAX = 6000;
-const CPU_STUMBLE_CHANCE = 0.2;
-const CPU_STUMBLE_MS_MIN = 7000;
-const CPU_STUMBLE_MS_MAX = 10000;
+// the fact it can't actually answer a real question out loud. It never actually fails to pass
+// (there's no answer for it to get wrong, and no strategic choice for it to make — with only two
+// players, "pass" always just means "back to the student"), so the only thing worth making
+// tunable is hold TIMING: how much pressure a fast, rarely-stumbling CPU keeps the student under
+// vs. how much breathing room a slow, often-stumbling one gives. Solo-only (`cpuDifficulty`);
+// unused whenever a real second team is playing instead of a CPU.
+// Scaled ~2.5x across the board (was 3500-7500/2000-6000/1000-3000 min/max) per teacher feedback
+// after a real classroom run — even on "medium" the CPU passed back way too fast for a student to
+// realistically get their answer out before it was already their turn again.
+// Expressed as a MULTIPLE of the teacher's chosen answer time (Q_SECONDS/turnSeconds) rather than
+// a fixed number of seconds — a flat absolute range meant the stumble case (up to 30s) could run
+// twice as long as a 15s turn, which read as the CPU being stuck rather than "occasionally slow."
+// These fractions reproduce the original hand-tuned absolute values above exactly at the 15s
+// default (e.g. easy min 8750ms / 15000ms = 7/12), so behavior at 15s is unchanged; other turn
+// lengths now scale proportionally instead of staying fixed.
+type Difficulty = "easy" | "medium" | "hard";
+const CPU_HOLD_FRACTION_BY_DIFFICULTY: Record<Difficulty, { min: number; max: number; stumbleChance: number; stumbleMin: number; stumbleMax: number }> = {
+  easy: { min: 7 / 12, max: 5 / 4, stumbleChance: 0.35, stumbleMin: 4 / 3, stumbleMax: 2 },
+  medium: { min: 1 / 3, max: 1, stumbleChance: 0.2, stumbleMin: 7 / 6, stumbleMax: 5 / 3 },
+  hard: { min: 1 / 6, max: 1 / 2, stumbleChance: 0.08, stumbleMin: 5 / 6, stumbleMax: 13 / 12 },
+};
 
 const AMBIENT_BITS = Array.from({ length: 12 }, (_, i) => ({
   left: (i * 41) % 100,
@@ -44,12 +59,13 @@ const STYLE_TAG = (
     @keyframes figureThrow{0%{transform:rotate(0deg) scale(1)}30%{transform:rotate(-18deg) scale(1.05)}60%{transform:rotate(22deg) scale(1.15)}100%{transform:rotate(0deg) scale(1)}}
     @keyframes figureCatch{0%{transform:scale(1)}40%{transform:scale(1.35) rotate(-8deg)}70%{transform:scale(0.9) rotate(6deg)}100%{transform:scale(1) rotate(0deg)}}
     @keyframes sweatDrop{0%{opacity:0;transform:translateY(-4px)}30%{opacity:1}100%{opacity:0;transform:translateY(10px)}}
+    @keyframes cpuThinkPulse{0%,100%{opacity:0.5;transform:scale(0.9)}50%{opacity:1;transform:scale(1.15)}}
     @keyframes cardShake{0%,100%{transform:translateX(0)}20%{transform:translateX(-3px) rotate(-0.4deg)}40%{transform:translateX(3px) rotate(0.4deg)}60%{transform:translateX(-2px)}80%{transform:translateX(2px)}}
     @keyframes roundPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.09)}}
     @keyframes burstPop{0%{transform:translate(-50%,-50%) scale(0.3);opacity:1}60%{transform:translate(-50%,-50%) scale(1.4);opacity:1}100%{transform:translate(-50%,-50%) scale(1.8);opacity:0}}
     @keyframes burstBit{0%{opacity:1;transform:translate(-50%,-50%) rotate(var(--a)) translateY(0) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) rotate(var(--a)) translateY(-70px) scale(1.3)}}
-    .hp-btn:hover{transform:translateY(-2px) scale(1.02)}
-    .hp-btn:active{transform:translateY(0) scale(0.97)}
+    .hp-btn:hover{filter:brightness(1.08)}
+    .hp-btn:active{transform:translate(4px,4px) !important;box-shadow:0 0 0 #1A1A2E !important}
   `}</style>
 );
 
@@ -75,6 +91,8 @@ type HotPotatoSnapshot = {
   holderIdx: number;
   history: { round: number; holderName: string; holderId: string | number }[];
   turnSeconds: number;
+  // Solo-only; defaults for saves made before this field existed.
+  cpuDifficulty: Difficulty;
 };
 
 function validateHotPotatoSnapshot(raw: unknown, teamCount: number): HotPotatoSnapshot | undefined {
@@ -82,7 +100,10 @@ function validateHotPotatoSnapshot(raw: unknown, teamCount: number): HotPotatoSn
   if (!s || typeof s.round !== "number" || s.round < 1 || s.round > TOTAL_ROUNDS) return undefined;
   if (typeof s.holderIdx !== "number" || s.holderIdx < 0 || s.holderIdx >= teamCount) return undefined;
   if (typeof s.turnSeconds !== "number" || !TURN_SECONDS_OPTIONS.includes(s.turnSeconds)) return undefined;
-  return { round: s.round, holderIdx: s.holderIdx, history: Array.isArray(s.history) ? s.history : [], turnSeconds: s.turnSeconds };
+  return {
+    round: s.round, holderIdx: s.holderIdx, history: Array.isArray(s.history) ? s.history : [], turnSeconds: s.turnSeconds,
+    cpuDifficulty: s.cpuDifficulty === "easy" || s.cpuDifficulty === "hard" ? s.cpuDifficulty : "medium",
+  };
 }
 
 export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEnd, level, forceFinalRef, serializeStateRef, initialGameState }: GameProps) {
@@ -99,9 +120,9 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
     () => (isSolo ? [propTeams[0], { ...cpuRef.current!, score: cpuScore }] : propTeams),
     [isSolo, propTeams, cpuScore]
   );
-  const updateScore = (id: string | number, delta: number) => {
+  const updateScore = (id: string | number, delta: number, opts?: { silent?: boolean }) => {
     if (isSolo && id === cpuRef.current?.id) { setCpuScore(s => s + delta); }
-    else { onUpdateScore(id, delta); }
+    else { onUpdateScore(id, delta, opts); }
   };
 
   const showSpanish = level === "A1" || level === "A2";
@@ -111,11 +132,28 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
   const resumed = useRef(validateHotPotatoSnapshot(initialGameState, teams.length)).current;
 
   const [turnSeconds, setTurnSeconds] = useState(resumed?.turnSeconds ?? TURN_SECONDS_OPTIONS[0]);
+  const [cpuDifficulty, setCpuDifficulty] = useState<Difficulty>(() => resumed?.cpuDifficulty ?? "medium");
   const Q_SECONDS = turnSeconds;
   const ROUND_SECONDS = turnSeconds * ROUND_SECONDS_MULT;
 
   const [phase, setPhase] = useState<"intro" | "play" | "exploding" | "roundend" | "gameover">(resumed ? "play" : "intro");
+  // The whole point of this game is racing an unpredictable fuse while answering — "play" is
+  // exactly the tension moment, and it doesn't route through the shared useTurnTimer hook.
+  useEffect(() => {
+    if (phase === "play") setMusicContext("tension");
+    return () => setMusicContext("gameplay");
+  }, [phase === "play"]);
+  // Reuses Word Whack's own tracks (see GAME_OVERRIDES in lib/music.ts) — same frantic, silly
+  // carnival energy, not a distinct Suno pair of its own.
+  useEffect(() => {
+    setMusicGame("hotpotato");
+    return () => setMusicGame(null);
+  }, []);
   const [showHowTo, setShowHowTo] = useState(false);
+
+  useEffect(() => {
+    if (phase === "gameover") { playSound("roundComplete"); stopMusic(); }
+  }, [phase]);
 
   useEffect(() => {
     if (!forceFinalRef) return;
@@ -135,9 +173,9 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
 
   useEffect(() => {
     if (!serializeStateRef) return;
-    serializeStateRef.current = (): HotPotatoSnapshot => ({ round, holderIdx, history, turnSeconds });
+    serializeStateRef.current = (): HotPotatoSnapshot => ({ round, holderIdx, history, turnSeconds, cpuDifficulty });
     return () => { if (serializeStateRef) serializeStateRef.current = null; };
-  }, [serializeStateRef, round, holderIdx, history, turnSeconds]);
+  }, [serializeStateRef, round, holderIdx, history, turnSeconds, cpuDifficulty]);
 
   const roundTimeRef = useRef(ROUND_SECONDS);
   const timerPaused = useRef(false);
@@ -153,7 +191,12 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
   useEffect(() => {
     if (phase === "roundend" && penalizedRoundRef.current !== round) {
       penalizedRoundRef.current = round;
-      updateScore(teams[holderIdxRef.current].id, -PENALTY_PTS);
+      // Silent: the explosion itself is this game's own feedback for running out of time —
+      // unsilenced, the shared "wrong" sound (one of the loudest/harshest in the whole roster)
+      // stacked directly on top of it every single explosion, which read as a much louder,
+      // harsher bang than the "hotpotato" sound alone was ever mixed for.
+      playSound("hotpotato");
+      updateScore(teams[holderIdxRef.current].id, -PENALTY_PTS, { silent: true });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, round, teams]);
@@ -164,15 +207,17 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
   // Hooks).
   useEffect(() => {
     if (!isSolo || phase !== "play" || teams[holderIdx]?.id !== cpuRef.current?.id) return;
-    const holdMs = Math.random() < CPU_STUMBLE_CHANCE
-      ? CPU_STUMBLE_MS_MIN + Math.random() * (CPU_STUMBLE_MS_MAX - CPU_STUMBLE_MS_MIN)
-      : CPU_HOLD_MS_MIN + Math.random() * (CPU_HOLD_MS_MAX - CPU_HOLD_MS_MIN);
+    const t = CPU_HOLD_FRACTION_BY_DIFFICULTY[cpuDifficulty];
+    const qSecMs = Q_SECONDS * 1000;
+    const holdMs = Math.random() < t.stumbleChance
+      ? qSecMs * (t.stumbleMin + Math.random() * (t.stumbleMax - t.stumbleMin))
+      : qSecMs * (t.min + Math.random() * (t.max - t.min));
     const timer = setTimeout(() => {
       if (!roundEndedRef.current) confirmPass();
     }, holdMs);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isSolo, phase, holderIdx]);
+  }, [isSolo, phase, holderIdx, cpuDifficulty, Q_SECONDS]);
 
   useEffect(() => {
     roundTimeRef.current = ROUND_SECONDS;
@@ -234,16 +279,26 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
   };
 
   const confirmPass = () => {
+    // The only audible feedback for the pass itself — until now the whole hand-to-hand toss was
+    // completely silent apart from the background music, with nothing marking "answered in time"
+    // short of watching the potato icon move. Reuses the dice-roll clatter rather than a new
+    // asset — the closest existing sound to a quick physical toss.
+    playSound("dice");
     setPassing(true);
     setPassId(id => id + 1);
     setTimeout(() => {
       setPassing(false);
       setHolderIdx(i => (i + 1) % teams.length);
       setJustCaught(true);
+      // Resume the round clock only once the new holder is actually in effect — resuming it
+      // synchronously here (as it used to) left a 650ms window, while the potato is still mid-
+      // throw, where the round could time out and the explosion penalty would read the OLD
+      // holderIdxRef, charging the team that had just correctly answered and passed instead of
+      // whoever the potato was actually landing on.
+      timerPaused.current = false;
       setTimeout(() => setJustCaught(false), 420);
     }, 650);
     setShowAnswer(false);
-    timerPaused.current = false;
     setQi(i => i + 1);
   };
 
@@ -279,6 +334,7 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
   const qColor = qTimeLeft > 6 ? "#22C55E" : qTimeLeft > 3 ? "#F59E0B" : "#EF4444";
   const potatoWobble = qTimeLeft > 6 ? "potatoWobbleCalm 1.8s ease-in-out infinite" : qTimeLeft > 3 ? "potatoWobbleWarn 0.6s ease-in-out infinite" : "potatoWobbleCritical 0.15s linear infinite";
   const holder = teams[holderIdx];
+  const cpuIsHolding = isSolo && holder?.id === cpuRef.current?.id;
   const q = questions[qi % Math.max(questions.length, 1)];
 
   const [showQPreview, setShowQPreview] = useState(false);
@@ -371,6 +427,28 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
           </div>
         </div>
 
+        {isSolo && (
+          <div style={{ marginBottom: "24px" }}>
+            <div style={{ fontSize: "13px", fontWeight: "700", color: "#7C2D12", marginBottom: "8px", display: "flex", alignItems: "center", justifyContent: "center", gap: "5px" }}><Icon name="robot" size={13} /> CPU pass speed</div>
+            <div style={{ display: "flex", gap: "8px", justifyContent: "center", flexWrap: "wrap" }}>
+              {(["easy", "medium", "hard"] as const).map(d => (
+                <button key={d} onClick={() => setCpuDifficulty(d)} className="hp-btn" style={{
+                  background: cpuDifficulty === d ? "linear-gradient(135deg,#EA580C,#F97316)" : "white",
+                  color: cpuDifficulty === d ? "white" : "#7C2D12",
+                  border: `2px solid ${cpuDifficulty === d ? "#EA580C" : "#FED7AA"}`,
+                  borderRadius: "12px", padding: "10px 16px", cursor: "pointer",
+                  fontWeight: "800", fontSize: "14px", minWidth: "78px", transition: "all 0.15s"
+                }}>
+                  {d[0].toUpperCase() + d.slice(1)}
+                </button>
+              ))}
+            </div>
+            <div style={{ fontSize: "11px", color: "#9A3412", marginTop: "6px" }}>
+              Hard means the CPU passes it back to you fast — Easy gives you more time between turns.
+            </div>
+          </div>
+        )}
+
         <button onClick={() => setShowHowTo(true)} className="hp-btn" style={{ display: "block", margin: "0 auto 14px", background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
           <Icon name="help" size={14} /> How to Play
         </button>
@@ -387,7 +465,7 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
             seededStartRef.current = true;
           }
           setPhase("play");
-        }} className="hp-btn" style={{ background: "linear-gradient(135deg,#EA580C,#F97316)", color: "white", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(249,115,22,0.4)", transition: "transform 0.15s ease" }}>
+        }} className="hp-btn" style={{ background: "#F97316", color: "white", border: "3px solid #1A1A2E", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "6px 6px 0 #1A1A2E" }}>
           <Icon name="potato" size={18} /> Start Round 1!
         </button>
       </div>
@@ -454,7 +532,7 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
               const count = penaltyCounts[t.id] || 0;
               const isWorst = count === Math.max(...Object.values(penaltyCounts));
               return (
-                <div key={t.id} style={{ background: isWorst ? "linear-gradient(135deg,#FEF2F2,#FEE2E2)" : "white", border: `3px solid ${isWorst ? "#EF4444" : t.color.bg}`, borderRadius: "16px", padding: "14px", textAlign: "center", boxShadow: "0 4px 14px rgba(0,0,0,0.12)" }}>
+                <div key={t.id} style={{ background: isWorst ? "#FEE2E2" : "white", border: "3px solid #1A1A2E", borderRadius: "16px", padding: "14px", textAlign: "center", boxShadow: "3px 3px 0 #1A1A2E" }}>
                   <div style={{ marginBottom: "4px", color: count === 0 ? "#F59E0B" : isWorst ? "#92400E" : "#EA580C" }}>{count === 0 ? <Icon name="trophy" size={26} /> : isWorst ? <Icon name="potato" size={26} /> : <Icon name="warning" size={24} />}</div>
                   <div style={{ fontWeight: "800", color: isWorst ? "#991B1B" : t.color.dark, fontSize: "14px", marginBottom: "4px" }}><TeamIcon team={t} /> {t.name}</div>
                   <div style={{ fontSize: "12px", fontWeight: "700", color: "#6B7280" }}>Held potato {count}×</div>
@@ -475,7 +553,7 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
               );
             })}
           </div>
-          <button onClick={onEnd} className="hp-btn" style={{ background: "white", color: "#EA580C", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "18px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(0,0,0,0.2)", transition: "transform 0.15s ease" }}><Icon name="checkeredFlag" size={17} /> End Game</button>
+          <button onClick={onEnd} className="hp-btn" style={{ background: "white", color: "#EA580C", border: "3px solid #1A1A2E", borderRadius: "16px", padding: "16px 48px", fontSize: "18px", fontWeight: "900", cursor: "pointer", boxShadow: "6px 6px 0 #1A1A2E" }}><Icon name="checkeredFlag" size={17} /> End Game</button>
         </div>
       </div>
     );
@@ -489,8 +567,8 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
       {STYLE_TAG}
       <div style={{ position: "relative", zIndex: 1 }}>
         <div style={{
-          background: "linear-gradient(135deg,#EA580C,#F97316)", borderRadius: "14px", padding: "12px 16px", marginBottom: "14px",
-          boxShadow: "0 4px 16px rgba(124,45,18,0.3)",
+          background: "#F97316", border: "3px solid #1A1A2E", borderRadius: "14px", padding: "12px 16px", marginBottom: "14px",
+          boxShadow: "4px 4px 0 #1A1A2E",
           animation: !isExploding && ((qTimeLeft <= 3 && !showAnswer) || roundCritical) ? "cardShake 0.4s ease-in-out infinite" : "none",
         }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px" }}>
@@ -542,7 +620,11 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
                         "Team R…" before, on every device, not just narrow screens. */}
                     {(() => { const max = isHolder ? 9 : 7; return t.name.length > max ? t.name.slice(0, max - 1).trimEnd() + "…" : t.name; })()}
                   </text>
-                  {isHolder && <text x={pos.x} y={pos.y + 10} textAnchor="middle" fontSize="8" fill="rgba(255,255,255,0.85)" fontWeight="700" style={{ userSelect: "none" }}>HOLDING</text>}
+                  {isHolder && (
+                    <text x={pos.x} y={pos.y + 10} textAnchor="middle" fontSize="8" fill="rgba(255,255,255,0.85)" fontWeight="700" style={{ userSelect: "none" }}>
+                      {cpuIsHolding ? "THINKING…" : "HOLDING"}
+                    </text>
+                  )}
                   {/* little figure below each position */}
                   <text
                     x={pos.x} y={pos.y + (isHolder ? 52 : 44)} textAnchor="middle" fontSize="18"
@@ -598,9 +680,11 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
                 <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "900", fontSize: "15px", color: qColor }}>{qTimeLeft}</div>
               </div>
               <div style={{ flex: 1, fontWeight: "700", color: "#374151", fontSize: "13px" }}>
-                <TeamIcon team={holder} /> <strong>{holder.name}</strong> — answer now!<br />
-                <span style={{ color: qColor, fontSize: "12px", display: "inline-flex", alignItems: "center", gap: "4px" }}>
-                  {qTimeLeft > 6 ? <><Icon name="clock" size={11} /> Take your time…</> : qTimeLeft > 3 ? <><Icon name="bolt" size={11} /> Hurry!</> : <><span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#EF4444", display: "inline-block" }} /> Last seconds!</>}
+                <TeamIcon team={holder} /> <strong>{holder.name}</strong> {cpuIsHolding ? "is thinking…" : "— answer now!"}<br />
+                <span style={{ color: cpuIsHolding ? "#7C2D12" : qColor, fontSize: "12px", display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                  {cpuIsHolding
+                    ? <><Icon name="robot" size={11} style={{ animation: "cpuThinkPulse 1.1s ease-in-out infinite" }} /> Still deciding — it will pass when ready</>
+                    : qTimeLeft > 6 ? <><Icon name="clock" size={11} /> Take your time…</> : qTimeLeft > 3 ? <><Icon name="bolt" size={11} /> Hurry!</> : <><span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#EF4444", display: "inline-block" }} /> Last seconds!</>}
                 </span>
               </div>
             </div>
@@ -627,15 +711,15 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
         </div>
 
         {!showAnswer ? (
-          <button onClick={revealAnswer} className="hp-btn" style={{ width: "100%", background: "white", color: "#4338CA", border: "2px solid #C4B5FD", borderRadius: "12px", padding: "13px", fontSize: "15px", fontWeight: "800", cursor: "pointer", transition: "transform 0.15s ease" }}>
+          <button onClick={revealAnswer} className="hp-btn" style={{ width: "100%", background: "white", color: "#4338CA", border: "3px solid #1A1A2E", borderRadius: "12px", padding: "13px", fontSize: "15px", fontWeight: "800", cursor: "pointer", boxShadow: "3px 3px 0 #1A1A2E" }}>
             <Icon name="eye" size={14} /> Reveal answer early
           </button>
         ) : (
           <div style={{ display: "flex", gap: "10px" }}>
-            <button onClick={confirmPass} className="hp-btn" style={{ flex: 1, background: "linear-gradient(135deg,#16A34A,#22C55E)", color: "white", border: "none", borderRadius: "12px", padding: "14px 8px", fontSize: "14px", fontWeight: "900", cursor: "pointer", boxShadow: "0 4px 14px #22C55E40", transition: "transform 0.15s ease" }}>
+            <button onClick={confirmPass} className="hp-btn" style={{ flex: 1, background: "#22C55E", color: "white", border: "3px solid #1A1A2E", borderRadius: "12px", padding: "14px 8px", fontSize: "14px", fontWeight: "900", cursor: "pointer", boxShadow: "4px 4px 0 #1A1A2E" }}>
               <Icon name="check" size={13} /> Answered in time<br /><span style={{ fontSize: "12px", opacity: 0.85, display: "inline-flex", alignItems: "center", gap: "3px" }}>Pass potato <Icon name="next" size={11} /></span>
             </button>
-            <button onClick={confirmKeep} className="hp-btn" style={{ flex: 1, background: "linear-gradient(135deg,#DC2626,#EF4444)", color: "white", border: "none", borderRadius: "12px", padding: "14px 8px", fontSize: "14px", fontWeight: "900", cursor: "pointer", boxShadow: "0 4px 14px #EF444440", transition: "transform 0.15s ease" }}>
+            <button onClick={confirmKeep} className="hp-btn" style={{ flex: 1, background: "#EF4444", color: "white", border: "3px solid #1A1A2E", borderRadius: "12px", padding: "14px 8px", fontSize: "14px", fontWeight: "900", cursor: "pointer", boxShadow: "4px 4px 0 #1A1A2E" }}>
               <Icon name="close" size={12} /> Too slow / wrong<br /><span style={{ fontSize: "12px", opacity: 0.85, display: "inline-flex", alignItems: "center", gap: "3px" }}>Keep potato <Icon name="potato" size={12} /></span>
             </button>
           </div>

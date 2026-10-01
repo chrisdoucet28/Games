@@ -9,11 +9,13 @@ import { QuestionCard } from "../shared/QuestionCard";
 import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
 import { denseRank } from "../../utils/ranking";
 import { RankBadge } from "../shared/RankBadge";
-import { makeSoloCpuTeam } from "../../lib/soloOpponent";
+import { makeSoloCpuTeam, makeTeacherTeam } from "../../lib/soloOpponent";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
 import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
-import { HILL_TOPIC_STEPS, HILL_GRAMMAR_STEPS } from "../../data/tutorials/hill";
+import { HILL_THEME_STEPS, HILL_GRAMMAR_STEPS } from "../../data/tutorials/hill";
+import { playSound } from "../../lib/sounds";
+import { setMusicGame, stopMusic } from "../../lib/music";
 import {
   generateSessionCode, openHillChannel, closeChannel,
   type HillPhase, type HillStatePayload, type HillActionPayload,
@@ -29,7 +31,10 @@ const GM = GAME_MODES.find(g => g.id === "hill")!;
 // How long the CPU "thinks" before picking a zone, and before its uncontested claim resolves.
 const CPU_THINK_MS = 1400;
 const CPU_ANSWER_MS = 1000;
-const CPU_CLAIM_SUCCESS_PROB = 0.8;
+// Chance the CPU goes after a zone the student already owns even while free zones remain — without
+// this it only ever attacks as a last resort once every zone is claimed, which reads as passive for
+// most of a match. When no free zone is left it always attacks regardless of this constant.
+const CPU_ATTACK_PREFERENCE = 0.5;
 // Countdown the student gets to defend/attack a contested zone against the CPU, replacing the
 // teacher's Attacker/Defender/Neither judgment in solo — same idea as Race Track's timer.
 const CONTEST_SECONDS = 20;
@@ -47,11 +52,11 @@ const HILL_ZONES_GRAMMAR: ZoneDef[] = [
   { id: "Center", icon: "crown", pts: 5 },
 ];
 
-// Topic-focus mode: zones are reflavored as discourse moves. Claiming zones across a round
-// literally assembles a class conversation about the topic — opinion, question, example,
+// Theme mode: zones are reflavored as discourse moves. Claiming zones across a round
+// literally assembles a class conversation about the theme — opinion, question, example,
 // pushback, alternative — instead of five disconnected one-liners. Each zone wraps whatever
 // speaking prompt comes up with a move-specific prefix, so no new content is needed.
-const HILL_ZONES_TOPIC: ZoneDef[] = [
+const HILL_ZONES_THEME: ZoneDef[] = [
   { id: "North", icon: "help", pts: 3, label: "Question", prefix: "Ask a follow-up question about: " },
   { id: "South", icon: "chat", pts: 3, label: "Example", prefix: "Give a personal example about: " },
   { id: "East", icon: "handshake", pts: 2, label: "Agree/Disagree", prefix: "Agree or disagree, and say why: " },
@@ -105,8 +110,8 @@ const STYLE_TAG = (
     @keyframes koDiceSpin{0%{transform:rotate(0deg) scale(1)}50%{transform:rotate(200deg) scale(1.1)}100%{transform:rotate(360deg) scale(1)}}
     @keyframes koCoinShine{0%,100%{filter:brightness(1)}50%{filter:brightness(1.35)}}
     @keyframes koCrownPop{0%{transform:scale(0) rotate(-20deg);opacity:0}70%{transform:scale(1.2) rotate(8deg);opacity:1}100%{transform:scale(1) rotate(0deg);opacity:1}}
-    .ko-btn:hover:not(:disabled){transform:translateY(-2px) scale(1.02);filter:brightness(1.08)}
-    .ko-btn:active:not(:disabled){transform:translateY(0) scale(0.97)}
+    .ko-btn:hover:not(:disabled){filter:brightness(1.08)}
+    .ko-btn:active:not(:disabled){transform:translate(4px,4px) !important;box-shadow:0 0 0 #1A1A2E !important}
     .ko-zone:hover{filter:brightness(1.15)}
   `}</style>
 );
@@ -128,9 +133,16 @@ function AmbientBackdrop() {
 type HillSnapshot = {
   owners: Record<string, string | number>;
   roundPoints: Record<string | number, number>;
+  gameScores: Record<string | number, number>;
   round: number;
   turnOrder: number[];
   activeTeamIdx: number;
+  // Which solo opponent was chosen, and its score — both default for saves made before this field
+  // existed. cpuScore/teacherScore were previously missing entirely, silently resetting the solo
+  // opponent's score to 0 on every resume even though gameScores (the per-game tally) resumed fine.
+  opponentType: "cpu" | "teacher";
+  cpuScore: number;
+  teacherScore: number;
 };
 
 function validateHillSnapshot(raw: unknown, teamCount: number): HillSnapshot | undefined {
@@ -138,40 +150,68 @@ function validateHillSnapshot(raw: unknown, teamCount: number): HillSnapshot | u
   if (!s || !Array.isArray(s.turnOrder) || s.turnOrder.length !== teamCount) return undefined;
   if (typeof s.activeTeamIdx !== "number" || s.activeTeamIdx < 0 || s.activeTeamIdx >= teamCount) return undefined;
   if (typeof s.round !== "number" || s.round < 1) return undefined;
-  return { owners: s.owners ?? {}, roundPoints: s.roundPoints ?? {}, round: s.round, turnOrder: s.turnOrder, activeTeamIdx: s.activeTeamIdx };
+  return {
+    owners: s.owners ?? {}, roundPoints: s.roundPoints ?? {}, gameScores: s.gameScores ?? {}, round: s.round, turnOrder: s.turnOrder, activeTeamIdx: s.activeTeamIdx,
+    opponentType: s.opponentType === "teacher" ? "teacher" : "cpu", cpuScore: s.cpuScore ?? 0, teacherScore: s.teacherScore ?? 0,
+  };
 }
 
-export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState }: GameProps) {
+export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState, presetPhoneSession }: GameProps) {
   const TURN_SECONDS = 20;
 
-  // Solo play makes the CPU a real dice-rolled turn participant — "just another team, but it's
-  // a CPU" — gets a real turn slot, claims/attacks zones on its own turn. The one thing it can't
-  // do is answer a real question, so its own turn auto-resolves via a random roll, and a
-  // contested duel against it uses a timer instead of teacher judgment (see below).
+  // Solo play makes the second team a real dice-rolled turn participant — "just another team,"
+  // either a CPU or a live teacher (opponentType below) — but neither one ever actually answers a
+  // question. Only the student is ever meant to produce/prove language; the opponent exists purely
+  // to keep zones contestable (pick a real zone to attack or claim). So both opponent types share
+  // the exact same resolution shape: an uncontested claim on their own turn always just succeeds
+  // with no prompt shown (see the two "answer"-phase effects below — both refs always exist, but
+  // only whichever one opponentType actually selected ever shows up in `teams`/matches
+  // activeTeam.id, so the other effect naturally never fires), and a contested duel always uses the
+  // student-facing countdown ("Got it!"/"Wrong" before time runs out) rather than judged
+  // Attacker/Defender/Neither UI — see contestIsSoloDuel/soloOpponentRef below.
   const isSolo = propTeams.length === 1;
+  // Needed before `resumed` (which needs a team count to validate against) can be computed, but
+  // before `opponentType`/`cpuRef`/`teacherRef` (which `resumed` itself seeds) exist yet — same
+  // ordering fix SpyAmongUsGame.tsx already uses for its own teacher-opponent solo mode.
+  const effectiveTeamCount = isSolo ? 2 : propTeams.length;
+  const resumed = useRef(validateHillSnapshot(initialGameState, effectiveTeamCount)).current;
+  const [opponentType, setOpponentType] = useState<"cpu" | "teacher">(() => resumed?.opponentType ?? "cpu");
+  // Both constructed unconditionally (not gated on opponentType) — a useRef's initializer only
+  // ever runs once at mount, so gating either on opponentType would freeze whichever wasn't picked
+  // as the default at null forever, even after switching. Cheap plain objects either way; every
+  // downstream check compares against a specific ref's .id, so having both allocated doesn't
+  // change which one is ever actually treated as "the opponent."
   const cpuRef = useRef(isSolo ? makeSoloCpuTeam() : null);
-  const [cpuScore, setCpuScore] = useState(0);
+  const teacherRef = useRef(isSolo ? makeTeacherTeam() : null);
+  const [cpuScore, setCpuScore] = useState(() => resumed?.cpuScore ?? 0);
+  const [teacherScore, setTeacherScore] = useState(() => resumed?.teacherScore ?? 0);
   // Memoized so `teams` is referentially stable across renders when nothing has actually
   // changed — several existing effects/callbacks in this file depend on `teams` by reference,
   // and a fresh array literal every render would make them re-fire (and re-setState) forever.
   const teams = useMemo(
-    () => (isSolo ? [propTeams[0], { ...cpuRef.current!, score: cpuScore }] : propTeams),
-    [isSolo, propTeams, cpuScore]
+    () => (isSolo
+      ? [propTeams[0], opponentType === "teacher" ? { ...teacherRef.current!, score: teacherScore } : { ...cpuRef.current!, score: cpuScore }]
+      : propTeams),
+    [isSolo, propTeams, opponentType, cpuScore, teacherScore]
   );
+  const isThemeMode = questions.length > 0 && questions.every(q => q.type === "speaking task");
+  const ZONES = isThemeMode ? HILL_ZONES_THEME : HILL_ZONES_GRAMMAR;
+  // Points earned in THIS game only — team.score is the cross-game running total, so the "final"
+  // screen below ranking by it declared whoever was ahead overall the winner of this specific
+  // King of the Hill match, even when another team scored more zone-control/duel points here.
+  const [gameScores, setGameScores] = useState<Record<string | number, number>>(() => resumed?.gameScores ?? Object.fromEntries(teams.map(t => [t.id, 0])));
   const updateScore = (id: string | number, delta: number) => {
+    setGameScores(prev => ({ ...prev, [id]: (prev[id] ?? 0) + delta }));
     if (isSolo && id === cpuRef.current?.id) { setCpuScore(s => s + delta); }
+    else if (isSolo && id === teacherRef.current?.id) { setTeacherScore(s => s + delta); }
     else { onUpdateScore(id, delta); }
   };
-
-  const isTopicMode = questions.length > 0 && questions.every(q => q.type === "speaking task");
-  const ZONES = isTopicMode ? HILL_ZONES_TOPIC : HILL_ZONES_GRAMMAR;
-  const resumed = useRef(validateHillSnapshot(initialGameState, teams.length)).current;
 
   const pool = useRef((() => {
     // Grammar mode is "fill in the blank" only — never "correct grammar mistakes", even as a
     // fallback. Every topic's content pool is kept deep enough (see topics.ts) that this never
     // needs a top-up.
-    const base = isTopicMode
+    const base = isThemeMode
       ? questions
       : (() => {
           const finish = questions.filter(q => q.type === "fill in the blank");
@@ -195,17 +235,29 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
   // "Play on Phones" — lets the attacker/defender in a contested duel buzz in from their seats
   // instead of the teacher guessing who answered first by ear. Gated to propTeams.length > 1 (not
   // teams.length — teams always includes a synthetic CPU teammate in solo play, see the useMemo
-  // above) and !isTopicMode below: topic-mode duels are "teacher picks the stronger answer," an
+  // above) and !isThemeMode below: theme-mode duels are "teacher picks the stronger answer," an
   // explicit quality judgment with no "who's first" to resolve, so a buzzer has nothing to do
   // there. Always defaults to screen, even on Resume, same as every other phone-mode game.
-  const [inputMode, setInputMode] = useState<"screen" | "phone">("screen");
+  // Theme-mode duels are teacher-judged, no buzzing at all (see the !isThemeMode gate below) — a
+  // Class Check-In preset only applies when phone mode is actually meaningful for this instance.
+  const [inputMode, setInputMode] = useState<"screen" | "phone">(presetPhoneSession && !isThemeMode ? "phone" : "screen");
   const [introStep, setIntroStep] = useState<"setup" | "qr">("setup");
-  const [sessionCode, setSessionCode] = useState<string | null>(null);
+  const [sessionCode, setSessionCode] = useState<string | null>(presetPhoneSession && !isThemeMode ? presetPhoneSession.code : null);
   const [connectedTeamIds, setConnectedTeamIds] = useState<Set<string | number>>(new Set());
   // This duel's resolved buzz winner, or null while the buzzer is open. Purely informational — it
   // never gates resolveContest, which still takes the teacher's own Attacker/Defender/Neither click.
   const [buzzedTeamId, setBuzzedTeamId] = useState<string | number | null>(null);
   const channelRef = useRef<RealtimeChannel | null>(null);
+
+  useEffect(() => {
+    if (phase === "final") { playSound("roundComplete"); stopMusic(); }
+  }, [phase]);
+  // Reuses Castle Defense's tension track (see GAME_OVERRIDES in lib/music.ts) — same medieval-
+  // combat decision-under-pressure beat, zone-conquest instead of siege-defense.
+  useEffect(() => {
+    setMusicGame("hill");
+    return () => setMusicGame(null);
+  }, []);
 
   useEffect(() => {
     if (!forceFinalRef) return;
@@ -215,9 +267,9 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
 
   useEffect(() => {
     if (!serializeStateRef) return;
-    serializeStateRef.current = (): HillSnapshot => ({ owners, roundPoints, round, turnOrder, activeTeamIdx });
+    serializeStateRef.current = (): HillSnapshot => ({ owners, roundPoints, gameScores, round, turnOrder, activeTeamIdx, opponentType, cpuScore, teacherScore });
     return () => { if (serializeStateRef) serializeStateRef.current = null; };
-  }, [serializeStateRef, owners, roundPoints, round, turnOrder, activeTeamIdx]);
+  }, [serializeStateRef, owners, roundPoints, gameScores, round, turnOrder, activeTeamIdx, opponentType, cpuScore, teacherScore]);
   const [chosenZone, setChosenZone] = useState<string | null>(null);
   const [showAns, setShowAns] = useState(false);
   const [contest, setContest] = useState<any>(null);
@@ -232,6 +284,7 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
   const [finalOrder, setFinalOrder] = useState<any[] | null>(null);
 
   const runRoundRoll = useCallback((teamIndicesToRoll: number[], existingRolls: Record<number, number>) => {
+    playSound("dice");
     const rolls = { ...existingRolls };
     setDiceValues(prev => {
       const next = [...prev];
@@ -331,7 +384,7 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
   const activeZoneId = phase === "contested" ? contest?.zoneId : chosenZone;
   const activeZoneDef = ZONES.find(z => z.id === activeZoneId);
   const baseQ = pool[qi % Math.max(pool.length, 1)];
-  const q = isTopicMode && activeZoneDef?.prefix
+  const q = isThemeMode && activeZoneDef?.prefix
     ? { ...baseQ, question: activeZoneDef.prefix + (baseQ.question || (baseQ as any).task || "") }
     : baseQ;
 
@@ -353,7 +406,7 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
     setRoundSummary(summary);
     setPhase("round-end");
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [owners, teams, ZONES, cpuScore]);
+  }, [owners, teams, ZONES, cpuScore, teacherScore]);
 
   const nextTeamTurn = useCallback((_scored: boolean, ownersOverride?: Record<string, string | number>) => {
     const nextIdx = (activeTeamIdx + 1) % teams.length;
@@ -429,6 +482,9 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
       setContest({ attackerId: activeTeam.id, defenderId: currentOwner, zoneId, step: "simultaneous", key: `${round}-${activeTeamIdx}-${zoneId}` });
       setShowAns(false);
       setContestReady(false);
+      // The clash of the duel actually starting — attacking an owned zone, distinct from the
+      // victory cue in resolveContest/resolveUncontested above, which only fires once it's over.
+      playSound("hillClash");
       setPhase("contested");
     } else {
       setPhase("answer");
@@ -440,6 +496,9 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
     if (correct && chosenZone) {
       newOwners = { ...owners, [chosenZone]: activeTeam.id };
       setOwners(newOwners);
+      // Claiming a free zone is just as much "capturing the hill" as winning a contested duel
+      // below — in fact the more common case early in a round, before many zones are taken.
+      playSound("hill");
     }
     nextTeamTurn(correct, newOwners);
   };
@@ -449,6 +508,9 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
     let reason;
     if (winnerId === contest.attackerId) {
       newOwners[contest.zoneId] = contest.attackerId;
+      // Capture fanfare — only an actual zone flip earns this; a successful defense (below) held
+      // ground rather than took it, which doesn't call for the same celebratory beat.
+      playSound("hill");
       updateScore(contest.attackerId, 30);
       reason = "attacker";
     } else if (winnerId === contest.defenderId) {
@@ -461,8 +523,9 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
     setContest((c: any) => ({ ...c, step: "result", winner: winnerId, reason }));
   };
 
-  // CPU auto-picks a zone on its own turn: unclaimed if any exist, otherwise attacks a
-  // player-owned zone. Reuses pickZone's existing branch logic unchanged — must stay above the
+  // CPU auto-picks a zone on its own turn: attacks a player-owned zone either because there's no
+  // free zone left (a guaranteed attack) or, even when free zones remain, by the
+  // CPU_ATTACK_PREFERENCE roll — otherwise it expands into an unclaimed zone. Must stay above the
   // intro/final early returns below (Rules of Hooks).
   useEffect(() => {
     if (!isSolo || phase !== "pick" || activeTeam.id !== cpuRef.current?.id) return;
@@ -470,7 +533,8 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
     const zoneIds = ZONES.map(z => z.id);
     const unclaimed = zoneIds.filter(id => owners[id] === undefined);
     const attackable = zoneIds.filter(id => owners[id] !== undefined && owners[id] !== cpuId);
-    const pool = unclaimed.length > 0 ? unclaimed : attackable;
+    const shouldAttack = attackable.length > 0 && (unclaimed.length === 0 || Math.random() < CPU_ATTACK_PREFERENCE);
+    const pool = shouldAttack ? attackable : unclaimed;
     if (pool.length === 0) return;
     const timer = setTimeout(() => {
       pickZone(pool[Math.floor(Math.random() * pool.length)]);
@@ -479,27 +543,50 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSolo, phase, activeTeam.id, owners]);
 
-  // CPU can't actually answer a real question — auto-resolve its own uncontested zone claim via
-  // a tunable random success roll, driving the exact same resolveUncontested path a teacher's
-  // Correct/Wrong click would.
+  // CPU only reaches "answer" phase when it picked an unclaimed zone (a real duel against the
+  // student's zone goes through the "contested" timer path below instead) — there's no actual
+  // opponent to lose to here, so the claim always succeeds. Drives the exact same
+  // resolveUncontested path a teacher's Correct/Wrong click would.
   useEffect(() => {
     if (!isSolo || phase !== "answer" || activeTeam.id !== cpuRef.current?.id) return;
     const timer = setTimeout(() => {
-      resolveUncontested(Math.random() < CPU_CLAIM_SUCCESS_PROB);
+      resolveUncontested(true);
     }, CPU_ANSWER_MS);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSolo, phase, activeTeam.id]);
 
-  // Contested (head-to-head) duels against the CPU use a countdown instead of teacher judgment —
-  // the one spot the base game already frames as "whoever answers correctly first/better wins,"
-  // which doesn't work with a CPU that can't actually answer. The student defends/attacks by
-  // clicking "Got it!" before time runs out; letting it expire hands the zone to the CPU.
+  // The teacher exists to keep the game structurally competitive (deciding what to attack), not to
+  // produce more moments of language — only the student ever answers a real prompt. A teacher
+  // claiming an unclaimed zone has no student defending it, so there's nothing to test; it always
+  // succeeds with no prompt shown at all, same as the CPU's uncontested claim above.
+  useEffect(() => {
+    if (!isSolo || phase !== "answer" || activeTeam.id !== teacherRef.current?.id) return;
+    const timer = setTimeout(() => {
+      resolveUncontested(true);
+    }, CPU_ANSWER_MS);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSolo, phase, activeTeam.id]);
+
+  // Contested (head-to-head) duels against a solo opponent (CPU or teacher — same mechanic either
+  // way, per the design decision that this specific moment should "go down just like the CPU
+  // interaction" regardless of who's on the other side) use a countdown instead of judged
+  // Attacker/Defender/Neither UI: the student defends/attacks by clicking "Got it!" before time
+  // runs out; letting it expire (or clicking "Wrong") hands the zone to whichever opponent is
+  // actually active. This is still only ever testing the student — the opponent never "answers"
+  // anything, timer or not — it's just that the CPU literally can't, and (per feedback) the
+  // teacher deliberately doesn't either, so both share this exact resolution path.
   const contestIsSoloDuel = isSolo && phase === "contested" && contest?.step === "simultaneous";
+  const soloOpponentRef = opponentType === "teacher" ? teacherRef : cpuRef;
   const { timeLeft: contestTimeLeft, stop: stopContestTimer } = useTurnTimer(
     CONTEST_SECONDS,
     contestIsSoloDuel && contestReady,
-    () => { if (contest) resolveContest(cpuRef.current!.id); },
+    // useTurnTimer's onExpire plays "timesUp" right before calling this — when the opponent wins by
+    // capturing (resolveContest's attacker branch), it plays "hill" immediately after, landing right
+    // on top of the buzzer. Same short delay as OrderUpGame's session-timer/"roundComplete" fix, just
+    // to give the buzzer room before the capture fanfare.
+    () => { setTimeout(() => { if (contest) resolveContest(soloOpponentRef.current!.id); }, 700); },
     contest?.zoneId ?? "none"
   );
 
@@ -623,11 +710,11 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
           <div style={{ fontWeight: "900", fontSize: "20px", marginBottom: "10px", color: "#F9A8D4" }}>King of the Hill</div>
           <div style={{ fontSize: "15px", lineHeight: 1.7 }}>
             A map of <strong style={{ color: "#F9A8D4" }}>5 zones</strong> is up for grabs — answer to <strong style={{ color: "#F9A8D4" }}>claim one</strong>.{" "}
-            {isTopicMode
+            {isThemeMode
               ? "Each zone is a different conversation move — claiming zones builds a full class discussion."
               : "Every zone is a quick grammar challenge."}<br />
             Attack a zone someone already owns and it's <strong style={{ color: "#F9A8D4" }}>head-to-head</strong> —{" "}
-            {isTopicMode
+            {isThemeMode
               ? <>the teacher picks the stronger answer</>
               : <>the fastest correct answer wins</>
             }.<br />
@@ -635,7 +722,7 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
           </div>
         </div>
         <div style={{ marginTop: "18px", marginBottom: "20px", fontSize: "14px", color: "#F9A8D4", fontWeight: "600", display: "inline-flex", alignItems: "center", gap: "5px" }}>
-          The <Icon name="crown" size={14} /> {isTopicMode ? "Opinion" : "Center"} zone scores the most — expect fierce competition for it every round!
+          The <Icon name="crown" size={14} /> {isThemeMode ? "Opinion" : "Center"} zone scores the most — expect fierce competition for it every round!
         </div>
         <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "24px" }}>
           {teams.map(t => (
@@ -644,7 +731,9 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
             </div>
           ))}
         </div>
-        {propTeams.length > 1 && !isTopicMode && (
+        {/* Skipped entirely for a Class Check-In sitting — presetPhoneSession already picked
+            phone mode and its code, and the class-level QR already covered joining. */}
+        {propTeams.length > 1 && !isThemeMode && !presetPhoneSession && (
           <>
             {introStep === "setup" && (
               <div style={{ marginBottom: "20px" }}>
@@ -685,17 +774,36 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
             })()}
           </>
         )}
-        <button onClick={() => setShowHowTo(true)} className="ko-btn" style={{ display: "block", margin: "0 auto 14px", background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
+        {isSolo && (
+          <div style={{ marginBottom: "20px" }}>
+            <div style={{ fontSize: "13px", color: "#F9A8D4", fontWeight: "700", marginBottom: "10px" }}>Who do you want to play against?</div>
+            <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
+              <button onClick={() => setOpponentType("cpu")} className="ko-btn" style={{
+                padding: "10px 20px", borderRadius: "12px", fontWeight: "800", fontSize: "14px", cursor: "pointer",
+                border: `2px solid ${opponentType === "cpu" ? "#DB2777" : "rgba(255,255,255,0.2)"}`,
+                background: opponentType === "cpu" ? "rgba(219,39,119,0.15)" : "rgba(255,255,255,0.05)",
+                color: opponentType === "cpu" ? "#F9A8D4" : "#F9A8D488",
+              }}><Icon name="robot" size={14} /> CPU</button>
+              <button onClick={() => setOpponentType("teacher")} className="ko-btn" style={{
+                padding: "10px 20px", borderRadius: "12px", fontWeight: "800", fontSize: "14px", cursor: "pointer",
+                border: `2px solid ${opponentType === "teacher" ? "#DB2777" : "rgba(255,255,255,0.2)"}`,
+                background: opponentType === "teacher" ? "rgba(219,39,119,0.15)" : "rgba(255,255,255,0.05)",
+                color: opponentType === "teacher" ? "#F9A8D4" : "#F9A8D488",
+              }}><Icon name="person" size={14} /> Teacher</button>
+            </div>
+          </div>
+        )}
+        <button onClick={() => setShowHowTo(true)} className="ko-btn" style={{ display: "block", margin: "0 auto 14px", background: "white", color: GM.color, border: "3px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
           <Icon name="help" size={14} /> How to Play
         </button>
         {showHowTo && (
           <HowToPlayModal
             gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color}
-            steps={isTopicMode ? HILL_TOPIC_STEPS : HILL_GRAMMAR_STEPS}
+            steps={isThemeMode ? HILL_THEME_STEPS : HILL_GRAMMAR_STEPS}
             onClose={() => setShowHowTo(false)}
           />
         )}
-        <button onClick={() => setPhase("rolling")} className="ko-btn" style={{ background: "linear-gradient(135deg,#831843,#DB2777)", color: "white", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(219,39,119,0.5)", transition: "transform 0.15s ease" }}><Icon name="crown" size={18} /> Roll for Turn Order!</button>
+        <button onClick={() => setPhase("rolling")} className="ko-btn" style={{ background: "#DB2777", color: "white", border: "3px solid #1A1A2E", borderRadius: "12px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "6px 6px 0 #1A1A2E" }}><Icon name="crown" size={18} /> Roll for Turn Order!</button>
       </div>
     </div>
   );
@@ -707,14 +815,14 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
         <AmbientBackdrop />
         {STYLE_TAG}
         <div style={{ position: "relative", zIndex: 1 }}>
-          <div style={{ background: "linear-gradient(160deg,#831843,#4C0519)", border: "2px solid #F9A8D455", borderRadius: "20px", padding: "28px 24px", marginBottom: "20px", color: "white", maxWidth: "480px", margin: "0 auto 20px", boxShadow: "0 0 50px rgba(219,39,119,0.4)" }}>
+          <div style={{ background: "#4C0519", border: "4px solid #1A1A2E", borderRadius: "12px", padding: "28px 24px", marginBottom: "20px", color: "white", maxWidth: "480px", margin: "0 auto 20px", boxShadow: "6px 6px 0 #1A1A2E" }}>
             <div style={{ marginBottom: "10px" }}><Icon name="hourglass" size={36} /></div>
             <div style={{ fontWeight: "900", fontSize: "19px", marginBottom: "10px", color: "#F9A8D4" }}><TeamIcon team={noticeTeam} /> {noticeTeam.name} ran out of time!</div>
             <div style={{ fontSize: "15px", lineHeight: 1.6, opacity: 0.95 }}>
               {timeoutNotice.retried ? "That's your one free retry for this game — watch the clock this time!" : "You've already used your free retry this game — the turn moves on."}
             </div>
           </div>
-          <button onClick={dismissTimeoutNotice} className="ko-btn" style={{ background: "linear-gradient(135deg,#831843,#DB2777)", color: "white", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(219,39,119,0.5)", transition: "transform 0.15s ease" }}>
+          <button onClick={dismissTimeoutNotice} className="ko-btn" style={{ background: "#DB2777", color: "white", border: "3px solid #1A1A2E", borderRadius: "12px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "6px 6px 0 #1A1A2E" }}>
             {timeoutNotice.retried ? <><Icon name="refresh" size={17} /> Try Again!</> : <><Icon name="next" size={17} /> Next Team</>}
           </button>
         </div>
@@ -723,9 +831,10 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
   }
 
   if (phase === "final") {
-    // Dense rank on final score — two teams tied for the throne both wear the crown instead of
-    // an arbitrary array-order winner.
-    const ranking = denseRank(teams, t => t.score).sort((a, b) => b.value - a.value);
+    // Dense rank on points earned in THIS game (gameScores), not team.score (the cross-game
+    // running total) — two teams tied for the throne both wear the crown instead of an
+    // arbitrary array-order winner.
+    const ranking = denseRank(teams, t => gameScores[t.id] ?? 0).sort((a, b) => b.value - a.value);
     const winners = ranking.filter(r => r.rank === 0);
     const isTie = winners.length > 1;
     const headline = isTie
@@ -740,7 +849,7 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
           <div style={{ fontWeight: "900", fontSize: "22px", color: "#F9A8D4", marginBottom: "16px" }}>{headline}</div>
           <div style={{ display: "grid", gridTemplateColumns: teamsGridCols(teams.length), gap: "10px", margin: "0 auto 20px", maxWidth: "760px" }}>
             {ranking.map(({ item: t, rank, value }) => (
-              <div key={t.id} style={{ background: `linear-gradient(160deg,${t.color.dark}55,#1F0A1F)`, border: `2px solid ${t.color.bg}`, borderRadius: "14px", padding: "12px" }}>
+              <div key={t.id} style={{ background: t.color.dark, border: "3px solid #1A1A2E", boxShadow: "4px 4px 0 #1A1A2E", borderRadius: "12px", padding: "12px" }}>
                 <div><RankBadge rank={rank} size={22} /></div>
                 <div style={{ fontWeight: "800", color: "white", fontSize: "14px", marginTop: "4px" }}><TeamIcon team={t} /> {t.name}</div>
                 <div style={{ color: "#FCD34D", fontWeight: "900", fontSize: "16px", marginTop: "4px" }}>{value} pts</div>
@@ -748,7 +857,7 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
               </div>
             ))}
           </div>
-          <button onClick={onEnd} className="ko-btn" style={{ background: "linear-gradient(135deg,#831843,#DB2777)", color: "white", border: "none", borderRadius: "14px", padding: "14px 36px", fontSize: "17px", fontWeight: "900", cursor: "pointer", transition: "transform 0.15s ease" }}><Icon name="checkeredFlag" size={17} /> End Game</button>
+          <button onClick={onEnd} className="ko-btn" style={{ background: "#DB2777", color: "white", border: "3px solid #1A1A2E", borderRadius: "12px", padding: "14px 36px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "5px 5px 0 #1A1A2E" }}><Icon name="checkeredFlag" size={17} /> End Game</button>
         </div>
       </div>
     );
@@ -789,7 +898,10 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
     <div style={arenaStyle}>
       <AmbientBackdrop />
       {STYLE_TAG}
-      {inputMode === "phone" && sessionCode && (
+      {/* Suppressed for a Class Check-In sitting — the class-level badge (LessonGamesGenerator.tsx's
+          renderClassCheckInBadge) is the only floating reconnect button shown then, and it's the
+          only one pointing at the right (class, not per-game) join URL. */}
+      {inputMode === "phone" && sessionCode && !presetPhoneSession && (
         <PhoneReconnectBadge
           sessionCode={sessionCode} joinUrl={`${window.location.origin}${window.location.pathname}?join=${sessionCode}&game=hill`}
           teams={propTeams} connectedTeamIds={connectedTeamIds}
@@ -829,7 +941,7 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
                   </div>
                 </div>
                 <div>
-                  <button onClick={() => setPhase("pick")} className="ko-btn" style={{ background: "linear-gradient(135deg,#831843,#DB2777)", color: "white", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "800", cursor: "pointer", transition: "transform 0.15s ease" }}><Icon name="play" size={15} /> Start Round {round}</button>
+                  <button onClick={() => setPhase("pick")} className="ko-btn" style={{ background: "#DB2777", color: "white", border: "3px solid #1A1A2E", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "800", cursor: "pointer", boxShadow: "4px 4px 0 #1A1A2E" }}><Icon name="play" size={15} /> Start Round {round}</button>
                 </div>
               </div>
             )}
@@ -857,7 +969,7 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
                 const ownedZones = ZONES.filter(zone => owners[zone.id] === team.id);
                 const income = ownedZones.reduce((sum, zone) => sum + zone.pts, 0);
                 return (
-                  <div key={team.id} style={{ background: `linear-gradient(160deg,${team.color.dark}44,#1F0A1F)`, border: `2px solid ${team.color.bg}`, borderRadius: "12px", padding: "8px 12px", fontSize: "12px", color: "white", fontWeight: "700", display: "inline-flex", alignItems: "center", gap: "5px" }}>
+                  <div key={team.id} style={{ background: team.color.dark, border: "2px solid #1A1A2E", boxShadow: "2px 2px 0 #1A1A2E", borderRadius: "12px", padding: "8px 12px", fontSize: "12px", color: "white", fontWeight: "700", display: "inline-flex", alignItems: "center", gap: "5px" }}>
                     <TeamIcon team={team} color="white" /> {team.name}: {income} pts/rnd
                   </div>
                 );
@@ -868,8 +980,8 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
             </div>
 
             {phase !== "round-end" && (
-              <div style={{ background: `linear-gradient(90deg,${activeTeam.color.dark},${activeTeam.color.bg})`, borderRadius: "14px", padding: "10px 16px", marginBottom: "12px", boxShadow: `0 4px 18px ${activeTeam.color.bg}55` }}>
-                <span style={{ color: "white", fontWeight: "900", fontSize: "16px", textShadow: "0 1px 3px rgba(0,0,0,0.4)", display: "inline-flex", alignItems: "center", gap: "6px" }}><Icon name="crown" size={16} /> {activeTeam.name}'s turn</span>
+              <div style={{ background: activeTeam.color.bg, border: "3px solid #1A1A2E", borderRadius: "12px", padding: "10px 16px", marginBottom: "12px", boxShadow: "4px 4px 0 #1A1A2E" }}>
+                <span style={{ color: "white", fontWeight: "900", fontSize: "16px", textShadow: "2px 2px 0 #1A1A2E", display: "inline-flex", alignItems: "center", gap: "6px" }}><Icon name="crown" size={16} /> {activeTeam.name}'s turn</span>
               </div>
             )}
 
@@ -878,8 +990,8 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
                 <QuestionCard question={q} showAnswer={showAns} onReveal={() => { stop(); setShowAns(true); }} gameId="hill" />
                 {(showAns || q?.type === "speaking task") && (
                   <div style={{ display: "flex", gap: "10px", justifyContent: "center", marginTop: "12px" }}>
-                    <button onClick={() => resolveUncontested(true)} className="ko-btn" style={{ background: "#22C55E", color: "white", border: "none", borderRadius: "12px", padding: "12px 24px", fontSize: "16px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease" }}><Icon name="check" size={15} /> Correct! Claim!</button>
-                    <button onClick={() => resolveUncontested(false)} className="ko-btn" style={{ background: "#EF4444", color: "white", border: "none", borderRadius: "12px", padding: "12px 24px", fontSize: "16px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease" }}><Icon name="close" size={13} /> Wrong</button>
+                    <button onClick={() => resolveUncontested(true)} className="ko-btn" style={{ background: "#22C55E", color: "white", border: "3px solid #1A1A2E", borderRadius: "12px", padding: "12px 24px", fontSize: "16px", fontWeight: "700", cursor: "pointer", boxShadow: "4px 4px 0 #1A1A2E" }}><Icon name="check" size={15} /> Correct! Claim!</button>
+                    <button onClick={() => resolveUncontested(false)} className="ko-btn" style={{ background: "#EF4444", color: "white", border: "3px solid #1A1A2E", borderRadius: "12px", padding: "12px 24px", fontSize: "16px", fontWeight: "700", cursor: "pointer", boxShadow: "4px 4px 0 #1A1A2E" }}><Icon name="close" size={13} /> Wrong</button>
                   </div>
                 )}
               </>
@@ -887,19 +999,19 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
 
             {phase === "contested" && contest?.step === "simultaneous" && (
               <div>
-                <div style={{ background: "linear-gradient(90deg,rgba(255,255,255,0) 0%, rgba(248,113,113,0.18) 50%, rgba(255,255,255,0) 100%)", border: "2px solid #FCA5A5", borderRadius: "16px", padding: "14px", marginBottom: "12px", textAlign: "center", animation: "koDuelPulse 1.6s ease-in-out infinite" }}>
+                <div style={{ background: "#4C0519", border: "3px solid #1A1A2E", boxShadow: "4px 4px 0 #1A1A2E", borderRadius: "12px", padding: "14px", marginBottom: "12px", textAlign: "center", animation: "koDuelPulse 1.6s ease-in-out infinite" }}>
                   <div style={{ fontWeight: "900", fontSize: "18px", color: "#FCA5A5", display: "inline-flex", alignItems: "center", gap: "6px" }}><Icon name="sword" size={17} /> Battle for {contest.zoneId}!</div>
                   <div style={{ fontSize: "13px", color: "#F3E8FF", fontWeight: "700", lineHeight: 1.5 }}>
                     {attacker?.name} is attacking a claimed zone. Both teams face the same question, and only one can control it.
                   </div>
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginBottom: "12px" }}>
-                  <div style={{ background: `linear-gradient(160deg,${attacker?.color.dark}55,#1F0A1F)`, border: `3px solid ${attacker?.color.bg}`, borderRadius: "12px", padding: "10px", textAlign: "center" }}>
+                  <div style={{ background: attacker?.color.dark, border: "3px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E", borderRadius: "12px", padding: "10px", textAlign: "center" }}>
                     <div style={{ marginBottom: "2px" }}><Icon name="sword" size={18} /></div>
                     <div style={{ fontWeight: "900", fontSize: "13px", color: "white" }}>{attacker?.name}</div>
                     <div style={{ fontSize: "11px", color: "#F3E8FF", opacity: 0.8 }}>Attacker</div>
                   </div>
-                  <div style={{ background: `linear-gradient(160deg,${defender?.color.dark}55,#1F0A1F)`, border: `3px solid ${defender?.color.bg}`, borderRadius: "12px", padding: "10px", textAlign: "center" }}>
+                  <div style={{ background: defender?.color.dark, border: "3px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E", borderRadius: "12px", padding: "10px", textAlign: "center" }}>
                     <div style={{ marginBottom: "2px" }}><Icon name="shield" size={18} /></div>
                     <div style={{ fontWeight: "900", fontSize: "13px", color: "white" }}>{defender?.name}</div>
                     <div style={{ fontSize: "11px", color: "#F3E8FF", opacity: 0.8 }}>Defender of {contest.zoneId}</div>
@@ -910,7 +1022,7 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
                     <div style={{ fontWeight: "700", fontSize: "14px", color: "#F9A8D4", marginBottom: "14px" }}>
                       Take a second to look at the board — the {CONTEST_SECONDS}s clock only starts once you're ready.
                     </div>
-                    <button onClick={() => setContestReady(true)} className="ko-btn" style={{ background: "linear-gradient(135deg,#831843,#DB2777)", color: "white", border: "none", borderRadius: "12px", padding: "14px 28px", cursor: "pointer", fontWeight: "800", fontSize: "16px", transition: "transform 0.15s ease" }}><Icon name="play" size={15} /> I'm Ready!</button>
+                    <button onClick={() => setContestReady(true)} className="ko-btn" style={{ background: "#DB2777", color: "white", border: "3px solid #1A1A2E", borderRadius: "12px", padding: "14px 28px", cursor: "pointer", fontWeight: "800", fontSize: "16px", boxShadow: "4px 4px 0 #1A1A2E" }}><Icon name="play" size={15} /> I'm Ready!</button>
                   </div>
                 ) : (
                   <QuestionCard question={q} showAnswer={showAns} onReveal={() => { stop(); if (contestIsSoloDuel) stopContestTimer(); setShowAns(true); }} gameId="hill" />
@@ -925,25 +1037,25 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
                         Answer correctly before time runs out to {contest.attackerId === propTeams[0].id ? "capture" : "defend"} the zone!
                       </div>
                       <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
-                        <button onClick={() => { stopContestTimer(); resolveContest(propTeams[0].id); }} className="ko-btn" style={{ background: "#22C55E", color: "white", border: "none", borderRadius: "12px", padding: "14px 28px", cursor: "pointer", fontWeight: "800", fontSize: "16px", transition: "transform 0.15s ease" }}><Icon name="check" size={15} /> Got it!</button>
+                        <button onClick={() => { stopContestTimer(); resolveContest(propTeams[0].id); }} className="ko-btn" style={{ background: "#22C55E", color: "white", border: "3px solid #1A1A2E", borderRadius: "12px", padding: "14px 28px", cursor: "pointer", fontWeight: "800", fontSize: "16px", boxShadow: "4px 4px 0 #1A1A2E" }}><Icon name="check" size={15} /> Got it!</button>
                         {/* Lets the student concede the instant they know they missed it, instead of
-                            being forced to sit out the rest of the countdown for the same CPU-wins
-                            outcome a timeout would give anyway. */}
-                        <button onClick={() => { stopContestTimer(); resolveContest(cpuRef.current!.id); }} className="ko-btn" style={{ background: "rgba(255,255,255,0.1)", color: "#F9A8D4", border: "1px solid #F9A8D455", borderRadius: "12px", padding: "14px 28px", cursor: "pointer", fontWeight: "800", fontSize: "16px", transition: "transform 0.15s ease" }}><Icon name="close" size={13} /> Wrong</button>
+                            being forced to sit out the rest of the countdown for the same
+                            opponent-wins outcome a timeout would give anyway. */}
+                        <button onClick={() => { stopContestTimer(); resolveContest(soloOpponentRef.current!.id); }} className="ko-btn" style={{ background: "rgba(255,255,255,0.1)", color: "#F9A8D4", border: "3px solid #1A1A2E", borderRadius: "12px", padding: "14px 28px", cursor: "pointer", fontWeight: "800", fontSize: "16px", boxShadow: "4px 4px 0 #1A1A2E" }}><Icon name="close" size={13} /> Wrong</button>
                       </div>
                     </div>
                   )
                 ) : (
                   <>
                     <div style={{ textAlign: "center", fontWeight: "700", fontSize: "13px", color: "#F9A8D4", marginTop: "10px" }}>
-                      {isTopicMode || q?.type === "speaking task"
+                      {isThemeMode || q?.type === "speaking task"
                         ? "Teacher judges which team gave the better answer."
                         : "Judge which team answered correctly first."}
                     </div>
                     {buzzedTeamId !== null && (() => {
                       const buzzedTeam = teams.find(t => t.id === buzzedTeamId);
                       return (
-                        <div style={{ textAlign: "center", marginTop: "10px", background: "#172438", border: `1.5px solid ${buzzedTeam?.color.bg ?? "#F7C948"}`, borderRadius: "12px", padding: "8px 14px" }}>
+                        <div style={{ textAlign: "center", marginTop: "10px", background: "#172438", border: "3px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E", borderRadius: "12px", padding: "8px 14px" }}>
                           <span style={{ fontWeight: "800", fontSize: "13px", color: "#FCD34D", display: "inline-flex", alignItems: "center", gap: "5px" }}><Icon name="bolt" size={13} /> <TeamIcon team={buzzedTeam} /> {buzzedTeam?.name} buzzed in first!</span>
                         </div>
                       );
@@ -951,15 +1063,15 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
                     {(showAns || q?.type === "speaking task") && (
                       <div style={{ marginTop: "14px" }}>
                         <div style={{ textAlign: "center", fontWeight: "700", fontSize: "13px", color: "#F9A8D4", marginBottom: "10px" }}>
-                          {isTopicMode || q?.type === "speaking task"
+                          {isThemeMode || q?.type === "speaking task"
                             ? "Teacher judges - whose answer was better?"
                             : "Who answered correctly first?"}
                         </div>
                         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "8px" }}>
-                          <button onClick={() => resolveContest(contest.attackerId)} className="ko-btn" style={{ background: attacker?.color.bg, color: "white", border: contest.attackerId === buzzedTeamId ? "3px solid #F7C948" : "none", borderRadius: "12px", padding: "14px 10px", cursor: "pointer", fontWeight: "800", transition: "transform 0.15s ease" }}><Icon name="sword" size={14} /> {attacker?.name}</button>
-                          <button onClick={() => resolveContest(contest.defenderId)} className="ko-btn" style={{ background: defender?.color.bg, color: "white", border: contest.defenderId === buzzedTeamId ? "3px solid #F7C948" : "none", borderRadius: "12px", padding: "14px 10px", cursor: "pointer", fontWeight: "800", transition: "transform 0.15s ease" }}><Icon name="shield" size={14} /> {defender?.name}</button>
+                          <button onClick={() => resolveContest(contest.attackerId)} className="ko-btn" style={{ background: attacker?.color.bg, color: "white", border: contest.attackerId === buzzedTeamId ? "3px solid #F7C948" : "3px solid #1A1A2E", borderRadius: "12px", padding: "14px 10px", cursor: "pointer", fontWeight: "800", boxShadow: "3px 3px 0 #1A1A2E" }}><Icon name="sword" size={14} /> {attacker?.name}</button>
+                          <button onClick={() => resolveContest(contest.defenderId)} className="ko-btn" style={{ background: defender?.color.bg, color: "white", border: contest.defenderId === buzzedTeamId ? "3px solid #F7C948" : "3px solid #1A1A2E", borderRadius: "12px", padding: "14px 10px", cursor: "pointer", fontWeight: "800", boxShadow: "3px 3px 0 #1A1A2E" }}><Icon name="shield" size={14} /> {defender?.name}</button>
                         </div>
-                        <button onClick={() => resolveContest(null)} className="ko-btn" style={{ marginTop: "10px", background: "rgba(255,255,255,0.1)", color: "#F9A8D4", cursor: "pointer", border: "1px solid #F9A8D455", padding: "8px 16px", borderRadius: "10px", transition: "transform 0.15s ease" }}><Icon name="handshake" size={13} /> Neither</button>
+                        <button onClick={() => resolveContest(null)} className="ko-btn" style={{ marginTop: "10px", background: "rgba(255,255,255,0.1)", color: "#F9A8D4", cursor: "pointer", border: "3px solid #1A1A2E", padding: "8px 16px", borderRadius: "12px", boxShadow: "3px 3px 0 #1A1A2E" }}><Icon name="handshake" size={13} /> Neither</button>
                       </div>
                     )}
                   </>
@@ -979,13 +1091,13 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
                   {contest.reason === "defender" && <div style={{ fontWeight: "900", fontSize: "16px", color: "white" }}>{defender?.name} defended {contest.zoneId}! +20 bonus pts</div>}
                   {contest.reason === "neither" && <div style={{ fontWeight: "900", fontSize: "16px", color: "white" }}>Neither wins — {contest.zoneId} stays with {defender?.name}!</div>}
                 </div>
-                <button onClick={() => nextTeamTurn(false, owners)} className="ko-btn" style={{ background: "linear-gradient(135deg,#831843,#DB2777)", color: "white", border: "none", borderRadius: "12px", padding: "12px 28px", cursor: "pointer", fontWeight: "800", transition: "transform 0.15s ease" }}><Icon name="next" size={14} /> Next Turn</button>
+                <button onClick={() => nextTeamTurn(false, owners)} className="ko-btn" style={{ background: "#DB2777", color: "white", border: "3px solid #1A1A2E", borderRadius: "12px", padding: "12px 28px", cursor: "pointer", fontWeight: "800", boxShadow: "4px 4px 0 #1A1A2E" }}><Icon name="next" size={14} /> Next Turn</button>
               </div>
             )}
 
             {phase === "round-end" && roundSummary && (
               <div style={{ textAlign: "center" }}>
-                <div style={{ background: "linear-gradient(160deg,#78350F,#451A03)", border: "2px solid #FCD34D66", borderRadius: "16px", padding: "16px", marginBottom: "14px" }}>
+                <div style={{ background: "#451A03", border: "3px solid #1A1A2E", boxShadow: "4px 4px 0 #1A1A2E", borderRadius: "12px", padding: "16px", marginBottom: "14px" }}>
                   <div style={{ fontWeight: "900", fontSize: "18px", color: "#FCD34D", animation: "koCoinShine 2s ease-in-out infinite", display: "inline-flex", alignItems: "center", gap: "6px" }}><Icon name="coin" size={17} /> End of Round {round}</div>
                 </div>
                 <div style={{ display: "grid", gap: "10px", marginBottom: "16px" }}>
@@ -994,7 +1106,7 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
                     if (!team) return null;
                     const totalRoundControl = roundPoints[summary.teamId] ?? 0;
                     return (
-                      <div key={summary.teamId} style={{ background: `linear-gradient(160deg,${team.color.dark}44,#1F0A1F)`, border: `3px solid ${team.color.bg}`, borderRadius: "16px", padding: "12px 16px", textAlign: "left" }}>
+                      <div key={summary.teamId} style={{ background: team.color.dark, border: "3px solid #1A1A2E", boxShadow: "4px 4px 0 #1A1A2E", borderRadius: "12px", padding: "12px 16px", textAlign: "left" }}>
                         <div style={{ fontWeight: "900", fontSize: "16px", color: "white", marginBottom: "6px", display: "flex", alignItems: "center", gap: "6px" }}>
                           <TeamIcon team={team} color="white" /> {team.name}
                         </div>
@@ -1017,7 +1129,7 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
                     );
                   })}
                 </div>
-                <button onClick={startNextRound} className="ko-btn" style={{ background: "linear-gradient(135deg,#831843,#DB2777)", color: "white", border: "none", borderRadius: "14px", padding: "14px 36px", fontSize: "17px", fontWeight: "900", cursor: "pointer", transition: "transform 0.15s ease" }}>{round >= TOTAL_ROUNDS ? <><Icon name="trophy" size={16} /> See Final Results</> : <><Icon name="play" size={16} /> Start Round {round + 1}</>}</button>
+                <button onClick={startNextRound} className="ko-btn" style={{ background: "#DB2777", color: "white", border: "3px solid #1A1A2E", borderRadius: "12px", padding: "14px 36px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "5px 5px 0 #1A1A2E" }}>{round >= TOTAL_ROUNDS ? <><Icon name="trophy" size={16} /> See Final Results</> : <><Icon name="play" size={16} /> Start Round {round + 1}</>}</button>
               </div>
             )}
           </>

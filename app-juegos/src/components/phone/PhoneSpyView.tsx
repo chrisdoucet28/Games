@@ -26,15 +26,15 @@ export function PhoneSpyView({ state, teamId }: Props) {
   // re-checking wording after the fact) to hide it once they're done.
   const showRoleCard = !hasSpoken;
 
+  // "peek" is never broadcast in phone mode (every team, including a solo session's teacher
+  // stand-in, gets its role privately via this same phone view instead — see
+  // enterRoundStartPhase in SpyAmongUsGame.tsx), so there's no status line for it here.
   let statusLine = "";
-  if (state.phase === "peek") statusLine = "🧑‍🏫 Your teacher is looking at their own card — get ready!";
-  else if (state.phase === "discuss") statusLine = "💬 Discuss as a group — look at your card, get ready to speak.";
+  if (state.phase === "discuss") statusLine = "💬 Discuss as a group — look at your card, get ready to speak.";
   else if (state.phase === "order-roll") statusLine = "🎲 Rolling for speaking order…";
   else if (isMyTurn) statusLine = "🎙️ Your turn — speak now!";
   else if (hasSpoken) statusLine = "✅ You've spoken — listening to the rest of the crew…";
-  // roster is filtered to exclude the teacher stand-in (solo play) — a speaker id with no match
-  // there can only be the teacher, never a real team.
-  else if (isSpeakPhase) statusLine = `⏳ Waiting your turn — ${currentSpeaker?.name ?? "your teacher"} is speaking now.`;
+  else if (isSpeakPhase) statusLine = `⏳ Waiting your turn — ${currentSpeaker?.name ?? "the next speaker"} is speaking now.`;
   else if (state.phase === "vote" || state.phase === "spy-guess" || state.phase === "guess-2p" || state.phase === "reveal" || state.phase === "reveal-2p") {
     statusLine = "👀 Look at the big screen!";
   }

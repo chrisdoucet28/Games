@@ -22,3 +22,13 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+.vercel
+.env*
+
+# Music/narration mp3s are served from Vercel Blob storage (see MEDIA_BASE in src/lib/music.ts
+# and src/data/realWorldReadings.ts), not committed — every deployment used to ship a full copy
+# of these, which drove Vercel's deployment storage quota up on every single push. These
+# directories are only ever transient local staging between generating/adding a track and running
+# scripts/upload-media-to-blob.ts.
+public/music/
+public/audio/real-world/

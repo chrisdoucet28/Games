@@ -11,6 +11,8 @@ import { RankBadge } from "../shared/RankBadge";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
 import { CARDS_TUTORIAL_STEPS } from "../../data/tutorials/cards";
+import { playSound } from "../../lib/sounds";
+import { setMusicGame, stopMusic } from "../../lib/music";
 
 const GM = GAME_MODES.find(g => g.id === "cards")!;
 
@@ -30,8 +32,8 @@ const STYLE_TAG = (
     @keyframes csMarquee{0%,100%{opacity:0.55}50%{opacity:1}}
     @keyframes csStarPulse{0%,100%{transform:scale(1);filter:brightness(1)}50%{transform:scale(1.12);filter:brightness(1.3)}}
     @keyframes csRevealPop{0%{transform:scale(0.85);opacity:0}60%{transform:scale(1.05)}100%{transform:scale(1);opacity:1}}
-    .cs-btn:hover:not(:disabled){transform:translateY(-2px) scale(1.02);filter:brightness(1.1)}
-    .cs-btn:active:not(:disabled){transform:translateY(0) scale(0.97)}
+    .cs-btn:hover:not(:disabled){filter:brightness(1.1)}
+    .cs-btn:active:not(:disabled){transform:translate(4px,4px) !important;box-shadow:0 0 0 #1A1A2E !important}
     .cs-card:hover{filter:brightness(1.1)}
   `}</style>
 );
@@ -78,12 +80,13 @@ type CardShuffleSnapshot = {
   roundCount: number;
   starHitsByTeam: Record<string | number, number>;
   correctByTeam: Record<string | number, number>;
+  gameScoreByTeam: Record<string | number, number>;
 };
 
 function validateCardShuffleSnapshot(raw: unknown): CardShuffleSnapshot | undefined {
   const s = raw as Partial<CardShuffleSnapshot> | null | undefined;
   if (!s || typeof s.roundCount !== "number" || s.roundCount < 0) return undefined;
-  return { roundCount: s.roundCount, starHitsByTeam: s.starHitsByTeam ?? {}, correctByTeam: s.correctByTeam ?? {} };
+  return { roundCount: s.roundCount, starHitsByTeam: s.starHitsByTeam ?? {}, correctByTeam: s.correctByTeam ?? {}, gameScoreByTeam: s.gameScoreByTeam ?? {} };
 }
 
 export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState }: GameProps) {
@@ -116,6 +119,17 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
   const [showHowTo, setShowHowTo] = useState(false);
 
   useEffect(() => {
+    if (phase === "final") { playSound("roundComplete"); stopMusic(); }
+  }, [phase]);
+  // Reuses only a tension track (see GAME_OVERRIDES in lib/music.ts) — Card Shuffle's core loop
+  // (picking a face-down slot under time pressure) *is* the tension moment, so that's the only
+  // context worth a custom Suno track; brief reveal/scoring windows keep the shared gameplay track.
+  useEffect(() => {
+    setMusicGame("cards");
+    return () => setMusicGame(null);
+  }, []);
+
+  useEffect(() => {
     if (!forceFinalRef) return;
     forceFinalRef.current = phase === "final" ? null : () => { setPhase("final"); return true; };
     return () => { if (forceFinalRef) forceFinalRef.current = null; };
@@ -126,12 +140,16 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
   // what needs to survive to the final results screen.
   const [starHitsByTeam, setStarHitsByTeam] = useState<Record<string | number, number>>(() => resumed?.starHitsByTeam ?? {});
   const [correctByTeam, setCorrectByTeam] = useState<Record<string | number, number>>(() => resumed?.correctByTeam ?? {});
+  // Points earned in THIS game only — team.score is the cross-game running total, so the final
+  // screen ranking by it declared whoever was ahead overall the "star of the show" even when
+  // another team scored more here.
+  const [gameScoreByTeam, setGameScoreByTeam] = useState<Record<string | number, number>>(() => resumed?.gameScoreByTeam ?? {});
 
   useEffect(() => {
     if (!serializeStateRef) return;
-    serializeStateRef.current = (): CardShuffleSnapshot => ({ roundCount, starHitsByTeam, correctByTeam });
+    serializeStateRef.current = (): CardShuffleSnapshot => ({ roundCount, starHitsByTeam, correctByTeam, gameScoreByTeam });
     return () => { if (serializeStateRef) serializeStateRef.current = null; };
-  }, [serializeStateRef, roundCount, starHitsByTeam, correctByTeam]);
+  }, [serializeStateRef, roundCount, starHitsByTeam, correctByTeam, gameScoreByTeam]);
 
   const [answeringTeamIdx, setAnsweringTeamIdx] = useState(0);
   const [showAns, setShowAns] = useState(false);
@@ -160,15 +178,32 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
     }, duration);
   });
 
-  const buildShuffleSequence = () => {
+  // Round-by-round escalation, not a random pick every time — teacher feedback live in class: the
+  // old version picked one of 4 fixed "styles" at random each round with zero tie to round number,
+  // so round 1 could land on the most chaotic preset purely by chance and the final round on the
+  // mildest one. Nothing was actually "starting approachable and getting crazier" the way the game
+  // wants to feel. `round` is 0-indexed (round 1 = 0); `t` is 0 on round 1 and 1 on the final round,
+  // and every tier's swap COUNT and DURATION is interpolated between an easy and a chaotic endpoint
+  // across that range — round 1 is almost entirely slow/medium swaps (genuinely trackable by eye),
+  // the final round is dominated by fast/blur swaps at a quicker pace than before. Small ±1 jitter
+  // keeps repeat plays of the same round from feeling identical without ever letting an early round
+  // out-chaos a later one.
+  const buildShuffleSequence = (round: number) => {
     const allPairs = [[0, 1], [0, 2], [0, 3], [1, 2], [1, 3], [2, 3]];
     const rng = () => Math.random();
-    const style = Math.floor(rng() * 4);
-    let slowCount, medCount, fastCount, blurCount;
-    if (style === 0) { slowCount = 3; medCount = 4; fastCount = 5; blurCount = 7; }
-    else if (style === 1) { slowCount = 2; medCount = 3; fastCount = 7; blurCount = 8; }
-    else if (style === 2) { slowCount = 4; medCount = 5; fastCount = 4; blurCount = 6; }
-    else { slowCount = 3; medCount = 6; fastCount = 6; blurCount = 5; }
+    const t = maxRounds > 1 ? round / (maxRounds - 1) : 0;
+    const lerp = (a: number, b: number) => Math.round(a + (b - a) * t);
+    const jitter = () => Math.floor(rng() * 3) - 1; // -1, 0, or 1
+
+    const slowDur = lerp(620, 500);
+    const medDur = lerp(380, 300);
+    const fastDur = lerp(280, 150);
+    const blurDur = lerp(160, 85);
+
+    const slowCount = Math.max(1, lerp(6, 2) + jitter());
+    const medCount = Math.max(1, lerp(4, 2) + jitter());
+    const fastCount = Math.max(0, lerp(1, 6) + jitter());
+    const blurCount = Math.max(0, lerp(0, 9) + jitter());
 
     const pickPair = (exclude: number[] | null) => {
       const choices = allPairs.filter(p => !exclude || !(p[0] === exclude[0] && p[1] === exclude[1]));
@@ -190,10 +225,10 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
       return { seq, durs };
     };
 
-    const slow = maybeCycle(slowCount, 620);
-    const medium = maybeCycle(medCount, 370);
-    const fast = maybeCycle(fastCount, 170);
-    const blur = maybeCycle(blurCount, 95);
+    const slow = maybeCycle(slowCount, slowDur);
+    const medium = maybeCycle(medCount, medDur);
+    const fast = maybeCycle(fastCount, fastDur);
+    const blur = maybeCycle(blurCount, blurDur);
 
     const addBurst = rng() < 0.5;
     const burstPos = Math.floor(rng() * medium.seq.length);
@@ -206,12 +241,13 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
   };
 
   const runShuffle = async () => {
+    playSound("cards");
     setPhase("shuffling");
     slotsRef.current = [0, 1, 2, 3];
     setCardSlots([0, 1, 2, 3]);
     setCardPos([0, 1, 2, 3].map(slotPos));
     await new Promise(r => setTimeout(r, 500));
-    const { seq, dur, pauseAfter } = buildShuffleSequence();
+    const { seq, dur, pauseAfter } = buildShuffleSequence(roundCount);
     for (let i = 0; i < seq.length; i++) {
       const [cA, cB] = seq[i];
       await animateSwap(cA, cB, dur[i]);
@@ -285,9 +321,11 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
         onUpdateScore(t.id, 120);
         setStarHitsByTeam(prev => ({ ...prev, [t.id]: (prev[t.id] ?? 0) + 1 }));
         setCorrectByTeam(prev => ({ ...prev, [t.id]: (prev[t.id] ?? 0) + 1 }));
+        setGameScoreByTeam(prev => ({ ...prev, [t.id]: (prev[t.id] ?? 0) + 120 }));
       } else if (!cards[pick.cardIdx]?.isStar && pick.correct) {
         onUpdateScore(t.id, 30);
         setCorrectByTeam(prev => ({ ...prev, [t.id]: (prev[t.id] ?? 0) + 1 }));
+        setGameScoreByTeam(prev => ({ ...prev, [t.id]: (prev[t.id] ?? 0) + 30 }));
       }
     });
   }, [phase, teams, teamPicks, cards, onUpdateScore]);
@@ -338,9 +376,9 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
           </div>
         </div>
         <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "24px" }}>
-          {teams.map(t => (<div key={t.id} style={{ background: `linear-gradient(160deg,${t.color.dark}55,#450A0A)`, border: "3px solid " + t.color.bg, borderRadius: "14px", padding: "10px 18px", fontWeight: "800", fontSize: "14px", color: "white", display: "flex", alignItems: "center", gap: "6px" }}><TeamIcon team={t} color="white" /> {t.name}</div>))}
+          {teams.map(t => (<div key={t.id} style={{ background: t.color.dark, border: "2px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E", borderRadius: "14px", padding: "10px 18px", fontWeight: "800", fontSize: "14px", color: "white", display: "flex", alignItems: "center", gap: "6px" }}><TeamIcon team={t} color="white" /> {t.name}</div>))}
         </div>
-        <button onClick={() => setShowHowTo(true)} className="cs-btn" style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginBottom: "14px", background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
+        <button onClick={() => setShowHowTo(true)} className="cs-btn" style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginBottom: "14px", background: "white", color: GM.color, border: "3px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
           <Icon name="help" size={15} /> How to Play
         </button>
         {showHowTo && (
@@ -350,7 +388,7 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
             onClose={() => setShowHowTo(false)}
           />
         )}
-        <button onClick={() => setPhase("preview")} className="cs-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg,#B91C1C,#FCD34D)", color: "#450A0A", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(252,211,77,0.4)", transition: "transform 0.15s ease" }}>
+        <button onClick={() => setPhase("preview")} className="cs-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#FCD34D", color: "#450A0A", border: "3px solid #1A1A2E", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "6px 6px 0 #1A1A2E" }}>
           <Icon name="tent" size={20} /> Step Right Up!
         </button>
       </div>
@@ -358,9 +396,10 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
   );
 
   if (phase === "final") {
-    // Dense rank on final score — two teams tied for top billing both get gold instead of an
-    // arbitrary array-order winner.
-    const ranking = denseRank(teams, t => t.score).sort((a, b) => b.value - a.value);
+    // Dense rank on points earned in THIS game (gameScoreByTeam), not team.score (the cross-game
+    // running total) — two teams tied for top billing both get gold instead of an arbitrary
+    // array-order winner.
+    const ranking = denseRank(teams, t => gameScoreByTeam[t.id] ?? 0).sort((a, b) => b.value - a.value);
     const winners = ranking.filter(r => r.rank === 0);
     const isTie = winners.length > 1;
     const headline = isTie
@@ -376,7 +415,7 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
           <div style={{ fontWeight: "900", fontSize: "22px", color: "#FCD34D", marginBottom: "16px" }}>{headline}</div>
           <div style={{ display: "grid", gridTemplateColumns: teamsGridCols(teams.length), gap: "10px", margin: "0 auto 20px", maxWidth: "760px" }}>
             {ranking.map(({ item: t, rank, value }) => (
-              <div key={t.id} style={{ background: `linear-gradient(160deg,${t.color.dark}55,#450A0A)`, border: `2px solid ${t.color.bg}`, borderRadius: "14px", padding: "12px" }}>
+              <div key={t.id} style={{ background: t.color.dark, border: "2px solid #1A1A2E", boxShadow: "4px 4px 0 #1A1A2E", borderRadius: "14px", padding: "12px" }}>
                 <div><RankBadge rank={rank} size={22} /></div>
                 <div style={{ fontWeight: "800", color: "white", fontSize: "14px", marginTop: "4px" }}><TeamIcon team={t} /> {t.name}</div>
                 <div style={{ color: "#FCD34D", fontWeight: "900", fontSize: "16px", marginTop: "4px" }}>{value} pts</div>
@@ -384,7 +423,7 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
               </div>
             ))}
           </div>
-          <button onClick={onEnd} className="cs-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg,#B91C1C,#FCD34D)", color: "#450A0A", border: "none", borderRadius: "14px", padding: "14px 32px", fontSize: "16px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 20px rgba(252,211,77,0.4)", transition: "transform 0.15s ease" }}><Icon name="checkeredFlag" size={18} /> End Game</button>
+          <button onClick={onEnd} className="cs-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#FCD34D", color: "#450A0A", border: "3px solid #1A1A2E", borderRadius: "14px", padding: "14px 32px", fontSize: "16px", fontWeight: "900", cursor: "pointer", boxShadow: "5px 5px 0 #1A1A2E" }}><Icon name="checkeredFlag" size={18} /> End Game</button>
         </div>
       </div>
     );
@@ -398,14 +437,14 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
         <div style={TENT_STRIPES} />
         {STYLE_TAG}
         <div style={{ position: "relative", zIndex: 1 }}>
-          <div style={{ background: "linear-gradient(160deg,#991B1B,#450A0A)", border: "2px solid #FCD34D66", borderRadius: "20px", padding: "28px 24px", marginBottom: "20px", color: "white", maxWidth: "480px", margin: "0 auto 20px" }}>
+          <div style={{ background: "#450A0A", border: "4px solid #1A1A2E", boxShadow: "6px 6px 0 #1A1A2E", borderRadius: "20px", padding: "28px 24px", marginBottom: "20px", color: "white", maxWidth: "480px", margin: "0 auto 20px" }}>
             <div style={{ marginBottom: "10px" }}><Icon name="clock" size={36} /></div>
             <div style={{ fontWeight: "900", fontSize: "19px", marginBottom: "10px", color: "#FCD34D" }}><TeamIcon team={noticeTeam} /> {noticeTeam.name} ran out of time!</div>
             <div style={{ fontSize: "15px", lineHeight: 1.6, opacity: 0.95 }}>
               {timeoutNotice.retried ? "That's your one free retry for this game — watch the clock this time!" : "You've already used your free retry this game — the turn moves on."}
             </div>
           </div>
-          <button onClick={dismissTimeoutNotice} className="cs-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg,#B91C1C,#FCD34D)", color: "#450A0A", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(252,211,77,0.4)", transition: "transform 0.15s ease" }}>
+          <button onClick={dismissTimeoutNotice} className="cs-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#FCD34D", color: "#450A0A", border: "3px solid #1A1A2E", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "6px 6px 0 #1A1A2E" }}>
             {timeoutNotice.retried ? <><Icon name="refresh" size={18} /> Try Again!</> : <><Icon name="next" size={18} /> Next Team</>}
           </button>
         </div>
@@ -420,7 +459,7 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
       {(phase === "shuffling" || phase === "preview") && <SpotlightBackdrop />}
       {STYLE_TAG}
       <div style={{ position: "relative", zIndex: 1 }}>
-        <div style={{ background: "linear-gradient(90deg,#991B1B,#B91C1C)", border: "1.5px solid #FCD34D55", borderRadius: "14px", padding: "10px 16px", marginBottom: "14px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px", boxShadow: "0 4px 18px rgba(153,27,27,0.5)" }}>
+        <div style={{ background: "#B91C1C", border: "3px solid #1A1A2E", borderRadius: "14px", padding: "10px 16px", marginBottom: "14px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px", boxShadow: "4px 4px 0 #1A1A2E" }}>
           <span style={{ color: "white", fontWeight: "900", fontSize: "16px", textShadow: "0 1px 3px rgba(0,0,0,0.4)", display: "inline-flex", alignItems: "center", gap: "6px" }}>
             <Icon name="tent" size={15} /> Round {roundCount + 1}/{maxRounds} —{" "}
             {phase === "preview" && <><Icon name="star" size={14} /> Remember which card is the star — then we shuffle!</>}
@@ -508,7 +547,7 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
         {phase === "preview" && (
           <div style={{ textAlign: "center", marginTop: "20px" }}>
             <p style={{ color: "#FEF3C7", fontWeight: "700", fontSize: "14px", marginBottom: "10px", animation: "csMarquee 1.6s ease-in-out infinite" }}>One card has a <strong style={{ color: "#FCD34D", display: "inline-flex", alignItems: "center", gap: "3px" }}><Icon name="star" size={12} /> star</strong> — remember which one!</p>
-            <button onClick={runShuffle} className="cs-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg,#B91C1C,#FCD34D)", color: "#450A0A", border: "none", borderRadius: "14px", padding: "14px 36px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 20px rgba(252,211,77,0.4)", transition: "transform 0.15s ease" }}><Icon name="shuffle" size={18} /> Shuffle!</button>
+            <button onClick={runShuffle} className="cs-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#FCD34D", color: "#450A0A", border: "3px solid #1A1A2E", borderRadius: "14px", padding: "14px 36px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "5px 5px 0 #1A1A2E" }}><Icon name="shuffle" size={18} /> Shuffle!</button>
           </div>
         )}
 
@@ -520,7 +559,7 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
 
         {phase === "answering" && pickedCard && (
           <div style={{ marginTop: "8px" }}>
-            <div style={{ position: "relative", background: "linear-gradient(160deg,#FFFBEB,#FEF3C7)", border: "3px solid #F59E0B", borderRadius: "16px", padding: "20px", textAlign: "center", marginBottom: "14px" }}>
+            <div style={{ position: "relative", background: "#FEF3C7", border: "3px solid #1A1A2E", boxShadow: "4px 4px 0 #1A1A2E", borderRadius: "16px", padding: "20px", textAlign: "center", marginBottom: "14px" }}>
               <div style={{ position: "absolute", top: "10px", right: "10px" }}>
                 <FlagPromptButton gameId="cards" questionData={pickedCard} />
               </div>
@@ -529,12 +568,12 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
             </div>
             {!showAns ? (
               <div style={{ textAlign: "center" }}>
-                <button onClick={() => { stop(); setShowAns(true); }} className="cs-btn" style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "linear-gradient(135deg,#B91C1C,#DC2626)", color: "white", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "15px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease" }}><Icon name="hand" size={14} /> Performance complete!</button>
+                <button onClick={() => { stop(); setShowAns(true); }} className="cs-btn" style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "#DC2626", color: "white", border: "3px solid #1A1A2E", borderRadius: "12px", padding: "12px 28px", fontSize: "15px", fontWeight: "700", cursor: "pointer", boxShadow: "4px 4px 0 #1A1A2E" }}><Icon name="hand" size={14} /> Performance complete!</button>
               </div>
             ) : (
               <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
-                <button onClick={() => resolveAnswer(true)} className="cs-btn" style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "linear-gradient(135deg,#15803D,#22C55E)", color: "white", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease" }}><Icon name="check" size={14} /> Correct</button>
-                <button onClick={() => resolveAnswer(false)} className="cs-btn" style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "linear-gradient(135deg,#B91C1C,#EF4444)", color: "white", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease" }}><Icon name="close" size={14} /> Wrong</button>
+                <button onClick={() => resolveAnswer(true)} className="cs-btn" style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "#22C55E", color: "white", border: "3px solid #1A1A2E", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "700", cursor: "pointer", boxShadow: "4px 4px 0 #1A1A2E" }}><Icon name="check" size={14} /> Correct</button>
+                <button onClick={() => resolveAnswer(false)} className="cs-btn" style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "#EF4444", color: "white", border: "3px solid #1A1A2E", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "700", cursor: "pointer", boxShadow: "4px 4px 0 #1A1A2E" }}><Icon name="close" size={14} /> Wrong</button>
               </div>
             )}
           </div>
@@ -542,10 +581,10 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
 
         {phase === "reveal" && (
           <div style={{ textAlign: "center", marginTop: "70px" }}>
-            <div style={{ background: "linear-gradient(160deg,#FDE68A,#F59E0B)", border: "3px solid #FCD34D", borderRadius: "14px", padding: "14px", marginBottom: "14px", boxShadow: "0 0 24px rgba(245,158,11,0.5)" }}>
+            <div style={{ background: "#F59E0B", border: "3px solid #1A1A2E", borderRadius: "14px", padding: "14px", marginBottom: "14px", boxShadow: "4px 4px 0 #1A1A2E" }}>
               <div style={{ fontSize: "22px", marginBottom: "6px", color: "#450A0A", fontWeight: "900", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}><Icon name="star" size={20} /> Star card revealed!</div>
             </div>
-            <button onClick={nextRound} className="cs-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg,#B91C1C,#FCD34D)", color: "#450A0A", border: "none", borderRadius: "14px", padding: "14px 32px", fontSize: "16px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 20px rgba(252,211,77,0.4)", transition: "transform 0.15s ease" }}>
+            <button onClick={nextRound} className="cs-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#FCD34D", color: "#450A0A", border: "3px solid #1A1A2E", borderRadius: "14px", padding: "14px 32px", fontSize: "16px", fontWeight: "900", cursor: "pointer", boxShadow: "5px 5px 0 #1A1A2E" }}>
               {roundCount + 1 >= maxRounds ? <><Icon name="trophy" size={18} /> See Final Results</> : <><Icon name="next" size={18} /> Next Round</>}
             </button>
           </div>

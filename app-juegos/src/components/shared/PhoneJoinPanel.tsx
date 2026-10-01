@@ -20,9 +20,12 @@ interface PhoneJoinPanelProps {
   children?: ReactNode;
   // e.g. the "Switch back to Play on Screen" link — only the pre-game call site needs one.
   footer?: ReactNode;
+  // Only Word Relay passes this (several phones can share a team there) — every other game has at
+  // most one phone per team, so "Connected" says everything needed.
+  phoneCountByTeam?: Record<string, number>;
 }
 
-export function PhoneJoinPanel({ sessionCode, joinUrl, teams, connectedTeamIds, accent, panelBg, borderColor, children, footer }: PhoneJoinPanelProps) {
+export function PhoneJoinPanel({ sessionCode, joinUrl, teams, connectedTeamIds, accent, panelBg, borderColor, children, footer, phoneCountByTeam }: PhoneJoinPanelProps) {
   return (
     <div style={{ background: panelBg, border: `2px solid ${borderColor}`, borderRadius: "20px", padding: "20px", maxWidth: "360px", marginLeft: "auto", marginRight: "auto" }}>
       <div style={{ fontWeight: "800", fontSize: "14px", color: accent, marginBottom: "12px" }}>📱 Scan to join, or go to the site and enter this code:</div>
@@ -36,7 +39,11 @@ export function PhoneJoinPanel({ sessionCode, joinUrl, teams, connectedTeamIds, 
           <div key={t.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "rgba(255,255,255,0.06)", borderRadius: "8px", padding: "6px 10px", fontSize: "13px" }}>
             <span><TeamIcon team={t} /> {t.name}</span>
             <span style={{ color: connectedTeamIds.has(t.id) ? "#4ADE80" : "#6B7280", fontWeight: "700" }}>
-              {connectedTeamIds.has(t.id) ? "✅ Connected" : "⏳ Waiting…"}
+              {connectedTeamIds.has(t.id)
+                ? (phoneCountByTeam && (phoneCountByTeam[String(t.id)] ?? 0) > 0
+                    ? `✅ ${phoneCountByTeam[String(t.id)]} phone${phoneCountByTeam[String(t.id)] === 1 ? "" : "s"}`
+                    : "✅ Connected")
+                : "⏳ Waiting…"}
             </span>
           </div>
         ))}

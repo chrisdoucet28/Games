@@ -16,7 +16,7 @@ export function PrivacyPolicyScreen() {
       <div style={{ background: "linear-gradient(160deg,#0C1E3D 0%,#0369A1 45%,#0EA5E9 100%)", padding: "40px 20px", textAlign: "center" }}>
         <div style={{ fontSize: "40px", marginBottom: "8px" }}>🕹️</div>
         <h1 style={{ color: "white", fontSize: "26px", fontWeight: "900", margin: 0 }}>Class<span style={{ color: "#FCD34D" }}>Cade</span> Privacy Policy</h1>
-        <p style={{ color: "#BAE6FD", fontSize: "13px", marginTop: "8px" }}>Last updated August 2026</p>
+        <p style={{ color: "#BAE6FD", fontSize: "13px", marginTop: "8px" }}>Last updated September 2026</p>
       </div>
 
       <div style={{ maxWidth: "720px", margin: "0 auto", padding: "32px 20px 60px", color: "#1F2937", fontSize: "15px", lineHeight: 1.7 }}>
@@ -32,6 +32,9 @@ export function PrivacyPolicyScreen() {
           <li><strong>Account info</strong> — your email address, and, if you use Google Sign-In, the name and profile photo Google shares with us.</li>
           <li><strong>Profile info</strong> — your display name, chosen theme, and an avatar or school logo if you upload one.</li>
           <li><strong>Class and game data</strong> — class names, school name, class level, team names/colors/mascots, scores, saved in-progress games, and which topics you've selected.</li>
+          <li><strong>Account type</strong> — whether you told us you're a teacher or a student.</li>
+          <li><strong>Student progress</strong> — if you use a student account, which lessons you've marked finished and the results of your practice quiz rounds (the topics practiced, and how many answers were correct). Your level, XP and badges are worked out from this.</li>
+          <li><strong>Class membership</strong> — if you use a student account to join a teacher's class, the name you type when you ask to join, whether the teacher has approved you, the saved team you pick during a Class Check-In, and the days you checked in. Only your teacher's view of the class shows your typed name (never your email address); your team and check-in days are visible only to you. Joining a class is always optional.</li>
           <li><strong>Feedback</strong> — anything you submit through the in-app Feedback button or a game's flag button.</li>
           <li><strong>Billing status</strong> — if you subscribe to a paid plan, we store your subscription status and plan (active, plan type, renewal date). Your card details go directly to our payment processor, Stripe — we never see or store them.</li>
           <li><strong>Basic usage analytics</strong> — anonymized page-visit data (via Vercel Analytics) to understand how the app is used. This isn't tied to your personal profile.</li>
@@ -39,10 +42,12 @@ export function PrivacyPolicyScreen() {
 
         <h2 style={sectionHeading}>What we don't collect</h2>
         <p>
-          Students never create a ClassCade account or enter any personal information. When a class
-          plays a game using the "Play on Phones" feature, a student's phone only ever sends which
-          team they tapped to join — no name, email, or other personal data is ever collected from
-          students.
+          Students don't need an account to use ClassCade. When a class plays a game using the "Play
+          on Phones" feature, a student's phone only ever sends which team they tapped to join — no
+          name, email, or other personal data is collected. The public Learn lessons and Practice quiz
+          also work without any account, and nothing is stored about you unless you choose to log in
+          with a student account. Even then, a student who never joins a teacher's class shares nothing
+          with any teacher.
         </p>
 
         <h2 style={sectionHeading}>Why we collect it</h2>
@@ -59,6 +64,10 @@ export function PrivacyPolicyScreen() {
           <li><strong>Google</strong> — provides the optional "Sign in with Google" login method.</li>
           <li><strong>Vercel</strong> — hosts the website and provides anonymized usage analytics.</li>
         </ul>
+        <p>
+          If you're a student and choose to join a teacher's class, that teacher can see the name you
+          typed to join (and remove you from the class). Nobody else does.
+        </p>
         <p>We never sell your data, and we never share it with anyone for advertising purposes.</p>
 
         <h2 style={sectionHeading}>How long we keep it, and deleting your data</h2>
@@ -70,9 +79,11 @@ export function PrivacyPolicyScreen() {
 
         <h2 style={sectionHeading}>Children's privacy</h2>
         <p>
-          ClassCade is built for teachers, not students — only a teacher creates and controls an
-          account. As explained above, students interacting with a class game through the "Play on
-          Phones" feature never create an account or submit personal information of any kind.
+          ClassCade accounts, both teacher and student accounts, are intended for adults aged 18 and
+          over. We don't knowingly collect information from anyone under 18, and if we learn that an
+          account belongs to someone under 18 we will delete it. Students joining a class game through
+          the "Play on Phones" feature never create an account or submit personal information of any
+          kind.
         </p>
 
         <h2 style={sectionHeading}>Cookies and local storage</h2>

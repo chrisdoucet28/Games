@@ -7,6 +7,9 @@ import { Icon } from "./Icon";
 // gameId matches GAME_MODES ids in data/constants.ts. questionData is whatever raw object (or
 // { raw: "..." } wrapper for plain-string prompts) identifies the flagged content — stored as-is
 // in Supabase jsonb for later review, never read back by the app itself.
+// Deliberately just a message, nothing more — triage (is this a one-off or a bigger pattern, does
+// it need code work) is the app owner's job in /admin, not something to ask a teacher to judge
+// mid-class. See AdminFeedbackPanel.tsx's own is_pattern_issue toggle, which is admin-only.
 interface FlagPromptButtonProps {
   gameId: string;
   questionData: unknown;

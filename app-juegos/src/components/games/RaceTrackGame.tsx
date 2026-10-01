@@ -12,6 +12,8 @@ import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
 import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
 import { RACETRACK_TUTORIAL_STEPS } from "../../data/tutorials/racetrack";
+import { playSound } from "../../lib/sounds";
+import { setMusicContext, setMusicGame, stopMusic } from "../../lib/music";
 import {
   generateSessionCode, openRaceTrackChannel, closeChannel,
   type RaceTrackPhase, type RaceTrackStatePayload, type RaceTrackActionPayload,
@@ -28,8 +30,12 @@ const GM = GAME_MODES.find(g => g.id === "racetrack")!;
 const TOTAL = 60;
 // Solo play has no rival team to "beat to the answer," so a per-question countdown replaces
 // that tension — answer before it expires or the turn is skipped, same idea as every other
-// timed game in this codebase.
-const SOLO_TASK_SECONDS = 30;
+// timed game in this codebase. No CPU/teacher rival fits a shared-track board game where the
+// board itself (dice, spaces, effects, coins) already carries the whole solo experience — per
+// teacher feedback, difficulty levels for this countdown (mirroring Vault Heist's own timer-speed
+// dial) are what solo actually needs, not an opponent.
+type Difficulty = "easy" | "medium" | "hard";
+const SOLO_TASK_SECONDS_BY_DIFFICULTY: Record<Difficulty, number> = { easy: 45, medium: 30, hard: 18 };
 
 type ZoneDef = { id: string; label: string; short: string; icon: IconName; color: string; end: number };
 const ZONES: ZoneDef[] = [
@@ -155,8 +161,8 @@ const STYLE_TAG = (
     @keyframes rtConfetti{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(160px) rotate(360deg);opacity:0}}
     @keyframes rtSpeedLine{0%{transform:translateX(-130%);opacity:0}12%{opacity:.5}88%{opacity:.5}100%{transform:translateX(230%);opacity:0}}
     @keyframes rtLightPulse{0%,100%{opacity:.4}50%{opacity:1}}
-    .rt-btn:hover:not(:disabled){transform:translateY(-2px) scale(1.02);filter:brightness(1.08)}
-    .rt-btn:active:not(:disabled){transform:translateY(0) scale(0.97)}
+    .rt-btn:hover:not(:disabled){filter:brightness(1.08)}
+    .rt-btn:active:not(:disabled){transform:translate(4px,4px) !important;box-shadow:0 0 0 #1A1A2E !important}
     .rt-btn:disabled{opacity:.4;cursor:not-allowed}
     .rt-chip:hover{filter:brightness(1.2)}
   `}</style>
@@ -191,20 +197,28 @@ function CheckeredStrip() {
 type RaceSnapshot = {
   raceTeams: Record<string | number, RaceTeamState>;
   track?: TrackSpace[];
+  difficulty?: Difficulty;
 };
 
 function validateRaceSnapshot(raw: unknown, teamIds: (string | number)[]): RaceSnapshot | undefined {
   const s = raw as Partial<RaceSnapshot> | null | undefined;
   if (!s || typeof s.raceTeams !== "object" || s.raceTeams === null) return undefined;
   if (!teamIds.every(id => s.raceTeams![id] && typeof s.raceTeams![id].pos === "number")) return undefined;
-  return { raceTeams: s.raceTeams, track: Array.isArray(s.track) && s.track.length === TOTAL + 1 ? s.track : undefined };
+  return {
+    raceTeams: s.raceTeams,
+    track: Array.isArray(s.track) && s.track.length === TOTAL + 1 ? s.track : undefined,
+    difficulty: s.difficulty === "easy" || s.difficulty === "hard" ? s.difficulty : "medium",
+  };
 }
 
-export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState }: GameProps) {
+export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState, presetPhoneSession }: GameProps) {
   const resumed = useRef(validateRaceSnapshot(initialGameState, teams.map(t => t.id))).current;
   // A resumed race skips the intro and drops straight into a fresh task for the group.
   const [phase, setPhase] = useState<Phase>(() => resumed ? "task" : "intro");
   const [showHowTo, setShowHowTo] = useState(false);
+  // Solo only — see SOLO_TASK_SECONDS_BY_DIFFICULTY. Picked on the intro screen; harmless to seed
+  // even for multi-team games, since it's never read outside the isSolo branch of the timer below.
+  const [difficulty, setDifficulty] = useState<Difficulty>(() => resumed?.difficulty ?? "medium");
   const [track, setTrack] = useState<TrackSpace[]>(() => resumed?.track ?? buildTrack());
   const [raceTeams, setRaceTeams] = useState<Record<string | number, RaceTeamState>>(() =>
     resumed?.raceTeams ?? Object.fromEntries(teams.map((t, i) => [t.id, { pos: 0, coins: 0, shields: 0, skip: false, powerups: [], car: t.mascot ?? CARS[i % CARS.length] }]))
@@ -224,9 +238,9 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
   // answered first by ear. Gated to teams.length > 1 below: with only one team there's no "who's
   // first" question to resolve, so unlike Order Up's typing mode this one has no standalone value
   // for solo play. Always defaults to screen, even on Resume, same as every other phone-mode game.
-  const [inputMode, setInputMode] = useState<"screen" | "phone">("screen");
+  const [inputMode, setInputMode] = useState<"screen" | "phone">(presetPhoneSession ? "phone" : "screen");
   const [introStep, setIntroStep] = useState<"setup" | "qr">("setup");
-  const [sessionCode, setSessionCode] = useState<string | null>(null);
+  const [sessionCode, setSessionCode] = useState<string | null>(presetPhoneSession?.code ?? null);
   const [connectedTeamIds, setConnectedTeamIds] = useState<Set<string | number>>(new Set());
   // This round's resolved buzz winner, or null while the buzzer is open.
   const [buzzedTeamId, setBuzzedTeamId] = useState<string | number | null>(null);
@@ -335,6 +349,7 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
   const teamName = (id: string | number) => teams.find(t => t.id === id)?.name ?? "Team";
 
   const rollOnce = (onDone: (val: number) => void) => {
+    playSound("dice");
     setPhase("rolling");
     setRolling(true);
     let ticks = 0;
@@ -507,7 +522,7 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
   // at their own pace and then explicitly clicks "No one got it" to move on.
   const isSolo = teams.length === 1;
   const { timeLeft: soloTimeLeft } = useTurnTimer(
-    SOLO_TASK_SECONDS,
+    SOLO_TASK_SECONDS_BY_DIFFICULTY[difficulty],
     isSolo && phase === "task",
     () => setShowAns(true),
     taskKey,
@@ -561,12 +576,24 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
     const rows: RankRow[] = ranking.map(t => {
       const rank = distinctPosDesc.indexOf(finalPos[t.id]);
       const pts = RANK_POINTS[rank] ?? 5;
-      onUpdateScore(t.id, pts);
+      // Silent: a final-ranking points tally, not a single correct answer, immediately followed
+      // by the phase change to "gameover" — unsilenced, every team's payout stacked a "correct"
+      // chime right on top of the roundComplete sting that follows.
+      onUpdateScore(t.id, pts, { silent: true });
       return { id: t.id, name: t.name, pos: finalPos[t.id], points: pts };
     });
     setRaceTeams(prev => ({ ...prev, [teamId]: { ...prev[teamId], pos: TOTAL } }));
     setFinalRanking(rows);
-    setPhase("gameover");
+    // The original engine-rev cue that used to play here (and on "Start Race!"/"Next Task →") was
+    // pulled entirely — teacher feedback: a genuinely sustained, non-decaying 5-second drone, not a
+    // proper one-shot sting, and it read as "absurdly weird and bad" for a single button-press
+    // moment. A fresh, much shorter replacement now plays at the finish line and on "Start Race!"
+    // (see the intro screen's button below) — kept off "Next Task →" since that fires on every
+    // single task, far too often for even a short engine cue not to get grating. Short delay before
+    // "gameover" preserved so it isn't stepped on by the "roundComplete" sting the phase change
+    // triggers (same fix pattern as OrderUpGame's session-end/KingOfHillGame's contest-timer).
+    playSound("racetrack");
+    setTimeout(() => setPhase("gameover"), 700);
   };
 
   // Ranks every team by wherever they currently stand on the track — no one gets bumped to the
@@ -579,12 +606,32 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
     const rows: RankRow[] = ranking.map(t => {
       const rank = distinctPosDesc.indexOf(finalPos[t.id]);
       const pts = RANK_POINTS[rank] ?? 5;
-      onUpdateScore(t.id, pts);
+      // Silent: a final-ranking points tally, not a single correct answer, immediately followed
+      // by the phase change to "gameover" — unsilenced, every team's payout stacked a "correct"
+      // chime right on top of the roundComplete sting that follows.
+      onUpdateScore(t.id, pts, { silent: true });
       return { id: t.id, name: t.name, pos: finalPos[t.id], points: pts };
     });
     setFinalRanking(rows);
     setPhase("gameover");
   };
+
+  useEffect(() => {
+    if (phase === "gameover") { playSound("roundComplete"); stopMusic(); }
+  }, [phase]);
+  // Custom Suno gameplay track — see GAME_OVERRIDES in lib/music.ts. Unlike every other
+  // tension-only game (Castle, Zombie Siege, etc.), Race Track's team mode never runs a turn timer
+  // at all (its tension is solo-only, gated behind useTurnTimer above) — so nothing in this
+  // component ever calls setMusicContext("gameplay") itself the way those games' timer cleanup
+  // does. Entry used to depend entirely on the PARENT's generic "screen === 'game'" effect
+  // (LessonGamesGenerator) to assert that context, racing this component's own setMusicGame call
+  // to set the right gameId first — asserting it here directly instead, same as it would if a
+  // timer's cleanup did it, removes that cross-component race for good.
+  useEffect(() => {
+    setMusicGame("racetrack");
+    setMusicContext("gameplay");
+    return () => setMusicGame(null);
+  }, []);
 
   useEffect(() => {
     if (!forceFinalRef) return;
@@ -595,9 +642,9 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
 
   useEffect(() => {
     if (!serializeStateRef) return;
-    serializeStateRef.current = (): RaceSnapshot => ({ raceTeams, track });
+    serializeStateRef.current = (): RaceSnapshot => ({ raceTeams, track, difficulty });
     return () => { if (serializeStateRef) serializeStateRef.current = null; };
-  }, [serializeStateRef, raceTeams, track]);
+  }, [serializeStateRef, raceTeams, track, difficulty]);
 
   const handlePickPhoneMode = () => {
     setInputMode("phone");
@@ -720,7 +767,7 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
       <SpeedLines />
       <div style={{ position: "relative", zIndex: 1 }}>
         <CheckeredStrip />
-        <div style={{ background: "linear-gradient(160deg,#1E293B,#0B0F17)", border: "2px solid #EF4444", borderRadius: "18px", padding: "28px 24px", margin: "10px auto", color: "#E2E8F0", maxWidth: "560px", boxShadow: "0 0 44px rgba(239,68,68,0.35)" }}>
+        <div style={{ background: "#1E293B", border: "3px solid #1A1A2E", borderRadius: "18px", padding: "28px 24px", margin: "10px auto", color: "#E2E8F0", maxWidth: "560px", boxShadow: "5px 5px 0 #1A1A2E" }}>
           <div style={{ marginBottom: "10px" }}><Icon name="checkeredFlag" size={36} /></div>
           <div style={{ fontWeight: "900", fontSize: "20px", marginBottom: "10px", color: "#F87171", letterSpacing: "0.5px" }}>RACE TRACK</div>
           <div style={{ fontSize: "15px", lineHeight: 1.7 }}>
@@ -741,7 +788,9 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
           <div style={{ width: "14px", height: "14px", borderRadius: "50%", background: "#FBBF24", animation: "rtLightPulse 1.4s ease-in-out infinite 0.25s" }} />
           <div style={{ width: "14px", height: "14px", borderRadius: "50%", background: "#4ADE80", animation: "rtLightPulse 1.4s ease-in-out infinite 0.5s" }} />
         </div>
-        {teams.length > 1 && (
+        {/* Skipped entirely for a Class Check-In sitting — presetPhoneSession already picked
+            phone mode and its code, and the class-level QR already covered joining. */}
+        {teams.length > 1 && !presetPhoneSession && (
           <>
             {introStep === "setup" && (
               <div style={{ marginBottom: "20px" }}>
@@ -779,6 +828,29 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
             })()}
           </>
         )}
+        {isSolo && (
+          <div style={{ marginBottom: "20px" }}>
+            <div style={{ fontSize: "13px", color: "#93C5FD", fontWeight: "700", marginBottom: "10px" }}>Choose a timer speed</div>
+            <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap" }}>
+              {(["easy", "medium", "hard"] as const).map(d => {
+                const selected = difficulty === d;
+                const dotColor = d === "easy" ? "#22C55E" : d === "medium" ? "#EAB308" : "#EF4444";
+                const label = d[0].toUpperCase() + d.slice(1);
+                return (
+                  <button key={d} onClick={() => setDifficulty(d)} className="rt-btn" style={{
+                    padding: "10px 20px", borderRadius: "12px", fontWeight: "800", fontSize: "14px", cursor: "pointer",
+                    border: `2px solid ${selected ? "#EF4444" : "rgba(255,255,255,0.2)"}`,
+                    background: selected ? "rgba(239,68,68,0.15)" : "rgba(255,255,255,0.05)",
+                    color: selected ? "#F87171" : "#93C5FD",
+                    display: "inline-flex", alignItems: "center", gap: "6px",
+                  }}>
+                    <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: dotColor, display: "inline-block" }} /> {label} · {SOLO_TASK_SECONDS_BY_DIFFICULTY[d]}s
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
         <button onClick={() => setShowHowTo(true)} className="rt-btn" style={{ display: "block", margin: "0 auto 14px", background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
           <Icon name="help" size={14} /> How to Play
         </button>
@@ -789,7 +861,7 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
             onClose={() => setShowHowTo(false)}
           />
         )}
-        <button onClick={() => setPhase("task")} className="rt-btn" style={{ background: "linear-gradient(135deg,#B91C1C,#EF4444)", color: "white", border: "none", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "0 6px 24px rgba(239,68,68,0.5)", transition: "transform 0.15s ease" }}><Icon name="play" size={18} /> Start Race!</button>
+        <button onClick={() => { playSound("racetrack"); setPhase("task"); }} className="rt-btn" style={{ background: "#EF4444", color: "white", border: "3px solid #1A1A2E", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "6px 6px 0 #1A1A2E" }}><Icon name="play" size={18} /> Start Race!</button>
       </div>
     </div>
   );
@@ -803,7 +875,7 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
         {finalRanking.map((r, i) => {
           const t = teams.find(tm => tm.id === r.id)!;
           return (
-            <div key={r.id} style={{ background: `linear-gradient(160deg, ${t.color.dark}55, #0A0A18)`, border: `2px solid ${t.color.bg}`, borderRadius: "14px", padding: "12px" }}>
+            <div key={r.id} style={{ background: t.color.dark, border: "2px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E", borderRadius: "14px", padding: "12px" }}>
               <div><RankBadge rank={i} size={22} /></div>
               <div style={{ fontWeight: "800", color: "#F3F4F6", fontSize: "14px", marginTop: "4px" }}><TeamIcon team={t} /> {r.name}</div>
               <div style={{ color: "#9CA3AF", fontSize: "12px", marginTop: "2px" }}>Space {r.pos}/{TOTAL}</div>
@@ -812,7 +884,7 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
           );
         })}
       </div>
-      <button onClick={onEnd} className="rt-btn" style={{ background: "#F7C948", color: "#150F00", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "800", cursor: "pointer", transition: "transform 0.15s ease" }}><Icon name="checkeredFlag" size={15} /> End Game</button>
+      <button onClick={onEnd} className="rt-btn" style={{ background: "#F7C948", color: "#150F00", border: "3px solid #1A1A2E", borderRadius: "12px", padding: "12px 28px", fontSize: "16px", fontWeight: "800", cursor: "pointer", boxShadow: "4px 4px 0 #1A1A2E" }}><Icon name="checkeredFlag" size={15} /> End Game</button>
     </div>
   );
 
@@ -821,7 +893,10 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
   return (
     <div style={arenaStyle}>
       {STYLE_TAG}
-      {inputMode === "phone" && sessionCode && (
+      {/* Suppressed for a Class Check-In sitting — the class-level badge (LessonGamesGenerator.tsx's
+          renderClassCheckInBadge) is the only floating reconnect button shown then, and it's the
+          only one pointing at the right (class, not per-game) join URL. */}
+      {inputMode === "phone" && sessionCode && !presetPhoneSession && (
         <PhoneReconnectBadge
           sessionCode={sessionCode} joinUrl={`${window.location.origin}${window.location.pathname}?join=${sessionCode}&game=racetrack`}
           teams={teams} connectedTeamIds={connectedTeamIds}
@@ -843,8 +918,8 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
             const isActive = phase !== "task" && winnerId === t.id;
             return (
               <div key={t.id} style={{
-                background: `linear-gradient(160deg, ${t.color.dark}44, #0A0A18)`, border: `2px solid ${t.color.bg}`, borderRadius: "12px", padding: "8px 10px",
-                boxShadow: isActive ? `0 0 16px ${t.color.bg}88` : "none",
+                background: t.color.dark, border: "2px solid #1A1A2E", borderRadius: "12px", padding: "8px 10px",
+                boxShadow: isActive ? "3px 3px 0 #F7C948" : "2px 2px 0 #1A1A2E",
               }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "4px" }}>
                   <span style={{ fontWeight: "800", fontSize: "12px", color: "#F3F4F6" }}>{rt.car} {t.name}</span>
@@ -1000,7 +1075,7 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
           <>
             {isSolo && (
               <div style={{ display: "flex", justifyContent: "center", marginBottom: "10px" }}>
-                <TurnTimerBar timeLeft={soloTimeLeft} totalSeconds={SOLO_TASK_SECONDS} />
+                <TurnTimerBar timeLeft={soloTimeLeft} totalSeconds={SOLO_TASK_SECONDS_BY_DIFFICULTY[difficulty]} />
               </div>
             )}
             <QuestionCard question={currentQ} showAnswer={showAns} onReveal={() => setShowAns(true)} gameId="racetrack" />
