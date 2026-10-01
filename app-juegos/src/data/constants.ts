@@ -55,6 +55,23 @@ export const FREE_PLAN_LIMITS = { maxClasses: 1, maxTeams: 2 };
 // to actually charge.
 export const FREE_LAUNCH_ALL_PREMIUM = true;
 
+// 🛑 TEMPORARY PAUSE on student accounts — the owner's own decision (not a bug, not leftover test
+// code) to hold off on any real student-account activity while they sort out an unrelated conflict
+// at their day job and haven't yet turned on billing. While this is true, in App.tsx:
+// - A phone-width visitor (any login state, any role, including the owner's own teacher account)
+//   never reaches login/signup or the real app at all — just a plain "this is a demo, use a
+//   computer" message pointing at the public /practice quiz. Device is read from screen width, not
+//   user-agent sniffing.
+// - A brand new account on a computer is auto-assigned 'teacher' with no choice ever shown
+//   (RoleChooserScreen's "I'm a student" option never renders while this is on).
+// - Any account already on role 'student' (from before this flag existed, or chosen since) sees
+//   the same demo message instead of StudentHome, on any device.
+// None of this touches data — no account is deleted, no class membership is removed, nothing in
+// Supabase changes. It's purely a client-side gate, so flipping this back to false (planned for
+// the same time Stripe/billing goes live) instantly restores every existing student account and
+// the normal teacher/student choice with zero migration needed.
+export const STUDENT_ACCOUNTS_PAUSED = true;
+
 export function teamsGridCols(n: number): string {
   if (n <= 3) return `repeat(${n},1fr)`;
   if (n === 4) return "repeat(2,1fr)";
