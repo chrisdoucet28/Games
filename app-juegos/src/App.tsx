@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Analytics } from '@vercel/analytics/react';
 import LessonGamesGenerator from './LessonGamesGenerator';
 import { AuthScreen } from './components/shared/AuthScreen';
@@ -24,7 +24,6 @@ import { StudentHome } from './components/student/StudentHome';
 import { AdminScreen } from './components/shared/AdminScreen';
 import { StudentAccountsPausedScreen } from './components/shared/StudentAccountsPausedScreen';
 import { FREE_LAUNCH_ALL_PREMIUM, STUDENT_ACCOUNTS_PAUSED } from './data/constants';
-import { chooseRole } from './lib/profile';
 import { Icon } from './components/shared/Icon';
 import { isMusicEnabled, setMusicEnabled, onMusicEnabledChange, stopMusic } from './lib/music';
 
@@ -34,25 +33,6 @@ import { isMusicEnabled, setMusicEnabled, onMusicEnabledChange, stopMusic } from
 // EXPERIENCE someone gets once, not a live-resizing layout concern, so it doesn't track resizes.
 function isPhoneWidth(): boolean {
   return window.innerWidth < 768;
-}
-
-// Only reachable while STUDENT_ACCOUNTS_PAUSED is true, for a brand new account on a computer —
-// persists 'teacher' automatically so RoleChooserScreen's "I'm a student" option is never even
-// shown. The ref guards against firing twice if the parent re-renders (e.g. the theme/subscription
-// fetches elsewhere in AuthenticatedApp resolving) while this is still in flight; a failure resets
-// the guard so it retries on the next render instead of getting stuck.
-function AutoAssignTeacherRole({ onDone }: { onDone: () => void }) {
-  const firedRef = useRef(false);
-  useEffect(() => {
-    if (firedRef.current) return;
-    firedRef.current = true;
-    chooseRole('teacher').then(onDone).catch(() => { firedRef.current = false; });
-  }, [onDone]);
-  return (
-    <div style={{ minHeight: '100vh', background: '#1E1B4B', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ color: 'white', fontFamily: "'Segoe UI',system-ui,sans-serif", fontSize: '16px' }}>Loading…</div>
-    </div>
-  );
 }
 
 function ConfigErrorScreen() {
@@ -329,19 +309,14 @@ function AuthenticatedApp() {
   }
 
   // STUDENT_ACCOUNTS_PAUSED, the computer-side half (the phone-width check above already caught
-  // every phone visitor regardless of role). Short-circuits ahead of the real chooser/StudentHome
-  // branch below, which is left completely untouched — flipping the flag back to false instantly
-  // restores it with no further changes needed here.
-  if (STUDENT_ACCOUNTS_PAUSED && roleInfo.role === 'student') {
-    return <StudentAccountsPausedScreen />;
-  }
-  if (STUDENT_ACCOUNTS_PAUSED && !roleInfo.chosen) {
-    return <AutoAssignTeacherRole onDone={() => setRoleInfo({ role: 'teacher', chosen: true })} />;
-  }
-
-  // Both the one-time chooser and the student home get the same slim top bar (log out + music
-  // mute) as the teacher app — a student never sees the teacher's welcome/plan screens.
-  if (!roleInfo.chosen || roleInfo.role === 'student') {
+  // every phone visitor regardless of role). While paused, every account — brand new, existing
+  // teacher, or existing student — just falls straight through to the normal teacher app below,
+  // no matter what `roleInfo` says. Deliberately does NOT write anything to `profiles.role`: an
+  // existing student-role account stays 'student' in the database untouched (per the owner's
+  // explicit instruction — "they can stay student"), it just isn't acted on while paused. Flipping
+  // the flag back to false instantly restores the real chooser/StudentHome branch below with no
+  // further changes needed here.
+  if (!STUDENT_ACCOUNTS_PAUSED && (!roleInfo.chosen || roleInfo.role === 'student')) {
     return (
       <div>
         <StatusBadge action="Log Out" onAction={() => supabase.auth.signOut()} theme={theme} isAdmin={isAdmin}>
