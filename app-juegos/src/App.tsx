@@ -31,8 +31,15 @@ import { isMusicEnabled, setMusicEnabled, onMusicEnabledChange, stopMusic } from
 // use elsewhere for a different purpose — see AuthScreen.tsx's isInAppBrowser) — same ~768px
 // phone/tablet boundary used for responsive layout throughout the app. This decides which
 // EXPERIENCE someone gets once, not a live-resizing layout concern, so it doesn't track resizes.
+//
+// Width alone isn't enough, though: a teacher running two windows side by side on a normal
+// desktop monitor can easily end up under 768px in one of them, and got wrongly shown the
+// phone-paused screen as a result. Requiring a coarse (touch) primary pointer alongside the width
+// check filters that out — a mouse/trackpad-driven window reports "fine" regardless of how narrow
+// it is, while an actual phone or tablet reports "coarse". Still not user-agent sniffing; this is
+// a real hardware-capability media feature, not a spoofable string.
 function isPhoneWidth(): boolean {
-  return window.innerWidth < 768;
+  return window.innerWidth < 768 && window.matchMedia("(pointer: coarse)").matches;
 }
 
 function ConfigErrorScreen() {
