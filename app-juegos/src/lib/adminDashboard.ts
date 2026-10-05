@@ -71,3 +71,12 @@ export async function listAutoFixRuns(): Promise<AutoFixRun[]> {
   if (error) throw error;
   return (data ?? []) as AutoFixRun[];
 }
+
+// Wipes the whole activity log -- it's just a running feed for the admin panel (the routine's own
+// Supabase MCP tools never read it back), so clearing it has no effect on the routine's actual
+// queue/status work. `.not("id", "is", null)` is the standard Supabase JS pattern for "delete
+// every row" -- the client refuses a bare `.delete()` with no filter at all.
+export async function clearAutoFixRuns(): Promise<void> {
+  const { error } = await supabase.from("auto_fix_runs").delete().not("id", "is", null);
+  if (error) throw error;
+}
