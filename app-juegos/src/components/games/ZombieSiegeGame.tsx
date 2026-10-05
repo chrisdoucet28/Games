@@ -1084,8 +1084,8 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
           <div style={{ marginBottom: "20px" }}>
             <ScoreBoard teams={teams} />
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: teamsGridCols(teams.length), gap: "10px", margin: "0 auto 24px", maxWidth: "760px" }}>
-            {teams.map(t => {
+          <div style={{ display: "grid", gridTemplateColumns: teamsGridCols(activeRoster.length), gap: "10px", margin: "0 auto 24px", maxWidth: "760px" }}>
+            {activeRoster.map(t => {
               const stats = statsByTeam[t.id] ?? { kills: 0, chairsPlaced: 0 };
               return (
                 <div key={t.id} style={{ background: "#14210F", border: "2px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E", borderRadius: "14px", padding: "10px" }}>

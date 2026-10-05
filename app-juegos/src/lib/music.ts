@@ -159,7 +159,9 @@ function resolveSrc(ctx: MusicContext, gameId: string | null): string {
 // teacher's own voice, so it should always read as background, never foreground. Applies
 // regardless of which actual file plays for a context (shared default or a game's own override).
 const MUSIC_VOLUME: Record<MusicContext, number> = {
-  ambient: 0.22,
+  // Teacher feedback: this read as noticeably louder than the gameplay/tension tracks it sits
+  // between (menus, setup, results) — nudged down to close that gap.
+  ambient: 0.18,
   gameplay: 0.25,
   // Teacher feedback: this was too loud relative to the other two — it's the one context that
   // overlaps with a team actively trying to think/speak/write, so it needs to sit further back,
