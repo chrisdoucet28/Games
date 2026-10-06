@@ -191,6 +191,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   to_be: {
     title: "A New Friend",
+    audioUrl: `${MEDIA_BASE}/audio/real-world/to_be.mp3`,
     passage: [
       "Hi! I am Sara. I am 22 years old.",
       "I am from Mexico, but now I am in Madrid. I am a student.",
@@ -346,6 +347,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   numbers_and_colours: {
     title: "My Bedroom",
+    audioUrl: `${MEDIA_BASE}/audio/real-world/numbers_and_colours.mp3`,
     passage: [
       "This is my bedroom. It is small, but I love it.",
       "I have two windows and one door. The walls are light blue.",
@@ -699,6 +701,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   equatives_non_equatives: {
     title: "Choosing a Gym",
+    audioUrl: `${MEDIA_BASE}/audio/real-world/equatives_non_equatives.mp3`,
     passage: [
       "I visited two gyms today! Gym A is as big as Gym B, but it isn't as modern.",
       "Gym B has newer machines, and it's less crowded than Gym A in the evening. The classes at Gym A are just as good, though — my friend says the teachers are friendlier.",
@@ -1795,6 +1798,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   causative_verbs: {
     title: "Renovating My Kitchen",
+    audioUrl: `${MEDIA_BASE}/audio/real-world/causative_verbs.mp3`,
     passage: [
       "When we bought this house, I promised myself I wouldn't rush into any big projects. That plan lasted about two months, until the kitchen ceiling started leaking and I had no choice but to get it fixed properly.",
       "I decided to have the whole kitchen redone rather than just patch the ceiling, which in hindsight was either a brilliant idea or a terrible one — I still haven't decided which. I had an electrician rewire the whole room first, since the old wiring wasn't safe. Then I got a plumber to move the sink to the other wall, which meant having the floor pulled up too.",
@@ -1812,6 +1816,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   embedded_questions: {
     title: "Interview: Starting a Small Business",
+    audioUrl: `${MEDIA_BASE}/audio/real-world/embedded_questions.mp3`,
     passage: [
       "Interviewer: Thanks for joining us. Could you tell me how you first got the idea for the business?",
       "Guest: Of course. I was working in a café and I kept noticing how many people asked if we sold gluten-free bread. I started wondering whether there was actually a real gap in the market, so I did some research.",
@@ -1835,6 +1840,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   future_in_past: {
     title: "The Plan That Didn't Happen",
+    audioUrl: `${MEDIA_BASE}/audio/real-world/future_in_past.mp3`,
     passage: [
       "Ten years ago, I was completely certain about my future. I was going to move to Berlin, learn German properly, and work as a translator. I'd already told everyone at university that I would be leaving the country within a year of graduating.",
       "My best friend, who was going to travel with me, backed out first — she'd met someone and decided she was going to stay closer to home instead. I told myself it wouldn't change my plans, but looking back, it clearly shook my confidence more than I admitted at the time.",
@@ -1853,6 +1859,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   third_conditional: {
     title: "Looking Back: My Career Choices",
+    audioUrl: `${MEDIA_BASE}/audio/real-world/third_conditional.mp3`,
     passage: [
       "People often ask if I regret becoming a teacher instead of pursuing engineering, which is what I originally studied. Honestly, the answer changes depending on the day, but mostly, no — I don't think I would have been happier the other way.",
       "If I had finished my engineering degree, I would probably have taken a graduate job at the firm where I did my internship. If I'd done that, I would have earned considerably more money in my twenties than I did as a trainee teacher. There's no getting around that fact.",
@@ -1870,6 +1877,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   education_systems: {
     title: "Two Systems, Two Childhoods",
+    audioUrl: `${MEDIA_BASE}/audio/real-world/education_systems.mp3`,
     passage: [
       "When Priya moved from India to Finland at age eleven, the difference in her education nearly gave her whiplash. Back home, her days had been long — six hours of classes followed by two more of private tutoring, all building toward a single set of exams that would determine which university she could attend.",
       "In Finland, she found something almost unrecognisable. School started later in the morning, homework was minimal, and formal testing barely existed before the age of sixteen. \"My first week, I kept waiting for the real lessons to start,\" she said. \"It took me a month to realise this was the real thing.\"",
@@ -1887,6 +1895,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   work_life_balance: {
     title: "Why I Started Saying No",
+    audioUrl: `${MEDIA_BASE}/audio/real-world/work_life_balance.mp3`,
     passage: [
       "For most of my twenties, I wore busyness like a badge of honour. I answered emails at midnight, skipped lunch breaks most days, and genuinely believed that anyone who left the office at five o'clock simply wasn't ambitious enough.",
       "The wake-up call came two years ago, when I collapsed at my desk from exhaustion and spent three days in hospital being told, quite bluntly, that I was heading toward burnout. It's an unpleasant thing to hear at twenty-eight, but it forced a reckoning I'd been avoiding for years.",
@@ -1904,6 +1913,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   success_motivation: {
     title: "Interview: What Actually Drives Success",
+    audioUrl: `${MEDIA_BASE}/audio/real-world/success_motivation.mp3`,
     passage: [
       "Interviewer: You've coached hundreds of athletes and executives. What's the biggest myth about motivation you'd like to correct?",
       "Coach: That it's a feeling you either have or don't have. People imagine successful people wake up every day bursting with drive, and honestly, that's almost never true. Motivation is unreliable. What actually separates people who achieve their goals from those who don't is habit, not motivation.",
@@ -2021,6 +2031,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   future_perfect: {
     title: "By 2050: A Look at What's Coming",
+    audioUrl: `${MEDIA_BASE}/audio/real-world/future_perfect.mp3`,
     passage: [
       "Predicting the future is a famously unreliable business, but scientists across several fields are willing to make cautious estimates about where things are headed over the next few decades — and by many accounts, the changes will have been dramatic.",
       "By 2040, according to most energy researchers, the majority of new cars sold worldwide will have switched to electric power, and several major cities will have banned petrol vehicles from their centres entirely. By that same point, renewable sources will likely have overtaken fossil fuels as the world's primary source of electricity for the first time in over a century.",
@@ -2037,6 +2048,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   present_perfect_continuous: {
     title: "Six Months of Learning to Run",
+    audioUrl: `${MEDIA_BASE}/audio/real-world/present_perfect_continuous.mp3`,
     passage: [
       "I've been trying to become a runner, on and off, for about six years. I say \"trying\" deliberately, because until recently I hadn't been sticking with it for longer than a few weeks at a time before some excuse — weather, tiredness, a vague sense that I simply wasn't built for it — ended the attempt.",
       "This time has been different. I've been getting up at six every morning for the past six months, which is longer than I've been doing almost anything consistently in my adult life. My knees have been aching most weeks, and I've definitely been complaining about it to anyone who'll listen, but I haven't stopped, which surprises me more than anyone.",
@@ -2070,6 +2082,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   wish_if_only: {
     title: "Advice Column: Is It Too Late to Change Careers?",
+    audioUrl: `${MEDIA_BASE}/audio/real-world/wish_if_only.mp3`,
     passage: [
       "Dear columnist, I'm thirty-eight and I often think, if only I'd studied medicine instead of business, I'd be doing work that actually feels meaningful. I wish I'd made a braver choice at eighteen. Is it too late to start again? — Regretful in Leeds",
       "Dear Regretful, I wish I could tell you there's a version of this decision without loss, but there isn't, and I won't pretend otherwise. If only every career change came without risk, we'd all make them constantly. It doesn't, and that's precisely why the question matters so much to you now.",
@@ -2086,6 +2099,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   gerunds_infinitives: {
     title: "Why We Keep Picking Up New Hobbies",
+    audioUrl: `${MEDIA_BASE}/audio/real-world/gerunds_infinitives.mp3`,
     passage: [
       "My friend Ana recently decided to take up pottery, having previously tried to learn the violin, attempted to master rock climbing, and briefly considered training for a marathon, all within the space of about eighteen months. When I teased her about it, she shrugged and said she just enjoys trying new things, and stopped worrying long ago about finishing them.",
       "It's tempting to dismiss this pattern as flakiness, but psychologists studying hobby culture increasingly suggest it reflects something healthier: an unwillingness to let work define an entire identity. People who refuse to limit themselves to one interest often report avoiding burnout more successfully, precisely because they've stopped expecting a single pursuit to satisfy every need.",
@@ -2119,6 +2133,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   past_modals_deduction: {
     title: "Forum: What Actually Happened to the Missing Painting?",
+    audioUrl: `${MEDIA_BASE}/audio/real-world/past_modals_deduction.mp3`,
     passage: [
       "Posted by artmystery92: Okay, has anyone else been following the story of the painting that vanished from the Whitfield Gallery? I've read every article and I still can't work out what must have happened.",
       "Reply from curious_cat: The gallery insists it can't have been an outside job — the security footage shows no one entering after closing. Which means whoever took it must have already been inside the building.",

@@ -12,6 +12,10 @@
 // quota always covers the most-used content first, not just whatever happens to sit earliest in
 // the file. Needs an ELEVENLABS_API_KEY in app-juegos/.env (git-ignored, never commit it).
 //
+// Every run starts with a voice check (see voiceCheck): it stops BEFORE spending any credits if a
+// passage has a named/gendered narrator whose topic isn't pinned in LOCKED_VOICE. Pass --check to
+// run only that check (no API call, no key needed) — do this first whenever new topics are added.
+//
 // Writes clips to public/audio/real-world/ (git-ignored — transient local staging only). After a
 // run, upload the new clips with scripts/upload-media-to-blob.ts and paste the printed URLs into
 // the matching audioUrl fields in src/data/realWorldReadings.ts by hand — same two-step flow as
@@ -51,6 +55,7 @@ const MALE_VOICE = "CwhRBWXzGAHq8TQ4Fs17";
 const LOCKED_VOICE: Record<string, string> = {
   present_simple: FEMALE_VOICE, // "Hi, I'm Sofia!"
   what_do_you_do: MALE_VOICE,   // "Hi, I'm Carlos."
+  to_be: FEMALE_VOICE,          // "I am Sara"
 };
 
 // Every other topic alternates female/male by position in REAL_WORLD_READINGS — deterministic (a
@@ -63,6 +68,46 @@ function buildVoiceAssignment(ids: string[]): Record<string, string> {
     assignment[id] = LOCKED_VOICE[id] ?? (i % 2 === 0 ? FEMALE_VOICE : MALE_VOICE);
   });
   return assignment;
+}
+
+// Pre-flight voice check — runs before any API call, so a gendered narrator mismatch (the "I am
+// Sara" read by the male voice bug) is caught before credits are spent, not after. BLOCKING cues
+// are ones where the passage itself names/gender-marks its narrator: the topic must then have a
+// LOCKED_VOICE entry (that is the human decision "yes, this voice matches"). Resolve a block by
+// adding the topic to LOCKED_VOICE with the right voice. WARN cues are only printed for a human to
+// skim (e.g. "my sister" — a relative, which doesn't gender the narrator).
+const BLOCKING_CUES: [string, RegExp][] = [
+  ["named narrator", /\b(?:I'm|I am|My name is|My name's)\s+[A-Z][a-z]+/],
+  ["self-described gender/role", /\bI(?:'m| am) (?:a|an) (?:man|woman|guy|girl|lady|gentleman|boy|waiter|waitress|actor|actress|mother|father|husband|wife)\b/i],
+  ["signed with a name", /(?:^|\n)\s*(?:Best|Best wishes|Regards|Kind regards|Thanks|Cheers|Love|Sincerely|Yours),?\s+[A-Z][a-z]+\s*$/m],
+];
+const WARN_CUES: [string, RegExp][] = [
+  ["mentions a relative", /\bmy (?:husband|wife|boyfriend|girlfriend|mother|father|mom|mum|dad|son|daughter|brother|sister)\b/i],
+  ["as a <gendered role>", /\bas a (?:man|woman|mother|father|mum|dad|husband|wife)\b/i],
+];
+
+function voiceCheck(ids: string[], voiceAssignment: Record<string, string>): boolean {
+  let blocked = 0;
+  console.log("Voice plan (F = female, M = male; * = pinned in LOCKED_VOICE):");
+  for (const id of ids) {
+    const text = REAL_WORLD_READINGS[id].passage.join("\n");
+    const locked = id in LOCKED_VOICE;
+    const label = voiceAssignment[id] === FEMALE_VOICE ? "F" : "M";
+    const block = BLOCKING_CUES.map(([n, re]) => { const m = text.match(re); return m ? `${n}: "${m[0].trim()}"` : null; }).filter(Boolean);
+    const warn = WARN_CUES.map(([n, re]) => { const m = text.match(re); return m ? `${n}: "${m[0].trim()}"` : null; }).filter(Boolean);
+    const unresolved = block.length > 0 && !locked;
+    if (unresolved) blocked++;
+    if (unresolved || warn.length || (block.length && locked)) {
+      console.log(`  ${unresolved ? "BLOCK" : "note "} ${id.padEnd(34)} ${label}${locked ? "*" : " "}  ${[...block, ...warn].join(" | ")}`);
+    }
+  }
+  const f = ids.filter(id => voiceAssignment[id] === FEMALE_VOICE).length;
+  console.log(`  (${ids.length} topic(s): ${f} female, ${ids.length - f} male; only topics with a cue are listed)\n`);
+  if (blocked) {
+    console.error(`${blocked} topic(s) have a gendered/named narrator with no LOCKED_VOICE entry. Add each to LOCKED_VOICE with the voice that matches the narrator, then re-run. Nothing was generated.`);
+    return false;
+  }
+  return true;
 }
 
 function loadApiKey(): string {
@@ -92,7 +137,7 @@ async function generateOne(id: string, text: string, voiceId: string, apiKey: st
 
 async function main() {
   const force = process.argv.includes("--force");
-  const apiKey = loadApiKey();
+  const checkOnly = process.argv.includes("--check");
   const allEntries = Object.entries(REAL_WORLD_READINGS);
   const entries = force ? allEntries : allEntries.filter(([, r]) => !r.audioUrl);
   entries.sort((a, b) => {
@@ -104,6 +149,9 @@ async function main() {
   console.log(`Generating ${entries.length} clip(s)${skipped ? ` (skipping ${skipped} already present)` : ""}...`);
 
   const voiceAssignment = buildVoiceAssignment(Object.keys(REAL_WORLD_READINGS));
+  if (!voiceCheck(entries.map(([id]) => id), voiceAssignment)) process.exit(1);
+  if (checkOnly) { console.log("--check: voice plan OK, nothing generated."); return; }
+  const apiKey = loadApiKey();
   const remaining = entries.map(([id]) => id);
   for (const [id, r] of entries) {
     const voiceId = voiceAssignment[id];
