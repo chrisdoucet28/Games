@@ -22,9 +22,25 @@ import { PracticeScreen } from './components/shared/PracticeScreen';
 import { RoleChooserScreen } from './components/shared/RoleChooserScreen';
 import { StudentHome } from './components/student/StudentHome';
 import { AdminScreen } from './components/shared/AdminScreen';
-import { FREE_LAUNCH_ALL_PREMIUM } from './data/constants';
+import { StudentAccountsPausedScreen } from './components/shared/StudentAccountsPausedScreen';
+import { FREE_LAUNCH_ALL_PREMIUM, STUDENT_ACCOUNTS_PAUSED } from './data/constants';
 import { Icon } from './components/shared/Icon';
 import { isMusicEnabled, setMusicEnabled, onMusicEnabledChange, stopMusic } from './lib/music';
+
+// Width-based, not user-agent sniffing (fragile/spoofable, and already has one narrow legitimate
+// use elsewhere for a different purpose — see AuthScreen.tsx's isInAppBrowser) — same ~768px
+// phone/tablet boundary used for responsive layout throughout the app. This decides which
+// EXPERIENCE someone gets once, not a live-resizing layout concern, so it doesn't track resizes.
+//
+// Width alone isn't enough, though: a teacher running two windows side by side on a normal
+// desktop monitor can easily end up under 768px in one of them, and got wrongly shown the
+// phone-paused screen as a result. Requiring a coarse (touch) primary pointer alongside the width
+// check filters that out — a mouse/trackpad-driven window reports "fine" regardless of how narrow
+// it is, while an actual phone or tablet reports "coarse". Still not user-agent sniffing; this is
+// a real hardware-capability media feature, not a spoofable string.
+function isPhoneWidth(): boolean {
+  return window.innerWidth < 768 && window.matchMedia("(pointer: coarse)").matches;
+}
 
 function ConfigErrorScreen() {
   return (
@@ -249,6 +265,14 @@ function AuthenticatedApp() {
     getSubscription().then(setSubscription).catch(() => {});
   }, [session]);
 
+  // STUDENT_ACCOUNTS_PAUSED: see its own comment in data/constants.ts. Checked before `loading`/
+  // `session` even resolve (window.innerWidth is available synchronously, no fetch needed) so a
+  // phone visitor never sees a flash of AuthScreen or the real app first — this applies regardless
+  // of login state or role, including the owner's own teacher account on their own phone.
+  if (STUDENT_ACCOUNTS_PAUSED && isPhoneWidth()) {
+    return <StudentAccountsPausedScreen />;
+  }
+
   if (loading) {
     return (
       <div style={{ minHeight: '100vh', background: '#1E1B4B', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -291,9 +315,20 @@ function AuthenticatedApp() {
     return <AdminScreen userEmail={session.user.email ?? null} onExit={() => { window.location.pathname = '/'; }} />;
   }
 
-  // Both the one-time chooser and the student home get the same slim top bar (log out + music
-  // mute) as the teacher app — a student never sees the teacher's welcome/plan screens.
-  if (!roleInfo.chosen || roleInfo.role === 'student') {
+  // STUDENT_ACCOUNTS_PAUSED, the computer-side half (the phone-width check above already caught
+  // every phone visitor regardless of role). While paused, every account — brand new, existing
+  // teacher, or existing student — just falls straight through to the normal teacher app below,
+  // no matter what `roleInfo` says. Deliberately does NOT write anything to `profiles.role`: an
+  // existing student-role account stays 'student' in the database untouched (per the owner's
+  // explicit instruction — "they can stay student"), it just isn't acted on while paused. Flipping
+  // the flag back to false instantly restores the real chooser/StudentHome branch below with no
+  // further changes needed here — BUT: the owner wants every account re-asked for its role one
+  // more time when that happens ("we can ask every account again one more time"), not just
+  // resumed silently. This flip alone does NOT do that — it only skips the chooser for accounts
+  // that already have `role_chosen=true`. Raise this with the owner before actually flipping the
+  // flag back; a real fix needs a separate re-prompt step (e.g. a `role_reconfirmed_at` column, or
+  // resetting `role_chosen=false` for every account) rather than guessing at one here.
+  if (!STUDENT_ACCOUNTS_PAUSED && (!roleInfo.chosen || roleInfo.role === 'student')) {
     return (
       <div>
         <StatusBadge action="Log Out" onAction={() => supabase.auth.signOut()} theme={theme} isAdmin={isAdmin}>

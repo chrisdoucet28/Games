@@ -510,8 +510,13 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
 
   // Resolves the CPU's own round entry after a short delay — the exact same resolveRoundCorrect/
   // resolveRoundWrong a human's Correct/Wrong click already uses, just triggered by a hidden dice
-  // roll instead. The ref (not just checking entry.resolved) guards against double-scheduling if
-  // this effect re-runs mid-delay for an unrelated reason (e.g. a difficulty change mid-round).
+  // roll instead. `roundEntries` is deliberately NOT a dependency here (bug fixed 2026-10): with it
+  // in the array, every OTHER team submitting their own entry this round (an everyday event, nothing
+  // to do with the CPU) re-ran this effect, whose cleanup cleared the CPU's pending timer; the ref
+  // guard below then saw this round as "already scheduled" and bailed out without setting a new one
+  // — so the CPU's own entry silently never resolved and the round could never complete ("waited
+  // over 10 minutes for the CPU to submit its writing, nothing happened"). roundNumber already is
+  // the right per-round trigger, and the ref still prevents double-scheduling within one round.
   const cpuEntryScheduledRoundRef = useRef<number | null>(null);
   useEffect(() => {
     if (!isSolo || phase !== "playing" || !cpuRef.current) return;
@@ -542,7 +547,7 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
     }, delay);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isSolo, phase, roundNumber, roundEntries, difficulty]);
+  }, [isSolo, phase, roundNumber, difficulty]);
 
   // Guarded inside the functional updater (not a separate read beforehand) — a screen click racing
   // a phone broadcast for the same bounty can't both succeed, same idiom as Order Up's claimTicket.
@@ -653,14 +658,24 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
   );
 
   // Resolves the CPU's fix attempt (success or failure, see CPU_FIX_FAIL_CHANCE_BY_DIFFICULTY)
-  // after a short working delay — same guarded-ref idiom as the round-entry effect above, keyed on
-  // bounty id since a new attempt only ever starts once the previous one has resolved.
+  // after a short working delay. Depends on `cpuAttemptingBountyId` (computed above, during render)
+  // rather than the raw `bounties` array for the same reason the round-entry effect above no longer
+  // depends on `roundEntries` (bug fixed 2026-10): depending on the whole array meant ANY unrelated
+  // bounty changing (a human team claiming or resolving a different bounty) re-ran this effect mid-
+  // delay, whose cleanup cleared the CPU's pending timer, after which the ref guard saw the same
+  // bounty id as "already scheduled" and refused to reschedule it — silently stranding the CPU
+  // "fixing" a bounty forever. Keying on just the id means the effect only reruns when the CPU
+  // actually starts (or finishes) an attempt, not on every unrelated bounty update.
+  const cpuAttemptingBountyId = isSolo && cpuRef.current
+    ? bounties.find(b => b.claimedBy === cpuRef.current!.id && !b.resolved)?.id
+    : undefined;
   const cpuFixScheduledBountyRef = useRef<number | null>(null);
   useEffect(() => {
     if (!isSolo || phase !== "playing" || !cpuRef.current) return;
+    if (cpuAttemptingBountyId === undefined) { cpuFixScheduledBountyRef.current = null; return; }
     const cpuId = cpuRef.current.id;
-    const attempting = bounties.find(b => b.claimedBy === cpuId && !b.resolved);
-    if (!attempting) { cpuFixScheduledBountyRef.current = null; return; }
+    const attempting = bounties.find(b => b.id === cpuAttemptingBountyId);
+    if (!attempting) return;
     if (cpuFixScheduledBountyRef.current === attempting.id) return;
     cpuFixScheduledBountyRef.current = attempting.id;
     const succeeds = Math.random() >= CPU_FIX_FAIL_CHANCE_BY_DIFFICULTY[difficulty];
@@ -671,7 +686,7 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
     }, delay);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isSolo, phase, bounties, difficulty]);
+  }, [isSolo, phase, difficulty, cpuAttemptingBountyId]);
 
   const roundComplete = roundEntries.length > 0 && roundEntries.every(e => e.resolved);
   const isLastRound = roundNumber >= totalRounds - 1;

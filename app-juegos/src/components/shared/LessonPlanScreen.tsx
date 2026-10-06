@@ -367,6 +367,13 @@ export function LessonPlanSlideshow({ topic, theme, teams, onBack, onPlayGameFor
           </button>
           <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
             <span style={{ color: "#9CA3AF", fontSize: "12px", fontWeight: "700" }}>Step {slideIndex + 1} of {slides.length}</span>
+            {/* PrintableLessonPlan (below) renders the whole lesson regardless of slideIndex, so
+                this works identically from any step — not just the "done" screen's own print
+                button further down, which a teacher would otherwise have to click through the
+                entire lesson to reach. */}
+            <button onClick={() => window.print()} title="Print this lesson" style={{ background: "none", border: "none", color: "#9CA3AF", cursor: "pointer", fontWeight: "700", fontFamily: theme.headingFont, fontSize: "12px", display: "inline-flex", alignItems: "center", gap: "4px", padding: 0 }}>
+              <Icon name="printer" size={12} /> Print
+            </button>
             {/* Previous only steps back one slide at a time — with up to 20+ steps, leaving the
                 lesson mid-way otherwise means clicking it that many times. Skips straight to the
                 index regardless of progress; nothing here is saved, so there's nothing to lose. */}
