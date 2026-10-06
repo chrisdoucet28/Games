@@ -592,13 +592,9 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
             <div style={{ fontWeight: "900", fontSize: "20px", marginBottom: "10px", color: "#5EEAD4" }}>Word Relay</div>
             <div style={{ fontSize: "15px", lineHeight: 1.7, opacity: 0.95 }}>
               {propTeams.length === 1 && peoplePerTeam === 1 ? "Your team has a hidden word. " : "Every team has its own hidden word. "}
-              <strong style={{ color: "#5EEAD4" }}>One person from each team comes to the front</strong> and asks yes/no questions to work out what it is — no peeking! Teams take turns asking <strong style={{ color: "#5EEAD4" }}>one question at a time</strong>, round-robin, so nobody's just standing around waiting.
+              <strong style={{ color: "#5EEAD4" }}>One person from each team comes to the front</strong> and asks yes/no questions to work it out — one question at a time, team by team.
               <br />
-              {inputMode === "phone"
-                ? "Everyone joins on their own phone. Teammates' phones show the word and answer; the asker's phone never does."
-                : "The teacher sees the word and answers each question, then taps whether they guessed it."}
-              <br />
-              Everyone gets <strong style={{ color: "#5EEAD4" }}>{QUESTIONS_PER_PERSON} questions</strong> of their own. Guess the word — or use up your {QUESTIONS_PER_PERSON} without guessing — and <strong style={{ color: "#5EEAD4" }}>the next teammate swaps in</strong> with a brand new word, so everyone gets a turn at the front. A word is worth up to <strong style={{ color: "#5EEAD4" }}>{MAX_POINTS} points</strong> — guess on your 1st question for {MAX_POINTS}, and it drops to {MIN_POINTS} by your {QUESTIONS_PER_PERSON}th. Most points wins.
+              Guess it in as few questions as you can: up to <strong style={{ color: "#5EEAD4" }}>{MAX_POINTS} points</strong> for your 1st question, down to {MIN_POINTS} by your {QUESTIONS_PER_PERSON}th. Then the next teammate swaps in!
             </div>
           </div>
           <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "18px" }}>
