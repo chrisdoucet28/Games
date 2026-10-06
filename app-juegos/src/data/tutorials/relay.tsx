@@ -38,13 +38,14 @@ export const RELAY_TUTORIAL_STEPS: TutorialStep[] = [
     ),
   },
   {
-    narration: "Each team has 15 questions in total, shared out between its people — 5 each for a team of 3. The sooner you guess, the more you score: a word is worth 10 points plus up to 10 bonus points. Guess on your first question and it's 20 points; use every question and it's 10.",
+    narration: "Everyone gets 5 questions of their own. The sooner you guess, the more you score: guess on your very first question and the word is worth 300 points — it drops with every question you use, down to 10 points if it takes all 5.",
     visual: (
       <div style={{ textAlign: "center", fontSize: "13px", fontWeight: 700, color: "#374151", lineHeight: 1.7 }}>
-        <div>Guess on question 1 → <strong style={{ color: "#15803D" }}>+20</strong></div>
-        <div>Guess on question 3 → <strong style={{ color: "#15803D" }}>+15</strong></div>
+        <div>Guess on question 1 → <strong style={{ color: "#15803D" }}>+300</strong></div>
+        <div>Guess on question 2 → <strong style={{ color: "#15803D" }}>+230</strong></div>
+        <div>Guess on question 3 → <strong style={{ color: "#15803D" }}>+160</strong></div>
+        <div>Guess on question 4 → <strong style={{ color: "#15803D" }}>+80</strong></div>
         <div>Guess on question 5 → <strong style={{ color: "#15803D" }}>+10</strong></div>
-        <div style={{ fontSize: "11px", color: "#6B7280" }}>(a team of 3 — 5 questions each)</div>
       </div>
     ),
   },
@@ -53,7 +54,7 @@ export const RELAY_TUTORIAL_STEPS: TutorialStep[] = [
     visual: (
       <div style={{ textAlign: "center" }}>
         <div style={{ background: "#F0FDF4", border: "2px solid #22C55E", borderRadius: "10px", padding: "10px 14px", fontWeight: 700, color: "#14532D", fontSize: "13px" }}>
-          Team Red guessed "jacket"! ✅ +18 — time to swap!
+          Team Red guessed "jacket" on question 2! ✅ +230 — time to swap!
         </div>
       </div>
     ),
@@ -80,7 +81,7 @@ export const RELAY_TUTORIAL_STEPS: TutorialStep[] = [
     visual: (
       <div style={{ textAlign: "center" }}>
         <div style={{ fontSize: "20px" }}>🏁</div>
-        <div style={{ fontSize: "11px", fontWeight: 700, color: "#374151" }}>15 questions per team — most points wins</div>
+        <div style={{ fontSize: "11px", fontWeight: 700, color: "#374151" }}>5 questions per person — most points wins</div>
       </div>
     ),
   },

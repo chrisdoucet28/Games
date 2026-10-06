@@ -23,24 +23,24 @@ import {
 
 const GM = GAME_MODES.find(g => g.id === "relay")!;
 
-// Each TEAM gets this many questions in total, shared out between its people (teacher-chosen
-// peoplePerTeam) — 5 each for a team of 3. A real class found 15 questions PER PERSON far too many
-// (a team of 3 was spending 45), so the team total is fixed instead. questionsForSlot() below deals
-// the remainder out to the first people on the team (a team of 2 is 8 + 7), so a team always gets
-// exactly this many whatever its size. Using up a person's own share without guessing forces a swap
-// to the next teammate, so one stuck word can't stall the team.
-const TEAM_QUESTION_BUDGET = 15;
-// A guessed word is worth BASE_POINTS, plus up to MAX_SPEED_BONUS more depending on how few of that
-// person's own questions were used: guessing on the very first question earns the whole bonus,
-// guessing on the last one earns none (see guessPoints). Rewards the team that guesses first.
-const BASE_POINTS = 10;
-const MAX_SPEED_BONUS = 10;
+// Every person gets this many questions of their own before their team has to swap them out. The
+// owner's call after a real class: a flat 5 per student (15 per person was far too many — a team of
+// 3 was spending 45). A team's total is therefore 5 x however many people the teacher says are on
+// it. Using up the 5 without guessing forces a swap to the next teammate, so one stuck word can't
+// stall the team.
+const QUESTIONS_PER_PERSON = 5;
+// A guessed word is worth MAX_POINTS on the very first question, falling in a straight line to
+// MIN_POINTS on the last, rounded to the nearest 10 (5 questions: 300 / 230 / 160 / 80 / 10). Rewards
+// the team that guesses first, and sits on the same scale as the other games' point totals.
+const MAX_POINTS = 300;
+const MIN_POINTS = 10;
 
-// `questionNumber` is the 1-based question the guess happened on, `budget` that person's own share.
-// Budgets are never below 2 (15 split across at most 6 people), so the divisor is never 0.
+// `questionNumber` is the 1-based question the guess happened on, `budget` that person's own total.
 function guessPoints(questionNumber: number, budget: number): number {
+  if (budget <= 1) return MAX_POINTS;
   const q = Math.min(Math.max(questionNumber, 1), budget);
-  return BASE_POINTS + Math.round(MAX_SPEED_BONUS * (budget - q) / (budget - 1));
+  const raw = MIN_POINTS + (MAX_POINTS - MIN_POINTS) * (budget - q) / (budget - 1);
+  return Math.round(raw / 10) * 10;
 }
 
 // Solo only — how long the CPU "thinks" before its own turn resolves, and how long its result sits
@@ -97,7 +97,8 @@ function validateRelaySnapshot(raw: unknown, teamCount: number): RelaySnapshot |
     ? s.customWords.filter((w): w is string => typeof w === "string" && w.trim() !== "").slice(0, 200)
     : null;
   const wordsByTeam = s.wordsByTeam ?? {};
-  const pointsByTeam = s.pointsByTeam ?? Object.fromEntries(Object.entries(wordsByTeam).map(([k, w]) => [k, (w as number) * BASE_POINTS]));
+  // A game saved before speed-bonus scoring scored every word a flat 10.
+  const pointsByTeam = s.pointsByTeam ?? Object.fromEntries(Object.entries(wordsByTeam).map(([k, w]) => [k, (w as number) * 10]));
   return { teamIndex: s.teamIndex, slotIndexByTeam, wordsByTeam, pointsByTeam, peoplePerTeam, difficulty, customWords };
 }
 
@@ -158,13 +159,8 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
   // How many people the teacher said are on each team (uniform across every team, not a per-team
   // roster — the teacher's own explicit call, so a small team doesn't finish before a big one).
   const [peoplePerTeam, setPeoplePerTeam] = useState(() => resumed?.peoplePerTeam ?? 1);
-  // How many of the team's TEAM_QUESTION_BUDGET the person in `slot` gets — the remainder goes to
-  // the first people (15 over 4 people = 4,4,4,3). 0 once the slot is past the last person.
-  const questionsForSlot = (slot: number): number => {
-    if (slot >= peoplePerTeam) return 0;
-    const base = Math.floor(TEAM_QUESTION_BUDGET / peoplePerTeam);
-    return base + (slot < TEAM_QUESTION_BUDGET % peoplePerTeam ? 1 : 0);
-  };
+  // How many questions the person in `slot` gets — 0 once the slot is past the team's last person.
+  const questionsForSlot = (slot: number): number => (slot >= peoplePerTeam ? 0 : QUESTIONS_PER_PERSON);
   const [difficulty, setDifficulty] = useState<Difficulty>(() => resumed?.difficulty ?? "medium");
   const [teamIndex, setTeamIndex] = useState(() => resumed?.teamIndex ?? 0);
   // Bumped once per resolveTurn call — see the CPU turn effect's own comment for why this exists
@@ -441,7 +437,7 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
       screenShowsWord,
       phoneCountByTeam: countOut,
       questionsLeftByTeam: leftOut,
-      questionsPerTeam: TEAM_QUESTION_BUDGET,
+      questionsPerTeam: QUESTIONS_PER_PERSON * peoplePerTeam,
       wordsByTeam: wordsOut,
       pointsByTeam: pointsOut,
       revealKind: phase === "reveal" ? revealInfo.kind : undefined,
@@ -602,7 +598,7 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
                 ? "Everyone joins on their own phone. Teammates' phones show the word and answer; the asker's phone never does."
                 : "The teacher sees the word and answers each question, then taps whether they guessed it."}
               <br />
-              Each team gets <strong style={{ color: "#5EEAD4" }}>{TEAM_QUESTION_BUDGET} questions in total</strong>, shared out between its people{peoplePerTeam > 1 ? ` (${TEAM_QUESTION_BUDGET % peoplePerTeam === 0 ? `${TEAM_QUESTION_BUDGET / peoplePerTeam} each` : `about ${Math.round(TEAM_QUESTION_BUDGET / peoplePerTeam)} each`})` : ""}. Guess the word — or use up your share without guessing — and <strong style={{ color: "#5EEAD4" }}>the next teammate swaps in</strong> with a brand new word, so everyone gets a turn at the front. Each word is worth <strong style={{ color: "#5EEAD4" }}>{BASE_POINTS} points, plus up to {MAX_SPEED_BONUS} bonus points</strong> — the fewer questions you use, the more you score. Most points wins.
+              Everyone gets <strong style={{ color: "#5EEAD4" }}>{QUESTIONS_PER_PERSON} questions</strong> of their own. Guess the word — or use up your {QUESTIONS_PER_PERSON} without guessing — and <strong style={{ color: "#5EEAD4" }}>the next teammate swaps in</strong> with a brand new word, so everyone gets a turn at the front. A word is worth up to <strong style={{ color: "#5EEAD4" }}>{MAX_POINTS} points</strong> — guess on your 1st question for {MAX_POINTS}, and it drops to {MIN_POINTS} by your {QUESTIONS_PER_PERSON}th. Most points wins.
             </div>
           </div>
           <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "18px" }}>
@@ -810,7 +806,7 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
   const currentBudget = questionsForSlot(slotIndexByTeam[currentKey] ?? 0);
   const currentQuestionNumber = Math.min((questionsUsedByTeam[currentKey] ?? 0) + 1, Math.max(currentBudget, 1));
   // What a correct guess would earn right now — shown live on the button so the stakes are visible.
-  const pointsIfGuessedNow = currentBudget > 0 ? guessPoints(currentQuestionNumber, currentBudget) : BASE_POINTS;
+  const pointsIfGuessedNow = currentBudget > 0 ? guessPoints(currentQuestionNumber, currentBudget) : MIN_POINTS;
 
   return (
     <div style={arenaStyle}>
