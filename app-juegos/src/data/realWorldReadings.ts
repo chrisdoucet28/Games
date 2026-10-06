@@ -191,6 +191,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   to_be: {
     title: "A New Friend",
+    audioUrl: `${MEDIA_BASE}/audio/real-world/to_be.mp3`,
     passage: [
       "Hi! I am Sara. I am 22 years old.",
       "I am from Mexico, but now I am in Madrid. I am a student.",
@@ -1876,6 +1877,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   education_systems: {
     title: "Two Systems, Two Childhoods",
+    audioUrl: `${MEDIA_BASE}/audio/real-world/education_systems.mp3`,
     passage: [
       "When Priya moved from India to Finland at age eleven, the difference in her education nearly gave her whiplash. Back home, her days had been long — six hours of classes followed by two more of private tutoring, all building toward a single set of exams that would determine which university she could attend.",
       "In Finland, she found something almost unrecognisable. School started later in the morning, homework was minimal, and formal testing barely existed before the age of sixteen. \"My first week, I kept waiting for the real lessons to start,\" she said. \"It took me a month to realise this was the real thing.\"",
@@ -1893,6 +1895,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   work_life_balance: {
     title: "Why I Started Saying No",
+    audioUrl: `${MEDIA_BASE}/audio/real-world/work_life_balance.mp3`,
     passage: [
       "For most of my twenties, I wore busyness like a badge of honour. I answered emails at midnight, skipped lunch breaks most days, and genuinely believed that anyone who left the office at five o'clock simply wasn't ambitious enough.",
       "The wake-up call came two years ago, when I collapsed at my desk from exhaustion and spent three days in hospital being told, quite bluntly, that I was heading toward burnout. It's an unpleasant thing to hear at twenty-eight, but it forced a reckoning I'd been avoiding for years.",
@@ -1910,6 +1913,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   success_motivation: {
     title: "Interview: What Actually Drives Success",
+    audioUrl: `${MEDIA_BASE}/audio/real-world/success_motivation.mp3`,
     passage: [
       "Interviewer: You've coached hundreds of athletes and executives. What's the biggest myth about motivation you'd like to correct?",
       "Coach: That it's a feeling you either have or don't have. People imagine successful people wake up every day bursting with drive, and honestly, that's almost never true. Motivation is unreliable. What actually separates people who achieve their goals from those who don't is habit, not motivation.",
@@ -2095,6 +2099,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   gerunds_infinitives: {
     title: "Why We Keep Picking Up New Hobbies",
+    audioUrl: `${MEDIA_BASE}/audio/real-world/gerunds_infinitives.mp3`,
     passage: [
       "My friend Ana recently decided to take up pottery, having previously tried to learn the violin, attempted to master rock climbing, and briefly considered training for a marathon, all within the space of about eighteen months. When I teased her about it, she shrugged and said she just enjoys trying new things, and stopped worrying long ago about finishing them.",
       "It's tempting to dismiss this pattern as flakiness, but psychologists studying hobby culture increasingly suggest it reflects something healthier: an unwillingness to let work define an entire identity. People who refuse to limit themselves to one interest often report avoiding burnout more successfully, precisely because they've stopped expecting a single pursuit to satisfy every need.",
@@ -2128,6 +2133,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   past_modals_deduction: {
     title: "Forum: What Actually Happened to the Missing Painting?",
+    audioUrl: `${MEDIA_BASE}/audio/real-world/past_modals_deduction.mp3`,
     passage: [
       "Posted by artmystery92: Okay, has anyone else been following the story of the painting that vanished from the Whitfield Gallery? I've read every article and I still can't work out what must have happened.",
       "Reply from curious_cat: The gallery insists it can't have been an outside job — the security footage shows no one entering after closing. Which means whoever took it must have already been inside the building.",
