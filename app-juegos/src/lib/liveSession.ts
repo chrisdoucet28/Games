@@ -249,9 +249,19 @@ export type RelayStatePayload = {
   screenShowsWord: boolean;
   phoneCountByTeam: Record<string, number>;
   questionsLeftByTeam: Record<string, number>;
+  // A team's TOTAL question budget (a fixed number per person x the team's size).
   questionsPerTeam: number;
   // Words correctly guessed per team this game.
   wordsByTeam: Record<string, number>;
+  // Points per team — a word is worth more the fewer questions it took (300 down to 10). Optional so a phone still
+  // holding an older build keeps working (it falls back to showing words).
+  pointsByTeam?: Record<string, number>;
+  // Only set during "reveal": whether it's a guess or a person running out of questions, the points
+  // that guess earned, and whether it was the team's last person (the team is then done).
+  revealKind?: "guessed" | "outOfQuestions";
+  revealPoints?: number;
+  revealTeamFinished?: boolean;
+  allTeamsFinished?: boolean;
   connectedTeamIds: (string | number)[];
   ts: number;
 };

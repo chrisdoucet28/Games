@@ -23,13 +23,25 @@ import {
 
 const GM = GAME_MODES.find(g => g.id === "relay")!;
 
-// Each person gets this many question turns of their own before their team has to swap them out
-// (15, not the original 10 — see the comment on QUESTIONS_PER_PERSON's old name in git history:
-// 10 was proving too stingy once the budget moved from "shared across the whole team" to
-// "per student" — most players were only getting through ~2 words). Guessing a word early is what
-// earns more words — wasting all 15 without guessing forces a swap to the next teammate anyway.
-const QUESTIONS_PER_PERSON = 15;
-const POINTS_PER_WORD = 10;
+// Every person gets this many questions of their own before their team has to swap them out. The
+// owner's call after a real class: a flat 5 per student (15 per person was far too many — a team of
+// 3 was spending 45). A team's total is therefore 5 x however many people the teacher says are on
+// it. Using up the 5 without guessing forces a swap to the next teammate, so one stuck word can't
+// stall the team.
+const QUESTIONS_PER_PERSON = 5;
+// A guessed word is worth MAX_POINTS on the very first question, falling in a straight line to
+// MIN_POINTS on the last, rounded to the nearest 10 (5 questions: 300 / 230 / 160 / 80 / 10). Rewards
+// the team that guesses first, and sits on the same scale as the other games' point totals.
+const MAX_POINTS = 300;
+const MIN_POINTS = 10;
+
+// `questionNumber` is the 1-based question the guess happened on, `budget` that person's own total.
+function guessPoints(questionNumber: number, budget: number): number {
+  if (budget <= 1) return MAX_POINTS;
+  const q = Math.min(Math.max(questionNumber, 1), budget);
+  const raw = MIN_POINTS + (MAX_POINTS - MIN_POINTS) * (budget - q) / (budget - 1);
+  return Math.round(raw / 10) * 10;
+}
 
 // Solo only — how long the CPU "thinks" before its own turn resolves, and how long its result sits
 // on screen before auto-continuing. Matches Vault Heist's CPU_ANSWER_MS_BY_DIFFICULTY /
@@ -60,6 +72,8 @@ type RelaySnapshot = {
   teamIndex: number;
   slotIndexByTeam: Record<string, number>;
   wordsByTeam: Record<string | number, number>;
+  // Optional: a game saved before speed-bonus scoring only has wordsByTeam (every word was a flat 10).
+  pointsByTeam?: Record<string | number, number>;
   peoplePerTeam: number;
   // Solo only.
   difficulty?: Difficulty;
@@ -82,7 +96,10 @@ function validateRelaySnapshot(raw: unknown, teamCount: number): RelaySnapshot |
   const customWords = Array.isArray(s.customWords)
     ? s.customWords.filter((w): w is string => typeof w === "string" && w.trim() !== "").slice(0, 200)
     : null;
-  return { teamIndex: s.teamIndex, slotIndexByTeam, wordsByTeam: s.wordsByTeam ?? {}, peoplePerTeam, difficulty, customWords };
+  const wordsByTeam = s.wordsByTeam ?? {};
+  // A game saved before speed-bonus scoring scored every word a flat 10.
+  const pointsByTeam = s.pointsByTeam ?? Object.fromEntries(Object.entries(wordsByTeam).map(([k, w]) => [k, (w as number) * 10]));
+  return { teamIndex: s.teamIndex, slotIndexByTeam, wordsByTeam, pointsByTeam, peoplePerTeam, difficulty, customWords };
 }
 
 export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState, presetPhoneSession }: GameProps) {
@@ -142,6 +159,8 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
   // How many people the teacher said are on each team (uniform across every team, not a per-team
   // roster — the teacher's own explicit call, so a small team doesn't finish before a big one).
   const [peoplePerTeam, setPeoplePerTeam] = useState(() => resumed?.peoplePerTeam ?? 1);
+  // How many questions the person in `slot` gets — 0 once the slot is past the team's last person.
+  const questionsForSlot = (slot: number): number => (slot >= peoplePerTeam ? 0 : QUESTIONS_PER_PERSON);
   const [difficulty, setDifficulty] = useState<Difficulty>(() => resumed?.difficulty ?? "medium");
   const [teamIndex, setTeamIndex] = useState(() => resumed?.teamIndex ?? 0);
   // Bumped once per resolveTurn call — see the CPU turn effect's own comment for why this exists
@@ -152,7 +171,7 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
   // roundIndex, which tracked one shared budget for the whole team regardless of how many people
   // were on it.
   const [slotIndexByTeam, setSlotIndexByTeam] = useState<Record<string, number>>(() => resumed?.slotIndexByTeam ?? {});
-  // How many of the CURRENT slot's own QUESTIONS_PER_PERSON have been used — always starts fresh on
+  // How many of the CURRENT slot's own questions (see questionsForSlot) have been used — always starts fresh on
   // resume (same "don't try to restore exact mid-word progress" philosophy as the original
   // snapshot not restoring the exact hidden words that were live when saved).
   const [questionsUsedByTeam, setQuestionsUsedByTeam] = useState<Record<string, number>>({});
@@ -169,9 +188,16 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
     return initial;
   });
   const [wordsByTeam, setWordsByTeam] = useState<Record<string | number, number>>(() => resumed?.wordsByTeam ?? {});
+  // Points per team (the ranking), separate from words guessed now that a word's value depends on
+  // how fast it was guessed.
+  const [pointsByTeam, setPointsByTeam] = useState<Record<string | number, number>>(() => resumed?.pointsByTeam ?? {});
   const [showWordList, setShowWordList] = useState(false);
-  // The word a team just guessed, shown on the reveal card — teamWords already holds their NEXT word.
+  // The word a team just finished with, shown on the reveal card — teamWords already holds their NEXT word.
   const [revealWord, setRevealWord] = useState("");
+  // What the reveal card is announcing: a guess (with the points it earned) or a person running out
+  // of questions, and whether that was the team's LAST person — in which case the team is done and
+  // everyone on it sits down instead of "someone new takes over".
+  const [revealInfo, setRevealInfo] = useState<{ kind: "guessed" | "outOfQuestions"; points: number; teamFinished: boolean }>({ kind: "guessed", points: 0, teamFinished: false });
 
   // The word pool and its shuffled deck (every word once per lap, reshuffled when exhausted, no repeat
   // across a lap boundary) live in the shared hook, along with the teacher's own-words mode — see
@@ -180,9 +206,9 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
 
   useEffect(() => {
     if (!serializeStateRef) return;
-    serializeStateRef.current = (): RelaySnapshot => ({ teamIndex, slotIndexByTeam, wordsByTeam, peoplePerTeam, difficulty, customWords });
+    serializeStateRef.current = (): RelaySnapshot => ({ teamIndex, slotIndexByTeam, wordsByTeam, pointsByTeam, peoplePerTeam, difficulty, customWords });
     return () => { if (serializeStateRef) serializeStateRef.current = null; };
-  }, [serializeStateRef, teamIndex, slotIndexByTeam, wordsByTeam, peoplePerTeam, difficulty, customWords]);
+  }, [serializeStateRef, teamIndex, slotIndexByTeam, wordsByTeam, pointsByTeam, peoplePerTeam, difficulty, customWords]);
 
   // Every real team has its own hidden word at all times — the CPU never does (see cpuTurnEffect
   // below), so it's drawn from propTeams, not the CPU-augmented `teams`, to avoid burning a real
@@ -242,7 +268,7 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
   const questionsLeftFor = (teamI: number) => {
     const key = String(teams[teamI]?.id);
     if (isTeamFinished(key)) return 0;
-    return Math.max(0, QUESTIONS_PER_PERSON - (questionsUsedByTeam[key] ?? 0));
+    return Math.max(0, questionsForSlot(slotIndexByTeam[key] ?? 0) - (questionsUsedByTeam[key] ?? 0));
   };
 
   // --- Turn actions ---
@@ -299,20 +325,26 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
     let newSlot = prevSlot;
     let newUsed = questionsUsedByTeam[key] ?? 0;
     let swapped = false;
+    let exhausted = false;
+    const budget = questionsForSlot(prevSlot);
 
     if (guessed) {
-      updateScore(currentTeam.id, POINTS_PER_WORD);
+      // The guess happens during question (questions used so far + 1) — earlier = more points.
+      const points = guessPoints(newUsed + 1, budget);
+      updateScore(currentTeam.id, points);
       setWordsByTeam(prev => ({ ...prev, [currentTeam.id]: (prev[currentTeam.id] ?? 0) + 1 }));
+      setPointsByTeam(prev => ({ ...prev, [currentTeam.id]: (prev[currentTeam.id] ?? 0) + points }));
       playSound("relay");
       setRevealWord(teamWords[key] ?? "");
+      setRevealInfo({ kind: "guessed", points, teamFinished: prevSlot + 1 >= peoplePerTeam });
       newSlot = prevSlot + 1;
       newUsed = 0;
       swapped = true;
     } else {
       newUsed += 1;
-      // Ran out of this person's own 15 without guessing — a safety valve so one stuck word can't
+      // Ran out of this person's own share without guessing — a safety valve so one stuck word can't
       // stall this team's slot forever; the next teammate takes over instead.
-      if (newUsed >= QUESTIONS_PER_PERSON) { newSlot = prevSlot + 1; newUsed = 0; swapped = true; }
+      if (newUsed >= budget) { newSlot = prevSlot + 1; newUsed = 0; swapped = true; exhausted = true; }
     }
 
     const nextSlotIndexByTeam = { ...slotIndexByTeam, [key]: newSlot };
@@ -330,8 +362,17 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
     }
 
     if (guessed) { setPhase("reveal"); return; }
-    // A miss always hands off to the next team immediately, same round-robin as any other question
-    // — whether or not it also happened to exhaust this team's slot.
+    // A person running out of questions gets the same reveal beat a guess does (the word, plus
+    // "swap" or — for a team's last person — "everyone sit down"). Without it a team's final person
+    // just kept standing at the front while the game silently moved on without them. Skipped for the
+    // CPU, which has no one standing at the front and no real word to show.
+    if (exhausted && !isCpuTurn) {
+      setRevealWord(teamWords[key] ?? "");
+      setRevealInfo({ kind: "outOfQuestions", points: 0, teamFinished: newSlot >= peoplePerTeam });
+      setPhase("reveal");
+      return;
+    }
+    // An ordinary question hands off to the next team immediately, same round-robin as always.
     goToNextTeam(nextSlotIndexByTeam, nextNeedsReadyByTeam);
   };
 
@@ -375,9 +416,11 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
     const leftOut: Record<string, number> = {};
     const countOut: Record<string, number> = {};
     const queueOut: Record<string, string[]> = {};
+    const pointsOut: Record<string, number> = {};
     teams.forEach((t, i) => {
       const k = String(t.id);
       wordsOut[k] = wordsByTeam[t.id] ?? 0;
+      pointsOut[k] = pointsByTeam[t.id] ?? 0;
       leftOut[k] = phase === "final" ? 0 : questionsLeftFor(i);
       countOut[k] = (connectedByTeam[k] ?? []).length;
       queueOut[k] = rotatedDevices(k);
@@ -394,8 +437,13 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
       screenShowsWord,
       phoneCountByTeam: countOut,
       questionsLeftByTeam: leftOut,
-      questionsPerTeam: QUESTIONS_PER_PERSON,
+      questionsPerTeam: QUESTIONS_PER_PERSON * peoplePerTeam,
       wordsByTeam: wordsOut,
+      pointsByTeam: pointsOut,
+      revealKind: phase === "reveal" ? revealInfo.kind : undefined,
+      revealPoints: phase === "reveal" ? revealInfo.points : undefined,
+      revealTeamFinished: phase === "reveal" ? revealInfo.teamFinished : undefined,
+      allTeamsFinished,
       connectedTeamIds: Array.from(connectedTeamIds),
       ts: Date.now(),
     };
@@ -478,7 +526,7 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
 
   useEffect(() => {
     sendStateRef.current?.();
-  }, [phase, teamIndex, slotIndexByTeam, questionsUsedByTeam, teamWords, revealWord, connectedByTeam, askerByTeam, wordsByTeam]);
+  }, [phase, teamIndex, slotIndexByTeam, questionsUsedByTeam, teamWords, revealWord, revealInfo, connectedByTeam, askerByTeam, wordsByTeam, pointsByTeam]);
 
   useEffect(() => {
     if (phase === "final" && channelRef.current) {
@@ -544,13 +592,9 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
             <div style={{ fontWeight: "900", fontSize: "20px", marginBottom: "10px", color: "#5EEAD4" }}>Word Relay</div>
             <div style={{ fontSize: "15px", lineHeight: 1.7, opacity: 0.95 }}>
               {propTeams.length === 1 && peoplePerTeam === 1 ? "Your team has a hidden word. " : "Every team has its own hidden word. "}
-              <strong style={{ color: "#5EEAD4" }}>One person from each team comes to the front</strong> and asks yes/no questions to work out what it is — no peeking! Teams take turns asking <strong style={{ color: "#5EEAD4" }}>one question at a time</strong>, round-robin, so nobody's just standing around waiting.
+              <strong style={{ color: "#5EEAD4" }}>One person from each team comes to the front</strong> and asks yes/no questions to work it out — one question at a time, team by team.
               <br />
-              {inputMode === "phone"
-                ? "Everyone joins on their own phone. Teammates' phones show the word and answer; the asker's phone never does."
-                : "The teacher sees the word and answers each question, then taps whether they guessed it."}
-              <br />
-              Guess it — or use up your own <strong style={{ color: "#5EEAD4" }}>{QUESTIONS_PER_PERSON} questions</strong> without guessing — and <strong style={{ color: "#5EEAD4" }}>the next teammate swaps in</strong> with a brand new word, so every person on a team gets their own turn at the front. Each word is worth <strong style={{ color: "#5EEAD4" }}>{POINTS_PER_WORD} points</strong> — most words wins.
+              Guess it in as few questions as you can: up to <strong style={{ color: "#5EEAD4" }}>{MAX_POINTS} points</strong> for your 1st question, down to {MIN_POINTS} by your {QUESTIONS_PER_PERSON}th. Then the next teammate swaps in!
             </div>
           </div>
           <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "18px" }}>
@@ -700,12 +744,12 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
   }
 
   if (phase === "final") {
-    const ranking = denseRank(teams, t => (wordsByTeam[t.id] ?? 0) * POINTS_PER_WORD).sort((a, b) => b.value - a.value);
+    const ranking = denseRank(teams, t => pointsByTeam[t.id] ?? 0).sort((a, b) => b.value - a.value);
     const winners = ranking.filter(r => r.rank === 0);
     const isTie = winners.length > 1;
     const headline = isTie
-      ? `${winners.map(w => w.item.name).join(" & ")} tied for the most words guessed!`
-      : `${winners[0]?.item.name} guessed the most words!`;
+      ? `${winners.map(w => w.item.name).join(" & ")} tied for the most points!`
+      : `${winners[0]?.item.name} scored the most points!`;
     return (
       <div style={{ ...arenaStyle, textAlign: "center" }}>
         {STYLE_TAG}
@@ -741,9 +785,10 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
         return (
           <div key={t.id} style={{ background: t.color.dark, border: `2px solid ${t.id === currentTeam.id ? "#5EEAD4" : "#1A1A2E"}`, borderRadius: "12px", padding: "8px 14px", color: "white", fontSize: "12px", fontWeight: "800", textAlign: "center", opacity: finished ? 0.6 : 1 }}>
             <div><TeamIcon team={t} color="white" /> {t.name}</div>
-            <div style={{ color: "#5EEAD4", fontSize: "14px" }}>{wordsByTeam[t.id] ?? 0} words</div>
-            {peoplePerTeam > 1 && <div style={{ opacity: 0.85, fontWeight: "700" }}>Person {Math.min((slotIndexByTeam[key] ?? 0) + 1, peoplePerTeam)} of {peoplePerTeam}</div>}
-            <div style={{ opacity: 0.8, fontWeight: "700" }}>{finished ? "Done" : `${questionsLeftFor(i)} questions left`}</div>
+            <div style={{ color: "#5EEAD4", fontSize: "14px" }}>{pointsByTeam[t.id] ?? 0} pts</div>
+            <div style={{ opacity: 0.85, fontWeight: "700" }}>{wordsByTeam[t.id] ?? 0} words</div>
+            {peoplePerTeam > 1 && !finished && <div style={{ opacity: 0.85, fontWeight: "700" }}>Person {Math.min((slotIndexByTeam[key] ?? 0) + 1, peoplePerTeam)} of {peoplePerTeam}</div>}
+            <div style={{ opacity: 0.8, fontWeight: "700" }}>{finished ? "Finished — sitting down" : `${questionsLeftFor(i)} questions left`}</div>
           </div>
         );
       })}
@@ -754,7 +799,10 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
     ? `Asker: phone ${teamDevices.indexOf(askerDeviceId) + 1} of ${teamDevices.length}`
     : null;
   const currentSlotNumber = Math.min((slotIndexByTeam[currentKey] ?? 0) + 1, peoplePerTeam);
-  const currentQuestionNumber = Math.min((questionsUsedByTeam[currentKey] ?? 0) + 1, QUESTIONS_PER_PERSON);
+  const currentBudget = questionsForSlot(slotIndexByTeam[currentKey] ?? 0);
+  const currentQuestionNumber = Math.min((questionsUsedByTeam[currentKey] ?? 0) + 1, Math.max(currentBudget, 1));
+  // What a correct guess would earn right now — shown live on the button so the stakes are visible.
+  const pointsIfGuessedNow = currentBudget > 0 ? guessPoints(currentQuestionNumber, currentBudget) : MIN_POINTS;
 
   return (
     <div style={arenaStyle}>
@@ -774,7 +822,9 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
         <div style={{ background: "#134E4A", border: "3px solid #1A1A2E", borderRadius: "14px", padding: "14px 16px", marginBottom: "16px", textAlign: "center", color: "white", boxShadow: "4px 4px 0 #1A1A2E" }}>
           <div style={{ fontWeight: "900", fontSize: "18px" }}><TeamIcon team={currentTeam} /> {currentTeam.name}'s turn</div>
           <div style={{ fontWeight: "800", fontSize: "13px", opacity: 0.9, marginTop: "4px" }}>
-            {peoplePerTeam > 1 ? `Person ${currentSlotNumber} of ${peoplePerTeam} · ` : ""}Question {currentQuestionNumber} of {QUESTIONS_PER_PERSON}{askerLabel ? ` · ${askerLabel}` : ""}
+            {isTeamFinished(currentKey)
+              ? "Finished — everyone sits down"
+              : <>{peoplePerTeam > 1 ? `Person ${currentSlotNumber} of ${peoplePerTeam} · ` : ""}Question {currentQuestionNumber} of {currentBudget}{askerLabel ? ` · ${askerLabel}` : ""}</>}
           </div>
         </div>
 
@@ -811,8 +861,11 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
               </div>
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(160px,1fr))", gap: "12px" }}>
-              <button onClick={markGuessed} className="rl-btn" style={bigBtn("#22C55E")}>Guessed it! +{POINTS_PER_WORD}</button>
-              <button onClick={markMissed} className="rl-btn" style={bigBtn("rgba(0,0,0,0.3)", "#5EEAD4")}>Not yet →</button>
+              <button onClick={markGuessed} className="rl-btn" style={bigBtn("#22C55E")}>Guessed it! +{pointsIfGuessedNow}</button>
+              <button onClick={markMissed} className="rl-btn" style={bigBtn("rgba(0,0,0,0.3)", "#5EEAD4")}>Question asked → next team</button>
+            </div>
+            <div style={{ textAlign: "center", marginTop: "10px", color: "#99F6E4", fontSize: "12px", fontWeight: "700", lineHeight: 1.5 }}>
+              Not guessed yet? Tap "Question asked" — it uses up one of their questions and passes the turn. The sooner they guess, the more points.
             </div>
             <div style={{ textAlign: "center", marginTop: "10px" }}>
               <button onClick={changeWord} style={{ background: "none", border: "none", color: "#99F6E499", fontSize: "12px", fontWeight: "700", cursor: "pointer", textDecoration: "underline" }}>Change this word</button>
@@ -831,21 +884,31 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
         {phase === "reveal" && isCpuTurn && (
           <div style={{ background: "#022C22", border: "4px solid #6B7280", borderRadius: "22px", padding: "28px 18px", textAlign: "center", boxShadow: "6px 6px 0 #1A1A2E" }}>
             <div style={{ fontSize: "40px", marginBottom: "6px" }}>🤖</div>
-            <div style={{ color: "#5EEAD4", fontWeight: "800", fontSize: "13px", textTransform: "uppercase" }}>CPU guessed it! +{POINTS_PER_WORD}</div>
+            <div style={{ color: "#5EEAD4", fontWeight: "800", fontSize: "13px", textTransform: "uppercase" }}>CPU guessed it! +{revealInfo.points}</div>
           </div>
         )}
 
-        {phase === "reveal" && !isCpuTurn && (
-          <div style={{ background: "#022C22", border: "4px solid #22C55E", borderRadius: "22px", padding: "28px 18px", textAlign: "center", boxShadow: "6px 6px 0 #1A1A2E" }}>
-            <div style={{ fontSize: "40px", marginBottom: "6px" }}>🎉</div>
-            <div style={{ color: "#5EEAD4", fontWeight: "800", fontSize: "13px", textTransform: "uppercase", marginBottom: "8px" }}>{currentTeam.name} guessed it! +{POINTS_PER_WORD}</div>
+        {phase === "reveal" && !isCpuTurn && (() => {
+          const guessedIt = revealInfo.kind === "guessed";
+          return (
+          <div style={{ background: "#022C22", border: `4px solid ${guessedIt ? "#22C55E" : "#F59E0B"}`, borderRadius: "22px", padding: "28px 18px", textAlign: "center", boxShadow: "6px 6px 0 #1A1A2E" }}>
+            <div style={{ fontSize: "40px", marginBottom: "6px" }}>{guessedIt ? "🎉" : "⏱️"}</div>
+            <div style={{ color: "#5EEAD4", fontWeight: "800", fontSize: "13px", textTransform: "uppercase", marginBottom: "8px" }}>
+              {guessedIt ? `${currentTeam.name} guessed it! +${revealInfo.points}` : `${currentTeam.name} ran out of questions — the word was:`}
+            </div>
             {screenShowsWord && (
               <div style={{ fontWeight: "900", fontSize: "clamp(32px,8vw,60px)", color: "#F0FDFA", lineHeight: 1.1, marginBottom: "10px", overflowWrap: "anywhere" }}>{revealWord}</div>
             )}
+            {/* A team's last person just finished: nobody is left to swap in, so the team is DONE —
+                tell them to sit down instead of promising "someone new takes over". */}
             <div style={{ color: "#CCFBF1", fontSize: "16px", fontWeight: "800", marginBottom: "18px" }}>
-              {inputMode === "phone" && askerDeviceId
-                ? "Time to swap — the next phone in line takes over next turn!"
-                : `Time to swap — someone new from ${currentTeam.name} takes over next turn!`}
+              {revealInfo.teamFinished
+                ? (allTeamsFinished
+                    ? "That was the last turn — every team is finished!"
+                    : `${currentTeam.name} is finished! Everyone on ${currentTeam.name}: sit down and wait while the other teams finish.`)
+                : inputMode === "phone" && askerDeviceId
+                  ? "Time to swap — the next phone in line takes over next turn!"
+                  : `Time to swap — someone new from ${currentTeam.name} takes over next turn!`}
             </div>
             {screenShowsWord ? (
               <button onClick={continueFromReveal} className="rl-btn" style={bigBtn("#0D9488")}>{allTeamsFinished ? "See final results" : "Next team →"}</button>
@@ -853,7 +916,8 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
               <div style={{ color: "#99F6E4", fontSize: "13px", fontWeight: "600" }}>A teammate taps "Next team" on their phone to keep going.</div>
             )}
           </div>
-        )}
+          );
+        })()}
 
         {scoreStrip}
       </div>
