@@ -1832,12 +1832,23 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(240px,1fr))", gap: "16px" }}>
             {Array.from({ length: numTeams }).map((_, i) => {
               const color = TEAM_COLORS[teamColors[i] ?? i];
+              // Same name match (trimmed, case-insensitive) handleSetup itself uses to decide
+              // whether this slot keeps its points or starts over at 0 — shown live, before the
+              // teacher ever commits to it, so a name that's about to stop matching (a typo, an
+              // accidental edit, a roster tap that swapped in a differently-cased copy) is visible
+              // right here instead of silently discovered later as "my team lost its points."
+              const carriedOverScore = teams.find(t => t.name.trim().toLowerCase() === teamNames[i]?.trim().toLowerCase())?.score ?? 0;
 
               return (
                 <div key={i} style={{ border: `3px solid ${color.bg}`, borderRadius: "14px", overflow: "hidden", background: "white" }}>
                   <div style={{ background: color.bg, padding: "10px 12px", display: "flex", alignItems: "center", gap: "8px" }}>
                     <TeamIcon team={{ mascot: teamMascots[i], color }} size={18} color="white" />
                     <span style={{ color: "white", fontWeight: "800", fontSize: "14px" }}>{color.name}</span>
+                    {carriedOverScore > 0 && (
+                      <span style={{ marginLeft: "auto", color: "white", background: "rgba(0,0,0,0.22)", borderRadius: "999px", padding: "3px 10px", fontSize: "11.5px", fontWeight: "800", whiteSpace: "nowrap" }}>
+                        Keeps {carriedOverScore} pt{carriedOverScore === 1 ? "" : "s"}
+                      </span>
+                    )}
                   </div>
                   <input
                     value={teamNames[i]}
