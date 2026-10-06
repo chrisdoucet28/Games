@@ -283,6 +283,21 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
     ],
   },
 
+  sports_do_go_play: {
+    title: "My Sports Week",
+    passage: [
+      "I love sport! On Mondays I play basketball at school with my friends.",
+      "On Wednesdays I do judo at the sports club. My coach is very good.",
+      "On Saturdays my dad and I go swimming. The swimming pool is near our house.",
+      "My sister doesn't play sports, but she goes running every morning.",
+    ],
+    questions: [
+      { type: "reading comprehension", question: "What sport does the writer play on Mondays?", answer: "Basketball." },
+      { type: "reading comprehension", question: "When does the writer do judo?", answer: "On Wednesdays." },
+      { type: "reading comprehension", question: "What does the writer's sister do every morning?", answer: "She goes running." },
+    ],
+  },
+
   hobbies: {
     title: "Free Time Forum",
     audioUrl: `${MEDIA_BASE}/audio/real-world/hobbies.mp3`,

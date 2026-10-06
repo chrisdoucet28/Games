@@ -6749,6 +6749,105 @@ export const LESSONS: Record<string, Lesson> = {
     ],
   },
 
+  sports_do_go_play: {
+    title: "Sports (do / go / play)",
+    intro: "In English we use three different verbs with sports: play, go and do. You cannot choose them freely — each sport has its own verb. This lesson gives you a simple rule to choose the right one, the sport words you need, and how to make negatives and questions.",
+    sections: [
+      {
+        heading: "The quick rule",
+        body: [
+          "PLAY → sports with a ball, and team games or games against an opponent.",
+          "GO → activities that end in -ing (swimming, skiing, cycling).",
+          "DO → individual activities, exercise and martial arts (yoga, karate, gymnastics).",
+        ],
+        examples: [
+          "I **play** football.",
+          "We **go** swimming.",
+          "She **does** yoga.",
+        ],
+      },
+      {
+        heading: "PLAY + ball sports and team games",
+        body: [
+          "play football, basketball, tennis, golf, volleyball, baseball, rugby, hockey, badminton, table tennis, cricket.",
+          "There is no 'to' or 'the' before the sport: play football (not 'play the football').",
+        ],
+        examples: [
+          "My brother **plays basketball** at school.",
+          "They **play tennis** at the club.",
+          "I **play table tennis** with my uncle.",
+        ],
+      },
+      {
+        heading: "GO + an -ing activity",
+        body: [
+          "go swimming, running, cycling, skiing, surfing, hiking, climbing, fishing, sailing, skating.",
+          "Use 'go' + the -ing word. Do not add 'to' (go swimming, not 'go to swim').",
+        ],
+        examples: [
+          "We **go swimming** every Friday.",
+          "My parents **go skiing** every winter.",
+          "He **goes cycling** on Sundays.",
+        ],
+      },
+      {
+        heading: "DO + individual activities, exercise and martial arts",
+        body: [
+          "do yoga, karate, judo, gymnastics, aerobics, pilates, athletics.",
+          "These are usually activities without a ball and without a team.",
+        ],
+        examples: [
+          "She **does yoga** in the morning.",
+          "My brother **does karate** on Tuesdays.",
+          "We **do aerobics** at the gym.",
+        ],
+      },
+      {
+        heading: "he / she / it: plays, goes, does",
+        body: [
+          "With he, she, it (or one person), add -s or -es: play → plays, go → goes, do → does.",
+          "With I, you, we, they, use the base form: play, go, do.",
+        ],
+        examples: [
+          "She **plays** tennis. / They **play** tennis.",
+          "He **goes** running. / We **go** running.",
+          "My sister **does** judo. / I **do** judo.",
+        ],
+      },
+      {
+        heading: "Negatives and questions",
+        body: [
+          "Negative: don't (I, you, we, they) or doesn't (he, she, it) + the base verb: play, go or do.",
+          "Question: Do or Does + subject + base verb. To ask which sport, use What sport + do/does + subject + verb?",
+        ],
+        examples: [
+          "I **don't play** golf. She **doesn't go** running.",
+          "**Do** you **play** volleyball? **Does** he **do** judo?",
+          "**What sport do** you **play**? **How often does** she **go** climbing?",
+        ],
+      },
+      {
+        heading: "Sport words you need",
+        body: [
+          "Places: a pitch (football, rugby), a court (tennis, basketball), a swimming pool, a gym.",
+          "People and things: a team, a player, a coach, a match, a ball, a racket.",
+        ],
+        examples: [
+          "We play football on the **pitch**.",
+          "There is a **swimming pool** near my school.",
+          "Our **coach** is very friendly.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ I do football on Saturdays. → ✅ I play football on Saturdays. (ball games use 'play')",
+      "❌ We play swimming every week. → ✅ We go swimming every week. (activities ending in -ing use 'go')",
+      "❌ She plays yoga in the morning. → ✅ She does yoga in the morning. (individual activities use 'do')",
+      "❌ They go to swim on Sundays. → ✅ They go swimming on Sundays. ('go' + -ing, no 'to')",
+      "❌ Does she goes swimming? → ✅ Does she go swimming? (after do/does, use the base verb)",
+    ],
+  },
+
   hobbies: {
     title: "Hobbies & Free Time",
     intro: "Talking about hobbies relies on two patterns: 'go' + gerund for outdoor/sport activities, and verbs like 'love/enjoy/be interested in' followed by a gerund.",

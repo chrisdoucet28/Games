@@ -124,6 +124,20 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
     ],
   },
 
+  sports_do_go_play: {
+    kind: "paragraphCloze",
+    segments: [
+      "My family loves sport! My brother ", { blank: "plays", base: "football (play / go / do)" },
+      " football every Saturday. My sister ", { blank: "does", base: "karate (play / go / do)" },
+      " karate after school. My parents ", { blank: "go", base: "swimming (play / go / do)" },
+      " swimming on Sundays. I ", { blank: "play", base: "basketball (play / go / do)" },
+      " basketball at school, and in winter we all ", { blank: "go", base: "skiing (play / go / do)" },
+      " skiing in the mountains. My mum ", { blank: "does", base: "yoga (play / go / do)" },
+      " yoga at home, but she ", { blank: "doesn't play", base: "golf (not / play / go / do)" },
+      " golf. What sport ", { blank: "do", base: "do / does" }, " you play?",
+    ],
+  },
+
   hobbies: {
     kind: "matching",
     pairs: [
