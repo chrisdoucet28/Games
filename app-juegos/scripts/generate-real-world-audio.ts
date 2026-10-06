@@ -51,6 +51,7 @@ const MALE_VOICE = "CwhRBWXzGAHq8TQ4Fs17";
 const LOCKED_VOICE: Record<string, string> = {
   present_simple: FEMALE_VOICE, // "Hi, I'm Sofia!"
   what_do_you_do: MALE_VOICE,   // "Hi, I'm Carlos."
+  to_be: FEMALE_VOICE,          // "I am Sara"
 };
 
 // Every other topic alternates female/male by position in REAL_WORLD_READINGS — deterministic (a

@@ -346,6 +346,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   numbers_and_colours: {
     title: "My Bedroom",
+    audioUrl: `${MEDIA_BASE}/audio/real-world/numbers_and_colours.mp3`,
     passage: [
       "This is my bedroom. It is small, but I love it.",
       "I have two windows and one door. The walls are light blue.",
@@ -699,6 +700,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   equatives_non_equatives: {
     title: "Choosing a Gym",
+    audioUrl: `${MEDIA_BASE}/audio/real-world/equatives_non_equatives.mp3`,
     passage: [
       "I visited two gyms today! Gym A is as big as Gym B, but it isn't as modern.",
       "Gym B has newer machines, and it's less crowded than Gym A in the evening. The classes at Gym A are just as good, though — my friend says the teachers are friendlier.",
@@ -1795,6 +1797,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   causative_verbs: {
     title: "Renovating My Kitchen",
+    audioUrl: `${MEDIA_BASE}/audio/real-world/causative_verbs.mp3`,
     passage: [
       "When we bought this house, I promised myself I wouldn't rush into any big projects. That plan lasted about two months, until the kitchen ceiling started leaking and I had no choice but to get it fixed properly.",
       "I decided to have the whole kitchen redone rather than just patch the ceiling, which in hindsight was either a brilliant idea or a terrible one — I still haven't decided which. I had an electrician rewire the whole room first, since the old wiring wasn't safe. Then I got a plumber to move the sink to the other wall, which meant having the floor pulled up too.",
@@ -1812,6 +1815,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   embedded_questions: {
     title: "Interview: Starting a Small Business",
+    audioUrl: `${MEDIA_BASE}/audio/real-world/embedded_questions.mp3`,
     passage: [
       "Interviewer: Thanks for joining us. Could you tell me how you first got the idea for the business?",
       "Guest: Of course. I was working in a café and I kept noticing how many people asked if we sold gluten-free bread. I started wondering whether there was actually a real gap in the market, so I did some research.",
@@ -1835,6 +1839,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   future_in_past: {
     title: "The Plan That Didn't Happen",
+    audioUrl: `${MEDIA_BASE}/audio/real-world/future_in_past.mp3`,
     passage: [
       "Ten years ago, I was completely certain about my future. I was going to move to Berlin, learn German properly, and work as a translator. I'd already told everyone at university that I would be leaving the country within a year of graduating.",
       "My best friend, who was going to travel with me, backed out first — she'd met someone and decided she was going to stay closer to home instead. I told myself it wouldn't change my plans, but looking back, it clearly shook my confidence more than I admitted at the time.",
@@ -1853,6 +1858,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   third_conditional: {
     title: "Looking Back: My Career Choices",
+    audioUrl: `${MEDIA_BASE}/audio/real-world/third_conditional.mp3`,
     passage: [
       "People often ask if I regret becoming a teacher instead of pursuing engineering, which is what I originally studied. Honestly, the answer changes depending on the day, but mostly, no — I don't think I would have been happier the other way.",
       "If I had finished my engineering degree, I would probably have taken a graduate job at the firm where I did my internship. If I'd done that, I would have earned considerably more money in my twenties than I did as a trainee teacher. There's no getting around that fact.",
@@ -2021,6 +2027,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   future_perfect: {
     title: "By 2050: A Look at What's Coming",
+    audioUrl: `${MEDIA_BASE}/audio/real-world/future_perfect.mp3`,
     passage: [
       "Predicting the future is a famously unreliable business, but scientists across several fields are willing to make cautious estimates about where things are headed over the next few decades — and by many accounts, the changes will have been dramatic.",
       "By 2040, according to most energy researchers, the majority of new cars sold worldwide will have switched to electric power, and several major cities will have banned petrol vehicles from their centres entirely. By that same point, renewable sources will likely have overtaken fossil fuels as the world's primary source of electricity for the first time in over a century.",
@@ -2037,6 +2044,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   present_perfect_continuous: {
     title: "Six Months of Learning to Run",
+    audioUrl: `${MEDIA_BASE}/audio/real-world/present_perfect_continuous.mp3`,
     passage: [
       "I've been trying to become a runner, on and off, for about six years. I say \"trying\" deliberately, because until recently I hadn't been sticking with it for longer than a few weeks at a time before some excuse — weather, tiredness, a vague sense that I simply wasn't built for it — ended the attempt.",
       "This time has been different. I've been getting up at six every morning for the past six months, which is longer than I've been doing almost anything consistently in my adult life. My knees have been aching most weeks, and I've definitely been complaining about it to anyone who'll listen, but I haven't stopped, which surprises me more than anyone.",
@@ -2070,6 +2078,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   wish_if_only: {
     title: "Advice Column: Is It Too Late to Change Careers?",
+    audioUrl: `${MEDIA_BASE}/audio/real-world/wish_if_only.mp3`,
     passage: [
       "Dear columnist, I'm thirty-eight and I often think, if only I'd studied medicine instead of business, I'd be doing work that actually feels meaningful. I wish I'd made a braver choice at eighteen. Is it too late to start again? — Regretful in Leeds",
       "Dear Regretful, I wish I could tell you there's a version of this decision without loss, but there isn't, and I won't pretend otherwise. If only every career change came without risk, we'd all make them constantly. It doesn't, and that's precisely why the question matters so much to you now.",
