@@ -508,21 +508,24 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
     pushBanner(<><Icon name="warning" size={14} /> {team?.name ?? "That"}'s sentence is now a bounty — {formatValue(value)}!</>, "wrong");
   };
 
-  // Resolves the CPU's own round entry after a short delay — the exact same resolveRoundCorrect/
-  // resolveRoundWrong a human's Correct/Wrong click already uses, just triggered by a hidden dice
-  // roll instead. `roundEntries` is deliberately NOT a dependency here (bug fixed 2026-10): with it
-  // in the array, every OTHER team submitting their own entry this round (an everyday event, nothing
-  // to do with the CPU) re-ran this effect, whose cleanup cleared the CPU's pending timer; the ref
-  // guard below then saw this round as "already scheduled" and bailed out without setting a new one
-  // — so the CPU's own entry silently never resolved and the round could never complete ("waited
-  // over 10 minutes for the CPU to submit its writing, nothing happened"). roundNumber already is
-  // the right per-round trigger, and the ref still prevents double-scheduling within one round.
+  // Derived fresh on every render, same reasoning as `cpuAttemptingBountyId` further down — this
+  // (not the raw `roundEntries` array) is what the effect below actually depends on. The previous
+  // fix (2026-10) dropped `roundEntries` from the dependency array to stop every OTHER team's
+  // submission from tearing down the CPU's pending timer, but that left a real gap: on the very
+  // first "playing" render, this effect and the seeding effect above both fire in the same commit,
+  // and this effect's closure still sees the OLD (empty) `roundEntries` from before that seed took
+  // effect — with the array itself no longer a dependency, nothing ever told this effect the CPU's
+  // entry had actually appeared, so its timer never got scheduled and the round could never
+  // complete ("the CPU never submits its text, we wait forever" — a 100%-repro case, not the
+  // original bug's intermittent one). A plain boolean recomputed every render flips false -> true
+  // the instant the CPU's entry exists and is unresolved, which IS a real dependency change React
+  // picks up — while still staying exactly true/unchanged (no rerun, no teardown) when some OTHER
+  // team's entry resolves, since that never touches the CPU's own entry.
+  const cpuEntryPending = isSolo && !!cpuRef.current && roundEntries.some(e => e.teamId === cpuRef.current!.id && !e.resolved);
   const cpuEntryScheduledRoundRef = useRef<number | null>(null);
   useEffect(() => {
-    if (!isSolo || phase !== "playing" || !cpuRef.current) return;
+    if (!isSolo || phase !== "playing" || !cpuRef.current || !cpuEntryPending) return;
     const cpuId = cpuRef.current.id;
-    const entry = roundEntries.find(e => e.teamId === cpuId);
-    if (!entry || entry.resolved) return;
     if (cpuEntryScheduledRoundRef.current === roundNumber) return;
     cpuEntryScheduledRoundRef.current = roundNumber;
     const delay = CPU_ENTRY_DELAY_MS.min + Math.random() * (CPU_ENTRY_DELAY_MS.max - CPU_ENTRY_DELAY_MS.min);
@@ -547,7 +550,7 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
     }, delay);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isSolo, phase, roundNumber, difficulty]);
+  }, [isSolo, phase, roundNumber, difficulty, cpuEntryPending]);
 
   // Guarded inside the functional updater (not a separate read beforehand) — a screen click racing
   // a phone broadcast for the same bounty can't both succeed, same idiom as Order Up's claimTicket.
