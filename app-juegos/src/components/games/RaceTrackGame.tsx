@@ -211,7 +211,7 @@ function validateRaceSnapshot(raw: unknown, teamIds: (string | number)[]): RaceS
   };
 }
 
-export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState, presetPhoneSession }: GameProps) {
+export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState, presetPhoneSession, onRequestPhoneSession }: GameProps) {
   const resumed = useRef(validateRaceSnapshot(initialGameState, teams.map(t => t.id))).current;
   // A resumed race skips the intro and drops straight into a fresh task for the group.
   const [phase, setPhase] = useState<Phase>(() => resumed ? "task" : "intro");
@@ -646,11 +646,24 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
     return () => { if (serializeStateRef) serializeStateRef.current = null; };
   }, [serializeStateRef, raceTeams, track, difficulty]);
 
+  const [sessionIsClassLevel, setSessionIsClassLevel] = useState(!!presetPhoneSession);
+
   const handlePickPhoneMode = () => {
     setInputMode("phone");
-    setSessionCode(generateSessionCode());
+    if (onRequestPhoneSession) {
+      setSessionCode(onRequestPhoneSession());
+      setSessionIsClassLevel(true);
+    } else {
+      setSessionCode(generateSessionCode());
+      setSessionIsClassLevel(false);
+    }
     setIntroStep("qr");
   };
+
+  const buildJoinUrl = (code: string) =>
+    sessionIsClassLevel
+      ? `${window.location.origin}${window.location.pathname}?classJoin=${code}`
+      : `${window.location.origin}${window.location.pathname}?join=${code}&game=racetrack`;
 
   const handlePickScreenMode = () => {
     setInputMode("screen");
@@ -813,7 +826,7 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
             )}
 
             {introStep === "qr" && sessionCode && (() => {
-              const joinUrl = `${window.location.origin}${window.location.pathname}?join=${sessionCode}&game=racetrack`;
+              const joinUrl = buildJoinUrl(sessionCode);
               return (
                 <PhoneJoinPanel
                   sessionCode={sessionCode} joinUrl={joinUrl} teams={teams} connectedTeamIds={connectedTeamIds}
@@ -898,7 +911,7 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
           only one pointing at the right (class, not per-game) join URL. */}
       {inputMode === "phone" && sessionCode && !presetPhoneSession && (
         <PhoneReconnectBadge
-          sessionCode={sessionCode} joinUrl={`${window.location.origin}${window.location.pathname}?join=${sessionCode}&game=racetrack`}
+          sessionCode={sessionCode} joinUrl={buildJoinUrl(sessionCode)}
           teams={teams} connectedTeamIds={connectedTeamIds}
           accent="#F87171" panelBg="linear-gradient(160deg,#1E293B,#0B0F17)" borderColor="#EF444466"
         />

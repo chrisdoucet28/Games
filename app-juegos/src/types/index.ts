@@ -121,6 +121,13 @@ export interface TeamColor {
     // and skip its own "Play on Screen vs Play on Phones" picker UI entirely (the class-level QR
     // already covered joining; this game's own intro screen has nothing left to do).
     presetPhoneSession?: { code: string };
+    // Called when the teacher picks "Play on Phones" with no Class Check-In already running (i.e.
+    // presetPhoneSession is unset) — starts one on the spot and returns its code, so THIS game's QR
+    // is already the class-level one and every later game in the sitting inherits it for free, no
+    // second scan needed. Idempotent: a second call elsewhere in the same sitting just returns the
+    // same code. Optional/undefined only in a context with no class-session concept at all, in which
+    // case a game falls back to its own one-off code exactly as before this existed.
+    onRequestPhoneSession?: () => string;
   }
 
   // A teacher's own personalization — separate from auth.users, which only holds login info.

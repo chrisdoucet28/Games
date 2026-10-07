@@ -1060,22 +1060,10 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     setClassConnectedTeamIds(new Set());
   };
 
-  // Manual activation only (per the teacher's own explicit choice) — nothing about Class Check-In
-  // exists until this is clicked. Presence sync mirrors every other game's own channel-open effect
-  // (see e.g. OrderUpGame.tsx), just for the class-level roster instead of one game's tickets.
-  const handleStartClassCheckIn = () => {
-    const code = generateSessionCode();
-    setClassSessionCode(code);
-    const channel = openClassSessionChannel(code);
-    classChannelRef.current = channel;
-    channel.on("presence", { event: "sync" }, () => {
-      const presenceState = channel.presenceState<{ teamId: string | number }>();
-      const ids = new Set<string | number>();
-      Object.values(presenceState).forEach(entries => entries.forEach(entry => ids.add(entry.teamId)));
-      setClassConnectedTeamIds(ids);
-    });
-    channel.subscribe();
-  };
+  // The explicit "Start Class Check-In" button — kept as its own name since that's what the button
+  // calls, but the real logic now lives in ensurePhoneSession below (shared with the implicit path:
+  // a game asking for a phone session on its own, see onRequestPhoneSession).
+  const handleStartClassCheckIn = () => ensurePhoneSession();
 
   // A persistent, single floating badge for the whole class-linked sitting — shown on every
   // screen a class session realistically spans (topic-select, game-select, game, results) EXCEPT
@@ -1146,6 +1134,36 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
   const broadcastClassActiveGame = (gameId: string | null) => {
     classActiveGameRef.current = gameId;
     sendClassSessionState();
+  };
+
+  // Starts (or, if already running, just returns) the class-level session — the single mechanism
+  // behind both "Start Class Check-In" and a game's own "Play on Phones" picking up a class-level
+  // code on its own the first time it's used. Teacher feedback: switching from Race Track straight
+  // into Bounty Board made students rescan a second QR, because without this, each game only ever
+  // generated its OWN one-off code — Class Check-In (the thing that already makes a checked-in
+  // phone follow the teacher from game to game with no rescanning) only ever started if the teacher
+  // remembered to tap that button BEFORE any student scanned anything. Idempotent (returns the
+  // existing code rather than generating a second one) so it's always safe to call from a game that
+  // doesn't know whether Class Check-In already happened elsewhere.
+  const ensurePhoneSession = (): string => {
+    if (classSessionCode) return classSessionCode;
+    const code = generateSessionCode();
+    setClassSessionCode(code);
+    const channel = openClassSessionChannel(code);
+    classChannelRef.current = channel;
+    channel.on("presence", { event: "sync" }, () => {
+      const presenceState = channel.presenceState<{ teamId: string | number }>();
+      const ids = new Set<string | number>();
+      Object.values(presenceState).forEach(entries => entries.forEach(entry => ids.add(entry.teamId)));
+      setClassConnectedTeamIds(ids);
+    });
+    channel.subscribe();
+    // Called mid-game (not just from the pre-game "Start Class Check-In" button), so the usual
+    // startGame-time broadcast already ran and no-opped against a still-null classSessionCode —
+    // this is what tells a phone that just landed on ClassJoinScreen which game to actually open.
+    classActiveGameRef.current = selectedGame?.id ?? null;
+    sendClassSessionState();
+    return code;
   };
 
   const startGame = async (mode: GameMode) => {
@@ -2198,23 +2216,23 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
               fallback={<GameCrashFallback name={selectedGame.name} message="We've been notified. Your teams and scores are still safe — pick a game to keep going." buttonLabel="Back to Choose a Game" onBack={() => setScreen("game-select")} />}
             >
             <Suspense fallback={<GameLoadingFallback name={selectedGame.name} />}>
-              {selectedGame.id === "auction" && <AuctionGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} presetPhoneSession={classSessionCode ? { code: classSessionCode } : undefined} />}
+              {selectedGame.id === "auction" && <AuctionGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} presetPhoneSession={classSessionCode ? { code: classSessionCode } : undefined} onRequestPhoneSession={ensurePhoneSession} />}
               {selectedGame.id === "minefield" && <MinefieldGame questions={[]} gridData={minefieldGridData} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-              {selectedGame.id === "hotseat" && <HotSeatGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} presetPhoneSession={classSessionCode ? { code: classSessionCode } : undefined} />}
-              {selectedGame.id === "relay" && <RelayGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} presetPhoneSession={classSessionCode ? { code: classSessionCode } : undefined} />}
-              {selectedGame.id === "spy" && <SpyAmongUsGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} presetPhoneSession={classSessionCode ? { code: classSessionCode } : undefined} />}
+              {selectedGame.id === "hotseat" && <HotSeatGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} presetPhoneSession={classSessionCode ? { code: classSessionCode } : undefined} onRequestPhoneSession={ensurePhoneSession} />}
+              {selectedGame.id === "relay" && <RelayGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} presetPhoneSession={classSessionCode ? { code: classSessionCode } : undefined} onRequestPhoneSession={ensurePhoneSession} />}
+              {selectedGame.id === "spy" && <SpyAmongUsGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} presetPhoneSession={classSessionCode ? { code: classSessionCode } : undefined} onRequestPhoneSession={ensurePhoneSession} />}
               {selectedGame.id === "battleship" && <BattleshipGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
               {selectedGame.id === "vault" && <VaultHeistGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
               {selectedGame.id === "cards" && <CardShuffleGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
               {selectedGame.id === "castle" && <CastleGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-              {selectedGame.id === "hill" && <KingOfHillGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} presetPhoneSession={classSessionCode ? { code: classSessionCode } : undefined} />}
+              {selectedGame.id === "hill" && <KingOfHillGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} presetPhoneSession={classSessionCode ? { code: classSessionCode } : undefined} onRequestPhoneSession={ensurePhoneSession} />}
               {selectedGame.id === "hotpotato" && <HotPotatoGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} level={hotPotatoLevel} />}
-              {selectedGame.id === "racetrack" && <RaceTrackGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} presetPhoneSession={classSessionCode ? { code: classSessionCode } : undefined} />}
-              {selectedGame.id === "whack" && <WordWhackGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} presetPhoneSession={classSessionCode ? { code: classSessionCode } : undefined} />}
+              {selectedGame.id === "racetrack" && <RaceTrackGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} presetPhoneSession={classSessionCode ? { code: classSessionCode } : undefined} onRequestPhoneSession={ensurePhoneSession} />}
+              {selectedGame.id === "whack" && <WordWhackGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} presetPhoneSession={classSessionCode ? { code: classSessionCode } : undefined} onRequestPhoneSession={ensurePhoneSession} />}
               {selectedGame.id === "rocket" && <RocketFuelGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
               {selectedGame.id === "zombie" && <ZombieSiegeGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} paused={paused} onTogglePause={() => setPaused(p => !p)} />}
-              {selectedGame.id === "orderup" && <OrderUpGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} level={orderUpLevel} paused={paused} onTogglePause={() => setPaused(p => !p)} presetPhoneSession={classSessionCode ? { code: classSessionCode } : undefined} />}
-              {selectedGame.id === "bounty" && <BountyBoardGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} presetPhoneSession={classSessionCode ? { code: classSessionCode } : undefined} />}
+              {selectedGame.id === "orderup" && <OrderUpGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} level={orderUpLevel} paused={paused} onTogglePause={() => setPaused(p => !p)} presetPhoneSession={classSessionCode ? { code: classSessionCode } : undefined} onRequestPhoneSession={ensurePhoneSession} />}
+              {selectedGame.id === "bounty" && <BountyBoardGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} presetPhoneSession={classSessionCode ? { code: classSessionCode } : undefined} onRequestPhoneSession={ensurePhoneSession} />}
             </Suspense>
             </Sentry.ErrorBoundary>
           </div>

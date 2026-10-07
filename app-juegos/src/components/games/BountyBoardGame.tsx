@@ -373,7 +373,7 @@ function validateBountyBoardSnapshot(raw: unknown): BountyBoardSnapshot | undefi
   return { answerMode: s.answerMode, roundNumber: s.roundNumber, gameScoreByTeam: s.gameScoreByTeam ?? {}, cpuScore: s.cpuScore ?? 0, difficulty };
 }
 
-export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState, presetPhoneSession }: GameProps) {
+export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState, presetPhoneSession, onRequestPhoneSession }: GameProps) {
   const resumed = useRef(validateBountyBoardSnapshot(initialGameState)).current;
   const isSolo = propTeams.length === 1;
   // Constructed unconditionally so its identity never changes across renders regardless of
@@ -431,6 +431,13 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
   const [inputMode, setInputMode] = useState<"screen" | "phone">(presetPhoneSession ? "phone" : "screen");
   const [introStep, setIntroStep] = useState<"setup" | "qr">("setup");
   const [sessionCode, setSessionCode] = useState<string | null>(presetPhoneSession?.code ?? null);
+  // True whenever sessionCode is a class-level code (either seeded from presetPhoneSession, or
+  // obtained from onRequestPhoneSession when the teacher picks "Play on Phones" with no Class
+  // Check-In already running) — decides whether the QR this game shows points at ?classJoin=
+  // (ClassJoinScreen, which follows the teacher from game to game) or the old one-off ?join=&game=
+  // (this game only, no "connect every player" for free, only a fallback if the context above has
+  // no class-session concept at all).
+  const [sessionIsClassLevel, setSessionIsClassLevel] = useState(!!presetPhoneSession);
   const [connectedTeamIds, setConnectedTeamIds] = useState<Set<string | number>>(new Set());
   const [answerMode, setAnswerMode] = useState<"spoken" | "typing">(resumed?.answerMode ?? "spoken");
   const channelRef = useRef<RealtimeChannel | null>(null);
@@ -710,9 +717,23 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
 
   const handlePickPhoneMode = () => {
     setInputMode("phone");
-    setSessionCode(generateSessionCode());
+    if (onRequestPhoneSession) {
+      setSessionCode(onRequestPhoneSession());
+      setSessionIsClassLevel(true);
+    } else {
+      setSessionCode(generateSessionCode());
+      setSessionIsClassLevel(false);
+    }
     setIntroStep("qr");
   };
+
+  // Shared by the intro QR and the mid-game reconnect badge below — class-level sessions point at
+  // ClassJoinScreen (follows the teacher game to game), one-off sessions at this game's own
+  // PhoneJoinScreen (see sessionIsClassLevel above).
+  const buildJoinUrl = (code: string) =>
+    sessionIsClassLevel
+      ? `${window.location.origin}${window.location.pathname}?classJoin=${code}`
+      : `${window.location.origin}${window.location.pathname}?join=${code}&game=bounty`;
 
   const handlePickScreenMode = () => {
     setInputMode("screen");
@@ -874,7 +895,7 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
           )}
 
           {introStep === "qr" && sessionCode && (() => {
-            const joinUrl = `${window.location.origin}${window.location.pathname}?join=${sessionCode}&game=bounty`;
+            const joinUrl = buildJoinUrl(sessionCode);
             return (
               <PhoneJoinPanel
                 sessionCode={sessionCode} joinUrl={joinUrl} teams={propTeams} connectedTeamIds={connectedTeamIds}
@@ -989,7 +1010,7 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
           only one pointing at the right (class, not per-game) join URL. */}
       {inputMode === "phone" && sessionCode && !presetPhoneSession && (
         <PhoneReconnectBadge
-          sessionCode={sessionCode} joinUrl={`${window.location.origin}${window.location.pathname}?join=${sessionCode}&game=bounty`}
+          sessionCode={sessionCode} joinUrl={buildJoinUrl(sessionCode)}
           teams={propTeams} connectedTeamIds={connectedTeamIds}
           accent="#92400E" panelBg="linear-gradient(160deg,#FFFFFF,#FEF3C7)" borderColor="#FDE68A"
         />

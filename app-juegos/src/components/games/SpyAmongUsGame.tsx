@@ -141,7 +141,7 @@ function validateSpySnapshot(raw: unknown, teamCount: number, roundCount: number
   };
 }
 
-export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState, presetPhoneSession }: GameProps) {
+export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState, presetPhoneSession, onRequestPhoneSession }: GameProps) {
   const DISCUSS_SECONDS = 120;
   // Solo play makes the teacher the second live participant — Spy Among Us already has a
   // fully-built, fully-tested 2-player ruleset (isTwoPlayer below), so this just needs to make
@@ -271,6 +271,9 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
   const [inputMode, setInputMode] = useState<"screen" | "phone">(presetPhoneSession ? "phone" : "screen");
   const [introStep, setIntroStep] = useState<"setup" | "qr">("setup");
   const [sessionCode, setSessionCode] = useState<string | null>(presetPhoneSession?.code ?? null);
+  // See BountyBoardGame.tsx's own copy of this for the full explanation — true whenever sessionCode
+  // is class-level (so the QR points at ?classJoin=, which follows the teacher game to game).
+  const [sessionIsClassLevel, setSessionIsClassLevel] = useState(!!presetPhoneSession);
   const [connectedTeamIds, setConnectedTeamIds] = useState<Set<string | number>>(new Set());
   const channelRef = useRef<RealtimeChannel | null>(null);
 
@@ -387,9 +390,20 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
 
   const handlePickPhoneMode = () => {
     setInputMode("phone");
-    setSessionCode(generateSessionCode());
+    if (onRequestPhoneSession) {
+      setSessionCode(onRequestPhoneSession());
+      setSessionIsClassLevel(true);
+    } else {
+      setSessionCode(generateSessionCode());
+      setSessionIsClassLevel(false);
+    }
     setIntroStep("qr");
   };
+
+  const buildJoinUrl = (code: string) =>
+    sessionIsClassLevel
+      ? `${window.location.origin}${window.location.pathname}?classJoin=${code}`
+      : `${window.location.origin}${window.location.pathname}?join=${code}&game=spy`;
 
   const handlePickScreenMode = () => {
     setInputMode("screen");
@@ -767,7 +781,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
           )}
 
           {introStep === "qr" && sessionCode && (() => {
-            const joinUrl = `${window.location.origin}${window.location.pathname}?join=${sessionCode}&game=spy`;
+            const joinUrl = buildJoinUrl(sessionCode);
             return (
               <PhoneJoinPanel
                 sessionCode={sessionCode} joinUrl={joinUrl} teams={teams} connectedTeamIds={connectedTeamIds}
@@ -885,7 +899,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
           only one pointing at the right (class, not per-game) join URL. */}
       {inputMode === "phone" && sessionCode && !presetPhoneSession && (
         <PhoneReconnectBadge
-          sessionCode={sessionCode} joinUrl={`${window.location.origin}${window.location.pathname}?join=${sessionCode}&game=spy`}
+          sessionCode={sessionCode} joinUrl={buildJoinUrl(sessionCode)}
           teams={teams} connectedTeamIds={connectedTeamIds}
           accent="#38BDF8" panelBg="linear-gradient(160deg,#1E3A5F,#0F172A)" borderColor="#38BDF866"
         />

@@ -429,7 +429,7 @@ function validateOrderUpSnapshot(raw: unknown): OrderUpSnapshot | undefined {
   };
 }
 
-export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef, paused, onTogglePause, serializeStateRef, initialGameState, presetPhoneSession }: GameProps) {
+export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef, paused, onTogglePause, serializeStateRef, initialGameState, presetPhoneSession, onRequestPhoneSession }: GameProps) {
   const resumed = useRef(validateOrderUpSnapshot(initialGameState)).current;
 
   // A ref (not just the `paused` prop) so the per-ticket countdown interval's closure always reads
@@ -470,6 +470,9 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
   const [inputMode, setInputMode] = useState<"screen" | "phone">(presetPhoneSession ? "phone" : "screen");
   const [introStep, setIntroStep] = useState<"setup" | "qr">("setup");
   const [sessionCode, setSessionCode] = useState<string | null>(presetPhoneSession?.code ?? null);
+  // See BountyBoardGame.tsx's own copy of this for the full explanation — true whenever sessionCode
+  // is class-level (so the QR points at ?classJoin=, which follows the teacher game to game).
+  const [sessionIsClassLevel, setSessionIsClassLevel] = useState(!!presetPhoneSession);
   const [connectedTeamIds, setConnectedTeamIds] = useState<Set<string | number>>(new Set());
   // "spoken": however a team wants to show the teacher their sentence in person (written down,
   // said aloud, whatever) — teacher taps "Ready to judge" once they've seen/heard it (today's only
@@ -736,9 +739,20 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
 
   const handlePickPhoneMode = () => {
     setInputMode("phone");
-    setSessionCode(generateSessionCode());
+    if (onRequestPhoneSession) {
+      setSessionCode(onRequestPhoneSession());
+      setSessionIsClassLevel(true);
+    } else {
+      setSessionCode(generateSessionCode());
+      setSessionIsClassLevel(false);
+    }
     setIntroStep("qr");
   };
+
+  const buildJoinUrl = (code: string) =>
+    sessionIsClassLevel
+      ? `${window.location.origin}${window.location.pathname}?classJoin=${code}`
+      : `${window.location.origin}${window.location.pathname}?join=${code}&game=orderup`;
 
   const handlePickScreenMode = () => {
     setInputMode("screen");
@@ -941,7 +955,7 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
           )}
 
           {introStep === "qr" && sessionCode && (() => {
-            const joinUrl = `${window.location.origin}${window.location.pathname}?join=${sessionCode}&game=orderup`;
+            const joinUrl = buildJoinUrl(sessionCode);
             return (
               <PhoneJoinPanel
                 sessionCode={sessionCode} joinUrl={joinUrl} teams={teams} connectedTeamIds={connectedTeamIds}
@@ -1051,7 +1065,7 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
           only one pointing at the right (class, not per-game) join URL. */}
       {inputMode === "phone" && sessionCode && !presetPhoneSession && (
         <PhoneReconnectBadge
-          sessionCode={sessionCode} joinUrl={`${window.location.origin}${window.location.pathname}?join=${sessionCode}&game=orderup`}
+          sessionCode={sessionCode} joinUrl={buildJoinUrl(sessionCode)}
           teams={teams} connectedTeamIds={connectedTeamIds}
           accent="#BE185D" panelBg="linear-gradient(160deg,#FFFFFF,#FFE4E6)" borderColor="#FBCFE8"
         />

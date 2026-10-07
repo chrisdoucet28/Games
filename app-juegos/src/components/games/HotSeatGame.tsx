@@ -86,7 +86,7 @@ function validateHotSeatSnapshot(raw: unknown, teamCount: number): HotSeatSnapsh
   return { roundIndex: s.roundIndex, teamIndex: s.teamIndex, totalWordsByTeam: s.totalWordsByTeam ?? {}, customWords };
 }
 
-export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState, presetPhoneSession }: GameProps) {
+export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState, presetPhoneSession, onRequestPhoneSession }: GameProps) {
   const resumed = useRef(validateHotSeatSnapshot(initialGameState, teams.length)).current;
 
   const [phase, setPhase] = useState<"welcome" | "intro" | "play" | "turnend" | "final">(resumed ? "intro" : "welcome");
@@ -106,6 +106,9 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
   const [inputMode, setInputMode] = useState<"screen" | "phone">(presetPhoneSession ? "phone" : "screen");
   const [introStep, setIntroStep] = useState<"setup" | "qr">("setup");
   const [sessionCode, setSessionCode] = useState<string | null>(presetPhoneSession?.code ?? null);
+  // See BountyBoardGame.tsx's own copy of this for the full explanation — true whenever sessionCode
+  // is class-level (so the QR points at ?classJoin=, which follows the teacher game to game).
+  const [sessionIsClassLevel, setSessionIsClassLevel] = useState(!!presetPhoneSession);
   const [connectedTeamIds, setConnectedTeamIds] = useState<Set<string | number>>(new Set());
   // "groups": the active team's own phone shows the word (teammates describe, matching the
   // in-person rule). "solo": every *other* connected team's phone shows it instead, since a
@@ -376,9 +379,20 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
 
   const handlePickPhoneMode = () => {
     setInputMode("phone");
-    setSessionCode(generateSessionCode());
+    if (onRequestPhoneSession) {
+      setSessionCode(onRequestPhoneSession());
+      setSessionIsClassLevel(true);
+    } else {
+      setSessionCode(generateSessionCode());
+      setSessionIsClassLevel(false);
+    }
     setIntroStep("qr");
   };
+
+  const buildJoinUrl = (code: string) =>
+    sessionIsClassLevel
+      ? `${window.location.origin}${window.location.pathname}?classJoin=${code}`
+      : `${window.location.origin}${window.location.pathname}?join=${code}&game=hotseat`;
 
   const handlePickScreenMode = () => {
     setInputMode("screen");
@@ -493,7 +507,7 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
               )}
 
               {introStep === "qr" && sessionCode && (() => {
-                const joinUrl = `${window.location.origin}${window.location.pathname}?join=${sessionCode}&game=hotseat`;
+                const joinUrl = buildJoinUrl(sessionCode);
                 return (
                   <PhoneJoinPanel
                     sessionCode={sessionCode} joinUrl={joinUrl} teams={teams} connectedTeamIds={connectedTeamIds}
@@ -631,7 +645,7 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
           only one pointing at the right (class, not per-game) join URL. */}
       {inputMode === "phone" && sessionCode && !presetPhoneSession && (
         <PhoneReconnectBadge
-          sessionCode={sessionCode} joinUrl={`${window.location.origin}${window.location.pathname}?join=${sessionCode}&game=hotseat`}
+          sessionCode={sessionCode} joinUrl={buildJoinUrl(sessionCode)}
           teams={teams} connectedTeamIds={connectedTeamIds}
           accent="#FDBA74" panelBg="linear-gradient(160deg,#7C2D12,#1C0701)" borderColor="#F9731666"
         />

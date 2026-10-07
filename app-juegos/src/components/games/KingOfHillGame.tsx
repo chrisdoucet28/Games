@@ -156,7 +156,7 @@ function validateHillSnapshot(raw: unknown, teamCount: number): HillSnapshot | u
   };
 }
 
-export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState, presetPhoneSession }: GameProps) {
+export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState, presetPhoneSession, onRequestPhoneSession }: GameProps) {
   const TURN_SECONDS = 20;
 
   // Solo play makes the second team a real dice-rolled turn participant — "just another team,"
@@ -590,11 +590,24 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
     contest?.zoneId ?? "none"
   );
 
+  const [sessionIsClassLevel, setSessionIsClassLevel] = useState(!!presetPhoneSession && !isThemeMode);
+
   const handlePickPhoneMode = () => {
     setInputMode("phone");
-    setSessionCode(generateSessionCode());
+    if (onRequestPhoneSession) {
+      setSessionCode(onRequestPhoneSession());
+      setSessionIsClassLevel(true);
+    } else {
+      setSessionCode(generateSessionCode());
+      setSessionIsClassLevel(false);
+    }
     setIntroStep("qr");
   };
+
+  const buildJoinUrl = (code: string) =>
+    sessionIsClassLevel
+      ? `${window.location.origin}${window.location.pathname}?classJoin=${code}`
+      : `${window.location.origin}${window.location.pathname}?join=${code}&game=hill`;
 
   const handlePickScreenMode = () => {
     setInputMode("screen");
@@ -759,7 +772,7 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
             )}
 
             {introStep === "qr" && sessionCode && (() => {
-              const joinUrl = `${window.location.origin}${window.location.pathname}?join=${sessionCode}&game=hill`;
+              const joinUrl = buildJoinUrl(sessionCode);
               return (
                 <PhoneJoinPanel
                   sessionCode={sessionCode} joinUrl={joinUrl} teams={propTeams} connectedTeamIds={connectedTeamIds}
@@ -903,7 +916,7 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
           only one pointing at the right (class, not per-game) join URL. */}
       {inputMode === "phone" && sessionCode && !presetPhoneSession && (
         <PhoneReconnectBadge
-          sessionCode={sessionCode} joinUrl={`${window.location.origin}${window.location.pathname}?join=${sessionCode}&game=hill`}
+          sessionCode={sessionCode} joinUrl={buildJoinUrl(sessionCode)}
           teams={propTeams} connectedTeamIds={connectedTeamIds}
           accent="#F9A8D4" panelBg="linear-gradient(160deg,#831843,#4C0519)" borderColor="#F9A8D455"
         />
