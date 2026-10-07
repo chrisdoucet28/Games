@@ -1830,6 +1830,12 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
                   // on top of them, so it never actually needs extra capacity — only a genuine
                   // append (teams already set up) should hit the plan cap.
                   const locked = !isActive && numTeams >= cap && !teamsUntouched;
+                  // The roster itself (classes.team_roster) only ever stores name/color/mascot —
+                  // score lives on the live `teams` array instead, so it's looked up here by the
+                  // same name match handleSetup uses. This is what a teacher asked for directly:
+                  // seeing a team's current points right on the chip they're about to tap, not only
+                  // after tapping it (in the card further down).
+                  const rosterScore = teams.find(t => t.name.trim().toLowerCase() === entry.name.trim().toLowerCase())?.score ?? 0;
                   return (
                     <div key={entry.id} style={{ position: "relative" }}>
                       <button
@@ -1842,9 +1848,17 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
                           border: `2px solid ${isActive ? entry.color.bg : "#D1D5DB"}`,
                           borderRadius: "999px", padding: "8px 16px 8px 12px", cursor: "pointer",
                           fontWeight: isActive ? "800" : "700", fontSize: "13px", opacity: locked ? 0.5 : 1,
+                          display: "inline-flex", alignItems: "center", gap: "6px",
                         }}
                       >
                         <TeamIcon team={entry} color={isActive ? "white" : undefined} /> {entry.name}
+                        {rosterScore > 0 && (
+                          <span style={{
+                            background: isActive ? "rgba(255,255,255,0.28)" : "rgba(0,0,0,0.08)",
+                            color: isActive ? "white" : "#6B7280",
+                            borderRadius: "999px", padding: "2px 8px", fontSize: "11px", fontWeight: "800",
+                          }}>{rosterScore} pts</span>
+                        )}
                       </button>
                       <button
                         type="button"
