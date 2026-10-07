@@ -29,7 +29,7 @@ import { FeedbackButton } from "./components/shared/FeedbackButton";
 import { BrandBadge } from "./components/shared/BrandBadge";
 import { Icon, type IconName } from "./components/shared/Icon";
 import { MascotIcon } from "./components/shared/MascotArt";
-import { saveProgress, clearProgress, listClasses, createClass, upsertTeamRoster, deleteFromTeamRoster, saveTeams } from "./lib/classes";
+import { saveProgress, clearProgress, listClasses, createClass, upsertTeamRoster, deleteFromTeamRoster, saveTeams, getClass } from "./lib/classes";
 import { recordClassCoverage } from "./lib/classMembership";
 import { isPaidStatus } from "./lib/subscription";
 import { playSound, isSoundEnabled, setSoundEnabled, onSoundEnabledChange } from "./lib/sounds";
@@ -275,6 +275,33 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
   // already-active class (saveTeamsToRoster/saveTeamsToClass/saveToClass's own defaulted-classId
   // calls) doesn't need to touch it.
   const [activeClassName, setActiveClassName] = useState<string | null>(null);
+
+  // Mirrors activeClassId into localStorage so a browser refresh (which wipes every piece of React
+  // state above, teams/scores included) isn't a dead end: a teacher who refreshes mid-class and
+  // then starts a fresh, unlinked session under the same team names has no way to get their real
+  // scores back, and silently starting over at 0 reads as "my team randomly lost its points" (a
+  // real report — a teacher's team kept its 150 points right up until a refresh + a fresh Lesson
+  // Plan start put it back at 0 under the same name). This alone doesn't restore anything by
+  // itself — see lastClassCandidate below, which turns a stored id back into an actual on-screen
+  // "continue where you left off?" choice on next load, rather than silently auto-resuming.
+  const LAST_CLASS_STORAGE_KEY = "classcade_last_active_class_id";
+  useEffect(() => {
+    try {
+      if (activeClassId) localStorage.setItem(LAST_CLASS_STORAGE_KEY, activeClassId);
+      else localStorage.removeItem(LAST_CLASS_STORAGE_KEY);
+    } catch { /* private browsing / storage disabled — nothing to persist, nothing to break */ }
+  }, [activeClassId]);
+  // Fetched once per fresh page load only (empty deps) — if the teacher dismisses it or explicitly
+  // starts an unlinked game (which clears the stored id too, see the Welcome screen's "Start a
+  // Game" button), it simply won't come back until the next real page load.
+  const [lastClassCandidate, setLastClassCandidate] = useState<SavedClass | null>(null);
+  useEffect(() => {
+    let stored: string | null = null;
+    try { stored = localStorage.getItem(LAST_CLASS_STORAGE_KEY); } catch { /* ignore */ }
+    if (!stored) return;
+    getClass(stored).then(cls => { if (cls) setLastClassCandidate(cls); }).catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   // "Class Check-In" — one persistent join code/channel for a whole class-linked sitting, so a
   // student scans once and their phone auto-follows every later game switch (see startGame/
   // handleGameEnd below), instead of re-scanning a fresh per-game code every time. Only ever set
@@ -1373,6 +1400,38 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
             </div>
           ))}
         </div>
+        {/* "Continue where you left off?" — only ever appears once per fresh page load (see
+            lastClassCandidate above), and only offers, never auto-applies: a refresh might just as
+            easily mean "I'm done with that class, starting a new period" as "I didn't mean to lose
+            my place." Shows each team's actual current score so a teacher can tell at a glance
+            whether this is really the session they want back, before committing to it. */}
+        {lastClassCandidate && (
+          <div style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.25)", borderRadius: "16px", padding: "14px 18px", marginBottom: "20px", display: "flex", alignItems: "center", gap: "14px", flexWrap: "wrap", justifyContent: "center", backdropFilter: "blur(8px)" }}>
+            <div style={{ textAlign: "left" }}>
+              <div style={{ color: "white", fontWeight: "800", fontSize: "14px" }}>Continue "{lastClassCandidate.name}"?</div>
+              <div style={{ color: "rgba(255,255,255,0.75)", fontSize: "12.5px", marginTop: "2px" }}>
+                {lastClassCandidate.teams.length > 0
+                  ? lastClassCandidate.teams.map(t => `${t.name} (${t.score})`).join(" · ")
+                  : "No teams saved yet"}
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: "8px" }}>
+              <button
+                onClick={() => {
+                  const cls = lastClassCandidate;
+                  setLastClassCandidate(null);
+                  if (cls.in_progress) resumeClass(cls); else startWithClass(cls);
+                }}
+                style={{ background: "white", color: theme.heroBg[0], border: "none", borderRadius: "10px", padding: "9px 18px", fontSize: "13px", fontWeight: "800", cursor: "pointer", fontFamily: theme.headingFont }}
+              >Continue</button>
+              <button
+                onClick={() => setLastClassCandidate(null)}
+                title="Dismiss"
+                style={{ background: "none", border: "1px solid rgba(255,255,255,0.35)", color: "white", borderRadius: "10px", padding: "9px 14px", fontSize: "13px", fontWeight: "800", cursor: "pointer" }}
+              >✕</button>
+            </div>
+          </div>
+        )}
         {/* Primary fork: "games or lesson plans" is the first real decision after login — both
             equally weighted (same size/padding/font-weight), distinguished only by which gradient
             each uses, so neither reads as the "default" choice over the other. Each gets a short
