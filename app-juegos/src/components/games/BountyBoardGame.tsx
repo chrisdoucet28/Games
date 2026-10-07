@@ -25,9 +25,14 @@ import {
 const GM = GAME_MODES.find(g => g.id === "bounty")!;
 
 // Base payout for a correct answer on the first try — every escalation is a whole multiple of
-// this (V, 2V, 3V, 4V…), never compounding off the previous value. Matches Order Up's own
-// single-item baseline (ORDER_SCORE_BY_ITEM_COUNT[1]).
-const BOUNTY_VALUE = 10;
+// this (V, 2V, 3V, 4V…), never compounding off the previous value. Originally matched Order Up's
+// single-item baseline (ORDER_SCORE_BY_ITEM_COUNT[1] = 10), but that undersold it: Order Up's "1
+// item" is the floor of a scale built to reward COMBINING several grammar targets into one
+// sentence, while Bounty Board (like Rocket Fuel/Zombie Siege) is always one flat, single-prompt
+// round — the much closer sibling shape. Teacher feedback live in class: "feels thin" (same
+// complaint Zombie Siege's own CORRECT_ANSWER_SCORE comment already describes) — bumped to match
+// Rocket Fuel's POINTS_PER_CORRECT / Zombie Siege's CORRECT_ANSWER_SCORE instead.
+const BOUNTY_VALUE = 20;
 // Bounded by however many distinct "use vocabulary in a sentence" prompts the selected topics
 // actually yield — a narrow topic selection shouldn't force 8 rounds out of a 3-item pool.
 const MAX_ROUNDS = 8;
