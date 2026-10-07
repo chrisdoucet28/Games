@@ -707,6 +707,39 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     runStep(0);
   };
 
+  // Loads a class's own saved teams — names, colors, mascots, AND their actual current scores —
+  // into the live editor state. Shared by startWithClass below and by dispatchPendingSave's "link"
+  // branch further down, which used to call resetTeamsToNormal() instead (wiping every score to 0
+  // the moment a teacher used "Switch"/"Load saved teams…" to link a class mid-sitting — a real,
+  // reproducible report: "Santiago" showed 0 right after linking, before anyone had even picked a
+  // team yet, because nothing ever re-loaded his actual saved score at that point).
+  const hydrateTeamsFromClass = (cls: SavedClass) => {
+    if (cls.teams.length === 0) return;
+    setNumTeams(cls.teams.length);
+    setTeamNames(prev => {
+      const next = [...prev];
+      cls.teams.forEach((t, i) => { next[i] = t.name; });
+      return next;
+    });
+    setTeamColors(prev => {
+      const next = [...prev];
+      cls.teams.forEach((t, i) => {
+        const idx = TEAM_COLORS.findIndex(c => c.name === t.color.name);
+        next[i] = idx === -1 ? i : idx;
+      });
+      return next;
+    });
+    setTeamMascots(prev => {
+      const next = [...prev];
+      cls.teams.forEach((t, i) => { next[i] = t.mascot ?? null; });
+      return next;
+    });
+    setTeams(cls.teams);
+    // A real class's own saved teams, not a blank slate — a later roster tap in team-setup
+    // should append to this lineup, not treat it as still-untouched placeholders to replace.
+    setTeamsUntouched(false);
+  };
+
   // "Start New Game" from My Classes — brings the class's persistent roster/scores into the
   // normal setup flow, same as if the teacher had typed those names in themselves.
   const startWithClass = (cls: SavedClass) => {
@@ -716,31 +749,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     // us "this is my B2 class" doesn't have to re-pick it every single time they start a game.
     setLevel(cls.default_level ?? "all");
     setTeamRoster(cls.team_roster ?? []);
-    if (cls.teams.length > 0) {
-      setNumTeams(cls.teams.length);
-      setTeamNames(prev => {
-        const next = [...prev];
-        cls.teams.forEach((t, i) => { next[i] = t.name; });
-        return next;
-      });
-      setTeamColors(prev => {
-        const next = [...prev];
-        cls.teams.forEach((t, i) => {
-          const idx = TEAM_COLORS.findIndex(c => c.name === t.color.name);
-          next[i] = idx === -1 ? i : idx;
-        });
-        return next;
-      });
-      setTeamMascots(prev => {
-        const next = [...prev];
-        cls.teams.forEach((t, i) => { next[i] = t.mascot ?? null; });
-        return next;
-      });
-      setTeams(cls.teams);
-      // A real class's own saved teams, not a blank slate — a later roster tap in team-setup
-      // should append to this lineup, not treat it as still-untouched placeholders to replace.
-      setTeamsUntouched(false);
-    }
+    hydrateTeamsFromClass(cls);
     setScreen("topic-select");
   };
 
@@ -842,12 +851,13 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
       setActiveClassId(cls.id);
       setActiveClassName(cls.name);
       setTeamRoster(cls.team_roster ?? []);
-      // Blanks the live editor to this class's own clean slate — without this, switching from an
-      // already-linked class straight to a different one would leave the FIRST class's team names
-      // sitting in the editor, about to autosave into the SECOND class's roster the moment anything
-      // else changes. The teacher taps chips below to bring in whichever of this class's own saved
-      // teams they want, same as any other link.
-      resetTeamsToNormal();
+      // Loads this class's own saved teams — names AND their real current scores, same as
+      // startWithClass — rather than blanking the editor to Team Red/Team Blue at 0. Switching from
+      // an already-linked class straight to a different one still can't leave the FIRST class's team
+      // names sitting in the editor about to autosave into the SECOND class's roster: a class with no
+      // saved teams yet (hydrateTeamsFromClass no-ops on an empty cls.teams) still needs the clean
+      // slate, so that case falls through to the same reset as before.
+      if (cls.teams.length > 0) hydrateTeamsFromClass(cls); else resetTeamsToNormal();
     } else if (action === "teams") saveTeamsToClass(cls.id);
     else saveToClass(cls.id);
   };
