@@ -62,33 +62,42 @@ export function FlagPromptButton({ gameId, questionData }: FlagPromptButtonProps
     );
   }
 
+  // Every caller drops this icon into a small `position: absolute` corner of its own card (a round
+  // prompt, a bounty, a round entry...) with no spare room around it — when expanded, the popup
+  // used to render in normal inline flow starting at that exact point, so on anything short (like a
+  // one-line prompt card) it grew downward right over the card's own text instead of clearing it.
+  // `position: relative` here gives the popup its own local anchor to drop BELOW the icon instead,
+  // regardless of which game/card embeds it — no call site needs to change.
   return (
-    <div style={{
-      display: "inline-block", background: "white", border: "2px solid #E5E7EB", borderRadius: "10px",
-      padding: "8px", maxWidth: "220px", fontFamily: "'Segoe UI',system-ui,sans-serif", textAlign: "left",
-      boxShadow: "0 4px 14px rgba(0,0,0,0.15)",
-    }}>
-      <textarea
-        autoFocus
-        value={message}
-        onChange={e => setMessage(e.target.value)}
-        rows={2}
-        maxLength={2000}
-        placeholder="What's wrong with this prompt? (optional)"
-        style={{ width: "100%", boxSizing: "border-box", border: "1px solid #E5E7EB", borderRadius: "6px", padding: "5px 7px", fontSize: "11px", fontFamily: "inherit", resize: "vertical" }}
-      />
-      {status === "error" && (
-        <div style={{ color: "#B91C1C", fontSize: "10px", fontWeight: 700, marginTop: "4px" }}>Couldn't send — try again.</div>
-      )}
-      <div style={{ display: "flex", justifyContent: "flex-end", gap: "6px", marginTop: "5px" }}>
-        <button onClick={cancel} style={{ background: "none", border: "none", color: "#9CA3AF", fontWeight: 700, cursor: "pointer", fontSize: "10px" }}>Cancel</button>
-        <button
-          onClick={submit}
-          disabled={status === "sending"}
-          style={{ background: "#DC2626", color: "white", border: "none", borderRadius: "6px", padding: "4px 10px", fontWeight: 800, cursor: "pointer", fontSize: "10px", display: "inline-flex", alignItems: "center", gap: "4px" }}
-        >
-          {status === "sending" ? "..." : <><Icon name="flag" size={10} /> Send</>}
-        </button>
+    <div style={{ position: "relative", display: "inline-block" }}>
+      <div style={{
+        position: "absolute", top: "calc(100% + 4px)", right: 0, zIndex: 50,
+        width: "220px", background: "white", border: "2px solid #E5E7EB", borderRadius: "10px",
+        padding: "8px", fontFamily: "'Segoe UI',system-ui,sans-serif", textAlign: "left",
+        boxShadow: "0 4px 14px rgba(0,0,0,0.15)",
+      }}>
+        <textarea
+          autoFocus
+          value={message}
+          onChange={e => setMessage(e.target.value)}
+          rows={2}
+          maxLength={2000}
+          placeholder="What's wrong with this prompt? (optional)"
+          style={{ width: "100%", boxSizing: "border-box", border: "1px solid #E5E7EB", borderRadius: "6px", padding: "5px 7px", fontSize: "11px", fontFamily: "inherit", resize: "vertical" }}
+        />
+        {status === "error" && (
+          <div style={{ color: "#B91C1C", fontSize: "10px", fontWeight: 700, marginTop: "4px" }}>Couldn't send — try again.</div>
+        )}
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: "6px", marginTop: "5px" }}>
+          <button onClick={cancel} style={{ background: "none", border: "none", color: "#9CA3AF", fontWeight: 700, cursor: "pointer", fontSize: "10px" }}>Cancel</button>
+          <button
+            onClick={submit}
+            disabled={status === "sending"}
+            style={{ background: "#DC2626", color: "white", border: "none", borderRadius: "6px", padding: "4px 10px", fontWeight: 800, cursor: "pointer", fontSize: "10px", display: "inline-flex", alignItems: "center", gap: "4px" }}
+          >
+            {status === "sending" ? "..." : <><Icon name="flag" size={10} /> Send</>}
+          </button>
+        </div>
       </div>
     </div>
   );
