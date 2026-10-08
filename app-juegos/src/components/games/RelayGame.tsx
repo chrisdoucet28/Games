@@ -535,6 +535,9 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
   }, [phase]);
 
   const [sessionIsClassLevel, setSessionIsClassLevel] = useState(!!presetPhoneSession);
+  // Snapshot taken once at mount — see BountyBoardGame.tsx's own copy for the full explanation of
+  // why the setup/QR block below must key off this instead of the live presetPhoneSession prop.
+  const startedWithPresetSession = useRef(!!presetPhoneSession).current;
 
   const handlePickPhoneMode = () => {
     setInputMode("phone");
@@ -678,7 +681,7 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
           {/* Skipped entirely for a Class Check-In sitting — presetPhoneSession already picked
               phone mode and its code, and the class-level QR already covered joining. Gated by the
               REAL team count, not the CPU-augmented one — the CPU can never hold a phone. */}
-          {propTeams.length > 1 && !presetPhoneSession && (
+          {propTeams.length > 1 && !startedWithPresetSession && (
             <>
               {introStep === "setup" && (
                 <div style={{ marginBottom: "20px" }}>

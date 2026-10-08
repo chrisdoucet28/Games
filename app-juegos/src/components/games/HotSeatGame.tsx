@@ -109,6 +109,9 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
   // See BountyBoardGame.tsx's own copy of this for the full explanation — true whenever sessionCode
   // is class-level (so the QR points at ?classJoin=, which follows the teacher game to game).
   const [sessionIsClassLevel, setSessionIsClassLevel] = useState(!!presetPhoneSession);
+  // Snapshot taken once at mount — see BountyBoardGame.tsx's own copy for the full explanation of
+  // why the setup/QR block below must key off this instead of the live presetPhoneSession prop.
+  const startedWithPresetSession = useRef(!!presetPhoneSession).current;
   const [connectedTeamIds, setConnectedTeamIds] = useState<Set<string | number>>(new Set());
   // "groups": the active team's own phone shows the word (teammates describe, matching the
   // in-person rule). "solo": every *other* connected team's phone shows it instead, since a
@@ -482,7 +485,7 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
           {/* Skipped entirely for a Class Check-In sitting — presetPhoneSession already picked
               phone mode and its code (teamStructure defaults to "groups", the more common mode,
               since there's no picker step left to choose it from). */}
-          {teams.length > 1 && !presetPhoneSession && (
+          {teams.length > 1 && !startedWithPresetSession && (
             <>
               {introStep === "setup" && (
                 <div style={{ marginBottom: "20px" }}>

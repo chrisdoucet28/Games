@@ -438,6 +438,13 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
   // (this game only, no "connect every player" for free, only a fallback if the context above has
   // no class-session concept at all).
   const [sessionIsClassLevel, setSessionIsClassLevel] = useState(!!presetPhoneSession);
+  // Snapshot of whether this game started already linked to a class-level session, taken once at
+  // mount — unlike the live presetPhoneSession prop, which flips truthy the instant "Play on
+  // Phones" below promotes a session via onRequestPhoneSession. Using the live prop to decide
+  // whether to show the setup/QR block at all made that block vanish the moment the teacher clicked
+  // the very button that creates the session, since the resulting re-render handed this component a
+  // now-truthy presetPhoneSession before it ever got to render the QR it had just set state to show.
+  const startedWithPresetSession = useRef(!!presetPhoneSession).current;
   const [connectedTeamIds, setConnectedTeamIds] = useState<Set<string | number>>(new Set());
   const [answerMode, setAnswerMode] = useState<"spoken" | "typing">(resumed?.answerMode ?? "spoken");
   const channelRef = useRef<RealtimeChannel | null>(null);
@@ -871,7 +878,7 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
         </div>
         {/* Skipped entirely for a Class Check-In sitting — presetPhoneSession already picked
             phone mode and its code, and the class-level QR already covered joining. */}
-        {!presetPhoneSession && <>
+        {!startedWithPresetSession && <>
           {introStep === "setup" && (
             <div style={{ marginBottom: "20px" }}>
               <div style={{ fontSize: "13px", color: "#92400E", fontWeight: "700", marginBottom: "10px" }}>How will answers get submitted?</div>

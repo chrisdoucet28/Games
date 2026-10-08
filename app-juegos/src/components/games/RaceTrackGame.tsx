@@ -647,6 +647,9 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
   }, [serializeStateRef, raceTeams, track, difficulty]);
 
   const [sessionIsClassLevel, setSessionIsClassLevel] = useState(!!presetPhoneSession);
+  // Snapshot taken once at mount — see BountyBoardGame.tsx's own copy for the full explanation of
+  // why the setup/QR block below must key off this instead of the live presetPhoneSession prop.
+  const startedWithPresetSession = useRef(!!presetPhoneSession).current;
 
   const handlePickPhoneMode = () => {
     setInputMode("phone");
@@ -803,7 +806,7 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
         </div>
         {/* Skipped entirely for a Class Check-In sitting — presetPhoneSession already picked
             phone mode and its code, and the class-level QR already covered joining. */}
-        {teams.length > 1 && !presetPhoneSession && (
+        {teams.length > 1 && !startedWithPresetSession && (
           <>
             {introStep === "setup" && (
               <div style={{ marginBottom: "20px" }}>

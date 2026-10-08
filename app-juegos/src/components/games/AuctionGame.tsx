@@ -222,6 +222,9 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
   // See BountyBoardGame.tsx's own copy of this for the full explanation — true whenever sessionCode
   // is class-level (so the QR points at ?classJoin=, which follows the teacher game to game).
   const [sessionIsClassLevel, setSessionIsClassLevel] = useState(!!presetPhoneSession);
+  // Snapshot taken once at mount — see BountyBoardGame.tsx's own copy for the full explanation of
+  // why the setup/QR block below must key off this instead of the live presetPhoneSession prop.
+  const startedWithPresetSession = useRef(!!presetPhoneSession).current;
   const [connectedTeamIds, setConnectedTeamIds] = useState<Set<string | number>>(new Set());
   const channelRef = useRef<RealtimeChannel | null>(null);
 
@@ -497,7 +500,7 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
         </div>
         {/* Skipped entirely for a Class Check-In sitting — presetPhoneSession already picked
             phone mode and its code, and the class-level QR already covered joining. */}
-        {!presetPhoneSession && <>
+        {!startedWithPresetSession && <>
         {introStep === "setup" && (
           <div style={{ marginBottom: "20px" }}>
             <div style={{ fontSize: "13px", color: "#C4B5FD", fontWeight: "700", marginBottom: "10px" }}>How will teams place their bets?</div>
