@@ -429,7 +429,7 @@ function validateOrderUpSnapshot(raw: unknown): OrderUpSnapshot | undefined {
   };
 }
 
-export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef, paused, onTogglePause, serializeStateRef, initialGameState, presetPhoneSession }: GameProps) {
+export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef, paused, onTogglePause, serializeStateRef, initialGameState, presetPhoneSession, onRequestPhoneSession }: GameProps) {
   const resumed = useRef(validateOrderUpSnapshot(initialGameState)).current;
 
   // A ref (not just the `paused` prop) so the per-ticket countdown interval's closure always reads
@@ -470,6 +470,12 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
   const [inputMode, setInputMode] = useState<"screen" | "phone">(presetPhoneSession ? "phone" : "screen");
   const [introStep, setIntroStep] = useState<"setup" | "qr">("setup");
   const [sessionCode, setSessionCode] = useState<string | null>(presetPhoneSession?.code ?? null);
+  // See BountyBoardGame.tsx's own copy of this for the full explanation — true whenever sessionCode
+  // is class-level (so the QR points at ?classJoin=, which follows the teacher game to game).
+  const [sessionIsClassLevel, setSessionIsClassLevel] = useState(!!presetPhoneSession);
+  // Snapshot taken once at mount — see BountyBoardGame.tsx's own copy for the full explanation of
+  // why the setup/QR block below must key off this instead of the live presetPhoneSession prop.
+  const startedWithPresetSession = useRef(!!presetPhoneSession).current;
   const [connectedTeamIds, setConnectedTeamIds] = useState<Set<string | number>>(new Set());
   // "spoken": however a team wants to show the teacher their sentence in person (written down,
   // said aloud, whatever) — teacher taps "Ready to judge" once they've seen/heard it (today's only
@@ -736,9 +742,20 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
 
   const handlePickPhoneMode = () => {
     setInputMode("phone");
-    setSessionCode(generateSessionCode());
+    if (onRequestPhoneSession) {
+      setSessionCode(onRequestPhoneSession());
+      setSessionIsClassLevel(true);
+    } else {
+      setSessionCode(generateSessionCode());
+      setSessionIsClassLevel(false);
+    }
     setIntroStep("qr");
   };
+
+  const buildJoinUrl = (code: string) =>
+    sessionIsClassLevel
+      ? `${window.location.origin}${window.location.pathname}?classJoin=${code}`
+      : `${window.location.origin}${window.location.pathname}?join=${code}&game=orderup`;
 
   const handlePickScreenMode = () => {
     setInputMode("screen");
@@ -917,7 +934,7 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
         </div>
         {/* Skipped entirely for a Class Check-In sitting — presetPhoneSession already picked
             phone mode and its code, and the class-level QR already covered joining. */}
-        {!presetPhoneSession && <>
+        {!startedWithPresetSession && <>
           {introStep === "setup" && (
             <div style={{ marginBottom: "20px" }}>
               <div style={{ fontSize: "13px", color: "#9D174D", fontWeight: "700", marginBottom: "10px" }}>How will orders get answered?</div>
@@ -941,7 +958,7 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
           )}
 
           {introStep === "qr" && sessionCode && (() => {
-            const joinUrl = `${window.location.origin}${window.location.pathname}?join=${sessionCode}&game=orderup`;
+            const joinUrl = buildJoinUrl(sessionCode);
             return (
               <PhoneJoinPanel
                 sessionCode={sessionCode} joinUrl={joinUrl} teams={teams} connectedTeamIds={connectedTeamIds}
@@ -1051,7 +1068,7 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
           only one pointing at the right (class, not per-game) join URL. */}
       {inputMode === "phone" && sessionCode && !presetPhoneSession && (
         <PhoneReconnectBadge
-          sessionCode={sessionCode} joinUrl={`${window.location.origin}${window.location.pathname}?join=${sessionCode}&game=orderup`}
+          sessionCode={sessionCode} joinUrl={buildJoinUrl(sessionCode)}
           teams={teams} connectedTeamIds={connectedTeamIds}
           accent="#BE185D" panelBg="linear-gradient(160deg,#FFFFFF,#FFE4E6)" borderColor="#FBCFE8"
         />

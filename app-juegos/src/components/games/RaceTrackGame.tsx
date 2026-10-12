@@ -211,7 +211,7 @@ function validateRaceSnapshot(raw: unknown, teamIds: (string | number)[]): RaceS
   };
 }
 
-export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState, presetPhoneSession }: GameProps) {
+export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState, presetPhoneSession, onRequestPhoneSession }: GameProps) {
   const resumed = useRef(validateRaceSnapshot(initialGameState, teams.map(t => t.id))).current;
   // A resumed race skips the intro and drops straight into a fresh task for the group.
   const [phase, setPhase] = useState<Phase>(() => resumed ? "task" : "intro");
@@ -650,11 +650,27 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
     return () => { if (serializeStateRef) serializeStateRef.current = null; };
   }, [serializeStateRef, raceTeams, track, difficulty]);
 
+  const [sessionIsClassLevel, setSessionIsClassLevel] = useState(!!presetPhoneSession);
+  // Snapshot taken once at mount — see BountyBoardGame.tsx's own copy for the full explanation of
+  // why the setup/QR block below must key off this instead of the live presetPhoneSession prop.
+  const startedWithPresetSession = useRef(!!presetPhoneSession).current;
+
   const handlePickPhoneMode = () => {
     setInputMode("phone");
-    setSessionCode(generateSessionCode());
+    if (onRequestPhoneSession) {
+      setSessionCode(onRequestPhoneSession());
+      setSessionIsClassLevel(true);
+    } else {
+      setSessionCode(generateSessionCode());
+      setSessionIsClassLevel(false);
+    }
     setIntroStep("qr");
   };
+
+  const buildJoinUrl = (code: string) =>
+    sessionIsClassLevel
+      ? `${window.location.origin}${window.location.pathname}?classJoin=${code}`
+      : `${window.location.origin}${window.location.pathname}?join=${code}&game=racetrack`;
 
   const handlePickScreenMode = () => {
     setInputMode("screen");
@@ -794,7 +810,7 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
         </div>
         {/* Skipped entirely for a Class Check-In sitting — presetPhoneSession already picked
             phone mode and its code, and the class-level QR already covered joining. */}
-        {teams.length > 1 && !presetPhoneSession && (
+        {teams.length > 1 && !startedWithPresetSession && (
           <>
             {introStep === "setup" && (
               <div style={{ marginBottom: "20px" }}>
@@ -817,7 +833,7 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
             )}
 
             {introStep === "qr" && sessionCode && (() => {
-              const joinUrl = `${window.location.origin}${window.location.pathname}?join=${sessionCode}&game=racetrack`;
+              const joinUrl = buildJoinUrl(sessionCode);
               return (
                 <PhoneJoinPanel
                   sessionCode={sessionCode} joinUrl={joinUrl} teams={teams} connectedTeamIds={connectedTeamIds}
@@ -902,7 +918,7 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
           only one pointing at the right (class, not per-game) join URL. */}
       {inputMode === "phone" && sessionCode && !presetPhoneSession && (
         <PhoneReconnectBadge
-          sessionCode={sessionCode} joinUrl={`${window.location.origin}${window.location.pathname}?join=${sessionCode}&game=racetrack`}
+          sessionCode={sessionCode} joinUrl={buildJoinUrl(sessionCode)}
           teams={teams} connectedTeamIds={connectedTeamIds}
           accent="#F87171" panelBg="linear-gradient(160deg,#1E293B,#0B0F17)" borderColor="#EF444466"
         />

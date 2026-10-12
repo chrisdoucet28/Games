@@ -25,9 +25,14 @@ import {
 const GM = GAME_MODES.find(g => g.id === "bounty")!;
 
 // Base payout for a correct answer on the first try — every escalation is a whole multiple of
-// this (V, 2V, 3V, 4V…), never compounding off the previous value. Matches Order Up's own
-// single-item baseline (ORDER_SCORE_BY_ITEM_COUNT[1]).
-const BOUNTY_VALUE = 10;
+// this (V, 2V, 3V, 4V…), never compounding off the previous value. Originally matched Order Up's
+// single-item baseline (ORDER_SCORE_BY_ITEM_COUNT[1] = 10), but that undersold it: Order Up's "1
+// item" is the floor of a scale built to reward COMBINING several grammar targets into one
+// sentence, while Bounty Board (like Rocket Fuel/Zombie Siege) is always one flat, single-prompt
+// round — the much closer sibling shape. Teacher feedback live in class: "feels thin" (same
+// complaint Zombie Siege's own CORRECT_ANSWER_SCORE comment already describes) — bumped to match
+// Rocket Fuel's POINTS_PER_CORRECT / Zombie Siege's CORRECT_ANSWER_SCORE instead.
+const BOUNTY_VALUE = 20;
 // Bounded by however many distinct "use vocabulary in a sentence" prompts the selected topics
 // actually yield — a narrow topic selection shouldn't force 8 rounds out of a 3-item pool.
 const MAX_ROUNDS = 8;
@@ -368,7 +373,7 @@ function validateBountyBoardSnapshot(raw: unknown): BountyBoardSnapshot | undefi
   return { answerMode: s.answerMode, roundNumber: s.roundNumber, gameScoreByTeam: s.gameScoreByTeam ?? {}, cpuScore: s.cpuScore ?? 0, difficulty };
 }
 
-export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState, presetPhoneSession }: GameProps) {
+export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState, presetPhoneSession, onRequestPhoneSession }: GameProps) {
   const resumed = useRef(validateBountyBoardSnapshot(initialGameState)).current;
   const isSolo = propTeams.length === 1;
   // Constructed unconditionally so its identity never changes across renders regardless of
@@ -426,6 +431,20 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
   const [inputMode, setInputMode] = useState<"screen" | "phone">(presetPhoneSession ? "phone" : "screen");
   const [introStep, setIntroStep] = useState<"setup" | "qr">("setup");
   const [sessionCode, setSessionCode] = useState<string | null>(presetPhoneSession?.code ?? null);
+  // True whenever sessionCode is a class-level code (either seeded from presetPhoneSession, or
+  // obtained from onRequestPhoneSession when the teacher picks "Play on Phones" with no Class
+  // Check-In already running) — decides whether the QR this game shows points at ?classJoin=
+  // (ClassJoinScreen, which follows the teacher from game to game) or the old one-off ?join=&game=
+  // (this game only, no "connect every player" for free, only a fallback if the context above has
+  // no class-session concept at all).
+  const [sessionIsClassLevel, setSessionIsClassLevel] = useState(!!presetPhoneSession);
+  // Snapshot of whether this game started already linked to a class-level session, taken once at
+  // mount — unlike the live presetPhoneSession prop, which flips truthy the instant "Play on
+  // Phones" below promotes a session via onRequestPhoneSession. Using the live prop to decide
+  // whether to show the setup/QR block at all made that block vanish the moment the teacher clicked
+  // the very button that creates the session, since the resulting re-render handed this component a
+  // now-truthy presetPhoneSession before it ever got to render the QR it had just set state to show.
+  const startedWithPresetSession = useRef(!!presetPhoneSession).current;
   const [connectedTeamIds, setConnectedTeamIds] = useState<Set<string | number>>(new Set());
   const [answerMode, setAnswerMode] = useState<"spoken" | "typing">(resumed?.answerMode ?? "spoken");
   const channelRef = useRef<RealtimeChannel | null>(null);
@@ -508,21 +527,24 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
     pushBanner(<><Icon name="warning" size={14} /> {team?.name ?? "That"}'s sentence is now a bounty — {formatValue(value)}!</>, "wrong");
   };
 
-  // Resolves the CPU's own round entry after a short delay — the exact same resolveRoundCorrect/
-  // resolveRoundWrong a human's Correct/Wrong click already uses, just triggered by a hidden dice
-  // roll instead. `roundEntries` is deliberately NOT a dependency here (bug fixed 2026-10): with it
-  // in the array, every OTHER team submitting their own entry this round (an everyday event, nothing
-  // to do with the CPU) re-ran this effect, whose cleanup cleared the CPU's pending timer; the ref
-  // guard below then saw this round as "already scheduled" and bailed out without setting a new one
-  // — so the CPU's own entry silently never resolved and the round could never complete ("waited
-  // over 10 minutes for the CPU to submit its writing, nothing happened"). roundNumber already is
-  // the right per-round trigger, and the ref still prevents double-scheduling within one round.
+  // Derived fresh on every render, same reasoning as `cpuAttemptingBountyId` further down — this
+  // (not the raw `roundEntries` array) is what the effect below actually depends on. The previous
+  // fix (2026-10) dropped `roundEntries` from the dependency array to stop every OTHER team's
+  // submission from tearing down the CPU's pending timer, but that left a real gap: on the very
+  // first "playing" render, this effect and the seeding effect above both fire in the same commit,
+  // and this effect's closure still sees the OLD (empty) `roundEntries` from before that seed took
+  // effect — with the array itself no longer a dependency, nothing ever told this effect the CPU's
+  // entry had actually appeared, so its timer never got scheduled and the round could never
+  // complete ("the CPU never submits its text, we wait forever" — a 100%-repro case, not the
+  // original bug's intermittent one). A plain boolean recomputed every render flips false -> true
+  // the instant the CPU's entry exists and is unresolved, which IS a real dependency change React
+  // picks up — while still staying exactly true/unchanged (no rerun, no teardown) when some OTHER
+  // team's entry resolves, since that never touches the CPU's own entry.
+  const cpuEntryPending = isSolo && !!cpuRef.current && roundEntries.some(e => e.teamId === cpuRef.current!.id && !e.resolved);
   const cpuEntryScheduledRoundRef = useRef<number | null>(null);
   useEffect(() => {
-    if (!isSolo || phase !== "playing" || !cpuRef.current) return;
+    if (!isSolo || phase !== "playing" || !cpuRef.current || !cpuEntryPending) return;
     const cpuId = cpuRef.current.id;
-    const entry = roundEntries.find(e => e.teamId === cpuId);
-    if (!entry || entry.resolved) return;
     if (cpuEntryScheduledRoundRef.current === roundNumber) return;
     cpuEntryScheduledRoundRef.current = roundNumber;
     const delay = CPU_ENTRY_DELAY_MS.min + Math.random() * (CPU_ENTRY_DELAY_MS.max - CPU_ENTRY_DELAY_MS.min);
@@ -547,7 +569,7 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
     }, delay);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isSolo, phase, roundNumber, difficulty]);
+  }, [isSolo, phase, roundNumber, difficulty, cpuEntryPending]);
 
   // Guarded inside the functional updater (not a separate read beforehand) — a screen click racing
   // a phone broadcast for the same bounty can't both succeed, same idiom as Order Up's claimTicket.
@@ -702,9 +724,23 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
 
   const handlePickPhoneMode = () => {
     setInputMode("phone");
-    setSessionCode(generateSessionCode());
+    if (onRequestPhoneSession) {
+      setSessionCode(onRequestPhoneSession());
+      setSessionIsClassLevel(true);
+    } else {
+      setSessionCode(generateSessionCode());
+      setSessionIsClassLevel(false);
+    }
     setIntroStep("qr");
   };
+
+  // Shared by the intro QR and the mid-game reconnect badge below — class-level sessions point at
+  // ClassJoinScreen (follows the teacher game to game), one-off sessions at this game's own
+  // PhoneJoinScreen (see sessionIsClassLevel above).
+  const buildJoinUrl = (code: string) =>
+    sessionIsClassLevel
+      ? `${window.location.origin}${window.location.pathname}?classJoin=${code}`
+      : `${window.location.origin}${window.location.pathname}?join=${code}&game=bounty`;
 
   const handlePickScreenMode = () => {
     setInputMode("screen");
@@ -842,7 +878,7 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
         </div>
         {/* Skipped entirely for a Class Check-In sitting — presetPhoneSession already picked
             phone mode and its code, and the class-level QR already covered joining. */}
-        {!presetPhoneSession && <>
+        {!startedWithPresetSession && <>
           {introStep === "setup" && (
             <div style={{ marginBottom: "20px" }}>
               <div style={{ fontSize: "13px", color: "#92400E", fontWeight: "700", marginBottom: "10px" }}>How will answers get submitted?</div>
@@ -866,7 +902,7 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
           )}
 
           {introStep === "qr" && sessionCode && (() => {
-            const joinUrl = `${window.location.origin}${window.location.pathname}?join=${sessionCode}&game=bounty`;
+            const joinUrl = buildJoinUrl(sessionCode);
             return (
               <PhoneJoinPanel
                 sessionCode={sessionCode} joinUrl={joinUrl} teams={propTeams} connectedTeamIds={connectedTeamIds}
@@ -981,7 +1017,7 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
           only one pointing at the right (class, not per-game) join URL. */}
       {inputMode === "phone" && sessionCode && !presetPhoneSession && (
         <PhoneReconnectBadge
-          sessionCode={sessionCode} joinUrl={`${window.location.origin}${window.location.pathname}?join=${sessionCode}&game=bounty`}
+          sessionCode={sessionCode} joinUrl={buildJoinUrl(sessionCode)}
           teams={propTeams} connectedTeamIds={connectedTeamIds}
           accent="#92400E" panelBg="linear-gradient(160deg,#FFFFFF,#FEF3C7)" borderColor="#FDE68A"
         />

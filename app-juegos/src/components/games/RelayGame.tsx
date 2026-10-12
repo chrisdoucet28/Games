@@ -102,7 +102,7 @@ function validateRelaySnapshot(raw: unknown, teamCount: number): RelaySnapshot |
   return { teamIndex: s.teamIndex, slotIndexByTeam, wordsByTeam, pointsByTeam, peoplePerTeam, difficulty, customWords };
 }
 
-export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState, presetPhoneSession }: GameProps) {
+export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState, presetPhoneSession, onRequestPhoneSession }: GameProps) {
   const isSolo = propTeams.length === 1;
   // Constructed unconditionally so its identity never changes across renders (a useRef initializer
   // only runs once at mount) — same idiom as Bounty Board's own cpuRef.
@@ -534,11 +534,27 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
     }
   }, [phase]);
 
+  const [sessionIsClassLevel, setSessionIsClassLevel] = useState(!!presetPhoneSession);
+  // Snapshot taken once at mount — see BountyBoardGame.tsx's own copy for the full explanation of
+  // why the setup/QR block below must key off this instead of the live presetPhoneSession prop.
+  const startedWithPresetSession = useRef(!!presetPhoneSession).current;
+
   const handlePickPhoneMode = () => {
     setInputMode("phone");
-    setSessionCode(generateSessionCode());
+    if (onRequestPhoneSession) {
+      setSessionCode(onRequestPhoneSession());
+      setSessionIsClassLevel(true);
+    } else {
+      setSessionCode(generateSessionCode());
+      setSessionIsClassLevel(false);
+    }
     setIntroStep("qr");
   };
+
+  const buildJoinUrl = (code: string) =>
+    sessionIsClassLevel
+      ? `${window.location.origin}${window.location.pathname}?classJoin=${code}`
+      : `${window.location.origin}${window.location.pathname}?join=${code}&game=relay`;
 
   const handlePickScreenMode = () => {
     setInputMode("screen");
@@ -665,7 +681,7 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
           {/* Skipped entirely for a Class Check-In sitting — presetPhoneSession already picked
               phone mode and its code, and the class-level QR already covered joining. Gated by the
               REAL team count, not the CPU-augmented one — the CPU can never hold a phone. */}
-          {propTeams.length > 1 && !presetPhoneSession && (
+          {propTeams.length > 1 && !startedWithPresetSession && (
             <>
               {introStep === "setup" && (
                 <div style={{ marginBottom: "20px" }}>
@@ -690,7 +706,7 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
               )}
 
               {introStep === "qr" && sessionCode && (() => {
-                const joinUrl = `${window.location.origin}${window.location.pathname}?join=${sessionCode}&game=relay`;
+                const joinUrl = buildJoinUrl(sessionCode);
                 const phoneCountByTeam: Record<string, number> = {};
                 teams.forEach(t => { phoneCountByTeam[String(t.id)] = (connectedByTeam[String(t.id)] ?? []).length; });
                 return (
@@ -812,7 +828,7 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
           only one pointing at the right (class, not per-game) join URL. */}
       {inputMode === "phone" && sessionCode && !presetPhoneSession && (
         <PhoneReconnectBadge
-          sessionCode={sessionCode} joinUrl={`${window.location.origin}${window.location.pathname}?join=${sessionCode}&game=relay`}
+          sessionCode={sessionCode} joinUrl={buildJoinUrl(sessionCode)}
           teams={teams} connectedTeamIds={connectedTeamIds}
           phoneCountByTeam={Object.fromEntries(teams.map(t => [String(t.id), (connectedByTeam[String(t.id)] ?? []).length]))}
           accent="#5EEAD4" panelBg="linear-gradient(160deg,#0F766E,#022C22)" borderColor="#2DD4BF66"

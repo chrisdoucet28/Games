@@ -36,7 +36,13 @@
     <title>ClassCade — ESL Classroom Games & Grammar Lessons (A1-C1)</title>
   </head>
   <body>
-    <div id="root"></div>
+    <!-- Chrome's "Translate this page" rewrites DOM text nodes in place while React is also
+         managing this same subtree, which crashes React's reconciliation with errors like
+         "Failed to execute 'insertBefore' on 'Node': the node before which the new node is to be
+         inserted is not a child of this node" (seen live via Sentry, Android Chrome on /practice).
+         translate="no" + notranslate tell Chrome to leave this element's DOM alone — the browser's
+         translate option still appears for the page overall, it just won't touch what's inside. -->
+    <div id="root" translate="no" class="notranslate"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
