@@ -12,7 +12,7 @@ import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
 import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
 import { RACETRACK_TUTORIAL_STEPS } from "../../data/tutorials/racetrack";
-import { playSound } from "../../lib/sounds";
+import { playSound, type SoundName } from "../../lib/sounds";
 import { setMusicContext, setMusicGame, stopMusic } from "../../lib/music";
 import {
   generateSessionCode, openRaceTrackChannel, closeChannel,
@@ -390,9 +390,11 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
     const space = trackRef.current[landedIdx];
     const name = teamName(teamId);
 
-    const finish = (finalIdx: number, msg: React.ReactNode, color: string, icon: IconName, patch: Partial<RaceTeamState>) => {
+    // `sfx` is the space's own cue — played as the marker moves, or right away when it stays put.
+    const finish = (finalIdx: number, msg: React.ReactNode, color: string, icon: IconName, patch: Partial<RaceTeamState>, sfx?: SoundName) => {
       setRaceTeams(prev => ({ ...prev, [teamId]: { ...prev[teamId], ...patch, pos: finalIdx } }));
       const moved = finalIdx !== landedIdx;
+      if (sfx) { if (moved) setTimeout(() => playSound(sfx), 350); else playSound(sfx); }
       if (moved) setTimeout(() => bumpFx(finalIdx, color, icon), 350);
       setTimeout(() => {
         if (finalIdx >= TOTAL) { triggerWin(teamId); return; }
@@ -404,9 +406,9 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
     if (space.banana) {
       setTrack(prev => prev.map((s, i) => (i === landedIdx ? { ...s, banana: false } : s)));
       if (team.shields > 0) {
-        finish(landedIdx, `${name}'s shield blocked the banana trap!`, "#3B82F6", "shield", { shields: team.shields - 1 });
+        finish(landedIdx, `${name}'s shield blocked the banana trap!`, "#3B82F6", "shield", { shields: team.shields - 1 }, "rtShield");
       } else {
-        finish(Math.max(0, landedIdx - 3), `Banana trap! ${name} slides back 3 spaces!`, "#FFE066", "banana", {});
+        finish(Math.max(0, landedIdx - 3), `Banana trap! ${name} slides back 3 spaces!`, "#FFE066", "banana", {}, "rtBanana");
       }
       return;
     }
@@ -416,40 +418,40 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
         finish(landedIdx, `Normal space — no effect. Keep racing!`, "#4ADE80", "check", {});
         return;
       case "boost":
-        finish(Math.min(landedIdx + 3, TOTAL), `Boost! ${name} zooms forward 3 extra spaces!`, "#F7C948", "bolt", {});
+        finish(Math.min(landedIdx + 3, TOTAL), `Boost! ${name} zooms forward 3 extra spaces!`, "#F7C948", "bolt", {}, "rtBoost");
         return;
       case "mud":
-        if (team.shields > 0) finish(landedIdx, `Shield blocks the mud! ${name} stays clean.`, "#3B82F6", "shield", { shields: team.shields - 1 });
-        else finish(landedIdx, `Mud! ${name} is stuck — skip their next turn!`, "#92400E", "mud", { skip: true });
+        if (team.shields > 0) finish(landedIdx, `Shield blocks the mud! ${name} stays clean.`, "#3B82F6", "shield", { shields: team.shields - 1 }, "rtShield");
+        else finish(landedIdx, `Mud! ${name} is stuck — skip their next turn!`, "#92400E", "mud", { skip: true }, "rtMud");
         return;
       case "shortcut":
-        finish(Math.min(landedIdx + 5, TOTAL), `Shortcut! ${name} races ahead 5 spaces!`, "#7C3AED", "rocket", {});
+        finish(Math.min(landedIdx + 5, TOTAL), `Shortcut! ${name} races ahead 5 spaces!`, "#7C3AED", "rocket", {}, "rtShortcut");
         return;
       case "trap":
-        if (team.shields > 0) finish(landedIdx, `Shield blocks the trap! ${name} is safe.`, "#3B82F6", "shield", { shields: team.shields - 1 });
-        else finish(Math.max(0, landedIdx - 3), `Trap! ${name} is sent back 3 spaces!`, "#EF4444", "explosion", {});
+        if (team.shields > 0) finish(landedIdx, `Shield blocks the trap! ${name} is safe.`, "#3B82F6", "shield", { shields: team.shields - 1 }, "rtShield");
+        else finish(Math.max(0, landedIdx - 3), `Trap! ${name} is sent back 3 spaces!`, "#EF4444", "explosion", {}, "rtTrap");
         return;
       case "teleport": {
-        if (team.shields > 0) { finish(landedIdx, `Shield blocks the teleport! ${name} stays put.`, "#3B82F6", "shield", { shields: team.shields - 1 }); return; }
+        if (team.shields > 0) { finish(landedIdx, `Shield blocks the teleport! ${name} stays put.`, "#3B82F6", "shield", { shields: team.shields - 1 }, "rtShield"); return; }
         const tp = Math.floor(Math.random() * (TOTAL - 1)) + 1;
-        finish(tp, `Teleport! ${name} warps to space ${tp}!`, "#06B6D4", "vortex", {});
+        finish(tp, `Teleport! ${name} warps to space ${tp}!`, "#06B6D4", "vortex", {}, "rtTeleport");
         return;
       }
       case "coin":
-        finish(landedIdx, `Coin! ${name} collects 10 bonus coins!`, "#FBBF24", "coin", { coins: team.coins + 10 });
+        finish(landedIdx, `Coin! ${name} collects 10 bonus coins!`, "#FBBF24", "coin", { coins: team.coins + 10 }, "rtCoin");
         return;
       case "shield":
-        finish(landedIdx, `${name} picks up a Shield! Negatives bounce off next time.`, "#3B82F6", "shield", { shields: team.shields + 1 });
+        finish(landedIdx, `${name} picks up a Shield! Negatives bounce off next time.`, "#3B82F6", "shield", { shields: team.shields + 1 }, "rtShield");
         return;
       case "lucky": {
         const luck = luckyOutcome(team, landedIdx, name);
-        finish(luck.finalIdx, luck.msg, "#EC4899", "clover", luck.patch);
+        finish(luck.finalIdx, luck.msg, "#EC4899", "clover", luck.patch, "rtLucky");
         return;
       }
       case "question": {
         const pu = POWERUPS[Math.floor(Math.random() * POWERUPS.length)];
-        if (pu.id === "shield") { finish(landedIdx, `Bonus question! ${name} answered and earned: Shield!`, "#F97316", "help", { shields: team.shields + 1 }); return; }
-        finish(landedIdx, <>Bonus question! {name} answered and earned: <Icon name={pu.icon} size={13} /> {pu.label}!</>, "#F97316", "help", { powerups: [...team.powerups, pu.id] });
+        if (pu.id === "shield") { finish(landedIdx, `Bonus question! ${name} answered and earned: Shield!`, "#F97316", "help", { shields: team.shields + 1 }, "rtPowerup"); return; }
+        finish(landedIdx, <>Bonus question! {name} answered and earned: <Icon name={pu.icon} size={13} /> {pu.label}!</>, "#F97316", "help", { powerups: [...team.powerups, pu.id] }, "rtPowerup");
         return;
       }
       default:
@@ -474,7 +476,7 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
     const name = teamName(teamId);
     let bonus = 0;
     const powerups = [...team.powerups];
-    if (powerups.includes("rocket")) { powerups.splice(powerups.indexOf("rocket"), 1); bonus += 6; showToast(<><Icon name="rocket" size={13} /> Rocket! {name} blasts forward 6 extra spaces!</>); }
+    if (powerups.includes("rocket")) { powerups.splice(powerups.indexOf("rocket"), 1); bonus += 6; playSound("rtShortcut"); showToast(<><Icon name="rocket" size={13} /> Rocket! {name} blasts forward 6 extra spaces!</>); }
     setRaceTeams(prev => ({ ...prev, [teamId]: { ...prev[teamId], powerups } }));
     landTeam(teamId, total + bonus);
   };
