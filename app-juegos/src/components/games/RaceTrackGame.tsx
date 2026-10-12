@@ -619,19 +619,23 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
   useEffect(() => {
     if (phase === "gameover") { playSound("roundComplete"); stopMusic(); }
   }, [phase]);
-  // Custom Suno gameplay track — see GAME_OVERRIDES in lib/music.ts. Unlike every other
-  // tension-only game (Castle, Zombie Siege, etc.), Race Track's team mode never runs a turn timer
-  // at all (its tension is solo-only, gated behind useTurnTimer above) — so nothing in this
-  // component ever calls setMusicContext("gameplay") itself the way those games' timer cleanup
-  // does. Entry used to depend entirely on the PARENT's generic "screen === 'game'" effect
-  // (LessonGamesGenerator) to assert that context, racing this component's own setMusicGame call
-  // to set the right gameId first — asserting it here directly instead, same as it would if a
-  // timer's cleanup did it, removes that cross-component race for good.
+  // Custom Suno tracks — see GAME_OVERRIDES in lib/music.ts. Unlike every other timer-based game,
+  // Race Track's team mode never runs a turn timer (its tension is solo-only, gated behind
+  // useTurnTimer above), so nothing here gets the gameplay/tension switch for free. Both contexts
+  // are asserted directly instead: tension while a team is answering the task, gameplay while the
+  // car rolls and the space effect plays — so the music shifts with what the class is doing instead
+  // of one track looping for the whole race. Asserting it here (rather than relying on the parent's
+  // generic "screen === 'game'" effect) also removes the old race against this component's own
+  // setMusicGame call. Solo's timer asserts the same two values, so the two never disagree. Skipped
+  // on "gameover" — stopMusic() above owns silence there and this must not restart it.
   useEffect(() => {
     setMusicGame("racetrack");
-    setMusicContext("gameplay");
     return () => setMusicGame(null);
   }, []);
+  useEffect(() => {
+    if (phase === "gameover") return;
+    setMusicContext(phase === "task" ? "tension" : "gameplay");
+  }, [phase]);
 
   useEffect(() => {
     if (!forceFinalRef) return;

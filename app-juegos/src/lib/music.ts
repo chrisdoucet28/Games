@@ -125,11 +125,15 @@ const GAME_OVERRIDES: Partial<Record<string, Partial<Record<MusicContext, string
   hotseat: {
     tension: `${MEDIA_BASE}/music/hotseat-tension.mp3`,
   },
-  // Gameplay-only — Race Track barely ever leaves this context in normal team play (its timer-
-  // driven tension is gated to solo mode), so this is the track that carries almost the entire
-  // game; the shared tension track fills the rare solo-mode countdown instead.
+  // Race Track's own gameplay track carries the board-moving moments (rolling, the space effect).
+  // Teacher feedback that the music "never changes" — it used to be the ONLY track, because the
+  // timer that normally triggers tension is solo-only. RaceTrackGame.tsx now asserts tension itself
+  // while a team is answering the task, so the music audibly shifts between "thinking" and "racing".
+  // Tension reuses Rocket Fuel's "Misión Control" (the house's build-to-a-climax track) rather than
+  // the shared tension track, which teachers found reads as meditation.
   racetrack: {
     gameplay: `${MEDIA_BASE}/music/racetrack-gameplay.mp3`,
+    tension: `${MEDIA_BASE}/music/rocket-tension.mp3`,
   },
   // Genuinely dual-mood, same shape as Auction — a real calm/unhurried stretch (peeking at your
   // role, free discussion trying to spot the spy) and a real distinct tense moment (the vote, or
