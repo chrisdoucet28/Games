@@ -52,19 +52,17 @@ const GAME_OVERRIDES: Partial<Record<string, Partial<Record<MusicContext, string
     gameplay: `${MEDIA_BASE}/music/auction-gameplay.mp3`,
     tension: `${MEDIA_BASE}/music/auction-tension.mp3`,
   },
-  // Reused rather than new tracks — Hot Potato's frantic, comedic-explosion energy is the same
-  // "silly carnival frenzy" identity Word Whack's own tracks were made for, and it barely has a
-  // calm moment of its own to need a distinct gameplay track.
+  // Hot Potato's gameplay is its own cartoon-chase Suno track now; its tension (the exploding-timer
+  // moment) still reuses Word Whack's carnival-frenzy track — same silly-panic identity.
   hotpotato: {
-    gameplay: `${MEDIA_BASE}/music/whack-gameplay.mp3`,
+    gameplay: `${MEDIA_BASE}/music/hotpotato-gameplay.mp3`,
     tension: `${MEDIA_BASE}/music/whack-tension.mp3`,
   },
-  // Reused rather than new tracks — Vault Heist's high-stakes, no-partial-credit, suspense-before-
-  // a-reveal shape is the same beat Auction's tracks were made for, just heist- instead of
-  // auction-themed.
+  // Vault Heist's own heist-jazz gameplay + safe-cracking suspense tracks (it used to borrow
+  // Auction's pair, hence the old TENSION_VOLUME_SCALE entry below).
   vault: {
-    gameplay: `${MEDIA_BASE}/music/auction-gameplay.mp3`,
-    tension: `${MEDIA_BASE}/music/auction-tension.mp3`,
+    gameplay: `${MEDIA_BASE}/music/vault-gameplay.mp3`,
+    tension: `${MEDIA_BASE}/music/vault-tension.mp3`,
   },
   // Tension-only overrides — these three games spend almost their entire active playtime in the
   // timed/tension moment (a brief resolution/breather window is all "gameplay" ever covers for
@@ -76,11 +74,9 @@ const GAME_OVERRIDES: Partial<Record<string, Partial<Record<MusicContext, string
   cards: {
     tension: `${MEDIA_BASE}/music/cards-tension.mp3`,
   },
-  // Reused rather than a new track — King of the Hill's zone-picking/contested-duel tension is
-  // genuinely the same medieval-combat decision-under-pressure beat Castle Defense's track was
-  // made for, just zone-conquest instead of siege-defense.
+  // King of the Hill's own medieval-duel tension track (it used to borrow Castle Defense's).
   hill: {
-    tension: `${MEDIA_BASE}/music/castle-tension.mp3`,
+    tension: `${MEDIA_BASE}/music/hill-tension.mp3`,
   },
   // Both contexts now custom — teacher feedback that the between-wave "preparing" moments (the
   // read-pause before a new wave's zombies start spawning, and the "Wave Complete!" breather)
@@ -131,11 +127,10 @@ const GAME_OVERRIDES: Partial<Record<string, Partial<Record<MusicContext, string
   // in the last zone), so there's a lasting, audible shift at the climax. NOT tied to the
   // answering/rolling phases: answering is most of the game (tension would become the main song)
   // and the car moving is ~2s (too short to carry one) — the teacher rejected that first attempt.
-  // Tension reuses Rocket Fuel's "Misión Control" (the house's build-to-a-climax track) rather than
-  // the shared tension track, which teachers found reads as meditation.
+  // Tension is its own "Final Lap" Suno track (it briefly borrowed Rocket Fuel's).
   racetrack: {
     gameplay: `${MEDIA_BASE}/music/racetrack-gameplay.mp3`,
-    tension: `${MEDIA_BASE}/music/rocket-tension.mp3`,
+    tension: `${MEDIA_BASE}/music/racetrack-tension.mp3`,
   },
   // Genuinely dual-mood, same shape as Auction — a real calm/unhurried stretch (peeking at your
   // role, free discussion trying to spot the spy) and a real distinct tense moment (the vote, or
@@ -181,12 +176,17 @@ const MUSIC_VOLUME: Record<MusicContext, number> = {
 // switch itself (not just the volume) reads as jarring. Scales tension's volume up for just that
 // game; every other game (no entry, scale 1) is unaffected.
 const TENSION_VOLUME_SCALE: Partial<Record<string, number>> = {
-  // Teacher feedback: "the switch up is crazy" the moment a lock's question appears — auction-
-  // tension.mp3 reads as way calmer than auction-gameplay.mp3, a much bigger contrast than the
-  // shared gameplay/tension pair. Narrows the gap rather than eliminating it — Vault Heist's
-  // answer phase is still a team reading/discussing/answering out loud, so it should stay quieter
-  // than full gameplay energy, just not this big a cliff.
-  vault: 1.6,
+  // Teacher feedback (on the old Auction-borrowed pair): "the switch up is crazy" the moment a
+  // lock's question appears. The new vault-tension.mp3 is ~3.4dB quieter than vault-gameplay.mp3
+  // at the shared volumes, which would put the switch about 8.5dB down — the house default is ~9dB
+  // but this is the game that complained about it, so narrowed to ~5dB. Still quieter than full
+  // gameplay energy, since the answer phase is a team talking over it.
+  vault: 1.5,
+  // Race Track's tension is the FINAL-STRETCH climax, not a quiet thinking bed — at the shared 0.14
+  // it would play ~9dB below the racing song and the race would get quieter just as it peaks.
+  // racetrack-tension.mp3 is also mastered ~3dB quieter than racetrack-gameplay.mp3, so this scale
+  // (0.14 x 2.5 = 0.35 vs gameplay's 0.25) lands the two at about the same loudness.
+  racetrack: 2.5,
 };
 
 function resolveVolume(ctx: MusicContext, gameId: string | null): number {
@@ -230,12 +230,26 @@ export function onMusicEnabledChange(fn: (enabled: boolean) => void): () => void
 // depending on currentGameId, so a context-keyed cache would mix up two games' tracks.
 const players = new Map<string, HTMLAudioElement>();
 
+// Seconds of trailing dead air to skip when looping, keyed by file name. racetrack-tension.mp3 ends
+// with ~1.9s of pure silence (measured), which would be an audible hole every loop of the final
+// stretch. Tracks loop by restarting, so jumping back early is enough; `timeupdate` only fires
+// ~4x/second, so the jump lands within ~250ms after this point — hence 2.0 against 1.9 of silence.
+const LOOP_TRIM_END_S: Record<string, number> = {
+  "racetrack-tension.mp3": 2.0,
+};
+
 function getPlayer(src: string): HTMLAudioElement {
   let el = players.get(src);
   if (!el) {
     el = new Audio(src);
     el.loop = true;
     el.volume = 0;
+    const trim = LOOP_TRIM_END_S[src.split("/").pop() ?? ""];
+    if (trim) {
+      el.addEventListener("timeupdate", () => {
+        if (el!.duration && el!.currentTime >= el!.duration - trim) el!.currentTime = 0;
+      });
+    }
     players.set(src, el);
   }
   return el;
