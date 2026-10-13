@@ -621,23 +621,28 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
   useEffect(() => {
     if (phase === "gameover") { playSound("roundComplete"); stopMusic(); }
   }, [phase]);
-  // Custom Suno tracks — see GAME_OVERRIDES in lib/music.ts. Unlike every other timer-based game,
-  // Race Track's team mode never runs a turn timer (its tension is solo-only, gated behind
-  // useTurnTimer above), so nothing here gets the gameplay/tension switch for free. Both contexts
-  // are asserted directly instead: tension while a team is answering the task, gameplay while the
-  // car rolls and the space effect plays — so the music shifts with what the class is doing instead
-  // of one track looping for the whole race. Asserting it here (rather than relying on the parent's
-  // generic "screen === 'game'" effect) also removes the old race against this component's own
-  // setMusicGame call. Solo's timer asserts the same two values, so the two never disagree. Skipped
-  // on "gameover" — stopMusic() above owns silence there and this must not restart it.
+  // Custom Suno tracks — see GAME_OVERRIDES in lib/music.ts. The racing song is the main track for
+  // the whole race; once the leader reaches the last zone (the Speaking quarter, past the third
+  // zone's end) the tense build-up track takes over for the finish. Latched, never reset: a trap or
+  // mud sending the leader back across the line must not flip the song back and forth. Deliberately
+  // NOT tied to the answering/rolling phases — the answering phase is most of the game, and the
+  // car moving lasts ~2 seconds, so neither can carry a song of its own. Race Track's team mode
+  // never runs a turn timer (solo's does, via useTurnTimer above), so the context is asserted here
+  // directly rather than relying on the parent's generic "screen === 'game'" effect, which also
+  // removes the old race against this component's own setMusicGame call. Skipped on "gameover" —
+  // stopMusic() above owns silence there and this must not restart it.
+  const [finalStretch, setFinalStretch] = useState(false);
+  useEffect(() => {
+    if (leadPos > ZONES[ZONES.length - 2].end) setFinalStretch(true);
+  }, [leadPos]);
   useEffect(() => {
     setMusicGame("racetrack");
     return () => setMusicGame(null);
   }, []);
   useEffect(() => {
     if (phase === "gameover") return;
-    setMusicContext(phase === "task" ? "tension" : "gameplay");
-  }, [phase]);
+    setMusicContext(finalStretch ? "tension" : "gameplay");
+  }, [phase, finalStretch]);
 
   useEffect(() => {
     if (!forceFinalRef) return;

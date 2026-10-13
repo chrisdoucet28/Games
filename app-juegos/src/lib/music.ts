@@ -125,10 +125,12 @@ const GAME_OVERRIDES: Partial<Record<string, Partial<Record<MusicContext, string
   hotseat: {
     tension: `${MEDIA_BASE}/music/hotseat-tension.mp3`,
   },
-  // Race Track's own gameplay track carries the board-moving moments (rolling, the space effect).
-  // Teacher feedback that the music "never changes" — it used to be the ONLY track, because the
-  // timer that normally triggers tension is solo-only. RaceTrackGame.tsx now asserts tension itself
-  // while a team is answering the task, so the music audibly shifts between "thinking" and "racing".
+  // Race Track's own racing track is the main song for the whole race. Teacher feedback that the
+  // music "never changes" — it used to be the ONLY track, because the timer that normally triggers
+  // tension is solo-only. RaceTrackGame.tsx now switches to tension for the final stretch (leader
+  // in the last zone), so there's a lasting, audible shift at the climax. NOT tied to the
+  // answering/rolling phases: answering is most of the game (tension would become the main song)
+  // and the car moving is ~2s (too short to carry one) — the teacher rejected that first attempt.
   // Tension reuses Rocket Fuel's "Misión Control" (the house's build-to-a-climax track) rather than
   // the shared tension track, which teachers found reads as meditation.
   racetrack: {
