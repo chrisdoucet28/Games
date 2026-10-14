@@ -8,6 +8,7 @@ import { LESSON_PLANS } from "../../data/lessonPlans";
 import { LessonContent } from "./LessonContent";
 import { Icon } from "./Icon";
 import { TopicDiagram } from "./diagrams/GrammarDiagram";
+import { WithHandoutFooter } from "./HandoutFooter";
 
 type Props = {
   onBack: () => void;
@@ -46,7 +47,7 @@ const PRINT_CSS = `
 // so a typical lesson's title + intro + sections + common-mistakes fits on a single printed page.
 function PrintableLesson({ t, logoUrl }: { t: (typeof LESSON_TOPICS)[number]; logoUrl?: string | null }) {
   return (
-    <div>
+    <WithHandoutFooter topicId={t.id}>
       {logoUrl && (
         <img src={logoUrl} alt="" style={{ display: "block", maxHeight: "34px", maxWidth: "160px", objectFit: "contain", marginBottom: "8px" }} />
       )}
@@ -84,7 +85,7 @@ function PrintableLesson({ t, logoUrl }: { t: (typeof LESSON_TOPICS)[number]; lo
           ))}
         </div>
       )}
-    </div>
+    </WithHandoutFooter>
   );
 }
 
