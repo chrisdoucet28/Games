@@ -4,6 +4,7 @@ import { LEVELS_META } from "../../data/constants";
 import { FOCUS_ORDER, FOCUS_LABEL, matchesTopicSearch } from "../../data/learnTopics";
 import { getPracticeQuestions, type PracticeItem } from "../../lib/practiceContent";
 import { setMetaDescription } from "../../lib/pageMeta";
+import { PRACTICE_TITLE, PRACTICE_DESCRIPTION } from "../../lib/seo";
 import { useStudentSession } from "../../hooks/useStudentSession";
 import { getStudentStats, recordPracticeRound } from "../../lib/studentProgress";
 import { BADGES, earnedBadgeIds, levelInfo, xpForRound, xpFromStats, type StudentStats } from "../../data/studentRewards";
@@ -46,8 +47,8 @@ type RoundReward =
 
 export function PracticeScreen() {
   useEffect(() => {
-    document.title = "Practice — Self-Check Quiz | ClassCade";
-    setMetaDescription("Practice English grammar and vocabulary on your own with an instant self-check quiz — no account needed, works great on your phone.");
+    document.title = PRACTICE_TITLE;
+    setMetaDescription(PRACTICE_DESCRIPTION);
   }, []);
 
   // Everything student-specific is additive: logged out (and for teachers) this screen behaves

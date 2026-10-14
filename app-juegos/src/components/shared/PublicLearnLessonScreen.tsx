@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { LESSON_TOPICS, FOCUS_LABEL, LEVEL_COLOR } from "../../data/learnTopics";
+import { LESSON_TOPICS, LEVEL_COLOR } from "../../data/learnTopics";
 import { renderBold, renderMistake } from "../../data/learnTopicsRender";
 import { setMetaDescription } from "../../lib/pageMeta";
+import { lessonTitle, lessonDescription } from "../../lib/seo";
 import { useStudentSession } from "../../hooks/useStudentSession";
 import { getLessonsDone, markLessonDone, unmarkLessonDone } from "../../lib/studentProgress";
 import { Icon } from "./Icon";
@@ -20,9 +21,10 @@ export function PublicLearnLessonScreen({ topicId }: Props) {
 
   useEffect(() => {
     if (topic) {
-      const focusLabel = FOCUS_LABEL[topic.meta.focus ?? "grammar"];
-      document.title = `${topic.lesson.title} — ${topic.meta.level} ${focusLabel} | ClassCade`;
-      setMetaDescription(topic.lesson.intro);
+      // Same functions scripts/prerender.ts bakes into the static HTML, so what Google fetched and
+      // what the browser shows can't disagree.
+      document.title = lessonTitle(topic);
+      setMetaDescription(lessonDescription(topic));
     } else {
       document.title = "Lesson Not Found | ClassCade";
       setMetaDescription("This lesson could not be found. Browse the full ClassCade Learn library instead.");

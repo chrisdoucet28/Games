@@ -4,6 +4,7 @@ import { ThemeAmbience } from "./ThemeAmbience";
 import { MarketingLanding } from "./MarketingLanding";
 import { Icon } from "./Icon";
 import { peekPendingJoinCode } from "../../lib/pendingJoin";
+import { HOME_TITLE } from "../../lib/seo";
 
 type Mode = "sign-in" | "sign-up";
 
@@ -99,7 +100,9 @@ export function AuthScreen() {
   const [resetSent, setResetSent] = useState(false);
 
   useEffect(() => {
-    document.title = !showForm ? "ClassCade" : mode === "sign-in" ? "Log In - ClassCade" : "Sign Up - ClassCade";
+    // The logged-out landing page IS the homepage Google indexes — it used to overwrite the keyword
+    // title with a bare "ClassCade" the moment the app booted, undoing index.html's own title.
+    document.title = !showForm ? HOME_TITLE : mode === "sign-in" ? "Log In - ClassCade" : "Sign Up - ClassCade";
   }, [showForm, mode]);
 
   // Consumed once per page load: clear the error out of the address bar (a refresh shouldn't show

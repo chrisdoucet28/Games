@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Icon } from "./Icon";
 import { TEAM_COLORS } from "../../data/constants";
 import { setMetaDescription } from "../../lib/pageMeta";
+import { ABOUT_TITLE, ABOUT_DESCRIPTION } from "../../lib/seo";
 
 // A real, stable, publicly-viewable page — same pattern as PrivacyPolicyScreen/
 // TermsOfServiceScreen (rendered by App.tsx before the auth gate, based on
@@ -11,8 +12,8 @@ import { setMetaDescription } from "../../lib/pageMeta";
 // Privacy/Terms — those are legal boilerplate, this is meant to feel like the app itself.
 export function OurStoryScreen() {
   useEffect(() => {
-    document.title = "Our Story - ClassCade";
-    setMetaDescription("Why a teacher built ClassCade: the story behind the games, from classrooms in Korea to ESL classrooms everywhere.");
+    document.title = ABOUT_TITLE;
+    setMetaDescription(ABOUT_DESCRIPTION);
   }, []);
 
   return (
