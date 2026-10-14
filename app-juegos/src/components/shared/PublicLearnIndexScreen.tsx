@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { LESSON_TOPICS, LEVEL_ORDER, LEVEL_COLOR, FOCUS_ORDER, FOCUS_LABEL, matchesTopicSearch } from "../../data/learnTopics";
 import { setMetaDescription } from "../../lib/pageMeta";
+import { LEARN_TITLE, LEARN_DESCRIPTION } from "../../lib/seo";
 import { useStudentSession } from "../../hooks/useStudentSession";
 import { getLessonsDone } from "../../lib/studentProgress";
 import { Icon } from "./Icon";
@@ -12,8 +13,8 @@ import { Icon } from "./Icon";
 // the per-teacher Theme system (a logged-out visitor has no teacher theme).
 export function PublicLearnIndexScreen() {
   useEffect(() => {
-    document.title = "Learn English — Free Grammar & Vocabulary Lessons | ClassCade";
-    setMetaDescription("Free ESL lessons covering grammar, vocabulary, and themes from A1 to C1 — the same topics used in ClassCade's classroom games.");
+    document.title = LEARN_TITLE;
+    setMetaDescription(LEARN_DESCRIPTION);
   }, []);
 
   // Extra UI only for a signed-in student — everyone else (and Google) sees the page exactly as
