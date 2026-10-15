@@ -6897,7 +6897,7 @@ export const TOPIC_LIBRARY = {
       { type:"fill in the blank", question:"'How often ___ she go climbing?'", answer:"does", hint:"Questions about she/he/it use 'does'", difficulty:"hard" },
       { type:"fill in the blank", question:"'My brother ___ judo on Mondays.'", answer:"does", hint:"Martial arts use 'do' (does for he/she/it)", difficulty:"easy" },
       { type:"use vocabulary in a sentence", question:"'play' + a team sport — what you do with friends", answer:"I play football with my friends.", hint:"Ball and team sports use 'play'.", difficulty:"easy" },
-      { type:"use vocabulary in a sentence", question:"'go' + an -ing activity — your weekend", answer:"We go swimming on Saturdays.", hint:"Activities ending in -ing use 'go'.", difficulty:"easy" },
+      { type:"use vocabulary in a sentence", question:"'go' + an activity ending in '-ing' — your weekend", answer:"We go swimming on Saturdays.", hint:"Activities ending in -ing use 'go'.", difficulty:"easy" },
       { type:"use vocabulary in a sentence", question:"'do' + yoga — the evening", answer:"I do yoga in the evening.", hint:"Individual activities use 'do'.", difficulty:"easy" },
       { type:"use vocabulary in a sentence", question:"'play' + a racket sport — a club", answer:"She plays tennis at the club.", hint:"Racket and ball sports use 'play'.", difficulty:"easy" },
       { type:"use vocabulary in a sentence", question:"'go' + a winter sport — your family", answer:"My family goes skiing every winter.", hint:"Skiing ends in -ing — use 'go'.", difficulty:"medium" },
