@@ -3379,7 +3379,7 @@ export const TOPIC_LIBRARY = {
       { type:"correct grammar mistakes", question:"'I've looked everywhere but I can't find it somewhere.'", answer:"I've looked everywhere but I can't find it anywhere.", hint:"'Anywhere' in negative clauses", difficulty:"hard" },
       { type:"choose correct grammar", question:"'___ what happens, stay calm.' (Whatever/Whoever/However)", answer:"Whatever", hint:"'Whatever' refers to things/events", difficulty:"hard" },
       { type:"rewrite sentences", question:"'I / not / see anybody'", answer:"I didn't see anybody. / I saw nobody.", hint:"Choose one negative element", difficulty:"medium", transform:"indefinite-pronoun" },
-      { type:"fill in the blank", question:"'___ calls, tell them I'm busy.'", answer:"Whoever", hint:"'Whoever' = any person who", difficulty:"hard" },
+      { type:"fill in the blank", question:"'___ calls, tell them I'm busy.'", answer:"Whoever / If anyone", hint:"'Whoever' = any person who", difficulty:"hard" },
       { type:"use vocabulary in a sentence", question:"'somebody' — a mystery", answer:"Somebody left their jacket on the chair.", hint:"Use 'somebody' for an unspecified person in affirmative sentences.", difficulty:"easy" },
       { type:"use vocabulary in a sentence", question:"'nothing' — no food left", answer:"There was nothing left in the fridge for breakfast.", hint:"'Nothing' already has negative meaning — don't add 'not' before the verb.", difficulty:"easy" },
       { type:"use vocabulary in a sentence", question:"'everyone' — a party", answer:"Everyone had a great time at the party.", hint:"'Everyone' takes a singular verb, even though it means many people.", difficulty:"easy" },
