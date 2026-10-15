@@ -27549,7 +27549,7 @@ export const TOPIC_LIBRARY = {
       { type:"choose correct grammar", question:"'If there ___ a fire, the alarm makes a sound.' (is/will be/was)", answer:"is", hint:"Present simple in the condition", difficulty:"easy" },
       { type:"fill in the blank", question:"'When I have a headache, I usually ___ some water.'", answer:"drink / take", hint:"Personal habit: present simple", difficulty:"easy" },
       { type:"choose correct grammar", question:"'If you ___ oil and water, they don't mix.' (put/will put/are putting)", answer:"put", hint:"Scientific/general fact: present simple", difficulty:"easy" },
-      { type:"use vocabulary in a sentence", question:"zero conditional — heating ice", answer:"If you leave metal outside, it rusts.", hint:"Zero conditional = if/when + present simple, present simple", difficulty:"easy" },
+      { type:"use vocabulary in a sentence", question:"zero conditional — heating ice", answer:"If you heat ice, it melts.", hint:"Zero conditional = if/when + present simple, present simple", difficulty:"easy" },
       { type:"use vocabulary in a sentence", question:"zero conditional with 'when' — a weather fact", answer:"When it rains a lot, the rivers rise.", hint:"'When' can replace 'if' for facts that are always true", difficulty:"easy" },
       { type:"use vocabulary in a sentence", question:"zero conditional: a school rule", answer:"If students arrive late, the teacher marks them absent.", hint:"Remember present simple in both clauses, not 'will'", difficulty:"easy" },
       { type:"use vocabulary in a sentence", question:"zero conditional: not sleeping enough", answer:"If you don't sleep enough, you feel tired the next day.", hint:"Use present simple for a general result, not 'will feel'", difficulty:"medium" },
