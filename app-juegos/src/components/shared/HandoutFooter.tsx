@@ -1,17 +1,23 @@
 import type { ReactNode } from "react";
-// Already in the main bundle via PhoneJoinPanel, so the QR adds no real weight here.
-import { QRCodeSVG } from "qrcode.react";
 import { SITE, lessonPath } from "../../lib/seo";
+import { Icon } from "./Icon";
 
-// Small black-and-white "back to ClassCade" footer for a printed Learn handout. The URL is the
-// same canonical lesson URL the SEO prerender bakes into that lesson's page (see lib/seo.ts).
+// Small "back to ClassCade" footer for a printed Learn handout: the same joystick + Class/Cade
+// wordmark as the app's own header, inked dark enough to read on a black-and-white printer (the
+// on-screen gold #FCD34D all but vanishes on white paper). The URL is the same canonical lesson URL
+// the SEO prerender bakes into that lesson's page (see lib/seo.ts).
 function Footer({ topicId }: { topicId: string }) {
   const url = `${SITE}${lessonPath(topicId)}`;
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: "10px", borderTop: "1px solid #9CA3AF", paddingTop: "5px", marginTop: "8px", color: "#374151", fontSize: "9.5px", lineHeight: 1.35 }}>
-      <QRCodeSVG value={url} size={40} level="L" marginSize={0} fgColor="#000000" bgColor="#FFFFFF" style={{ flexShrink: 0 }} />
-      <div>
-        <div style={{ fontWeight: "800", color: "#111827" }}>Play free classroom games for this topic at playclasscade.com</div>
+    <div style={{ display: "flex", alignItems: "center", gap: "10px", borderTop: "1px solid #9CA3AF", paddingTop: "6px", marginTop: "8px", color: "#374151", fontSize: "9.5px", lineHeight: 1.35 }}>
+      <div style={{ display: "inline-flex", alignItems: "center", gap: "5px", flexShrink: 0 }}>
+        <Icon name="joystick" size={17} color="#B45309" />
+        <span style={{ fontSize: "14px", fontWeight: "900", color: "#111827", letterSpacing: "-0.01em" }}>
+          Class<span style={{ color: "#B45309" }}>Cade</span>
+        </span>
+      </div>
+      <div style={{ borderLeft: "1px solid #D1D5DB", paddingLeft: "10px" }}>
+        <div style={{ fontWeight: "700", color: "#111827" }}>Play free classroom games for this topic at playclasscade.com</div>
         <div>{url.replace(/^https:\/\//, "")}</div>
       </div>
     </div>
