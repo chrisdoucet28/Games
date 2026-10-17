@@ -36,6 +36,39 @@ export async function updateProfile(patch: { displayName?: string; themeId?: str
   return data as Profile;
 }
 
+// Answering the monthly-update question, from anywhere (sign-up follow-through, the one-time prompt,
+// or the My Profile toggle) — any answer also marks the prompt as seen so it never comes back. The
+// consent timestamp is stamped by a database trigger, not sent from here.
+export async function setMarketingOptIn(optIn: boolean): Promise<void> {
+  const userId = await currentUserId();
+  const { error } = await supabase
+    .from("profiles")
+    .update({ marketing_opt_in: optIn, marketing_prompt_seen: true })
+    .eq("id", userId);
+  if (error) throw error;
+}
+
+// Google sign-up can't carry the sign-up form's checkbox through the OAuth redirect the way
+// email sign-up does (auth metadata → handle_new_user), so its answer is parked here and applied on
+// first login (App.tsx). If it's ever lost (different browser, cleared storage), that account just
+// gets the one-time question instead — never a silent opt-in.
+const PENDING_OPT_IN_KEY = "classcade.pendingMarketingOptIn";
+
+export function parkPendingMarketingOptIn(optIn: boolean): void {
+  try { localStorage.setItem(PENDING_OPT_IN_KEY, optIn ? "1" : "0"); } catch { /* storage blocked */ }
+}
+
+export function takePendingMarketingOptIn(): boolean | null {
+  try {
+    const raw = localStorage.getItem(PENDING_OPT_IN_KEY);
+    if (raw === null) return null;
+    localStorage.removeItem(PENDING_OPT_IN_KEY);
+    return raw === "1";
+  } catch {
+    return null;
+  }
+}
+
 // The only way an account's type changes — a database trigger blocks a direct UPDATE of role. The
 // function itself refuses to turn an account that already has classes into a student account, and
 // its error message is written to be shown to the person as-is.

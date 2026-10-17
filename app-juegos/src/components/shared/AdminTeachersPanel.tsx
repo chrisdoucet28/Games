@@ -1,7 +1,54 @@
 import { useEffect, useMemo, useState } from "react";
 import { ADMIN_COLORS as C } from "./adminColors";
-import { listTeachers, type AdminTeacher } from "../../lib/adminDashboard";
+import { listTeachers, listMarketingOptIns, type AdminTeacher, type MarketingOptIn } from "../../lib/adminDashboard";
 import { FREE_LAUNCH_ALL_PREMIUM } from "../../data/constants";
+
+// The opted-in email list, as a CSV any email tool (Mailchimp, Brevo, etc.) can import. Quotes
+// every field so a display name with a comma can't shift columns.
+function downloadOptInCsv(rows: MarketingOptIn[]) {
+  const q = (v: string) => `"${v.replace(/"/g, '""')}"`;
+  const lines = ["email,name,opted_in_at", ...rows.map(r => [q(r.email), q(r.display_name ?? ""), q(r.opted_in_at ?? "")].join(","))];
+  const url = URL.createObjectURL(new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8" }));
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `classcade-email-list-${new Date().toISOString().slice(0, 10)}.csv`;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+// Its own small card, loaded separately from the teacher table so a database without the
+// opt-in migration just hides this card instead of breaking the whole panel.
+function EmailListCard() {
+  const [rows, setRows] = useState<MarketingOptIn[] | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    listMarketingOptIns().then(setRows).catch(() => setRows(null));
+  }, []);
+
+  if (!rows) return null;
+
+  const copyEmails = async () => {
+    try {
+      await navigator.clipboard.writeText(rows.map(r => r.email).join(", "));
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch { /* clipboard blocked */ }
+  };
+
+  const btn: React.CSSProperties = { background: C.surface, border: `1px solid ${C.border}`, borderRadius: 10, padding: "6px 12px", fontSize: 12, fontWeight: 800, color: C.ink, cursor: rows.length ? "pointer" : "default", opacity: rows.length ? 1 : 0.5, fontFamily: "inherit" };
+
+  return (
+    <div style={{ display: "flex", gap: 10, alignItems: "center", background: C.surface, border: `1px solid ${C.border}`, borderRadius: 13, padding: "12px 16px" }}>
+      <div style={{ flex: 1 }}>
+        <div style={{ fontSize: 13, fontWeight: 800, color: C.ink }}>📧 Email list: {rows.length} opted in</div>
+        <div style={{ fontSize: 11.5, fontWeight: 700, color: C.inkFaint, marginTop: 2 }}>Only these teachers agreed to marketing email. Nobody else gets one.</div>
+      </div>
+      <button type="button" disabled={!rows.length} onClick={copyEmails} style={btn}>{copied ? "Copied!" : "Copy emails"}</button>
+      <button type="button" disabled={!rows.length} onClick={() => downloadOptInCsv(rows)} style={btn}>Download CSV</button>
+    </div>
+  );
+}
 
 // Browse + look-up only for now — no write actions (change a subscription, etc.) yet. The owner
 // wants that eventually, but scoped it out of this first pass; adding it later just means a new
@@ -27,6 +74,7 @@ export function AdminTeachersPanel() {
 
   return (
     <>
+      <EmailListCard />
       <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
         <span style={{ fontSize: 11.5, fontWeight: 800, padding: "6px 11px", borderRadius: 999, border: `1px solid ${C.border}`, color: C.inkDim }}>
           {teachers.length} teachers

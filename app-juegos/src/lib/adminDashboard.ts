@@ -62,6 +62,20 @@ export async function listTeachers(): Promise<AdminTeacher[]> {
   return (data ?? []) as AdminTeacher[];
 }
 
+export interface MarketingOptIn {
+  email: string;
+  display_name: string | null;
+  opted_in_at: string | null;
+}
+
+// Teachers who said yes to the monthly update email (sign-up checkbox, one-time prompt, or the My
+// Profile toggle) — the only list that's ever OK to send marketing email to.
+export async function listMarketingOptIns(): Promise<MarketingOptIn[]> {
+  const { data, error } = await supabase.rpc("admin_marketing_opt_ins");
+  if (error) throw error;
+  return (data ?? []) as MarketingOptIn[];
+}
+
 export async function listAutoFixRuns(): Promise<AutoFixRun[]> {
   const { data, error } = await supabase
     .from("auto_fix_runs")
