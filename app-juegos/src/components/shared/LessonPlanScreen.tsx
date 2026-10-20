@@ -891,7 +891,11 @@ function PrintableLessonPlan({ topic, slides, roundOut, logoUrl }: { topic: Lear
           </ul>
         </div>
       ))}
-      <hr style={printDividerStyle} />
+      {/* Forces the Learn Lesson portion above (title/intro/diagram/sections) onto page 1 by
+          itself — feedback 2c53a70f: once content below this point (practice questions, the
+          round-out exercise, any real-world reading) starts, it should always begin on a fresh
+          page, regardless of how short or long the lesson content above happened to render. */}
+      <hr style={{ ...printDividerStyle, breakAfter: "page", pageBreakAfter: "always" }} />
 
       {questionGroups.map((g, gi) => (
         <div key={gi} style={{ marginTop: gi > 0 ? "12px" : "4px", ...printAvoidBreakStyle }}>
