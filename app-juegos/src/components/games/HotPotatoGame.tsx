@@ -209,9 +209,15 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
     if (!isSolo || phase !== "play" || teams[holderIdx]?.id !== cpuRef.current?.id) return;
     const t = CPU_HOLD_FRACTION_BY_DIFFICULTY[cpuDifficulty];
     const qSecMs = Q_SECONDS * 1000;
-    const holdMs = Math.random() < t.stumbleChance
+    const rawHoldMs = Math.random() < t.stumbleChance
       ? qSecMs * (t.stumbleMin + Math.random() * (t.stumbleMax - t.stumbleMin))
       : qSecMs * (t.min + Math.random() * (t.max - t.min));
+    // Whenever a fraction above (easy's own min/max, or any difficulty's stumble case) pushes the
+    // hold past qSecMs, the per-question timer has already hit 0 and revealed the answer (see the
+    // qTimeLeft effect below) before this timer fires — capping the hold at qSecMs + 3000 means the
+    // student is never left staring at a revealed answer for longer than ~3s before it passes back,
+    // instead of waiting out the CPU's full (and sometimes much longer) hold time unbounded.
+    const holdMs = Math.min(rawHoldMs, qSecMs + 3000);
     const timer = setTimeout(() => {
       if (!roundEndedRef.current) confirmPass();
     }, holdMs);
