@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { TeamIcon } from "./TeamIcon";
 import type { SavedClass } from "../../types";
-import { TEAM_COLORS, GAME_MODES, LEVELS_META, FREE_PLAN_LIMITS } from "../../data/constants";
+import { TEAM_COLORS, GAME_MODES, LEVELS_META, FREE_PLAN_LIMITS, STUDENT_ACCOUNTS_PAUSED } from "../../data/constants";
 import { listClasses, createClass, deleteClass, setLeaderboardVisibility } from "../../lib/classes";
 import { hexToRgba, type Theme } from "../../data/themes";
 import { Icon } from "./Icon";
@@ -222,7 +222,11 @@ export function ClassesScreen({ onBack, onResumeClass, onStartWithClass, theme, 
                   </button>
                 </div>
 
-                <ClassStudentsPanel classId={cls.id} theme={theme} />
+                {/* Hidden while STUDENT_ACCOUNTS_PAUSED (see its own comment in data/constants.ts
+                    and App.tsx's gate) — every other student-facing entry point already respects
+                    this flag, but this panel's join code was never gated, so it kept advertising
+                    an account type nobody could actually create right now (feedback b33f4d5c). */}
+                {!STUDENT_ACCOUNTS_PAUSED && <ClassStudentsPanel classId={cls.id} theme={theme} />}
                 <ClassCoverageSummary classId={cls.id} accentColor={theme.accentSolid} />
               </div>
             ))}
