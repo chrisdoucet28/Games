@@ -6492,7 +6492,7 @@ export const TOPIC_LIBRARY = {
       { type:"fill in the blank", question:"'My dad is really into ___ (fix) old cars.'", answer:"fixing", hint:"After 'into', use the gerund", difficulty:"medium" },
       { type:"fill in the blank", question:"'I don't like ___ (walk) in the rain.'", answer:"walking", hint:"'Don't like' + verb-ing", difficulty:"easy" },
       { type:"fill in the blank", question:"'We ___ (enjoy) cooking together on Sundays.'", answer:"enjoy", hint:"'We' doesn't take -s on the verb", difficulty:"easy" },
-      { type:"fill in the blank", question:"'I don't like ___ noise, especially at night.'", answer:"loud", hint:"The adjective goes before the noun", difficulty:"hard" },
+      { type:"fill in the blank", question:"'I don't like ___ (be) bothered by loud noise at night.'", answer:"being", hint:"'Don't like' + verb-ing, even in the passive", difficulty:"hard" },
       { type:"rewrite sentences", question:"'she / love / read books'", answer:"She loves reading books. (or: She loves to read books.)", hint:"'Love' + gerund or infinitive — both correct", difficulty:"easy", transform:"like-love-hate-gerund" },
       { type:"rewrite sentences", question:"'he / like / play football'", answer:"He likes playing football. (or: He likes to play football.)", hint:"'Like' + gerund or infinitive — both correct", difficulty:"easy", transform:"like-love-hate-gerund" },
       { type:"rewrite sentences", question:"'I / hate / wait in traffic'", answer:"I hate waiting in traffic. (or: I hate to wait in traffic.)", hint:"'Hate' + gerund or infinitive — both correct", difficulty:"easy", transform:"like-love-hate-gerund" },
