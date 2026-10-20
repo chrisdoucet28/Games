@@ -4,6 +4,7 @@ import { ThemeAmbience } from "./ThemeAmbience";
 import { MarketingLanding } from "./MarketingLanding";
 import { Icon } from "./Icon";
 import { peekPendingJoinCode } from "../../lib/pendingJoin";
+import { parkPendingMarketingOptIn } from "../../lib/profile";
 import { HOME_TITLE } from "../../lib/seo";
 
 type Mode = "sign-in" | "sign-up";
@@ -98,6 +99,8 @@ export function AuthScreen() {
   // whatever was already typed in carries over instead of resetting.
   const [resetMode, setResetMode] = useState(false);
   const [resetSent, setResetSent] = useState(false);
+  // Monthly-update consent on the Sign Up tab — unchecked by default, always (opt-in only).
+  const [marketingOptIn, setMarketingOptIn] = useState(false);
 
   useEffect(() => {
     // The logged-out landing page IS the homepage Google indexes — it used to overwrite the keyword
@@ -137,7 +140,12 @@ export function AuthScreen() {
         // as the Google button below) instead of always using the dashboard's Site URL — which also
         // means signing up on a preview/branch site doesn't land on the live one. Supabase falls back
         // to the Site URL if this origin isn't in the dashboard's Redirect URLs allow-list.
-        const { data, error: signUpError } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin } });
+        // `data` lands in auth metadata, which the handle_new_user trigger copies onto the new profile
+        // — so the answer survives confirming the email on a different device.
+        const { data, error: signUpError } = await supabase.auth.signUp({
+          email, password,
+          options: { emailRedirectTo: window.location.origin, data: { marketing_opt_in: marketingOptIn } },
+        });
         if (signUpError) throw signUpError;
         if (data.user && data.user.identities && data.user.identities.length === 0) {
           // Supabase deliberately answers "success" for an email that already has an account (so
@@ -194,6 +202,9 @@ export function AuthScreen() {
 
   const signInWithGoogle = async () => {
     setError(null);
+    // Only from the Sign Up tab, where the checkbox is actually showing — a Google log-in leaves
+    // whatever the account already answered alone.
+    if (mode === "sign-up") parkPendingMarketingOptIn(marketingOptIn);
     const { error: oauthError } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: { redirectTo: window.location.origin },
@@ -340,6 +351,16 @@ export function AuthScreen() {
                       Forgot password?
                     </button>
                   </div>
+                )}
+                {mode === "sign-up" && (
+                  // Applies to the Google button below too (see signInWithGoogle).
+                  <label style={{ display: "flex", alignItems: "flex-start", gap: "8px", color: "#BAE6FD", fontSize: "12.5px", lineHeight: 1.45, marginBottom: "16px", cursor: "pointer" }}>
+                    <input
+                      type="checkbox" checked={marketingOptIn} onChange={e => setMarketingOptIn(e.target.checked)}
+                      style={{ marginTop: "2px", accentColor: "#F59E0B", flexShrink: 0 }}
+                    />
+                    <span>Send me occasional updates: new games, topics and free resources (about once a month). Unsubscribe anytime.</span>
+                  </label>
                 )}
 
                 {error && (

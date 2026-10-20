@@ -66,15 +66,22 @@ function buildHtml(p: Page): string {
   html = swap(html, /<meta name="twitter:title" content="[^"]*"\s*\/?>/, `<meta name="twitter:title" content="${esc(p.title)}" />`, "twitter:title");
   html = swap(html, /<meta name="twitter:description" content="[^"]*"\s*\/?>/, `<meta name="twitter:description" content="${esc(p.description)}" />`, "twitter:description");
   const ld = p.jsonLd.map(o => `    <script type="application/ld+json">${JSON.stringify(o).replace(/</g, "\\u003c")}</script>`).join("\n");
-  html = swap(html, /<\/head>/, `${ld}\n  </head>`, "</head>");
+  html = swap(html, /<\/head>/, `${HIDE_FOR_JS}\n${ld}\n  </head>`, "</head>");
   // Keep the root's own attributes (translate="no" class="notranslate" — the Chrome-translate crash fix).
   html = swap(html, /<div id="root"([^>]*)><\/div>/, (_m, attrs) => `<div id="root"${attrs}>${p.body}</div>`, '<div id="root">');
   return html;
 }
 
-// Plain, readable styling for the few moments before the app's JavaScript replaces this content.
+// Visitors never see the static copy: this runs in <head>, before #root is parsed, so any browser
+// running JavaScript hides it and shows the plain page background until React replaces it (without
+// this it flashed for a split second — "17 competitive team games" + a bullet list — on every full
+// page load). It stays in the HTML source for crawlers, and still shows if JavaScript is off.
+const HIDE_FOR_JS = `    <script>document.documentElement.classList.add("cc-js")</script>
+    <style>.cc-js [data-prerender]{display:none}</style>`;
+
+// Plain, readable styling — only visible with JavaScript off (see HIDE_FOR_JS).
 const WRAP = `font-family:'Segoe UI',system-ui,sans-serif;max-width:780px;margin:0 auto;padding:24px 16px;line-height:1.65;color:#0C1E3D;background:#F0F9FF;min-height:100vh`;
-const wrap = (inner: string) => `<main style="${WRAP}">${inner}</main>`;
+const wrap = (inner: string) => `<main data-prerender style="${WRAP}">${inner}</main>`;
 const crumbs = (items: { name: string; href?: string }[]) =>
   `<nav aria-label="Breadcrumb" style="font-size:14px;margin-bottom:12px">${items.map(i => (i.href ? `<a href="${i.href}">${esc(i.name)}</a>` : esc(i.name))).join(" › ")}</nav>`;
 
