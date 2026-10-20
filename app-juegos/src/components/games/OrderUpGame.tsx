@@ -558,11 +558,19 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
     if (tickets.length < capacity) {
       const needed = capacity - tickets.length;
       const newTickets = Array.from({ length: needed }, () => generateTicket(grammarPool, vocabWordPool, () => ticketIdRef.current++, resolvedCountRef.current));
-      // Solo play has nobody else to claim against, so there's no "tap to claim" step at all —
-      // every ticket is simply already claimed by the one team that exists, the moment it appears.
-      // Everything downstream (the claimed-not-judging card, typing mode, judging, expiry penalty)
-      // then just works unchanged, with zero teams.length === 1 special-casing anywhere else.
-      if (teams.length === 1) newTickets.forEach(t => { t.claimedBy = teams[0].id; });
+      // Solo play skips the "tap to claim" step only for whichever ticket becomes the one team's
+      // first open order — so starting fresh (or finishing everything) always has something to
+      // claim immediately, same as the multi-team floor above. Once she already has a claimed,
+      // unresolved ticket, any further new ticket stays unclaimed like it would for any other
+      // team, so a second order arriving mid-turn needs an explicit tap — otherwise every open
+      // ticket showed as already claimed by her the instant it appeared, with no way for the
+      // teacher to tell which one she was actually working on (feedback f7fc275a).
+      if (teams.length === 1) {
+        let hasClaimed = tickets.some(t => t.claimedBy !== undefined);
+        newTickets.forEach(t => {
+          if (!hasClaimed) { t.claimedBy = teams[0].id; hasClaimed = true; }
+        });
+      }
       setTickets(prev => [...prev, ...newTickets]);
     }
   }, [phase, tickets.length, grammarPool, vocabWordPool, maxSlots, initialSlots, teams]);
