@@ -17,6 +17,7 @@ import { setMusicContext, setMusicGame, stopMusic } from "../../lib/music";
 import {
   generateSessionCode, openRaceTrackChannel, closeChannel,
   type RaceTrackPhase, type RaceTrackStatePayload, type RaceTrackActionPayload,
+  type RaceTrackSpaceKind, type RaceTrackSpaceInfo,
 } from "../../lib/liveSession";
 
 // How long the screen waits after the first buzz of a round before resolving a winner — long
@@ -100,7 +101,10 @@ const POWERUPS: { id: string; label: string; icon: IconName; desc: string; cost:
 
 type TrackSpace = { type: SpaceId | "start" | "finish"; color: string; icon?: IconName | null; banana?: boolean };
 type RaceTeamState = { pos: number; coins: number; shields: number; skip: boolean; powerups: string[]; car: string };
-type EffectInfo = { msg: React.ReactNode; color: string; icon: IconName };
+// plainMsg mirrors msg in plain text (no JSX) — the broadcast to phones (see sendState below)
+// can't carry React nodes, and every msg is already plain text except the two spots that embed a
+// powerup's own icon inline, which pass an explicit override instead.
+type EffectInfo = { msg: React.ReactNode; plainMsg: string; color: string; icon: IconName };
 type FxRing = { idx: number; color: string; icon: IconName | null; key: number };
 type Phase = "intro" | "task" | "rolling" | "effect" | "gameover";
 type RankRow = { id: string | number; name: string; pos: number; points: number };
@@ -141,7 +145,7 @@ function computeTrackPositions(): { x: number; y: number }[] {
 const TPOS = computeTrackPositions();
 const TRACK_PATH_D = TPOS.map((p, i) => `${i ? "L" : "M"}${p.x},${p.y}`).join(" ") + " Z";
 
-function luckyOutcome(team: RaceTeamState, landedIdx: number, teamName: string): { finalIdx: number; msg: React.ReactNode; patch: Partial<RaceTeamState> } {
+function luckyOutcome(team: RaceTeamState, landedIdx: number, teamName: string): { finalIdx: number; msg: React.ReactNode; plainMsg?: string; patch: Partial<RaceTeamState> } {
   const roll = Math.floor(Math.random() * 5);
   if (roll === 0) return { finalIdx: landedIdx, msg: `Lucky! ${teamName} finds 20 bonus coins!`, patch: { coins: team.coins + 20 } };
   if (roll === 1) return { finalIdx: Math.min(landedIdx + 4, TOTAL), msg: `Lucky! ${teamName} leaps forward 4 spaces!`, patch: {} };
@@ -149,7 +153,12 @@ function luckyOutcome(team: RaceTeamState, landedIdx: number, teamName: string):
   if (roll === 3) return { finalIdx: landedIdx, msg: `Lucky! ${teamName} gets 15 bonus coins!`, patch: { coins: team.coins + 15 } };
   const pu = POWERUPS[Math.floor(Math.random() * POWERUPS.length)];
   if (pu.id === "shield") return { finalIdx: landedIdx, msg: `Lucky! ${teamName} earns a free Shield!`, patch: { shields: team.shields + 1 } };
-  return { finalIdx: landedIdx, msg: <>Lucky! {teamName} earns a random powerup: <Icon name={pu.icon} size={13} /> {pu.label}!</>, patch: { powerups: [...team.powerups, pu.id] } };
+  return {
+    finalIdx: landedIdx,
+    msg: <>Lucky! {teamName} earns a random powerup: <Icon name={pu.icon} size={13} /> {pu.label}!</>,
+    plainMsg: `Lucky! ${teamName} earns a random powerup: ${pu.label}!`,
+    patch: { powerups: [...team.powerups, pu.id] },
+  };
 }
 
 const STYLE_TAG = (
@@ -257,7 +266,14 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
   // powerup bought/used mid-animation can get silently overwritten once the chain's own write lands.
   const raceTeamsRef = useRef(raceTeams);
   const trackRef = useRef(track);
-  useEffect(() => { raceTeamsRef.current = raceTeams; trackRef.current = track; });
+  // Mirrored the same way, for the same reason — sendState's broadcast (below) needs the latest
+  // effect/winner even though it's only triggered by the phase-change effect's own dependencies.
+  const lastEffectRef = useRef(lastEffect);
+  const winnerIdRef = useRef(winnerId);
+  useEffect(() => {
+    raceTeamsRef.current = raceTeams; trackRef.current = track;
+    lastEffectRef.current = lastEffect; winnerIdRef.current = winnerId;
+  });
 
   const qByType = useRef<Record<string, QuestionData[]> | null>(null);
   if (!qByType.current) {
@@ -391,14 +407,16 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
     const name = teamName(teamId);
 
     // `sfx` is the space's own cue — played as the marker moves, or right away when it stays put.
-    const finish = (finalIdx: number, msg: React.ReactNode, color: string, icon: IconName, patch: Partial<RaceTeamState>, sfx?: SoundName) => {
+    // `plainMsgOverride` only needs setting at the two call sites whose msg is JSX (an inline
+    // powerup icon) — every other call site's msg is already plain text, reused as-is.
+    const finish = (finalIdx: number, msg: React.ReactNode, color: string, icon: IconName, patch: Partial<RaceTeamState>, sfx?: SoundName, plainMsgOverride?: string) => {
       setRaceTeams(prev => ({ ...prev, [teamId]: { ...prev[teamId], ...patch, pos: finalIdx } }));
       const moved = finalIdx !== landedIdx;
       if (sfx) { if (moved) setTimeout(() => playSound(sfx), 350); else playSound(sfx); }
       if (moved) setTimeout(() => bumpFx(finalIdx, color, icon), 350);
       setTimeout(() => {
         if (finalIdx >= TOTAL) { triggerWin(teamId); return; }
-        setLastEffect({ msg, color, icon });
+        setLastEffect({ msg, plainMsg: plainMsgOverride ?? (typeof msg === "string" ? msg : ""), color, icon });
         setPhase("effect");
       }, moved ? 700 : 250);
     };
@@ -445,13 +463,18 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
         return;
       case "lucky": {
         const luck = luckyOutcome(team, landedIdx, name);
-        finish(luck.finalIdx, luck.msg, "#EC4899", "clover", luck.patch, "rtLucky");
+        finish(luck.finalIdx, luck.msg, "#EC4899", "clover", luck.patch, "rtLucky", luck.plainMsg);
         return;
       }
       case "question": {
         const pu = POWERUPS[Math.floor(Math.random() * POWERUPS.length)];
         if (pu.id === "shield") { finish(landedIdx, `Bonus question! ${name} answered and earned: Shield!`, "#F97316", "help", { shields: team.shields + 1 }, "rtPowerup"); return; }
-        finish(landedIdx, <>Bonus question! {name} answered and earned: <Icon name={pu.icon} size={13} /> {pu.label}!</>, "#F97316", "help", { powerups: [...team.powerups, pu.id] }, "rtPowerup");
+        finish(
+          landedIdx,
+          <>Bonus question! {name} answered and earned: <Icon name={pu.icon} size={13} /> {pu.label}!</>,
+          "#F97316", "help", { powerups: [...team.powerups, pu.id] }, "rtPowerup",
+          `Bonus question! ${name} answered and earned: ${pu.label}!`,
+        );
         return;
       }
       default:
@@ -497,7 +520,7 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
       }
       setRaceTeams(prev => ({ ...prev, [teamId]: { ...prev[teamId], skip: false } }));
       rollOnce(() => {
-        setLastEffect({ msg: `${name} is stuck in the mud and loses their turn!`, color: "#92400E", icon: "sleep" });
+        setLastEffect({ msg: `${name} is stuck in the mud and loses their turn!`, plainMsg: `${name} is stuck in the mud and loses their turn!`, color: "#92400E", icon: "sleep" });
         setPhase("effect");
       });
       return;
@@ -702,7 +725,26 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
         : rawPhase === "task" ? "task"
         : "interlude";
       const positions: Record<string, number> = {};
-      teams.forEach(t => { positions[String(t.id)] = raceTeamsRef.current[t.id]?.pos ?? 0; });
+      const coinsByTeam: Record<string, number> = {};
+      const shieldsByTeam: Record<string, number> = {};
+      const powerupsByTeam: Record<string, string[]> = {};
+      const spaceByTeam: Record<string, RaceTrackSpaceInfo> = {};
+      teams.forEach(t => {
+        const rt = raceTeamsRef.current[t.id];
+        const pos = rt?.pos ?? 0;
+        positions[String(t.id)] = pos;
+        coinsByTeam[String(t.id)] = rt?.coins ?? 0;
+        shieldsByTeam[String(t.id)] = rt?.shields ?? 0;
+        powerupsByTeam[String(t.id)] = rt?.powerups ?? [];
+        const space = trackRef.current[pos];
+        spaceByTeam[String(t.id)] = space
+          ? { kind: space.type as RaceTrackSpaceKind, color: space.color, icon: space.icon ?? null }
+          : { kind: "start", color: "#4ADE80", icon: null };
+      });
+      const effect = lastEffectRef.current;
+      const lastEffectPayload = effect && winnerIdRef.current !== null
+        ? { teamId: winnerIdRef.current, text: effect.plainMsg, color: effect.color, icon: effect.icon }
+        : null;
       const payload: RaceTrackStatePayload = {
         phase: mappedPhase,
         roster: teams.map(t => ({ id: t.id, name: t.name, color: t.color, mascot: t.mascot })),
@@ -711,6 +753,11 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
         buzzedTeamId: buzzedTeamIdRef.current,
         rejectedTeamIds: Array.from(rejectedTeamIdsRef.current),
         positions,
+        coinsByTeam,
+        shieldsByTeam,
+        powerupsByTeam,
+        spaceByTeam,
+        lastEffect: lastEffectPayload,
         ts: Date.now(),
       };
       channel.send({ type: "broadcast", event: "state", payload });

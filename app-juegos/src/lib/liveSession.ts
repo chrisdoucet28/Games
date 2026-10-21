@@ -386,6 +386,14 @@ export type RaceTrackRosterEntry = { id: string | number; name: string; color: T
 // mid-race to go back to waiting.
 export type RaceTrackPhase = "lobby" | "task" | "interlude" | "final";
 
+// Mirrors RaceTrackGame.tsx's own SpaceId (plus its "start"/"finish" track-building specials) —
+// kept as an independent literal union here rather than importing it, matching this file's
+// existing self-contained payload types pattern. `icon` is a plain string (not the app's IconName
+// union) for the same reason; PhoneRaceTrackView casts it when handing it to <Icon>.
+export type RaceTrackSpaceKind =
+  | "start" | "finish" | "normal" | "boost" | "mud" | "shortcut" | "trap" | "teleport" | "coin" | "shield" | "lucky" | "question";
+export type RaceTrackSpaceInfo = { kind: RaceTrackSpaceKind; color: string; icon: string | null };
+
 export type RaceTrackStatePayload = {
   phase: RaceTrackPhase;
   roster: RaceTrackRosterEntry[];
@@ -401,6 +409,20 @@ export type RaceTrackStatePayload = {
   rejectedTeamIds: (string | number)[];
   // Each team's current track position — a light phone-side context strip, not load-bearing.
   positions: Record<string, number>;
+  // The actual board state (coins/shields/powerups/current tile) a phone never saw before — just
+  // the bare position number above. Teacher feedback: a phone should show more than a buzzer and a
+  // number, since the board itself already tracks all of this per team.
+  coinsByTeam: Record<string, number>;
+  shieldsByTeam: Record<string, number>;
+  powerupsByTeam: Record<string, string[]>;
+  // Each team's own current tile, derived from track[positions[id]] — lets a phone show the real
+  // space (icon/color) its own car is sitting on without sending the whole 61-space track over.
+  spaceByTeam: Record<string, RaceTrackSpaceInfo>;
+  // The most recent roll's resolved outcome — the teacher's screen already shows this as a shared
+  // "effect" card during "interlude"; mirrored here in plain text (no JSX) so the team it actually
+  // happened to also sees it on their own phone, not just whoever can read the projector. Always
+  // about whichever team just rolled (teamId), never a combined/ambiguous event.
+  lastEffect: { teamId: string | number; text: string; color: string; icon: string } | null;
   ts: number;
 };
 
