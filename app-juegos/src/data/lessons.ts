@@ -6829,11 +6829,11 @@ export const LESSONS: Record<string, Lesson> = {
       {
         heading: "Sport words you need",
         body: [
-          "Places: a pitch (football, rugby), a court (tennis, basketball), a swimming pool, a gym.",
+          "Places: a field (football, rugby), a court (tennis, basketball), a swimming pool, a gym.",
           "People and things: a team, a player, a coach, a match, a ball, a racket.",
         ],
         examples: [
-          "We play football on the **pitch**.",
+          "We play football on the **field**.",
           "There is a **swimming pool** near my school.",
           "Our **coach** is very friendly.",
         ],

@@ -158,6 +158,13 @@ export interface TeamColor {
     // settable from the client). Gates the /admin panel. Optional for the same reason as role —
     // a database that doesn't have the admin_access migration yet returns neither.
     is_admin?: boolean;
+    // Monthly "what's new" email consent — always opt-in, false by default. marketing_opt_in_at is
+    // the consent record (set by a database trigger, never the client); marketing_prompt_seen is
+    // false until the account has answered the one-time in-app question (or the sign-up checkbox).
+    // Optional for the same reason as role — older databases return none of the three.
+    marketing_opt_in?: boolean;
+    marketing_opt_in_at?: string | null;
+    marketing_prompt_seen?: boolean;
     created_at: string;
     updated_at: string;
   }

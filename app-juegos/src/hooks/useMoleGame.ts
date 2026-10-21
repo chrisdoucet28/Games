@@ -17,9 +17,9 @@ export const DIFFICULTY_OPTIONS: Difficulty[] = ["easy", "medium", "hard"];
 // Difficulty only changes how long each mole stays up before ducking — the 90s turn length never
 // changes. Each mode still ramps faster as the clock runs down (t>60/t>30/t>10/else).
 export const DUCK_MS: Record<Difficulty, [number, number, number, number]> = {
-  easy: [5300, 4500, 3900, 3300],
-  medium: [4400, 3700, 3100, 2500],
-  hard: [4000, 3300, 2600, 2100],
+  easy: [5800, 5000, 4400, 3800],
+  medium: [4900, 4200, 3600, 3000],
+  hard: [4500, 3800, 3100, 2600],
 };
 
 export type ParsedMCQ = { prompt: string; choices: string[]; correctIdx: number };

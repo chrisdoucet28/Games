@@ -86,7 +86,10 @@ export type SoundName = keyof typeof SOUND_FILES;
 // moment more often than not, and shouldn't fight it for attention.
 const DEFAULT_TIER2_VOLUME = 0.7;
 const SOUND_VOLUME: Record<SoundName, number> = {
-  correct: 0.55,
+  // Was 0.55 — teacher feedback (via Vault Heist) flagged this shared "correct" ping as pretty
+  // loud. Same chokepoint cue fires across every game on any score-increasing answer (see
+  // LessonGamesGenerator.tsx's updateScore), so the fix applies everywhere, not just there.
+  correct: 0.45,
   // Was 0.8 — the exact level teacher feedback flagged as "too loud/harsh" for timesUp below,
   // and wrong fires far more often (every incorrect answer, nearly every game) than timesUp
   // (once per turn, at expiry only). Same fix applied here for consistency, pending confirmation.

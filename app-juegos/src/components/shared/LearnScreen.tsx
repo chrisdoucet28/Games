@@ -31,12 +31,19 @@ type Props = {
 // tighter type helps most single lessons fit on one printed page instead of spilling onto a second.
 const PRINT_CSS = `
   @page {
-    margin: 12mm 15mm;
+    margin: 9mm 12mm;
   }
   @media print {
     .learn-no-print { display: none !important; }
     .learn-print-only { display: block !important; }
     .learn-print-bg { background: white !important; padding: 0 !important; }
+    /* Caps every diagram's print footprint at a flat height regardless of its own viewBox aspect
+       ratio — each diagram sets its own inline width:100%/height:auto (see GrammarDiagram.tsx's
+       siblings), which scaled with lesson content width rather than a page-height budget. An audit
+       across all 139 lessons after diagrams shipped found 82 now spilling onto a second printed
+       page, almost entirely accounted for by the diagram's own height. Overriding via !important
+       since the per-diagram inline style otherwise wins. */
+    .print-diagram-cap svg { height: 110px !important; width: auto !important; max-width: 100% !important; }
   }
   .learn-print-only { display: none; }
 `;
@@ -51,24 +58,26 @@ function PrintableLesson({ t, logoUrl }: { t: (typeof LESSON_TOPICS)[number]; lo
       {logoUrl && (
         <img src={logoUrl} alt="" style={{ display: "block", maxHeight: "34px", maxWidth: "160px", objectFit: "contain", marginBottom: "8px" }} />
       )}
-      <span style={{ background: LEVEL_COLOR[t.meta.level ?? "A2"], color: "white", borderRadius: "999px", padding: "2px 10px", fontSize: "10.5px", fontWeight: "800" }}>{t.meta.level}</span>
-      <h2 style={{ fontSize: "19px", fontWeight: "900", color: "#111827", margin: "6px 0 5px" }}>{t.lesson.title}</h2>
-      <p style={{ color: "#374151", fontSize: "12px", lineHeight: 1.4, margin: "0 0 10px" }}>{t.lesson.intro}</p>
+      <span style={{ background: LEVEL_COLOR[t.meta.level ?? "A2"], color: "white", borderRadius: "999px", padding: "2px 9px", fontSize: "10px", fontWeight: "800" }}>{t.meta.level}</span>
+      <h2 style={{ fontSize: "17px", fontWeight: "900", color: "#111827", margin: "5px 0 4px" }}>{t.lesson.title}</h2>
+      <p style={{ color: "#374151", fontSize: "11.5px", lineHeight: 1.3, margin: "0 0 7px" }}>{t.lesson.intro}</p>
 
-      <TopicDiagram topicId={t.id} variant="print" />
+      <div className="print-diagram-cap" style={{ textAlign: "center", marginBottom: "4px" }}>
+        <TopicDiagram topicId={t.id} variant="print" />
+      </div>
 
       {t.lesson.sections.map((section, i) => (
-        <div key={i} style={{ marginBottom: "9px" }}>
-          <div style={{ fontWeight: "800", color: "#374151", fontSize: "11px", marginBottom: "3px", textTransform: "uppercase", letterSpacing: "0.03em" }}>{section.heading}</div>
+        <div key={i} style={{ marginBottom: "6px" }}>
+          <div style={{ fontWeight: "800", color: "#374151", fontSize: "10.5px", marginBottom: "2px", textTransform: "uppercase", letterSpacing: "0.03em" }}>{section.heading}</div>
           <ul style={{ margin: 0, paddingLeft: "16px", color: "#1F2937" }}>
             {section.body.map((line, j) => (
-              <li key={j} style={{ marginBottom: "2px", lineHeight: 1.3, fontSize: "11.5px" }}>{renderBold(line)}</li>
+              <li key={j} style={{ marginBottom: "1px", lineHeight: 1.22, fontSize: "11px" }}>{renderBold(line)}</li>
             ))}
           </ul>
           {section.examples && section.examples.length > 0 && (
-            <div style={{ border: "1px solid #D1D5DB", borderRadius: "5px", padding: "5px 9px", marginTop: "5px" }}>
+            <div style={{ border: "1px solid #D1D5DB", borderRadius: "5px", padding: "4px 8px", marginTop: "4px" }}>
               {section.examples.map((ex, j) => (
-                <div key={j} style={{ fontSize: "11px", fontStyle: "italic", color: "#1F2937", lineHeight: 1.3, marginBottom: j < section.examples!.length - 1 ? "2px" : 0 }}>
+                <div key={j} style={{ fontSize: "10.5px", fontStyle: "italic", color: "#1F2937", lineHeight: 1.2, marginBottom: j < section.examples!.length - 1 ? "1px" : 0 }}>
                   {renderBold(ex)}
                 </div>
               ))}
@@ -78,10 +87,10 @@ function PrintableLesson({ t, logoUrl }: { t: (typeof LESSON_TOPICS)[number]; lo
       ))}
 
       {t.lesson.commonMistakes.length > 0 && (
-        <div style={{ border: "1px solid #9CA3AF", borderRadius: "5px", padding: "7px 9px", marginTop: "5px" }}>
-          <div style={{ fontWeight: "800", color: "#111827", fontSize: "10.5px", marginBottom: "4px", textTransform: "uppercase", letterSpacing: "0.03em" }}>Common mistakes</div>
+        <div style={{ border: "1px solid #9CA3AF", borderRadius: "5px", padding: "6px 8px", marginTop: "4px" }}>
+          <div style={{ fontWeight: "800", color: "#111827", fontSize: "10px", marginBottom: "3px", textTransform: "uppercase", letterSpacing: "0.03em" }}>Common mistakes</div>
           {t.lesson.commonMistakes.map((m, i) => (
-            <div key={i} style={{ fontSize: "10.5px", color: "#1F2937", marginBottom: i < t.lesson.commonMistakes.length - 1 ? "3px" : 0, lineHeight: 1.25 }}>{renderMistake(m, "print")}</div>
+            <div key={i} style={{ fontSize: "10px", color: "#1F2937", marginBottom: i < t.lesson.commonMistakes.length - 1 ? "2px" : 0, lineHeight: 1.18 }}>{renderMistake(m, "print")}</div>
           ))}
         </div>
       )}

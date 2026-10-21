@@ -124,9 +124,14 @@ type SpySnapshot = {
   spyWinsByTeam: Record<string | number, number>;
   crewWinsByTeam: Record<string | number, number>;
   gameScoreByTeam: Record<string | number, number>;
-  // Only meaningful in solo (teacher stand-in) sessions — undefined/absent in normal multi-team
-  // games, where there's no teacher participant to track a score for.
+  // Only meaningful in solo (teacher stand-in) or a real-2-team game the teacher opted into —
+  // undefined/absent in normal multi-team games, where there's no teacher participant to track a
+  // score for.
   teacherScore?: number;
+  // Only meaningful for a real 2-team game (see canTeacherOptIn) — whether the teacher had opted
+  // in as a 3rd player when this was saved. Read directly off initialGameState before this type's
+  // own validation even runs, since effectiveTeamCount needs it first — see its own comment above.
+  teacherJoining?: boolean;
 };
 
 function validateSpySnapshot(raw: unknown, teamCount: number, roundCount: number): SpySnapshot | undefined {
@@ -138,6 +143,7 @@ function validateSpySnapshot(raw: unknown, teamCount: number, roundCount: number
     timesWasSpy: s.timesWasSpy ?? {}, spyWinsByTeam: s.spyWinsByTeam ?? {}, crewWinsByTeam: s.crewWinsByTeam ?? {},
     gameScoreByTeam: s.gameScoreByTeam ?? {},
     teacherScore: typeof s.teacherScore === "number" ? s.teacherScore : undefined,
+    teacherJoining: typeof s.teacherJoining === "boolean" ? s.teacherJoining : undefined,
   };
 }
 
@@ -145,20 +151,34 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
   const DISCUSS_SECONDS = 120;
   // Solo play makes the teacher the second live participant — Spy Among Us already has a
   // fully-built, fully-tested 2-player ruleset (isTwoPlayer below), so this just needs to make
-  // `teams` genuinely length 2. `effectiveTeamCount` is used (rather than `teams.length`) to
-  // validate a resumed snapshot before `teams` itself is constructed, since resuming needs to
-  // know the right bound before teacherScore/teams exist yet.
+  // `teams` genuinely length 2. Real 2-team games can ALSO optionally add the teacher in as a
+  // genuine 3rd player (teacherOptIn below) — unlike solo, where the teacher is required just to
+  // have a second participant at all, this is a pure bonus the two real teams don't need; opting
+  // in simply pushes `teams` to length 3, which is enough on its own to route the whole game
+  // through the already-built group ruleset (isTwoPlayer below) instead of the 2-player one, with
+  // no further branching needed anywhere else in this file (feedback f54fe95b).
   const isSolo = propTeams.length === 1;
-  const teacherTeamRef = useRef(isSolo ? makeTeacherTeam() : null);
-  const effectiveTeamCount = isSolo ? 2 : propTeams.length;
+  const canTeacherOptIn = propTeams.length === 2;
+  // Read once, from a resumed game's own save — effectiveTeamCount (below) needs to know whether
+  // the teacher was part of that save BEFORE `teams` itself can be built, so this can't wait for
+  // validateSpySnapshot's own result (which needs effectiveTeamCount to validate against).
+  const savedTeacherJoining = typeof (initialGameState as { teacherJoining?: unknown } | null | undefined)?.teacherJoining === "boolean"
+    ? (initialGameState as { teacherJoining: boolean }).teacherJoining
+    : undefined;
+  // Only ever meaningful (and only ever shown as a choice) when canTeacherOptIn — isSolo always
+  // forces teacherJoining true below regardless of this state's value.
+  const [teacherOptIn, setTeacherOptIn] = useState(() => canTeacherOptIn && (savedTeacherJoining ?? false));
+  const teacherJoining = isSolo || (canTeacherOptIn && teacherOptIn);
+  const teacherTeamRef = useRef(makeTeacherTeam());
+  const effectiveTeamCount = teacherJoining ? propTeams.length + 1 : propTeams.length;
   const resumed = useRef(validateSpySnapshot(initialGameState, effectiveTeamCount, questions.length)).current;
   const [teacherScore, setTeacherScore] = useState(() => resumed?.teacherScore ?? 0);
   // Memoized so `teams` is referentially stable across renders when nothing has actually
   // changed — a fresh array literal every render would break any effect/callback that depends
   // on `teams` by reference.
   const teams = useMemo(
-    () => (isSolo ? [propTeams[0], { ...teacherTeamRef.current!, score: teacherScore }] : propTeams),
-    [isSolo, propTeams, teacherScore]
+    () => (teacherJoining ? [...propTeams, { ...teacherTeamRef.current, score: teacherScore }] : propTeams),
+    [teacherJoining, propTeams, teacherScore]
   );
   // Points earned in THIS game only — team.score is the cross-game running total, so the final
   // screen ranking by it declared whoever was ahead overall the winner even when another team
@@ -168,7 +188,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
   // parent's onUpdateScore/ScoreBoard/saved-class state.
   const updateScore = (id: string | number, delta: number) => {
     setGameScoreByTeam(prev => ({ ...prev, [id]: (prev[id] ?? 0) + delta }));
-    if (isSolo && id === teacherTeamRef.current?.id) { setTeacherScore(s => s + delta); }
+    if (teacherJoining && id === teacherTeamRef.current.id) { setTeacherScore(s => s + delta); }
     else { onUpdateScore(id, delta); }
   };
   const isTwoPlayer = teams.length === 2;
@@ -243,9 +263,9 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
 
   useEffect(() => {
     if (!serializeStateRef) return;
-    serializeStateRef.current = (): SpySnapshot => ({ ri, spyTeamIdx, timesWasSpy, spyWinsByTeam, crewWinsByTeam, gameScoreByTeam, teacherScore });
+    serializeStateRef.current = (): SpySnapshot => ({ ri, spyTeamIdx, timesWasSpy, spyWinsByTeam, crewWinsByTeam, gameScoreByTeam, teacherScore, teacherJoining });
     return () => { if (serializeStateRef) serializeStateRef.current = null; };
-  }, [serializeStateRef, ri, spyTeamIdx, timesWasSpy, spyWinsByTeam, crewWinsByTeam, gameScoreByTeam, teacherScore]);
+  }, [serializeStateRef, ri, spyTeamIdx, timesWasSpy, spyWinsByTeam, crewWinsByTeam, gameScoreByTeam, teacherScore, teacherJoining]);
   const [peekIdx, setPeekIdx] = useState(0);
   const [revealed, setRevealed] = useState(false);
   const [votes, setVotes] = useState<Record<string | number, string | number>>({});
@@ -439,6 +459,24 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
       setTp2SpeakIdx(0);
       setPhase("speak-2p");
     }
+  };
+
+  // Wraps enterRoundStartPhase for the very first round's "Start Mission" click only (never for
+  // nextRound()'s own later calls, which already do their own equivalent re-seed right around that
+  // call and would otherwise get clobbered by a second one here). Only matters for a real 2-team
+  // game: spyTeamIdx/timesWasSpy/speakOrder/rollDice were all seeded at mount from the ORIGINAL
+  // 2-team `teams`, before the teacher's opt-in choice (made on this same intro screen) could have
+  // changed it to 3 — without this, round 1 would silently run as if the teacher never joined.
+  const startMission = () => {
+    if (canTeacherOptIn) {
+      const freshSpyIdx = randomTeamIndex();
+      setSpyTeamIdx(freshSpyIdx);
+      const freshSpyId = teams[freshSpyIdx]?.id;
+      if (freshSpyId !== undefined) setTimesWasSpy({ [freshSpyId]: 1 });
+      setSpeakOrder([...teams]);
+      setRollDice(teams.map(() => null));
+    }
+    enterRoundStartPhase();
   };
 
   const round = questions[ri] as SpyRound | undefined;
@@ -739,6 +777,29 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
               ? "Just the two of you — take it in turns to be the sneaky one!"
               : `${teams.length} teams this round — a new team becomes the Spy every round.`}
           </div>
+          {/* Optional for a real 2-team game only — solo already requires the teacher just to have
+              a second participant at all, and a 3+-team game already has plenty of crew without
+              needing the teacher as a bonus player (feedback f54fe95b was specifically about the
+              2-team case). Toggling this changes `teams`.length from 2 to 3, which on its own is
+              enough to route the whole game through the group ruleset below instead of the 1v1
+              one — see teacherJoining's own comment above. */}
+          {canTeacherOptIn && (
+            <div style={{ marginBottom: "20px" }}>
+              <button
+                onClick={() => setTeacherOptIn(v => !v)}
+                className="sau-btn"
+                style={{
+                  display: "inline-flex", alignItems: "center", gap: "8px",
+                  padding: "10px 20px", borderRadius: "12px", fontWeight: "800", fontSize: "14px", cursor: "pointer",
+                  border: `2px solid ${teacherOptIn ? "#38BDF8" : "rgba(255,255,255,0.2)"}`,
+                  background: teacherOptIn ? "rgba(56,189,248,0.15)" : "rgba(255,255,255,0.05)",
+                  color: teacherOptIn ? "#38BDF8" : "#94A3B8",
+                }}
+              >
+                <Icon name="school" size={14} /> {teacherOptIn ? "Teacher is playing too — it's a 3-way!" : "Want the teacher to join in as a 3rd player?"}
+              </button>
+            </div>
+          )}
           <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "24px" }}>
             {teams.map((team) => (
               <div
@@ -791,9 +852,9 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
                 accent="#38BDF8" panelBg="linear-gradient(160deg,#1E3A5F,#0F172A)" borderColor="#38BDF866"
                 footer={
                   <>
-                    {isSolo && (
+                    {teacherJoining && (
                       <div style={{ fontSize: "12px", color: "#FCD34D", fontWeight: "700", marginBottom: "10px", lineHeight: 1.5 }}>
-                        <Icon name="phone" size={12} /> Playing solo? Scan this with your own phone too and join as "Teacher" — that way your role stays hidden from the class, same as theirs.
+                        <Icon name="phone" size={12} /> Teacher playing too? Scan this with your own phone too and join as "Teacher" — that way your role stays hidden from the class, same as theirs.
                       </div>
                     )}
                     <button onClick={handlePickScreenMode} style={{ background: "none", border: "none", color: "#9CA3AF", fontSize: "12px", fontWeight: "700", cursor: "pointer", textDecoration: "underline" }}>
@@ -825,7 +886,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
             />
           )}
           <button
-            onClick={enterRoundStartPhase}
+            onClick={startMission}
             className="sau-btn"
             style={{
               display: "inline-flex", alignItems: "center", gap: "8px",
