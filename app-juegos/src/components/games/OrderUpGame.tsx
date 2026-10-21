@@ -172,6 +172,26 @@ function pickItemCount(resolvedCount: number): number {
   return 3;
 }
 
+// A ticket's vocab badges show whatever form the word happens to be stored in — for most vocab
+// (nouns, adjectives, base-form verbs) that's fine in any sentence, but the hotSeatWords pool
+// several topics draw from (irregular_verbs, past_simple, and scattered individual entries
+// elsewhere) store verbs in their PAST TENSE form, since that's literally what those topics teach.
+// Pairing one of those with a "negative"/"question" grammar badge on the same ticket nudges a
+// student toward an unwritable "Did you bought...?" instead of "Did you buy...?" — negative and
+// question both need the auxiliary + BASE form, not the past form (feedback 7e1f04af). Covers
+// every past-tense/participle form actually used as a hotSeatWords entry in topics.ts, cross-
+// checked against the base form topics.ts itself documents alongside each one (e.g. "Yesterday I
+// ___ to the park. (go)" confirms went -> go) — left out any word ambiguous between a verb and an
+// adjective reading (e.g. "broken", "left") since the adjective reading already works fine as-is.
+const PAST_TENSE_BASE_FORM: Record<string, string> = {
+  ate: "eat", bought: "buy", broke: "break", took: "take", wrote: "write", written: "write",
+  fell: "fall", drove: "drive", spoke: "speak", spoken: "speak", taught: "teach", slept: "sleep",
+  lost: "lose", stolen: "steal", grown: "grow", forgotten: "forget", forgot: "forget",
+  chose: "choose", ran: "run", caught: "catch", thought: "think", went: "go", gone: "go",
+  saw: "see", seen: "see", came: "come", built: "build", was: "be", were: "be",
+  eaten: "eat", played: "play", repaired: "repair", got: "get", said: "say",
+};
+
 // Picks each item's KIND with an even coin flip, independent of how large each pool is — the
 // actual content is wildly lopsided (1200+ unique vocab words vs. ~85 grammar options across
 // positive/negative/question + every topic's transform tags combined), so slicing one shuffled
@@ -213,6 +233,14 @@ function generateTicket(grammarPool: string[], vocabWordPool: string[], nextId: 
       usedVocab.add(word);
       items.push({ kind: "vocab", word, foodEmoji: randomFrom(DINER_FOOD_EMOJIS) });
     }
+  }
+  // This ticket's own grammar badge (if any) decides whether its vocab badges need the swap above
+  // — a bare vocab badge, or one paired with "positive" or any other transform tag, keeps showing
+  // the word's stored form unchanged.
+  if (items.some(it => it.kind === "grammar" && (it.transform === "negative" || it.transform === "question"))) {
+    items.forEach(it => {
+      if (it.kind === "vocab" && PAST_TENSE_BASE_FORM[it.word]) it.word = PAST_TENSE_BASE_FORM[it.word];
+    });
   }
   const totalSeconds = TICKET_SECONDS_BY_ITEM_COUNT[items.length] ?? TICKET_SECONDS_BY_ITEM_COUNT[1];
   return {
