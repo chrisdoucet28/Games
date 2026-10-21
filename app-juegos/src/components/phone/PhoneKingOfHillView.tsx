@@ -138,11 +138,14 @@ function ZoneBoard({ state, teamId }: { state: HillStatePayload; teamId: string 
     );
   }
 
+  // The 4 corners (NE/NW/SE/SW) only exist in state.zones for larger team counts (see
+  // KingOfHillGame.tsx's zonesForTeamCount) — renderCell already falls back to an empty cell
+  // when an id isn't present, so a 2-team game's board renders identically to before.
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "8px", maxWidth: "280px", margin: "0 auto" }}>
-      {renderCell(null)}{renderCell("North")}{renderCell(null)}
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "8px", maxWidth: state.zones.length > 5 ? "320px" : "280px", margin: "0 auto" }}>
+      {renderCell("NW")}{renderCell("North")}{renderCell("NE")}
       {renderCell("West")}{renderCell("Center")}{renderCell("East")}
-      {renderCell(null)}{renderCell("South")}{renderCell(null)}
+      {renderCell("SW")}{renderCell("South")}{renderCell("SE")}
     </div>
   );
 }

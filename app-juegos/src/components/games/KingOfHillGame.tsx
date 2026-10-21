@@ -43,28 +43,58 @@ type ZoneDef = { id: string; icon: IconName; pts: number; label?: string; prefix
 
 // Grammar-focus mode: King of the Hill's dominant flavor is "fill in the blank" — zones are
 // plain territory, the linguistic identity comes entirely from the shared, simultaneous-answer
-// duel mechanic (both teams face the exact same blank when contesting a claimed zone).
+// duel mechanic (both teams face the exact same blank when contesting a claimed zone). The 4
+// corners (NE/NW/SE/SW) only come into play for larger team counts (see zonesForTeamCount) —
+// same "flag" icon and "2 pts" tier as the existing East/West, just filling in the board's
+// compass corners so bigger classes get more free territory before duels become mandatory.
 const HILL_ZONES_GRAMMAR: ZoneDef[] = [
   { id: "North", icon: "flag", pts: 3 },
   { id: "South", icon: "flag", pts: 3 },
   { id: "East", icon: "flag", pts: 2 },
   { id: "West", icon: "flag", pts: 2 },
   { id: "Center", icon: "crown", pts: 5 },
+  { id: "NE", icon: "flag", pts: 2 },
+  { id: "NW", icon: "flag", pts: 2 },
+  { id: "SE", icon: "flag", pts: 2 },
+  { id: "SW", icon: "flag", pts: 2 },
 ];
 
 // Theme mode: zones are reflavored as discourse moves. Claiming zones across a round
 // literally assembles a class conversation about the theme — opinion, question, example,
 // pushback, alternative — instead of five disconnected one-liners. Each zone wraps whatever
-// speaking prompt comes up with a move-specific prefix, so no new content is needed.
+// speaking prompt comes up with a move-specific prefix, so no new content is needed. The 4
+// corners get their own distinct discourse moves (never duplicating the base 5's Question/
+// Example/Agree-Disagree/Alternative/Opinion) — same reasoning as the grammar corners above,
+// just only shown to larger classes (see zonesForTeamCount).
 const HILL_ZONES_THEME: ZoneDef[] = [
   { id: "North", icon: "help", pts: 3, label: "Question", prefix: "Ask a follow-up question about: " },
   { id: "South", icon: "chat", pts: 3, label: "Example", prefix: "Give a personal example about: " },
   { id: "East", icon: "handshake", pts: 2, label: "Agree/Disagree", prefix: "Agree or disagree, and say why: " },
   { id: "West", icon: "idea", pts: 2, label: "Alternative", prefix: "Suggest an alternative or solution about: " },
   { id: "Center", icon: "crown", pts: 5, label: "Opinion", prefix: "Give your opinion: " },
+  { id: "NE", icon: "crystalBall", pts: 2, label: "Prediction", prefix: "Predict what might happen next about: " },
+  { id: "NW", icon: "chart", pts: 2, label: "Comparison", prefix: "Compare this to something else you know: " },
+  { id: "SE", icon: "search", pts: 2, label: "Clarification", prefix: "Ask for more detail about: " },
+  { id: "SW", icon: "bookOpen", pts: 2, label: "Summary", prefix: "Summarize the main point about: " },
 ];
 
-const TOTAL_ROUNDS = 4;
+// Length pass (teacher feedback: "4 rounds is too few" + "more rounds with fewer teams, fewer
+// rounds with more teams; fewer zones with fewer teams, more zones with more teams"). Every
+// team count still gets strictly more rounds-per-team than the old flat 4, and the corner zones
+// only unlock once there are enough teams to actually need the extra territory.
+function roundsForTeamCount(teamCount: number): number {
+  if (teamCount <= 2) return 7;
+  if (teamCount === 3) return 6;
+  return 5; // 4-5 teams
+}
+
+function zonesForTeamCount(teamCount: number, allZones: ZoneDef[]): ZoneDef[] {
+  const byId = (id: string) => allZones.find(z => z.id === id)!;
+  const base = ["North", "South", "East", "West", "Center"].map(byId);
+  if (teamCount <= 2) return base;
+  if (teamCount === 3) return [...base, byId("NE"), byId("SW")];
+  return [...base, byId("NE"), byId("NW"), byId("SE"), byId("SW")]; // 4-5 teams
+}
 
 // Local counterpart to Spy Among Us's DiceFace — same mask-punch pip technique, kept file-local
 // since dynamic 1-6 dice rolls are specific to these two games' turn-order mechanics.
@@ -195,7 +225,11 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
     [isSolo, propTeams, opponentType, cpuScore, teacherScore]
   );
   const isThemeMode = questions.length > 0 && questions.every(q => q.type === "speaking task");
-  const ZONES = isThemeMode ? HILL_ZONES_THEME : HILL_ZONES_GRAMMAR;
+  // Both the round count and the zone set scale with how many teams are actually playing — see
+  // roundsForTeamCount/zonesForTeamCount above for the full reasoning. teams.length is stable
+  // across renders (see the useMemo above) so this doesn't change mid-game once teams is set.
+  const TOTAL_ROUNDS = roundsForTeamCount(teams.length);
+  const ZONES = zonesForTeamCount(teams.length, isThemeMode ? HILL_ZONES_THEME : HILL_ZONES_GRAMMAR);
   // Points earned in THIS game only — team.score is the cross-game running total, so the "final"
   // screen below ranking by it declared whoever was ahead overall the winner of this specific
   // King of the Hill match, even when another team scored more zone-control/duel points here.
@@ -747,7 +781,7 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
           <div style={{ marginBottom: "10px" }}><Icon name="crown" size={36} /></div>
           <div style={{ fontWeight: "900", fontSize: "20px", marginBottom: "10px", color: "#F9A8D4" }}>King of the Hill</div>
           <div style={{ fontSize: "15px", lineHeight: 1.7 }}>
-            A map of <strong style={{ color: "#F9A8D4" }}>5 zones</strong> is up for grabs — answer to <strong style={{ color: "#F9A8D4" }}>claim one</strong>.{" "}
+            A map of <strong style={{ color: "#F9A8D4" }}>{ZONES.length} zones</strong> is up for grabs — answer to <strong style={{ color: "#F9A8D4" }}>claim one</strong>.{" "}
             {isThemeMode
               ? "Each zone is a different conversation move — claiming zones builds a full class discussion."
               : "Every zone is a quick grammar challenge."}<br />
@@ -929,6 +963,12 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
     );
   };
 
+  // Safe wrapper around renderZone for the 3x3 grid below — the 4 corner ids aren't always part
+  // of the active ZONES set (see zonesForTeamCount), and renderZone itself assumes the zone it's
+  // given exists. Falls back to the same empty placeholder cell the grid has always used for an
+  // unfilled corner.
+  const renderCell = (zId: string) => (ZONES.some(z => z.id === zId) ? renderZone(zId) : <div key={zId} />);
+
   const attacker = contest ? teams.find(t => t.id === contest.attackerId) : null;
   const defender = contest ? teams.find(t => t.id === contest.defenderId) : null;
 
@@ -1013,8 +1053,14 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
                 );
               })}
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "8px", maxWidth: "380px", margin: "0 auto 14px" }}>
-              <div />{renderZone("North")}<div />{renderZone("West")}{renderZone("Center")}{renderZone("East")}<div />{renderZone("South")}<div />
+            {/* Full 3x3 compass grid always — the 4 corners (NE/NW/SE/SW) only render as actual
+                zones for larger team counts (see zonesForTeamCount); otherwise they're the same
+                empty placeholder cells this grid has always had, so a 2-team game looks identical
+                to before. */}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "8px", maxWidth: ZONES.length > 5 ? "460px" : "380px", margin: "0 auto 14px" }}>
+              {renderCell("NW")}{renderCell("North")}{renderCell("NE")}
+              {renderCell("West")}{renderCell("Center")}{renderCell("East")}
+              {renderCell("SW")}{renderCell("South")}{renderCell("SE")}
             </div>
 
             {phase !== "round-end" && (
