@@ -18,7 +18,7 @@ import { playSound } from "../../lib/sounds";
 import { setMusicGame, stopMusic } from "../../lib/music";
 import {
   generateSessionCode, openHillChannel, closeChannel,
-  type HillPhase, type HillStatePayload, type HillActionPayload,
+  type HillPhase, type HillStatePayload, type HillActionPayload, type HillZoneInfo, type HillDuelResult,
 } from "../../lib/liveSession";
 
 // How long the screen waits after the first buzz of a duel before resolving a winner — same
@@ -359,11 +359,20 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
   const phaseRef = useRef(phase);
   const contestRef = useRef(contest);
   const buzzedTeamIdRef = useRef(buzzedTeamId);
+  // sendState's board/turn/score context (below) needs the latest of each — mirrored the same way.
+  const ownersRef = useRef(owners);
+  const gameScoresRef = useRef(gameScores);
+  const activeTeamIdxRef = useRef(activeTeamIdx);
+  const turnOrderRef = useRef(turnOrder);
   const connectedTeamIdsRef = useRef<Set<string | number>>(new Set());
   const sendStateRef = useRef<(() => void) | null>(null);
   useEffect(() => { phaseRef.current = phase; }, [phase]);
   useEffect(() => { contestRef.current = contest; }, [contest]);
   useEffect(() => { buzzedTeamIdRef.current = buzzedTeamId; }, [buzzedTeamId]);
+  useEffect(() => { ownersRef.current = owners; }, [owners]);
+  useEffect(() => { gameScoresRef.current = gameScores; }, [gameScores]);
+  useEffect(() => { activeTeamIdxRef.current = activeTeamIdx; }, [activeTeamIdx]);
+  useEffect(() => { turnOrderRef.current = turnOrder; }, [turnOrder]);
 
   // Buffers buzzes for the current duel so the screen can pick whichever buzz has the earliest
   // client timestamp once the collection window closes, rather than whichever broadcast physically
@@ -634,7 +643,13 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
       const mappedPhase: HillPhase = rawPhase === "intro" ? "lobby"
         : rawPhase === "final" ? "final"
         : (rawPhase === "contested" && c?.step === "simultaneous") ? "duel"
+        : (rawPhase === "contested" && c?.step === "result") ? "result"
         : "idle";
+      const zones: HillZoneInfo[] = ZONES.map(z => ({ id: z.id, icon: z.icon, pts: z.pts, label: z.label ?? z.id }));
+      const activeTeamRealIdxNow = turnOrderRef.current[activeTeamIdxRef.current];
+      const duelResult: HillDuelResult | null = mappedPhase === "result" && c
+        ? { zoneId: c.zoneId, attackerId: c.attackerId, defenderId: c.defenderId, winnerId: c.winner, reason: c.reason }
+        : null;
       const payload: HillStatePayload = {
         phase: mappedPhase,
         roster: teams.map(t => ({ id: t.id, name: t.name, color: t.color, mascot: t.mascot })),
@@ -643,6 +658,11 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
         defenderId: mappedPhase === "duel" ? c.defenderId : null,
         contestKey: c?.key ?? "",
         buzzedTeamId: buzzedTeamIdRef.current,
+        zones,
+        owners: ownersRef.current as Record<string, string | number>,
+        scores: gameScoresRef.current as Record<string, number>,
+        activeTeamId: mappedPhase === "idle" ? (teams[activeTeamRealIdxNow]?.id ?? null) : null,
+        duelResult,
         ts: Date.now(),
       };
       channel.send({ type: "broadcast", event: "state", payload });
@@ -699,9 +719,11 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
   }, [inputMode, sessionCode, teams]);
 
   // Pushes an immediate state update on transitions rather than waiting for the standing interval.
+  // owners/gameScores/activeTeamIdx are included too, so a phone's board/turn/score context all
+  // update the instant any of them changes, not just once every 4s.
   useEffect(() => {
     sendStateRef.current?.();
-  }, [phase, contest, buzzedTeamId, connectedTeamIds]);
+  }, [phase, contest, buzzedTeamId, connectedTeamIds, owners, gameScores, activeTeamIdx]);
 
   // Tells every connected phone the game is over the moment it actually ends.
   useEffect(() => {

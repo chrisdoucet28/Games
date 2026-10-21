@@ -481,10 +481,25 @@ export function openRaceTrackChannel(code: string): RealtimeChannel {
 // always have. Topic-mode content and solo (CPU) play don't get this at all — see KingOfHillGame.tsx.
 export type HillRosterEntry = { id: string | number; name: string; color: TeamColor; mascot?: string | null };
 
-// "idle" covers everything that isn't a live grammar-mode duel — rolling (fires at the start of
-// every round, not just the game's opening one), pick, answer, a resolved contest awaiting "Next
-// Turn," round-end. A phone has nothing to do in any of those beyond "watch the shared screen."
-export type HillPhase = "lobby" | "idle" | "duel" | "final";
+// "idle" covers rolling (fires at the start of every round, not just the game's opening one),
+// pick, answer, round-end — none of those have anything duel-specific for a phone to react to
+// beyond the always-broadcast board/turn/score context below. "result" is its own phase (split
+// out from "idle"): the brief window after a duel resolves, while the shared screen shows the
+// crown/handshake outcome card and before the teacher clicks "Next Turn" — see HillDuelResult.
+export type HillPhase = "lobby" | "idle" | "duel" | "result" | "final";
+
+export type HillZoneInfo = { id: string; icon: string; pts: number; label: string };
+
+// Only populated once phase is "result". Without this, a duel's own phone broadcast fell straight
+// back to "idle" the instant it resolved, and neither the attacker's nor the defender's phone
+// ever learned who actually won.
+export type HillDuelResult = {
+  zoneId: string;
+  attackerId: string | number;
+  defenderId: string | number;
+  winnerId: string | number | null;
+  reason: "attacker" | "defender" | "neither";
+};
 
 export type HillStatePayload = {
   phase: HillPhase;
@@ -496,6 +511,19 @@ export type HillStatePayload = {
   // A new value means a genuinely new duel instance — resets buzzedTeamId on every connected phone.
   contestKey: string;
   buzzedTeamId: string | number | null;
+  // The zone board itself — content differs by grammar vs theme mode, so broadcast rather than
+  // hard-coded on the phone side; static for the whole session otherwise, same as roster.
+  zones: HillZoneInfo[];
+  // zoneId -> owning teamId, exactly mirroring the shared screen's own board state. A teacher
+  // feedback request: a phone previously had no idea which zones existed, let alone who owned them.
+  owners: Record<string, string | number>;
+  // This game's running score per team (not the cross-game total) — same "scores" shape every
+  // other phone-mode game already broadcasts.
+  scores: Record<string, number>;
+  // Whose turn it is right now — only meaningful while phase is "idle" (lets a phone show "it's
+  // your turn, pick a zone on the screen!" even outside an actual duel).
+  activeTeamId: string | number | null;
+  duelResult: HillDuelResult | null;
   ts: number;
 };
 
