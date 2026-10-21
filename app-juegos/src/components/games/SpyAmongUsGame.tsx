@@ -16,7 +16,7 @@ import { playSound } from "../../lib/sounds";
 import { setMusicContext, setMusicGame, stopMusic } from "../../lib/music";
 import {
   generateSessionCode, openSpyChannel, closeChannel,
-  type SpyStatePayload, type SpyPhase, type SpyRoleInfo,
+  type SpyStatePayload, type SpyPhase, type SpyRoleInfo, type SpyVoteActionPayload, type SpyRevealInfo,
 } from "../../lib/liveSession";
 
 const GM = GAME_MODES.find(g => g.id === "spy")!;
@@ -313,6 +313,9 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
   // whenever phase is "speak-2p".
   const tp2SpeakOrderRef = useRef(tp2SpeakOrder);
   const tp2SpeakIdxRef = useRef(tp2SpeakIdx);
+  // sendState's "votes"/"reveal" fields (below) need the latest of each — mirrored the same way.
+  const votesRef = useRef(votes);
+  const spyGuessRef = useRef(spyGuess);
   const connectedTeamIdsRef = useRef<Set<string | number>>(new Set());
   const sendStateRef = useRef<(() => void) | null>(null);
   useEffect(() => {
@@ -324,13 +327,15 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
     speakIdxRef.current = speakIdx;
     tp2SpeakOrderRef.current = tp2SpeakOrder;
     tp2SpeakIdxRef.current = tp2SpeakIdx;
-  }, [ri, spyRi, spyTeamIdx, phase, speakOrder, speakIdx, tp2SpeakOrder, tp2SpeakIdx]);
+    votesRef.current = votes;
+    spyGuessRef.current = spyGuess;
+  }, [ri, spyRi, spyTeamIdx, phase, speakOrder, speakIdx, tp2SpeakOrder, tp2SpeakIdx, votes, spyGuess]);
 
-  // Opens/closes the realtime channel only when phone mode itself is toggled on/off. Unlike
-  // Auction, phones here never send anything back — this channel only ever broadcasts `state`
-  // (each round's private role+prompt for every team, plus who's currently speaking) and a
-  // one-shot `ended` event; there's no `.on("broadcast", ...)` listener for incoming phone data
-  // because there isn't any.
+  // Opens/closes the realtime channel only when phone mode itself is toggled on/off. Mostly
+  // screen -> phone like it always was (`state` broadcasts: each round's private role+prompt for
+  // every team, who's currently speaking, and now the live vote tally/reveal card too) plus a
+  // one-shot `ended` event — but there's now also a phone -> screen `action` listener below, for
+  // a connected team casting its own vote from its phone during "vote".
   useEffect(() => {
     if (inputMode !== "phone" || !sessionCode) return;
     const channel = openSpyChannel(sessionCode);
@@ -358,6 +363,18 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
       // its own phone to see its role privately, same as a real team would, since this broadcast
       // and the shared/projected screen are visible to the whole class.
       const roster = teams;
+      // Only populated once the round has actually resolved to "reveal" — see SpyRevealInfo.
+      const reveal: SpyRevealInfo | null = mappedPhase === "reveal" && currentRound && spyId !== undefined
+        ? {
+            spyTeamId: spyId,
+            crewmateTopic: currentRound.crewmateTopic ?? "",
+            crewmatePrompt: currentRound.crewmatePrompt ?? "",
+            spyTopic: currentSpyRound?.spyTopic ?? currentRound.spyTopic ?? "",
+            spyPrompt: currentSpyRound?.spyPrompt ?? currentRound.spyPrompt ?? "",
+            explanation: currentRound.explanation ?? "",
+            spyGuess: spyGuessRef.current,
+          }
+        : null;
       const payload: SpyStatePayload = {
         phase: mappedPhase,
         ri: riRef.current,
@@ -366,6 +383,8 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
         speakOrder: (usingTp2Order ? tp2SpeakOrderRef.current : speakOrderRef.current).map(t => t.id),
         speakIdx: usingTp2Order ? tp2SpeakIdxRef.current : speakIdxRef.current,
         connectedTeamIds: Array.from(connectedTeamIdsRef.current),
+        votes: votesRef.current as Record<string, string | number>,
+        reveal,
         ts: Date.now(),
       };
       channel.send({ type: "broadcast", event: "state", payload });
@@ -379,6 +398,19 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
       connectedTeamIdsRef.current = ids;
       setConnectedTeamIds(ids);
       sendState(); // roster/connected list changed — push a fresh state right away, don't wait for the interval
+    });
+
+    // The only place phone input actually touches game logic here — a connected team casting its
+    // own vote from its phone instead of the teacher tapping it in on the shared screen. Only
+    // reachable during "vote"; self-votes are rejected defensively even though the phone UI itself
+    // never offers one (the screen's own suspect list already excludes the voter for the same
+    // reason).
+    channel.on("broadcast", { event: "action" }, ({ payload }) => {
+      const action = payload as SpyVoteActionPayload;
+      if (phaseRef.current !== "vote") return;
+      if (!connectedTeamIdsRef.current.has(action.teamId)) return;
+      if (action.teamId === action.suspectId) return;
+      castVoteRef.current(action.teamId, action.suspectId);
     });
 
     channel.subscribe(status => {
@@ -398,9 +430,11 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
   // Pushes an immediate state update on round/phase/speaker transitions rather than waiting for
   // the interval — speakIdx (unlike Auction, which only needed qi/phase) matters here too, since a
   // phone's "is it my turn to speak" indicator must update the moment the teacher advances it.
+  // votes/spyGuess are included too, so a phone's live vote tally and the reveal card both update
+  // the instant either changes, not just once every 4s.
   useEffect(() => {
     sendStateRef.current?.();
-  }, [phase, ri, spyRi, speakIdx]);
+  }, [phase, ri, spyRi, speakIdx, votes, spyGuess]);
 
   // Tells every connected phone the mission is over the moment it actually ends, same reasoning
   // as Auction's identical effect — without this, a closed channel looks identical to a dropped
@@ -683,6 +717,11 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
   const castVote = (voterId: string | number, suspectId: string | number) => {
     setVotes((current) => ({ ...current, [voterId]: suspectId }));
   };
+  // Mirrored into a ref so the phone-vote broadcast listener (set up above, before castVote is
+  // even declared in source order) always calls today's version — same reasoning as
+  // HotSeatGame.tsx's markCorrectRef/skipWordRef/endTurnRef.
+  const castVoteRef = useRef(castVote);
+  useEffect(() => { castVoteRef.current = castVote; });
 
   const resolve2pGuesses = () => {
     const spyPlayer = teams[spyTeamIdx];

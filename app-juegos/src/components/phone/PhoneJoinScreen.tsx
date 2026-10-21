@@ -3,7 +3,7 @@ import { TeamIcon } from "../shared/TeamIcon";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 import {
   openAuctionChannel, openSpyChannel, openWhackChannel, openHotSeatChannel, openOrderUpChannel, openRaceTrackChannel, openHillChannel, openBountyBoardChannel, openRelayChannel, closeChannel, getDeviceId,
-  type AuctionStatePayload, type AuctionBetPayload, type SpyStatePayload,
+  type AuctionStatePayload, type AuctionBetPayload, type SpyStatePayload, type SpyVoteActionPayload,
   type WhackStatePayload, type WhackTurnReportPayload,
   type HotSeatStatePayload, type HotSeatActionPayload,
   type OrderUpStatePayload, type OrderUpActionPayload,
@@ -246,6 +246,10 @@ export function PhoneJoinScreen({ code, game }: Props) {
     channelRef.current?.send({ type: "broadcast", event: "turnReport", payload });
   };
 
+  const sendSpyVote = (payload: SpyVoteActionPayload) => {
+    channelRef.current?.send({ type: "broadcast", event: "action", payload });
+  };
+
   const sendHotSeatAction = (payload: HotSeatActionPayload) => {
     channelRef.current?.send({ type: "broadcast", event: "action", payload });
   };
@@ -360,7 +364,7 @@ export function PhoneJoinScreen({ code, game }: Props) {
   }
 
   if (game === "spy") {
-    return <PhoneSpyView state={state as SpyStatePayload} teamId={claimedTeamId} />;
+    return <PhoneSpyView state={state as SpyStatePayload} teamId={claimedTeamId} onAction={sendSpyVote} />;
   }
   if (game === "whack") {
     return <PhoneWordWhackView state={state as WhackStatePayload} teamId={claimedTeamId} onTurnReport={sendTurnReport} />;

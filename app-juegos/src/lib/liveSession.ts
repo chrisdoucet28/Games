@@ -80,10 +80,11 @@ export function closeChannel(channel: RealtimeChannel | null): void {
 
 // --- Spy Among Us (group mode + solo + 1v1) ---
 //
-// Unlike Auction, phones here are receive-only: no bet-equivalent broadcast comes back from a
-// phone, so there's no SpyActionPayload. Each round's `roles` map covers every team's private
-// role+prompt, broadcast to everyone on the channel — same "channel code is the trust boundary"
-// model Auction already uses; a phone only ever *displays* its own team's entry.
+// Mostly receive-only like it always was — each round's `roles` map covers every team's private
+// role+prompt, broadcast to everyone on the channel, same "channel code is the trust boundary"
+// model Auction already uses; a phone only ever *displays* its own team's entry. The one
+// exception is voting (see SpyVoteActionPayload below): a connected phone can now cast its own
+// team's vote directly, instead of the teacher tapping it in on the shared screen on its behalf.
 export type SpyRosterEntry = { id: string | number; name: string; color: TeamColor; mascot?: string | null };
 
 // Mirrors SpyAmongUsGame.tsx's own Phase type minus "intro" (collapses to "lobby" — see
@@ -97,6 +98,27 @@ export type SpyPhase =
 
 export type SpyRoleInfo = { role: "spy" | "crew"; prompt: string };
 
+// Broadcast phone -> teacher's screen, only ever acted on during the "vote" phase. The teacher's
+// screen already shows every team's current pick live as votes come in (walking around tapping
+// each one in, in front of the whole class) — this is a connected team casting that same vote
+// itself, from its own phone, instead. A dropped phone is still voted for the old way, by tapping
+// the existing on-screen buttons; that path never goes away.
+export type SpyVoteActionPayload = { teamId: string | number; suspectId: string | number };
+
+// Only populated once phase is "reveal" — mirrors the exact reveal card the shared screen shows
+// at that moment (spy identity, both prompts, the explanation, and the spy's own topic guess if
+// the vote caught them) so a phone isn't just told "look at the big screen" for the one part of
+// the round that actually matters most to see.
+export type SpyRevealInfo = {
+  spyTeamId: string | number;
+  crewmateTopic: string;
+  crewmatePrompt: string;
+  spyTopic: string;
+  spyPrompt: string;
+  explanation: string;
+  spyGuess: string | null;
+};
+
 export type SpyStatePayload = {
   phase: SpyPhase;
   ri: number;
@@ -105,6 +127,12 @@ export type SpyStatePayload = {
   speakOrder: (string | number)[];
   speakIdx: number;
   connectedTeamIds: (string | number)[];
+  // Voter teamId -> accused suspect teamId, exactly as cast so far — same visibility every other
+  // field here already has (the shared screen already shows this live, in public, as the vote
+  // happens). Lets a phone show its own team's current pick and a live "X of Y voted" tally,
+  // computed client-side from this same map.
+  votes: Record<string, string | number>;
+  reveal: SpyRevealInfo | null;
   ts: number;
 };
 

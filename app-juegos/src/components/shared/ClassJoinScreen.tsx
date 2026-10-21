@@ -5,7 +5,7 @@ import {
   openClassSessionChannel, closeChannel, getDeviceId, PHONE_CAPABLE_GAME_IDS,
   type ClassSessionStatePayload,
   openAuctionChannel, openSpyChannel, openWhackChannel, openHotSeatChannel, openOrderUpChannel, openRaceTrackChannel, openHillChannel, openBountyBoardChannel, openRelayChannel,
-  type AuctionStatePayload, type AuctionBetPayload, type SpyStatePayload,
+  type AuctionStatePayload, type AuctionBetPayload, type SpyStatePayload, type SpyVoteActionPayload,
   type WhackStatePayload, type WhackTurnReportPayload,
   type HotSeatStatePayload, type HotSeatActionPayload,
   type OrderUpStatePayload, type OrderUpActionPayload,
@@ -243,6 +243,7 @@ export function ClassJoinScreen({ code }: Props) {
   }, [activeGame, claimedTeamId, code]);
 
   const sendBet = (payload: AuctionBetPayload) => innerChannelRef.current?.send({ type: "broadcast", event: "bet", payload });
+  const sendSpyVote = (payload: SpyVoteActionPayload) => innerChannelRef.current?.send({ type: "broadcast", event: "action", payload });
   const sendTurnReport = (payload: WhackTurnReportPayload) => innerChannelRef.current?.send({ type: "broadcast", event: "turnReport", payload });
   const sendHotSeatAction = (payload: HotSeatActionPayload) => innerChannelRef.current?.send({ type: "broadcast", event: "action", payload });
   const sendOrderUpAction = (payload: OrderUpActionPayload) => innerChannelRef.current?.send({ type: "broadcast", event: "action", payload });
@@ -346,7 +347,7 @@ export function ClassJoinScreen({ code }: Props) {
   }
 
   if (activeGame === "spy") {
-    return <PhoneSpyView state={innerState as SpyStatePayload} teamId={claimedTeamId} />;
+    return <PhoneSpyView state={innerState as SpyStatePayload} teamId={claimedTeamId} onAction={sendSpyVote} />;
   }
   if (activeGame === "whack") {
     return <PhoneWordWhackView state={innerState as WhackStatePayload} teamId={claimedTeamId} onTurnReport={sendTurnReport} />;
