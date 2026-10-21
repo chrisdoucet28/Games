@@ -6564,7 +6564,7 @@ export const TOPIC_LIBRARY = {
       {prompt:"Name a subject you don't like.", answer:"(free answer)", spanish:"Nombra una asignatura que no te gusta."},
       {prompt:"'I ___ like waiting.' (not)", answer:"don't", spanish:"Completa el espacio con la forma negativa correcta."},
       {prompt:"'They ___ the film.' (not enjoy)", answer:"didn't enjoy", spanish:"Completa el espacio con la forma negativa correcta del verbo 'enjoy' en pasado."},
-      {prompt:"Say what your best friend loves.", answer:"(free answer)", spanish:"Di qué le encanta a tu mejor amigo/a."},
+      {prompt:"'My best friend loves ___.' (name something)", answer:"(free answer)", spanish:"Completa la frase nombrando algo que le encanta a tu mejor amigo/a."},
       {prompt:"'I can't stand ___.' (name something)", answer:"(free answer)", spanish:"Completa la frase nombrando algo que no soportas."},
     ],
     auctionSentences: [
