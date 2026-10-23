@@ -15,7 +15,7 @@ import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
 import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
 import { HILL_THEME_STEPS, HILL_GRAMMAR_STEPS } from "../../data/tutorials/hill";
 import { playSound } from "../../lib/sounds";
-import { setMusicGame, stopMusic } from "../../lib/music";
+import { setMusicGame, setMusicContext, stopMusic } from "../../lib/music";
 import {
   generateSessionCode, openHillChannel, closeChannel,
   type HillPhase, type HillStatePayload, type HillActionPayload, type HillZoneInfo, type HillDuelResult,
@@ -393,6 +393,10 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
   const phaseRef = useRef(phase);
   const contestRef = useRef(contest);
   const buzzedTeamIdRef = useRef(buzzedTeamId);
+  // The phone buzz listener (below) needs this too — a phone could otherwise buzz in before the
+  // "I'm Ready!" gate is even cleared on the shared screen, registering a buzz for a question
+  // nobody can see yet.
+  const contestReadyRef = useRef(contestReady);
   // sendState's board/turn/score context (below) needs the latest of each — mirrored the same way.
   const ownersRef = useRef(owners);
   const gameScoresRef = useRef(gameScores);
@@ -403,6 +407,7 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
   useEffect(() => { phaseRef.current = phase; }, [phase]);
   useEffect(() => { contestRef.current = contest; }, [contest]);
   useEffect(() => { buzzedTeamIdRef.current = buzzedTeamId; }, [buzzedTeamId]);
+  useEffect(() => { contestReadyRef.current = contestReady; }, [contestReady]);
   useEffect(() => { ownersRef.current = owners; }, [owners]);
   useEffect(() => { gameScoresRef.current = gameScores; }, [gameScores]);
   useEffect(() => { activeTeamIdxRef.current = activeTeamIdx; }, [activeTeamIdx]);
@@ -619,7 +624,9 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
   // runs out; letting it expire (or clicking "Wrong") hands the zone to whichever opponent is
   // actually active. This is still only ever testing the student — the opponent never "answers"
   // anything, timer or not — it's just that the CPU literally can't, and (per feedback) the
-  // teacher deliberately doesn't either, so both share this exact resolution path.
+  // teacher deliberately doesn't either, so both share this exact resolution path. `contestReady`
+  // itself gates the question reveal for EVERY duel though, solo or real (see the "I'm Ready!"
+  // button below) — only the countdown-vs-judged resolution mechanic is solo-exclusive.
   const contestIsSoloDuel = isSolo && phase === "contested" && contest?.step === "simultaneous";
   const soloOpponentRef = opponentType === "teacher" ? teacherRef : cpuRef;
   const { timeLeft: contestTimeLeft, stop: stopContestTimer } = useTurnTimer(
@@ -632,6 +639,18 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
     () => { setTimeout(() => { if (contest) resolveContest(soloOpponentRef.current!.id); }, 700); },
     contest?.zoneId ?? "none"
   );
+
+  // A real (non-solo) duel has no countdown clock of its own — it's buzz-then-judge, not timed —
+  // so it never passed through useTurnTimer's own tension-music switch above, and the shared
+  // "gameplay" bed just kept playing through what's supposed to be the game's most intense
+  // moment. Teacher feedback: "waiting" music was playing far more than the actual battle music.
+  // Mirrors the same tension-while-active/gameplay-after shape, just keyed to the duel's ready
+  // state instead of a running clock.
+  useEffect(() => {
+    const activeRealDuel = phase === "contested" && contest?.step === "simultaneous" && !contestIsSoloDuel && contestReady;
+    if (activeRealDuel) setMusicContext("tension");
+    return () => { if (activeRealDuel) setMusicContext("gameplay"); };
+  }, [phase, contest?.step, contestIsSoloDuel, contestReady]);
 
   const [sessionIsClassLevel, setSessionIsClassLevel] = useState(!!presetPhoneSession && !isThemeMode);
   // Snapshot taken once at mount — see BountyBoardGame.tsx's own copy for the full explanation of
@@ -674,9 +693,11 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
     const sendState = () => {
       const rawPhase = phaseRef.current;
       const c = contestRef.current;
+      // "duel" (the phone's buzzer) only reports once the shared screen's own "I'm Ready!" gate
+      // has cleared — otherwise a phone could buzz in before the question is even shown on screen.
       const mappedPhase: HillPhase = rawPhase === "intro" ? "lobby"
         : rawPhase === "final" ? "final"
-        : (rawPhase === "contested" && c?.step === "simultaneous") ? "duel"
+        : (rawPhase === "contested" && c?.step === "simultaneous" && contestReadyRef.current) ? "duel"
         : (rawPhase === "contested" && c?.step === "result") ? "result"
         : "idle";
       const zones: HillZoneInfo[] = ZONES.map(z => ({ id: z.id, icon: z.icon, pts: z.pts, label: z.label ?? z.id }));
@@ -720,6 +741,7 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
       if (action.action !== "buzz") return;
       const c = contestRef.current;
       if (phaseRef.current !== "contested" || c?.step !== "simultaneous") return;
+      if (!contestReadyRef.current) return;
       if (action.teamId !== c.attackerId && action.teamId !== c.defenderId) return;
       if (buzzedTeamIdRef.current !== null) return;
       const roundKey = c.key;
@@ -754,10 +776,12 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
 
   // Pushes an immediate state update on transitions rather than waiting for the standing interval.
   // owners/gameScores/activeTeamIdx are included too, so a phone's board/turn/score context all
-  // update the instant any of them changes, not just once every 4s.
+  // update the instant any of them changes, not just once every 4s. contestReady is what actually
+  // flips a real duel's mappedPhase to "duel" now, so it needs the same immediate push — otherwise
+  // a phone could sit on "idle" for up to 4s after the teacher presses "I'm Ready!".
   useEffect(() => {
     sendStateRef.current?.();
-  }, [phase, contest, buzzedTeamId, connectedTeamIds, owners, gameScores, activeTeamIdx]);
+  }, [phase, contest, buzzedTeamId, connectedTeamIds, owners, gameScores, activeTeamIdx, contestReady]);
 
   // Tells every connected phone the game is over the moment it actually ends.
   useEffect(() => {
@@ -1101,34 +1125,37 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
                     <div style={{ fontSize: "11px", color: "#F3E8FF", opacity: 0.8 }}>Defender of {contest.zoneId}</div>
                   </div>
                 </div>
-                {contestIsSoloDuel && !contestReady ? (
+                {/* Gated behind "I'm Ready!" for every duel now, solo or real — a real duel used to
+                    show the question the instant it started, with no warning beat after the
+                    "Battle for X!" banner. Teacher feedback: that abrupt jump was confusing. */}
+                {!contestReady ? (
                   <div style={{ textAlign: "center", marginTop: "4px" }}>
                     <div style={{ fontWeight: "700", fontSize: "14px", color: "#F9A8D4", marginBottom: "14px" }}>
-                      Take a second to look at the board — the {CONTEST_SECONDS}s clock only starts once you're ready.
+                      {contestIsSoloDuel
+                        ? `Take a second to look at the board — the ${CONTEST_SECONDS}s clock only starts once you're ready.`
+                        : "Take a second to look at the board — the question only appears once you're ready."}
                     </div>
                     <button onClick={() => setContestReady(true)} className="ko-btn" style={{ background: "#DB2777", color: "white", border: "3px solid #1A1A2E", borderRadius: "12px", padding: "14px 28px", cursor: "pointer", fontWeight: "800", fontSize: "16px", boxShadow: "4px 4px 0 #1A1A2E" }}><Icon name="play" size={15} /> I'm Ready!</button>
                   </div>
                 ) : (
                   <QuestionCard question={q} showAnswer={showAns} onReveal={() => { stop(); if (contestIsSoloDuel) stopContestTimer(); setShowAns(true); }} gameId="hill" />
                 )}
-                {contestIsSoloDuel ? (
-                  contestReady && (
-                    <div style={{ textAlign: "center", marginTop: "14px" }}>
-                      <div style={{ display: "flex", justifyContent: "center", marginBottom: "10px" }}>
-                        <TurnTimerBar timeLeft={contestTimeLeft} totalSeconds={CONTEST_SECONDS} />
-                      </div>
-                      <div style={{ fontWeight: "700", fontSize: "13px", color: "#F9A8D4", marginBottom: "10px" }}>
-                        Answer correctly before time runs out to {contest.attackerId === propTeams[0].id ? "capture" : "defend"} the zone!
-                      </div>
-                      <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
-                        <button onClick={() => { stopContestTimer(); resolveContest(propTeams[0].id); }} className="ko-btn" style={{ background: "#22C55E", color: "white", border: "3px solid #1A1A2E", borderRadius: "12px", padding: "14px 28px", cursor: "pointer", fontWeight: "800", fontSize: "16px", boxShadow: "4px 4px 0 #1A1A2E" }}><Icon name="check" size={15} /> Got it!</button>
-                        {/* Lets the student concede the instant they know they missed it, instead of
-                            being forced to sit out the rest of the countdown for the same
-                            opponent-wins outcome a timeout would give anyway. */}
-                        <button onClick={() => { stopContestTimer(); resolveContest(soloOpponentRef.current!.id); }} className="ko-btn" style={{ background: "rgba(255,255,255,0.1)", color: "#F9A8D4", border: "3px solid #1A1A2E", borderRadius: "12px", padding: "14px 28px", cursor: "pointer", fontWeight: "800", fontSize: "16px", boxShadow: "4px 4px 0 #1A1A2E" }}><Icon name="close" size={13} /> Wrong</button>
-                      </div>
+                {contestReady && (contestIsSoloDuel ? (
+                  <div style={{ textAlign: "center", marginTop: "14px" }}>
+                    <div style={{ display: "flex", justifyContent: "center", marginBottom: "10px" }}>
+                      <TurnTimerBar timeLeft={contestTimeLeft} totalSeconds={CONTEST_SECONDS} />
                     </div>
-                  )
+                    <div style={{ fontWeight: "700", fontSize: "13px", color: "#F9A8D4", marginBottom: "10px" }}>
+                      Answer correctly before time runs out to {contest.attackerId === propTeams[0].id ? "capture" : "defend"} the zone!
+                    </div>
+                    <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
+                      <button onClick={() => { stopContestTimer(); resolveContest(propTeams[0].id); }} className="ko-btn" style={{ background: "#22C55E", color: "white", border: "3px solid #1A1A2E", borderRadius: "12px", padding: "14px 28px", cursor: "pointer", fontWeight: "800", fontSize: "16px", boxShadow: "4px 4px 0 #1A1A2E" }}><Icon name="check" size={15} /> Got it!</button>
+                      {/* Lets the student concede the instant they know they missed it, instead of
+                          being forced to sit out the rest of the countdown for the same
+                          opponent-wins outcome a timeout would give anyway. */}
+                      <button onClick={() => { stopContestTimer(); resolveContest(soloOpponentRef.current!.id); }} className="ko-btn" style={{ background: "rgba(255,255,255,0.1)", color: "#F9A8D4", border: "3px solid #1A1A2E", borderRadius: "12px", padding: "14px 28px", cursor: "pointer", fontWeight: "800", fontSize: "16px", boxShadow: "4px 4px 0 #1A1A2E" }}><Icon name="close" size={13} /> Wrong</button>
+                    </div>
+                  </div>
                 ) : (
                   <>
                     <div style={{ textAlign: "center", fontWeight: "700", fontSize: "13px", color: "#F9A8D4", marginTop: "10px" }}>
@@ -1159,7 +1186,7 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
                       </div>
                     )}
                   </>
-                )}
+                ))}
               </div>
             )}
 

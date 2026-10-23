@@ -145,18 +145,18 @@ const SCORING_STEP_THEME: TutorialStep = {
 };
 
 const FINAL_STEP: TutorialStep = {
-  narration: "The game lasts 4 rounds. After round 4's points are added up, the team with the most total points wins!",
+  narration: "The number of rounds depends on how many teams are playing — fewer teams play more rounds, more teams play fewer. After the last round's points are added up, the team with the most total points wins!",
   visual: (
     <div style={{ textAlign: "center" }}>
       <div style={{ fontSize: "22px" }}>🏆</div>
-      <div style={{ fontWeight: 900, color: "#831843", fontSize: "13px", marginTop: "4px" }}>Round 4 of 4 — final scores!</div>
+      <div style={{ fontWeight: 900, color: "#831843", fontSize: "13px", marginTop: "4px" }}>Final round — final scores!</div>
     </div>
   ),
 };
 
 export const HILL_THEME_STEPS: TutorialStep[] = [
   {
-    narration: "This is the board. It has 5 zones. In theme mode, each zone is a different move in a conversation: Question, Example, Agree/Disagree, Alternative, and Opinion. Right now, every zone is Free — no team owns any of them yet.",
+    narration: "This is the board. In theme mode, each zone is a different move in a conversation: Question, Example, Agree/Disagree, Alternative, and Opinion (bigger classes add 4 more corner zones — Prediction, Comparison, Clarification, and Summary). Right now, every zone is Free — no team owns any of them yet.",
     visual: <ZoneMap zones={ZONES_THEME} />,
   },
   ROLL_DICE_STEP,
@@ -172,7 +172,7 @@ export const HILL_THEME_STEPS: TutorialStep[] = [
 
 export const HILL_GRAMMAR_STEPS: TutorialStep[] = [
   {
-    narration: "This is the board. It has 5 zones, each worth different points — North and South are worth 3, East and West are worth 2, and the Center (👑) is worth 5. Right now, every zone is Free — no team owns any of them yet.",
+    narration: "This is the board. Zones are worth different points — North and South are worth 3, East and West are worth 2, and the Center (👑) is worth 5 (bigger classes add 4 more corner zones, worth 2 each). Right now, every zone is Free — no team owns any of them yet.",
     visual: <ZoneMap zones={ZONES_GRAMMAR} />,
   },
   ROLL_DICE_STEP,
