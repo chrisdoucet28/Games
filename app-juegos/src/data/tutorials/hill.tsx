@@ -98,7 +98,7 @@ const CLAIM_STEP_THEME: TutorialStep = {
 };
 
 const ATTACK_STEP_GRAMMAR: TutorialStep = {
-  narration: "If you pick a zone another team OWNS: this is an attack! Both teams get the exact same question. First correct answer wins it. Attacker wins = takes the zone + 30 bonus points. Defender wins = keeps the zone + 20 bonus points.",
+  narration: "If you pick a zone another team OWNS: this is an attack! Both teams get the exact same question. First correct answer wins it. Attacker wins = takes the zone + 30 bonus points. Defender wins = keeps the zone + 20 bonus points. Playing solo against the CPU or teacher? You get your own clock instead — answer correctly before it runs out to win the zone.",
   visual: (
     <div style={{ textAlign: "center" }}>
       <ZoneMap zones={ZONES_GRAMMAR} owners={{ North: { name: "Red", color: "#DC2626" } }} attacker={{ zoneId: "North", name: "Blue", color: "#2563EB" }} />
@@ -108,7 +108,7 @@ const ATTACK_STEP_GRAMMAR: TutorialStep = {
 };
 
 const ATTACK_STEP_THEME: TutorialStep = {
-  narration: "If you pick a zone another team OWNS: this is an attack! Both teams speak on the same prompt. The teacher decides which answer was better. The winner takes the zone (attacker: +30 pts) or keeps it (defender: +20 pts).",
+  narration: "If you pick a zone another team OWNS: this is an attack! Both teams speak on the same prompt. The teacher decides which answer was better. The winner takes the zone (attacker: +30 pts) or keeps it (defender: +20 pts). Playing solo against the CPU or teacher? You get your own clock instead — answer correctly before it runs out to win the zone.",
   visual: (
     <div style={{ textAlign: "center" }}>
       <ZoneMap zones={ZONES_THEME} owners={{ North: { name: "Red", color: "#DC2626" } }} attacker={{ zoneId: "North", name: "Blue", color: "#2563EB" }} />
@@ -123,12 +123,12 @@ function ScoringVisual({ zones }: { zones: ZoneDef[] }) {
     <div style={{ display: "flex", justifyContent: "center", gap: "18px", alignItems: "flex-end" }}>
       <div style={{ textAlign: "center" }}>
         <ZoneMap zones={zones} owners={owners} small />
-        <div style={{ fontSize: "10px", fontWeight: 800, color: "#166534", marginTop: "4px" }}>Round 1 end: Red +8 pts</div>
+        <div style={{ fontSize: "10px", fontWeight: 800, color: "#166534", marginTop: "4px" }}>Round 1 end: Red +80 score (8 control pts)</div>
       </div>
       <div style={{ fontSize: "16px", alignSelf: "center" }}>→</div>
       <div style={{ textAlign: "center" }}>
         <ZoneMap zones={zones} owners={owners} small />
-        <div style={{ fontSize: "10px", fontWeight: 800, color: "#166534", marginTop: "4px" }}>Round 2 end: Red +8 MORE pts</div>
+        <div style={{ fontSize: "10px", fontWeight: 800, color: "#166534", marginTop: "4px" }}>Round 2 end: Red +80 MORE</div>
       </div>
     </div>
   );

@@ -47,7 +47,7 @@ export const RACETRACK_TUTORIAL_STEPS: TutorialStep[] = [
     ),
   },
   {
-    narration: "Raise your hand fast! Whoever answers correctly FIRST rolls the dice. No one gets it right? Tap 'No one got it' — nobody moves.",
+    narration: "Raise your hand fast! Whoever answers correctly FIRST rolls the dice. No one gets it right? Tap 'No one got it' — nobody moves. Playing solo? There's no one to race against, so you get your own clock instead (pick easy/medium/hard on the setup screen) — answer correctly before it runs out to roll.",
     visual: (
       <div style={{ textAlign: "center" }}>
         <div style={{ fontSize: "22px" }}>🙋🙋‍♀️</div>

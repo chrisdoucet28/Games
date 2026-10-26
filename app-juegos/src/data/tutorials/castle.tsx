@@ -7,7 +7,7 @@ export const CASTLE_TUTORIAL_STEPS: TutorialStep[] = [
     visual: (
       <div style={{ textAlign: "center" }}>
         <div style={{ fontSize: "26px" }}>🏰</div>
-        <div style={{ fontWeight: 800, color: "#064E3B", fontSize: "12px", marginTop: "4px" }}>HP: 100/100</div>
+        <div style={{ fontWeight: 800, color: "#064E3B", fontSize: "12px", marginTop: "4px" }}>HP: 150/150</div>
       </div>
     ),
   },
@@ -52,7 +52,7 @@ export const CASTLE_TUTORIAL_STEPS: TutorialStep[] = [
     narration: "Magic hits much harder than Sword, but costs 50 MP — and you only start with 20 MP. Use Focus (no attack) to build your MP up before you can cast Magic.",
     visual: (
       <div style={{ textAlign: "center" }}>
-        <div style={{ fontSize: "11px", fontWeight: 800, color: "#7C3AED" }}>🔮 Focus: +38 MP this turn</div>
+        <div style={{ fontSize: "11px", fontWeight: 800, color: "#7C3AED" }}>🔮 Focus: +30 MP this turn</div>
         <div style={{ fontSize: "11px", fontWeight: 800, color: "#7C3AED", marginTop: "2px" }}>✨ Magic needs 50 MP to cast</div>
       </div>
     ),
@@ -71,7 +71,7 @@ export const CASTLE_TUTORIAL_STEPS: TutorialStep[] = [
     visual: (
       <div style={{ textAlign: "center" }}>
         <div style={{ fontSize: "26px" }}>🍎</div>
-        <div style={{ fontWeight: 900, color: "#166534", fontSize: "13px", marginTop: "4px" }}>+15 HP bonus!</div>
+        <div style={{ fontWeight: 900, color: "#166534", fontSize: "13px", marginTop: "4px" }}>+20 HP bonus!</div>
       </div>
     ),
   },

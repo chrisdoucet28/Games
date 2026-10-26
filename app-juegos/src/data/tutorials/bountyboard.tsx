@@ -13,11 +13,11 @@ export const BOUNTYBOARD_TUTORIAL_STEPS: TutorialStep[] = [
     ),
   },
   {
-    narration: "Get it right and your team scores instantly — 10 points, no waiting.",
+    narration: "Get it right and your team scores instantly — 20 points, no waiting.",
     visual: (
       <div style={{ textAlign: "center" }}>
         <div style={{ background: "#F0FDF4", border: "2px solid #22C55E", borderRadius: "10px", padding: "10px 14px", fontWeight: 700, color: "#14532D", fontSize: "13px" }}>
-          "I went to the park yesterday." ✅ +10 pts
+          "I went to the park yesterday." ✅ +20 pts
         </div>
       </div>
     ),
@@ -27,7 +27,7 @@ export const BOUNTYBOARD_TUTORIAL_STEPS: TutorialStep[] = [
     visual: (
       <div style={{ textAlign: "center" }}>
         <div style={{ background: "#FEE2E2", border: "3px double #7F1D1D", borderRadius: "10px", padding: "10px 14px", fontWeight: 700, color: "#7F1D1D", fontSize: "13px" }}>
-          "I goed to the park." — 💰 20 pts
+          "I goed to the park." — 💰 40 pts
         </div>
       </div>
     ),
@@ -45,7 +45,7 @@ export const BOUNTYBOARD_TUTORIAL_STEPS: TutorialStep[] = [
     narration: "Miss the fix too? The bounty climbs even higher and reopens for another team — this can keep going until someone finally gets it right.",
     visual: (
       <div style={{ display: "flex", justifyContent: "center", gap: "10px" }}>
-        <span style={{ fontWeight: 800, color: "#B91C1C", fontSize: "13px" }}>💰 20 → 30 → 40 pts…</span>
+        <span style={{ fontWeight: 800, color: "#B91C1C", fontSize: "13px" }}>💰 40 → 60 → 80 pts…</span>
       </div>
     ),
   },
