@@ -77,11 +77,20 @@ export const RELAY_TUTORIAL_STEPS: TutorialStep[] = [
     ),
   },
   {
-    narration: "The teacher picks how many people are on each team before the game starts — every one of them gets a turn at the front. The team with the most points once everyone has had their turn wins! Playing solo? A CPU teammate joins and takes its own turns too, thinking for a moment before taking its own guess — so it's not just you alone.",
+    narration: "The teacher picks how many people are on each team before the game starts — every one of them gets a turn at the front. The team with the most points once everyone has had their turn wins!",
     visual: (
       <div style={{ textAlign: "center" }}>
         <div style={{ fontSize: "20px" }}>🏁</div>
         <div style={{ fontSize: "11px", fontWeight: 700, color: "#374151" }}>5 questions per person — most points wins</div>
+      </div>
+    ),
+  },
+  {
+    narration: "Playing solo? A CPU teammate joins and takes its own turns too, thinking for a moment before taking its own guess — so it's not just you alone.",
+    visual: (
+      <div style={{ textAlign: "center" }}>
+        <div style={{ fontSize: "22px" }}>🤖</div>
+        <div style={{ fontSize: "11px", fontWeight: 700, color: "#374151" }}>Solo mode: a CPU teammate joins you</div>
       </div>
     ),
   },

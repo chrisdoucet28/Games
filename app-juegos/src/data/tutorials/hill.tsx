@@ -98,7 +98,7 @@ const CLAIM_STEP_THEME: TutorialStep = {
 };
 
 const ATTACK_STEP_GRAMMAR: TutorialStep = {
-  narration: "If you pick a zone another team OWNS: this is an attack! Both teams get the exact same question. First correct answer wins it. Attacker wins = takes the zone + 30 bonus points. Defender wins = keeps the zone + 20 bonus points. Playing solo against the CPU or teacher? You get your own clock instead — answer correctly before it runs out to win the zone.",
+  narration: "If you pick a zone another team OWNS: this is an attack! Both teams get the exact same question. First correct answer wins it. Attacker wins = takes the zone + 30 bonus points. Defender wins = keeps the zone + 20 bonus points.",
   visual: (
     <div style={{ textAlign: "center" }}>
       <ZoneMap zones={ZONES_GRAMMAR} owners={{ North: { name: "Red", color: "#DC2626" } }} attacker={{ zoneId: "North", name: "Blue", color: "#2563EB" }} />
@@ -108,11 +108,22 @@ const ATTACK_STEP_GRAMMAR: TutorialStep = {
 };
 
 const ATTACK_STEP_THEME: TutorialStep = {
-  narration: "If you pick a zone another team OWNS: this is an attack! Both teams speak on the same prompt. The teacher decides which answer was better. The winner takes the zone (attacker: +30 pts) or keeps it (defender: +20 pts). Playing solo against the CPU or teacher? You get your own clock instead — answer correctly before it runs out to win the zone.",
+  narration: "If you pick a zone another team OWNS: this is an attack! Both teams speak on the same prompt. The teacher decides which answer was better. The winner takes the zone (attacker: +30 pts) or keeps it (defender: +20 pts).",
   visual: (
     <div style={{ textAlign: "center" }}>
       <ZoneMap zones={ZONES_THEME} owners={{ North: { name: "Red", color: "#DC2626" } }} attacker={{ zoneId: "North", name: "Blue", color: "#2563EB" }} />
       <div style={{ fontSize: "10px", color: "#831843", fontWeight: 700, marginTop: "4px" }}>Blue is attacking Red's Question zone!</div>
+    </div>
+  ),
+};
+
+// Its own step rather than tacked onto ATTACK_STEP above — one idea per slide.
+const SOLO_DUEL_STEP: TutorialStep = {
+  narration: "Playing solo against the CPU or teacher? A duel works differently for you: instead of racing to answer first, you get your own clock — answer correctly before it runs out to win the zone.",
+  visual: (
+    <div style={{ textAlign: "center" }}>
+      <div style={{ fontSize: "22px" }}>⏱️</div>
+      <div style={{ fontSize: "11px", fontWeight: 700, color: "#831843", marginTop: "4px" }}>Solo duels: beat the clock, not the other team</div>
     </div>
   ),
 };
@@ -166,6 +177,7 @@ export const HILL_THEME_STEPS: TutorialStep[] = [
   },
   CLAIM_STEP_THEME,
   ATTACK_STEP_THEME,
+  SOLO_DUEL_STEP,
   SCORING_STEP_THEME,
   FINAL_STEP,
 ];
@@ -182,6 +194,7 @@ export const HILL_GRAMMAR_STEPS: TutorialStep[] = [
   },
   CLAIM_STEP_GRAMMAR,
   ATTACK_STEP_GRAMMAR,
+  SOLO_DUEL_STEP,
   SCORING_STEP_GRAMMAR,
   FINAL_STEP,
 ];

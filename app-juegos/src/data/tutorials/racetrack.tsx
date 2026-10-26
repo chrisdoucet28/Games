@@ -47,11 +47,20 @@ export const RACETRACK_TUTORIAL_STEPS: TutorialStep[] = [
     ),
   },
   {
-    narration: "Raise your hand fast! Whoever answers correctly FIRST rolls the dice. No one gets it right? Tap 'No one got it' — nobody moves. Playing solo? There's no one to race against, so you get your own clock instead (pick easy/medium/hard on the setup screen) — answer correctly before it runs out to roll.",
+    narration: "Raise your hand fast! Whoever answers correctly FIRST rolls the dice. No one gets it right? Tap 'No one got it' — nobody moves.",
     visual: (
       <div style={{ textAlign: "center" }}>
         <div style={{ fontSize: "22px" }}>🙋🙋‍♀️</div>
         <div style={{ fontSize: "11px", fontWeight: 700, color: "#7F1D1D", marginTop: "4px" }}>First correct hand wins the roll!</div>
+      </div>
+    ),
+  },
+  {
+    narration: "Playing solo? There's no one to race against, so you get your own clock instead — pick easy, medium, or hard on the setup screen, then answer correctly before it runs out to roll.",
+    visual: (
+      <div style={{ textAlign: "center" }}>
+        <div style={{ fontSize: "22px" }}>⏱️</div>
+        <div style={{ fontSize: "11px", fontWeight: 700, color: "#7F1D1D", marginTop: "4px" }}>Solo mode: beat your own clock</div>
       </div>
     ),
   },
