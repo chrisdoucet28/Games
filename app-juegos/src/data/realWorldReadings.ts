@@ -2276,7 +2276,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
   },
 
   future_of_work: {
-    title: "The Office That Никогда Reopened",
+    title: "The Office That Never Reopened",
     passage: [
       "When Marisol Fernandez's company sent everyone home in early 2020, she assumed, like most of her colleagues, that it would last a matter of weeks. Five years later, she has never returned to a permanent desk, her company has sold its headquarters entirely, and roughly sixty percent of its four thousand employees now work from locations scattered across a dozen countries.",
       "Fernandez's experience, once considered an unusual exception, has become something closer to the norm across large sections of the global economy. What began as an emergency accommodation has, for many industries, calcified into permanent infrastructure, forcing a fundamental reconsideration of what \"work\" actually requires in terms of physical presence.",
