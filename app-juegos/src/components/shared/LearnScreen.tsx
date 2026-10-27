@@ -37,13 +37,22 @@ const PRINT_CSS = `
     .learn-no-print { display: none !important; }
     .learn-print-only { display: block !important; }
     .learn-print-bg { background: white !important; padding: 0 !important; }
-    /* Caps every diagram's print footprint at a flat height regardless of its own viewBox aspect
-       ratio — each diagram sets its own inline width:100%/height:auto (see GrammarDiagram.tsx's
-       siblings), which scaled with lesson content width rather than a page-height budget. An audit
-       across all 139 lessons after diagrams shipped found 82 now spilling onto a second printed
-       page, almost entirely accounted for by the diagram's own height. Overriding via !important
-       since the per-diagram inline style otherwise wins. */
-    .print-diagram-cap svg { height: 110px !important; width: auto !important; max-width: 100% !important; }
+    /* Teacher feedback: the old flat height:110px cap here (regardless of each diagram's own
+       viewBox aspect ratio) squashed every diagram down to the same height no matter how tall its
+       content actually was, and — since the diagram's own bordered wrapper div (see any file in
+       diagrams/*.tsx) stayed block-level at full container width instead of shrinking to match —
+       left the now-tiny diagram floating in the top-left corner of a mostly-empty box. Capping by
+       WIDTH instead fixes both: every diagram shares the exact same viewBox width (460, see
+       diagrams/*.tsx), so one flat width applies the same scale factor to all of them — shrinking
+       proportionally, never distorting or clipping — and making the wrapper div inline-block lets
+       it shrink-to-fit that narrower content instead of leaving dead space around it. 320px keeps
+       most lessons' diagrams reasonably close to their on-screen look while still landing most
+       lessons on one printed page (verified across the full height range, 160-412 viewBox units,
+       via Playwright-generated print PDFs) — a page spilling to a second sheet because its own
+       diagram is genuinely tall is an acceptable tradeoff now; a warped or corner-bunched diagram
+       is not. */
+    .print-diagram-cap svg { width: 320px !important; height: auto !important; max-width: 100% !important; }
+    .print-diagram-cap > div { display: inline-block !important; }
   }
   .learn-print-only { display: none; }
 `;
