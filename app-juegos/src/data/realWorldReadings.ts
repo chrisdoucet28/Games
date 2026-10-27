@@ -2036,6 +2036,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   arts_and_entertainment: {
     title: "Streaming Changed Everything — Did It Change It for the Better?",
+    audioUrl: `${MEDIA_BASE}/audio/real-world/arts_and_entertainment.mp3`,
     passage: [
       "Fifteen years ago, watching a new film meant either going to the cinema or waiting months for a DVD release. Today, thousands of titles sit permanently at our fingertips, ready within seconds, and an entire generation has grown up barely understanding the concept of waiting for entertainment at all.",
       "The shift has undeniably democratised access. A teenager in a small town with no cinema now has the same library available as someone in a major city, something unthinkable a generation ago. Independent filmmakers, once locked out by the enormous cost of theatrical distribution, can now reach global audiences directly through streaming platforms, occasionally launching entire careers from a single unexpected hit.",
@@ -2086,6 +2087,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   prefixes_suffixes_adjectives: {
     title: "Restaurant Review: The Blue Table",
+    audioUrl: `${MEDIA_BASE}/audio/real-world/prefixes_suffixes_adjectives.mp3`,
     passage: [
       "I'll admit I walked into The Blue Table with fairly unrealistic expectations, having heard nothing but unbelievable praise from friends for months. The result, thankfully, was mostly reassuring rather than disappointing.",
       "The restaurant itself is small and slightly disorganised-looking from the outside, tucked between a launderette and a closed bookshop, which I found oddly charming rather than off-putting. Inside, the staff were thoughtful without being overbearing, checking in just enough without becoming irritating, which is a genuinely underrated skill in hospitality.",
@@ -2137,6 +2139,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   describing_trends_data: {
     title: "What the Numbers Show: Coffee Shop Sales",
+    audioUrl: `${MEDIA_BASE}/audio/real-world/describing_trends_data.mp3`,
     passage: [
       "Sales at Bean & Co have fluctuated considerably over the past five years, according to figures released this week, offering a useful snapshot of how the coffee industry has weathered a turbulent period.",
       "Revenue climbed steadily between 2021 and 2022, rising by nearly eighteen percent as pandemic restrictions eased and customers returned to in-person shopping. That growth peaked sharply in early 2023, before falling away just as quickly; sales dropped by almost twelve percent over the following six months, a decline the company attributes largely to rising ingredient costs being passed on to customers through higher prices.",
@@ -2174,6 +2177,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   workplace_professional_vocabulary: {
     title: "Email: Restructuring Announcement",
+    audioUrl: `${MEDIA_BASE}/audio/real-world/workplace_professional_vocabulary.mp3`,
     passage: [
       "Subject: Team Restructuring — Effective Next Month",
       "Dear team, following an extensive review of our current workflow, we'll be implementing several changes to team structure, effective from the first of next month. I want to outline these clearly and address any concerns directly.",
@@ -2193,6 +2197,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   advanced_idioms_expressions: {
     title: "Catching Up: A Conversation Between Old Friends",
+    audioUrl: `${MEDIA_BASE}/audio/real-world/advanced_idioms_expressions.mp3`,
     passage: [
       "So, how's the new job going? Are you settling in okay?",
       "Honestly, it's been a bit of a baptism of fire. I was thrown in at the deep end the first week — my manager went on leave almost immediately, so I had to hit the ground running with barely any handover.",
