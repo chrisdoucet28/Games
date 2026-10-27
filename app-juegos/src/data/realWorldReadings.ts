@@ -42,6 +42,22 @@ export type RealWorldReading = {
   // re-running the script (any account with quota left) fills in whatever's still missing without
   // touching what's already there.
   audioUrl?: string;
+  // Present only on CONVERSATIONS: the audio is read by TWO voices (one per speaker) instead of one
+  // narrator, so listeners can tell who is talking — see scripts/generate-real-world-audio.ts. This
+  // changes only how the audio is made; the on-screen `passage` text is never touched.
+  // Without `turns`, each passage line is one turn and the speakers alternate A, B, A, B...
+  // starting with speaker 0. Give `turns` when that isn't true — the same person speaking twice in
+  // a row, or two people inside one passage line. The turns' text, joined, must equal the passage
+  // text (the script checks). `voices` pins each speaker's voice (default female then male); set it
+  // when a speaker names themselves ("I'm Marta") so the voice has to match.
+  dialogue?: {
+    turns?: { speaker: 0 | 1; text: string }[];
+    // For passages written as "Interviewer: ... / Guest: ..." — the two labels (speaker 0, then 1). Each
+    // line is one turn and the label is dropped from the AUDIO (it stays on screen), so the voice
+    // never reads "Interviewer:" aloud.
+    speakerLabels?: [string, string];
+    voices?: ["female" | "male", "female" | "male"];
+  };
   // 3 comprehension-check questions about the text's content (not the grammar point itself —
   // that's what Practice A/B/Production already cover). Same QuestionData shape/reveal-answer
   // convention as every other question slide.
@@ -51,7 +67,8 @@ export type RealWorldReading = {
 export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
   greetings_introductions: {
     title: "New at School",
-    audioUrl: `${MEDIA_BASE}/audio/real-world/greetings_introductions.mp3`,
+    audioUrl: `${MEDIA_BASE}/audio/real-world/greetings_introductions-2v.mp3`,
+    dialogue: { voices: ["female", "male"] },
     passage: [
       "Hi! I'm Marta. I'm new here. Nice to meet you!",
       "Hi Marta! I'm Leo. Nice to meet you too. How are you?",
@@ -98,7 +115,8 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   what_time_is_it: {
     title: "What Time Should We Meet?",
-    audioUrl: `${MEDIA_BASE}/audio/real-world/what_time_is_it.mp3`,
+    audioUrl: `${MEDIA_BASE}/audio/real-world/what_time_is_it-2v.mp3`,
+    dialogue: {},
     passage: [
       "What time is the film?",
       "It starts at half past seven.",
@@ -160,7 +178,8 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   possessive_adjectives_pronouns: {
     title: "Lost and Found",
-    audioUrl: `${MEDIA_BASE}/audio/real-world/possessive_adjectives_pronouns.mp3`,
+    audioUrl: `${MEDIA_BASE}/audio/real-world/possessive_adjectives_pronouns-2v.mp3`,
+    dialogue: {},
     passage: [
       "Is this your bag? I found it near the door.",
       "No, it isn't mine. Maybe it's Anna's — that blue one over there is hers, but this isn't the same colour.",
@@ -207,7 +226,17 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   auxiliary_verbs_be_do: {
     title: "Joining the Club",
-    audioUrl: `${MEDIA_BASE}/audio/real-world/auxiliary_verbs_be_do.mp3`,
+    audioUrl: `${MEDIA_BASE}/audio/real-world/auxiliary_verbs_be_do-2v.mp3`,
+    dialogue: {
+      turns: [
+        { speaker: 0, text: "Are you a member of the sports club?" },
+        { speaker: 1, text: "Yes, I am! Do you want to join too?" },
+        { speaker: 0, text: "I don't know. Is it expensive?" },
+        { speaker: 1, text: "No, it isn't." },
+        { speaker: 0, text: "Does it open on weekends?" },
+        { speaker: 1, text: "Yes, it does — every Saturday and Sunday." },
+      ],
+    },
     passage: [
       "Are you a member of the sports club?",
       "Yes, I am! Do you want to join too?",
@@ -224,7 +253,8 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   can_cant: {
     title: "Can You Help?",
-    audioUrl: `${MEDIA_BASE}/audio/real-world/can_cant.mp3`,
+    audioUrl: `${MEDIA_BASE}/audio/real-world/can_cant-2v.mp3`,
+    dialogue: {},
     passage: [
       "Can you swim?",
       "Yes, I can. I can also play tennis, but I can't ski.",
@@ -240,7 +270,14 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   present_continuous_a1: {
     title: "What Is Everyone Doing?",
-    audioUrl: `${MEDIA_BASE}/audio/real-world/present_continuous_a1.mp3`,
+    audioUrl: `${MEDIA_BASE}/audio/real-world/present_continuous_a1-2v.mp3`,
+    dialogue: {
+      turns: [
+        { speaker: 0, text: "Where is everyone?" },
+        { speaker: 1, text: "Mum is cooking dinner in the kitchen. Dad is watching the news." },
+        { speaker: 1, text: "My sister is doing her homework, and I am writing this message! What are you doing right now?" },
+      ],
+    },
     passage: [
       "Where is everyone?",
       "Mum is cooking dinner in the kitchen. Dad is watching the news.",
@@ -316,7 +353,14 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   personality: {
     title: "My New Roommate",
-    audioUrl: `${MEDIA_BASE}/audio/real-world/personality.mp3`,
+    audioUrl: `${MEDIA_BASE}/audio/real-world/personality-2v.mp3`,
+    dialogue: {
+      turns: [
+        { speaker: 0, text: "What is your new roommate like?" },
+        { speaker: 1, text: "She's really kind and very patient. She's a bit shy at first, but she's also funny once you know her." },
+        { speaker: 1, text: "Her brother is completely different — he's very outgoing and never stops talking!" },
+      ],
+    },
     passage: [
       "What is your new roommate like?",
       "She's really kind and very patient. She's a bit shy at first, but she's also funny once you know her.",
@@ -331,7 +375,8 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   feelings: {
     title: "Checking In",
-    audioUrl: `${MEDIA_BASE}/audio/real-world/feelings.mp3`,
+    audioUrl: `${MEDIA_BASE}/audio/real-world/feelings-2v.mp3`,
+    dialogue: {},
     passage: [
       "How are you feeling today?",
       "I'm a bit tired, but I'm happy because it's Friday! How about you?",
@@ -347,7 +392,8 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   appearance: {
     title: "How Will I Know You?",
-    audioUrl: `${MEDIA_BASE}/audio/real-world/appearance.mp3`,
+    audioUrl: `${MEDIA_BASE}/audio/real-world/appearance-2v.mp3`,
+    dialogue: {},
     passage: [
       "How will I know you at the airport?",
       "I'm tall, with short black hair. I'll be wearing a blue jacket.",
@@ -379,7 +425,14 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   clothes: {
     title: "Packing for the Trip",
-    audioUrl: `${MEDIA_BASE}/audio/real-world/clothes.mp3`,
+    audioUrl: `${MEDIA_BASE}/audio/real-world/clothes-2v.mp3`,
+    dialogue: {
+      turns: [
+        { speaker: 0, text: "What are you packing?" },
+        { speaker: 1, text: "I'm wearing my jeans and a jacket today, but I'm packing shorts and a swimsuit for the beach." },
+        { speaker: 1, text: "I always wear sunglasses on holiday, and I never forget my pyjamas!" },
+      ],
+    },
     passage: [
       "What are you packing?",
       "I'm wearing my jeans and a jacket today, but I'm packing shorts and a swimsuit for the beach.",
@@ -424,7 +477,8 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   possessive_s: {
     title: "Whose Is This?",
-    audioUrl: `${MEDIA_BASE}/audio/real-world/possessive_s.mp3`,
+    audioUrl: `${MEDIA_BASE}/audio/real-world/possessive_s-2v.mp3`,
+    dialogue: {},
     passage: [
       "Is this Tom's bag?",
       "No, I think it's my sister's bag.",
@@ -440,7 +494,8 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   prepositions_place: {
     title: "Where's My Phone?",
-    audioUrl: `${MEDIA_BASE}/audio/real-world/prepositions_place.mp3`,
+    audioUrl: `${MEDIA_BASE}/audio/real-world/prepositions_place-2v.mp3`,
+    dialogue: {},
     passage: [
       "Have you seen my phone?",
       "Is it on the table?",
@@ -472,7 +527,8 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   giving_directions: {
     title: "How Do I Get There?",
-    audioUrl: `${MEDIA_BASE}/audio/real-world/giving_directions.mp3`,
+    audioUrl: `${MEDIA_BASE}/audio/real-world/giving_directions-2v.mp3`,
+    dialogue: {},
     passage: [
       "How do I get to the café?",
       "Go straight ahead, then turn left at the bank. It's on your right, next to the bookshop.",
@@ -505,7 +561,8 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   present_simple_vs_continuous: {
     title: "A Normal Week... Sort Of",
-    audioUrl: `${MEDIA_BASE}/audio/real-world/present_simple_vs_continuous.mp3`,
+    audioUrl: `${MEDIA_BASE}/audio/real-world/present_simple_vs_continuous-2v.mp3`,
+    dialogue: {},
     passage: [
       "Hi! How's it going?",
       "Good, thanks! I usually work from the office, but this week I'm working from home because of the building repairs.",
@@ -523,7 +580,18 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   invitations: {
     title: "Are You Free This Weekend?",
-    audioUrl: `${MEDIA_BASE}/audio/real-world/invitations.mp3`,
+    audioUrl: `${MEDIA_BASE}/audio/real-world/invitations-2v.mp3`,
+    dialogue: {
+      turns: [
+        { speaker: 0, text: "Hey everyone! Would you like to come to my birthday dinner on Saturday?" },
+        { speaker: 1, text: "I'd love to! What time should we arrive?" },
+        { speaker: 0, text: "Around seven." },
+        { speaker: 1, text: "I'm afraid I can't make it — I'm visiting my parents that weekend." },
+        { speaker: 0, text: "No worries! Maybe next time. Actually, why don't we celebrate again the following weekend?" },
+        { speaker: 1, text: "That's a great idea! I'm in." },
+        { speaker: 1, text: "Me too — thanks for inviting us!" },
+      ],
+    },
     passage: [
       "Hey everyone! Would you like to come to my birthday dinner on Saturday?",
       "I'd love to! What time should we arrive?",
@@ -571,7 +639,8 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   future_will_going_to: {
     title: "Weekend Plans",
-    audioUrl: `${MEDIA_BASE}/audio/real-world/future_will_going_to.mp3`,
+    audioUrl: `${MEDIA_BASE}/audio/real-world/future_will_going_to-2v.mp3`,
+    dialogue: {},
     passage: [
       "What are you doing this weekend?",
       "I'm going to visit my cousin — we planned it last week. What about you?",
@@ -604,7 +673,8 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   first_conditional: {
     title: "Planning the Picnic",
-    audioUrl: `${MEDIA_BASE}/audio/real-world/first_conditional.mp3`,
+    audioUrl: `${MEDIA_BASE}/audio/real-world/first_conditional-2v.mp3`,
+    dialogue: {},
     passage: [
       "Are we still going on the picnic tomorrow?",
       "If it doesn't rain, yes! But if the weather's bad, we'll go to the cinema instead.",
@@ -621,7 +691,8 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   used_to_past: {
     title: "Then and Now",
-    audioUrl: `${MEDIA_BASE}/audio/real-world/used_to_past.mp3`,
+    audioUrl: `${MEDIA_BASE}/audio/real-world/used_to_past-2v.mp3`,
+    dialogue: {},
     passage: [
       "What was your life like ten years ago?",
       "It was very different! I used to live in a small village, and I didn't use to have a car — I used to cycle everywhere. I used to work in a shop too, but now I work from home.",
@@ -652,7 +723,8 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   making_questions: {
     title: "The Job Interview",
-    audioUrl: `${MEDIA_BASE}/audio/real-world/making_questions.mp3`,
+    audioUrl: `${MEDIA_BASE}/audio/real-world/making_questions-2v.mp3`,
+    dialogue: {},
     passage: [
       "Thank you for coming in today. First, where do you currently work?",
       "I work at a small marketing agency downtown.",
@@ -867,7 +939,8 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   ordering_food: {
     title: "At the Restaurant",
-    audioUrl: `${MEDIA_BASE}/audio/real-world/ordering_food.mp3`,
+    audioUrl: `${MEDIA_BASE}/audio/real-world/ordering_food-2v.mp3`,
+    dialogue: {},
     passage: [
       "Are you ready to order?",
       "Yes, could I have the chicken soup to start, please?",
@@ -901,7 +974,8 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   making_suggestions: {
     title: "Planning Friday Night",
-    audioUrl: `${MEDIA_BASE}/audio/real-world/making_suggestions.mp3`,
+    audioUrl: `${MEDIA_BASE}/audio/real-world/making_suggestions-2v.mp3`,
+    dialogue: {},
     passage: [
       "What should we do on Friday night?",
       "How about trying that new restaurant downtown?",
@@ -979,7 +1053,15 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   modals_possibility: {
     title: "Where's Everyone?",
-    audioUrl: `${MEDIA_BASE}/audio/real-world/modals_possibility.mp3`,
+    audioUrl: `${MEDIA_BASE}/audio/real-world/modals_possibility-2v.mp3`,
+    dialogue: {
+      turns: [
+        { speaker: 0, text: "Has anyone seen Tom today?" },
+        { speaker: 1, text: "His car isn't in the car park, so he might be working from home. Actually, he mentioned a dentist appointment yesterday, so that could be why he's out." },
+        { speaker: 0, text: "Sarah isn't here either — she must be at the client meeting, since it's in her calendar." },
+        { speaker: 1, text: "I can't be sure about either of them, but I think they'll both be back by this afternoon." },
+      ],
+    },
     passage: [
       "Has anyone seen Tom today? His car isn't in the car park, so he might be working from home. Actually, he mentioned a dentist appointment yesterday, so that could be why he's out.",
       "Sarah isn't here either — she must be at the client meeting, since it's in her calendar.",
@@ -996,7 +1078,8 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   present_perfect: {
     title: "Checking In on the Move",
-    audioUrl: `${MEDIA_BASE}/audio/real-world/present_perfect.mp3`,
+    audioUrl: `${MEDIA_BASE}/audio/real-world/present_perfect-2v.mp3`,
+    dialogue: {},
     passage: [
       "Have you finished packing yet?",
       "Not yet — I've already packed the kitchen and the bedroom, but I haven't started on the living room. I've been putting it off because there's just so much stuff!",
@@ -1051,7 +1134,8 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   so_neither: {
     title: "We Have So Much in Common",
-    audioUrl: `${MEDIA_BASE}/audio/real-world/so_neither.mp3`,
+    audioUrl: `${MEDIA_BASE}/audio/real-world/so_neither-2v.mp3`,
+    dialogue: {},
     passage: [
       "I love hiking on weekends.",
       "So do I! I try to get out to the hills at least once a month.",
@@ -1079,7 +1163,8 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   prefer_rather: {
     title: "Choosing a Restaurant",
-    audioUrl: `${MEDIA_BASE}/audio/real-world/prefer_rather.mp3`,
+    audioUrl: `${MEDIA_BASE}/audio/real-world/prefer_rather-2v.mp3`,
+    dialogue: {},
     passage: [
       "Where should we eat tonight?",
       "I don't know — I generally prefer Italian food to anything else, but I've had pasta three times this week already. What about you?",
@@ -1117,7 +1202,8 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   get_used_to: {
     title: "Moving Abroad",
-    audioUrl: `${MEDIA_BASE}/audio/real-world/get_used_to.mp3`,
+    audioUrl: `${MEDIA_BASE}/audio/real-world/get_used_to-2v.mp3`,
+    dialogue: {},
     passage: [
       "What was the hardest part of moving to a new country?",
       "Honestly, getting used to the food took the longest. I didn't use to eat spicy food at all back home, so it was a real shock at first. Now I'm completely used to it — I actually crave it!",
@@ -1137,7 +1223,8 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   reported_speech: {
     title: "What Did She Say?",
-    audioUrl: `${MEDIA_BASE}/audio/real-world/reported_speech.mp3`,
+    audioUrl: `${MEDIA_BASE}/audio/real-world/reported_speech-2v.mp3`,
+    dialogue: {},
     passage: [
       "So what did the manager say in the meeting?",
       "She said the company was doing well this quarter, and she told us we would get an update on bonuses by the end of the month. She also said that she had already spoken to head office about it.",
@@ -1399,6 +1486,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
   subject_object_questions: {
     title: "Detective Notes",
     audioUrl: `${MEDIA_BASE}/audio/real-world/subject_object_questions.mp3`,
+    dialogue: {},
     passage: [
       "Who broke the window?",
       "We don't know yet — that's what we're trying to find out.",
@@ -1478,6 +1566,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
   modal_verbs: {
     title: "Ask Before You Assume",
     audioUrl: `${MEDIA_BASE}/audio/real-world/modal_verbs.mp3`,
+    dialogue: {},
     passage: [
       "Excuse me, may I ask you something about the new policy?",
       "Of course, go ahead.",
@@ -1553,6 +1642,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
   asking_for_clarification: {
     title: "Lost in the Instructions",
     audioUrl: `${MEDIA_BASE}/audio/real-world/asking_for_clarification.mp3`,
+    dialogue: {},
     passage: [
       "Sorry, could you repeat that last part? I didn't quite catch it.",
       "Sure — I said you need to restart the system before applying the update.",
@@ -1575,6 +1665,20 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
   agreeing_disagreeing: {
     title: "The Office Debate",
     audioUrl: `${MEDIA_BASE}/audio/real-world/agreeing_disagreeing.mp3`,
+    // Three colleagues in the text; two voices split by SIDE (speaker 0 = for the delay, 1 = against it).
+    dialogue: {
+      turns: [
+        { speaker: 0, text: "I think we should move the deadline back a week." },
+        { speaker: 0, text: "I couldn't agree more — the team's clearly under too much pressure right now." },
+        { speaker: 1, text: "I'm afraid I disagree, actually. We promised the client this date, and pushing it back could damage trust." },
+        { speaker: 0, text: "That's a fair point, but quality matters more than speed here, in my opinion." },
+        { speaker: 1, text: "To some extent, I agree, but we still need to manage expectations with the client properly." },
+        { speaker: 0, text: "There's no doubt about it — a rushed job could cost us the account entirely if something goes wrong. That's a risk I'm not willing to take right now." },
+        { speaker: 1, text: "Fair enough. Maybe we could deliver an early version now and finish the rest next week?" },
+        { speaker: 0, text: "I beg to differ, actually — splitting the delivery might confuse the client more than reassure them. I'd rather we communicate clearly instead." },
+        { speaker: 1, text: "I can't deny that's a reasonable point too. Let's at least propose the delay and explain our reasoning honestly, rather than deciding anything without them." },
+      ],
+    },
     passage: [
       "I think we should move the deadline back a week.",
       "I couldn't agree more — the team's clearly under too much pressure right now.",
@@ -1596,6 +1700,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
   question_tags: {
     title: "Small Talk at the Bus Stop",
     audioUrl: `${MEDIA_BASE}/audio/real-world/question_tags.mp3`,
+    dialogue: {},
     passage: [
       "Lovely weather today, isn't it?",
       "It really is! You're waiting for the number twelve, aren't you?",
@@ -1756,6 +1861,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
   describing_locations: {
     title: "Where Should We Stay?",
     audioUrl: `${MEDIA_BASE}/audio/real-world/describing_locations.mp3`,
+    dialogue: {},
     passage: [
       "I found a great little town for our trip. It's situated in a valley, surrounded by mountains on almost every side.",
       "That sounds beautiful. Is it within walking distance of the train station?",
@@ -1833,6 +1939,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
   embedded_questions: {
     title: "Interview: Starting a Small Business",
     audioUrl: `${MEDIA_BASE}/audio/real-world/embedded_questions.mp3`,
+    dialogue: { speakerLabels: ["Interviewer:", "Guest:"] },
     passage: [
       "Interviewer: Thanks for joining us. Could you tell me how you first got the idea for the business?",
       "Guest: Of course. I was working in a café and I kept noticing how many people asked if we sold gluten-free bread. I started wondering whether there was actually a real gap in the market, so I did some research.",
@@ -1930,6 +2037,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
   success_motivation: {
     title: "Interview: What Actually Drives Success",
     audioUrl: `${MEDIA_BASE}/audio/real-world/success_motivation.mp3`,
+    dialogue: { speakerLabels: ["Interviewer:", "Coach:"] },
     passage: [
       "Interviewer: You've coached hundreds of athletes and executives. What's the biggest myth about motivation you'd like to correct?",
       "Coach: That it's a feeling you either have or don't have. People imagine successful people wake up every day bursting with drive, and honestly, that's almost never true. Motivation is unreliable. What actually separates people who achieve their goals from those who don't is habit, not motivation.",
@@ -2198,6 +2306,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
   advanced_idioms_expressions: {
     title: "Catching Up: A Conversation Between Old Friends",
     audioUrl: `${MEDIA_BASE}/audio/real-world/advanced_idioms_expressions.mp3`,
+    dialogue: {},
     passage: [
       "So, how's the new job going? Are you settling in okay?",
       "Honestly, it's been a bit of a baptism of fire. I was thrown in at the deep end the first week — my manager went on leave almost immediately, so I had to hit the ground running with barely any handover.",
