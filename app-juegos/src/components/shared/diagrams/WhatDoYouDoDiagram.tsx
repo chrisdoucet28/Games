@@ -8,7 +8,7 @@ export function WhatDoYouDoDiagram({ variant, accentColor = "#2563EB" }: { varia
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -42,16 +42,16 @@ export function WhatDoYouDoDiagram({ variant, accentColor = "#2563EB" }: { varia
         <text x="117" y="32" textAnchor="middle" fontSize="14" fontWeight="800" fill={accent}>A</text>
         <text x="117" y="50" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={ink}>a teacher · a doctor</text>
         <text x="117" y="64" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={ink}>a nurse · a lawyer</text>
-        <text x="117" y="82" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>I'm a teacher.</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="117" y="82" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>I'm a teacher.</text>
 
         <rect x="245" y="12" width="195" height="78" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="342" y="32" textAnchor="middle" fontSize="14" fontWeight="800" fill={accent}>AN</text>
         <text x="342" y="50" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={ink}>an engineer · an actor</text>
         <text x="342" y="64" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={ink}>an artist</text>
-        <text x="342" y="82" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>She's an actor.</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="342" y="82" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>She's an actor.</text>
 
         <text x="230" y="114" textAnchor="middle" fontSize="9.5" fontWeight="800" fill={ink}>only ONE "does" in the question</text>
-        <text x="230" y="128" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>What does she do? (not "does she does")</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="128" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>What does she do? (not "does she does")</text>
 
         <line x1="20" y1="140" x2="440" y2="140" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 

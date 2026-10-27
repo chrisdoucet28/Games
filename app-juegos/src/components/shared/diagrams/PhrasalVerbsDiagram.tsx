@@ -9,7 +9,7 @@ export function PhrasalVerbsDiagram({ variant, accentColor = "#2563EB" }: { vari
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -42,16 +42,16 @@ export function PhrasalVerbsDiagram({ variant, accentColor = "#2563EB" }: { vari
         <rect x="20" y="12" width="195" height="88" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="117" y="30" textAnchor="middle" fontSize="11" fontWeight="800" fill={accent}>SEPARABLE</text>
         <text x="117" y="45" textAnchor="middle" fontSize="9" fontWeight="700" fill={ink}>verb + PRONOUN + particle</text>
-        <text x="117" y="60" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>(a noun object could go either side —</text>
-        <text x="117" y="72" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>a pronoun can't)</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="117" y="60" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>(a noun object could go either side —</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="117" y="72" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>a pronoun can't)</text>
         <text x="117" y="86" textAnchor="middle" fontSize="9" fontStyle="italic" fill={ink}>pick me up (not "pick up me")</text>
 
         <rect x="245" y="12" width="195" height="88" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="342" y="30" textAnchor="middle" fontSize="11" fontWeight="800" fill={accent}>INSEPARABLE</text>
         <text x="342" y="45" textAnchor="middle" fontSize="9" fontWeight="700" fill={ink}>verb + particle + object</text>
-        <text x="342" y="60" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>(the pronoun/noun never moves</text>
-        <text x="342" y="72" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>in front of the particle)</text>
-        <text x="342" y="86" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>look after my dog</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="342" y="60" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>(the pronoun/noun never moves</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="342" y="72" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>in front of the particle)</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="342" y="86" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>look after my dog</text>
 
         <line x1="20" y1="112" x2="440" y2="112" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 

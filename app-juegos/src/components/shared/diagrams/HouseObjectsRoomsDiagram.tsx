@@ -33,7 +33,7 @@ export function HouseObjectsRoomsDiagram({ variant, accentColor = "#2563EB" }: {
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -103,15 +103,15 @@ export function HouseObjectsRoomsDiagram({ variant, accentColor = "#2563EB" }: {
 
         <rect x="20" y="182" width="195" height="52" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="117" y="200" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={accent}>THERE IS</text>
-        <text x="117" y="213" textAnchor="middle" fontSize="7.8" fill={caption}>one thing (singular)</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="117" y="213" textAnchor="middle" fontSize="7.8" fill={caption}>one thing (singular)</text>
         <text x="117" y="226" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={ink}>There is a table in the dining room.</text>
 
         <rect x="245" y="182" width="195" height="52" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="342" y="200" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={accent}>THERE ARE</text>
-        <text x="342" y="213" textAnchor="middle" fontSize="7.8" fill={caption}>2 or more things (plural)</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="342" y="213" textAnchor="middle" fontSize="7.8" fill={caption}>2 or more things (plural)</text>
         <text x="342" y="226" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={ink}>There are two chairs in the kitchen.</text>
 
-        <text x="230" y="248" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>"some" becomes "any" in negatives and questions</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="248" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>"some" becomes "any" in negatives and questions</text>
 
         <line x1="20" y1="260" x2="440" y2="260" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 

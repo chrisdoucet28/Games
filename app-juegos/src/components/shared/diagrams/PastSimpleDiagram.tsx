@@ -11,7 +11,7 @@ export function PastSimpleDiagram({ variant, accentColor = "#2563EB" }: { varian
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const blockFill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -44,15 +44,15 @@ export function PastSimpleDiagram({ variant, accentColor = "#2563EB" }: { varian
         <rect x="15" y="12" width="200" height="34" rx="8" fill={blockFill} stroke={ink} strokeWidth="2" />
         <text x="115" y="34" textAnchor="middle" fontSize="11.5" fontWeight="800" fill={ink}>POSITIVE</text>
         <text x="115" y="68" textAnchor="middle" fontSize="13.5" fontWeight="800" fill={accent}>verb + -ed (or irregular)</text>
-        <text x="115" y="86" textAnchor="middle" fontSize="10" fontStyle="italic" fill={caption}>She walked. · She went. (go → went)</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="115" y="86" textAnchor="middle" fontSize="10" fontStyle="italic" fill={caption}>She walked. · She went. (go → went)</text>
 
         <rect x="245" y="12" width="200" height="34" rx="8" fill={blockFill} stroke={ink} strokeWidth="2" />
         <text x="345" y="34" textAnchor="middle" fontSize="11.5" fontWeight="800" fill={ink}>NEGATIVE / QUESTION</text>
         <text x="345" y="68" textAnchor="middle" fontSize="13.5" fontWeight="800" fill={accent}>did / didn't + base verb</text>
-        <text x="345" y="86" textAnchor="middle" fontSize="10" fontStyle="italic" fill={caption}>She didn't walk. · Did she go?</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="345" y="86" textAnchor="middle" fontSize="10" fontStyle="italic" fill={caption}>She didn't walk. · Did she go?</text>
 
         <text x="115" y="115" textAnchor="middle" fontSize="10" fontWeight="700" fill={ink}>irregular? no rule — just learn it</text>
-        <text x="115" y="130" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>go → went · eat → ate · see → saw</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="115" y="130" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>go → went · eat → ate · see → saw</text>
 
         <text x="345" y="115" textAnchor="middle" fontSize="11" fontWeight="800" fill={wrong}>✗ Did you called her?</text>
         <text x="345" y="133" textAnchor="middle" fontSize="11" fontWeight="800" fill={right}>✓ Did you call her?</text>
@@ -61,7 +61,7 @@ export function PastSimpleDiagram({ variant, accentColor = "#2563EB" }: { varian
 
         <text x="230" y="172" textAnchor="middle" fontSize="11" fontWeight="800" fill={wrong}>✗ I didn't went. · What she cooked?</text>
         <text x="230" y="192" textAnchor="middle" fontSize="11" fontWeight="800" fill={right}>✓ I didn't go. · What did she cook?</text>
-        <text x="230" y="207" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>the base verb never carries -ed once did/didn't is there — and a question word never replaces "did"</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="207" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>the base verb never carries -ed once did/didn't is there — and a question word never replaces "did"</text>
       </svg>
     </div>
   );

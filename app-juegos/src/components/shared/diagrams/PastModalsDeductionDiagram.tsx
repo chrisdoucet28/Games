@@ -9,7 +9,7 @@ export function PastModalsDeductionDiagram({ variant, accentColor = "#2563EB" }:
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -42,23 +42,23 @@ export function PastModalsDeductionDiagram({ variant, accentColor = "#2563EB" }:
         <rect x="10" y="12" width="140" height="66" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="80" y="30" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={accent}>CAN'T HAVE</text>
         <text x="80" y="47" textAnchor="middle" fontSize="13" fontWeight="800" fill={ink}>0%</text>
-        <text x="80" y="64" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>can't have known</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="80" y="64" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>can't have known</text>
 
         <rect x="160" y="12" width="140" height="66" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="230" y="30" textAnchor="middle" fontSize="9" fontWeight="800" fill={accent}>MIGHT · COULD HAVE</text>
         <text x="230" y="47" textAnchor="middle" fontSize="13" fontWeight="800" fill={ink}>~50%</text>
-        <text x="230" y="64" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>might have forgotten</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="64" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>might have forgotten</text>
 
         <rect x="310" y="12" width="140" height="66" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="380" y="30" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={accent}>MUST HAVE</text>
         <text x="380" y="47" textAnchor="middle" fontSize="13" fontWeight="800" fill={ink}>90%+</text>
-        <text x="380" y="64" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>must have left</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="380" y="64" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>must have left</text>
 
         <rect x="30" y="90" width="400" height="34" rx="8" fill={fill} stroke={accent} strokeWidth="1.5" />
         <text x="230" y="104" textAnchor="middle" fontSize="9.5" fontWeight="800" fill={ink}>SHOULD(N'T) HAVE — a past mistake, not a guess</text>
-        <text x="230" y="118" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>I should have studied harder — I failed the exam.</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="118" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>I should have studied harder — I failed the exam.</text>
 
-        <text x="230" y="140" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>never "has", never a base verb, never "to" — just modal + have + participle</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="140" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>never "has", never a base verb, never "to" — just modal + have + participle</text>
 
         <line x1="20" y1="152" x2="440" y2="152" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 

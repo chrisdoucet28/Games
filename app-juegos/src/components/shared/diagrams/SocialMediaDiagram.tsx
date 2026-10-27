@@ -10,7 +10,7 @@ export function SocialMediaDiagram({ variant, accentColor = "#2563EB" }: { varia
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -43,12 +43,12 @@ export function SocialMediaDiagram({ variant, accentColor = "#2563EB" }: { varia
         <rect x="20" y="12" width="195" height="56" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="117" y="30" textAnchor="middle" fontSize="9.5" fontWeight="800" fill={accent}>SOCIAL MEDIA + HAS</text>
         <text x="117" y="46" textAnchor="middle" fontSize="8" fontStyle="italic" fill={ink}>Social media has changed everything.</text>
-        <text x="117" y="60" textAnchor="middle" fontSize="6.6" fill={caption}>looks plural, acts singular</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="117" y="60" textAnchor="middle" fontSize="6.6" fill={caption}>looks plural, acts singular</text>
 
         <rect x="245" y="12" width="195" height="56" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="342" y="30" textAnchor="middle" fontSize="9.5" fontWeight="800" fill={accent}>PEOPLE + ARE</text>
         <text x="342" y="46" textAnchor="middle" fontSize="8" fontStyle="italic" fill={ink}>People are worried about fake news.</text>
-        <text x="342" y="60" textAnchor="middle" fontSize="6.6" fill={caption}>always plural, never "a people"</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="342" y="60" textAnchor="middle" fontSize="6.6" fill={caption}>always plural, never "a people"</text>
 
         <text x="20" y="94" fontSize="8" fontWeight="800" letterSpacing="0.04em" fill={caption}>USEFUL WORDS</text>
         {["influencer", "cyberbullying", "misinformation", "goes viral"].map((w, i) => {

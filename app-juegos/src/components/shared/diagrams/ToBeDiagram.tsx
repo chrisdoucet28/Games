@@ -9,7 +9,7 @@ export function ToBeDiagram({ variant, accentColor = "#2563EB" }: { variant: "sc
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -43,19 +43,19 @@ export function ToBeDiagram({ variant, accentColor = "#2563EB" }: { variant: "sc
         <text x="80" y="37" textAnchor="middle" fontSize="11.5" fontWeight="800" fill={ink}>I</text>
         <line x1="80" y1="49" x2="80" y2="70" stroke={accent} strokeWidth="1.5" markerEnd="url(#tbArrow)" />
         <text x="80" y="90" textAnchor="middle" fontSize="14" fontWeight="800" fill={accent}>AM</text>
-        <text x="80" y="108" textAnchor="middle" fontSize="10" fontStyle="italic" fill={caption}>I'm 25.</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="80" y="108" textAnchor="middle" fontSize="10" fontStyle="italic" fill={caption}>I'm 25.</text>
 
         <rect x="165" y="15" width="130" height="34" rx="7" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="230" y="37" textAnchor="middle" fontSize="11.5" fontWeight="800" fill={ink}>HE / SHE / IT</text>
         <line x1="230" y1="49" x2="230" y2="70" stroke={accent} strokeWidth="1.5" markerEnd="url(#tbArrow)" />
         <text x="230" y="90" textAnchor="middle" fontSize="14" fontWeight="800" fill={accent}>IS</text>
-        <text x="230" y="108" textAnchor="middle" fontSize="10" fontStyle="italic" fill={caption}>She's a nurse.</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="108" textAnchor="middle" fontSize="10" fontStyle="italic" fill={caption}>She's a nurse.</text>
 
         <rect x="315" y="15" width="130" height="34" rx="7" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="380" y="37" textAnchor="middle" fontSize="11.5" fontWeight="800" fill={ink}>YOU / WE / THEY</text>
         <line x1="380" y1="49" x2="380" y2="70" stroke={accent} strokeWidth="1.5" markerEnd="url(#tbArrow)" />
         <text x="380" y="90" textAnchor="middle" fontSize="14" fontWeight="800" fill={accent}>ARE</text>
-        <text x="380" y="108" textAnchor="middle" fontSize="10" fontStyle="italic" fill={caption}>We're in the same class.</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="380" y="108" textAnchor="middle" fontSize="10" fontStyle="italic" fill={caption}>We're in the same class.</text>
 
         <defs>
           <marker id="tbArrow" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">

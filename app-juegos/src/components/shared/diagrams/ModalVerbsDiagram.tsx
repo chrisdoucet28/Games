@@ -9,7 +9,7 @@ export function ModalVerbsDiagram({ variant, accentColor = "#2563EB" }: { varian
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -41,18 +41,18 @@ export function ModalVerbsDiagram({ variant, accentColor = "#2563EB" }: { varian
       <svg viewBox="0 0 460 185" style={{ width: "100%", height: "auto", display: "block" }}>
         <rect x="10" y="12" width="140" height="58" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="80" y="30" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={accent}>PERMISSION</text>
-        <text x="80" y="44" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>can · could · may</text>
-        <text x="80" y="58" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>Could I borrow...?</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="80" y="44" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>can · could · may</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="80" y="58" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>Could I borrow...?</text>
 
         <rect x="160" y="12" width="140" height="58" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="230" y="30" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={accent}>ADVICE</text>
-        <text x="230" y="44" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>should · ought to · had better</text>
-        <text x="230" y="58" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>You should see a doctor.</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="44" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>should · ought to · had better</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="58" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>You should see a doctor.</text>
 
         <rect x="310" y="12" width="140" height="58" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="380" y="30" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={accent}>ABILITY</text>
-        <text x="380" y="44" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>can · could · was able to</text>
-        <text x="380" y="58" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>She can speak Spanish.</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="380" y="44" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>can · could · was able to</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="380" y="58" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>She can speak Spanish.</text>
 
         <text x="230" y="88" textAnchor="middle" fontSize="10.5" fontWeight="700" fill={ink}>always + BARE VERB — never "to", never "-s", never past tense</text>
 

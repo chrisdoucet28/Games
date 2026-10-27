@@ -8,7 +8,7 @@ export function RelativeClausesDiagram({ variant, accentColor = "#2563EB" }: { v
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -40,31 +40,31 @@ export function RelativeClausesDiagram({ variant, accentColor = "#2563EB" }: { v
       <svg viewBox="0 0 460 195" style={{ width: "100%", height: "auto", display: "block" }}>
         <rect x="10" y="12" width="68" height="38" rx="6" fill={fill} stroke={accent} strokeWidth="1.5" />
         <text x="44" y="28" textAnchor="middle" fontSize="10" fontWeight="800" fill={accent}>WHO</text>
-        <text x="44" y="41" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>people</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="44" y="41" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>people</text>
 
         <rect x="84" y="12" width="82" height="38" rx="6" fill={fill} stroke={accent} strokeWidth="1.5" />
         <text x="125" y="28" textAnchor="middle" fontSize="9.5" fontWeight="800" fill={accent}>WHICH/THAT</text>
-        <text x="125" y="41" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>things</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="125" y="41" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>things</text>
 
         <rect x="172" y="12" width="80" height="38" rx="6" fill={fill} stroke={accent} strokeWidth="1.5" />
         <text x="212" y="28" textAnchor="middle" fontSize="10" fontWeight="800" fill={accent}>WHOSE</text>
-        <text x="212" y="41" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>possession</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="212" y="41" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>possession</text>
 
         <rect x="258" y="12" width="66" height="38" rx="6" fill={fill} stroke={accent} strokeWidth="1.5" />
         <text x="291" y="28" textAnchor="middle" fontSize="10" fontWeight="800" fill={accent}>WHERE</text>
-        <text x="291" y="41" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>places</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="291" y="41" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>places</text>
 
         <rect x="330" y="12" width="60" height="38" rx="6" fill={fill} stroke={accent} strokeWidth="1.5" />
         <text x="360" y="28" textAnchor="middle" fontSize="10" fontWeight="800" fill={accent}>WHEN</text>
-        <text x="360" y="41" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>time</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="360" y="41" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>time</text>
 
         <rect x="396" y="12" width="54" height="38" rx="6" fill={fill} stroke={accent} strokeWidth="1.5" />
         <text x="423" y="28" textAnchor="middle" fontSize="10" fontWeight="800" fill={accent}>WHY</text>
-        <text x="423" y="41" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>reason</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="423" y="41" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>reason</text>
 
         <rect x="30" y="64" width="400" height="46" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="230" y="82" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={ink}>never repeat the pronoun it already replaces</text>
-        <text x="230" y="98" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>The book which I told you about. (not "about it")</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="98" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>The book which I told you about. (not "about it")</text>
 
         <line x1="20" y1="122" x2="440" y2="122" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 

@@ -10,7 +10,7 @@ export function UsedToPastDiagram({ variant, accentColor = "#2563EB" }: { varian
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const blockFill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -43,14 +43,14 @@ export function UsedToPastDiagram({ variant, accentColor = "#2563EB" }: { varian
         <rect x="15" y="12" width="200" height="34" rx="8" fill={blockFill} stroke={ink} strokeWidth="2" />
         <text x="115" y="34" textAnchor="middle" fontSize="11.5" fontWeight="800" fill={ink}>POSITIVE</text>
         <text x="115" y="68" textAnchor="middle" fontSize="13.5" fontWeight="800" fill={accent}>used to + base verb</text>
-        <text x="115" y="86" textAnchor="middle" fontSize="10" fontStyle="italic" fill={caption}>I used to play the guitar.</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="115" y="86" textAnchor="middle" fontSize="10" fontStyle="italic" fill={caption}>I used to play the guitar.</text>
 
         <rect x="245" y="12" width="200" height="34" rx="8" fill={blockFill} stroke={ink} strokeWidth="2" />
         <text x="345" y="34" textAnchor="middle" fontSize="11.5" fontWeight="800" fill={ink}>NEGATIVE / QUESTION</text>
         <text x="345" y="68" textAnchor="middle" fontSize="13.5" fontWeight="800" fill={accent}>use to (no -d)</text>
-        <text x="345" y="86" textAnchor="middle" fontSize="10" fontStyle="italic" fill={caption}>Did you use to live here?</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="345" y="86" textAnchor="middle" fontSize="10" fontStyle="italic" fill={caption}>Did you use to live here?</text>
 
-        <text x="115" y="115" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>didn't already carries the past</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="115" y="115" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>didn't already carries the past</text>
 
         <line x1="20" y1="128" x2="440" y2="128" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 
@@ -58,7 +58,7 @@ export function UsedToPastDiagram({ variant, accentColor = "#2563EB" }: { varian
         <text x="230" y="168" textAnchor="middle" fontSize="11" fontWeight="800" fill={right}>✓ Did you use to live here?</text>
 
         <text x="230" y="190" textAnchor="middle" fontSize="10" fontWeight="700" fill={ink}>no present form — for a habit NOW, use present simple instead</text>
-        <text x="230" y="205" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>a CURRENT habit: not "I use to play tennis" — just "I play tennis"</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="205" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>a CURRENT habit: not "I use to play tennis" — just "I play tennis"</text>
       </svg>
     </div>
   );

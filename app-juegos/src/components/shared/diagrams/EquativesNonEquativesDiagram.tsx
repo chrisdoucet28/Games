@@ -9,7 +9,7 @@ export function EquativesNonEquativesDiagram({ variant, accentColor = "#2563EB" 
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -41,17 +41,17 @@ export function EquativesNonEquativesDiagram({ variant, accentColor = "#2563EB" 
       <svg viewBox="0 0 460 205" style={{ width: "100%", height: "auto", display: "block" }}>
         <rect x="20" y="12" width="195" height="112" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="117" y="30" textAnchor="middle" fontSize="11" fontWeight="800" fill={ink}>AS ___ AS</text>
-        <text x="117" y="47" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>add "not" to make it unequal</text>
-        <text x="40" y="67" fontSize="10" fontStyle="italic" fill={caption}>as tall as her brother</text>
-        <text x="40" y="83" fontSize="10" fontStyle="italic" fill={caption}>not as big as this one</text>
-        <text x="40" y="99" fontSize="10" fontStyle="italic" fill={caption}>almost as good as new</text>
-        <text x="40" y="115" fontSize="10" fontStyle="italic" fill={caption}>just as heavy as before</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="117" y="47" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>add "not" to make it unequal</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="40" y="67" fontSize="10" fontStyle="italic" fill={caption}>as tall as her brother</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="40" y="83" fontSize="10" fontStyle="italic" fill={caption}>not as big as this one</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="40" y="99" fontSize="10" fontStyle="italic" fill={caption}>almost as good as new</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="40" y="115" fontSize="10" fontStyle="italic" fill={caption}>just as heavy as before</text>
 
         <rect x="245" y="12" width="195" height="112" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="342" y="30" textAnchor="middle" fontSize="11" fontWeight="800" fill={ink}>LESS ___ THAN</text>
-        <text x="342" y="47" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>always unequal</text>
-        <text x="262" y="67" fontSize="10" fontStyle="italic" fill={caption}>less expensive than that one</text>
-        <text x="262" y="83" fontSize="10" fontStyle="italic" fill={caption}>less difficult than before</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="342" y="47" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>always unequal</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="262" y="67" fontSize="10" fontStyle="italic" fill={caption}>less expensive than that one</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="262" y="83" fontSize="10" fontStyle="italic" fill={caption}>less difficult than before</text>
 
         <text x="230" y="148" textAnchor="middle" fontSize="10.5" fontWeight="700" fill={ink}>always the plain adjective: as heavy as (not heavier), less heavy than</text>
 

@@ -9,7 +9,7 @@ export function PassiveSimpleDiagram({ variant, accentColor = "#2563EB" }: { var
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -42,17 +42,17 @@ export function PassiveSimpleDiagram({ variant, accentColor = "#2563EB" }: { var
         <rect x="10" y="12" width="140" height="58" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="80" y="30" textAnchor="middle" fontSize="10" fontWeight="800" fill={accent}>PRESENT</text>
         <text x="80" y="44" textAnchor="middle" fontSize="9" fontWeight="700" fill={ink}>am/is/are + participle</text>
-        <text x="80" y="58" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>English is spoken here.</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="80" y="58" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>English is spoken here.</text>
 
         <rect x="160" y="12" width="140" height="58" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="230" y="30" textAnchor="middle" fontSize="10" fontWeight="800" fill={accent}>PAST</text>
         <text x="230" y="44" textAnchor="middle" fontSize="9" fontWeight="700" fill={ink}>was/were + participle</text>
-        <text x="230" y="58" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>This bridge was built in 1950.</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="58" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>This bridge was built in 1950.</text>
 
         <rect x="310" y="12" width="140" height="58" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="380" y="30" textAnchor="middle" fontSize="10" fontWeight="800" fill={accent}>FUTURE</text>
         <text x="380" y="44" textAnchor="middle" fontSize="9" fontWeight="700" fill={ink}>will be + participle</text>
-        <text x="380" y="58" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>Results will be announced.</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="380" y="58" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>Results will be announced.</text>
 
         <text x="230" y="88" textAnchor="middle" fontSize="10.5" fontWeight="700" fill={ink}>the agent (who did it) always follows "by" — never "from"</text>
 

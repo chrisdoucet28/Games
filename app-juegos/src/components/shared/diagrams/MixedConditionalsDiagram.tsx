@@ -9,7 +9,7 @@ export function MixedConditionalsDiagram({ variant, accentColor = "#2563EB" }: {
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -42,16 +42,16 @@ export function MixedConditionalsDiagram({ variant, accentColor = "#2563EB" }: {
         <rect x="20" y="12" width="195" height="74" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="117" y="30" textAnchor="middle" fontSize="10" fontWeight="800" fill={accent}>PAST CAUSE → NOW RESULT</text>
         <text x="117" y="46" textAnchor="middle" fontSize="8" fontWeight="700" fill={ink}>if + HAD + pp, + would + verb</text>
-        <text x="117" y="62" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>If she had studied medicine,</text>
-        <text x="117" y="75" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>she would be a doctor today.</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="117" y="62" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>If she had studied medicine,</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="117" y="75" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>she would be a doctor today.</text>
 
         <rect x="245" y="12" width="195" height="74" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="342" y="30" textAnchor="middle" fontSize="10" fontWeight="800" fill={accent}>NOW STATE → PAST RESULT</text>
         <text x="342" y="46" textAnchor="middle" fontSize="8" fontWeight="700" fill={ink}>if + past simple, + would have + pp</text>
-        <text x="342" y="62" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>If he weren't so shy, he would</text>
-        <text x="342" y="75" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>have spoken up at the meeting.</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="342" y="62" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>If he weren't so shy, he would</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="342" y="75" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>have spoken up at the meeting.</text>
 
-        <text x="230" y="100" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>still never "would" in the if-clause, in either direction</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="100" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>still never "would" in the if-clause, in either direction</text>
 
         <line x1="20" y1="112" x2="440" y2="112" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 

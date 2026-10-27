@@ -10,7 +10,7 @@ export function UnderstandingGetDiagram({ variant, accentColor = "#2563EB" }: { 
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -42,35 +42,35 @@ export function UnderstandingGetDiagram({ variant, accentColor = "#2563EB" }: { 
       <svg viewBox="0 0 460 275" style={{ width: "100%", height: "auto", display: "block" }}>
         <rect x="10" y="12" width="140" height="70" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="80" y="30" textAnchor="middle" fontSize="9" fontWeight="800" fill={accent}>OBTAIN · RECEIVE · BUY</text>
-        <text x="80" y="50" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>I got a new laptop.</text>
-        <text x="80" y="64" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>(received or bought)</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="80" y="50" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>I got a new laptop.</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="80" y="64" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>(received or bought)</text>
 
         <rect x="160" y="12" width="140" height="70" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="230" y="30" textAnchor="middle" fontSize="10" fontWeight="800" fill={accent}>ARRIVE (get to)</text>
-        <text x="230" y="50" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>We got to the airport.</text>
-        <text x="230" y="64" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>(= arrived there)</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="50" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>We got to the airport.</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="64" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>(= arrived there)</text>
 
         <rect x="310" y="12" width="140" height="70" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="380" y="30" textAnchor="middle" fontSize="9" fontWeight="800" fill={accent}>BECOME (+adjective)</text>
-        <text x="380" y="50" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>It's getting dark.</text>
-        <text x="380" y="64" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>(a change of state)</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="380" y="50" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>It's getting dark.</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="380" y="64" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>(a change of state)</text>
 
         <rect x="10" y="92" width="140" height="70" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="80" y="110" textAnchor="middle" fontSize="10" fontWeight="800" fill={accent}>PHRASAL VERBS</text>
-        <text x="80" y="130" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>get up · get on/off</text>
-        <text x="80" y="142" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>get back · get together</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="80" y="130" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>get up · get on/off</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="80" y="142" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>get back · get together</text>
 
         <rect x="160" y="92" width="140" height="70" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="230" y="110" textAnchor="middle" fontSize="9" fontWeight="800" fill={accent}>INFORMAL PASSIVE</text>
-        <text x="230" y="124" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>get + past participle</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="124" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>get + past participle</text>
         <text x="230" y="141" textAnchor="middle" fontSize="8" fontStyle="italic" fill={ink}>She got promoted.</text>
 
         <rect x="310" y="92" width="140" height="70" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="380" y="110" textAnchor="middle" fontSize="8.5" fontWeight="800" fill={accent}>ARRANGE A SERVICE</text>
-        <text x="380" y="124" textAnchor="middle" fontSize="7" fontStyle="italic" fill={caption}>get + object + participle</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="380" y="124" textAnchor="middle" fontSize="7" fontStyle="italic" fill={caption}>get + object + participle</text>
         <text x="380" y="141" textAnchor="middle" fontSize="8" fontStyle="italic" fill={ink}>I got my hair cut.</text>
 
-        <text x="230" y="180" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>passive vs service: does it happen TO you, or do YOU arrange it?</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="180" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>passive vs service: does it happen TO you, or do YOU arrange it?</text>
 
         <line x1="20" y1="192" x2="440" y2="192" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 

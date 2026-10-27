@@ -13,7 +13,7 @@ export function DaysDatesPrepositionsTimeDiagram({ variant, accentColor = "#2563
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.14) : "white";
   const highlightFill = isScreen ? hexToRgba(accentColor, 0.16) : "white";
 
@@ -46,17 +46,17 @@ export function DaysDatesPrepositionsTimeDiagram({ variant, accentColor = "#2563
 
         <circle cx="80" cy="90" r="6" fill={accent} />
         <text x="80" y="65" textAnchor="middle" fontSize="13" fontWeight="800" fill={accent}>AT</text>
-        <text x="80" y="115" textAnchor="middle" fontSize="10" fontStyle="italic" fill={caption}>one clock time</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="80" y="115" textAnchor="middle" fontSize="10" fontStyle="italic" fill={caption}>one clock time</text>
         <text x="80" y="130" textAnchor="middle" fontSize="10" fontStyle="italic" fill={ink}>at 6 o'clock</text>
 
         <rect x="205" y="75" width="30" height="30" rx="4" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="220" y="55" textAnchor="middle" fontSize="13" fontWeight="800" fill={accent}>ON</text>
-        <text x="220" y="122" textAnchor="middle" fontSize="10" fontStyle="italic" fill={caption}>a day or date</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="220" y="122" textAnchor="middle" fontSize="10" fontStyle="italic" fill={caption}>a day or date</text>
         <text x="220" y="137" textAnchor="middle" fontSize="10" fontStyle="italic" fill={ink}>on Monday · on May 10th</text>
 
         <rect x="345" y="55" width="70" height="70" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="380" y="42" textAnchor="middle" fontSize="13" fontWeight="800" fill={accent}>IN</text>
-        <text x="380" y="150" textAnchor="middle" fontSize="10" fontStyle="italic" fill={caption}>a month, year, or part of day</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="380" y="150" textAnchor="middle" fontSize="10" fontStyle="italic" fill={caption}>a month, year, or part of day</text>
         <text x="380" y="165" textAnchor="middle" fontSize="10" fontStyle="italic" fill={ink}>in July · in the morning</text>
 
         <defs>
@@ -76,17 +76,17 @@ export function DaysDatesPrepositionsTimeDiagram({ variant, accentColor = "#2563
         <text x="60" y="250" fontSize="12" fontWeight="800" fill={accent}>2nd</text>
         <text x="94" y="250" fontSize="12" fontWeight="800" fill={accent}>3rd</text>
 
-        <text x="150" y="250" fontSize="11" fill={caption}>4th</text>
-        <text x="180" y="250" fontSize="11" fill={caption}>5th</text>
-        <text x="205" y="250" fontSize="11" fill={caption}>⋯</text>
-        <text x="228" y="250" fontSize="11" fill={caption}>20th</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="150" y="250" fontSize="11" fill={caption}>4th</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="180" y="250" fontSize="11" fill={caption}>5th</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="205" y="250" fontSize="11" fill={caption}>⋯</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="228" y="250" fontSize="11" fill={caption}>20th</text>
 
         <rect x="262" y="234" width="145" height="24" rx="5" fill={highlightFill} stroke={accent} strokeWidth="1.5" />
         <text x="272" y="250" fontSize="12" fontWeight="800" fill={accent}>21st</text>
         <text x="308" y="250" fontSize="12" fontWeight="800" fill={accent}>22nd</text>
         <text x="350" y="250" fontSize="12" fontWeight="800" fill={accent}>23rd</text>
 
-        <text x="425" y="250" fontSize="11" fill={caption}>24th</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="425" y="250" fontSize="11" fill={caption}>24th</text>
 
         <text x="230" y="276" textAnchor="middle" fontSize="10" fontStyle="italic" fill={ink}>October 21st (not "21th") · June 3rd (not "3th")</text>
       </svg>

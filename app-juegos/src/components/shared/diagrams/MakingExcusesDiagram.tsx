@@ -68,7 +68,7 @@ export function MakingExcusesDiagram({ variant, accentColor = "#2563EB" }: { var
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -113,15 +113,15 @@ export function MakingExcusesDiagram({ variant, accentColor = "#2563EB" }: { var
 
         <rect x="20" y="86" width="195" height="52" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="117" y="104" textAnchor="middle" fontSize="10" fontWeight="800" fill={accent}>RESULT + BECAUSE</text>
-        <text x="117" y="118" textAnchor="middle" fontSize="7.5" fill={caption}>result first, then cause</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="117" y="118" textAnchor="middle" fontSize="7.5" fill={caption}>result first, then cause</text>
         <text x="117" y="132" textAnchor="middle" fontSize="8" fontStyle="italic" fill={ink}>I was late because I missed the bus.</text>
 
         <rect x="245" y="86" width="195" height="52" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="342" y="104" textAnchor="middle" fontSize="10" fontWeight="800" fill={accent}>CAUSE + SO</text>
-        <text x="342" y="118" textAnchor="middle" fontSize="7.5" fill={caption}>cause first, then result</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="342" y="118" textAnchor="middle" fontSize="7.5" fill={caption}>cause first, then result</text>
         <text x="342" y="132" textAnchor="middle" fontSize="8" fontStyle="italic" fill={ink}>I missed the bus, so I was late.</text>
 
-        <text x="230" y="152" textAnchor="middle" fontSize="8.3" fontStyle="italic" fill={caption}>admitting fault: I should have called you. (a past regret)</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="152" textAnchor="middle" fontSize="8.3" fontStyle="italic" fill={caption}>admitting fault: I should have called you. (a past regret)</text>
 
         <line x1="20" y1="164" x2="440" y2="164" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 

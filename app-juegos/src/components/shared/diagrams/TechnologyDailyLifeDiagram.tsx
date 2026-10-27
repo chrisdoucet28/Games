@@ -52,7 +52,7 @@ export function TechnologyDailyLifeDiagram({ variant, accentColor = "#2563EB" }:
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -96,7 +96,7 @@ export function TechnologyDailyLifeDiagram({ variant, accentColor = "#2563EB" }:
         })}
 
         <text x="230" y="128" textAnchor="middle" fontSize="9.3" fontStyle="italic" fill={ink}>Artificial intelligence <tspan fontWeight="800">has changed</tspan> many industries.</text>
-        <text x="230" y="140" textAnchor="middle" fontSize="6.8" fill={caption}>(one thing, one idea — not "have changed")</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="140" textAnchor="middle" fontSize="6.8" fill={caption}>(one thing, one idea — not "have changed")</text>
 
         <text x="20" y="158" fontSize="8" fontWeight="800" letterSpacing="0.04em" fill={caption}>USEFUL WORDS</text>
         {["digital divide", "streaming", "cybersecurity", "work remotely"].map((w, i) => {

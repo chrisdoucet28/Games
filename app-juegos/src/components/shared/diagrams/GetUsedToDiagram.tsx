@@ -9,7 +9,7 @@ export function GetUsedToDiagram({ variant, accentColor = "#2563EB" }: { variant
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -42,20 +42,20 @@ export function GetUsedToDiagram({ variant, accentColor = "#2563EB" }: { variant
         <rect x="10" y="12" width="140" height="70" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="80" y="30" textAnchor="middle" fontSize="10" fontWeight="800" fill={accent}>USED TO</text>
         <text x="80" y="43" textAnchor="middle" fontSize="8" fontWeight="700" fill={ink}>a finished past habit</text>
-        <text x="80" y="57" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>+ bare verb</text>
-        <text x="80" y="70" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>I used to smoke.</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="80" y="57" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>+ bare verb</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="80" y="70" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>I used to smoke.</text>
 
         <rect x="160" y="12" width="140" height="70" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="230" y="30" textAnchor="middle" fontSize="10" fontWeight="800" fill={accent}>BE USED TO</text>
         <text x="230" y="43" textAnchor="middle" fontSize="8" fontWeight="700" fill={ink}>already familiar</text>
-        <text x="230" y="57" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>+ noun/-ing</text>
-        <text x="230" y="70" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>She's used to working late.</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="57" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>+ noun/-ing</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="70" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>She's used to working late.</text>
 
         <rect x="310" y="12" width="140" height="70" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="380" y="30" textAnchor="middle" fontSize="10" fontWeight="800" fill={accent}>GET USED TO</text>
         <text x="380" y="43" textAnchor="middle" fontSize="8" fontWeight="700" fill={ink}>becoming familiar</text>
-        <text x="380" y="57" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>+ noun/-ing</text>
-        <text x="380" y="70" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>I got used to the cold.</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="380" y="57" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>+ noun/-ing</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="380" y="70" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>I got used to the cold.</text>
 
         <line x1="20" y1="96" x2="440" y2="96" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 

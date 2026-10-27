@@ -17,7 +17,7 @@ export function ModalsObligationDiagram({ variant, accentColor = "#2563EB" }: { 
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -58,8 +58,8 @@ export function ModalsObligationDiagram({ variant, accentColor = "#2563EB" }: { 
               <rect x={boxX} y={boxY} width="200" height="80" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
               <text x={cx} y={boxY + 20} textAnchor="middle" fontSize="12" fontWeight="800" fill={accent}>{b.label}</text>
               <text x={cx} y={boxY + 36} textAnchor="middle" fontSize="9" fontWeight="700" fill={ink}>{b.sub}</text>
-              <text x={cx} y={boxY + 53} textAnchor="middle" fontSize="8.3" fontStyle="italic" fill={caption}>{b.example}</text>
-              <text x={cx} y={boxY + 66} textAnchor="middle" fontSize="7.8" fontStyle="italic" fill={caption}>{b.note}</text>
+              <text fontWeight={isScreen ? undefined : "600"} x={cx} y={boxY + 53} textAnchor="middle" fontSize="8.3" fontStyle="italic" fill={caption}>{b.example}</text>
+              <text fontWeight={isScreen ? undefined : "600"} x={cx} y={boxY + 66} textAnchor="middle" fontSize="7.8" fontStyle="italic" fill={caption}>{b.note}</text>
             </g>
           );
         })}

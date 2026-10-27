@@ -12,7 +12,7 @@ export function LikesDislikesDiagram({ variant, accentColor = "#2563EB" }: { var
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -44,28 +44,28 @@ export function LikesDislikesDiagram({ variant, accentColor = "#2563EB" }: { var
       <svg viewBox="0 0 460 250" style={{ width: "100%", height: "auto", display: "block" }}>
         <rect x="10" y="12" width="140" height="76" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="80" y="32" textAnchor="middle" fontSize="12.5" fontWeight="800" fill={accent}>LOVE</text>
-        <text x="80" y="48" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>+ -ing or to</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="80" y="48" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>+ -ing or to</text>
         <text x="80" y="64" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={ink}>love playing</text>
         <text x="80" y="78" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={ink}>love to play</text>
 
         <rect x="160" y="12" width="140" height="76" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="230" y="32" textAnchor="middle" fontSize="12.5" fontWeight="800" fill={accent}>LIKE</text>
-        <text x="230" y="48" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>+ -ing or to</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="48" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>+ -ing or to</text>
         <text x="230" y="64" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={ink}>like swimming</text>
         <text x="230" y="78" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={ink}>like to swim</text>
 
         <rect x="310" y="12" width="140" height="76" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="380" y="32" textAnchor="middle" fontSize="12.5" fontWeight="800" fill={accent}>HATE</text>
-        <text x="380" y="48" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>+ -ing or to</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="380" y="48" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>+ -ing or to</text>
         <text x="380" y="64" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={ink}>hate waiting</text>
         <text x="380" y="78" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={ink}>hate to wait</text>
 
         <rect x="130" y="102" width="200" height="60" rx="8" fill={fill} stroke={accent} strokeWidth="2" strokeDasharray="5 3" />
         <text x="230" y="124" textAnchor="middle" fontSize="12.5" fontWeight="800" fill={accent}>ENJOY</text>
-        <text x="230" y="140" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>+ -ing only</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="140" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>+ -ing only</text>
         <text x="230" y="155" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={ink}>enjoy swimming</text>
 
-        <text x="230" y="182" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>you can also say: not keen on · can't stand · prefer X to Y</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="182" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>you can also say: not keen on · can't stand · prefer X to Y</text>
 
         <line x1="20" y1="194" x2="440" y2="194" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 

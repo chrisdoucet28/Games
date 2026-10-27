@@ -18,7 +18,7 @@ export function InvitationsDiagram({ variant, accentColor = "#2563EB" }: { varia
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -56,7 +56,7 @@ export function InvitationsDiagram({ variant, accentColor = "#2563EB" }: { varia
             <g key={p.phrase}>
               <rect x={x} y="16" width="74" height="58" rx="6" fill={fill} stroke={accent} strokeWidth="1.5" />
               <text x={cx} y="34" textAnchor="middle" fontSize="6.8" fontWeight="800" fill={accent}>{p.phrase}</text>
-              <text x={cx} y="50" textAnchor="middle" fontSize="10" fill={caption}>↓</text>
+              <text fontWeight={isScreen ? undefined : "600"} x={cx} y="50" textAnchor="middle" fontSize="10" fill={caption}>↓</text>
               <text x={cx} y="66" textAnchor="middle" fontSize="8" fontStyle="italic" fill={ink}>{p.form}</text>
             </g>
           );
@@ -79,7 +79,7 @@ export function InvitationsDiagram({ variant, accentColor = "#2563EB" }: { varia
         <text x="380" y="120" textAnchor="middle" fontSize="7.6" fontStyle="italic" fill={ink}>I'm afraid I can't make it.</text>
         <text x="380" y="134" textAnchor="middle" fontSize="7.6" fontStyle="italic" fill={ink}>I already have plans.</text>
         <text x="380" y="148" textAnchor="middle" fontSize="7.6" fontStyle="italic" fill={ink}>Maybe another time?</text>
-        <text x="380" y="165" textAnchor="middle" fontSize="6.8" fontStyle="italic" fill={caption}>be kind, then give a reason</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="380" y="165" textAnchor="middle" fontSize="6.8" fontStyle="italic" fill={caption}>be kind, then give a reason</text>
 
         <line x1="20" y1="186" x2="440" y2="186" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 

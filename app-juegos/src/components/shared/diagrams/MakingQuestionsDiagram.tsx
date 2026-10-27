@@ -10,7 +10,7 @@ export function MakingQuestionsDiagram({ variant, accentColor = "#2563EB" }: { v
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const blockFill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -58,10 +58,10 @@ export function MakingQuestionsDiagram({ variant, accentColor = "#2563EB" }: { v
           <marker id="mqArrow" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill={accent} /></marker>
         </defs>
 
-        <text x="55" y="76" textAnchor="middle" fontSize="10.5" fontStyle="italic" fill={caption}>Where</text>
-        <text x="166" y="76" textAnchor="middle" fontSize="10.5" fontStyle="italic" fill={caption}>did</text>
-        <text x="277" y="76" textAnchor="middle" fontSize="10.5" fontStyle="italic" fill={caption}>you</text>
-        <text x="395" y="76" textAnchor="middle" fontSize="10.5" fontStyle="italic" fill={caption}>go?</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="55" y="76" textAnchor="middle" fontSize="10.5" fontStyle="italic" fill={caption}>Where</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="166" y="76" textAnchor="middle" fontSize="10.5" fontStyle="italic" fill={caption}>did</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="277" y="76" textAnchor="middle" fontSize="10.5" fontStyle="italic" fill={caption}>you</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="395" y="76" textAnchor="middle" fontSize="10.5" fontStyle="italic" fill={caption}>go?</text>
 
         <text x="230" y="100" textAnchor="middle" fontSize="10" fontWeight="700" fill={ink}>the auxiliary is never missing, and never doubled</text>
 

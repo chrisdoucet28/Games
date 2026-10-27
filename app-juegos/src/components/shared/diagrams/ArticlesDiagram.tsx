@@ -9,7 +9,7 @@ export function ArticlesDiagram({ variant, accentColor = "#2563EB" }: { variant:
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -42,16 +42,16 @@ export function ArticlesDiagram({ variant, accentColor = "#2563EB" }: { variant:
         <rect x="20" y="12" width="195" height="80" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="117" y="30" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={accent}>GENERAL CATEGORY</text>
         <text x="117" y="46" textAnchor="middle" fontSize="9" fontWeight="700" fill={ink}>NO article at all</text>
-        <text x="117" y="63" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>Dogs are loyal animals.</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="117" y="63" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>Dogs are loyal animals.</text>
         <text x="117" y="78" textAnchor="middle" fontSize="8" fontStyle="italic" fill={wrong}>not "The dogs..."</text>
 
         <rect x="245" y="12" width="195" height="80" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="342" y="30" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={accent}>SINGULAR COUNTABLE</text>
         <text x="342" y="46" textAnchor="middle" fontSize="9" fontWeight="700" fill={ink}>ALWAYS needs a/an</text>
-        <text x="342" y="63" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>She is a teacher.</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="342" y="63" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>She is a teacher.</text>
         <text x="342" y="78" textAnchor="middle" fontSize="8" fontStyle="italic" fill={wrong}>not "She is teacher"</text>
 
-        <text x="230" y="106" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>a/an follows the SOUND: an hour (silent h) · a university (sounds "yoo-")</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="106" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>a/an follows the SOUND: an hour (silent h) · a university (sounds "yoo-")</text>
 
         <line x1="20" y1="118" x2="440" y2="118" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 

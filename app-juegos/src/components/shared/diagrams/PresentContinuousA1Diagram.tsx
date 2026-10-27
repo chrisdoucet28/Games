@@ -8,7 +8,7 @@ export function PresentContinuousA1Diagram({ variant, accentColor = "#2563EB" }:
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
 
   const cards = [
@@ -51,8 +51,8 @@ export function PresentContinuousA1Diagram({ variant, accentColor = "#2563EB" }:
               <text x={x + 51.5} y="38" textAnchor="middle" fontSize="13" fontWeight="700" fill={ink}>{c.before}</text>
               <text x={x + 51.5} y="52" textAnchor="middle" fontSize="11" fill={accent}>↓</text>
               <text x={x + 51.5} y="70" textAnchor="middle" fontSize="13" fontWeight="800" fill={accent}>{c.after}</text>
-              <text x={x + 51.5} y="82" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>{c.ruleLine1}</text>
-              <text x={x + 51.5} y="92" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>{c.ruleLine2}</text>
+              <text fontWeight={isScreen ? undefined : "600"} x={x + 51.5} y="82" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>{c.ruleLine1}</text>
+              <text fontWeight={isScreen ? undefined : "600"} x={x + 51.5} y="92" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>{c.ruleLine2}</text>
             </g>
           );
         })}

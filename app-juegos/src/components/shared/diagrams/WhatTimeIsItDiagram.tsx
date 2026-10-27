@@ -9,7 +9,7 @@ export function WhatTimeIsItDiagram({ variant, accentColor = "#2563EB" }: { vari
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const pastFill = isScreen ? hexToRgba(accentColor, 0.14) : "white";
   const toFill = isScreen ? hexToRgba(accentColor, 0.28) : "white";
 
@@ -55,18 +55,18 @@ export function WhatTimeIsItDiagram({ variant, accentColor = "#2563EB" }: { vari
         <circle cx="115" cy="115" r="4" fill={ink} />
 
         <text x="115" y="224" textAnchor="middle" fontSize="12.5" fontWeight="800" fill={ink}>quarter to FIVE</text>
-        <text x="115" y="240" textAnchor="middle" fontSize="10" fontStyle="italic" fill={caption}>(4:45 — not "quarter to four")</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="115" y="240" textAnchor="middle" fontSize="10" fontStyle="italic" fill={caption}>(4:45 — not "quarter to four")</text>
 
         {/* Past / To split bar */}
         <rect x="270" y="15" width="170" height="90" fill={pastFill} stroke={ink} strokeWidth="1.5" />
         <text x="355" y="45" textAnchor="middle" fontSize="12" fontWeight="800" fill={ink}>PAST</text>
-        <text x="355" y="65" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>minutes 1–29</text>
-        <text x="355" y="82" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>ten past two</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="355" y="65" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>minutes 1–29</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="355" y="82" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>ten past two</text>
 
         <rect x="270" y="105" width="170" height="90" fill={toFill} stroke={ink} strokeWidth="1.5" />
         <text x="355" y="135" textAnchor="middle" fontSize="12" fontWeight="800" fill={ink}>TO (next hour)</text>
-        <text x="355" y="155" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>minutes 31–59</text>
-        <text x="355" y="172" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>ten to three</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="355" y="155" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>minutes 31–59</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="355" y="172" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>ten to three</text>
 
         <line x1="270" y1="105" x2="440" y2="105" stroke={accent} strokeWidth="2.5" />
         <text x="355" y="118" textAnchor="middle" fontSize="9.5" fontWeight="800" fill={accent}>30 = HALF PAST</text>

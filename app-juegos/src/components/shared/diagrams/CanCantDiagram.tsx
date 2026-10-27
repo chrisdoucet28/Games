@@ -9,7 +9,7 @@ export function CanCantDiagram({ variant, accentColor = "#2563EB" }: { variant: 
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
 
@@ -38,7 +38,7 @@ export function CanCantDiagram({ variant, accentColor = "#2563EB" }: { variant: 
         "Can" never changes
       </div>
       <svg viewBox="0 0 460 205" style={{ width: "100%", height: "auto", display: "block" }}>
-        <text x="60" y="50" textAnchor="middle" fontSize="11" fontStyle="italic" fill={caption}>I / he / she / we / they</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="60" y="50" textAnchor="middle" fontSize="11" fontStyle="italic" fill={caption}>I / he / she / we / they</text>
         <line x1="60" y1="58" x2="60" y2="74" stroke={caption} strokeWidth="1.5" markerEnd="url(#ccArrow)" />
 
         <rect x="20" y="76" width="90" height="36" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
@@ -53,7 +53,7 @@ export function CanCantDiagram({ variant, accentColor = "#2563EB" }: { variant: 
         <text x="295" y="98" textAnchor="middle" fontSize="8.5" fontWeight="700" fill={wrong}>to</text>
         <line x1="286" y1="85" x2="304" y2="103" stroke={wrong} strokeWidth="1.5" />
 
-        <text x="385" y="99" textAnchor="middle" fontSize="11.5" fontStyle="italic" fill={caption}>speak, swim, drive…</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="385" y="99" textAnchor="middle" fontSize="11.5" fontStyle="italic" fill={caption}>speak, swim, drive…</text>
 
         <text x="65" y="130" textAnchor="middle" fontSize="10" fontWeight="700" fill={accent}>ability</text>
         <text x="65" y="145" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={ink}>I can speak two languages.</text>
@@ -63,7 +63,7 @@ export function CanCantDiagram({ variant, accentColor = "#2563EB" }: { variant: 
 
         <line x1="20" y1="160" x2="440" y2="160" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
         <text x="230" y="178" textAnchor="middle" fontSize="12" fontWeight="800" fill={ink}>past: COULD / COULDN'T + base verb</text>
-        <text x="230" y="193" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>I could climb trees when I was young.</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="193" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>I could climb trees when I was young.</text>
 
         <defs>
           <marker id="ccArrow" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto">

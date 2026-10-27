@@ -9,7 +9,7 @@ export function WorkLifeBalanceDiagram({ variant, accentColor = "#2563EB" }: { v
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -52,8 +52,8 @@ export function WorkLifeBalanceDiagram({ variant, accentColor = "#2563EB" }: { v
         <rect x="288" y="32" width="64" height="30" rx="5" fill={fill} stroke={accent} strokeWidth="1.5" />
         <text x="320" y="52" textAnchor="middle" fontSize="9" fontWeight="800" fill={ink}>LIFE</text>
 
-        <text x="140" y="102" textAnchor="middle" fontSize="7.2" fontStyle="italic" fill={caption}>burnout</text>
-        <text x="320" y="78" textAnchor="middle" fontSize="7.2" fontStyle="italic" fill={caption}>switch off</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="140" y="102" textAnchor="middle" fontSize="7.2" fontStyle="italic" fill={caption}>burnout</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="320" y="78" textAnchor="middle" fontSize="7.2" fontStyle="italic" fill={caption}>switch off</text>
 
         <text x="20" y="132" fontSize="8" fontWeight="800" letterSpacing="0.04em" fill={caption}>USEFUL WORDS</text>
         {["set boundaries", "flexible hours", "hustle culture", "four-day working week"].map((w, i) => {

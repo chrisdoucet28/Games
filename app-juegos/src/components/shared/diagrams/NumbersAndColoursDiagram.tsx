@@ -73,7 +73,7 @@ export function NumbersAndColoursDiagram({ variant, accentColor = "#2563EB" }: {
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -151,18 +151,18 @@ export function NumbersAndColoursDiagram({ variant, accentColor = "#2563EB" }: {
           );
         })}
 
-        <text x="230" y="244" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>watch the spelling: forty has no "u" (not "fourty")</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="244" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>watch the spelling: forty has no "u" (not "fourty")</text>
 
         <line x1="20" y1="256" x2="440" y2="256" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 
         <rect x="20" y="266" width="195" height="52" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="117" y="284" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={accent}>COLOUR + NOUN</text>
-        <text x="117" y="297" textAnchor="middle" fontSize="7.8" fill={caption}>never takes -s</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="117" y="297" textAnchor="middle" fontSize="7.8" fill={caption}>never takes -s</text>
         <text x="117" y="310" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={ink}>a black bag</text>
 
         <rect x="245" y="266" width="195" height="52" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="342" y="284" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={accent}>NUMBER + NOUN + S</text>
-        <text x="342" y="297" textAnchor="middle" fontSize="7.8" fill={caption}>2 or more? add -s</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="342" y="297" textAnchor="middle" fontSize="7.8" fill={caption}>2 or more? add -s</text>
         <text x="342" y="310" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={ink}>two red bags</text>
 
         <line x1="20" y1="330" x2="440" y2="330" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />

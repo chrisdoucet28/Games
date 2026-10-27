@@ -8,7 +8,7 @@ export function TellingStoriesDiagram({ variant, accentColor = "#2563EB" }: { va
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -54,25 +54,25 @@ export function TellingStoriesDiagram({ variant, accentColor = "#2563EB" }: { va
         <text x="65" y="76" textAnchor="middle" fontSize="9.5" fontWeight="800" fill={accent}>SETUP</text>
         <text x="65" y="90" textAnchor="middle" fontSize="7" fontStyle="italic" fill={ink}>One day... /</text>
         <text x="65" y="101" textAnchor="middle" fontSize="7" fontStyle="italic" fill={ink}>Once upon a time...</text>
-        <text x="65" y="117" textAnchor="middle" fontSize="6.5" fontStyle="italic" fill={caption}>past continuous scene</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="65" y="117" textAnchor="middle" fontSize="6.5" fontStyle="italic" fill={caption}>past continuous scene</text>
 
         <rect x="130" y="60" width="110" height="66" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="185" y="76" textAnchor="middle" fontSize="9.5" fontWeight="800" fill={accent}>EVENTS</text>
         <text x="185" y="90" textAnchor="middle" fontSize="7" fontStyle="italic" fill={ink}>First... Then...</text>
         <text x="185" y="101" textAnchor="middle" fontSize="7" fontStyle="italic" fill={ink}>Next... After that...</text>
-        <text x="185" y="117" textAnchor="middle" fontSize="6.5" fontStyle="italic" fill={caption}>past simple, in order</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="185" y="117" textAnchor="middle" fontSize="6.5" fontStyle="italic" fill={caption}>past simple, in order</text>
 
         <rect x="250" y="60" width="110" height="66" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="305" y="76" textAnchor="middle" fontSize="9.5" fontWeight="800" fill={accent}>THE TWIST</text>
         <text x="305" y="90" textAnchor="middle" fontSize="7" fontStyle="italic" fill={ink}>Suddenly... /</text>
         <text x="305" y="101" textAnchor="middle" fontSize="7" fontStyle="italic" fill={ink}>Unfortunately...</text>
-        <text x="305" y="117" textAnchor="middle" fontSize="6.5" fontStyle="italic" fill={caption}>the unexpected part</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="305" y="117" textAnchor="middle" fontSize="6.5" fontStyle="italic" fill={caption}>the unexpected part</text>
 
         <rect x="370" y="60" width="80" height="66" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="410" y="76" textAnchor="middle" fontSize="9.5" fontWeight="800" fill={accent}>ENDING</text>
         <text x="410" y="90" textAnchor="middle" fontSize="7" fontStyle="italic" fill={ink}>In the end... /</text>
         <text x="410" y="101" textAnchor="middle" fontSize="7" fontStyle="italic" fill={ink}>As a result...</text>
-        <text x="410" y="117" textAnchor="middle" fontSize="6.5" fontStyle="italic" fill={caption}>the outcome</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="410" y="117" textAnchor="middle" fontSize="6.5" fontStyle="italic" fill={caption}>the outcome</text>
 
         <line x1="20" y1="140" x2="440" y2="140" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 

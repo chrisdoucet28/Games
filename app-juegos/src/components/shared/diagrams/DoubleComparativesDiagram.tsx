@@ -8,7 +8,7 @@ import { Icon } from "../Icon";
 export function DoubleComparativesDiagram({ variant, accentColor = "#2563EB" }: { variant: "screen" | "print"; accentColor?: string }) {
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -40,17 +40,17 @@ export function DoubleComparativesDiagram({ variant, accentColor = "#2563EB" }: 
       <svg viewBox="0 0 460 195" style={{ width: "100%", height: "auto", display: "block" }}>
         <rect x="20" y="12" width="195" height="66" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="117" y="32" textAnchor="middle" fontSize="12.5" fontWeight="800" fill={accent}>THE + comparative</text>
-        <text x="117" y="50" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>The harder you work,</text>
-        <text x="117" y="66" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>short: -er · long: the more ___</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="117" y="50" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>The harder you work,</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="117" y="66" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>short: -er · long: the more ___</text>
 
         <text x="230" y="46" textAnchor="middle" fontSize="16" fill={accent}>→</text>
 
         <rect x="245" y="12" width="195" height="66" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="342" y="32" textAnchor="middle" fontSize="12.5" fontWeight="800" fill={accent}>THE + comparative</text>
-        <text x="342" y="50" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>the better your results.</text>
-        <text x="342" y="66" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>good→the better, bad→the worse</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="342" y="50" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>the better your results.</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="342" y="66" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>good→the better, bad→the worse</text>
 
-        <text x="230" y="98" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>no "is" inside either clause: the more expensive the hotel...</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="98" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>no "is" inside either clause: the more expensive the hotel...</text>
 
         <line x1="20" y1="110" x2="440" y2="110" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 

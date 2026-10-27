@@ -9,7 +9,7 @@ export function AuxiliaryVerbsBeDoDiagram({ variant, accentColor = "#2563EB" }: 
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -52,14 +52,14 @@ export function AuxiliaryVerbsBeDoDiagram({ variant, accentColor = "#2563EB" }: 
 
         <rect x="15" y="75" width="190" height="50" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="110" y="96" textAnchor="middle" fontSize="11" fontWeight="800" fill={ink}>adjective / job / place</text>
-        <text x="110" y="114" textAnchor="middle" fontSize="10" fontStyle="italic" fill={caption}>happy · a teacher · at home</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="110" y="114" textAnchor="middle" fontSize="10" fontStyle="italic" fill={caption}>happy · a teacher · at home</text>
 
         <text x="110" y="146" textAnchor="middle" fontSize="14" fontWeight="800" fill={accent}>use BE</text>
         <text x="110" y="163" textAnchor="middle" fontSize="10" fontStyle="italic" fill={ink}>Are you happy? · She isn't hungry.</text>
 
         <rect x="255" y="75" width="190" height="50" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="350" y="96" textAnchor="middle" fontSize="11" fontWeight="800" fill={ink}>action verb</text>
-        <text x="350" y="114" textAnchor="middle" fontSize="10" fontStyle="italic" fill={caption}>like · work · play · study</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="350" y="114" textAnchor="middle" fontSize="10" fontStyle="italic" fill={caption}>like · work · play · study</text>
 
         <text x="350" y="146" textAnchor="middle" fontSize="14" fontWeight="800" fill={accent}>use DO / DOES</text>
         <text x="350" y="163" textAnchor="middle" fontSize="10" fontStyle="italic" fill={ink}>Do you like pizza? · He doesn't eat meat.</text>

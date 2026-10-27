@@ -11,7 +11,7 @@ export function CausativeVerbsDiagram({ variant, accentColor = "#2563EB" }: { va
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -51,38 +51,38 @@ export function CausativeVerbsDiagram({ variant, accentColor = "#2563EB" }: { va
 
         <rect x="8" y="12" width="108" height="66" rx="7" fill={fill} stroke={accent} strokeWidth="1.5" />
         <text x="62" y="27" textAnchor="middle" fontSize="11" fontWeight="800" fill={accent}>MAKE</text>
-        <text x="62" y="39" textAnchor="middle" fontSize="7" fontStyle="italic" fill={caption}>+ object + verb</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="62" y="39" textAnchor="middle" fontSize="7" fontStyle="italic" fill={caption}>+ object + verb</text>
         <text x="62" y="52" textAnchor="middle" fontSize="7" fontStyle="italic" fill={ink}>made us sit</text>
         <text x="62" y="65" textAnchor="middle" fontSize="7" fontWeight="700" fill={ink}>forced — no choice</text>
 
         <rect x="120" y="12" width="108" height="66" rx="7" fill={fill} stroke={accent} strokeWidth="1.5" />
         <text x="174" y="27" textAnchor="middle" fontSize="11" fontWeight="800" fill={accent}>HAVE</text>
-        <text x="174" y="39" textAnchor="middle" fontSize="7" fontStyle="italic" fill={caption}>+ object + verb</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="174" y="39" textAnchor="middle" fontSize="7" fontStyle="italic" fill={caption}>+ object + verb</text>
         <text x="174" y="52" textAnchor="middle" fontSize="7" fontStyle="italic" fill={ink}>have him check it</text>
         <text x="174" y="65" textAnchor="middle" fontSize="7" fontWeight="700" fill={ink}>arranged — expected</text>
 
         <rect x="232" y="12" width="108" height="66" rx="7" fill={fill} stroke={accent} strokeWidth="1.5" />
         <text x="286" y="27" textAnchor="middle" fontSize="11" fontWeight="800" fill={accent}>GET</text>
-        <text x="286" y="39" textAnchor="middle" fontSize="7" fontStyle="italic" fill={caption}>+ object + TO verb</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="286" y="39" textAnchor="middle" fontSize="7" fontStyle="italic" fill={caption}>+ object + TO verb</text>
         <text x="286" y="52" textAnchor="middle" fontSize="7" fontStyle="italic" fill={ink}>got him to help</text>
         <text x="286" y="65" textAnchor="middle" fontSize="7" fontWeight="700" fill={ink}>persuaded — convince</text>
 
         <rect x="344" y="12" width="108" height="66" rx="7" fill={fill} stroke={accent} strokeWidth="1.5" />
         <text x="398" y="27" textAnchor="middle" fontSize="11" fontWeight="800" fill={accent}>LET</text>
-        <text x="398" y="39" textAnchor="middle" fontSize="7" fontStyle="italic" fill={caption}>+ object + verb</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="398" y="39" textAnchor="middle" fontSize="7" fontStyle="italic" fill={caption}>+ object + verb</text>
         <text x="398" y="52" textAnchor="middle" fontSize="7" fontStyle="italic" fill={ink}>lets us leave early</text>
         <text x="398" y="65" textAnchor="middle" fontSize="7" fontWeight="700" fill={ink}>permitted — their choice</text>
 
         <rect x="8" y="88" width="444" height="9" rx="4.5" fill={`url(#${gradId})`} />
-        <text x="8" y="110" fontSize="8.5" fontStyle="italic" fill={caption}>strongest command</text>
-        <text x="452" y="110" textAnchor="end" fontSize="8.5" fontStyle="italic" fill={caption}>most freedom</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="8" y="110" fontSize="8.5" fontStyle="italic" fill={caption}>strongest command</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="452" y="110" textAnchor="end" fontSize="8.5" fontStyle="italic" fill={caption}>most freedom</text>
 
         <rect x="20" y="124" width="420" height="52" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="230" y="142" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={accent}>PASSIVE CAUSATIVE — HAVE/GET + OBJECT + PAST PARTICIPLE</text>
         <text x="230" y="157" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={ink}>I had my hair cut. · I got my car fixed.</text>
-        <text x="230" y="171" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>you don't name who did it — the OBJECT receives the action, not a person</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="171" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>you don't name who did it — the OBJECT receives the action, not a person</text>
 
-        <text x="230" y="192" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>active: a named person does the action · passive: a service happens to your object</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="192" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>active: a named person does the action · passive: a service happens to your object</text>
 
         <line x1="20" y1="202" x2="440" y2="202" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 

@@ -7,7 +7,7 @@ import { Icon } from "../Icon";
 export function FuturePerfectDiagram({ variant, accentColor = "#2563EB" }: { variant: "screen" | "print"; accentColor?: string }) {
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -39,10 +39,10 @@ export function FuturePerfectDiagram({ variant, accentColor = "#2563EB" }: { var
       <svg viewBox="0 0 460 175" style={{ width: "100%", height: "auto", display: "block" }}>
         <rect x="50" y="14" width="360" height="56" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="230" y="36" textAnchor="middle" fontSize="14" fontWeight="800" fill={accent}>WILL HAVE + PAST PARTICIPLE</text>
-        <text x="230" y="55" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>By June, she will have finished the course.</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="55" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>By June, she will have finished the course.</text>
 
-        <text x="230" y="90" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>question: Will + subject + HAVE + participle? · negative: won't HAVE + participle</text>
-        <text x="230" y="105" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>almost always paired with "by" + a future time</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="90" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>question: Will + subject + HAVE + participle? · negative: won't HAVE + participle</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="105" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>almost always paired with "by" + a future time</text>
 
         <line x1="20" y1="118" x2="440" y2="118" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 

@@ -10,7 +10,7 @@ export function BasicWordOrderDiagram({ variant, accentColor = "#2563EB" }: { va
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const blockFill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -53,7 +53,7 @@ export function BasicWordOrderDiagram({ variant, accentColor = "#2563EB" }: { va
         <line x1="287" y1="56" x2="328" y2="56" stroke={accent} strokeWidth="2" markerEnd="url(#woArrow)" />
         <circle cx="307" cy="45" r="7" fill="none" stroke={wrong} strokeWidth="1.5" />
         <line x1="302" y1="40" x2="312" y2="50" stroke={wrong} strokeWidth="1.5" />
-        <text x="307" y="30" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>nothing goes here</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="307" y="30" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>nothing goes here</text>
 
         <rect x="330" y="34" width="110" height="44" rx="8" fill={blockFill} stroke={accent} strokeWidth="2" />
         <text x="385" y="61" textAnchor="middle" fontSize="13" fontWeight="800" fill={ink}>OBJECT</text>
@@ -64,11 +64,11 @@ export function BasicWordOrderDiagram({ variant, accentColor = "#2563EB" }: { va
           </marker>
         </defs>
 
-        <text x="75" y="100" textAnchor="middle" fontSize="11.5" fontStyle="italic" fill={caption}>She</text>
-        <text x="230" y="100" textAnchor="middle" fontSize="11.5" fontStyle="italic" fill={caption}>often calls</text>
-        <text x="385" y="100" textAnchor="middle" fontSize="11.5" fontStyle="italic" fill={caption}>her mother</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="75" y="100" textAnchor="middle" fontSize="11.5" fontStyle="italic" fill={caption}>She</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="100" textAnchor="middle" fontSize="11.5" fontStyle="italic" fill={caption}>often calls</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="385" y="100" textAnchor="middle" fontSize="11.5" fontStyle="italic" fill={caption}>her mother</text>
 
-        <text x="230" y="126" textAnchor="middle" fontSize="10" fontStyle="italic" fill={caption}>always use a subject — even for weather: It's raining.</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="126" textAnchor="middle" fontSize="10" fontStyle="italic" fill={caption}>always use a subject — even for weather: It's raining.</text>
 
         <text x="115" y="160" textAnchor="end" fontSize="12" fontWeight="800" fill={wrong}>✗ Is raining.</text>
         <text x="135" y="160" fontSize="12" fontWeight="800" fill={right}>✓ It's raining.</text>

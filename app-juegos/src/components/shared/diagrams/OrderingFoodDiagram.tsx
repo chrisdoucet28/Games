@@ -43,7 +43,7 @@ export function OrderingFoodDiagram({ variant, accentColor = "#2563EB" }: { vari
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -78,7 +78,7 @@ export function OrderingFoodDiagram({ variant, accentColor = "#2563EB" }: { vari
         <text x="117" y="50" textAnchor="middle" fontSize="7.6" fontStyle="italic" fill={ink}>Could I have the pasta?</text>
         <text x="117" y="64" textAnchor="middle" fontSize="7.6" fontStyle="italic" fill={ink}>I'd like the soup.</text>
         <text x="117" y="78" textAnchor="middle" fontSize="7.6" fontStyle="italic" fill={ink}>Can I get some water?</text>
-        <text x="117" y="94" textAnchor="middle" fontSize="6.8" fill={caption}>base verb after could/can</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="117" y="94" textAnchor="middle" fontSize="6.8" fill={caption}>base verb after could/can</text>
 
         <rect x="245" y="16" width="195" height="86" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="342" y="34" textAnchor="middle" fontSize="10" fontWeight="800" fill={accent}>DIETARY &amp; EXTRAS</text>

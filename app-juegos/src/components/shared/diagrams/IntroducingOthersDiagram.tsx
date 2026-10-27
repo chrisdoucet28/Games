@@ -9,7 +9,7 @@ export function IntroducingOthersDiagram({ variant, accentColor = "#2563EB" }: {
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -51,7 +51,7 @@ export function IntroducingOthersDiagram({ variant, accentColor = "#2563EB" }: {
         <text x="342" y="65" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={ink}>These are my classmates.</text>
         <text x="342" y="79" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={ink}>Their names are Ana and Leo.</text>
 
-        <text x="230" y="106" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>meeting two people? say their name first</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="106" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>meeting two people? say their name first</text>
         <text x="230" y="120" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={ink}>Sarah, this is David.</text>
 
         <line x1="20" y1="132" x2="440" y2="132" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />

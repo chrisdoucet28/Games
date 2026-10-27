@@ -9,7 +9,7 @@ export function FutureInPastDiagram({ variant, accentColor = "#2563EB" }: { vari
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -42,14 +42,14 @@ export function FutureInPastDiagram({ variant, accentColor = "#2563EB" }: { vari
         <rect x="20" y="12" width="195" height="80" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="117" y="30" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={accent}>WAS/WERE GOING TO</text>
         <text x="117" y="46" textAnchor="middle" fontSize="8.5" fontWeight="700" fill={ink}>a past plan (often unfulfilled)</text>
-        <text x="117" y="63" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>I was going to go for a run.</text>
-        <text x="117" y="78" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>was/were ABOUT TO = imminent</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="117" y="63" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>I was going to go for a run.</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="117" y="78" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>was/were ABOUT TO = imminent</text>
 
         <rect x="245" y="12" width="195" height="80" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="342" y="30" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={accent}>WOULD + base verb</text>
         <text x="342" y="46" textAnchor="middle" fontSize="8.5" fontWeight="700" fill={ink}>"will" backshifted in reported speech</text>
-        <text x="342" y="63" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>She said she would call me back.</text>
-        <text x="342" y="78" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>(she said: "I will call...")</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="342" y="63" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>She said she would call me back.</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="342" y="78" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>(she said: "I will call...")</text>
 
         <line x1="20" y1="104" x2="440" y2="104" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 

@@ -10,7 +10,7 @@ export function GerundsInfinitivesDiagram({ variant, accentColor = "#2563EB" }: 
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -43,20 +43,20 @@ export function GerundsInfinitivesDiagram({ variant, accentColor = "#2563EB" }: 
         <rect x="20" y="12" width="195" height="102" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="117" y="30" textAnchor="middle" fontSize="11.5" fontWeight="800" fill={accent}>GERUND (-ing)</text>
         <text x="117" y="45" textAnchor="middle" fontSize="8" fontWeight="700" fill={ink}>real, ongoing, or already true</text>
-        <text x="117" y="62" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>enjoy · finish · suggest · avoid</text>
-        <text x="117" y="74" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>consider · admit · keep · deny</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="117" y="62" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>enjoy · finish · suggest · avoid</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="117" y="74" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>consider · admit · keep · deny</text>
         <text x="117" y="94" textAnchor="middle" fontSize="8" fontStyle="italic" fill={ink}>I enjoy visiting new places.</text>
-        <text x="117" y="108" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>(a real, ongoing activity)</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="117" y="108" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>(a real, ongoing activity)</text>
 
         <rect x="245" y="12" width="195" height="102" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="342" y="30" textAnchor="middle" fontSize="11.5" fontWeight="800" fill={accent}>INFINITIVE (to + verb)</text>
         <text x="342" y="45" textAnchor="middle" fontSize="8" fontWeight="700" fill={ink}>a decision, hope, or plan — not yet real</text>
-        <text x="342" y="62" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>decide · agree · hope · promise</text>
-        <text x="342" y="74" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>manage · refuse · afford · offer</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="342" y="62" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>decide · agree · hope · promise</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="342" y="74" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>manage · refuse · afford · offer</text>
         <text x="342" y="94" textAnchor="middle" fontSize="8" fontStyle="italic" fill={ink}>She decided to leave her job.</text>
-        <text x="342" y="108" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>(not done yet — just decided)</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="342" y="108" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>(not done yet — just decided)</text>
 
-        <text x="230" y="134" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>exception: remember/stop/try change meaning depending on which one follows</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="134" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>exception: remember/stop/try change meaning depending on which one follows</text>
 
         <line x1="20" y1="146" x2="440" y2="146" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 

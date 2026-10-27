@@ -163,7 +163,7 @@ export function AppearanceDiagram({ variant, accentColor = "#2563EB" }: { varian
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -196,12 +196,12 @@ export function AppearanceDiagram({ variant, accentColor = "#2563EB" }: { varian
         <rect x="20" y="16" width="195" height="70" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="117" y="34" textAnchor="middle" fontSize="9.5" fontWeight="800" fill={accent}>What does she look like?</text>
         <text x="117" y="52" textAnchor="middle" fontSize="8.3" fontStyle="italic" fill={ink}>She's tall and has curly hair.</text>
-        <text x="117" y="66" textAnchor="middle" fontSize="7.2" fill={caption}>one person: does</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="117" y="66" textAnchor="middle" fontSize="7.2" fill={caption}>one person: does</text>
 
         <rect x="245" y="16" width="195" height="70" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="342" y="34" textAnchor="middle" fontSize="9.5" fontWeight="800" fill={accent}>What do they look like?</text>
         <text x="342" y="52" textAnchor="middle" fontSize="8.3" fontStyle="italic" fill={ink}>They have dark hair.</text>
-        <text x="342" y="66" textAnchor="middle" fontSize="7.2" fill={caption}>2 or more: do</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="342" y="66" textAnchor="middle" fontSize="7.2" fill={caption}>2 or more: do</text>
 
         <text x="20" y="102" fontSize="8" fontWeight="800" letterSpacing="0.04em" fill={caption}>HEIGHT, BUILD, AGE — BE</text>
         {BUILD_WORDS.map((w, i) => {

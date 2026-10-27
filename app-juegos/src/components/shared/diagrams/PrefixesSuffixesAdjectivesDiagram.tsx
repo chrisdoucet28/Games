@@ -24,7 +24,7 @@ export function PrefixesSuffixesAdjectivesDiagram({ variant, accentColor = "#256
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -63,7 +63,7 @@ export function PrefixesSuffixesAdjectivesDiagram({ variant, accentColor = "#256
             <g key={v.prefix}>
               <rect x={boxX} y="16" width="90" height="54" rx="6" fill={fill} stroke={accent} strokeWidth="1.5" />
               <text x={cx} y="34" textAnchor="middle" fontSize="13" fontWeight="800" fill={accent}>{v.prefix}</text>
-              <text x={cx} y="46" textAnchor="middle" fontSize="7" fill={caption}>{v.rule}</text>
+              <text fontWeight={isScreen ? undefined : "600"} x={cx} y="46" textAnchor="middle" fontSize="7" fill={caption}>{v.rule}</text>
               <text x={cx} y="62" textAnchor="middle" fontSize="8.2" fontStyle="italic" fill={ink}>{v.example}</text>
             </g>
           );

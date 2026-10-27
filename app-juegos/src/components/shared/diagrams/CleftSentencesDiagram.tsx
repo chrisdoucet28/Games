@@ -9,7 +9,7 @@ export function CleftSentencesDiagram({ variant, accentColor = "#2563EB" }: { va
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -42,16 +42,16 @@ export function CleftSentencesDiagram({ variant, accentColor = "#2563EB" }: { va
         <rect x="20" y="12" width="195" height="70" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="117" y="30" textAnchor="middle" fontSize="11" fontWeight="800" fill={accent}>IT-CLEFT</text>
         <text x="117" y="46" textAnchor="middle" fontSize="8.5" fontWeight="700" fill={ink}>It + WAS + [focus] + who/that</text>
-        <text x="117" y="64" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>It was Maria who solved it.</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="117" y="64" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>It was Maria who solved it.</text>
         <text x="117" y="77" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={wrong}>not "It Maria who..."</text>
 
         <rect x="245" y="12" width="195" height="70" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="342" y="30" textAnchor="middle" fontSize="11" fontWeight="800" fill={accent}>WHAT-CLEFT</text>
         <text x="342" y="46" textAnchor="middle" fontSize="8.5" fontWeight="700" fill={ink}>What + clause + IS/WAS + [focus]</text>
-        <text x="342" y="64" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>What I need is a break.</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="342" y="64" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>What I need is a break.</text>
         <text x="342" y="77" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={wrong}>not "What I need it..."</text>
 
-        <text x="230" y="102" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>the what-clause is always singular — use is/was even for a plural focus</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="102" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>the what-clause is always singular — use is/was even for a plural focus</text>
 
         <line x1="20" y1="114" x2="440" y2="114" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 
