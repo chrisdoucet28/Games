@@ -52,6 +52,10 @@ export type RealWorldReading = {
   // when a speaker names themselves ("I'm Marta") so the voice has to match.
   dialogue?: {
     turns?: { speaker: 0 | 1; text: string }[];
+    // For passages written as "Interviewer: ... / Guest: ..." — the two labels (speaker 0, then 1). Each
+    // line is one turn and the label is dropped from the AUDIO (it stays on screen), so the voice
+    // never reads "Interviewer:" aloud.
+    speakerLabels?: [string, string];
     voices?: ["female" | "male", "female" | "male"];
   };
   // 3 comprehension-check questions about the text's content (not the grammar point itself —
@@ -63,7 +67,7 @@ export type RealWorldReading = {
 export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
   greetings_introductions: {
     title: "New at School",
-    audioUrl: `${MEDIA_BASE}/audio/real-world/greetings_introductions.mp3`,
+    audioUrl: `${MEDIA_BASE}/audio/real-world/greetings_introductions-2v.mp3`,
     dialogue: { voices: ["female", "male"] },
     passage: [
       "Hi! I'm Marta. I'm new here. Nice to meet you!",
@@ -490,7 +494,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   prepositions_place: {
     title: "Where's My Phone?",
-    audioUrl: `${MEDIA_BASE}/audio/real-world/prepositions_place.mp3`,
+    audioUrl: `${MEDIA_BASE}/audio/real-world/prepositions_place-2v.mp3`,
     dialogue: {},
     passage: [
       "Have you seen my phone?",
@@ -1075,6 +1079,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
   present_perfect: {
     title: "Checking In on the Move",
     audioUrl: `${MEDIA_BASE}/audio/real-world/present_perfect.mp3`,
+    dialogue: {},
     passage: [
       "Have you finished packing yet?",
       "Not yet — I've already packed the kitchen and the bedroom, but I haven't started on the living room. I've been putting it off because there's just so much stuff!",
@@ -1130,6 +1135,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
   so_neither: {
     title: "We Have So Much in Common",
     audioUrl: `${MEDIA_BASE}/audio/real-world/so_neither.mp3`,
+    dialogue: {},
     passage: [
       "I love hiking on weekends.",
       "So do I! I try to get out to the hills at least once a month.",
@@ -1158,6 +1164,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
   prefer_rather: {
     title: "Choosing a Restaurant",
     audioUrl: `${MEDIA_BASE}/audio/real-world/prefer_rather.mp3`,
+    dialogue: {},
     passage: [
       "Where should we eat tonight?",
       "I don't know — I generally prefer Italian food to anything else, but I've had pasta three times this week already. What about you?",
@@ -1196,6 +1203,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
   get_used_to: {
     title: "Moving Abroad",
     audioUrl: `${MEDIA_BASE}/audio/real-world/get_used_to.mp3`,
+    dialogue: {},
     passage: [
       "What was the hardest part of moving to a new country?",
       "Honestly, getting used to the food took the longest. I didn't use to eat spicy food at all back home, so it was a real shock at first. Now I'm completely used to it — I actually crave it!",
@@ -1216,6 +1224,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
   reported_speech: {
     title: "What Did She Say?",
     audioUrl: `${MEDIA_BASE}/audio/real-world/reported_speech.mp3`,
+    dialogue: {},
     passage: [
       "So what did the manager say in the meeting?",
       "She said the company was doing well this quarter, and she told us we would get an update on bonuses by the end of the month. She also said that she had already spoken to head office about it.",
@@ -1477,6 +1486,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
   subject_object_questions: {
     title: "Detective Notes",
     audioUrl: `${MEDIA_BASE}/audio/real-world/subject_object_questions.mp3`,
+    dialogue: {},
     passage: [
       "Who broke the window?",
       "We don't know yet — that's what we're trying to find out.",
@@ -1556,6 +1566,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
   modal_verbs: {
     title: "Ask Before You Assume",
     audioUrl: `${MEDIA_BASE}/audio/real-world/modal_verbs.mp3`,
+    dialogue: {},
     passage: [
       "Excuse me, may I ask you something about the new policy?",
       "Of course, go ahead.",
@@ -1631,6 +1642,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
   asking_for_clarification: {
     title: "Lost in the Instructions",
     audioUrl: `${MEDIA_BASE}/audio/real-world/asking_for_clarification.mp3`,
+    dialogue: {},
     passage: [
       "Sorry, could you repeat that last part? I didn't quite catch it.",
       "Sure — I said you need to restart the system before applying the update.",
@@ -1653,6 +1665,20 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
   agreeing_disagreeing: {
     title: "The Office Debate",
     audioUrl: `${MEDIA_BASE}/audio/real-world/agreeing_disagreeing.mp3`,
+    // Three colleagues in the text; two voices split by SIDE (speaker 0 = for the delay, 1 = against it).
+    dialogue: {
+      turns: [
+        { speaker: 0, text: "I think we should move the deadline back a week." },
+        { speaker: 0, text: "I couldn't agree more — the team's clearly under too much pressure right now." },
+        { speaker: 1, text: "I'm afraid I disagree, actually. We promised the client this date, and pushing it back could damage trust." },
+        { speaker: 0, text: "That's a fair point, but quality matters more than speed here, in my opinion." },
+        { speaker: 1, text: "To some extent, I agree, but we still need to manage expectations with the client properly." },
+        { speaker: 0, text: "There's no doubt about it — a rushed job could cost us the account entirely if something goes wrong. That's a risk I'm not willing to take right now." },
+        { speaker: 1, text: "Fair enough. Maybe we could deliver an early version now and finish the rest next week?" },
+        { speaker: 0, text: "I beg to differ, actually — splitting the delivery might confuse the client more than reassure them. I'd rather we communicate clearly instead." },
+        { speaker: 1, text: "I can't deny that's a reasonable point too. Let's at least propose the delay and explain our reasoning honestly, rather than deciding anything without them." },
+      ],
+    },
     passage: [
       "I think we should move the deadline back a week.",
       "I couldn't agree more — the team's clearly under too much pressure right now.",
@@ -1674,6 +1700,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
   question_tags: {
     title: "Small Talk at the Bus Stop",
     audioUrl: `${MEDIA_BASE}/audio/real-world/question_tags.mp3`,
+    dialogue: {},
     passage: [
       "Lovely weather today, isn't it?",
       "It really is! You're waiting for the number twelve, aren't you?",
@@ -1834,6 +1861,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
   describing_locations: {
     title: "Where Should We Stay?",
     audioUrl: `${MEDIA_BASE}/audio/real-world/describing_locations.mp3`,
+    dialogue: {},
     passage: [
       "I found a great little town for our trip. It's situated in a valley, surrounded by mountains on almost every side.",
       "That sounds beautiful. Is it within walking distance of the train station?",
@@ -1911,6 +1939,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
   embedded_questions: {
     title: "Interview: Starting a Small Business",
     audioUrl: `${MEDIA_BASE}/audio/real-world/embedded_questions.mp3`,
+    dialogue: { speakerLabels: ["Interviewer:", "Guest:"] },
     passage: [
       "Interviewer: Thanks for joining us. Could you tell me how you first got the idea for the business?",
       "Guest: Of course. I was working in a café and I kept noticing how many people asked if we sold gluten-free bread. I started wondering whether there was actually a real gap in the market, so I did some research.",
@@ -2008,6 +2037,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
   success_motivation: {
     title: "Interview: What Actually Drives Success",
     audioUrl: `${MEDIA_BASE}/audio/real-world/success_motivation.mp3`,
+    dialogue: { speakerLabels: ["Interviewer:", "Coach:"] },
     passage: [
       "Interviewer: You've coached hundreds of athletes and executives. What's the biggest myth about motivation you'd like to correct?",
       "Coach: That it's a feeling you either have or don't have. People imagine successful people wake up every day bursting with drive, and honestly, that's almost never true. Motivation is unreliable. What actually separates people who achieve their goals from those who don't is habit, not motivation.",
@@ -2276,6 +2306,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
   advanced_idioms_expressions: {
     title: "Catching Up: A Conversation Between Old Friends",
     audioUrl: `${MEDIA_BASE}/audio/real-world/advanced_idioms_expressions.mp3`,
+    dialogue: {},
     passage: [
       "So, how's the new job going? Are you settling in okay?",
       "Honestly, it's been a bit of a baptism of fire. I was thrown in at the deep end the first week — my manager went on leave almost immediately, so I had to hit the ground running with barely any handover.",

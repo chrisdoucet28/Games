@@ -171,6 +171,14 @@ const isDone = (r: RealWorldReading) => (r.dialogue ? !!r.audioUrl && r.audioUrl
 // The turns for a conversation. Explicit `turns` must spell out the on-screen passage exactly (so the
 // audio can never drift from the text); otherwise each passage line is one turn, alternating.
 function turnsFor(id: string, r: RealWorldReading): Turn[] {
+  const labels = r.dialogue?.speakerLabels;
+  if (labels) {
+    return r.passage.map((line, i) => {
+      const sp = labels.findIndex(l => line.startsWith(l));
+      if (sp < 0) throw new Error(`${id}: line ${i + 1} doesn't start with a speaker label (${labels.join(" / ")})`);
+      return { speaker: sp as 0 | 1, text: line.slice(labels[sp].length).trim() };
+    });
+  }
   if (!r.dialogue?.turns) return r.passage.map((text, i) => ({ speaker: (i % 2) as 0 | 1, text }));
   const spoken = squash(r.dialogue.turns.map(t => t.text).join(" "));
   const shown = squash(r.passage.join(" "));
