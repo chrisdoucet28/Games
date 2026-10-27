@@ -285,6 +285,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   sports_do_go_play: {
     title: "My Sports Week",
+    audioUrl: `${MEDIA_BASE}/audio/real-world/sports_do_go_play.mp3`,
     passage: [
       "I love sport! On Mondays I play basketball at school with my friends.",
       "On Wednesdays I do judo at the sports club. My coach is very good.",
@@ -1950,6 +1951,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   cultural_differences: {
     title: "Six Months In: Lessons From Living Abroad",
+    audioUrl: `${MEDIA_BASE}/audio/real-world/cultural_differences.mp3`,
     passage: [
       "I moved to Tokyo six months ago, and I'm still collecting embarrassing stories about the things I got wrong. My first week, I tipped a waiter, which I later learned can actually be seen as slightly insulting here, as though I was implying he needed the extra cash rather than trusting the service to speak for itself.",
       "Then there was the meeting where I kept trying to fill every silence, assuming my Japanese colleagues were uncomfortable, when in fact the pauses were intentional — a normal, comfortable part of how they think and communicate. My constant talking probably came across as pushy rather than friendly.",
@@ -1966,6 +1968,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   climate_change: {
     title: "The Town That Moved",
+    audioUrl: `${MEDIA_BASE}/audio/real-world/climate_change.mp3`,
     passage: [
       "Ten years ago, Marta Olsen's grandparents' house stood a comfortable two hundred metres from the sea. Today, waves reach the foundations at high tide, and the whole street has been officially condemned. Her small coastal town in northern Denmark is one of a growing number relocating entire neighbourhoods inland as rising seas and increasingly severe storms make the coastline unlivable.",
       "\"We used to think of this as something that would happen eventually, to someone else,\" Olsen said. \"Then eventually became now, and someone else became us.\" Scientists studying the region say erosion rates have roughly tripled since the 1990s, driven by warming oceans and the loss of natural sea ice that once buffered winter storms.",
@@ -1982,6 +1985,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   technology_daily_life: {
     title: "A Day Without My Phone",
+    audioUrl: `${MEDIA_BASE}/audio/real-world/technology_daily_life.mp3`,
     passage: [
       "I decided, somewhat impulsively, to leave my phone at home for an entire Saturday. What I expected was relief. What I got instead was a strange kind of disorientation that revealed just how deeply technology has reshaped even the most ordinary parts of my day.",
       "The first problem appeared before I'd even left the house: I couldn't check the weather, so I had to actually look out the window and guess, something I honestly couldn't remember doing in years. Then I realised I had no way to pay for the bus, since I'd stopped carrying cash months ago in favour of a contactless payment app.",
@@ -1998,6 +2002,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   money_and_economy: {
     title: "Why Prices Keep Rising, Explained Simply",
+    audioUrl: `${MEDIA_BASE}/audio/real-world/money_and_economy.mp3`,
     passage: [
       "Every few months, someone asks me to explain inflation in a way that actually makes sense, rather than the vague economics-textbook version most people half-remember. So here's my attempt, using the supermarket as an example rather than abstract percentages.",
       "Imagine a loaf of bread costs two pounds today. If inflation runs at five percent this year, that same loaf will likely cost around two pounds ten next year, assuming nothing else changes. On its own, that seems trivial. But apply that same five percent to your rent, your electricity bill, your weekly shop, and your annual salary needs to rise by roughly the same amount just for you to stand still financially, let alone get ahead.",
@@ -2014,6 +2019,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   crime_and_law: {
     title: "A Different Kind of Punishment",
+    audioUrl: `${MEDIA_BASE}/audio/real-world/crime_and_law.mp3`,
     passage: [
       "When seventeen-year-old Daniel was caught shoplifting for the third time, the local court offered his family an unusual choice: a standard court process, or participation in a restorative justice programme, where Daniel would meet the shop owner face to face rather than simply receive a fine.",
       "His mother admits she was sceptical. \"I thought it sounded soft, honestly,\" she said. \"Like he was getting away with something.\" What actually happened, she said, was harder for Daniel than any fine could have been. Sitting across from the shop owner, who explained calmly how repeated thefts had affected a small family business already struggling to survive, forced Daniel to confront the real consequences of his actions in a way an anonymous court date never could.",
