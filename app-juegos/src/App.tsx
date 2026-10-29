@@ -65,10 +65,13 @@ function ConfigErrorScreen() {
 // Progress/Fullscreen/End Game) whenever a game was in progress. A plain top strip in normal
 // document flow just pushes the rest of the page down instead, so it can never overlap anything
 // regardless of which screen is showing.
-function StatusBadge({ children, action, onAction, theme, isAdmin }: { children: React.ReactNode; action: string; onAction: () => void; theme: Theme; isAdmin?: boolean }) {
+function StatusBadge({ children, action, onAction, theme, isAdmin, hideMusicButton }: { children: React.ReactNode; action: string; onAction: () => void; theme: Theme; isAdmin?: boolean; hideMusicButton?: boolean }) {
   // The one spot rendered on every logged-in screen, so it's the only place a persistent
   // background-music mute control can live — the per-game sound toggle in LessonGamesGenerator's
-  // game header only covers the actual game screen, but music now plays everywhere.
+  // game header only covers the actual game screen, but music now plays everywhere. During actual
+  // gameplay LessonGamesGenerator's own top bar shows its own Music button right next to Sound
+  // Effects, so hideMusicButton suppresses this one then — otherwise two Music buttons would be
+  // on screen (stacked, not side by side) at once, controlling the exact same toggle.
   const [musicOn, setMusicOnState] = useState(isMusicEnabled);
   useEffect(() => onMusicEnabledChange(setMusicOnState), []);
 
@@ -98,16 +101,19 @@ function StatusBadge({ children, action, onAction, theme, isAdmin }: { children:
           Admin
         </button>
       )}
-      <button
-        onClick={() => setMusicEnabled(!musicOn)}
-        title={musicOn ? 'Mute background music' : 'Unmute background music'}
-        style={{
-          background: 'rgba(255,255,255,0.15)', color: 'white', border: 'none',
-          borderRadius: '14px', padding: '6px 8px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center',
-        }}
-      >
-        <Icon name={musicOn ? 'musicOn' : 'musicOff'} size={13} />
-      </button>
+      {!hideMusicButton && (
+        <button
+          onClick={() => setMusicEnabled(!musicOn)}
+          title={musicOn ? 'Music is on — click to mute background music' : 'Music is off — click to play background music'}
+          style={{
+            background: musicOn ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.15)', color: 'white', border: 'none',
+            borderRadius: '14px', padding: '6px 12px', fontSize: '12px', fontWeight: 700, cursor: 'pointer',
+            display: 'inline-flex', alignItems: 'center', gap: '5px', fontFamily: theme.headingFont,
+          }}
+        >
+          <Icon name={musicOn ? 'musicOn' : 'musicOff'} size={13} /> Music
+        </button>
+      )}
       <button
         onClick={onAction}
         style={{
@@ -209,6 +215,10 @@ function AuthenticatedApp() {
   // The one-time monthly-update question (MarketingOptInPrompt). Defaults to hidden, same
   // optimistic reasoning as planIntroSeen — only flips on once the profile confirms it's unanswered.
   const [showMarketingPrompt, setShowMarketingPrompt] = useState(false);
+  // True only while LessonGamesGenerator's own internal screen state is "game" — lets StatusBadge
+  // hide its Music button during gameplay, since the game's own top bar has its own Music button
+  // right next to Sound Effects there. Keeps exactly one Music button on screen at any given time.
+  const [inGameScreen, setInGameScreen] = useState(false);
   // A teacher's shared class link ("/?joinClass=CODE"): parked in sessionStorage and stripped from the
   // address before any screen renders, so the code survives logging in or signing up and then
   // prefills the student home's "Join a class" form (see lib/pendingJoin.ts). Teachers ignore it.
@@ -379,7 +389,7 @@ function AuthenticatedApp() {
 
   return (
     <div>
-      <StatusBadge action="Log Out" onAction={() => supabase.auth.signOut()} theme={theme} isAdmin={isAdmin}>
+      <StatusBadge action="Log Out" onAction={() => supabase.auth.signOut()} theme={theme} isAdmin={isAdmin} hideMusicButton={inGameScreen}>
         <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#22C55E', display: 'inline-block', marginRight: '6px' }} />
         Logged in as {session.user.email}
       </StatusBadge>
@@ -390,6 +400,7 @@ function AuthenticatedApp() {
         checkoutRedirect={checkoutRedirect}
         initialScreen={initialScreen}
         role={roleInfo.role}
+        onGameScreenChange={setInGameScreen}
       />
     </div>
   );
