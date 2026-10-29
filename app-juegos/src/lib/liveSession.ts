@@ -47,6 +47,11 @@ export type AuctionStatePayload = {
   ts: number;
   correct?: boolean;
   results?: Record<string, AuctionResultInfo>;
+  // Correction Mode only: teams who correctly bet the sentence was wrong, and now owe a typed
+  // correction before their win is final — see AuctionGame.tsx's resolveRound()/judgeCorrection().
+  // A team in this list gets no `results` entry yet (that would leak the win before it's actually
+  // confirmed), so PhoneAuctionView shows its own "write it" screen instead of the result overlay.
+  pendingCorrectionTeamIds?: (string | number)[];
 };
 
 // Broadcast from a phone -> the teacher's screen. Sent on every local change and re-sent once on
@@ -55,6 +60,14 @@ export type AuctionBetPayload = {
   teamId: string | number;
   vote: "true" | "false";
   amount: number;
+};
+
+// Broadcast from a phone -> the teacher's screen, Correction Mode only: the team's one typed
+// attempt at the corrected sentence, sent once on submit (phone-side locks the field after, same
+// "commit and wait" pattern as a placed bet — no resend-on-edit to support).
+export type AuctionCorrectionPayload = {
+  teamId: string | number;
+  text: string;
 };
 
 function auctionChannelName(code: string): string {

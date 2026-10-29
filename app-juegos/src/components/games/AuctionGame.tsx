@@ -16,7 +16,7 @@ import { playSound } from "../../lib/sounds";
 import { setMusicContext, setMusicGame, stopMusic } from "../../lib/music";
 import {
   generateSessionCode, openAuctionChannel, closeChannel,
-  type AuctionStatePayload, type AuctionBetPayload, type AuctionResultInfo,
+  type AuctionStatePayload, type AuctionBetPayload, type AuctionResultInfo, type AuctionCorrectionPayload,
 } from "../../lib/liveSession";
 
 const GM = GAME_MODES.find(g => g.id === "auction")!;
@@ -213,6 +213,10 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
   // their written correction — see resolveRound()/judgeCorrection(). Gates Next Sentence so a
   // pending team's fate can't be skipped past.
   const [pendingCorrectionTeamIds, setPendingCorrectionTeamIds] = useState<Set<string | number>>(new Set());
+  // Correction Mode + phone mode only: each pending team's typed correction, as it arrives over
+  // the channel — shown on the teacher's judge card so they have something to actually judge
+  // against. Empty/untouched in screen mode, where there's nothing to type into.
+  const [corrections, setCorrections] = useState<Record<string | number, string>>({});
   const [satOutLastRound, setSatOutLastRound] = useState<Set<string | number>>(new Set());
   // Wins tracked per team across the whole auction — resultMsg itself resets every round, so this
   // is the one thing that needs to survive to the final results screen.
@@ -259,6 +263,9 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
   // [] at the top of nextRound() in the same tick phase flips off "result", so the overlay
   // disappears on its own the instant the teacher advances, no extra bookkeeping needed.
   const resultMsgRef = useRef(resultMsg);
+  // sendState() reads this to leave a pending team out of `results` entirely — otherwise a phone
+  // would see its own win before the teacher has actually confirmed the written correction.
+  const pendingCorrectionTeamIdsRef = useRef(pendingCorrectionTeamIds);
   const connectedTeamIdsRef = useRef<Set<string | number>>(new Set());
   const sendStateRef = useRef<(() => void) | null>(null);
   useEffect(() => {
@@ -266,7 +273,8 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
     sentenceRef.current = questions[qi]?.sentence ?? "";
     phaseRef.current = phase;
     resultMsgRef.current = resultMsg;
-  }, [qi, questions, phase, resultMsg]);
+    pendingCorrectionTeamIdsRef.current = pendingCorrectionTeamIds;
+  }, [qi, questions, phase, resultMsg, pendingCorrectionTeamIds]);
 
   // Opens/closes the realtime channel only when phone mode itself is toggled on/off — broadcasts
   // a fresh AuctionStatePayload on every presence change and on a standing interval (covers late
@@ -282,7 +290,9 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
       const currentQuestion = questions[qiRef.current];
       const results: Record<string, AuctionResultInfo> = {};
       resultMsgRef.current.forEach(r => {
-        if (!r.satOut) results[String(r.teamId)] = { won: r.won, delta: r.delta, vote: r.vote as "true" | "false" | null, amount: r.amount };
+        // A still-pending team gets no results entry at all — that's what keeps its phone from
+        // showing a win before the teacher has actually confirmed the written correction.
+        if (!r.satOut && !r.pendingCorrection) results[String(r.teamId)] = { won: r.won, delta: r.delta, vote: r.vote as "true" | "false" | null, amount: r.amount };
       });
       const payload: AuctionStatePayload = {
         phase: phaseRef.current,
@@ -294,6 +304,7 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
         ts: Date.now(),
         correct: Object.keys(results).length > 0 ? !!currentQuestion?.isCorrect : undefined,
         results: Object.keys(results).length > 0 ? results : undefined,
+        pendingCorrectionTeamIds: Array.from(pendingCorrectionTeamIdsRef.current),
       };
       channel.send({ type: "broadcast", event: "state", payload });
     };
@@ -313,6 +324,11 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
       setBets(b => ({ ...b, [bet.teamId]: { vote: bet.vote, amount: bet.amount } }));
     });
 
+    channel.on("broadcast", { event: "correction" }, ({ payload }) => {
+      const correction = payload as AuctionCorrectionPayload;
+      setCorrections(prev => ({ ...prev, [correction.teamId]: correction.text }));
+    });
+
     channel.subscribe(status => {
       if (status === "SUBSCRIBED") sendState();
     });
@@ -327,12 +343,13 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
     };
   }, [inputMode, sessionCode, teams]);
 
-  // Pushes an immediate state update on round/phase transitions rather than waiting for the
-  // interval, so a phone doesn't sit on stale content (the previous sentence, or a waiting-room
-  // screen after the teacher's already hit Start) for up to ~4s.
+  // Pushes an immediate state update on round/phase transitions (and whenever a result actually
+  // changes — a resolveRound() reveal, or a judgeCorrection() verdict) rather than waiting for the
+  // interval, so a phone doesn't sit on stale content (the previous sentence, a waiting-room
+  // screen after the teacher's already hit Start, or its own pending win) for up to ~4s.
   useEffect(() => {
     sendStateRef.current?.();
-  }, [qi, phase]);
+  }, [qi, phase, resultMsg, pendingCorrectionTeamIds]);
 
   // Tells every connected phone the auction is over the moment it actually ends, rather than
   // leaving them to conclude that from silence — without this, closing the channel on unmount
@@ -508,6 +525,7 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
     setBets({});
     setResultMsg([]);
     setPendingCorrectionTeamIds(new Set());
+    setCorrections({});
     setPhase("betting");
   };
 
@@ -564,18 +582,6 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
                 display: "inline-flex", alignItems: "center", gap: "6px",
               }}><Icon name="phone" size={14} /> Play on Phones</button>
             </div>
-            <div style={{ marginTop: "16px" }}>
-              <button onClick={() => setCorrectionMode(on => !on)} style={{
-                padding: "10px 20px", borderRadius: "12px", fontWeight: "800", fontSize: "14px", cursor: "pointer",
-                border: `2px solid ${correctionMode ? "#FCD34D" : "rgba(255,255,255,0.2)"}`,
-                background: correctionMode ? "rgba(253,224,71,0.15)" : "rgba(255,255,255,0.05)",
-                color: correctionMode ? "#FCD34D" : "#C4B5FD",
-                display: "inline-flex", alignItems: "center", gap: "6px",
-              }}><Icon name={correctionMode ? "check" : "pencil"} size={14} /> Correction Mode {correctionMode ? "ON" : "OFF"}</button>
-              <div style={{ fontSize: "12px", color: "#9CA3AF", marginTop: "6px", maxWidth: "440px", marginLeft: "auto", marginRight: "auto" }}>
-                When on, a REJECTED sentence isn't just explained — everyone writes the corrected version first, for you to check before moving to the next lot.
-              </div>
-            </div>
           </div>
         )}
 
@@ -594,6 +600,22 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
           );
         })()}
         </>}
+
+        {/* Unlike the screen/phone picker above, this stays available even for a Class Check-In
+            sitting (startedWithPresetSession) — phone mode is already locked in either way there,
+            but Correction Mode is still the teacher's own independent choice to make. */}
+        <div style={{ marginBottom: "20px" }}>
+          <button onClick={() => setCorrectionMode(on => !on)} style={{
+            padding: "10px 20px", borderRadius: "12px", fontWeight: "800", fontSize: "14px", cursor: "pointer",
+            border: `2px solid ${correctionMode ? "#FCD34D" : "rgba(255,255,255,0.2)"}`,
+            background: correctionMode ? "rgba(253,224,71,0.15)" : "rgba(255,255,255,0.05)",
+            color: correctionMode ? "#FCD34D" : "#C4B5FD",
+            display: "inline-flex", alignItems: "center", gap: "6px",
+          }}><Icon name={correctionMode ? "check" : "pencil"} size={14} /> Correction Mode {correctionMode ? "ON" : "OFF"}</button>
+          <div style={{ fontSize: "12px", color: "#9CA3AF", marginTop: "6px", maxWidth: "440px", marginLeft: "auto", marginRight: "auto" }}>
+            When on, a REJECTED sentence isn't just explained — everyone writes the corrected version first, for you to check before moving to the next lot.
+          </div>
+        </div>
 
         <button onClick={() => setShowHowTo(true)} style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginBottom: "14px", background: "white", color: GM.color, border: "3px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
           <Icon name="help" size={15} /> How to Play
@@ -823,7 +845,7 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
             {correctionMode && !s.isCorrect && (
               <div style={{ background: "rgba(253,224,71,0.1)", border: "2px solid #FCD34D66", borderRadius: "14px", padding: "14px 18px", textAlign: "center", marginBottom: "16px" }}>
                 <div style={{ fontWeight: "900", fontSize: "15px", color: "#FCD34D", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", marginBottom: "4px" }}>
-                  <Icon name="pencil" size={15} /> Everyone's turn: write the corrected sentence!
+                  <Icon name="pencil" size={15} /> {inputMode === "phone" ? "Pending teams are typing the correction on their phones!" : "Everyone's turn: write the corrected sentence!"}
                 </div>
                 <div style={{ fontSize: "13px", color: "#DDD6FE" }}>
                   {pendingCorrectionTeamIds.size > 0
@@ -862,6 +884,17 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
                       <div style={{ fontSize: "13px", marginBottom: "8px", color: "#D1D5DB" }}>
                         Bet <strong>{r.amount}pts</strong> on FALSE — correct! Did they also write the fix right?
                       </div>
+                      {inputMode === "phone" && (
+                        corrections[r.teamId] ? (
+                          <div style={{ background: "rgba(0,0,0,0.3)", borderRadius: "10px", padding: "10px 12px", marginBottom: "10px", fontSize: "14px", color: "white", fontStyle: "italic", textAlign: "left" }}>
+                            "{corrections[r.teamId]}"
+                          </div>
+                        ) : (
+                          <div style={{ fontSize: "12px", color: "#9CA3AF", fontWeight: "700", marginBottom: "10px", display: "flex", alignItems: "center", justifyContent: "center", gap: "5px" }}>
+                            <Icon name="hourglass" size={12} /> Waiting for their phone to submit it…
+                          </div>
+                        )
+                      )}
                       <div style={{ display: "flex", gap: "6px", justifyContent: "center" }}>
                         <button onClick={() => judgeCorrection(r.teamId, true)} className="auction-btn" style={{
                           flex: 1, padding: "8px 4px", fontWeight: "800", fontSize: "13px", border: "2px solid #22C55E", borderRadius: "10px", cursor: "pointer",

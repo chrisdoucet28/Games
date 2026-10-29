@@ -5,7 +5,7 @@ import {
   openClassSessionChannel, closeChannel, getDeviceId, PHONE_CAPABLE_GAME_IDS,
   type ClassSessionStatePayload,
   openAuctionChannel, openSpyChannel, openWhackChannel, openHotSeatChannel, openOrderUpChannel, openRaceTrackChannel, openHillChannel, openBountyBoardChannel, openRelayChannel,
-  type AuctionStatePayload, type AuctionBetPayload, type SpyStatePayload, type SpyVoteActionPayload,
+  type AuctionStatePayload, type AuctionBetPayload, type AuctionCorrectionPayload, type SpyStatePayload, type SpyVoteActionPayload,
   type WhackStatePayload, type WhackTurnReportPayload,
   type HotSeatStatePayload, type HotSeatActionPayload,
   type OrderUpStatePayload, type OrderUpActionPayload,
@@ -243,6 +243,7 @@ export function ClassJoinScreen({ code }: Props) {
   }, [activeGame, claimedTeamId, code]);
 
   const sendBet = (payload: AuctionBetPayload) => innerChannelRef.current?.send({ type: "broadcast", event: "bet", payload });
+  const sendCorrection = (payload: AuctionCorrectionPayload) => innerChannelRef.current?.send({ type: "broadcast", event: "correction", payload });
   const sendSpyVote = (payload: SpyVoteActionPayload) => innerChannelRef.current?.send({ type: "broadcast", event: "action", payload });
   const sendTurnReport = (payload: WhackTurnReportPayload) => innerChannelRef.current?.send({ type: "broadcast", event: "turnReport", payload });
   const sendHotSeatAction = (payload: HotSeatActionPayload) => innerChannelRef.current?.send({ type: "broadcast", event: "action", payload });
@@ -370,5 +371,5 @@ export function ClassJoinScreen({ code }: Props) {
   if (activeGame === "relay") {
     return <PhoneRelayView state={innerState as RelayStatePayload} teamId={claimedTeamId} deviceId={getDeviceId()} onAction={sendRelayAction} />;
   }
-  return <PhoneAuctionView state={innerState as AuctionStatePayload} teamId={claimedTeamId} onBet={sendBet} />;
+  return <PhoneAuctionView state={innerState as AuctionStatePayload} teamId={claimedTeamId} onBet={sendBet} onSubmitCorrection={sendCorrection} />;
 }

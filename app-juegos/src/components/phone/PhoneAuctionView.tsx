@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { TeamIcon } from "../shared/TeamIcon";
-import type { AuctionStatePayload, AuctionBetPayload } from "../../lib/liveSession";
+import type { AuctionStatePayload, AuctionBetPayload, AuctionCorrectionPayload } from "../../lib/liveSession";
 
 type Props = {
   state: AuctionStatePayload;
   teamId: string | number;
   onBet: (payload: AuctionBetPayload) => void;
+  onSubmitCorrection: (payload: AuctionCorrectionPayload) => void;
 };
 
 const BET_AMOUNTS = [25, 50, 100];
@@ -16,20 +17,34 @@ const BET_AMOUNTS = [25, 50, 100];
 // replacing it (nothing to hide at this point — the bet's already locked in) and disappears on its
 // own once the teacher advances: `state.results` is only populated during "result"/"final" and
 // gets cleared the instant nextRound() resets it server-side, so there's nothing to dismiss here.
-export function PhoneAuctionView({ state, teamId, onBet }: Props) {
+export function PhoneAuctionView({ state, teamId, onBet, onSubmitCorrection }: Props) {
   const [vote, setVote] = useState<"true" | "false" | null>(null);
   const [amount, setAmount] = useState<number | null>(null);
+  // Correction Mode: this team correctly bet the sentence was wrong, and now owes a typed
+  // correction before the win lands for real — see AuctionStatePayload.pendingCorrectionTeamIds.
+  const [correctionText, setCorrectionText] = useState("");
+  const [correctionSubmitted, setCorrectionSubmitted] = useState(false);
 
-  // A fresh lot means a fresh bet — reset local picks whenever the teacher's screen moves on.
+  // A fresh lot means a fresh bet (and a fresh correction, if the last one even got that far) —
+  // reset local picks whenever the teacher's screen moves on.
   useEffect(() => {
     setVote(null);
     setAmount(null);
+    setCorrectionText("");
+    setCorrectionSubmitted(false);
   }, [state.qi]);
 
   const bank = state.banks[String(teamId)] ?? 0;
   const team = state.roster.find(t => t.id === teamId);
   const locked = vote !== null && amount !== null;
   const myResult = state.results?.[String(teamId)];
+  const pendingCorrection = (state.pendingCorrectionTeamIds ?? []).includes(teamId);
+
+  const submitCorrection = () => {
+    if (!correctionText.trim()) return;
+    onSubmitCorrection({ teamId, text: correctionText.trim() });
+    setCorrectionSubmitted(true);
+  };
 
   const pick = (nextVote: typeof vote, nextAmount: typeof amount) => {
     const finalVote = nextVote ?? vote;
@@ -93,6 +108,56 @@ export function PhoneAuctionView({ state, teamId, onBet }: Props) {
       {locked && (
         <div style={{ textAlign: "center", background: "rgba(34,197,94,0.15)", border: "2px solid #22C55E", borderRadius: "12px", padding: "12px", fontWeight: "800", fontSize: "14px", color: "#4ADE80" }}>
           🔒 Locked in — {amount}pts on {vote === "true" ? "TRUE" : "FALSE"}. Look at the screen!
+        </div>
+      )}
+
+      {pendingCorrection && !myResult && (
+        <div style={{
+          position: "fixed", inset: 0, background: "rgba(5,3,15,0.82)", backdropFilter: "blur(2px)",
+          display: "flex", alignItems: "center", justifyContent: "center", padding: "20px", zIndex: 50,
+        }}>
+          <div style={{
+            width: "100%", maxWidth: "360px", textAlign: "center", borderRadius: "20px", padding: "26px 22px",
+            background: "linear-gradient(160deg,#78350F,#1E1033)", border: "3px solid #FCD34D",
+            boxShadow: "0 0 40px #FCD34D55",
+          }}>
+            {correctionSubmitted ? (
+              <>
+                <div style={{ fontSize: "40px", marginBottom: "10px" }}>✅</div>
+                <div style={{ fontWeight: "900", fontSize: "18px", color: "#FCD34D", marginBottom: "10px" }}>Submitted!</div>
+                <div style={{ fontSize: "14px", color: "#D1D5DB" }}>Waiting for the teacher to check it. Look at the screen!</div>
+              </>
+            ) : (
+              <>
+                <div style={{ fontSize: "32px", marginBottom: "8px" }}>✏️</div>
+                <div style={{ fontWeight: "900", fontSize: "18px", color: "#FCD34D", marginBottom: "6px" }}>You got it! Now write the fix.</div>
+                <div style={{ fontSize: "13px", color: "#D1D5DB", marginBottom: "14px" }}>
+                  You only collect your bet if this is right too.
+                </div>
+                <textarea
+                  value={correctionText}
+                  onChange={e => setCorrectionText(e.target.value.slice(0, 200))}
+                  placeholder="Type the corrected sentence…"
+                  rows={3}
+                  style={{
+                    width: "100%", boxSizing: "border-box", borderRadius: "10px", border: "2px solid #FCD34D55",
+                    background: "rgba(0,0,0,0.3)", color: "white", fontSize: "15px", padding: "10px 12px",
+                    marginBottom: "12px", fontFamily: "inherit", resize: "none",
+                  }}
+                />
+                <button
+                  onClick={submitCorrection}
+                  disabled={!correctionText.trim()}
+                  style={{
+                    width: "100%", padding: "13px", borderRadius: "12px", border: "none", fontWeight: "900", fontSize: "15px",
+                    background: correctionText.trim() ? "#FCD34D" : "#4B5563",
+                    color: correctionText.trim() ? "#150F00" : "#9CA3AF",
+                    cursor: correctionText.trim() ? "pointer" : "not-allowed",
+                  }}
+                >Submit</button>
+              </>
+            )}
+          </div>
         </div>
       )}
 
