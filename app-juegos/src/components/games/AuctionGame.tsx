@@ -217,6 +217,10 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
   // "Play on Phones" mode — always defaults to screen, even on Resume (see the note on the intro
   // toggle below for why a resumed game intentionally never reopens a phone session).
   const [inputMode, setInputMode] = useState<"screen" | "phone">(presetPhoneSession ? "phone" : "screen");
+  // Teacher feedback: a variant where a REJECTED sentence isn't just explained and moved past —
+  // the whole class writes the corrected version first, for the teacher to check live. Opt-in and
+  // picked once at the intro screen, same as inputMode, so it deliberately doesn't survive Resume.
+  const [correctionMode, setCorrectionMode] = useState(false);
   const [introStep, setIntroStep] = useState<"setup" | "qr">("setup");
   const [sessionCode, setSessionCode] = useState<string | null>(presetPhoneSession?.code ?? null);
   // See BountyBoardGame.tsx's own copy of this for the full explanation — true whenever sessionCode
@@ -520,6 +524,18 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
                 display: "inline-flex", alignItems: "center", gap: "6px",
               }}><Icon name="phone" size={14} /> Play on Phones</button>
             </div>
+            <div style={{ marginTop: "16px" }}>
+              <button onClick={() => setCorrectionMode(on => !on)} style={{
+                padding: "10px 20px", borderRadius: "12px", fontWeight: "800", fontSize: "14px", cursor: "pointer",
+                border: `2px solid ${correctionMode ? "#FCD34D" : "rgba(255,255,255,0.2)"}`,
+                background: correctionMode ? "rgba(253,224,71,0.15)" : "rgba(255,255,255,0.05)",
+                color: correctionMode ? "#FCD34D" : "#C4B5FD",
+                display: "inline-flex", alignItems: "center", gap: "6px",
+              }}><Icon name={correctionMode ? "check" : "pencil"} size={14} /> Correction Mode {correctionMode ? "ON" : "OFF"}</button>
+              <div style={{ fontSize: "12px", color: "#9CA3AF", marginTop: "6px", maxWidth: "440px", marginLeft: "auto", marginRight: "auto" }}>
+                When on, a REJECTED sentence isn't just explained — everyone writes the corrected version first, for you to check before moving to the next lot.
+              </div>
+            </div>
           </div>
         )}
 
@@ -763,6 +779,15 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
                 <FlagPromptButton gameId="auction" questionData={s} />
               </div>
             </div>
+
+            {correctionMode && !s.isCorrect && (
+              <div style={{ background: "rgba(253,224,71,0.1)", border: "2px solid #FCD34D66", borderRadius: "14px", padding: "14px 18px", textAlign: "center", marginBottom: "16px" }}>
+                <div style={{ fontWeight: "900", fontSize: "15px", color: "#FCD34D", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", marginBottom: "4px" }}>
+                  <Icon name="pencil" size={15} /> Everyone's turn: write the corrected sentence!
+                </div>
+                <div style={{ fontSize: "13px", color: "#DDD6FE" }}>Check each team's correction before moving to the next lot.</div>
+              </div>
+            )}
 
             <div style={{ display: "grid", gridTemplateColumns: teamsGridCols(teams.length), gap: "10px", marginBottom: "18px" }}>
               {resultMsg.map(r => {
