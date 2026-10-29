@@ -33,6 +33,7 @@ import { saveProgress, clearProgress, listClasses, createClass, upsertTeamRoster
 import { recordClassCoverage } from "./lib/classMembership";
 import { isPaidStatus } from "./lib/subscription";
 import { playSound, isSoundEnabled, setSoundEnabled, onSoundEnabledChange } from "./lib/sounds";
+import { isMusicEnabled, setMusicEnabled, onMusicEnabledChange } from "./lib/music";
 import { setMusicContext, stopMusic } from "./lib/music";
 import { denseRank } from "./utils/ranking";
 import { RankBadge } from "./components/shared/RankBadge";
@@ -1365,6 +1366,8 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
   const [paused, setPaused] = useState(false);
   const [soundEnabled, setSoundEnabledState] = useState(isSoundEnabled);
   useEffect(() => onSoundEnabledChange(setSoundEnabledState), []);
+  const [musicEnabled, setMusicEnabledState] = useState(isMusicEnabled);
+  useEffect(() => onMusicEnabledChange(setMusicEnabledState), []);
 
   const handleGameEnd = () => {
     // The class's running scores persist either way; a naturally-finished game just has nothing
@@ -2200,10 +2203,15 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
               {saveStatus === "saving" ? "Saving…" : saveStatus === "saved" ? <><Icon name="check" size={13} /> Saved!</> : saveStatus === "error" ? <><Icon name="warning" size={13} /> Failed — try again</> : <><Icon name="save" size={13} /> Save & Exit</>}
             </button>
             <button
+              onClick={() => setMusicEnabled(!musicEnabled)}
+              title={musicEnabled ? "Music is on — click to mute background music" : "Music is off — click to play background music"}
+              style={{ background: musicEnabled ? "rgba(255,255,255,0.3)" : "rgba(255,255,255,0.15)", color: "white", border: "none", borderRadius: "8px", padding: "6px 12px", cursor: "pointer", fontWeight: "700", fontFamily: theme.headingFont }}
+            ><Icon name={musicEnabled ? "musicOn" : "musicOff"} size={13} /> Music</button>
+            <button
               onClick={() => setSoundEnabled(!soundEnabled)}
-              title={soundEnabled ? "Mute sound effects" : "Unmute sound effects"}
-              style={{ background: "rgba(255,255,255,0.15)", color: "white", border: "none", borderRadius: "8px", padding: "6px 12px", cursor: "pointer", fontWeight: "700", fontFamily: theme.headingFont }}
-            ><Icon name={soundEnabled ? "soundOn" : "soundOff"} size={13} /></button>
+              title={soundEnabled ? "Sound effects are on — click to mute" : "Sound effects are off — click to unmute"}
+              style={{ background: soundEnabled ? "rgba(255,255,255,0.3)" : "rgba(255,255,255,0.15)", color: "white", border: "none", borderRadius: "8px", padding: "6px 12px", cursor: "pointer", fontWeight: "700", fontFamily: theme.headingFont }}
+            ><Icon name={soundEnabled ? "soundOn" : "soundOff"} size={13} /> Sound</button>
             <button onClick={toggleFullscreen} style={{ background: "rgba(255,255,255,0.15)", color: "white", border: "none", borderRadius: "8px", padding: "6px 12px", cursor: "pointer", fontWeight: "700", fontFamily: theme.headingFont }}><Icon name="fullscreen" size={13} /> Fullscreen</button>
             <button onClick={handleTopBarEndGame} style={{ background: "rgba(255,255,255,0.15)", color: "white", border: "none", borderRadius: "8px", padding: "6px 12px", cursor: "pointer", fontWeight: "700", fontFamily: theme.headingFont }}><Icon name="checkeredFlag" size={13} /> End Game</button>
           </div>

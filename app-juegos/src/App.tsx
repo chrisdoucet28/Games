@@ -100,13 +100,14 @@ function StatusBadge({ children, action, onAction, theme, isAdmin }: { children:
       )}
       <button
         onClick={() => setMusicEnabled(!musicOn)}
-        title={musicOn ? 'Mute background music' : 'Unmute background music'}
+        title={musicOn ? 'Music is on — click to mute background music' : 'Music is off — click to play background music'}
         style={{
-          background: 'rgba(255,255,255,0.15)', color: 'white', border: 'none',
-          borderRadius: '14px', padding: '6px 8px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center',
+          background: musicOn ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.15)', color: 'white', border: 'none',
+          borderRadius: '14px', padding: '6px 12px', fontSize: '12px', fontWeight: 700, cursor: 'pointer',
+          display: 'inline-flex', alignItems: 'center', gap: '5px', fontFamily: theme.headingFont,
         }}
       >
-        <Icon name={musicOn ? 'musicOn' : 'musicOff'} size={13} />
+        <Icon name={musicOn ? 'musicOn' : 'musicOff'} size={13} /> Music
       </button>
       <button
         onClick={onAction}
