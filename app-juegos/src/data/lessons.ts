@@ -3980,7 +3980,7 @@ export const LESSONS: Record<string, Lesson> = {
         body: ["wish/if only + past perfect → a regret about something that already happened."],
         examples: [
           "I **wish I had studied** harder for the exam last week.",
-          "If only **I had known** what I know now back then!",
+          "If only **I had brought** an umbrella this morning!",
         ],
       },
       {
