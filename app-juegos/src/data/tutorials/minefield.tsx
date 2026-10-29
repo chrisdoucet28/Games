@@ -56,11 +56,11 @@ export const MINEFIELD_TUTORIAL_STEPS: TutorialStep[] = [
     ),
   },
   {
-    narration: "Correct, and it's NOT a mine: you earn +50 points, and that tile turns green and stays safe — it can't hurt anyone now.",
+    narration: "Correct, and it's NOT a mine: you earn +75 points, and that tile turns green and stays safe — it can't hurt anyone now.",
     visual: (
       <div style={{ textAlign: "center" }}>
         <MineGrid safe={[1, 0]} />
-        <div style={{ fontSize: "11px", fontWeight: 800, color: "#166534", marginTop: "4px" }}>✅ +50 pts — tile is now safe!</div>
+        <div style={{ fontSize: "11px", fontWeight: 800, color: "#166534", marginTop: "4px" }}>✅ +75 pts — tile is now safe!</div>
       </div>
     ),
   },
@@ -73,11 +73,11 @@ export const MINEFIELD_TUTORIAL_STEPS: TutorialStep[] = [
     ),
   },
   {
-    narration: "If the tile you picked IS a hidden mine: BOOM! You lose 75 points, no matter what you said. Be careful which tiles you choose!",
+    narration: "If the tile you picked IS a hidden mine: BOOM! You lose 110 points, no matter what you said. Be careful which tiles you choose!",
     visual: (
       <div style={{ textAlign: "center" }}>
         <MineGrid boom={[3, 2]} />
-        <div style={{ fontSize: "11px", fontWeight: 800, color: "#B91C1C", marginTop: "4px" }}>💥 -75 pts — that was a mine!</div>
+        <div style={{ fontSize: "11px", fontWeight: 800, color: "#B91C1C", marginTop: "4px" }}>💥 -110 pts — that was a mine!</div>
       </div>
     ),
   },

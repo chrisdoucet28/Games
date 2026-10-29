@@ -102,9 +102,9 @@ export const RACETRACK_TUTORIAL_STEPS: TutorialStep[] = [
     narration: "The first team to reach Finish wins the race! Then every team scores points based on how far they got — 1st place scores the most, but everyone gets something.",
     visual: (
       <div style={{ display: "flex", flexDirection: "column", gap: "3px", maxWidth: "160px", margin: "0 auto", fontSize: "11px", fontWeight: 800, color: "#374151" }}>
-        <div>🥇 1st — 100 pts</div>
-        <div>🥈 2nd — 65 pts</div>
-        <div>🥉 3rd — 40 pts</div>
+        <div>🥇 1st — 300 pts</div>
+        <div>🥈 2nd — 195 pts</div>
+        <div>🥉 3rd — 120 pts</div>
       </div>
     ),
   },

@@ -12,7 +12,7 @@ export const HOTPOTATO_TUTORIAL_STEPS: TutorialStep[] = [
     ),
   },
   {
-    narration: "Each team starts with 100 points. The game has 5 rounds. In every round, one team holds the hot potato 🥔 first.",
+    narration: "Each team starts with 150 points. The game has 5 rounds. In every round, one team holds the hot potato 🥔 first.",
     visual: (
       <div style={{ textAlign: "center" }}>
         <div style={{ fontSize: "30px" }}>🥔</div>
@@ -47,16 +47,16 @@ export const HOTPOTATO_TUTORIAL_STEPS: TutorialStep[] = [
     ),
   },
   {
-    narration: "Every round also has its own longer clock. Whoever is STILL holding the potato when that clock hits 0 loses 30 points!",
+    narration: "Every round also has its own longer clock. Whoever is STILL holding the potato when that clock hits 0 loses 45 points!",
     visual: (
       <div style={{ textAlign: "center" }}>
         <div style={{ fontSize: "34px" }}>🥔💥</div>
-        <div style={{ fontWeight: 900, color: "#991B1B", fontSize: "14px", marginTop: "4px" }}>Team Blue was holding it — -30 pts!</div>
+        <div style={{ fontWeight: 900, color: "#991B1B", fontSize: "14px", marginTop: "4px" }}>Team Blue was holding it — -45 pts!</div>
       </div>
     ),
   },
   {
-    narration: "This repeats for all 5 rounds — the potato keeps passing around. Losing 30 points can happen again and again, so answer fast and pass it on!",
+    narration: "This repeats for all 5 rounds — the potato keeps passing around. Losing 45 points can happen again and again, so answer fast and pass it on!",
     visual: (
       <div style={{ textAlign: "center" }}>
         <div style={{ fontSize: "12px", fontWeight: 800, color: "#7C2D12" }}>Round 3/5 — new round, new holder!</div>

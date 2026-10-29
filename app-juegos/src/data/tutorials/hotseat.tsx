@@ -23,11 +23,11 @@ export const HOTSEAT_TUTORIAL_STEPS: TutorialStep[] = [
     ),
   },
   {
-    narration: "As soon as the guesser says the correct word, tap Correct! You earn +10 points, and a brand new word appears right away.",
+    narration: "As soon as the guesser says the correct word, tap Correct! You earn +15 points, and a brand new word appears right away.",
     visual: (
       <div style={{ textAlign: "center" }}>
         <div style={{ fontSize: "22px" }}>✅</div>
-        <div style={{ fontSize: "11px", fontWeight: 800, color: "#166534" }}>+10 pts — next word appears!</div>
+        <div style={{ fontSize: "11px", fontWeight: 800, color: "#166534" }}>+15 pts — next word appears!</div>
       </div>
     ),
   },

@@ -126,8 +126,10 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
   };
 
   const showSpanish = level === "A1" || level === "A2";
-  const STARTING_BANK = 100;
-  const PENALTY_PTS = 30;
+  // Both bumped 1.5x (same ratio) in a cross-game balance pass: Hot Potato's typical full-game
+  // total was near the bottom of the roster alongside Race Track/Vault Heist/Minefield.
+  const STARTING_BANK = 150;
+  const PENALTY_PTS = 45;
 
   const resumed = useRef(validateHotPotatoSnapshot(initialGameState, teams.length)).current;
 

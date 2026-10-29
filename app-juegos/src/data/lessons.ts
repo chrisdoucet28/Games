@@ -1529,6 +1529,21 @@ export const LESSONS: Record<string, Lesson> = {
         ],
       },
       {
+        heading: "Possessive 's and family relationships",
+        body: [
+          "Use 's after a person to show whose relative you mean: my father's father, my sister's husband.",
+          "Family vocabulary: grandfather/grandmother, uncle/aunt, cousin, nephew/niece, mother-in-law/father-in-law, son-in-law/daughter-in-law, grandson/granddaughter.",
+          "Work out the relationship logically: your father's father is your grandfather; your sister's husband is your brother-in-law (not your nephew).",
+          "Don't forget the apostrophe before the 's: 'my daughter's husband', not 'my daughters husband'.",
+        ],
+        examples: [
+          "My father's father is my **grandfather**.",
+          "My mother's sister is my **aunt**.",
+          "My brother's daughter is my **niece**.",
+          "My husband's mother is my **mother-in-law**.",
+        ],
+      },
+      {
         heading: "Comparing people in a family",
         body: [
           "Short adjectives.",

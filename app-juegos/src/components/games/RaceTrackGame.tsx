@@ -52,7 +52,12 @@ function getZone(pos: number): ZoneDef {
 // Content-variety pool, not a fixed mapping — deliberately left as raw emoji, same call as Order
 // Up's CUSTOMER_EMOJIS/DINER_FOOD_EMOJIS. A team's own mascot always takes priority over this.
 const CARS = ["🚗", "🚕", "🚙", "🚌", "🚎", "🏎️", "🚓", "🛻"];
-const RANK_POINTS = [100, 65, 40, 20, 10];
+// Race Track's only score payout — unlike every other game, there's no per-answer scoring during
+// play (the race itself runs on a separate "coins" currency spent in the shop, not team score), so
+// this one-time rank bonus has to carry the whole game's score. A cross-game balance pass found it
+// was by far the lowest-scoring game in the roster (even 1st place barely cleared other games'
+// typical totals) — tripled so a win lands in the same range as a typical full game elsewhere.
+const RANK_POINTS = [300, 195, 120, 60, 30];
 
 // Local pip-mask DiceFace — same pattern as every other game's dice roll this session.
 const DICE_PIPS: Record<number, [number, number][]> = {
