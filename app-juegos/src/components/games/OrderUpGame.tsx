@@ -71,8 +71,16 @@ const RAMP_TO_TWO_ITEM = 5;
 const RAMP_TO_THREE_ITEM = 15;
 // Long on purpose — writing a full sentence (sometimes stacking several constraints) takes a lot
 // longer than a shout-answer game's timer, and this is meant to be comfortable even for a slower
-// writer, not a race.
-const TICKET_SECONDS_BY_ITEM_COUNT: Record<number, number> = { 1: 100, 2: 150, 3: 200 };
+// writer, not a race. Teacher feedback: the old flat 100/150/200 died too quickly even for a
+// typical class, so "medium" (the default) is now 20% longer than that old flat value, with
+// "easy"/"hard" built around it the same way Race Track's own solo timer-speed dial works — picked
+// once on the intro screen, same place.
+type TicketDifficulty = "easy" | "medium" | "hard";
+const TICKET_SECONDS_BY_DIFFICULTY: Record<TicketDifficulty, Record<number, number>> = {
+  easy: { 1: 150, 2: 225, 3: 300 },
+  medium: { 1: 120, 2: 180, 3: 240 },
+  hard: { 1: 90, 2: 135, 3: 180 },
+};
 // Non-linear — stacking three constraints into one natural sentence is harder than linear, and
 // this stays under the 50-100 range this app reserves for rarer bonus events elsewhere.
 const ORDER_SCORE_BY_ITEM_COUNT: Record<number, number> = { 1: 10, 2: 25, 3: 45 };
@@ -197,7 +205,7 @@ const PAST_TENSE_BASE_FORM: Record<string, string> = {
 // positive/negative/question + every topic's transform tags combined), so slicing one shuffled
 // combined pool would make tickets almost never show a grammar badge. Falls back to whichever
 // kind still has an unused entry if the flip lands on one this ticket has already exhausted.
-function generateTicket(grammarPool: string[], vocabWordPool: string[], nextId: () => number, resolvedCount: number): Ticket {
+function generateTicket(grammarPool: string[], vocabWordPool: string[], nextId: () => number, resolvedCount: number, difficulty: TicketDifficulty): Ticket {
   const itemCount = pickItemCount(resolvedCount);
   const usedGrammar = new Set<string>();
   const usedVocab = new Set<string>();
@@ -242,7 +250,8 @@ function generateTicket(grammarPool: string[], vocabWordPool: string[], nextId: 
       if (it.kind === "vocab" && PAST_TENSE_BASE_FORM[it.word]) it.word = PAST_TENSE_BASE_FORM[it.word];
     });
   }
-  const totalSeconds = TICKET_SECONDS_BY_ITEM_COUNT[items.length] ?? TICKET_SECONDS_BY_ITEM_COUNT[1];
+  const secondsByItemCount = TICKET_SECONDS_BY_DIFFICULTY[difficulty];
+  const totalSeconds = secondsByItemCount[items.length] ?? secondsByItemCount[1];
   return {
     id: nextId(),
     items,
@@ -440,6 +449,7 @@ type OrderUpSnapshot = {
   dishCounts: Record<string | number, DishCounts>;
   comboBonusByTeam: Record<string | number, number>;
   gameScoreByTeam: Record<string | number, number>;
+  ticketDifficulty?: TicketDifficulty;
 };
 
 function validateOrderUpSnapshot(raw: unknown): OrderUpSnapshot | undefined {
@@ -454,6 +464,7 @@ function validateOrderUpSnapshot(raw: unknown): OrderUpSnapshot | undefined {
     dishCounts: s.dishCounts ?? {},
     comboBonusByTeam: s.comboBonusByTeam ?? {},
     gameScoreByTeam: s.gameScoreByTeam ?? {},
+    ticketDifficulty: s.ticketDifficulty === "easy" || s.ticketDifficulty === "hard" ? s.ticketDifficulty : "medium",
   };
 }
 
@@ -475,6 +486,7 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
   const [showHowTo, setShowHowTo] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [sessionLength, setSessionLength] = useState<string>(resumed?.sessionLength ?? "medium");
+  const [ticketDifficulty, setTicketDifficulty] = useState<TicketDifficulty>(resumed?.ticketDifficulty ?? "medium");
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [judging, setJudging] = useState<JudgingState>(null);
   const [banner, setBanner] = useState<Banner | null>(null);
@@ -570,9 +582,10 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
       dishCounts,
       comboBonusByTeam,
       gameScoreByTeam,
+      ticketDifficulty,
     });
     return () => { if (serializeStateRef) serializeStateRef.current = null; };
-  }, [serializeStateRef, sessionLength, sessionTimeLeft, dishCounts, comboBonusByTeam, gameScoreByTeam]);
+  }, [serializeStateRef, sessionLength, sessionTimeLeft, dishCounts, comboBonusByTeam, gameScoreByTeam, ticketDifficulty]);
 
   // Tops the queue up to whatever the current ramp allows — fires on mount (spawning the first
   // customer) and again after every resolution (serve/expire), since removing a ticket changes
@@ -585,7 +598,7 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
     const capacity = currentQueueCapacity(resolvedCountRef.current, maxSlots, initialSlots);
     if (tickets.length < capacity) {
       const needed = capacity - tickets.length;
-      const newTickets = Array.from({ length: needed }, () => generateTicket(grammarPool, vocabWordPool, () => ticketIdRef.current++, resolvedCountRef.current));
+      const newTickets = Array.from({ length: needed }, () => generateTicket(grammarPool, vocabWordPool, () => ticketIdRef.current++, resolvedCountRef.current, ticketDifficulty));
       // Solo play skips the "tap to claim" step only for whichever ticket becomes the one team's
       // first open order — so starting fresh (or finishing everything) always has something to
       // claim immediately, same as the multi-team floor above. Once she already has a claimed,
@@ -601,7 +614,7 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
       }
       setTickets(prev => [...prev, ...newTickets]);
     }
-  }, [phase, tickets.length, grammarPool, vocabWordPool, maxSlots, initialSlots, teams]);
+  }, [phase, tickets.length, grammarPool, vocabWordPool, maxSlots, initialSlots, teams, ticketDifficulty]);
 
   // Mirrors `tickets` for the interval below to read synchronously — the interval callback needs
   // to call onUpdateScore/pushBanner as plain statements, not from inside setTickets' own updater
@@ -619,6 +632,11 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
       const survivors: Ticket[] = [];
       const expiredTickets: Ticket[] = [];
       ticketsRef.current.forEach(t => {
+        // The ticket currently open in judging is frozen, not just protected from expiring — a
+        // teacher mid-judgment (reading a typed answer, listening to a spoken one) shouldn't come
+        // back to a countdown that quietly ran out while their attention was elsewhere. It picks
+        // back up exactly where it left off once judging closes (resolved, skipped, or released).
+        if (t.id === judgingRef.current?.ticketId) { survivors.push(t); return; }
         const secondsLeft = t.secondsLeft - 1;
         if (secondsLeft <= 0) expiredTickets.push(t);
         else survivors.push({ ...t, secondsLeft });
@@ -934,6 +952,28 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
                 {len === "short" ? "Short · 8 min" : len === "medium" ? "Medium · 12 min" : "Long · 18 min"}
               </button>
             ))}
+          </div>
+        </div>
+        <div style={{ marginBottom: "22px" }}>
+          <div style={{ fontSize: "13px", fontWeight: "700", color: "#9D174D", marginBottom: "8px", display: "inline-flex", alignItems: "center", gap: "5px" }}><Icon name="hourglass" size={13} /> How much patience do customers have?</div>
+          <div style={{ display: "flex", gap: "8px", justifyContent: "center", flexWrap: "wrap" }}>
+            {(["easy", "medium", "hard"] as const).map(d => {
+              const selected = ticketDifficulty === d;
+              const dotColor = d === "easy" ? "#22C55E" : d === "medium" ? "#EAB308" : "#EF4444";
+              const label = d[0].toUpperCase() + d.slice(1);
+              return (
+                <button key={d} onClick={() => setTicketDifficulty(d)} className="ou-btn" style={{
+                  background: selected ? "linear-gradient(135deg,#BE185D,#F43F5E)" : "rgba(255,255,255,0.6)",
+                  color: selected ? "white" : "#9D174D",
+                  border: `2px solid ${selected ? "#F43F5E" : "#FBCFE8"}`,
+                  borderRadius: "12px", padding: "10px 18px", cursor: "pointer",
+                  fontWeight: "800", fontSize: "14px", transition: "all 0.15s",
+                  display: "inline-flex", alignItems: "center", gap: "6px",
+                }}>
+                  <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: dotColor, display: "inline-block" }} /> {label} · {TICKET_SECONDS_BY_DIFFICULTY[d][1]}-{TICKET_SECONDS_BY_DIFFICULTY[d][3]}s
+                </button>
+              );
+            })}
           </div>
         </div>
         <div style={{ marginBottom: "18px" }}>
