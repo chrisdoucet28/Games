@@ -103,8 +103,8 @@ export const RACETRACK_TUTORIAL_STEPS: TutorialStep[] = [
     visual: (
       <div style={{ display: "flex", flexDirection: "column", gap: "3px", maxWidth: "160px", margin: "0 auto", fontSize: "11px", fontWeight: 800, color: "#374151" }}>
         <div>🥇 1st — 300 pts</div>
-        <div>🥈 2nd — 65 pts</div>
-        <div>🥉 3rd — 40 pts</div>
+        <div>🥈 2nd — 195 pts</div>
+        <div>🥉 3rd — 120 pts</div>
       </div>
     ),
   },

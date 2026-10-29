@@ -27,7 +27,7 @@ export const HOTSEAT_TUTORIAL_STEPS: TutorialStep[] = [
     visual: (
       <div style={{ textAlign: "center" }}>
         <div style={{ fontSize: "22px" }}>✅</div>
-        <div style={{ fontSize: "11px", fontWeight: 800, color: "#166534" }}>+10 pts — next word appears!</div>
+        <div style={{ fontSize: "11px", fontWeight: 800, color: "#166534" }}>+15 pts — next word appears!</div>
       </div>
     ),
   },

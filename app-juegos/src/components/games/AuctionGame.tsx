@@ -33,6 +33,10 @@ interface ResultMsg {
   vote: string | null;
   amount: number;
   satOut: boolean;
+  // Correction Mode only: this team correctly bet the sentence was wrong, but their win isn't
+  // final yet — they also have to have written the fix, for the teacher to confirm, before the
+  // points actually land. See judgeCorrection().
+  pendingCorrection?: boolean;
 }
 
 const AMBIENT_BITS = Array.from({ length: 14 }, (_, i) => ({
@@ -205,6 +209,10 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
   const [showHowTo, setShowHowTo] = useState(false);
   const [bets, setBets] = useState<Record<string | number, Bet>>({});
   const [resultMsg, setResultMsg] = useState<ResultMsg[]>([]);
+  // Correction Mode only: teams whose win on this lot is on hold pending the teacher confirming
+  // their written correction — see resolveRound()/judgeCorrection(). Gates Next Sentence so a
+  // pending team's fate can't be skipped past.
+  const [pendingCorrectionTeamIds, setPendingCorrectionTeamIds] = useState<Set<string | number>>(new Set());
   const [satOutLastRound, setSatOutLastRound] = useState<Set<string | number>>(new Set());
   // Wins tracked per team across the whole auction — resultMsg itself resets every round, so this
   // is the one thing that needs to survive to the final results screen.
@@ -420,6 +428,7 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
     playSound("auction");
     const msgs: ResultMsg[] = [];
     const brokeThisRound = new Set<string | number>();
+    const pendingIds = new Set<string | number>();
     const newBank = { ...auctionBank };
 
     teams.forEach(t => {
@@ -433,6 +442,17 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
       const votedCorrect = b.vote === "true";
       const wasCorrect = !!s.isCorrect;
       const won = votedCorrect === wasCorrect;
+
+      // Correction Mode: correctly calling a REJECTED sentence isn't enough on its own to collect
+      // — the team also has to have written the fix, for the teacher to confirm, before the bank
+      // actually moves. A losing bet, or a correct TRUE call, resolves immediately as always;
+      // there's nothing to correct either way.
+      if (correctionMode && !wasCorrect && won) {
+        pendingIds.add(t.id);
+        msgs.push({ teamId: t.id, won: true, delta: amount, vote: b.vote || null, amount, satOut: false, pendingCorrection: true });
+        return;
+      }
+
       const delta = won ? amount : -amount;
       newBank[t.id] = Math.max(0, (newBank[t.id] ?? 0) + delta);
       msgs.push({ teamId: t.id, won, delta, vote: b.vote || null, amount, satOut: false });
@@ -441,12 +461,31 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
     setAuctionBank(newBank);
     setSatOutLastRound(brokeThisRound);
     setResultMsg(msgs);
+    setPendingCorrectionTeamIds(pendingIds);
     setRoundsWon(prev => {
       const next = { ...prev };
-      msgs.forEach(m => { if (m.won) next[m.teamId] = (next[m.teamId] ?? 0) + 1; });
+      msgs.forEach(m => { if (m.won && !m.pendingCorrection) next[m.teamId] = (next[m.teamId] ?? 0) + 1; });
       return next;
     });
     setPhase("result");
+  };
+
+  // Correction Mode: the teacher's call on whether a pending team's written correction was
+  // actually right. Right -> the win they already saw lands for real. Wrong -> they forfeit the
+  // bet entirely, same as if they'd lost the round outright — correctly calling REJECTED isn't
+  // enough by itself in this mode.
+  const judgeCorrection = (teamId: string | number, correctionWasRight: boolean) => {
+    const msg = resultMsg.find(m => m.teamId === teamId);
+    if (!msg) return;
+    const delta = correctionWasRight ? msg.amount : -msg.amount;
+    setAuctionBank(prev => ({ ...prev, [teamId]: Math.max(0, (prev[teamId] ?? 0) + delta) }));
+    setResultMsg(prev => prev.map(m => m.teamId === teamId ? { ...m, delta, won: correctionWasRight, pendingCorrection: false } : m));
+    if (correctionWasRight) setRoundsWon(prev => ({ ...prev, [teamId]: (prev[teamId] ?? 0) + 1 }));
+    setPendingCorrectionTeamIds(prev => {
+      const next = new Set(prev);
+      next.delete(teamId);
+      return next;
+    });
   };
 
   const nextRound = () => {
@@ -468,6 +507,7 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
     setQi(i => i + 1);
     setBets({});
     setResultMsg([]);
+    setPendingCorrectionTeamIds(new Set());
     setPhase("betting");
   };
 
@@ -785,7 +825,11 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
                 <div style={{ fontWeight: "900", fontSize: "15px", color: "#FCD34D", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", marginBottom: "4px" }}>
                   <Icon name="pencil" size={15} /> Everyone's turn: write the corrected sentence!
                 </div>
-                <div style={{ fontSize: "13px", color: "#DDD6FE" }}>Check each team's correction before moving to the next lot.</div>
+                <div style={{ fontSize: "13px", color: "#DDD6FE" }}>
+                  {pendingCorrectionTeamIds.size > 0
+                    ? "A team that bet FALSE only collects if their written correction is right too — judge each one below before moving on."
+                    : "Check everyone's correction before moving to the next lot."}
+                </div>
               </div>
             )}
 
@@ -804,6 +848,30 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
                       <div style={{ marginBottom: "4px" }}><Icon name="wallet" size={22} color="#6B7280" /></div>
                       <div style={{ fontSize: "13px", color: "#9CA3AF", fontWeight: "700" }}>Sat out</div>
                       <div style={{ fontSize: "12px", color: "#4ADE80", fontWeight: "700", marginTop: "4px" }}>+25 pts next round!</div>
+                    </div>
+                  );
+                }
+
+                if (r.pendingCorrection) {
+                  return (
+                    <div key={r.teamId} style={{ background: "linear-gradient(160deg,#78350F44,#150C28)", border: "3px solid #FCD34D", boxShadow: "3px 3px 0 #FCD34D", borderRadius: "14px", padding: "12px", textAlign: "center" }}>
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", marginBottom: "6px" }}>
+                        <MascotAvatar mascot={t.mascot} color={t.color.bg} size={24} />
+                        <span style={{ fontWeight: "900", fontSize: "15px", color: "white" }}>{t.name}</span>
+                      </div>
+                      <div style={{ fontSize: "13px", marginBottom: "8px", color: "#D1D5DB" }}>
+                        Bet <strong>{r.amount}pts</strong> on FALSE — correct! Did they also write the fix right?
+                      </div>
+                      <div style={{ display: "flex", gap: "6px", justifyContent: "center" }}>
+                        <button onClick={() => judgeCorrection(r.teamId, true)} className="auction-btn" style={{
+                          flex: 1, padding: "8px 4px", fontWeight: "800", fontSize: "13px", border: "2px solid #22C55E", borderRadius: "10px", cursor: "pointer",
+                          background: "#22C55E", color: "white", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "4px",
+                        }}><Icon name="check" size={12} /> Correct (+{r.amount})</button>
+                        <button onClick={() => judgeCorrection(r.teamId, false)} className="auction-btn" style={{
+                          flex: 1, padding: "8px 4px", fontWeight: "800", fontSize: "13px", border: "2px solid #EF4444", borderRadius: "10px", cursor: "pointer",
+                          background: "#EF4444", color: "white", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "4px",
+                        }}><Icon name="close" size={11} /> Wrong (-{r.amount})</button>
+                      </div>
                     </div>
                   );
                 }
@@ -840,11 +908,15 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
             </div>
 
             <div style={{ textAlign: "center" }}>
-              <button onClick={nextRound} className="auction-btn" style={{
+              <button onClick={nextRound} disabled={pendingCorrectionTeamIds.size > 0} className="auction-btn" style={{
                 display: "inline-flex", alignItems: "center", gap: "8px",
-                background: "#F7C948", color: "#150F00", border: "3px solid #1A1A2E",
-                borderRadius: "14px", padding: "14px 36px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "5px 5px 0 #1A1A2E"
+                background: pendingCorrectionTeamIds.size > 0 ? "#4B5563" : "#F7C948",
+                color: pendingCorrectionTeamIds.size > 0 ? "#9CA3AF" : "#150F00", border: "3px solid #1A1A2E",
+                borderRadius: "14px", padding: "14px 36px", fontSize: "17px", fontWeight: "900",
+                cursor: pendingCorrectionTeamIds.size > 0 ? "not-allowed" : "pointer",
+                boxShadow: pendingCorrectionTeamIds.size > 0 ? "none" : "5px 5px 0 #1A1A2E"
               }}>{qi + 1 >= questions.length ? <><Icon name="trophy" size={18} /> See Final Results</> : <><Icon name="next" size={18} /> Next Sentence</>}</button>
+              {pendingCorrectionTeamIds.size > 0 && <p style={{ color: "#9CA3AF", fontSize: "13px", marginTop: "8px" }}>Judge every pending team's correction first</p>}
             </div>
           </div>
         )}

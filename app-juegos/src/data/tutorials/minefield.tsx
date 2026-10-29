@@ -60,7 +60,7 @@ export const MINEFIELD_TUTORIAL_STEPS: TutorialStep[] = [
     visual: (
       <div style={{ textAlign: "center" }}>
         <MineGrid safe={[1, 0]} />
-        <div style={{ fontSize: "11px", fontWeight: 800, color: "#166534", marginTop: "4px" }}>✅ +50 pts — tile is now safe!</div>
+        <div style={{ fontSize: "11px", fontWeight: 800, color: "#166534", marginTop: "4px" }}>✅ +75 pts — tile is now safe!</div>
       </div>
     ),
   },
