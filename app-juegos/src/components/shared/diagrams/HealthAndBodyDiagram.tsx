@@ -10,7 +10,7 @@ export function HealthAndBodyDiagram({ variant, accentColor = "#2563EB" }: { var
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -65,16 +65,16 @@ export function HealthAndBodyDiagram({ variant, accentColor = "#2563EB" }: { var
 
         <line x1="90" y1="159" x2="215" y2="146" stroke={caption} strokeWidth="1" strokeDasharray="2 3" />
         <text x="220" y="144" fontSize="9.5" fontWeight="800" fill={ink}>My feet hurt.</text>
-        <text x="220" y="155" fontSize="7.2" fill={caption}>(plural body part, no -s)</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="220" y="155" fontSize="7.2" fill={caption}>(plural body part, no -s)</text>
 
         <rect x="20" y="180" width="195" height="52" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="117" y="198" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={accent}>FOR</text>
-        <text x="117" y="211" textAnchor="middle" fontSize="7.5" fill={caption}>a length of time</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="117" y="211" textAnchor="middle" fontSize="7.5" fill={caption}>a length of time</text>
         <text x="117" y="225" textAnchor="middle" fontSize="8" fontStyle="italic" fill={ink}>I've had this cough for 3 days.</text>
 
         <rect x="245" y="180" width="195" height="52" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="342" y="198" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={accent}>SINCE</text>
-        <text x="342" y="211" textAnchor="middle" fontSize="7.5" fill={caption}>a starting point</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="342" y="211" textAnchor="middle" fontSize="7.5" fill={caption}>a starting point</text>
         <text x="342" y="225" textAnchor="middle" fontSize="8" fontStyle="italic" fill={ink}>My throat has been sore since Monday.</text>
 
         <line x1="20" y1="244" x2="440" y2="244" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />

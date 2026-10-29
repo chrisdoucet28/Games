@@ -76,7 +76,7 @@ export function ClothesDiagram({ variant, accentColor = "#2563EB" }: { variant: 
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -120,13 +120,13 @@ export function ClothesDiagram({ variant, accentColor = "#2563EB" }: { variant: 
               <rect x={x} y="16" width="140" height="86" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
               <text x={cx} y="40" textAnchor="middle" fontSize="20" fontWeight="800" fill={accent}>{t.glyph}</text>
               <text x={cx} y="58" textAnchor="middle" fontSize="9.5" fontWeight="800" fill={accent}>{t.title}</text>
-              <text x={cx} y="70" textAnchor="middle" fontSize="7.2" fill={caption}>{t.sub}</text>
+              <text fontWeight={isScreen ? undefined : "600"} x={cx} y="70" textAnchor="middle" fontSize="7.2" fill={caption}>{t.sub}</text>
               <text x={cx} y="90" textAnchor="middle" fontSize="7.6" fontStyle="italic" fill={ink}>{t.example}</text>
             </g>
           );
         })}
 
-        <text x="230" y="114" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>always plural — never "a" before them</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="114" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>always plural — never "a" before them</text>
         {PLURAL_WORDS.map((w, i) => {
           const colWidth = 420 / PLURAL_WORDS.length;
           const boxX = 20 + i * colWidth + (colWidth - 46) / 2;

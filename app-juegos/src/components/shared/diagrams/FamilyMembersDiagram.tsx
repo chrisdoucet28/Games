@@ -8,7 +8,7 @@ export function FamilyMembersDiagram({ variant, accentColor = "#2563EB" }: { var
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -40,17 +40,17 @@ export function FamilyMembersDiagram({ variant, accentColor = "#2563EB" }: { var
       <svg viewBox="0 0 460 220" style={{ width: "100%", height: "auto", display: "block" }}>
         <rect x="20" y="12" width="195" height="80" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="117" y="32" textAnchor="middle" fontSize="11" fontWeight="800" fill={accent}>ONE PERSON</text>
-        <text x="117" y="48" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>my brother · my aunt</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="117" y="48" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>my brother · my aunt</text>
         <text x="117" y="65" textAnchor="middle" fontSize="12" fontWeight="800" fill={ink}>is / has</text>
         <text x="117" y="80" textAnchor="middle" fontSize="8" fontStyle="italic" fill={ink}>My brother has a car.</text>
 
         <rect x="245" y="12" width="195" height="80" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="342" y="32" textAnchor="middle" fontSize="11" fontWeight="800" fill={accent}>MORE THAN ONE</text>
-        <text x="342" y="48" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>my parents · my cousins</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="342" y="48" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>my parents · my cousins</text>
         <text x="342" y="65" textAnchor="middle" fontSize="12" fontWeight="800" fill={ink}>are / have</text>
         <text x="342" y="80" textAnchor="middle" fontSize="8" fontStyle="italic" fill={ink}>My parents have two cars.</text>
 
-        <text x="230" y="108" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>one child, no brothers or sisters? say "an only child" (not "children")</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="108" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>one child, no brothers or sisters? say "an only child" (not "children")</text>
 
         <line x1="20" y1="120" x2="440" y2="120" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 

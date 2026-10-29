@@ -10,7 +10,7 @@ export function PossessiveAdjectivesPronounsDiagram({ variant, accentColor = "#2
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
 
   return (
@@ -42,12 +42,12 @@ export function PossessiveAdjectivesPronounsDiagram({ variant, accentColor = "#2
         <text x="120" y="38" textAnchor="middle" fontSize="12" fontWeight="800" fill={ink}>POSSESSIVE ADJECTIVE</text>
         <text x="55" y="65" fontSize="13" fontWeight="700" fill={accent}>my</text>
         <rect x="80" y="52" width="70" height="20" rx="3" fill="none" stroke={caption} strokeWidth="1.5" strokeDasharray="3 3" />
-        <text x="115" y="66" textAnchor="middle" fontSize="10" fontStyle="italic" fill={caption}>noun</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="115" y="66" textAnchor="middle" fontSize="10" fontStyle="italic" fill={caption}>noun</text>
 
         <rect x="240" y="15" width="200" height="70" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="340" y="38" textAnchor="middle" fontSize="12" fontWeight="800" fill={ink}>POSSESSIVE PRONOUN</text>
         <text x="340" y="65" textAnchor="middle" fontSize="13" fontWeight="700" fill={accent}>mine.</text>
-        <text x="340" y="78" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>nothing after it</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="340" y="78" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>nothing after it</text>
 
         <text x="120" y="105" textAnchor="middle" fontSize="10.5" fontStyle="italic" fill={ink}>This is my book.</text>
         <text x="340" y="105" textAnchor="middle" fontSize="10.5" fontStyle="italic" fill={ink}>This book is mine.</text>
@@ -55,7 +55,7 @@ export function PossessiveAdjectivesPronounsDiagram({ variant, accentColor = "#2
         <text x="230" y="130" textAnchor="middle" fontSize="10" fontWeight="700" fill={caption}>my → mine  ·  your → yours  ·  her → hers  ·  their → theirs</text>
 
         <text x="230" y="160" textAnchor="middle" fontSize="11.5" fontWeight="800" fill={ink}>Whose bag is this? — It's mine.</text>
-        <text x="230" y="176" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>a "whose" question is answered with a pronoun, never an adjective</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="176" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>a "whose" question is answered with a pronoun, never an adjective</text>
       </svg>
     </div>
   );

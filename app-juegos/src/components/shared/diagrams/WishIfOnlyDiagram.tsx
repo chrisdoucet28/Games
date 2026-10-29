@@ -9,7 +9,7 @@ export function WishIfOnlyDiagram({ variant, accentColor = "#2563EB" }: { varian
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -42,20 +42,20 @@ export function WishIfOnlyDiagram({ variant, accentColor = "#2563EB" }: { varian
         <rect x="10" y="12" width="140" height="72" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="80" y="30" textAnchor="middle" fontSize="10" fontWeight="800" fill={accent}>NOW</text>
         <text x="80" y="44" textAnchor="middle" fontSize="8" fontWeight="700" fill={ink}>+ past simple / were / could</text>
-        <text x="80" y="60" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>I wish I had more time.</text>
-        <text x="80" y="73" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>If only I were taller!</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="80" y="60" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>I wish I had more time.</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="80" y="73" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>If only I were taller!</text>
 
         <rect x="160" y="12" width="140" height="72" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="230" y="30" textAnchor="middle" fontSize="10" fontWeight="800" fill={accent}>THE PAST</text>
         <text x="230" y="44" textAnchor="middle" fontSize="8" fontWeight="700" fill={ink}>+ past perfect</text>
-        <text x="230" y="60" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>I wish I had studied</text>
-        <text x="230" y="73" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>harder last week.</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="60" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>I wish I had studied</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="73" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>harder last week.</text>
 
         <rect x="310" y="12" width="140" height="72" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="380" y="30" textAnchor="middle" fontSize="9.5" fontWeight="800" fill={accent}>ANNOYING HABIT</text>
         <text x="380" y="44" textAnchor="middle" fontSize="8" fontWeight="700" fill={ink}>wish + would + verb</text>
-        <text x="380" y="60" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>I wish you would stop</text>
-        <text x="380" y="73" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>interrupting me.</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="380" y="60" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>I wish you would stop</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="380" y="73" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>interrupting me.</text>
 
         <line x1="20" y1="96" x2="440" y2="96" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 

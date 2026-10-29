@@ -9,7 +9,7 @@ export function PastPerfectDiagram({ variant, accentColor = "#2563EB" }: { varia
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
 
@@ -48,14 +48,14 @@ export function PastPerfectDiagram({ variant, accentColor = "#2563EB" }: { varia
         <circle cx="110" cy="45" r="6" fill={accent} />
         <text x="110" y="26" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={accent}>EARLIER</text>
         <text x="110" y="68" textAnchor="middle" fontSize="9" fontWeight="700" fill={ink}>had + participle</text>
-        <text x="110" y="84" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>she had already left</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="110" y="84" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>she had already left</text>
 
         <circle cx="340" cy="45" r="6" fill={accent} />
         <text x="340" y="26" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={accent}>LATER</text>
         <text x="340" y="68" textAnchor="middle" fontSize="9" fontWeight="700" fill={ink}>past simple</text>
-        <text x="340" y="84" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>when I arrived</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="340" y="84" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>when I arrived</text>
 
-        <text x="230" y="106" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>signal words: already, just, never, ever, before — often with "by the time"</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="106" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>signal words: already, just, never, ever, before — often with "by the time"</text>
 
         <line x1="20" y1="118" x2="440" y2="118" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 

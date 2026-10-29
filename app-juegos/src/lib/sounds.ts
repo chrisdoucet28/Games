@@ -59,6 +59,19 @@ const SOUND_FILES = {
   // SOUND_VOLUME below) per teacher feedback: it should read as a nice touch, not a jump scare,
   // after the original racetrack.ogg (a broken sustained drone) was pulled entirely.
   racetrack: "/sounds/racetrack.mp3",
+  // Race Track's board-space effects (mixkit.co, Mixkit Sound Effects Free License) — one cue per
+  // space type so landing on a boost/mud/trap/teleport/etc. is audible, not just visible. Played
+  // from RaceTrackGame.tsx's resolveLanding. Volumes below were set from a measured loudness pass.
+  rtBoost: "/sounds/rt-boost.mp3",
+  rtShortcut: "/sounds/rt-shortcut.mp3",
+  rtMud: "/sounds/rt-mud.mp3",
+  rtTrap: "/sounds/rt-trap.mp3",
+  rtBanana: "/sounds/rt-banana.mp3",
+  rtTeleport: "/sounds/rt-teleport.mp3",
+  rtCoin: "/sounds/rt-coin.mp3",
+  rtShield: "/sounds/rt-shield.mp3",
+  rtLucky: "/sounds/rt-lucky.mp3",
+  rtPowerup: "/sounds/rt-powerup.mp3",
   spy: "/sounds/spy.mp3",
   vault: "/sounds/vault.ogg",
   whack: "/sounds/whack.ogg",
@@ -73,7 +86,10 @@ export type SoundName = keyof typeof SOUND_FILES;
 // moment more often than not, and shouldn't fight it for attention.
 const DEFAULT_TIER2_VOLUME = 0.7;
 const SOUND_VOLUME: Record<SoundName, number> = {
-  correct: 0.55,
+  // Was 0.55 — teacher feedback (via Vault Heist) flagged this shared "correct" ping as pretty
+  // loud. Same chokepoint cue fires across every game on any score-increasing answer (see
+  // LessonGamesGenerator.tsx's updateScore), so the fix applies everywhere, not just there.
+  correct: 0.45,
   // Was 0.8 — the exact level teacher feedback flagged as "too loud/harsh" for timesUp below,
   // and wrong fires far more often (every incorrect answer, nearly every game) than timesUp
   // (once per turn, at expiry only). Same fix applied here for consistency, pending confirmation.
@@ -123,6 +139,19 @@ const SOUND_VOLUME: Record<SoundName, number> = {
   // Kept deliberately quiet — teacher feedback explicitly warned against this landing like a jump
   // scare (see RaceTrackGame.tsx's "Start Race!" button and triggerWin).
   racetrack: 0.45,
+  // Race Track space cues — measured active-RMS per file (Web Audio pass), volume = ~0.09 / RMS so
+  // every one lands at the same effective loudness (a touch under the Tier 2 average, since these
+  // fire every turn). rtMud's source is quiet enough to sit at full volume.
+  rtBoost: 0.56,
+  rtShortcut: 0.38,
+  rtMud: 1,
+  rtTrap: 0.57,
+  rtBanana: 0.52,
+  rtTeleport: 0.71,
+  rtCoin: 0.41,
+  rtShield: 0.79,
+  rtLucky: 0.61,
+  rtPowerup: 0.58,
   // Replaced the near-inaudible 27ms original with a full "ominous drums" sting, meant to land
   // over the quiet reveal bed (see SpyAmongUsGame.tsx's music-context effect). Web Audio API pass
   // shows this file mixed quieter than a typical Tier 2 sound, so nudged above the Tier 2 default
@@ -144,6 +173,9 @@ const SOUND_VOLUME: Record<SoundName, number> = {
 // dragging on too long; most sounds should finish naturally.
 const SOUND_MAX_MS: Partial<Record<SoundName, number>> = {
   hill: 3000,
+  // Source clips of 4.75s / 3s for a moment the effect card is already on screen for — trimmed.
+  rtShortcut: 2500,
+  rtTrap: 2500,
 };
 
 const STORAGE_KEY = "classcade_sound_enabled";

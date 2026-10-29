@@ -9,7 +9,7 @@ export function ThereIsAreDiagram({ variant, accentColor = "#2563EB" }: { varian
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -42,21 +42,21 @@ export function ThereIsAreDiagram({ variant, accentColor = "#2563EB" }: { varian
         <rect x="15" y="12" width="200" height="34" rx="8" fill={fill} stroke={ink} strokeWidth="2" />
         <text x="115" y="34" textAnchor="middle" fontSize="11.5" fontWeight="800" fill={ink}>SINGULAR / UNCOUNTABLE</text>
         <text x="115" y="68" textAnchor="middle" fontSize="15" fontWeight="800" fill={accent}>there IS / WAS</text>
-        <text x="115" y="86" textAnchor="middle" fontSize="10" fontStyle="italic" fill={caption}>There is a cat in the garden.</text>
-        <text x="115" y="101" textAnchor="middle" fontSize="10" fontStyle="italic" fill={caption}>There was a queue outside.</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="115" y="86" textAnchor="middle" fontSize="10" fontStyle="italic" fill={caption}>There is a cat in the garden.</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="115" y="101" textAnchor="middle" fontSize="10" fontStyle="italic" fill={caption}>There was a queue outside.</text>
 
         <rect x="245" y="12" width="200" height="34" rx="8" fill={fill} stroke={ink} strokeWidth="2" />
         <text x="345" y="34" textAnchor="middle" fontSize="11.5" fontWeight="800" fill={ink}>PLURAL</text>
         <text x="345" y="68" textAnchor="middle" fontSize="15" fontWeight="800" fill={accent}>there ARE / WERE</text>
-        <text x="345" y="86" textAnchor="middle" fontSize="10" fontStyle="italic" fill={caption}>There are many students here.</text>
-        <text x="345" y="101" textAnchor="middle" fontSize="10" fontStyle="italic" fill={caption}>There were a lot of people.</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="345" y="86" textAnchor="middle" fontSize="10" fontStyle="italic" fill={caption}>There are many students here.</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="345" y="101" textAnchor="middle" fontSize="10" fontStyle="italic" fill={caption}>There were a lot of people.</text>
 
         <text x="230" y="128" textAnchor="middle" fontSize="10.5" fontWeight="700" fill={ink}>negative / question → add ANY</text>
-        <text x="230" y="144" textAnchor="middle" fontSize="10" fontStyle="italic" fill={caption}>There isn't any bread. · Are there any apples?</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="144" textAnchor="middle" fontSize="10" fontStyle="italic" fill={caption}>There isn't any bread. · Are there any apples?</text>
 
         <text x="230" y="172" textAnchor="middle" fontSize="11" fontWeight="800" fill={wrong}>✗ It is a nice park near the school.</text>
         <text x="230" y="190" textAnchor="middle" fontSize="11" fontWeight="800" fill={right}>✓ There is a nice park near the school.</text>
-        <text x="230" y="204" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>say "there is/are" here — not "it is"</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="204" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>say "there is/are" here — not "it is"</text>
       </svg>
     </div>
   );

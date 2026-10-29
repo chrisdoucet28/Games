@@ -10,7 +10,7 @@ export function HobbiesDiagram({ variant, accentColor = "#2563EB" }: { variant: 
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -42,21 +42,21 @@ export function HobbiesDiagram({ variant, accentColor = "#2563EB" }: { variant: 
       <svg viewBox="0 0 460 208" style={{ width: "100%", height: "auto", display: "block" }}>
         <rect x="10" y="16" width="140" height="90" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="80" y="34" textAnchor="middle" fontSize="11.5" fontWeight="800" fill={accent}>PLAY</text>
-        <text x="80" y="48" textAnchor="middle" fontSize="7.5" fill={caption}>sports, games, instruments</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="80" y="48" textAnchor="middle" fontSize="7.5" fill={caption}>sports, games, instruments</text>
         <text x="80" y="64" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={ink}>She plays tennis.</text>
-        <text x="80" y="78" textAnchor="middle" fontSize="7.3" fontStyle="italic" fill={caption}>(not "does tennis")</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="80" y="78" textAnchor="middle" fontSize="7.3" fontStyle="italic" fill={caption}>(not "does tennis")</text>
 
         <rect x="160" y="16" width="140" height="90" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="230" y="34" textAnchor="middle" fontSize="11.5" fontWeight="800" fill={accent}>DO</text>
-        <text x="230" y="48" textAnchor="middle" fontSize="7.5" fill={caption}>exercise, martial arts</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="48" textAnchor="middle" fontSize="7.5" fill={caption}>exercise, martial arts</text>
         <text x="230" y="64" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={ink}>He does karate.</text>
-        <text x="230" y="78" textAnchor="middle" fontSize="7.3" fontStyle="italic" fill={caption}>(not "plays karate")</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="78" textAnchor="middle" fontSize="7.3" fontStyle="italic" fill={caption}>(not "plays karate")</text>
 
         <rect x="310" y="16" width="140" height="90" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="380" y="34" textAnchor="middle" fontSize="11.5" fontWeight="800" fill={accent}>GO</text>
-        <text x="380" y="48" textAnchor="middle" fontSize="7.5" fill={caption}>outdoor -ing activities</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="380" y="48" textAnchor="middle" fontSize="7.5" fill={caption}>outdoor -ing activities</text>
         <text x="380" y="64" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={ink}>They go swimming.</text>
-        <text x="380" y="78" textAnchor="middle" fontSize="7.3" fontStyle="italic" fill={caption}>(not "do cycling")</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="380" y="78" textAnchor="middle" fontSize="7.3" fontStyle="italic" fill={caption}>(not "do cycling")</text>
 
         <line x1="20" y1="118" x2="440" y2="118" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 

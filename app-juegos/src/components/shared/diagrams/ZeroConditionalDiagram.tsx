@@ -10,7 +10,7 @@ export function ZeroConditionalDiagram({ variant, accentColor = "#2563EB" }: { v
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -42,7 +42,7 @@ export function ZeroConditionalDiagram({ variant, accentColor = "#2563EB" }: { v
       <svg viewBox="0 0 460 193" style={{ width: "100%", height: "auto", display: "block" }}>
         <rect x="15" y="8" width="195" height="60" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="112" y="30" textAnchor="middle" fontSize="12" fontWeight="800" fill={ink}>IF + present simple</text>
-        <text x="112" y="46" textAnchor="middle" fontSize="10" fontStyle="italic" fill={caption}>if you heat ice…</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="112" y="46" textAnchor="middle" fontSize="10" fontStyle="italic" fill={caption}>if you heat ice…</text>
 
         <line x1="215" y1="38" x2="245" y2="38" stroke={accent} strokeWidth="2" markerEnd="url(#zcArrow)" />
         <defs>
@@ -51,9 +51,9 @@ export function ZeroConditionalDiagram({ variant, accentColor = "#2563EB" }: { v
 
         <rect x="250" y="8" width="195" height="60" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="347" y="30" textAnchor="middle" fontSize="12" fontWeight="800" fill={ink}>present simple</text>
-        <text x="347" y="46" textAnchor="middle" fontSize="10" fontStyle="italic" fill={caption}>…it melts.</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="347" y="46" textAnchor="middle" fontSize="10" fontStyle="italic" fill={caption}>…it melts.</text>
 
-        <text x="230" y="93" textAnchor="middle" fontSize="10.5" fontStyle="italic" fill={caption}>vs. first conditional's "will" — this is a rule with no exceptions, not one likely case</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="93" textAnchor="middle" fontSize="10.5" fontStyle="italic" fill={caption}>vs. first conditional's "will" — this is a rule with no exceptions, not one likely case</text>
 
         <line x1="20" y1="108" x2="440" y2="108" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 
@@ -61,7 +61,7 @@ export function ZeroConditionalDiagram({ variant, accentColor = "#2563EB" }: { v
         <text x="230" y="148" textAnchor="middle" fontSize="11" fontWeight="800" fill={right}>✓ If you heat ice, it melts.</text>
 
         <text x="230" y="170" textAnchor="middle" fontSize="10" fontWeight="700" fill={ink}>both clauses stay present simple — never past</text>
-        <text x="230" y="186" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>✗ they died → ✓ they die</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="186" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>✗ they died → ✓ they die</text>
       </svg>
     </div>
   );

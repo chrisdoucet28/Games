@@ -9,7 +9,7 @@ export function ComparativesSuperlativesDiagram({ variant, accentColor = "#2563E
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -43,7 +43,7 @@ export function ComparativesSuperlativesDiagram({ variant, accentColor = "#2563E
         <text x="360" y="16" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={caption}>SUPERLATIVE</text>
 
         <text x="35" y="52" fontSize="10.5" fontWeight="800" fill={ink}>SHORT</text>
-        <text x="35" y="66" fontSize="9" fontStyle="italic" fill={caption}>1 syllable</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="35" y="66" fontSize="9" fontStyle="italic" fill={caption}>1 syllable</text>
         <rect x="90" y="30" width="120" height="46" rx="7" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="150" y="50" textAnchor="middle" fontSize="12.5" fontWeight="800" fill={accent}>-er than</text>
         <text x="150" y="66" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={ink}>taller than</text>
@@ -53,7 +53,7 @@ export function ComparativesSuperlativesDiagram({ variant, accentColor = "#2563E
         <text x="360" y="66" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={ink}>the tallest</text>
 
         <text x="35" y="112" fontSize="10.5" fontWeight="800" fill={ink}>LONG</text>
-        <text x="35" y="126" fontSize="9" fontStyle="italic" fill={caption}>2+ syllables</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="35" y="126" fontSize="9" fontStyle="italic" fill={caption}>2+ syllables</text>
         <rect x="90" y="90" width="120" height="46" rx="7" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="150" y="110" textAnchor="middle" fontSize="12.5" fontWeight="800" fill={accent}>more ___</text>
         <text x="150" y="126" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={ink}>more interesting</text>
@@ -62,7 +62,7 @@ export function ComparativesSuperlativesDiagram({ variant, accentColor = "#2563E
         <text x="360" y="110" textAnchor="middle" fontSize="12.5" fontWeight="800" fill={accent}>the most ___</text>
         <text x="360" y="126" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={ink}>the most expensive</text>
 
-        <text x="230" y="152" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>irregular: good → better → the best · bad → worse → the worst</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="152" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>irregular: good → better → the best · bad → worse → the worst</text>
 
         <line x1="20" y1="162" x2="440" y2="162" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 

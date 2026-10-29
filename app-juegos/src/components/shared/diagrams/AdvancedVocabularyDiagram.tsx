@@ -18,7 +18,7 @@ export function AdvancedVocabularyDiagram({ variant, accentColor = "#2563EB" }: 
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -72,7 +72,7 @@ export function AdvancedVocabularyDiagram({ variant, accentColor = "#2563EB" }: 
           return (
             <g key={s.from}>
               <rect x={boxX} y="108" width="62" height="50" rx="6" fill={fill} stroke={accent} strokeWidth="1.5" />
-              <text x={cx} y="126" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>{s.from}</text>
+              <text fontWeight={isScreen ? undefined : "600"} x={cx} y="126" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>{s.from}</text>
               <text x={cx} y="139" textAnchor="middle" fontSize="9" fill={accent}>↓</text>
               <text x={cx} y="153" textAnchor="middle" fontSize="7.6" fontWeight="700" fill={ink}>{s.to}</text>
             </g>

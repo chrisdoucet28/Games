@@ -10,7 +10,7 @@ export function SuperlativesDiagram({ variant, accentColor = "#2563EB" }: { vari
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -47,9 +47,9 @@ export function SuperlativesDiagram({ variant, accentColor = "#2563EB" }: { vari
 
         <rect x="150" y="12" width="140" height="40" rx="7" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="220" y="30" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={ink}>tallest</text>
-        <text x="220" y="44" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>most expensive</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="220" y="44" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>most expensive</text>
 
-        <text x="325" y="38" textAnchor="middle" fontSize="12" fontStyle="italic" fill={caption}>← always together</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="325" y="38" textAnchor="middle" fontSize="12" fontStyle="italic" fill={caption}>← always together</text>
 
         <text x="230" y="72" textAnchor="middle" fontSize="11" fontWeight="800" fill={wrong}>✗ tallest building in the city</text>
         <text x="230" y="90" textAnchor="middle" fontSize="11" fontWeight="800" fill={right}>✓ the tallest building in the city</text>
@@ -60,7 +60,7 @@ export function SuperlativesDiagram({ variant, accentColor = "#2563EB" }: { vari
 
         <rect x="90" y="136" width="280" height="38" rx="7" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="230" y="153" textAnchor="middle" fontSize="11" fill={ink}>one of the best restaurant<tspan fontWeight="800" fill={right}>s</tspan></text>
-        <text x="230" y="168" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>"among the best" — softer than "the single best"</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="168" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>"among the best" — softer than "the single best"</text>
 
         <text x="230" y="192" textAnchor="middle" fontSize="11" fontWeight="800" fill={wrong}>✗ one of the best restaurant in town</text>
         <text x="230" y="208" textAnchor="middle" fontSize="11" fontWeight="800" fill={right}>✓ one of the best restaurants in town</text>

@@ -9,7 +9,7 @@ export function EmbeddedQuestionsDiagram({ variant, accentColor = "#2563EB" }: {
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -41,19 +41,19 @@ export function EmbeddedQuestionsDiagram({ variant, accentColor = "#2563EB" }: {
       <svg viewBox="0 0 460 205" style={{ width: "100%", height: "auto", display: "block" }}>
         <rect x="20" y="12" width="195" height="90" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="117" y="30" textAnchor="middle" fontSize="10" fontWeight="800" fill={accent}>DIRECT QUESTION</text>
-        <text x="117" y="47" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>Where is the post office?</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="117" y="47" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>Where is the post office?</text>
         <text x="117" y="61" textAnchor="middle" fontSize="13" fill={ink}>↓ embed it</text>
         <text x="117" y="80" textAnchor="middle" fontSize="9.5" fontWeight="800" fill={ink}>Do you know where the</text>
         <text x="117" y="94" textAnchor="middle" fontSize="9.5" fontWeight="800" fill={ink}>post office is?</text>
 
         <rect x="245" y="12" width="195" height="90" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="342" y="30" textAnchor="middle" fontSize="10" fontWeight="800" fill={accent}>DIRECT QUESTION</text>
-        <text x="342" y="47" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>Is she coming?</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="342" y="47" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>Is she coming?</text>
         <text x="342" y="61" textAnchor="middle" fontSize="13" fill={ink}>↓ embed it</text>
         <text x="342" y="80" textAnchor="middle" fontSize="9.5" fontWeight="800" fill={ink}>I'm not sure if</text>
         <text x="342" y="94" textAnchor="middle" fontSize="9.5" fontWeight="800" fill={ink}>she's coming.</text>
 
-        <text x="230" y="120" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>polite starters: Do you know... · Could you tell me... · I wonder... · I'm not sure...</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="120" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>polite starters: Do you know... · Could you tell me... · I wonder... · I'm not sure...</text>
 
         <line x1="20" y1="132" x2="440" y2="132" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 

@@ -8,6 +8,7 @@ import { LESSON_PLANS } from "../../data/lessonPlans";
 import { LessonContent } from "./LessonContent";
 import { Icon } from "./Icon";
 import { TopicDiagram } from "./diagrams/GrammarDiagram";
+import { WithHandoutFooter } from "./HandoutFooter";
 
 type Props = {
   onBack: () => void;
@@ -30,12 +31,28 @@ type Props = {
 // tighter type helps most single lessons fit on one printed page instead of spilling onto a second.
 const PRINT_CSS = `
   @page {
-    margin: 12mm 15mm;
+    margin: 9mm 12mm;
   }
   @media print {
     .learn-no-print { display: none !important; }
     .learn-print-only { display: block !important; }
     .learn-print-bg { background: white !important; padding: 0 !important; }
+    /* Teacher feedback: the old flat height:110px cap here (regardless of each diagram's own
+       viewBox aspect ratio) squashed every diagram down to the same height no matter how tall its
+       content actually was, and — since the diagram's own bordered wrapper div (see any file in
+       diagrams/*.tsx) stayed block-level at full container width instead of shrinking to match —
+       left the now-tiny diagram floating in the top-left corner of a mostly-empty box. Capping by
+       WIDTH instead fixes both: every diagram shares the exact same viewBox width (460, see
+       diagrams/*.tsx), so one flat width applies the same scale factor to all of them — shrinking
+       proportionally, never distorting or clipping — and making the wrapper div inline-block lets
+       it shrink-to-fit that narrower content instead of leaving dead space around it. 320px keeps
+       most lessons' diagrams reasonably close to their on-screen look while still landing most
+       lessons on one printed page (verified across the full height range, 160-412 viewBox units,
+       via Playwright-generated print PDFs) — a page spilling to a second sheet because its own
+       diagram is genuinely tall is an acceptable tradeoff now; a warped or corner-bunched diagram
+       is not. */
+    .print-diagram-cap svg { width: 320px !important; height: auto !important; max-width: 100% !important; }
+    .print-diagram-cap > div { display: inline-block !important; }
   }
   .learn-print-only { display: none; }
 `;
@@ -46,28 +63,30 @@ const PRINT_CSS = `
 // so a typical lesson's title + intro + sections + common-mistakes fits on a single printed page.
 function PrintableLesson({ t, logoUrl }: { t: (typeof LESSON_TOPICS)[number]; logoUrl?: string | null }) {
   return (
-    <div>
+    <WithHandoutFooter topicId={t.id}>
       {logoUrl && (
         <img src={logoUrl} alt="" style={{ display: "block", maxHeight: "34px", maxWidth: "160px", objectFit: "contain", marginBottom: "8px" }} />
       )}
-      <span style={{ background: LEVEL_COLOR[t.meta.level ?? "A2"], color: "white", borderRadius: "999px", padding: "2px 10px", fontSize: "10.5px", fontWeight: "800" }}>{t.meta.level}</span>
-      <h2 style={{ fontSize: "19px", fontWeight: "900", color: "#111827", margin: "6px 0 5px" }}>{t.lesson.title}</h2>
-      <p style={{ color: "#374151", fontSize: "12px", lineHeight: 1.4, margin: "0 0 10px" }}>{t.lesson.intro}</p>
+      <span style={{ background: LEVEL_COLOR[t.meta.level ?? "A2"], color: "white", borderRadius: "999px", padding: "2px 9px", fontSize: "10px", fontWeight: "800" }}>{t.meta.level}</span>
+      <h2 style={{ fontSize: "17px", fontWeight: "900", color: "#111827", margin: "5px 0 4px" }}>{t.lesson.title}</h2>
+      <p style={{ color: "#374151", fontSize: "11.5px", lineHeight: 1.3, margin: "0 0 7px" }}>{t.lesson.intro}</p>
 
-      <TopicDiagram topicId={t.id} variant="print" />
+      <div className="print-diagram-cap" style={{ textAlign: "center", marginBottom: "4px" }}>
+        <TopicDiagram topicId={t.id} variant="print" />
+      </div>
 
       {t.lesson.sections.map((section, i) => (
-        <div key={i} style={{ marginBottom: "9px" }}>
-          <div style={{ fontWeight: "800", color: "#374151", fontSize: "11px", marginBottom: "3px", textTransform: "uppercase", letterSpacing: "0.03em" }}>{section.heading}</div>
+        <div key={i} style={{ marginBottom: "6px" }}>
+          <div style={{ fontWeight: "800", color: "#374151", fontSize: "10.5px", marginBottom: "2px", textTransform: "uppercase", letterSpacing: "0.03em" }}>{section.heading}</div>
           <ul style={{ margin: 0, paddingLeft: "16px", color: "#1F2937" }}>
             {section.body.map((line, j) => (
-              <li key={j} style={{ marginBottom: "2px", lineHeight: 1.3, fontSize: "11.5px" }}>{renderBold(line)}</li>
+              <li key={j} style={{ marginBottom: "1px", lineHeight: 1.22, fontSize: "11px" }}>{renderBold(line)}</li>
             ))}
           </ul>
           {section.examples && section.examples.length > 0 && (
-            <div style={{ border: "1px solid #D1D5DB", borderRadius: "5px", padding: "5px 9px", marginTop: "5px" }}>
+            <div style={{ border: "1px solid #D1D5DB", borderRadius: "5px", padding: "4px 8px", marginTop: "4px" }}>
               {section.examples.map((ex, j) => (
-                <div key={j} style={{ fontSize: "11px", fontStyle: "italic", color: "#1F2937", lineHeight: 1.3, marginBottom: j < section.examples!.length - 1 ? "2px" : 0 }}>
+                <div key={j} style={{ fontSize: "10.5px", fontStyle: "italic", color: "#1F2937", lineHeight: 1.2, marginBottom: j < section.examples!.length - 1 ? "1px" : 0 }}>
                   {renderBold(ex)}
                 </div>
               ))}
@@ -77,14 +96,14 @@ function PrintableLesson({ t, logoUrl }: { t: (typeof LESSON_TOPICS)[number]; lo
       ))}
 
       {t.lesson.commonMistakes.length > 0 && (
-        <div style={{ border: "1px solid #9CA3AF", borderRadius: "5px", padding: "7px 9px", marginTop: "5px" }}>
-          <div style={{ fontWeight: "800", color: "#111827", fontSize: "10.5px", marginBottom: "4px", textTransform: "uppercase", letterSpacing: "0.03em" }}>Common mistakes</div>
+        <div style={{ border: "1px solid #9CA3AF", borderRadius: "5px", padding: "6px 8px", marginTop: "4px" }}>
+          <div style={{ fontWeight: "800", color: "#111827", fontSize: "10px", marginBottom: "3px", textTransform: "uppercase", letterSpacing: "0.03em" }}>Common mistakes</div>
           {t.lesson.commonMistakes.map((m, i) => (
-            <div key={i} style={{ fontSize: "10.5px", color: "#1F2937", marginBottom: i < t.lesson.commonMistakes.length - 1 ? "3px" : 0, lineHeight: 1.25 }}>{renderMistake(m, "print")}</div>
+            <div key={i} style={{ fontSize: "10px", color: "#1F2937", marginBottom: i < t.lesson.commonMistakes.length - 1 ? "2px" : 0, lineHeight: 1.18 }}>{renderMistake(m, "print")}</div>
           ))}
         </div>
       )}
-    </div>
+    </WithHandoutFooter>
   );
 }
 

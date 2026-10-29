@@ -10,7 +10,7 @@ export function FutureWillGoingToDiagram({ variant, accentColor = "#2563EB" }: {
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -51,15 +51,15 @@ export function FutureWillGoingToDiagram({ variant, accentColor = "#2563EB" }: {
 
         <rect x="10" y="68" width="150" height="50" rx="8" fill={fill} stroke={ink} strokeWidth="2" />
         <text x="85" y="88" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={ink}>decided right now</text>
-        <text x="85" y="103" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>no evidence, just an opinion</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="85" y="103" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>no evidence, just an opinion</text>
 
         <text x="85" y="140" textAnchor="middle" fontSize="15" fontWeight="800" fill={accent}>WILL</text>
         <text x="85" y="157" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={ink}>The phone's ringing — I'll get it!</text>
 
         <rect x="300" y="68" width="150" height="50" rx="8" fill={fill} stroke={ink} strokeWidth="2" />
         <text x="375" y="83" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={ink}>decided before now</text>
-        <text x="375" y="98" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>or evidence you can see now</text>
-        <text x="375" y="112" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>(already arranged)</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="375" y="98" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>or evidence you can see now</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="375" y="112" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>(already arranged)</text>
 
         <text x="375" y="140" textAnchor="middle" fontSize="15" fontWeight="800" fill={accent}>GOING TO</text>
         <text x="375" y="157" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={ink}>Those clouds — it's going to rain.</text>

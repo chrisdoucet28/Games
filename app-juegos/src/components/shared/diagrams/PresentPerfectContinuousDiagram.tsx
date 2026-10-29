@@ -9,7 +9,7 @@ export function PresentPerfectContinuousDiagram({ variant, accentColor = "#2563E
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -42,16 +42,16 @@ export function PresentPerfectContinuousDiagram({ variant, accentColor = "#2563E
         <rect x="20" y="12" width="195" height="66" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="117" y="30" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={accent}>CONTINUOUS</text>
         <text x="117" y="46" textAnchor="middle" fontSize="8.5" fontWeight="700" fill={ink}>duration / the activity itself</text>
-        <text x="117" y="63" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>I've been waiting for an hour.</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="117" y="63" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>I've been waiting for an hour.</text>
 
         <rect x="245" y="12" width="195" height="66" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="342" y="30" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={accent}>SIMPLE</text>
         <text x="342" y="46" textAnchor="middle" fontSize="8.5" fontWeight="700" fill={ink}>result, a count, or done</text>
-        <text x="342" y="63" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>I've finished. She's written 3 novels.</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="342" y="63" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>I've finished. She's written 3 novels.</text>
 
         <rect x="30" y="88" width="400" height="34" rx="8" fill={fill} stroke={accent} strokeWidth="1.5" />
         <text x="230" y="102" textAnchor="middle" fontSize="9.5" fontWeight="800" fill={ink}>stative verbs (know, want, believe...) → always SIMPLE, even with for/since</text>
-        <text x="230" y="116" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>I've known her for ten years. (not "have been knowing")</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="116" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>I've known her for ten years. (not "have been knowing")</text>
 
         <line x1="20" y1="132" x2="440" y2="132" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 

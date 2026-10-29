@@ -17,7 +17,7 @@ export function MakingSuggestionsDiagram({ variant, accentColor = "#2563EB" }: {
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -55,7 +55,7 @@ export function MakingSuggestionsDiagram({ variant, accentColor = "#2563EB" }: {
             <g key={p.phrase}>
               <rect x={x} y="16" width="74" height="58" rx="6" fill={fill} stroke={accent} strokeWidth="1.5" />
               <text x={cx} y="34" textAnchor="middle" fontSize="8.2" fontWeight="800" fill={accent}>{p.phrase}</text>
-              <text x={cx} y="50" textAnchor="middle" fontSize="10" fill={caption}>↓</text>
+              <text fontWeight={isScreen ? undefined : "600"} x={cx} y="50" textAnchor="middle" fontSize="10" fill={caption}>↓</text>
               <text x={cx} y="66" textAnchor="middle" fontSize="8" fontStyle="italic" fill={ink}>{p.form}</text>
             </g>
           );

@@ -3,7 +3,7 @@ import type { TutorialStep } from "../../types";
 
 export const ORDERUP_TUTORIAL_STEPS: TutorialStep[] = [
   {
-    narration: "Customers line up outside the diner. Each dish icon above their head is one English requirement — a sentence form, a grammar point, or a word you must use.",
+    narration: "You're a server at a busy diner! Customers line up outside, and each dish icon above their head is one English requirement — a sentence form, a grammar point, or a word you must use — that you need to nail to take their order.",
     visual: (
       <div style={{ textAlign: "center" }}>
         <div style={{ display: "flex", justifyContent: "center", gap: "6px", marginBottom: "6px" }}>

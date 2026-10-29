@@ -67,4 +67,13 @@ export const ROCKET_TUTORIAL_STEPS: TutorialStep[] = [
       </div>
     ),
   },
+  {
+    narration: "Playing solo? After your launch, you can hit \"One More Launch!\" for a bonus round — your own rocket from before shows up as a faint 'shadow' you're racing to beat!",
+    visual: (
+      <div style={{ textAlign: "center" }}>
+        <div style={{ fontSize: "24px" }}>🚀 <span style={{ opacity: 0.4 }}>👻🚀</span></div>
+        <div style={{ fontSize: "11px", fontWeight: 700, color: "#4338CA", marginTop: "4px" }}>Beat your own shadow rocket!</div>
+      </div>
+    ),
+  },
 ];

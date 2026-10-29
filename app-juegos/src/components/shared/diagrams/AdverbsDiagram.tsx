@@ -9,7 +9,7 @@ export function AdverbsDiagram({ variant, accentColor = "#2563EB" }: { variant: 
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -42,16 +42,16 @@ export function AdverbsDiagram({ variant, accentColor = "#2563EB" }: { variant: 
         <rect x="20" y="12" width="195" height="76" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="117" y="30" textAnchor="middle" fontSize="12" fontWeight="800" fill={accent}>ADJECTIVE</text>
         <text x="117" y="46" textAnchor="middle" fontSize="9" fontWeight="700" fill={ink}>describes a noun</text>
-        <text x="117" y="63" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>She is a careful driver.</text>
-        <text x="117" y="78" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>also after be/seem/look</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="117" y="63" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>She is a careful driver.</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="117" y="78" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>also after be/seem/look</text>
 
         <rect x="245" y="12" width="195" height="76" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="342" y="30" textAnchor="middle" fontSize="12" fontWeight="800" fill={accent}>ADVERB (-ly)</text>
         <text x="342" y="46" textAnchor="middle" fontSize="9" fontWeight="700" fill={ink}>describes a verb</text>
-        <text x="342" y="63" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>She drives carefully.</text>
-        <text x="342" y="78" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>good → well (irregular)</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="342" y="63" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>She drives carefully.</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="342" y="78" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>good → well (irregular)</text>
 
-        <text x="230" y="104" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>exceptions: sense verbs (tastes wonderful) · frequency (is always late) · X enough</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="104" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>exceptions: sense verbs (tastes wonderful) · frequency (is always late) · X enough</text>
 
         <line x1="20" y1="116" x2="440" y2="116" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 

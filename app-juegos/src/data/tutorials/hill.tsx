@@ -117,18 +117,29 @@ const ATTACK_STEP_THEME: TutorialStep = {
   ),
 };
 
+// Its own step rather than tacked onto ATTACK_STEP above — one idea per slide.
+const SOLO_DUEL_STEP: TutorialStep = {
+  narration: "Playing solo against the CPU or teacher? A duel works differently for you: instead of racing to answer first, you get your own clock — answer correctly before it runs out to win the zone.",
+  visual: (
+    <div style={{ textAlign: "center" }}>
+      <div style={{ fontSize: "22px" }}>⏱️</div>
+      <div style={{ fontSize: "11px", fontWeight: 700, color: "#831843", marginTop: "4px" }}>Solo duels: beat the clock, not the other team</div>
+    </div>
+  ),
+};
+
 function ScoringVisual({ zones }: { zones: ZoneDef[] }) {
   const owners = { North: { name: "Red", color: "#DC2626" }, Center: { name: "Red", color: "#DC2626" } };
   return (
     <div style={{ display: "flex", justifyContent: "center", gap: "18px", alignItems: "flex-end" }}>
       <div style={{ textAlign: "center" }}>
         <ZoneMap zones={zones} owners={owners} small />
-        <div style={{ fontSize: "10px", fontWeight: 800, color: "#166534", marginTop: "4px" }}>Round 1 end: Red +8 pts</div>
+        <div style={{ fontSize: "10px", fontWeight: 800, color: "#166534", marginTop: "4px" }}>Round 1 end: Red +80 score (8 control pts)</div>
       </div>
       <div style={{ fontSize: "16px", alignSelf: "center" }}>→</div>
       <div style={{ textAlign: "center" }}>
         <ZoneMap zones={zones} owners={owners} small />
-        <div style={{ fontSize: "10px", fontWeight: 800, color: "#166534", marginTop: "4px" }}>Round 2 end: Red +8 MORE pts</div>
+        <div style={{ fontSize: "10px", fontWeight: 800, color: "#166534", marginTop: "4px" }}>Round 2 end: Red +80 MORE</div>
       </div>
     </div>
   );
@@ -145,18 +156,18 @@ const SCORING_STEP_THEME: TutorialStep = {
 };
 
 const FINAL_STEP: TutorialStep = {
-  narration: "The game lasts 4 rounds. After round 4's points are added up, the team with the most total points wins!",
+  narration: "The number of rounds depends on how many teams are playing — fewer teams play more rounds, more teams play fewer. After the last round's points are added up, the team with the most total points wins!",
   visual: (
     <div style={{ textAlign: "center" }}>
       <div style={{ fontSize: "22px" }}>🏆</div>
-      <div style={{ fontWeight: 900, color: "#831843", fontSize: "13px", marginTop: "4px" }}>Round 4 of 4 — final scores!</div>
+      <div style={{ fontWeight: 900, color: "#831843", fontSize: "13px", marginTop: "4px" }}>Final round — final scores!</div>
     </div>
   ),
 };
 
 export const HILL_THEME_STEPS: TutorialStep[] = [
   {
-    narration: "This is the board. It has 5 zones. In theme mode, each zone is a different move in a conversation: Question, Example, Agree/Disagree, Alternative, and Opinion. Right now, every zone is Free — no team owns any of them yet.",
+    narration: "This is the board. In theme mode, each zone is a different move in a conversation: Question, Example, Agree/Disagree, Alternative, and Opinion (bigger classes add 4 more corner zones — Prediction, Comparison, Clarification, and Summary). Right now, every zone is Free — no team owns any of them yet.",
     visual: <ZoneMap zones={ZONES_THEME} />,
   },
   ROLL_DICE_STEP,
@@ -166,13 +177,14 @@ export const HILL_THEME_STEPS: TutorialStep[] = [
   },
   CLAIM_STEP_THEME,
   ATTACK_STEP_THEME,
+  SOLO_DUEL_STEP,
   SCORING_STEP_THEME,
   FINAL_STEP,
 ];
 
 export const HILL_GRAMMAR_STEPS: TutorialStep[] = [
   {
-    narration: "This is the board. It has 5 zones, each worth different points — North and South are worth 3, East and West are worth 2, and the Center (👑) is worth 5. Right now, every zone is Free — no team owns any of them yet.",
+    narration: "This is the board. Zones are worth different points — North and South are worth 3, East and West are worth 2, and the Center (👑) is worth 5 (bigger classes add 4 more corner zones, worth 2 each). Right now, every zone is Free — no team owns any of them yet.",
     visual: <ZoneMap zones={ZONES_GRAMMAR} />,
   },
   ROLL_DICE_STEP,
@@ -182,6 +194,7 @@ export const HILL_GRAMMAR_STEPS: TutorialStep[] = [
   },
   CLAIM_STEP_GRAMMAR,
   ATTACK_STEP_GRAMMAR,
+  SOLO_DUEL_STEP,
   SCORING_STEP_GRAMMAR,
   FINAL_STEP,
 ];

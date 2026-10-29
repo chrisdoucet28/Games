@@ -9,7 +9,7 @@ export function DailyRoutinesFrequencyDiagram({ variant, accentColor = "#2563EB"
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -48,10 +48,10 @@ export function DailyRoutinesFrequencyDiagram({ variant, accentColor = "#2563EB"
         <text x="342" y="46" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={ink}>I am never late.</text>
 
         <text x="45" y="84" fontSize="8" fontWeight="700" fill={caption}>always</text>
-        <text x="127" y="84" fontSize="8" fontStyle="italic" fill={caption}>usually</text>
-        <text x="209" y="84" fontSize="8" fontStyle="italic" fill={caption}>often</text>
-        <text x="277" y="84" fontSize="8" fontStyle="italic" fill={caption}>sometimes</text>
-        <text x="365" y="84" fontSize="8" fontStyle="italic" fill={caption}>rarely</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="127" y="84" fontSize="8" fontStyle="italic" fill={caption}>usually</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="209" y="84" fontSize="8" fontStyle="italic" fill={caption}>often</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="277" y="84" fontSize="8" fontStyle="italic" fill={caption}>sometimes</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="365" y="84" fontSize="8" fontStyle="italic" fill={caption}>rarely</text>
         <text x="425" y="84" fontSize="8" fontWeight="700" fill={caption}>never</text>
         <line x1="20" y1="92" x2="440" y2="92" stroke={accent} strokeWidth="2" markerEnd="url(#drfArrow)" />
         <defs>
@@ -62,7 +62,7 @@ export function DailyRoutinesFrequencyDiagram({ variant, accentColor = "#2563EB"
 
         <rect x="130" y="106" width="200" height="36" rx="8" fill={fill} stroke={accent} strokeWidth="1.5" />
         <text x="230" y="122" textAnchor="middle" fontSize="9.5" fontWeight="800" fill={ink}>he / she / it: add -s</text>
-        <text x="230" y="136" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>She wakes up at 7.</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="136" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>She wakes up at 7.</text>
 
         <line x1="20" y1="154" x2="440" y2="154" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 

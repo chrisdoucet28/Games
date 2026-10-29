@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getProfile, updateProfile, uploadAvatar, uploadOrgLogo, removeAvatar, removeOrgLogo, chooseRole } from "../../lib/profile";
+import { getProfile, updateProfile, uploadAvatar, uploadOrgLogo, removeAvatar, removeOrgLogo, chooseRole, setMarketingOptIn } from "../../lib/profile";
 import { THEMES, hexToRgba, type Theme } from "../../data/themes";
 import { Icon } from "./Icon";
 import { RoleRestricted } from "./RoleRestricted";
@@ -61,6 +61,10 @@ export function ProfileScreen({ onBack, theme, onThemeChange, isPaid, onUpgrade 
   // RoleRestricted's own comment. Sourced from this screen's own fetch, not a prop, so it stays
   // correct even if this screen is ever reached through a path that doesn't thread role down.
   const [role, setRole] = useState<"teacher" | "student" | undefined>(undefined);
+  // null = the database has no marketing columns yet, so the section stays hidden.
+  const [marketingOptIn, setMarketingOptInState] = useState<boolean | null>(null);
+  const [marketingBusy, setMarketingBusy] = useState(false);
+  const [marketingError, setMarketingError] = useState<string | null>(null);
 
   useEffect(() => {
     getProfile()
@@ -71,6 +75,7 @@ export function ProfileScreen({ onBack, theme, onThemeChange, isPaid, onUpgrade 
         setOrgLogoUrl(p.org_logo_url);
         setRoleSupported(p.role !== undefined);
         setRole(p.role);
+        setMarketingOptInState(p.marketing_opt_in ?? null);
       })
       .catch(err => setError(err instanceof Error ? err.message : "Couldn't load your profile."))
       .finally(() => setLoading(false));
@@ -102,6 +107,20 @@ export function ProfileScreen({ onBack, theme, onThemeChange, isPaid, onUpgrade 
       setBrandingError(err instanceof Error ? err.message : "Couldn't remove that image.");
     } finally {
       (kind === "avatar" ? setAvatarBusy : setLogoBusy)(false);
+    }
+  };
+
+  // Saves on click, like the branding uploads — a single checkbox shouldn't need the form's Save.
+  const handleMarketingToggle = async (optIn: boolean) => {
+    setMarketingError(null);
+    setMarketingBusy(true);
+    try {
+      await setMarketingOptIn(optIn);
+      setMarketingOptInState(optIn);
+    } catch (err) {
+      setMarketingError(err instanceof Error ? err.message : "Couldn't save that setting.");
+    } finally {
+      setMarketingBusy(false);
     }
   };
 
@@ -219,6 +238,23 @@ export function ProfileScreen({ onBack, theme, onThemeChange, isPaid, onUpgrade 
             </form>
           )}
         </div>
+
+        {marketingOptIn !== null && !loading && (
+          <div style={{ background: "white", border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, borderRadius: "16px", padding: "16px 20px", marginTop: "16px" }}>
+            <label style={{ display: "flex", alignItems: "flex-start", gap: "10px", cursor: marketingBusy ? "default" : "pointer" }}>
+              <input
+                type="checkbox" checked={marketingOptIn} disabled={marketingBusy}
+                onChange={e => handleMarketingToggle(e.target.checked)}
+                style={{ marginTop: "3px", accentColor: theme.accentSolid, flexShrink: 0 }}
+              />
+              <span>
+                <span style={{ display: "block", color: "#4B5563", fontSize: "13px", fontWeight: "700" }}>Email me ClassCade updates</span>
+                <span style={{ display: "block", color: "#6B7280", fontSize: "12px", lineHeight: 1.5, marginTop: "2px" }}>New games, topics and free resources, about once a month.</span>
+              </span>
+            </label>
+            {marketingError && <div role="alert" style={{ color: "#991B1B", fontSize: "12px", marginTop: "8px" }}>{marketingError}</div>}
+          </div>
+        )}
 
         {roleSupported && !loading && (
           <div style={{ background: "white", border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, borderRadius: "16px", padding: "16px 20px", marginTop: "16px" }}>

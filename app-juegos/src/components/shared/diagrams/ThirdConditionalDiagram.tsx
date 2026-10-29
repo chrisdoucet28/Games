@@ -8,7 +8,7 @@ export function ThirdConditionalDiagram({ variant, accentColor = "#2563EB" }: { 
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -41,14 +41,14 @@ export function ThirdConditionalDiagram({ variant, accentColor = "#2563EB" }: { 
         <rect x="20" y="12" width="195" height="70" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="117" y="32" textAnchor="middle" fontSize="11" fontWeight="800" fill={accent}>IF + PAST PERFECT</text>
         <text x="117" y="48" textAnchor="middle" fontSize="9" fontWeight="700" fill={ink}>the changed past event</text>
-        <text x="117" y="65" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>If she had studied,</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="117" y="65" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>If she had studied,</text>
 
         <rect x="245" y="12" width="195" height="70" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="342" y="32" textAnchor="middle" fontSize="11" fontWeight="800" fill={accent}>WOULD HAVE + PARTICIPLE</text>
         <text x="342" y="48" textAnchor="middle" fontSize="9" fontWeight="700" fill={ink}>the imagined result</text>
-        <text x="342" y="65" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>she would have passed.</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="342" y="65" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>she would have passed.</text>
 
-        <text x="230" y="98" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>less certain result: might have / could have instead of "would have"</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="98" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>less certain result: might have / could have instead of "would have"</text>
 
         <line x1="20" y1="110" x2="440" y2="110" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 

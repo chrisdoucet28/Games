@@ -10,7 +10,7 @@ export function SubjectObjectQuestionsDiagram({ variant, accentColor = "#2563EB"
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -42,17 +42,17 @@ export function SubjectObjectQuestionsDiagram({ variant, accentColor = "#2563EB"
       <svg viewBox="0 0 460 210" style={{ width: "100%", height: "auto", display: "block" }}>
         <rect x="20" y="12" width="195" height="100" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="117" y="30" textAnchor="middle" fontSize="11" fontWeight="800" fill={accent}>SUBJECT QUESTION</text>
-        <text x="117" y="47" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>Someone broke the window.</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="117" y="47" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>Someone broke the window.</text>
         <text x="117" y="61" textAnchor="middle" fontSize="13" fill={ink}>↓</text>
         <text x="117" y="79" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={ink}>Who broke the window?</text>
-        <text x="117" y="96" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>question word = the subject, nothing else moves</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="117" y="96" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>question word = the subject, nothing else moves</text>
 
         <rect x="245" y="12" width="195" height="100" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="342" y="30" textAnchor="middle" fontSize="11" fontWeight="800" fill={accent}>OBJECT QUESTION</text>
-        <text x="342" y="47" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>You broke something.</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="342" y="47" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>You broke something.</text>
         <text x="342" y="61" textAnchor="middle" fontSize="13" fill={ink}>↓</text>
         <text x="342" y="79" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={ink}>What did you break?</text>
-        <text x="342" y="96" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>do/does/did + subject inserted before the verb</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="342" y="96" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>do/does/did + subject inserted before the verb</text>
 
         <line x1="20" y1="124" x2="440" y2="124" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 

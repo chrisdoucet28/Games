@@ -8,7 +8,7 @@ export function PersonalityDiagram({ variant, accentColor = "#2563EB" }: { varia
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -40,13 +40,13 @@ export function PersonalityDiagram({ variant, accentColor = "#2563EB" }: { varia
       <svg viewBox="0 0 460 196" style={{ width: "100%", height: "auto", display: "block" }}>
         <rect x="20" y="16" width="195" height="80" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="117" y="36" textAnchor="middle" fontSize="10" fontWeight="800" fill={accent}>WHAT IS she LIKE?</text>
-        <text x="117" y="50" textAnchor="middle" fontSize="7.8" fill={caption}>her personality</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="117" y="50" textAnchor="middle" fontSize="7.8" fill={caption}>her personality</text>
         <text x="117" y="66" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={ink}>What is she like?</text>
         <text x="117" y="80" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={ink}>She's very friendly.</text>
 
         <rect x="245" y="16" width="195" height="80" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="342" y="36" textAnchor="middle" fontSize="10" fontWeight="800" fill={accent}>WHAT DOES she LIKE?</text>
-        <text x="342" y="50" textAnchor="middle" fontSize="7.8" fill={caption}>her preferences</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="342" y="50" textAnchor="middle" fontSize="7.8" fill={caption}>her preferences</text>
         <text x="342" y="66" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={ink}>What does she like?</text>
         <text x="342" y="80" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={ink}>She likes pizza.</text>
 

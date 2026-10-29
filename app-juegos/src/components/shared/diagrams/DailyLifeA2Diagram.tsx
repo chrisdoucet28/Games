@@ -72,7 +72,7 @@ export function DailyLifeA2Diagram({ variant, accentColor = "#2563EB" }: { varia
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -114,7 +114,7 @@ export function DailyLifeA2Diagram({ variant, accentColor = "#2563EB" }: { varia
               {i > 0 && (
                 <>
                   {seqWords.map((word, wi) => (
-                    <text key={word} x={boxX - 12} y={seqWords.length === 1 ? 46 : 36 + wi * 8} textAnchor="middle" fontSize="6.6" fontStyle="italic" fill={caption}>{word}</text>
+                    <text fontWeight={isScreen ? undefined : "600"} key={word} x={boxX - 12} y={seqWords.length === 1 ? 46 : 36 + wi * 8} textAnchor="middle" fontSize="6.6" fontStyle="italic" fill={caption}>{word}</text>
                   ))}
                   <line x1={boxX - 22} y1="58" x2={boxX - 3} y2="58" stroke={accent} strokeWidth="1.5" markerEnd="url(#dlaArrow)" />
                 </>

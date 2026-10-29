@@ -11,7 +11,7 @@ export function QuestionTagsDiagram({ variant, accentColor = "#2563EB" }: { vari
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -71,7 +71,7 @@ export function QuestionTagsDiagram({ variant, accentColor = "#2563EB" }: { vari
         <rect x="288" y="96" width="162" height="34" rx="6" fill={fill} stroke={accent} strokeWidth="1.5" />
         <text x="369" y="117" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={ink}>, do you?</text>
 
-        <text x="230" y="150" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>no auxiliary already there → use do/does/did to build the tag</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="150" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>no auxiliary already there → use do/does/did to build the tag</text>
 
         <line x1="20" y1="162" x2="440" y2="162" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 

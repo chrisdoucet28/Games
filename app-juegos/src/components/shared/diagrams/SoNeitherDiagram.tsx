@@ -8,7 +8,7 @@ export function SoNeitherDiagram({ variant, accentColor = "#2563EB" }: { variant
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -38,24 +38,24 @@ export function SoNeitherDiagram({ variant, accentColor = "#2563EB" }: { variant
         Invert: the auxiliary jumps in front of the subject
       </div>
       <svg viewBox="0 0 460 195" style={{ width: "100%", height: "auto", display: "block" }}>
-        <text x="117" y="28" textAnchor="middle" fontSize="10.5" fontStyle="italic" fill={caption}>"I love pizza."</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="117" y="28" textAnchor="middle" fontSize="10.5" fontStyle="italic" fill={caption}>"I love pizza."</text>
         <text x="117" y="44" textAnchor="middle" fontSize="9" fontWeight="700" fill={ink}>subject + verb (normal order)</text>
 
         <text x="230" y="36" textAnchor="middle" fontSize="16" fill={accent}>→</text>
 
         <rect x="290" y="14" width="150" height="40" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="365" y="34" textAnchor="middle" fontSize="12" fontWeight="800" fill={accent}>So do I.</text>
-        <text x="365" y="48" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>aux before subject</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="365" y="48" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>aux before subject</text>
 
         <rect x="20" y="66" width="195" height="52" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="117" y="86" textAnchor="middle" fontSize="11.5" fontWeight="800" fill={accent}>SO + aux + subject</text>
         <text x="117" y="102" textAnchor="middle" fontSize="9" fontWeight="700" fill={ink}>agrees with a POSITIVE</text>
-        <text x="117" y="115" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>"So have we." "So was he."</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="117" y="115" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>"So have we." "So was he."</text>
 
         <rect x="245" y="66" width="195" height="52" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="342" y="86" textAnchor="middle" fontSize="11.5" fontWeight="800" fill={accent}>NEITHER + aux + subject</text>
         <text x="342" y="102" textAnchor="middle" fontSize="9" fontWeight="700" fill={ink}>agrees with a NEGATIVE</text>
-        <text x="342" y="115" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>"Neither can I." "Neither does he."</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="342" y="115" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>"Neither can I." "Neither does he."</text>
 
         <line x1="20" y1="128" x2="440" y2="128" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 

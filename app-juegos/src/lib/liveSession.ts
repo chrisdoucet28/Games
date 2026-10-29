@@ -80,10 +80,11 @@ export function closeChannel(channel: RealtimeChannel | null): void {
 
 // --- Spy Among Us (group mode + solo + 1v1) ---
 //
-// Unlike Auction, phones here are receive-only: no bet-equivalent broadcast comes back from a
-// phone, so there's no SpyActionPayload. Each round's `roles` map covers every team's private
-// role+prompt, broadcast to everyone on the channel — same "channel code is the trust boundary"
-// model Auction already uses; a phone only ever *displays* its own team's entry.
+// Mostly receive-only like it always was — each round's `roles` map covers every team's private
+// role+prompt, broadcast to everyone on the channel, same "channel code is the trust boundary"
+// model Auction already uses; a phone only ever *displays* its own team's entry. The one
+// exception is voting (see SpyVoteActionPayload below): a connected phone can now cast its own
+// team's vote directly, instead of the teacher tapping it in on the shared screen on its behalf.
 export type SpyRosterEntry = { id: string | number; name: string; color: TeamColor; mascot?: string | null };
 
 // Mirrors SpyAmongUsGame.tsx's own Phase type minus "intro" (collapses to "lobby" — see
@@ -97,6 +98,27 @@ export type SpyPhase =
 
 export type SpyRoleInfo = { role: "spy" | "crew"; prompt: string };
 
+// Broadcast phone -> teacher's screen, only ever acted on during the "vote" phase. The teacher's
+// screen already shows every team's current pick live as votes come in (walking around tapping
+// each one in, in front of the whole class) — this is a connected team casting that same vote
+// itself, from its own phone, instead. A dropped phone is still voted for the old way, by tapping
+// the existing on-screen buttons; that path never goes away.
+export type SpyVoteActionPayload = { teamId: string | number; suspectId: string | number };
+
+// Only populated once phase is "reveal" — mirrors the exact reveal card the shared screen shows
+// at that moment (spy identity, both prompts, the explanation, and the spy's own topic guess if
+// the vote caught them) so a phone isn't just told "look at the big screen" for the one part of
+// the round that actually matters most to see.
+export type SpyRevealInfo = {
+  spyTeamId: string | number;
+  crewmateTopic: string;
+  crewmatePrompt: string;
+  spyTopic: string;
+  spyPrompt: string;
+  explanation: string;
+  spyGuess: string | null;
+};
+
 export type SpyStatePayload = {
   phase: SpyPhase;
   ri: number;
@@ -105,6 +127,12 @@ export type SpyStatePayload = {
   speakOrder: (string | number)[];
   speakIdx: number;
   connectedTeamIds: (string | number)[];
+  // Voter teamId -> accused suspect teamId, exactly as cast so far — same visibility every other
+  // field here already has (the shared screen already shows this live, in public, as the vote
+  // happens). Lets a phone show its own team's current pick and a live "X of Y voted" tally,
+  // computed client-side from this same map.
+  votes: Record<string, string | number>;
+  reveal: SpyRevealInfo | null;
   ts: number;
 };
 
@@ -249,9 +277,19 @@ export type RelayStatePayload = {
   screenShowsWord: boolean;
   phoneCountByTeam: Record<string, number>;
   questionsLeftByTeam: Record<string, number>;
+  // A team's TOTAL question budget (a fixed number per person x the team's size).
   questionsPerTeam: number;
   // Words correctly guessed per team this game.
   wordsByTeam: Record<string, number>;
+  // Points per team — a word is worth more the fewer questions it took (300 down to 10). Optional so a phone still
+  // holding an older build keeps working (it falls back to showing words).
+  pointsByTeam?: Record<string, number>;
+  // Only set during "reveal": whether it's a guess or a person running out of questions, the points
+  // that guess earned, and whether it was the team's last person (the team is then done).
+  revealKind?: "guessed" | "outOfQuestions";
+  revealPoints?: number;
+  revealTeamFinished?: boolean;
+  allTeamsFinished?: boolean;
   connectedTeamIds: (string | number)[];
   ts: number;
 };
@@ -376,6 +414,14 @@ export type RaceTrackRosterEntry = { id: string | number; name: string; color: T
 // mid-race to go back to waiting.
 export type RaceTrackPhase = "lobby" | "task" | "interlude" | "final";
 
+// Mirrors RaceTrackGame.tsx's own SpaceId (plus its "start"/"finish" track-building specials) —
+// kept as an independent literal union here rather than importing it, matching this file's
+// existing self-contained payload types pattern. `icon` is a plain string (not the app's IconName
+// union) for the same reason; PhoneRaceTrackView casts it when handing it to <Icon>.
+export type RaceTrackSpaceKind =
+  | "start" | "finish" | "normal" | "boost" | "mud" | "shortcut" | "trap" | "teleport" | "coin" | "shield" | "lucky" | "question";
+export type RaceTrackSpaceInfo = { kind: RaceTrackSpaceKind; color: string; icon: string | null };
+
 export type RaceTrackStatePayload = {
   phase: RaceTrackPhase;
   roster: RaceTrackRosterEntry[];
@@ -391,6 +437,20 @@ export type RaceTrackStatePayload = {
   rejectedTeamIds: (string | number)[];
   // Each team's current track position — a light phone-side context strip, not load-bearing.
   positions: Record<string, number>;
+  // The actual board state (coins/shields/powerups/current tile) a phone never saw before — just
+  // the bare position number above. Teacher feedback: a phone should show more than a buzzer and a
+  // number, since the board itself already tracks all of this per team.
+  coinsByTeam: Record<string, number>;
+  shieldsByTeam: Record<string, number>;
+  powerupsByTeam: Record<string, string[]>;
+  // Each team's own current tile, derived from track[positions[id]] — lets a phone show the real
+  // space (icon/color) its own car is sitting on without sending the whole 61-space track over.
+  spaceByTeam: Record<string, RaceTrackSpaceInfo>;
+  // The most recent roll's resolved outcome — the teacher's screen already shows this as a shared
+  // "effect" card during "interlude"; mirrored here in plain text (no JSX) so the team it actually
+  // happened to also sees it on their own phone, not just whoever can read the projector. Always
+  // about whichever team just rolled (teamId), never a combined/ambiguous event.
+  lastEffect: { teamId: string | number; text: string; color: string; icon: string } | null;
   ts: number;
 };
 
@@ -421,10 +481,25 @@ export function openRaceTrackChannel(code: string): RealtimeChannel {
 // always have. Topic-mode content and solo (CPU) play don't get this at all — see KingOfHillGame.tsx.
 export type HillRosterEntry = { id: string | number; name: string; color: TeamColor; mascot?: string | null };
 
-// "idle" covers everything that isn't a live grammar-mode duel — rolling (fires at the start of
-// every round, not just the game's opening one), pick, answer, a resolved contest awaiting "Next
-// Turn," round-end. A phone has nothing to do in any of those beyond "watch the shared screen."
-export type HillPhase = "lobby" | "idle" | "duel" | "final";
+// "idle" covers rolling (fires at the start of every round, not just the game's opening one),
+// pick, answer, round-end — none of those have anything duel-specific for a phone to react to
+// beyond the always-broadcast board/turn/score context below. "result" is its own phase (split
+// out from "idle"): the brief window after a duel resolves, while the shared screen shows the
+// crown/handshake outcome card and before the teacher clicks "Next Turn" — see HillDuelResult.
+export type HillPhase = "lobby" | "idle" | "duel" | "result" | "final";
+
+export type HillZoneInfo = { id: string; icon: string; pts: number; label: string };
+
+// Only populated once phase is "result". Without this, a duel's own phone broadcast fell straight
+// back to "idle" the instant it resolved, and neither the attacker's nor the defender's phone
+// ever learned who actually won.
+export type HillDuelResult = {
+  zoneId: string;
+  attackerId: string | number;
+  defenderId: string | number;
+  winnerId: string | number | null;
+  reason: "attacker" | "defender" | "neither";
+};
 
 export type HillStatePayload = {
   phase: HillPhase;
@@ -436,6 +511,19 @@ export type HillStatePayload = {
   // A new value means a genuinely new duel instance — resets buzzedTeamId on every connected phone.
   contestKey: string;
   buzzedTeamId: string | number | null;
+  // The zone board itself — content differs by grammar vs theme mode, so broadcast rather than
+  // hard-coded on the phone side; static for the whole session otherwise, same as roster.
+  zones: HillZoneInfo[];
+  // zoneId -> owning teamId, exactly mirroring the shared screen's own board state. A teacher
+  // feedback request: a phone previously had no idea which zones existed, let alone who owned them.
+  owners: Record<string, string | number>;
+  // This game's running score per team (not the cross-game total) — same "scores" shape every
+  // other phone-mode game already broadcasts.
+  scores: Record<string, number>;
+  // Whose turn it is right now — only meaningful while phase is "idle" (lets a phone show "it's
+  // your turn, pick a zone on the screen!" even outside an actual duel).
+  activeTeamId: string | number | null;
+  duelResult: HillDuelResult | null;
   ts: number;
 };
 

@@ -2,6 +2,7 @@ import { GAME_MODES, GAME_ICONS } from "../../data/constants";
 import { LESSON_TOPICS } from "../../data/learnTopics";
 import { GameCategoryGuide } from "./GameCategoryGuide";
 import { Icon, type IconName } from "./Icon";
+import { HOME_H1 } from "../../lib/seo";
 
 type Props = { onSignUp: () => void; onLogIn: () => void };
 
@@ -123,9 +124,11 @@ export function MarketingLanding({ onSignUp, onLogIn }: Props) {
       {/* Hero */}
       <div style={{ textAlign: "center", marginBottom: "24px" }}>
         <Icon name="joystick" size={48} color="#FCD34D" style={{ marginBottom: "8px", filter: "drop-shadow(0 4px 16px rgba(0,0,0,0.4))" }} />
-        <h1 style={{ fontSize: "28px", fontWeight: "900", color: "white", margin: 0, letterSpacing: "-0.01em" }}>
+        <div style={{ fontSize: "28px", fontWeight: "900", color: "white", margin: 0, letterSpacing: "-0.01em" }}>
           Class<span style={{ color: "#FCD34D" }}>Cade</span>
-        </h1>
+        </div>
+        {/* The page's real H1 carries the search keywords; the wordmark above stays the visual brand. */}
+        <h1 style={{ fontSize: "17px", fontWeight: "800", color: "#E0F2FE", margin: "8px 0 0", lineHeight: 1.35 }}>{HOME_H1}</h1>
         <p style={{ color: "#BAE6FD", fontSize: "14px", lineHeight: 1.6, margin: "10px 0 0" }}>
           A classroom game website built for English teachers. Jump straight into one of{" "}
           {GAME_MODES.length} competitive team games, or start with a full Lesson Plan that ends

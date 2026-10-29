@@ -10,7 +10,7 @@ export function QuantifiersDiagram({ variant, accentColor = "#2563EB" }: { varia
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -46,29 +46,29 @@ export function QuantifiersDiagram({ variant, accentColor = "#2563EB" }: { varia
         <text x="45" y="63" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={ink}>LARGE</text>
         <rect x="88" y="26" width="170" height="66" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="173" y="46" textAnchor="middle" fontSize="12" fontWeight="800" fill={accent}>many</text>
-        <text x="173" y="58" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>(question / negative)</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="173" y="58" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>(question / negative)</text>
         <text x="173" y="75" textAnchor="middle" fontSize="12" fontWeight="800" fill={accent}>a lot of</text>
-        <text x="173" y="87" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>(affirmative)</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="173" y="87" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>(affirmative)</text>
 
         <rect x="266" y="26" width="180" height="66" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="356" y="46" textAnchor="middle" fontSize="12" fontWeight="800" fill={accent}>much</text>
-        <text x="356" y="58" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>(question / negative)</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="356" y="58" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>(question / negative)</text>
         <text x="356" y="75" textAnchor="middle" fontSize="12" fontWeight="800" fill={accent}>a lot of</text>
-        <text x="356" y="87" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>(affirmative)</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="356" y="87" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>(affirmative)</text>
 
         <text x="45" y="130" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={ink}>SMALL</text>
         <rect x="88" y="100" width="170" height="52" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="173" y="124" textAnchor="middle" fontSize="13" fontWeight="800" fill={accent}>a few</text>
-        <text x="173" y="140" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>a few things</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="173" y="140" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>a few things</text>
 
         <rect x="266" y="100" width="180" height="52" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="356" y="124" textAnchor="middle" fontSize="13" fontWeight="800" fill={accent}>a little</text>
-        <text x="356" y="140" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>a little milk</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="356" y="140" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>a little milk</text>
 
         <text x="45" y="184" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={ink}>ZERO</text>
         <rect x="88" y="160" width="358" height="40" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="267" y="178" textAnchor="middle" fontSize="12" fontWeight="800" fill={accent}>no / not any</text>
-        <text x="267" y="193" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>same for both types · "none" alone in short answers</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="267" y="193" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>same for both types · "none" alone in short answers</text>
 
         <text x="230" y="218" textAnchor="middle" fontSize="10" fontWeight="700" fill={ink}>much/many: negatives &amp; questions. Affirmative: a lot of.</text>
 
@@ -76,7 +76,7 @@ export function QuantifiersDiagram({ variant, accentColor = "#2563EB" }: { varia
 
         <text x="230" y="247" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ She spends a lot time watching TV.</text>
         <text x="230" y="263" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ She spends a lot of time watching TV.</text>
-        <text x="230" y="277" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>never double up: "I don't have no time" → "I don't have any time"</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="277" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>never double up: "I don't have no time" → "I don't have any time"</text>
       </svg>
     </div>
   );

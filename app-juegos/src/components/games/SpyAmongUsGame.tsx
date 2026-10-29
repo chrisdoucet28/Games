@@ -16,7 +16,7 @@ import { playSound } from "../../lib/sounds";
 import { setMusicContext, setMusicGame, stopMusic } from "../../lib/music";
 import {
   generateSessionCode, openSpyChannel, closeChannel,
-  type SpyStatePayload, type SpyPhase, type SpyRoleInfo,
+  type SpyStatePayload, type SpyPhase, type SpyRoleInfo, type SpyVoteActionPayload, type SpyRevealInfo,
 } from "../../lib/liveSession";
 
 const GM = GAME_MODES.find(g => g.id === "spy")!;
@@ -124,9 +124,14 @@ type SpySnapshot = {
   spyWinsByTeam: Record<string | number, number>;
   crewWinsByTeam: Record<string | number, number>;
   gameScoreByTeam: Record<string | number, number>;
-  // Only meaningful in solo (teacher stand-in) sessions — undefined/absent in normal multi-team
-  // games, where there's no teacher participant to track a score for.
+  // Only meaningful in solo (teacher stand-in) or a real-2-team game the teacher opted into —
+  // undefined/absent in normal multi-team games, where there's no teacher participant to track a
+  // score for.
   teacherScore?: number;
+  // Only meaningful for a real 2-team game (see canTeacherOptIn) — whether the teacher had opted
+  // in as a 3rd player when this was saved. Read directly off initialGameState before this type's
+  // own validation even runs, since effectiveTeamCount needs it first — see its own comment above.
+  teacherJoining?: boolean;
 };
 
 function validateSpySnapshot(raw: unknown, teamCount: number, roundCount: number): SpySnapshot | undefined {
@@ -138,27 +143,42 @@ function validateSpySnapshot(raw: unknown, teamCount: number, roundCount: number
     timesWasSpy: s.timesWasSpy ?? {}, spyWinsByTeam: s.spyWinsByTeam ?? {}, crewWinsByTeam: s.crewWinsByTeam ?? {},
     gameScoreByTeam: s.gameScoreByTeam ?? {},
     teacherScore: typeof s.teacherScore === "number" ? s.teacherScore : undefined,
+    teacherJoining: typeof s.teacherJoining === "boolean" ? s.teacherJoining : undefined,
   };
 }
 
-export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState, presetPhoneSession }: GameProps) {
+export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState, presetPhoneSession, onRequestPhoneSession }: GameProps) {
   const DISCUSS_SECONDS = 120;
   // Solo play makes the teacher the second live participant — Spy Among Us already has a
   // fully-built, fully-tested 2-player ruleset (isTwoPlayer below), so this just needs to make
-  // `teams` genuinely length 2. `effectiveTeamCount` is used (rather than `teams.length`) to
-  // validate a resumed snapshot before `teams` itself is constructed, since resuming needs to
-  // know the right bound before teacherScore/teams exist yet.
+  // `teams` genuinely length 2. Real 2-team games can ALSO optionally add the teacher in as a
+  // genuine 3rd player (teacherOptIn below) — unlike solo, where the teacher is required just to
+  // have a second participant at all, this is a pure bonus the two real teams don't need; opting
+  // in simply pushes `teams` to length 3, which is enough on its own to route the whole game
+  // through the already-built group ruleset (isTwoPlayer below) instead of the 2-player one, with
+  // no further branching needed anywhere else in this file (feedback f54fe95b).
   const isSolo = propTeams.length === 1;
-  const teacherTeamRef = useRef(isSolo ? makeTeacherTeam() : null);
-  const effectiveTeamCount = isSolo ? 2 : propTeams.length;
+  const canTeacherOptIn = propTeams.length === 2;
+  // Read once, from a resumed game's own save — effectiveTeamCount (below) needs to know whether
+  // the teacher was part of that save BEFORE `teams` itself can be built, so this can't wait for
+  // validateSpySnapshot's own result (which needs effectiveTeamCount to validate against).
+  const savedTeacherJoining = typeof (initialGameState as { teacherJoining?: unknown } | null | undefined)?.teacherJoining === "boolean"
+    ? (initialGameState as { teacherJoining: boolean }).teacherJoining
+    : undefined;
+  // Only ever meaningful (and only ever shown as a choice) when canTeacherOptIn — isSolo always
+  // forces teacherJoining true below regardless of this state's value.
+  const [teacherOptIn, setTeacherOptIn] = useState(() => canTeacherOptIn && (savedTeacherJoining ?? false));
+  const teacherJoining = isSolo || (canTeacherOptIn && teacherOptIn);
+  const teacherTeamRef = useRef(makeTeacherTeam());
+  const effectiveTeamCount = teacherJoining ? propTeams.length + 1 : propTeams.length;
   const resumed = useRef(validateSpySnapshot(initialGameState, effectiveTeamCount, questions.length)).current;
   const [teacherScore, setTeacherScore] = useState(() => resumed?.teacherScore ?? 0);
   // Memoized so `teams` is referentially stable across renders when nothing has actually
   // changed — a fresh array literal every render would break any effect/callback that depends
   // on `teams` by reference.
   const teams = useMemo(
-    () => (isSolo ? [propTeams[0], { ...teacherTeamRef.current!, score: teacherScore }] : propTeams),
-    [isSolo, propTeams, teacherScore]
+    () => (teacherJoining ? [...propTeams, { ...teacherTeamRef.current, score: teacherScore }] : propTeams),
+    [teacherJoining, propTeams, teacherScore]
   );
   // Points earned in THIS game only — team.score is the cross-game running total, so the final
   // screen ranking by it declared whoever was ahead overall the winner even when another team
@@ -168,7 +188,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
   // parent's onUpdateScore/ScoreBoard/saved-class state.
   const updateScore = (id: string | number, delta: number) => {
     setGameScoreByTeam(prev => ({ ...prev, [id]: (prev[id] ?? 0) + delta }));
-    if (isSolo && id === teacherTeamRef.current?.id) { setTeacherScore(s => s + delta); }
+    if (teacherJoining && id === teacherTeamRef.current.id) { setTeacherScore(s => s + delta); }
     else { onUpdateScore(id, delta); }
   };
   const isTwoPlayer = teams.length === 2;
@@ -243,9 +263,9 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
 
   useEffect(() => {
     if (!serializeStateRef) return;
-    serializeStateRef.current = (): SpySnapshot => ({ ri, spyTeamIdx, timesWasSpy, spyWinsByTeam, crewWinsByTeam, gameScoreByTeam, teacherScore });
+    serializeStateRef.current = (): SpySnapshot => ({ ri, spyTeamIdx, timesWasSpy, spyWinsByTeam, crewWinsByTeam, gameScoreByTeam, teacherScore, teacherJoining });
     return () => { if (serializeStateRef) serializeStateRef.current = null; };
-  }, [serializeStateRef, ri, spyTeamIdx, timesWasSpy, spyWinsByTeam, crewWinsByTeam, gameScoreByTeam, teacherScore]);
+  }, [serializeStateRef, ri, spyTeamIdx, timesWasSpy, spyWinsByTeam, crewWinsByTeam, gameScoreByTeam, teacherScore, teacherJoining]);
   const [peekIdx, setPeekIdx] = useState(0);
   const [revealed, setRevealed] = useState(false);
   const [votes, setVotes] = useState<Record<string | number, string | number>>({});
@@ -271,6 +291,12 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
   const [inputMode, setInputMode] = useState<"screen" | "phone">(presetPhoneSession ? "phone" : "screen");
   const [introStep, setIntroStep] = useState<"setup" | "qr">("setup");
   const [sessionCode, setSessionCode] = useState<string | null>(presetPhoneSession?.code ?? null);
+  // See BountyBoardGame.tsx's own copy of this for the full explanation — true whenever sessionCode
+  // is class-level (so the QR points at ?classJoin=, which follows the teacher game to game).
+  const [sessionIsClassLevel, setSessionIsClassLevel] = useState(!!presetPhoneSession);
+  // Snapshot taken once at mount — see BountyBoardGame.tsx's own copy for the full explanation of
+  // why the setup/QR block below must key off this instead of the live presetPhoneSession prop.
+  const startedWithPresetSession = useRef(!!presetPhoneSession).current;
   const [connectedTeamIds, setConnectedTeamIds] = useState<Set<string | number>>(new Set());
   const channelRef = useRef<RealtimeChannel | null>(null);
 
@@ -287,6 +313,9 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
   // whenever phase is "speak-2p".
   const tp2SpeakOrderRef = useRef(tp2SpeakOrder);
   const tp2SpeakIdxRef = useRef(tp2SpeakIdx);
+  // sendState's "votes"/"reveal" fields (below) need the latest of each — mirrored the same way.
+  const votesRef = useRef(votes);
+  const spyGuessRef = useRef(spyGuess);
   const connectedTeamIdsRef = useRef<Set<string | number>>(new Set());
   const sendStateRef = useRef<(() => void) | null>(null);
   useEffect(() => {
@@ -298,13 +327,15 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
     speakIdxRef.current = speakIdx;
     tp2SpeakOrderRef.current = tp2SpeakOrder;
     tp2SpeakIdxRef.current = tp2SpeakIdx;
-  }, [ri, spyRi, spyTeamIdx, phase, speakOrder, speakIdx, tp2SpeakOrder, tp2SpeakIdx]);
+    votesRef.current = votes;
+    spyGuessRef.current = spyGuess;
+  }, [ri, spyRi, spyTeamIdx, phase, speakOrder, speakIdx, tp2SpeakOrder, tp2SpeakIdx, votes, spyGuess]);
 
-  // Opens/closes the realtime channel only when phone mode itself is toggled on/off. Unlike
-  // Auction, phones here never send anything back — this channel only ever broadcasts `state`
-  // (each round's private role+prompt for every team, plus who's currently speaking) and a
-  // one-shot `ended` event; there's no `.on("broadcast", ...)` listener for incoming phone data
-  // because there isn't any.
+  // Opens/closes the realtime channel only when phone mode itself is toggled on/off. Mostly
+  // screen -> phone like it always was (`state` broadcasts: each round's private role+prompt for
+  // every team, who's currently speaking, and now the live vote tally/reveal card too) plus a
+  // one-shot `ended` event — but there's now also a phone -> screen `action` listener below, for
+  // a connected team casting its own vote from its phone during "vote".
   useEffect(() => {
     if (inputMode !== "phone" || !sessionCode) return;
     const channel = openSpyChannel(sessionCode);
@@ -332,6 +363,18 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
       // its own phone to see its role privately, same as a real team would, since this broadcast
       // and the shared/projected screen are visible to the whole class.
       const roster = teams;
+      // Only populated once the round has actually resolved to "reveal" — see SpyRevealInfo.
+      const reveal: SpyRevealInfo | null = mappedPhase === "reveal" && currentRound && spyId !== undefined
+        ? {
+            spyTeamId: spyId,
+            crewmateTopic: currentRound.crewmateTopic ?? "",
+            crewmatePrompt: currentRound.crewmatePrompt ?? "",
+            spyTopic: currentSpyRound?.spyTopic ?? currentRound.spyTopic ?? "",
+            spyPrompt: currentSpyRound?.spyPrompt ?? currentRound.spyPrompt ?? "",
+            explanation: currentRound.explanation ?? "",
+            spyGuess: spyGuessRef.current,
+          }
+        : null;
       const payload: SpyStatePayload = {
         phase: mappedPhase,
         ri: riRef.current,
@@ -340,6 +383,8 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
         speakOrder: (usingTp2Order ? tp2SpeakOrderRef.current : speakOrderRef.current).map(t => t.id),
         speakIdx: usingTp2Order ? tp2SpeakIdxRef.current : speakIdxRef.current,
         connectedTeamIds: Array.from(connectedTeamIdsRef.current),
+        votes: votesRef.current as Record<string, string | number>,
+        reveal,
         ts: Date.now(),
       };
       channel.send({ type: "broadcast", event: "state", payload });
@@ -353,6 +398,19 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
       connectedTeamIdsRef.current = ids;
       setConnectedTeamIds(ids);
       sendState(); // roster/connected list changed — push a fresh state right away, don't wait for the interval
+    });
+
+    // The only place phone input actually touches game logic here — a connected team casting its
+    // own vote from its phone instead of the teacher tapping it in on the shared screen. Only
+    // reachable during "vote"; self-votes are rejected defensively even though the phone UI itself
+    // never offers one (the screen's own suspect list already excludes the voter for the same
+    // reason).
+    channel.on("broadcast", { event: "action" }, ({ payload }) => {
+      const action = payload as SpyVoteActionPayload;
+      if (phaseRef.current !== "vote") return;
+      if (!connectedTeamIdsRef.current.has(action.teamId)) return;
+      if (action.teamId === action.suspectId) return;
+      castVoteRef.current(action.teamId, action.suspectId);
     });
 
     channel.subscribe(status => {
@@ -372,9 +430,11 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
   // Pushes an immediate state update on round/phase/speaker transitions rather than waiting for
   // the interval — speakIdx (unlike Auction, which only needed qi/phase) matters here too, since a
   // phone's "is it my turn to speak" indicator must update the moment the teacher advances it.
+  // votes/spyGuess are included too, so a phone's live vote tally and the reveal card both update
+  // the instant either changes, not just once every 4s.
   useEffect(() => {
     sendStateRef.current?.();
-  }, [phase, ri, spyRi, speakIdx]);
+  }, [phase, ri, spyRi, speakIdx, votes, spyGuess]);
 
   // Tells every connected phone the mission is over the moment it actually ends, same reasoning
   // as Auction's identical effect — without this, a closed channel looks identical to a dropped
@@ -387,9 +447,20 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
 
   const handlePickPhoneMode = () => {
     setInputMode("phone");
-    setSessionCode(generateSessionCode());
+    if (onRequestPhoneSession) {
+      setSessionCode(onRequestPhoneSession());
+      setSessionIsClassLevel(true);
+    } else {
+      setSessionCode(generateSessionCode());
+      setSessionIsClassLevel(false);
+    }
     setIntroStep("qr");
   };
+
+  const buildJoinUrl = (code: string) =>
+    sessionIsClassLevel
+      ? `${window.location.origin}${window.location.pathname}?classJoin=${code}`
+      : `${window.location.origin}${window.location.pathname}?join=${code}&game=spy`;
 
   const handlePickScreenMode = () => {
     setInputMode("screen");
@@ -422,6 +493,24 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
       setTp2SpeakIdx(0);
       setPhase("speak-2p");
     }
+  };
+
+  // Wraps enterRoundStartPhase for the very first round's "Start Mission" click only (never for
+  // nextRound()'s own later calls, which already do their own equivalent re-seed right around that
+  // call and would otherwise get clobbered by a second one here). Only matters for a real 2-team
+  // game: spyTeamIdx/timesWasSpy/speakOrder/rollDice were all seeded at mount from the ORIGINAL
+  // 2-team `teams`, before the teacher's opt-in choice (made on this same intro screen) could have
+  // changed it to 3 — without this, round 1 would silently run as if the teacher never joined.
+  const startMission = () => {
+    if (canTeacherOptIn) {
+      const freshSpyIdx = randomTeamIndex();
+      setSpyTeamIdx(freshSpyIdx);
+      const freshSpyId = teams[freshSpyIdx]?.id;
+      if (freshSpyId !== undefined) setTimesWasSpy({ [freshSpyId]: 1 });
+      setSpeakOrder([...teams]);
+      setRollDice(teams.map(() => null));
+    }
+    enterRoundStartPhase();
   };
 
   const round = questions[ri] as SpyRound | undefined;
@@ -628,6 +717,11 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
   const castVote = (voterId: string | number, suspectId: string | number) => {
     setVotes((current) => ({ ...current, [voterId]: suspectId }));
   };
+  // Mirrored into a ref so the phone-vote broadcast listener (set up above, before castVote is
+  // even declared in source order) always calls today's version — same reasoning as
+  // HotSeatGame.tsx's markCorrectRef/skipWordRef/endTurnRef.
+  const castVoteRef = useRef(castVote);
+  useEffect(() => { castVoteRef.current = castVote; });
 
   const resolve2pGuesses = () => {
     const spyPlayer = teams[spyTeamIdx];
@@ -722,6 +816,29 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
               ? "Just the two of you — take it in turns to be the sneaky one!"
               : `${teams.length} teams this round — a new team becomes the Spy every round.`}
           </div>
+          {/* Optional for a real 2-team game only — solo already requires the teacher just to have
+              a second participant at all, and a 3+-team game already has plenty of crew without
+              needing the teacher as a bonus player (feedback f54fe95b was specifically about the
+              2-team case). Toggling this changes `teams`.length from 2 to 3, which on its own is
+              enough to route the whole game through the group ruleset below instead of the 1v1
+              one — see teacherJoining's own comment above. */}
+          {canTeacherOptIn && (
+            <div style={{ marginBottom: "20px" }}>
+              <button
+                onClick={() => setTeacherOptIn(v => !v)}
+                className="sau-btn"
+                style={{
+                  display: "inline-flex", alignItems: "center", gap: "8px",
+                  padding: "10px 20px", borderRadius: "12px", fontWeight: "800", fontSize: "14px", cursor: "pointer",
+                  border: `2px solid ${teacherOptIn ? "#38BDF8" : "rgba(255,255,255,0.2)"}`,
+                  background: teacherOptIn ? "rgba(56,189,248,0.15)" : "rgba(255,255,255,0.05)",
+                  color: teacherOptIn ? "#38BDF8" : "#94A3B8",
+                }}
+              >
+                <Icon name="school" size={14} /> {teacherOptIn ? "Teacher is playing too — it's a 3-way!" : "Want the teacher to join in as a 3rd player?"}
+              </button>
+            </div>
+          )}
           <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "24px" }}>
             {teams.map((team) => (
               <div
@@ -743,7 +860,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
           </div>
           {/* Skipped entirely for a Class Check-In sitting — presetPhoneSession already picked
               phone mode and its code, and the class-level QR already covered joining. */}
-          {!presetPhoneSession && <>
+          {!startedWithPresetSession && <>
           {introStep === "setup" && (
             <div style={{ marginBottom: "20px" }}>
               <div style={{ fontSize: "13px", color: "#94A3B8", fontWeight: "700", marginBottom: "10px" }}>How will teams see their secret role?</div>
@@ -767,16 +884,16 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
           )}
 
           {introStep === "qr" && sessionCode && (() => {
-            const joinUrl = `${window.location.origin}${window.location.pathname}?join=${sessionCode}&game=spy`;
+            const joinUrl = buildJoinUrl(sessionCode);
             return (
               <PhoneJoinPanel
                 sessionCode={sessionCode} joinUrl={joinUrl} teams={teams} connectedTeamIds={connectedTeamIds}
                 accent="#38BDF8" panelBg="linear-gradient(160deg,#1E3A5F,#0F172A)" borderColor="#38BDF866"
                 footer={
                   <>
-                    {isSolo && (
+                    {teacherJoining && (
                       <div style={{ fontSize: "12px", color: "#FCD34D", fontWeight: "700", marginBottom: "10px", lineHeight: 1.5 }}>
-                        <Icon name="phone" size={12} /> Playing solo? Scan this with your own phone too and join as "Teacher" — that way your role stays hidden from the class, same as theirs.
+                        <Icon name="phone" size={12} /> Teacher playing too? Scan this with your own phone too and join as "Teacher" — that way your role stays hidden from the class, same as theirs.
                       </div>
                     )}
                     <button onClick={handlePickScreenMode} style={{ background: "none", border: "none", color: "#9CA3AF", fontSize: "12px", fontWeight: "700", cursor: "pointer", textDecoration: "underline" }}>
@@ -808,7 +925,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
             />
           )}
           <button
-            onClick={enterRoundStartPhase}
+            onClick={startMission}
             className="sau-btn"
             style={{
               display: "inline-flex", alignItems: "center", gap: "8px",
@@ -885,7 +1002,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
           only one pointing at the right (class, not per-game) join URL. */}
       {inputMode === "phone" && sessionCode && !presetPhoneSession && (
         <PhoneReconnectBadge
-          sessionCode={sessionCode} joinUrl={`${window.location.origin}${window.location.pathname}?join=${sessionCode}&game=spy`}
+          sessionCode={sessionCode} joinUrl={buildJoinUrl(sessionCode)}
           teams={teams} connectedTeamIds={connectedTeamIds}
           accent="#38BDF8" panelBg="linear-gradient(160deg,#1E3A5F,#0F172A)" borderColor="#38BDF866"
         />

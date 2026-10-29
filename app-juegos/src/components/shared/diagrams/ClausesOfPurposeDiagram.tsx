@@ -9,7 +9,7 @@ export function ClausesOfPurposeDiagram({ variant, accentColor = "#2563EB" }: { 
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -42,16 +42,16 @@ export function ClausesOfPurposeDiagram({ variant, accentColor = "#2563EB" }: { 
         <rect x="20" y="12" width="195" height="76" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="117" y="32" textAnchor="middle" fontSize="12.5" fontWeight="800" fill={accent}>TO + VERB</text>
         <text x="117" y="48" textAnchor="middle" fontSize="9" fontWeight="700" fill={ink}>the standard way to say why</text>
-        <text x="117" y="65" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>I'm calling to book a table.</text>
-        <text x="117" y="78" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>in order to / so as to = formal</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="117" y="65" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>I'm calling to book a table.</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="117" y="78" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>in order to / so as to = formal</text>
 
         <rect x="245" y="12" width="195" height="76" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="342" y="32" textAnchor="middle" fontSize="12.5" fontWeight="800" fill={accent}>FOR + NOUN/-ING</text>
         <text x="342" y="48" textAnchor="middle" fontSize="9" fontWeight="700" fill={ink}>never before a verb</text>
-        <text x="342" y="65" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>This knife is for cutting bread.</text>
-        <text x="342" y="78" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>(a general function, not one action)</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="342" y="65" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>This knife is for cutting bread.</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="342" y="78" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>(a general function, not one action)</text>
 
-        <text x="230" y="106" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>different subject or a modal needed → "so that" + clause</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="106" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>different subject or a modal needed → "so that" + clause</text>
 
         <line x1="20" y1="118" x2="440" y2="118" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 

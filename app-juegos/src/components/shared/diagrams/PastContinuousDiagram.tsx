@@ -9,7 +9,7 @@ export function PastContinuousDiagram({ variant, accentColor = "#2563EB" }: { va
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
 
@@ -43,9 +43,9 @@ export function PastContinuousDiagram({ variant, accentColor = "#2563EB" }: { va
 
         <line x1="290" y1="18" x2="290" y2="60" stroke={ink} strokeWidth="2" />
         <text x="290" y="74" textAnchor="middle" fontSize="10" fontWeight="800" fill={ink}>...when the phone rang.</text>
-        <text x="290" y="88" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>(shorter action — past simple)</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="290" y="88" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>(shorter action — past simple)</text>
 
-        <text x="230" y="112" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>two things at once, often with "while": while I was studying, she was reading.</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="112" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>two things at once, often with "while": while I was studying, she was reading.</text>
 
         <line x1="20" y1="124" x2="440" y2="124" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 

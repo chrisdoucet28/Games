@@ -16,7 +16,7 @@ export function PrivacyPolicyScreen() {
       <div style={{ background: "linear-gradient(160deg,#0C1E3D 0%,#0369A1 45%,#0EA5E9 100%)", padding: "40px 20px", textAlign: "center" }}>
         <div style={{ fontSize: "40px", marginBottom: "8px" }}>🕹️</div>
         <h1 style={{ color: "white", fontSize: "26px", fontWeight: "900", margin: 0 }}>Class<span style={{ color: "#FCD34D" }}>Cade</span> Privacy Policy</h1>
-        <p style={{ color: "#BAE6FD", fontSize: "13px", marginTop: "8px" }}>Last updated September 2026</p>
+        <p style={{ color: "#BAE6FD", fontSize: "13px", marginTop: "8px" }}>Last updated October 2026</p>
       </div>
 
       <div style={{ maxWidth: "720px", margin: "0 auto", padding: "32px 20px 60px", color: "#1F2937", fontSize: "15px", lineHeight: 1.7 }}>
@@ -35,6 +35,7 @@ export function PrivacyPolicyScreen() {
           <li><strong>Account type</strong> — whether you told us you're a teacher or a student.</li>
           <li><strong>Student progress</strong> — if you use a student account, which lessons you've marked finished and the results of your practice quiz rounds (the topics practiced, and how many answers were correct). Your level, XP and badges are worked out from this.</li>
           <li><strong>Class membership</strong> — if you use a student account to join a teacher's class, the name you type when you ask to join, whether the teacher has approved you, the saved team you pick during a Class Check-In, and the days you checked in. Only your teacher's view of the class shows your typed name (never your email address); your team and check-in days are visible only to you. Joining a class is always optional.</li>
+          <li><strong>Email update preference</strong> — whether you chose to receive occasional ClassCade update emails, and when. This is off unless you turn it on, and you can turn it off anytime in My Profile.</li>
           <li><strong>Feedback</strong> — anything you submit through the in-app Feedback button or a game's flag button.</li>
           <li><strong>Billing status</strong> — if you subscribe to a paid plan, we store your subscription status and plan (active, plan type, renewal date). Your card details go directly to our payment processor, Stripe — we never see or store them.</li>
           <li><strong>Basic usage analytics</strong> — anonymized page-visit data (via Vercel Analytics) to understand how the app is used. This isn't tied to your personal profile.</li>
@@ -53,7 +54,9 @@ export function PrivacyPolicyScreen() {
         <h2 style={sectionHeading}>Why we collect it</h2>
         <p>
           To run the core features of the app (your account, saved classes, and billing), to respond
-          to feedback and improve the app, and to keep the site running reliably.
+          to feedback and improve the app, and to keep the site running reliably. If — and only if — you
+          opt in to update emails, we also use your email address to send you news about new games,
+          topics and free resources, about once a month.
         </p>
 
         <h2 style={sectionHeading}>Who we share it with</h2>

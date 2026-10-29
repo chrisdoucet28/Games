@@ -9,7 +9,7 @@ export function PresentPerfectDiagram({ variant, accentColor = "#2563EB" }: { va
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -42,16 +42,16 @@ export function PresentPerfectDiagram({ variant, accentColor = "#2563EB" }: { va
         <rect x="20" y="12" width="195" height="80" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="117" y="30" textAnchor="middle" fontSize="11" fontWeight="800" fill={accent}>JUST · ALREADY</text>
         <text x="117" y="46" textAnchor="middle" fontSize="9" fontWeight="700" fill={ink}>have/has + [word] + participle</text>
-        <text x="117" y="64" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>She has just arrived.</text>
-        <text x="117" y="80" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>I've already finished.</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="117" y="64" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>She has just arrived.</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="117" y="80" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>I've already finished.</text>
 
         <rect x="245" y="12" width="195" height="80" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="342" y="30" textAnchor="middle" fontSize="11" fontWeight="800" fill={accent}>YET</text>
         <text x="342" y="46" textAnchor="middle" fontSize="9" fontWeight="700" fill={ink}>at the END — negatives/questions</text>
-        <text x="342" y="64" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>I haven't finished yet.</text>
-        <text x="342" y="80" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>(signals present perfect, not past simple)</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="342" y="64" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>I haven't finished yet.</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="342" y="80" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>(signals present perfect, not past simple)</text>
 
-        <text x="230" y="106" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>for + a length of time · since + a starting point</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="106" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>for + a length of time · since + a starting point</text>
 
         <line x1="20" y1="118" x2="440" y2="118" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 

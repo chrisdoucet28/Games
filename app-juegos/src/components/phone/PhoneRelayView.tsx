@@ -45,11 +45,15 @@ export function PhoneRelayView({ state, teamId, deviceId, onAction }: Props) {
   const placeInLine = queue.indexOf(deviceId);
   const questionsLeft = state.questionsLeftByTeam[teamKey] ?? 0;
   const send = (action: RelayActionPayload["action"]) => onAction({ teamId, deviceId, action });
+  // Points when the screen sends them, words for a screen still on an older build.
+  const scoreLabel = (key: string) => state.pointsByTeam ? `${state.pointsByTeam[key] ?? 0} pts` : `${state.wordsByTeam[key] ?? 0} words`;
+  const outOfQuestions = state.revealKind === "outOfQuestions";
+  const teamFinished = state.revealTeamFinished === true;
 
   const header = (
     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "14px" }}>
       <span style={{ fontWeight: "900", fontSize: "15px" }}><TeamIcon team={team} /> {team?.name}</span>
-      <span style={{ fontSize: "13px", fontWeight: "800", color: "#5EEAD4" }}>{state.wordsByTeam[teamKey] ?? 0} words · {questionsLeft} questions left</span>
+      <span style={{ fontSize: "13px", fontWeight: "800", color: "#5EEAD4" }}>{scoreLabel(teamKey)} · {questionsLeft} questions left</span>
     </div>
   );
 
@@ -58,7 +62,7 @@ export function PhoneRelayView({ state, teamId, deviceId, onAction }: Props) {
       {state.roster.map(t => (
         <div key={t.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: t.id === state.activeTeamId ? "rgba(94,234,212,0.15)" : "rgba(255,255,255,0.06)", border: `1.5px solid ${t.id === state.activeTeamId ? "#5EEAD4" : "rgba(255,255,255,0.15)"}`, borderRadius: "10px", padding: "8px 12px" }}>
           <span style={{ fontSize: "13px", fontWeight: "700" }}><TeamIcon team={t} /> {t.name}</span>
-          <span style={{ fontSize: "13px", fontWeight: "800", color: "#5EEAD4" }}>{state.wordsByTeam[String(t.id)] ?? 0} words</span>
+          <span style={{ fontSize: "13px", fontWeight: "800", color: "#5EEAD4" }}>{scoreLabel(String(t.id))}</span>
         </div>
       ))}
     </div>
@@ -70,31 +74,41 @@ export function PhoneRelayView({ state, teamId, deviceId, onAction }: Props) {
 
   // Someone else's turn — nothing to do but follow along.
   if (!amActiveTeam && !iAmAnswerer) {
-    const justGuessed = state.phase === "reveal";
+    const justRevealed = state.phase === "reveal";
     return (
       <div style={{ ...wrapStyle, textAlign: "center" }}>
         {header}
-        <div style={{ fontSize: "36px", marginBottom: "8px" }}>{justGuessed ? "🎉" : "👀"}</div>
+        <div style={{ fontSize: "36px", marginBottom: "8px" }}>{justRevealed ? (outOfQuestions ? "⏱️" : "🎉") : "👀"}</div>
         <div style={{ fontWeight: "800", fontSize: "16px", color: "#5EEAD4" }}>
-          {activeTeam ? (justGuessed ? `${activeTeam.name} guessed their word!` : `${activeTeam.name} is asking questions…`) : "Get ready — waiting for the game to start…"}
+          {activeTeam
+            ? (justRevealed
+                ? `${activeTeam.name} ${outOfQuestions ? "ran out of questions" : "guessed their word"}${teamFinished ? " — and they're finished!" : "!"}`
+                : `${activeTeam.name} is asking questions…`)
+            : "Get ready — waiting for the game to start…"}
         </div>
         {scoreboard}
       </div>
     );
   }
 
-  // The word just got guessed — the whole guessing team sees it. The asker slot has already moved
-  // on, so whoever is now the asker is told they're next.
+  // The word just got guessed (or the asker ran out of questions) — the whole team sees it. The
+  // asker slot has already moved on, so whoever is now the asker is told they're next — unless that
+  // was the team's last person, in which case the whole team is finished and just sits down.
   if (state.phase === "reveal") {
+    const who = answeringForOtherTeam ? (activeTeam?.name ?? "A team") : "Your team";
     return (
       <div style={wrapStyle}>
         {header}
-        <div style={{ textAlign: "center", background: "linear-gradient(160deg,#022C22,#031F19)", border: "4px solid #22C55E", borderRadius: "22px", padding: "22px 16px", marginBottom: "16px" }}>
-          <div style={{ fontSize: "34px", marginBottom: "6px" }}>🎉</div>
-          <div style={{ color: "#5EEAD4", fontWeight: "800", fontSize: "12px", textTransform: "uppercase", marginBottom: "8px" }}>{answeringForOtherTeam ? `${activeTeam?.name ?? "A team"} guessed it!` : "Your team guessed it!"}</div>
+        <div style={{ textAlign: "center", background: "linear-gradient(160deg,#022C22,#031F19)", border: `4px solid ${outOfQuestions ? "#F59E0B" : "#22C55E"}`, borderRadius: "22px", padding: "22px 16px", marginBottom: "16px" }}>
+          <div style={{ fontSize: "34px", marginBottom: "6px" }}>{outOfQuestions ? "⏱️" : "🎉"}</div>
+          <div style={{ color: "#5EEAD4", fontWeight: "800", fontSize: "12px", textTransform: "uppercase", marginBottom: "8px" }}>
+            {outOfQuestions ? `${who} ran out of questions — the word was:` : `${who} guessed it!${state.revealPoints ? ` +${state.revealPoints}` : ""}`}
+          </div>
           <div style={{ fontWeight: "900", fontSize: "clamp(26px,8vw,40px)", color: "#F0FDFA", overflowWrap: "anywhere" }}>{state.currentWord}</div>
           <div style={{ marginTop: "12px", fontSize: "14px", fontWeight: "800", color: "#99F6E4" }}>
-            {iAmAsker ? "You're up next — get ready to ask!" : answeringForOtherTeam ? "They swap in someone new next turn." : "Time to swap — a teammate takes over!"}
+            {teamFinished
+              ? (state.allTeamsFinished ? "That was the last turn — every team is finished!" : "Your team is finished! Everyone sit down and wait for the other teams.")
+              : iAmAsker ? "You're up next — get ready to ask!" : answeringForOtherTeam ? "They swap in someone new next turn." : "Time to swap — a teammate takes over!"}
           </div>
         </div>
         {iAmAnswerer && <button onClick={() => send("next")} style={bigButton("linear-gradient(135deg,#0D9488,#14B8A6)")}>Next team →</button>}
@@ -151,7 +165,7 @@ export function PhoneRelayView({ state, teamId, deviceId, onAction }: Props) {
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
           <button onClick={() => send("guessed")} style={bigButton("linear-gradient(135deg,#15803D,#22C55E)")}>They guessed it! ✅</button>
-          <button onClick={() => send("missed")} style={{ ...bigButton("rgba(0,0,0,0.3)"), color: "#5EEAD4", border: "3px solid #14B8A6", padding: "14px", fontSize: "15px" }}>Not yet → next team</button>
+          <button onClick={() => send("missed")} style={{ ...bigButton("rgba(0,0,0,0.3)"), color: "#5EEAD4", border: "3px solid #14B8A6", padding: "14px", fontSize: "15px" }}>Question asked → next team</button>
           <button onClick={() => send("changeWord")} style={{ background: "none", border: "none", color: "#99F6E499", fontSize: "12px", fontWeight: "700", cursor: "pointer", textDecoration: "underline" }}>Change this word</button>
         </div>
       </div>

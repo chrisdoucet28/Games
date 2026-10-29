@@ -10,7 +10,7 @@ export function IrregularVerbsDiagram({ variant, accentColor = "#2563EB" }: { va
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
 
@@ -65,11 +65,11 @@ export function IrregularVerbsDiagram({ variant, accentColor = "#2563EB" }: { va
 
         <rect x="155" y="133" width="150" height="34" rx="7" fill="none" stroke={ink} strokeWidth="1.5" />
         <text x="230" y="147" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={ink}>PAST SIMPLE</text>
-        <text x="230" y="161" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>Yesterday I went.</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="161" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>Yesterday I went.</text>
 
         <rect x="305" y="133" width="150" height="34" rx="7" fill="none" stroke={ink} strokeWidth="1.5" />
         <text x="380" y="147" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={ink}>have / has / had</text>
-        <text x="380" y="161" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>I have gone.</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="380" y="161" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>I have gone.</text>
 
         <text x="230" y="188" textAnchor="middle" fontSize="11" fontWeight="800" fill={wrong}>✗ I have went there. · He has ate already.</text>
         <text x="230" y="206" textAnchor="middle" fontSize="11" fontWeight="800" fill={right}>✓ I have been there. · He has eaten already.</text>

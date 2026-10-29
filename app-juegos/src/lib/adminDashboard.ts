@@ -62,6 +62,20 @@ export async function listTeachers(): Promise<AdminTeacher[]> {
   return (data ?? []) as AdminTeacher[];
 }
 
+export interface MarketingOptIn {
+  email: string;
+  display_name: string | null;
+  opted_in_at: string | null;
+}
+
+// Teachers who said yes to the monthly update email (sign-up checkbox, one-time prompt, or the My
+// Profile toggle) — the only list that's ever OK to send marketing email to.
+export async function listMarketingOptIns(): Promise<MarketingOptIn[]> {
+  const { data, error } = await supabase.rpc("admin_marketing_opt_ins");
+  if (error) throw error;
+  return (data ?? []) as MarketingOptIn[];
+}
+
 export async function listAutoFixRuns(): Promise<AutoFixRun[]> {
   const { data, error } = await supabase
     .from("auto_fix_runs")
@@ -70,4 +84,13 @@ export async function listAutoFixRuns(): Promise<AutoFixRun[]> {
     .limit(10);
   if (error) throw error;
   return (data ?? []) as AutoFixRun[];
+}
+
+// Wipes the whole activity log -- it's just a running feed for the admin panel (the routine's own
+// Supabase MCP tools never read it back), so clearing it has no effect on the routine's actual
+// queue/status work. `.not("id", "is", null)` is the standard Supabase JS pattern for "delete
+// every row" -- the client refuses a bare `.delete()` with no filter at all.
+export async function clearAutoFixRuns(): Promise<void> {
+  const { error } = await supabase.from("auto_fix_runs").delete().not("id", "is", null);
+  if (error) throw error;
 }

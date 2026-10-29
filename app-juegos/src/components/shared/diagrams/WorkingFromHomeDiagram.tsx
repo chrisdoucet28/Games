@@ -51,7 +51,7 @@ export function WorkingFromHomeDiagram({ variant, accentColor = "#2563EB" }: { v
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -95,7 +95,7 @@ export function WorkingFromHomeDiagram({ variant, accentColor = "#2563EB" }: { v
         })}
 
         <text x="230" y="122" textAnchor="middle" fontSize="9" fontStyle="italic" fill={ink}>She has a <tspan fontWeight="800">home office</tspan> in the spare bedroom.</text>
-        <text x="230" y="134" textAnchor="middle" fontSize="6.6" fill={caption}>("home office" = the room, not the practice of working from home)</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="134" textAnchor="middle" fontSize="6.6" fill={caption}>("home office" = the room, not the practice of working from home)</text>
 
         <text x="20" y="152" fontSize="8" fontWeight="800" letterSpacing="0.04em" fill={caption}>USEFUL WORDS</text>
         {["distraction", "isolated", "concentrate on", "log off"].map((w, i) => {

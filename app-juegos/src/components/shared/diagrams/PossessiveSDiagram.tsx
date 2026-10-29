@@ -11,7 +11,7 @@ export function PossessiveSDiagram({ variant, accentColor = "#2563EB" }: { varia
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -43,14 +43,14 @@ export function PossessiveSDiagram({ variant, accentColor = "#2563EB" }: { varia
       <svg viewBox="0 0 460 220" style={{ width: "100%", height: "auto", display: "block" }}>
         <rect x="15" y="18" width="165" height="50" rx="8" fill={fill} stroke={ink} strokeWidth="2" />
         <text x="97" y="48" textAnchor="middle" fontSize="13" fontWeight="800" fill={ink}>MY BROTHER</text>
-        <text x="97" y="10" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>the owner</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="97" y="10" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>the owner</text>
 
         <line x1="180" y1="43" x2="292" y2="43" stroke={accent} strokeWidth="2" markerEnd="url(#psArrow)" />
         <text x="236" y="30" textAnchor="middle" fontSize="19" fontWeight="800" fill={accent}>'s</text>
 
         <rect x="295" y="18" width="150" height="50" rx="8" fill={fill} stroke={ink} strokeWidth="2" />
         <text x="370" y="48" textAnchor="middle" fontSize="13" fontWeight="800" fill={ink}>CAR</text>
-        <text x="370" y="10" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>the thing owned</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="370" y="10" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>the thing owned</text>
 
         <defs>
           <marker id="psArrow" markerWidth="9" markerHeight="9" refX="4" refY="4" orient="auto"><path d="M0,0 L9,4 L0,9 Z" fill={accent} /></marker>
@@ -64,10 +64,10 @@ export function PossessiveSDiagram({ variant, accentColor = "#2563EB" }: { varia
 
         <text x="230" y="144" textAnchor="middle" fontSize="12" fontWeight="800" fill={wrong}>✗ the sister of Tom</text>
         <text x="230" y="164" textAnchor="middle" fontSize="12" fontWeight="800" fill={right}>✓ Tom's sister</text>
-        <text x="230" y="180" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>never "the [thing] of [owner]" — say [owner]'s [thing]</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="180" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>never "the [thing] of [owner]" — say [owner]'s [thing]</text>
 
-        <text x="230" y="203" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>if the owner is already plural ending in -s, just add the apostrophe:</text>
-        <text x="230" y="216" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>my parents' house · the boys' bikes</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="203" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>if the owner is already plural ending in -s, just add the apostrophe:</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="216" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>my parents' house · the boys' bikes</text>
       </svg>
     </div>
   );

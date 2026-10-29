@@ -9,7 +9,7 @@ export function ComparativesDiagram({ variant, accentColor = "#2563EB" }: { vari
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -42,17 +42,17 @@ export function ComparativesDiagram({ variant, accentColor = "#2563EB" }: { vari
         <rect x="20" y="12" width="195" height="112" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="117" y="30" textAnchor="middle" fontSize="11" fontWeight="800" fill={ink}>SHORT adjective</text>
         <text x="117" y="47" textAnchor="middle" fontSize="12.5" fontWeight="800" fill={accent}>-er than</text>
-        <text x="40" y="67" fontSize="10" fontStyle="italic" fill={caption}>tall → taller than</text>
-        <text x="40" y="83" fontSize="10" fontStyle="italic" fill={caption}>big → bigger than</text>
-        <text x="40" y="99" fontSize="10" fontStyle="italic" fill={caption}>happy → happier than</text>
-        <text x="40" y="115" fontSize="10" fontStyle="italic" fill={caption}>nice → nicer than</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="40" y="67" fontSize="10" fontStyle="italic" fill={caption}>tall → taller than</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="40" y="83" fontSize="10" fontStyle="italic" fill={caption}>big → bigger than</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="40" y="99" fontSize="10" fontStyle="italic" fill={caption}>happy → happier than</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="40" y="115" fontSize="10" fontStyle="italic" fill={caption}>nice → nicer than</text>
 
         <rect x="245" y="12" width="195" height="112" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="342" y="30" textAnchor="middle" fontSize="11" fontWeight="800" fill={ink}>LONG adjective</text>
         <text x="342" y="47" textAnchor="middle" fontSize="12.5" fontWeight="800" fill={accent}>more ___ than</text>
-        <text x="262" y="67" fontSize="10" fontStyle="italic" fill={caption}>more interesting than</text>
-        <text x="262" y="83" fontSize="10" fontStyle="italic" fill={caption}>more expensive than</text>
-        <text x="262" y="99" fontSize="10" fontStyle="italic" fill={caption}>more difficult than</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="262" y="67" fontSize="10" fontStyle="italic" fill={caption}>more interesting than</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="262" y="83" fontSize="10" fontStyle="italic" fill={caption}>more expensive than</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="262" y="99" fontSize="10" fontStyle="italic" fill={caption}>more difficult than</text>
 
         <text x="230" y="148" textAnchor="middle" fontSize="10.5" fontWeight="700" fill={ink}>irregular: good → better · bad → worse · far → further/farther</text>
 

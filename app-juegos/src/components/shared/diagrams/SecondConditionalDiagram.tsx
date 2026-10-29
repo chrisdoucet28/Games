@@ -8,7 +8,7 @@ export function SecondConditionalDiagram({ variant, accentColor = "#2563EB" }: {
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -41,12 +41,12 @@ export function SecondConditionalDiagram({ variant, accentColor = "#2563EB" }: {
         <rect x="20" y="12" width="195" height="70" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="117" y="32" textAnchor="middle" fontSize="11.5" fontWeight="800" fill={accent}>IF + PAST SIMPLE</text>
         <text x="117" y="48" textAnchor="middle" fontSize="9" fontWeight="700" fill={ink}>the hypothetical part</text>
-        <text x="117" y="65" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>If I had more money,</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="117" y="65" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>If I had more money,</text>
 
         <rect x="245" y="12" width="195" height="70" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="342" y="32" textAnchor="middle" fontSize="11.5" fontWeight="800" fill={accent}>WOULD + BASE VERB</text>
         <text x="342" y="48" textAnchor="middle" fontSize="9" fontWeight="700" fill={ink}>the imagined result</text>
-        <text x="342" y="65" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>I would travel the world.</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="342" y="65" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>I would travel the world.</text>
 
         <text x="230" y="98" textAnchor="middle" fontSize="10" fontWeight="700" fill={ink}>use "were" for EVERY subject: If I were you...</text>
 

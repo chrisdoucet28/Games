@@ -823,6 +823,13 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
   // of this existed.
   const pool = useRef([...questions].sort(() => Math.random() - 0.5)).current;
   const lastTopicRef = useRef<string | undefined>(undefined);
+  // Tracks which real teams (never the teacher-ally, see handleCorrectAnswer) have been credited
+  // against the CURRENT prompt — once every team has landed at least one, handleCorrectAnswer swaps
+  // the prompt mid-round (feedback 55b95085, "it doesn't change": a long, busy wave could leave one
+  // prompt on screen for a while since it previously only changed on a full wave clear, which read
+  // as stuck even though the siege kept progressing underneath it). Reset happens in startRound
+  // itself, so every fresh prompt — a new round OR a mid-round swap — starts the count back at zero.
+  const answeredTeamIdsRef = useRef<Set<string | number>>(new Set());
   const pickNextQuestion = useCallback((roundNumber: number): QuestionData | null => {
     if (!pool.length) return null;
     const halfSentenceItems = pool.filter(q => q.type === "finish the sentence");
@@ -849,6 +856,7 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
   // against the same prompt — there's no per-team cap, since the horde only gets harder and the
   // class needs to be able to keep pumping out barricades/power-ups at whatever pace it can manage.
   const startRound = useCallback((question: QuestionData | null, roundNumber: number) => {
+    answeredTeamIdsRef.current = new Set();
     setCurrentQuestion(question);
     setRoundPhase("reveal");
     if (breakTimeoutRef.current) clearTimeout(breakTimeoutRef.current);
@@ -998,6 +1006,16 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
       bumpStat(teamId, "chairsPlaced");
       pushFx("barricadePlaced");
     }
+    // Mid-round prompt refresh (see answeredTeamIdsRef above) — teams.some(...) is what excludes
+    // the teacher-ally's own credits from counting toward "every team". Picking via siege.round
+    // (not advancing it) keeps the halfSentence/speakingTask round-tier cutoffs, zombie spawn
+    // timing, and wave quota completely untouched — only the on-screen prompt changes.
+    if (teams.some(t => t.id === teamId)) {
+      answeredTeamIdsRef.current.add(teamId);
+      if (answeredTeamIdsRef.current.size >= teams.length) {
+        startRound(pickNextQuestion(siege.round), siege.round);
+      }
+    }
   };
 
   const arenaStyle: React.CSSProperties = {
@@ -1084,8 +1102,8 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
           <div style={{ marginBottom: "20px" }}>
             <ScoreBoard teams={teams} />
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: teamsGridCols(teams.length), gap: "10px", margin: "0 auto 24px", maxWidth: "760px" }}>
-            {teams.map(t => {
+          <div style={{ display: "grid", gridTemplateColumns: teamsGridCols(activeRoster.length), gap: "10px", margin: "0 auto 24px", maxWidth: "760px" }}>
+            {activeRoster.map(t => {
               const stats = statsByTeam[t.id] ?? { kills: 0, chairsPlaced: 0 };
               return (
                 <div key={t.id} style={{ background: "#14210F", border: "2px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E", borderRadius: "14px", padding: "10px" }}>

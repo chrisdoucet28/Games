@@ -59,6 +59,7 @@ export const TOPIC_OPTIONS: { value: string; label: string; level: string | null
   { value: "likes_dislikes",        label: "Likes & Dislikes",             level: "A1",  focus: "vocabulary", order: 13},
   { value: "what_do_you_do",        label: "What do you do? + Professions",level: "A1",  focus: "vocabulary", order: 8},
   { value: "hobbies",               label: "Hobbies",                      level: "A1",  focus: "vocabulary", order: 14},
+  { value: "sports_do_go_play",     label: "Sports (do / go / play)",      level: "A1",  focus: "vocabulary", order: 15},
   { value: "personality",           label: "Personality Adjectives",       level: "A1",  focus: "vocabulary", order: 16},
   { value: "feelings",              label: "Feelings (Basic)",              level: "A1",  focus: "vocabulary", order: 17},
   { value: "appearance",            label: "What do you look like?",       level: "A1",  focus: "vocabulary", order: 18},

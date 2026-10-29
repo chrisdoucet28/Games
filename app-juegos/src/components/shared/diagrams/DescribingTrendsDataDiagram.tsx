@@ -40,7 +40,7 @@ export function DescribingTrendsDataDiagram({ variant, accentColor = "#2563EB" }
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -98,12 +98,12 @@ export function DescribingTrendsDataDiagram({ variant, accentColor = "#2563EB" }
 
         <rect x="20" y="80" width="195" height="58" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="117" y="98" textAnchor="middle" fontSize="11" fontWeight="800" fill={accent}>RISE / FALL</text>
-        <text x="117" y="112" textAnchor="middle" fontSize="7.6" fill={caption}>no object after it</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="117" y="112" textAnchor="middle" fontSize="7.6" fill={caption}>no object after it</text>
         <text x="117" y="128" textAnchor="middle" fontSize="8.3" fontStyle="italic" fill={ink}>Prices rose sharply.</text>
 
         <rect x="245" y="80" width="195" height="58" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="342" y="98" textAnchor="middle" fontSize="11" fontWeight="800" fill={accent}>RAISE</text>
-        <text x="342" y="112" textAnchor="middle" fontSize="7.6" fill={caption}>needs an object</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="342" y="112" textAnchor="middle" fontSize="7.6" fill={caption}>needs an object</text>
         <text x="342" y="128" textAnchor="middle" fontSize="8.3" fontStyle="italic" fill={ink}>The government raised taxes.</text>
 
         <text x="20" y="150" fontSize="8" fontWeight="800" letterSpacing="0.04em" fill={caption}>PREPOSITIONS WITH NUMBERS — SAME TREND</text>

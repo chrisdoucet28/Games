@@ -10,6 +10,19 @@ export async function listClasses(): Promise<SavedClass[]> {
   return data as SavedClass[];
 }
 
+// Single-class fetch for the "continue where you left off" prompt on a fresh page load (see
+// LessonGamesGenerator's lastActiveClassId persistence) — resolves to null rather than throwing
+// on a missing/deleted class, since that's just "nothing to offer," not a real error.
+export async function getClass(classId: string): Promise<SavedClass | null> {
+  const { data, error } = await supabase
+    .from("classes")
+    .select("*")
+    .eq("id", classId)
+    .maybeSingle();
+  if (error) throw error;
+  return (data as SavedClass | null) ?? null;
+}
+
 export async function createClass(name: string, school: string | null, defaultLevel: string | null): Promise<SavedClass> {
   const { data, error } = await supabase
     .from("classes")

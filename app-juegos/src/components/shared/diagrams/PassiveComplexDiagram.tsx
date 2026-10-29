@@ -9,7 +9,7 @@ export function PassiveComplexDiagram({ variant, accentColor = "#2563EB" }: { va
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -42,18 +42,18 @@ export function PassiveComplexDiagram({ variant, accentColor = "#2563EB" }: { va
         <rect x="20" y="12" width="195" height="70" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="117" y="30" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={accent}>am/is/are + BEING + pp</text>
         <text x="117" y="46" textAnchor="middle" fontSize="8.5" fontWeight="700" fill={ink}>continuous passive</text>
-        <text x="117" y="64" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>is being questioned right now</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="117" y="64" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>is being questioned right now</text>
 
         <rect x="245" y="12" width="195" height="70" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="342" y="30" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={accent}>has/have + BEEN + pp</text>
         <text x="342" y="46" textAnchor="middle" fontSize="8.5" fontWeight="700" fill={ink}>perfect passive</text>
-        <text x="342" y="64" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>has been completed already</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="342" y="64" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>has been completed already</text>
 
         <rect x="30" y="92" width="400" height="34" rx="8" fill={fill} stroke={accent} strokeWidth="1.5" />
         <text x="230" y="106" textAnchor="middle" fontSize="9" fontWeight="800" fill={ink}>modal + BE + pp · modal + HAVE BEEN + pp (past)</text>
-        <text x="230" y="120" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>must be finished by Friday · might have been delivered</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="120" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>must be finished by Friday · might have been delivered</text>
 
-        <text x="230" y="144" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>reporting: is said/believed/thought + TO (HAVE) BE(EN) + participle</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="144" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>reporting: is said/believed/thought + TO (HAVE) BE(EN) + participle</text>
 
         <line x1="20" y1="154" x2="440" y2="154" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 

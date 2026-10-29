@@ -9,7 +9,7 @@ export function IndefinitePronounsDiagram({ variant, accentColor = "#2563EB" }: 
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -41,29 +41,29 @@ export function IndefinitePronounsDiagram({ variant, accentColor = "#2563EB" }: 
       <svg viewBox="0 0 460 205" style={{ width: "100%", height: "auto", display: "block" }}>
         <rect x="10" y="12" width="105" height="42" rx="6" fill={fill} stroke={accent} strokeWidth="1.5" />
         <text x="62" y="30" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={accent}>SOME-</text>
-        <text x="62" y="44" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>positive statements</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="62" y="44" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>positive statements</text>
 
         <rect x="122" y="12" width="105" height="42" rx="6" fill={fill} stroke={accent} strokeWidth="1.5" />
         <text x="174" y="30" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={accent}>ANY-</text>
-        <text x="174" y="44" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>questions &amp; negatives</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="174" y="44" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>questions &amp; negatives</text>
 
         <rect x="234" y="12" width="105" height="42" rx="6" fill={fill} stroke={accent} strokeWidth="1.5" />
         <text x="286" y="30" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={accent}>NO-</text>
-        <text x="286" y="44" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>already negative</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="286" y="44" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>already negative</text>
 
         <rect x="346" y="12" width="104" height="42" rx="6" fill={fill} stroke={accent} strokeWidth="1.5" />
         <text x="398" y="30" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={accent}>EVERY-</text>
-        <text x="398" y="44" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>always singular</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="398" y="44" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>always singular</text>
 
         <text x="230" y="70" textAnchor="middle" fontSize="10" fontWeight="700" fill={ink}>all of these take a SINGULAR verb</text>
 
         <rect x="80" y="82" width="140" height="42" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="150" y="100" textAnchor="middle" fontSize="11" fontWeight="800" fill={accent}>NEITHER</text>
-        <text x="150" y="115" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>singular: Neither of us wants...</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="150" y="115" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>singular: Neither of us wants...</text>
 
         <rect x="240" y="82" width="140" height="42" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="310" y="100" textAnchor="middle" fontSize="11" fontWeight="800" fill={accent}>BOTH</text>
-        <text x="310" y="115" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>plural: Both of us want...</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="310" y="115" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>plural: Both of us want...</text>
 
         <line x1="20" y1="136" x2="440" y2="136" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 

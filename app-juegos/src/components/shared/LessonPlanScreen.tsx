@@ -367,6 +367,13 @@ export function LessonPlanSlideshow({ topic, theme, teams, onBack, onPlayGameFor
           </button>
           <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
             <span style={{ color: "#9CA3AF", fontSize: "12px", fontWeight: "700" }}>Step {slideIndex + 1} of {slides.length}</span>
+            {/* PrintableLessonPlan (below) renders the whole lesson regardless of slideIndex, so
+                this works identically from any step — not just the "done" screen's own print
+                button further down, which a teacher would otherwise have to click through the
+                entire lesson to reach. */}
+            <button onClick={() => window.print()} title="Print this lesson" style={{ background: "none", border: "none", color: "#9CA3AF", cursor: "pointer", fontWeight: "700", fontFamily: theme.headingFont, fontSize: "12px", display: "inline-flex", alignItems: "center", gap: "4px", padding: 0 }}>
+              <Icon name="printer" size={12} /> Print
+            </button>
             {/* Previous only steps back one slide at a time — with up to 20+ steps, leaving the
                 lesson mid-way otherwise means clicking it that many times. Skips straight to the
                 index regardless of progress; nothing here is saved, so there's nothing to lose. */}
@@ -884,7 +891,11 @@ function PrintableLessonPlan({ topic, slides, roundOut, logoUrl }: { topic: Lear
           </ul>
         </div>
       ))}
-      <hr style={printDividerStyle} />
+      {/* Forces the Learn Lesson portion above (title/intro/diagram/sections) onto page 1 by
+          itself — feedback 2c53a70f: once content below this point (practice questions, the
+          round-out exercise, any real-world reading) starts, it should always begin on a fresh
+          page, regardless of how short or long the lesson content above happened to render. */}
+      <hr style={{ ...printDividerStyle, breakAfter: "page", pageBreakAfter: "always" }} />
 
       {questionGroups.map((g, gi) => (
         <div key={gi} style={{ marginTop: gi > 0 ? "12px" : "4px", ...printAvoidBreakStyle }}>

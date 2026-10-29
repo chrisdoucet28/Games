@@ -9,7 +9,7 @@ export function PreferRatherDiagram({ variant, accentColor = "#2563EB" }: { vari
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -42,16 +42,16 @@ export function PreferRatherDiagram({ variant, accentColor = "#2563EB" }: { vari
         <rect x="20" y="12" width="195" height="78" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="117" y="30" textAnchor="middle" fontSize="12" fontWeight="800" fill={accent}>PREFER (no "would")</text>
         <text x="117" y="46" textAnchor="middle" fontSize="9" fontWeight="700" fill={ink}>general, always true</text>
-        <text x="117" y="64" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>I prefer tea to coffee.</text>
-        <text x="117" y="78" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>prefer + noun/-ing + to</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="117" y="64" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>I prefer tea to coffee.</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="117" y="78" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>prefer + noun/-ing + to</text>
 
         <rect x="245" y="12" width="195" height="78" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="342" y="30" textAnchor="middle" fontSize="12" fontWeight="800" fill={accent}>I'D RATHER / I'D PREFER</text>
         <text x="342" y="46" textAnchor="middle" fontSize="9" fontWeight="700" fill={ink}>a specific choice, now</text>
-        <text x="342" y="64" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>I'd rather stay home tonight.</text>
-        <text x="342" y="78" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>'d rather + bare verb (+than)</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="342" y="64" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>I'd rather stay home tonight.</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="342" y="78" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>'d rather + bare verb (+than)</text>
 
-        <text x="230" y="106" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>'d prefer + to + verb · 'd prefer X to Y · 'd rather X than Y</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="106" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>'d prefer + to + verb · 'd prefer X to Y · 'd rather X than Y</text>
 
         <line x1="20" y1="118" x2="440" y2="118" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 

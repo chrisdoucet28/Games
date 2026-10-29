@@ -9,7 +9,7 @@ export function InversionDiagram({ variant, accentColor = "#2563EB" }: { variant
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -39,21 +39,21 @@ export function InversionDiagram({ variant, accentColor = "#2563EB" }: { variant
         A fronted negative flips auxiliary and subject
       </div>
       <svg viewBox="0 0 460 200" style={{ width: "100%", height: "auto", display: "block" }}>
-        <text x="117" y="28" textAnchor="middle" fontSize="10" fontStyle="italic" fill={caption}>"I have never seen such a view."</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="117" y="28" textAnchor="middle" fontSize="10" fontStyle="italic" fill={caption}>"I have never seen such a view."</text>
         <text x="117" y="44" textAnchor="middle" fontSize="8.5" fontWeight="700" fill={ink}>normal order</text>
 
         <text x="230" y="36" textAnchor="middle" fontSize="16" fill={accent}>→</text>
 
         <rect x="270" y="14" width="180" height="42" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="360" y="34" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={accent}>Never have I seen...</text>
-        <text x="360" y="48" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>NEVER + auxiliary + subject</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="360" y="48" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>NEVER + auxiliary + subject</text>
 
         <text x="230" y="76" textAnchor="middle" fontSize="9.5" fontWeight="700" fill={ink}>same fronting trick: rarely, hardly, seldom, not only, at no point</text>
-        <text x="230" y="90" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>match the auxiliary to the tense: have/has, did, do/does</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="90" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>match the auxiliary to the tense: have/has, did, do/does</text>
 
         <rect x="30" y="100" width="400" height="34" rx="8" fill={fill} stroke={accent} strokeWidth="1.5" />
         <text x="230" y="114" textAnchor="middle" fontSize="9.5" fontWeight="800" fill={ink}>HARDLY HAD...WHEN · NO SOONER HAD...THAN — don't mix them</text>
-        <text x="230" y="128" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>Hardly had I sat down when the alarm went off.</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="128" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>Hardly had I sat down when the alarm went off.</text>
 
         <line x1="20" y1="144" x2="440" y2="144" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 

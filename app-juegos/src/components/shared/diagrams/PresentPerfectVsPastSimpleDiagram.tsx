@@ -15,7 +15,7 @@ export function PresentPerfectVsPastSimpleDiagram({ variant, accentColor = "#256
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
 
   return (
     <div
@@ -50,17 +50,17 @@ export function PresentPerfectVsPastSimpleDiagram({ variant, accentColor = "#256
 
         {/* Past Simple row — one finished dot, nothing drawn after it (disconnected from now) */}
         <text x="8" y="46" fontSize="12.5" fontWeight="800" fill={ink}>Past Simple</text>
-        <text x="8" y="60" fontSize="9.5" fontStyle="italic" fill={caption}>one finished, named moment</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="8" y="60" fontSize="9.5" fontStyle="italic" fill={caption}>one finished, named moment</text>
         <circle cx="260" cy="52" r="7" fill={ink} />
         <text x="260" y="76" textAnchor="middle" fontSize="10.5" fontStyle="italic" fill={ink}>yesterday</text>
 
         {/* Present Perfect row — dashed (vague start) into a solid arrow that reaches "now" */}
         <text x="8" y="116" fontSize="12.5" fontWeight="800" fill={accent}>Present Perfect</text>
-        <text x="8" y="130" fontSize="9.5" fontStyle="italic" fill={caption}>no exact time — still true now</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="8" y="130" fontSize="9.5" fontStyle="italic" fill={caption}>no exact time — still true now</text>
         <line x1="170" y1="122" x2="210" y2="122" stroke={accent} strokeWidth="3" strokeDasharray="2 6" strokeLinecap="round" />
         <line x1="210" y1="122" x2="420" y2="122" stroke={accent} strokeWidth="3" strokeLinecap="round" />
         <polygon points="416,112 416,132 434,122" fill={accent} />
-        <text x="300" y="148" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>since / for / just / already / ever</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="300" y="148" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>since / for / just / already / ever</text>
       </svg>
     </div>
   );

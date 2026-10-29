@@ -172,6 +172,26 @@ function pickItemCount(resolvedCount: number): number {
   return 3;
 }
 
+// A ticket's vocab badges show whatever form the word happens to be stored in — for most vocab
+// (nouns, adjectives, base-form verbs) that's fine in any sentence, but the hotSeatWords pool
+// several topics draw from (irregular_verbs, past_simple, and scattered individual entries
+// elsewhere) store verbs in their PAST TENSE form, since that's literally what those topics teach.
+// Pairing one of those with a "negative"/"question" grammar badge on the same ticket nudges a
+// student toward an unwritable "Did you bought...?" instead of "Did you buy...?" — negative and
+// question both need the auxiliary + BASE form, not the past form (feedback 7e1f04af). Covers
+// every past-tense/participle form actually used as a hotSeatWords entry in topics.ts, cross-
+// checked against the base form topics.ts itself documents alongside each one (e.g. "Yesterday I
+// ___ to the park. (go)" confirms went -> go) — left out any word ambiguous between a verb and an
+// adjective reading (e.g. "broken", "left") since the adjective reading already works fine as-is.
+const PAST_TENSE_BASE_FORM: Record<string, string> = {
+  ate: "eat", bought: "buy", broke: "break", took: "take", wrote: "write", written: "write",
+  fell: "fall", drove: "drive", spoke: "speak", spoken: "speak", taught: "teach", slept: "sleep",
+  lost: "lose", stolen: "steal", grown: "grow", forgotten: "forget", forgot: "forget",
+  chose: "choose", ran: "run", caught: "catch", thought: "think", went: "go", gone: "go",
+  saw: "see", seen: "see", came: "come", built: "build", was: "be", were: "be",
+  eaten: "eat", played: "play", repaired: "repair", got: "get", said: "say",
+};
+
 // Picks each item's KIND with an even coin flip, independent of how large each pool is — the
 // actual content is wildly lopsided (1200+ unique vocab words vs. ~85 grammar options across
 // positive/negative/question + every topic's transform tags combined), so slicing one shuffled
@@ -213,6 +233,14 @@ function generateTicket(grammarPool: string[], vocabWordPool: string[], nextId: 
       usedVocab.add(word);
       items.push({ kind: "vocab", word, foodEmoji: randomFrom(DINER_FOOD_EMOJIS) });
     }
+  }
+  // This ticket's own grammar badge (if any) decides whether its vocab badges need the swap above
+  // — a bare vocab badge, or one paired with "positive" or any other transform tag, keeps showing
+  // the word's stored form unchanged.
+  if (items.some(it => it.kind === "grammar" && (it.transform === "negative" || it.transform === "question"))) {
+    items.forEach(it => {
+      if (it.kind === "vocab" && PAST_TENSE_BASE_FORM[it.word]) it.word = PAST_TENSE_BASE_FORM[it.word];
+    });
   }
   const totalSeconds = TICKET_SECONDS_BY_ITEM_COUNT[items.length] ?? TICKET_SECONDS_BY_ITEM_COUNT[1];
   return {
@@ -429,7 +457,7 @@ function validateOrderUpSnapshot(raw: unknown): OrderUpSnapshot | undefined {
   };
 }
 
-export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef, paused, onTogglePause, serializeStateRef, initialGameState, presetPhoneSession }: GameProps) {
+export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinalRef, paused, onTogglePause, serializeStateRef, initialGameState, presetPhoneSession, onRequestPhoneSession }: GameProps) {
   const resumed = useRef(validateOrderUpSnapshot(initialGameState)).current;
 
   // A ref (not just the `paused` prop) so the per-ticket countdown interval's closure always reads
@@ -470,6 +498,12 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
   const [inputMode, setInputMode] = useState<"screen" | "phone">(presetPhoneSession ? "phone" : "screen");
   const [introStep, setIntroStep] = useState<"setup" | "qr">("setup");
   const [sessionCode, setSessionCode] = useState<string | null>(presetPhoneSession?.code ?? null);
+  // See BountyBoardGame.tsx's own copy of this for the full explanation — true whenever sessionCode
+  // is class-level (so the QR points at ?classJoin=, which follows the teacher game to game).
+  const [sessionIsClassLevel, setSessionIsClassLevel] = useState(!!presetPhoneSession);
+  // Snapshot taken once at mount — see BountyBoardGame.tsx's own copy for the full explanation of
+  // why the setup/QR block below must key off this instead of the live presetPhoneSession prop.
+  const startedWithPresetSession = useRef(!!presetPhoneSession).current;
   const [connectedTeamIds, setConnectedTeamIds] = useState<Set<string | number>>(new Set());
   // "spoken": however a team wants to show the teacher their sentence in person (written down,
   // said aloud, whatever) — teacher taps "Ready to judge" once they've seen/heard it (today's only
@@ -552,11 +586,19 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
     if (tickets.length < capacity) {
       const needed = capacity - tickets.length;
       const newTickets = Array.from({ length: needed }, () => generateTicket(grammarPool, vocabWordPool, () => ticketIdRef.current++, resolvedCountRef.current));
-      // Solo play has nobody else to claim against, so there's no "tap to claim" step at all —
-      // every ticket is simply already claimed by the one team that exists, the moment it appears.
-      // Everything downstream (the claimed-not-judging card, typing mode, judging, expiry penalty)
-      // then just works unchanged, with zero teams.length === 1 special-casing anywhere else.
-      if (teams.length === 1) newTickets.forEach(t => { t.claimedBy = teams[0].id; });
+      // Solo play skips the "tap to claim" step only for whichever ticket becomes the one team's
+      // first open order — so starting fresh (or finishing everything) always has something to
+      // claim immediately, same as the multi-team floor above. Once she already has a claimed,
+      // unresolved ticket, any further new ticket stays unclaimed like it would for any other
+      // team, so a second order arriving mid-turn needs an explicit tap — otherwise every open
+      // ticket showed as already claimed by her the instant it appeared, with no way for the
+      // teacher to tell which one she was actually working on (feedback f7fc275a).
+      if (teams.length === 1) {
+        let hasClaimed = tickets.some(t => t.claimedBy !== undefined);
+        newTickets.forEach(t => {
+          if (!hasClaimed) { t.claimedBy = teams[0].id; hasClaimed = true; }
+        });
+      }
       setTickets(prev => [...prev, ...newTickets]);
     }
   }, [phase, tickets.length, grammarPool, vocabWordPool, maxSlots, initialSlots, teams]);
@@ -736,9 +778,20 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
 
   const handlePickPhoneMode = () => {
     setInputMode("phone");
-    setSessionCode(generateSessionCode());
+    if (onRequestPhoneSession) {
+      setSessionCode(onRequestPhoneSession());
+      setSessionIsClassLevel(true);
+    } else {
+      setSessionCode(generateSessionCode());
+      setSessionIsClassLevel(false);
+    }
     setIntroStep("qr");
   };
+
+  const buildJoinUrl = (code: string) =>
+    sessionIsClassLevel
+      ? `${window.location.origin}${window.location.pathname}?classJoin=${code}`
+      : `${window.location.origin}${window.location.pathname}?join=${code}&game=orderup`;
 
   const handlePickScreenMode = () => {
     setInputMode("screen");
@@ -917,7 +970,7 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
         </div>
         {/* Skipped entirely for a Class Check-In sitting — presetPhoneSession already picked
             phone mode and its code, and the class-level QR already covered joining. */}
-        {!presetPhoneSession && <>
+        {!startedWithPresetSession && <>
           {introStep === "setup" && (
             <div style={{ marginBottom: "20px" }}>
               <div style={{ fontSize: "13px", color: "#9D174D", fontWeight: "700", marginBottom: "10px" }}>How will orders get answered?</div>
@@ -941,7 +994,7 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
           )}
 
           {introStep === "qr" && sessionCode && (() => {
-            const joinUrl = `${window.location.origin}${window.location.pathname}?join=${sessionCode}&game=orderup`;
+            const joinUrl = buildJoinUrl(sessionCode);
             return (
               <PhoneJoinPanel
                 sessionCode={sessionCode} joinUrl={joinUrl} teams={teams} connectedTeamIds={connectedTeamIds}
@@ -1051,7 +1104,7 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
           only one pointing at the right (class, not per-game) join URL. */}
       {inputMode === "phone" && sessionCode && !presetPhoneSession && (
         <PhoneReconnectBadge
-          sessionCode={sessionCode} joinUrl={`${window.location.origin}${window.location.pathname}?join=${sessionCode}&game=orderup`}
+          sessionCode={sessionCode} joinUrl={buildJoinUrl(sessionCode)}
           teams={teams} connectedTeamIds={connectedTeamIds}
           accent="#BE185D" panelBg="linear-gradient(160deg,#FFFFFF,#FFE4E6)" borderColor="#FBCFE8"
         />

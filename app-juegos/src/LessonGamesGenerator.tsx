@@ -29,7 +29,7 @@ import { FeedbackButton } from "./components/shared/FeedbackButton";
 import { BrandBadge } from "./components/shared/BrandBadge";
 import { Icon, type IconName } from "./components/shared/Icon";
 import { MascotIcon } from "./components/shared/MascotArt";
-import { saveProgress, clearProgress, listClasses, createClass, upsertTeamRoster, deleteFromTeamRoster, saveTeams } from "./lib/classes";
+import { saveProgress, clearProgress, listClasses, createClass, upsertTeamRoster, deleteFromTeamRoster, saveTeams, getClass } from "./lib/classes";
 import { recordClassCoverage } from "./lib/classMembership";
 import { isPaidStatus } from "./lib/subscription";
 import { playSound, isSoundEnabled, setSoundEnabled, onSoundEnabledChange } from "./lib/sounds";
@@ -275,6 +275,33 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
   // already-active class (saveTeamsToRoster/saveTeamsToClass/saveToClass's own defaulted-classId
   // calls) doesn't need to touch it.
   const [activeClassName, setActiveClassName] = useState<string | null>(null);
+
+  // Mirrors activeClassId into localStorage so a browser refresh (which wipes every piece of React
+  // state above, teams/scores included) isn't a dead end: a teacher who refreshes mid-class and
+  // then starts a fresh, unlinked session under the same team names has no way to get their real
+  // scores back, and silently starting over at 0 reads as "my team randomly lost its points" (a
+  // real report — a teacher's team kept its 150 points right up until a refresh + a fresh Lesson
+  // Plan start put it back at 0 under the same name). This alone doesn't restore anything by
+  // itself — see lastClassCandidate below, which turns a stored id back into an actual on-screen
+  // "continue where you left off?" choice on next load, rather than silently auto-resuming.
+  const LAST_CLASS_STORAGE_KEY = "classcade_last_active_class_id";
+  useEffect(() => {
+    try {
+      if (activeClassId) localStorage.setItem(LAST_CLASS_STORAGE_KEY, activeClassId);
+      else localStorage.removeItem(LAST_CLASS_STORAGE_KEY);
+    } catch { /* private browsing / storage disabled — nothing to persist, nothing to break */ }
+  }, [activeClassId]);
+  // Fetched once per fresh page load only (empty deps) — if the teacher dismisses it or explicitly
+  // starts an unlinked game (which clears the stored id too, see the Welcome screen's "Start a
+  // Game" button), it simply won't come back until the next real page load.
+  const [lastClassCandidate, setLastClassCandidate] = useState<SavedClass | null>(null);
+  useEffect(() => {
+    let stored: string | null = null;
+    try { stored = localStorage.getItem(LAST_CLASS_STORAGE_KEY); } catch { /* ignore */ }
+    if (!stored) return;
+    getClass(stored).then(cls => { if (cls) setLastClassCandidate(cls); }).catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   // "Class Check-In" — one persistent join code/channel for a whole class-linked sitting, so a
   // student scans once and their phone auto-follows every later game switch (see startGame/
   // handleGameEnd below), instead of re-scanning a fresh per-game code every time. Only ever set
@@ -680,6 +707,39 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     runStep(0);
   };
 
+  // Loads a class's own saved teams — names, colors, mascots, AND their actual current scores —
+  // into the live editor state. Shared by startWithClass below and by dispatchPendingSave's "link"
+  // branch further down, which used to call resetTeamsToNormal() instead (wiping every score to 0
+  // the moment a teacher used "Switch"/"Load saved teams…" to link a class mid-sitting — a real,
+  // reproducible report: "Santiago" showed 0 right after linking, before anyone had even picked a
+  // team yet, because nothing ever re-loaded his actual saved score at that point).
+  const hydrateTeamsFromClass = (cls: SavedClass) => {
+    if (cls.teams.length === 0) return;
+    setNumTeams(cls.teams.length);
+    setTeamNames(prev => {
+      const next = [...prev];
+      cls.teams.forEach((t, i) => { next[i] = t.name; });
+      return next;
+    });
+    setTeamColors(prev => {
+      const next = [...prev];
+      cls.teams.forEach((t, i) => {
+        const idx = TEAM_COLORS.findIndex(c => c.name === t.color.name);
+        next[i] = idx === -1 ? i : idx;
+      });
+      return next;
+    });
+    setTeamMascots(prev => {
+      const next = [...prev];
+      cls.teams.forEach((t, i) => { next[i] = t.mascot ?? null; });
+      return next;
+    });
+    setTeams(cls.teams);
+    // A real class's own saved teams, not a blank slate — a later roster tap in team-setup
+    // should append to this lineup, not treat it as still-untouched placeholders to replace.
+    setTeamsUntouched(false);
+  };
+
   // "Start New Game" from My Classes — brings the class's persistent roster/scores into the
   // normal setup flow, same as if the teacher had typed those names in themselves.
   const startWithClass = (cls: SavedClass) => {
@@ -689,31 +749,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     // us "this is my B2 class" doesn't have to re-pick it every single time they start a game.
     setLevel(cls.default_level ?? "all");
     setTeamRoster(cls.team_roster ?? []);
-    if (cls.teams.length > 0) {
-      setNumTeams(cls.teams.length);
-      setTeamNames(prev => {
-        const next = [...prev];
-        cls.teams.forEach((t, i) => { next[i] = t.name; });
-        return next;
-      });
-      setTeamColors(prev => {
-        const next = [...prev];
-        cls.teams.forEach((t, i) => {
-          const idx = TEAM_COLORS.findIndex(c => c.name === t.color.name);
-          next[i] = idx === -1 ? i : idx;
-        });
-        return next;
-      });
-      setTeamMascots(prev => {
-        const next = [...prev];
-        cls.teams.forEach((t, i) => { next[i] = t.mascot ?? null; });
-        return next;
-      });
-      setTeams(cls.teams);
-      // A real class's own saved teams, not a blank slate — a later roster tap in team-setup
-      // should append to this lineup, not treat it as still-untouched placeholders to replace.
-      setTeamsUntouched(false);
-    }
+    hydrateTeamsFromClass(cls);
     setScreen("topic-select");
   };
 
@@ -815,12 +851,13 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
       setActiveClassId(cls.id);
       setActiveClassName(cls.name);
       setTeamRoster(cls.team_roster ?? []);
-      // Blanks the live editor to this class's own clean slate — without this, switching from an
-      // already-linked class straight to a different one would leave the FIRST class's team names
-      // sitting in the editor, about to autosave into the SECOND class's roster the moment anything
-      // else changes. The teacher taps chips below to bring in whichever of this class's own saved
-      // teams they want, same as any other link.
-      resetTeamsToNormal();
+      // Loads this class's own saved teams — names AND their real current scores, same as
+      // startWithClass — rather than blanking the editor to Team Red/Team Blue at 0. Switching from
+      // an already-linked class straight to a different one still can't leave the FIRST class's team
+      // names sitting in the editor about to autosave into the SECOND class's roster: a class with no
+      // saved teams yet (hydrateTeamsFromClass no-ops on an empty cls.teams) still needs the clean
+      // slate, so that case falls through to the same reset as before.
+      if (cls.teams.length > 0) hydrateTeamsFromClass(cls); else resetTeamsToNormal();
     } else if (action === "teams") saveTeamsToClass(cls.id);
     else saveToClass(cls.id);
   };
@@ -1023,22 +1060,10 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     setClassConnectedTeamIds(new Set());
   };
 
-  // Manual activation only (per the teacher's own explicit choice) — nothing about Class Check-In
-  // exists until this is clicked. Presence sync mirrors every other game's own channel-open effect
-  // (see e.g. OrderUpGame.tsx), just for the class-level roster instead of one game's tickets.
-  const handleStartClassCheckIn = () => {
-    const code = generateSessionCode();
-    setClassSessionCode(code);
-    const channel = openClassSessionChannel(code);
-    classChannelRef.current = channel;
-    channel.on("presence", { event: "sync" }, () => {
-      const presenceState = channel.presenceState<{ teamId: string | number }>();
-      const ids = new Set<string | number>();
-      Object.values(presenceState).forEach(entries => entries.forEach(entry => ids.add(entry.teamId)));
-      setClassConnectedTeamIds(ids);
-    });
-    channel.subscribe();
-  };
+  // The explicit "Start Class Check-In" button — kept as its own name since that's what the button
+  // calls, but the real logic now lives in ensurePhoneSession below (shared with the implicit path:
+  // a game asking for a phone session on its own, see onRequestPhoneSession).
+  const handleStartClassCheckIn = () => ensurePhoneSession();
 
   // A persistent, single floating badge for the whole class-linked sitting — shown on every
   // screen a class session realistically spans (topic-select, game-select, game, results) EXCEPT
@@ -1109,6 +1134,36 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
   const broadcastClassActiveGame = (gameId: string | null) => {
     classActiveGameRef.current = gameId;
     sendClassSessionState();
+  };
+
+  // Starts (or, if already running, just returns) the class-level session — the single mechanism
+  // behind both "Start Class Check-In" and a game's own "Play on Phones" picking up a class-level
+  // code on its own the first time it's used. Teacher feedback: switching from Race Track straight
+  // into Bounty Board made students rescan a second QR, because without this, each game only ever
+  // generated its OWN one-off code — Class Check-In (the thing that already makes a checked-in
+  // phone follow the teacher from game to game with no rescanning) only ever started if the teacher
+  // remembered to tap that button BEFORE any student scanned anything. Idempotent (returns the
+  // existing code rather than generating a second one) so it's always safe to call from a game that
+  // doesn't know whether Class Check-In already happened elsewhere.
+  const ensurePhoneSession = (): string => {
+    if (classSessionCode) return classSessionCode;
+    const code = generateSessionCode();
+    setClassSessionCode(code);
+    const channel = openClassSessionChannel(code);
+    classChannelRef.current = channel;
+    channel.on("presence", { event: "sync" }, () => {
+      const presenceState = channel.presenceState<{ teamId: string | number }>();
+      const ids = new Set<string | number>();
+      Object.values(presenceState).forEach(entries => entries.forEach(entry => ids.add(entry.teamId)));
+      setClassConnectedTeamIds(ids);
+    });
+    channel.subscribe();
+    // Called mid-game (not just from the pre-game "Start Class Check-In" button), so the usual
+    // startGame-time broadcast already ran and no-opped against a still-null classSessionCode —
+    // this is what tells a phone that just landed on ClassJoinScreen which game to actually open.
+    classActiveGameRef.current = selectedGame?.id ?? null;
+    sendClassSessionState();
+    return code;
   };
 
   const startGame = async (mode: GameMode) => {
@@ -1373,6 +1428,38 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
             </div>
           ))}
         </div>
+        {/* "Continue where you left off?" — only ever appears once per fresh page load (see
+            lastClassCandidate above), and only offers, never auto-applies: a refresh might just as
+            easily mean "I'm done with that class, starting a new period" as "I didn't mean to lose
+            my place." Shows each team's actual current score so a teacher can tell at a glance
+            whether this is really the session they want back, before committing to it. */}
+        {lastClassCandidate && (
+          <div style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.25)", borderRadius: "16px", padding: "14px 18px", marginBottom: "20px", display: "flex", alignItems: "center", gap: "14px", flexWrap: "wrap", justifyContent: "center", backdropFilter: "blur(8px)" }}>
+            <div style={{ textAlign: "left" }}>
+              <div style={{ color: "white", fontWeight: "800", fontSize: "14px" }}>Continue "{lastClassCandidate.name}"?</div>
+              <div style={{ color: "rgba(255,255,255,0.75)", fontSize: "12.5px", marginTop: "2px" }}>
+                {lastClassCandidate.teams.length > 0
+                  ? lastClassCandidate.teams.map(t => `${t.name} (${t.score})`).join(" · ")
+                  : "No teams saved yet"}
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: "8px" }}>
+              <button
+                onClick={() => {
+                  const cls = lastClassCandidate;
+                  setLastClassCandidate(null);
+                  if (cls.in_progress) resumeClass(cls); else startWithClass(cls);
+                }}
+                style={{ background: "white", color: theme.heroBg[0], border: "none", borderRadius: "10px", padding: "9px 18px", fontSize: "13px", fontWeight: "800", cursor: "pointer", fontFamily: theme.headingFont }}
+              >Continue</button>
+              <button
+                onClick={() => setLastClassCandidate(null)}
+                title="Dismiss"
+                style={{ background: "none", border: "1px solid rgba(255,255,255,0.35)", color: "white", borderRadius: "10px", padding: "9px 14px", fontSize: "13px", fontWeight: "800", cursor: "pointer" }}
+              >✕</button>
+            </div>
+          </div>
+        )}
         {/* Primary fork: "games or lesson plans" is the first real decision after login — both
             equally weighted (same size/padding/font-weight), distinguished only by which gradient
             each uses, so neither reads as the "default" choice over the other. Each gets a short
@@ -1771,6 +1858,12 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
                   // on top of them, so it never actually needs extra capacity — only a genuine
                   // append (teams already set up) should hit the plan cap.
                   const locked = !isActive && numTeams >= cap && !teamsUntouched;
+                  // The roster itself (classes.team_roster) only ever stores name/color/mascot —
+                  // score lives on the live `teams` array instead, so it's looked up here by the
+                  // same name match handleSetup uses. This is what a teacher asked for directly:
+                  // seeing a team's current points right on the chip they're about to tap, not only
+                  // after tapping it (in the card further down).
+                  const rosterScore = teams.find(t => t.name.trim().toLowerCase() === entry.name.trim().toLowerCase())?.score ?? 0;
                   return (
                     <div key={entry.id} style={{ position: "relative" }}>
                       <button
@@ -1783,9 +1876,17 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
                           border: `2px solid ${isActive ? entry.color.bg : "#D1D5DB"}`,
                           borderRadius: "999px", padding: "8px 16px 8px 12px", cursor: "pointer",
                           fontWeight: isActive ? "800" : "700", fontSize: "13px", opacity: locked ? 0.5 : 1,
+                          display: "inline-flex", alignItems: "center", gap: "6px",
                         }}
                       >
                         <TeamIcon team={entry} color={isActive ? "white" : undefined} /> {entry.name}
+                        {rosterScore > 0 && (
+                          <span style={{
+                            background: isActive ? "rgba(255,255,255,0.28)" : "rgba(0,0,0,0.08)",
+                            color: isActive ? "white" : "#6B7280",
+                            borderRadius: "999px", padding: "2px 8px", fontSize: "11px", fontWeight: "800",
+                          }}>{rosterScore} pts</span>
+                        )}
                       </button>
                       <button
                         type="button"
@@ -1832,12 +1933,23 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(240px,1fr))", gap: "16px" }}>
             {Array.from({ length: numTeams }).map((_, i) => {
               const color = TEAM_COLORS[teamColors[i] ?? i];
+              // Same name match (trimmed, case-insensitive) handleSetup itself uses to decide
+              // whether this slot keeps its points or starts over at 0 — shown live, before the
+              // teacher ever commits to it, so a name that's about to stop matching (a typo, an
+              // accidental edit, a roster tap that swapped in a differently-cased copy) is visible
+              // right here instead of silently discovered later as "my team lost its points."
+              const carriedOverScore = teams.find(t => t.name.trim().toLowerCase() === teamNames[i]?.trim().toLowerCase())?.score ?? 0;
 
               return (
                 <div key={i} style={{ border: `3px solid ${color.bg}`, borderRadius: "14px", overflow: "hidden", background: "white" }}>
                   <div style={{ background: color.bg, padding: "10px 12px", display: "flex", alignItems: "center", gap: "8px" }}>
                     <TeamIcon team={{ mascot: teamMascots[i], color }} size={18} color="white" />
                     <span style={{ color: "white", fontWeight: "800", fontSize: "14px" }}>{color.name}</span>
+                    {carriedOverScore > 0 && (
+                      <span style={{ marginLeft: "auto", color: "white", background: "rgba(0,0,0,0.22)", borderRadius: "999px", padding: "3px 10px", fontSize: "11.5px", fontWeight: "800", whiteSpace: "nowrap" }}>
+                        Keeps {carriedOverScore} pt{carriedOverScore === 1 ? "" : "s"}
+                      </span>
+                    )}
                   </div>
                   <input
                     value={teamNames[i]}
@@ -2104,23 +2216,23 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
               fallback={<GameCrashFallback name={selectedGame.name} message="We've been notified. Your teams and scores are still safe — pick a game to keep going." buttonLabel="Back to Choose a Game" onBack={() => setScreen("game-select")} />}
             >
             <Suspense fallback={<GameLoadingFallback name={selectedGame.name} />}>
-              {selectedGame.id === "auction" && <AuctionGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} presetPhoneSession={classSessionCode ? { code: classSessionCode } : undefined} />}
+              {selectedGame.id === "auction" && <AuctionGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} presetPhoneSession={classSessionCode ? { code: classSessionCode } : undefined} onRequestPhoneSession={ensurePhoneSession} />}
               {selectedGame.id === "minefield" && <MinefieldGame questions={[]} gridData={minefieldGridData} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-              {selectedGame.id === "hotseat" && <HotSeatGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} presetPhoneSession={classSessionCode ? { code: classSessionCode } : undefined} />}
-              {selectedGame.id === "relay" && <RelayGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} presetPhoneSession={classSessionCode ? { code: classSessionCode } : undefined} />}
-              {selectedGame.id === "spy" && <SpyAmongUsGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} presetPhoneSession={classSessionCode ? { code: classSessionCode } : undefined} />}
+              {selectedGame.id === "hotseat" && <HotSeatGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} presetPhoneSession={classSessionCode ? { code: classSessionCode } : undefined} onRequestPhoneSession={ensurePhoneSession} />}
+              {selectedGame.id === "relay" && <RelayGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} presetPhoneSession={classSessionCode ? { code: classSessionCode } : undefined} onRequestPhoneSession={ensurePhoneSession} />}
+              {selectedGame.id === "spy" && <SpyAmongUsGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} presetPhoneSession={classSessionCode ? { code: classSessionCode } : undefined} onRequestPhoneSession={ensurePhoneSession} />}
               {selectedGame.id === "battleship" && <BattleshipGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
               {selectedGame.id === "vault" && <VaultHeistGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
               {selectedGame.id === "cards" && <CardShuffleGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
               {selectedGame.id === "castle" && <CastleGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
-              {selectedGame.id === "hill" && <KingOfHillGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} presetPhoneSession={classSessionCode ? { code: classSessionCode } : undefined} />}
+              {selectedGame.id === "hill" && <KingOfHillGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} presetPhoneSession={classSessionCode ? { code: classSessionCode } : undefined} onRequestPhoneSession={ensurePhoneSession} />}
               {selectedGame.id === "hotpotato" && <HotPotatoGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} level={hotPotatoLevel} />}
-              {selectedGame.id === "racetrack" && <RaceTrackGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} presetPhoneSession={classSessionCode ? { code: classSessionCode } : undefined} />}
-              {selectedGame.id === "whack" && <WordWhackGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} presetPhoneSession={classSessionCode ? { code: classSessionCode } : undefined} />}
+              {selectedGame.id === "racetrack" && <RaceTrackGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} presetPhoneSession={classSessionCode ? { code: classSessionCode } : undefined} onRequestPhoneSession={ensurePhoneSession} />}
+              {selectedGame.id === "whack" && <WordWhackGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} presetPhoneSession={classSessionCode ? { code: classSessionCode } : undefined} onRequestPhoneSession={ensurePhoneSession} />}
               {selectedGame.id === "rocket" && <RocketFuelGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} />}
               {selectedGame.id === "zombie" && <ZombieSiegeGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} paused={paused} onTogglePause={() => setPaused(p => !p)} />}
-              {selectedGame.id === "orderup" && <OrderUpGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} level={orderUpLevel} paused={paused} onTogglePause={() => setPaused(p => !p)} presetPhoneSession={classSessionCode ? { code: classSessionCode } : undefined} />}
-              {selectedGame.id === "bounty" && <BountyBoardGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} presetPhoneSession={classSessionCode ? { code: classSessionCode } : undefined} />}
+              {selectedGame.id === "orderup" && <OrderUpGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} level={orderUpLevel} paused={paused} onTogglePause={() => setPaused(p => !p)} presetPhoneSession={classSessionCode ? { code: classSessionCode } : undefined} onRequestPhoneSession={ensurePhoneSession} />}
+              {selectedGame.id === "bounty" && <BountyBoardGame questions={questions} teams={teams} forceFinalRef={forceFinalRef} serializeStateRef={serializeStateRef} initialGameState={resumeGameState} onUpdateScore={updateScore} onEnd={handleGameEnd} presetPhoneSession={classSessionCode ? { code: classSessionCode } : undefined} onRequestPhoneSession={ensurePhoneSession} />}
             </Suspense>
             </Sentry.ErrorBoundary>
           </div>

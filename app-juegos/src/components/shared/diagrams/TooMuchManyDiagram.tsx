@@ -8,7 +8,7 @@ export function TooMuchManyDiagram({ variant, accentColor = "#2563EB" }: { varia
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -41,23 +41,23 @@ export function TooMuchManyDiagram({ variant, accentColor = "#2563EB" }: { varia
         <rect x="10" y="14" width="140" height="82" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="80" y="33" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={accent}>TOO</text>
         <text x="80" y="47" textAnchor="middle" fontSize="8.5" fontWeight="700" fill={ink}>+ adjective/adverb</text>
-        <text x="80" y="60" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>(no noun at all)</text>
-        <text x="80" y="76" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>too hot</text>
-        <text x="80" y="90" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>too quietly</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="80" y="60" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>(no noun at all)</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="80" y="76" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>too hot</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="80" y="90" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>too quietly</text>
 
         <rect x="160" y="14" width="140" height="82" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="230" y="33" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={accent}>TOO MUCH</text>
         <text x="230" y="47" textAnchor="middle" fontSize="8.5" fontWeight="700" fill={ink}>+ uncountable noun</text>
-        <text x="230" y="60" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>(can't count it)</text>
-        <text x="230" y="76" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>too much sugar</text>
-        <text x="230" y="90" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>too much time</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="60" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>(can't count it)</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="76" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>too much sugar</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="90" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>too much time</text>
 
         <rect x="310" y="14" width="140" height="82" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="380" y="33" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={accent}>TOO MANY</text>
         <text x="380" y="47" textAnchor="middle" fontSize="8.5" fontWeight="700" fill={ink}>+ countable plural</text>
-        <text x="380" y="60" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>(can count it)</text>
-        <text x="380" y="76" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>too many people</text>
-        <text x="380" y="90" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>too many books</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="380" y="60" textAnchor="middle" fontSize="8" fontStyle="italic" fill={caption}>(can count it)</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="380" y="76" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>too many people</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="380" y="90" textAnchor="middle" fontSize="9" fontStyle="italic" fill={caption}>too many books</text>
 
         <text x="230" y="118" textAnchor="middle" fontSize="10.5" fontWeight="700" fill={ink}>quick check: can you count it? no noun → TOO · yes → MANY · no → MUCH</text>
 
@@ -65,7 +65,7 @@ export function TooMuchManyDiagram({ variant, accentColor = "#2563EB" }: { varia
 
         <text x="230" y="150" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={wrong}>✗ It's too much hot. · There's too many sugar. · too much people</text>
         <text x="230" y="168" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={right}>✓ It's too hot. · too much sugar. · too many people</text>
-        <text x="230" y="186" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>same rule for adverbs: she talks too quietly (not "too much quietly")</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="186" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>same rule for adverbs: she talks too quietly (not "too much quietly")</text>
       </svg>
     </div>
   );

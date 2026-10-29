@@ -5,6 +5,7 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="google-site-verification" content="fNBUsLKoXxZfqDxV6hgIYE6xnbUry8LmT3c0FIeF7Ck" />
+    <meta name="p:domain_verify" content="57a6ef02ebcee37d97ea30aa26869bec" />
     <meta name="theme-color" content="#0C1E3D" />
     <!-- Every screen has its own fixed colours (white cards, navy/sky gradients, amber buttons). Without
          this, a phone browser's automatic dark mode inverts them into dark grey cards and dark red
@@ -36,7 +37,13 @@
     <title>ClassCade — ESL Classroom Games & Grammar Lessons (A1-C1)</title>
   </head>
   <body>
-    <div id="root"></div>
+    <!-- Chrome's "Translate this page" rewrites DOM text nodes in place while React is also
+         managing this same subtree, which crashes React's reconciliation with errors like
+         "Failed to execute 'insertBefore' on 'Node': the node before which the new node is to be
+         inserted is not a child of this node" (seen live via Sentry, Android Chrome on /practice).
+         translate="no" + notranslate tell Chrome to leave this element's DOM alone — the browser's
+         translate option still appears for the page overall, it just won't touch what's inside. -->
+    <div id="root" translate="no" class="notranslate"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

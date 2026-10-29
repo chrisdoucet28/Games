@@ -9,7 +9,7 @@ export function GerundsDiagram({ variant, accentColor = "#2563EB" }: { variant: 
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -42,16 +42,16 @@ export function GerundsDiagram({ variant, accentColor = "#2563EB" }: { variant: 
         <rect x="20" y="12" width="195" height="72" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="117" y="30" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={accent}>PREPOSITION + -ING</text>
         <text x="117" y="46" textAnchor="middle" fontSize="8.5" fontWeight="700" fill={ink}>without, for, by, after, before...</text>
-        <text x="117" y="62" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>She left without saying goodbye.</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="117" y="62" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>She left without saying goodbye.</text>
         <text x="117" y="76" textAnchor="middle" fontSize="8" fontStyle="italic" fill={wrong}>not "without to say"</text>
 
         <rect x="245" y="12" width="195" height="72" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="342" y="30" textAnchor="middle" fontSize="10.5" fontWeight="800" fill={accent}>LOOK FORWARD TO + -ING</text>
         <text x="342" y="46" textAnchor="middle" fontSize="8.5" fontWeight="700" fill={ink}>"to" here is a preposition</text>
-        <text x="342" y="62" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>looking forward to seeing you.</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="342" y="62" textAnchor="middle" fontSize="8.5" fontStyle="italic" fill={caption}>looking forward to seeing you.</text>
         <text x="342" y="76" textAnchor="middle" fontSize="8" fontStyle="italic" fill={wrong}>not "to see" — it looks like one!</text>
 
-        <text x="230" y="102" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>also gerund: as a subject (Learning takes time) &amp; can't help / feel like / spend time</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="102" textAnchor="middle" fontSize="9.5" fontStyle="italic" fill={caption}>also gerund: as a subject (Learning takes time) &amp; can't help / feel like / spend time</text>
 
         <line x1="20" y1="114" x2="440" y2="114" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
 

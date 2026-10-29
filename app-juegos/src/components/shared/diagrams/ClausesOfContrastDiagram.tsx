@@ -9,7 +9,7 @@ export function ClausesOfContrastDiagram({ variant, accentColor = "#2563EB" }: {
   const isScreen = variant === "screen";
   const accent = isScreen ? accentColor : "#1F2937";
   const ink = "#1F2937";
-  const caption = "#6B7280";
+  const caption = isScreen ? "#6B7280" : "#4B5563";
   const fill = isScreen ? hexToRgba(accentColor, 0.12) : "white";
   const wrong = isScreen ? "#DC2626" : "#1F2937";
   const right = isScreen ? "#16A34A" : "#1F2937";
@@ -42,19 +42,19 @@ export function ClausesOfContrastDiagram({ variant, accentColor = "#2563EB" }: {
         <rect x="10" y="12" width="140" height="66" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="80" y="30" textAnchor="middle" fontSize="9.5" fontWeight="800" fill={accent}>ALTHOUGH · THOUGH</text>
         <text x="80" y="44" textAnchor="middle" fontSize="8" fontWeight="700" fill={ink}>+ full clause, one sentence</text>
-        <text x="80" y="60" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>Although it rained, we went.</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="80" y="60" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>Although it rained, we went.</text>
         <text x="80" y="72" textAnchor="middle" fontSize="7" fontStyle="italic" fill={wrong}>never + "but" too</text>
 
         <rect x="160" y="12" width="140" height="66" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="230" y="30" textAnchor="middle" fontSize="9.5" fontWeight="800" fill={accent}>DESPITE · IN SPITE OF</text>
         <text x="230" y="44" textAnchor="middle" fontSize="8" fontWeight="700" fill={ink}>+ noun/-ing, never a clause</text>
-        <text x="230" y="60" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>Despite the rain, we went.</text>
-        <text x="230" y="72" textAnchor="middle" fontSize="7" fontStyle="italic" fill={caption}>in spite OF · despite (no "of")</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="60" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>Despite the rain, we went.</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="230" y="72" textAnchor="middle" fontSize="7" fontStyle="italic" fill={caption}>in spite OF · despite (no "of")</text>
 
         <rect x="310" y="12" width="140" height="66" rx="8" fill={fill} stroke={accent} strokeWidth="2" />
         <text x="380" y="30" textAnchor="middle" fontSize="9.5" fontWeight="800" fill={accent}>HOWEVER · NEVERTHELESS</text>
         <text x="380" y="44" textAnchor="middle" fontSize="8" fontWeight="700" fill={ink}>starts a NEW sentence</text>
-        <text x="380" y="60" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>It rained. However, we went.</text>
+        <text fontWeight={isScreen ? undefined : "600"} x="380" y="60" textAnchor="middle" fontSize="7.5" fontStyle="italic" fill={caption}>It rained. However, we went.</text>
         <text x="380" y="72" textAnchor="middle" fontSize="7" fontStyle="italic" fill={wrong}>comma alone can't join clauses</text>
 
         <line x1="20" y1="94" x2="440" y2="94" stroke={caption} strokeWidth="1" strokeDasharray="2 4" />
