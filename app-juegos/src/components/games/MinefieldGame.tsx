@@ -283,11 +283,13 @@ export function MinefieldGame({ gridData, teams: propTeams, onUpdateScore, onEnd
     if (isMine) {
       setBoom(true);
       playSound("minefield");
-      updateScore(judgingTeam.id, -75);
+      // Was -75/+50 — bumped 1.5x each (same ratio) in a cross-game balance pass: Minefield's
+      // typical full-game total was near the bottom of the roster alongside Race Track/Vault Heist.
+      updateScore(judgingTeam.id, -110);
       setMinesHitByTeam(prev => ({ ...prev, [judgingTeam.id]: (prev[judgingTeam.id] ?? 0) + 1 }));
       setTimeout(() => setBoom(false), 2200);
     } else if (correct) {
-      updateScore(judgingTeam.id, 50);
+      updateScore(judgingTeam.id, 75);
       setCorrectByTeam(prev => ({ ...prev, [judgingTeam.id]: (prev[judgingTeam.id] ?? 0) + 1 }));
     }
 

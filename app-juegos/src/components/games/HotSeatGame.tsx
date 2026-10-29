@@ -24,7 +24,9 @@ const GM = GAME_MODES.find(g => g.id === "hotseat")!;
 
 const TOTAL_ROUNDS = 3;
 const TURN_SECONDS = 90;
-const POINTS_PER_WORD = 10;
+// Was 10 — teacher feedback: Hot Seat felt stingy next to a cross-game balance pass putting most
+// other games' typical full-game total in the 250-500 range; 15/word lands a typical game there too.
+const POINTS_PER_WORD = 15;
 
 const EMBERS = Array.from({ length: 16 }, (_, i) => ({
   left: (i * 41) % 100,
@@ -222,6 +224,10 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
     setTurnCorrect(0);
     setTimeLeft(TURN_SECONDS);
     setPhase("play");
+    // Whatever word was on screen when the previous team's turn ended (timed out or "End Turn")
+    // is still sitting in currentWord — draw a fresh one so the next team never starts on a word
+    // the last team already failed to finish.
+    setCurrentWord(drawWord());
   };
 
   const markCorrect = () => {
