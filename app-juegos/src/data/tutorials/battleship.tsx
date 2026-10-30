@@ -35,36 +35,42 @@ const OceanGrid = ({ target, hit, miss }: { target?: string; hit?: string; miss?
   );
 };
 
+// A small, consistent "this part is made up" flag — sits on its own line below the example
+// content (never inline beside it, which would throw off the content's own centering). The grid
+// and its coordinates are real (every game uses A-E / 1-5) — this only ever flags the SENTENCE,
+// since that's the part that depends on whatever topic the teacher picked for today's class.
+function ExampleTag() {
+  return (
+    <div style={{ marginTop: "8px" }}>
+      <span style={{ display: "inline-block", background: "#FDE68A", color: "#78350F", fontSize: "9px", fontWeight: 900, letterSpacing: "0.06em", padding: "2px 8px", borderRadius: "999px", textTransform: "uppercase" }}>
+        Just an example
+      </span>
+    </div>
+  );
+}
+
 export const BATTLESHIP_TUTORIAL_STEPS: TutorialStep[] = [
   {
-    narration: "The goal: every team hides ships somewhere on their own ocean grid. You try to find and sink the OTHER teams' hidden ships before they sink yours.",
-    visual: (
-      <div style={{ textAlign: "center" }}>
-        <div style={{ fontSize: "26px" }}>🚢🌊🔍</div>
-        <div style={{ fontSize: "11px", fontWeight: 700, color: "#1E3A8A", marginTop: "4px" }}>Find the hidden ships!</div>
-      </div>
-    ),
-  },
-  {
-    narration: "This is a team's ocean grid. Every square is labeled, like C3 (column C, row 3). Ships are hidden somewhere on this grid — you cannot see them.",
+    narration: "Battleship is a hide-and-seek grammar game. Every team secretly has ships hidden somewhere on their own grid — you're trying to find and sink everyone else's before they sink yours.",
     visual: <OceanGrid />,
   },
   {
-    narration: "On your turn: first, pick which enemy team to attack. Then, pick ONE square on their ocean to fire at.",
+    narration: "Here's what you actually do: on your turn, pick which team to attack, then pick ONE square on their grid to fire at.",
     visual: <OceanGrid target="C3" />,
   },
   {
-    narration: "Every square has its own 'find and fix the mistake' question. You must answer it to fire — but read the next step carefully, because your answer does NOT decide hit or miss!",
+    narration: "Firing takes an answer first — a 'find and fix the mistake' question. But here's the twist: your answer decides your POINTS, not whether you hit anything. The ships are in fixed spots regardless of what you answer.",
     visual: (
       <div style={{ textAlign: "center" }}>
         <div style={{ background: "#FEF2F2", border: "2px solid #EF4444", borderRadius: "10px", padding: "10px 16px", fontWeight: 700, color: "#7F1D1D", fontSize: "12px" }}>
           Find the mistake: "She go to school every day."
         </div>
+        <ExampleTag />
       </div>
     ),
   },
   {
-    narration: "If a real ship IS on that square: it is always a HIT, even if your answer was wrong. Correct answer = +60 pts. Wrong answer = still a hit, but only +30 pts.",
+    narration: "If a ship is really on that square: it's always a hit, whether you got the grammar right or not — right answers just earn more.",
     visual: (
       <div style={{ textAlign: "center" }}>
         <OceanGrid hit="C3" />
@@ -73,7 +79,7 @@ export const BATTLESHIP_TUTORIAL_STEPS: TutorialStep[] = [
     ),
   },
   {
-    narration: "If there is NO ship on that square: it is always a MISS, even if your answer was correct. Correct answer = +15 pts for trying. Wrong answer = +0 pts.",
+    narration: "If there's no ship there: it's always a miss, even with a correct answer — though a correct answer still earns a little for trying.",
     visual: (
       <div style={{ textAlign: "center" }}>
         <OceanGrid miss="D4" />
@@ -82,7 +88,18 @@ export const BATTLESHIP_TUTORIAL_STEPS: TutorialStep[] = [
     ),
   },
   {
-    narration: "Keep firing at a team until every one of their hidden ships is hit — that eliminates them! The last team with ships still afloat wins the battle.",
+    narration: "The exact numbers, if you want them: a hit with a correct answer is worth the most, a hit on a wrong answer is worth half that, a correct answer on a miss earns a little for trying, and a wrong answer on a miss earns nothing.",
+    visual: (
+      <div style={{ display: "flex", flexDirection: "column", gap: "4px", alignItems: "center", fontSize: "11px", fontWeight: 700, color: "#1E3A8A" }}>
+        <div>💥 Hit + correct = <strong>60 pts</strong></div>
+        <div>💥 Hit + wrong = <strong>30 pts</strong></div>
+        <div>🌊 Miss + correct = <strong>15 pts</strong></div>
+        <div>🌊 Miss + wrong = <strong>0 pts</strong></div>
+      </div>
+    ),
+  },
+  {
+    narration: "Keep firing at a team until every one of their hidden ships is hit — that eliminates them. Last team with ships still afloat wins the battle.",
     visual: (
       <div style={{ textAlign: "center" }}>
         <div style={{ fontSize: "26px" }}>🏆⚓</div>

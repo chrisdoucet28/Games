@@ -3,7 +3,7 @@ import type { TutorialStep } from "../../types";
 
 export const CASTLE_TUTORIAL_STEPS: TutorialStep[] = [
   {
-    narration: "Every team has their own castle with HP (health points). Answer questions to attack other castles, defend your own, or recover — protect your castle and knock the others down!",
+    narration: "Castle Siege is a battle game. Every team has their own castle, and the goal is simple: knock the other castles down while keeping yours standing — all by answering English questions.",
     visual: (
       <div style={{ textAlign: "center" }}>
         <div style={{ fontSize: "26px" }}>🏰</div>
@@ -12,7 +12,7 @@ export const CASTLE_TUTORIAL_STEPS: TutorialStep[] = [
     ),
   },
   {
-    narration: "Every turn, pick ONE of four actions. Each action uses a different kind of question: Sword = multiple choice, Magic = speaking, Defend = fix the mistake, Focus = fill in the blank.",
+    narration: "Here's what you actually do: every turn, pick ONE of four actions. Sword and Magic attack another team; Defend protects yours; Focus powers you up for Magic later.",
     visual: (
       <div style={{ display: "flex", justifyContent: "center", gap: "8px", flexWrap: "wrap" }}>
         {[["🗡️", "Sword"], ["✨", "Magic"], ["🛡️", "Defend"], ["🔮", "Focus"]].map(([icon, label]) => (
@@ -25,7 +25,7 @@ export const CASTLE_TUTORIAL_STEPS: TutorialStep[] = [
     ),
   },
   {
-    narration: "If you chose Sword or Magic (an attack), pick WHICH team's castle to hit — this matters most when there are 3 or more teams.",
+    narration: "Choosing Sword or Magic means picking WHICH team's castle to hit first — worth thinking about once there are 3 or more teams in play.",
     visual: (
       <div style={{ display: "flex", justifyContent: "center", gap: "10px" }}>
         <div style={{ textAlign: "center" }}>
@@ -40,29 +40,29 @@ export const CASTLE_TUTORIAL_STEPS: TutorialStep[] = [
     ),
   },
   {
-    narration: "Answer your question correctly to make the action work. Answer wrong, and your turn ends — nothing happens.",
+    narration: "Then answer the question that action gives you. Get it right and the action actually happens — an attack lands, a defense goes up. Get it wrong and nothing does; your turn just ends.",
     visual: (
       <div style={{ textAlign: "center" }}>
         <div style={{ fontSize: "26px" }}>⚔️</div>
-        <div style={{ fontWeight: 900, color: "#064E3B", fontSize: "14px", marginTop: "4px" }}>Team Red dealt 30 damage!</div>
+        <div style={{ fontWeight: 900, color: "#064E3B", fontSize: "14px", marginTop: "4px" }}>Team Red's Sword landed!</div>
       </div>
     ),
   },
   {
-    narration: "Magic hits much harder than Sword, but costs 50 MP — and you only start with 20 MP. Use Focus (no attack) to build your MP up before you can cast Magic.",
+    narration: "Magic hits much harder than Sword, but it costs MP you have to build up first — use Focus (no attack) to earn it before you can cast Magic.",
     visual: (
       <div style={{ textAlign: "center" }}>
-        <div style={{ fontSize: "11px", fontWeight: 800, color: "#7C3AED" }}>🔮 Focus: +30 MP this turn</div>
-        <div style={{ fontSize: "11px", fontWeight: 800, color: "#7C3AED", marginTop: "2px" }}>✨ Magic needs 50 MP to cast</div>
+        <div style={{ fontSize: "11px", fontWeight: 800, color: "#7C3AED" }}>🔮 Focus builds MP</div>
+        <div style={{ fontSize: "11px", fontWeight: 800, color: "#7C3AED", marginTop: "2px" }}>✨ Magic needs enough MP saved up to cast</div>
       </div>
     ),
   },
   {
-    narration: "Defend doesn't attack anyone. It puts up a shield that HALVES the damage you take for your next 3 turns, plus a few points for you.",
+    narration: "Defend doesn't attack anyone — it puts up a shield that cuts the damage you take for the next few turns.",
     visual: (
       <div style={{ textAlign: "center" }}>
         <div style={{ fontSize: "24px" }}>🛡️</div>
-        <div style={{ fontWeight: 800, color: "#0891B2", fontSize: "12px", marginTop: "4px" }}>Shield up — damage halved for 3 turns!</div>
+        <div style={{ fontWeight: 800, color: "#0891B2", fontSize: "12px", marginTop: "4px" }}>Shield up — damage reduced for a few turns!</div>
       </div>
     ),
   },

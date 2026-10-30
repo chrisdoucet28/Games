@@ -27,7 +27,7 @@ export const RELAY_TUTORIAL_STEPS: TutorialStep[] = [
     ),
   },
   {
-    narration: "Teams take turns — one question at a time. The person at the front asks a yes/no question (or takes a guess). The teacher (or, on phones, their teammates) knows the word and answers. Then the teacher taps \"Question asked\" and it's the next team's turn.",
+    narration: "Here's what you do: teams take turns, one question at a time. The person at the front asks a yes/no question (or takes a guess). The teacher — or, on phones, their teammates — knows the word and answers, then it's the next team's turn.",
     visual: (
       <div style={{ textAlign: "center", fontSize: "13px", fontWeight: 700, color: "#5EEAD4" }}>
         🙋 Red: "Is it something you wear?" · 🧑‍🏫 "Yes!"
@@ -38,7 +38,17 @@ export const RELAY_TUTORIAL_STEPS: TutorialStep[] = [
     ),
   },
   {
-    narration: "Everyone gets 5 questions of their own. The sooner you guess, the more you score: guess on your very first question and the word is worth 300 points — it drops with every question you use, down to 10 points if it takes all 5.",
+    narration: "Guessed it? The word is REVEALED and that person sits down — a teammate swaps in with a brand new word. Run out of questions without guessing and the next teammate swaps in anyway, so nobody gets stuck.",
+    visual: (
+      <div style={{ textAlign: "center" }}>
+        <div style={{ background: "#F0FDF4", border: "2px solid #22C55E", borderRadius: "10px", padding: "10px 14px", fontWeight: 700, color: "#14532D", fontSize: "13px" }}>
+          Team Red guessed "jacket"! ✅ Time to swap!
+        </div>
+      </div>
+    ),
+  },
+  {
+    narration: "Everyone gets 5 questions of their own, and the sooner you guess, the more it's worth — guessing right away is worth the most, and it drops a little with every question you use up.",
     visual: (
       <div style={{ textAlign: "center", fontSize: "13px", fontWeight: 700, color: "#374151", lineHeight: 1.7 }}>
         <div>Guess on question 1 → <strong style={{ color: "#15803D" }}>+300</strong></div>
@@ -46,16 +56,6 @@ export const RELAY_TUTORIAL_STEPS: TutorialStep[] = [
         <div>Guess on question 3 → <strong style={{ color: "#15803D" }}>+160</strong></div>
         <div>Guess on question 4 → <strong style={{ color: "#15803D" }}>+80</strong></div>
         <div>Guess on question 5 → <strong style={{ color: "#15803D" }}>+10</strong></div>
-      </div>
-    ),
-  },
-  {
-    narration: "Guessed it? The word is REVEALED and the person sits down — a teammate swaps in with a brand new word. Run out of your questions without guessing and the next teammate swaps in anyway, so nobody gets stuck.",
-    visual: (
-      <div style={{ textAlign: "center" }}>
-        <div style={{ background: "#F0FDF4", border: "2px solid #22C55E", borderRadius: "10px", padding: "10px 14px", fontWeight: 700, color: "#14532D", fontSize: "13px" }}>
-          Team Red guessed "jacket" on question 2! ✅ +230 — time to swap!
-        </div>
       </div>
     ),
   },
@@ -69,19 +69,10 @@ export const RELAY_TUTORIAL_STEPS: TutorialStep[] = [
     ),
   },
   {
-    narration: "On phones, everyone joins on their own phone. Teammates' phones show the word and hold the buttons; the asker's phone never shows it, and the turns rotate through everyone automatically.",
+    narration: "On phones, everyone joins on their own phone. Teammates' phones show the word and hold the buttons; the asker's phone never shows it, and turns rotate through everyone automatically.",
     visual: (
       <div style={{ textAlign: "center", fontSize: "13px", fontWeight: 700, color: "#94A3B8" }}>
         📱 asker: "You're up!" · 📱 teammate: the word + buttons
-      </div>
-    ),
-  },
-  {
-    narration: "The teacher picks how many people are on each team before the game starts — every one of them gets a turn at the front. The team with the most points once everyone has had their turn wins!",
-    visual: (
-      <div style={{ textAlign: "center" }}>
-        <div style={{ fontSize: "20px" }}>🏁</div>
-        <div style={{ fontSize: "11px", fontWeight: 700, color: "#374151" }}>5 questions per person — most points wins</div>
       </div>
     ),
   },
@@ -91,6 +82,15 @@ export const RELAY_TUTORIAL_STEPS: TutorialStep[] = [
       <div style={{ textAlign: "center" }}>
         <div style={{ fontSize: "22px" }}>🤖</div>
         <div style={{ fontSize: "11px", fontWeight: 700, color: "#374151" }}>Solo mode: a CPU teammate joins you</div>
+      </div>
+    ),
+  },
+  {
+    narration: "Every person on every team gets a turn at the front. Once everyone's had theirs, the team with the most points wins!",
+    visual: (
+      <div style={{ textAlign: "center" }}>
+        <div style={{ fontSize: "20px" }}>🏁</div>
+        <div style={{ fontSize: "11px", fontWeight: 700, color: "#374151" }}>Most points once everyone's had a turn wins</div>
       </div>
     ),
   },

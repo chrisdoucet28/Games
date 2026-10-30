@@ -67,18 +67,8 @@ function ZoneMap({ zones, owners = {}, highlight, attacker, small }: { zones: Zo
   );
 }
 
-const ROLL_DICE_STEP: TutorialStep = {
-  narration: "First, every team rolls one dice. The team with the highest number goes first. Then teams take turns, one at a time, in that order.",
-  visual: (
-    <div style={{ textAlign: "center" }}>
-      <div style={{ fontSize: "26px" }}>🎲</div>
-      <div style={{ fontSize: "12px", color: "#831843", fontWeight: 700, marginTop: "4px" }}>Team Red rolls 5 — Team Red goes first!</div>
-    </div>
-  ),
-};
-
 const CLAIM_STEP_GRAMMAR: TutorialStep = {
-  narration: "If you pick a FREE zone: you get a grammar question. Answer it correctly, and the zone is yours now! Answer wrong, and the zone stays free — your turn ends.",
+  narration: "Pick a FREE zone and you get a grammar question. Answer it correctly and the zone is yours now. Answer wrong and it just stays free — your turn ends.",
   visual: (
     <div style={{ textAlign: "center" }}>
       <ZoneMap zones={ZONES_GRAMMAR} owners={{ North: { name: "Red", color: "#DC2626" } }} highlight="North" />
@@ -88,7 +78,7 @@ const CLAIM_STEP_GRAMMAR: TutorialStep = {
 };
 
 const CLAIM_STEP_THEME: TutorialStep = {
-  narration: "If you pick a FREE zone: you get a speaking prompt for that zone's move (like Question or Example). Give your answer. If your team's answer counts, the zone is yours now!",
+  narration: "Pick a FREE zone and you get a speaking prompt for that zone's move (like Question or Example). If your team's answer counts, the zone is yours now.",
   visual: (
     <div style={{ textAlign: "center" }}>
       <ZoneMap zones={ZONES_THEME} owners={{ North: { name: "Red", color: "#DC2626" } }} highlight="North" />
@@ -98,7 +88,7 @@ const CLAIM_STEP_THEME: TutorialStep = {
 };
 
 const ATTACK_STEP_GRAMMAR: TutorialStep = {
-  narration: "If you pick a zone another team OWNS: this is an attack! Both teams get the exact same question. First correct answer wins it. Attacker wins = takes the zone + 30 bonus points. Defender wins = keeps the zone + 20 bonus points.",
+  narration: "Pick a zone another team OWNS and that's an attack — both teams get the exact same question, and whoever answers correctly first wins the showdown. Win it as the attacker and you take the zone (plus a bonus); win it as the defender and you keep it (plus a smaller one).",
   visual: (
     <div style={{ textAlign: "center" }}>
       <ZoneMap zones={ZONES_GRAMMAR} owners={{ North: { name: "Red", color: "#DC2626" } }} attacker={{ zoneId: "North", name: "Blue", color: "#2563EB" }} />
@@ -108,11 +98,21 @@ const ATTACK_STEP_GRAMMAR: TutorialStep = {
 };
 
 const ATTACK_STEP_THEME: TutorialStep = {
-  narration: "If you pick a zone another team OWNS: this is an attack! Both teams speak on the same prompt. The teacher decides which answer was better. The winner takes the zone (attacker: +30 pts) or keeps it (defender: +20 pts).",
+  narration: "Pick a zone another team OWNS and that's an attack — both teams speak on the same prompt, and the teacher decides whose answer was better. Win it as the attacker and you take the zone (plus a bonus); win it as the defender and you keep it (plus a smaller one).",
   visual: (
     <div style={{ textAlign: "center" }}>
       <ZoneMap zones={ZONES_THEME} owners={{ North: { name: "Red", color: "#DC2626" } }} attacker={{ zoneId: "North", name: "Blue", color: "#2563EB" }} />
       <div style={{ fontSize: "10px", color: "#831843", fontWeight: 700, marginTop: "4px" }}>Blue is attacking Red's Question zone!</div>
+    </div>
+  ),
+};
+
+const ROLL_DICE_STEP: TutorialStep = {
+  narration: "One more thing before your first turn: everyone rolls a dice to decide the order, highest first, then it's turn by turn from there.",
+  visual: (
+    <div style={{ textAlign: "center" }}>
+      <div style={{ fontSize: "26px" }}>🎲</div>
+      <div style={{ fontSize: "12px", color: "#831843", fontWeight: 700, marginTop: "4px" }}>Team Red rolls 5 — Team Red goes first!</div>
     </div>
   ),
 };
@@ -134,29 +134,29 @@ function ScoringVisual({ zones }: { zones: ZoneDef[] }) {
     <div style={{ display: "flex", justifyContent: "center", gap: "18px", alignItems: "flex-end" }}>
       <div style={{ textAlign: "center" }}>
         <ZoneMap zones={zones} owners={owners} small />
-        <div style={{ fontSize: "10px", fontWeight: 800, color: "#166534", marginTop: "4px" }}>Round 1 end: Red +80 score (8 control pts)</div>
+        <div style={{ fontSize: "10px", fontWeight: 800, color: "#166534", marginTop: "4px" }}>Round 1 end: Red scores for both zones</div>
       </div>
       <div style={{ fontSize: "16px", alignSelf: "center" }}>→</div>
       <div style={{ textAlign: "center" }}>
         <ZoneMap zones={zones} owners={owners} small />
-        <div style={{ fontSize: "10px", fontWeight: 800, color: "#166534", marginTop: "4px" }}>Round 2 end: Red +80 MORE</div>
+        <div style={{ fontSize: "10px", fontWeight: 800, color: "#166534", marginTop: "4px" }}>Round 2 end: Red scores again</div>
       </div>
     </div>
   );
 }
 
 const SCORING_STEP_GRAMMAR: TutorialStep = {
-  narration: "Every zone shows its own points, like +5/rnd. At the end of EVERY round, each team gets points for every zone they still own — again and again, round after round. Keeping the Center zone (👑) the whole game is worth a lot!",
+  narration: "The bigger picture: at the end of EVERY round, each team scores for every zone they still own — again and again, round after round. Holding onto the Center zone (👑) the whole game adds up fast.",
   visual: <ScoringVisual zones={ZONES_GRAMMAR} />,
 };
 
 const SCORING_STEP_THEME: TutorialStep = {
-  narration: "Every zone shows its own points, like +5/rnd. At the end of EVERY round, each team gets points for every zone they still own — again and again, round after round. Keeping the Opinion zone (👑) the whole game is worth a lot!",
+  narration: "The bigger picture: at the end of EVERY round, each team scores for every zone they still own — again and again, round after round. Holding onto the Opinion zone (👑) the whole game adds up fast.",
   visual: <ScoringVisual zones={ZONES_THEME} />,
 };
 
 const FINAL_STEP: TutorialStep = {
-  narration: "The number of rounds depends on how many teams are playing — fewer teams play more rounds, more teams play fewer. After the last round's points are added up, the team with the most total points wins!",
+  narration: "The number of rounds depends on how many teams are playing. After the last round's scores are added up, the team with the most total points wins!",
   visual: (
     <div style={{ textAlign: "center" }}>
       <div style={{ fontSize: "22px" }}>🏆</div>
@@ -167,16 +167,16 @@ const FINAL_STEP: TutorialStep = {
 
 export const HILL_THEME_STEPS: TutorialStep[] = [
   {
-    narration: "This is the board. In theme mode, each zone is a different move in a conversation: Question, Example, Agree/Disagree, Alternative, and Opinion (bigger classes add 4 more corner zones — Prediction, Comparison, Clarification, and Summary). Right now, every zone is Free — no team owns any of them yet.",
+    narration: "King of the Hill is a territory game. Teams fight over zones on a shared board by answering questions — whoever controls the most when the game ends wins. In theme mode, each zone is a different move in a conversation: Question, Example, Agree/Disagree, Alternative, and Opinion (bigger classes add 4 more corner zones). Right now every zone is Free.",
     visual: <ZoneMap zones={ZONES_THEME} />,
   },
-  ROLL_DICE_STEP,
   {
-    narration: "On your turn, pick ONE zone on the board. You can pick a Free zone, or you can attack a zone another team already owns.",
+    narration: "Here's what you actually do: on your turn, pick ONE zone on the board — a Free one to claim, or one another team already owns to attack.",
     visual: <ZoneMap zones={ZONES_THEME} highlight="North" />,
   },
   CLAIM_STEP_THEME,
   ATTACK_STEP_THEME,
+  ROLL_DICE_STEP,
   SOLO_DUEL_STEP,
   SCORING_STEP_THEME,
   FINAL_STEP,
@@ -184,16 +184,16 @@ export const HILL_THEME_STEPS: TutorialStep[] = [
 
 export const HILL_GRAMMAR_STEPS: TutorialStep[] = [
   {
-    narration: "This is the board. Zones are worth different points — North and South are worth 3, East and West are worth 2, and the Center (👑) is worth 5 (bigger classes add 4 more corner zones, worth 2 each). Right now, every zone is Free — no team owns any of them yet.",
+    narration: "King of the Hill is a territory game. Teams fight over zones on a shared board by answering grammar questions — whoever controls the most when the game ends wins. Some zones (like the Center 👑) are worth more than others, and bigger classes add 4 more corner zones. Right now every zone is Free.",
     visual: <ZoneMap zones={ZONES_GRAMMAR} />,
   },
-  ROLL_DICE_STEP,
   {
-    narration: "On your turn, pick ONE zone on the board. You can pick a Free zone, or you can attack a zone another team already owns.",
+    narration: "Here's what you actually do: on your turn, pick ONE zone on the board — a Free one to claim, or one another team already owns to attack.",
     visual: <ZoneMap zones={ZONES_GRAMMAR} highlight="North" />,
   },
   CLAIM_STEP_GRAMMAR,
   ATTACK_STEP_GRAMMAR,
+  ROLL_DICE_STEP,
   SOLO_DUEL_STEP,
   SCORING_STEP_GRAMMAR,
   FINAL_STEP,

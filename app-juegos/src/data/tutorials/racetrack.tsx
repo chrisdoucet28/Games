@@ -1,6 +1,20 @@
 // Tutorial mockup for RaceTrackGame.tsx — update if that game's rules/scoring change.
 import type { TutorialStep } from "../../types";
 
+// A small, consistent "this part is made up" flag — sits on its own line below the example
+// content (never inline beside it, which would throw off the content's own centering), since a
+// student shouldn't mistake a sample question for literally what they'll be asked — that depends
+// on whatever topic(s) the teacher picked for today's class.
+function ExampleTag() {
+  return (
+    <div style={{ marginTop: "8px" }}>
+      <span style={{ display: "inline-block", background: "#FDE68A", color: "#78350F", fontSize: "9px", fontWeight: 900, letterSpacing: "0.06em", padding: "2px 8px", borderRadius: "999px", textTransform: "uppercase" }}>
+        Just an example
+      </span>
+    </div>
+  );
+}
+
 // Mirrors RaceTrackGame.tsx's real ZONES (task type by track position) and SPACE_DEFS (special
 // space types) — a simplified straight strip instead of the real rectangular loop, since a loop
 // doesn't fit in a small modal, but the zones/spaces/order are the real ones.
@@ -33,39 +47,22 @@ const TrackStrip = ({ carPos }: { carPos: number }) => {
 
 export const RACETRACK_TUTORIAL_STEPS: TutorialStep[] = [
   {
-    narration: "This is the track. It goes from Start to Finish. The track has 4 zones. Early zones have short written tasks. Later zones move to speaking.",
+    narration: "Race Track is a board game your whole class races together on one shared track, from Start to Finish. It's split into 4 zones — early ones are short written tasks, later ones move to speaking.",
     visual: <TrackStrip carPos={0} />,
   },
   {
-    narration: "Every team sees the SAME question — the one matching the zone the leading team is in. There is no separate turn order.",
+    narration: "Here's what you do: everyone sees the SAME question, matching whichever zone the leading team is in. Raise your hand fast — the first team to answer correctly wins the roll.",
     visual: (
       <div style={{ textAlign: "center" }}>
         <div style={{ background: "#FEF2F2", border: "2px solid #EF4444", borderRadius: "10px", padding: "10px 16px", fontWeight: 700, color: "#7F1D1D", fontSize: "13px" }}>
           "She ___ (go) to school every day."
         </div>
+        <ExampleTag />
       </div>
     ),
   },
   {
-    narration: "Raise your hand fast! Whoever answers correctly FIRST rolls the dice. No one gets it right? Tap 'No one got it' — nobody moves.",
-    visual: (
-      <div style={{ textAlign: "center" }}>
-        <div style={{ fontSize: "22px" }}>🙋🙋‍♀️</div>
-        <div style={{ fontSize: "11px", fontWeight: 700, color: "#7F1D1D", marginTop: "4px" }}>First correct hand wins the roll!</div>
-      </div>
-    ),
-  },
-  {
-    narration: "Playing solo? There's no one to race against, so you get your own clock instead — pick easy, medium, or hard on the setup screen, then answer correctly before it runs out to roll.",
-    visual: (
-      <div style={{ textAlign: "center" }}>
-        <div style={{ fontSize: "22px" }}>⏱️</div>
-        <div style={{ fontSize: "11px", fontWeight: 700, color: "#7F1D1D", marginTop: "4px" }}>Solo mode: beat your own clock</div>
-      </div>
-    ),
-  },
-  {
-    narration: "The team that answered first rolls the dice and moves forward that many spaces on the track.",
+    narration: "Whoever won the roll rolls the dice and moves their team forward that many spaces on the track.",
     visual: (
       <div style={{ textAlign: "center" }}>
         <div style={{ fontSize: "24px" }}>🎲</div>
@@ -74,12 +71,12 @@ export const RACETRACK_TUTORIAL_STEPS: TutorialStep[] = [
     ),
   },
   {
-    narration: "Landing on a special space does something extra! ⚡Boost and 🚀Shortcut send you forward. 🟫Mud makes you skip a turn, and 💥Trap sends you back — 🛡️Shield can block those.",
+    narration: "Landing on a special space does something extra: ⚡Boost and 🚀Shortcut send you forward, 🟫Mud and 💥Trap set you back, 🛡️Shield blocks the bad ones, and 🪙Coin/❓spaces earn coins to spend on powerups between turns.",
     visual: (
       <div style={{ display: "flex", justifyContent: "center", gap: "6px", flexWrap: "wrap", maxWidth: "220px", margin: "0 auto" }}>
         {[
           { icon: "⚡", label: "+3" }, { icon: "🚀", label: "+5" }, { icon: "🟫", label: "skip" },
-          { icon: "💥", label: "-3" }, { icon: "🌀", label: "warp" }, { icon: "🛡️", label: "block" },
+          { icon: "💥", label: "-3" }, { icon: "🛡️", label: "block" }, { icon: "🪙", label: "coins" },
         ].map(s => (
           <div key={s.icon} style={{ background: "#F3F4F6", borderRadius: "8px", padding: "4px 6px", textAlign: "center", minWidth: "34px" }}>
             <div style={{ fontSize: "14px" }}>{s.icon}</div>
@@ -90,11 +87,11 @@ export const RACETRACK_TUTORIAL_STEPS: TutorialStep[] = [
     ),
   },
   {
-    narration: "🪙Coin spaces and ❓question spaces give you coins or powerups. Between turns, spend coins on things like a Rocket (+6 spaces) or a Banana Trap for other teams.",
+    narration: "Playing solo? There's no one to race against, so you get your own clock instead — pick easy, medium, or hard on the setup screen, then answer correctly before it runs out to roll.",
     visual: (
-      <div style={{ display: "flex", justifyContent: "center", gap: "8px" }}>
-        <span style={{ fontSize: "11px", fontWeight: 800, color: "#92400E" }}>🪙 10 coins</span>
-        <span style={{ fontSize: "11px", fontWeight: 800, color: "#92400E" }}>🚀 Rocket — 15 coins</span>
+      <div style={{ textAlign: "center" }}>
+        <div style={{ fontSize: "22px" }}>⏱️</div>
+        <div style={{ fontSize: "11px", fontWeight: 700, color: "#7F1D1D", marginTop: "4px" }}>Solo mode: beat your own clock</div>
       </div>
     ),
   },
