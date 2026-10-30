@@ -49,12 +49,40 @@ export type SaveProgressInput = {
   gameState: unknown | null;
 };
 
+// A session's active `teams` array only ever covers whoever was actually selected for that
+// sitting — it's never guaranteed to be the class's FULL roster (a teacher might run a quick
+// round with just one or two students, then come back later and select everyone again). Every
+// write path below used to persist `teams` as a flat overwrite, which meant running a session
+// with fewer students than the class's full history silently erased every other roster member's
+// score from the database the moment that narrower array was saved — not just hidden from the
+// current screen, actually gone. This merges onto whatever's already persisted instead: an
+// incoming team (matched by trimmed, case-insensitive name, same key handleSetup's own
+// score-continuity lookup and upsertTeamRoster already use) overwrites that name's entry, but any
+// OTHER name currently in the database and not present in this session's `teams` keeps its last
+// known score untouched rather than being dropped. The only way a name should actually disappear
+// from a class for good is the explicit "remove from roster" action (deleteFromTeamRoster) — never
+// just "wasn't picked for today."
+async function mergeTeamsForPersist(classId: string, teams: Team[]): Promise<Team[]> {
+  const { data, error } = await supabase
+    .from("classes")
+    .select("teams")
+    .eq("id", classId)
+    .single();
+  if (error) throw error;
+
+  const persisted: Team[] = (data?.teams as Team[] | null) ?? [];
+  const byName = new Map(persisted.map(t => [t.name.trim().toLowerCase(), t]));
+  teams.forEach(t => { byName.set(t.name.trim().toLowerCase(), t); });
+  return Array.from(byName.values());
+}
+
 // Called when the teacher explicitly hits "Save Progress" mid-game.
 export async function saveProgress(classId: string, input: SaveProgressInput): Promise<void> {
+  const mergedTeams = await mergeTeamsForPersist(classId, input.teams);
   const { error } = await supabase
     .from("classes")
     .update({
-      teams: input.teams,
+      teams: mergedTeams,
       in_progress: true,
       selected_topics: input.selectedTopics,
       selected_game: input.selectedGame,
@@ -71,10 +99,11 @@ export async function saveProgress(classId: string, input: SaveProgressInput): P
 // Called when a game reaches its natural end (or the teacher ends it outright) — the class's
 // running scores still need to persist, but there's nothing left to resume.
 export async function clearProgress(classId: string, teams: Team[]): Promise<void> {
+  const mergedTeams = await mergeTeamsForPersist(classId, teams);
   const { error } = await supabase
     .from("classes")
     .update({
-      teams,
+      teams: mergedTeams,
       in_progress: false,
       selected_topics: null,
       selected_game: null,
@@ -148,7 +177,8 @@ export async function upsertTeamRoster(
 // game-select screen, where a teacher may want to save scores between games with no specific
 // game yet chosen to "resume" into.
 export async function saveTeams(classId: string, teams: Team[]): Promise<void> {
-  const { error } = await supabase.from("classes").update({ teams }).eq("id", classId);
+  const mergedTeams = await mergeTeamsForPersist(classId, teams);
+  const { error } = await supabase.from("classes").update({ teams: mergedTeams }).eq("id", classId);
   if (error) throw error;
 }
 

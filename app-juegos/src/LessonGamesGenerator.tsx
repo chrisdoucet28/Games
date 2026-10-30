@@ -1008,11 +1008,29 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     setScreen("team-setup");
   };
 
-  const handleSetup = () => {
+  const handleSetup = async () => {
     const existingScores = Object.fromEntries(teams.map(t => [t.name, t.score]));
+    // `teams` only ever reflects whoever was active in the session that's currently loaded in
+    // memory — if that was a smaller lineup (e.g. one student played solo last time), a name not
+    // in it isn't necessarily new; it may just have sat out, with its real score still safely on
+    // the class record. Falling back straight to 0 here is exactly what silently zeroed out two
+    // students' scores after a one-student sitting and then selecting all three again (feedback:
+    // "the other two students had lost their points"). Fetch the class's actual last-persisted
+    // scores as a fallback before ever defaulting to 0, so a name only reads as genuinely new if
+    // it isn't in EITHER source.
+    let persistedScores: Record<string, number> = {};
+    if (activeClassId) {
+      try {
+        const cls = await getClass(activeClassId);
+        persistedScores = Object.fromEntries((cls?.teams ?? []).map(t => [t.name, t.score]));
+      } catch {
+        // Best-effort — if this fails, fall through to the same 0-default as before rather than
+        // blocking setup entirely over a transient fetch error.
+      }
+    }
     const builtTeams = teamNames.slice(0, numTeams).map((name, i) => ({
       id: i, name, color: TEAM_COLORS[teamColors[i] ?? i], mascot: teamMascots[i] ?? null,
-      score: existingScores[name] ?? 0,
+      score: existingScores[name] ?? persistedScores[name] ?? 0,
     }));
     setTeams(builtTeams);
     if (activeClassId) {
