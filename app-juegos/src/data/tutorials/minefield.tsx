@@ -9,13 +9,16 @@ import type { TutorialStep } from "../../types";
 const COLS = ["I", "She", "They", "We", "He"];
 const ROWS = ["go", "eat", "see", "buy", "write"];
 
-// A small, consistent "this part is made up" flag — every example sentence/word/tile in this
-// tutorial sits right under one of these, since the #1 confusion this tutorial exists to prevent
-// is a student locking onto the specific demo content as if it's literally what they'll be asked.
+// A small, consistent "this part is made up" flag — sits on its own line below the example
+// content (never inline beside it, which would throw off the content's own centering), since the
+// #1 confusion this tutorial exists to prevent is a student locking onto the specific demo content
+// as if it's literally what they'll be asked.
 function ExampleTag() {
   return (
-    <div style={{ display: "inline-block", background: "#FDE68A", color: "#78350F", fontSize: "9px", fontWeight: 900, letterSpacing: "0.06em", padding: "2px 8px", borderRadius: "999px", marginBottom: "6px", textTransform: "uppercase" }}>
-      Just an example
+    <div style={{ marginTop: "8px" }}>
+      <span style={{ display: "inline-block", background: "#FDE68A", color: "#78350F", fontSize: "9px", fontWeight: 900, letterSpacing: "0.06em", padding: "2px 8px", borderRadius: "999px", textTransform: "uppercase" }}>
+        Just an example
+      </span>
     </div>
   );
 }
@@ -59,10 +62,9 @@ export const MINEFIELD_TUTORIAL_STEPS: TutorialStep[] = [
     narration: "Here's what you actually do: on your turn, pick ONE hidden tile. Every tile mixes its column header with its row header into the start of a sentence — you finish it out loud.",
     visual: (
       <div style={{ textAlign: "center" }}>
-        <ExampleTag />
         <MineGrid pick={[1, 0]} />
         <div style={{ fontSize: "11px", color: "#4C1D95", fontWeight: 800, marginTop: "4px" }}>She + go = "She ___ (go) to..."</div>
-        <div style={{ fontSize: "10px", color: "#9CA3AF", fontWeight: 700, marginTop: "2px" }}>Your real grid uses whatever your teacher picked for today — not necessarily this.</div>
+        <ExampleTag />
       </div>
     ),
   },
@@ -70,10 +72,10 @@ export const MINEFIELD_TUTORIAL_STEPS: TutorialStep[] = [
     narration: "Say the complete sentence out loud. Your teacher listens and decides whether it's right — there's no typing, no app judging it for you.",
     visual: (
       <div style={{ textAlign: "center" }}>
-        <ExampleTag />
         <div style={{ background: "#F5F3FF", border: "2px solid #7C3AED", borderRadius: "10px", padding: "8px 14px", fontWeight: 700, color: "#4C1D95", fontSize: "12px" }}>
           "She went to the park yesterday."
         </div>
+        <ExampleTag />
       </div>
     ),
   },
