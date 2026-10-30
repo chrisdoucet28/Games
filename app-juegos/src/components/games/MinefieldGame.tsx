@@ -322,17 +322,20 @@ export function MinefieldGame({ gridData, teams: propTeams, onUpdateScore, onEnd
       <div style={{ textAlign: "center" }}>
         <style>{`.mf-btn:hover:not(:disabled){filter:brightness(1.08)} .mf-btn:active:not(:disabled){transform:translate(4px,4px) !important;box-shadow:0 0 0 #1A1A2E !important}`}</style>
         <div style={{ background: "#6D28D9", border: "4px solid #1A1A2E", boxShadow: "6px 6px 0 #1A1A2E", borderRadius: "20px", padding: "28px 24px", marginBottom: "10px", position: "relative", color: "white", maxWidth: "560px", margin: "0 auto 10px" }}>
-          <div style={{ fontWeight: "900", fontSize: "20px", marginBottom: "8px" }}>Minefield</div>
-          {topicRotation && (
-            <div style={{ background: "rgba(255,255,255,0.16)", borderRadius: "999px", padding: "6px 14px", display: "inline-block", fontWeight: "900", fontSize: "13px", marginBottom: "12px" }}>
-              Topic {gridIndex + 1} of {grids.length}
-            </div>
-          )}
-          <div style={{ fontWeight: "900", fontSize: "clamp(22px,4vw,30px)", marginBottom: "10px" }}>{topic}</div>
-          <div style={{ fontSize: "15px", lineHeight: 1.7, opacity: 0.95 }}>
-            Pick a tile, then speak one sentence combining its column and row label — but <strong>7 of the 25 tiles are hidden mines</strong>.
-            <br />
-            Correct = <strong>+50 pts</strong>. Hit a mine = <strong>-75 pts</strong>. Wrong on a safe tile = no points, but it stays in play.
+          <div style={{ fontWeight: "900", fontSize: "20px", marginBottom: "10px" }}>Minefield</div>
+          <div style={{ fontSize: "15px", lineHeight: 1.7, opacity: 0.95, marginBottom: "14px" }}>
+            A shared grid, picked together as a class. <strong>Pick a tile, speak one sentence combining its column and row label</strong> — but 7 of the 25 tiles are hidden mines, and nobody knows which ones until they're picked.
+          </div>
+          <div style={{ background: "rgba(255,255,255,0.12)", borderRadius: "12px", padding: "10px 14px" }}>
+            {topicRotation && (
+              <div style={{ fontSize: "11px", fontWeight: "800", opacity: 0.8, marginBottom: "4px", textTransform: "uppercase", letterSpacing: "0.04em" }}>
+                Right now — Topic {gridIndex + 1} of {grids.length}
+              </div>
+            )}
+            <div style={{ fontWeight: "900", fontSize: "clamp(18px,3vw,24px)" }}>{topic}</div>
+          </div>
+          <div style={{ fontSize: "13px", lineHeight: 1.6, opacity: 0.9, marginTop: "12px" }}>
+            Get it right on a safe tile and it's cleared for good. Hit a mine and it costs your team — wrong on a safe tile just means no one's learned anything about it yet, so it stays in play for another team to try.
             {topicRotation && <><br />It's one shared minefield all game — topics cycle through for variety until every safe tile is found.</>}
           </div>
         </div>

@@ -3,8 +3,22 @@ import type { TutorialStep } from "../../types";
 
 // Mirrors MinefieldGame.tsx's real 5x5 grid: column headers are subjects, row headers are verb
 // prompts, and picking a tile combines that column + row into one sentence to complete and speak.
+// These exact words ("I/She/They/We/He", "go/eat/see/buy/write") are a STAND-IN — every ExampleTag
+// next to this grid exists specifically so a student never mistakes this for what they'll actually
+// get (that depends entirely on whatever topic(s) the teacher picked for today's class).
 const COLS = ["I", "She", "They", "We", "He"];
 const ROWS = ["go", "eat", "see", "buy", "write"];
+
+// A small, consistent "this part is made up" flag — every example sentence/word/tile in this
+// tutorial sits right under one of these, since the #1 confusion this tutorial exists to prevent
+// is a student locking onto the specific demo content as if it's literally what they'll be asked.
+function ExampleTag() {
+  return (
+    <div style={{ display: "inline-block", background: "#FDE68A", color: "#78350F", fontSize: "9px", fontWeight: 900, letterSpacing: "0.06em", padding: "2px 8px", borderRadius: "999px", marginBottom: "6px", textTransform: "uppercase" }}>
+      Just an example
+    </div>
+  );
+}
 
 const MineGrid = ({ pick, boom, safe }: { pick?: [number, number]; boom?: [number, number]; safe?: [number, number] }) => (
   <div style={{ display: "inline-block" }}>
@@ -33,22 +47,30 @@ const MineGrid = ({ pick, boom, safe }: { pick?: [number, number]; boom?: [numbe
 
 export const MINEFIELD_TUTORIAL_STEPS: TutorialStep[] = [
   {
-    narration: "This is the minefield. Each column at the top is a subject, like 'She' or 'They'. Each row on the side is a verb prompt, like 'go' or 'eat'. 7 of the 25 tiles are hidden mines — you don't know which ones yet!",
-    visual: <MineGrid />,
-  },
-  {
-    narration: "On your turn, pick ONE hidden tile. That tile combines its column subject with its row prompt into one sentence you must complete.",
+    narration: "Minefield is a speaking game your whole class plays together on one shared grid. Most tiles are safe — a handful are hidden mines nobody can see yet.",
     visual: (
       <div style={{ textAlign: "center" }}>
-        <MineGrid pick={[1, 0]} />
-        <div style={{ fontSize: "11px", color: "#4C1D95", fontWeight: 800, marginTop: "4px" }}>She + go = "She ___ (go) to..."</div>
+        <MineGrid />
+        <div style={{ fontSize: "11px", color: "#6B7280", fontWeight: 700, marginTop: "6px" }}>25 tiles. A few are mines. Nobody knows which yet.</div>
       </div>
     ),
   },
   {
-    narration: "Say the complete sentence out loud, using the correct verb form. The teacher listens and judges whether it's right.",
+    narration: "Here's what you actually do: on your turn, pick ONE hidden tile. Every tile mixes its column header with its row header into the start of a sentence — you finish it out loud.",
     visual: (
       <div style={{ textAlign: "center" }}>
+        <ExampleTag />
+        <MineGrid pick={[1, 0]} />
+        <div style={{ fontSize: "11px", color: "#4C1D95", fontWeight: 800, marginTop: "4px" }}>She + go = "She ___ (go) to..."</div>
+        <div style={{ fontSize: "10px", color: "#9CA3AF", fontWeight: 700, marginTop: "2px" }}>Your real grid uses whatever your teacher picked for today — not necessarily this.</div>
+      </div>
+    ),
+  },
+  {
+    narration: "Say the complete sentence out loud. Your teacher listens and decides whether it's right — there's no typing, no app judging it for you.",
+    visual: (
+      <div style={{ textAlign: "center" }}>
+        <ExampleTag />
         <div style={{ background: "#F5F3FF", border: "2px solid #7C3AED", borderRadius: "10px", padding: "8px 14px", fontWeight: 700, color: "#4C1D95", fontSize: "12px" }}>
           "She went to the park yesterday."
         </div>
@@ -56,33 +78,40 @@ export const MINEFIELD_TUTORIAL_STEPS: TutorialStep[] = [
     ),
   },
   {
-    narration: "Correct, and it's NOT a mine: you earn +75 points, and that tile turns green and stays safe — it can't hurt anyone now.",
+    narration: "Get it right on a safe tile and it's cleared for good — green, done, can't hurt anyone. Get it wrong on a safe tile and nothing bad happens; it just stays hidden for another team to try.",
     visual: (
-      <div style={{ textAlign: "center" }}>
-        <MineGrid safe={[1, 0]} />
-        <div style={{ fontSize: "11px", fontWeight: 800, color: "#166534", marginTop: "4px" }}>✅ +75 pts — tile is now safe!</div>
+      <div style={{ display: "flex", justifyContent: "center", gap: "18px", alignItems: "center" }}>
+        <div style={{ textAlign: "center" }}>
+          <MineGrid safe={[1, 0]} />
+          <div style={{ fontSize: "10px", fontWeight: 800, color: "#166534", marginTop: "4px" }}>Right → safe for good</div>
+        </div>
+        <div style={{ textAlign: "center" }}>
+          <div style={{ fontSize: "10px", fontWeight: 800, color: "#9D174D" }}>Wrong → stays hidden,<br />try again later</div>
+        </div>
       </div>
     ),
   },
   {
-    narration: "Wrong answer: you get 0 points, but nothing explodes. The tile just stays hidden, ready for another team to try later.",
-    visual: (
-      <div style={{ textAlign: "center" }}>
-        <div style={{ fontSize: "11px", fontWeight: 800, color: "#9D174D" }}>❌ 0 pts — the tile stays hidden.</div>
-      </div>
-    ),
-  },
-  {
-    narration: "If the tile you picked IS a hidden mine: BOOM! You lose 110 points, no matter what you said. Be careful which tiles you choose!",
+    narration: "But if the tile you picked IS a hidden mine — right or wrong answer, doesn't matter — BOOM. That one costs your team, so think about which tiles are worth the risk.",
     visual: (
       <div style={{ textAlign: "center" }}>
         <MineGrid boom={[3, 2]} />
-        <div style={{ fontSize: "11px", fontWeight: 800, color: "#B91C1C", marginTop: "4px" }}>💥 -110 pts — that was a mine!</div>
+        <div style={{ fontSize: "11px", fontWeight: 800, color: "#B91C1C", marginTop: "4px" }}>💥 A mine — ouch.</div>
       </div>
     ),
   },
   {
-    narration: "Keep going until every safe tile has been found. The team with the most points when the field is clear wins!",
+    narration: "If your teacher picked more than one topic, the grid's words rotate through each one in turns as you play — same board, same mines, just a fresh set of prompts each round.",
+    visual: (
+      <div style={{ textAlign: "center" }}>
+        <div style={{ background: "rgba(109,40,217,0.1)", borderRadius: "999px", padding: "6px 14px", display: "inline-block", fontWeight: "900", fontSize: "12px", color: "#4C1D95" }}>
+          Topic 1 of 3 → Topic 2 of 3 → Topic 3 of 3 → back to 1...
+        </div>
+      </div>
+    ),
+  },
+  {
+    narration: "Keep going until every safe tile has been found. Whoever has the most points when the field is clear wins — a correct answer earns points, a mine costs some.",
     visual: (
       <div style={{ textAlign: "center" }}>
         <div style={{ fontSize: "26px" }}>💣</div>
