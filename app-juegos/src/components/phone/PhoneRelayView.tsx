@@ -108,7 +108,9 @@ export function PhoneRelayView({ state, teamId, deviceId, onAction }: Props) {
           <div style={{ marginTop: "12px", fontSize: "14px", fontWeight: "800", color: "#99F6E4" }}>
             {teamFinished
               ? (state.allTeamsFinished ? "That was the last turn — every team is finished!" : "Your team is finished! Everyone sit down and wait for the other teams.")
-              : iAmAsker ? "You're up next — get ready to ask!" : answeringForOtherTeam ? "They swap in someone new next turn." : "Time to swap — a teammate takes over!"}
+              : iAmAsker ? "You're up next — get ready to ask!"
+              : answeringForOtherTeam ? (state.revealStartsNewRound ? "They're going again with a new word next turn." : "They swap in someone new next turn.")
+              : (state.revealStartsNewRound ? "Round complete — your team goes again with a new word!" : "Time to swap — a teammate takes over!")}
           </div>
         </div>
         {iAmAnswerer && <button onClick={() => send("next")} style={bigButton("linear-gradient(135deg,#0D9488,#14B8A6)")}>Next team →</button>}
@@ -139,10 +141,14 @@ export function PhoneRelayView({ state, teamId, deviceId, onAction }: Props) {
           <div style={{ fontSize: "44px", marginBottom: "8px" }}>🙋</div>
           <div style={{ fontWeight: "900", fontSize: "22px", color: "#5EEAD4", marginBottom: "10px" }}>You're up!</div>
           <div style={{ fontSize: "15px", lineHeight: 1.6, color: "#CCFBF1", fontWeight: "600" }}>
-            Walk to the front and ask <strong>one yes/no question</strong> — or take a guess — to find out your team's word. Don't look at anyone's phone!
+            {state.isSolo
+              ? <>Ask <strong>one yes/no question</strong> — or take a guess — to find out your word. Don't peek at the word!</>
+              : <>Walk to the front and ask <strong>one yes/no question</strong> — or take a guess — to find out your team's word. Don't peek at the word!</>}
           </div>
         </div>
-        <div style={{ marginTop: "14px", fontSize: "13px", fontWeight: "700", color: "#99F6E4" }}>Someone who knows the word will answer yes or no.</div>
+        <div style={{ marginTop: "14px", fontSize: "13px", fontWeight: "700", color: "#99F6E4" }}>
+          {state.isSolo ? "Whoever's running the screen knows the word and will answer yes or no." : "Someone who knows the word will answer yes or no."}
+        </div>
       </div>
     );
   }

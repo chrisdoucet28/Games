@@ -60,11 +60,11 @@ export const RELAY_TUTORIAL_STEPS: TutorialStep[] = [
     ),
   },
   {
-    narration: "When the LAST person on a team finishes, the whole team is done — everyone on that team sits down and waits while the other teams finish their turns.",
+    narration: "Once EVERY person on a team has had a turn, that's one round done — the team loops back to the first person again with a brand new word, for as many rounds as the teacher picked. Only once the LAST round ends does the team sit down for good.",
     visual: (
       <div style={{ textAlign: "center" }}>
-        <div style={{ fontSize: "26px" }}>🪑🪑🪑</div>
-        <div style={{ fontSize: "12px", fontWeight: 700, color: "#374151" }}>Team Red is finished — sit down and wait!</div>
+        <div style={{ fontSize: "26px" }}>🔁</div>
+        <div style={{ fontSize: "12px", fontWeight: 700, color: "#374151" }}>Round 1 complete! Team Red goes again — round 2 of 3.</div>
       </div>
     ),
   },
@@ -86,11 +86,11 @@ export const RELAY_TUTORIAL_STEPS: TutorialStep[] = [
     ),
   },
   {
-    narration: "Every person on every team gets a turn at the front. Once everyone's had theirs, the team with the most points wins!",
+    narration: "The teacher picks how many rounds to play on the welcome screen — once every team has finished its last round, the game ends and the team with the most points wins!",
     visual: (
       <div style={{ textAlign: "center" }}>
         <div style={{ fontSize: "20px" }}>🏁</div>
-        <div style={{ fontSize: "11px", fontWeight: 700, color: "#374151" }}>Most points once everyone's had a turn wins</div>
+        <div style={{ fontSize: "11px", fontWeight: 700, color: "#374151" }}>Most points once every round is done wins</div>
       </div>
     ),
   },

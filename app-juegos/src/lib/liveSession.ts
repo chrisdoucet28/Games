@@ -302,6 +302,15 @@ export type RelayStatePayload = {
   revealKind?: "guessed" | "outOfQuestions";
   revealPoints?: number;
   revealTeamFinished?: boolean;
+  // Only set during "reveal": whether this reveal is a team completing a full lap through its
+  // roster (looping back to person 1 with a fresh word for the next round) rather than an ordinary
+  // "next person" swap — phones use this so they never say "someone new" when it's actually the
+  // same person starting their next round (always true with one person per team).
+  revealStartsNewRound?: boolean;
+  // Whether this is a solo (1 real team, playing against a CPU) sitting — phones use this to soften
+  // in-person-classroom phrasing ("walk to the front", "someone who knows the word") that doesn't
+  // fit a single remote/solo student with no teammates or classmates physically present.
+  isSolo: boolean;
   allTeamsFinished?: boolean;
   connectedTeamIds: (string | number)[];
   ts: number;

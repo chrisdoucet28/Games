@@ -75,6 +75,9 @@ type RelaySnapshot = {
   // Optional: a game saved before speed-bonus scoring only has wordsByTeam (every word was a flat 10).
   pointsByTeam?: Record<string | number, number>;
   peoplePerTeam: number;
+  // How many full laps through the roster to play. Optional: a game saved before this existed only
+  // ever played a single lap (see validateRelaySnapshot's own default below).
+  roundsCount?: number;
   // Solo only.
   difficulty?: Difficulty;
   // The teacher's own word list, if they used one — a resumed game keeps playing it.
@@ -86,10 +89,15 @@ function validateRelaySnapshot(raw: unknown, teamCount: number): RelaySnapshot |
   if (!s) return undefined;
   if (typeof s.teamIndex !== "number" || s.teamIndex < 0 || s.teamIndex >= teamCount) return undefined;
   const peoplePerTeam = typeof s.peoplePerTeam === "number" && s.peoplePerTeam >= 1 ? Math.min(s.peoplePerTeam, 6) : 1;
+  // A game saved before rounds existed only ever played one lap through the roster — default to 1
+  // (not the fresh-game default of 3) so a resumed older game keeps behaving exactly as it did when
+  // it was saved, instead of suddenly gaining extra rounds nobody asked for.
+  const roundsCount = typeof s.roundsCount === "number" && s.roundsCount >= 1 ? Math.min(s.roundsCount, 8) : 1;
+  const totalTurnsPerTeam = peoplePerTeam * roundsCount;
   const slotIndexByTeam: Record<string, number> = {};
   if (s.slotIndexByTeam && typeof s.slotIndexByTeam === "object") {
     Object.entries(s.slotIndexByTeam).forEach(([k, v]) => {
-      if (typeof v === "number" && v >= 0) slotIndexByTeam[k] = Math.min(v, peoplePerTeam);
+      if (typeof v === "number" && v >= 0) slotIndexByTeam[k] = Math.min(v, totalTurnsPerTeam);
     });
   }
   const difficulty = s.difficulty === "easy" || s.difficulty === "hard" ? s.difficulty : "medium";
@@ -99,7 +107,7 @@ function validateRelaySnapshot(raw: unknown, teamCount: number): RelaySnapshot |
   const wordsByTeam = s.wordsByTeam ?? {};
   // A game saved before speed-bonus scoring scored every word a flat 10.
   const pointsByTeam = s.pointsByTeam ?? Object.fromEntries(Object.entries(wordsByTeam).map(([k, w]) => [k, (w as number) * 10]));
-  return { teamIndex: s.teamIndex, slotIndexByTeam, wordsByTeam, pointsByTeam, peoplePerTeam, difficulty, customWords };
+  return { teamIndex: s.teamIndex, slotIndexByTeam, wordsByTeam, pointsByTeam, peoplePerTeam, roundsCount, difficulty, customWords };
 }
 
 export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState, presetPhoneSession, onRequestPhoneSession }: GameProps) {
@@ -159,17 +167,27 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
   // How many people the teacher said are on each team (uniform across every team, not a per-team
   // roster — the teacher's own explicit call, so a small team doesn't finish before a big one).
   const [peoplePerTeam, setPeoplePerTeam] = useState(() => resumed?.peoplePerTeam ?? 1);
-  // How many questions the person in `slot` gets — 0 once the slot is past the team's last person.
-  const questionsForSlot = (slot: number): number => (slot >= peoplePerTeam ? 0 : QUESTIONS_PER_PERSON);
+  // How many full laps through that roster to play before the game ends — same picker idiom as
+  // peoplePerTeam. Without this a team was permanently done the moment its own roster had each had
+  // one turn (one word per person, ever, then sit out the rest of the game) — far too short,
+  // especially a solo team's default "1 person per team", which used to mean a one-word game.
+  // Defaults to 3, matching Hot Seat's own fixed TOTAL_ROUNDS.
+  const [roundsCount, setRoundsCount] = useState(() => resumed?.roundsCount ?? 3);
+  // A team's lifetime turn budget: every person on the roster, repeated for roundsCount laps —
+  // replaces the old flat peoplePerTeam cap everywhere a team's "am I finished" check used it.
+  const totalTurnsPerTeam = peoplePerTeam * roundsCount;
+  // How many questions the person in `slot` gets — 0 once the slot is past the team's lifetime budget.
+  const questionsForSlot = (slot: number): number => (slot >= totalTurnsPerTeam ? 0 : QUESTIONS_PER_PERSON);
   const [difficulty, setDifficulty] = useState<Difficulty>(() => resumed?.difficulty ?? "medium");
   const [teamIndex, setTeamIndex] = useState(() => resumed?.teamIndex ?? 0);
   // Bumped once per resolveTurn call — see the CPU turn effect's own comment for why this exists
   // (phase alone isn't always enough to detect a genuinely new CPU turn).
   const [turnSeq, setTurnSeq] = useState(0);
-  // Which numbered person (0-based, up to peoplePerTeam - 1) is currently up for each team — a team
-  // is finished once its own slot index reaches peoplePerTeam. Replaces the old single global
-  // roundIndex, which tracked one shared budget for the whole team regardless of how many people
-  // were on it.
+  // Cumulative turns a team has used across its whole game (NOT reset at a round boundary) — a
+  // team is finished once this reaches totalTurnsPerTeam. The current person within the current
+  // round is slot % peoplePerTeam; the current round is Math.floor(slot / peoplePerTeam). Replaces
+  // the old single global roundIndex, which tracked one shared budget for the whole team regardless
+  // of how many people were on it.
   const [slotIndexByTeam, setSlotIndexByTeam] = useState<Record<string, number>>(() => resumed?.slotIndexByTeam ?? {});
   // How many of the CURRENT slot's own questions (see questionsForSlot) have been used — always starts fresh on
   // resume (same "don't try to restore exact mid-word progress" philosophy as the original
@@ -206,9 +224,9 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
 
   useEffect(() => {
     if (!serializeStateRef) return;
-    serializeStateRef.current = (): RelaySnapshot => ({ teamIndex, slotIndexByTeam, wordsByTeam, pointsByTeam, peoplePerTeam, difficulty, customWords });
+    serializeStateRef.current = (): RelaySnapshot => ({ teamIndex, slotIndexByTeam, wordsByTeam, pointsByTeam, peoplePerTeam, roundsCount, difficulty, customWords });
     return () => { if (serializeStateRef) serializeStateRef.current = null; };
-  }, [serializeStateRef, teamIndex, slotIndexByTeam, wordsByTeam, pointsByTeam, peoplePerTeam, difficulty, customWords]);
+  }, [serializeStateRef, teamIndex, slotIndexByTeam, wordsByTeam, pointsByTeam, peoplePerTeam, roundsCount, difficulty, customWords]);
 
   // Every real team has its own hidden word at all times — the CPU never does (see cpuTurnEffect
   // below), so it's drawn from propTeams, not the CPU-augmented `teams`, to avoid burning a real
@@ -238,8 +256,14 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
   const currentTeam = teams[teamIndex];
   const currentKey = String(currentTeam?.id);
   const isCpuTurn = isSolo && currentTeam?.id === cpuRef.current?.id;
-  const isTeamFinished = (teamKey: string) => (slotIndexByTeam[teamKey] ?? 0) >= peoplePerTeam;
+  const isTeamFinished = (teamKey: string) => (slotIndexByTeam[teamKey] ?? 0) >= totalTurnsPerTeam;
   const allTeamsFinished = teams.every(t => isTeamFinished(String(t.id)));
+  // Whether the CURRENT reveal is a team completing a full lap (finishing this round and looping
+  // back to person 1 with a fresh word) rather than an ordinary "next person" swap — with
+  // peoplePerTeam === 1 this is every non-finishing reveal, since there's only ever one person to
+  // loop back to. Drives both the screen's own reveal message and the phones' (never say "someone
+  // new" when it's actually the same person starting their next round).
+  const revealStartsNewRound = !revealInfo.teamFinished && peoplePerTeam > 0 && (slotIndexByTeam[currentKey] ?? 0) % peoplePerTeam === 0;
 
   // --- Who is asking, and who answers (phone mode) ---
   const rotatedDevices = (teamKey: string): string[] => {
@@ -280,13 +304,14 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
     setAskerByTeam(prev => ({ ...prev, [teamKey]: next }));
   };
 
-  // Finds the next team still short of peoplePerTeam, cycling from just after `fromIndex` — skips
-  // any team that's already used up every one of its slots. Returns -1 once every team is done.
+  // Finds the next team still short of totalTurnsPerTeam, cycling from just after `fromIndex` —
+  // skips any team that's already used up its full lifetime turn budget. Returns -1 once every team
+  // is done.
   const findNextActiveTeamIndex = (fromIndex: number, slotIndexSnapshot: Record<string, number>): number => {
     for (let step = 1; step <= teams.length; step++) {
       const idx = (fromIndex + step) % teams.length;
       const key = String(teams[idx].id);
-      if ((slotIndexSnapshot[key] ?? 0) < peoplePerTeam) return idx;
+      if ((slotIndexSnapshot[key] ?? 0) < totalTurnsPerTeam) return idx;
     }
     return -1;
   };
@@ -336,7 +361,7 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
       setPointsByTeam(prev => ({ ...prev, [currentTeam.id]: (prev[currentTeam.id] ?? 0) + points }));
       playSound("relay");
       setRevealWord(teamWords[key] ?? "");
-      setRevealInfo({ kind: "guessed", points, teamFinished: prevSlot + 1 >= peoplePerTeam });
+      setRevealInfo({ kind: "guessed", points, teamFinished: prevSlot + 1 >= totalTurnsPerTeam });
       newSlot = prevSlot + 1;
       newUsed = 0;
       swapped = true;
@@ -354,7 +379,7 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
     setQuestionsUsedByTeam(prev => ({ ...prev, [key]: newUsed }));
     if (swapped) {
       setNeedsReadyByTeam(nextNeedsReadyByTeam);
-      if (newSlot < peoplePerTeam && key !== String(cpuRef.current?.id)) {
+      if (newSlot < totalTurnsPerTeam && key !== String(cpuRef.current?.id)) {
         const fresh = drawWord();
         setTeamWords(prev => ({ ...prev, [key]: fresh }));
       }
@@ -368,7 +393,7 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
     // CPU, which has no one standing at the front and no real word to show.
     if (exhausted && !isCpuTurn) {
       setRevealWord(teamWords[key] ?? "");
-      setRevealInfo({ kind: "outOfQuestions", points: 0, teamFinished: newSlot >= peoplePerTeam });
+      setRevealInfo({ kind: "outOfQuestions", points: 0, teamFinished: newSlot >= totalTurnsPerTeam });
       setPhase("reveal");
       return;
     }
@@ -437,12 +462,14 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
       screenShowsWord,
       phoneCountByTeam: countOut,
       questionsLeftByTeam: leftOut,
-      questionsPerTeam: QUESTIONS_PER_PERSON * peoplePerTeam,
+      questionsPerTeam: QUESTIONS_PER_PERSON * totalTurnsPerTeam,
       wordsByTeam: wordsOut,
       pointsByTeam: pointsOut,
       revealKind: phase === "reveal" ? revealInfo.kind : undefined,
       revealPoints: phase === "reveal" ? revealInfo.points : undefined,
       revealTeamFinished: phase === "reveal" ? revealInfo.teamFinished : undefined,
+      revealStartsNewRound: phase === "reveal" ? revealStartsNewRound : undefined,
+      isSolo,
       allTeamsFinished,
       connectedTeamIds: Array.from(connectedTeamIds),
       ts: Date.now(),
@@ -607,10 +634,10 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
             <div style={{ marginBottom: "10px" }}><Icon name="megaphone" size={36} /></div>
             <div style={{ fontWeight: "900", fontSize: "20px", marginBottom: "10px", color: "#5EEAD4" }}>Word Relay</div>
             <div style={{ fontSize: "15px", lineHeight: 1.7, opacity: 0.95 }}>
-              {propTeams.length === 1 && peoplePerTeam === 1 ? "Your team has a hidden word. " : "Every team has its own hidden word. "}
+              {isSolo ? "You have a hidden word each round. " : "Every team has its own hidden word. "}
               <strong style={{ color: "#5EEAD4" }}>One person from each team comes to the front</strong> and asks yes/no questions to work it out — one question at a time, team by team.
               <br />
-              Guess it in as few questions as you can: up to <strong style={{ color: "#5EEAD4" }}>{MAX_POINTS} points</strong> for your 1st question, down to {MIN_POINTS} by your {QUESTIONS_PER_PERSON}th. Then the next teammate swaps in!
+              Guess it in as few questions as you can: up to <strong style={{ color: "#5EEAD4" }}>{MAX_POINTS} points</strong> for your 1st question, down to {MIN_POINTS} by your {QUESTIONS_PER_PERSON}th. Then {isSolo ? "you go again with a new word" : "the next teammate swaps in"}!
             </div>
           </div>
           <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "18px" }}>
@@ -638,6 +665,29 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
                   }}>{n}</button>
                 );
               })}
+            </div>
+          </div>
+
+          {/* How many full laps through that roster to play — without this a team was done for good
+              the moment its own roster had each had one turn (one word per person, ever). Same
+              picker idiom as peoplePerTeam, applied uniformly for the same reason. */}
+          <div style={{ marginBottom: "20px" }}>
+            <div style={{ fontSize: "13px", color: "#99F6E4", fontWeight: "700", marginBottom: "10px" }}>How many rounds?</div>
+            <div style={{ display: "flex", gap: "8px", justifyContent: "center", flexWrap: "wrap" }}>
+              {[1, 2, 3, 4, 5, 6].map(n => {
+                const selected = roundsCount === n;
+                return (
+                  <button key={n} onClick={() => setRoundsCount(n)} className="rl-btn" style={{
+                    width: "40px", height: "40px", borderRadius: "10px", fontWeight: "900", fontSize: "15px", cursor: "pointer",
+                    border: `2px solid ${selected ? "#2DD4BF" : "rgba(255,255,255,0.2)"}`,
+                    background: selected ? "rgba(45,212,191,0.2)" : "rgba(255,255,255,0.05)",
+                    color: selected ? "#5EEAD4" : "#94A3B8",
+                  }}>{n}</button>
+                );
+              })}
+            </div>
+            <div style={{ fontSize: "12px", color: "#99F6E499", fontWeight: "600", marginTop: "8px" }}>
+              Every team's whole roster goes again each round — {peoplePerTeam} × {roundsCount} = {totalTurnsPerTeam} word{totalTurnsPerTeam === 1 ? "" : "s"} per team this game.
             </div>
           </div>
 
@@ -810,7 +860,13 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
             <div><TeamIcon team={t} color="white" /> {t.name}</div>
             <div style={{ color: "#5EEAD4", fontSize: "14px" }}>{pointsByTeam[t.id] ?? 0} pts</div>
             <div style={{ opacity: 0.85, fontWeight: "700" }}>{wordsByTeam[t.id] ?? 0} words</div>
-            {peoplePerTeam > 1 && !finished && <div style={{ opacity: 0.85, fontWeight: "700" }}>Person {Math.min((slotIndexByTeam[key] ?? 0) + 1, peoplePerTeam)} of {peoplePerTeam}</div>}
+            {!finished && (roundsCount > 1 || peoplePerTeam > 1) && (() => {
+              const raw = slotIndexByTeam[key] ?? 0;
+              const parts: string[] = [];
+              if (roundsCount > 1) parts.push(`Round ${Math.floor(raw / peoplePerTeam) + 1} of ${roundsCount}`);
+              if (peoplePerTeam > 1) parts.push(`Person ${(raw % peoplePerTeam) + 1} of ${peoplePerTeam}`);
+              return <div style={{ opacity: 0.85, fontWeight: "700" }}>{parts.join(" · ")}</div>;
+            })()}
             <div style={{ opacity: 0.8, fontWeight: "700" }}>{finished ? "Finished — sitting down" : `${questionsLeftFor(i)} questions left`}</div>
           </div>
         );
@@ -821,8 +877,10 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
   const askerLabel = inputMode === "phone" && askerDeviceId
     ? `Asker: phone ${teamDevices.indexOf(askerDeviceId) + 1} of ${teamDevices.length}`
     : null;
-  const currentSlotNumber = Math.min((slotIndexByTeam[currentKey] ?? 0) + 1, peoplePerTeam);
-  const currentBudget = questionsForSlot(slotIndexByTeam[currentKey] ?? 0);
+  const currentSlotRaw = slotIndexByTeam[currentKey] ?? 0;
+  const currentPersonNumber = Math.min((currentSlotRaw % peoplePerTeam) + 1, peoplePerTeam);
+  const currentRoundNumber = Math.min(Math.floor(currentSlotRaw / peoplePerTeam) + 1, roundsCount);
+  const currentBudget = questionsForSlot(currentSlotRaw);
   const currentQuestionNumber = Math.min((questionsUsedByTeam[currentKey] ?? 0) + 1, Math.max(currentBudget, 1));
   // What a correct guess would earn right now — shown live on the button so the stakes are visible.
   const pointsIfGuessedNow = currentBudget > 0 ? guessPoints(currentQuestionNumber, currentBudget) : MIN_POINTS;
@@ -847,16 +905,18 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
           <div style={{ fontWeight: "800", fontSize: "13px", opacity: 0.9, marginTop: "4px" }}>
             {isTeamFinished(currentKey)
               ? "Finished — everyone sits down"
-              : <>{peoplePerTeam > 1 ? `Person ${currentSlotNumber} of ${peoplePerTeam} · ` : ""}Question {currentQuestionNumber} of {currentBudget}{askerLabel ? ` · ${askerLabel}` : ""}</>}
+              : <>{roundsCount > 1 ? `Round ${currentRoundNumber} of ${roundsCount} · ` : ""}{peoplePerTeam > 1 ? `Person ${currentPersonNumber} of ${peoplePerTeam} · ` : ""}Question {currentQuestionNumber} of {currentBudget}{askerLabel ? ` · ${askerLabel}` : ""}</>}
           </div>
         </div>
 
         {phase === "ready" && (
           <div style={{ background: "#022C22", border: "4px solid #1A1A2E", borderRadius: "22px", padding: "32px 18px", textAlign: "center", boxShadow: "6px 6px 0 #1A1A2E" }}>
             <div style={{ fontSize: "40px", marginBottom: "8px" }}>🙋</div>
-            <div style={{ fontWeight: "900", fontSize: "22px", color: "#5EEAD4", marginBottom: "8px" }}>{currentTeam.name}: send someone up!</div>
+            <div style={{ fontWeight: "900", fontSize: "22px", color: "#5EEAD4", marginBottom: "8px" }}>{isSolo ? "Get ready to ask!" : `${currentTeam.name}: send someone up!`}</div>
             <div style={{ color: "#CCFBF1", fontSize: "15px", fontWeight: "600", lineHeight: 1.6, maxWidth: "460px", margin: "0 auto 20px" }}>
-              Whoever is asking steps to the front and <strong>faces away from the screen</strong>. When they're ready, show the word to the teacher and the class.
+              {isSolo
+                ? <>Don't peek at the word — <strong>look away from the screen</strong> (or just don't look) while you get ready to ask. When you're ready, reveal it.</>
+                : <>Whoever is asking steps to the front and <strong>faces away from the screen</strong>. When they're ready, show the word to the teacher and the class.</>}
             </div>
             <button onClick={() => setPhase("asking")} className="rl-btn" style={bigBtn("#0D9488")}>Show the word</button>
           </div>
@@ -929,9 +989,11 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
                 ? (allTeamsFinished
                     ? "That was the last turn — every team is finished!"
                     : `${currentTeam.name} is finished! Everyone on ${currentTeam.name}: sit down and wait while the other teams finish.`)
-                : inputMode === "phone" && askerDeviceId
-                  ? "Time to swap — the next phone in line takes over next turn!"
-                  : `Time to swap — someone new from ${currentTeam.name} takes over next turn!`}
+                : revealStartsNewRound
+                  ? `Round ${currentRoundNumber - 1} complete! ${currentTeam.name} goes again with a new word — round ${currentRoundNumber} of ${roundsCount}.`
+                  : inputMode === "phone" && askerDeviceId
+                    ? "Time to swap — the next phone in line takes over next turn!"
+                    : `Time to swap — someone new from ${currentTeam.name} takes over next turn!`}
             </div>
             {screenShowsWord ? (
               <button onClick={continueFromReveal} className="rl-btn" style={bigBtn("#0D9488")}>{allTeamsFinished ? "See final results" : "Next team →"}</button>
