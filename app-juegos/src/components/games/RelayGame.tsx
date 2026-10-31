@@ -679,9 +679,13 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
           )}
 
           {/* Skipped entirely for a Class Check-In sitting — presetPhoneSession already picked
-              phone mode and its code, and the class-level QR already covered joining. Gated by the
-              REAL team count, not the CPU-augmented one — the CPU can never hold a phone. */}
-          {propTeams.length > 1 && !startedWithPresetSession && (
+              phone mode and its code, and the class-level QR already covered joining. Available at
+              any real team count, including true solo (one student, playing online/remotely) — the
+              asker/answerer split below already handles a one-phone team (its own lone phone
+              becomes the asker, and the teacher's screen falls back to holding the word and the
+              controls since there's no second phone to be the answerer), the same fallback a
+              one-phone team already needed for in-person play. */}
+          {!startedWithPresetSession && (
             <>
               {introStep === "setup" && (
                 <div style={{ marginBottom: "20px" }}>
@@ -708,10 +712,13 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
               {introStep === "qr" && sessionCode && (() => {
                 const joinUrl = buildJoinUrl(sessionCode);
                 const phoneCountByTeam: Record<string, number> = {};
-                teams.forEach(t => { phoneCountByTeam[String(t.id)] = (connectedByTeam[String(t.id)] ?? []).length; });
+                // propTeams, not teams — the CPU can never hold a phone, so it must never show up
+                // as something a real device could tap to "join as" (same pattern Bounty Board's
+                // own PhoneJoinPanel call already uses).
+                propTeams.forEach(t => { phoneCountByTeam[String(t.id)] = (connectedByTeam[String(t.id)] ?? []).length; });
                 return (
                   <PhoneJoinPanel
-                    sessionCode={sessionCode} joinUrl={joinUrl} teams={teams} connectedTeamIds={connectedTeamIds}
+                    sessionCode={sessionCode} joinUrl={joinUrl} teams={propTeams} connectedTeamIds={connectedTeamIds}
                     phoneCountByTeam={phoneCountByTeam}
                     accent="#5EEAD4" panelBg="linear-gradient(160deg,#0F766E,#022C22)" borderColor="#2DD4BF66"
                     footer={
