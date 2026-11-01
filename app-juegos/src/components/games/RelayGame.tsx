@@ -659,6 +659,12 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
     </div>
   );
 
+  // Which real teams (never the CPU — it can't hold a phone) still have zero phones connected while
+  // phone mode is selected — the "Let's Play!" gate right below the welcome screen's word list.
+  const teamsWithoutAPhone = inputMode === "phone"
+    ? propTeams.filter(t => (connectedByTeam[String(t.id)] ?? []).length === 0).map(t => t.name)
+    : [];
+
   // Tutorial mockup: src/data/tutorials/relay.tsx — update if this welcome screen's rules text changes.
   if (phase === "welcome") {
     return (
@@ -846,18 +852,28 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
               onClose={() => setShowHowTo(false)}
             />
           )}
+          {/* Every real team needs at least one phone connected before phone mode can start — a team
+              that never joined would otherwise silently lock in at 1 "phantom" person nobody is
+              actually playing. Screen mode has no device data to check, so it's never gated. */}
+          {teamsWithoutAPhone.length > 0 && (
+            <div style={{ fontSize: "13px", color: "#FCA5A5", fontWeight: "700", marginBottom: "10px" }}>
+              Waiting for a phone to join: {teamsWithoutAPhone.join(", ")}
+            </div>
+          )}
           <button
+            disabled={teamsWithoutAPhone.length > 0}
             onClick={() => {
+              if (teamsWithoutAPhone.length > 0) return;
               // Consumes team 0's own needsReady flag right here, same as goToNextTeam does for
               // every later hand-off — otherwise this first team's SECOND turn (no swap in between)
               // would spuriously show "send someone up" again for the same person still standing.
               setNeedsReadyByTeam(prev => ({ ...prev, [currentKey]: false }));
               // Locks in each team's real people count for the whole game, right as it starts —
-              // phone mode reads however many phones actually joined each team (never 0, so a team
-              // with nobody joined yet still gets the screen-fallback 1 rather than breaking the
-              // turn math); screen mode just uses the manual picker for every team, same as before.
-              // Frozen here and never recalculated, so a later disconnect/reconnect can't change a
-              // team's turn budget mid-game.
+              // phone mode reads however many phones actually joined each team (every real team is
+              // guaranteed at least 1 by the gate above); screen mode just uses the manual picker for
+              // every team, same as before. Frozen here and never recalculated — late joiners aren't
+              // what this (or any) game here is built for, so a disconnect/reconnect afterward never
+              // changes a team's turn budget mid-game.
               const locked: Record<string, number> = {};
               propTeams.forEach(t => {
                 const key = String(t.id);
@@ -872,7 +888,14 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
               setPhase(phoneFlow ? "asking" : "ready");
             }}
             className="rl-btn"
-            style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#0D9488", color: "white", border: "3px solid #1A1A2E", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "6px 6px 0 #1A1A2E" }}
+            style={{
+              display: "inline-flex", alignItems: "center", gap: "8px", color: "white", border: "3px solid #1A1A2E",
+              borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900",
+              background: teamsWithoutAPhone.length > 0 ? "#134E4A" : "#0D9488",
+              cursor: teamsWithoutAPhone.length > 0 ? "not-allowed" : "pointer",
+              opacity: teamsWithoutAPhone.length > 0 ? 0.6 : 1,
+              boxShadow: "6px 6px 0 #1A1A2E",
+            }}
           >
             <Icon name="megaphone" size={20} /> Let's Play!
           </button>
