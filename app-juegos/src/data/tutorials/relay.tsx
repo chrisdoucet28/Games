@@ -69,7 +69,7 @@ export const RELAY_TUTORIAL_STEPS: TutorialStep[] = [
     ),
   },
   {
-    narration: "On phones, everyone joins on their own phone. Teammates' phones show the word and hold the buttons; the asker's phone never shows it, and turns rotate through everyone automatically.",
+    narration: "On phones, everyone joins on their own phone — however many phones are on a team is automatically that team's number of people, so uneven teams are fine. Teammates' phones show the word and hold the buttons; the asker's phone never shows it, and turns rotate through everyone automatically.",
     visual: (
       <div style={{ textAlign: "center", fontSize: "13px", fontWeight: 700, color: "#94A3B8" }}>
         📱 asker: "You're up!" · 📱 teammate: the word + buttons

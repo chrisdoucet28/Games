@@ -103,8 +103,12 @@ function validateRelaySnapshot(raw: unknown, teamCount: number): RelaySnapshot |
   const peoplePerTeamByTeam: Record<string, number> | undefined = (() => {
     if (!s.peoplePerTeamByTeam || typeof s.peoplePerTeamByTeam !== "object") return undefined;
     const out: Record<string, number> = {};
+    // Capped much higher than the manual picker's 1-6: a phone-derived count has no UI ceiling at
+    // all while the game is live (it's just "however many phones joined this team"), so a real
+    // locked-in value could legitimately exceed 6 — this only guards against corrupted data, not
+    // against a real class size.
     Object.entries(s.peoplePerTeamByTeam).forEach(([k, v]) => {
-      if (typeof v === "number" && v >= 1) out[k] = Math.min(v, 10);
+      if (typeof v === "number" && v >= 1) out[k] = Math.min(v, 40);
     });
     return Object.keys(out).length > 0 ? out : undefined;
   })();
