@@ -186,6 +186,13 @@ export type WhackStatePayload = {
   turnSeconds: number;
   roster: WhackRosterEntry[];
   activeTeamId: string | number | null;
+  // Which ONE of the active team's connected phones actually plays this turn — if several
+  // teammates are connected, every one of them would otherwise independently believe it's their
+  // turn and run their own full mole round, and the screen would add every report it got together
+  // (no "already reported" guard), stacking a team's score instead of counting it once. The
+  // screen picks this once per turn and rotates it the next time that team is up, so a multi-phone
+  // team's turns actually take turns too, not just its people. Null whenever nobody's playing yet.
+  activeDeviceId: string | null;
   startRoundIdx: number;
   scores: Record<string, number>;
   connectedTeamIds: (string | number)[];
@@ -199,6 +206,10 @@ export type WhackStatePayload = {
 // own local turn timer actually expires.
 export type WhackTurnReportPayload = {
   teamId: string | number;
+  // The phone that sent this — the screen only accepts a report from whichever device it actually
+  // handed the turn to, so a stray report from a teammate's phone that also ran a round (an older
+  // build, or a phone that reconnected mid-turn) can't double-count a team's score.
+  deviceId: string;
   finalScore: number;
   bestCombo: number;
   endRoundIdx: number;

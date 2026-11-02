@@ -7,6 +7,7 @@ import { useTurnTimer } from "../../hooks/useTurnTimer";
 type Props = {
   state: WhackStatePayload;
   teamId: string | number;
+  deviceId: string;
   onTurnReport: (payload: WhackTurnReportPayload) => void;
 };
 
@@ -16,8 +17,14 @@ type Props = {
 // timer runs out. Every other phone (and the shared screen) just shows a live scoreboard while
 // waiting — no mole content is mirrored anywhere else, deliberately, to avoid a second, harder
 // sync problem for no real benefit (nobody watching can act on it anyway).
-export function PhoneWordWhackView({ state, teamId, onTurnReport }: Props) {
-  const isMyTurn = state.phase === "turn" && state.activeTeamId === teamId;
+//
+// Checking activeDeviceId (not just activeTeamId) matters whenever a team has more than one phone
+// connected: without it, EVERY one of that team's phones would independently believe it's their
+// turn, each run its own full round, and the screen would add every report it got together —
+// stacking the team's score instead of counting it once. Only the ONE device the screen actually
+// picked sees isMyTurn; the rest of the team spectates like any other team would.
+export function PhoneWordWhackView({ state, teamId, deviceId, onTurnReport }: Props) {
+  const isMyTurn = state.phase === "turn" && state.activeTeamId === teamId && state.activeDeviceId === deviceId;
   const team = state.roster.find(t => t.id === teamId);
 
   // Flips once this phone has already reported its turn's result, so it shows a "nice work" card
@@ -60,6 +67,7 @@ export function PhoneWordWhackView({ state, teamId, onTurnReport }: Props) {
     setLastResult({ score: game.turnScore, combo: game.bestCombo });
     onTurnReport({
       teamId,
+      deviceId,
       finalScore: game.turnScore,
       bestCombo: game.bestCombo,
       endRoundIdx: game.roundIdxRef.current,
@@ -152,13 +160,17 @@ export function PhoneWordWhackView({ state, teamId, onTurnReport }: Props) {
 
   if (!isMyTurn) {
     const activeTeam = state.roster.find(t => t.id === state.activeTeamId);
+    // Your own team is up, just not your phone — a teammate's device was picked for this turn.
+    const teammateIsPlaying = activeTeam?.id === teamId;
     return (
       <div style={{ ...wrapStyle, textAlign: "center" }}>
         <div style={{ fontSize: "22px", marginBottom: "4px" }}><TeamIcon team={team} size={22} /></div>
         <div style={{ fontWeight: "900", fontSize: "16px", marginBottom: "16px" }}>{team?.name}</div>
         <div style={{ fontSize: "36px", marginBottom: "8px" }}>🔨</div>
         <div style={{ fontWeight: "800", fontSize: "16px", color: "#BEF264", marginBottom: "18px" }}>
-          {activeTeam ? `${activeTeam.name} is playing now!` : "Get ready — waiting for the warm-up to start…"}
+          {activeTeam
+            ? (teammateIsPlaying ? "Your teammate is playing now!" : `${activeTeam.name} is playing now!`)
+            : "Get ready — waiting for the warm-up to start…"}
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: "6px", maxWidth: "300px", margin: "0 auto" }}>
           {state.roster.map(t => (

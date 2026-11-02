@@ -351,7 +351,7 @@ export function ClassJoinScreen({ code }: Props) {
     return <PhoneSpyView state={innerState as SpyStatePayload} teamId={claimedTeamId} onAction={sendSpyVote} />;
   }
   if (activeGame === "whack") {
-    return <PhoneWordWhackView state={innerState as WhackStatePayload} teamId={claimedTeamId} onTurnReport={sendTurnReport} />;
+    return <PhoneWordWhackView state={innerState as WhackStatePayload} teamId={claimedTeamId} deviceId={getDeviceId()} onTurnReport={sendTurnReport} />;
   }
   if (activeGame === "hotseat") {
     return <PhoneHotSeatView state={innerState as HotSeatStatePayload} teamId={claimedTeamId} onAction={sendHotSeatAction} />;

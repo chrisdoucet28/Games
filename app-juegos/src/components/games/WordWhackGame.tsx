@@ -194,7 +194,23 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
   // why the setup/QR block below must key off this instead of the live presetPhoneSession prop.
   const startedWithPresetSession = useRef(!!presetPhoneSession).current;
   const [connectedTeamIds, setConnectedTeamIds] = useState<Set<string | number>>(new Set());
+  // Flat set of every currently-connected device id, across every team — lets the mid-turn
+  // disconnect check below (phoneMissingMidTurn) notice specifically when the ONE phone a turn was
+  // actually handed to drops, not just whether some phone on that team is still around (a
+  // teammate's phone staying connected would otherwise mask the active device vanishing, leaving
+  // the turn stuck with nothing to end it).
+  const [connectedDeviceIds, setConnectedDeviceIds] = useState<Set<string>>(new Set());
   const channelRef = useRef<RealtimeChannel | null>(null);
+  // Device ids per team, in the order each was first seen — same pattern as RelayGame.tsx's own
+  // deviceRosterRef/connectedByTeam, so the active-device rotation below doesn't reshuffle when
+  // someone reconnects.
+  const deviceRosterRef = useRef<Record<string, string[]>>({});
+  const connectedByTeamRef = useRef<Record<string, string[]>>({});
+  // Which ONE connected device actually plays each team's turn — set to that team's first
+  // connected device the first time it's needed, and advanced (see advanceActiveDeviceFor below)
+  // every time that team's turn ends, so a multi-phone team's turns rotate through its people
+  // instead of the same phone playing every time while the others never get a turn at all.
+  const activeDeviceByTeamRef = useRef<Record<string, string>>({});
 
   useEffect(() => {
     if (!serializeStateRef) return;
@@ -223,10 +239,15 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, round, teamIdx]);
 
-  // True once the team a phone-driven turn belongs to has actually dropped off the channel mid-turn
-  // — feeds the disconnect-grace timer below, which is what decides when to offer the teacher a
-  // manual skip.
-  const phoneMissingMidTurn = turnOwnedByPhoneRef.current && phase === "playing" && !connectedTeamIds.has(activeTeam.id);
+  // True once either the whole team or, specifically, the ONE device this turn was handed to has
+  // dropped off the channel mid-turn — feeds the disconnect-grace timer below, which is what
+  // decides when to offer the teacher a manual skip. Checking the specific device too (not just
+  // team-level presence) matters once a team has more than one phone connected: a teammate's phone
+  // staying connected would otherwise mask the actual active device vanishing, leaving the turn
+  // stuck forever with nothing left to end it.
+  const activeDeviceForCurrentTeam = activeDeviceByTeamRef.current[String(activeTeam.id)];
+  const phoneMissingMidTurn = turnOwnedByPhoneRef.current && phase === "playing" &&
+    (!connectedTeamIds.has(activeTeam.id) || (!!activeDeviceForCurrentTeam && !connectedDeviceIds.has(activeDeviceForCurrentTeam)));
 
   // Gives a normal reconnect (wifi blip, or the student just reopening the join link — see
   // PhoneReconnectBadge) a real chance to resolve silently before surfacing anything to the
@@ -284,6 +305,17 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
     active: screenRunsThisTurn, resetKey: `${round}-${teamIdx}`, turnTimeLeftRef,
   });
 
+  // Rotates which connected device gets to play a team's NEXT turn — called once that team's
+  // current turn has ended (see nextTeam below), never mid-turn. Falls back to the team's first
+  // connected device the first time it's called for that team.
+  const advanceActiveDeviceFor = (teamKey: string) => {
+    const list = connectedByTeamRef.current[teamKey] ?? [];
+    if (list.length === 0) return;
+    const current = activeDeviceByTeamRef.current[teamKey] ?? list[0];
+    const idx = Math.max(0, list.indexOf(current));
+    activeDeviceByTeamRef.current = { ...activeDeviceByTeamRef.current, [teamKey]: list[(idx + 1) % list.length] };
+  };
+
   // Refs the phone-mode broadcaster (below) reads from, so opening/closing the realtime channel
   // only happens when phone mode itself toggles on/off, not on every round/phase/score change —
   // same pattern as every other phone-mode game.
@@ -314,11 +346,26 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
       // Only set once the countdown has actually finished — a phone stays on "waiting for your
       // turn" through the 3-2-1 beat, same as the screen's own mole grid doesn't appear until then.
       const activeTeamId = rawPhase === "playing" ? teams[teamIdxRef.current]?.id ?? null : null;
+      const activeTeamKey = activeTeamId !== null ? String(activeTeamId) : null;
+      // The device this turn was (or will be) handed to. Committed into activeDeviceByTeamRef the
+      // FIRST time it's resolved for this team's turn (falling back to its first connected device),
+      // then read as-is from there on — deliberately NOT re-derived from the live connected list on
+      // every broadcast, so a device briefly dropping out of presence mid-turn (a wifi blip) can't
+      // silently shift "the active device" to a teammate's phone out from under the one actually
+      // playing. Only advanceActiveDeviceFor (called when the turn ends) ever changes it after that.
+      let activeDeviceId: string | null = null;
+      if (activeTeamKey) {
+        activeDeviceId = activeDeviceByTeamRef.current[activeTeamKey] ?? connectedByTeamRef.current[activeTeamKey]?.[0] ?? null;
+        if (activeDeviceId && activeDeviceByTeamRef.current[activeTeamKey] === undefined) {
+          activeDeviceByTeamRef.current = { ...activeDeviceByTeamRef.current, [activeTeamKey]: activeDeviceId };
+        }
+      }
       const payload: WhackStatePayload = {
         phase: mappedPhase,
         pool, difficulty, turnSeconds: TURN_SECONDS,
         roster: teams.map(t => ({ id: t.id, name: t.name, color: t.color, mascot: t.mascot })),
         activeTeamId,
+        activeDeviceId,
         startRoundIdx: globalRoundIdxRef.current,
         scores: Object.fromEntries(teams.map(t => [String(t.id), finalScoresRef.current[t.id] ?? 0])),
         connectedTeamIds: Array.from(connectedTeamIdsRef.current),
@@ -330,16 +377,44 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
     sendStateRef.current = sendState;
 
     channel.on("presence", { event: "sync" }, () => {
-      const presenceState = channel.presenceState<{ teamId: string | number }>();
+      const presenceState = channel.presenceState<{ teamId: string | number; deviceId?: string }>();
       const ids = new Set<string | number>();
-      Object.values(presenceState).forEach(entries => entries.forEach(entry => ids.add(entry.teamId)));
+      const allDeviceIds = new Set<string>();
+      const live: Record<string, Set<string>> = {};
+      Object.values(presenceState).forEach(entries => entries.forEach(entry => {
+        ids.add(entry.teamId);
+        if (!entry.deviceId) return;
+        allDeviceIds.add(entry.deviceId);
+        const key = String(entry.teamId);
+        if (!live[key]) live[key] = new Set();
+        live[key].add(entry.deviceId);
+        if (!deviceRosterRef.current[key]) deviceRosterRef.current[key] = [];
+        if (!deviceRosterRef.current[key].includes(entry.deviceId)) deviceRosterRef.current[key].push(entry.deviceId);
+      }));
+      const byTeam: Record<string, string[]> = {};
+      Object.keys(deviceRosterRef.current).forEach(key => {
+        byTeam[key] = deviceRosterRef.current[key].filter(id => live[key]?.has(id));
+      });
+      connectedByTeamRef.current = byTeam;
       connectedTeamIdsRef.current = ids;
       setConnectedTeamIds(ids);
+      setConnectedDeviceIds(allDeviceIds);
       sendState();
     });
 
     channel.on("broadcast", { event: "turnReport" }, ({ payload }) => {
       const report = payload as WhackTurnReportPayload;
+      // Only the device this turn was actually handed to gets to end it — without this, a
+      // teammate's phone that also ran its own round (or a stale/duplicate message) would add a
+      // second score on top of the real one. Phase/team checks guard the same report arriving
+      // after the turn's already moved on.
+      if (phaseRef.current !== "playing") return;
+      if (report.teamId !== teams[teamIdxRef.current]?.id) return;
+      // Already committed by sendState the moment this turn's "playing" broadcast went out — a
+      // phone can only ever have started its local timer (and so could only now be reporting) after
+      // receiving that exact broadcast, so this is guaranteed set by the time a valid report arrives.
+      const expectedDevice = activeDeviceByTeamRef.current[String(report.teamId)];
+      if (expectedDevice && report.deviceId !== expectedDevice) return;
       // Silent for the same reason as the screen-mode endTurn() above — a turn tally, not a
       // single correct answer.
       if (report.finalScore > 0) onUpdateScore(report.teamId, report.finalScore, { silent: true });
@@ -401,6 +476,10 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
     setIntroStep("setup");
     setSessionCode(null);
     setConnectedTeamIds(new Set());
+    setConnectedDeviceIds(new Set());
+    deviceRosterRef.current = {};
+    connectedByTeamRef.current = {};
+    activeDeviceByTeamRef.current = {};
   };
 
   const startTeamTurn = () => {
@@ -416,6 +495,9 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
   }, [phase, countdown]);
 
   const nextTeam = () => {
+    // Rotates which connected device gets THIS team's next turn, so a multi-phone team's turns
+    // actually cycle through its people instead of the same phone playing every round.
+    advanceActiveDeviceFor(String(teams[teamIdx].id));
     const next = teamIdx + 1;
     if (next >= teams.length) {
       if (round >= TOTAL_ROUNDS) { setPhase("final"); return; }

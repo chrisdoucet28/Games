@@ -371,7 +371,7 @@ export function PhoneJoinScreen({ code, game }: Props) {
     return <PhoneSpyView state={state as SpyStatePayload} teamId={claimedTeamId} onAction={sendSpyVote} />;
   }
   if (game === "whack") {
-    return <PhoneWordWhackView state={state as WhackStatePayload} teamId={claimedTeamId} onTurnReport={sendTurnReport} />;
+    return <PhoneWordWhackView state={state as WhackStatePayload} teamId={claimedTeamId} deviceId={getDeviceId()} onTurnReport={sendTurnReport} />;
   }
   if (game === "hotseat") {
     return <PhoneHotSeatView state={state as HotSeatStatePayload} teamId={claimedTeamId} onAction={sendHotSeatAction} />;
