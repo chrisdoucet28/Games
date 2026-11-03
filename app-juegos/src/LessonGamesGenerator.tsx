@@ -563,10 +563,14 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     setTeamsUntouched(nextUntouched);
   };
 
-  // Forgets a saved team preset for next time — deliberately leaves today's active lineup alone
-  // even if that name happens to be in play right now.
+  // Deletes a saved team for good — its roster preset AND its actual score (so it also drops off
+  // the leaderboard, which reads from that same score). Confirmed first since there's no undo; if
+  // the team is one of today's active slots, deselects it from the current setup too, so a
+  // just-deleted team can't still be sitting in the lineup about to be played.
   const removeFromRoster = (entry: TeamRosterEntry) => {
     if (!activeClassId) return;
+    if (!window.confirm(`Delete ${entry.name} for good? This can't be undone, and their score will be erased from the leaderboard.`)) return;
+    if (isRosterTeamActive(entry)) toggleRosterTeam(entry);
     setTeamRoster(prev => prev.filter(r => r.id !== entry.id));
     deleteFromTeamRoster(activeClassId, entry.id).catch(() => {});
   };
@@ -1919,7 +1923,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
                       <button
                         type="button"
                         onClick={(e) => { e.stopPropagation(); removeFromRoster(entry); }}
-                        title="Remove from saved teams"
+                        title="Delete this team for good"
                         style={{
                           position: "absolute", top: "-6px", right: "-6px", width: "18px", height: "18px", borderRadius: "50%",
                           background: "#EF4444", color: "white", border: "2px solid white", fontSize: "10px", lineHeight: 1, cursor: "pointer",

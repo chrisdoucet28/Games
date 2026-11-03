@@ -190,20 +190,31 @@ export async function setLeaderboardVisibility(classId: string, hidden: boolean)
   if (error) throw error;
 }
 
-// Removes one saved team from a class's roster — deliberately doesn't touch the current session's
-// live teams even if that name is in play right now; it only forgets the preset for next time.
+// Deletes one team from a class for good: both its roster preset (the "pick a team you've used
+// before" shortcut) AND its actual score entry in `teams` — matched by the same trimmed,
+// case-insensitive name used everywhere else in this file. This is the one explicit, deliberate
+// way a team is meant to disappear entirely, per mergeTeamsForPersist's own comment above: every
+// other write path in this file merges onto existing teams precisely so nothing vanishes by
+// accident — this function is the sole exception, and callers should confirm with the teacher
+// before calling it, since it erases that team's score (and, since the leaderboard syncs off
+// `teams`, its leaderboard entry too) with no way back.
 export async function deleteFromTeamRoster(classId: string, rosterId: string): Promise<TeamRosterEntry[]> {
   const { data, error: fetchError } = await supabase
     .from("classes")
-    .select("team_roster")
+    .select("team_roster, teams")
     .eq("id", classId)
     .single();
   if (fetchError) throw fetchError;
 
   const roster: TeamRosterEntry[] = (data?.team_roster as TeamRosterEntry[] | null) ?? [];
-  const next = roster.filter(r => r.id !== rosterId);
+  const removed = roster.find(r => r.id === rosterId);
+  const nextRoster = roster.filter(r => r.id !== rosterId);
 
-  const { error } = await supabase.from("classes").update({ team_roster: next }).eq("id", classId);
+  const teams: Team[] = (data?.teams as Team[] | null) ?? [];
+  const removedKey = removed?.name.trim().toLowerCase();
+  const nextTeams = removedKey ? teams.filter(t => t.name.trim().toLowerCase() !== removedKey) : teams;
+
+  const { error } = await supabase.from("classes").update({ team_roster: nextRoster, teams: nextTeams }).eq("id", classId);
   if (error) throw error;
-  return next;
+  return nextRoster;
 }
