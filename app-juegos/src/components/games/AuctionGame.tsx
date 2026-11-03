@@ -836,7 +836,18 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
               <div style={{ fontWeight: "800", fontSize: "15px", color: "white", marginBottom: "6px" }}>
                 This sentence is {s.isCorrect ? "CORRECT" : "INCORRECT"}
               </div>
-              <p style={{ color: s.isCorrect ? "#86EFAC" : "#FCA5A5", fontSize: "15px", margin: 0, lineHeight: 1.5 }}>{s.explanation}</p>
+              {/* Correction Mode: explanations are written (deliberately, everywhere in this content)
+                  to state the actual correct form — e.g. "the past simple is 'caught', not
+                  'catched'" — which is exactly what a pending team is being asked to independently
+                  write in the box right below this one. Held back until every pending correction has
+                  been judged (pendingCorrectionTeamIds empties), the same signal that already gates
+                  the "Next round" button, so it can't leak ahead of itself. Outside Correction Mode,
+                  or once judging is done, it shows immediately as always. */}
+              <p style={{ color: s.isCorrect ? "#86EFAC" : "#FCA5A5", fontSize: "15px", margin: 0, lineHeight: 1.5 }}>
+                {correctionMode && !s.isCorrect && pendingCorrectionTeamIds.size > 0
+                  ? "Figure out the fix yourselves first — the explanation shows once every correction's been judged."
+                  : s.explanation}
+              </p>
               <div style={{ position: "absolute", top: "10px", right: "10px" }}>
                 <FlagPromptButton gameId="auction" questionData={s} />
               </div>
