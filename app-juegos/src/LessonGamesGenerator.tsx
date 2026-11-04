@@ -1657,16 +1657,15 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     const TOPIC_DEFAULT_CAP_PER_LEVEL = 6;
     const isSearchingTopics = topicSearch.trim() !== "";
 
-    // "All levels" groups topics into per-level sections instead of one mixed list — with every
-    // level's topics sitting in the same flat grid and no level shown anywhere on a chip, two
-    // similarly-named topics at different levels were impossible to tell apart while picking. Each
-    // group keeps that level's own teaching-sequence order (already applied by
-    // getFilteredTopicOptions). A single level picked has nothing to group — only one section would
-    // ever exist — so that case stays the flat list it always was.
-    const topicsByLevel = level === "all"
+    // "All levels" buckets topics by level (each bucket keeping that level's own teaching-sequence
+    // order, already applied by getFilteredTopicOptions) purely to cap the collapsed default
+    // evenly per level below — not for display grouping (a per-chip level badge turned out to be
+    // enough on its own; see renderTopicChip). A single level picked has nothing to bucket, so that
+    // case stays the flat list it always was.
+    const topicsByLevel: TopicOption[][] = level === "all"
       ? LEVELS_META.filter(l => l.id !== "all")
-          .map(l => ({ ...l, topics: filteredTopics.filter(o => o.level === l.id) }))
-          .filter(g => g.topics.length > 0)
+          .map(l => filteredTopics.filter(o => o.level === l.id))
+          .filter(bucket => bucket.length > 0)
       : [];
 
     // Collapsed default: one flat cap for a single level, a PER-LEVEL cap when every level is
@@ -1676,18 +1675,16 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     // whichever levels' early lessons happened to sort first. Capping per level instead guarantees
     // every level gets a fair sample in the collapsed view.
     const collapsedCount = level === "all"
-      ? topicsByLevel.reduce((sum, g) => sum + Math.min(TOPIC_DEFAULT_CAP_PER_LEVEL, g.topics.length), 0)
+      ? topicsByLevel.reduce((sum, bucket) => sum + Math.min(TOPIC_DEFAULT_CAP_PER_LEVEL, bucket.length), 0)
       : Math.min(TOPIC_DEFAULT_CAP, filteredTopics.length);
     const hasHiddenWhenCollapsed = !isSearchingTopics && filteredTopics.length > collapsedCount;
     const topicsAreCapped = hasHiddenWhenCollapsed && !showAllTopics;
 
     const visibleTopics = topicsAreCapped ? filteredTopics.slice(0, TOPIC_DEFAULT_CAP) : filteredTopics;
-    const visibleGroupedTopics = topicsByLevel.map(g => ({
-      ...g,
-      total: g.topics.length,
-      topics: topicsAreCapped ? g.topics.slice(0, TOPIC_DEFAULT_CAP_PER_LEVEL) : g.topics,
-    }));
-    const totalVisibleNow = level === "all" ? visibleGroupedTopics.reduce((sum, g) => sum + g.topics.length, 0) : visibleTopics.length;
+    // Topics stay clustered by level in reading order (each level's chips land next to each
+    // other), just rendered as one flat grid rather than separate headed sections.
+    const visibleTopicsAcrossLevels = topicsByLevel.flatMap(bucket => topicsAreCapped ? bucket.slice(0, TOPIC_DEFAULT_CAP_PER_LEVEL) : bucket);
+    const totalVisibleNow = level === "all" ? visibleTopicsAcrossLevels.length : visibleTopics.length;
     const selectedTopicOptions = selectedTopics.map(getTopicOption).filter((option): option is TopicOption => Boolean(option));
     const selectedTopicSummary = selectedTopicOptions.map(o => o.label).join(", ");
     const FOCUS_META = [
@@ -1842,26 +1839,11 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
                     );
                   };
 
-                  // "All levels" renders level-grouped sections instead of one mixed grid — see
-                  // topicsByLevel's own comment above for why. A single level picked is just one
-                  // section, so that case stays the plain flat grid it always was.
-                  if (level === "all") {
-                    return visibleGroupedTopics.map((g, i) => (
-                      <div key={g.id} style={{ marginTop: i > 0 ? "16px" : 0 }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "8px", fontWeight: "900", fontSize: "12px", color: g.color, textTransform: "uppercase", letterSpacing: "0.04em" }}>
-                          <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: g.color, display: "inline-block" }} />
-                          {g.id} — {g.desc} ({g.topics.length < g.total ? `${g.topics.length} of ${g.total}` : g.total})
-                        </div>
-                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(130px,1fr))", gap: "8px" }}>
-                          {g.topics.map(renderTopicChip)}
-                        </div>
-                      </div>
-                    ));
-                  }
+                  const chipsToRender = level === "all" ? visibleTopicsAcrossLevels : visibleTopics;
 
                   return (
                     <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(130px,1fr))", gap: "8px" }}>
-                      {visibleTopics.map(renderTopicChip)}
+                      {chipsToRender.map(renderTopicChip)}
                     </div>
                   );
                 })()}
