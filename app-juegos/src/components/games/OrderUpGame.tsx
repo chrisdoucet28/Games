@@ -160,6 +160,23 @@ function randomFrom<T>(arr: readonly T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
+// A plain uniform pick from the full candidate list can land on the same grammar tag or vocab
+// word several tickets in a row purely by chance — more noticeable the smaller the pool (a topic
+// with only one or two transform tags feels "stuck" after just two repeats). `recent` is a shared
+// mutable array (threaded across every generateTicket call for the whole session, including
+// several tickets generated in the same top-up batch) holding the last few distinct picks of this
+// kind; picking avoids them when that still leaves a real choice, and falls back to the full list
+// otherwise so a genuinely tiny pool (or one with no other option left this ticket) never deadlocks.
+const RECENT_AVOID_COUNT = 3;
+function pickAvoidingRecent<T>(candidates: T[], recent: T[]): T {
+  const avoid = new Set(recent);
+  const fresh = candidates.filter(c => !avoid.has(c));
+  const picked = randomFrom(fresh.length > 0 ? fresh : candidates);
+  recent.push(picked);
+  while (recent.length > RECENT_AVOID_COUNT) recent.shift();
+  return picked;
+}
+
 // Each item's foodEmoji IS the dish that item hands the serving team (see resolveCorrect) — no
 // separate ticket-level dish field, since a ticket can hand out several different dishes at once.
 type TicketItem =
@@ -205,7 +222,10 @@ const PAST_TENSE_BASE_FORM: Record<string, string> = {
 // positive/negative/question + every topic's transform tags combined), so slicing one shuffled
 // combined pool would make tickets almost never show a grammar badge. Falls back to whichever
 // kind still has an unused entry if the flip lands on one this ticket has already exhausted.
-function generateTicket(grammarPool: string[], vocabWordPool: string[], nextId: () => number, resolvedCount: number, difficulty: TicketDifficulty): Ticket {
+function generateTicket(
+  grammarPool: string[], vocabWordPool: string[], nextId: () => number, resolvedCount: number, difficulty: TicketDifficulty,
+  recentGrammarTags: string[], recentVocabWords: string[],
+): Ticket {
   const itemCount = pickItemCount(resolvedCount);
   const usedGrammar = new Set<string>();
   const usedVocab = new Set<string>();
@@ -230,14 +250,14 @@ function generateTicket(grammarPool: string[], vocabWordPool: string[], nextId: 
     const wantGrammar = Math.random() < 0.5;
     const useGrammar = wantGrammar ? grammarLeft.length > 0 : !vocabLeft.length && grammarLeft.length > 0;
     if (useGrammar) {
-      const tag = grammarLeft[Math.floor(Math.random() * grammarLeft.length)];
+      const tag = pickAvoidingRecent(grammarLeft, recentGrammarTags);
       usedGrammar.add(tag);
       grammarCount += 1;
       const excluded = MUTUALLY_EXCLUSIVE_FORMS[tag];
       if (excluded) excludedGrammar.add(excluded);
       items.push({ kind: "grammar", transform: tag, label: grammarLabel(tag), foodEmoji: randomFrom(DINER_FOOD_EMOJIS) });
     } else {
-      const word = vocabLeft[Math.floor(Math.random() * vocabLeft.length)];
+      const word = pickAvoidingRecent(vocabLeft, recentVocabWords);
       usedVocab.add(word);
       items.push({ kind: "vocab", word, foodEmoji: randomFrom(DINER_FOOD_EMOJIS) });
     }
@@ -531,6 +551,11 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
   // The session's difficulty "clock" — advances only as orders actually get resolved (served or
   // expired), not as tickets are merely generated, so the ramp tracks real class progress.
   const resolvedCountRef = useRef(resumed?.resolvedCount ?? 0);
+  // Last few distinct grammar tags / vocab words generated, across the whole session — see
+  // pickAvoidingRecent above. Plain mutable arrays (not state) since generateTicket itself appends
+  // to them as a side effect, including across several tickets spawned in the same top-up batch.
+  const recentGrammarTagsRef = useRef<string[]>([]);
+  const recentVocabWordsRef = useRef<string[]>([]);
 
   const pushBanner = useCallback((text: React.ReactNode, kind: Banner["kind"]) => {
     const key = bannerIdRef.current++;
@@ -598,23 +623,17 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
     const capacity = currentQueueCapacity(resolvedCountRef.current, maxSlots, initialSlots);
     if (tickets.length < capacity) {
       const needed = capacity - tickets.length;
-      const newTickets = Array.from({ length: needed }, () => generateTicket(grammarPool, vocabWordPool, () => ticketIdRef.current++, resolvedCountRef.current, ticketDifficulty));
-      // Solo play skips the "tap to claim" step only for whichever ticket becomes the one team's
-      // first open order — so starting fresh (or finishing everything) always has something to
-      // claim immediately, same as the multi-team floor above. Once she already has a claimed,
-      // unresolved ticket, any further new ticket stays unclaimed like it would for any other
-      // team, so a second order arriving mid-turn needs an explicit tap — otherwise every open
-      // ticket showed as already claimed by her the instant it appeared, with no way for the
-      // teacher to tell which one she was actually working on (feedback f7fc275a).
-      if (teams.length === 1) {
-        let hasClaimed = tickets.some(t => t.claimedBy !== undefined);
-        newTickets.forEach(t => {
-          if (!hasClaimed) { t.claimedBy = teams[0].id; hasClaimed = true; }
-        });
-      }
+      // Never auto-claimed, solo included — a lone team still has to tap a ticket to claim it, same
+      // as any other team count, and that stays true for every ticket all game (a solo auto-claim
+      // used to grab the first open order the instant it appeared, which meant a second order
+      // arriving alongside it was the only one ever shown as unclaimed — feedback from live play).
+      const newTickets = Array.from({ length: needed }, () => generateTicket(
+        grammarPool, vocabWordPool, () => ticketIdRef.current++, resolvedCountRef.current, ticketDifficulty,
+        recentGrammarTagsRef.current, recentVocabWordsRef.current,
+      ));
       setTickets(prev => [...prev, ...newTickets]);
     }
-  }, [phase, tickets.length, grammarPool, vocabWordPool, maxSlots, initialSlots, teams, ticketDifficulty]);
+  }, [phase, tickets.length, grammarPool, vocabWordPool, maxSlots, initialSlots, ticketDifficulty]);
 
   // Mirrors `tickets` for the interval below to read synchronously — the interval callback needs
   // to call onUpdateScore/pushBanner as plain statements, not from inside setTickets' own updater
