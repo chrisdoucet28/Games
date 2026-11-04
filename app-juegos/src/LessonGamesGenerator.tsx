@@ -1654,9 +1654,40 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
   if (screen === "topic-select") {
     const filteredTopics = getFilteredTopicOptions(level, focus).filter(o => matchesTopicSearch(o.label, topicSearch));
     const TOPIC_DEFAULT_CAP = 30;
+    const TOPIC_DEFAULT_CAP_PER_LEVEL = 6;
     const isSearchingTopics = topicSearch.trim() !== "";
-    const topicsAreCapped = !isSearchingTopics && !showAllTopics && filteredTopics.length > TOPIC_DEFAULT_CAP;
+
+    // "All levels" groups topics into per-level sections instead of one mixed list — with every
+    // level's topics sitting in the same flat grid and no level shown anywhere on a chip, two
+    // similarly-named topics at different levels were impossible to tell apart while picking. Each
+    // group keeps that level's own teaching-sequence order (already applied by
+    // getFilteredTopicOptions). A single level picked has nothing to group — only one section would
+    // ever exist — so that case stays the flat list it always was.
+    const topicsByLevel = level === "all"
+      ? LEVELS_META.filter(l => l.id !== "all")
+          .map(l => ({ ...l, topics: filteredTopics.filter(o => o.level === l.id) }))
+          .filter(g => g.topics.length > 0)
+      : [];
+
+    // Collapsed default: one flat cap for a single level, a PER-LEVEL cap when every level is
+    // mixed together. Without the per-level split, "all levels"'s default view was whichever
+    // topics happened to have the lowest raw order number once every level's own independent
+    // 1, 2, 3… teaching sequence got compared side by side — not a deliberate balance, just
+    // whichever levels' early lessons happened to sort first. Capping per level instead guarantees
+    // every level gets a fair sample in the collapsed view.
+    const collapsedCount = level === "all"
+      ? topicsByLevel.reduce((sum, g) => sum + Math.min(TOPIC_DEFAULT_CAP_PER_LEVEL, g.topics.length), 0)
+      : Math.min(TOPIC_DEFAULT_CAP, filteredTopics.length);
+    const hasHiddenWhenCollapsed = !isSearchingTopics && filteredTopics.length > collapsedCount;
+    const topicsAreCapped = hasHiddenWhenCollapsed && !showAllTopics;
+
     const visibleTopics = topicsAreCapped ? filteredTopics.slice(0, TOPIC_DEFAULT_CAP) : filteredTopics;
+    const visibleGroupedTopics = topicsByLevel.map(g => ({
+      ...g,
+      total: g.topics.length,
+      topics: topicsAreCapped ? g.topics.slice(0, TOPIC_DEFAULT_CAP_PER_LEVEL) : g.topics,
+    }));
+    const totalVisibleNow = level === "all" ? visibleGroupedTopics.reduce((sum, g) => sum + g.topics.length, 0) : visibleTopics.length;
     const selectedTopicOptions = selectedTopics.map(getTopicOption).filter((option): option is TopicOption => Boolean(option));
     const selectedTopicSummary = selectedTopicOptions.map(o => o.label).join(", ");
     const FOCUS_META = [
@@ -1732,7 +1763,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
                 <div style={{ color: "#6B7280", fontSize: "12px", marginTop: "2px" }}>
                   {filteredTopics.length > 0
                     ? topicsAreCapped
-                      ? `Showing ${visibleTopics.length} of ${filteredTopics.length} topics - ${selectedTopics.length} selected`
+                      ? `Showing ${totalVisibleNow} of ${filteredTopics.length} topics - ${selectedTopics.length} selected`
                       : `${filteredTopics.length} topic${filteredTopics.length !== 1 ? "s" : ""} shown - ${selectedTopics.length} selected`
                     : topicSearch.trim() !== ""
                       ? `No topics match "${topicSearch.trim()}"`
@@ -1780,8 +1811,11 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
                     Select all {filteredTopics.length}
                   </button>
                 </div>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(130px,1fr))", gap: "8px" }}>
-                  {visibleTopics.map(o => {
+                {(() => {
+                  // One shared chip renderer for both paths below, so the level badge and
+                  // selected/unselected styling never drift apart between the grouped and flat
+                  // layouts.
+                  const renderTopicChip = (o: TopicOption) => {
                     const isSelected = selectedTopics.includes(o.value);
                     const levelColor = LEVELS_META.find(l => l.id === o.level)?.color || "#6366F1";
                     return (
@@ -1793,17 +1827,50 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
                         cursor: "pointer", textAlign: "left", transition: "all 0.15s",
                         fontWeight: isSelected ? "800" : "700", fontSize: "13px", lineHeight: 1.4
                       }}>
+                        {/* Always-on level badge — previously the only level signal was this same
+                            chip's own background color, and only once selected, which meant two
+                            similarly-named topics at different levels were indistinguishable while
+                            still picking. */}
+                        <span style={{
+                          display: "inline-block", fontSize: "9px", fontWeight: "900", letterSpacing: "0.03em",
+                          padding: "1px 5px", borderRadius: "999px", marginRight: "5px", verticalAlign: "1px",
+                          background: isSelected ? "rgba(255,255,255,0.3)" : hexToRgba(levelColor, 0.15),
+                          color: isSelected ? "white" : levelColor,
+                        }}>{o.level}</span>
                         {o.label}
                       </button>
                     );
-                  })}
-                </div>
+                  };
+
+                  // "All levels" renders level-grouped sections instead of one mixed grid — see
+                  // topicsByLevel's own comment above for why. A single level picked is just one
+                  // section, so that case stays the plain flat grid it always was.
+                  if (level === "all") {
+                    return visibleGroupedTopics.map((g, i) => (
+                      <div key={g.id} style={{ marginTop: i > 0 ? "16px" : 0 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "8px", fontWeight: "900", fontSize: "12px", color: g.color, textTransform: "uppercase", letterSpacing: "0.04em" }}>
+                          <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: g.color, display: "inline-block" }} />
+                          {g.id} — {g.desc} ({g.topics.length < g.total ? `${g.topics.length} of ${g.total}` : g.total})
+                        </div>
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(130px,1fr))", gap: "8px" }}>
+                          {g.topics.map(renderTopicChip)}
+                        </div>
+                      </div>
+                    ));
+                  }
+
+                  return (
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(130px,1fr))", gap: "8px" }}>
+                      {visibleTopics.map(renderTopicChip)}
+                    </div>
+                  );
+                })()}
                 {topicsAreCapped && (
                   <button type="button" onClick={() => setShowAllTopics(true)} style={{ width: "100%", marginTop: "10px", background: "#F0F9FF", border: `2px dashed ${hexToRgba(theme.accentSolid, 0.4)}`, color: theme.accentSolid, borderRadius: "10px", padding: "10px", fontWeight: "800", fontSize: "13px", cursor: "pointer" }}>
                     Show all {filteredTopics.length} topics
                   </button>
                 )}
-                {!topicsAreCapped && !isSearchingTopics && filteredTopics.length > TOPIC_DEFAULT_CAP && (
+                {showAllTopics && hasHiddenWhenCollapsed && (
                   <button type="button" onClick={() => setShowAllTopics(false)} style={{ width: "100%", marginTop: "10px", background: "none", border: "none", color: "#6B7280", borderRadius: "10px", padding: "8px", fontWeight: "700", fontSize: "12px", cursor: "pointer" }}>
                     Show fewer topics
                   </button>

@@ -7,9 +7,12 @@
 // dynamic import() only at the point a game or lesson plan actually starts (see startGame() in
 // LessonGamesGenerator.tsx and LessonPlanScreen.tsx).
 // `order` is an optional within-level, within-focus teaching-sequence hint (lower goes first) —
-// only assigned so far for A1 (see CLAUDE.md-adjacent session notes); topics without it sort by
-// their existing position in this array, unchanged. Extend level-by-level rather than guessing
-// order for a level all at once.
+// now assigned across every level (A1 through C1), not just A1; a topic without it sorts by its
+// existing position in this array, unchanged. Since it resets per level, picking "all levels" in
+// topic-select groups topics into per-level sections (see LessonGamesGenerator.tsx's
+// topicsByLevel) rather than sorting the raw number across levels — comparing "lesson #1" from
+// five different levels head-to-head would just interleave them arbitrarily, not anything
+// coherent.
 export const TOPIC_OPTIONS: { value: string; label: string; level: string | null; focus: string | null; order?: number }[] = [
   { value: "ai",                    label: "✨ AI Generated",              level: null,  focus: null       },
   { value: "past_simple",                  label: "Past Simple",                        level: "A2",  focus: "grammar"  , order: 3 },
