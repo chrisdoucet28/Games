@@ -51,7 +51,7 @@ export const ORDERUP_TUTORIAL_STEPS: TutorialStep[] = [
     ),
   },
   {
-    narration: "Once claimed, a ticket has a patience timer — but it freezes the instant your teacher opens judging on it, so you're never racing the clock while they're actually reading your answer. Don't finish before that, and your team takes a hit. Not ready? Release the claim any time, no penalty, for someone else to try.",
+    narration: "Once claimed, a ticket has a patience timer — don't finish before it runs out, or your team takes a hit. Not ready? Release the claim any time, no penalty, for someone else to try.",
     visual: (
       <div style={{ textAlign: "center" }}>
         <div style={{ fontSize: "20px" }}>😠🚪</div>
