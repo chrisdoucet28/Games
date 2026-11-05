@@ -30,7 +30,16 @@ export function PhoneHotSeatView({ state, teamId, onAction }: Props) {
   }
 
   const amActive = state.activeTeamId === teamId;
-  const isDescribingNow = state.teamStructure === "groups" ? amActive : !amActive;
+  // Between turns (and before the first one), `activeTeamId` is null — nobody is "on the hot
+  // seat" yet, so nobody should be describing either. Groups mode already got this right by
+  // accident (amActive is false for everyone, and groups mode's own isDescribingNow is just
+  // amActive) — solo mode's inverted `!amActive` didn't have the same accident working in its
+  // favor: with no team ever matching a null activeTeamId, `!amActive` came out true for every
+  // team, which fell through to the describing view and showed the just-finished word (plus the
+  // Correct/Skip/End Turn controls, though tapping them was always a no-op — the screen rejects
+  // any action once phase has left "play") to the whole class, including whoever had just been
+  // guessing. Explicit now for both modes, rather than relying on groups mode's coincidence.
+  const isDescribingNow = state.activeTeamId === null ? false : (state.teamStructure === "groups" ? amActive : !amActive);
 
   // Solo mode + I'm the active team = I'm the one guessing, not describing — the only case where
   // being "active" does NOT mean "I have the word."
