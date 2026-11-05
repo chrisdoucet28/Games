@@ -310,15 +310,16 @@ export function ClassJoinScreen({ code }: Props) {
         <div style={{ fontSize: "36px", marginBottom: "6px" }}>🎒</div>
         <div style={{ fontWeight: "900", fontSize: "18px", color: "#FCD34D", marginBottom: "18px" }}>Tap your team</div>
         <div style={{ display: "flex", flexDirection: "column", gap: "10px", width: "100%", maxWidth: "360px" }}>
-          {/* Word Relay is the one game where several phones genuinely share a team on purpose
-              (each is one person in the asker rotation) — same exception PhoneJoinScreen.tsx's own
-              lock already carves out. Every other game locks a team to whichever phone claimed it
-              first, same as that per-game flow: without this, any phone (a different team's
-              student, or just someone with the code) could tap an already-claimed team — including
-              "Teacher" below — and see THAT team's own private state (Spy Among Us's secret
-              role/prompt above all) for the rest of the sitting, not just this one game. */}
+          {/* Word Relay and Hot Seat are the two games where several phones genuinely share a team
+              on purpose (each is one person — Relay's asker rotation, Hot Seat's guesser/describer
+              split) — same exception PhoneJoinScreen.tsx's own lock already carves out. Every other
+              game locks a team to whichever phone claimed it first, same as that per-game flow:
+              without this, any phone (a different team's student, or just someone with the code)
+              could tap an already-claimed team — including "Teacher" below — and see THAT team's
+              own private state (Spy Among Us's secret role/prompt above all) for the rest of the
+              sitting, not just this one game. */}
           {classState.roster.map(t => {
-            const takenByOther = classState.activeGame !== "relay" && classState.connectedTeamIds.includes(t.id) && t.id !== claimedTeamIdRef.current;
+            const takenByOther = classState.activeGame !== "relay" && classState.activeGame !== "hotseat" && classState.connectedTeamIds.includes(t.id) && t.id !== claimedTeamIdRef.current;
             return (
               <button
                 key={t.id}
@@ -443,7 +444,7 @@ export function ClassJoinScreen({ code }: Props) {
     return <PhoneWordWhackView state={innerState as WhackStatePayload} teamId={claimedTeamId} deviceId={getDeviceId()} onTurnReport={sendTurnReport} />;
   }
   if (activeGame === "hotseat") {
-    return <PhoneHotSeatView state={innerState as HotSeatStatePayload} teamId={claimedTeamId} onAction={sendHotSeatAction} />;
+    return <PhoneHotSeatView state={innerState as HotSeatStatePayload} teamId={claimedTeamId} deviceId={getDeviceId()} onAction={sendHotSeatAction} />;
   }
   if (activeGame === "orderup") {
     return <PhoneOrderUpView state={innerState as OrderUpStatePayload} teamId={claimedTeamId} onAction={sendOrderUpAction} />;

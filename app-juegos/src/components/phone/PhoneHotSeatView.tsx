@@ -4,6 +4,7 @@ import { TeamIcon } from "../shared/TeamIcon";
 type Props = {
   state: HotSeatStatePayload;
   teamId: string | number;
+  deviceId: string;
   onAction: (payload: HotSeatActionPayload) => void;
 };
 
@@ -11,8 +12,15 @@ type Props = {
 // renders whatever the screen's latest broadcast says and forwards taps back as one-shot actions.
 // No per-tap latency pressure here (unlike Word Whack's mole grid), so a small round-trip on
 // Correct/Skip is imperceptible.
-export function PhoneHotSeatView({ state, teamId, onAction }: Props) {
+//
+// Individual people, not one phone per team (see liveSession.ts's HotSeatStatePayload header) —
+// every phone decides its own role purely from whether ITS OWN deviceId is the guesser, in the
+// describer list, or neither. Which team deviceId belongs to barely matters here: "groups" mode's
+// guesser and describers are naturally all the same team (the pool was built that way), "solo"
+// mode's describers can be on any team, and the view doesn't need to tell the difference.
+export function PhoneHotSeatView({ state, teamId, deviceId, onAction }: Props) {
   const team = state.roster.find(t => t.id === teamId);
+  const activeTeam = state.roster.find(t => t.id === state.activeTeamId);
 
   const wrapStyle: React.CSSProperties = {
     minHeight: "100vh", padding: "20px 18px", fontFamily: "'Segoe UI',system-ui,sans-serif", color: "white",
@@ -29,21 +37,11 @@ export function PhoneHotSeatView({ state, teamId, onAction }: Props) {
     );
   }
 
-  const amActive = state.activeTeamId === teamId;
-  // Between turns (and before the first one), `activeTeamId` is null — nobody is "on the hot
-  // seat" yet, so nobody should be describing either. Groups mode already got this right by
-  // accident (amActive is false for everyone, and groups mode's own isDescribingNow is just
-  // amActive) — solo mode's inverted `!amActive` didn't have the same accident working in its
-  // favor: with no team ever matching a null activeTeamId, `!amActive` came out true for every
-  // team, which fell through to the describing view and showed the just-finished word (plus the
-  // Correct/Skip/End Turn controls, though tapping them was always a no-op — the screen rejects
-  // any action once phase has left "play") to the whole class, including whoever had just been
-  // guessing. Explicit now for both modes, rather than relying on groups mode's coincidence.
-  const isDescribingNow = state.activeTeamId === null ? false : (state.teamStructure === "groups" ? amActive : !amActive);
-
-  // Solo mode + I'm the active team = I'm the one guessing, not describing — the only case where
-  // being "active" does NOT mean "I have the word."
-  if (state.teamStructure === "solo" && amActive) {
+  // Being THE guesser (not just "on the active team") is the one case where this phone must NOT
+  // show the word — true for groups and solo alike now, both just pick a guesser device from the
+  // active team's own connected phones. guesserDeviceId is only ever set during "play" (see
+  // sendState in HotSeatGame.tsx), so this is naturally false between turns too.
+  if (state.guesserDeviceId === deviceId) {
     return (
       <div style={{ ...wrapStyle, textAlign: "center" }}>
         <div style={{ fontSize: "22px", marginBottom: "4px" }}><TeamIcon team={team} size={22} /></div>
@@ -57,8 +55,9 @@ export function PhoneHotSeatView({ state, teamId, onAction }: Props) {
     );
   }
 
-  if (!isDescribingNow) {
-    const activeTeam = state.roster.find(t => t.id === state.activeTeamId);
+  const amDescribing = state.describerDeviceIds.includes(deviceId);
+
+  if (!amDescribing) {
     return (
       <div style={{ ...wrapStyle, textAlign: "center" }}>
         <div style={{ fontSize: "22px", marginBottom: "4px" }}><TeamIcon team={team} size={22} /></div>
@@ -80,12 +79,15 @@ export function PhoneHotSeatView({ state, teamId, onAction }: Props) {
   }
 
   // Describing now — the word, a countdown, this turn's tally, and the same three controls the
-  // shared screen normally has.
+  // shared screen normally has. Header names the describer's OWN team when it matches the active
+  // one (groups mode, and the rare solo case of an over-full "team"); solo's cross-team describers
+  // get "Describing for X" instead, so it's clear whose turn they're helping with.
+  const describingForOwnTeam = team?.id === state.activeTeamId;
   return (
     <div style={wrapStyle}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px" }}>
         <span style={{ fontWeight: "900", fontSize: "15px" }}>
-          {state.teamStructure === "groups" ? <><TeamIcon team={team} /> {team?.name}</> : "🔥 Describing"}
+          {describingForOwnTeam ? <><TeamIcon team={team} /> {team?.name}</> : `🔥 Describing for ${activeTeam?.name ?? "them"}`}
         </span>
         <span style={{ fontSize: "13px", fontWeight: "800", color: "#FDBA74" }}>⏱️ {state.timeLeft}s</span>
       </div>
@@ -103,20 +105,20 @@ export function PhoneHotSeatView({ state, teamId, onAction }: Props) {
 
       <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
         <button
-          onClick={() => onAction({ teamId, action: "correct" })}
+          onClick={() => onAction({ teamId, deviceId, action: "correct" })}
           style={{ background: "linear-gradient(135deg,#15803D,#22C55E)", color: "white", border: "none", borderRadius: "14px", padding: "16px", fontSize: "17px", fontWeight: "900", cursor: "pointer" }}
         >
           Correct ✅
         </button>
         <div style={{ display: "flex", gap: "10px" }}>
           <button
-            onClick={() => onAction({ teamId, action: "skip" })}
+            onClick={() => onAction({ teamId, deviceId, action: "skip" })}
             style={{ flex: 1, background: "rgba(0,0,0,0.3)", color: "#FDBA74", border: "3px solid #F59E0B", borderRadius: "14px", padding: "12px", fontSize: "14px", fontWeight: "900", cursor: "pointer" }}
           >
             Skip
           </button>
           <button
-            onClick={() => onAction({ teamId, action: "endTurn" })}
+            onClick={() => onAction({ teamId, deviceId, action: "endTurn" })}
             style={{ flex: 1, background: "rgba(0,0,0,0.3)", color: "#FCA5A5", border: "3px solid #EF4444", borderRadius: "14px", padding: "12px", fontSize: "14px", fontWeight: "900", cursor: "pointer" }}
           >
             End Turn

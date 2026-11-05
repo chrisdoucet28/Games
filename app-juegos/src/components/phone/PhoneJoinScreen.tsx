@@ -326,9 +326,10 @@ export function PhoneJoinScreen({ code, game }: Props) {
               Bounty Board, Word Relay all do this) so it shows up in scoreboards/rankings — but it
               has no real student behind it, so it's never an option a phone can actually claim. */}
           {state.roster.filter(t => !isSoloCpu(t.id)).map(t => {
-            // Word Relay is the one game where several phones share a team (each is one person in
-            // the asker rotation), so a team someone already joined stays open to claim there.
-            const takenByOther = game !== "relay" && state.connectedTeamIds.includes(t.id) && t.id !== claimedTeamIdRef.current;
+            // Word Relay and Hot Seat are the two games where several phones share a team on
+            // purpose (each is one person — Relay's asker rotation, Hot Seat's guesser/describer
+            // split), so a team someone already joined stays open to claim there.
+            const takenByOther = game !== "relay" && game !== "hotseat" && state.connectedTeamIds.includes(t.id) && t.id !== claimedTeamIdRef.current;
             return (
               <button
                 key={t.id}
@@ -374,7 +375,7 @@ export function PhoneJoinScreen({ code, game }: Props) {
     return <PhoneWordWhackView state={state as WhackStatePayload} teamId={claimedTeamId} deviceId={getDeviceId()} onTurnReport={sendTurnReport} />;
   }
   if (game === "hotseat") {
-    return <PhoneHotSeatView state={state as HotSeatStatePayload} teamId={claimedTeamId} onAction={sendHotSeatAction} />;
+    return <PhoneHotSeatView state={state as HotSeatStatePayload} teamId={claimedTeamId} deviceId={getDeviceId()} onAction={sendHotSeatAction} />;
   }
   if (game === "orderup") {
     return <PhoneOrderUpView state={state as OrderUpStatePayload} teamId={claimedTeamId} onAction={sendOrderUpAction} />;

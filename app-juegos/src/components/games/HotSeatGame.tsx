@@ -12,7 +12,7 @@ import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
 import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
 import { CustomWordsPanel } from "../shared/CustomWordsPanel";
 import { useWordDeck } from "../../hooks/useWordDeck";
-import { HOTSEAT_TUTORIAL_STEPS } from "../../data/tutorials/hotseat";
+import { HOTSEAT_SCREEN_TUTORIAL_STEPS, HOTSEAT_PHONE_GROUPS_TUTORIAL_STEPS, HOTSEAT_PHONE_SOLO_TUTORIAL_STEPS } from "../../data/tutorials/hotseat";
 import { playSound } from "../../lib/sounds";
 import { setMusicContext, setMusicGame, stopMusic } from "../../lib/music";
 import {
@@ -27,6 +27,32 @@ const TURN_SECONDS = 90;
 // Was 10 — teacher feedback: Hot Seat felt stingy next to a cross-game balance pass putting most
 // other games' typical full-game total in the 250-500 range; 15/word lands a typical game there too.
 const POINTS_PER_WORD = 15;
+
+// Random, not a fixed/rotating order — teacher feedback, same spirit as the earlier fix making
+// Order Up's grammar/vocab picks avoid repeats, but here variety isn't the goal, a fresh pick each
+// turn is. Shared by startTurn() (screen, picking who's up) and the action-validation handler
+// (recomputed fresh server-side, never trusted from a broadcast) so both always agree on who's
+// allowed to describe this exact turn.
+function pickGuesserDevice(connectedByTeam: Record<string, string[]>, activeTeamKey: string): string | null {
+  const pool = connectedByTeam[activeTeamKey] ?? [];
+  if (pool.length === 0) return null;
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+// Phones holding the word and the controls this turn — the rest of the guesser's own team in
+// "groups" mode, or every other connected phone in class in "solo" mode (each "team" there is one
+// person, so there's nobody else ON that team to describe). Always excludes the guesser itself.
+function describerDevicesFor(
+  connectedByTeam: Record<string, string[]>,
+  teamStructure: "groups" | "solo",
+  activeTeamKey: string,
+  guesserDeviceId: string | null,
+): string[] {
+  const pool = teamStructure === "groups"
+    ? (connectedByTeam[activeTeamKey] ?? [])
+    : Object.values(connectedByTeam).flat();
+  return pool.filter(d => d !== guesserDeviceId);
+}
 
 const EMBERS = Array.from({ length: 16 }, (_, i) => ({
   left: (i * 41) % 100,
@@ -112,10 +138,17 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
   // is class-level (so the QR points at ?classJoin=, which follows the teacher game to game).
   const [sessionIsClassLevel, setSessionIsClassLevel] = useState(!!presetPhoneSession);
   const [connectedTeamIds, setConnectedTeamIds] = useState<Set<string | number>>(new Set());
-  // "groups": the active team's own phone shows the word (teammates describe, matching the
-  // in-person rule). "solo": every *other* connected team's phone shows it instead, since a
-  // 1-person "team" has no teammate of its own to describe for it — see PhoneHotSeatView.tsx.
+  // Individual people, not one phone per team (same idea as Word Relay) — every connected device
+  // id per team, so the active team's turn can pick ONE of them as guesser and hand the word to
+  // the rest. "groups": several real teams, each with its own members, describing pool stays
+  // inside the active team. "solo": every "team" is one person, so the describing pool is every
+  // OTHER connected phone in class — see PhoneHotSeatView.tsx and the liveSession.ts header above
+  // HotSeatStatePayload for the full reasoning.
+  const [connectedByTeam, setConnectedByTeam] = useState<Record<string, string[]>>({});
   const [teamStructure, setTeamStructure] = useState<"groups" | "solo">("groups");
+  // This turn's randomly-picked guesser device, chosen fresh at startTurn() — null between turns
+  // (and whenever the active team has no connected phone to pick from).
+  const [guesserDeviceId, setGuesserDeviceId] = useState<string | null>(null);
   const channelRef = useRef<RealtimeChannel | null>(null);
 
   useEffect(() => {
@@ -175,16 +208,18 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
   const timerPct = (timeLeft / TURN_SECONDS) * 100;
   const timerColor = timeLeft > 45 ? "#22C55E" : timeLeft > 20 ? "#F59E0B" : "#EF4444";
 
-  // Whether anyone is actually covering the describing role on their phone this turn — depends on
-  // team structure, since who "describes on their phone" flips between the two (see the plan).
-  const describersOnPhone = inputMode !== "phone" || !currentTeam ? false
-    : teamStructure === "groups" ? connectedTeamIds.has(currentTeam.id)
-    : teams.some(t => t.id !== currentTeam.id && connectedTeamIds.has(t.id));
+  // Whether anyone is actually covering the describing role on a phone this turn — empty means
+  // falling back to the shared screen instead (nobody connected to describe, or the guesser was
+  // the only phone in the relevant pool), same as a one-phone team already does in Word Relay.
+  const describerDeviceIds = inputMode !== "phone" || !currentTeam ? []
+    : describerDevicesFor(connectedByTeam, teamStructure, String(currentTeam.id), guesserDeviceId);
+  const describersOnPhone = describerDeviceIds.length > 0;
 
   const endTurn = () => {
     if (timerRef.current) clearInterval(timerRef.current);
     playSound("hotseat");
     setLastTurnCorrect(turnCorrectRef.current);
+    setGuesserDeviceId(null);
     setPhase("turnend");
   };
 
@@ -203,6 +238,7 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
           if (timerRef.current) clearInterval(timerRef.current);
           playSound("hotseat");
           setLastTurnCorrect(turnCorrectRef.current);
+          setGuesserDeviceId(null);
           setPhase("turnend");
           return 0;
         }
@@ -220,6 +256,9 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
     turnCorrectRef.current = 0;
     setTurnCorrect(0);
     setTimeLeft(TURN_SECONDS);
+    // Freshly random every turn, not a rotation — null (no connected phone on this team to pick)
+    // is exactly what makes describersOnPhone fall back to the shared screen below.
+    setGuesserDeviceId(inputMode === "phone" && currentTeam ? pickGuesserDevice(connectedByTeam, String(currentTeam.id)) : null);
     setPhase("play");
     // Whatever word was on screen when the previous team's turn ended (timed out or "End Turn")
     // is still sitting in currentWord — draw a fresh one so the next team never starts on a word
@@ -271,6 +310,8 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
   const totalWordsByTeamRef = useRef(totalWordsByTeam);
   const teamStructureRef = useRef(teamStructure);
   const connectedTeamIdsRef = useRef<Set<string | number>>(new Set());
+  const connectedByTeamRef = useRef<Record<string, string[]>>({});
+  const guesserDeviceIdRef = useRef<string | null>(null);
   const sendStateRef = useRef<(() => void) | null>(null);
   const markCorrectRef = useRef(markCorrect);
   const skipWordRef = useRef(skipWord);
@@ -283,6 +324,7 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
     teamIndexRef.current = teamIndex;
     totalWordsByTeamRef.current = totalWordsByTeam;
     teamStructureRef.current = teamStructure;
+    guesserDeviceIdRef.current = guesserDeviceId;
     markCorrectRef.current = markCorrect;
     skipWordRef.current = skipWord;
     endTurnRef.current = endTurn;
@@ -303,13 +345,22 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
       const activeTeam = teams[teamIndexRef.current];
       const scores: Record<string, number> = {};
       teams.forEach(t => { scores[String(t.id)] = totalWordsByTeamRef.current[t.id] ?? 0; });
+      // Only populated while a word is actually live (phase "play") — during the brief "turnend"
+      // transition and before the game starts, nobody's on the hot seat yet, guessing or
+      // describing (guesserDeviceId itself is already cleared by then — see endTurn — but
+      // describerDeviceIds still needs its own explicit gate since it's recomputed fresh here
+      // every broadcast, not carried over from state).
+      const guesserDeviceId = rawPhase === "play" ? guesserDeviceIdRef.current : null;
+      const describerDeviceIds = rawPhase === "play" && activeTeam
+        ? describerDevicesFor(connectedByTeamRef.current, teamStructureRef.current, String(activeTeam.id), guesserDeviceId)
+        : [];
       const payload: HotSeatStatePayload = {
         phase: mappedPhase,
         teamStructure: teamStructureRef.current,
         roster: teams.map(t => ({ id: t.id, name: t.name, color: t.color, mascot: t.mascot })),
-        // Only populated while a word is actually live (phase "play") — during the brief
-        // "turnend" transition and before the game starts, no team is "on the hot seat" yet.
         activeTeamId: rawPhase === "play" ? (activeTeam?.id ?? null) : null,
+        guesserDeviceId,
+        describerDeviceIds,
         currentWord: currentWordRef.current,
         timeLeft: timeLeftRef.current,
         turnSeconds: TURN_SECONDS,
@@ -323,27 +374,34 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
     sendStateRef.current = sendState;
 
     channel.on("presence", { event: "sync" }, () => {
-      const presenceState = channel.presenceState<{ teamId: string | number }>();
+      const presenceState = channel.presenceState<{ teamId: string | number; deviceId?: string }>();
       const ids = new Set<string | number>();
-      Object.values(presenceState).forEach(entries => entries.forEach(entry => ids.add(entry.teamId)));
+      const byTeam: Record<string, string[]> = {};
+      Object.values(presenceState).forEach(entries => entries.forEach(entry => {
+        ids.add(entry.teamId);
+        if (entry.deviceId) {
+          const key = String(entry.teamId);
+          (byTeam[key] ??= []).push(entry.deviceId);
+        }
+      }));
       connectedTeamIdsRef.current = ids;
+      connectedByTeamRef.current = byTeam;
       setConnectedTeamIds(ids);
+      setConnectedByTeam(byTeam);
       sendState(); // roster/connected list changed — push a fresh state right away, don't wait for the interval
     });
 
     // The only place phone input actually touches game logic — validates who's allowed to act
-    // right now (differs by teamStructure), debounces near-simultaneous double-taps (matters most
-    // in solo mode, where several phones can act on the same word), then calls the exact same
-    // functions a screen-mode button click would.
+    // right now by recomputing the current describer pool fresh (never trusting a broadcast echo),
+    // debounces near-simultaneous double-taps (matters most in solo mode, where several phones can
+    // act on the same word), then calls the exact same functions a screen-mode button click would.
     channel.on("broadcast", { event: "action" }, ({ payload }) => {
       const action = payload as HotSeatActionPayload;
       if (phaseRef.current !== "play") return;
-      const activeTeamId = teams[teamIndexRef.current]?.id;
-      const isActiveTeam = action.teamId === activeTeamId;
-      const allowed = teamStructureRef.current === "groups"
-        ? isActiveTeam
-        : !isActiveTeam && connectedTeamIdsRef.current.has(action.teamId);
-      if (!allowed) return;
+      const activeTeam = teams[teamIndexRef.current];
+      if (!activeTeam) return;
+      const allowedDeviceIds = describerDevicesFor(connectedByTeamRef.current, teamStructureRef.current, String(activeTeam.id), guesserDeviceIdRef.current);
+      if (!allowedDeviceIds.includes(action.deviceId)) return;
       const now = Date.now();
       if (now - lastActionAtRef.current < 500) return;
       lastActionAtRef.current = now;
@@ -405,6 +463,7 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
     setIntroStep("setup");
     setSessionCode(null);
     setConnectedTeamIds(new Set());
+    setConnectedByTeam({});
   };
 
   const arenaStyle: React.CSSProperties = {
@@ -545,7 +604,7 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
                         }}><Icon name="person" size={12} /> Solo</button>
                       </div>
                       <div style={{ fontSize: "11px", color: "#FED7AA99", marginTop: "6px" }}>
-                        {teamStructure === "groups" ? "Each team's own phone shows the word to their describers." : "Every other team's phone shows the word — they describe for whoever's up."}
+                        {teamStructure === "groups" ? "Each team's own phones show the word to their describers — except whoever's picked to guess." : "Everyone else's phones show the word — the whole class describes for whoever's up."}
                       </div>
                     </div>
                   </PhoneJoinPanel>
@@ -561,7 +620,7 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
           {showHowTo && (
             <HowToPlayModal
               gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color}
-              steps={HOTSEAT_TUTORIAL_STEPS}
+              steps={inputMode !== "phone" ? HOTSEAT_SCREEN_TUTORIAL_STEPS : teamStructure === "groups" ? HOTSEAT_PHONE_GROUPS_TUTORIAL_STEPS : HOTSEAT_PHONE_SOLO_TUTORIAL_STEPS}
               onClose={() => setShowHowTo(false)}
             />
           )}
@@ -688,10 +747,10 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
             <div style={{ marginBottom: "10px" }}><Icon name="phone" size={34} /></div>
             <div style={{ fontWeight: "900", fontSize: "17px", color: "#FDBA74", marginBottom: "6px" }}>
               {teamStructure === "groups"
-                ? `${currentTeam.name} is describing on their phone!`
+                ? `${currentTeam.name}'s describers are on their phones!`
                 : "Everyone else is describing on their phones!"}
             </div>
-            <div style={{ color: "#FED7AA", fontSize: "13px", fontWeight: "600" }}>The word is hidden here so {currentTeam.name} can't see it.</div>
+            <div style={{ color: "#FED7AA", fontSize: "13px", fontWeight: "600" }}>The word is hidden here so whoever's guessing can't see it.</div>
           </div>
         )}
 

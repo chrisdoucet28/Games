@@ -233,21 +233,38 @@ export function openWhackChannel(code: string): RealtimeChannel {
 // same word-deck/timer/scoring logic it always has; a phone-driven turn is just that same state
 // broadcast out, and phone taps folded back in as if they were local button clicks. See
 // HotSeatGame.tsx for exactly where.
+//
+// Individual people, not one phone per team (same idea as Word Relay) — every connected phone is
+// identified by its own deviceId (see getDeviceId), and at the start of each team's turn the
+// screen randomly picks ONE of that team's connected devices to be the guesser (teacher feedback:
+// a fixed/rotating order wasn't wanted, a fresh random pick each turn was). The word and controls
+// go to every OTHER connected phone in play this turn — the rest of the guesser's own team in
+// "groups" mode, or literally everyone else connected in "solo" mode, since "solo" means each team
+// is really just one person with no teammates of their own to describe for them. With fewer than
+// two phones in play (nobody connected, or only the guesser's own), there's no one to describe on
+// a phone at all, so the word and controls fall back to the shared screen instead, same as a
+// one-phone team already does in Word Relay.
 export type HotSeatRosterEntry = { id: string | number; name: string; color: TeamColor; mascot?: string | null };
 
-// Which specific card a phone shows during "turn" is derived client-side from activeTeamId +
-// teamStructure (see PhoneHotSeatView.tsx) — a single broadcast phase can't itself be "describing"
-// for one team and "guessing" for another at the same time.
+// Which specific card a phone shows during "turn" is derived client-side from its OWN deviceId
+// against guesserDeviceId/describerDeviceIds (see PhoneHotSeatView.tsx) — a single broadcast phase
+// can't itself be "describing" for one phone and "guessing" for another at the same time.
 export type HotSeatPhase = "lobby" | "turn" | "final";
 
 export type HotSeatStatePayload = {
   phase: HotSeatPhase;
-  // "groups": the active team's own phone describes (teammates give clues, matches the in-person
-  // rule). "solo": every *other* connected team's phone describes instead, since a 1-person "team"
-  // has no teammates of its own to hide the word from — see the plan's reasoning.
+  // "groups": several real teams, each with its own members. "solo": every "team" is one person,
+  // so the describing pool spans the whole connected class rather than staying inside one team.
   teamStructure: "groups" | "solo";
   roster: HotSeatRosterEntry[];
   activeTeamId: string | number | null;
+  // This turn's guesser — null outside "play" (between turns, nobody's up yet) or when the active
+  // team has no connected phone to pick from (screen-only fallback applies instead).
+  guesserDeviceId: string | null;
+  // Phones holding the word and the Correct/Skip/End Turn controls this turn — always excludes
+  // guesserDeviceId. Empty (not just absent) is the signal a phone itself can't act on; the screen
+  // uses the same emptiness to decide whether IT needs to show the word instead.
+  describerDeviceIds: string[];
   currentWord: string;
   timeLeft: number;
   turnSeconds: number;
@@ -257,9 +274,9 @@ export type HotSeatStatePayload = {
   ts: number;
 };
 
-// Broadcast phone -> screen. teamId is validated against who's actually allowed to act right now —
-// the active team in "groups" mode, anyone but the active team in "solo" mode (see HotSeatGame.tsx).
-export type HotSeatActionPayload = { teamId: string | number; action: "correct" | "skip" | "endTurn" };
+// Broadcast phone -> screen. deviceId is validated against describerDeviceIds — the only phones
+// ever allowed to act (see HotSeatGame.tsx); teamId travels alongside for scoring attribution.
+export type HotSeatActionPayload = { teamId: string | number; deviceId: string; action: "correct" | "skip" | "endTurn" };
 
 function hotSeatChannelName(code: string): string {
   return `hotseat-${code}`;
