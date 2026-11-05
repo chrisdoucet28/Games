@@ -310,38 +310,54 @@ export function ClassJoinScreen({ code }: Props) {
         <div style={{ fontSize: "36px", marginBottom: "6px" }}>🎒</div>
         <div style={{ fontWeight: "900", fontSize: "18px", color: "#FCD34D", marginBottom: "18px" }}>Tap your team</div>
         <div style={{ display: "flex", flexDirection: "column", gap: "10px", width: "100%", maxWidth: "360px" }}>
-          {/* No "already joined" lock here: several phones can share a team (Word Relay treats each
-              phone as one person in a rotation). Games with one phone per team just mirror that
-              team's view on every phone that claimed it. */}
-          {classState.roster.map(t => (
-            <button
-              key={t.id}
-              onClick={() => handleClaim(t.id)}
-              style={{
-                display: "flex", alignItems: "center", gap: "12px", padding: "16px 18px",
-                borderRadius: "16px", border: `2px solid ${t.color.bg}`,
-                background: `linear-gradient(160deg,${t.color.dark}55,#1E1033)`,
-                color: "white", fontWeight: "800", fontSize: "16px", cursor: "pointer",
-              }}
-            >
-              <span style={{ fontSize: "24px" }}><TeamIcon team={t} size={24} /></span>
-              <span style={{ flex: 1, textAlign: "left" }}>{t.name}</span>
-            </button>
-          ))}
-          {showTeacherOption && (
-            <button
-              onClick={() => handleClaim(TEACHER_ID)}
-              style={{
-                display: "flex", alignItems: "center", gap: "12px", padding: "16px 18px",
-                borderRadius: "16px", border: `2px dashed ${TEACHER_COLOR.bg}`,
-                background: `linear-gradient(160deg,${TEACHER_COLOR.dark}55,#1E1033)`,
-                color: "white", fontWeight: "800", fontSize: "16px", cursor: "pointer",
-              }}
-            >
-              <span style={{ fontSize: "24px" }}><TeamIcon team={TEACHER_ROSTER_ENTRY} size={24} /></span>
-              <span style={{ flex: 1, textAlign: "left" }}>Teacher (playing too)</span>
-            </button>
-          )}
+          {/* Word Relay is the one game where several phones genuinely share a team on purpose
+              (each is one person in the asker rotation) — same exception PhoneJoinScreen.tsx's own
+              lock already carves out. Every other game locks a team to whichever phone claimed it
+              first, same as that per-game flow: without this, any phone (a different team's
+              student, or just someone with the code) could tap an already-claimed team — including
+              "Teacher" below — and see THAT team's own private state (Spy Among Us's secret
+              role/prompt above all) for the rest of the sitting, not just this one game. */}
+          {classState.roster.map(t => {
+            const takenByOther = classState.activeGame !== "relay" && classState.connectedTeamIds.includes(t.id) && t.id !== claimedTeamIdRef.current;
+            return (
+              <button
+                key={t.id}
+                onClick={() => !takenByOther && handleClaim(t.id)}
+                disabled={takenByOther}
+                style={{
+                  display: "flex", alignItems: "center", gap: "12px", padding: "16px 18px",
+                  borderRadius: "16px", border: `2px solid ${t.color.bg}`,
+                  background: takenByOther ? "rgba(255,255,255,0.04)" : `linear-gradient(160deg,${t.color.dark}55,#1E1033)`,
+                  color: "white", fontWeight: "800", fontSize: "16px", cursor: takenByOther ? "not-allowed" : "pointer",
+                  opacity: takenByOther ? 0.5 : 1,
+                }}
+              >
+                <span style={{ fontSize: "24px" }}><TeamIcon team={t} size={24} /></span>
+                <span style={{ flex: 1, textAlign: "left" }}>{t.name}</span>
+                {takenByOther && <span style={{ fontSize: "12px", color: "#9CA3AF", fontWeight: "700" }}>Already joined</span>}
+              </button>
+            );
+          })}
+          {showTeacherOption && (() => {
+            const takenByOther = classState.connectedTeamIds.includes(TEACHER_ID) && TEACHER_ID !== claimedTeamIdRef.current;
+            return (
+              <button
+                onClick={() => !takenByOther && handleClaim(TEACHER_ID)}
+                disabled={takenByOther}
+                style={{
+                  display: "flex", alignItems: "center", gap: "12px", padding: "16px 18px",
+                  borderRadius: "16px", border: `2px dashed ${TEACHER_COLOR.bg}`,
+                  background: takenByOther ? "rgba(255,255,255,0.04)" : `linear-gradient(160deg,${TEACHER_COLOR.dark}55,#1E1033)`,
+                  color: "white", fontWeight: "800", fontSize: "16px", cursor: takenByOther ? "not-allowed" : "pointer",
+                  opacity: takenByOther ? 0.5 : 1,
+                }}
+              >
+                <span style={{ fontSize: "24px" }}><TeamIcon team={TEACHER_ROSTER_ENTRY} size={24} /></span>
+                <span style={{ flex: 1, textAlign: "left" }}>Teacher (playing too)</span>
+                {takenByOther && <span style={{ fontSize: "12px", color: "#9CA3AF", fontWeight: "700" }}>Already joined</span>}
+              </button>
+            );
+          })()}
         </div>
         <div style={{ color: "#93C5FD99", fontSize: "12px", marginTop: "18px", lineHeight: 1.6 }}>
           You'll only need to do this once — your phone will automatically follow along for the rest of class.

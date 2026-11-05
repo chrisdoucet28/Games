@@ -233,8 +233,21 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
   const [timesWasSpy, setTimesWasSpy] = useState<Record<string | number, number>>(() => resumed?.timesWasSpy ?? ({ [teams[spyTeamIdx]?.id ?? ""]: 1 }));
   const [spyWinsByTeam, setSpyWinsByTeam] = useState<Record<string | number, number>>(() => resumed?.spyWinsByTeam ?? {});
   const [crewWinsByTeam, setCrewWinsByTeam] = useState<Record<string | number, number>>(() => resumed?.crewWinsByTeam ?? {});
-  // A resumed mission skips the intro and re-peeks everyone for the same round/spy.
-  const [phase, setPhase] = useState<Phase>(() => resumed ? "peek" : "intro");
+  // A resumed mission skips the intro screen (and its Screen/Phone picker) entirely, so
+  // `presetPhoneSession` — the same prop that decides inputMode's own initial value just below —
+  // is the only signal left for which mode this resumed sitting is actually in. Screen mode
+  // re-peeks everyone for the same round/spy, same as always. Phone mode must NOT start on
+  // "peek": that phase is screen-only (see enterRoundStartPhase's own comment) — a phone landing
+  // on it would show its role card before the teacher meant to reveal anything, and the shared
+  // screen itself would show the pass-the-device reveal UI in front of the whole class, the exact
+  // leak phone mode exists to prevent. Phone mode instead resumes straight into whichever phase a
+  // fresh phone-mode round would have opened on (mirrors enterRoundStartPhase's own branching) —
+  // every team already has its role privately via its own phone either way.
+  const [phase, setPhase] = useState<Phase>(() => {
+    if (!resumed) return "intro";
+    if (!presetPhoneSession) return "peek";
+    return isTwoPlayer ? "speak-2p" : "discuss";
+  });
   // Tension for the actual decision moments (voting who the spy is, the spy guessing the topic) —
   // not "discuss"/"speak", which is free conversation, not an answer under pressure. Also covers
   // "reveal"/"reveal-2p" (who the spy actually was) — teacher feedback: the reveal sting needs a
