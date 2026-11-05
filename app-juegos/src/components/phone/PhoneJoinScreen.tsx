@@ -23,7 +23,7 @@ import { PhoneBountyBoardView } from "./PhoneBountyBoardView";
 import { PhoneRelayView } from "./PhoneRelayView";
 import { isSoloCpu } from "../../lib/soloOpponent";
 
-type Game = "auction" | "spy" | "whack" | "hotseat" | "orderup" | "racetrack" | "hill" | "bounty" | "relay";
+export type Game = "auction" | "spy" | "whack" | "hotseat" | "orderup" | "racetrack" | "hill" | "bounty" | "relay";
 type Props = { code: string; game: Game };
 
 // No state broadcast for this long means the teacher's tab is gone (refreshed, closed the game,
@@ -38,7 +38,7 @@ type ClaimedSession = { code: string; teamId: string | number };
 // The bits that differ between games sharing this one join/claim/lobby shell — everything else
 // (claim grid, connection-lost timeout, localStorage rejoin) is identical in shape for both, since
 // every game's roster/connectedTeamIds payload fields are the same.
-const GAME_COPY: Record<Game, {
+export const GAME_COPY: Record<Game, {
   joinEmoji: string;
   arenaBg: string;
   startingBody: string;

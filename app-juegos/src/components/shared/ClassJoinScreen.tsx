@@ -23,6 +23,7 @@ import { PhoneRaceTrackView } from "../phone/PhoneRaceTrackView";
 import { PhoneKingOfHillView } from "../phone/PhoneKingOfHillView";
 import { PhoneBountyBoardView } from "../phone/PhoneBountyBoardView";
 import { PhoneRelayView } from "../phone/PhoneRelayView";
+import { GAME_COPY, type Game } from "../phone/PhoneJoinScreen";
 import { useAuth } from "../../hooks/useAuth";
 import { getMyClassLink, linkMyTeam, recordClassAttendance, type MyClass } from "../../lib/classMembership";
 import { TEACHER_ID, TEACHER_COLOR } from "../../lib/soloOpponent";
@@ -398,6 +399,23 @@ export function ClassJoinScreen({ code }: Props) {
         >
           Not your team? Change
         </button>
+      </div>
+    );
+  }
+
+  // The teacher hasn't actually started the game yet ("intro" for Auction, "lobby" for every
+  // other phone-capable game — see PhoneJoinScreen.tsx's own copy of this same gate, which this
+  // class-level flow was missing: it rendered straight into the per-game view the moment a game's
+  // FIRST broadcast arrived, lobby or not). Nobody should see anything private — Spy Among Us's
+  // secret topic/role above all, since that's the entire point of the game — before the whole
+  // room starts together at the teacher's own signal.
+  if (innerState.phase === "intro" || innerState.phase === "lobby") {
+    const copy = GAME_COPY[activeGame as Game];
+    return (
+      <div style={arenaStyle}>
+        <div style={{ fontSize: "36px", marginBottom: "6px" }}>{claimedTeam ? <TeamIcon team={claimedTeam} size={36} /> : copy.joinEmoji}</div>
+        <div style={{ fontWeight: "900", fontSize: "18px", color: "#FCD34D", marginBottom: "8px" }}>You're in as {claimedTeam?.name}!</div>
+        <div style={{ color: "#93C5FD", fontSize: "14px", lineHeight: 1.6 }}>{copy.startingBody}</div>
       </div>
     );
   }
