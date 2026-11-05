@@ -238,9 +238,6 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
   // See BountyBoardGame.tsx's own copy of this for the full explanation — true whenever sessionCode
   // is class-level (so the QR points at ?classJoin=, which follows the teacher game to game).
   const [sessionIsClassLevel, setSessionIsClassLevel] = useState(!!presetPhoneSession);
-  // Snapshot taken once at mount — see BountyBoardGame.tsx's own copy for the full explanation of
-  // why the setup/QR block below must key off this instead of the live presetPhoneSession prop.
-  const startedWithPresetSession = useRef(!!presetPhoneSession).current;
   const [connectedTeamIds, setConnectedTeamIds] = useState<Set<string | number>>(new Set());
   const channelRef = useRef<RealtimeChannel | null>(null);
 
@@ -560,9 +557,11 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
             </div>
           ))}
         </div>
-        {/* Skipped entirely for a Class Check-In sitting — presetPhoneSession already picked
-            phone mode and its code, and the class-level QR already covered joining. */}
-        {!startedWithPresetSession && <>
+        {/* Always shown, even when a class-level session already exists (Class Check-In, or an
+            earlier game's "Play on Phones") — a teacher choosing THIS game still needs the choice
+            of Screen vs Phones for it specifically; picking Phones reuses the existing class-level
+            code (see handlePickPhoneMode/ensurePhoneSession) rather than starting a new one. */}
+        <>
         {introStep === "setup" && (
           <div style={{ marginBottom: "20px" }}>
             <div style={{ fontSize: "13px", color: "#C4B5FD", fontWeight: "700", marginBottom: "10px" }}>How will teams place their bets?</div>
@@ -599,11 +598,9 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
             />
           );
         })()}
-        </>}
+        </>
 
-        {/* Unlike the screen/phone picker above, this stays available even for a Class Check-In
-            sitting (startedWithPresetSession) — phone mode is already locked in either way there,
-            but Correction Mode is still the teacher's own independent choice to make. */}
+        {/* Correction Mode is the teacher's own independent choice, same as the picker above. */}
         <div style={{ marginBottom: "20px" }}>
           <button onClick={() => setCorrectionMode(on => !on)} style={{
             padding: "10px 20px", borderRadius: "12px", fontWeight: "800", fontSize: "14px", cursor: "pointer",

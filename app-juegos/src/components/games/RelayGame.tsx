@@ -597,9 +597,6 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
   }, [phase]);
 
   const [sessionIsClassLevel, setSessionIsClassLevel] = useState(!!presetPhoneSession);
-  // Snapshot taken once at mount — see BountyBoardGame.tsx's own copy for the full explanation of
-  // why the setup/QR block below must key off this instead of the live presetPhoneSession prop.
-  const startedWithPresetSession = useRef(!!presetPhoneSession).current;
 
   const handlePickPhoneMode = () => {
     setInputMode("phone");
@@ -780,18 +777,19 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
             </div>
           )}
 
-          {/* Skipped entirely for a Class Check-In sitting — presetPhoneSession already picked
-              phone mode and its code, and the class-level QR already covered joining. Available at
-              any real team count, including true solo (one student, playing online/remotely) — the
-              asker/answerer split below already handles a one-phone team (its own lone phone
-              becomes the asker, and the teacher's screen falls back to holding the word and the
-              controls since there's no second phone to be the answerer), the same fallback a
-              one-phone team already needed for in-person play. */}
-          {!startedWithPresetSession && (
-            <>
-              {introStep === "setup" && (
-                <div style={{ marginBottom: "20px" }}>
-                  <div style={{ fontSize: "13px", color: "#99F6E4", fontWeight: "700", marginBottom: "10px" }}>How will you play?</div>
+          {/* Always shown, even when a class-level session already exists (Class Check-In, or an
+              earlier game's "Play on Phones") — a teacher choosing THIS game still needs the choice
+              of Screen vs Phones for it specifically; picking Phones reuses the existing class-level
+              code (see handlePickPhoneMode/ensurePhoneSession) rather than starting a new one.
+              Available at any real team count, including true solo (one student, playing
+              online/remotely) — the asker/answerer split below already handles a one-phone team
+              (its own lone phone becomes the asker, and the teacher's screen falls back to holding
+              the word and the controls since there's no second phone to be the answerer), the same
+              fallback a one-phone team already needed for in-person play. */}
+          <>
+            {introStep === "setup" && (
+              <div style={{ marginBottom: "20px" }}>
+                <div style={{ fontSize: "13px", color: "#99F6E4", fontWeight: "700", marginBottom: "10px" }}>How will you play?</div>
                   <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
                     <button onClick={handlePickScreenMode} className="rl-btn" style={{
                       padding: "10px 20px", borderRadius: "12px", fontWeight: "800", fontSize: "14px", cursor: "pointer",
@@ -838,8 +836,7 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
                   />
                 );
               })()}
-            </>
-          )}
+          </>
 
           {wordListToggle}
           <button onClick={() => setShowHowTo(true)} className="rl-btn" style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginBottom: "14px", background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>

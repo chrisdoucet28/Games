@@ -438,13 +438,6 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
   // (this game only, no "connect every player" for free, only a fallback if the context above has
   // no class-session concept at all).
   const [sessionIsClassLevel, setSessionIsClassLevel] = useState(!!presetPhoneSession);
-  // Snapshot of whether this game started already linked to a class-level session, taken once at
-  // mount — unlike the live presetPhoneSession prop, which flips truthy the instant "Play on
-  // Phones" below promotes a session via onRequestPhoneSession. Using the live prop to decide
-  // whether to show the setup/QR block at all made that block vanish the moment the teacher clicked
-  // the very button that creates the session, since the resulting re-render handed this component a
-  // now-truthy presetPhoneSession before it ever got to render the QR it had just set state to show.
-  const startedWithPresetSession = useRef(!!presetPhoneSession).current;
   const [connectedTeamIds, setConnectedTeamIds] = useState<Set<string | number>>(new Set());
   const [answerMode, setAnswerMode] = useState<"spoken" | "typing">(resumed?.answerMode ?? "spoken");
   const channelRef = useRef<RealtimeChannel | null>(null);
@@ -876,9 +869,11 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
             Get it wrong and it becomes a <strong style={{ color: "#B91C1C" }}>bounty</strong>: a different team can claim it and fix your exact sentence for double the points — miss it again and it's worth even more!
           </div>
         </div>
-        {/* Skipped entirely for a Class Check-In sitting — presetPhoneSession already picked
-            phone mode and its code, and the class-level QR already covered joining. */}
-        {!startedWithPresetSession && <>
+        {/* Always shown, even when a class-level session already exists (Class Check-In, or an
+            earlier game's "Play on Phones") — a teacher choosing THIS game still needs the choice
+            of Screen vs Phones for it specifically; picking Phones reuses the existing class-level
+            code (see handlePickPhoneMode/ensurePhoneSession) rather than starting a new one. */}
+        <>
           {introStep === "setup" && (
             <div style={{ marginBottom: "20px" }}>
               <div style={{ fontSize: "13px", color: "#92400E", fontWeight: "700", marginBottom: "10px" }}>How will answers get submitted?</div>
@@ -935,7 +930,7 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
               </PhoneJoinPanel>
             );
           })()}
-        </>}
+        </>
         {/* Solo only — how many mistakes the CPU makes, both in its own sentences (writing wrong
             ones more often) and in fixing yours (more likely to fail and hand it back to you).
             Same three-way picker idiom as Hot Potato's "CPU pass speed" row. */}

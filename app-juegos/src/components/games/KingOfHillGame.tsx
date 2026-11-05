@@ -653,9 +653,6 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
   }, [phase, contest?.step, contestIsSoloDuel, contestReady]);
 
   const [sessionIsClassLevel, setSessionIsClassLevel] = useState(!!presetPhoneSession && !isThemeMode);
-  // Snapshot taken once at mount — see BountyBoardGame.tsx's own copy for the full explanation of
-  // why the setup/QR block below must key off this instead of the live presetPhoneSession prop.
-  const startedWithPresetSession = useRef(!!presetPhoneSession).current;
 
   const handlePickPhoneMode = () => {
     setInputMode("phone");
@@ -827,9 +824,12 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
             </div>
           ))}
         </div>
-        {/* Skipped entirely for a Class Check-In sitting — presetPhoneSession already picked
-            phone mode and its code, and the class-level QR already covered joining. */}
-        {propTeams.length > 1 && !isThemeMode && !startedWithPresetSession && (
+        {/* Always shown (team-count and theme-mode gates aside), even when a class-level session
+            already exists (Class Check-In, or an earlier game's "Play on Phones") — a teacher
+            choosing THIS game still needs the choice of Screen vs Phones for it specifically;
+            picking Phones reuses the existing class-level code (see
+            handlePickPhoneMode/ensurePhoneSession) rather than starting a new one. */}
+        {propTeams.length > 1 && !isThemeMode && (
           <>
             {introStep === "setup" && (
               <div style={{ marginBottom: "20px" }}>

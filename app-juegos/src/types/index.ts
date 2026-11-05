@@ -116,10 +116,12 @@ export interface TeamColor {
     paused?: boolean;
     onTogglePause?: () => void;
     // Set only when this game is being launched as part of an active Class Check-In sitting (see
-    // LessonGamesGenerator.tsx's classSessionCode) — the game should seed its own phone-mode
-    // session from this code instead of generating a fresh one, default straight into phone mode,
-    // and skip its own "Play on Screen vs Play on Phones" picker UI entirely (the class-level QR
-    // already covered joining; this game's own intro screen has nothing left to do).
+    // LessonGamesGenerator.tsx's classSessionCode) — the game should default to phone mode and
+    // seed its own session from this code if the teacher picks "Play on Phones", instead of
+    // generating a fresh one. Does NOT skip the game's own "Play on Screen vs Play on Phones"
+    // picker UI — a teacher choosing THIS game still needs that choice for it specifically (a
+    // class-level session existing doesn't mean every later game should be locked into phone mode
+    // with no way back to Screen; see feedback on this exact regression).
     presetPhoneSession?: { code: string };
     // Called when the teacher picks "Play on Phones" with no Class Check-In already running (i.e.
     // presetPhoneSession is unset) — starts one on the spot and returns its code, so THIS game's QR

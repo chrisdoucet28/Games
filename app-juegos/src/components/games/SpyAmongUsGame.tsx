@@ -294,9 +294,6 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
   // See BountyBoardGame.tsx's own copy of this for the full explanation — true whenever sessionCode
   // is class-level (so the QR points at ?classJoin=, which follows the teacher game to game).
   const [sessionIsClassLevel, setSessionIsClassLevel] = useState(!!presetPhoneSession);
-  // Snapshot taken once at mount — see BountyBoardGame.tsx's own copy for the full explanation of
-  // why the setup/QR block below must key off this instead of the live presetPhoneSession prop.
-  const startedWithPresetSession = useRef(!!presetPhoneSession).current;
   const [connectedTeamIds, setConnectedTeamIds] = useState<Set<string | number>>(new Set());
   const channelRef = useRef<RealtimeChannel | null>(null);
 
@@ -858,9 +855,11 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
               </div>
             ))}
           </div>
-          {/* Skipped entirely for a Class Check-In sitting — presetPhoneSession already picked
-              phone mode and its code, and the class-level QR already covered joining. */}
-          {!startedWithPresetSession && <>
+          {/* Always shown, even when a class-level session already exists (Class Check-In, or an
+              earlier game's "Play on Phones") — a teacher choosing THIS game still needs the choice
+              of Screen vs Phones for it specifically; picking Phones reuses the existing class-level
+              code (see handlePickPhoneMode/ensurePhoneSession) rather than starting a new one. */}
+          <>
           {introStep === "setup" && (
             <div style={{ marginBottom: "20px" }}>
               <div style={{ fontSize: "13px", color: "#94A3B8", fontWeight: "700", marginBottom: "10px" }}>How will teams see their secret role?</div>
@@ -904,7 +903,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
               />
             );
           })()}
-          </>}
+          </>
           <button
             onClick={() => setShowHowTo(true)}
             className="sau-btn"
