@@ -25,6 +25,7 @@ import { PhoneBountyBoardView } from "../phone/PhoneBountyBoardView";
 import { PhoneRelayView } from "../phone/PhoneRelayView";
 import { useAuth } from "../../hooks/useAuth";
 import { getMyClassLink, linkMyTeam, recordClassAttendance, type MyClass } from "../../lib/classMembership";
+import { TEACHER_ID, TEACHER_COLOR } from "../../lib/soloOpponent";
 
 type Props = { code: string };
 
@@ -45,6 +46,13 @@ const STATE_TIMEOUT_MS = 12000;
 const STORAGE_PREFIX = "classcade-class-session:";
 
 type ClaimedSession = { code: string; teamId: string | number };
+
+// Synthetic roster entry for Spy Among Us's teacher co-player (see the long comment where this is
+// offered as a claim option below) — never actually present in classState.roster, since that's
+// built from the real teams picked for today, so every display lookup against that roster needs
+// this as an explicit fallback for TEACHER_ID or it silently renders blank for the teacher's own
+// phone.
+const TEACHER_ROSTER_ENTRY = { id: TEACHER_ID, name: "Teacher", color: TEACHER_COLOR, mascot: TEACHER_COLOR.emoji };
 
 function loadClaimedTeamId(code: string): string | number | null {
   try {
@@ -282,6 +290,20 @@ export function ClassJoinScreen({ code }: Props) {
   }
 
   if (claimedTeamId === null) {
+    // Spy Among Us is the one game where a teacher can be a genuine second live participant with
+    // their OWN private phone view (solo play requires it; a real 2-team game can opt it in) — see
+    // SpyAmongUsGame.tsx's own teacherJoining/makeTeacherTeam. That synthetic "Teacher" entry only
+    // ever existed in Spy's own per-game roster, which a phone used to connect to directly; now
+    // that every "Play on Phones" tap promotes to this shared class-level session instead, this
+    // class-level roster (built from the real teams picked for today, in LessonGamesGenerator.tsx's
+    // sendClassSessionState) is the only thing a phone ever sees to claim from, and it has no idea
+    // Spy's own teacher co-play feature exists — so the option silently disappeared. Showing it here
+    // too (same id Spy's own roster uses) restores it: claiming "teacher" here just flows through to
+    // Spy's own channel exactly as if the teacher had scanned Spy's own QR directly. Shown whenever
+    // Spy is the active game, even for a team count where Spy wouldn't actually offer it (3+ real
+    // teams) — tapping it then is a harmless dead end ("nothing to do on your phone"), far better
+    // than the option being invisible in the 1-2 team case where it's actually needed.
+    const showTeacherOption = classState.activeGame === "spy";
     return (
       <div style={arenaStyle}>
         <div style={{ fontSize: "36px", marginBottom: "6px" }}>🎒</div>
@@ -305,6 +327,20 @@ export function ClassJoinScreen({ code }: Props) {
               <span style={{ flex: 1, textAlign: "left" }}>{t.name}</span>
             </button>
           ))}
+          {showTeacherOption && (
+            <button
+              onClick={() => handleClaim(TEACHER_ID)}
+              style={{
+                display: "flex", alignItems: "center", gap: "12px", padding: "16px 18px",
+                borderRadius: "16px", border: `2px dashed ${TEACHER_COLOR.bg}`,
+                background: `linear-gradient(160deg,${TEACHER_COLOR.dark}55,#1E1033)`,
+                color: "white", fontWeight: "800", fontSize: "16px", cursor: "pointer",
+              }}
+            >
+              <span style={{ fontSize: "24px" }}><TeamIcon team={TEACHER_ROSTER_ENTRY} size={24} /></span>
+              <span style={{ flex: 1, textAlign: "left" }}>Teacher (playing too)</span>
+            </button>
+          )}
         </div>
         <div style={{ color: "#93C5FD99", fontSize: "12px", marginTop: "18px", lineHeight: 1.6 }}>
           You'll only need to do this once — your phone will automatically follow along for the rest of class.
@@ -318,7 +354,8 @@ export function ClassJoinScreen({ code }: Props) {
     );
   }
 
-  const claimedTeam = classState.roster.find(t => t.id === claimedTeamId);
+  const claimedTeam = classState.roster.find(t => t.id === claimedTeamId)
+    ?? (claimedTeamId === TEACHER_ID ? TEACHER_ROSTER_ENTRY : undefined);
 
   // Nothing playable right now — either between games, or the active game has no phone mode at
   // all (see the confirmed design: no phone support is being added to those 8 games in this pass).
