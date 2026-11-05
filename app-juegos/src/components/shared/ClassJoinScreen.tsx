@@ -357,16 +357,34 @@ export function ClassJoinScreen({ code }: Props) {
   const claimedTeam = classState.roster.find(t => t.id === claimedTeamId)
     ?? (claimedTeamId === TEACHER_ID ? TEACHER_ROSTER_ENTRY : undefined);
 
-  // Nothing playable right now — either between games, or the active game has no phone mode at
-  // all (see the confirmed design: no phone support is being added to those 8 games in this pass).
-  if (activeGame === null || !PHONE_CAPABLE_GAME_IDS.has(activeGame) || !innerState) {
+  // The "Teacher" claim option above is shown any time Spy is active, since this class-level
+  // roster has no way to know Spy's own teacherJoining toggle state (see that option's own long
+  // comment) — so it can be tapped in a round where Spy actually has nobody playing teacher (a
+  // 2-team game whose "want the teacher to join in as a 3rd player?" toggle is off, or 3+ real
+  // teams, where that toggle isn't even offered). Once Spy's own state arrives, its OWN roster is
+  // the ground truth for whether "teacher" is really a seat in THIS round — falling through to
+  // PhoneSpyView with a teamId it doesn't recognize would render a broken-looking blank role card
+  // instead of the clear, actionable message this case gets instead.
+  const teacherOptionInactive = claimedTeamId === TEACHER_ID && activeGame === "spy" && !!innerState
+    && !innerState.roster.some(t => t.id === TEACHER_ID);
+
+  // Nothing playable right now — either between games, the active game has no phone mode at all
+  // (see the confirmed design: no phone support is being added to those 8 games in this pass), or
+  // this phone claimed "Teacher" for a Spy round that isn't actually using it (see above).
+  if (activeGame === null || !PHONE_CAPABLE_GAME_IDS.has(activeGame) || !innerState || teacherOptionInactive) {
     return (
       <div style={arenaStyle}>
         <div style={{ fontSize: "22px", marginBottom: "4px" }}><TeamIcon team={claimedTeam} size={22} /></div>
         <div style={{ fontWeight: "900", fontSize: "16px", marginBottom: "18px" }}>{claimedTeam?.name}</div>
-        <div style={{ fontSize: "40px", marginBottom: "10px" }}>📺</div>
-        <div style={{ fontWeight: "900", fontSize: "18px", color: "#FCD34D", marginBottom: "8px" }}>Watch the shared screen</div>
-        <div style={{ color: "#93C5FD", fontSize: "14px", lineHeight: 1.6 }}>Nothing to do on your phone right now — it'll switch on its own the moment your teacher starts a phone-friendly game.</div>
+        <div style={{ fontSize: "40px", marginBottom: "10px" }}>{teacherOptionInactive ? "🙅" : "📺"}</div>
+        <div style={{ fontWeight: "900", fontSize: "18px", color: "#FCD34D", marginBottom: "8px" }}>
+          {teacherOptionInactive ? "The teacher isn't playing this round" : "Watch the shared screen"}
+        </div>
+        <div style={{ color: "#93C5FD", fontSize: "14px", lineHeight: 1.6 }}>
+          {teacherOptionInactive
+            ? "Ask your teacher to turn on \"teacher plays too\" on their screen, or pick a real team below instead."
+            : "Nothing to do on your phone right now — it'll switch on its own the moment your teacher starts a phone-friendly game."}
+        </div>
         {checkinCounted ? (
           <div style={{ marginTop: "16px", background: "rgba(134,239,172,0.12)", border: "1px solid rgba(134,239,172,0.4)", color: "#86EFAC", borderRadius: "12px", padding: "8px 14px", fontSize: "13px", fontWeight: 700 }}>
             ✓ Check-in counted today · +10 XP
