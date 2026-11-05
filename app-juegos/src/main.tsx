@@ -37,6 +37,24 @@ function ErrorFallback() {
   );
 }
 
+// Every page deploys automatically on push to main (see CLAUDE.md), each one hashing lazy-loaded
+// chunks (React.lazy() + import(), e.g. LessonPlanScreen-*.js) under a new filename — a tab left
+// open across a deploy, or one serving a cached index.html, still references the OLD hash, which
+// no longer exists once the new build has overwritten it. Vite's build wraps every dynamic
+// import() in a preload helper that fires this event on exactly that failure (a normal page
+// navigation never touches it) — a hard reload re-fetches the current index.html, which points at
+// whatever chunks actually exist now, which fixes it. Guarded by sessionStorage so a reload that
+// doesn't actually help (offline, or a genuinely broken deploy) gives up after one try and falls
+// through to the ErrorBoundary below instead of looping forever; the guard clears itself once the
+// app's been up a little while, so a later, unrelated deploy can still trigger its own one reload.
+const PRELOAD_RELOAD_KEY = 'cc-reloaded-after-preload-error';
+window.addEventListener('vite:preloadError', () => {
+  if (sessionStorage.getItem(PRELOAD_RELOAD_KEY)) return;
+  sessionStorage.setItem(PRELOAD_RELOAD_KEY, '1');
+  window.location.reload();
+});
+setTimeout(() => sessionStorage.removeItem(PRELOAD_RELOAD_KEY), 15000);
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <Sentry.ErrorBoundary fallback={<ErrorFallback />}>
