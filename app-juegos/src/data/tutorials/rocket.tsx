@@ -38,7 +38,7 @@ export const ROCKET_TUTORIAL_STEPS: TutorialStep[] = [
     ),
   },
   {
-    narration: "Get it right and your rocket gains fuel — you'll get 2 rounds of 90 seconds each to build up as much as you can.",
+    narration: "Get it right and your rocket gains fuel — you'll get 2 rounds of 120 seconds each to build up as much as you can.",
     visual: (
       <div style={{ textAlign: "center" }}>
         <div style={{ fontSize: "20px" }}>⛽ +1 fuel</div>

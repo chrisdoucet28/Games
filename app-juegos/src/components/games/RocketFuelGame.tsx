@@ -14,8 +14,10 @@ import { setMusicGame, stopMusic } from "../../lib/music";
 
 const GM = GAME_MODES.find(g => g.id === "rocket")!;
 
-const TURN_SECONDS = 90;
-// Every team gets this many 90s turns (each building more secret fuel) before launch — a single
+// Bumped from 90s per the teacher's own in-class call — 90 ran out before slower-working students
+// could even get one prompt out, let alone several.
+const TURN_SECONDS = 120;
+// Every team gets this many turns (each building more secret fuel) before launch — a single
 // turn per team felt too short on its own, per teacher feedback; 2 gives the full experience
 // without dragging the game out.
 const TOTAL_ROUNDS = 2;
@@ -383,7 +385,7 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
           <div style={{ marginBottom: "10px" }}><Icon name="rocket" size={36} /></div>
           <div style={{ fontWeight: "900", fontSize: "20px", marginBottom: "10px", color: "#A5B4FC" }}>Rocket Fuel</div>
           <div style={{ fontSize: "15px", lineHeight: 1.7 }}>
-            Each team gets <strong style={{ color: "#A5B4FC" }}>{TOTAL_ROUNDS} rounds of 90 seconds</strong> at mission control — use the given word in your own sentence, and every correct one adds fuel. Stuck on a prompt? Skip it for a new one, no penalty.<br />
+            Each team gets <strong style={{ color: "#A5B4FC" }}>{TOTAL_ROUNDS} rounds of {TURN_SECONDS} seconds</strong> at mission control — use the given word in your own sentence, and every correct one adds fuel. Stuck on a prompt? Skip it for a new one, no penalty.<br />
             Nobody's fuel level is revealed until every team has fuelled up — then all rockets <strong style={{ color: "#A5B4FC" }}>launch together</strong>, and whoever fuelled the most flies the highest!
           </div>
         </div>
