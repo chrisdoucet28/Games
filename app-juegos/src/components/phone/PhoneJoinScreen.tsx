@@ -28,8 +28,10 @@ type Props = { code: string; game: Game };
 
 // No state broadcast for this long means the teacher's tab is gone (refreshed, closed the game,
 // or this code was never valid) — same threshold used for "still waiting on the very first one"
-// and "was working, then went quiet mid-game".
-const STATE_TIMEOUT_MS = 12000;
+// and "was working, then went quiet mid-game". Was 12s — too easy to trip from a normal brief
+// screen-lock in a real classroom; see the auto-reload-on-visibility effect above and the
+// reconnect button below, both added for the same real-class failure.
+const STATE_TIMEOUT_MS = 20000;
 
 const STORAGE_PREFIX = "classcade-phone-session:";
 
@@ -182,6 +184,10 @@ export function PhoneJoinScreen({ code, game }: Props) {
   const mountTimeRef = useRef(Date.now());
   const [nowTick, setNowTick] = useState(Date.now());
 
+  // Mirrors lastStateAt for the visibility handler below — see ClassJoinScreen.tsx's own copy of
+  // this ref for why a ref, not the state value, is what that stable listener needs to read.
+  const lastStateAtRef = useRef<number | null>(null);
+
   useEffect(() => {
     const channel = game === "spy" ? openSpyChannel(code)
       : game === "whack" ? openWhackChannel(code)
@@ -197,7 +203,8 @@ export function PhoneJoinScreen({ code, game }: Props) {
     channel.on("broadcast", { event: "state" }, ({ payload }) => {
       const statePayload = payload as AuctionStatePayload | SpyStatePayload | WhackStatePayload | HotSeatStatePayload | OrderUpStatePayload | RaceTrackStatePayload | HillStatePayload | BountyBoardStatePayload | RelayStatePayload;
       setState(statePayload);
-      setLastStateAt(Date.now());
+      lastStateAtRef.current = Date.now();
+      setLastStateAt(lastStateAtRef.current);
       // Covers a phone that only joins/reconnects after the game already ended — it'll never see
       // the one-shot "ended" broadcast below, but every state broadcast from that point on
       // reports phase: "final" too.
@@ -225,6 +232,22 @@ export function PhoneJoinScreen({ code, game }: Props) {
   useEffect(() => {
     const interval = setInterval(() => setNowTick(Date.now()), 1000);
     return () => clearInterval(interval);
+  }, []);
+
+  // See ClassJoinScreen.tsx's own copy of this effect for the full story — a backgrounded/locked
+  // phone's connection doesn't reliably spring back on its own, and the old dead-end "go to the
+  // homepage" link in the connectionLost screen below was what actually sent students away and
+  // lost their place in a real class, not anything about sharing a device. A reload re-fetches
+  // this exact join URL in this exact tab, so the claimed team and this phone's device id both
+  // come right back automatically.
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState !== "visible") return;
+      const staleSince = lastStateAtRef.current ?? mountTimeRef.current;
+      if (Date.now() - staleSince > STATE_TIMEOUT_MS) window.location.reload();
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => document.removeEventListener("visibilitychange", handleVisibility);
   }, []);
 
   const connectionLost = lastStateAt === null
@@ -296,12 +319,20 @@ export function PhoneJoinScreen({ code, game }: Props) {
           {lastStateAt === null ? "Couldn't find this game" : "Lost connection to your teacher's screen"}
         </div>
         <div style={{ color: "#C4B5FD", fontSize: "14px", lineHeight: 1.6 }}>
-          Code: <strong style={{ color: "white" }}>{code}</strong><br />
-          Ask your teacher to check the game is still open, or for a new code.
+          Code: <strong style={{ color: "white" }}>{code}</strong>
         </div>
-        <a href="/" style={{ display: "inline-block", marginTop: "20px", color: "#C4B5FD", fontWeight: "700", fontSize: "13px", textDecoration: "none", border: "2px solid #C4B5FD55", borderRadius: "10px", padding: "8px 16px" }}>
-          ← Back to ClassCade
-        </a>
+        {/* See ClassJoinScreen.tsx's own copy of this button for the full reasoning — reloads this
+            exact join URL in this exact tab, so the claimed team and device id both come right
+            back. Used to be a dead-end link to the plain classcade.com homepage instead. */}
+        <button
+          onClick={() => window.location.reload()}
+          style={{ display: "inline-flex", alignItems: "center", gap: "8px", marginTop: "20px", background: "#C4B5FD", color: "#2E1065", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "15px", fontWeight: "900", cursor: "pointer" }}
+        >
+          🔄 Reconnect
+        </button>
+        <div style={{ color: "#C4B5FD99", fontSize: "12px", marginTop: "14px", lineHeight: 1.6 }}>
+          Still nothing? Ask your teacher to check the game is still open, or for a new code.
+        </div>
       </div>
     );
   }

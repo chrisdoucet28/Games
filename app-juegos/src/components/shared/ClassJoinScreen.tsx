@@ -39,7 +39,10 @@ type InnerStatePayload =
 // CLASS channel's own heartbeat instead. The inner per-game channel (opened/closed below as
 // activeGame changes) deliberately has no timeout of its own: it's expected to go quiet between
 // games, that's not a lost connection, it's the normal "nothing playable right now" state.
-const STATE_TIMEOUT_MS = 12000;
+// Was 12s — too easy to trip from a normal brief screen-lock in a real classroom, and every trip
+// used to dead-end at a "go to the homepage" link (see the auto-reload-on-visibility effect
+// above and the reconnect button below, both added for the same real-class failure).
+const STATE_TIMEOUT_MS = 20000;
 
 // Deliberately a different key prefix than PhoneJoinScreen.tsx's own `classcade-phone-session:`
 // — this claim is scoped to the whole class sitting (one stable code), not to one game's code, so
@@ -128,13 +131,19 @@ export function ClassJoinScreen({ code }: Props) {
   const mountTimeRef = useRef(Date.now());
   const [nowTick, setNowTick] = useState(Date.now());
 
+  // Mirrors lastClassStateAt for the visibility handler below, which needs a stable callback (added
+  // once, never torn down/re-added) that still always reads the LATEST staleness — a state value
+  // closed over at listener-registration time would stay frozen at whatever it was on mount.
+  const lastClassStateAtRef = useRef<number | null>(null);
+
   useEffect(() => {
     const channel = openClassSessionChannel(code);
     classChannelRef.current = channel;
 
     channel.on("broadcast", { event: "state" }, ({ payload }) => {
       setClassState(payload as ClassSessionStatePayload);
-      setLastClassStateAt(Date.now());
+      lastClassStateAtRef.current = Date.now();
+      setLastClassStateAt(lastClassStateAtRef.current);
     });
 
     channel.subscribe(status => {
@@ -154,6 +163,27 @@ export function ClassJoinScreen({ code }: Props) {
   useEffect(() => {
     const interval = setInterval(() => setNowTick(Date.now()), 1000);
     return () => clearInterval(interval);
+  }, []);
+
+  // A locked/backgrounded phone's realtime connection doesn't reliably spring back to life the
+  // instant the student looks at it again — mobile browsers suspend background tabs aggressively
+  // enough that the channel can sit dead well past STATE_TIMEOUT_MS with nothing proactively
+  // retrying. Without this, the student's first signal anything's wrong is the "Lost connection"
+  // screen below, whose only way out used to be a dead-end link to the plain classcade.com
+  // homepage — tapping it (a reasonable thing to do when told you're disconnected) is what was
+  // actually sending students away from the game and losing their place, not anything about
+  // sharing a device. A plain reload is the most reliable fix: it re-fetches this exact same join
+  // URL in this exact same tab, so the team already claimed (saveClaimedTeamId, read at mount) and
+  // this phone's own device id (sessionStorage, tab-scoped but untouched by a reload) both come
+  // right back — same team, same spot in any per-device rotation, no re-claiming needed.
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState !== "visible") return;
+      const staleSince = lastClassStateAtRef.current ?? mountTimeRef.current;
+      if (Date.now() - staleSince > STATE_TIMEOUT_MS) window.location.reload();
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => document.removeEventListener("visibilitychange", handleVisibility);
   }, []);
 
   const connectionLost = lastClassStateAt === null
@@ -270,12 +300,23 @@ export function ClassJoinScreen({ code }: Props) {
           {lastClassStateAt === null ? "Couldn't find this class" : "Lost connection to your teacher's screen"}
         </div>
         <div style={{ color: "#93C5FD", fontSize: "14px", lineHeight: 1.6 }}>
-          Code: <strong style={{ color: "white" }}>{code}</strong><br />
-          Ask your teacher to check today's class check-in is still open, or for a new code.
+          Code: <strong style={{ color: "white" }}>{code}</strong>
         </div>
-        <a href="/" style={{ display: "inline-block", marginTop: "20px", color: "#93C5FD", fontWeight: "700", fontSize: "13px", textDecoration: "none", border: "2px solid #93C5FD55", borderRadius: "10px", padding: "8px 16px" }}>
-          ← Back to ClassCade
-        </a>
+        {/* Reloads this exact join URL in this exact tab — the already-claimed team and this
+            phone's own device id both come right back (see the auto-reload-on-visibility effect
+            above for the full reasoning), so this is "try again" for the overwhelmingly common
+            case (teacher's session is actually still running). A dead-end link to the plain
+            classcade.com homepage used to sit here — tapping it, a reasonable reaction to being
+            told you're disconnected, was what actually sent students away and lost their place. */}
+        <button
+          onClick={() => window.location.reload()}
+          style={{ display: "inline-flex", alignItems: "center", gap: "8px", marginTop: "20px", background: "#38BDF8", color: "#0F172A", border: "none", borderRadius: "12px", padding: "12px 28px", fontSize: "15px", fontWeight: "900", cursor: "pointer" }}
+        >
+          🔄 Reconnect
+        </button>
+        <div style={{ color: "#93C5FD99", fontSize: "12px", marginTop: "14px", lineHeight: 1.6 }}>
+          Still nothing? Ask your teacher to check today's class check-in is still open, or for a new code.
+        </div>
       </div>
     );
   }
