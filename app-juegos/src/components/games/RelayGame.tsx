@@ -35,6 +35,21 @@ const QUESTIONS_PER_PERSON = 5;
 const MAX_POINTS = 300;
 const MIN_POINTS = 10;
 
+// Generic yes/no question frames shown next to the word pool while the asker's building a
+// question — NOT tied to this topic's specific words, since the skill Word Relay actually
+// practices is forming a yes/no question at all (auxiliary verb + inversion), which is the same
+// skill regardless of whether the words are animals, jobs, or abstract theme vocabulary.
+const QUESTION_STARTERS = [
+  "Is it a...?",
+  "Is it bigger/smaller than a...?",
+  "Does it have...?",
+  "Does it...?",
+  "Can it...?",
+  "Can you...with it?",
+  "Do you use it for...?",
+  "Have you ever...?",
+];
+
 // `questionNumber` is the 1-based question the guess happened on, `budget` that person's own total.
 function guessPoints(questionNumber: number, budget: number): number {
   if (budget <= 1) return MAX_POINTS;
@@ -1052,12 +1067,26 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
             <div style={{ fontWeight: "900", fontSize: "16px", color: "#5EEAD4", marginBottom: "2px" }}>Asking time!</div>
             <div style={{ color: "#99F6E499", fontSize: "11px", fontWeight: "600", marginBottom: "14px" }}>The exact word stays off this screen so the asker can't see it.</div>
             {/* Fills the space the word card would otherwise leave empty — the full pool, not the
-                one live word, so this is never a spoiler even if the asker glances up. */}
-            <div style={{ fontSize: "11px", fontWeight: "800", color: "#5EEAD499", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: "8px" }}>Possible words this round</div>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", justifyContent: "center", maxHeight: "260px", overflowY: "auto" }}>
-              {[...words].sort().map((word, i) => (
-                <span key={`${word}-${i}`} style={{ background: "rgba(20,184,166,0.18)", color: "#99F6E4", border: "1px solid #14B8A655", borderRadius: "6px", padding: "4px 10px", fontSize: "13px", fontWeight: "700" }}>{word}</span>
-              ))}
+                one live word, so this is never a spoiler even if the asker glances up — plus
+                generic question-starter frames (see QUESTION_STARTERS) so the asker has something
+                to lean on while building their yes/no question. */}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: "18px", textAlign: "left" }}>
+              <div>
+                <div style={{ fontSize: "11px", fontWeight: "800", color: "#5EEAD499", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: "8px", textAlign: "center" }}>Possible words this round</div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", justifyContent: "center", maxHeight: "260px", overflowY: "auto" }}>
+                  {[...words].sort().map((word, i) => (
+                    <span key={`${word}-${i}`} style={{ background: "rgba(20,184,166,0.18)", color: "#99F6E4", border: "1px solid #14B8A655", borderRadius: "6px", padding: "4px 10px", fontSize: "13px", fontWeight: "700" }}>{word}</span>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <div style={{ fontSize: "11px", fontWeight: "800", color: "#5EEAD499", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: "8px", textAlign: "center" }}>Question starters</div>
+                <div style={{ display: "flex", flexDirection: "column", gap: "6px", maxHeight: "260px", overflowY: "auto" }}>
+                  {QUESTION_STARTERS.map(q => (
+                    <div key={q} style={{ background: "rgba(20,184,166,0.1)", color: "#CCFBF1", border: "1px solid #14B8A640", borderRadius: "8px", padding: "6px 10px", fontSize: "13px", fontWeight: "700", textAlign: "center" }}>{q}</div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         ))}
