@@ -1877,9 +1877,9 @@ export const TOPIC_LIBRARY = {
     hotSeatWords: [
       {word:"invitation"},{word:"accept"},{word:"reject"},{word:"decline"},
       {word:"fancy"},{word:"available"},{word:"free"},{word:"busy"},
-      {word:"unfortunately"},{word:"I'm afraid"},{word:"I'd love to"},{word:"count me in"},
-      {word:"maybe another time"},{word:"sounds great"},{word:"formal"},{word:"informal"},
-      {word:"RSVP"},{word:"plans"},{word:"suggest"},{word:"What time?"},
+      {word:"restaurant"},{word:"wedding"},{word:"museum"},{word:"cinema"},
+      {word:"concert"},{word:"barbecue"},{word:"picnic"},{word:"café"},
+      {word:"formal"},{word:"informal"},{word:"plans"},{word:"suggest"},
     ],
     hotPotatoPrompts: [
       {prompt:"'Would you like ___ come to dinner?' (to/and/that)", answer:"to", spanish:"Elige la palabra correcta para completar la invitación."},
