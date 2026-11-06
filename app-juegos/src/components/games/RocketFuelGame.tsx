@@ -286,6 +286,11 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
   const connectedByTeamRef = useRef<Record<string, string[]>>({});
   const promptsByDeviceRef = useRef<Record<string, QuestionData>>({});
   const deviceTimeLeftRef = useRef<Record<string, number>>({});
+  // The most recent time bonus each device has earned, broadcast so that device's own phone can
+  // show it on the "Sent!" screen — see liveSession.ts's lastBonusByDevice. key only ever
+  // increases (bonusKeyCounterRef), so a phone can tell a fresh bonus from one it already showed.
+  const lastBonusByDeviceRef = useRef<Record<string, { amount: number; key: number }>>({});
+  const bonusKeyCounterRef = useRef(0);
   const submissionIdRef = useRef(0);
   const sendStateRef = useRef<(() => void) | null>(null);
   const fuelRef = useRef<Record<string | number, number>>(resumed?.fuel ?? {});
@@ -390,6 +395,9 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
     deviceIds.forEach(id => delete updatedClocks[id]);
     deviceTimeLeftRef.current = updatedClocks;
     setDeviceTimeLeft(updatedClocks);
+    const updatedBonuses = { ...lastBonusByDeviceRef.current };
+    deviceIds.forEach(id => delete updatedBonuses[id]);
+    lastBonusByDeviceRef.current = updatedBonuses;
   };
 
   // Resuming drops straight into "team-turn" for the team who was up, skipping the intro screen —
@@ -588,6 +596,7 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
         activeTeamId: inTurn ? (liveActiveTeam?.id ?? null) : null,
         promptByDevice,
         timeLeftByDevice: { ...deviceTimeLeftRef.current },
+        lastBonusByDevice: { ...lastBonusByDeviceRef.current },
         connectedTeamIds: Array.from(connectedTeamIdsRef.current),
         ts: Date.now(),
       };
@@ -643,6 +652,10 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
       const updatedClocks = { ...deviceTimeLeftRef.current, [action.deviceId]: (deviceTimeLeftRef.current[action.deviceId] ?? 0) + bonus };
       deviceTimeLeftRef.current = updatedClocks;
       setDeviceTimeLeft(updatedClocks);
+      // Lets THIS device's own phone show "+Ns!" on its "Sent!" screen — see liveSession.ts's
+      // lastBonusByDevice.
+      bonusKeyCounterRef.current += 1;
+      lastBonusByDeviceRef.current = { ...lastBonusByDeviceRef.current, [action.deviceId]: { amount: bonus, key: bonusKeyCounterRef.current } };
       timeBonusKeyRef.current += 1;
       setTimeBonusPopup({ amount: bonus, key: timeBonusKeyRef.current });
       sendStateRef.current?.();

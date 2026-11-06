@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { RocketFuelStatePayload, RocketFuelActionPayload } from "../../lib/liveSession";
 import { TeamIcon } from "../shared/TeamIcon";
 
@@ -26,17 +26,36 @@ export function PhoneRocketFuelView({ state, teamId, deviceId, onAction }: Props
   const myTimeLeft = state.timeLeftByDevice[deviceId];
 
   const [draft, setDraft] = useState("");
-  // The question text we last sent a submission for — lets the UI show a brief "sent!" state
-  // instead of the input box while waiting for the screen to deal this device its next prompt,
-  // and stops a double-tap from submitting the same prompt twice.
-  const [pendingFor, setPendingFor] = useState<string | null>(null);
+  // Owns the "Sent!" screen's whole lifetime, independent of whether the new prompt has arrived
+  // yet — bonus starts null (not known yet) and fills in once the screen's broadcast carries it,
+  // which is what actually triggers moving on (see the effects below). Also what stops a
+  // double-tap from submitting the same prompt twice.
+  const [submitted, setSubmitted] = useState<{ bonus: number | null } | null>(null);
+  // The bonus "key" (see liveSession.ts's lastBonusByDevice) current at the moment of submission
+  // — only a LATER key means a genuinely new bonus arrived, not a stale/repeated broadcast.
+  const bonusKeyAtSubmitRef = useRef(0);
 
   useEffect(() => {
-    // A genuinely new prompt arrived (different question text) — clear the draft and the pending
-    // flag so the input box reopens fresh rather than carrying over the last prompt's leftovers.
+    // A genuinely new prompt arrived (different question text) — clear the draft so the input
+    // box reopens fresh rather than carrying over the last prompt's leftovers.
     setDraft("");
-    setPendingFor(null);
   }, [myPrompt?.question]);
+
+  useEffect(() => {
+    if (!submitted || submitted.bonus !== null) return;
+    const entry = state.lastBonusByDevice[deviceId];
+    if (entry && entry.key !== bonusKeyAtSubmitRef.current) setSubmitted({ bonus: entry.amount });
+  }, [state.lastBonusByDevice, submitted, deviceId]);
+
+  useEffect(() => {
+    if (!submitted) return;
+    // Once the bonus is known, hold the "Sent!" screen a beat so it's actually readable before
+    // moving on to the next prompt. If it never arrives (lost connection, teacher ended the turn
+    // mid-flight), don't get stuck showing "Sent!" forever — fall through after a few seconds
+    // either way.
+    const t = setTimeout(() => setSubmitted(null), submitted.bonus !== null ? 1400 : 3000);
+    return () => clearTimeout(t);
+  }, [submitted]);
 
   const wrapStyle: React.CSSProperties = {
     minHeight: "100vh", padding: "24px 20px", fontFamily: "'Segoe UI',system-ui,sans-serif", color: "white",
@@ -53,9 +72,24 @@ export function PhoneRocketFuelView({ state, teamId, deviceId, onAction }: Props
     );
   }
 
-  // A prompt is currently assigned to THIS phone — the one state that matters most, so it's
-  // checked first regardless of anything else.
-  if (myPrompt && pendingFor !== myPrompt.question) {
+  // Just submitted — shown regardless of whether the screen's already dealt the next prompt (see
+  // the effects above for why this has its own independent lifetime), so checked first.
+  if (submitted) {
+    return (
+      <div style={{ ...wrapStyle, textAlign: "center", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+        <div style={{ fontSize: "52px", marginBottom: "12px" }}>✅</div>
+        <div style={{ fontWeight: "900", fontSize: "22px", color: "#A5B4FC", marginBottom: "10px" }}>Sent!</div>
+        {submitted.bonus !== null ? (
+          <div style={{ fontSize: "22px", fontWeight: "900", color: "#5EEAD4", marginTop: "6px" }}>⏱️ +{submitted.bonus}s bonus!</div>
+        ) : (
+          <div style={{ color: "#C7D2FE", fontSize: "15px" }}>Getting your next word…</div>
+        )}
+      </div>
+    );
+  }
+
+  // A prompt is currently assigned to THIS phone — the next most important thing to show.
+  if (myPrompt) {
     const text = draft.trim();
     return (
       <div style={wrapStyle}>
@@ -82,7 +116,12 @@ export function PhoneRocketFuelView({ state, teamId, deviceId, onAction }: Props
           style={{ width: "100%", boxSizing: "border-box", border: "2px solid #4338CA66", borderRadius: "14px", padding: "14px 14px", fontSize: "18px", fontFamily: "inherit", resize: "vertical", marginBottom: "14px" }}
         />
         <button
-          onClick={() => { if (!text) return; onAction({ teamId, deviceId, action: "submit", text }); setPendingFor(myPrompt.question); }}
+          onClick={() => {
+            if (!text) return;
+            bonusKeyAtSubmitRef.current = state.lastBonusByDevice[deviceId]?.key ?? 0;
+            onAction({ teamId, deviceId, action: "submit", text });
+            setSubmitted({ bonus: null });
+          }}
           disabled={!text}
           style={{
             width: "100%", background: !text ? "#4B5563" : "linear-gradient(135deg,#4338CA,#6366F1)", color: "white", border: "none",
@@ -94,17 +133,6 @@ export function PhoneRocketFuelView({ state, teamId, deviceId, onAction }: Props
         <div style={{ textAlign: "center", color: "#C7D2FE99", fontSize: "13px", fontWeight: "600", marginTop: "12px" }}>
           Your teacher checks these after the turn — no rush, just do your best.
         </div>
-      </div>
-    );
-  }
-
-  // Just submitted, waiting for the screen to deal this device its next prompt.
-  if (myPrompt && pendingFor === myPrompt.question) {
-    return (
-      <div style={{ ...wrapStyle, textAlign: "center", display: "flex", flexDirection: "column", justifyContent: "center" }}>
-        <div style={{ fontSize: "52px", marginBottom: "12px" }}>✅</div>
-        <div style={{ fontWeight: "900", fontSize: "22px", color: "#A5B4FC", marginBottom: "10px" }}>Sent!</div>
-        <div style={{ color: "#C7D2FE", fontSize: "15px" }}>Getting your next word…</div>
       </div>
     );
   }

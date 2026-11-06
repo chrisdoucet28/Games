@@ -766,6 +766,12 @@ export type RocketFuelStatePayload = {
   // first dealt a prompt; present and possibly 0 once it has been (0 means it's done for this turn,
   // not disconnected).
   timeLeftByDevice: Record<string, number>;
+  // The most recent time bonus THIS device earned — `key` only ever increases, so a phone can
+  // tell "I haven't shown this one yet" from "this is the same bonus I already showed" even
+  // across re-broadcasts. Absent for a device that's never earned one. Purely a display signal
+  // for PhoneRocketFuelView's "Sent! +Ns bonus!" moment — timeLeftByDevice above is still the
+  // source of truth for how much time a device actually has.
+  lastBonusByDevice: Record<string, { amount: number; key: number }>;
   connectedTeamIds: (string | number)[];
   ts: number;
 };
