@@ -1485,7 +1485,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   subject_object_questions: {
     title: "Detective Notes",
-    audioUrl: `${MEDIA_BASE}/audio/real-world/subject_object_questions.mp3`,
+    audioUrl: `${MEDIA_BASE}/audio/real-world/subject_object_questions-2v.mp3`,
     dialogue: {},
     passage: [
       "Who broke the window?",
@@ -1565,7 +1565,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   modal_verbs: {
     title: "Ask Before You Assume",
-    audioUrl: `${MEDIA_BASE}/audio/real-world/modal_verbs.mp3`,
+    audioUrl: `${MEDIA_BASE}/audio/real-world/modal_verbs-2v.mp3`,
     dialogue: {},
     passage: [
       "Excuse me, may I ask you something about the new policy?",
@@ -1641,7 +1641,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   asking_for_clarification: {
     title: "Lost in the Instructions",
-    audioUrl: `${MEDIA_BASE}/audio/real-world/asking_for_clarification.mp3`,
+    audioUrl: `${MEDIA_BASE}/audio/real-world/asking_for_clarification-2v.mp3`,
     dialogue: {},
     passage: [
       "Sorry, could you repeat that last part? I didn't quite catch it.",
@@ -1664,7 +1664,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   agreeing_disagreeing: {
     title: "The Office Debate",
-    audioUrl: `${MEDIA_BASE}/audio/real-world/agreeing_disagreeing.mp3`,
+    audioUrl: `${MEDIA_BASE}/audio/real-world/agreeing_disagreeing-2v.mp3`,
     // Three colleagues in the text; two voices split by SIDE (speaker 0 = for the delay, 1 = against it).
     dialogue: {
       turns: [
@@ -1699,7 +1699,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   question_tags: {
     title: "Small Talk at the Bus Stop",
-    audioUrl: `${MEDIA_BASE}/audio/real-world/question_tags.mp3`,
+    audioUrl: `${MEDIA_BASE}/audio/real-world/question_tags-2v.mp3`,
     dialogue: {},
     passage: [
       "Lovely weather today, isn't it?",
@@ -1860,7 +1860,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   describing_locations: {
     title: "Where Should We Stay?",
-    audioUrl: `${MEDIA_BASE}/audio/real-world/describing_locations.mp3`,
+    audioUrl: `${MEDIA_BASE}/audio/real-world/describing_locations-2v.mp3`,
     dialogue: {},
     passage: [
       "I found a great little town for our trip. It's situated in a valley, surrounded by mountains on almost every side.",
@@ -1938,7 +1938,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   embedded_questions: {
     title: "Interview: Starting a Small Business",
-    audioUrl: `${MEDIA_BASE}/audio/real-world/embedded_questions.mp3`,
+    audioUrl: `${MEDIA_BASE}/audio/real-world/embedded_questions-2v.mp3`,
     dialogue: { speakerLabels: ["Interviewer:", "Guest:"] },
     passage: [
       "Interviewer: Thanks for joining us. Could you tell me how you first got the idea for the business?",
@@ -2036,7 +2036,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   success_motivation: {
     title: "Interview: What Actually Drives Success",
-    audioUrl: `${MEDIA_BASE}/audio/real-world/success_motivation.mp3`,
+    audioUrl: `${MEDIA_BASE}/audio/real-world/success_motivation-2v.mp3`,
     dialogue: { speakerLabels: ["Interviewer:", "Coach:"] },
     passage: [
       "Interviewer: You've coached hundreds of athletes and executives. What's the biggest myth about motivation you'd like to correct?",
@@ -2305,7 +2305,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   advanced_idioms_expressions: {
     title: "Catching Up: A Conversation Between Old Friends",
-    audioUrl: `${MEDIA_BASE}/audio/real-world/advanced_idioms_expressions.mp3`,
+    audioUrl: `${MEDIA_BASE}/audio/real-world/advanced_idioms_expressions-2v.mp3`,
     dialogue: {},
     passage: [
       "So, how's the new job going? Are you settling in okay?",
@@ -2331,6 +2331,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   persuading_disagreeing_advanced: {
     title: "Forum Debate: Should University Be Free?",
+    audioUrl: `${MEDIA_BASE}/audio/real-world/persuading_disagreeing_advanced.mp3`,
     passage: [
       "Original post by teacherlife88: Genuinely curious what people think — should university education be free, funded through taxation? I lean strongly in favour, but I'm keen to hear counterarguments.",
       "Reply from finance_guy22: I'd push back on that pretty firmly. Free at the point of use isn't the same as free — someone still pays, and in this case it's every taxpayer, including those who never attend university and arguably benefit least from the system.",
