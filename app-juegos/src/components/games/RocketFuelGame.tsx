@@ -260,6 +260,10 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
   const [sessionCode, setSessionCode] = useState<string | null>(presetPhoneSession?.code ?? null);
   const [sessionIsClassLevel, setSessionIsClassLevel] = useState(!!presetPhoneSession);
   const [connectedTeamIds, setConnectedTeamIds] = useState<Set<string | number>>(new Set());
+  // Mirrors connectedByTeamRef for render reads (the floating phone count, the "N phones
+  // connected" readout on the mission-control placeholder) — the ref alone is enough for the
+  // channel effect's own long-lived callbacks, but a render needs reactive state to read from.
+  const [connectedByTeam, setConnectedByTeam] = useState<Record<string, string[]>>({});
   // This device's own currently-assigned prompt, per connected phone on the active team — see
   // dealPromptTo below. Cleared for a team's devices the moment its turn ends (endTurn), so a
   // phone's view naturally falls back to "being reviewed" instead of a stale prompt.
@@ -549,6 +553,7 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
       const previouslyKnown = new Set(Object.values(connectedByTeamRef.current).flat());
       connectedByTeamRef.current = byTeam;
       setConnectedTeamIds(ids);
+      setConnectedByTeam(byTeam);
       // A late-joiner on the CURRENTLY ACTIVE team, mid-turn, with no prompt yet — deal it one
       // right away rather than leaving it stuck on the "waiting" view for the rest of the turn.
       const liveActiveTeam = teams[teamIdxRef.current];
@@ -634,6 +639,7 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
     setIntroStep("setup");
     setSessionCode(null);
     setConnectedTeamIds(new Set());
+    setConnectedByTeam({});
   };
 
   const arenaStyle: React.CSSProperties = {
@@ -695,6 +701,7 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
           {introStep === "qr" && sessionCode && (
             <PhoneJoinPanel
               sessionCode={sessionCode} joinUrl={buildJoinUrl(sessionCode)} teams={teams} connectedTeamIds={connectedTeamIds}
+              phoneCountByTeam={Object.fromEntries(teams.map(t => [String(t.id), (connectedByTeam[String(t.id)] ?? []).length]))}
               accent="#A5B4FC" panelBg="linear-gradient(160deg,#312E81,#1E1B4B)" borderColor="#4338CA66"
               footer={
                 <button onClick={handlePickScreenMode} style={{ background: "none", border: "none", color: "#C7D2FE99", fontSize: "12px", fontWeight: "700", cursor: "pointer", textDecoration: "underline" }}>
@@ -733,6 +740,7 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
         <PhoneReconnectBadge
           sessionCode={sessionCode} joinUrl={buildJoinUrl(sessionCode)}
           teams={teams} connectedTeamIds={connectedTeamIds}
+          phoneCountByTeam={Object.fromEntries(teams.map(t => [String(t.id), (connectedByTeam[String(t.id)] ?? []).length]))}
           accent="#A5B4FC" panelBg="linear-gradient(160deg,#312E81,#1E1B4B)" borderColor="#4338CA66"
         />
       )}
@@ -793,9 +801,19 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
                 <div style={{ color: "#C7D2FE99", fontSize: "13px", fontWeight: "600", marginBottom: "16px" }}>
                   Everyone's answering their own prompt privately on their own phone — you'll review every sentence once this turn ends.
                 </div>
-                <div style={{ fontSize: "26px", fontWeight: "900", color: "#5EEAD4" }}>{submissions.length}</div>
-                <div style={{ fontSize: "11px", fontWeight: "800", color: "#A5B4FC99", textTransform: "uppercase", letterSpacing: "0.04em" }}>
-                  sentence{submissions.length === 1 ? "" : "s"} sent in so far
+                <div style={{ display: "flex", justifyContent: "center", gap: "36px" }}>
+                  <div>
+                    <div style={{ fontSize: "26px", fontWeight: "900", color: "#FDE047" }}>{(connectedByTeam[String(activeTeam.id)] ?? []).length}</div>
+                    <div style={{ fontSize: "11px", fontWeight: "800", color: "#A5B4FC99", textTransform: "uppercase", letterSpacing: "0.04em" }}>
+                      phone{(connectedByTeam[String(activeTeam.id)] ?? []).length === 1 ? "" : "s"} connected
+                    </div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: "26px", fontWeight: "900", color: "#5EEAD4" }}>{submissions.length}</div>
+                    <div style={{ fontSize: "11px", fontWeight: "800", color: "#A5B4FC99", textTransform: "uppercase", letterSpacing: "0.04em" }}>
+                      sentence{submissions.length === 1 ? "" : "s"} sent in
+                    </div>
+                  </div>
                 </div>
               </div>
             ) : (
