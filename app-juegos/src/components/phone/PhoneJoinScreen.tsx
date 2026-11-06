@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { TeamIcon } from "../shared/TeamIcon";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 import {
-  openAuctionChannel, openSpyChannel, openWhackChannel, openHotSeatChannel, openOrderUpChannel, openRaceTrackChannel, openHillChannel, openBountyBoardChannel, openRelayChannel, closeChannel, getDeviceId,
+  openAuctionChannel, openSpyChannel, openWhackChannel, openHotSeatChannel, openOrderUpChannel, openRaceTrackChannel, openHillChannel, openBountyBoardChannel, openRelayChannel, openRocketChannel, closeChannel, getDeviceId,
   type AuctionStatePayload, type AuctionBetPayload, type AuctionCorrectionPayload, type SpyStatePayload, type SpyVoteActionPayload,
   type WhackStatePayload, type WhackTurnReportPayload,
   type HotSeatStatePayload, type HotSeatActionPayload,
@@ -11,6 +11,7 @@ import {
   type HillStatePayload, type HillActionPayload,
   type BountyBoardStatePayload, type BountyBoardActionPayload,
   type RelayStatePayload, type RelayActionPayload,
+  type RocketFuelStatePayload, type RocketFuelActionPayload,
 } from "../../lib/liveSession";
 import { PhoneAuctionView } from "./PhoneAuctionView";
 import { PhoneSpyView } from "./PhoneSpyView";
@@ -21,9 +22,10 @@ import { PhoneRaceTrackView } from "./PhoneRaceTrackView";
 import { PhoneKingOfHillView } from "./PhoneKingOfHillView";
 import { PhoneBountyBoardView } from "./PhoneBountyBoardView";
 import { PhoneRelayView } from "./PhoneRelayView";
+import { PhoneRocketFuelView } from "./PhoneRocketFuelView";
 import { isSoloCpu } from "../../lib/soloOpponent";
 
-export type Game = "auction" | "spy" | "whack" | "hotseat" | "orderup" | "racetrack" | "hill" | "bounty" | "relay";
+export type Game = "auction" | "spy" | "whack" | "hotseat" | "orderup" | "racetrack" | "hill" | "bounty" | "relay" | "rocket";
 type Props = { code: string; game: Game };
 
 // No state broadcast for this long means the teacher's tab is gone (refreshed, closed the game,
@@ -123,6 +125,14 @@ export const GAME_COPY: Record<Game, {
     endedTitle: "That's a wrap!",
     endedBody: "Thanks for playing — check the big screen for final results.",
   },
+  rocket: {
+    joinEmoji: "🚀",
+    arenaBg: "radial-gradient(ellipse at 50% -10%,#4338CA 0%,#1E1B4B 55%,#030014 100%)",
+    startingBody: "Get ready — waiting for your teacher to ignite engines…",
+    endedEmoji: "🚀",
+    endedTitle: "Thanks for playing!",
+    endedBody: "Check the big screen for the launch!",
+  },
 };
 
 function loadClaimedTeamId(code: string): string | number | null {
@@ -155,6 +165,7 @@ const GAME_TITLES: Record<Game, string> = {
   hill: "King of the Hill",
   bounty: "Bounty Board",
   relay: "Word Relay",
+  rocket: "Rocket Fuel",
 };
 
 export function PhoneJoinScreen({ code, game }: Props) {
@@ -175,7 +186,7 @@ export function PhoneJoinScreen({ code, game }: Props) {
   // when the effect first ran.
   const claimedTeamIdRef = useRef<string | number | null>(loadClaimedTeamId(code));
   const [claimedTeamId, setClaimedTeamId] = useState<string | number | null>(claimedTeamIdRef.current);
-  const [state, setState] = useState<AuctionStatePayload | SpyStatePayload | WhackStatePayload | HotSeatStatePayload | OrderUpStatePayload | RaceTrackStatePayload | HillStatePayload | BountyBoardStatePayload | RelayStatePayload | null>(null);
+  const [state, setState] = useState<AuctionStatePayload | SpyStatePayload | WhackStatePayload | HotSeatStatePayload | OrderUpStatePayload | RaceTrackStatePayload | HillStatePayload | BountyBoardStatePayload | RelayStatePayload | RocketFuelStatePayload | null>(null);
   const [lastStateAt, setLastStateAt] = useState<number | null>(null);
   // Once true, stays true regardless of what happens to the connection afterward — a phone that
   // learns the game is over shouldn't ever fall back to "lost connection" messaging just because
@@ -197,11 +208,12 @@ export function PhoneJoinScreen({ code, game }: Props) {
       : game === "hill" ? openHillChannel(code)
       : game === "bounty" ? openBountyBoardChannel(code)
       : game === "relay" ? openRelayChannel(code)
+      : game === "rocket" ? openRocketChannel(code)
       : openAuctionChannel(code);
     channelRef.current = channel;
 
     channel.on("broadcast", { event: "state" }, ({ payload }) => {
-      const statePayload = payload as AuctionStatePayload | SpyStatePayload | WhackStatePayload | HotSeatStatePayload | OrderUpStatePayload | RaceTrackStatePayload | HillStatePayload | BountyBoardStatePayload | RelayStatePayload;
+      const statePayload = payload as AuctionStatePayload | SpyStatePayload | WhackStatePayload | HotSeatStatePayload | OrderUpStatePayload | RaceTrackStatePayload | HillStatePayload | BountyBoardStatePayload | RelayStatePayload | RocketFuelStatePayload;
       setState(statePayload);
       lastStateAtRef.current = Date.now();
       setLastStateAt(lastStateAtRef.current);
@@ -301,6 +313,10 @@ export function PhoneJoinScreen({ code, game }: Props) {
     channelRef.current?.send({ type: "broadcast", event: "action", payload });
   };
 
+  const sendRocketAction = (payload: RocketFuelActionPayload) => {
+    channelRef.current?.send({ type: "broadcast", event: "action", payload });
+  };
+
   if (gameEnded) {
     return (
       <div style={arenaStyle}>
@@ -357,10 +373,11 @@ export function PhoneJoinScreen({ code, game }: Props) {
               Bounty Board, Word Relay all do this) so it shows up in scoreboards/rankings — but it
               has no real student behind it, so it's never an option a phone can actually claim. */}
           {state.roster.filter(t => !isSoloCpu(t.id)).map(t => {
-            // Word Relay and Hot Seat are the two games where several phones share a team on
-            // purpose (each is one person — Relay's asker rotation, Hot Seat's guesser/describer
-            // split), so a team someone already joined stays open to claim there.
-            const takenByOther = game !== "relay" && game !== "hotseat" && state.connectedTeamIds.includes(t.id) && t.id !== claimedTeamIdRef.current;
+            // Word Relay, Hot Seat, and Rocket Fuel are the games where several phones share a
+            // team on purpose (each is one person — Relay's asker rotation, Hot Seat's
+            // guesser/describer split, Rocket Fuel's every-phone-gets-its-own-prompt), so a team
+            // someone already joined stays open to claim there.
+            const takenByOther = game !== "relay" && game !== "hotseat" && game !== "rocket" && state.connectedTeamIds.includes(t.id) && t.id !== claimedTeamIdRef.current;
             return (
               <button
                 key={t.id}
@@ -422,6 +439,9 @@ export function PhoneJoinScreen({ code, game }: Props) {
   }
   if (game === "relay") {
     return <PhoneRelayView state={state as RelayStatePayload} teamId={claimedTeamId} deviceId={getDeviceId()} onAction={sendRelayAction} />;
+  }
+  if (game === "rocket") {
+    return <PhoneRocketFuelView state={state as RocketFuelStatePayload} teamId={claimedTeamId} deviceId={getDeviceId()} onAction={sendRocketAction} />;
   }
   return <PhoneAuctionView state={state as AuctionStatePayload} teamId={claimedTeamId} onBet={sendBet} onSubmitCorrection={sendCorrection} />;
 }

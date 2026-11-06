@@ -4,7 +4,7 @@ import type { RealtimeChannel } from "@supabase/supabase-js";
 import {
   openClassSessionChannel, closeChannel, getDeviceId, PHONE_CAPABLE_GAME_IDS,
   type ClassSessionStatePayload,
-  openAuctionChannel, openSpyChannel, openWhackChannel, openHotSeatChannel, openOrderUpChannel, openRaceTrackChannel, openHillChannel, openBountyBoardChannel, openRelayChannel,
+  openAuctionChannel, openSpyChannel, openWhackChannel, openHotSeatChannel, openOrderUpChannel, openRaceTrackChannel, openHillChannel, openBountyBoardChannel, openRelayChannel, openRocketChannel,
   type AuctionStatePayload, type AuctionBetPayload, type AuctionCorrectionPayload, type SpyStatePayload, type SpyVoteActionPayload,
   type WhackStatePayload, type WhackTurnReportPayload,
   type HotSeatStatePayload, type HotSeatActionPayload,
@@ -13,6 +13,7 @@ import {
   type HillStatePayload, type HillActionPayload,
   type BountyBoardStatePayload, type BountyBoardActionPayload,
   type RelayStatePayload, type RelayActionPayload,
+  type RocketFuelStatePayload, type RocketFuelActionPayload,
 } from "../../lib/liveSession";
 import { PhoneAuctionView } from "../phone/PhoneAuctionView";
 import { PhoneSpyView } from "../phone/PhoneSpyView";
@@ -23,6 +24,7 @@ import { PhoneRaceTrackView } from "../phone/PhoneRaceTrackView";
 import { PhoneKingOfHillView } from "../phone/PhoneKingOfHillView";
 import { PhoneBountyBoardView } from "../phone/PhoneBountyBoardView";
 import { PhoneRelayView } from "../phone/PhoneRelayView";
+import { PhoneRocketFuelView } from "../phone/PhoneRocketFuelView";
 import { GAME_COPY, type Game } from "../phone/PhoneJoinScreen";
 import { useAuth } from "../../hooks/useAuth";
 import { getMyClassLink, linkMyTeam, recordClassAttendance, type MyClass } from "../../lib/classMembership";
@@ -33,7 +35,7 @@ type Props = { code: string };
 type InnerStatePayload =
   | AuctionStatePayload | SpyStatePayload | WhackStatePayload | HotSeatStatePayload
   | OrderUpStatePayload | RaceTrackStatePayload | HillStatePayload | BountyBoardStatePayload
-  | RelayStatePayload;
+  | RelayStatePayload | RocketFuelStatePayload;
 
 // Same threshold PhoneJoinScreen.tsx uses for its own per-game channel — here it watches the
 // CLASS channel's own heartbeat instead. The inner per-game channel (opened/closed below as
@@ -99,6 +101,7 @@ function openChannelForGame(gameId: string, code: string): RealtimeChannel {
     case "hill": return openHillChannel(code);
     case "bounty": return openBountyBoardChannel(code);
     case "relay": return openRelayChannel(code);
+    case "rocket": return openRocketChannel(code);
     default: return openAuctionChannel(code);
   }
 }
@@ -291,6 +294,7 @@ export function ClassJoinScreen({ code }: Props) {
   const sendHillAction = (payload: HillActionPayload) => innerChannelRef.current?.send({ type: "broadcast", event: "action", payload });
   const sendBountyBoardAction = (payload: BountyBoardActionPayload) => innerChannelRef.current?.send({ type: "broadcast", event: "action", payload });
   const sendRelayAction = (payload: RelayActionPayload) => innerChannelRef.current?.send({ type: "broadcast", event: "action", payload });
+  const sendRocketAction = (payload: RocketFuelActionPayload) => innerChannelRef.current?.send({ type: "broadcast", event: "action", payload });
 
   if (connectionLost) {
     return (
@@ -360,7 +364,7 @@ export function ClassJoinScreen({ code }: Props) {
               own private state (Spy Among Us's secret role/prompt above all) for the rest of the
               sitting, not just this one game. */}
           {classState.roster.map(t => {
-            const takenByOther = classState.activeGame !== "relay" && classState.activeGame !== "hotseat" && classState.connectedTeamIds.includes(t.id) && t.id !== claimedTeamIdRef.current;
+            const takenByOther = classState.activeGame !== "relay" && classState.activeGame !== "hotseat" && classState.activeGame !== "rocket" && classState.connectedTeamIds.includes(t.id) && t.id !== claimedTeamIdRef.current;
             return (
               <button
                 key={t.id}
@@ -501,6 +505,9 @@ export function ClassJoinScreen({ code }: Props) {
   }
   if (activeGame === "relay") {
     return <PhoneRelayView state={innerState as RelayStatePayload} teamId={claimedTeamId} deviceId={getDeviceId()} onAction={sendRelayAction} />;
+  }
+  if (activeGame === "rocket") {
+    return <PhoneRocketFuelView state={innerState as RocketFuelStatePayload} teamId={claimedTeamId} deviceId={getDeviceId()} onAction={sendRocketAction} />;
   }
   return <PhoneAuctionView state={innerState as AuctionStatePayload} teamId={claimedTeamId} onBet={sendBet} onSubmitCorrection={sendCorrection} />;
 }

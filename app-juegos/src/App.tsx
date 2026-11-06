@@ -177,7 +177,7 @@ function App() {
   // already-shared Auction join links (from before this param existed) keep working unchanged.
   const joinCode = searchParams.get('join');
   const gameParam = searchParams.get('game');
-  const joinGame = gameParam === 'spy' ? 'spy' : gameParam === 'whack' ? 'whack' : gameParam === 'hotseat' ? 'hotseat' : gameParam === 'orderup' ? 'orderup' : gameParam === 'racetrack' ? 'racetrack' : gameParam === 'hill' ? 'hill' : gameParam === 'bounty' ? 'bounty' : gameParam === 'relay' ? 'relay' : 'auction';
+  const joinGame = gameParam === 'spy' ? 'spy' : gameParam === 'whack' ? 'whack' : gameParam === 'hotseat' ? 'hotseat' : gameParam === 'orderup' ? 'orderup' : gameParam === 'racetrack' ? 'racetrack' : gameParam === 'hill' ? 'hill' : gameParam === 'bounty' ? 'bounty' : gameParam === 'relay' ? 'relay' : gameParam === 'rocket' ? 'rocket' : 'auction';
   if (joinCode) {
     return (
       <>

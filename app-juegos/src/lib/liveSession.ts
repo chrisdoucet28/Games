@@ -728,9 +728,57 @@ export function openClassSessionChannel(code: string): RealtimeChannel {
   });
 }
 
-// The 9 games whose own per-game channel a checked-in phone can actually open and drive — kept
+// --- Rocket Fuel ---
+//
+// Individual people, not one phone per team (same idea as Hot Seat/Word Relay) — every connected
+// phone on the CURRENTLY ACTIVE team gets its own prompt and works it independently and privately,
+// instead of one person speaking in front of the room while everyone else just watches (teacher
+// feedback: some students do much better given a quiet, untimed-per-item way to answer, instead of
+// needing to be the one talking). The whole team still shares ONE turn clock, same as the
+// screen-only version — a submission (right or wrong; see below) hands back a random time bonus
+// the moment it's SENT, rewarding steady work over accuracy, and immediately deals that same phone
+// a fresh prompt so it can keep going.
+//
+// Unlike Hot Seat/Relay, judging never happens live here: every submission just queues up, and the
+// teacher works through a small review (Correct/Wrong per sentence) on the existing team-end
+// screen once the turn's over — see RocketFuelGame.tsx's reviewQueue/judgeSubmission. There's no
+// live "correct" moment on a phone to react to (fuel is a secret until launch, same as always),
+// which is exactly why the time bonus triggers on SEND, not on a judgment that hasn't happened yet.
+export type RocketFuelRosterEntry = { id: string | number; name: string; color: TeamColor; mascot?: string | null };
+
+export type RocketFuelPhase = "lobby" | "turn" | "final";
+
+export type RocketFuelStatePayload = {
+  phase: RocketFuelPhase;
+  roster: RocketFuelRosterEntry[];
+  activeTeamId: string | number | null;
+  // This device's own currently-assigned prompt — a different one per connected phone on the
+  // active team, dealt out independently (see RocketFuelGame.tsx's promptsByDevice). Absent for any
+  // device not currently working a prompt (wrong team, between turns, turn just ended and is being
+  // reviewed, or this phone hasn't been dealt one yet).
+  promptByDevice: Record<string, { word?: string; question: string }>;
+  connectedTeamIds: (string | number)[];
+  ts: number;
+};
+
+// Broadcast phone -> screen. Only one action — there's no live judging to react to from a phone,
+// just "here's my sentence for this prompt," validated against promptByDevice so a stray/duplicate
+// send can't double-submit or submit for a prompt that's already moved on.
+export type RocketFuelActionPayload = { teamId: string | number; deviceId: string; action: "submit"; text: string };
+
+function rocketChannelName(code: string): string {
+  return `rocket-${code}`;
+}
+
+export function openRocketChannel(code: string): RealtimeChannel {
+  return supabase.channel(rocketChannelName(code), {
+    config: { presence: { key: crypto.randomUUID() } },
+  });
+}
+
+// The 10 games whose own per-game channel a checked-in phone can actually open and drive — kept
 // here (not duplicated in LessonGamesGenerator.tsx or ClassJoinScreen.tsx) since this file is
 // already the single inventory of every phone-mode channel that exists.
 export const PHONE_CAPABLE_GAME_IDS: ReadonlySet<string> = new Set([
-  "auction", "spy", "whack", "hotseat", "orderup", "racetrack", "hill", "bounty", "relay",
+  "auction", "spy", "whack", "hotseat", "orderup", "racetrack", "hill", "bounty", "relay", "rocket",
 ]);
