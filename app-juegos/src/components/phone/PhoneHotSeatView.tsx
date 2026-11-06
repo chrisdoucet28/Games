@@ -14,10 +14,10 @@ type Props = {
 // Correct/Skip is imperceptible.
 //
 // Individual people, not one phone per team (see liveSession.ts's HotSeatStatePayload header) —
-// every phone decides its own role purely from whether ITS OWN deviceId is the guesser, in the
-// describer list, or neither. Which team deviceId belongs to barely matters here: "groups" mode's
-// guesser and describers are naturally all the same team (the pool was built that way), "solo"
-// mode's describers can be on any team, and the view doesn't need to tell the difference.
+// every phone decides its own role purely from whether ITS OWN deviceId is the guesser, can see
+// the word, and/or holds the controls. Three states follow: guessing (no word), describing (word
+// + controls, on the active team), or just watching (word, no controls — a rival team tagging
+// along). Which team deviceId belongs to barely matters beyond picking which of those three it is.
 export function PhoneHotSeatView({ state, teamId, deviceId, onAction }: Props) {
   const team = state.roster.find(t => t.id === teamId);
   const activeTeam = state.roster.find(t => t.id === state.activeTeamId);
@@ -55,9 +55,11 @@ export function PhoneHotSeatView({ state, teamId, deviceId, onAction }: Props) {
     );
   }
 
-  const amDescribing = state.describerDeviceIds.includes(deviceId);
+  const canSeeWord = state.wordVisibleDeviceIds.includes(deviceId);
 
-  if (!amDescribing) {
+  // Not connected to this turn at all (between turns, before the game's started, or — mid-game —
+  // a phone that hasn't picked up the broadcast yet) — the one real "nothing to see" state left.
+  if (!canSeeWord) {
     return (
       <div style={{ ...wrapStyle, textAlign: "center" }}>
         <div style={{ fontSize: "22px", marginBottom: "4px" }}><TeamIcon team={team} size={22} /></div>
@@ -78,17 +80,19 @@ export function PhoneHotSeatView({ state, teamId, deviceId, onAction }: Props) {
     );
   }
 
-  // Describing now — the word, a countdown, this turn's tally, and the same three controls the
-  // shared screen normally has. Header names the describer's OWN team when it matches the active
-  // one (groups mode, and the rare solo case of an over-full "team"); solo's cross-team describers
-  // get "Describing for X" instead, so it's clear whose turn they're helping with.
-  const describingForOwnTeam = team?.id === state.activeTeamId;
+  const amDescribing = state.describerDeviceIds.includes(deviceId);
+  // Header names the viewer's OWN team when it matches the active one (groups mode's own
+  // describers, and the rare solo case of an over-full "team"); everyone else — including a rival
+  // team just watching along — gets "for X" instead, so it's clear whose turn this actually is.
+  const forOwnTeam = team?.id === state.activeTeamId;
+  const headerLabel = forOwnTeam
+    ? <><TeamIcon team={team} /> {team?.name}</>
+    : amDescribing ? `🔥 Describing for ${activeTeam?.name ?? "them"}` : `👀 Watching ${activeTeam?.name ?? "them"} guess`;
+
   return (
     <div style={wrapStyle}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px" }}>
-        <span style={{ fontWeight: "900", fontSize: "15px" }}>
-          {describingForOwnTeam ? <><TeamIcon team={team} /> {team?.name}</> : `🔥 Describing for ${activeTeam?.name ?? "them"}`}
-        </span>
+        <span style={{ fontWeight: "900", fontSize: "15px" }}>{headerLabel}</span>
         <span style={{ fontSize: "13px", fontWeight: "800", color: "#FDBA74" }}>⏱️ {state.timeLeft}s</span>
       </div>
 
@@ -97,34 +101,41 @@ export function PhoneHotSeatView({ state, teamId, deviceId, onAction }: Props) {
       </div>
 
       <div style={{ background: "linear-gradient(160deg,#1C0701,#2D0A00)", border: "4px solid #F97316", borderRadius: "22px", padding: "22px 16px", textAlign: "center", marginBottom: "16px", boxShadow: "0 0 30px rgba(249,115,22,0.35)" }}>
-        <div style={{ color: "#FDBA74", fontWeight: "800", fontSize: "12px", textTransform: "uppercase", marginBottom: "10px" }}>Describe this word</div>
+        <div style={{ color: "#FDBA74", fontWeight: "800", fontSize: "12px", textTransform: "uppercase", marginBottom: "10px" }}>{amDescribing ? "Describe this word" : "The word"}</div>
         <div style={{ background: "rgba(0,0,0,0.4)", borderRadius: "16px", border: "3px solid #F9731655", padding: "20px 10px", color: "#FFF7ED", fontWeight: "900", fontSize: "clamp(28px,9vw,44px)", lineHeight: 1.1, minHeight: "80px", display: "flex", alignItems: "center", justifyContent: "center", overflowWrap: "anywhere" }}>
           {state.currentWord}
         </div>
       </div>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-        <button
-          onClick={() => onAction({ teamId, deviceId, action: "correct" })}
-          style={{ background: "linear-gradient(135deg,#15803D,#22C55E)", color: "white", border: "none", borderRadius: "14px", padding: "16px", fontSize: "17px", fontWeight: "900", cursor: "pointer" }}
-        >
-          Correct ✅
-        </button>
-        <div style={{ display: "flex", gap: "10px" }}>
+      {amDescribing ? (
+        <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
           <button
-            onClick={() => onAction({ teamId, deviceId, action: "skip" })}
-            style={{ flex: 1, background: "rgba(0,0,0,0.3)", color: "#FDBA74", border: "3px solid #F59E0B", borderRadius: "14px", padding: "12px", fontSize: "14px", fontWeight: "900", cursor: "pointer" }}
+            onClick={() => onAction({ teamId, deviceId, action: "correct" })}
+            style={{ background: "linear-gradient(135deg,#15803D,#22C55E)", color: "white", border: "none", borderRadius: "14px", padding: "16px", fontSize: "17px", fontWeight: "900", cursor: "pointer" }}
           >
-            Skip
+            Correct ✅
           </button>
-          <button
-            onClick={() => onAction({ teamId, deviceId, action: "endTurn" })}
-            style={{ flex: 1, background: "rgba(0,0,0,0.3)", color: "#FCA5A5", border: "3px solid #EF4444", borderRadius: "14px", padding: "12px", fontSize: "14px", fontWeight: "900", cursor: "pointer" }}
-          >
-            End Turn
-          </button>
+          <div style={{ display: "flex", gap: "10px" }}>
+            <button
+              onClick={() => onAction({ teamId, deviceId, action: "skip" })}
+              style={{ flex: 1, background: "rgba(0,0,0,0.3)", color: "#FDBA74", border: "3px solid #F59E0B", borderRadius: "14px", padding: "12px", fontSize: "14px", fontWeight: "900", cursor: "pointer" }}
+            >
+              Skip
+            </button>
+            <button
+              onClick={() => onAction({ teamId, deviceId, action: "endTurn" })}
+              style={{ flex: 1, background: "rgba(0,0,0,0.3)", color: "#FCA5A5", border: "3px solid #EF4444", borderRadius: "14px", padding: "12px", fontSize: "14px", fontWeight: "900", cursor: "pointer" }}
+            >
+              End Turn
+            </button>
+          </div>
         </div>
-      </div>
+      ) : (
+        // Just watching — a rival team, here to see what they're up against, not to act on it.
+        <div style={{ textAlign: "center", color: "#FED7AA99", fontSize: "12px", fontWeight: "600" }}>
+          {activeTeam?.name ?? "They"}'s own team has the controls — you're just along for the ride.
+        </div>
+      )}
     </div>
   );
 }

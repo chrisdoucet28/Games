@@ -311,10 +311,16 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
   const askerDeviceId = inputMode === "phone" ? (rotatedDevices(currentKey)[0] ?? null) : null;
   const allDevices = Object.values(connectedByTeam).flat();
   const otherDevices = allDevices.filter(d => !teamDevices.includes(d));
-  // Answerers hold the word and the controls: the asking team's other phones, or — if there are
-  // none (a one-phone team, or every team is a single student) — everyone else's phones. During the
-  // reveal the whole guessing team can move things along. With no answerer phone connected at all,
-  // the teacher's screen shows the word and holds the controls instead.
+  // Every connected phone except the asker's can WATCH the word — other teams get to follow along
+  // while they wait their own turn (teacher feedback), not just stare at a placeholder.
+  const wordVisibleDeviceIds = inputMode === "phone" ? allDevices.filter(d => d !== askerDeviceId) : [];
+  // Answerers are the narrower subset that also holds the controls: the asking team's other
+  // phones, or — if there are none (a one-phone team, or every team is a single student) —
+  // everyone else's phones. During the reveal the whole guessing team can move things along. A
+  // rival team can watch (wordVisibleDeviceIds) without being the one who decides whether THIS
+  // team's guess counts, which is why answerers stay team-scoped even though word visibility
+  // doesn't. With no answerer phone connected at all, the teacher's screen shows the word and
+  // holds the controls instead.
   let answererDeviceIds: string[] = [];
   if (inputMode === "phone") {
     const own = phase === "reveal" ? teamDevices : teamDevices.filter(d => d !== askerDeviceId);
@@ -492,6 +498,7 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
       activeTeamId: inPlay ? (currentTeam?.id ?? null) : null,
       askerDeviceId: inPlay ? askerDeviceId : null,
       askerQueueByTeam: queueOut,
+      wordVisibleDeviceIds: inPlay ? wordVisibleDeviceIds : [],
       answererDeviceIds: inPlay ? answererDeviceIds : [],
       currentWord: wordForPayload,
       screenShowsWord,
@@ -1041,11 +1048,16 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
             </div>
           </>
         ) : (
-          <div style={{ background: "#022C22", border: "3px dashed #0D9488", borderRadius: "22px", padding: "34px 18px", textAlign: "center" }}>
-            <div style={{ marginBottom: "10px" }}><Icon name="phone" size={34} /></div>
-            <div style={{ fontWeight: "900", fontSize: "18px", color: "#5EEAD4", marginBottom: "6px" }}>Asking time!</div>
-            <div style={{ color: "#99F6E4", fontSize: "14px", fontWeight: "600", lineHeight: 1.5 }}>
-              The asker is at the front asking yes/no questions. The word is on the answering phones — it isn't shown here.
+          <div style={{ background: "#022C22", border: "3px dashed #0D9488", borderRadius: "22px", padding: "24px 18px", textAlign: "center" }}>
+            <div style={{ fontWeight: "900", fontSize: "16px", color: "#5EEAD4", marginBottom: "2px" }}>Asking time!</div>
+            <div style={{ color: "#99F6E499", fontSize: "11px", fontWeight: "600", marginBottom: "14px" }}>The exact word stays off this screen so the asker can't see it.</div>
+            {/* Fills the space the word card would otherwise leave empty — the full pool, not the
+                one live word, so this is never a spoiler even if the asker glances up. */}
+            <div style={{ fontSize: "11px", fontWeight: "800", color: "#5EEAD499", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: "8px" }}>Possible words this round</div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", justifyContent: "center", maxHeight: "260px", overflowY: "auto" }}>
+              {[...words].sort().map((word, i) => (
+                <span key={`${word}-${i}`} style={{ background: "rgba(20,184,166,0.18)", color: "#99F6E4", border: "1px solid #14B8A655", borderRadius: "6px", padding: "4px 10px", fontSize: "13px", fontWeight: "700" }}>{word}</span>
+              ))}
             </div>
           </div>
         ))}

@@ -39,19 +39,31 @@ function pickGuesserDevice(connectedByTeam: Record<string, string[]>, activeTeam
   return pool[Math.floor(Math.random() * pool.length)];
 }
 
-// Phones holding the word and the controls this turn — the rest of the guesser's own team in
-// "groups" mode, or every other connected phone in class in "solo" mode (each "team" there is one
-// person, so there's nobody else ON that team to describe). Always excludes the guesser itself.
+// Every connected phone (any team) that can see this turn's word — just "not the guesser," full
+// stop, regardless of team or mode. Controls are a narrower subset — see describerDevicesFor.
+function wordVisibleDevicesFor(connectedByTeam: Record<string, string[]>, guesserDeviceId: string | null): string[] {
+  return Object.values(connectedByTeam).flat().filter(d => d !== guesserDeviceId);
+}
+
+// The subset of wordVisibleDevicesFor that also holds the Correct/Skip/End Turn controls — the
+// rest of the guesser's own team in "groups" mode (falling back to every other connected phone if
+// the guesser's team has nobody else online, same as Word Relay's own one-phone-team fallback —
+// SOME connected phone should get to run the turn rather than needlessly dropping to the shared
+// screen just because this one team happens to be short a phone today), or every other connected
+// phone in class in "solo" mode (each "team" there is one person, so there's nobody else ON that
+// team to describe). A rival team can watch (see wordVisibleDevicesFor) without being the one who
+// decides whether this team's guess counts, which is why this stays team-scoped even though word
+// visibility doesn't.
 function describerDevicesFor(
   connectedByTeam: Record<string, string[]>,
   teamStructure: "groups" | "solo",
   activeTeamKey: string,
   guesserDeviceId: string | null,
 ): string[] {
-  const pool = teamStructure === "groups"
-    ? (connectedByTeam[activeTeamKey] ?? [])
-    : Object.values(connectedByTeam).flat();
-  return pool.filter(d => d !== guesserDeviceId);
+  const allDevices = Object.values(connectedByTeam).flat();
+  if (teamStructure === "solo") return allDevices.filter(d => d !== guesserDeviceId);
+  const own = (connectedByTeam[activeTeamKey] ?? []).filter(d => d !== guesserDeviceId);
+  return own.length > 0 ? own : allDevices.filter(d => d !== guesserDeviceId);
 }
 
 const EMBERS = Array.from({ length: 16 }, (_, i) => ({
@@ -347,10 +359,13 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
       teams.forEach(t => { scores[String(t.id)] = totalWordsByTeamRef.current[t.id] ?? 0; });
       // Only populated while a word is actually live (phase "play") — during the brief "turnend"
       // transition and before the game starts, nobody's on the hot seat yet, guessing or
-      // describing (guesserDeviceId itself is already cleared by then — see endTurn — but
-      // describerDeviceIds still needs its own explicit gate since it's recomputed fresh here
-      // every broadcast, not carried over from state).
+      // describing/watching (guesserDeviceId itself is already cleared by then — see endTurn —
+      // but wordVisibleDeviceIds/describerDeviceIds still need their own explicit gate since
+      // they're recomputed fresh here every broadcast, not carried over from state).
       const guesserDeviceId = rawPhase === "play" ? guesserDeviceIdRef.current : null;
+      const wordVisibleDeviceIds = rawPhase === "play"
+        ? wordVisibleDevicesFor(connectedByTeamRef.current, guesserDeviceId)
+        : [];
       const describerDeviceIds = rawPhase === "play" && activeTeam
         ? describerDevicesFor(connectedByTeamRef.current, teamStructureRef.current, String(activeTeam.id), guesserDeviceId)
         : [];
@@ -360,6 +375,7 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
         roster: teams.map(t => ({ id: t.id, name: t.name, color: t.color, mascot: t.mascot })),
         activeTeamId: rawPhase === "play" ? (activeTeam?.id ?? null) : null,
         guesserDeviceId,
+        wordVisibleDeviceIds,
         describerDeviceIds,
         currentWord: currentWordRef.current,
         timeLeft: timeLeftRef.current,
@@ -743,14 +759,21 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
         </div>
 
         {phase === "play" && describersOnPhone && (
-          <div style={{ background: "#1C0701", border: "3px dashed #F97316", borderRadius: "22px", padding: "34px 18px", textAlign: "center" }}>
-            <div style={{ marginBottom: "10px" }}><Icon name="phone" size={34} /></div>
-            <div style={{ fontWeight: "900", fontSize: "17px", color: "#FDBA74", marginBottom: "6px" }}>
+          <div style={{ background: "#1C0701", border: "3px dashed #F97316", borderRadius: "22px", padding: "24px 18px", textAlign: "center" }}>
+            <div style={{ fontWeight: "900", fontSize: "15px", color: "#FDBA74", marginBottom: "2px" }}>
               {teamStructure === "groups"
                 ? `${currentTeam.name}'s describers are on their phones!`
                 : "Everyone else is describing on their phones!"}
             </div>
-            <div style={{ color: "#FED7AA", fontSize: "13px", fontWeight: "600" }}>The word is hidden here so whoever's guessing can't see it.</div>
+            <div style={{ color: "#FED7AA99", fontSize: "11px", fontWeight: "600", marginBottom: "14px" }}>The exact word stays off this screen so whoever's guessing can't see it.</div>
+            {/* Fills the space the word card would otherwise leave empty — the full pool, not the
+                one live word, so this is never a spoiler even if the guesser glances up. */}
+            <div style={{ fontSize: "11px", fontWeight: "800", color: "#FDBA7499", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: "8px" }}>Possible words this round</div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", justifyContent: "center", maxHeight: "260px", overflowY: "auto" }}>
+              {[...words].sort().map((word, i) => (
+                <span key={`${word}-${i}`} style={{ background: "rgba(249,115,22,0.18)", color: "#FED7AA", border: "1px solid #F9731655", borderRadius: "6px", padding: "4px 10px", fontSize: "13px", fontWeight: "700" }}>{word}</span>
+              ))}
+            </div>
           </div>
         )}
 

@@ -11,9 +11,10 @@ type Props = {
 // Screen-authoritative, like PhoneBountyBoardView — this view never runs any game logic of its own,
 // it renders whatever the screen's latest broadcast says and forwards taps back as one-shot
 // actions. Each phone is one PERSON: the asker sees no word at all (they have to ask questions to
-// find it out), the "answerer" phones see the word and hold the controls, everyone else just
-// follows along. Which role a phone has is decided entirely by the screen (askerDeviceId /
-// answererDeviceIds) — this file only compares those ids against its own deviceId.
+// find it out), everyone else connected (wordVisibleDeviceIds) sees the word, and the narrower
+// "answerer" subset (answererDeviceIds) also holds the controls — a rival team can watch along
+// without being the one who decides whether THIS team's guess counts. Which role a phone has is
+// decided entirely by the screen — this file only compares those ids against its own deviceId.
 export function PhoneRelayView({ state, teamId, deviceId, onAction }: Props) {
   const team = state.roster.find(t => t.id === teamId);
   const teamKey = String(teamId);
@@ -40,6 +41,7 @@ export function PhoneRelayView({ state, teamId, deviceId, onAction }: Props) {
   const amActiveTeam = state.activeTeamId === teamId;
   const iAmAsker = state.askerDeviceId === deviceId;
   const iAmAnswerer = state.answererDeviceIds.includes(deviceId);
+  const canSeeWord = state.wordVisibleDeviceIds.includes(deviceId);
   const activeTeam = state.roster.find(t => t.id === state.activeTeamId);
   const queue = state.askerQueueByTeam[teamKey] ?? [];
   const placeInLine = queue.indexOf(deviceId);
@@ -72,20 +74,30 @@ export function PhoneRelayView({ state, teamId, deviceId, onAction }: Props) {
   // of its own, the screen pulls everyone else's phones in so the game never stalls.
   const answeringForOtherTeam = !amActiveTeam && iAmAnswerer;
 
-  // Someone else's turn — nothing to do but follow along.
+  // Someone else's turn — no controls, but still worth watching: if this phone can see the word
+  // (any connected phone except the asker), show it so a waiting team has something to look at
+  // instead of a blank "it's not your turn" screen.
   if (!amActiveTeam && !iAmAnswerer) {
     const justRevealed = state.phase === "reveal";
     return (
       <div style={{ ...wrapStyle, textAlign: "center" }}>
         {header}
         <div style={{ fontSize: "36px", marginBottom: "8px" }}>{justRevealed ? (outOfQuestions ? "⏱️" : "🎉") : "👀"}</div>
-        <div style={{ fontWeight: "800", fontSize: "16px", color: "#5EEAD4" }}>
+        <div style={{ fontWeight: "800", fontSize: "16px", color: "#5EEAD4", marginBottom: canSeeWord ? "14px" : "0" }}>
           {activeTeam
             ? (justRevealed
                 ? `${activeTeam.name} ${outOfQuestions ? "ran out of questions" : "guessed their word"}${teamFinished ? " — and they're finished!" : "!"}`
                 : `${activeTeam.name} is asking questions…`)
             : "Get ready — waiting for the game to start…"}
         </div>
+        {canSeeWord && (
+          <div style={{ background: "linear-gradient(160deg,#022C22,#031F19)", border: "3px solid #14B8A655", borderRadius: "18px", padding: "16px 10px", marginBottom: "14px" }}>
+            <div style={{ color: "#5EEAD4", fontWeight: "800", fontSize: "11px", textTransform: "uppercase", marginBottom: "8px" }}>
+              {justRevealed ? "The word was" : `${activeTeam?.name ?? "Their"}'s word`}
+            </div>
+            <div style={{ color: "#F0FDFA", fontWeight: "900", fontSize: "clamp(22px,7vw,32px)", overflowWrap: "anywhere" }}>{state.currentWord}</div>
+          </div>
+        )}
         {scoreboard}
       </div>
     );
@@ -179,12 +191,18 @@ export function PhoneRelayView({ state, teamId, deviceId, onAction }: Props) {
   }
 
   // On the asking team, but neither asker nor answerer (e.g. a spectating teammate when another
-  // team's phones were pulled in as answerers) — just follow along.
+  // team's phones were pulled in as answerers) — follow along, seeing the word same as anyone else.
   return (
     <div style={{ ...wrapStyle, textAlign: "center" }}>
       {header}
       <div style={{ fontSize: "36px", marginBottom: "8px" }}>📣</div>
-      <div style={{ fontWeight: "800", fontSize: "16px", color: "#5EEAD4" }}>Your team is asking questions!</div>
+      <div style={{ fontWeight: "800", fontSize: "16px", color: "#5EEAD4", marginBottom: canSeeWord ? "14px" : "0" }}>Your team is asking questions!</div>
+      {canSeeWord && (
+        <div style={{ background: "linear-gradient(160deg,#022C22,#031F19)", border: "3px solid #14B8A655", borderRadius: "18px", padding: "16px 10px", marginBottom: "14px" }}>
+          <div style={{ color: "#5EEAD4", fontWeight: "800", fontSize: "11px", textTransform: "uppercase", marginBottom: "8px" }}>The word is</div>
+          <div style={{ color: "#F0FDFA", fontWeight: "900", fontSize: "clamp(22px,7vw,32px)", overflowWrap: "anywhere" }}>{state.currentWord}</div>
+        </div>
+      )}
       {placeInLine > 0 && <div style={{ marginTop: "8px", fontSize: "14px", fontWeight: "700", color: "#99F6E4" }}>You're #{placeInLine + 1} in line to ask.</div>}
       {scoreboard}
     </div>

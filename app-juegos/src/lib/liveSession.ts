@@ -237,18 +237,26 @@ export function openWhackChannel(code: string): RealtimeChannel {
 // Individual people, not one phone per team (same idea as Word Relay) — every connected phone is
 // identified by its own deviceId (see getDeviceId), and at the start of each team's turn the
 // screen randomly picks ONE of that team's connected devices to be the guesser (teacher feedback:
-// a fixed/rotating order wasn't wanted, a fresh random pick each turn was). The word and controls
-// go to every OTHER connected phone in play this turn — the rest of the guesser's own team in
-// "groups" mode, or literally everyone else connected in "solo" mode, since "solo" means each team
-// is really just one person with no teammates of their own to describe for them. With fewer than
-// two phones in play (nobody connected, or only the guesser's own), there's no one to describe on
-// a phone at all, so the word and controls fall back to the shared screen instead, same as a
-// one-phone team already does in Word Relay.
+// a fixed/rotating order wasn't wanted, a fresh random pick each turn was). Two different, broader-
+// than-you'd-guess pools follow from that one pick:
+//   - wordVisibleDeviceIds: EVERY connected phone except the guesser's, regardless of team — other
+//     teams get to watch along and see the word too while they wait their own turn, rather than a
+//     blank "Team X is up" placeholder (teacher feedback: waiting teams want something to do).
+//   - describerDeviceIds: the narrower subset that also gets the Correct/Skip/End Turn controls —
+//     the rest of the guesser's own team in "groups" mode (falling back to every other connected
+//     phone if the guesser's team has nobody else online, same as Word Relay's own one-phone-team
+//     fallback), or literally everyone in "solo" mode, since "solo" means each team is really just
+//     one person with no teammates of their own. Kept separate from word visibility on purpose: a
+//     rival team can watch and feel included, but shouldn't be the one deciding whether a DIFFERENT
+//     team's guess counts.
+// With nobody at all connected to describe (describerDeviceIds empty), the word and controls fall
+// back to the shared screen instead, same as Word Relay's own fallback.
 export type HotSeatRosterEntry = { id: string | number; name: string; color: TeamColor; mascot?: string | null };
 
 // Which specific card a phone shows during "turn" is derived client-side from its OWN deviceId
-// against guesserDeviceId/describerDeviceIds (see PhoneHotSeatView.tsx) — a single broadcast phase
-// can't itself be "describing" for one phone and "guessing" for another at the same time.
+// against guesserDeviceId/describerDeviceIds/wordVisibleDeviceIds (see PhoneHotSeatView.tsx) — a
+// single broadcast phase can't itself be "describing" for one phone and "guessing" for another at
+// the same time.
 export type HotSeatPhase = "lobby" | "turn" | "final";
 
 export type HotSeatStatePayload = {
@@ -261,9 +269,13 @@ export type HotSeatStatePayload = {
   // This turn's guesser — null outside "play" (between turns, nobody's up yet) or when the active
   // team has no connected phone to pick from (screen-only fallback applies instead).
   guesserDeviceId: string | null;
-  // Phones holding the word and the Correct/Skip/End Turn controls this turn — always excludes
-  // guesserDeviceId. Empty (not just absent) is the signal a phone itself can't act on; the screen
-  // uses the same emptiness to decide whether IT needs to show the word instead.
+  // Every connected phone (any team) that can see this turn's word — always excludes
+  // guesserDeviceId, nothing else. Purely a display list; see describerDeviceIds for who can also
+  // act on it.
+  wordVisibleDeviceIds: string[];
+  // The subset of wordVisibleDeviceIds that also holds the Correct/Skip/End Turn controls. Empty
+  // (not just absent) is the signal nobody can act on a phone this turn; the screen uses the same
+  // emptiness to decide whether IT needs to show the word and controls instead.
   describerDeviceIds: string[];
   currentWord: string;
   timeLeft: number;
@@ -294,9 +306,12 @@ export function openHotSeatChannel(code: string): RealtimeChannel {
 // "asker") has to ask yes/no questions to find it out while everyone else who knows the word
 // answers. This is the only game whose phones are individual PEOPLE rather than one phone per
 // team — several phones can join the same team, each identified by a per-device id (see
-// getDeviceId), and the screen rotates the asker through them. The word itself is only ever shown
-// to the "answerer" phones (never the asker's), and never on the main screen while any answerer
-// phone is connected. See RelayGame.tsx for exactly where.
+// getDeviceId), and the screen rotates the asker through them. The word is shown to every
+// connected phone except the asker's (wordVisibleDeviceIds — other teams get to watch along while
+// they wait their own turn, teacher feedback), but only the narrower answererDeviceIds also holds
+// the controls (Guessed it!/Question asked/Change word) — a rival team can watch without being the
+// one who decides whether THIS team's guess counts. Never shown on the main screen while any
+// phone (asker's team or not) is connected to see it. See RelayGame.tsx for exactly where.
 export type RelayRosterEntry = { id: string | number; name: string; color: TeamColor; mascot?: string | null };
 
 export type RelayPhase = "lobby" | "ready" | "asking" | "reveal" | "final";
@@ -310,9 +325,12 @@ export type RelayStatePayload = {
   askerDeviceId: string | null;
   // Connected device ids per team, current asker first, so a phone can say "you're #2 in line".
   askerQueueByTeam: Record<string, string[]>;
-  // Phones allowed to see the word and press the controls this turn.
+  // Every connected phone (any team) that can see this turn's word — just "not the asker," full
+  // stop. Purely a display list; see answererDeviceIds for who can also act on it.
+  wordVisibleDeviceIds: string[];
+  // The subset of wordVisibleDeviceIds that also holds the controls this turn.
   answererDeviceIds: string[];
-  // Only sent while a word is live (asking/reveal); the phone UI shows it to answerers only.
+  // Only sent while a word is live (asking/reveal); the phone UI shows it to wordVisibleDeviceIds.
   currentWord: string;
   // True when no answerer phone is connected, so the main screen must show the word itself.
   screenShowsWord: boolean;
