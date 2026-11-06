@@ -734,10 +734,15 @@ export function openClassSessionChannel(code: string): RealtimeChannel {
 // phone on the CURRENTLY ACTIVE team gets its own prompt and works it independently and privately,
 // instead of one person speaking in front of the room while everyone else just watches (teacher
 // feedback: some students do much better given a quiet, untimed-per-item way to answer, instead of
-// needing to be the one talking). The whole team still shares ONE turn clock, same as the
-// screen-only version — a submission (right or wrong; see below) hands back a random time bonus
-// the moment it's SENT, rewarding steady work over accuracy, and immediately deals that same phone
-// a fresh prompt so it can keep going.
+// needing to be the one talking). Each connected phone runs its OWN clock, not a team-wide pool —
+// teacher feedback on an earlier version that pooled bonus time across the whole team: it let one
+// fast/accurate student's bonus benefit teammates who hadn't done anything, and a slow typer on an
+// otherwise-fast team got cut off early through no fault of their own. A device's clock starts at
+// TURN_SECONDS the moment it's first dealt a prompt (a late joiner gets a full one, not whatever's
+// left of someone else's), and a submission (right or wrong; see below) hands back a random time
+// bonus to THAT device's own clock the moment it's SENT, rewarding steady work over accuracy. A
+// device that runs out stops getting new prompts; the team's turn as a whole ends once every
+// connected device has run out, or the teacher ends it early — see RocketFuelGame.tsx.
 //
 // Unlike Hot Seat/Relay, judging never happens live here: every submission just queues up, and the
 // teacher works through a small review (Correct/Wrong per sentence) on the existing team-end
@@ -755,8 +760,12 @@ export type RocketFuelStatePayload = {
   // This device's own currently-assigned prompt — a different one per connected phone on the
   // active team, dealt out independently (see RocketFuelGame.tsx's promptsByDevice). Absent for any
   // device not currently working a prompt (wrong team, between turns, turn just ended and is being
-  // reviewed, or this phone hasn't been dealt one yet).
+  // reviewed, this phone hasn't been dealt one yet, or its own clock has run out).
   promptByDevice: Record<string, { word?: string; question: string }>;
+  // This device's own remaining seconds — see the header comment above. Absent until the device is
+  // first dealt a prompt; present and possibly 0 once it has been (0 means it's done for this turn,
+  // not disconnected).
+  timeLeftByDevice: Record<string, number>;
   connectedTeamIds: (string | number)[];
   ts: number;
 };

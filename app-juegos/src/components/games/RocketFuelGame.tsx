@@ -271,6 +271,12 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
   // One turn's worth of phone submissions, judged on the team-end screen — see reviewQueue.
   // Cleared at the start of every team's turn (startTeamTurn), same lifetime as turnFuel.
   const [submissions, setSubmissions] = useState<{ id: number; deviceId: string; text: string; word?: string }[]>([]);
+  // Phone mode only — each connected device's own remaining seconds, NOT a shared team pool (see
+  // liveSession.ts's Rocket Fuel section for why that changed). Starts at TURN_SECONDS the moment
+  // a device is first dealt a prompt (dealPromptTo), ticks down once a second while it's that
+  // team's live turn (the effect below), and is cleared along with that team's prompts whenever
+  // its turn ends (clearPromptsForTeam) so its NEXT turn starts with a fresh clock, not 0.
+  const [deviceTimeLeft, setDeviceTimeLeft] = useState<Record<string, number>>({});
 
   const cursorRef = useRef(0);
   const readingKeyRef = useRef(0);
@@ -279,6 +285,7 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
   const connectedTeamIdsRef = useRef<Set<string | number>>(new Set());
   const connectedByTeamRef = useRef<Record<string, string[]>>({});
   const promptsByDeviceRef = useRef<Record<string, QuestionData>>({});
+  const deviceTimeLeftRef = useRef<Record<string, number>>({});
   const submissionIdRef = useRef(0);
   const sendStateRef = useRef<(() => void) | null>(null);
   const fuelRef = useRef<Record<string | number, number>>(resumed?.fuel ?? {});
@@ -359,11 +366,19 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
     if (next) updated[deviceId] = next; else delete updated[deviceId];
     promptsByDeviceRef.current = updated;
     setPromptsByDevice(updated);
+    // Starts this device's own clock the first time it's ever dealt a prompt this turn — a late
+    // joiner gets a full TURN_SECONDS of their own, not whatever's left of anyone else's.
+    if (deviceTimeLeftRef.current[deviceId] === undefined) {
+      const updatedClocks = { ...deviceTimeLeftRef.current, [deviceId]: TURN_SECONDS };
+      deviceTimeLeftRef.current = updatedClocks;
+      setDeviceTimeLeft(updatedClocks);
+    }
   };
 
-  // Clears every one of a team's connected phones' assigned prompts — called when that team's
-  // turn ends, so a phone naturally falls back to "being reviewed" instead of holding onto a
-  // prompt that no longer counts for anything.
+  // Clears every one of a team's connected phones' assigned prompts AND their own clocks — called
+  // when that team's turn ends, so a phone naturally falls back to "being reviewed" instead of
+  // holding onto a prompt that no longer counts for anything, and so that team's NEXT turn deals
+  // fresh TURN_SECONDS clocks instead of leftover zeroes (see dealPromptTo's undefined check).
   const clearPromptsForTeam = (teamId: string | number) => {
     const deviceIds = connectedByTeamRef.current[String(teamId)] ?? [];
     if (deviceIds.length === 0) return;
@@ -371,6 +386,10 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
     deviceIds.forEach(id => delete updated[id]);
     promptsByDeviceRef.current = updated;
     setPromptsByDevice(updated);
+    const updatedClocks = { ...deviceTimeLeftRef.current };
+    deviceIds.forEach(id => delete updatedClocks[id]);
+    deviceTimeLeftRef.current = updatedClocks;
+    setDeviceTimeLeft(updatedClocks);
   };
 
   // Resuming drops straight into "team-turn" for the team who was up, skipping the intro screen —
@@ -393,10 +412,47 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
     false, false,
   );
 
-  // Paused while an answer is being shown (a turn spans several prompts in a row, so revealing one
-  // shouldn't burn into the time budget for the rest of the turn while the teacher judges it) or
-  // during the reading grace above.
-  const { timeLeft, addTime } = useTurnTimer(TURN_SECONDS, phase === "team-turn", endTurn, teamIdx, showAnswer || reading);
+  // Screen mode's own shared clock — paused while an answer is being shown (a turn spans several
+  // prompts in a row, so revealing one shouldn't burn into the time budget for the rest of the
+  // turn while the teacher judges it) or during the reading grace above. Only active in screen
+  // mode: phone mode replaces this with per-device clocks (see deviceTimeLeft/the ticking effect
+  // below) so one student's bonus can't extend everyone else's time.
+  const { timeLeft, addTime } = useTurnTimer(TURN_SECONDS, phase === "team-turn" && inputMode === "screen", endTurn, teamIdx, showAnswer || reading);
+
+  // Phone mode's per-device clock — ticks every device with a running clock down once a second; a
+  // device that reaches 0 loses its current prompt (its own phone shows "time's up for you," not
+  // the rest of the team), and the whole team's turn ends once every device that's been dealt a
+  // clock has run out (or the teacher ends it early via the same End Turn button screen mode has).
+  useEffect(() => {
+    if (phase !== "team-turn" || inputMode !== "phone") return;
+    const interval = setInterval(() => {
+      const clocks = deviceTimeLeftRef.current;
+      const ids = Object.keys(clocks);
+      if (ids.length === 0) return;
+      const updatedClocks: Record<string, number> = {};
+      const justExpired: string[] = [];
+      ids.forEach(id => {
+        const next = clocks[id] > 0 ? clocks[id] - 1 : clocks[id];
+        updatedClocks[id] = next;
+        if (clocks[id] > 0 && next === 0) justExpired.push(id);
+      });
+      deviceTimeLeftRef.current = updatedClocks;
+      setDeviceTimeLeft(updatedClocks);
+      if (justExpired.length > 0) {
+        const updatedPrompts = { ...promptsByDeviceRef.current };
+        justExpired.forEach(id => delete updatedPrompts[id]);
+        promptsByDeviceRef.current = updatedPrompts;
+        setPromptsByDevice(updatedPrompts);
+      }
+      if (ids.every(id => updatedClocks[id] <= 0)) endTurn();
+      else sendStateRef.current?.();
+    }, 1000);
+    return () => clearInterval(interval);
+    // endTurn/activeTeam are stable for this effect's whole lifetime (teamIdx only changes once
+    // phase has already left "team-turn", tearing this effect down first) — see endTurn's own
+    // comment history for why omitting them here is intentional, not an oversight.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase, inputMode]);
 
   const startTeamTurn = (idx: number) => {
     setTeamIdx(idx);
@@ -531,6 +587,7 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
         roster: teams.map(t => ({ id: t.id, name: t.name, color: t.color, mascot: t.mascot })),
         activeTeamId: inTurn ? (liveActiveTeam?.id ?? null) : null,
         promptByDevice,
+        timeLeftByDevice: { ...deviceTimeLeftRef.current },
         connectedTeamIds: Array.from(connectedTeamIdsRef.current),
         ts: Date.now(),
       };
@@ -579,9 +636,13 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
       submissionIdRef.current += 1;
       setSubmissions(prev => [...prev, { id: submissionIdRef.current, deviceId: action.deviceId, text, word: prompt.word }]);
       dealPromptTo(action.deviceId);
-      // See TIME_BONUS_OPTIONS — the reward is time, never points, same as the screen-only version.
+      // See TIME_BONUS_OPTIONS — the reward is time, never points. Goes to THIS device's own
+      // clock only, never a shared pool (see liveSession.ts's Rocket Fuel section for why) — a
+      // teammate's bonus should never buy anyone else extra time.
       const bonus = TIME_BONUS_OPTIONS[Math.floor(Math.random() * TIME_BONUS_OPTIONS.length)];
-      addTime(bonus);
+      const updatedClocks = { ...deviceTimeLeftRef.current, [action.deviceId]: (deviceTimeLeftRef.current[action.deviceId] ?? 0) + bonus };
+      deviceTimeLeftRef.current = updatedClocks;
+      setDeviceTimeLeft(updatedClocks);
       timeBonusKeyRef.current += 1;
       setTimeBonusPopup({ amount: bonus, key: timeBonusKeyRef.current });
       sendStateRef.current?.();
@@ -693,7 +754,7 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
                 }}><Icon name="phone" size={14} /> Play on Phones</button>
               </div>
               <div style={{ fontSize: "11px", color: "#C7D2FE99", marginTop: "8px", maxWidth: "420px", margin: "8px auto 0" }}>
-                On Phones, every connected phone on the team up at mission control works its own prompt privately — you review and judge everyone's sentences once the turn ends.
+                On Phones, every connected phone on the team up at mission control works its own prompt privately on its own clock — a bonus only ever extends that one phone's own time, never the whole team's. You review and judge everyone's sentences once their turn ends.
               </div>
             </div>
           )}
@@ -761,15 +822,19 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
           <span style={{ color: "white", fontWeight: "900", fontSize: "16px", textShadow: "0 1px 3px rgba(0,0,0,0.4)", display: "inline-flex", alignItems: "center", gap: "6px" }}><Icon name="rocket" size={15} /> {activeTeam.name}'s turn — {round > TOTAL_ROUNDS ? "Bonus Round" : `Round ${round}/${TOTAL_ROUNDS}`}, Team {teamIdx + 1} of {teams.length}</span>
           {phase === "team-turn" && (
             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-              {/* Swapped in for READING_SECONDS on every new prompt — see the `reading` sub-timer
-                  above — so the room sees why the race clock hasn't started moving yet, instead of
-                  it just looking frozen/broken. */}
-              {reading ? (
-                <span style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "rgba(0,0,0,0.3)", border: "1.5px solid rgba(255,255,255,0.4)", borderRadius: "10px", padding: "6px 12px", fontSize: "12px", fontWeight: "800", color: "white", whiteSpace: "nowrap" }}>
-                  <Icon name="bookOpen" size={13} /> Read it — {readingTimeLeft}s
-                </span>
-              ) : (
-                <TurnTimerBar timeLeft={timeLeft} totalSeconds={TURN_SECONDS} />
+              {/* Screen mode only — there's no single clock left to show in phone mode, every
+                  device runs its own (see the mission-control placeholder below for those). */}
+              {inputMode === "screen" && (
+                /* Swapped in for READING_SECONDS on every new prompt — see the `reading` sub-timer
+                   above — so the room sees why the race clock hasn't started moving yet, instead
+                   of it just looking frozen/broken. */
+                reading ? (
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "rgba(0,0,0,0.3)", border: "1.5px solid rgba(255,255,255,0.4)", borderRadius: "10px", padding: "6px 12px", fontSize: "12px", fontWeight: "800", color: "white", whiteSpace: "nowrap" }}>
+                    <Icon name="bookOpen" size={13} /> Read it — {readingTimeLeft}s
+                  </span>
+                ) : (
+                  <TurnTimerBar timeLeft={timeLeft} totalSeconds={TURN_SECONDS} />
+                )
               )}
               <button onClick={endTurn} className="rf-btn" style={{ display: "inline-flex", alignItems: "center", gap: "5px", background: "rgba(0,0,0,0.25)", color: "white", border: "1.5px solid rgba(255,255,255,0.4)", borderRadius: "10px", padding: "6px 14px", fontSize: "12px", fontWeight: "800", cursor: "pointer", whiteSpace: "nowrap", transition: "transform 0.15s ease" }}><Icon name="stop" size={11} /> End Turn</button>
             </div>
@@ -815,6 +880,22 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
                     </div>
                   </div>
                 </div>
+                {/* Each phone runs its own clock now (see liveSession.ts's Rocket Fuel section) —
+                    no student names to label these with, so just numbered in connection order;
+                    good enough for a quick "who's running low" glance. */}
+                {(connectedByTeam[String(activeTeam.id)] ?? []).length > 0 && (
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", justifyContent: "center", marginTop: "18px" }}>
+                    {(connectedByTeam[String(activeTeam.id)] ?? []).map((deviceId, i) => {
+                      const t = deviceTimeLeft[deviceId];
+                      const color = t === undefined ? "#94A3B8" : t <= 0 ? "#6B7280" : t > TURN_SECONDS * 0.5 ? "#4ADE80" : t > TURN_SECONDS * 0.25 ? "#FBBF24" : "#F87171";
+                      return (
+                        <span key={deviceId} style={{ background: "rgba(0,0,0,0.3)", border: `1.5px solid ${color}`, color, borderRadius: "8px", padding: "4px 10px", fontSize: "12px", fontWeight: "800" }}>
+                          Phone {i + 1}: {t === undefined ? "—" : `${t}s`}
+                        </span>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             ) : (
               <div style={{ maxWidth: "520px", margin: "0 auto" }}>

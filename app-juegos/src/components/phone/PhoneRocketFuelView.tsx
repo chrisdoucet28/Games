@@ -21,6 +21,9 @@ export function PhoneRocketFuelView({ state, teamId, deviceId, onAction }: Props
   const team = state.roster.find(t => t.id === teamId);
   const activeTeam = state.roster.find(t => t.id === state.activeTeamId);
   const myPrompt = state.promptByDevice[deviceId];
+  // Each phone runs its OWN clock now, not a shared team pool — see liveSession.ts's Rocket Fuel
+  // section for why. Undefined until this device is first dealt a prompt.
+  const myTimeLeft = state.timeLeftByDevice[deviceId];
 
   const [draft, setDraft] = useState("");
   // The question text we last sent a submission for — lets the UI show a brief "sent!" state
@@ -58,7 +61,11 @@ export function PhoneRocketFuelView({ state, teamId, deviceId, onAction }: Props
       <div style={wrapStyle}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
           <span style={{ fontWeight: "900", fontSize: "18px" }}><TeamIcon team={team} size={20} /> {team?.name}</span>
-          <span style={{ fontSize: "26px" }}>🚀</span>
+          {myTimeLeft !== undefined && (
+            <span style={{ display: "inline-flex", alignItems: "center", gap: "5px", background: "rgba(0,0,0,0.3)", border: "1.5px solid #A5B4FC66", borderRadius: "10px", padding: "5px 11px", fontSize: "14px", fontWeight: "900", color: myTimeLeft > 20 ? "#A5B4FC" : "#FCA5A5" }}>
+              ⏱️ {myTimeLeft}s
+            </span>
+          )}
         </div>
         <div style={{ background: "linear-gradient(160deg,#1E1B4B,#0B0B2E)", border: "4px solid #4338CA", borderRadius: "24px", padding: "26px 18px", textAlign: "center", marginBottom: "18px", boxShadow: "0 0 36px rgba(67,56,202,0.4)" }}>
           <div style={{ color: "#A5B4FC", fontWeight: "800", fontSize: "13px", textTransform: "uppercase", letterSpacing: "0.03em", marginBottom: "12px" }}>Use this word in a sentence</div>
@@ -98,6 +105,20 @@ export function PhoneRocketFuelView({ state, teamId, deviceId, onAction }: Props
         <div style={{ fontSize: "52px", marginBottom: "12px" }}>✅</div>
         <div style={{ fontWeight: "900", fontSize: "22px", color: "#A5B4FC", marginBottom: "10px" }}>Sent!</div>
         <div style={{ color: "#C7D2FE", fontSize: "15px" }}>Getting your next word…</div>
+      </div>
+    );
+  }
+
+  // This device's own clock ran out — distinct from the team's turn being over, since teammates
+  // on their own slower (or bonus-extended) clocks might still be going. Only true mid-turn:
+  // once the whole team's turn actually ends, the screen clears every device's clock back to
+  // undefined (see clearPromptsForTeam), which falls through to the generic view below instead.
+  if (myTimeLeft !== undefined && myTimeLeft <= 0) {
+    return (
+      <div style={{ ...wrapStyle, textAlign: "center", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+        <div style={{ fontSize: "48px", marginBottom: "12px" }}>⏰</div>
+        <div style={{ fontWeight: "900", fontSize: "20px", color: "#A5B4FC", marginBottom: "10px" }}>Time's up for you!</div>
+        <div style={{ color: "#C7D2FE", fontSize: "15px", lineHeight: 1.5 }}>Nice work — the rest of your team might still be going. Hang tight.</div>
       </div>
     );
   }
