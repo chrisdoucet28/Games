@@ -129,7 +129,7 @@ const STYLE_TAG = (
     @keyframes rfIgnitionFlash{0%{opacity:0}30%{opacity:1}100%{opacity:0}}
     @keyframes rfMiniShake{0%,100%{transform:translate(0,0) rotate(0deg)}20%{transform:translate(-4px,-2px) rotate(-7deg)}40%{transform:translate(4px,-5px) rotate(6deg)}60%{transform:translate(-3px,-7px) rotate(-4deg)}80%{transform:translate(2px,-3px) rotate(3deg)}}
     @keyframes rfFuelRise{0%{transform:translate(-50%,0) scale(1);opacity:1}100%{transform:translate(-50%,-64px) scale(0.5);opacity:0}}
-    @keyframes rfTimeBonusRise{0%{transform:translate(-50%,0) scale(1);opacity:1}100%{transform:translate(-50%,-28px) scale(0.85);opacity:0}}
+    @keyframes rfTimeBonusBanner{0%{transform:translateX(-50%) translateY(-16px) scale(0.85);opacity:0}15%{transform:translateX(-50%) translateY(0) scale(1.05);opacity:1}25%{transform:translateX(-50%) translateY(0) scale(1);opacity:1}80%{transform:translateX(-50%) translateY(0) scale(1);opacity:1}100%{transform:translateX(-50%) translateY(-10px) scale(0.95);opacity:0}}
     .rf-btn:hover:not(:disabled){filter:brightness(1.1)}
     .rf-btn:active:not(:disabled){transform:translate(4px,4px) !important;box-shadow:0 0 0 #1A1A2E !important}
   `}</style>
@@ -372,7 +372,7 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
   // Resuming drops straight into "team-turn" for the team who was up, skipping the intro screen —
   // but unlike startTeamTurn(), it doesn't draw a first prompt, so do that once on mount.
   useEffect(() => {
-    if (resumed) drawPrompt();
+    if (resumed && inputMode !== "phone") drawPrompt();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -399,12 +399,18 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
     turnFuelRef.current = 0;
     setTurnFuel(0);
     fuelRef.current[teams[idx].id] = fuelRef.current[teams[idx].id] ?? 0;
-    drawPrompt();
     setSubmissions([]);
-    // Phone mode: every phone already connected to this team gets its own first prompt right away
-    // — a phone that connects mid-turn is dealt one the instant it shows up instead (see the
-    // channel effect's presence-sync handler below).
-    (connectedByTeamRef.current[String(teams[idx].id)] ?? []).forEach(dealPromptTo);
+    if (inputMode === "phone") {
+      // Every phone already connected to this team gets its own first prompt right away — a
+      // phone that connects mid-turn is dealt one the instant it shows up instead (see the
+      // channel effect's presence-sync handler below). The screen itself never draws its own
+      // currentQ here — there's nothing for it to show that would mean anything (each phone is
+      // working a different prompt), so phase === "team-turn"'s render branches on inputMode
+      // instead of ever touching currentQ in this mode.
+      (connectedByTeamRef.current[String(teams[idx].id)] ?? []).forEach(dealPromptTo);
+    } else {
+      drawPrompt();
+    }
     setPhase("team-turn");
   };
 
@@ -730,28 +736,33 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
           accent="#A5B4FC" panelBg="linear-gradient(160deg,#312E81,#1E1B4B)" borderColor="#4338CA66"
         />
       )}
+      {/* A big, impossible-to-miss banner, not a small corner annotation — fixed-position so it
+          reads the same regardless of what's rendering underneath (screen mode's word card, phone
+          mode's placeholder), and fires for BOTH a live screen judge and a phone submission. */}
+      {timeBonusPopup && (
+        <div key={timeBonusPopup.key} style={{
+          position: "fixed", top: "90px", left: "50%", zIndex: 30, animation: "rfTimeBonusBanner 2s ease-out forwards",
+          background: "linear-gradient(135deg,#0D9488,#14B8A6)", color: "white", fontWeight: "900", fontSize: "26px",
+          padding: "14px 30px", borderRadius: "16px", border: "3px solid #1A1A2E", boxShadow: "5px 5px 0 #1A1A2E", whiteSpace: "nowrap",
+        }}>
+          ⏱️ +{timeBonusPopup.amount}s bonus!
+        </div>
+      )}
       <div style={{ position: "relative", zIndex: 1 }}>
         <div style={{ background: activeTeam.color.bg, border: "3px solid #1A1A2E", borderRadius: "14px", padding: "10px 16px", marginBottom: "14px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px", boxShadow: "4px 4px 0 #1A1A2E" }}>
           <span style={{ color: "white", fontWeight: "900", fontSize: "16px", textShadow: "0 1px 3px rgba(0,0,0,0.4)", display: "inline-flex", alignItems: "center", gap: "6px" }}><Icon name="rocket" size={15} /> {activeTeam.name}'s turn — {round > TOTAL_ROUNDS ? "Bonus Round" : `Round ${round}/${TOTAL_ROUNDS}`}, Team {teamIdx + 1} of {teams.length}</span>
           {phase === "team-turn" && (
             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-              <div style={{ position: "relative" }}>
-                {/* Swapped in for READING_SECONDS on every new prompt — see the `reading` sub-timer
-                    above — so the room sees why the race clock hasn't started moving yet, instead of
-                    it just looking frozen/broken. */}
-                {reading ? (
-                  <span style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "rgba(0,0,0,0.3)", border: "1.5px solid rgba(255,255,255,0.4)", borderRadius: "10px", padding: "6px 12px", fontSize: "12px", fontWeight: "800", color: "white", whiteSpace: "nowrap" }}>
-                    <Icon name="bookOpen" size={13} /> Read it — {readingTimeLeft}s
-                  </span>
-                ) : (
-                  <TurnTimerBar timeLeft={timeLeft} totalSeconds={TURN_SECONDS} />
-                )}
-                {timeBonusPopup && (
-                  <div key={timeBonusPopup.key} style={{ position: "absolute", left: "50%", top: "0", animation: "rfTimeBonusRise 1.2s ease-out forwards", color: "#5EEAD4", fontWeight: "900", fontSize: "15px", whiteSpace: "nowrap", textShadow: "0 1px 3px rgba(0,0,0,0.5)" }}>
-                    +{timeBonusPopup.amount}s!
-                  </div>
-                )}
-              </div>
+              {/* Swapped in for READING_SECONDS on every new prompt — see the `reading` sub-timer
+                  above — so the room sees why the race clock hasn't started moving yet, instead of
+                  it just looking frozen/broken. */}
+              {reading ? (
+                <span style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "rgba(0,0,0,0.3)", border: "1.5px solid rgba(255,255,255,0.4)", borderRadius: "10px", padding: "6px 12px", fontSize: "12px", fontWeight: "800", color: "white", whiteSpace: "nowrap" }}>
+                  <Icon name="bookOpen" size={13} /> Read it — {readingTimeLeft}s
+                </span>
+              ) : (
+                <TurnTimerBar timeLeft={timeLeft} totalSeconds={TURN_SECONDS} />
+              )}
               <button onClick={endTurn} className="rf-btn" style={{ display: "inline-flex", alignItems: "center", gap: "5px", background: "rgba(0,0,0,0.25)", color: "white", border: "1.5px solid rgba(255,255,255,0.4)", borderRadius: "10px", padding: "6px 14px", fontSize: "12px", fontWeight: "800", cursor: "pointer", whiteSpace: "nowrap", transition: "transform 0.15s ease" }}><Icon name="stop" size={11} /> End Turn</button>
             </div>
           )}
@@ -771,19 +782,37 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
               )}
             </div>
 
-            <div style={{ maxWidth: "520px", margin: "0 auto" }}>
-              <QuestionCard question={currentQ} showAnswer={showAnswer} onReveal={() => setShowAnswer(true)} gameId="rocket" />
-              <div style={{ display: "flex", gap: "10px", justifyContent: "center", marginTop: "14px" }}>
-                {showAnswer ? (
-                  <>
-                    <button onClick={() => judge(true)} className="rf-btn" style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "#22C55E", color: "white", border: "3px solid #1A1A2E", borderRadius: "12px", padding: "12px 28px", fontSize: "15px", fontWeight: "800", cursor: "pointer", boxShadow: "4px 4px 0 #1A1A2E" }}><Icon name="check" size={14} /> Fuelled it!</button>
-                    <button onClick={() => judge(false)} className="rf-btn" style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "#EF4444", color: "white", border: "3px solid #1A1A2E", borderRadius: "12px", padding: "12px 28px", fontSize: "15px", fontWeight: "800", cursor: "pointer", boxShadow: "4px 4px 0 #1A1A2E" }}><Icon name="close" size={13} /> No fuel</button>
-                  </>
-                ) : (
-                  <button onClick={drawPrompt} className="rf-btn" style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "rgba(255,255,255,0.1)", color: "#C7D2FE", border: "2px solid #A5B4FC55", borderRadius: "12px", padding: "10px 22px", fontSize: "14px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease" }}><Icon name="next" size={13} /> Skip — try a different one</button>
-                )}
+            {inputMode === "phone" ? (
+              // Nothing for the screen to show that would mean anything — each connected phone is
+              // working a DIFFERENT prompt in parallel, there's no single "the current word" the
+              // way screen mode has one. Just confirms things are moving, and fills the space.
+              <div style={{ maxWidth: "460px", margin: "0 auto", background: "#1E1B4B", border: "3px dashed #4338CA", borderRadius: "22px", padding: "28px 18px", textAlign: "center" }}>
+                <div style={{ fontWeight: "900", fontSize: "17px", color: "#A5B4FC", marginBottom: "6px" }}>
+                  {activeTeam.name}'s phones are at mission control!
+                </div>
+                <div style={{ color: "#C7D2FE99", fontSize: "13px", fontWeight: "600", marginBottom: "16px" }}>
+                  Everyone's answering their own prompt privately on their own phone — you'll review every sentence once this turn ends.
+                </div>
+                <div style={{ fontSize: "26px", fontWeight: "900", color: "#5EEAD4" }}>{submissions.length}</div>
+                <div style={{ fontSize: "11px", fontWeight: "800", color: "#A5B4FC99", textTransform: "uppercase", letterSpacing: "0.04em" }}>
+                  sentence{submissions.length === 1 ? "" : "s"} sent in so far
+                </div>
               </div>
-            </div>
+            ) : (
+              <div style={{ maxWidth: "520px", margin: "0 auto" }}>
+                <QuestionCard question={currentQ} showAnswer={showAnswer} onReveal={() => setShowAnswer(true)} gameId="rocket" />
+                <div style={{ display: "flex", gap: "10px", justifyContent: "center", marginTop: "14px" }}>
+                  {showAnswer ? (
+                    <>
+                      <button onClick={() => judge(true)} className="rf-btn" style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "#22C55E", color: "white", border: "3px solid #1A1A2E", borderRadius: "12px", padding: "12px 28px", fontSize: "15px", fontWeight: "800", cursor: "pointer", boxShadow: "4px 4px 0 #1A1A2E" }}><Icon name="check" size={14} /> Fuelled it!</button>
+                      <button onClick={() => judge(false)} className="rf-btn" style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "#EF4444", color: "white", border: "3px solid #1A1A2E", borderRadius: "12px", padding: "12px 28px", fontSize: "15px", fontWeight: "800", cursor: "pointer", boxShadow: "4px 4px 0 #1A1A2E" }}><Icon name="close" size={13} /> No fuel</button>
+                    </>
+                  ) : (
+                    <button onClick={drawPrompt} className="rf-btn" style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "rgba(255,255,255,0.1)", color: "#C7D2FE", border: "2px solid #A5B4FC55", borderRadius: "12px", padding: "10px 22px", fontSize: "14px", fontWeight: "700", cursor: "pointer", transition: "transform 0.15s ease" }}><Icon name="next" size={13} /> Skip — try a different one</button>
+                  )}
+                </div>
+              </div>
+            )}
           </>
         )}
 

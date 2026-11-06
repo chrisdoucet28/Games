@@ -36,16 +36,16 @@ export function PhoneRocketFuelView({ state, teamId, deviceId, onAction }: Props
   }, [myPrompt?.question]);
 
   const wrapStyle: React.CSSProperties = {
-    minHeight: "100vh", padding: "20px 18px", fontFamily: "'Segoe UI',system-ui,sans-serif", color: "white",
+    minHeight: "100vh", padding: "24px 20px", fontFamily: "'Segoe UI',system-ui,sans-serif", color: "white",
     background: "radial-gradient(ellipse at 50% 105%,#4338CA 0%,#1E1B4B 45%,#030014 100%)",
   };
 
   if (state.phase === "final") {
     return (
       <div style={{ ...wrapStyle, textAlign: "center", display: "flex", flexDirection: "column", justifyContent: "center" }}>
-        <div style={{ fontSize: "44px", marginBottom: "10px" }}>🚀</div>
-        <div style={{ fontWeight: "900", fontSize: "20px", color: "#A5B4FC" }}>Thanks for playing!</div>
-        <div style={{ color: "#C7D2FE", fontSize: "14px", marginTop: "8px" }}>Check the big screen for the launch!</div>
+        <div style={{ fontSize: "56px", marginBottom: "12px" }}>🚀</div>
+        <div style={{ fontWeight: "900", fontSize: "24px", color: "#A5B4FC" }}>Thanks for playing!</div>
+        <div style={{ color: "#C7D2FE", fontSize: "16px", marginTop: "10px" }}>Check the big screen for the launch!</div>
       </div>
     );
   }
@@ -56,12 +56,13 @@ export function PhoneRocketFuelView({ state, teamId, deviceId, onAction }: Props
     const text = draft.trim();
     return (
       <div style={wrapStyle}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "14px" }}>
-          <span style={{ fontWeight: "900", fontSize: "15px" }}><TeamIcon team={team} /> {team?.name}</span>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
+          <span style={{ fontWeight: "900", fontSize: "18px" }}><TeamIcon team={team} size={20} /> {team?.name}</span>
+          <span style={{ fontSize: "26px" }}>🚀</span>
         </div>
-        <div style={{ background: "linear-gradient(160deg,#1E1B4B,#0B0B2E)", border: "4px solid #4338CA", borderRadius: "22px", padding: "22px 16px", textAlign: "center", marginBottom: "16px", boxShadow: "0 0 30px rgba(67,56,202,0.35)" }}>
-          <div style={{ color: "#A5B4FC", fontWeight: "800", fontSize: "12px", textTransform: "uppercase", marginBottom: "10px" }}>Use this word in a sentence</div>
-          <div style={{ background: "rgba(0,0,0,0.4)", borderRadius: "16px", border: "3px solid #4338CA55", padding: "16px 10px", color: "#E0E7FF", fontWeight: "900", fontSize: "clamp(22px,8vw,32px)", lineHeight: 1.2, overflowWrap: "anywhere" }}>
+        <div style={{ background: "linear-gradient(160deg,#1E1B4B,#0B0B2E)", border: "4px solid #4338CA", borderRadius: "24px", padding: "26px 18px", textAlign: "center", marginBottom: "18px", boxShadow: "0 0 36px rgba(67,56,202,0.4)" }}>
+          <div style={{ color: "#A5B4FC", fontWeight: "800", fontSize: "13px", textTransform: "uppercase", letterSpacing: "0.03em", marginBottom: "12px" }}>Use this word in a sentence</div>
+          <div style={{ background: "rgba(0,0,0,0.4)", borderRadius: "18px", border: "3px solid #4338CA55", padding: "20px 12px", color: "#E0E7FF", fontWeight: "900", fontSize: "clamp(28px,10vw,40px)", lineHeight: 1.2, overflowWrap: "anywhere" }}>
             {myPrompt.question}
           </div>
         </div>
@@ -69,21 +70,21 @@ export function PhoneRocketFuelView({ state, teamId, deviceId, onAction }: Props
           value={draft}
           onChange={e => setDraft(e.target.value)}
           maxLength={300}
-          rows={3}
+          rows={4}
           placeholder="Type your sentence…"
-          style={{ width: "100%", boxSizing: "border-box", border: "2px solid #4338CA55", borderRadius: "12px", padding: "10px 12px", fontSize: "15px", fontFamily: "inherit", resize: "vertical", marginBottom: "12px" }}
+          style={{ width: "100%", boxSizing: "border-box", border: "2px solid #4338CA66", borderRadius: "14px", padding: "14px 14px", fontSize: "18px", fontFamily: "inherit", resize: "vertical", marginBottom: "14px" }}
         />
         <button
           onClick={() => { if (!text) return; onAction({ teamId, deviceId, action: "submit", text }); setPendingFor(myPrompt.question); }}
           disabled={!text}
           style={{
             width: "100%", background: !text ? "#4B5563" : "linear-gradient(135deg,#4338CA,#6366F1)", color: "white", border: "none",
-            borderRadius: "14px", padding: "16px", fontSize: "16px", fontWeight: "900", cursor: !text ? "not-allowed" : "pointer",
+            borderRadius: "16px", padding: "20px", fontSize: "19px", fontWeight: "900", cursor: !text ? "not-allowed" : "pointer",
           }}
         >
           Submit ⛽
         </button>
-        <div style={{ textAlign: "center", color: "#C7D2FE99", fontSize: "11px", fontWeight: "600", marginTop: "10px" }}>
+        <div style={{ textAlign: "center", color: "#C7D2FE99", fontSize: "13px", fontWeight: "600", marginTop: "12px" }}>
           Your teacher checks these after the turn — no rush, just do your best.
         </div>
       </div>
@@ -94,9 +95,9 @@ export function PhoneRocketFuelView({ state, teamId, deviceId, onAction }: Props
   if (myPrompt && pendingFor === myPrompt.question) {
     return (
       <div style={{ ...wrapStyle, textAlign: "center", display: "flex", flexDirection: "column", justifyContent: "center" }}>
-        <div style={{ fontSize: "40px", marginBottom: "10px" }}>✅</div>
-        <div style={{ fontWeight: "900", fontSize: "18px", color: "#A5B4FC", marginBottom: "8px" }}>Sent!</div>
-        <div style={{ color: "#C7D2FE", fontSize: "13px" }}>Getting your next word…</div>
+        <div style={{ fontSize: "52px", marginBottom: "12px" }}>✅</div>
+        <div style={{ fontWeight: "900", fontSize: "22px", color: "#A5B4FC", marginBottom: "10px" }}>Sent!</div>
+        <div style={{ color: "#C7D2FE", fontSize: "15px" }}>Getting your next word…</div>
       </div>
     );
   }
@@ -105,21 +106,21 @@ export function PhoneRocketFuelView({ state, teamId, deviceId, onAction }: Props
   // reviewed), it's some other team's turn, or the game hasn't started yet.
   const forOwnTeam = team?.id === state.activeTeamId;
   return (
-    <div style={{ ...wrapStyle, textAlign: "center" }}>
-      <div style={{ fontSize: "22px", marginBottom: "4px" }}><TeamIcon team={team} size={22} /></div>
-      <div style={{ fontWeight: "900", fontSize: "16px", marginBottom: "18px" }}>{team?.name}</div>
-      <div style={{ fontSize: "36px", marginBottom: "8px" }}>{forOwnTeam ? "📋" : "🚀"}</div>
-      <div style={{ fontWeight: "800", fontSize: "16px", color: "#A5B4FC", marginBottom: "18px" }}>
+    <div style={{ ...wrapStyle, textAlign: "center", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+      <div style={{ fontSize: "26px", marginBottom: "6px" }}><TeamIcon team={team} size={26} /></div>
+      <div style={{ fontWeight: "900", fontSize: "20px", marginBottom: "20px" }}>{team?.name}</div>
+      <div style={{ fontSize: "44px", marginBottom: "10px" }}>{forOwnTeam ? "📋" : "🚀"}</div>
+      <div style={{ fontWeight: "800", fontSize: "18px", color: "#A5B4FC", marginBottom: "22px" }}>
         {forOwnTeam
           ? "Nice work! Your teacher's checking your answers now."
           : activeTeam
             ? `${activeTeam.name} is at mission control!`
             : "Get ready — waiting for the game to start…"}
       </div>
-      <div style={{ display: "flex", flexDirection: "column", gap: "6px", maxWidth: "300px", margin: "0 auto" }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: "8px", maxWidth: "320px", margin: "0 auto", width: "100%" }}>
         {state.roster.map(t => (
-          <div key={t.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: t.id === state.activeTeamId ? "rgba(165,180,252,0.15)" : "rgba(255,255,255,0.06)", border: `1.5px solid ${t.id === state.activeTeamId ? "#A5B4FC" : "rgba(255,255,255,0.15)"}`, borderRadius: "10px", padding: "8px 12px" }}>
-            <span style={{ fontSize: "13px", fontWeight: "700" }}><TeamIcon team={t} /> {t.name}</span>
+          <div key={t.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: t.id === state.activeTeamId ? "rgba(165,180,252,0.15)" : "rgba(255,255,255,0.06)", border: `1.5px solid ${t.id === state.activeTeamId ? "#A5B4FC" : "rgba(255,255,255,0.15)"}`, borderRadius: "12px", padding: "10px 14px" }}>
+            <span style={{ fontSize: "15px", fontWeight: "700" }}><TeamIcon team={t} /> {t.name}</span>
           </div>
         ))}
       </div>
