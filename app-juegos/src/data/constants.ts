@@ -124,3 +124,20 @@ export const GAME_ICONS: Record<string, IconName> = {
 };
 
 export const TASK_TYPES: string[] = ["fill in the blank", "correct grammar mistakes", "use vocabulary in a sentence", "choose correct grammar", "rewrite sentences", "speaking task"];
+
+// Word Relay's generic yes/no question frames — not tied to any topic's specific words, since the
+// skill Word Relay practices is forming a yes/no question at all (auxiliary verb + inversion),
+// which is the same skill regardless of whether the words are animals, jobs, or abstract theme
+// vocabulary. Lives here (not in RelayGame.tsx) so PhoneRelayView.tsx can show the asker's own
+// phone the same list without statically importing the whole game component — RelayGame.tsx is
+// normally lazy-loaded, and the phone view isn't, so that import broke the code-splitting.
+export const RELAY_QUESTION_STARTERS = [
+  "Is it a...?",
+  "Is it bigger/smaller than a...?",
+  "Does it have...?",
+  "Does it...?",
+  "Can it...?",
+  "Can you...with it?",
+  "Do you use it for...?",
+  "Have you ever...?",
+];

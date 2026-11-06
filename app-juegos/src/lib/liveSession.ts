@@ -330,6 +330,13 @@ export type RelayStatePayload = {
   wordVisibleDeviceIds: string[];
   // The subset of wordVisibleDeviceIds that also holds the controls this turn.
   answererDeviceIds: string[];
+  // The full pool of possible words for this topic selection — safe to show literally anyone,
+  // including the asker, since it never narrows down which one is actually live. The screen
+  // already shows this (see RelayGame.tsx's "Possible words this round") to fill the empty space
+  // while phones handle a turn, but the asker themselves can't see the screen (facing away
+  // in-person, or playing phone-only) — this lets their own phone show the same pool, which is
+  // the whole reason it's there in the first place: helping whoever's building a question.
+  wordPool: string[];
   // Only sent while a word is live (asking/reveal); the phone UI shows it to wordVisibleDeviceIds.
   currentWord: string;
   // True when no answerer phone is connected, so the main screen must show the word itself.

@@ -1,5 +1,6 @@
 import type { RelayStatePayload, RelayActionPayload } from "../../lib/liveSession";
 import { TeamIcon } from "../shared/TeamIcon";
+import { RELAY_QUESTION_STARTERS } from "../../data/constants";
 
 type Props = {
   state: RelayStatePayload;
@@ -144,12 +145,15 @@ export function PhoneRelayView({ state, teamId, deviceId, onAction }: Props) {
     );
   }
 
-  // Their team's turn, and they're the one asking.
+  // Their team's turn, and they're the one asking. They can't see the big screen either way
+  // (facing away from it in person, or playing phone-only) — so the word pool and question
+  // starters it shows to fill the empty space while they're asking go here too, since nothing
+  // about either one gives away the live word (see liveSession.ts's wordPool).
   if (iAmAsker) {
     return (
       <div style={{ ...wrapStyle, textAlign: "center" }}>
         {header}
-        <div style={{ background: "linear-gradient(160deg,#022C22,#031F19)", border: "4px solid #0D9488", borderRadius: "22px", padding: "28px 16px", boxShadow: "0 0 30px rgba(13,148,136,0.35)" }}>
+        <div style={{ background: "linear-gradient(160deg,#022C22,#031F19)", border: "4px solid #0D9488", borderRadius: "22px", padding: "28px 16px", marginBottom: "16px", boxShadow: "0 0 30px rgba(13,148,136,0.35)" }}>
           <div style={{ fontSize: "44px", marginBottom: "8px" }}>🙋</div>
           <div style={{ fontWeight: "900", fontSize: "22px", color: "#5EEAD4", marginBottom: "10px" }}>You're up!</div>
           <div style={{ fontSize: "15px", lineHeight: 1.6, color: "#CCFBF1", fontWeight: "600" }}>
@@ -158,9 +162,25 @@ export function PhoneRelayView({ state, teamId, deviceId, onAction }: Props) {
               : <>Walk to the front and ask <strong>one yes/no question</strong> — or take a guess — to find out your team's word. Don't peek at the word!</>}
           </div>
         </div>
-        <div style={{ marginTop: "14px", fontSize: "13px", fontWeight: "700", color: "#99F6E4" }}>
+        <div style={{ fontSize: "13px", fontWeight: "700", color: "#99F6E4", marginBottom: "20px" }}>
           {state.isSolo ? "Whoever's running the screen knows the word and will answer yes or no." : "Someone who knows the word will answer yes or no."}
         </div>
+        {state.wordPool.length > 0 && (
+          <div style={{ textAlign: "left" }}>
+            <div style={{ fontSize: "11px", fontWeight: "800", color: "#5EEAD499", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: "8px", textAlign: "center" }}>Possible words</div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", justifyContent: "center", marginBottom: "18px" }}>
+              {[...state.wordPool].sort().map((word, i) => (
+                <span key={`${word}-${i}`} style={{ background: "rgba(20,184,166,0.18)", color: "#99F6E4", border: "1px solid #14B8A655", borderRadius: "6px", padding: "4px 10px", fontSize: "13px", fontWeight: "700" }}>{word}</span>
+              ))}
+            </div>
+            <div style={{ fontSize: "11px", fontWeight: "800", color: "#5EEAD499", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: "8px", textAlign: "center" }}>Question starters</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+              {RELAY_QUESTION_STARTERS.map(q => (
+                <div key={q} style={{ background: "rgba(20,184,166,0.1)", color: "#CCFBF1", border: "1px solid #14B8A640", borderRadius: "8px", padding: "6px 10px", fontSize: "13px", fontWeight: "700", textAlign: "center" }}>{q}</div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     );
   }
