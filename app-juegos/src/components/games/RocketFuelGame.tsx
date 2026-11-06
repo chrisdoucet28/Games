@@ -26,6 +26,16 @@ const TOTAL_ROUNDS = 2;
 // TOTAL_ROUNDS stays exactly 2 for everyone as before.
 const SOLO_MAX_ROUNDS = 3;
 const POINTS_PER_CORRECT = 20;
+// Every new prompt — first draw, after a skip, or the next one right after an answer — opens with
+// this many guaranteed seconds where the main turn clock is paused, just for reading it. Teacher
+// feedback: without this, a student could lose several seconds of their turn just processing the
+// prompt before they'd even started trying to answer it.
+const READING_SECONDS = 10;
+// A correct answer hands back a random one of these to the turn clock — never points, since fuel
+// is a secret until launch and shouldn't gain a luck element; time is the reward instead, so a
+// correct answer always helps (more of the turn left to try for another), with the exact amount
+// a fun surprise rather than always the max.
+const TIME_BONUS_OPTIONS = [5, 10, 15];
 const LAUNCH_BONUS_BY_RANK = [50, 30, 15, 5];
 const MAX_FLIGHT_PX = 460;
 const MIN_HEIGHT_FRACTION = 0.12; // even a 0-fuel rocket still visibly lifts off
@@ -112,6 +122,7 @@ const STYLE_TAG = (
     @keyframes rfIgnitionFlash{0%{opacity:0}30%{opacity:1}100%{opacity:0}}
     @keyframes rfMiniShake{0%,100%{transform:translate(0,0) rotate(0deg)}20%{transform:translate(-4px,-2px) rotate(-7deg)}40%{transform:translate(4px,-5px) rotate(6deg)}60%{transform:translate(-3px,-7px) rotate(-4deg)}80%{transform:translate(2px,-3px) rotate(3deg)}}
     @keyframes rfFuelRise{0%{transform:translate(-50%,0) scale(1);opacity:1}100%{transform:translate(-50%,-64px) scale(0.5);opacity:0}}
+    @keyframes rfTimeBonusRise{0%{transform:translate(-50%,0) scale(1);opacity:1}100%{transform:translate(-50%,-28px) scale(0.85);opacity:0}}
     .rf-btn:hover:not(:disabled){filter:brightness(1.1)}
     .rf-btn:active:not(:disabled){transform:translate(4px,4px) !important;box-shadow:0 0 0 #1A1A2E !important}
   `}</style>
@@ -229,8 +240,15 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
   const [countdown, setCountdown] = useState(3);
   const [launched, setLaunched] = useState(false);
   const [bonusAwarded, setBonusAwarded] = useState<Record<string | number, number>>({});
+  // True for READING_SECONDS right after every new prompt — see drawPrompt and READING_SECONDS.
+  const [reading, setReading] = useState(false);
+  // The latest correct-answer time bonus, just to animate it — see judge(). Only ever grows (a new
+  // key each time), so the popup retriggers its CSS animation on every correct answer in a row.
+  const [timeBonusPopup, setTimeBonusPopup] = useState<{ amount: number; key: number } | null>(null);
 
   const cursorRef = useRef(0);
+  const readingKeyRef = useRef(0);
+  const timeBonusKeyRef = useRef(0);
   const fuelRef = useRef<Record<string | number, number>>(resumed?.fuel ?? {});
   // Solo only: each individual round's own fuel tally, kept separate from fuelRef (which stays a
   // per-launch-cycle cumulative total used for scoring). Never reset between rounds or launches —
@@ -286,6 +304,10 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
     cursorRef.current += 1;
     setCurrentQ(pool[idx]);
     setShowAnswer(false);
+    // Every new prompt gets its own fresh READING_SECONDS grace — a new resetKey restarts the
+    // sub-timer below rather than just leaving whatever was left on the previous prompt's window.
+    readingKeyRef.current += 1;
+    setReading(true);
   };
 
   // Resuming drops straight into "team-turn" for the team who was up, skipping the intro screen —
@@ -297,9 +319,18 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
 
   const endTurn = () => setPhase("team-end");
 
-  // Paused while an answer is being shown — a turn spans several prompts in a row, so revealing
-  // one shouldn't burn into the time budget for the rest of the turn while the teacher judges it.
-  const { timeLeft } = useTurnTimer(TURN_SECONDS, phase === "team-turn", endTurn, teamIdx, showAnswer);
+  // A short sub-timer, not the main clock: counts down READING_SECONDS on its own every time
+  // drawPrompt bumps readingKeyRef, then flips `reading` off on expiry so the main timer below
+  // (paused while this is running) picks back up.
+  const { timeLeft: readingTimeLeft } = useTurnTimer(
+    READING_SECONDS, phase === "team-turn" && reading, () => setReading(false), readingKeyRef.current,
+    false, false,
+  );
+
+  // Paused while an answer is being shown (a turn spans several prompts in a row, so revealing one
+  // shouldn't burn into the time budget for the rest of the turn while the teacher judges it) or
+  // during the reading grace above.
+  const { timeLeft, addTime } = useTurnTimer(TURN_SECONDS, phase === "team-turn", endTurn, teamIdx, showAnswer || reading);
 
   const startTeamTurn = (idx: number) => {
     setTeamIdx(idx);
@@ -324,6 +355,11 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
       // Solo only — see roundFuelRef's declaration for why this is tracked separately from the
       // cumulative fuelRef above.
       if (teams.length === 1) roundFuelRef.current[round] = (roundFuelRef.current[round] ?? 0) + 1;
+      // See TIME_BONUS_OPTIONS — the reward is time, never points, so this never touches scoring.
+      const bonus = TIME_BONUS_OPTIONS[Math.floor(Math.random() * TIME_BONUS_OPTIONS.length)];
+      addTime(bonus);
+      timeBonusKeyRef.current += 1;
+      setTimeBonusPopup({ amount: bonus, key: timeBonusKeyRef.current });
     }
     drawPrompt();
   };
@@ -385,7 +421,7 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
           <div style={{ marginBottom: "10px" }}><Icon name="rocket" size={36} /></div>
           <div style={{ fontWeight: "900", fontSize: "20px", marginBottom: "10px", color: "#A5B4FC" }}>Rocket Fuel</div>
           <div style={{ fontSize: "15px", lineHeight: 1.7 }}>
-            Each team gets <strong style={{ color: "#A5B4FC" }}>{TOTAL_ROUNDS} rounds of {TURN_SECONDS} seconds</strong> at mission control — use the given word in your own sentence, and every correct one adds fuel. Stuck on a prompt? Skip it for a new one, no penalty.<br />
+            Each team gets <strong style={{ color: "#A5B4FC" }}>{TOTAL_ROUNDS} rounds of {TURN_SECONDS} seconds</strong> at mission control — use the given word in your own sentence, and every correct one adds fuel. Every prompt opens with {READING_SECONDS} free seconds just to read it before the clock starts, and a correct answer hands back a random bonus of extra time. Stuck on a prompt? Skip it for a new one, no penalty.<br />
             Nobody's fuel level is revealed until every team has fuelled up — then all rockets <strong style={{ color: "#A5B4FC" }}>launch together</strong>, and whoever fuelled the most flies the highest!
           </div>
         </div>
@@ -422,7 +458,23 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
           <span style={{ color: "white", fontWeight: "900", fontSize: "16px", textShadow: "0 1px 3px rgba(0,0,0,0.4)", display: "inline-flex", alignItems: "center", gap: "6px" }}><Icon name="rocket" size={15} /> {activeTeam.name}'s turn — {round > TOTAL_ROUNDS ? "Bonus Round" : `Round ${round}/${TOTAL_ROUNDS}`}, Team {teamIdx + 1} of {teams.length}</span>
           {phase === "team-turn" && (
             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-              <TurnTimerBar timeLeft={timeLeft} totalSeconds={TURN_SECONDS} />
+              <div style={{ position: "relative" }}>
+                {/* Swapped in for READING_SECONDS on every new prompt — see the `reading` sub-timer
+                    above — so the room sees why the race clock hasn't started moving yet, instead of
+                    it just looking frozen/broken. */}
+                {reading ? (
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "rgba(0,0,0,0.3)", border: "1.5px solid rgba(255,255,255,0.4)", borderRadius: "10px", padding: "6px 12px", fontSize: "12px", fontWeight: "800", color: "white", whiteSpace: "nowrap" }}>
+                    <Icon name="bookOpen" size={13} /> Read it — {readingTimeLeft}s
+                  </span>
+                ) : (
+                  <TurnTimerBar timeLeft={timeLeft} totalSeconds={TURN_SECONDS} />
+                )}
+                {timeBonusPopup && (
+                  <div key={timeBonusPopup.key} style={{ position: "absolute", left: "50%", top: "0", animation: "rfTimeBonusRise 1.2s ease-out forwards", color: "#5EEAD4", fontWeight: "900", fontSize: "15px", whiteSpace: "nowrap", textShadow: "0 1px 3px rgba(0,0,0,0.5)" }}>
+                    +{timeBonusPopup.amount}s!
+                  </div>
+                )}
+              </div>
               <button onClick={endTurn} className="rf-btn" style={{ display: "inline-flex", alignItems: "center", gap: "5px", background: "rgba(0,0,0,0.25)", color: "white", border: "1.5px solid rgba(255,255,255,0.4)", borderRadius: "10px", padding: "6px 14px", fontSize: "12px", fontWeight: "800", cursor: "pointer", whiteSpace: "nowrap", transition: "transform 0.15s ease" }}><Icon name="stop" size={11} /> End Turn</button>
             </div>
           )}
