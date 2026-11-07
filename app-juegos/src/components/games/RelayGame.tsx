@@ -148,6 +148,12 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
 
   const [phase, setPhase] = useState<Phase>(resumed ? "ready" : "welcome");
   const [showHowTo, setShowHowTo] = useState(false);
+  // Screen mode only — a teacher-controlled toggle for the live-word card (screenShowsWord): swaps
+  // it for the word pool instead, so the teacher can safely leave the screen up between questions
+  // without the live word sitting there if anyone glances over, then swap back to actually answer
+  // the next question. Reset to false (showing the live word) below whenever the word itself
+  // changes, so it's never left hidden by accident into a NEW turn where someone needs to read it.
+  const [wordBankShown, setWordBankShown] = useState(false);
 
   // "Play on Phones" — available whenever there's more than one team. Each phone is one PERSON:
   // several phones can join the same team, and the screen rotates which one is the asker.
@@ -289,6 +295,11 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
 
   const currentTeam = teams[teamIndex];
   const currentKey = String(currentTeam?.id);
+  // See wordBankShown's own declaration — never leave the live-word card toggled to the pool view
+  // across a word change, so the next question always opens with the actual word visible by default.
+  useEffect(() => {
+    setWordBankShown(false);
+  }, [teamWords[currentKey]]);
   const isCpuTurn = isSolo && currentTeam?.id === cpuRef.current?.id;
   const isTeamFinished = (teamKey: string) => (slotIndexByTeam[teamKey] ?? 0) >= totalTurnsForTeam(teamKey);
   const allTeamsFinished = teams.every(t => isTeamFinished(String(t.id)));
@@ -1031,13 +1042,38 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
         {phase === "asking" && !isCpuTurn && (screenShowsWord ? (
           <>
             <div style={{ position: "relative", background: "#022C22", border: "4px solid #1A1A2E", borderRadius: "22px", padding: "26px 18px", textAlign: "center", marginBottom: "16px", boxShadow: "6px 6px 0 #1A1A2E" }}>
-              <div style={{ position: "absolute", top: "10px", right: "10px" }}>
+              <div style={{ position: "absolute", top: "10px", right: "10px", display: "flex", alignItems: "center", gap: "6px" }}>
+                {/* Teacher-only toggle — see wordBankShown's own declaration. Swaps this card for
+                    the word pool so the live word isn't sitting on screen between questions;
+                    resets back to the live word automatically the moment it actually changes. */}
+                <button
+                  onClick={() => setWordBankShown(s => !s)}
+                  style={{
+                    background: wordBankShown ? "#14B8A6" : "rgba(255,255,255,0.08)", color: wordBankShown ? "#022C22" : "#5EEAD4",
+                    border: "1.5px solid #14B8A666", borderRadius: "8px", padding: "5px 9px", fontSize: "11px", fontWeight: "800", cursor: "pointer", whiteSpace: "nowrap",
+                  }}
+                >
+                  {wordBankShown ? "👁️ Show word" : "📋 Word bank"}
+                </button>
                 <FlagPromptButton gameId="relay" questionData={{ raw: teamWords[currentKey] }} />
               </div>
-              <div style={{ color: "#5EEAD4", fontWeight: "800", fontSize: "13px", textTransform: "uppercase", marginBottom: "10px" }}>The hidden word — asker faces away!</div>
-              <div key={teamWords[currentKey]} style={{ background: "rgba(0,0,0,0.35)", borderRadius: "18px", border: "3px solid #14B8A655", padding: "24px 12px", color: "#F0FDFA", fontWeight: "900", fontSize: "clamp(36px,9vw,72px)", lineHeight: 1.05, minHeight: "120px", display: "flex", alignItems: "center", justifyContent: "center", overflowWrap: "anywhere", textShadow: "0 0 18px rgba(45,212,191,0.6)", animation: "rlWordPop 0.25s ease-out" }}>
-                {teamWords[currentKey]}
-              </div>
+              {wordBankShown ? (
+                <>
+                  <div style={{ color: "#5EEAD4", fontWeight: "800", fontSize: "13px", textTransform: "uppercase", marginBottom: "10px" }}>Possible words — the live word is hidden</div>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "7px", justifyContent: "center", alignContent: "center", minHeight: "120px", padding: "8px 36px" }}>
+                    {[...words].sort().map((word, i) => (
+                      <span key={`${word}-${i}`} style={{ background: "rgba(20,184,166,0.18)", color: "#99F6E4", border: "1px solid #14B8A655", borderRadius: "6px", padding: "5px 12px", fontSize: "14px", fontWeight: "700" }}>{word}</span>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div style={{ color: "#5EEAD4", fontWeight: "800", fontSize: "13px", textTransform: "uppercase", marginBottom: "10px" }}>The hidden word — asker faces away!</div>
+                  <div key={teamWords[currentKey]} style={{ background: "rgba(0,0,0,0.35)", borderRadius: "18px", border: "3px solid #14B8A655", padding: "24px 12px", color: "#F0FDFA", fontWeight: "900", fontSize: "clamp(36px,9vw,72px)", lineHeight: 1.05, minHeight: "120px", display: "flex", alignItems: "center", justifyContent: "center", overflowWrap: "anywhere", textShadow: "0 0 18px rgba(45,212,191,0.6)", animation: "rlWordPop 0.25s ease-out" }}>
+                    {teamWords[currentKey]}
+                  </div>
+                </>
+              )}
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(160px,1fr))", gap: "12px" }}>
               <button onClick={markGuessed} className="rl-btn" style={bigBtn("#22C55E")}>Guessed it! +{pointsIfGuessedNow}</button>
