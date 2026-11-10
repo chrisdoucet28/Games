@@ -261,7 +261,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
   // whichever one runs always sees the CURRENT value, not whatever it was when first captured.
   const isAnonymousRef = useRef(isAnonymous);
   useEffect(() => { isAnonymousRef.current = isAnonymous; }, [isAnonymous]);
-  const [screen, setScreen] = useState<"welcome" | "classes" | "profile" | "learn" | "lessonplan" | "lessonplan-play" | "leaderboard" | "billing" | "topic-select" | "team-setup" | "game-select" | "game" | "results" | "student-picker">(
+  const [screen, setScreen] = useState<"welcome" | "classes" | "profile" | "learn" | "lessonplan" | "lessonplan-play" | "leaderboard" | "billing" | "topic-select" | "team-setup" | "game-select" | "game" | "results">(
     checkoutRedirect ? "billing" : initialScreen ?? "welcome"
   );
   // The lesson a teacher is en route to play — set the moment a topic is picked (from the Lesson
@@ -443,7 +443,6 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
       "lessonplan-play": "Lesson Plan - ClassCade",
       leaderboard: "Leaderboard - ClassCade",
       billing: "Billing - ClassCade",
-      "student-picker": "Pick a Student - ClassCade",
     };
     document.title = titles[screen];
   }, [screen, selectedGame]);
@@ -749,77 +748,6 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     runStep(0);
   };
 
-  // Welcome's "Pick a Student" quick tool — see student-picker's own screen render for the UI.
-  // The class list is the one piece of this tool worth remembering between visits (a teacher isn't
-  // retyping their roster every class), so it's the only part persisted; who's already been picked
-  // is deliberately session-only (reset to "nobody yet" is also what Reset does) and the no-repeat
-  // preference is remembered alongside the list since it's the same kind of "my usual setup" choice.
-  const STUDENT_NAMES_KEY = "classcade_quicktool_student_names";
-  const STUDENT_NOREPEAT_KEY = "classcade_quicktool_student_norepeat";
-  const [studentNamesText, setStudentNamesText] = useState(() => {
-    try { return localStorage.getItem(STUDENT_NAMES_KEY) ?? ""; } catch { return ""; }
-  });
-  const [studentNoRepeat, setStudentNoRepeat] = useState(() => {
-    try { return localStorage.getItem(STUDENT_NOREPEAT_KEY) !== "false"; } catch { return true; }
-  });
-  const studentNames = studentNamesText.split("\n").map(n => n.trim()).filter(Boolean);
-  const [pickedStudents, setPickedStudents] = useState<Set<string>>(new Set());
-  const [editingStudentList, setEditingStudentList] = useState(studentNames.length === 0);
-  const [studentSpinIndex, setStudentSpinIndex] = useState<number | null>(null);
-  const [pickedStudentResult, setPickedStudentResult] = useState<string | null>(null);
-  const [showStudentConfetti, setShowStudentConfetti] = useState(false);
-  const studentSpinTimeoutRef = useRef<number | null>(null);
-  const studentRemainingPool = studentNoRepeat ? studentNames.filter(n => !pickedStudents.has(n)) : studentNames;
-
-  useEffect(() => {
-    try { localStorage.setItem(STUDENT_NAMES_KEY, studentNamesText); } catch { /* private browsing / storage disabled — just won't persist */ }
-  }, [studentNamesText]);
-  useEffect(() => {
-    try { localStorage.setItem(STUDENT_NOREPEAT_KEY, String(studentNoRepeat)); } catch { /* same as above */ }
-  }, [studentNoRepeat]);
-  useEffect(() => {
-    return () => { if (studentSpinTimeoutRef.current !== null) window.clearTimeout(studentSpinTimeoutRef.current); };
-  }, []);
-  useEffect(() => {
-    if (!showStudentConfetti) return;
-    const t = setTimeout(() => setShowStudentConfetti(false), 2500);
-    return () => clearTimeout(t);
-  }, [showStudentConfetti]);
-
-  // Same wheel-style reveal as playRandomGame above (hop across the pool, start fast, ease to a
-  // stop) — spins across whoever's still eligible (studentRemainingPool), not the full list, so a
-  // no-repeat session can never land on someone already picked.
-  const pickAStudent = () => {
-    if (studentSpinIndex !== null || studentRemainingPool.length === 0) return;
-    playSound("dice");
-    setPickedStudentResult(null);
-    setShowStudentConfetti(false);
-    const pool = studentRemainingPool;
-    const targetIndex = Math.floor(Math.random() * pool.length);
-    // A pool of exactly one has nothing to visibly cycle through (step % 1 is always 0) — still
-    // worth a short pause before revealing rather than an instant, jarring answer.
-    const totalSteps = pool.length <= 1 ? 6 : pool.length * 3 + targetIndex;
-
-    const runStep = (step: number) => {
-      setStudentSpinIndex(step % pool.length);
-      if (step >= totalSteps) {
-        studentSpinTimeoutRef.current = window.setTimeout(() => {
-          setStudentSpinIndex(null);
-          const picked = pool[targetIndex];
-          setPickedStudentResult(picked);
-          setShowStudentConfetti(true);
-          if (studentNoRepeat) setPickedStudents(prev => new Set(prev).add(picked));
-        }, 500);
-        return;
-      }
-      const progress = step / totalSteps;
-      const delay = 45 + progress * progress * 280;
-      studentSpinTimeoutRef.current = window.setTimeout(() => runStep(step + 1), delay);
-    };
-
-    runStep(0);
-  };
-
   // Loads a class's own saved teams — names, colors, mascots, AND their actual current scores —
   // into the live editor state. Shared by startWithClass below and by dispatchPendingSave's "link"
   // branch further down, which used to call resetTeamsToNormal() instead (wiping every score to 0
@@ -863,6 +791,13 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     setLevel(cls.default_level ?? "all");
     setTeamRoster(cls.team_roster ?? []);
     hydrateTeamsFromClass(cls);
+    // Starting fresh on purpose supersedes whatever was left resumable on this class — if an
+    // earlier session was abandoned without ever hitting Save & Exit or reaching its own natural
+    // end (just closing the tab mid-game), its in_progress flag never got cleared, and "Resume"
+    // on this class would otherwise keep offering that stale, superseded game forever, not
+    // whatever's actually started here. Best-effort: if this fails, My Classes just shows one
+    // extra (harmless) Resume option next time, not a reason to block starting the new game.
+    if (cls.in_progress) clearProgress(cls.id, cls.teams).catch(() => {});
     setScreen("topic-select");
   };
 
@@ -875,10 +810,23 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     setSelectedTopics(cls.selected_topics ?? []);
     setLevel(cls.level ?? "all");
     setFocus(cls.focus ?? "all");
-    setSelectedGame(GAME_MODES.find(g => g.id === cls.selected_game) ?? null);
+    const matchedGame = GAME_MODES.find(g => g.id === cls.selected_game) ?? null;
+    setSelectedGame(matchedGame);
     setQuestions(cls.questions_snapshot ?? []);
     setMinefieldGridData((cls.minefield_grid_data as MinefieldGridData | MinefieldGridData[] | null) ?? null);
     setResumeGameState(cls.game_state ?? null);
+    // The saved game this class was mid-playing no longer matches anything real (the only way
+    // that happens is a game being renamed/retired since it was saved) — landing on "game" with
+    // no selectedGame renders nothing at all and leaves the teacher on a blank, stuck screen with
+    // no way back short of a refresh. Teams/topics/level/focus above are all still perfectly
+    // valid, so send them to game-select with those already loaded and a clear explanation,
+    // instead of a dead end — one tap to pick any current game and keep going with the same roster.
+    if (!matchedGame) {
+      setLoadError("That saved game isn't available anymore, but your teams and topics are still here — pick a game to keep going.");
+      setScreen("game-select");
+      return;
+    }
+    setLoadError("");
     // Resume normally skips team-setup (where Class Check-In gets started) entirely, so there's
     // usually no code yet to broadcast on — but if the teacher is already mid check-in for THIS
     // same class and resumes a different saved game for it, a checked-in phone should still follow.
@@ -1642,24 +1590,16 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
           </div>
         </div>
 
-        {/* Quick Tools: the team/mascot picker and a random-student picker on their own, for a
-            teacher who just needs one of those right now — cold-calling, splitting into teams for
-            something that isn't even a ClassCade game — without picking a level/topic first just to
-            reach them. "Make Teams" is the exact same team-setup screen every other path reaches,
-            just entered directly (quickToolsMode routes its CTA back to Welcome instead of onward
-            into game-select once done, see handleSetup). */}
+        {/* Quick tool: the team/mascot setup on its own, for a teacher who just needs teams sorted
+            right now — splitting a class into groups for something that isn't even a ClassCade game
+            — without picking a level/topic first just to reach it. The exact same team-setup
+            screen every other path reaches, just entered directly (quickToolsMode routes its CTA
+            back to Welcome instead of onward into game-select once done, see handleSetup). */}
         <div style={{ marginBottom: "14px", textAlign: "center" }}>
-          <div style={{ color: "rgba(255,255,255,0.5)", fontSize: "11px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "8px" }}>Quick tools — no topic needed</div>
-          <div style={{ display: "inline-flex", gap: "10px", flexWrap: "wrap", justifyContent: "center" }}>
-            <button
-              onClick={() => { setActiveClassId(null); setActiveClassName(null); setPendingLessonTopicId(null); setQuickToolsMode("teams"); setScreen("team-setup"); }}
-              style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.22)", color: "white", borderRadius: "999px", padding: "9px 18px", fontSize: "13.5px", fontWeight: "700", cursor: "pointer", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px" }}
-            ><Icon name="people" size={14} /> Make Teams</button>
-            <button
-              onClick={() => setScreen("student-picker")}
-              style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.22)", color: "white", borderRadius: "999px", padding: "9px 18px", fontSize: "13.5px", fontWeight: "700", cursor: "pointer", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px" }}
-            ><Icon name="dice" size={14} /> Pick a Student</button>
-          </div>
+          <button
+            onClick={() => { setActiveClassId(null); setActiveClassName(null); setPendingLessonTopicId(null); setQuickToolsMode("teams"); setScreen("team-setup"); }}
+            style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.22)", color: "white", borderRadius: "999px", padding: "9px 18px", fontSize: "13.5px", fontWeight: "700", cursor: "pointer", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px" }}
+          ><Icon name="people" size={14} /> Make Teams <span style={{ color: "rgba(255,255,255,0.55)", fontWeight: "600" }}>— no topic needed</span></button>
         </div>
 
         {/* Secondary toolbar: one shared quiet pill (not 4-5 independent bordered buttons) so this
@@ -2317,99 +2257,6 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
         <button onClick={handleSetup} style={{ width: "100%", background: `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "16px", padding: "18px", fontSize: "20px", fontWeight: "900", cursor: "pointer", fontFamily: theme.headingFont, display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
           {quickToolsMode ? <><Icon name="check" size={20} /> Done — Teams Ready!</> : pendingLessonTopicId ? <><Icon name="school" size={20} /> Start Lesson</> : <><Icon name="controller" size={20} /> Choose a Game!</>}
         </button>
-      </div>
-      <FeedbackButton />
-      <BrandBadge isPaid={isPaid} />
-    </div>
-  );
-
-  if (screen === "student-picker") return (
-    <div style={{ minHeight: "100vh", background: "#F0F9FF", padding: "clamp(10px,4vw,20px)", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
-      <div style={{ maxWidth: "640px", margin: "0 auto" }}>
-        <button
-          onClick={() => setScreen("welcome")}
-          style={{ background: "none", border: `2px solid ${theme.accentSolid}`, color: theme.accentSolid, borderRadius: "10px", padding: "8px 16px", cursor: "pointer", fontWeight: "700", marginBottom: "20px", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px" }}
-        ><Icon name="back" size={13} /> Back</button>
-
-        <div style={{ textAlign: "center", marginBottom: "24px" }}>
-          <h2 style={{ fontSize: "32px", fontWeight: "900", color: theme.heroBg[0], margin: 0, fontFamily: theme.headingFont, display: "flex", alignItems: "center", justifyContent: "center", gap: "10px" }}><Icon name="dice" size={28} /> Pick a Student</h2>
-          <p style={{ color: "#6B7280", marginTop: "8px" }}>Bring your class list, tap to call on someone at random</p>
-        </div>
-
-        {editingStudentList ? (
-          <div style={{ background: "white", border: `2px solid ${hexToRgba(theme.accentSolid, 0.25)}`, borderRadius: "16px", padding: "clamp(14px,4vw,20px)" }}>
-            <label style={{ display: "block", fontWeight: "800", color: theme.heroBg[0], fontSize: "14px", marginBottom: "8px" }}>Student names — one per line</label>
-            <textarea
-              value={studentNamesText}
-              onChange={e => setStudentNamesText(e.target.value)}
-              rows={10}
-              placeholder={"Alice\nBen\nChen\nDiego\n..."}
-              style={{ width: "100%", boxSizing: "border-box", border: "2px solid #D1D5DB", borderRadius: "10px", padding: "12px", fontSize: "15px", fontFamily: "inherit", resize: "vertical" }}
-            />
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "10px", marginBottom: "16px" }}>
-              <span style={{ color: "#6B7280", fontSize: "13px" }}>{studentNames.length} name{studentNames.length === 1 ? "" : "s"}</span>
-              {studentNamesText.length > 0 && (
-                <button type="button" onClick={() => setStudentNamesText("")} style={{ background: "none", border: "none", color: "#EF4444", fontWeight: "700", fontSize: "13px", cursor: "pointer", padding: 0 }}>Clear list</button>
-              )}
-            </div>
-            <button
-              onClick={() => { if (studentNames.length > 0) setEditingStudentList(false); }}
-              disabled={studentNames.length === 0}
-              style={{ width: "100%", background: studentNames.length === 0 ? "#CBD5E1" : `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "14px", padding: "16px", fontSize: "17px", fontWeight: "900", cursor: studentNames.length === 0 ? "not-allowed" : "pointer", fontFamily: theme.headingFont }}
-            >
-              {studentNames.length === 0 ? "Add at least one name" : "Done — Start Picking!"}
-            </button>
-          </div>
-        ) : (
-          <>
-            <div style={{ position: "relative", background: theme.heroBg[0], borderRadius: "20px", padding: "48px 20px", textAlign: "center", marginBottom: "18px", minHeight: "140px", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: `0 8px 32px ${hexToRgba(theme.heroBg[0], 0.3)}` }}>
-              <Confetti active={showStudentConfetti} />
-              {studentSpinIndex !== null ? (
-                <div style={{ color: "white", fontSize: "clamp(24px,6vw,36px)", fontWeight: "900", fontFamily: theme.headingFont }}>{studentRemainingPool[studentSpinIndex]}</div>
-              ) : pickedStudentResult ? (
-                <div style={{ color: "#FCD34D", fontSize: "clamp(28px,7vw,42px)", fontWeight: "900", fontFamily: theme.headingFont, textShadow: "0 2px 12px rgba(0,0,0,0.3)" }}>{pickedStudentResult}</div>
-              ) : (
-                <div style={{ color: "rgba(255,255,255,0.6)", fontSize: "16px", fontWeight: "700" }}>Tap "Pick a Student!" to begin</div>
-              )}
-            </div>
-
-            {studentRemainingPool.length === 0 ? (
-              <div style={{ textAlign: "center", marginBottom: "16px" }}>
-                <p style={{ color: "#6B7280", fontWeight: "700", marginBottom: "10px" }}>Everyone's been picked!</p>
-                <button
-                  onClick={() => setPickedStudents(new Set())}
-                  style={{ background: theme.accentSolid, color: "white", border: "none", borderRadius: "12px", padding: "12px 24px", fontSize: "15px", fontWeight: "800", cursor: "pointer", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px" }}
-                ><Icon name="refresh" size={14} /> Reset and pick again</button>
-              </div>
-            ) : (
-              <button
-                onClick={pickAStudent}
-                disabled={studentSpinIndex !== null}
-                style={{ width: "100%", background: `linear-gradient(135deg,${theme.cta[0]},${theme.cta[1]})`, color: "white", border: "none", borderRadius: "16px", padding: "18px", fontSize: "19px", fontWeight: "900", cursor: studentSpinIndex !== null ? "default" : "pointer", opacity: studentSpinIndex !== null ? 0.75 : 1, fontFamily: theme.headingFont, display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", marginBottom: "16px" }}
-              ><Icon name="dice" size={20} /> Pick a Student! {studentNoRepeat && `(${studentRemainingPool.length} left)`}</button>
-            )}
-
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "10px" }}>
-              <label style={{ display: "flex", alignItems: "center", gap: "7px", fontSize: "13.5px", color: "#374151", fontWeight: "700", cursor: "pointer" }}>
-                <input
-                  type="checkbox" checked={studentNoRepeat}
-                  onChange={e => { setStudentNoRepeat(e.target.checked); setPickedStudents(new Set()); }}
-                />
-                Don't repeat until everyone's picked
-              </label>
-              {studentNoRepeat && pickedStudents.size > 0 && (
-                <button type="button" onClick={() => setPickedStudents(new Set())} style={{ background: "none", border: "none", color: theme.accentSolid, fontWeight: "700", fontSize: "13px", cursor: "pointer", padding: 0, display: "inline-flex", alignItems: "center", gap: "4px" }}>
-                  <Icon name="refresh" size={12} /> Reset ({pickedStudents.size} picked)
-                </button>
-              )}
-            </div>
-
-            <button
-              type="button" onClick={() => setEditingStudentList(true)}
-              style={{ marginTop: "18px", background: "none", border: "2px solid #D1D5DB", borderRadius: "20px", padding: "6px 16px", fontWeight: "700", fontSize: "12.5px", color: "#9CA3AF", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "5px" }}
-            ><Icon name="pencil" size={12} /> Edit list ({studentNames.length})</button>
-          </>
-        )}
       </div>
       <FeedbackButton />
       <BrandBadge isPaid={isPaid} />
