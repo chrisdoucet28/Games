@@ -41,8 +41,12 @@ const READING_SECONDS = 10;
 // A correct answer hands back a random one of these to the turn clock — never points, since fuel
 // is a secret until launch and shouldn't gain a luck element; time is the reward instead, with the
 // exact amount (including sometimes nothing, so it's not a bonus every single time) a fun surprise
-// rather than always the max. Picked uniformly, so 0/5/10/15 are each a 25% chance.
-const TIME_BONUS_OPTIONS = [0, 5, 10, 15];
+// rather than always the max. Was a flat 25% each for 0/5/10/15 — teacher feedback playing live:
+// a good team almost never actually ran out the clock, since the max bonus landed often enough to
+// keep extending a turn indefinitely. Weighted by repetition instead of a flat pick so 15s (the one
+// that was keeping turns going) is now the rarest outcome, and getting nothing is the most common:
+// 0=35%, 5=25%, 10=25%, 15=15%.
+const TIME_BONUS_OPTIONS = [0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 10, 10, 10, 10, 10, 15, 15, 15];
 const LAUNCH_BONUS_BY_RANK = [50, 30, 15, 5];
 const MAX_FLIGHT_PX = 460;
 const MIN_HEIGHT_FRACTION = 0.12; // even a 0-fuel rocket still visibly lifts off
@@ -129,7 +133,19 @@ const STYLE_TAG = (
     @keyframes rfIgnitionFlash{0%{opacity:0}30%{opacity:1}100%{opacity:0}}
     @keyframes rfMiniShake{0%,100%{transform:translate(0,0) rotate(0deg)}20%{transform:translate(-4px,-2px) rotate(-7deg)}40%{transform:translate(4px,-5px) rotate(6deg)}60%{transform:translate(-3px,-7px) rotate(-4deg)}80%{transform:translate(2px,-3px) rotate(3deg)}}
     @keyframes rfFuelRise{0%{transform:translate(-50%,0) scale(1);opacity:1}100%{transform:translate(-50%,-64px) scale(0.5);opacity:0}}
-    @keyframes rfTimeBonusBanner{0%{transform:translateX(-50%) translateY(-16px) scale(0.85);opacity:0}15%{transform:translateX(-50%) translateY(0) scale(1.05);opacity:1}25%{transform:translateX(-50%) translateY(0) scale(1);opacity:1}80%{transform:translateX(-50%) translateY(0) scale(1);opacity:1}100%{transform:translateX(-50%) translateY(-10px) scale(0.95);opacity:0}}
+    @keyframes rfTimeBonusBanner{
+      0%{transform:translateX(-50%) translateY(-20px) scale(0.6);opacity:0}
+      10%{transform:translateX(-50%) translateY(0) scale(1.35);opacity:1}
+      16%{transform:translateX(-50%) translateY(0) scale(1);opacity:1}
+      /* A gentle pulse through the whole hold, not a static sit — easy to tune out a big banner
+         that stops moving the instant it lands; still catches the eye on a second glance. */
+      30%{transform:translateX(-50%) translateY(0) scale(1.1);opacity:1}
+      42%{transform:translateX(-50%) translateY(0) scale(1);opacity:1}
+      54%{transform:translateX(-50%) translateY(0) scale(1.1);opacity:1}
+      66%{transform:translateX(-50%) translateY(0) scale(1);opacity:1}
+      90%{transform:translateX(-50%) translateY(0) scale(1);opacity:1}
+      100%{transform:translateX(-50%) translateY(-10px) scale(0.95);opacity:0}
+    }
     .rf-btn:hover:not(:disabled){filter:brightness(1.1)}
     .rf-btn:active:not(:disabled){transform:translate(4px,4px) !important;box-shadow:0 0 0 #1A1A2E !important}
   `}</style>
@@ -831,12 +847,17 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
       )}
       {/* A big, impossible-to-miss banner, not a small corner annotation — fixed-position so it
           reads the same regardless of what's rendering underneath (screen mode's word card, phone
-          mode's placeholder), and fires for BOTH a live screen judge and a phone submission. */}
+          mode's placeholder), and fires for BOTH a live screen judge and a phone submission.
+          Teacher feedback playing live: even knowing to look for it, the original version (26px,
+          2s, pop-and-hold-still) was easy to miss entirely. Much bigger, a stronger overshoot on
+          entry, a slow pulse through the whole 3.4s hold instead of sitting static, and a glowing
+          ring behind it — reads as a genuine event, not a small corner annotation. */}
       {timeBonusPopup && (
         <div key={timeBonusPopup.key} style={{
-          position: "fixed", top: "90px", left: "50%", zIndex: 30, animation: "rfTimeBonusBanner 2s ease-out forwards",
-          background: "linear-gradient(135deg,#0D9488,#14B8A6)", color: "white", fontWeight: "900", fontSize: "26px",
-          padding: "14px 30px", borderRadius: "16px", border: "3px solid #1A1A2E", boxShadow: "5px 5px 0 #1A1A2E", whiteSpace: "nowrap",
+          position: "fixed", top: "80px", left: "50%", zIndex: 30, animation: "rfTimeBonusBanner 3.4s ease-out forwards",
+          background: "linear-gradient(135deg,#0D9488,#14B8A6)", color: "white", fontWeight: "900", fontSize: "44px",
+          padding: "26px 48px", borderRadius: "22px", border: "5px solid #1A1A2E",
+          boxShadow: "8px 8px 0 #1A1A2E, 0 0 60px 12px rgba(20,184,166,0.65)", whiteSpace: "nowrap",
         }}>
           ⏱️ +{timeBonusPopup.amount}s bonus!
         </div>
