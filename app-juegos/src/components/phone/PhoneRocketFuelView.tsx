@@ -79,9 +79,12 @@ export function PhoneRocketFuelView({ state, teamId, deviceId, onAction }: Props
       <div style={{ ...wrapStyle, textAlign: "center", display: "flex", flexDirection: "column", justifyContent: "center" }}>
         <div style={{ fontSize: "52px", marginBottom: "12px" }}>✅</div>
         <div style={{ fontWeight: "900", fontSize: "22px", color: "#A5B4FC", marginBottom: "10px" }}>Sent!</div>
-        {submitted.bonus !== null ? (
+        {submitted.bonus !== null && submitted.bonus > 0 ? (
           <div style={{ fontSize: "22px", fontWeight: "900", color: "#5EEAD4", marginTop: "6px" }}>⏱️ +{submitted.bonus}s bonus!</div>
         ) : (
+          // Covers both "bonus not known yet" (null) and "this one just happened to be 0" — a
+          // 0-second bonus is the same as no bonus from the student's point of view, so it gets
+          // the same neutral message rather than a "+0s bonus!" that reads like a glitch.
           <div style={{ color: "#C7D2FE", fontSize: "15px" }}>Getting your next word…</div>
         )}
       </div>

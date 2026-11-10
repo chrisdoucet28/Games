@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { playSound } from "../lib/sounds";
+import { playSound, type SoundName } from "../lib/sounds";
 import { setMusicContext } from "../lib/music";
 
 // Last few seconds of any timed turn get an audible tick — 5 seconds gives players enough warning
@@ -16,9 +16,14 @@ const TICK_STARTS_AT = 5;
 // this hook running alongside a first one in the same screen (e.g. Rocket Fuel's short "reading
 // grace" sub-timer next to its main turn clock), since each instance's own tension/gameplay effect
 // below would otherwise fight the other's every time either one's `active` flips.
+//
+// `expireSound` defaults to "timesUp" — the shared buzzer, correct for every caller where hitting
+// 0 is an actual time-up/failure moment. Pass a different SoundName (or null for silence) for a
+// timer whose expiry isn't that — e.g. Rocket Fuel's reading-grace sub-timer just hands off to the
+// real clock, and "timesUp"'s buzzer there reads as a wrong-answer cue for a non-event.
 export function useTurnTimer(
   seconds: number, active: boolean, onExpire: () => void, resetKey: any = 0, paused: boolean = false,
-  manageMusic: boolean = true,
+  manageMusic: boolean = true, expireSound: SoundName | null = "timesUp",
 ) {
   const [timeLeft, setTimeLeft] = useState(seconds);
   // The interval callback's own running total — timeLeft (React state) just mirrors it for
@@ -68,7 +73,7 @@ export function useTurnTimer(
       const remaining = remainingRef.current;
       if (remaining <= 0) {
         if (timerRef.current) clearInterval(timerRef.current);
-        playSound("timesUp");
+        if (expireSound) playSound(expireSound);
         // Call onExpire as a plain statement here, not from inside the setTimeLeft updater above —
         // React can invoke updater functions during its own render pass, and onExpire often triggers
         // state updates on ancestor components (e.g. onUpdateScore), which then throws "Cannot update

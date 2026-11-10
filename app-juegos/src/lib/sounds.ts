@@ -98,8 +98,12 @@ const SOUND_VOLUME: Record<SoundName, number> = {
   // Was 0.8, then 0.45 — teacher feedback flagged the buzzer as too loud a second time (this time
   // specifically via Word Whack), so dropped again to match tick's already-settled level.
   timesUp: 0.35,
-  win: 0.55,
-  roundComplete: 0.6,
+  // Was 0.55 — teacher feedback flagged the fanfare on the shared results screen (right after
+  // roundComplete's own chime below) as way too loud.
+  win: 0.35,
+  // Was 0.6 — teacher feedback flagged this end-of-game chime (plays on every game's own final
+  // screen) as way too loud, same complaint as win above.
+  roundComplete: 0.35,
   // Was 0.75 — louder than every Tier 2 signature sound (0.7) despite being a minor, frequent
   // transitional effect (turn-order/attack rolls), not a "big moment." Matched to the Tier 2
   // default instead.

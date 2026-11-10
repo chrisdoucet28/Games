@@ -39,10 +39,10 @@ const POINTS_PER_CORRECT = 20;
 // prompt before they'd even started trying to answer it.
 const READING_SECONDS = 10;
 // A correct answer hands back a random one of these to the turn clock — never points, since fuel
-// is a secret until launch and shouldn't gain a luck element; time is the reward instead, so a
-// correct answer always helps (more of the turn left to try for another), with the exact amount
-// a fun surprise rather than always the max.
-const TIME_BONUS_OPTIONS = [5, 10, 15];
+// is a secret until launch and shouldn't gain a luck element; time is the reward instead, with the
+// exact amount (including sometimes nothing, so it's not a bonus every single time) a fun surprise
+// rather than always the max. Picked uniformly, so 0/5/10/15 are each a 25% chance.
+const TIME_BONUS_OPTIONS = [0, 5, 10, 15];
 const LAUNCH_BONUS_BY_RANK = [50, 30, 15, 5];
 const MAX_FLIGHT_PX = 460;
 const MIN_HEIGHT_FRACTION = 0.12; // even a 0-fuel rocket still visibly lifts off
@@ -414,10 +414,12 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
 
   // A short sub-timer, not the main clock: counts down READING_SECONDS on its own every time
   // drawPrompt bumps readingKeyRef, then flips `reading` off on expiry so the main timer below
-  // (paused while this is running) picks back up.
+  // (paused while this is running) picks back up. expireSound is "dice" here, not the default
+  // "timesUp" buzzer — hitting 0 just means "reading time's over, clock's live now," not a missed
+  // answer, and "timesUp"'s buzzer read as a wrong-answer cue for that (teacher feedback).
   const { timeLeft: readingTimeLeft } = useTurnTimer(
     READING_SECONDS, phase === "team-turn" && reading, () => setReading(false), readingKeyRef.current,
-    false, false,
+    false, false, "dice",
   );
 
   // Screen mode's own shared clock — paused while an answer is being shown (a turn spans several
@@ -499,8 +501,12 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
       // See TIME_BONUS_OPTIONS — the reward is time, never points, so this never touches scoring.
       const bonus = TIME_BONUS_OPTIONS[Math.floor(Math.random() * TIME_BONUS_OPTIONS.length)];
       addTime(bonus);
-      timeBonusKeyRef.current += 1;
-      setTimeBonusPopup({ amount: bonus, key: timeBonusKeyRef.current });
+      // Only pop the banner for an actual bonus — TIME_BONUS_OPTIONS now includes 0, and a "+0s
+      // bonus!" banner would read as a glitch rather than "you just didn't get one this time."
+      if (bonus > 0) {
+        timeBonusKeyRef.current += 1;
+        setTimeBonusPopup({ amount: bonus, key: timeBonusKeyRef.current });
+      }
     }
     drawPrompt();
   };
@@ -653,11 +659,16 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
       deviceTimeLeftRef.current = updatedClocks;
       setDeviceTimeLeft(updatedClocks);
       // Lets THIS device's own phone show "+Ns!" on its "Sent!" screen — see liveSession.ts's
-      // lastBonusByDevice.
+      // lastBonusByDevice. Written even when bonus is 0, so the phone's own "bonus now known"
+      // effect still fires promptly instead of falling through to its no-bonus-arrived fallback.
       bonusKeyCounterRef.current += 1;
       lastBonusByDeviceRef.current = { ...lastBonusByDeviceRef.current, [action.deviceId]: { amount: bonus, key: bonusKeyCounterRef.current } };
-      timeBonusKeyRef.current += 1;
-      setTimeBonusPopup({ amount: bonus, key: timeBonusKeyRef.current });
+      // Only pop the screen's own banner for an actual bonus — see the matching comment in judge()
+      // above.
+      if (bonus > 0) {
+        timeBonusKeyRef.current += 1;
+        setTimeBonusPopup({ amount: bonus, key: timeBonusKeyRef.current });
+      }
       sendStateRef.current?.();
     });
 
