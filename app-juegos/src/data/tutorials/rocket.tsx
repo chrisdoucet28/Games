@@ -47,7 +47,7 @@ export const ROCKET_TUTORIAL_STEPS: TutorialStep[] = [
     ),
   },
   {
-    narration: "Every new word gives you 10 free seconds just to read it before the clock starts — and answering correctly hands back a random bonus of extra time, so a good answer always helps, however fast you got there.",
+    narration: "Every new word gives you 10 free seconds just to read it before the clock starts — and answering correctly hands back a random bonus of extra time, so a good answer often helps, however fast you got there.",
     visual: (
       <div style={{ textAlign: "center" }}>
         <div style={{ fontSize: "20px" }}>📖 10s to read</div>
