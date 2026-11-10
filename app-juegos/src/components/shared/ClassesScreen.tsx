@@ -22,7 +22,15 @@ type Props = {
   role?: "teacher" | "student";
 };
 
-const gameLabel = (gameId: string | null) => GAME_MODES.find(g => g.id === gameId)?.name ?? gameId ?? "a game";
+// Falls back to the raw stored id (e.g. "this_game_no_longer_exists") when a game was renamed or
+// retired since this class last saved its progress — a real id, meant for code, not a sentence a
+// teacher reads on a button ("Resume this_game_no_longer_exists"). "an unavailable game" reads
+// fine there and still makes clear why — see LessonGamesGenerator's resumeClass for the matching
+// fix on the actual Resume action.
+const gameLabel = (gameId: string | null) => {
+  if (!gameId) return "a game";
+  return GAME_MODES.find(g => g.id === gameId)?.name ?? "an unavailable game";
+};
 
 export function ClassesScreen({ onBack, onResumeClass, onStartWithClass, theme, isPaid, onUpgrade, role }: Props) {
   const [classes, setClasses] = useState<SavedClass[] | null>(null);

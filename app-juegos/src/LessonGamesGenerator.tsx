@@ -270,13 +270,6 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
   // entry point that ISN'T a lesson explicitly clears this, so no path can misroute on stale state
   // left over from a previous visit.
   const [pendingLessonTopicId, setPendingLessonTopicId] = useState<string | null>(null);
-  // Welcome's "Make Teams" quick tool — same team-setup screen everyone else reaches through
-  // topic-select, but entered directly (no topic needed at all) for a teacher who just wants
-  // names/colors/mascots sorted out right now, not a full game. Only ever "teams" or null (room
-  // to grow if another quick tool ever needs its own team-setup-adjacent step), read by team-setup's
-  // own Back button and by handleSetup's destination below, and cleared the moment handleSetup runs
-  // so it can never leak into a later, normal team-setup visit.
-  const [quickToolsMode, setQuickToolsMode] = useState<"teams" | null>(null);
   // Background music context: "gameplay" only for the actual game screen, "ambient" everywhere
   // else in the app (menus, setup, lesson plans, results...). The louder "tension" context is set
   // separately by useTurnTimer whenever a timed turn is actively running, and reverts to
@@ -1121,13 +1114,10 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
         })
         .catch(() => {});
     }
-    // Three ways to land here, three destinations: Welcome's "Make Teams" quick tool just wants
-    // teams named and saved, nothing else — back to Welcome once that's done, no game/lesson to
-    // route into. A pending lesson topic means the teacher arrived via the Lesson Plan index
-    // (topic already fixed before this screen was ever reached) — send them into that lesson's
-    // slideshow. Otherwise, the usual game-select.
-    setScreen(quickToolsMode ? "welcome" : pendingLessonTopicId ? "lessonplan-play" : "game-select");
-    setQuickToolsMode(null);
+    // A pending lesson topic means the teacher arrived here via the Lesson Plan index (topic
+    // already fixed before this screen was ever reached) — send them into that lesson's slideshow
+    // instead of the usual game-select.
+    setScreen(pendingLessonTopicId ? "lessonplan-play" : "game-select");
   };
 
   const toggleTopicSelection = (topicValue: string) => {
@@ -1590,18 +1580,6 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
           </div>
         </div>
 
-        {/* Quick tool: the team/mascot setup on its own, for a teacher who just needs teams sorted
-            right now — splitting a class into groups for something that isn't even a ClassCade game
-            — without picking a level/topic first just to reach it. The exact same team-setup
-            screen every other path reaches, just entered directly (quickToolsMode routes its CTA
-            back to Welcome instead of onward into game-select once done, see handleSetup). */}
-        <div style={{ marginBottom: "14px", textAlign: "center" }}>
-          <button
-            onClick={() => { setActiveClassId(null); setActiveClassName(null); setPendingLessonTopicId(null); setQuickToolsMode("teams"); setScreen("team-setup"); }}
-            style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.22)", color: "white", borderRadius: "999px", padding: "9px 18px", fontSize: "13.5px", fontWeight: "700", cursor: "pointer", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px" }}
-          ><Icon name="people" size={14} /> Make Teams <span style={{ color: "rgba(255,255,255,0.55)", fontWeight: "600" }}>— no topic needed</span></button>
-        </div>
-
         {/* Secondary toolbar: one shared quiet pill (not 4-5 independent bordered buttons) so this
             reads as a lower-priority row instead of competing with the primary fork above it. */}
         <div style={{ display: "inline-flex", alignItems: "center", gap: "2px", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: "999px", padding: "6px", flexWrap: "wrap", justifyContent: "center" }}>
@@ -1971,7 +1949,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
       {renderSavePicker()}
       <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
         <button
-          onClick={() => { if (quickToolsMode) { setQuickToolsMode(null); setScreen("welcome"); return; } setScreen(pendingLessonTopicId ? "lessonplan" : "topic-select"); }}
+          onClick={() => setScreen(pendingLessonTopicId ? "lessonplan" : "topic-select")}
           style={{ background: "none", border: `2px solid ${theme.accentSolid}`, color: theme.accentSolid, borderRadius: "10px", padding: "8px 16px", cursor: "pointer", fontWeight: "700", marginBottom: "20px", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px" }}
         ><Icon name="back" size={13} /> Back</button>
 
@@ -2255,7 +2233,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
         )}
 
         <button onClick={handleSetup} style={{ width: "100%", background: `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "16px", padding: "18px", fontSize: "20px", fontWeight: "900", cursor: "pointer", fontFamily: theme.headingFont, display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
-          {quickToolsMode ? <><Icon name="check" size={20} /> Done — Teams Ready!</> : pendingLessonTopicId ? <><Icon name="school" size={20} /> Start Lesson</> : <><Icon name="controller" size={20} /> Choose a Game!</>}
+          {pendingLessonTopicId ? <><Icon name="school" size={20} /> Start Lesson</> : <><Icon name="controller" size={20} /> Choose a Game!</>}
         </button>
       </div>
       <FeedbackButton />
