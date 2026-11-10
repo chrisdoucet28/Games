@@ -784,6 +784,13 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     setLevel(cls.default_level ?? "all");
     setTeamRoster(cls.team_roster ?? []);
     hydrateTeamsFromClass(cls);
+    // Starting fresh on purpose supersedes whatever was left resumable on this class — if an
+    // earlier session was abandoned without ever hitting Save & Exit or reaching its own natural
+    // end (just closing the tab mid-game), its in_progress flag never got cleared, and "Resume"
+    // on this class would otherwise keep offering that stale, superseded game forever, not
+    // whatever's actually started here. Best-effort: if this fails, My Classes just shows one
+    // extra (harmless) Resume option next time, not a reason to block starting the new game.
+    if (cls.in_progress) clearProgress(cls.id, cls.teams).catch(() => {});
     setScreen("topic-select");
   };
 
@@ -796,10 +803,23 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     setSelectedTopics(cls.selected_topics ?? []);
     setLevel(cls.level ?? "all");
     setFocus(cls.focus ?? "all");
-    setSelectedGame(GAME_MODES.find(g => g.id === cls.selected_game) ?? null);
+    const matchedGame = GAME_MODES.find(g => g.id === cls.selected_game) ?? null;
+    setSelectedGame(matchedGame);
     setQuestions(cls.questions_snapshot ?? []);
     setMinefieldGridData((cls.minefield_grid_data as MinefieldGridData | MinefieldGridData[] | null) ?? null);
     setResumeGameState(cls.game_state ?? null);
+    // The saved game this class was mid-playing no longer matches anything real (the only way
+    // that happens is a game being renamed/retired since it was saved) — landing on "game" with
+    // no selectedGame renders nothing at all and leaves the teacher on a blank, stuck screen with
+    // no way back short of a refresh. Teams/topics/level/focus above are all still perfectly
+    // valid, so send them to game-select with those already loaded and a clear explanation,
+    // instead of a dead end — one tap to pick any current game and keep going with the same roster.
+    if (!matchedGame) {
+      setLoadError("That saved game isn't available anymore, but your teams and topics are still here — pick a game to keep going.");
+      setScreen("game-select");
+      return;
+    }
+    setLoadError("");
     // Resume normally skips team-setup (where Class Check-In gets started) entirely, so there's
     // usually no code yet to broadcast on — but if the teacher is already mid check-in for THIS
     // same class and resumes a different saved game for it, a checked-in phone should still follow.
