@@ -59,6 +59,13 @@ function readLinkProblem(): string | null {
 }
 let pendingLinkProblem: string | null = readLinkProblem();
 
+// Lets App.tsx decide whether to show this full-page screen (with the notice above) instead of
+// LessonGamesGenerator's anonymous-explore flow for a visitor who isn't signed in — someone who
+// just followed a dead/expired link needs that explanation before anything else, not a games menu.
+export function hasPendingLinkProblem(): boolean {
+  return pendingLinkProblem !== null;
+}
+
 const FOOTER_LINKS = (
   <div style={{ display: "flex", gap: "16px", justifyContent: "center", flexWrap: "wrap", marginTop: "20px" }}>
     <a href="/learn" style={{ color: "#7DB8DB", fontSize: "12px", textDecoration: "none" }}>Learn Lessons</a>

@@ -1,14 +1,15 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Analytics } from '@vercel/analytics/react';
 import LessonGamesGenerator from './LessonGamesGenerator';
-import { AuthScreen } from './components/shared/AuthScreen';
+import { AuthScreen, hasPendingLinkProblem } from './components/shared/AuthScreen';
+import { AuthPromptModal } from './components/shared/AuthPromptModal';
 import { ResetPasswordScreen } from './components/shared/ResetPasswordScreen';
 import { PhoneJoinScreen } from './components/phone/PhoneJoinScreen';
 import { ClassJoinScreen } from './components/shared/ClassJoinScreen';
 import { useAuth } from './hooks/useAuth';
 import { capturePendingJoinCode } from './lib/pendingJoin';
 import { supabase, isSupabaseConfigured } from './lib/supabaseClient';
-import { getProfile, setMarketingOptIn, takePendingMarketingOptIn } from './lib/profile';
+import { getProfile, setMarketingOptIn, takePendingMarketingOptIn, chooseRole, updateProfile } from './lib/profile';
 import { MarketingOptInPrompt } from './components/shared/MarketingOptInPrompt';
 import { getSubscription, FREE_SUBSCRIPTION } from './lib/subscription';
 import { DEFAULT_THEME, getTheme, type Theme } from './data/themes';
@@ -222,7 +223,9 @@ function AuthenticatedApp() {
   // A teacher's shared class link ("/?joinClass=CODE"): parked in sessionStorage and stripped from the
   // address before any screen renders, so the code survives logging in or signing up and then
   // prefills the student home's "Join a class" form (see lib/pendingJoin.ts). Teachers ignore it.
-  useState(() => capturePendingJoinCode());
+  // The return value only matters for deciding (just below) whether a signed-out visitor sees
+  // AuthScreen's own "you're joining a class" notice instead of the anonymous-explore flow.
+  const [pendingJoinCode] = useState(() => capturePendingJoinCode());
   // Stripe's checkout success/cancel URLs redirect back to "/?checkout=success|cancel" — read
   // that once on load, then strip it from the URL so a refresh doesn't re-trigger it.
   const [checkoutRedirect] = useState<'success' | 'cancel' | null>(() => {
@@ -259,10 +262,49 @@ function AuthenticatedApp() {
     let cancelled = false;
     setRoleLoadError(false);
     getProfile()
-      .then(p => { if (!cancelled) { setRoleInfo({ role: p.role ?? 'teacher', chosen: p.role_chosen ?? true }); setIsAdmin(p.is_admin ?? false); } })
+      .then(p => {
+        if (cancelled) return;
+        setRoleInfo({ role: p.role ?? 'teacher', chosen: p.role_chosen ?? true });
+        setIsAdmin(p.is_admin ?? false);
+        // The real fetch landed — hand off from the optimistic "treat as an already-set-up
+        // teacher" override (see cameFromAnonymousExplore below) to whatever this account
+        // actually is, same as any other login. For a genuinely BRAND NEW signup (the only
+        // case `role_chosen`/`has_completed_plan_intro` are ever false) reached through that
+        // flow, persist the same override server-side too — they already got a real tour of
+        // the app by exploring it, not the canned one, so the role-chooser/welcome-intro
+        // screens must never show up on a LATER visit just because this session's one-time
+        // override has already cleared by then.
+        if (cameFromAnonymousExplore) {
+          if (!p.role_chosen) chooseRole('teacher').catch(() => {});
+          if (!p.has_completed_plan_intro) updateProfile({ hasCompletedPlanIntro: true }).catch(() => {});
+        }
+        setCameFromAnonymousExplore(false);
+      })
       .catch(() => { if (!cancelled) setRoleLoadError(true); });
     return () => { cancelled = true; };
   }, [userId, roleReloadKey]);
+
+  // The login moment for someone who was exploring ClassCade with no account yet (see the `!session`
+  // branch below and LessonGamesGenerator's own isAnonymous/onRequireAuth props) — set the instant
+  // they hit something that actually needs an account (starting a real game, My Classes, etc.), and
+  // cleared once either: they sign in and the real roleInfo fetch above lands, or they close the
+  // modal without finishing. `resume` is the action that was waiting on it (e.g. "now actually call
+  // startGame(mode)") — run once, right after `session` appears, then discarded.
+  const [authPromptReason, setAuthPromptReason] = useState<string | null>(null);
+  const authPromptResumeRef = useRef<(() => void) | null>(null);
+  const [cameFromAnonymousExplore, setCameFromAnonymousExplore] = useState(false);
+  const requireAuth = (reason: string, resume: () => void) => {
+    authPromptResumeRef.current = resume;
+    setCameFromAnonymousExplore(true);
+    setAuthPromptReason(reason);
+  };
+  useEffect(() => {
+    if (!session || !authPromptResumeRef.current) return;
+    const resume = authPromptResumeRef.current;
+    authPromptResumeRef.current = null;
+    setAuthPromptReason(null);
+    resume();
+  }, [session]);
 
   useEffect(() => {
     if (!session) {
@@ -305,7 +347,36 @@ function AuthenticatedApp() {
   }
 
   if (!session) {
-    return <AuthScreen />;
+    // Two circumstances need AuthScreen's own full-page treatment, not a games menu: someone who
+    // followed a dead/expired confirmation link (they need that explanation before anything else),
+    // and someone following a teacher's "/?joinClass=CODE" link (they need to be told to log in/
+    // sign up with a STUDENT account to continue — a teacher-facing games menu would just confuse
+    // that moment). Everyone else gets the real explore-before-login flow below.
+    if (hasPendingLinkProblem() || pendingJoinCode !== null) {
+      return <AuthScreen />;
+    }
+    // The real app, not a marketing mockup — welcome/topic-select/team-setup/game-select all work
+    // with no account at all (see LessonGamesGenerator's isAnonymous prop); requireAuth is the one
+    // choke point that turns "exploring" into "needs an account" (starting a real game, My Classes,
+    // My Profile, Billing, saving/resuming a class — see its own call sites in that file). Someone
+    // who wants to log in directly rather than explore first still can — clicking any of the
+    // account-only nav buttons here opens the exact same modal immediately.
+    return (
+      <div>
+        <LessonGamesGenerator
+          key="lgg"
+          theme={DEFAULT_THEME} onThemeChange={() => {}}
+          subscription={FREE_SUBSCRIPTION} onSubscriptionChange={() => {}}
+          checkoutRedirect={null}
+          initialScreen={null}
+          role="teacher"
+          isAnonymous
+          onRequireAuth={requireAuth}
+          onGameScreenChange={setInGameScreen}
+        />
+        {authPromptReason && <AuthPromptModal reason={authPromptReason} onClose={() => { authPromptResumeRef.current = null; setAuthPromptReason(null); }} />}
+      </div>
+    );
   }
 
   // A recovery-link session — parked here before role/plan/app state matters at all, since the
@@ -314,7 +385,15 @@ function AuthenticatedApp() {
     return <ResetPasswordScreen onDone={clearPasswordRecovery} />;
   }
 
-  if (!roleInfo) {
+  // Optimistic stand-in while `cameFromAnonymousExplore` is still true (see its own declaration) —
+  // lets every gate below this fall straight through into the real app on the SAME render `session`
+  // first appears, instead of one or more renders of Loading/RoleChooser/PlanIntro in between, each
+  // of which would unmount the LessonGamesGenerator instance above and lose the game/topic/teams
+  // state it was already holding onto.
+  const effectiveRoleInfo = cameFromAnonymousExplore ? { role: 'teacher' as const, chosen: true } : roleInfo;
+  const effectivePlanIntroSeen = cameFromAnonymousExplore || planIntroSeen;
+
+  if (!effectiveRoleInfo) {
     return (
       <div style={{ minHeight: '100vh', background: '#1E1B4B', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '14px', padding: '20px', textAlign: 'center' }}>
         <div style={{ color: 'white', fontFamily: "'Segoe UI',system-ui,sans-serif", fontSize: '16px' }}>
@@ -351,14 +430,14 @@ function AuthenticatedApp() {
   // that already have `role_chosen=true`. Raise this with the owner before actually flipping the
   // flag back; a real fix needs a separate re-prompt step (e.g. a `role_reconfirmed_at` column, or
   // resetting `role_chosen=false` for every account) rather than guessing at one here.
-  if (!STUDENT_ACCOUNTS_PAUSED && (!roleInfo.chosen || roleInfo.role === 'student')) {
+  if (!STUDENT_ACCOUNTS_PAUSED && (!effectiveRoleInfo.chosen || effectiveRoleInfo.role === 'student')) {
     return (
       <div>
         <StatusBadge action="Log Out" onAction={() => supabase.auth.signOut()} theme={theme} isAdmin={isAdmin}>
           <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#22C55E', display: 'inline-block', marginRight: '6px' }} />
           Logged in as {session.user.email}
         </StatusBadge>
-        {!roleInfo.chosen ? (
+        {!effectiveRoleInfo.chosen ? (
           <RoleChooserScreen onChosen={role => setRoleInfo({ role, chosen: true })} />
         ) : (
           <StudentHome onSwitchToTeacher={() => window.location.reload()} />
@@ -371,7 +450,7 @@ function AuthenticatedApp() {
   // has_completed_plan_intro gate shows a lightweight "how this works" welcome screen instead of
   // the real plan-choice screen, since there's no billing decision to make right now. Swaps back
   // to PlanIntroScreen automatically once billing is turned on — no change needed here then.
-  if (!planIntroSeen) {
+  if (!effectivePlanIntroSeen) {
     return (
       <div>
         <StatusBadge action="Log Out" onAction={() => supabase.auth.signOut()} theme={theme} isAdmin={isAdmin}>
@@ -395,11 +474,12 @@ function AuthenticatedApp() {
       </StatusBadge>
       {showMarketingPrompt && <MarketingOptInPrompt theme={theme} onDone={() => setShowMarketingPrompt(false)} />}
       <LessonGamesGenerator
+        key="lgg"
         theme={theme} onThemeChange={setTheme}
         subscription={subscription} onSubscriptionChange={setSubscription}
         checkoutRedirect={checkoutRedirect}
         initialScreen={initialScreen}
-        role={roleInfo.role}
+        role={effectiveRoleInfo.role}
         onGameScreenChange={setInGameScreen}
       />
     </div>

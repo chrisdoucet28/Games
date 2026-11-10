@@ -228,17 +228,39 @@ type LessonGamesGeneratorProps = {
   // Set once, when the first-login welcome screen's "Explore Learn" button was used instead of
   // the plain "Let's go!" — see App.tsx and WelcomeIntroScreen.tsx.
   initialScreen?: "learn" | null;
-  // App.tsx's own confirmed roleInfo.role — this component is only ever mounted once that's
-  // already 'teacher', so this is defense-in-depth for ClassesScreen/BillingScreen (see
-  // RoleRestricted's comment), not the real gate.
+  // App.tsx's own confirmed roleInfo.role while logged in, always 'teacher' while isAnonymous (see
+  // below) — defense-in-depth for ClassesScreen/BillingScreen (see RoleRestricted's comment), not
+  // the real gate.
   role: "teacher" | "student";
+  // True for a visitor with no account yet — welcome/topic-select/team-setup/game-select all work
+  // the same either way (nothing on those screens touches Supabase), but anything that actually
+  // needs an account routes through onRequireAuth instead of running directly. See startGame,
+  // openSavePicker, and goToAccountScreen below for the three places that matters, and App.tsx's
+  // `!session` branch for how this prop gets set.
+  isAnonymous?: boolean;
+  // Opens the sign-in/sign-up modal (App.tsx owns it, not this component) with a human-readable
+  // `reason` ("to start this game", "to open My Classes", ...) and a `resume` callback that
+  // App.tsx calls exactly once, right after a session actually appears, to run whatever action was
+  // waiting on it. Only ever provided alongside isAnonymous — see the gated call sites below.
+  onRequireAuth?: (reason: string, resume: () => void) => void;
   // Fired whenever internal `screen` state enters/leaves "game" — lets App.tsx's StatusBadge hide
   // its own Music button during gameplay, since the game top bar shows its own Music button right
   // next to Sound Effects then. Keeps exactly one Music button on screen at a time.
   onGameScreenChange?: (isGameScreen: boolean) => void;
 };
 
-export default function LessonGamesGenerator({ theme, onThemeChange, subscription, onSubscriptionChange, checkoutRedirect, initialScreen, role, onGameScreenChange }: LessonGamesGeneratorProps) {
+export default function LessonGamesGenerator({ theme, onThemeChange, subscription, onSubscriptionChange, checkoutRedirect, initialScreen, role, isAnonymous, onRequireAuth, onGameScreenChange }: LessonGamesGeneratorProps) {
+  // Read inside startGame/openSavePicker/goToAccountScreen instead of the raw `isAnonymous` prop
+  // directly — App.tsx keeps this SAME LessonGamesGenerator instance mounted across the anonymous→
+  // logged-in transition (so in-progress team/topic state survives it), but a gated action's own
+  // resume callback (e.g. "now actually call startGame(mode)") is captured as a closure at the
+  // moment someone first clicks it, BEFORE that transition — by the time App.tsx calls it back,
+  // `isAnonymous` has already flipped to false on a newer render, yet that stale closure's own
+  // captured copy of the prop would still read true, re-triggering the auth prompt forever instead
+  // of ever actually running. A ref sidesteps this: every closure shares the same mutable box, so
+  // whichever one runs always sees the CURRENT value, not whatever it was when first captured.
+  const isAnonymousRef = useRef(isAnonymous);
+  useEffect(() => { isAnonymousRef.current = isAnonymous; }, [isAnonymous]);
   const [screen, setScreen] = useState<"welcome" | "classes" | "profile" | "learn" | "lessonplan" | "lessonplan-play" | "leaderboard" | "billing" | "topic-select" | "team-setup" | "game-select" | "game" | "results">(
     checkoutRedirect ? "billing" : initialScreen ?? "welcome"
   );
@@ -819,7 +841,28 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
   // pending actions (mid-game Save & Exit, game-select's "Save teams to class", team-setup's
   // "Load saved teams") — pendingSaveAction remembers which one to actually run once a class
   // comes back from the picker.
+  // My Classes/Leaderboard/My Profile/Billing (and the free-tier team-count lock, which also
+  // points at Billing) all need a real account to show anything meaningful — wraps the same
+  // setScreen call those buttons already made, so a click behaves exactly as before once logged
+  // in, and opens the auth prompt first when it isn't.
+  const goToAccountScreen = (target: "classes" | "leaderboard" | "profile" | "billing") => {
+    if (isAnonymousRef.current) {
+      const reason = target === "classes" ? "to open My Classes"
+        : target === "leaderboard" ? "to see the leaderboard"
+        : target === "profile" ? "to open My Profile"
+        : "to upgrade your plan";
+      onRequireAuth?.(reason, () => setScreen(target));
+      return;
+    }
+    setScreen(target);
+  };
+
   const openSavePicker = (action: "exit" | "link" | "teams") => {
+    // Saving/resuming into a class needs an account to save TO — see startGame's matching gate.
+    if (isAnonymousRef.current) {
+      onRequireAuth?.("to save your teams to a class", () => openSavePicker(action));
+      return;
+    }
     setPendingSaveAction(action);
     setPickerError(null);
     setPickerClasses(null);
@@ -1197,6 +1240,14 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
   };
 
   const startGame = async (mode: GameMode) => {
+    // The one choke point every "Play" entry reaches (game-select's own tiles, the Lesson Plans
+    // hand-off, and the "Surprise me" wheel spin) — gating here instead of at each call site means
+    // none of them can ever bypass it. See isAnonymousRef's own comment for why this reads the ref,
+    // not the prop directly.
+    if (isAnonymousRef.current) {
+      onRequireAuth?.("to start this game", () => startGame(mode));
+      return;
+    }
     setSelectedGame(mode);
     setLoadingGame(true);
     setLoadError("");
@@ -1512,16 +1563,16 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
         {/* Secondary toolbar: one shared quiet pill (not 4-5 independent bordered buttons) so this
             reads as a lower-priority row instead of competing with the primary fork above it. */}
         <div style={{ display: "inline-flex", alignItems: "center", gap: "2px", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: "999px", padding: "6px", flexWrap: "wrap", justifyContent: "center" }}>
-          <button onClick={() => setScreen("classes")} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.75)", borderRadius: "999px", padding: "10px 18px", fontSize: "14px", fontWeight: "700", cursor: "pointer", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px" }}><Icon name="books" size={14} /> My Classes</button>
+          <button onClick={() => goToAccountScreen("classes")} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.75)", borderRadius: "999px", padding: "10px 18px", fontSize: "14px", fontWeight: "700", cursor: "pointer", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px" }}><Icon name="books" size={14} /> My Classes</button>
           <button onClick={() => { setLearnFilter(null); setLearnReturnTo("welcome"); setScreen("learn"); }} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.75)", borderRadius: "999px", padding: "10px 18px", fontSize: "14px", fontWeight: "700", cursor: "pointer", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px" }}><Icon name="learn" size={14} /> Learn</button>
-          <button onClick={() => setScreen("leaderboard")} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.75)", borderRadius: "999px", padding: "10px 18px", fontSize: "14px", fontWeight: "700", cursor: "pointer", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px" }}><Icon name="trophy" size={14} /> Leaderboard</button>
-          <button onClick={() => setScreen("profile")} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.75)", borderRadius: "999px", padding: "10px 18px", fontSize: "14px", fontWeight: "700", cursor: "pointer", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px" }}><Icon name="person" size={14} /> My Profile</button>
+          <button onClick={() => goToAccountScreen("leaderboard")} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.75)", borderRadius: "999px", padding: "10px 18px", fontSize: "14px", fontWeight: "700", cursor: "pointer", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px" }}><Icon name="trophy" size={14} /> Leaderboard</button>
+          <button onClick={() => goToAccountScreen("profile")} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.75)", borderRadius: "999px", padding: "10px 18px", fontSize: "14px", fontWeight: "700", cursor: "pointer", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px" }}><Icon name="person" size={14} /> My Profile</button>
           {/* Hidden during the free-launch phase — see FREE_LAUNCH_ALL_PREMIUM in data/constants.ts.
               Everyone already has premium, so there's nothing useful for this button to show (and
               clicking into BillingScreen would render a confusing paid-but-no-real-subscription
               state). Just delete this guard clause to bring it back once billing is re-enabled. */}
           {!FREE_LAUNCH_ALL_PREMIUM && (
-            <button onClick={() => setScreen("billing")} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.75)", borderRadius: "999px", padding: "10px 18px", fontSize: "14px", fontWeight: "700", cursor: "pointer", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px" }}><Icon name="gem" size={14} /> {isPaid ? "My Plan" : "Upgrade"}</button>
+            <button onClick={() => goToAccountScreen("billing")} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.75)", borderRadius: "999px", padding: "10px 18px", fontSize: "14px", fontWeight: "700", cursor: "pointer", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px" }}><Icon name="gem" size={14} /> {isPaid ? "My Plan" : "Upgrade"}</button>
           )}
         </div>
       </div>
@@ -1949,7 +2000,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
                     <div key={entry.id} style={{ position: "relative" }}>
                       <button
                         type="button"
-                        onClick={() => locked ? setScreen("billing") : toggleRosterTeam(entry)}
+                        onClick={() => locked ? goToAccountScreen("billing") : toggleRosterTeam(entry)}
                         title={locked ? `Free plan is limited to ${cap} teams — upgrade to unlock more` : undefined}
                         style={{
                           background: isActive ? entry.color.bg : "#F0F9FF",
@@ -1999,7 +2050,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
               return (
                 <button
                   key={n}
-                  onClick={() => { if (locked) { setScreen("billing"); return; } setNumTeams(n); }}
+                  onClick={() => { if (locked) { goToAccountScreen("billing"); return; } setNumTeams(n); }}
                   title={locked ? `Free plan is limited to ${FREE_PLAN_LIMITS.maxTeams} teams — upgrade to unlock more` : undefined}
                   style={{ background: numTeams === n ? theme.accentSolid : "white", color: numTeams === n ? "white" : locked ? "#9CA3AF" : "#374151", border: `3px solid ${numTeams === n ? theme.accentSolid : "#D1D5DB"}`, borderRadius: "12px", padding: "10px 24px", fontSize: "18px", fontWeight: "800", cursor: "pointer", opacity: locked ? 0.6 : 1, display: "inline-flex", alignItems: "center", gap: "5px" }}
                 >
