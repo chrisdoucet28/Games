@@ -127,6 +127,19 @@ handout) with no guarantee they've seen any other specific lesson first.
   game is teacher-judged, not auto-graded, so a worked example dialogue there is reference for the
   teacher, not something boxing the student in, and the word/phrase itself is still real and
   singular. See the script's own `ALLOWED_DIALOGUE_TOPICS` list for the current exception set.
+  A second, subtler failure mode the script does NOT catch (it needs a human/Claude judgment
+  call, not a reliable regex): a `question` bundling two independent words/phrases together
+  (e.g. `"'wearing' + 'trainers' in present continuous"`, `"'cash' vs 'card'"`) or an `answer`
+  that stitches two different target forms into one utterance (e.g. `"'will' + 'going to' —
+  spontaneous decision vs fixed plan"` answered with one sentence using both). Simplify to ONE
+  word/phrase per item — check whether the other half already has its own standalone item
+  elsewhere in the topic before just deleting it. The one legitimate exception: a topic whose
+  own grammar point IS a tense/aspect contrast (e.g. `present_simple_vs_continuous`,
+  `present_perfect_continuous`'s "vs simple" item) — there, both forms appearing in one sentence
+  is the actual skill being tested, not two bundled targets, so leave those alone. A compound
+  grammar structure with two syntactic slots that are inherently one grammar point (`"'so' +
+  adjective + 'that'"`, `"'enough' + noun + 'to' + infinitive"`) is also fine — that's one
+  structure, not two words.
 - **Billing**: free tier = 1 class + 2 teams per game (the class limit is enforced server-side by
   a Postgres trigger, not just the UI; the team limit is UI-only, a deliberate tradeoff). Paid =
   unlimited classes + up to 5 teams. `public.subscriptions` is Stripe-agnostic by design (a
