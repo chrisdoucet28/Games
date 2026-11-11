@@ -4031,11 +4031,12 @@ export const LESSONS: Record<string, Lesson> = {
       },
       {
         heading: "Always infinitive",
-        body: ["decide, agree, hope, promise, manage, refuse, afford, offer + to + base verb"],
+        body: ["decide, agree, hope, promise, manage, refuse, afford, offer, would like + to + base verb"],
         examples: [
           "She **decided to leave** her job.",
           "They **agreed to accept** the plan.",
           "We **managed to meet** the deadline.",
+          "I**'d like to visit** Japan someday.",
         ],
       },
       {
