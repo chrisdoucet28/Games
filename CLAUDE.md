@@ -102,6 +102,20 @@ handout) with no guarantee they've seen any other specific lesson first.
   is for real behavioral or UI risk — new interaction logic, schema changes, anything that could
   plausibly be broken. A clean `tsc -b` plus a source-level diff review is the default bar for
   small, low-risk content or copy edits.
+- **Rocket Fuel `use vocabulary in a sentence` content**: Rocket Fuel gives a student ONE
+  word/phrase and asks them to build ONE sentence with it — never a pre-built two-line dialogue
+  exchange (a `question` with no real word/phrase, just a vague scenario description, and an
+  `answer` that's two separate quoted utterances back and forth). Caught live: `what_time_is_it`
+  had an item whose `question` was "asking and answering together — a quick time check" and whose
+  `answer` was a full Q&A pair — nothing for the student to construct. Run
+  `node app-juegos/scripts/check-rocket-fuel-vocab.js` after adding or editing any topic's
+  "use vocabulary in a sentence" items before committing — it fails (non-zero exit) only on the
+  literal dialogue-exchange pattern (two quoted utterances in one answer). It is NOT a signal to
+  flag every two-part answer: reply-tag phrases whose whole grammatical point is responding to a
+  preceding statement (e.g. `so_neither`'s "So do I.") are a legitimate, reviewed exception — the
+  game is teacher-judged, not auto-graded, so a worked example dialogue there is reference for the
+  teacher, not something boxing the student in, and the word/phrase itself is still real and
+  singular. See the script's own `ALLOWED_DIALOGUE_TOPICS` list for the current exception set.
 - **Billing**: free tier = 1 class + 2 teams per game (the class limit is enforced server-side by
   a Postgres trigger, not just the UI; the team limit is UI-only, a deliberate tradeoff). Paid =
   unlimited classes + up to 5 teams. `public.subscriptions` is Stripe-agnostic by design (a
