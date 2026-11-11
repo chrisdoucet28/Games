@@ -102,6 +102,17 @@ handout) with no guarantee they've seen any other specific lesson first.
   is for real behavioral or UI risk — new interaction logic, schema changes, anything that could
   plausibly be broken. A clean `tsc -b` plus a source-level diff review is the default bar for
   small, low-risk content or copy edits.
+- **Hot Potato fill-in-blank `prompt`s for continuous tenses**: a `prompt` like `"'She ___ cooking
+  when I arrived.' (was/were)"` only asks the student to pick the auxiliary — the fixed sentence
+  text around the blank must already contain the actual `-ing` verb, or filling in the "correct"
+  choice still produces a broken sentence. Caught live: `past_continuous` had
+  `"'I ___ TV when you called.' (was/were)"` — answer "was" gives "I was TV when you called.",
+  with no verb at all. Run `node app-juegos/scripts/check-hotpotato-continuous-blanks.js` after
+  adding/editing Hot Potato content in `present_simple_vs_continuous`, `present_continuous_a1/a2`,
+  `past_continuous`, `present_perfect_continuous`, or `future_continuous`. Scoped to those topics
+  on purpose — the same `(was/were)`/`(am/is/are)` auxiliary-choice convention is also used for
+  plain "to be" conjugation (`to_be`) and second-conditional subjunctive "were" (`second_conditional`),
+  neither of which needs an `-ing` verb at all.
 - **Rocket Fuel `use vocabulary in a sentence` content**: Rocket Fuel gives a student ONE
   word/phrase and asks them to build ONE sentence with it — never a pre-built two-line dialogue
   exchange (a `question` with no real word/phrase, just a vague scenario description, and an

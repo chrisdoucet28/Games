@@ -22529,7 +22529,7 @@ export const TOPIC_LIBRARY = {
       {prompt:"Past continuous of 'run'?", answer:"was/were running", spanish:"¿Cuál es la forma del pasado continuo de 'run'?"},
       {prompt:"'We was eating.' - fix it.", answer:"We were eating.", spanish:"Corrige el error en la frase."},
       {prompt:"'She were sleeping.' - fix it.", answer:"She was sleeping.", spanish:"Corrige el error en la frase."},
-      {prompt:"'I ___ TV when you called.' (was/were)", answer:"was", spanish:"Elige la forma correcta de 'be' para completar la frase."},
+      {prompt:"'I ___ watching TV when you called.' (was/were)", answer:"was", spanish:"Elige la forma correcta de 'be' para completar la frase."},
       {prompt:"Negative of 'He was listening.'", answer:"He wasn't listening.", spanish:"Escribe la forma negativa de la frase."},
       {prompt:"'It ___ raining when we left.' (was/were)", answer:"was", spanish:"Elige la forma correcta de 'be' para completar la frase."},
       {prompt:"'While I cook, she was reading.' - fix it.", answer:"While I was cooking, she was reading.", spanish:"Corrige el error en la frase."},
