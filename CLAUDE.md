@@ -141,7 +141,17 @@ handout) with no guarantee they've seen any other specific lesson first.
   say, present simple and past simple items under a bare `"negative"` tag has the same bug as a
   blanket custom tag: use `transform:"tense-<name>"` + `form:"negative"|"question"` instead (see
   `irregular_verbs` or `past_simple` for the established pattern) whenever one topic's rewrite
-  content actually spans more than one tense or structure.
+  content actually spans more than one tense or structure. The specific, narrow failure mode this
+  produces: two items share the exact same `question` fragment text but differ only by `form`
+  (one affirmative/implicit, one negative or a question) — with no `form` tag, the admin topic
+  browser's "rewrite sentences" list shows what looks like an unlabeled duplicate, and the
+  in-game lock reveal doesn't disclose which form is expected (caught live in `past_continuous`,
+  2026-11). Run `node app-juegos/scripts/check-vault-form-tags.js` after adding or editing any
+  topic's `rewrite sentences` items before committing — it fails (non-zero exit) only on this
+  exact duplicate-fragment/missing-form pattern, not on every negative/question-shaped item (most
+  rewrite topics — invitations, suggestions, clarification requests, indefinite pronouns — are
+  inherently phrased as a question/negative by their own function, not transformed from a
+  positive sentence, and don't need the tag).
 - **Vault Heist rewrite-sentence fragments must only show words that specific answer needs**: the
   `question` field is a literal set of words the player is meant to build the answer from — never
   show a word or clause there that the correct answer for that exact item doesn't use. When one
