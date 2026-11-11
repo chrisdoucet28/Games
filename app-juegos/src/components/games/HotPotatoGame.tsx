@@ -139,12 +139,6 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
   const ROUND_SECONDS = turnSeconds * ROUND_SECONDS_MULT;
 
   const [phase, setPhase] = useState<"intro" | "play" | "exploding" | "roundend" | "gameover">(resumed ? "play" : "intro");
-  // The whole point of this game is racing an unpredictable fuse while answering — "play" is
-  // exactly the tension moment, and it doesn't route through the shared useTurnTimer hook.
-  useEffect(() => {
-    if (phase === "play") setMusicContext("tension");
-    return () => setMusicContext("gameplay");
-  }, [phase === "play"]);
   // Reuses Word Whack's own tracks (see GAME_OVERRIDES in lib/music.ts) — same frantic, silly
   // carnival energy, not a distinct Suno pair of its own.
   useEffect(() => {
@@ -168,6 +162,16 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
   const [roundTimeLeft, setRoundTimeLeft] = useState(ROUND_SECONDS);
   const [qTimeLeft, setQTimeLeft] = useState(Q_SECONDS);
   const [showAnswer, setShowAnswer] = useState(false);
+  // The whole point of this game is racing an unpredictable fuse while answering — "play" is
+  // the tension moment, but only while that fuse is actually running: the moment an answer is
+  // revealed (either the per-question timer ran out or the teacher hit reveal), the round clock
+  // itself pauses too (see timerPaused.current in the qTimerRef/revealAnswer effects below), so
+  // the frantic tension track kept blaring under a moment that's actually meant to be a breather.
+  // Drop to the calmer shared "gameplay" bed for exactly as long as showAnswer is true.
+  useEffect(() => {
+    setMusicContext(phase === "play" && !showAnswer ? "tension" : "gameplay");
+    return () => setMusicContext("gameplay");
+  }, [phase === "play", showAnswer]);
   const [passing, setPassing] = useState(false);
   const [justCaught, setJustCaught] = useState(false);
   const [passId, setPassId] = useState(0);

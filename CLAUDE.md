@@ -102,6 +102,44 @@ handout) with no guarantee they've seen any other specific lesson first.
   is for real behavioral or UI risk — new interaction logic, schema changes, anything that could
   plausibly be broken. A clean `tsc -b` plus a source-level diff review is the default bar for
   small, low-risk content or copy edits.
+- **Hot Potato fill-in-blank `prompt`s for continuous tenses**: a `prompt` like `"'She ___ cooking
+  when I arrived.' (was/were)"` only asks the student to pick the auxiliary — the fixed sentence
+  text around the blank must already contain the actual `-ing` verb, or filling in the "correct"
+  choice still produces a broken sentence. Caught live: `past_continuous` had
+  `"'I ___ TV when you called.' (was/were)"` — answer "was" gives "I was TV when you called.",
+  with no verb at all. Run `node app-juegos/scripts/check-hotpotato-continuous-blanks.js` after
+  adding/editing Hot Potato content in `present_simple_vs_continuous`, `present_continuous_a1/a2`,
+  `past_continuous`, `present_perfect_continuous`, or `future_continuous`. Scoped to those topics
+  on purpose — the same `(was/were)`/`(am/is/are)` auxiliary-choice convention is also used for
+  plain "to be" conjugation (`to_be`) and second-conditional subjunctive "were" (`second_conditional`),
+  neither of which needs an `-ing` verb at all.
+- **Rocket Fuel `use vocabulary in a sentence` content**: Rocket Fuel gives a student ONE
+  word/phrase and asks them to build ONE sentence with it — never a pre-built two-line dialogue
+  exchange (a `question` with no real word/phrase, just a vague scenario description, and an
+  `answer` that's two separate quoted utterances back and forth). Caught live: `what_time_is_it`
+  had an item whose `question` was "asking and answering together — a quick time check" and whose
+  `answer` was a full Q&A pair — nothing for the student to construct. Run
+  `node app-juegos/scripts/check-rocket-fuel-vocab.js` after adding or editing any topic's
+  "use vocabulary in a sentence" items before committing — it fails (non-zero exit) only on the
+  literal dialogue-exchange pattern (two quoted utterances in one answer). It is NOT a signal to
+  flag every two-part answer: reply-tag phrases whose whole grammatical point is responding to a
+  preceding statement (e.g. `so_neither`'s "So do I.") are a legitimate, reviewed exception — the
+  game is teacher-judged, not auto-graded, so a worked example dialogue there is reference for the
+  teacher, not something boxing the student in, and the word/phrase itself is still real and
+  singular. See the script's own `ALLOWED_DIALOGUE_TOPICS` list for the current exception set.
+  A second, subtler failure mode the script does NOT catch (it needs a human/Claude judgment
+  call, not a reliable regex): a `question` bundling two independent words/phrases together
+  (e.g. `"'wearing' + 'trainers' in present continuous"`, `"'cash' vs 'card'"`) or an `answer`
+  that stitches two different target forms into one utterance (e.g. `"'will' + 'going to' —
+  spontaneous decision vs fixed plan"` answered with one sentence using both). Simplify to ONE
+  word/phrase per item — check whether the other half already has its own standalone item
+  elsewhere in the topic before just deleting it. The one legitimate exception: a topic whose
+  own grammar point IS a tense/aspect contrast (e.g. `present_simple_vs_continuous`,
+  `present_perfect_continuous`'s "vs simple" item) — there, both forms appearing in one sentence
+  is the actual skill being tested, not two bundled targets, so leave those alone. A compound
+  grammar structure with two syntactic slots that are inherently one grammar point (`"'so' +
+  adjective + 'that'"`, `"'enough' + noun + 'to' + infinitive"`) is also fine — that's one
+  structure, not two words.
 - **Billing**: free tier = 1 class + 2 teams per game (the class limit is enforced server-side by
   a Postgres trigger, not just the UI; the team limit is UI-only, a deliberate tradeoff). Paid =
   unlimited classes + up to 5 teams. `public.subscriptions` is Stripe-agnostic by design (a
