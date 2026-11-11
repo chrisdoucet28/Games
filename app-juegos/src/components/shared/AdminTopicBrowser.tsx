@@ -234,6 +234,33 @@ function SpyRoundDetail({ item }: { item: Record<string, unknown> }) {
   );
 }
 
+// Vault Heist "rewrite sentences" items carry `transform` (which sub-skill/tense a lock needs)
+// and an optional `form` ("negative"/"question", only set when that same transform's pool spans
+// more than one form) — both drive real in-game behavior (VaultHeistGame.tsx's lock-reveal
+// label and "ALSO NEEDS: NEGATIVE/A QUESTION" badge) but were previously invisible here, so two
+// items sharing the same `question` fragment with a different form looked like plain duplicates
+// to a teacher reviewing this list (see CLAUDE.md's Vault Heist transform-tag rule).
+function TransformBadges({ item }: { item: Record<string, unknown> }) {
+  const transform = typeof item.transform === "string" ? item.transform : null;
+  const form = typeof item.form === "string" ? item.form : null;
+  if (!transform && !form) return null;
+  const formColor = form === "question" ? "#93C5FD" : form === "negative" ? "#FCA5A5" : C.inkDim;
+  return (
+    <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 4 }}>
+      {transform && (
+        <span style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: "0.03em", color: C.inkDim, background: C.surface2, border: `1px solid ${C.border}`, borderRadius: 6, padding: "2px 7px" }}>
+          {transform.replace(/-/g, " ").toUpperCase()}
+        </span>
+      )}
+      {form && (
+        <span style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: "0.03em", color: formColor, background: C.surface2, border: `1px solid ${C.border}`, borderRadius: 6, padding: "2px 7px" }}>
+          FORM: {form.toUpperCase()}
+        </span>
+      )}
+    </div>
+  );
+}
+
 function ItemRow({ topicId, section, itemIndex, item, highlighted, onRef }: {
   topicId: string; section: string; itemIndex: number | null; item: Record<string, unknown>;
   highlighted?: boolean; onRef?: (el: HTMLDivElement | null) => void;
@@ -254,7 +281,10 @@ function ItemRow({ topicId, section, itemIndex, item, highlighted, onRef }: {
       {isMinefieldGrid && <MinefieldGridDetail item={item} />}
       {isSpyRound && <SpyRoundDetail item={item} />}
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-        <div style={{ flex: 1, fontSize: 12.5, color: C.ink, fontWeight: 600 }}>{isMinefieldGrid || isSpyRound ? null : itemSummary(item)}</div>
+        <div style={{ flex: 1, fontSize: 12.5, color: C.ink, fontWeight: 600 }}>
+          {isMinefieldGrid || isSpyRound ? null : itemSummary(item)}
+          {isMinefieldGrid || isSpyRound ? null : <TransformBadges item={item} />}
+        </div>
         {done ? (
           <span style={{ fontSize: 11, fontWeight: 800, color: "#86EFAC", flexShrink: 0 }}>Suggested ✓</span>
         ) : (
