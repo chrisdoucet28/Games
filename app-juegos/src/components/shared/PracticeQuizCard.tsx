@@ -185,14 +185,25 @@ function RevealCard({ item, answered, onResolve }: { item: Extract<PracticeItem,
       )}
       <QuestionCard question={item.question} showAnswer={revealed} onReveal={() => setRevealed(true)} gameId="practice" />
       {revealed && !answered && (
-        <div style={{ display: "flex", gap: "10px", marginTop: "14px" }}>
-          <button onClick={() => onResolve(true)} style={{ flex: 1, background: "#DCFCE7", border: `3px solid ${GREEN}`, color: GREEN_DEEP, borderRadius: "14px", padding: "14px 10px", fontSize: "14px", fontWeight: 900, cursor: "pointer", minHeight: "52px" }}>
-            I got it right
-          </button>
-          <button onClick={() => onResolve(false)} style={{ flex: 1, background: "#FEE2E2", border: `3px solid ${RED}`, color: RED_DEEP, borderRadius: "14px", padding: "14px 10px", fontSize: "14px", fontWeight: 900, cursor: "pointer", minHeight: "52px" }}>
-            I need practice
-          </button>
-        </div>
+        <>
+          {/* A beta tester playing solo kept landing on "use vocabulary in a sentence" items,
+              building her own (correct) sentence, then seeing this one printed example and
+              assuming she'd gotten it wrong because the wording didn't match. The green box above
+              only ever shows ONE example answer — for every reveal type (see REVEAL_TYPES' own
+              comment in practiceContent.ts), not just this one — so say that out loud here,
+              rather than let a self-grading student quietly mark a correct answer as wrong. */}
+          <p style={{ textAlign: "center", color: GREEN_DEEP, fontSize: "12.5px", fontWeight: 700, fontStyle: "italic", margin: "10px 0 0" }}>
+            This is just one example — if your own answer made sense and did the same job, mark yourself right!
+          </p>
+          <div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
+            <button onClick={() => onResolve(true)} style={{ flex: 1, background: "#DCFCE7", border: `3px solid ${GREEN}`, color: GREEN_DEEP, borderRadius: "14px", padding: "14px 10px", fontSize: "14px", fontWeight: 900, cursor: "pointer", minHeight: "52px" }}>
+              I got it right
+            </button>
+            <button onClick={() => onResolve(false)} style={{ flex: 1, background: "#FEE2E2", border: `3px solid ${RED}`, color: RED_DEEP, borderRadius: "14px", padding: "14px 10px", fontSize: "14px", fontWeight: 900, cursor: "pointer", minHeight: "52px" }}>
+              I need practice
+            </button>
+          </div>
+        </>
       )}
     </div>
   );
