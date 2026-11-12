@@ -33,10 +33,23 @@ const ORANGE_DEEP = "#B45309";
 const GREEN = "#22C55E";
 const GREEN_DEEP = "#15803D";
 
+// "use vocabulary in a sentence" is the one content type with genuinely no single right answer —
+// any sentence that correctly uses the target word/phrase/tense counts, so `answer` is only ever
+// a sample, never the literal only acceptable response (unlike "correct grammar mistakes", "fill
+// in the blank", etc., which do have one canonical fix). Teachers playing Rocket Fuel (this type's
+// main home) and students self-grading in Practice Mode both reported assuming a differently-
+// worded but equally correct answer meant they'd gotten it wrong, because the green "answer" box
+// below looked identical to every other type's definitive-answer box. Recolor it and label it
+// explicitly instead of relying on everyone to already know this one type works differently.
+function isExampleOnlyType(type: string | undefined): boolean {
+  return type === "use vocabulary in a sentence";
+}
+
 export function QuestionCard({ question, showAnswer, onReveal, gameId }: QuestionCardProps) {
   if (!question) return null;
   const isSpeaking = question.type === "speaking task";
-  const accent = isSpeaking ? ORANGE : SKY;
+  const isExampleOnly = isExampleOnlyType(question.type);
+  const accent = isSpeaking || isExampleOnly ? ORANGE : SKY;
 
   return (
     <div style={{
@@ -62,7 +75,9 @@ export function QuestionCard({ question, showAnswer, onReveal, gameId }: Questio
           color: accent, fontWeight: 900, fontSize: "12px", textTransform: "uppercase", letterSpacing: "0.08em",
           display: "inline-flex", alignItems: "center", gap: "6px",
         }}>
-          {isSpeaking ? <><Icon name="mic" size={12} color={accent} /> Speaking Prompt</> : question.type}
+          {isSpeaking ? <><Icon name="mic" size={12} color={accent} /> Speaking Prompt</>
+            : isExampleOnly ? <><Icon name="idea" size={12} color={accent} /> {question.type}</>
+            : question.type}
         </span>
       </div>
 
@@ -83,24 +98,29 @@ export function QuestionCard({ question, showAnswer, onReveal, gameId }: Questio
           </div>
         </div>
       ) : showAnswer ? (
-        <div style={{ background: "white", border: `3px solid ${GREEN}`, borderRadius: "14px", padding: "16px", position: "relative" }}>
+        <div style={{ background: "white", border: `3px solid ${isExampleOnly ? ORANGE : GREEN}`, borderRadius: "14px", padding: "16px", position: "relative" }}>
           <div style={{ position: "absolute", top: "8px", right: "8px" }}>
             <FlagPromptButton gameId={gameId} questionData={question} />
           </div>
+          {isExampleOnly && (
+            <div style={{ color: ORANGE_DEEP, fontSize: "11px", fontWeight: "900", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "8px" }}>
+              Example — your own sentence can work too
+            </div>
+          )}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "9px" }}>
-            <span style={{ background: GREEN, width: "24px", height: "24px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, border: `2px solid ${INK}` }}>
-              <Icon name="check" size={13} color="white" />
+            <span style={{ background: isExampleOnly ? ORANGE : GREEN, width: "24px", height: "24px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, border: `2px solid ${INK}` }}>
+              <Icon name={isExampleOnly ? "idea" : "check"} size={13} color="white" />
             </span>
-            <span style={{ fontWeight: "900", fontSize: "20px", color: GREEN_DEEP }}>{question.answer}</span>
+            <span style={{ fontWeight: "900", fontSize: "20px", color: isExampleOnly ? ORANGE_DEEP : GREEN_DEEP }}>{question.answer}</span>
           </div>
           {hasAlternateAnswers(question.answer) && (
-            <div style={{ color: GREEN_DEEP, fontSize: "12px", fontStyle: "italic", marginTop: "6px", opacity: 0.85 }}>
+            <div style={{ color: isExampleOnly ? ORANGE_DEEP : GREEN_DEEP, fontSize: "12px", fontStyle: "italic", marginTop: "6px", opacity: 0.85 }}>
               (any of these are correct)
             </div>
           )}
           {question.hint && (
-            <div style={{ color: GREEN_DEEP, fontSize: "13px", marginTop: "9px", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}>
-              <Icon name="idea" size={13} color={GREEN_DEEP} /> {question.hint}
+            <div style={{ color: isExampleOnly ? ORANGE_DEEP : GREEN_DEEP, fontSize: "13px", marginTop: "9px", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}>
+              <Icon name="idea" size={13} color={isExampleOnly ? ORANGE_DEEP : GREEN_DEEP} /> {question.hint}
             </div>
           )}
         </div>
