@@ -190,6 +190,34 @@ handout) with no guarantee they've seen any other specific lesson first.
   rewrite topics — invitations, suggestions, clarification requests, indefinite pronouns — are
   inherently phrased as a question/negative by their own function, not transformed from a
   positive sentence, and don't need the tag).
+- **Vault Heist `transform` tags must never name the answer to the skill being tested** — a second,
+  distinct failure mode from the one above, caught live in `auxiliary_verbs_be_do`
+  (2026-11): its items used `transform:"be-question-negative"`/`"do-question-negative"`, so the
+  lock-reveal card literally told the student "use BE" or "use DO" *before* they answered —
+  the exact thing the topic exists to make them figure out from the sentence's own verb. Same bug,
+  same fix, in `subject_object_questions`'s `"subject-question"`/`"object-question"` tags (told the
+  student which word-order the topic is entirely about choosing). Both were merged into one shared,
+  non-disclosing tag per topic (bare `"negative"`/`"question"` for auxiliary_verbs_be_do since the
+  fragment already made that choice unrecoverable any other way; a fresh neutral tag,
+  `"question-word-order"`, for subject_object_questions, chosen to not collide with the unrelated
+  existing `"wh-question"` tag).
+  The test before giving a topic's rewrite pool a transform tag (or a family of them): **does this
+  tag's name supply information the fragment itself withholds, and is recovering that missing
+  information the actual grammar point being tested?** If yes, the tag is unauthored content, not
+  a label — rename it to something that discloses *which transformation variant is wanted* (that
+  part is fine and often necessary) without disclosing *the answer to the inference the student is
+  supposed to make*. This is a judgment call, not a script-checkable pattern (a reliable check would
+  also misfire on the legitimate uses below), so apply this test by hand to every new topic's
+  transform-tag scheme. Calibration — these are NOT the same bug, don't "fix" them:
+  `causative-active`/`causative-passive` and `permission-formal`/`permission-informal`/
+  `permission-polite` share an identical fragment across tags (e.g. `'use your phone'` → three
+  different required registers) but the fragment is genuinely, arbitrarily ambiguous between
+  several equally-correct outputs with nothing in the sentence itself to decide between them — the
+  tag is disclosing *which variant is wanted*, exactly like a `form` tag does, not revealing an
+  inference. `modal-obligation`/`modal-no-obligation` are fine too, for the opposite reason: the
+  fragment already contains the modal itself (`'she / have to / wake up early'`), so there's no
+  hidden choice to leak — the skill being tested is forming the sentence correctly, not picking the
+  modal.
 - **Vault Heist rewrite-sentence fragments must only show words that specific answer needs**: the
   `question` field is a literal set of words the player is meant to build the answer from — never
   show a word or clause there that the correct answer for that exact item doesn't use. When one
