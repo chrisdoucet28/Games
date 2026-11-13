@@ -77,6 +77,22 @@ export const RELAY_TUTORIAL_STEPS: TutorialStep[] = [
     ),
   },
   {
+    narration: "On phones you can also pick ALL AT ONCE: every team huddles up and plays its own word at the same time, no waiting for other teams. The screen becomes a live race board. Every team needs at least 2 phones for this (one asks, the others answer) — a team with only one phone should use Take turns instead.",
+    visual: (
+      <div style={{ textAlign: "center" }}>
+        <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
+          {FRONT_LINE.map(p => (
+            <div key={p.team} style={{ border: `2px dashed ${p.color}`, borderRadius: "12px", padding: "6px 8px" }}>
+              <div style={{ fontSize: "20px", lineHeight: 1 }}>🙋📱📱</div>
+              <div style={{ background: p.color, color: "white", borderRadius: "8px", padding: "2px 8px", fontSize: "11px", fontWeight: 800, marginTop: "4px" }}>{p.team}</div>
+            </div>
+          ))}
+        </div>
+        <div style={{ marginTop: "8px", fontSize: "11px", fontWeight: 700, color: "#6B7280" }}>⚡ All at once: every team asks in its own huddle</div>
+      </div>
+    ),
+  },
+  {
     narration: "Playing solo? A CPU teammate joins and takes its own turns too, thinking for a moment before taking its own guess — so it's not just you alone.",
     visual: (
       <div style={{ textAlign: "center" }}>
