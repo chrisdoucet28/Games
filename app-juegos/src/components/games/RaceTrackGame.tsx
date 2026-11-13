@@ -11,7 +11,6 @@ import { TurnTimerBar } from "../shared/TurnTimerBar";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
 import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
-import { RACETRACK_TUTORIAL_STEPS } from "../../data/tutorials/racetrack";
 import { playSound, type SoundName } from "../../lib/sounds";
 import { setMusicContext, setMusicGame, stopMusic } from "../../lib/music";
 import {
@@ -836,7 +835,7 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
     background: "radial-gradient(ellipse at 40% 40%,#0E2040 0%,#060E1C 100%)",
   };
 
-  // Tutorial mockup: src/data/tutorials/racetrack.tsx — update if this intro's rules text changes.
+  // How to Play video: shared/HowToPlayModal.tsx — if this intro's rules change, the video (Desktop\classcade-videos) needs a re-make.
   if (phase === "intro") return (
     <div style={{ ...arenaStyle, textAlign: "center", position: "relative" }}>
       {STYLE_TAG}
@@ -936,7 +935,7 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
         {showHowTo && (
           <HowToPlayModal
             gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color}
-            steps={RACETRACK_TUTORIAL_STEPS}
+            gameId={GM.id}
             onClose={() => setShowHowTo(false)}
           />
         )}

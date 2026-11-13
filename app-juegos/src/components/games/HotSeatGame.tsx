@@ -12,7 +12,6 @@ import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
 import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
 import { CustomWordsPanel } from "../shared/CustomWordsPanel";
 import { useWordDeck } from "../../hooks/useWordDeck";
-import { HOTSEAT_SCREEN_TUTORIAL_STEPS, HOTSEAT_PHONE_GROUPS_TUTORIAL_STEPS, HOTSEAT_PHONE_SOLO_TUTORIAL_STEPS } from "../../data/tutorials/hotseat";
 import { playSound } from "../../lib/sounds";
 import { setMusicContext, setMusicGame, stopMusic } from "../../lib/music";
 import {
@@ -519,7 +518,7 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
   // One-time explainer shown before the very first turn — every other game has an equivalent
   // "here's the whole picture" screen with a team roster. The old version skipped straight to
   // a per-turn "get ready" card and re-explained the full rules before every single turn instead.
-  // Tutorial mockup: src/data/tutorials/hotseat.tsx — update if this welcome screen's rules text changes.
+  // How to Play video: shared/HowToPlayModal.tsx — if this welcome screen's rules change, the video (Desktop\classcade-videos) needs a re-make.
   if (phase === "welcome") {
     return (
       <div style={{ ...arenaStyle, textAlign: "center" }}>
@@ -636,7 +635,7 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
           {showHowTo && (
             <HowToPlayModal
               gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color}
-              steps={inputMode !== "phone" ? HOTSEAT_SCREEN_TUTORIAL_STEPS : teamStructure === "groups" ? HOTSEAT_PHONE_GROUPS_TUTORIAL_STEPS : HOTSEAT_PHONE_SOLO_TUTORIAL_STEPS}
+              gameId={GM.id}
               onClose={() => setShowHowTo(false)}
             />
           )}

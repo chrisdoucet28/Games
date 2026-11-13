@@ -31,8 +31,6 @@ app-juegos/               ← the real project root (npm install / npm run dev /
                                used in topics.ts — see "Learn/game parity" below
       constants.ts          ← TEAM_COLORS, MASCOT_OPTIONS, LEVELS_META, GAME_MODES, FREE_PLAN_LIMITS
       themes.ts             ← accent-color theme presets for shared (non-game) chrome
-      tutorials/             ← one file per game, scripted "How to Play" walkthrough steps — see
-                               "How to Play" tutorials below
     components/
       games/                ← one file per game (15 total): AuctionGame, BattleshipGame,
                                CardShuffleGame, CastleGame, HotPotatoGame, HotSeatGame,
@@ -315,14 +313,17 @@ handout) with no guarantee they've seen any other specific lesson first.
   135 topics against Word Whack's actual parsing logic confirmed it was the only offender — but
   since nothing else in the app would ever catch a repeat of this, verify the format by eye (or
   with a quick parse check) for every new topic's `choose correct grammar` pool before moving on.
-- **"How to Play" tutorials (`data/tutorials/*.tsx`)**: each game's intro screen has a How to
-  Play button opening a scripted walkthrough (`components/shared/HowToPlayModal.tsx`) — hand-authored
-  mockups, not driven by real game state, so nothing keeps them in sync with the actual game
-  automatically. Each tutorial file opens with a one-line comment naming the game file it
-  recreates, and each game's intro block has a matching comment pointing back. When you change a
-  game's core rules/scoring/phases, do a quick pass over its tutorial file and update anything now
-  stale. This is a reminder, not an enforced rule — much lower-stakes than the Learn/topics parity
-  rule above, since a stale tutorial mockup is a UX papercut, not wrong grammar content.
+- **"How to Play" videos**: each game's intro screen has a How to Play button that plays that
+  game's animated explainer video (`components/shared/HowToPlayModal.tsx`, which holds the
+  gameId → file map). They replaced the old scripted step-by-step walkthroughs (`data/tutorials/`,
+  deleted 2026-11). The videos are built outside this repo (HyperFrames project in
+  `Desktop\classcade-videos`, one `games/<game>/build.cjs` each) and hosted on the Vercel Blob
+  media store (`video/how-to/<gameId>-vN.mp4` + `.jpg` poster). Blobs are cached for a year, so a
+  re-made video is uploaded under a new `-vN` name and the map entry bumped — never overwrite in
+  place. Each game's intro block has a one-line comment pointing at this. When you change a game's
+  core rules/scoring/phases, flag that its video is now stale and needs a re-make — nothing keeps
+  it in sync automatically. A stale video is a UX papercut, not wrong grammar content, so this is
+  a reminder rather than an enforced rule.
 
 ## Git workflow (multiple concurrent focus areas)
 

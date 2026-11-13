@@ -8,7 +8,6 @@ import { RankBadge } from "../shared/RankBadge";
 import { makeSoloCpuTeam, makeTeacherTeam } from "../../lib/soloOpponent";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
-import { MINEFIELD_TUTORIAL_STEPS } from "../../data/tutorials/minefield";
 import { playSound } from "../../lib/sounds";
 import { setMusicContext, setMusicGame, stopMusic } from "../../lib/music";
 
@@ -316,7 +315,7 @@ export function MinefieldGame({ gridData, teams: propTeams, onUpdateScore, onEnd
   const GAP = 5;
   const selData = selectedTile !== null ? getSentence(selectedTile) : null;
 
-  // Tutorial mockup: src/data/tutorials/minefield.tsx — update if this intro's rules text changes.
+  // How to Play video: shared/HowToPlayModal.tsx — if this intro's rules change, the video (Desktop\classcade-videos) needs a re-make.
   if (phase === "intro") {
     return (
       <div style={{ textAlign: "center" }}>
@@ -379,7 +378,7 @@ export function MinefieldGame({ gridData, teams: propTeams, onUpdateScore, onEnd
         {showHowTo && (
           <HowToPlayModal
             gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color}
-            steps={MINEFIELD_TUTORIAL_STEPS}
+            gameId={GM.id}
             onClose={() => setShowHowTo(false)}
           />
         )}

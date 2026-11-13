@@ -10,7 +10,6 @@ import { denseRank } from "../../utils/ranking";
 import { RankBadge } from "../shared/RankBadge";
 import { makeSoloCpuTeam, makeTeacherTeam } from "../../lib/soloOpponent";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
-import { CASTLE_TUTORIAL_STEPS } from "../../data/tutorials/castle";
 import { playSound } from "../../lib/sounds";
 import { setMusicGame, stopMusic } from "../../lib/music";
 
@@ -536,7 +535,7 @@ export function CastleGame({ questions, teams: propTeams, onUpdateScore, onEnd, 
     `}</style>
   );
 
-  // Tutorial mockup: src/data/tutorials/castle.tsx — update if this intro's rules text changes.
+  // How to Play video: shared/HowToPlayModal.tsx — if this intro's rules change, the video (Desktop\classcade-videos) needs a re-make.
   if (phase === "intro") return (
     <div style={{ ...arenaStyle, textAlign: "center" }}>
       {ambientLayer}
@@ -575,7 +574,7 @@ export function CastleGame({ questions, teams: propTeams, onUpdateScore, onEnd, 
         {showHowTo && (
           <HowToPlayModal
             gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color}
-            steps={CASTLE_TUTORIAL_STEPS}
+            gameId={GM.id}
             onClose={() => setShowHowTo(false)}
           />
         )}

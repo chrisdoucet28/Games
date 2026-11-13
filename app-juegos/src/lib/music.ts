@@ -344,6 +344,22 @@ export function setMusicEnabled(next: boolean): void {
   listeners.forEach(fn => fn(enabled));
 }
 
+// Temporary hush for something that brings its own soundtrack (a game's How to Play video): fades
+// the background music out without touching the teacher's Music on/off setting, then fades the
+// same track back in afterwards. Not persisted — closing the tab mid-video leaves the setting as it was.
+let suspended = false;
+export function setMusicSuspended(next: boolean): void {
+  if (suspended === next) return;
+  suspended = next;
+  if (next) {
+    players.forEach(el => {
+      if (!el.paused) fadeTo(el, 0, FADE_MS);
+    });
+  } else if (enabled && currentSrc && currentContext) {
+    fadeInSrc(currentSrc, resolveVolume(currentContext, currentGameId));
+  }
+}
+
 // Idempotent — safe to call every render/effect run without retriggering the fade. Re-resolves
 // against currentGameId every time, so the same ctx can still trigger a real crossfade if the
 // active game (and therefore the actual file behind that context) changed since the last call.

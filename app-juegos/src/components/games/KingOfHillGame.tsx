@@ -13,7 +13,6 @@ import { makeSoloCpuTeam, makeTeacherTeam } from "../../lib/soloOpponent";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
 import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
-import { HILL_THEME_STEPS, HILL_GRAMMAR_STEPS } from "../../data/tutorials/hill";
 import { playSound } from "../../lib/sounds";
 import { setMusicGame, setMusicContext, stopMusic } from "../../lib/music";
 import {
@@ -792,7 +791,7 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
     background: "radial-gradient(ellipse at 50% -10%,#DB2777 0%,#831843 45%,#1F0A1F 100%)",
   };
 
-  // Tutorial mockup: src/data/tutorials/hill.tsx — update if this intro's rules text changes.
+  // How to Play video: shared/HowToPlayModal.tsx — if this intro's rules change, the video (Desktop\classcade-videos) needs a re-make.
   if (phase === "intro") return (
     <div style={{ ...arenaStyle, textAlign: "center" }}>
       <AmbientBackdrop />
@@ -895,7 +894,7 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
         {showHowTo && (
           <HowToPlayModal
             gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color}
-            steps={isThemeMode ? HILL_THEME_STEPS : HILL_GRAMMAR_STEPS}
+            gameId={GM.id}
             onClose={() => setShowHowTo(false)}
           />
         )}

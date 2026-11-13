@@ -12,7 +12,6 @@ import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
 import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
 import { CustomWordsPanel } from "../shared/CustomWordsPanel";
 import { useWordDeck } from "../../hooks/useWordDeck";
-import { RELAY_TUTORIAL_STEPS } from "../../data/tutorials/relay";
 import { playSound } from "../../lib/sounds";
 import { setMusicGame, setMusicContext, stopMusic } from "../../lib/music";
 import { makeSoloCpuTeam } from "../../lib/soloOpponent";
@@ -841,7 +840,7 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
     : [];
   const startBlocked = teamsWithoutAPhone.length > 0 || teamsNeedingSecondPhone.length > 0;
 
-  // Tutorial mockup: src/data/tutorials/relay.tsx — update if this welcome screen's rules text changes.
+  // How to Play video: shared/HowToPlayModal.tsx — if this welcome screen's rules change, the video (Desktop\classcade-videos) needs a re-make.
   if (phase === "welcome") {
     return (
       <div style={{ ...arenaStyle, textAlign: "center" }}>
@@ -1060,7 +1059,7 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
           {showHowTo && (
             <HowToPlayModal
               gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color}
-              steps={RELAY_TUTORIAL_STEPS}
+              gameId={GM.id}
               onClose={() => setShowHowTo(false)}
             />
           )}

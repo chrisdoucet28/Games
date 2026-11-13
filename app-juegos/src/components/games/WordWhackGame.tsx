@@ -17,7 +17,6 @@ import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
 import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
 import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
-import { WHACK_TUTORIAL_STEPS } from "../../data/tutorials/whack";
 import { playSound } from "../../lib/sounds";
 import { stopMusic, setMusicGame } from "../../lib/music";
 import {
@@ -526,7 +525,7 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
     );
   }
 
-  // Tutorial mockup: src/data/tutorials/whack.tsx — update if this intro's rules text changes.
+  // How to Play video: shared/HowToPlayModal.tsx — if this intro's rules change, the video (Desktop\classcade-videos) needs a re-make.
   if (phase === "intro") return (
     <div style={{ ...arenaStyle, textAlign: "center" }}>
       <AmbientBackdrop />
@@ -611,7 +610,7 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
         {showHowTo && (
           <HowToPlayModal
             gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color}
-            steps={WHACK_TUTORIAL_STEPS}
+            gameId={GM.id}
             onClose={() => setShowHowTo(false)}
           />
         )}

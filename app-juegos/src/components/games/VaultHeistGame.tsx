@@ -11,7 +11,6 @@ import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
 import { TOPIC_OPTIONS } from "../../data/topicOptions";
 import { makeSoloCpuTeam } from "../../lib/soloOpponent";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
-import { VAULT_TUTORIAL_STEPS } from "../../data/tutorials/vault";
 import { playSound } from "../../lib/sounds";
 import { setMusicGame, stopMusic } from "../../lib/music";
 
@@ -592,7 +591,7 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
     );
   }
 
-  // Tutorial mockup: src/data/tutorials/vault.tsx — update if this intro's rules text changes.
+  // How to Play video: shared/HowToPlayModal.tsx — if this intro's rules change, the video (Desktop\classcade-videos) needs a re-make.
   if (phase === "intro") return (
     <div style={{ ...arenaStyle, textAlign: "center" }}>
       {ambientLayer}
@@ -671,7 +670,7 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
         {showHowTo && (
           <HowToPlayModal
             gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color}
-            steps={VAULT_TUTORIAL_STEPS}
+            gameId={GM.id}
             onClose={() => setShowHowTo(false)}
           />
         )}

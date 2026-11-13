@@ -10,7 +10,6 @@ import { denseRank } from "../../utils/ranking";
 import { RankBadge } from "../shared/RankBadge";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
-import { CARDS_TUTORIAL_STEPS } from "../../data/tutorials/cards";
 import { playSound } from "../../lib/sounds";
 import { setMusicGame, stopMusic } from "../../lib/music";
 
@@ -360,7 +359,7 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
     background: "radial-gradient(ellipse at 50% -10%,#DC2626 0%,#7F1D1D 48%,#2A0505 100%)",
   };
 
-  // Tutorial mockup: src/data/tutorials/cards.tsx — update if this intro's rules text changes.
+  // How to Play video: shared/HowToPlayModal.tsx — if this intro's rules change, the video (Desktop\classcade-videos) needs a re-make.
   if (phase === "intro") return (
     <div style={{ ...arenaStyle, textAlign: "center" }}>
       <AmbientBackdrop />
@@ -384,7 +383,7 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
         {showHowTo && (
           <HowToPlayModal
             gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color}
-            steps={CARDS_TUTORIAL_STEPS}
+            gameId={GM.id}
             onClose={() => setShowHowTo(false)}
           />
         )}

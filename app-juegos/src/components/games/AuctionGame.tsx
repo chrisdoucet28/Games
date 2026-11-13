@@ -11,7 +11,6 @@ import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
 import { MASCOT_ICON_BY_EMOJI } from "../shared/TeamIcon";
 import { MascotIcon } from "../shared/MascotArt";
 import { Icon, type IconName } from "../shared/Icon";
-import { AUCTION_TUTORIAL_STEPS } from "../../data/tutorials/auction";
 import { playSound } from "../../lib/sounds";
 import { setMusicContext, setMusicGame, stopMusic } from "../../lib/music";
 import {
@@ -531,7 +530,7 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
     background: "radial-gradient(ellipse at 50% -10%,#6D28D9 0%,#2E1065 45%,#0F0524 100%)",
   };
 
-  // Tutorial mockup: src/data/tutorials/auction.tsx — update if this intro's rules text changes.
+  // How to Play video: shared/HowToPlayModal.tsx — if this intro's rules change, the video (Desktop\classcade-videos) needs a re-make.
   if (phase === "intro") return (
     <div style={{ ...arenaStyle, textAlign: "center" }}>
       <AmbientBackdrop />
@@ -620,7 +619,7 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
         {showHowTo && (
           <HowToPlayModal
             gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color}
-            steps={AUCTION_TUTORIAL_STEPS}
+            gameId={GM.id}
             onClose={() => setShowHowTo(false)}
           />
         )}

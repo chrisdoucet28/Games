@@ -12,7 +12,6 @@ import { playSound } from "../../lib/sounds";
 import { setMusicGame, stopMusic } from "../../lib/music";
 import { makeSoloCpuTeam, makeTeacherTeam } from "../../lib/soloOpponent";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
-import { BATTLESHIP_TUTORIAL_STEPS } from "../../data/tutorials/battleship";
 
 const GM = GAME_MODES.find(g => g.id === "battleship")!;
 
@@ -498,7 +497,7 @@ export function BattleshipGame({ questions, teams: propTeams, onUpdateScore, onE
     background: "radial-gradient(ellipse at 50% -10%,#1E40AF 0%,#0C1B3A 45%,#020617 100%)",
   };
 
-  // Tutorial mockup: src/data/tutorials/battleship.tsx — update if this intro's rules text changes.
+  // How to Play video: shared/HowToPlayModal.tsx — if this intro's rules change, the video (Desktop\classcade-videos) needs a re-make.
   if (phase === "intro") return (
     <div style={{ ...arenaStyle, textAlign: "center" }}>
       <AmbientBackdrop />
@@ -541,7 +540,7 @@ export function BattleshipGame({ questions, teams: propTeams, onUpdateScore, onE
         {showHowTo && (
           <HowToPlayModal
             gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color}
-            steps={BATTLESHIP_TUTORIAL_STEPS}
+            gameId={GM.id}
             onClose={() => setShowHowTo(false)}
           />
         )}

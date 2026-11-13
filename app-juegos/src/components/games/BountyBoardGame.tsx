@@ -10,7 +10,6 @@ import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
 import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
 import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
-import { BOUNTYBOARD_TUTORIAL_STEPS } from "../../data/tutorials/bountyboard";
 import { playSound } from "../../lib/sounds";
 import { setMusicGame, setMusicContext, stopMusic } from "../../lib/music";
 import { makeSoloCpuTeam } from "../../lib/soloOpponent";
@@ -856,7 +855,7 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
     background: "radial-gradient(circle at 50% 0%, #FEF3C7 0%, #FDE9C0 55%, #F5DBA0 100%)",
   };
 
-  // Tutorial mockup: src/data/tutorials/bountyboard.tsx — update if this intro's rules text changes.
+  // How to Play video: shared/HowToPlayModal.tsx — if this intro's rules change, the video (Desktop\classcade-videos) needs a re-make.
   if (phase === "intro") return (
     <div style={{ ...arenaStyle, textAlign: "center" }}>
       {STYLE_TAG}
@@ -966,7 +965,7 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
         {showHowTo && (
           <HowToPlayModal
             gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color}
-            steps={BOUNTYBOARD_TUTORIAL_STEPS}
+            gameId={GM.id}
             onClose={() => setShowHowTo(false)}
           />
         )}

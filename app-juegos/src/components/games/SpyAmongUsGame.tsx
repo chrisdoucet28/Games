@@ -11,7 +11,6 @@ import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
 import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
 import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
-import { SPY_TWOPLAYER_STEPS, SPY_GROUP_STEPS } from "../../data/tutorials/spy";
 import { playSound } from "../../lib/sounds";
 import { setMusicContext, setMusicGame, stopMusic } from "../../lib/music";
 import {
@@ -784,7 +783,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
     background: "radial-gradient(ellipse at 50% -15%,#1E293B 0%,#0F172A 55%,#020617 100%)",
   };
 
-  // Tutorial mockup: src/data/tutorials/spy.tsx — update if this intro's rules text changes.
+  // How to Play video: shared/HowToPlayModal.tsx — if this intro's rules change, the video (Desktop\classcade-videos) needs a re-make.
   if (phase === "intro") {
     return (
       <div style={{ ...arenaStyle, textAlign: "center" }}>
@@ -932,7 +931,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
           {showHowTo && (
             <HowToPlayModal
               gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color}
-              steps={isTwoPlayer ? SPY_TWOPLAYER_STEPS : SPY_GROUP_STEPS}
+              gameId={GM.id}
               onClose={() => setShowHowTo(false)}
             />
           )}

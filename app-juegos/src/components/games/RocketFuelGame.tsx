@@ -11,7 +11,6 @@ import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
 import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
-import { ROCKET_TUTORIAL_STEPS } from "../../data/tutorials/rocket";
 import { playSound } from "../../lib/sounds";
 import { setMusicGame, stopMusic } from "../../lib/music";
 import {
@@ -748,7 +747,7 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
     background: "radial-gradient(ellipse at 50% 110%,#1E1B4B 0%,#0B0B2E 55%,#030014 100%)",
   };
 
-  // Tutorial mockup: src/data/tutorials/rocket.tsx — update if this intro's rules text changes.
+  // How to Play video: shared/HowToPlayModal.tsx — if this intro's rules change, the video (Desktop\classcade-videos) needs a re-make.
   if (phase === "intro") return (
     <div style={{ ...arenaStyle, textAlign: "center" }}>
       <Starfield />
@@ -819,7 +818,7 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
         {showHowTo && (
           <HowToPlayModal
             gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color}
-            steps={ROCKET_TUTORIAL_STEPS}
+            gameId={GM.id}
             onClose={() => setShowHowTo(false)}
           />
         )}

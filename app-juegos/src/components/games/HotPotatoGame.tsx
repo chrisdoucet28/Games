@@ -6,7 +6,6 @@ import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
 import { makeSoloCpuTeam } from "../../lib/soloOpponent";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
-import { HOTPOTATO_TUTORIAL_STEPS } from "../../data/tutorials/hotpotato";
 import { playSound } from "../../lib/sounds";
 import { setMusicContext, setMusicGame, stopMusic } from "../../lib/music";
 
@@ -356,7 +355,7 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
     background: "linear-gradient(160deg,#FED7AA 0%,#FB923C 45%,#EA580C 100%)",
   };
 
-  // Tutorial mockup: src/data/tutorials/hotpotato.tsx — update if this intro's rules text changes.
+  // How to Play video: shared/HowToPlayModal.tsx — if this intro's rules change, the video (Desktop\classcade-videos) needs a re-make.
   if (phase === "intro") return (
     <div style={{ ...arenaStyle, textAlign: "center" }}>
       <ChaosBackdrop />
@@ -467,7 +466,7 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
         {showHowTo && (
           <HowToPlayModal
             gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color}
-            steps={HOTPOTATO_TUTORIAL_STEPS}
+            gameId={GM.id}
             onClose={() => setShowHowTo(false)}
           />
         )}

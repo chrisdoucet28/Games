@@ -11,7 +11,6 @@ import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
 import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
 import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
-import { ORDERUP_TUTORIAL_STEPS } from "../../data/tutorials/orderup";
 import { playSound } from "../../lib/sounds";
 import { setMusicGame, stopMusic } from "../../lib/music";
 import {
@@ -941,7 +940,7 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
     background: "radial-gradient(circle at 50% 0%, #FFF1F2 0%, #FFE4E6 55%, #FECDD3 100%)",
   };
 
-  // Tutorial mockup: src/data/tutorials/orderup.tsx — update if this intro's rules text changes.
+  // How to Play video: shared/HowToPlayModal.tsx — if this intro's rules change, the video (Desktop\classcade-videos) needs a re-make.
   if (phase === "intro") return (
     <div style={{ ...arenaStyle, textAlign: "center" }}>
       {STYLE_TAG}
@@ -1095,7 +1094,7 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
         {showHowTo && (
           <HowToPlayModal
             gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color}
-            steps={ORDERUP_TUTORIAL_STEPS}
+            gameId={GM.id}
             onClose={() => setShowHowTo(false)}
           />
         )}

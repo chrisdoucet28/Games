@@ -7,7 +7,6 @@ import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
 import { HowToPlayModal } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
 import { TurnTimerBar } from "../shared/TurnTimerBar";
-import { ZOMBIE_TUTORIAL_STEPS } from "../../data/tutorials/zombie";
 import { playSound } from "../../lib/sounds";
 import { setMusicContext, setMusicGame, stopMusic } from "../../lib/music";
 import { makeTeacherTeam, TEACHER_ID } from "../../lib/soloOpponent";
@@ -1035,7 +1034,7 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
     </div>
   );
 
-  // Tutorial mockup: src/data/tutorials/zombie.tsx — update if this intro's rules text changes.
+  // How to Play video: shared/HowToPlayModal.tsx — if this intro's rules change, the video (Desktop\classcade-videos) needs a re-make.
   if (phase === "intro") return (
     <div style={{ ...arenaStyle, textAlign: "center" }}>
       {fogLayer}
@@ -1081,7 +1080,7 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
         {showHowTo && (
           <HowToPlayModal
             gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color}
-            steps={ZOMBIE_TUTORIAL_STEPS}
+            gameId={GM.id}
             onClose={() => setShowHowTo(false)}
           />
         )}
