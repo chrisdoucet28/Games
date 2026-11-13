@@ -8,7 +8,7 @@ import { useTurnTimer } from "../../hooks/useTurnTimer";
 import { TurnTimerBar } from "../shared/TurnTimerBar";
 import { QuestionCard } from "../shared/QuestionCard";
 import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
-import { HowToPlayModal } from "../shared/HowToPlayModal";
+import { HowToPlayBar } from "../shared/HowToPlayModal";
 import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
 import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
 import { playSound } from "../../lib/sounds";
@@ -253,7 +253,6 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
     setMusicGame("rocket");
     return () => setMusicGame(null);
   }, []);
-  const [showHowTo, setShowHowTo] = useState(false);
   const [teamIdx, setTeamIdx] = useState(() => resumed?.teamIdx ?? 0);
   const [round, setRound] = useState(() => resumed?.round ?? 1);
   const [currentQ, setCurrentQ] = useState<QuestionData | null>(null);
@@ -761,6 +760,7 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
             Nobody's fuel level is revealed until every team has fuelled up — then all rockets <strong style={{ color: "#A5B4FC" }}>launch together</strong>, and whoever fuelled the most flies the highest!
           </div>
         </div>
+        <HowToPlayBar gameId={GM.id} gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color} />
         <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "24px" }}>
           {teams.map((t, i) => (
             <div key={t.id} style={{ background: t.color.dark, border: "2px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E", borderRadius: "14px", padding: "10px 18px", fontWeight: "800", fontSize: "14px", color: "white", display: "flex", alignItems: "center", gap: "6px" }}>
@@ -812,16 +812,6 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
           )}
         </>
 
-        <button onClick={() => setShowHowTo(true)} className="rf-btn" style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginBottom: "14px", background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
-          <Icon name="help" size={15} /> How to Play
-        </button>
-        {showHowTo && (
-          <HowToPlayModal
-            gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color}
-            gameId={GM.id}
-            onClose={() => setShowHowTo(false)}
-          />
-        )}
         <button onClick={() => startTeamTurn(0)} className="rf-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#4338CA", color: "white", border: "3px solid #1A1A2E", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "6px 6px 0 #1A1A2E" }}>
           <Icon name="flame" size={20} /> Ignite Engines!
         </button>

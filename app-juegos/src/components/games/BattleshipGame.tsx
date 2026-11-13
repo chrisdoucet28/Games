@@ -11,7 +11,7 @@ import { RankBadge } from "../shared/RankBadge";
 import { playSound } from "../../lib/sounds";
 import { setMusicGame, stopMusic } from "../../lib/music";
 import { makeSoloCpuTeam, makeTeacherTeam } from "../../lib/soloOpponent";
-import { HowToPlayModal } from "../shared/HowToPlayModal";
+import { HowToPlayBar } from "../shared/HowToPlayModal";
 
 const GM = GAME_MODES.find(g => g.id === "battleship")!;
 
@@ -235,7 +235,6 @@ export function BattleshipGame({ questions, teams: propTeams, onUpdateScore, onE
     if (!resumed) return "intro";
     return teams.length === 2 ? "pick-coord" : "pick-target";
   });
-  const [showHowTo, setShowHowTo] = useState(false);
   const [targetTeamId, setTargetTeamId] = useState<string | number | null>(() => {
     if (!resumed || teams.length !== 2) return null;
     const activeId = teams[resumed.activeTeamIdx].id;
@@ -512,6 +511,7 @@ export function BattleshipGame({ questions, teams: propTeams, onUpdateScore, onE
             Sink all of a team's ships to eliminate them — last fleet afloat wins!
           </div>
         </div>
+        <HowToPlayBar gameId={GM.id} gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color} />
         <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "24px" }}>
           {teams.map(t => (<div key={t.id} style={{ background: t.color.dark, border: "2px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E", borderRadius: "14px", padding: "10px 18px", fontWeight: "800", fontSize: "14px", color: "white", display: "flex", alignItems: "center", gap: "6px" }}><TeamIcon team={t} color="white" /> {t.name}</div>))}
         </div>
@@ -533,16 +533,6 @@ export function BattleshipGame({ questions, teams: propTeams, onUpdateScore, onE
               }}><Icon name="person" size={14} /> Teacher</button>
             </div>
           </div>
-        )}
-        <button onClick={() => setShowHowTo(true)} className="bship-btn" style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginBottom: "14px", background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
-          <Icon name="help" size={15} /> How to Play
-        </button>
-        {showHowTo && (
-          <HowToPlayModal
-            gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color}
-            gameId={GM.id}
-            onClose={() => setShowHowTo(false)}
-          />
         )}
         <button onClick={() => {
           if (teams.length === 2) {

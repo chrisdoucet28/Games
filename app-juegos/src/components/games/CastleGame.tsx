@@ -9,7 +9,7 @@ import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
 import { denseRank } from "../../utils/ranking";
 import { RankBadge } from "../shared/RankBadge";
 import { makeSoloCpuTeam, makeTeacherTeam } from "../../lib/soloOpponent";
-import { HowToPlayModal } from "../shared/HowToPlayModal";
+import { HowToPlayBar } from "../shared/HowToPlayModal";
 import { playSound } from "../../lib/sounds";
 import { setMusicGame, stopMusic } from "../../lib/music";
 
@@ -297,7 +297,6 @@ export function CastleGame({ questions, teams: propTeams, onUpdateScore, onEnd, 
   // A resumed battle skips the intro screen and drops straight into a fresh action choice for
   // whichever team was up.
   const [phase, setPhase] = useState<Phase>(() => resumed ? "select-action" : "intro");
-  const [showHowTo, setShowHowTo] = useState(false);
   const [diceRoll, setDiceRoll] = useState<number | null>(null);
   const [rolling, setRolling] = useState(false);
   const [lastEvent, setLastEvent] = useState<LastEvent | null>(null);
@@ -549,6 +548,7 @@ export function CastleGame({ questions, teams: propTeams, onUpdateScore, onEnd, 
             Land a hit and you might turn up a <strong style={{ display: "inline-flex", alignItems: "center", gap: "3px" }}><Icon name="apple" size={13} /> healing apple</strong> for bonus HP! The last castle standing wins!
           </div>
         </div>
+        <HowToPlayBar gameId={GM.id} gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color} />
         {isSolo && (
           <div style={{ marginBottom: "20px" }}>
             <div style={{ fontSize: "13px", color: "#6EE7B7", fontWeight: "700", marginBottom: "10px" }}>Who do you want to play against?</div>
@@ -567,16 +567,6 @@ export function CastleGame({ questions, teams: propTeams, onUpdateScore, onEnd, 
               }}><Icon name="person" size={14} /> Teacher</button>
             </div>
           </div>
-        )}
-        <button onClick={() => setShowHowTo(true)} className="castle-next-btn" style={{ display: "block", margin: "0 auto 14px", background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
-          <Icon name="help" size={14} /> How to Play
-        </button>
-        {showHowTo && (
-          <HowToPlayModal
-            gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color}
-            gameId={GM.id}
-            onClose={() => setShowHowTo(false)}
-          />
         )}
         <button onClick={() => setPhase("select-action")} className="castle-next-btn" style={{ background: "#059669", color: "white", border: "3px solid #1A1A2E", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "6px 6px 0 #1A1A2E" }}><Icon name="castle" size={18} /> Prepare for Battle!</button>
       </div>

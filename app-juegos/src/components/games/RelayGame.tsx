@@ -6,7 +6,7 @@ import type { GameProps } from "../../types";
 import { teamsGridCols, GAME_MODES, GAME_ICONS, RELAY_QUESTION_STARTERS } from "../../data/constants";
 import { denseRank } from "../../utils/ranking";
 import { RankBadge } from "../shared/RankBadge";
-import { HowToPlayModal } from "../shared/HowToPlayModal";
+import { HowToPlayBar } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
 import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
 import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
@@ -158,7 +158,6 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
   };
 
   const [phase, setPhase] = useState<Phase>(resumed ? "ready" : "welcome");
-  const [showHowTo, setShowHowTo] = useState(false);
   // Screen mode only — a teacher-controlled toggle for the live-word card (screenShowsWord): swaps
   // it for the word pool instead, so the teacher can safely leave the screen up between questions
   // without the live word sitting there if anyone glances over, then swap back to actually answer
@@ -858,6 +857,7 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
               Guess it in as few questions as you can: up to <strong style={{ color: "#5EEAD4" }}>{MAX_POINTS} points</strong> for your 1st question, down to {MIN_POINTS} by your {QUESTIONS_PER_PERSON}th. Then {isSolo ? "you go again with a new word" : "the next teammate swaps in"}!
             </div>
           </div>
+          <HowToPlayBar gameId={GM.id} gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color} />
           <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "18px" }}>
             {teams.map((t, i) => (
               <div key={t.id} style={{ background: t.color.dark, border: "2px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E", borderRadius: "14px", padding: "10px 18px", fontWeight: "800", fontSize: "14px", color: "white", display: "flex", alignItems: "center", gap: "6px" }}>
@@ -1053,16 +1053,6 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
           </>
 
           {wordListToggle}
-          <button onClick={() => setShowHowTo(true)} className="rl-btn" style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginBottom: "14px", background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
-            <Icon name="help" size={15} /> How to Play
-          </button>
-          {showHowTo && (
-            <HowToPlayModal
-              gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color}
-              gameId={GM.id}
-              onClose={() => setShowHowTo(false)}
-            />
-          )}
           {/* Every real team needs at least one phone connected before phone mode can start — a team
               that never joined would otherwise silently lock in at 1 "phantom" person nobody is
               actually playing. Screen mode has no device data to check, so it's never gated. */}

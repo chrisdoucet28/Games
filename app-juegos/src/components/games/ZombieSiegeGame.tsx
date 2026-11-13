@@ -4,7 +4,7 @@ import { Icon, type IconName } from "../shared/Icon";
 import type { GameProps, QuestionData, Team } from "../../types";
 import { ScoreBoard } from "../shared/ScoreBoard";
 import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
-import { HowToPlayModal } from "../shared/HowToPlayModal";
+import { HowToPlayBar } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
 import { TurnTimerBar } from "../shared/TurnTimerBar";
 import { playSound } from "../../lib/sounds";
@@ -698,7 +698,6 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
   const resumed = useRef(validateZombieSiegeSnapshot(initialGameState, teams, isSolo)).current;
 
   const [phase, setPhase] = useState<Phase>(resumed ? "playing" : "intro");
-  const [showHowTo, setShowHowTo] = useState(false);
   const [withTeacherAlly, setWithTeacherAlly] = useState<boolean>(() => resumed?.withTeacherAlly ?? false);
   // A ref (not just the `paused` prop) so the tick interval's closure always reads the latest
   // value without needing to tear down and rebuild the interval every time pause is toggled.
@@ -1048,6 +1047,7 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
             Clear the wave, and a bigger one begins!
           </div>
         </div>
+        <HowToPlayBar gameId={GM.id} gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color} />
         {isSolo && (
           <div style={{ marginBottom: "14px" }}>
             <div style={{ fontSize: "13px", color: "#D9F99D", fontWeight: "700", marginBottom: "10px" }}>
@@ -1073,16 +1073,6 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
               </div>
             )}
           </div>
-        )}
-        <button onClick={() => setShowHowTo(true)} className="zs-btn" style={{ display: "block", margin: "0 auto 14px", background: "white", color: GM.color, border: "3px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
-          <Icon name="help" size={14} /> How to Play
-        </button>
-        {showHowTo && (
-          <HowToPlayModal
-            gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color}
-            gameId={GM.id}
-            onClose={() => setShowHowTo(false)}
-          />
         )}
         <button onClick={() => setPhase("playing")} className="zs-btn" style={{ background: "#65A30D", color: "#0D1A0D", border: "3px solid #1A1A2E", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "6px 6px 0 #1A1A2E" }}><Icon name="house" size={17} /> Board Up the House!</button>
       </div>

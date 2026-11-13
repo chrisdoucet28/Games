@@ -5,6 +5,7 @@ import { setMusicSuspended } from "../../lib/music";
 // Each game's "How to Play" button opens its animated explainer video (made 2026-11 with HyperFrames
 // from real game screens — source projects live outside this repo, in Desktop\classcade-videos).
 // The videos replaced the old scripted step-by-step walkthroughs (data/tutorials/, removed).
+// It never autoplays — the teacher presses play (owner, 2026-11-13).
 // Hosted on the same Vercel Blob store as the music. Blobs are cached for a year, so a re-edited
 // video must be uploaded under a NEW name (bump -v1 → -v2) and the entry below updated — never
 // overwrite the old file in place, or browsers keep showing the old one.
@@ -13,7 +14,7 @@ const HOW_TO_VIDEOS: Record<string, string> = {
   whack: "whack-v1", auction: "auction-v1", battleship: "battleship-v1", vault: "vault-v1", hill: "hill-v1",
   hotpotato: "hotpotato-v1", castle: "castle-v1", racetrack: "racetrack-v1", minefield: "minefield-v1",
   rocket: "rocket-v1", orderup: "orderup-v1", bounty: "bounty-v1", hotseat: "hotseat-v1", relay: "relay-v1",
-  cards: "cards-v1", spy: "spy-v1", zombie: "zombie-v1",
+  cards: "cards-v1", spy: "spy-v1", zombie: "zombie-v2",
 };
 
 interface HowToPlayModalProps {
@@ -66,12 +67,38 @@ export function HowToPlayModal({ gameId, gameName, gameIcon, accentColor, onClos
           <video
             src={`${VIDEO_BASE}/${file}.mp4`}
             poster={`${VIDEO_BASE}/${file}.jpg`}
-            controls autoPlay playsInline preload="auto"
+            controls playsInline preload="metadata"
             onError={() => setFailed(true)}
             style={{ display: "block", width: "100%", aspectRatio: "16 / 9", borderRadius: "12px", background: "#000" }}
           />
         )}
       </div>
     </div>
+  );
+}
+
+// The long "How to Play" button every game shows right under its description box (owner, 2026-11-13:
+// between the description and the teams, full width, not a small button further down). Owns its own
+// open/closed state, so a game just drops <HowToPlayBar … /> in and needs no state of its own.
+export function HowToPlayBar({ gameId, gameName, gameIcon, accentColor }: Omit<HowToPlayModalProps, "onClose">) {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <button
+        onClick={() => setOpen(true)}
+        style={{
+          display: "flex", alignItems: "center", justifyContent: "center", gap: "10px", width: "100%", maxWidth: "540px",
+          margin: "4px auto 18px", padding: "12px 18px", borderRadius: "14px", cursor: "pointer",
+          background: "rgba(255,255,255,0.95)", color: accentColor, border: `2px solid ${accentColor}`,
+          boxShadow: "0 3px 10px rgba(0,0,0,0.18)", fontSize: "16px", fontWeight: 900, fontFamily: "inherit",
+        }}
+      >
+        <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: "28px", height: "28px", borderRadius: "50%", background: accentColor, color: "white" }}>
+          <Icon name="play" size={13} />
+        </span>
+        How to Play <span style={{ fontWeight: 700, fontSize: "13px", opacity: 0.75 }}>· watch the video</span>
+      </button>
+      {open && <HowToPlayModal gameId={gameId} gameName={gameName} gameIcon={gameIcon} accentColor={accentColor} onClose={() => setOpen(false)} />}
+    </>
   );
 }

@@ -4,7 +4,7 @@ import type { GameProps, Team } from "../../types";
 import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
 import { denseRank } from "../../utils/ranking";
 import { RankBadge } from "../shared/RankBadge";
-import { HowToPlayModal } from "../shared/HowToPlayModal";
+import { HowToPlayBar } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
 import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
 import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
@@ -205,7 +205,6 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
     setMusicGame("auction");
     return () => setMusicGame(null);
   }, []);
-  const [showHowTo, setShowHowTo] = useState(false);
   const [bets, setBets] = useState<Record<string | number, Bet>>({});
   const [resultMsg, setResultMsg] = useState<ResultMsg[]>([]);
   // Correction Mode only: teams whose win on this lot is on hold pending the teacher confirming
@@ -545,6 +544,7 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
             Win and keep the points, lose and they're gone! Go <strong style={{ color: "#FB923C" }}>All In</strong> for big risk, or bet the <strong>25pt minimum</strong> to stay safe.
           </div>
         </div>
+        <HowToPlayBar gameId={GM.id} gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color} />
         <div style={{ marginTop: "24px", marginBottom: "20px", fontSize: "14px", color: "#C4B5FD", fontWeight: "600" }}>
           Each team gets a <strong style={{ color: "#FCD34D" }}>200 pt auction bank</strong> — separate from your score. Bet wisely — your final bank total adds to your score!
         </div>
@@ -613,16 +613,6 @@ export function AuctionGame({ questions, teams, onUpdateScore, onEnd, forceFinal
           </div>
         </div>
 
-        <button onClick={() => setShowHowTo(true)} style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginBottom: "14px", background: "white", color: GM.color, border: "3px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
-          <Icon name="help" size={15} /> How to Play
-        </button>
-        {showHowTo && (
-          <HowToPlayModal
-            gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color}
-            gameId={GM.id}
-            onClose={() => setShowHowTo(false)}
-          />
-        )}
         <button onClick={() => setPhase("betting")} className="auction-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#F7C948", color: "#150F00", border: "3px solid #1A1A2E", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "6px 6px 0 #1A1A2E" }}>
           <Icon name="hammer" size={20} /> Start the Auction!
         </button>

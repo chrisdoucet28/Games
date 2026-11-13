@@ -13,7 +13,7 @@ import {
 import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
 import { denseRank } from "../../utils/ranking";
 import { RankBadge } from "../shared/RankBadge";
-import { HowToPlayModal } from "../shared/HowToPlayModal";
+import { HowToPlayBar } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
 import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
 import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
@@ -148,7 +148,6 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
   })()).current;
 
   const [phase, setPhase] = useState<"intro" | "countdown" | "playing" | "turn-end" | "final">(resumed ? "countdown" : "intro");
-  const [showHowTo, setShowHowTo] = useState(false);
 
   useEffect(() => {
     if (phase === "final") { playSound("roundComplete"); stopMusic(); }
@@ -539,6 +538,7 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
             Hit right for points and a growing <strong style={{ color: "#BEF264" }}>combo bonus</strong>; hit wrong and that mole's gone, but the correct one's still up. Moles duck faster as your clock runs down!
           </div>
         </div>
+        <HowToPlayBar gameId={GM.id} gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color} />
         <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "20px" }}>
           {teams.map((t, i) => (
             <div key={t.id} style={{ background: t.color.dark, border: "3px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E", borderRadius: "14px", padding: "10px 18px", fontWeight: "800", fontSize: "14px", color: "white", display: "flex", alignItems: "center", gap: "6px" }}>
@@ -604,16 +604,6 @@ export function WordWhackGame({ questions, teams, onUpdateScore, onEnd, forceFin
           );
         })()}
         </>
-        <button onClick={() => setShowHowTo(true)} className="ww-btn" style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginBottom: "14px", background: "white", color: GM.color, border: "3px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
-          <Icon name="help" size={15} /> How to Play
-        </button>
-        {showHowTo && (
-          <HowToPlayModal
-            gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color}
-            gameId={GM.id}
-            onClose={() => setShowHowTo(false)}
-          />
-        )}
         <button onClick={() => { setTeamIdx(0); startTeamTurn(); }} className="ww-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#84CC16", color: "#0F1A05", border: "3px solid #1A1A2E", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "6px 6px 0 #1A1A2E" }}>
           <Icon name="hammer" size={20} /> Start Whacking!
         </button>

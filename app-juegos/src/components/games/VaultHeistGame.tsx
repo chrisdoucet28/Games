@@ -10,7 +10,7 @@ import { Confetti } from "../shared/Confetti";
 import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
 import { TOPIC_OPTIONS } from "../../data/topicOptions";
 import { makeSoloCpuTeam } from "../../lib/soloOpponent";
-import { HowToPlayModal } from "../shared/HowToPlayModal";
+import { HowToPlayBar } from "../shared/HowToPlayModal";
 import { playSound } from "../../lib/sounds";
 import { setMusicGame, stopMusic } from "../../lib/music";
 
@@ -237,7 +237,6 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
   // A resumed vault skips the intro/roll screens entirely and drops straight into "reveal" for
   // whichever team was up — bootstrapped once below, after finishOrderRef is seeded.
   const [phase, setPhase] = useState<Phase>(() => resumed ? "reveal" : "intro");
-  const [showHowTo, setShowHowTo] = useState(false);
   const [difficulty, setDifficulty] = useState<Difficulty>(() => resumed?.difficulty ?? "medium");
   // Solo-only dial, independent of `difficulty` above: how accurate the CPU is, not how much time
   // anyone gets. Unused whenever a real second team is playing instead of a CPU.
@@ -605,6 +604,7 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
             <span style={{ display: "inline-flex", alignItems: "center", gap: "3px" }}><Icon name="check" size={13} /> Correct → the lock cracks and you keep going.</span> <span style={{ display: "inline-flex", alignItems: "center", gap: "3px" }}><Icon name="close" size={11} /> Wrong → your last crack re-locks and the turn passes on.</span> No partial credit — accuracy is everything.
           </div>
         </div>
+        <HowToPlayBar gameId={GM.id} gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color} />
         <div style={{ marginBottom: "20px" }}>
           <div style={{ color: "#D6C9AE", fontWeight: "800", fontSize: "13px", marginBottom: "10px", letterSpacing: "0.04em", textTransform: "uppercase", display: "flex", alignItems: "center", justifyContent: "center", gap: "5px" }}><Icon name="clock" size={13} /> Choose a timer speed</div>
           <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap" }}>
@@ -663,16 +663,6 @@ export function VaultHeistGame({ questions, teams: propTeams, onUpdateScore, onE
               How likely the CPU is to crack each lock — separate from the timer speed above.
             </div>
           </div>
-        )}
-        <button onClick={() => setShowHowTo(true)} className="vault-next-btn" style={{ display: "block", margin: "0 auto 14px", background: "white", color: GM.color, border: "3px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
-          <Icon name="help" size={14} /> How to Play
-        </button>
-        {showHowTo && (
-          <HowToPlayModal
-            gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color}
-            gameId={GM.id}
-            onClose={() => setShowHowTo(false)}
-          />
         )}
         <button onClick={() => setPhase("rolling")} className="vault-next-btn" style={{ background: "#D4AF37", color: "#1F1608", border: "3px solid #1A1A2E", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "6px 6px 0 #1A1A2E" }}><Icon name="dice" size={18} /> Roll to Start!</button>
       </div>

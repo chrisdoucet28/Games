@@ -10,7 +10,7 @@ import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
 import { denseRank } from "../../utils/ranking";
 import { RankBadge } from "../shared/RankBadge";
 import { makeSoloCpuTeam, makeTeacherTeam } from "../../lib/soloOpponent";
-import { HowToPlayModal } from "../shared/HowToPlayModal";
+import { HowToPlayBar } from "../shared/HowToPlayModal";
 import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
 import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
 import { playSound } from "../../lib/sounds";
@@ -263,7 +263,6 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
   // A resumed match skips the intro and this round's dice roll — turn order is already known —
   // and drops straight into "pick" for whichever team was up.
   const [phase, setPhase] = useState<"intro" | "rolling" | "pick" | "answer" | "contested" | "round-end" | "final">(() => resumed ? "pick" : "intro");
-  const [showHowTo, setShowHowTo] = useState(false);
 
   // "Play on Phones" — lets the attacker/defender in a contested duel buzz in from their seats
   // instead of the teacher guessing who answered first by ear. Gated to propTeams.length > 1 (not
@@ -813,6 +812,7 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
             Score for every zone you own each round — most points after <strong style={{ color: "#F9A8D4" }}>{TOTAL_ROUNDS} rounds</strong> wins!
           </div>
         </div>
+        <HowToPlayBar gameId={GM.id} gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color} />
         <div style={{ marginTop: "18px", marginBottom: "20px", fontSize: "14px", color: "#F9A8D4", fontWeight: "600", display: "inline-flex", alignItems: "center", gap: "5px" }}>
           The <Icon name="crown" size={14} /> {isThemeMode ? "Opinion" : "Center"} zone scores the most — expect fierce competition for it every round!
         </div>
@@ -887,16 +887,6 @@ export function KingOfHillGame({ questions, teams: propTeams, onUpdateScore, onE
               }}><Icon name="person" size={14} /> Teacher</button>
             </div>
           </div>
-        )}
-        <button onClick={() => setShowHowTo(true)} className="ko-btn" style={{ display: "block", margin: "0 auto 14px", background: "white", color: GM.color, border: "3px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
-          <Icon name="help" size={14} /> How to Play
-        </button>
-        {showHowTo && (
-          <HowToPlayModal
-            gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color}
-            gameId={GM.id}
-            onClose={() => setShowHowTo(false)}
-          />
         )}
         <button onClick={() => setPhase("rolling")} className="ko-btn" style={{ background: "#DB2777", color: "white", border: "3px solid #1A1A2E", borderRadius: "12px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "6px 6px 0 #1A1A2E" }}><Icon name="crown" size={18} /> Roll for Turn Order!</button>
       </div>

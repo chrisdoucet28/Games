@@ -7,7 +7,7 @@ import { useTurnTimer } from "../../hooks/useTurnTimer";
 import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
 import { denseRank } from "../../utils/ranking";
 import { RankBadge } from "../shared/RankBadge";
-import { HowToPlayModal } from "../shared/HowToPlayModal";
+import { HowToPlayBar } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
 import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
 import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
@@ -502,7 +502,6 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
   const vocabWordPool = useRef([...new Set(questions.filter(q => q.word).map(q => q.word as string))]).current;
 
   const [phase, setPhase] = useState<Phase>(resumed ? "playing" : "intro");
-  const [showHowTo, setShowHowTo] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [sessionLength, setSessionLength] = useState<string>(resumed?.sessionLength ?? "medium");
   const [ticketDifficulty, setTicketDifficulty] = useState<TicketDifficulty>(resumed?.ticketDifficulty ?? "medium");
@@ -953,6 +952,7 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
             Claim any customer and write <strong style={{ color: "#BE185D" }}>one sentence</strong> that satisfies every dish at once — wait too long once you've claimed one and <strong style={{ color: "#BE185D" }}>your team</strong> loses points!
           </div>
         </div>
+        <HowToPlayBar gameId={GM.id} gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color} />
         <div style={{ marginBottom: "22px" }}>
           <div style={{ fontSize: "13px", fontWeight: "700", color: "#9D174D", marginBottom: "8px", display: "inline-flex", alignItems: "center", gap: "5px" }}><Icon name="clock" size={13} /> How long is the dinner rush?</div>
           <div style={{ display: "flex", gap: "8px", justifyContent: "center", flexWrap: "wrap" }}>
@@ -1088,16 +1088,6 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
             );
           })()}
         </>
-        <button onClick={() => setShowHowTo(true)} className="ou-btn" style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginBottom: "14px", background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
-          <Icon name="help" size={15} /> How to Play
-        </button>
-        {showHowTo && (
-          <HowToPlayModal
-            gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color}
-            gameId={GM.id}
-            onClose={() => setShowHowTo(false)}
-          />
-        )}
         <button onClick={() => setPhase("playing")} className="ou-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#F43F5E", color: "white", border: "3px solid #1A1A2E", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "6px 6px 0 #1A1A2E" }}><Icon name="bell" size={20} /> Open the Diner!</button>
       </div>
     </div>

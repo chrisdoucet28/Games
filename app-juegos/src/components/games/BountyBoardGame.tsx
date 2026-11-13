@@ -6,7 +6,7 @@ import type { GameProps } from "../../types";
 import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
 import { denseRank } from "../../utils/ranking";
 import { RankBadge } from "../shared/RankBadge";
-import { HowToPlayModal } from "../shared/HowToPlayModal";
+import { HowToPlayBar } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
 import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
 import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
@@ -413,7 +413,6 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
   })()).current;
 
   const [phase, setPhase] = useState<Phase>(resumed ? "playing" : "intro");
-  const [showHowTo, setShowHowTo] = useState(false);
   const [roundNumber, setRoundNumber] = useState(resumed?.roundNumber ?? 0);
   const [roundEntries, setRoundEntries] = useState<BountyRoundEntry[]>([]);
   const [bounties, setBounties] = useState<Bounty[]>([]);
@@ -868,6 +867,7 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
             Get it wrong and it becomes a <strong style={{ color: "#B91C1C" }}>bounty</strong>: a different team can claim it and fix your exact sentence for double the points — miss it again and it's worth even more!
           </div>
         </div>
+        <HowToPlayBar gameId={GM.id} gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color} />
         {/* Always shown, even when a class-level session already exists (Class Check-In, or an
             earlier game's "Play on Phones") — a teacher choosing THIS game still needs the choice
             of Screen vs Phones for it specifically; picking Phones reuses the existing class-level
@@ -958,16 +958,6 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
               Hard means a sharper CPU — it writes fewer wrong sentences and rarely fails to fix yours. Easy makes more of both kinds of mistakes.
             </div>
           </div>
-        )}
-        <button onClick={() => setShowHowTo(true)} className="bb-btn" style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginBottom: "14px", background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
-          <Icon name="help" size={15} /> How to Play
-        </button>
-        {showHowTo && (
-          <HowToPlayModal
-            gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color}
-            gameId={GM.id}
-            onClose={() => setShowHowTo(false)}
-          />
         )}
         <button onClick={() => setPhase("playing")} className="bb-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#B45309", color: "white", border: "3px solid #1A1A2E", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "6px 6px 0 #1A1A2E" }}><Icon name="sheriffStar" size={20} /> Open the Board!</button>
       </div>

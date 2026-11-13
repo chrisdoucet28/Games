@@ -7,7 +7,7 @@ import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
 import { denseRank } from "../../utils/ranking";
 import { RankBadge } from "../shared/RankBadge";
 import { makeTeacherTeam } from "../../lib/soloOpponent";
-import { HowToPlayModal } from "../shared/HowToPlayModal";
+import { HowToPlayBar } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
 import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
 import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
@@ -294,7 +294,6 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
   const [tp2Guesses, setTp2Guesses] = useState<Record<string | number, string>>({});
   const [tp2GuessIdx, setTp2GuessIdx] = useState(0);
   const [tp2SpeakOrder, setTp2SpeakOrder] = useState<Team[]>(() => [...teams]);
-  const [showHowTo, setShowHowTo] = useState(false);
 
   // "Play on Phones" mode — available in group mode, solo, and real 1v1 alike (see
   // enterRoundStartPhase below for how each ruleset handles it). Always defaults to screen, even
@@ -820,6 +819,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
               )}
             </div>
           </div>
+          <HowToPlayBar gameId={GM.id} gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color} />
           <div style={{ marginTop: "24px", marginBottom: "20px", fontSize: "14px", color: "#94A3B8", fontWeight: "600" }}>
             {isTwoPlayer
               ? "Just the two of you — take it in turns to be the sneaky one!"
@@ -916,25 +916,6 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
             );
           })()}
           </>
-          <button
-            onClick={() => setShowHowTo(true)}
-            className="sau-btn"
-            style={{
-              display: "inline-flex", alignItems: "center", gap: "6px", marginBottom: "14px",
-              background: "white", color: GM.color, border: "3px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E",
-              borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800",
-              cursor: "pointer",
-            }}
-          >
-            <Icon name="help" size={15} /> How to Play
-          </button>
-          {showHowTo && (
-            <HowToPlayModal
-              gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color}
-              gameId={GM.id}
-              onClose={() => setShowHowTo(false)}
-            />
-          )}
           <button
             onClick={startMission}
             className="sau-btn"

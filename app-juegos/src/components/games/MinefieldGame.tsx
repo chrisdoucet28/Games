@@ -6,7 +6,7 @@ import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
 import { denseRank } from "../../utils/ranking";
 import { RankBadge } from "../shared/RankBadge";
 import { makeSoloCpuTeam, makeTeacherTeam } from "../../lib/soloOpponent";
-import { HowToPlayModal } from "../shared/HowToPlayModal";
+import { HowToPlayBar } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
 import { playSound } from "../../lib/sounds";
 import { setMusicContext, setMusicGame, stopMusic } from "../../lib/music";
@@ -127,7 +127,6 @@ export function MinefieldGame({ gridData, teams: propTeams, onUpdateScore, onEnd
     if (phase === "speaking") setMusicContext("tension");
     return () => setMusicContext("gameplay");
   }, [phase === "speaking"]);
-  const [showHowTo, setShowHowTo] = useState(false);
 
   useEffect(() => {
     if (phase === "final") { playSound("roundComplete"); stopMusic(); }
@@ -338,6 +337,7 @@ export function MinefieldGame({ gridData, teams: propTeams, onUpdateScore, onEnd
             {topicRotation && <><br />It's one shared minefield all game — topics cycle through for variety until every safe tile is found.</>}
           </div>
         </div>
+        <HowToPlayBar gameId={GM.id} gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color} />
         <div style={{ marginTop: "24px", marginBottom: "20px", fontSize: "14px", color: "#6B7280", fontWeight: "600" }}>
           {topicRotation
             ? "Topics rotate each round for variety, looping back through the list if there's still board left to clear — the team with the most points when every safe tile is found wins!"
@@ -371,16 +371,6 @@ export function MinefieldGame({ gridData, teams: propTeams, onUpdateScore, onEnd
               </div>
             )}
           </div>
-        )}
-        <button onClick={() => setShowHowTo(true)} style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginBottom: "14px", background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
-          <Icon name="help" size={15} /> How to Play
-        </button>
-        {showHowTo && (
-          <HowToPlayModal
-            gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color}
-            gameId={GM.id}
-            onClose={() => setShowHowTo(false)}
-          />
         )}
         <button onClick={() => setPhase("pick")} className="mf-btn" style={{ background: "#6D28D9", color: "white", border: "3px solid #1A1A2E", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "5px 5px 0 #1A1A2E" }}>
           {topicRotation ? "Start This Topic" : "Enter the Minefield"}

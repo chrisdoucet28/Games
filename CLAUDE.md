@@ -313,9 +313,10 @@ handout) with no guarantee they've seen any other specific lesson first.
   135 topics against Word Whack's actual parsing logic confirmed it was the only offender — but
   since nothing else in the app would ever catch a repeat of this, verify the format by eye (or
   with a quick parse check) for every new topic's `choose correct grammar` pool before moving on.
-- **"How to Play" videos**: each game's intro screen has a How to Play button that plays that
-  game's animated explainer video (`components/shared/HowToPlayModal.tsx`, which holds the
-  gameId → file map). They replaced the old scripted step-by-step walkthroughs (`data/tutorials/`,
+- **"How to Play" videos**: each game's intro screen has a long How to Play button (`HowToPlayBar`)
+  right under its description box, above the teams, which opens that game's animated explainer
+  video — never autoplaying, the teacher presses play (`components/shared/HowToPlayModal.tsx`,
+  which holds the gameId → file map). They replaced the old scripted step-by-step walkthroughs (`data/tutorials/`,
   deleted 2026-11). The videos are built outside this repo (HyperFrames project in
   `Desktop\classcade-videos`, one `games/<game>/build.cjs` each) and hosted on the Vercel Blob
   media store (`video/how-to/<gameId>-vN.mp4` + `.jpg` poster). Blobs are cached for a year, so a

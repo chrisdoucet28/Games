@@ -8,7 +8,7 @@ import { QuestionCard } from "../shared/QuestionCard";
 import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
 import { useTurnTimer } from "../../hooks/useTurnTimer";
 import { TurnTimerBar } from "../shared/TurnTimerBar";
-import { HowToPlayModal } from "../shared/HowToPlayModal";
+import { HowToPlayBar } from "../shared/HowToPlayModal";
 import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
 import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
 import { playSound, type SoundName } from "../../lib/sounds";
@@ -228,7 +228,6 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
   const resumed = useRef(validateRaceSnapshot(initialGameState, teams.map(t => t.id))).current;
   // A resumed race skips the intro and drops straight into a fresh task for the group.
   const [phase, setPhase] = useState<Phase>(() => resumed ? "task" : "intro");
-  const [showHowTo, setShowHowTo] = useState(false);
   // Solo only — see SOLO_TASK_SECONDS_BY_DIFFICULTY. Picked on the intro screen; harmless to seed
   // even for multi-team games, since it's never read outside the isSolo branch of the timer below.
   const [difficulty, setDifficulty] = useState<Difficulty>(() => resumed?.difficulty ?? "medium");
@@ -850,6 +849,7 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
             The challenge ramps up as the leading team advances. Land on special spaces for boosts, traps, coins and shields, and spend coins in the <strong style={{ color: "#93C5FD", display: "inline-flex", alignItems: "center", gap: "3px" }}><Icon name="cart" size={13} /> Shop</strong>. First to the finish line wins!
           </div>
         </div>
+        <HowToPlayBar gameId={GM.id} gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color} />
         <CheckeredStrip />
         <div style={{ display: "flex", gap: "6px", justifyContent: "center", flexWrap: "wrap", margin: "18px 0 16px", maxWidth: "560px", marginLeft: "auto", marginRight: "auto" }}>
           {SPACE_DEFS.filter(s => s.id !== "normal").map(s => (
@@ -928,16 +928,6 @@ export function RaceTrackGame({ questions, teams, onUpdateScore, onEnd, forceFin
               })}
             </div>
           </div>
-        )}
-        <button onClick={() => setShowHowTo(true)} className="rt-btn" style={{ display: "block", margin: "0 auto 14px", background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
-          <Icon name="help" size={14} /> How to Play
-        </button>
-        {showHowTo && (
-          <HowToPlayModal
-            gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color}
-            gameId={GM.id}
-            onClose={() => setShowHowTo(false)}
-          />
         )}
         <button onClick={() => { playSound("racetrack"); setPhase("task"); }} className="rt-btn" style={{ background: "#EF4444", color: "white", border: "3px solid #1A1A2E", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "6px 6px 0 #1A1A2E" }}><Icon name="play" size={18} /> Start Race!</button>
       </div>
