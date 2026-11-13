@@ -240,7 +240,11 @@ function TogetherView({ state, teamId, deviceId, onAction }: Props) {
   const team = state.roster.find(t => t.id === teamId);
   const teamKey = String(teamId);
   const mine = state.byTeam?.[teamKey];
-  const send = (action: RelayActionPayload["action"]) => onAction({ teamId, deviceId, action });
+  // Stamped with what this phone is showing, so the screen can drop a duplicate or out-of-date tap.
+  const send = (action: RelayActionPayload["action"]) => onAction({
+    teamId, deviceId, action, word: mine?.word,
+    questionNumber: mine?.phase === "asking" ? mine.questionNumber : undefined,
+  });
   const points = state.pointsByTeam?.[teamKey] ?? 0;
 
   const wrapStyle: React.CSSProperties = {

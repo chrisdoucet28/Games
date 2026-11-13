@@ -400,6 +400,12 @@ export type RelayActionPayload = {
   teamId: string | number;
   deviceId: string;
   action: "guessed" | "missed" | "next" | "changeWord";
+  // "together" only — what this phone was showing when it was tapped: the word, plus (while asking)
+  // the question number. The screen drops a tap that no longer matches its own state, so a
+  // second teammate tapping "Question asked" for the SAME question a moment later (or a late
+  // "Next word" after the team already moved on) never counts twice.
+  word?: string;
+  questionNumber?: number;
 };
 
 const DEVICE_ID_KEY = "classcade-device-id";

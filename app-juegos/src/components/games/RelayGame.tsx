@@ -176,6 +176,9 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
   // Connected phone (device) ids per team, in the order each was first seen — stable, so the asker
   // rotation doesn't reshuffle when someone reconnects. Only phones that report a deviceId appear.
   const [connectedByTeam, setConnectedByTeam] = useState<Record<string, string[]>>({});
+  // Every phone ever seen per team this session, same order as deviceRosterRef (connected or not) —
+  // the "together" asker rotation runs through this (see rotationList).
+  const [knownByTeam, setKnownByTeam] = useState<Record<string, string[]>>({});
   const deviceRosterRef = useRef<Record<string, string[]>>({});
   // Each team's current asker (a device id). Falls back to the first connected phone whenever the
   // stored one isn't connected any more.
@@ -333,8 +336,15 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
   const revealStartsNewRound = !revealInfo.teamFinished && currentPeoplePerTeam > 0 && (slotIndexByTeam[currentKey] ?? 0) % currentPeoplePerTeam === 0;
 
   // --- Who is asking, and who answers (phone mode) ---
+  // Who the asker rotation runs through. "turns": only currently-connected phones (unchanged).
+  // "together": every phone EVER seen on that team, connected or not — so a phone whose screen
+  // locks mid-word doesn't hand the asker role to a teammate who has already seen the word (and on
+  // a 2-phone team, leave nobody holding the buttons). The asker doesn't need their phone at all to
+  // ask out loud, so a sleeping asker phone is harmless; the team's other phones keep the controls.
+  const rotationList = (teamKey: string): string[] =>
+    together ? (knownByTeam[teamKey] ?? []) : (connectedByTeam[teamKey] ?? []);
   const rotatedDevices = (teamKey: string): string[] => {
-    const list = connectedByTeam[teamKey] ?? [];
+    const list = rotationList(teamKey);
     const stored = askerByTeam[teamKey];
     const at = stored ? list.indexOf(stored) : 0;
     return at <= 0 ? list : [...list.slice(at), ...list.slice(0, at)];
@@ -370,7 +380,7 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
 
   // --- Turn actions ---
   const advanceAskerFor = (teamKey: string) => {
-    const list = connectedByTeam[teamKey] ?? [];
+    const list = rotationList(teamKey);
     if (list.length === 0) return;
     const current = rotatedDevices(teamKey)[0];
     const next = list[(list.indexOf(current) + 1) % list.length];
@@ -533,6 +543,12 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
     if (teamPhaseOf(key) !== "reveal") return;
     setTeamPhaseByTeam(prev => ({ ...prev, [key]: "asking" }));
   };
+  // What a phone on this team is showing right now — matched against each tap's own stamp.
+  const stampOf = (key: string): { word: string; questionNumber?: number } => {
+    if (teamPhaseOf(key) === "reveal") return { word: revealByTeam[key]?.word ?? "" };
+    const budget = questionsForSlot(key, slotIndexByTeam[key] ?? 0);
+    return { word: teamWords[key] ?? "", questionNumber: Math.min((questionsUsedByTeam[key] ?? 0) + 1, Math.max(budget, 1)) };
+  };
   const changeWordFor = (key: string) => {
     if (teamPhaseOf(key) !== "asking") return;
     const fresh = drawWord();
@@ -647,14 +663,14 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
   // always calls the latest closure.
   const buildPayloadRef = useRef(buildPayload);
   const sendStateRef = useRef<(() => void) | null>(null);
-  const liveRef = useRef({ phase, answererDeviceIds, markGuessed, markMissed, changeWord, continueFromReveal, together, connectedByTeam, teamPhaseOf, rotatedDevices, resolveTogether, continueTogether, changeWordFor });
+  const liveRef = useRef({ phase, answererDeviceIds, markGuessed, markMissed, changeWord, continueFromReveal, together, knownByTeam, teamPhaseOf, rotatedDevices, resolveTogether, continueTogether, changeWordFor, stampOf });
   const lastActionAtRef = useRef(0);
   // "together" throttles per TEAM, not globally — several teams tapping within the same half-second
   // is the normal case there, not a double-tap.
   const lastActionAtByTeamRef = useRef<Record<string, number>>({});
   useEffect(() => {
     buildPayloadRef.current = buildPayload;
-    liveRef.current = { phase, answererDeviceIds, markGuessed, markMissed, changeWord, continueFromReveal, together, connectedByTeam, teamPhaseOf, rotatedDevices, resolveTogether, continueTogether, changeWordFor };
+    liveRef.current = { phase, answererDeviceIds, markGuessed, markMissed, changeWord, continueFromReveal, together, knownByTeam, teamPhaseOf, rotatedDevices, resolveTogether, continueTogether, changeWordFor, stampOf };
   });
 
   useEffect(() => {
@@ -686,6 +702,7 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
       });
       setConnectedTeamIds(teamIds);
       setConnectedByTeam(byTeam);
+      setKnownByTeam(Object.fromEntries(Object.entries(deviceRosterRef.current).map(([k, v]) => [k, [...v]])));
     });
 
     // The only place phone input touches game logic — only a current answerer's phone is allowed
@@ -697,11 +714,16 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
         // Only a phone actually on the team it claims to act for; the asker (who can't see the
         // word) never judges their own guess, but anyone on the team can move past the reveal.
         const key = String(action.teamId);
-        if (live.phase !== "asking" || !(live.connectedByTeam[key] ?? []).includes(action.deviceId)) return;
+        if (live.phase !== "asking" || !(live.knownByTeam[key] ?? []).includes(action.deviceId)) return;
         const now = Date.now();
         if (now - (lastActionAtByTeamRef.current[key] ?? 0) < 500) return;
         const tPhase = live.teamPhaseOf(key);
         const isAsker = live.rotatedDevices(key)[0] === action.deviceId;
+        // Drop a tap made on a screen that is already out of date (see RelayActionPayload.word).
+        // A phone still on an older build sends no stamp, and is let through as before.
+        const stamp = live.stampOf(key);
+        if (action.word !== undefined && action.word !== stamp.word) return;
+        if (action.questionNumber !== undefined && action.questionNumber !== stamp.questionNumber) return;
         if (action.action === "guessed" && tPhase === "asking" && !isAsker) live.resolveTogether(key, true);
         else if (action.action === "missed" && tPhase === "asking" && !isAsker) live.resolveTogether(key, false);
         else if (action.action === "changeWord" && tPhase === "asking" && !isAsker) live.changeWordFor(key);
@@ -771,6 +793,7 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
     setSessionCode(null);
     setConnectedTeamIds(new Set());
     setConnectedByTeam({});
+    setKnownByTeam({});
     deviceRosterRef.current = {};
   };
 
@@ -1164,7 +1187,9 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
               const slot = slotIndexByTeam[key] ?? 0;
               const budget = questionsForSlot(key, slot);
               const qNum = Math.min((questionsUsedByTeam[key] ?? 0) + 1, Math.max(budget, 1));
-              const phones = (connectedByTeam[key] ?? []).length;
+              // Connected phones that can see the word (everyone but the asker) — 0 means nobody on the
+              // team can answer or tap until a teammate wakes their phone or rejoins.
+              const answerPhones = (connectedByTeam[key] ?? []).filter(d => d !== rotatedDevices(key)[0]).length;
               const guessedNow = tPhase === "reveal" && reveal?.kind === "guessed";
               const accent = tPhase === "done" ? "#64748B" : tPhase === "reveal" ? (guessedNow ? "#22C55E" : "#F59E0B") : "#1A1A2E";
               return (
@@ -1192,8 +1217,8 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
                       </>
                     )}
                   </div>
-                  {tPhase !== "done" && phones < 2 && (
-                    <div style={{ fontSize: "11px", color: "#FDE68A", fontWeight: "800", marginTop: "8px" }}>⚠️ Needs a 2nd phone to keep going</div>
+                  {tPhase !== "done" && answerPhones === 0 && (
+                    <div style={{ fontSize: "11px", color: "#FDE68A", fontWeight: "800", marginTop: "8px" }}>⚠️ No teammate phone connected — wake a phone up or rejoin</div>
                   )}
                 </div>
               );
