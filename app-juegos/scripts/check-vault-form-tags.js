@@ -35,7 +35,11 @@ const TOPICS_PATH = path.join(__dirname, "..", "src", "data", "topics.ts");
 const AMBIGUOUS_TRANSFORMS = new Set(["negative", "question", "affirmative"]);
 
 function isNegativeAnswer(answer) {
-  return /\b(n't|never|nobody|nothing|no one|neither|nor)\b/i.test(answer) || /\bnot\b/i.test(answer);
+  // No \b before "n't": a contraction's "n" is always glued directly onto the preceding word
+  // stem (do-n't, isn't, wasn't...), both \w characters, so \b never fires there -- an anchored
+  // /\bn't\b/ silently fails to match EVERY contraction, which is most negative answers in
+  // English. Only the trailing \b (after "t") is meaningful here.
+  return /n't\b/i.test(answer) || /\b(never|nobody|nothing|no one|neither|nor|not)\b/i.test(answer);
 }
 function expectedForm(answer) {
   if (/\?\s*$/.test(answer.trim())) return "question";
@@ -61,7 +65,13 @@ function main() {
 
     const qMatch = line.match(/question:"((?:[^"\\]|\\.)*)"/);
     const aMatch = line.match(/answer:"((?:[^"\\]|\\.)*)"/);
-    const formMatch = line.match(/form:"([a-zA-Z]+)"/);
+    // \b matters here: "form:" is a literal substring of "transform:" ("trans" + "form:"), so an
+    // unanchored /form:"(...)"/ on a line with no real form field would match the tail end of
+    // transform:"negative" (or any other hyphen-free single-word tag) and silently misread the
+    // transform's own value as if it were a form field. "transform" has no non-word character
+    // before its embedded "form", so \b (a \w/\W transition) never fires inside it, only at a
+    // real, separate "form:" key.
+    const formMatch = line.match(/\bform:"([a-zA-Z]+)"/);
     const transformMatch = line.match(/transform:"([a-zA-Z0-9_-]+)"/);
     if (!qMatch || !aMatch) continue;
 
