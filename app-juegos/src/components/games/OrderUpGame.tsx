@@ -953,6 +953,9 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
           </div>
         </div>
         <HowToPlayBar gameId={GM.id} gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color} />
+        <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "22px" }}>
+          {teams.map(t => (<div key={t.id} style={{ background: t.color.dark, border: "2px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E", borderRadius: "14px", padding: "10px 18px", fontWeight: "800", fontSize: "14px", color: "white", display: "flex", alignItems: "center", gap: "6px" }}><TeamIcon team={t} color="white" /> {t.name}</div>))}
+        </div>
         <div style={{ marginBottom: "22px" }}>
           <div style={{ fontSize: "13px", fontWeight: "700", color: "#9D174D", marginBottom: "8px", display: "inline-flex", alignItems: "center", gap: "5px" }}><Icon name="clock" size={13} /> How long is the dinner rush?</div>
           <div style={{ display: "flex", gap: "8px", justifyContent: "center", flexWrap: "wrap" }}>

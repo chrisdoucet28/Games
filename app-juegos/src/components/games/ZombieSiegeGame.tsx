@@ -1048,6 +1048,9 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
           </div>
         </div>
         <HowToPlayBar gameId={GM.id} gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color} />
+        <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "22px" }}>
+          {teams.map(t => (<div key={t.id} style={{ background: t.color.dark, border: "2px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E", borderRadius: "14px", padding: "10px 18px", fontWeight: "800", fontSize: "14px", color: "white", display: "flex", alignItems: "center", gap: "6px" }}><TeamIcon team={t} color="white" /> {t.name}</div>))}
+        </div>
         {isSolo && (
           <div style={{ marginBottom: "14px" }}>
             <div style={{ fontSize: "13px", color: "#D9F99D", fontWeight: "700", marginBottom: "10px" }}>

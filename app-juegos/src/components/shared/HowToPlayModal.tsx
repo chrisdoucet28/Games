@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Icon, type IconName } from "./Icon";
 import { setMusicSuspended } from "../../lib/music";
 
@@ -11,10 +11,10 @@ import { setMusicSuspended } from "../../lib/music";
 // overwrite the old file in place, or browsers keep showing the old one.
 const VIDEO_BASE = "https://es8h1nft4dvfmlmp.public.blob.vercel-storage.com/video/how-to";
 const HOW_TO_VIDEOS: Record<string, string> = {
-  whack: "whack-v1", auction: "auction-v1", battleship: "battleship-v1", vault: "vault-v1", hill: "hill-v1",
+  whack: "whack-v2", auction: "auction-v2", battleship: "battleship-v2", vault: "vault-v1", hill: "hill-v1",
   hotpotato: "hotpotato-v1", castle: "castle-v1", racetrack: "racetrack-v1", minefield: "minefield-v1",
-  rocket: "rocket-v1", orderup: "orderup-v1", bounty: "bounty-v1", hotseat: "hotseat-v1", relay: "relay-v1",
-  cards: "cards-v1", spy: "spy-v1", zombie: "zombie-v2",
+  rocket: "rocket-v1", orderup: "orderup-v1", bounty: "bounty-v1", hotseat: "hotseat-v2", relay: "relay-v2",
+  cards: "cards-v1", spy: "spy-v1", zombie: "zombie-v3",
 };
 
 interface HowToPlayModalProps {
@@ -28,6 +28,11 @@ interface HowToPlayModalProps {
 export function HowToPlayModal({ gameId, gameName, gameIcon, accentColor, onClose }: HowToPlayModalProps) {
   const file = HOW_TO_VIDEOS[gameId];
   const [failed, setFailed] = useState(!file);
+  // Big centre play button (owner, 2026-11-13: obvious for the teacher to hit). Shown whenever the video
+  // isn't playing; the browser's own small controls only appear once it has started, for pause/scrub/fullscreen.
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [playing, setPlaying] = useState(false);
+  const [started, setStarted] = useState(false);
 
   // The video has its own soundtrack — hush the background music while it's open.
   useEffect(() => {
@@ -64,13 +69,36 @@ export function HowToPlayModal({ gameId, gameName, gameIcon, accentColor, onClos
             The How to Play video couldn’t load — please check your internet connection and try again.
           </div>
         ) : (
-          <video
-            src={`${VIDEO_BASE}/${file}.mp4`}
-            poster={`${VIDEO_BASE}/${file}.jpg`}
-            controls playsInline preload="metadata"
-            onError={() => setFailed(true)}
-            style={{ display: "block", width: "100%", aspectRatio: "16 / 9", borderRadius: "12px", background: "#000" }}
-          />
+          <div style={{ position: "relative" }}>
+            <video
+              ref={videoRef}
+              src={`${VIDEO_BASE}/${file}.mp4`}
+              poster={`${VIDEO_BASE}/${file}.jpg`}
+              controls={started} playsInline preload="metadata"
+              onPlay={() => { setPlaying(true); setStarted(true); }}
+              onPause={() => setPlaying(false)}
+              onEnded={() => setPlaying(false)}
+              onError={() => setFailed(true)}
+              style={{ display: "block", width: "100%", aspectRatio: "16 / 9", borderRadius: "12px", background: "#000" }}
+            />
+            {!playing && (
+              <button
+                onClick={() => { videoRef.current?.play().catch(() => {}); }}
+                aria-label="Play the How to Play video"
+                className="htp-bigplay"
+                style={{
+                  position: "absolute", left: "50%", top: "50%", transform: "translate(-50%, -50%)",
+                  width: "clamp(84px, 14vw, 128px)", height: "clamp(84px, 14vw, 128px)", borderRadius: "50%",
+                  border: "5px solid white", background: accentColor, color: "white", cursor: "pointer",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  boxShadow: "0 8px 30px rgba(0,0,0,0.55)",
+                }}
+              >
+                <svg viewBox="0 0 24 24" style={{ width: "46%", height: "46%", marginLeft: "8%" }} aria-hidden="true"><polygon points="5,3 21,12 5,21" fill="currentColor" /></svg>
+              </button>
+            )}
+            <style>{`.htp-bigplay{animation:htpPulse 1.6s ease-in-out infinite}.htp-bigplay:hover{filter:brightness(1.1)}@keyframes htpPulse{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.07)}}`}</style>
+          </div>
         )}
       </div>
     </div>
