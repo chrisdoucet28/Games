@@ -8,7 +8,9 @@ export type FeedbackStatus = "new" | "queued" | "done" | "dismissed";
 
 export interface FeedbackRow {
   id: string;
-  user_id: string;
+  // Nullable since 20261114000000_feedback_allow_anonymous.sql -- the app's anonymous-explore mode
+  // has no Supabase auth session at all, so a submission from there has no auth.uid() to default to.
+  user_id: string | null;
   kind: "general" | "flag";
   message: string;
   game_id: string | null;
@@ -37,7 +39,10 @@ export async function listFeedback(): Promise<FeedbackRow[]> {
   if (error) throw error;
   const rows = (feedback ?? []) as Omit<FeedbackRow, "display_name">[];
 
-  const userIds = Array.from(new Set(rows.map((r) => r.user_id)));
+  // Filter out null before the .in() lookup below -- an anonymous submission has no user_id to
+  // join a profile for, and a bare `null` in a PostgREST `in.()` list filter is at best a silent
+  // non-match and at worst a cast error, not worth relying on either way.
+  const userIds = Array.from(new Set(rows.map((r) => r.user_id).filter((id): id is string => id !== null)));
   const nameById = new Map<string, string | null>();
   if (userIds.length > 0) {
     const { data: profiles, error: profileError } = await supabase
@@ -48,7 +53,7 @@ export async function listFeedback(): Promise<FeedbackRow[]> {
     for (const p of profiles ?? []) nameById.set(p.id, p.display_name);
   }
 
-  return rows.map((r) => ({ ...r, display_name: nameById.get(r.user_id) ?? null }));
+  return rows.map((r) => ({ ...r, display_name: (r.user_id ? nameById.get(r.user_id) : null) ?? null }));
 }
 
 export async function setFeedbackStatus(id: string, status: FeedbackStatus): Promise<void> {
