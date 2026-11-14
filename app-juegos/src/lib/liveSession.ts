@@ -278,6 +278,11 @@ export type HotSeatStatePayload = {
   // emptiness to decide whether IT needs to show the word and controls instead.
   describerDeviceIds: string[];
   currentWord: string;
+  // Bumped every time currentWord is redrawn (correct/skip/new turn) -- lets an incoming action
+  // broadcast be checked against "is this still the word the phone actually tapped for," instead
+  // of the old wall-clock debounce, which didn't know whether two taps from two different phones
+  // were for the same word or two different ones. See HotSeatGame.tsx's action handler.
+  wordSeq: number;
   timeLeft: number;
   turnSeconds: number;
   turnCorrect: number;
@@ -288,7 +293,9 @@ export type HotSeatStatePayload = {
 
 // Broadcast phone -> screen. deviceId is validated against describerDeviceIds — the only phones
 // ever allowed to act (see HotSeatGame.tsx); teamId travels alongside for scoring attribution.
-export type HotSeatActionPayload = { teamId: string | number; deviceId: string; action: "correct" | "skip" | "endTurn" };
+// wordSeq echoes back whichever HotSeatStatePayload.wordSeq this phone last saw -- a "correct"/
+// "skip" tap is only honoured if it still matches the screen's current word.
+export type HotSeatActionPayload = { teamId: string | number; deviceId: string; action: "correct" | "skip" | "endTurn"; wordSeq: number };
 
 function hotSeatChannelName(code: string): string {
   return `hotseat-${code}`;

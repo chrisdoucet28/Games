@@ -199,16 +199,26 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
   const turnCorrectRef = useRef(0);
 
   const [currentWord, setCurrentWord] = useState<string>(() => (words.length > 0 ? drawWord() : ""));
+  // Bumped every time the word is redrawn -- see HotSeatStatePayload.wordSeq. Mutated synchronously
+  // (not via setState) so it's already up to date the instant drawWord() runs, before the browser
+  // can even start processing the next incoming phone broadcast -- JS runs one event handler to
+  // completion at a time, so there's no window where a second "correct" tap for the word that was
+  // just resolved can still read the old value.
+  const wordSeqRef = useRef(0);
+  const nextWord = () => {
+    wordSeqRef.current += 1;
+    return drawWord();
+  };
 
   // Applied from the welcome screen (nothing has been played yet): swap the pool, then deal a first
   // word from the new list.
   const handleApplyCustomWords = (list: string[]) => {
     applyCustomWords(list);
-    setCurrentWord(drawWord());
+    setCurrentWord(nextWord());
   };
   const handleResetWords = () => {
     resetToTopicWords();
-    setCurrentWord(drawWord());
+    setCurrentWord(nextWord());
   };
 
   const currentTeam = teams[teamIndex];
@@ -273,7 +283,7 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
     // Whatever word was on screen when the previous team's turn ended (timed out or "End Turn")
     // is still sitting in currentWord — draw a fresh one so the next team never starts on a word
     // the last team already failed to finish.
-    setCurrentWord(drawWord());
+    setCurrentWord(nextWord());
   };
 
   const markCorrect = () => {
@@ -281,11 +291,11 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
     onUpdateScore(currentTeam.id, POINTS_PER_WORD);
     setTurnCorrect(score => score + 1);
     setTotalWordsByTeam(prev => ({ ...prev, [currentTeam.id]: (prev[currentTeam.id] ?? 0) + 1 }));
-    setCurrentWord(drawWord());
+    setCurrentWord(nextWord());
   };
 
   const skipWord = () => {
-    setCurrentWord(drawWord());
+    setCurrentWord(nextWord());
   };
 
   const goToNextTurn = () => {
@@ -326,7 +336,6 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
   const markCorrectRef = useRef(markCorrect);
   const skipWordRef = useRef(skipWord);
   const endTurnRef = useRef(endTurn);
-  const lastActionAtRef = useRef(0);
   useEffect(() => {
     phaseRef.current = phase;
     currentWordRef.current = currentWord;
@@ -376,6 +385,7 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
         wordVisibleDeviceIds,
         describerDeviceIds,
         currentWord: currentWordRef.current,
+        wordSeq: wordSeqRef.current,
         timeLeft: timeLeftRef.current,
         turnSeconds: TURN_SECONDS,
         turnCorrect: turnCorrectRef.current,
@@ -407,8 +417,13 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
 
     // The only place phone input actually touches game logic — validates who's allowed to act
     // right now by recomputing the current describer pool fresh (never trusting a broadcast echo),
-    // debounces near-simultaneous double-taps (matters most in solo mode, where several phones can
-    // act on the same word), then calls the exact same functions a screen-mode button click would.
+    // rejects a stale "correct"/"skip" whose wordSeq no longer matches the word that's actually
+    // live (two describers both tapping for the same word — previously guarded by a 500ms
+    // wall-clock debounce, which didn't know "same word" from "next word" and just added latency
+    // to every tap; wordSeq is bumped synchronously inside markCorrect/skipWord, so by the time a
+    // second broadcast for the same word is handled — JS runs one event handler to completion
+    // before the next, so there's no actual concurrency here — it's already stale), then calls the
+    // exact same functions a screen-mode button click would.
     channel.on("broadcast", { event: "action" }, ({ payload }) => {
       const action = payload as HotSeatActionPayload;
       if (phaseRef.current !== "play") return;
@@ -416,9 +431,7 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
       if (!activeTeam) return;
       const allowedDeviceIds = describerDevicesFor(connectedByTeamRef.current, teamStructureRef.current, String(activeTeam.id), guesserDeviceIdRef.current);
       if (!allowedDeviceIds.includes(action.deviceId)) return;
-      const now = Date.now();
-      if (now - lastActionAtRef.current < 500) return;
-      lastActionAtRef.current = now;
+      if ((action.action === "correct" || action.action === "skip") && action.wordSeq !== wordSeqRef.current) return;
       if (action.action === "correct") markCorrectRef.current();
       else if (action.action === "skip") skipWordRef.current();
       else if (action.action === "endTurn") endTurnRef.current();

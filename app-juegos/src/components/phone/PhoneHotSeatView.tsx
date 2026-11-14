@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { HotSeatStatePayload, HotSeatActionPayload } from "../../lib/liveSession";
 import { TeamIcon } from "../shared/TeamIcon";
 
@@ -21,6 +22,18 @@ type Props = {
 export function PhoneHotSeatView({ state, teamId, deviceId, onAction }: Props) {
   const team = state.roster.find(t => t.id === teamId);
   const activeTeam = state.roster.find(t => t.id === state.activeTeamId);
+
+  // Local, this-phone-only lock so a double-tap on Correct/Skip (same finger, same word) only
+  // ever sends one action -- the screen's own wordSeq check already makes a second one harmless,
+  // but disabling the buttons gives instant feedback instead of waiting on the round trip, which
+  // is the "feels slow" half of the original bug report. Clears itself the moment state.wordSeq
+  // moves on to the next word.
+  const [actedWordSeq, setActedWordSeq] = useState<number | null>(null);
+  const alreadyActed = actedWordSeq === state.wordSeq;
+  const act = (action: HotSeatActionPayload["action"]) => {
+    setActedWordSeq(state.wordSeq);
+    onAction({ teamId, deviceId, action, wordSeq: state.wordSeq });
+  };
 
   const wrapStyle: React.CSSProperties = {
     minHeight: "100vh", padding: "20px 18px", fontFamily: "'Segoe UI',system-ui,sans-serif", color: "white",
@@ -110,20 +123,22 @@ export function PhoneHotSeatView({ state, teamId, deviceId, onAction }: Props) {
       {amDescribing ? (
         <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
           <button
-            onClick={() => onAction({ teamId, deviceId, action: "correct" })}
-            style={{ background: "linear-gradient(135deg,#15803D,#22C55E)", color: "white", border: "none", borderRadius: "14px", padding: "16px", fontSize: "17px", fontWeight: "900", cursor: "pointer" }}
+            onClick={() => act("correct")}
+            disabled={alreadyActed}
+            style={{ background: "linear-gradient(135deg,#15803D,#22C55E)", color: "white", border: "none", borderRadius: "14px", padding: "16px", fontSize: "17px", fontWeight: "900", cursor: alreadyActed ? "default" : "pointer", opacity: alreadyActed ? 0.5 : 1 }}
           >
             Correct ✅
           </button>
           <div style={{ display: "flex", gap: "10px" }}>
             <button
-              onClick={() => onAction({ teamId, deviceId, action: "skip" })}
-              style={{ flex: 1, background: "rgba(0,0,0,0.3)", color: "#FDBA74", border: "3px solid #F59E0B", borderRadius: "14px", padding: "12px", fontSize: "14px", fontWeight: "900", cursor: "pointer" }}
+              onClick={() => act("skip")}
+              disabled={alreadyActed}
+              style={{ flex: 1, background: "rgba(0,0,0,0.3)", color: "#FDBA74", border: "3px solid #F59E0B", borderRadius: "14px", padding: "12px", fontSize: "14px", fontWeight: "900", cursor: alreadyActed ? "default" : "pointer", opacity: alreadyActed ? 0.5 : 1 }}
             >
               Skip
             </button>
             <button
-              onClick={() => onAction({ teamId, deviceId, action: "endTurn" })}
+              onClick={() => onAction({ teamId, deviceId, action: "endTurn", wordSeq: state.wordSeq })}
               style={{ flex: 1, background: "rgba(0,0,0,0.3)", color: "#FCA5A5", border: "3px solid #EF4444", borderRadius: "14px", padding: "12px", fontSize: "14px", fontWeight: "900", cursor: "pointer" }}
             >
               End Turn
