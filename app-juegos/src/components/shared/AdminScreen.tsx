@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { AdminFeedbackPanel } from "./AdminFeedbackPanel";
 import { AdminContentPanel, type ContentJump } from "./AdminContentPanel";
 import { AdminAssetsPanel } from "./AdminAssetsPanel";
+import { AdminMusicPanel } from "./AdminMusicPanel";
 import { AdminGrowthPanel } from "./AdminGrowthPanel";
 import { AdminBillingPanel } from "./AdminBillingPanel";
 import { AdminTeachersPanel } from "./AdminTeachersPanel";
@@ -10,7 +11,7 @@ import { listFeedback, setFeedbackStatus, setFeedbackPatternIssue, setFeedbackAd
 import { listContentSuggestions } from "../../lib/adminContent";
 import { formatQueueForClaude } from "./adminQueueExport";
 
-type View = "feedback" | "growth" | "content" | "assets" | "billing" | "classes";
+type View = "feedback" | "growth" | "content" | "assets" | "music" | "billing" | "classes";
 
 const NAV_GROUPS: { label: string; items: { key: View; icon: string; label: string }[] }[] = [
   { label: "Overview", items: [
@@ -22,6 +23,7 @@ const NAV_GROUPS: { label: string; items: { key: View; icon: string; label: stri
     { key: "classes", icon: "🏫", label: "Teachers & Classes" },
     { key: "content", icon: "📚", label: "Content & Topics" },
     { key: "assets", icon: "🎨", label: "Assets" },
+    { key: "music", icon: "🎵", label: "Music" },
   ] },
 ];
 
@@ -32,6 +34,7 @@ const TOPBAR: Record<View, { title: string; sub: string }> = {
   classes: { title: "Teachers & Classes", sub: "Every teacher account and how many classes they've saved" },
   content: { title: "Content & Topics", sub: "Every topic in the game/Learn library, with live Learn-parity check" },
   assets: { title: "Assets", sub: "Every mascot and game icon, rendered live — plus marketing artifact links" },
+  music: { title: "Music", sub: "Every background track, playable — which game it's for and what moment it plays at" },
 };
 
 type Props = { userEmail: string | null; onExit: () => void };
@@ -213,6 +216,7 @@ export function AdminScreen({ userEmail, onExit }: Props) {
               )}
               {view === "content" && <AdminContentPanel jump={contentJump} />}
               {view === "assets" && <AdminAssetsPanel />}
+              {view === "music" && <AdminMusicPanel />}
               {view === "growth" && <AdminGrowthPanel />}
               {view === "billing" && <AdminBillingPanel />}
               {view === "classes" && <AdminTeachersPanel />}
