@@ -47,9 +47,19 @@ function ErrorFallback() {
 // doesn't actually help (offline, or a genuinely broken deploy) gives up after one try and falls
 // through to the ErrorBoundary below instead of looping forever; the guard clears itself once the
 // app's been up a little while, so a later, unrelated deploy can still trigger its own one reload.
+//
+// event.preventDefault() matters here: without it, Vite's preload helper re-throws the original
+// error regardless of the reload() call below, which React.lazy's Suspense boundary (and Sentry's
+// ErrorBoundary wrapping it) sees and reports BEFORE the reload actually takes effect — caught
+// live in Sentry as a "Failed to fetch dynamically imported module" TypeError with no user-visible
+// crash (the reload happens a moment later and the teacher never even notices), but still alerting
+// as if it were an unhandled one. Calling it only while we're actually about to self-heal (the
+// guard isn't set yet) keeps a genuine repeat failure — reload already tried once and didn't help —
+// visible to Sentry/the ErrorBoundary instead of silently swallowing it forever.
 const PRELOAD_RELOAD_KEY = 'cc-reloaded-after-preload-error';
-window.addEventListener('vite:preloadError', () => {
+window.addEventListener('vite:preloadError', (event) => {
   if (sessionStorage.getItem(PRELOAD_RELOAD_KEY)) return;
+  event.preventDefault();
   sessionStorage.setItem(PRELOAD_RELOAD_KEY, '1');
   window.location.reload();
 });
