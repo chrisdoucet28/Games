@@ -8,9 +8,8 @@ import { TurnTimerBar } from "../shared/TurnTimerBar";
 import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
 import { denseRank } from "../../utils/ranking";
 import { RankBadge } from "../shared/RankBadge";
-import { HowToPlayModal } from "../shared/HowToPlayModal";
+import { HowToPlayBar } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
-import { CARDS_TUTORIAL_STEPS } from "../../data/tutorials/cards";
 import { playSound } from "../../lib/sounds";
 import { setMusicGame, stopMusic } from "../../lib/music";
 
@@ -116,7 +115,6 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
   const [cardPos, setCardPos] = useState(() => [0, 1, 2, 3].map(slotPos));
   // A resumed game skips the intro and drops straight into "preview" for a freshly-drawn round.
   const [phase, setPhase] = useState<"intro" | "preview" | "shuffling" | "picking" | "answering" | "reveal" | "final">(() => resumed ? "preview" : "intro");
-  const [showHowTo, setShowHowTo] = useState(false);
 
   useEffect(() => {
     if (phase === "final") { playSound("roundComplete"); stopMusic(); }
@@ -360,7 +358,7 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
     background: "radial-gradient(ellipse at 50% -10%,#DC2626 0%,#7F1D1D 48%,#2A0505 100%)",
   };
 
-  // Tutorial mockup: src/data/tutorials/cards.tsx — update if this intro's rules text changes.
+  // How to Play video: shared/HowToPlayModal.tsx — if this intro's rules change, the video (Desktop\classcade-videos) needs a re-make.
   if (phase === "intro") return (
     <div style={{ ...arenaStyle, textAlign: "center" }}>
       <AmbientBackdrop />
@@ -375,19 +373,10 @@ export function CardShuffleGame({ questions, teams, onUpdateScore, onEnd, forceF
             Each team picks a card and performs a speaking task for the crowd — land on the star for <strong style={{ color: "#FCD34D" }}>120 pts</strong>, any other card still scores <strong>30 pts</strong>.
           </div>
         </div>
+        <HowToPlayBar gameId={GM.id} gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color} />
         <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "24px" }}>
           {teams.map(t => (<div key={t.id} style={{ background: t.color.dark, border: "2px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E", borderRadius: "14px", padding: "10px 18px", fontWeight: "800", fontSize: "14px", color: "white", display: "flex", alignItems: "center", gap: "6px" }}><TeamIcon team={t} color="white" /> {t.name}</div>))}
         </div>
-        <button onClick={() => setShowHowTo(true)} className="cs-btn" style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginBottom: "14px", background: "white", color: GM.color, border: "3px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
-          <Icon name="help" size={15} /> How to Play
-        </button>
-        {showHowTo && (
-          <HowToPlayModal
-            gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color}
-            steps={CARDS_TUTORIAL_STEPS}
-            onClose={() => setShowHowTo(false)}
-          />
-        )}
         <button onClick={() => setPhase("preview")} className="cs-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#FCD34D", color: "#450A0A", border: "3px solid #1A1A2E", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "6px 6px 0 #1A1A2E" }}>
           <Icon name="tent" size={20} /> Step Right Up!
         </button>

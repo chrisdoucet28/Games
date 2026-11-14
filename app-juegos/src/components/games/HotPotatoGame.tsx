@@ -4,9 +4,8 @@ import { Icon, type IconName } from "../shared/Icon";
 import type { GameProps } from "../../types";
 import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
 import { makeSoloCpuTeam } from "../../lib/soloOpponent";
-import { HowToPlayModal } from "../shared/HowToPlayModal";
+import { HowToPlayBar } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
-import { HOTPOTATO_TUTORIAL_STEPS } from "../../data/tutorials/hotpotato";
 import { playSound } from "../../lib/sounds";
 import { setMusicContext, setMusicGame, stopMusic } from "../../lib/music";
 
@@ -145,7 +144,6 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
     setMusicGame("hotpotato");
     return () => setMusicGame(null);
   }, []);
-  const [showHowTo, setShowHowTo] = useState(false);
 
   useEffect(() => {
     if (phase === "gameover") { playSound("roundComplete"); stopMusic(); }
@@ -356,7 +354,7 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
     background: "linear-gradient(160deg,#FED7AA 0%,#FB923C 45%,#EA580C 100%)",
   };
 
-  // Tutorial mockup: src/data/tutorials/hotpotato.tsx — update if this intro's rules text changes.
+  // How to Play video: shared/HowToPlayModal.tsx — if this intro's rules change, the video (Desktop\classcade-videos) needs a re-make.
   if (phase === "intro") return (
     <div style={{ ...arenaStyle, textAlign: "center" }}>
       <ChaosBackdrop />
@@ -371,6 +369,7 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
           </div>
           <div style={{ position: "absolute", bottom: "-14px", left: "50%", transform: "translateX(-50%)", width: 0, height: 0, borderLeft: "14px solid transparent", borderRight: "14px solid transparent", borderTop: "14px solid #F97316" }} />
         </div>
+        <HowToPlayBar gameId={GM.id} gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color} />
         <div style={{ marginTop: "24px", marginBottom: "16px", fontSize: "14px", color: "#7C2D12", fontWeight: "700" }}>
           Pass the potato as fast as possible — the clock is always ticking!
         </div>
@@ -461,16 +460,6 @@ export function HotPotatoGame({ questions, teams: propTeams, onUpdateScore, onEn
           </div>
         )}
 
-        <button onClick={() => setShowHowTo(true)} className="hp-btn" style={{ display: "block", margin: "0 auto 14px", background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
-          <Icon name="help" size={14} /> How to Play
-        </button>
-        {showHowTo && (
-          <HowToPlayModal
-            gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color}
-            steps={HOTPOTATO_TUTORIAL_STEPS}
-            onClose={() => setShowHowTo(false)}
-          />
-        )}
         <button onClick={() => {
           if (!seededStartRef.current) {
             teams.forEach(team => updateScore(team.id, STARTING_BANK));

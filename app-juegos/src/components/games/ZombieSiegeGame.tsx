@@ -4,10 +4,9 @@ import { Icon, type IconName } from "../shared/Icon";
 import type { GameProps, QuestionData, Team } from "../../types";
 import { ScoreBoard } from "../shared/ScoreBoard";
 import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
-import { HowToPlayModal } from "../shared/HowToPlayModal";
+import { HowToPlayBar } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
 import { TurnTimerBar } from "../shared/TurnTimerBar";
-import { ZOMBIE_TUTORIAL_STEPS } from "../../data/tutorials/zombie";
 import { playSound } from "../../lib/sounds";
 import { setMusicContext, setMusicGame, stopMusic } from "../../lib/music";
 import { makeTeacherTeam, TEACHER_ID } from "../../lib/soloOpponent";
@@ -699,7 +698,6 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
   const resumed = useRef(validateZombieSiegeSnapshot(initialGameState, teams, isSolo)).current;
 
   const [phase, setPhase] = useState<Phase>(resumed ? "playing" : "intro");
-  const [showHowTo, setShowHowTo] = useState(false);
   const [withTeacherAlly, setWithTeacherAlly] = useState<boolean>(() => resumed?.withTeacherAlly ?? false);
   // A ref (not just the `paused` prop) so the tick interval's closure always reads the latest
   // value without needing to tear down and rebuild the interval every time pause is toggled.
@@ -1035,7 +1033,7 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
     </div>
   );
 
-  // Tutorial mockup: src/data/tutorials/zombie.tsx — update if this intro's rules text changes.
+  // How to Play video: shared/HowToPlayModal.tsx — if this intro's rules change, the video (Desktop\classcade-videos) needs a re-make.
   if (phase === "intro") return (
     <div style={{ ...arenaStyle, textAlign: "center" }}>
       {fogLayer}
@@ -1048,6 +1046,10 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
             One shared house, everyone's score. Add a sentence any time to earn a barricade or a <strong style={{ color: "#BEF264" }}>power-up</strong> — <strong style={{ color: "#BEF264" }}>bullets recharge</strong> and auto-shoot zombies at the door, and <strong style={{ color: "#BEF264" }}>2 axes</strong> per team are the last resort if one breaks through.<br />
             Clear the wave, and a bigger one begins!
           </div>
+        </div>
+        <HowToPlayBar gameId={GM.id} gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color} />
+        <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "22px" }}>
+          {teams.map(t => (<div key={t.id} style={{ background: t.color.dark, border: "2px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E", borderRadius: "14px", padding: "10px 18px", fontWeight: "800", fontSize: "14px", color: "white", display: "flex", alignItems: "center", gap: "6px" }}><TeamIcon team={t} color="white" /> {t.name}</div>))}
         </div>
         {isSolo && (
           <div style={{ marginBottom: "14px" }}>
@@ -1074,16 +1076,6 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
               </div>
             )}
           </div>
-        )}
-        <button onClick={() => setShowHowTo(true)} className="zs-btn" style={{ display: "block", margin: "0 auto 14px", background: "white", color: GM.color, border: "3px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
-          <Icon name="help" size={14} /> How to Play
-        </button>
-        {showHowTo && (
-          <HowToPlayModal
-            gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color}
-            steps={ZOMBIE_TUTORIAL_STEPS}
-            onClose={() => setShowHowTo(false)}
-          />
         )}
         <button onClick={() => setPhase("playing")} className="zs-btn" style={{ background: "#65A30D", color: "#0D1A0D", border: "3px solid #1A1A2E", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "6px 6px 0 #1A1A2E" }}><Icon name="house" size={17} /> Board Up the House!</button>
       </div>

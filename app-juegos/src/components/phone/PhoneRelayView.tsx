@@ -39,6 +39,8 @@ export function PhoneRelayView({ state, teamId, deviceId, onAction }: Props) {
     );
   }
 
+  if (state.playStyle === "together") return <TogetherView state={state} teamId={teamId} deviceId={deviceId} onAction={onAction} />;
+
   const amActiveTeam = state.activeTeamId === teamId;
   const iAmAsker = state.askerDeviceId === deviceId;
   const iAmAnswerer = state.answererDeviceIds.includes(deviceId);
@@ -224,6 +226,153 @@ export function PhoneRelayView({ state, teamId, deviceId, onAction }: Props) {
         </div>
       )}
       {placeInLine > 0 && <div style={{ marginTop: "8px", fontSize: "14px", fontWeight: "700", color: "#99F6E4" }}>You're #{placeInLine + 1} in line to ask.</div>}
+      {scoreboard}
+    </div>
+  );
+}
+
+// "All at once" (state.playStyle === "together"): every team plays its own word at the same time,
+// so this phone only ever cares about its OWN team's slice (state.byTeam[teamId]) — never another
+// team's word or controls. Asker: no word, the pool + question starters. Every teammate: the word
+// and the buttons (the screen ignores the asker's taps, see RelayGame.tsx). Reveal: the whole team
+// sees the word, and any of them can tap on to the next word.
+function TogetherView({ state, teamId, deviceId, onAction }: Props) {
+  const team = state.roster.find(t => t.id === teamId);
+  const teamKey = String(teamId);
+  const mine = state.byTeam?.[teamKey];
+  // Stamped with what this phone is showing, so the screen can drop a duplicate or out-of-date tap.
+  const send = (action: RelayActionPayload["action"]) => onAction({
+    teamId, deviceId, action, word: mine?.word,
+    questionNumber: mine?.phase === "asking" ? mine.questionNumber : undefined,
+  });
+  const points = state.pointsByTeam?.[teamKey] ?? 0;
+
+  const wrapStyle: React.CSSProperties = {
+    minHeight: "100vh", padding: "20px 18px", fontFamily: "'Segoe UI',system-ui,sans-serif", color: "white",
+    background: "radial-gradient(ellipse at 50% 105%,#0D9488 0%,#134E4A 45%,#042F2E 100%)",
+  };
+  const bigButton = (bg: string): React.CSSProperties => ({
+    background: bg, color: "white", border: "none", borderRadius: "14px", padding: "18px", fontSize: "18px",
+    fontWeight: "900", cursor: "pointer", width: "100%",
+  });
+  const header = (
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "14px" }}>
+      <span style={{ fontWeight: "900", fontSize: "15px" }}><TeamIcon team={team} /> {team?.name}</span>
+      <span style={{ fontSize: "13px", fontWeight: "800", color: "#5EEAD4" }}>
+        {points} pts{mine && mine.phase === "asking" ? ` · Q${mine.questionNumber} of ${mine.questionBudget}` : ""}
+      </span>
+    </div>
+  );
+  const scoreboard = (
+    <div style={{ display: "flex", flexDirection: "column", gap: "6px", maxWidth: "300px", margin: "18px auto 0" }}>
+      {state.roster.map(t => (
+        <div key={t.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: t.id === teamId ? "rgba(94,234,212,0.15)" : "rgba(255,255,255,0.06)", border: `1.5px solid ${t.id === teamId ? "#5EEAD4" : "rgba(255,255,255,0.15)"}`, borderRadius: "10px", padding: "8px 12px" }}>
+          <span style={{ fontSize: "13px", fontWeight: "700" }}><TeamIcon team={t} /> {t.name}</span>
+          <span style={{ fontSize: "13px", fontWeight: "800", color: "#5EEAD4" }}>{state.pointsByTeam?.[String(t.id)] ?? 0} pts</span>
+        </div>
+      ))}
+    </div>
+  );
+
+  // Lobby, or a screen that hasn't sent this team's slice yet.
+  if (state.phase === "lobby" || !mine) {
+    return (
+      <div style={{ ...wrapStyle, textAlign: "center" }}>
+        {header}
+        <div style={{ fontSize: "36px", marginBottom: "8px" }}>⚡</div>
+        <div style={{ fontWeight: "800", fontSize: "16px", color: "#5EEAD4" }}>Get ready — every team plays at the same time! Huddle up with your team.</div>
+      </div>
+    );
+  }
+
+  if (mine.phase === "done") {
+    return (
+      <div style={{ ...wrapStyle, textAlign: "center" }}>
+        {header}
+        <div style={{ fontSize: "40px", marginBottom: "8px" }}>✅</div>
+        <div style={{ fontWeight: "900", fontSize: "18px", color: "#5EEAD4" }}>Your team is finished!</div>
+        <div style={{ color: "#99F6E4", fontSize: "14px", fontWeight: "600", marginTop: "6px" }}>Sit down and wait while the other teams finish.</div>
+        {scoreboard}
+      </div>
+    );
+  }
+
+  if (mine.phase === "reveal") {
+    const out = mine.revealKind === "outOfQuestions";
+    const iAmNextAsker = mine.askerDeviceId === deviceId;
+    return (
+      <div style={wrapStyle}>
+        {header}
+        <div style={{ textAlign: "center", background: "linear-gradient(160deg,#022C22,#031F19)", border: `4px solid ${out ? "#F59E0B" : "#22C55E"}`, borderRadius: "22px", padding: "22px 16px", marginBottom: "16px" }}>
+          <div style={{ fontSize: "34px", marginBottom: "6px" }}>{out ? "⏱️" : "🎉"}</div>
+          <div style={{ color: "#5EEAD4", fontWeight: "800", fontSize: "12px", textTransform: "uppercase", marginBottom: "8px" }}>
+            {out ? "Out of questions — the word was:" : `You guessed it!${mine.revealPoints ? ` +${mine.revealPoints}` : ""}`}
+          </div>
+          <div style={{ fontWeight: "900", fontSize: "clamp(26px,8vw,40px)", color: "#F0FDFA", overflowWrap: "anywhere" }}>{mine.word}</div>
+          <div style={{ marginTop: "12px", fontSize: "14px", fontWeight: "800", color: "#99F6E4" }}>
+            {mine.revealTeamFinished
+              ? "That was your team's last word!"
+              : iAmNextAsker ? "You're asking next — get ready!"
+              : mine.revealStartsNewRound ? "Round complete — a new word for the next round!" : "Time to swap — a teammate asks next!"}
+          </div>
+        </div>
+        <button onClick={() => send("next")} style={bigButton("linear-gradient(135deg,#0D9488,#14B8A6)")}>
+          {mine.revealTeamFinished ? "Finish ✓" : "Next word →"}
+        </button>
+      </div>
+    );
+  }
+
+  // Asking — this phone's person is the asker: no word, just the pool and question starters.
+  if (mine.askerDeviceId === deviceId) {
+    return (
+      <div style={{ ...wrapStyle, textAlign: "center" }}>
+        {header}
+        <div style={{ background: "linear-gradient(160deg,#022C22,#031F19)", border: "4px solid #0D9488", borderRadius: "22px", padding: "24px 16px", marginBottom: "16px", boxShadow: "0 0 30px rgba(13,148,136,0.35)" }}>
+          <div style={{ fontSize: "44px", marginBottom: "8px" }}>🙋</div>
+          <div style={{ fontWeight: "900", fontSize: "22px", color: "#5EEAD4", marginBottom: "10px" }}>You're asking!</div>
+          <div style={{ fontSize: "15px", lineHeight: 1.6, color: "#CCFBF1", fontWeight: "600" }}>
+            Ask your team <strong>yes/no questions</strong> — or take a guess — to find out your word. Your teammates can see it, so don't peek at their phones!
+          </div>
+        </div>
+        {state.wordPool.length > 0 && (
+          <div style={{ textAlign: "left" }}>
+            <div style={{ fontSize: "11px", fontWeight: "800", color: "#5EEAD499", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: "8px", textAlign: "center" }}>Possible words</div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", justifyContent: "center", marginBottom: "18px" }}>
+              {[...state.wordPool].sort().map((word, i) => (
+                <span key={`${word}-${i}`} style={{ background: "rgba(20,184,166,0.18)", color: "#99F6E4", border: "1px solid #14B8A655", borderRadius: "6px", padding: "4px 10px", fontSize: "13px", fontWeight: "700" }}>{word}</span>
+              ))}
+            </div>
+            <div style={{ fontSize: "11px", fontWeight: "800", color: "#5EEAD499", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: "8px", textAlign: "center" }}>Question starters</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+              {RELAY_QUESTION_STARTERS.map(q => (
+                <div key={q} style={{ background: "rgba(20,184,166,0.1)", color: "#CCFBF1", border: "1px solid #14B8A640", borderRadius: "8px", padding: "6px 10px", fontSize: "13px", fontWeight: "700", textAlign: "center" }}>{q}</div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Asking — a teammate who holds the word and the buttons.
+  return (
+    <div style={wrapStyle}>
+      {header}
+      <div style={{ textAlign: "center", fontSize: "12px", color: "#99F6E4", fontWeight: "700", marginBottom: "10px" }}>
+        Answer your asker with yes or no — don't say the word!
+      </div>
+      <div style={{ background: "linear-gradient(160deg,#022C22,#031F19)", border: "4px solid #0D9488", borderRadius: "22px", padding: "22px 16px", textAlign: "center", marginBottom: "16px", boxShadow: "0 0 30px rgba(13,148,136,0.35)" }}>
+        <div style={{ color: "#5EEAD4", fontWeight: "800", fontSize: "12px", textTransform: "uppercase", marginBottom: "10px" }}>Your team's word</div>
+        <div style={{ background: "rgba(0,0,0,0.4)", borderRadius: "16px", border: "3px solid #14B8A655", padding: "20px 10px", color: "#F0FDFA", fontWeight: "900", fontSize: "clamp(28px,9vw,44px)", lineHeight: 1.1, minHeight: "80px", display: "flex", alignItems: "center", justifyContent: "center", overflowWrap: "anywhere" }}>{mine.word}</div>
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+        <button onClick={() => send("guessed")} style={bigButton("linear-gradient(135deg,#15803D,#22C55E)")}>They guessed it! +{mine.pointsIfGuessedNow} ✅</button>
+        <button onClick={() => send("missed")} style={{ ...bigButton("rgba(0,0,0,0.3)"), color: "#5EEAD4", border: "3px solid #14B8A6", padding: "14px", fontSize: "15px" }}>
+          Question asked ({mine.questionNumber} of {mine.questionBudget})
+        </button>
+        <button onClick={() => send("changeWord")} style={{ background: "none", border: "none", color: "#99F6E499", fontSize: "12px", fontWeight: "700", cursor: "pointer", textDecoration: "underline" }}>Change this word</button>
+      </div>
       {scoreboard}
     </div>
   );

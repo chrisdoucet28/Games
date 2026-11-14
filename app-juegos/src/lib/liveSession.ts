@@ -366,15 +366,46 @@ export type RelayStatePayload = {
   isSolo: boolean;
   allTeamsFinished?: boolean;
   connectedTeamIds: (string | number)[];
+  // "turns" (the original: one team asks one question, then the next team) or "together" (phone
+  // mode only: every team plays its own word at the same time, in its own huddle, never waiting for
+  // another team). Optional so a screen still on an older build is read as "turns". In "together",
+  // the single-team fields above (activeTeamId, askerDeviceId, currentWord, reveal*) are unused —
+  // each phone reads its own team's entry in byTeam instead.
+  playStyle?: "turns" | "together";
+  byTeam?: Record<string, RelayTeamState>;
   ts: number;
 };
 
+// One team's own slice of a "together" game. `word` is that team's live word while asking, or the
+// word it just finished with during its reveal — the asker's phone never shows it (same trust model
+// as currentWord in "turns").
+export type RelayTeamState = {
+  phase: "asking" | "reveal" | "done";
+  askerDeviceId: string | null;
+  word: string;
+  // 1-based question the asker is on, and that person's own budget — for "Question 2 of 5" and the
+  // live "Guessed it! +230" value.
+  questionNumber: number;
+  questionBudget: number;
+  pointsIfGuessedNow: number;
+  revealKind?: "guessed" | "outOfQuestions";
+  revealPoints?: number;
+  revealTeamFinished?: boolean;
+  revealStartsNewRound?: boolean;
+};
+
 // Broadcast phone -> screen. Validated screen-side: right phase, and the sender's deviceId must be
-// one of the current answerers.
+// one of the current answerers (in "together": a non-asker phone on the sender's own team).
 export type RelayActionPayload = {
   teamId: string | number;
   deviceId: string;
   action: "guessed" | "missed" | "next" | "changeWord";
+  // "together" only — what this phone was showing when it was tapped: the word, plus (while asking)
+  // the question number. The screen drops a tap that no longer matches its own state, so a
+  // second teammate tapping "Question asked" for the SAME question a moment later (or a late
+  // "Next word" after the team already moved on) never counts twice.
+  word?: string;
+  questionNumber?: number;
 };
 
 const DEVICE_ID_KEY = "classcade-device-id";

@@ -6,9 +6,8 @@ import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
 import { denseRank } from "../../utils/ranking";
 import { RankBadge } from "../shared/RankBadge";
 import { makeSoloCpuTeam, makeTeacherTeam } from "../../lib/soloOpponent";
-import { HowToPlayModal } from "../shared/HowToPlayModal";
+import { HowToPlayBar } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
-import { MINEFIELD_TUTORIAL_STEPS } from "../../data/tutorials/minefield";
 import { playSound } from "../../lib/sounds";
 import { setMusicContext, setMusicGame, stopMusic } from "../../lib/music";
 
@@ -128,7 +127,6 @@ export function MinefieldGame({ gridData, teams: propTeams, onUpdateScore, onEnd
     if (phase === "speaking") setMusicContext("tension");
     return () => setMusicContext("gameplay");
   }, [phase === "speaking"]);
-  const [showHowTo, setShowHowTo] = useState(false);
 
   useEffect(() => {
     if (phase === "final") { playSound("roundComplete"); stopMusic(); }
@@ -316,7 +314,7 @@ export function MinefieldGame({ gridData, teams: propTeams, onUpdateScore, onEnd
   const GAP = 5;
   const selData = selectedTile !== null ? getSentence(selectedTile) : null;
 
-  // Tutorial mockup: src/data/tutorials/minefield.tsx — update if this intro's rules text changes.
+  // How to Play video: shared/HowToPlayModal.tsx — if this intro's rules change, the video (Desktop\classcade-videos) needs a re-make.
   if (phase === "intro") {
     return (
       <div style={{ textAlign: "center" }}>
@@ -339,6 +337,7 @@ export function MinefieldGame({ gridData, teams: propTeams, onUpdateScore, onEnd
             {topicRotation && <><br />It's one shared minefield all game — topics cycle through for variety until every safe tile is found.</>}
           </div>
         </div>
+        <HowToPlayBar gameId={GM.id} gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color} />
         <div style={{ marginTop: "24px", marginBottom: "20px", fontSize: "14px", color: "#6B7280", fontWeight: "600" }}>
           {topicRotation
             ? "Topics rotate each round for variety, looping back through the list if there's still board left to clear — the team with the most points when every safe tile is found wins!"
@@ -372,16 +371,6 @@ export function MinefieldGame({ gridData, teams: propTeams, onUpdateScore, onEnd
               </div>
             )}
           </div>
-        )}
-        <button onClick={() => setShowHowTo(true)} style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginBottom: "14px", background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
-          <Icon name="help" size={15} /> How to Play
-        </button>
-        {showHowTo && (
-          <HowToPlayModal
-            gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color}
-            steps={MINEFIELD_TUTORIAL_STEPS}
-            onClose={() => setShowHowTo(false)}
-          />
         )}
         <button onClick={() => setPhase("pick")} className="mf-btn" style={{ background: "#6D28D9", color: "white", border: "3px solid #1A1A2E", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "5px 5px 0 #1A1A2E" }}>
           {topicRotation ? "Start This Topic" : "Enter the Minefield"}
@@ -466,7 +455,7 @@ export function MinefieldGame({ gridData, teams: propTeams, onUpdateScore, onEnd
         <div style={{ textAlign: "center", background: "#7F1D1D", border: "3px solid #EF4444", borderRadius: "14px", padding: "14px", marginBottom: "14px", animation: "boomPulse 0.3s ease-out" }}>
           <div style={{ fontWeight: "900", fontSize: "20px", color: "#FCA5A5" }}>BOOM! Mine hit!</div>
           <div style={{ color: "#FCA5A5", fontWeight: "700", fontSize: "14px", marginTop: "2px" }}>
-            "{lastResult.col} + {lastResult.row}..." - {lastResult.teamName} loses 75 pts
+            "{lastResult.col} + {lastResult.row}..." - {lastResult.teamName} loses 110 pts
           </div>
         </div>
       )}
@@ -478,7 +467,7 @@ export function MinefieldGame({ gridData, teams: propTeams, onUpdateScore, onEnd
           borderRadius: "12px", padding: "10px 16px", marginBottom: "12px", textAlign: "center", fontSize: "13px", fontWeight: "700",
           color: lastResult.correct && !lastResult.isMine ? "#14532D" : lastResult.isMine ? "#991B1B" : "#7C2D12"
         }}>
-          {lastResult.isMine ? `Mine! ${lastResult.teamName} loses 75 pts` : lastResult.correct ? `Great sentence! ${lastResult.teamName} gets +50 pts` : `Incorrect - ${lastResult.teamName} gets no points, square stays open`}
+          {lastResult.isMine ? `Mine! ${lastResult.teamName} loses 110 pts` : lastResult.correct ? `Great sentence! ${lastResult.teamName} gets +75 pts` : `Incorrect - ${lastResult.teamName} gets no points, square stays open`}
         </div>
       )}
 
@@ -506,7 +495,7 @@ export function MinefieldGame({ gridData, teams: propTeams, onUpdateScore, onEnd
           <div style={{ fontSize: "13px", fontWeight: "700", color: "#4338CA", marginBottom: "8px", textTransform: "uppercase", letterSpacing: "0.05em" }}>Teacher - Did the student use the target language correctly?</div>
           <div style={{ background: "#EEF2FF", borderRadius: "10px", padding: "10px 16px", marginBottom: "16px", fontStyle: "italic", color: "#3730A3", fontWeight: "700", fontSize: "15px" }}>"{selData.col} {selData.row} ..."</div>
           <div style={{ display: "flex", gap: "14px", justifyContent: "center", flexWrap: "wrap" }}>
-            <button onClick={() => afterJudge(true)} className="mf-btn" style={{ background: "#22C55E", color: "white", border: "3px solid #1A1A2E", borderRadius: "14px", padding: "14px 36px", fontSize: "18px", fontWeight: "900", cursor: "pointer", boxShadow: "4px 4px 0 #1A1A2E" }}>Correct! +50</button>
+            <button onClick={() => afterJudge(true)} className="mf-btn" style={{ background: "#22C55E", color: "white", border: "3px solid #1A1A2E", borderRadius: "14px", padding: "14px 36px", fontSize: "18px", fontWeight: "900", cursor: "pointer", boxShadow: "4px 4px 0 #1A1A2E" }}>Correct! +75</button>
             <button onClick={() => afterJudge(false)} className="mf-btn" style={{ background: "#EF4444", color: "white", border: "3px solid #1A1A2E", borderRadius: "14px", padding: "14px 36px", fontSize: "18px", fontWeight: "900", cursor: "pointer", boxShadow: "4px 4px 0 #1A1A2E" }}>Wrong - 0 pts</button>
           </div>
           <div style={{ fontSize: "12px", color: "#6B7280", marginTop: "10px", fontWeight: "600" }}>(Mine risk still applies regardless of answer. A wrong answer on a safe tile leaves the square open for next time.)</div>

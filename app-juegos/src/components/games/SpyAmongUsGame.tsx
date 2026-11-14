@@ -7,11 +7,10 @@ import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
 import { denseRank } from "../../utils/ranking";
 import { RankBadge } from "../shared/RankBadge";
 import { makeTeacherTeam } from "../../lib/soloOpponent";
-import { HowToPlayModal } from "../shared/HowToPlayModal";
+import { HowToPlayBar } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
 import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
 import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
-import { SPY_TWOPLAYER_STEPS, SPY_GROUP_STEPS } from "../../data/tutorials/spy";
 import { playSound } from "../../lib/sounds";
 import { setMusicContext, setMusicGame, stopMusic } from "../../lib/music";
 import {
@@ -295,7 +294,6 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
   const [tp2Guesses, setTp2Guesses] = useState<Record<string | number, string>>({});
   const [tp2GuessIdx, setTp2GuessIdx] = useState(0);
   const [tp2SpeakOrder, setTp2SpeakOrder] = useState<Team[]>(() => [...teams]);
-  const [showHowTo, setShowHowTo] = useState(false);
 
   // "Play on Phones" mode — available in group mode, solo, and real 1v1 alike (see
   // enterRoundStartPhase below for how each ruleset handles it). Always defaults to screen, even
@@ -784,7 +782,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
     background: "radial-gradient(ellipse at 50% -15%,#1E293B 0%,#0F172A 55%,#020617 100%)",
   };
 
-  // Tutorial mockup: src/data/tutorials/spy.tsx — update if this intro's rules text changes.
+  // How to Play video: shared/HowToPlayModal.tsx — if this intro's rules change, the video (Desktop\classcade-videos) needs a re-make.
   if (phase === "intro") {
     return (
       <div style={{ ...arenaStyle, textAlign: "center" }}>
@@ -821,6 +819,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
               )}
             </div>
           </div>
+          <HowToPlayBar gameId={GM.id} gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color} />
           <div style={{ marginTop: "24px", marginBottom: "20px", fontSize: "14px", color: "#94A3B8", fontWeight: "600" }}>
             {isTwoPlayer
               ? "Just the two of you — take it in turns to be the sneaky one!"
@@ -917,25 +916,6 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
             );
           })()}
           </>
-          <button
-            onClick={() => setShowHowTo(true)}
-            className="sau-btn"
-            style={{
-              display: "inline-flex", alignItems: "center", gap: "6px", marginBottom: "14px",
-              background: "white", color: GM.color, border: "3px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E",
-              borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800",
-              cursor: "pointer",
-            }}
-          >
-            <Icon name="help" size={15} /> How to Play
-          </button>
-          {showHowTo && (
-            <HowToPlayModal
-              gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color}
-              steps={isTwoPlayer ? SPY_TWOPLAYER_STEPS : SPY_GROUP_STEPS}
-              onClose={() => setShowHowTo(false)}
-            />
-          )}
           <button
             onClick={startMission}
             className="sau-btn"

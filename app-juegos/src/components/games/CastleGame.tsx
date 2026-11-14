@@ -9,8 +9,7 @@ import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
 import { denseRank } from "../../utils/ranking";
 import { RankBadge } from "../shared/RankBadge";
 import { makeSoloCpuTeam, makeTeacherTeam } from "../../lib/soloOpponent";
-import { HowToPlayModal } from "../shared/HowToPlayModal";
-import { CASTLE_TUTORIAL_STEPS } from "../../data/tutorials/castle";
+import { HowToPlayBar } from "../shared/HowToPlayModal";
 import { playSound } from "../../lib/sounds";
 import { setMusicGame, stopMusic } from "../../lib/music";
 
@@ -298,7 +297,6 @@ export function CastleGame({ questions, teams: propTeams, onUpdateScore, onEnd, 
   // A resumed battle skips the intro screen and drops straight into a fresh action choice for
   // whichever team was up.
   const [phase, setPhase] = useState<Phase>(() => resumed ? "select-action" : "intro");
-  const [showHowTo, setShowHowTo] = useState(false);
   const [diceRoll, setDiceRoll] = useState<number | null>(null);
   const [rolling, setRolling] = useState(false);
   const [lastEvent, setLastEvent] = useState<LastEvent | null>(null);
@@ -536,7 +534,7 @@ export function CastleGame({ questions, teams: propTeams, onUpdateScore, onEnd, 
     `}</style>
   );
 
-  // Tutorial mockup: src/data/tutorials/castle.tsx — update if this intro's rules text changes.
+  // How to Play video: shared/HowToPlayModal.tsx — if this intro's rules change, the video (Desktop\classcade-videos) needs a re-make.
   if (phase === "intro") return (
     <div style={{ ...arenaStyle, textAlign: "center" }}>
       {ambientLayer}
@@ -549,6 +547,10 @@ export function CastleGame({ questions, teams: propTeams, onUpdateScore, onEnd, 
             Each turn, choose to attack, cast a spell, raise a shield, or recover — then answer a question to pull it off. Get it right and it lands; get it wrong and your turn ends with nothing.<br />
             Land a hit and you might turn up a <strong style={{ display: "inline-flex", alignItems: "center", gap: "3px" }}><Icon name="apple" size={13} /> healing apple</strong> for bonus HP! The last castle standing wins!
           </div>
+        </div>
+        <HowToPlayBar gameId={GM.id} gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color} />
+        <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "22px" }}>
+          {teams.map(t => (<div key={t.id} style={{ background: t.color.dark, border: "2px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E", borderRadius: "14px", padding: "10px 18px", fontWeight: "800", fontSize: "14px", color: "white", display: "flex", alignItems: "center", gap: "6px" }}><TeamIcon team={t} color="white" /> {t.name}</div>))}
         </div>
         {isSolo && (
           <div style={{ marginBottom: "20px" }}>
@@ -568,16 +570,6 @@ export function CastleGame({ questions, teams: propTeams, onUpdateScore, onEnd, 
               }}><Icon name="person" size={14} /> Teacher</button>
             </div>
           </div>
-        )}
-        <button onClick={() => setShowHowTo(true)} className="castle-next-btn" style={{ display: "block", margin: "0 auto 14px", background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
-          <Icon name="help" size={14} /> How to Play
-        </button>
-        {showHowTo && (
-          <HowToPlayModal
-            gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color}
-            steps={CASTLE_TUTORIAL_STEPS}
-            onClose={() => setShowHowTo(false)}
-          />
         )}
         <button onClick={() => setPhase("select-action")} className="castle-next-btn" style={{ background: "#059669", color: "white", border: "3px solid #1A1A2E", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "6px 6px 0 #1A1A2E" }}><Icon name="castle" size={18} /> Prepare for Battle!</button>
       </div>

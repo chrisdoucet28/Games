@@ -6,19 +6,18 @@ import type { GameProps } from "../../types";
 import { teamsGridCols, GAME_MODES, GAME_ICONS, RELAY_QUESTION_STARTERS } from "../../data/constants";
 import { denseRank } from "../../utils/ranking";
 import { RankBadge } from "../shared/RankBadge";
-import { HowToPlayModal } from "../shared/HowToPlayModal";
+import { HowToPlayBar } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
 import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
 import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
 import { CustomWordsPanel } from "../shared/CustomWordsPanel";
 import { useWordDeck } from "../../hooks/useWordDeck";
-import { RELAY_TUTORIAL_STEPS } from "../../data/tutorials/relay";
 import { playSound } from "../../lib/sounds";
 import { setMusicGame, setMusicContext, stopMusic } from "../../lib/music";
 import { makeSoloCpuTeam } from "../../lib/soloOpponent";
 import {
   generateSessionCode, openRelayChannel, closeChannel,
-  type RelayPhase, type RelayStatePayload, type RelayActionPayload,
+  type RelayPhase, type RelayStatePayload, type RelayActionPayload, type RelayTeamState,
 } from "../../lib/liveSession";
 
 const GM = GAME_MODES.find(g => g.id === "relay")!;
@@ -54,6 +53,15 @@ const CPU_RESULT_MS = 1400;
 const CPU_GUESS_CHANCE_BY_DIFFICULTY: Record<Difficulty, number> = { easy: 0.35, medium: 0.22, hard: 0.12 };
 
 type Phase = "welcome" | "ready" | "asking" | "reveal" | "final";
+// Phone mode only. "turns": the original — one team asks one question, then the next team.
+// "together": every team plays its own word at the same time in its own huddle (teacher request:
+// groups talk amongst themselves instead of waiting for each other). Needs 2+ phones on every team
+// (one asks, the rest know the word), since the other teams are too busy to answer for a one-phone
+// team the way they can in "turns".
+type PlayStyle = "turns" | "together";
+// One team's reveal card in "together" mode — the same fields "turns" keeps in revealWord/revealInfo,
+// but per team, since several teams can be mid-reveal at once.
+type TeamReveal = { word: string; kind: "guessed" | "outOfQuestions"; points: number; teamFinished: boolean; startsNewRound: boolean };
 
 const STYLE_TAG = (
   <style>{`
@@ -89,6 +97,8 @@ type RelaySnapshot = {
   difficulty?: Difficulty;
   // The teacher's own word list, if they used one — a resumed game keeps playing it.
   customWords?: string[] | null;
+  // Phone mode's "Take turns" vs "All at once" — optional, a game saved before it existed was "turns".
+  playStyle?: PlayStyle;
 };
 
 function validateRelaySnapshot(raw: unknown, teamCount: number): RelaySnapshot | undefined {
@@ -127,7 +137,8 @@ function validateRelaySnapshot(raw: unknown, teamCount: number): RelaySnapshot |
   const wordsByTeam = s.wordsByTeam ?? {};
   // A game saved before speed-bonus scoring scored every word a flat 10.
   const pointsByTeam = s.pointsByTeam ?? Object.fromEntries(Object.entries(wordsByTeam).map(([k, w]) => [k, (w as number) * 10]));
-  return { teamIndex: s.teamIndex, slotIndexByTeam, wordsByTeam, pointsByTeam, peoplePerTeam, peoplePerTeamByTeam, roundsCount, difficulty, customWords };
+  const playStyle: PlayStyle = s.playStyle === "together" ? "together" : "turns";
+  return { teamIndex: s.teamIndex, slotIndexByTeam, wordsByTeam, pointsByTeam, peoplePerTeam, peoplePerTeamByTeam, roundsCount, difficulty, customWords, playStyle };
 }
 
 export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState, presetPhoneSession, onRequestPhoneSession }: GameProps) {
@@ -147,7 +158,6 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
   };
 
   const [phase, setPhase] = useState<Phase>(resumed ? "ready" : "welcome");
-  const [showHowTo, setShowHowTo] = useState(false);
   // Screen mode only — a teacher-controlled toggle for the live-word card (screenShowsWord): swaps
   // it for the word pool instead, so the teacher can safely leave the screen up between questions
   // without the live word sitting there if anyone glances over, then swap back to actually answer
@@ -164,10 +174,22 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
   // Connected phone (device) ids per team, in the order each was first seen — stable, so the asker
   // rotation doesn't reshuffle when someone reconnects. Only phones that report a deviceId appear.
   const [connectedByTeam, setConnectedByTeam] = useState<Record<string, string[]>>({});
+  // Every phone ever seen per team this session, same order as deviceRosterRef (connected or not) —
+  // the "together" asker rotation runs through this (see rotationList).
+  const [knownByTeam, setKnownByTeam] = useState<Record<string, string[]>>({});
   const deviceRosterRef = useRef<Record<string, string[]>>({});
   // Each team's current asker (a device id). Falls back to the first connected phone whenever the
   // stored one isn't connected any more.
   const [askerByTeam, setAskerByTeam] = useState<Record<string, string>>({});
+  // See PlayStyle. Defaults to "together" (the teacher's preferred phone mode); only ever takes
+  // effect in phone mode with 2+ real teams — `together` below is the one flag everything reads.
+  const [playStyle, setPlayStyle] = useState<PlayStyle>(() => resumed?.playStyle ?? "together");
+  const together = inputMode === "phone" && playStyle === "together" && !isSolo;
+  // "together" only: each team's own phase ("asking" until it guesses or runs out, then "reveal"
+  // until one of its phones taps Next) and the reveal card it's showing. A team with no entry is
+  // asking; a finished team out of its reveal is "done" (see teamPhaseOf).
+  const [teamPhaseByTeam, setTeamPhaseByTeam] = useState<Record<string, "asking" | "reveal">>({});
+  const [revealByTeam, setRevealByTeam] = useState<Record<string, TeamReveal>>({});
   const channelRef = useRef<RealtimeChannel | null>(null);
 
   useEffect(() => {
@@ -263,10 +285,10 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
     if (!serializeStateRef) return;
     serializeStateRef.current = (): RelaySnapshot => ({
       teamIndex, slotIndexByTeam, wordsByTeam, pointsByTeam, peoplePerTeam,
-      peoplePerTeamByTeam: lockedPeoplePerTeamByTeam ?? undefined, roundsCount, difficulty, customWords,
+      peoplePerTeamByTeam: lockedPeoplePerTeamByTeam ?? undefined, roundsCount, difficulty, customWords, playStyle,
     });
     return () => { if (serializeStateRef) serializeStateRef.current = null; };
-  }, [serializeStateRef, teamIndex, slotIndexByTeam, wordsByTeam, pointsByTeam, peoplePerTeam, lockedPeoplePerTeamByTeam, roundsCount, difficulty, customWords]);
+  }, [serializeStateRef, teamIndex, slotIndexByTeam, wordsByTeam, pointsByTeam, peoplePerTeam, lockedPeoplePerTeamByTeam, roundsCount, difficulty, customWords, playStyle]);
 
   // Every real team has its own hidden word at all times — the CPU never does (see cpuTurnEffect
   // below), so it's drawn from propTeams, not the CPU-augmented `teams`, to avoid burning a real
@@ -312,8 +334,15 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
   const revealStartsNewRound = !revealInfo.teamFinished && currentPeoplePerTeam > 0 && (slotIndexByTeam[currentKey] ?? 0) % currentPeoplePerTeam === 0;
 
   // --- Who is asking, and who answers (phone mode) ---
+  // Who the asker rotation runs through. "turns": only currently-connected phones (unchanged).
+  // "together": every phone EVER seen on that team, connected or not — so a phone whose screen
+  // locks mid-word doesn't hand the asker role to a teammate who has already seen the word (and on
+  // a 2-phone team, leave nobody holding the buttons). The asker doesn't need their phone at all to
+  // ask out loud, so a sleeping asker phone is harmless; the team's other phones keep the controls.
+  const rotationList = (teamKey: string): string[] =>
+    together ? (knownByTeam[teamKey] ?? []) : (connectedByTeam[teamKey] ?? []);
   const rotatedDevices = (teamKey: string): string[] => {
-    const list = connectedByTeam[teamKey] ?? [];
+    const list = rotationList(teamKey);
     const stored = askerByTeam[teamKey];
     const at = stored ? list.indexOf(stored) : 0;
     return at <= 0 ? list : [...list.slice(at), ...list.slice(0, at)];
@@ -349,7 +378,7 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
 
   // --- Turn actions ---
   const advanceAskerFor = (teamKey: string) => {
-    const list = connectedByTeam[teamKey] ?? [];
+    const list = rotationList(teamKey);
     if (list.length === 0) return;
     const current = rotatedDevices(teamKey)[0];
     const next = list[(list.indexOf(current) + 1) % list.length];
@@ -463,6 +492,73 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
   // outer slotIndexByTeam/needsReadyByTeam state directly here is safe.
   const continueFromReveal = () => goToNextTeam(slotIndexByTeam, needsReadyByTeam);
 
+  // --- "together" mode (see PlayStyle): every team runs its own word at once ---
+  // Same slot/budget/points bookkeeping as resolveTurn, but for ONE team, with no turn hand-off:
+  // a question just uses one up, and a guess (or running out) puts only that team into its own
+  // reveal while every other team keeps going. Every write is a functional per-team merge, because
+  // two different teams' phones can tap within the same render — a whole-object write built from
+  // this render's state would silently undo the other team's update.
+  const teamPhaseOf = (key: string): "asking" | "reveal" | "done" => {
+    if (teamPhaseByTeam[key] === "reveal") return "reveal";
+    return isTeamFinished(key) ? "done" : "asking";
+  };
+  const resolveTogether = (key: string, guessed: boolean) => {
+    const team = teams.find(t => String(t.id) === key);
+    if (!team || teamPhaseOf(key) !== "asking") return;
+    const prevSlot = slotIndexByTeam[key] ?? 0;
+    const used = questionsUsedByTeam[key] ?? 0;
+    const budget = questionsForSlot(key, prevSlot);
+    let points = 0;
+    if (guessed) {
+      points = guessPoints(used + 1, budget);
+      updateScore(team.id, points);
+      setWordsByTeam(prev => ({ ...prev, [team.id]: (prev[team.id] ?? 0) + 1 }));
+      setPointsByTeam(prev => ({ ...prev, [team.id]: (prev[team.id] ?? 0) + points }));
+      playSound("relay");
+    }
+    const newUsed = guessed ? 0 : used + 1;
+    if (!guessed && newUsed < budget) {
+      setQuestionsUsedByTeam(prev => ({ ...prev, [key]: newUsed }));
+      return;
+    }
+    const newSlot = prevSlot + 1;
+    const teamFinished = newSlot >= totalTurnsForTeam(key);
+    const ppt = peoplePerTeamFor(key);
+    setRevealByTeam(prev => ({ ...prev, [key]: {
+      word: teamWords[key] ?? "", kind: guessed ? "guessed" : "outOfQuestions", points, teamFinished,
+      startsNewRound: !teamFinished && ppt > 0 && newSlot % ppt === 0,
+    } }));
+    setSlotIndexByTeam(prev => ({ ...prev, [key]: newSlot }));
+    setQuestionsUsedByTeam(prev => ({ ...prev, [key]: 0 }));
+    if (!teamFinished) {
+      const fresh = drawWord();
+      setTeamWords(prev => ({ ...prev, [key]: fresh }));
+    }
+    advanceAskerFor(key);
+    setTeamPhaseByTeam(prev => ({ ...prev, [key]: "reveal" }));
+  };
+  const continueTogether = (key: string) => {
+    if (teamPhaseOf(key) !== "reveal") return;
+    setTeamPhaseByTeam(prev => ({ ...prev, [key]: "asking" }));
+  };
+  // What a phone on this team is showing right now — matched against each tap's own stamp.
+  const stampOf = (key: string): { word: string; questionNumber?: number } => {
+    if (teamPhaseOf(key) === "reveal") return { word: revealByTeam[key]?.word ?? "" };
+    const budget = questionsForSlot(key, slotIndexByTeam[key] ?? 0);
+    return { word: teamWords[key] ?? "", questionNumber: Math.min((questionsUsedByTeam[key] ?? 0) + 1, Math.max(budget, 1)) };
+  };
+  const changeWordFor = (key: string) => {
+    if (teamPhaseOf(key) !== "asking") return;
+    const fresh = drawWord();
+    setTeamWords(prev => ({ ...prev, [key]: fresh }));
+  };
+  // The game ends once every team is finished AND has tapped through its own last reveal (so the
+  // last team still gets to see its final word before the results take over the screen).
+  const everyTeamDone = together && teams.every(t => teamPhaseOf(String(t.id)) === "done");
+  useEffect(() => {
+    if (everyTeamDone && (phase === "asking" || phase === "ready")) setPhase("final");
+  }, [everyTeamDone, phase]);
+
   // The CPU never actually asks anything — same house rule as every other CPU integration in this
   // codebase (there's no legitimate question for it to ask, so it doesn't pretend to). Its "turn"
   // is a hidden roll behind a short think delay, run through the exact same resolveTurn a human's
@@ -506,16 +602,16 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
     return {
       phase: mapped,
       roster: teams.map(t => ({ id: t.id, name: t.name, color: t.color, mascot: t.mascot })),
-      activeTeamId: inPlay ? (currentTeam?.id ?? null) : null,
-      askerDeviceId: inPlay ? askerDeviceId : null,
+      activeTeamId: inPlay && !together ? (currentTeam?.id ?? null) : null,
+      askerDeviceId: inPlay && !together ? askerDeviceId : null,
       askerQueueByTeam: queueOut,
-      wordVisibleDeviceIds: inPlay ? wordVisibleDeviceIds : [],
-      answererDeviceIds: inPlay ? answererDeviceIds : [],
+      wordVisibleDeviceIds: inPlay && !together ? wordVisibleDeviceIds : [],
+      answererDeviceIds: inPlay && !together ? answererDeviceIds : [],
       // Always sent, not phase-gated — safe for anyone including the asker (see liveSession.ts),
       // and the pool itself doesn't change mid-game.
       wordPool: words,
-      currentWord: wordForPayload,
-      screenShowsWord,
+      currentWord: together ? "" : wordForPayload,
+      screenShowsWord: together ? false : screenShowsWord,
       phoneCountByTeam: countOut,
       questionsLeftByTeam: leftOut,
       questionsPerTeam: QUESTIONS_PER_PERSON * totalTurnsForTeam(currentKey),
@@ -528,9 +624,36 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
       isSolo,
       allTeamsFinished,
       connectedTeamIds: Array.from(connectedTeamIds),
+      playStyle: together ? "together" : "turns",
+      byTeam: together ? buildByTeam() : undefined,
       ts: Date.now(),
     };
   };
+  function buildByTeam(): Record<string, RelayTeamState> {
+    const out: Record<string, RelayTeamState> = {};
+    const inPlay = phase === "ready" || phase === "asking";
+    propTeams.forEach(t => {
+      const key = String(t.id);
+      const tPhase = teamPhaseOf(key);
+      const reveal = revealByTeam[key];
+      const slot = slotIndexByTeam[key] ?? 0;
+      const budget = questionsForSlot(key, slot);
+      const qNum = Math.min((questionsUsedByTeam[key] ?? 0) + 1, Math.max(budget, 1));
+      out[key] = {
+        phase: tPhase,
+        askerDeviceId: inPlay ? (rotatedDevices(key)[0] ?? null) : null,
+        word: !inPlay ? "" : tPhase === "asking" ? (teamWords[key] ?? "") : tPhase === "reveal" ? (reveal?.word ?? "") : "",
+        questionNumber: qNum,
+        questionBudget: budget,
+        pointsIfGuessedNow: budget > 0 ? guessPoints(qNum, budget) : MIN_POINTS,
+        revealKind: tPhase === "reveal" ? reveal?.kind : undefined,
+        revealPoints: tPhase === "reveal" ? reveal?.points : undefined,
+        revealTeamFinished: tPhase === "reveal" ? reveal?.teamFinished : undefined,
+        revealStartsNewRound: tPhase === "reveal" ? reveal?.startsNewRound : undefined,
+      };
+    });
+    return out;
+  }
 
   // Refs the phone-mode channel reads synchronously, so opening/closing the realtime channel only
   // happens when phone mode itself toggles on/off, not on every state change — same pattern as every
@@ -538,11 +661,14 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
   // always calls the latest closure.
   const buildPayloadRef = useRef(buildPayload);
   const sendStateRef = useRef<(() => void) | null>(null);
-  const liveRef = useRef({ phase, answererDeviceIds, markGuessed, markMissed, changeWord, continueFromReveal });
+  const liveRef = useRef({ phase, answererDeviceIds, markGuessed, markMissed, changeWord, continueFromReveal, together, knownByTeam, teamPhaseOf, rotatedDevices, resolveTogether, continueTogether, changeWordFor, stampOf });
   const lastActionAtRef = useRef(0);
+  // "together" throttles per TEAM, not globally — several teams tapping within the same half-second
+  // is the normal case there, not a double-tap.
+  const lastActionAtByTeamRef = useRef<Record<string, number>>({});
   useEffect(() => {
     buildPayloadRef.current = buildPayload;
-    liveRef.current = { phase, answererDeviceIds, markGuessed, markMissed, changeWord, continueFromReveal };
+    liveRef.current = { phase, answererDeviceIds, markGuessed, markMissed, changeWord, continueFromReveal, together, knownByTeam, teamPhaseOf, rotatedDevices, resolveTogether, continueTogether, changeWordFor, stampOf };
   });
 
   useEffect(() => {
@@ -574,6 +700,7 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
       });
       setConnectedTeamIds(teamIds);
       setConnectedByTeam(byTeam);
+      setKnownByTeam(Object.fromEntries(Object.entries(deviceRosterRef.current).map(([k, v]) => [k, [...v]])));
     });
 
     // The only place phone input touches game logic — only a current answerer's phone is allowed
@@ -581,6 +708,28 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
     channel.on("broadcast", { event: "action" }, ({ payload }) => {
       const action = payload as RelayActionPayload;
       const live = liveRef.current;
+      if (live.together) {
+        // Only a phone actually on the team it claims to act for; the asker (who can't see the
+        // word) never judges their own guess, but anyone on the team can move past the reveal.
+        const key = String(action.teamId);
+        if (live.phase !== "asking" || !(live.knownByTeam[key] ?? []).includes(action.deviceId)) return;
+        const now = Date.now();
+        if (now - (lastActionAtByTeamRef.current[key] ?? 0) < 500) return;
+        const tPhase = live.teamPhaseOf(key);
+        const isAsker = live.rotatedDevices(key)[0] === action.deviceId;
+        // Drop a tap made on a screen that is already out of date (see RelayActionPayload.word).
+        // A phone still on an older build sends no stamp, and is let through as before.
+        const stamp = live.stampOf(key);
+        if (action.word !== undefined && action.word !== stamp.word) return;
+        if (action.questionNumber !== undefined && action.questionNumber !== stamp.questionNumber) return;
+        if (action.action === "guessed" && tPhase === "asking" && !isAsker) live.resolveTogether(key, true);
+        else if (action.action === "missed" && tPhase === "asking" && !isAsker) live.resolveTogether(key, false);
+        else if (action.action === "changeWord" && tPhase === "asking" && !isAsker) live.changeWordFor(key);
+        else if (action.action === "next" && tPhase === "reveal") live.continueTogether(key);
+        else return;
+        lastActionAtByTeamRef.current[key] = now;
+        return;
+      }
       if (!live.answererDeviceIds.includes(action.deviceId)) return;
       const now = Date.now();
       if (now - lastActionAtRef.current < 500) return;
@@ -609,7 +758,7 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
 
   useEffect(() => {
     sendStateRef.current?.();
-  }, [phase, teamIndex, slotIndexByTeam, questionsUsedByTeam, teamWords, revealWord, revealInfo, connectedByTeam, askerByTeam, wordsByTeam, pointsByTeam]);
+  }, [phase, teamIndex, slotIndexByTeam, questionsUsedByTeam, teamWords, revealWord, revealInfo, connectedByTeam, askerByTeam, wordsByTeam, pointsByTeam, teamPhaseByTeam, revealByTeam, together]);
 
   useEffect(() => {
     if (phase === "final" && channelRef.current) {
@@ -642,6 +791,7 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
     setSessionCode(null);
     setConnectedTeamIds(new Set());
     setConnectedByTeam({});
+    setKnownByTeam({});
     deviceRosterRef.current = {};
   };
 
@@ -682,8 +832,14 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
   const teamsWithoutAPhone = inputMode === "phone"
     ? propTeams.filter(t => (connectedByTeam[String(t.id)] ?? []).length === 0).map(t => t.name)
     : [];
+  // "together" also needs a SECOND phone on every team — someone has to see the word and answer,
+  // and the other teams are busy with their own words (see PlayStyle).
+  const teamsNeedingSecondPhone = together
+    ? propTeams.filter(t => (connectedByTeam[String(t.id)] ?? []).length === 1).map(t => t.name)
+    : [];
+  const startBlocked = teamsWithoutAPhone.length > 0 || teamsNeedingSecondPhone.length > 0;
 
-  // Tutorial mockup: src/data/tutorials/relay.tsx — update if this welcome screen's rules text changes.
+  // How to Play video: shared/HowToPlayModal.tsx — if this welcome screen's rules change, the video (Desktop\classcade-videos) needs a re-make.
   if (phase === "welcome") {
     return (
       <div style={{ ...arenaStyle, textAlign: "center" }}>
@@ -694,11 +850,14 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
             <div style={{ fontWeight: "900", fontSize: "20px", marginBottom: "10px", color: "#5EEAD4" }}>Word Relay</div>
             <div style={{ fontSize: "15px", lineHeight: 1.7, opacity: 0.95 }}>
               {isSolo ? "You have a hidden word each round. " : "Every team has its own hidden word. "}
-              <strong style={{ color: "#5EEAD4" }}>One person from each team comes to the front</strong> and asks yes/no questions to work it out — one question at a time, team by team.
+              {together
+                ? <><strong style={{ color: "#5EEAD4" }}>Every team plays at the same time</strong>, in its own huddle: one person asks yes/no questions to work it out, and teammates who can see the word on their phones answer.</>
+                : <><strong style={{ color: "#5EEAD4" }}>One person from each team comes to the front</strong> and asks yes/no questions to work it out — one question at a time, team by team.</>}
               <br />
               Guess it in as few questions as you can: up to <strong style={{ color: "#5EEAD4" }}>{MAX_POINTS} points</strong> for your 1st question, down to {MIN_POINTS} by your {QUESTIONS_PER_PERSON}th. Then {isSolo ? "you go again with a new word" : "the next teammate swaps in"}!
             </div>
           </div>
+          <HowToPlayBar gameId={GM.id} gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color} />
           <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "18px" }}>
             {teams.map((t, i) => (
               <div key={t.id} style={{ background: t.color.dark, border: "2px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E", borderRadius: "14px", padding: "10px 18px", fontWeight: "800", fontSize: "14px", color: "white", display: "flex", alignItems: "center", gap: "6px" }}>
@@ -838,6 +997,39 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
                 // own PhoneJoinPanel call already uses).
                 propTeams.forEach(t => { phoneCountByTeam[String(t.id)] = (connectedByTeam[String(t.id)] ?? []).length; });
                 return (
+                  <>
+                  {/* "Take turns" vs "All at once" — see PlayStyle. Hidden for solo (one team vs
+                      the CPU has nobody to play alongside). */}
+                  {!isSolo && (
+                    <div style={{ marginBottom: "20px" }}>
+                      <div style={{ fontSize: "13px", color: "#99F6E4", fontWeight: "700", marginBottom: "10px" }}>How should teams play?</div>
+                      <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap" }}>
+                        {([
+                          { id: "together" as const, label: "⚡ All at once", desc: "Every team asks in its own huddle at the same time" },
+                          { id: "turns" as const, label: "🔁 Take turns", desc: "One question per team, then the next team" },
+                        ]).map(opt => {
+                          const selected = playStyle === opt.id;
+                          return (
+                            <button key={opt.id} onClick={() => setPlayStyle(opt.id)} className="rl-btn" style={{
+                              padding: "10px 16px", borderRadius: "12px", cursor: "pointer", maxWidth: "220px",
+                              border: `2px solid ${selected ? "#2DD4BF" : "rgba(255,255,255,0.2)"}`,
+                              background: selected ? "rgba(45,212,191,0.15)" : "rgba(255,255,255,0.05)",
+                              color: selected ? "#5EEAD4" : "#94A3B8",
+                            }}>
+                              <div style={{ fontWeight: "900", fontSize: "14px" }}>{opt.label}</div>
+                              <div style={{ fontWeight: "600", fontSize: "11px", marginTop: "3px", opacity: 0.9 }}>{opt.desc}</div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                      {playStyle === "together" && (
+                        <div style={{ fontSize: "12px", color: "#FDE68A", fontWeight: "700", marginTop: "10px", maxWidth: "440px", marginLeft: "auto", marginRight: "auto", lineHeight: 1.5 }}>
+                          📱📱 Every team needs at least 2 phones — one person asks, the others see the word and answer.
+                          A team with only one phone? Choose "Take turns" (the other teams answer for them).
+                        </div>
+                      )}
+                    </div>
+                  )}
                   <PhoneJoinPanel
                     sessionCode={sessionCode} joinUrl={joinUrl} teams={propTeams} connectedTeamIds={connectedTeamIds}
                     phoneCountByTeam={phoneCountByTeam}
@@ -855,21 +1047,12 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
                       </>
                     }
                   />
+                  </>
                 );
               })()}
           </>
 
           {wordListToggle}
-          <button onClick={() => setShowHowTo(true)} className="rl-btn" style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginBottom: "14px", background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
-            <Icon name="help" size={15} /> How to Play
-          </button>
-          {showHowTo && (
-            <HowToPlayModal
-              gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color}
-              steps={RELAY_TUTORIAL_STEPS}
-              onClose={() => setShowHowTo(false)}
-            />
-          )}
           {/* Every real team needs at least one phone connected before phone mode can start — a team
               that never joined would otherwise silently lock in at 1 "phantom" person nobody is
               actually playing. Screen mode has no device data to check, so it's never gated. */}
@@ -878,10 +1061,15 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
               Waiting for a phone to join: {teamsWithoutAPhone.join(", ")}
             </div>
           )}
+          {teamsNeedingSecondPhone.length > 0 && (
+            <div style={{ fontSize: "13px", color: "#FDE68A", fontWeight: "700", marginBottom: "10px", maxWidth: "460px", marginLeft: "auto", marginRight: "auto", lineHeight: 1.5 }}>
+              "All at once" needs a 2nd phone on: {teamsNeedingSecondPhone.join(", ")} — or switch to "Take turns" above.
+            </div>
+          )}
           <button
-            disabled={teamsWithoutAPhone.length > 0}
+            disabled={startBlocked}
             onClick={() => {
-              if (teamsWithoutAPhone.length > 0) return;
+              if (startBlocked) return;
               // Consumes team 0's own needsReady flag right here, same as goToNextTeam does for
               // every later hand-off — otherwise this first team's SECOND turn (no swap in between)
               // would spuriously show "send someone up" again for the same person still standing.
@@ -903,15 +1091,17 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
                 locked[String(cpuRef.current.id)] = locked[String(propTeams[0].id)] ?? peoplePerTeam;
               }
               setLockedPeoplePerTeamByTeam(locked);
+              setTeamPhaseByTeam({});
+              setRevealByTeam({});
               setPhase(phoneFlow ? "asking" : "ready");
             }}
             className="rl-btn"
             style={{
               display: "inline-flex", alignItems: "center", gap: "8px", color: "white", border: "3px solid #1A1A2E",
               borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900",
-              background: teamsWithoutAPhone.length > 0 ? "#134E4A" : "#0D9488",
-              cursor: teamsWithoutAPhone.length > 0 ? "not-allowed" : "pointer",
-              opacity: teamsWithoutAPhone.length > 0 ? 0.6 : 1,
+              background: startBlocked ? "#134E4A" : "#0D9488",
+              cursor: startBlocked ? "not-allowed" : "pointer",
+              opacity: startBlocked ? 0.6 : 1,
               boxShadow: "6px 6px 0 #1A1A2E",
             }}
           >
@@ -946,6 +1136,104 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
             ))}
           </div>
           <button onClick={onEnd} className="rl-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#0D9488", color: "white", border: "3px solid #1A1A2E", borderRadius: "14px", padding: "13px 34px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "5px 5px 0 #1A1A2E" }}><Icon name="checkeredFlag" size={18} /> End Game</button>
+        </div>
+      </div>
+    );
+  }
+
+  // "together" mode's screen: a live race board, one card per team, never showing a live word
+  // (every asker in the room can see the screen). Each team's own state comes from its phones.
+  if (together) {
+    return (
+      <div style={arenaStyle}>
+        {STYLE_TAG}
+        <style>{`@keyframes rlCardPop{0%{transform:scale(1)}40%{transform:scale(1.06)}100%{transform:scale(1)}}`}</style>
+        {sessionCode && !presetPhoneSession && (
+          <PhoneReconnectBadge
+            sessionCode={sessionCode} joinUrl={buildJoinUrl(sessionCode)}
+            teams={teams} connectedTeamIds={connectedTeamIds}
+            phoneCountByTeam={Object.fromEntries(teams.map(t => [String(t.id), (connectedByTeam[String(t.id)] ?? []).length]))}
+            accent="#5EEAD4" panelBg="linear-gradient(160deg,#0F766E,#022C22)" borderColor="#2DD4BF66"
+          />
+        )}
+        <div style={{ position: "relative", zIndex: 1 }}>
+          <div style={{ background: "#134E4A", border: "3px solid #1A1A2E", borderRadius: "14px", padding: "14px 16px", marginBottom: "16px", textAlign: "center", color: "white", boxShadow: "4px 4px 0 #1A1A2E" }}>
+            <div style={{ fontWeight: "900", fontSize: "20px" }}>⚡ Every team at once!</div>
+            <div style={{ fontWeight: "700", fontSize: "13px", opacity: 0.9, marginTop: "4px" }}>
+              Huddle with your team — the words are on your phones, never on this screen.
+            </div>
+            {phase === "ready" && (
+              <button onClick={() => setPhase("asking")} className="rl-btn" style={{ marginTop: "12px", background: "#0D9488", color: "white", border: "3px solid #1A1A2E", borderRadius: "14px", padding: "12px 30px", fontSize: "17px", fontWeight: "900", cursor: "pointer", boxShadow: "4px 4px 0 #1A1A2E" }}>Start!</button>
+            )}
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: teamsGridCols(teams.length), gap: "12px", marginBottom: "16px" }}>
+            {teams.map(t => {
+              const key = String(t.id);
+              const tPhase = teamPhaseOf(key);
+              const reveal = revealByTeam[key];
+              const ppt = peoplePerTeamFor(key);
+              const slot = slotIndexByTeam[key] ?? 0;
+              const budget = questionsForSlot(key, slot);
+              const qNum = Math.min((questionsUsedByTeam[key] ?? 0) + 1, Math.max(budget, 1));
+              // Connected phones that can see the word (everyone but the asker) — 0 means nobody on the
+              // team can answer or tap until a teammate wakes their phone or rejoins.
+              const answerPhones = (connectedByTeam[key] ?? []).filter(d => d !== rotatedDevices(key)[0]).length;
+              const guessedNow = tPhase === "reveal" && reveal?.kind === "guessed";
+              const accent = tPhase === "done" ? "#64748B" : tPhase === "reveal" ? (guessedNow ? "#22C55E" : "#F59E0B") : "#1A1A2E";
+              return (
+                <div key={t.id} style={{
+                  background: t.color.dark, border: `3px solid ${accent}`, borderRadius: "16px", padding: "14px 12px",
+                  color: "white", textAlign: "center", boxShadow: "4px 4px 0 #1A1A2E", opacity: tPhase === "done" ? 0.65 : 1,
+                  animation: guessedNow ? "rlCardPop 0.5s ease-out" : undefined,
+                }}>
+                  <div style={{ fontWeight: "900", fontSize: "16px" }}><TeamIcon team={t} color="white" /> {t.name}</div>
+                  <div style={{ color: "#5EEAD4", fontWeight: "900", fontSize: "30px", lineHeight: 1.1, marginTop: "6px" }}>{pointsByTeam[t.id] ?? 0}</div>
+                  <div style={{ fontSize: "11px", fontWeight: "800", opacity: 0.85 }}>points · {wordsByTeam[t.id] ?? 0} words</div>
+                  <div style={{ background: "rgba(0,0,0,0.3)", borderRadius: "10px", padding: "8px", marginTop: "10px", fontSize: "13px", fontWeight: "800", minHeight: "40px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+                    {tPhase === "done" && <>✅ Finished — sit down</>}
+                    {tPhase === "reveal" && reveal && (guessedNow
+                      ? <>🎉 Guessed “{reveal.word}”! <span style={{ color: "#86EFAC" }}>+{reveal.points}</span></>
+                      : <>⏱️ Out of questions — it was “{reveal.word}”</>)}
+                    {tPhase === "asking" && (
+                      <>
+                        <div>🙋 Asking… question {qNum} of {budget}</div>
+                        {(roundsCount > 1 || ppt > 1) && (
+                          <div style={{ fontSize: "11px", opacity: 0.8, marginTop: "2px" }}>
+                            {[roundsCount > 1 ? `Round ${Math.floor(slot / ppt) + 1} of ${roundsCount}` : "", ppt > 1 ? `Person ${(slot % ppt) + 1} of ${ppt}` : ""].filter(Boolean).join(" · ")}
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
+                  {tPhase !== "done" && answerPhones === 0 && (
+                    <div style={{ fontSize: "11px", color: "#FDE68A", fontWeight: "800", marginTop: "8px" }}>⚠️ No teammate phone connected — wake a phone up or rejoin</div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Same filler the turn-based screen shows while phones hold the word: the full pool
+              (never narrows down any team's live word) and the question starters. */}
+          <div style={{ background: "#022C22", border: "3px dashed #0D9488", borderRadius: "22px", padding: "18px", display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: "18px" }}>
+            <div>
+              <div style={{ fontSize: "11px", fontWeight: "800", color: "#5EEAD499", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: "8px", textAlign: "center" }}>Possible words</div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", justifyContent: "center", maxHeight: "220px", overflowY: "auto" }}>
+                {[...words].sort().map((word, i) => (
+                  <span key={`${word}-${i}`} style={{ background: "rgba(20,184,166,0.18)", color: "#99F6E4", border: "1px solid #14B8A655", borderRadius: "6px", padding: "4px 10px", fontSize: "13px", fontWeight: "700" }}>{word}</span>
+                ))}
+              </div>
+            </div>
+            <div>
+              <div style={{ fontSize: "11px", fontWeight: "800", color: "#5EEAD499", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: "8px", textAlign: "center" }}>Question starters</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: "6px", maxHeight: "220px", overflowY: "auto" }}>
+                {RELAY_QUESTION_STARTERS.map(q => (
+                  <div key={q} style={{ background: "rgba(20,184,166,0.1)", color: "#CCFBF1", border: "1px solid #14B8A640", borderRadius: "8px", padding: "6px 10px", fontSize: "13px", fontWeight: "700", textAlign: "center" }}>{q}</div>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     );

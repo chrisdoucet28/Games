@@ -6,13 +6,12 @@ import type { GameProps } from "../../types";
 import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
 import { denseRank } from "../../utils/ranking";
 import { RankBadge } from "../shared/RankBadge";
-import { HowToPlayModal } from "../shared/HowToPlayModal";
+import { HowToPlayBar } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
 import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
 import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
 import { CustomWordsPanel } from "../shared/CustomWordsPanel";
 import { useWordDeck } from "../../hooks/useWordDeck";
-import { HOTSEAT_SCREEN_TUTORIAL_STEPS, HOTSEAT_PHONE_GROUPS_TUTORIAL_STEPS, HOTSEAT_PHONE_SOLO_TUTORIAL_STEPS } from "../../data/tutorials/hotseat";
 import { playSound } from "../../lib/sounds";
 import { setMusicContext, setMusicGame, stopMusic } from "../../lib/music";
 import {
@@ -137,7 +136,6 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
     if (phase === "play") setMusicContext("tension");
     return () => setMusicContext("gameplay");
   }, [phase === "play"]);
-  const [showHowTo, setShowHowTo] = useState(false);
 
   // "Play on Phones" mode — available whenever there's more than one team (gated below); true
   // 1-team solo play has the teacher personally describing for the one real team, so there's no
@@ -519,7 +517,7 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
   // One-time explainer shown before the very first turn — every other game has an equivalent
   // "here's the whole picture" screen with a team roster. The old version skipped straight to
   // a per-turn "get ready" card and re-explained the full rules before every single turn instead.
-  // Tutorial mockup: src/data/tutorials/hotseat.tsx — update if this welcome screen's rules text changes.
+  // How to Play video: shared/HowToPlayModal.tsx — if this welcome screen's rules change, the video (Desktop\classcade-videos) needs a re-make.
   if (phase === "welcome") {
     return (
       <div style={{ ...arenaStyle, textAlign: "center" }}>
@@ -542,6 +540,7 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
               Each correct word is worth <strong style={{ color: "#FDBA74" }}>{POINTS_PER_WORD} points</strong>, over <strong style={{ color: "#FDBA74" }}>{TOTAL_ROUNDS} rounds</strong> — most points wins.
             </div>
           </div>
+          <HowToPlayBar gameId={GM.id} gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color} />
           <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "24px" }}>
             {teams.map((t, i) => (
               <div key={t.id} style={{ background: t.color.dark, border: "2px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E", borderRadius: "14px", padding: "10px 18px", fontWeight: "800", fontSize: "14px", color: "white", display: "flex", alignItems: "center", gap: "6px" }}>
@@ -630,16 +629,6 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
           )}
 
           {wordListToggle}
-          <button onClick={() => setShowHowTo(true)} className="hs-btn" style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginBottom: "14px", background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
-            <Icon name="help" size={15} /> How to Play
-          </button>
-          {showHowTo && (
-            <HowToPlayModal
-              gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color}
-              steps={inputMode !== "phone" ? HOTSEAT_SCREEN_TUTORIAL_STEPS : teamStructure === "groups" ? HOTSEAT_PHONE_GROUPS_TUTORIAL_STEPS : HOTSEAT_PHONE_SOLO_TUTORIAL_STEPS}
-              onClose={() => setShowHowTo(false)}
-            />
-          )}
           <button onClick={() => setPhase("intro")} className="hs-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#F97316", color: "white", border: "3px solid #1A1A2E", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "6px 6px 0 #1A1A2E" }}>
             <Icon name="flame" size={20} /> Let's Play!
           </button>

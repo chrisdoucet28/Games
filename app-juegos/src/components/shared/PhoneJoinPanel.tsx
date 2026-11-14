@@ -25,20 +25,33 @@ interface PhoneJoinPanelProps {
   phoneCountByTeam?: Record<string, number>;
 }
 
+// Most games pass a dark panelBg, but a few (Bounty Board, Order Up) pass a light cream/pink one —
+// white text on those is practically invisible. Judge the panel by the first hex color in panelBg
+// (the gradient's starting color, or the plain color) and flip text to dark when it's light.
+function isLightBackground(bg: string): boolean {
+  const m = bg.match(/#([0-9a-f]{6}|[0-9a-f]{3})\b/i);
+  if (!m) return false;
+  let hex = m[1];
+  if (hex.length === 3) hex = hex.split("").map(c => c + c).join("");
+  const r = parseInt(hex.slice(0, 2), 16), g = parseInt(hex.slice(2, 4), 16), b = parseInt(hex.slice(4, 6), 16);
+  return (0.299 * r + 0.587 * g + 0.114 * b) > 160;
+}
+
 export function PhoneJoinPanel({ sessionCode, joinUrl, teams, connectedTeamIds, accent, panelBg, borderColor, children, footer, phoneCountByTeam }: PhoneJoinPanelProps) {
+  const light = isLightBackground(panelBg);
   return (
-    <div style={{ background: panelBg, border: `2px solid ${borderColor}`, borderRadius: "20px", padding: "20px", maxWidth: "360px", marginLeft: "auto", marginRight: "auto" }}>
+    <div style={{ background: panelBg, border: `2px solid ${borderColor}`, borderRadius: "20px", padding: "20px", maxWidth: "360px", marginLeft: "auto", marginRight: "auto", ...(light ? { color: "#1F2937" } : {}) }}>
       <div style={{ fontWeight: "800", fontSize: "14px", color: accent, marginBottom: "12px" }}>📱 Scan to join, or go to the site and enter this code:</div>
-      <div style={{ background: "white", borderRadius: "12px", padding: "12px", display: "inline-block" }}>
+      <div style={{ background: "white", borderRadius: "12px", padding: "12px", display: "inline-block", ...(light ? { boxShadow: "0 1px 4px rgba(0,0,0,0.12)" } : {}) }}>
         <QRCodeSVG value={joinUrl} size={160} />
       </div>
-      <div style={{ fontSize: "28px", fontWeight: "900", letterSpacing: "0.1em", color: "white", margin: "12px 0" }}>{sessionCode}</div>
+      <div style={{ fontSize: "28px", fontWeight: "900", letterSpacing: "0.1em", color: light ? accent : "white", margin: "12px 0" }}>{sessionCode}</div>
       {children}
       <div style={{ display: "flex", flexDirection: "column", gap: "6px", marginBottom: "10px" }}>
         {teams.map(t => (
-          <div key={t.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "rgba(255,255,255,0.06)", borderRadius: "8px", padding: "6px 10px", fontSize: "13px" }}>
+          <div key={t.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: light ? "rgba(0,0,0,0.05)" : "rgba(255,255,255,0.06)", borderRadius: "8px", padding: "6px 10px", fontSize: "13px" }}>
             <span><TeamIcon team={t} /> {t.name}</span>
-            <span style={{ color: connectedTeamIds.has(t.id) ? "#4ADE80" : "#6B7280", fontWeight: "700" }}>
+            <span style={{ color: connectedTeamIds.has(t.id) ? (light ? "#15803D" : "#4ADE80") : "#6B7280", fontWeight: "700" }}>
               {connectedTeamIds.has(t.id)
                 ? (phoneCountByTeam && (phoneCountByTeam[String(t.id)] ?? 0) > 0
                     ? `✅ ${phoneCountByTeam[String(t.id)]} phone${phoneCountByTeam[String(t.id)] === 1 ? "" : "s"}`

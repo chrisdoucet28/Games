@@ -6,11 +6,10 @@ import type { GameProps } from "../../types";
 import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
 import { denseRank } from "../../utils/ranking";
 import { RankBadge } from "../shared/RankBadge";
-import { HowToPlayModal } from "../shared/HowToPlayModal";
+import { HowToPlayBar } from "../shared/HowToPlayModal";
 import { FlagPromptButton } from "../shared/FlagPromptButton";
 import { PhoneJoinPanel } from "../shared/PhoneJoinPanel";
 import { PhoneReconnectBadge } from "../shared/PhoneReconnectBadge";
-import { BOUNTYBOARD_TUTORIAL_STEPS } from "../../data/tutorials/bountyboard";
 import { playSound } from "../../lib/sounds";
 import { setMusicGame, setMusicContext, stopMusic } from "../../lib/music";
 import { makeSoloCpuTeam } from "../../lib/soloOpponent";
@@ -414,7 +413,6 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
   })()).current;
 
   const [phase, setPhase] = useState<Phase>(resumed ? "playing" : "intro");
-  const [showHowTo, setShowHowTo] = useState(false);
   const [roundNumber, setRoundNumber] = useState(resumed?.roundNumber ?? 0);
   const [roundEntries, setRoundEntries] = useState<BountyRoundEntry[]>([]);
   const [bounties, setBounties] = useState<Bounty[]>([]);
@@ -856,7 +854,7 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
     background: "radial-gradient(circle at 50% 0%, #FEF3C7 0%, #FDE9C0 55%, #F5DBA0 100%)",
   };
 
-  // Tutorial mockup: src/data/tutorials/bountyboard.tsx — update if this intro's rules text changes.
+  // How to Play video: shared/HowToPlayModal.tsx — if this intro's rules change, the video (Desktop\classcade-videos) needs a re-make.
   if (phase === "intro") return (
     <div style={{ ...arenaStyle, textAlign: "center" }}>
       {STYLE_TAG}
@@ -868,6 +866,10 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
             Every round, one word goes up on the board — every team writes <strong style={{ color: "#92400E" }}>their own sentence</strong> for it, at the same time, then hands it in for the teacher to post.<br />
             Get it wrong and it becomes a <strong style={{ color: "#B91C1C" }}>bounty</strong>: a different team can claim it and fix your exact sentence for double the points — miss it again and it's worth even more!
           </div>
+        </div>
+        <HowToPlayBar gameId={GM.id} gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color} />
+        <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "22px" }}>
+          {teams.map(t => (<div key={t.id} style={{ background: t.color.dark, border: "2px solid #1A1A2E", boxShadow: "3px 3px 0 #1A1A2E", borderRadius: "14px", padding: "10px 18px", fontWeight: "800", fontSize: "14px", color: "white", display: "flex", alignItems: "center", gap: "6px" }}><TeamIcon team={t} color="white" /> {t.name}</div>))}
         </div>
         {/* Always shown, even when a class-level session already exists (Class Check-In, or an
             earlier game's "Play on Phones") — a teacher choosing THIS game still needs the choice
@@ -959,16 +961,6 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
               Hard means a sharper CPU — it writes fewer wrong sentences and rarely fails to fix yours. Easy makes more of both kinds of mistakes.
             </div>
           </div>
-        )}
-        <button onClick={() => setShowHowTo(true)} className="bb-btn" style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginBottom: "14px", background: "rgba(255,255,255,0.95)", color: GM.color, border: `2px solid ${GM.color}`, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", borderRadius: "12px", padding: "10px 24px", fontSize: "14px", fontWeight: "800", cursor: "pointer" }}>
-          <Icon name="help" size={15} /> How to Play
-        </button>
-        {showHowTo && (
-          <HowToPlayModal
-            gameName={GM.name} gameIcon={GAME_ICONS[GM.id]} accentColor={GM.color}
-            steps={BOUNTYBOARD_TUTORIAL_STEPS}
-            onClose={() => setShowHowTo(false)}
-          />
         )}
         <button onClick={() => setPhase("playing")} className="bb-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#B45309", color: "white", border: "3px solid #1A1A2E", borderRadius: "16px", padding: "16px 48px", fontSize: "19px", fontWeight: "900", cursor: "pointer", boxShadow: "6px 6px 0 #1A1A2E" }}><Icon name="sheriffStar" size={20} /> Open the Board!</button>
       </div>
