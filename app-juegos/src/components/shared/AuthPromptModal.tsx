@@ -44,7 +44,9 @@ export function AuthPromptModal({ reason, onClose }: Props) {
   const [existingAccount, setExistingAccount] = useState(false);
   const [resetMode, setResetMode] = useState(false);
   const [resetSent, setResetSent] = useState(false);
-  const [marketingOptIn, setMarketingOptIn] = useState(false);
+  // Every teacher joins the update list by default (owner, 2026-11-15); unsubscribe is in each email
+  // and in My Profile.
+  const marketingOptIn = true;
   const [inAppBrowser] = useState(() => isInAppBrowser());
 
   // Signing in/up itself doesn't need to do anything else here — App.tsx's own useAuth() picks up
@@ -228,10 +230,9 @@ export function AuthPromptModal({ reason, onClose }: Props) {
               </div>
             )}
             {mode === "sign-up" && (
-              <label style={{ display: "flex", alignItems: "flex-start", gap: "8px", color: "#BAE6FD", fontSize: "12.5px", lineHeight: 1.45, marginBottom: "16px", cursor: "pointer" }}>
-                <input type="checkbox" checked={marketingOptIn} onChange={e => setMarketingOptIn(e.target.checked)} style={{ marginTop: "2px", accentColor: "#F59E0B", flexShrink: 0 }} />
-                <span>Send me occasional updates: new games, topics and free resources (about once a month). Unsubscribe anytime.</span>
-              </label>
+              <p style={{ color: "#BAE6FD", fontSize: "12.5px", lineHeight: 1.45, margin: "0 0 16px" }}>
+                We'll email you occasional updates: new games, topics and free resources (about once a month). Unsubscribe anytime.
+              </p>
             )}
             {error && <div style={{ color: "#FCA5A5", fontSize: "13px", marginBottom: "14px", lineHeight: 1.5 }}>{error}</div>}
             <button type="submit" disabled={loading} style={{ width: "100%", background: "linear-gradient(135deg,#F59E0B,#D97706)", color: "white", border: "none", borderRadius: "12px", padding: "13px", fontSize: "15px", fontWeight: "900", cursor: loading ? "default" : "pointer", opacity: loading ? 0.7 : 1 }}>

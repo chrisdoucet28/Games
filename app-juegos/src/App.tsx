@@ -10,7 +10,6 @@ import { useAuth } from './hooks/useAuth';
 import { capturePendingJoinCode } from './lib/pendingJoin';
 import { supabase, isSupabaseConfigured } from './lib/supabaseClient';
 import { getProfile, setMarketingOptIn, takePendingMarketingOptIn, chooseRole, updateProfile } from './lib/profile';
-import { MarketingOptInPrompt } from './components/shared/MarketingOptInPrompt';
 import { getSubscription, FREE_SUBSCRIPTION } from './lib/subscription';
 import { DEFAULT_THEME, getTheme, type Theme } from './data/themes';
 import { PlanIntroScreen } from './components/shared/PlanIntroScreen';
@@ -213,9 +212,6 @@ function AuthenticatedApp() {
   // LessonGamesGenerator as a one-time initial-screen override, same idea as checkoutRedirect
   // below (both only ever matter on the very first render after this gate clears).
   const [initialScreen, setInitialScreen] = useState<'learn' | null>(null);
-  // The one-time monthly-update question (MarketingOptInPrompt). Defaults to hidden, same
-  // optimistic reasoning as planIntroSeen — only flips on once the profile confirms it's unanswered.
-  const [showMarketingPrompt, setShowMarketingPrompt] = useState(false);
   // True only while LessonGamesGenerator's own internal screen state is "game" — lets StatusBadge
   // hide its Music button during gameplay, since the game's own top bar has its own Music button
   // right next to Sound Effects there. Keeps exactly one Music button on screen at any given time.
@@ -317,15 +313,11 @@ function AuthenticatedApp() {
     getProfile().then(p => {
       setTheme(getTheme(p.theme_id));
       setPlanIntroSeen(p.has_completed_plan_intro);
-      // A Google sign-up's checkbox answer was parked before the OAuth redirect — apply it now
-      // instead of asking again. Read (and cleared) on every login so a stale one never lingers;
-      // only applied to an account that hasn't answered yet. `=== false` (not falsy) so a database
-      // without the column never shows the prompt.
-      const pending = takePendingMarketingOptIn();
-      if (p.marketing_prompt_seen === false) {
-        if (pending !== null) setMarketingOptIn(pending).catch(() => {});
-        else setShowMarketingPrompt(true);
-      }
+      // Every teacher is on the monthly-update list by default (owner, 2026-11-15): an account that
+      // has never been set (a brand-new sign-up, Google included) is added here once. Unsubscribing
+      // (email link or My Profile) sets marketing_prompt_seen too, so it is never re-added.
+      takePendingMarketingOptIn();
+      if (p.marketing_prompt_seen === false && p.role !== "student") setMarketingOptIn(true).catch(() => {});
     }).catch(() => {});
     getSubscription().then(setSubscription).catch(() => {});
   }, [session]);
@@ -472,7 +464,6 @@ function AuthenticatedApp() {
         <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#22C55E', display: 'inline-block', marginRight: '6px' }} />
         Logged in as {session.user.email}
       </StatusBadge>
-      {showMarketingPrompt && <MarketingOptInPrompt theme={theme} onDone={() => setShowMarketingPrompt(false)} />}
       <LessonGamesGenerator
         key="lgg"
         theme={theme} onThemeChange={setTheme}
