@@ -18,6 +18,7 @@ import { matchesTopicSearch } from "./data/learnTopics";
 import { ScoreBoard } from "./components/shared/ScoreBoard";
 import { Confetti } from "./components/shared/Confetti";
 import { ClassesScreen } from "./components/shared/ClassesScreen";
+import { ChooseClassScreen } from "./components/shared/ChooseClassScreen";
 import { ProfileScreen } from "./components/shared/ProfileScreen";
 import { LearnScreen } from "./components/shared/LearnScreen";
 import { LESSON_TOPICS } from "./data/learnTopics";
@@ -261,9 +262,13 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
   // whichever one runs always sees the CURRENT value, not whatever it was when first captured.
   const isAnonymousRef = useRef(isAnonymous);
   useEffect(() => { isAnonymousRef.current = isAnonymous; }, [isAnonymous]);
-  const [screen, setScreen] = useState<"welcome" | "classes" | "profile" | "learn" | "lessonplan" | "lessonplan-play" | "leaderboard" | "billing" | "topic-select" | "team-setup" | "game-select" | "game" | "results">(
+  const [screen, setScreen] = useState<"welcome" | "classes" | "choose-class" | "profile" | "learn" | "lessonplan" | "lessonplan-play" | "leaderboard" | "billing" | "topic-select" | "team-setup" | "game-select" | "game" | "results">(
     checkoutRedirect ? "billing" : initialScreen ?? "welcome"
   );
+  // Which screen "choose-class" should hand off to once a class is picked (or skipped) -- set
+  // right before navigating there, from whichever Welcome button ("Start a Game" vs "Lesson
+  // Plans") sent the teacher into the picker.
+  const [classPickerTarget, setClassPickerTarget] = useState<"topic-select" | "lessonplan">("topic-select");
   // The lesson a teacher is en route to play — set the moment a topic is picked (from the Lesson
   // Plan index, or Learn's "Start Lesson Plan" button) and read once team-setup's CTA is clicked,
   // so team-setup knows to route to "lessonplan-play" instead of "game-select". Every team-setup
@@ -306,32 +311,6 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
   // calls) doesn't need to touch it.
   const [activeClassName, setActiveClassName] = useState<string | null>(null);
 
-  // Mirrors activeClassId into localStorage so a browser refresh (which wipes every piece of React
-  // state above, teams/scores included) isn't a dead end: a teacher who refreshes mid-class and
-  // then starts a fresh, unlinked session under the same team names has no way to get their real
-  // scores back, and silently starting over at 0 reads as "my team randomly lost its points" (a
-  // real report — a teacher's team kept its 150 points right up until a refresh + a fresh Lesson
-  // Plan start put it back at 0 under the same name). This alone doesn't restore anything by
-  // itself — see lastClassCandidate below, which turns a stored id back into an actual on-screen
-  // "continue where you left off?" choice on next load, rather than silently auto-resuming.
-  const LAST_CLASS_STORAGE_KEY = "classcade_last_active_class_id";
-  useEffect(() => {
-    try {
-      if (activeClassId) localStorage.setItem(LAST_CLASS_STORAGE_KEY, activeClassId);
-      else localStorage.removeItem(LAST_CLASS_STORAGE_KEY);
-    } catch { /* private browsing / storage disabled — nothing to persist, nothing to break */ }
-  }, [activeClassId]);
-  // Fetched once per fresh page load only (empty deps) — if the teacher dismisses it or explicitly
-  // starts an unlinked game (which clears the stored id too, see the Welcome screen's "Start a
-  // Game" button), it simply won't come back until the next real page load.
-  const [lastClassCandidate, setLastClassCandidate] = useState<SavedClass | null>(null);
-  useEffect(() => {
-    let stored: string | null = null;
-    try { stored = localStorage.getItem(LAST_CLASS_STORAGE_KEY); } catch { /* ignore */ }
-    if (!stored) return;
-    getClass(stored).then(cls => { if (cls) setLastClassCandidate(cls); }).catch(() => {});
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
   // "Class Check-In" — one persistent join code/channel for a whole class-linked sitting, so a
   // student scans once and their phone auto-follows every later game switch (see startGame/
   // handleGameEnd below), instead of re-scanning a fresh per-game code every time. Only ever set
@@ -430,6 +409,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
       game: selectedGame ? `${selectedGame.name} - ClassCade` : "ClassCade",
       results: "Results - ClassCade",
       classes: "My Classes - ClassCade",
+      "choose-class": "Choose a Class - ClassCade",
       profile: "My Profile - ClassCade",
       learn: "Learn - ClassCade",
       lessonplan: "Lesson Plans - ClassCade",
@@ -774,9 +754,12 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     setTeamsUntouched(false);
   };
 
-  // "Start New Game" from My Classes — brings the class's persistent roster/scores into the
-  // normal setup flow, same as if the teacher had typed those names in themselves.
-  const startWithClass = (cls: SavedClass) => {
+  // "Start New Game" from My Classes (or "Use This Class"/"Start New Game" from the new
+  // choose-class picker) — brings the class's persistent roster/scores into the normal setup
+  // flow, same as if the teacher had typed those names in themselves. `nextScreen` lets the
+  // choose-class picker send a Lesson-Plans entry to "lessonplan" instead of the usual
+  // "topic-select"; every other caller (My Classes) just wants the game path, so it's optional.
+  const startWithClass = (cls: SavedClass, nextScreen: "topic-select" | "lessonplan" = "topic-select") => {
     setActiveClassId(cls.id);
     setActiveClassName(cls.name);
     // Pre-selects step 1 of Game Setup with this class's own level, so a teacher who already told
@@ -791,7 +774,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     // whatever's actually started here. Best-effort: if this fails, My Classes just shows one
     // extra (harmless) Resume option next time, not a reason to block starting the new game.
     if (cls.in_progress) clearProgress(cls.id, cls.teams).catch(() => {});
-    setScreen("topic-select");
+    setScreen(nextScreen);
   };
 
   // "Resume" from My Classes — skips setup/game-select entirely and drops straight back into
@@ -1531,51 +1514,37 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
             </div>
           ))}
         </div>
-        {/* "Continue where you left off?" — only ever appears once per fresh page load (see
-            lastClassCandidate above), and only offers, never auto-applies: a refresh might just as
-            easily mean "I'm done with that class, starting a new period" as "I didn't mean to lose
-            my place." Shows each team's actual current score so a teacher can tell at a glance
-            whether this is really the session they want back, before committing to it. */}
-        {lastClassCandidate && (
-          <div style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.25)", borderRadius: "16px", padding: "14px 18px", marginBottom: "20px", display: "flex", alignItems: "center", gap: "14px", flexWrap: "wrap", justifyContent: "center", backdropFilter: "blur(8px)" }}>
-            <div style={{ textAlign: "left" }}>
-              <div style={{ color: "white", fontWeight: "800", fontSize: "14px" }}>Continue "{lastClassCandidate.name}"?</div>
-              <div style={{ color: "rgba(255,255,255,0.75)", fontSize: "12.5px", marginTop: "2px" }}>
-                {lastClassCandidate.teams.length > 0
-                  ? lastClassCandidate.teams.map(t => `${t.name} (${t.score})`).join(" · ")
-                  : "No teams saved yet"}
-              </div>
-            </div>
-            <div style={{ display: "flex", gap: "8px" }}>
-              <button
-                onClick={() => {
-                  const cls = lastClassCandidate;
-                  setLastClassCandidate(null);
-                  if (cls.in_progress) resumeClass(cls); else startWithClass(cls);
-                }}
-                style={{ background: "white", color: theme.heroBg[0], border: "none", borderRadius: "10px", padding: "9px 18px", fontSize: "13px", fontWeight: "800", cursor: "pointer", fontFamily: theme.headingFont }}
-              >Continue</button>
-              <button
-                onClick={() => setLastClassCandidate(null)}
-                title="Dismiss"
-                style={{ background: "none", border: "1px solid rgba(255,255,255,0.35)", color: "white", borderRadius: "10px", padding: "9px 14px", fontSize: "13px", fontWeight: "800", cursor: "pointer" }}
-              >✕</button>
-            </div>
-          </div>
-        )}
         {/* Primary fork: "games or lesson plans" is the first real decision after login — both
             equally weighted (same size/padding/font-weight), distinguished only by which gradient
             each uses, so neither reads as the "default" choice over the other. Each gets a short
             hint underneath (not on the button itself, so the button label stays scannable) telling
             a new teacher what to actually expect time-wise before they click — the two paths take
-            genuinely different amounts of class time and this is the one place that says so. */}
+            genuinely different amounts of class time and this is the one place that says so.
+            Both route signed-in teachers through "choose-class" first (see classPickerTarget) —
+            that's also where an unfinished game on any saved class gets its own explicit Resume
+            choice, not just on My Classes, which a teacher using the app day-to-day may never open.
+            An anonymous explorer has no classes to pick from, so skips straight through as before. */}
         <div style={{ display: "flex", gap: "16px", justifyContent: "center", flexWrap: "wrap", marginBottom: "18px" }}>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
-            <button onClick={() => { setActiveClassId(null); setActiveClassName(null); setPendingLessonTopicId(null); setScreen("topic-select"); }} style={{ background: `linear-gradient(135deg,${theme.cta[0]},${theme.cta[1]})`, color: "white", border: "none", borderRadius: "16px", padding: "18px 48px", fontSize: "20px", fontWeight: "900", cursor: "pointer", boxShadow: `0 8px 32px ${hexToRgba(theme.cta[1], 0.45)}`, letterSpacing: "0.01em", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "8px" }}><Icon name="rocket" size={20} /> Start a Game</button>
+            <button
+              onClick={() => {
+                if (isAnonymousRef.current) { setActiveClassId(null); setActiveClassName(null); setPendingLessonTopicId(null); setScreen("topic-select"); return; }
+                setClassPickerTarget("topic-select");
+                setScreen("choose-class");
+              }}
+              style={{ background: `linear-gradient(135deg,${theme.cta[0]},${theme.cta[1]})`, color: "white", border: "none", borderRadius: "16px", padding: "18px 48px", fontSize: "20px", fontWeight: "900", cursor: "pointer", boxShadow: `0 8px 32px ${hexToRgba(theme.cta[1], 0.45)}`, letterSpacing: "0.01em", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "8px" }}
+            ><Icon name="rocket" size={20} /> Start a Game</button>
             <span style={{ color: "rgba(255,255,255,0.65)", fontSize: "12.5px", fontWeight: "700" }}>Perfect for the last 30 minutes of class!</span>
           </div>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
-            <button onClick={() => setScreen("lessonplan")} style={{ background: `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "16px", padding: "18px 48px", fontSize: "20px", fontWeight: "900", cursor: "pointer", boxShadow: `0 8px 32px ${hexToRgba(theme.accent[1], 0.45)}`, letterSpacing: "0.01em", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "8px" }}><Icon name="school" size={20} /> Lesson Plans</button>
+            <button
+              onClick={() => {
+                if (isAnonymousRef.current) { setScreen("lessonplan"); return; }
+                setClassPickerTarget("lessonplan");
+                setScreen("choose-class");
+              }}
+              style={{ background: `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "16px", padding: "18px 48px", fontSize: "20px", fontWeight: "900", cursor: "pointer", boxShadow: `0 8px 32px ${hexToRgba(theme.accent[1], 0.45)}`, letterSpacing: "0.01em", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "8px" }}
+            ><Icon name="school" size={20} /> Lesson Plans</button>
             <span style={{ color: "rgba(255,255,255,0.65)", fontSize: "12.5px", fontWeight: "700" }}>~30 min lesson + ~30 min playing</span>
           </div>
         </div>
@@ -1611,6 +1580,22 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
         isPaid={isPaid}
         onUpgrade={() => setScreen("billing")}
         role={role}
+      />
+      <FeedbackButton />
+      <BrandBadge isPaid={isPaid} />
+    </>
+  );
+
+  if (screen === "choose-class") return (
+    <>
+      <ChooseClassScreen
+        onBack={() => setScreen("welcome")}
+        onResumeClass={resumeClass}
+        onStartWithClass={cls => startWithClass(cls, classPickerTarget)}
+        onSkip={() => { setActiveClassId(null); setActiveClassName(null); setPendingLessonTopicId(null); setScreen(classPickerTarget); }}
+        theme={theme}
+        isPaid={isPaid}
+        onUpgrade={() => setScreen("billing")}
       />
       <FeedbackButton />
       <BrandBadge isPaid={isPaid} />
