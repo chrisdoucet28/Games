@@ -1995,7 +1995,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
               // back-to-back classes has no way to tell (from this screen alone) whether they're
               // still on the previous period's class before naming new teams into it. "Switch"
               // reopens the same link picker so this isn't a one-way door once linked.
-              <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "12px", fontSize: "12px", color: "#6B7280", flexWrap: "wrap" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "12px", fontSize: "12px", color: "#6B7280" }}>
                 <span>Linked to <strong style={{ color: theme.heroBg[0] }}>{activeClassName ?? "this class"}</strong></span>
                 <button
                   type="button"
@@ -2003,19 +2003,6 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
                   style={{ background: "none", border: "none", color: theme.accentSolid, fontWeight: "800", fontSize: "12px", cursor: "pointer", padding: 0, textDecoration: "underline" }}
                 >Switch</button>
               </div>
-            )}
-            {/* The linked class already has a game in progress -- same "Resume X" a teacher would
-                see on My Classes for this exact class, right here instead, since this is where a
-                class actually gets linked day to day (auto-matched roster names, or the Switch
-                drawer above) -- no extra screen, nothing to visit first. */}
-            {activeClassFull?.in_progress && (
-              <button
-                type="button"
-                onClick={() => resumeClass(activeClassFull)}
-                style={{ background: `linear-gradient(135deg,${theme.cta[0]},${theme.cta[1]})`, color: "white", border: "none", borderRadius: "10px", padding: "9px 16px", fontWeight: "800", fontSize: "13px", cursor: "pointer", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px", marginBottom: "12px" }}
-              >
-                <Icon name="play" size={13} /> Resume {GAME_MODES.find(g => g.id === activeClassFull.selected_game)?.name ?? "an unavailable game"}
-              </button>
             )}
             {!activeClassId ? (
               <div style={{ border: "2px dashed #93C5FD", borderRadius: "12px", padding: "16px", textAlign: "center" }}>
@@ -2261,6 +2248,20 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
         <button onClick={handleSetup} style={{ width: "100%", background: `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "16px", padding: "18px", fontSize: "20px", fontWeight: "900", cursor: "pointer", fontFamily: theme.headingFont, display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
           {pendingLessonTopicId ? <><Icon name="school" size={20} /> Start Lesson</> : <><Icon name="controller" size={20} /> Choose a Game!</>}
         </button>
+
+        {/* The linked class already has a game in progress -- same "Resume X" a teacher would see
+            on My Classes for this exact class, right here instead, since this is where a class
+            actually gets linked day to day (auto-matched roster names, or the Switch drawer
+            above) -- no extra screen, nothing to visit first. Full-width and below the main CTA
+            so it reads as its own clear choice, not a small aside easy to miss. */}
+        {activeClassFull?.in_progress && (
+          <button
+            onClick={() => resumeClass(activeClassFull)}
+            style={{ width: "100%", marginTop: "12px", background: `linear-gradient(135deg,${theme.cta[0]},${theme.cta[1]})`, color: "white", border: "none", borderRadius: "16px", padding: "18px", fontSize: "20px", fontWeight: "900", cursor: "pointer", fontFamily: theme.headingFont, display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}
+          >
+            <Icon name="play" size={20} /> Resume {GAME_MODES.find(g => g.id === activeClassFull.selected_game)?.name ?? "an unavailable game"}
+          </button>
+        )}
       </div>
       <FeedbackButton />
       <BrandBadge isPaid={isPaid} />
