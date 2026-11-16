@@ -769,24 +769,27 @@ export function openClassSessionChannel(code: string): RealtimeChannel {
 // --- Rocket Fuel ---
 //
 // Individual people, not one phone per team (same idea as Hot Seat/Word Relay) — every connected
-// phone on the CURRENTLY ACTIVE team gets its own prompt and works it independently and privately,
-// instead of one person speaking in front of the room while everyone else just watches (teacher
-// feedback: some students do much better given a quiet, untimed-per-item way to answer, instead of
-// needing to be the one talking). Each connected phone runs its OWN clock, not a team-wide pool —
-// teacher feedback on an earlier version that pooled bonus time across the whole team: it let one
-// fast/accurate student's bonus benefit teammates who hadn't done anything, and a slow typer on an
-// otherwise-fast team got cut off early through no fault of their own. A device's clock starts at
-// TURN_SECONDS the moment it's first dealt a prompt (a late joiner gets a full one, not whatever's
-// left of someone else's), and a submission (right or wrong; see below) hands back a random time
-// bonus to THAT device's own clock the moment it's SENT, rewarding steady work over accuracy. A
-// device that runs out stops getting new prompts; the team's turn as a whole ends once every
-// connected device has run out, or the teacher ends it early — see RocketFuelGame.tsx.
+// phone on EVERY team gets its own prompt and works it independently and privately, all at once,
+// instead of one team going at a time while every other team's phones sit idle. (That's exactly
+// what the first version of this did — teams took turns, one at a time — and teacher feedback
+// playing it live was immediate: the other teams had nothing going on for them and just sat there.
+// All-teams-at-once is a deliberate fix for that, not the original design.) Each connected phone
+// runs its OWN clock, not a team-wide pool and not a shared game-wide pool — teacher feedback on an
+// earlier version that pooled bonus time across a whole team: it let one fast/accurate student's
+// bonus benefit teammates who hadn't done anything, and a slow typer on an otherwise-fast team got
+// cut off early through no fault of their own. A device's clock starts at TURN_SECONDS the moment
+// it's first dealt a prompt (a late joiner gets a full one, not whatever's left of someone else's),
+// and a submission (right or wrong; see below) hands back a random time bonus to THAT device's own
+// clock the moment it's SENT, rewarding steady work over accuracy. A device that runs out stops
+// getting new prompts; the round as a whole ends once every connected device on every team has run
+// out, or the teacher ends it early for everyone at once — see RocketFuelGame.tsx.
 //
-// Unlike Hot Seat/Relay, judging never happens live here: every submission just queues up, and the
-// teacher works through a small review (Correct/Wrong per sentence) on the existing team-end
-// screen once the turn's over — see RocketFuelGame.tsx's reviewQueue/judgeSubmission. There's no
-// live "correct" moment on a phone to react to (fuel is a secret until launch, same as always),
-// which is exactly why the time bonus triggers on SEND, not on a judgment that hasn't happened yet.
+// Unlike Hot Seat/Relay, judging never happens live here: every submission from every team just
+// queues into one shared pool, and the teacher works through a small review (Correct/Wrong per
+// sentence, labeled by team) on the existing team-end screen once the round's over — see
+// RocketFuelGame.tsx's reviewQueue/judgeSubmission. There's no live "correct" moment on a phone to
+// react to (fuel is a secret until launch, same as always), which is exactly why the time bonus
+// triggers on SEND, not on a judgment that hasn't happened yet.
 export type RocketFuelRosterEntry = { id: string | number; name: string; color: TeamColor; mascot?: string | null };
 
 export type RocketFuelPhase = "lobby" | "turn" | "final";
@@ -794,10 +797,9 @@ export type RocketFuelPhase = "lobby" | "turn" | "final";
 export type RocketFuelStatePayload = {
   phase: RocketFuelPhase;
   roster: RocketFuelRosterEntry[];
-  activeTeamId: string | number | null;
-  // This device's own currently-assigned prompt — a different one per connected phone on the
-  // active team, dealt out independently (see RocketFuelGame.tsx's promptsByDevice). Absent for any
-  // device not currently working a prompt (wrong team, between turns, turn just ended and is being
+  // This device's own currently-assigned prompt — a different one per connected phone, on every
+  // team at once, dealt out independently (see RocketFuelGame.tsx's promptsByDevice). Absent for
+  // any device not currently working a prompt (between rounds, round just ended and is being
   // reviewed, this phone hasn't been dealt one yet, or its own clock has run out).
   promptByDevice: Record<string, { word?: string; question: string }>;
   // This device's own remaining seconds — see the header comment above. Absent until the device is

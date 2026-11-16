@@ -11,15 +11,15 @@ type Props = {
 
 // Screen-authoritative, like every other phone view — this never runs its own game logic, just
 // renders whatever the screen's latest broadcast says and forwards a submission back as a
-// one-shot action. Individual people, not one phone per team: every phone connected to the
-// ACTIVE team works its own prompt independently and privately (promptByDevice is keyed by
+// one-shot action. Individual people, not one phone per team: every phone connected, on EVERY
+// team at once, works its own prompt independently and privately (promptByDevice is keyed by
 // deviceId, a different prompt per phone, dealt out in parallel) — there's no guesser/describer
-// split like Hot Seat, since nobody here needs to be shielded from seeing anything. Judging never
-// happens on a phone; the teacher reviews every submission afterward on the big screen (see
-// liveSession.ts's Rocket Fuel section), so this view's only job is prompt in, sentence out.
+// split like Hot Seat, since nobody here needs to be shielded from seeing anything, and no team
+// has to wait idle for another team's turn to finish. Judging never happens on a phone; the
+// teacher reviews every submission afterward on the big screen (see liveSession.ts's Rocket Fuel
+// section), so this view's only job is prompt in, sentence out.
 export function PhoneRocketFuelView({ state, teamId, deviceId, onAction }: Props) {
   const team = state.roster.find(t => t.id === teamId);
-  const activeTeam = state.roster.find(t => t.id === state.activeTeamId);
   const myPrompt = state.promptByDevice[deviceId];
   // Each phone runs its OWN clock now, not a shared team pool — see liveSession.ts's Rocket Fuel
   // section for why. Undefined until this device is first dealt a prompt.
@@ -154,24 +154,26 @@ export function PhoneRocketFuelView({ state, teamId, deviceId, onAction }: Props
     );
   }
 
-  // No prompt assigned to this phone right now — either this team's turn just ended (being
-  // reviewed), it's some other team's turn, or the game hasn't started yet.
-  const forOwnTeam = team?.id === state.activeTeamId;
+  // No prompt assigned to this phone right now. Every team plays at once now, so there's no
+  // "some other team's turn" case to show anymore — if the game's already under way (phase
+  // "turn") and this phone has no prompt, the round it was part of has just ended and every
+  // team's phones lose their prompts together (see RocketFuelGame.tsx's endTurn), so it's always
+  // "the teacher's reviewing now," never "wait for someone else." The only other case is the game
+  // not having started yet (phase "lobby").
+  const roundInProgress = state.phase === "turn";
   return (
     <div style={{ ...wrapStyle, textAlign: "center", display: "flex", flexDirection: "column", justifyContent: "center" }}>
       <div style={{ fontSize: "26px", marginBottom: "6px" }}><TeamIcon team={team} size={26} /></div>
       <div style={{ fontWeight: "900", fontSize: "20px", marginBottom: "20px" }}>{team?.name}</div>
-      <div style={{ fontSize: "44px", marginBottom: "10px" }}>{forOwnTeam ? "📋" : "🚀"}</div>
+      <div style={{ fontSize: "44px", marginBottom: "10px" }}>{roundInProgress ? "📋" : "🚀"}</div>
       <div style={{ fontWeight: "800", fontSize: "18px", color: "#A5B4FC", marginBottom: "22px" }}>
-        {forOwnTeam
-          ? "Nice work! Your teacher's checking your answers now."
-          : activeTeam
-            ? `${activeTeam.name} is at mission control!`
-            : "Get ready — waiting for the game to start…"}
+        {roundInProgress
+          ? "Nice work! Your teacher's checking everyone's answers now."
+          : "Get ready — waiting for the game to start…"}
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: "8px", maxWidth: "320px", margin: "0 auto", width: "100%" }}>
         {state.roster.map(t => (
-          <div key={t.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: t.id === state.activeTeamId ? "rgba(165,180,252,0.15)" : "rgba(255,255,255,0.06)", border: `1.5px solid ${t.id === state.activeTeamId ? "#A5B4FC" : "rgba(255,255,255,0.15)"}`, borderRadius: "12px", padding: "10px 14px" }}>
+          <div key={t.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "rgba(255,255,255,0.06)", border: "1.5px solid rgba(255,255,255,0.15)", borderRadius: "12px", padding: "10px 14px" }}>
             <span style={{ fontSize: "15px", fontWeight: "700" }}><TeamIcon team={t} /> {t.name}</span>
           </div>
         ))}
