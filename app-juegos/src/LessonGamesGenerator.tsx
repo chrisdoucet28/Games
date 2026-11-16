@@ -306,6 +306,19 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
   // calls) doesn't need to touch it.
   const [activeClassName, setActiveClassName] = useState<string | null>(null);
 
+  // The currently-linked class's own live record, re-fetched whenever activeClassId changes --
+  // just enough to know if IT has an unfinished game, so team-setup's Saved Teams panel can offer
+  // "Resume" right where a class is already naturally linked (auto-matched roster names, the
+  // in-panel Switch/link drawer, or My Classes) -- no extra screen, no extra step. null while
+  // nothing's linked, or while the fetch for a freshly-linked class hasn't resolved yet.
+  const [activeClassFull, setActiveClassFull] = useState<SavedClass | null>(null);
+  useEffect(() => {
+    if (!activeClassId) { setActiveClassFull(null); return; }
+    let cancelled = false;
+    getClass(activeClassId).then(cls => { if (!cancelled) setActiveClassFull(cls); }).catch(() => {});
+    return () => { cancelled = true; };
+  }, [activeClassId]);
+
   // Mirrors activeClassId into localStorage so a browser refresh (which wipes every piece of React
   // state above, teams/scores included) isn't a dead end: a teacher who refreshes mid-class and
   // then starts a fresh, unlinked session under the same team names has no way to get their real
@@ -1982,7 +1995,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
               // back-to-back classes has no way to tell (from this screen alone) whether they're
               // still on the previous period's class before naming new teams into it. "Switch"
               // reopens the same link picker so this isn't a one-way door once linked.
-              <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "12px", fontSize: "12px", color: "#6B7280" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "12px", fontSize: "12px", color: "#6B7280", flexWrap: "wrap" }}>
                 <span>Linked to <strong style={{ color: theme.heroBg[0] }}>{activeClassName ?? "this class"}</strong></span>
                 <button
                   type="button"
@@ -1990,6 +2003,19 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
                   style={{ background: "none", border: "none", color: theme.accentSolid, fontWeight: "800", fontSize: "12px", cursor: "pointer", padding: 0, textDecoration: "underline" }}
                 >Switch</button>
               </div>
+            )}
+            {/* The linked class already has a game in progress -- same "Resume X" a teacher would
+                see on My Classes for this exact class, right here instead, since this is where a
+                class actually gets linked day to day (auto-matched roster names, or the Switch
+                drawer above) -- no extra screen, nothing to visit first. */}
+            {activeClassFull?.in_progress && (
+              <button
+                type="button"
+                onClick={() => resumeClass(activeClassFull)}
+                style={{ background: `linear-gradient(135deg,${theme.cta[0]},${theme.cta[1]})`, color: "white", border: "none", borderRadius: "10px", padding: "9px 16px", fontWeight: "800", fontSize: "13px", cursor: "pointer", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px", marginBottom: "12px" }}
+              >
+                <Icon name="play" size={13} /> Resume {GAME_MODES.find(g => g.id === activeClassFull.selected_game)?.name ?? "an unavailable game"}
+              </button>
             )}
             {!activeClassId ? (
               <div style={{ border: "2px dashed #93C5FD", borderRadius: "12px", padding: "16px", textAlign: "center" }}>
