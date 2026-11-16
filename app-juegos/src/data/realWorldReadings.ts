@@ -2353,6 +2353,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   passive_reporting_structures: {
     title: "The Mystery of Flight 227",
+    audioUrl: `${MEDIA_BASE}/audio/real-world/passive_reporting_structures.mp3`,
     passage: [
       "Three days after cargo flight 227 disappeared from radar over the Atlantic, it is still not known exactly what happened to the aircraft or its two-person crew. The plane is believed to have lost contact shortly after entering a severe storm system, and it is thought that the pilots attempted an emergency descent before all communication was lost entirely.",
       "Investigators say the aircraft is understood to have been carrying routine cargo, and no distress signal was ever received, which has been described by aviation experts as unusual given the circumstances. It is widely reported that similar aircraft are equipped with automatic emergency beacons designed to activate on impact, yet none has so far been detected in the search area.",
@@ -2454,6 +2455,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   inversion: {
     title: "Never Had I Felt So Lost",
+    audioUrl: `${MEDIA_BASE}/audio/real-world/inversion.mp3`,
     passage: [
       "Never had I felt so completely out of my depth as I did on my first day working the night shift at St. Agnes's hospital. Not only was I unfamiliar with half the equipment on the ward, but I also had no idea where anything was kept, having transferred from a much smaller unit only that morning.",
       "Rarely does a hospital corridor feel as long as it did that night, stretching endlessly under flickering fluorescent lights while I searched, increasingly desperate, for a supply cupboard I'd been told was \"just past reception.\" Little did I know that the directions I'd been given referred to an entirely different wing of the building.",
@@ -2472,6 +2474,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   mixed_conditionals: {
     title: "The Job I Didn't Take",
+    audioUrl: `${MEDIA_BASE}/audio/real-world/mixed_conditionals.mp3`,
     passage: [
       "If I had accepted the transfer to Singapore eight years ago, I would probably be a completely different person today — more confident in some ways, perhaps more isolated in others, certainly wealthier, given the salary difference between what I earn now and what that role would have paid.",
       "I think about it more than I'd like to admit, usually late at night when a work email reminds me of some frustration that a fresh start might have avoided entirely. If I hadn't stayed here to care for my father during his illness, I would be living somewhere else right now, possibly running the regional office I was offered instead of the smaller team I currently manage.",
@@ -2506,6 +2509,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   cleft_sentences: {
     title: "What Really Went Wrong at Kelder Manufacturing",
+    audioUrl: `${MEDIA_BASE}/audio/real-world/cleft_sentences.mp3`,
     passage: [
       "It wasn't the recession that destroyed Kelder Manufacturing, whatever the official statement claimed. What actually happened was years of quiet mismanagement finally catching up with a company that had been coasting on reputation alone for the better part of a decade.",
       "It was the board's decision to reject automation upgrades in 2015, not any external economic shock, that left the company producing goods at nearly double the cost of its competitors. What management chose to prioritise instead — a lavish new headquarters, expensive executive bonuses — tells you everything about where the real failure originated.",
