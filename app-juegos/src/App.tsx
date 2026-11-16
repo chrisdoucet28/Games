@@ -129,6 +129,34 @@ function StatusBadge({ children, action, onAction, theme, isAdmin, hideMusicButt
   );
 }
 
+// The anonymous-explore counterpart to StatusBadge above — someone who wants to log in right
+// away rather than explore first previously had no direct way to: the only path in was hitting an
+// account-gated action first (Start a Game, My Classes, ...) to trigger requireAuth indirectly.
+// Same non-fixed positioning reasoning as StatusBadge (never overlaps a game's own top bar).
+function AnonymousTopBar({ theme, onLogIn }: { theme: Theme; onLogIn: () => void }) {
+  return (
+    <div
+      className="learn-no-print"
+      style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'flex-end',
+        background: theme.heroBg[0], padding: '6px 14px',
+        fontFamily: "'Segoe UI',system-ui,sans-serif",
+      }}
+    >
+      <button
+        onClick={onLogIn}
+        style={{
+          background: 'rgba(255,255,255,0.15)', color: 'white', border: 'none',
+          borderRadius: '14px', padding: '6px 12px', fontSize: '12px', fontWeight: 700, cursor: 'pointer',
+          fontFamily: theme.headingFont,
+        }}
+      >
+        Log In
+      </button>
+    </div>
+  );
+}
+
 function App() {
   // Public, static, no-auth-required legal pages — linked from the Google OAuth consent screen
   // (and generally required for a public app to have). No client-side router exists in this app
@@ -359,10 +387,12 @@ function AuthenticatedApp() {
     // with no account at all (see LessonGamesGenerator's isAnonymous prop); requireAuth is the one
     // choke point that turns "exploring" into "needs an account" (starting a real game, My Classes,
     // My Profile, Billing, saving/resuming a class — see its own call sites in that file). Someone
-    // who wants to log in directly rather than explore first still can — clicking any of the
-    // account-only nav buttons here opens the exact same modal immediately.
+    // who wants to log in directly rather than explore first can do that two ways: the AnonymousTopBar
+    // "Log In" button right above (the direct path), or clicking any account-only nav button further
+    // down, which opens the exact same modal indirectly, on the way to whatever they actually clicked.
     return (
       <div>
+        <AnonymousTopBar theme={DEFAULT_THEME} onLogIn={() => requireAuth("to your account", () => {})} />
         <LessonGamesGenerator
           key="lgg"
           theme={DEFAULT_THEME} onThemeChange={() => {}}
