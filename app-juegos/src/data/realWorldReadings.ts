@@ -2535,6 +2535,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   business_professional_vocabulary: {
     title: "Quarterly Results: A Mixed Picture",
+    audioUrl: `${MEDIA_BASE}/audio/real-world/business_professional_vocabulary.mp3`,
     passage: [
       "Torvald Industries reported its third-quarter earnings yesterday, revealing a mixed picture that left analysts divided over the company's near-term outlook. Revenue rose by 6.2 percent year-on-year, comfortably beating market expectations, yet net profit margins contracted for the second consecutive quarter, driven largely by rising input costs and an aggressive expansion into overseas markets that has yet to deliver returns.",
       "\"We're seeing solid top-line growth, but the bottom line tells a more complicated story,\" said chief financial officer Elena Marsh during yesterday's earnings call. \"We anticipated some short-term margin compression as we scale operations in Southeast Asia, and that's precisely what we're seeing play out.\" The company's overseas division, launched eighteen months ago, currently operates at a loss, though executives maintain it remains on track to reach profitability within the next two fiscal years.",
@@ -2552,6 +2553,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   media_misinformation: {
     title: "The Story That Wasn't True (But Spread Anyway)",
+    audioUrl: `${MEDIA_BASE}/audio/real-world/media_misinformation.mp3`,
     passage: [
       "Within six hours of being posted, the claim had been shared over two hundred thousand times: a well-known food company, the post alleged, was secretly using a banned chemical preservative in its products, with \"internal documents\" supposedly proving the cover-up. By the time independent fact-checkers had thoroughly debunked the claim the following day, it had already reached millions of people, and the company's stock had briefly dropped nearly four percent in response.",
       "The correction, when it eventually arrived, reached a fraction of that original audience. This asymmetry — false claims spreading dramatically faster and further than the corrections that follow them — has been documented repeatedly by researchers studying online misinformation, and it represents one of the most stubborn challenges facing efforts to combat false information at scale.",
