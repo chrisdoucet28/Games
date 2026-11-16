@@ -2372,6 +2372,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   memory_mind_psychology: {
     title: "Why You Don't Remember What You Think You Remember",
+    audioUrl: `${MEDIA_BASE}/audio/real-world/memory_mind_psychology.mp3`,
     passage: [
       "Ask someone to describe a vivid childhood memory, and they'll usually do so with total confidence — the colour of the walls, the exact words spoken, the emotional weight of the moment. What almost none of them realise is that this confidence tells you almost nothing about accuracy. Memory, psychologists have discovered, is far less like a video recording than most people assume, and far more like a story we quietly rewrite every time we tell it.",
       "The landmark research here comes from cognitive psychologist Elizabeth Loftus, whose decades of work demonstrated something genuinely unsettling: false memories can be implanted with surprising ease, and once implanted, they feel exactly as real as genuine ones. In one famous study, Loftus's team convinced a meaningful percentage of participants that they had been lost in a shopping mall as children — an event that had never actually happened — simply by describing it convincingly alongside real memories supplied by family members.",
@@ -2388,6 +2389,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   future_of_work: {
     title: "The Office That Never Reopened",
+    audioUrl: `${MEDIA_BASE}/audio/real-world/future_of_work.mp3`,
     passage: [
       "When Marisol Fernandez's company sent everyone home in early 2020, she assumed, like most of her colleagues, that it would last a matter of weeks. Five years later, she has never returned to a permanent desk, her company has sold its headquarters entirely, and roughly sixty percent of its four thousand employees now work from locations scattered across a dozen countries.",
       "Fernandez's experience, once considered an unusual exception, has become something closer to the norm across large sections of the global economy. What began as an emergency accommodation has, for many industries, calcified into permanent infrastructure, forcing a fundamental reconsideration of what \"work\" actually requires in terms of physical presence.",
@@ -2405,6 +2407,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   relationships_modern_life: {
     title: "Swiping Right on Everything: Dating in the Algorithm Age",
+    audioUrl: `${MEDIA_BASE}/audio/real-world/relationships_modern_life.mp3`,
     passage: [
       "There was a time, not especially long ago, when meeting a romantic partner typically involved some combination of chance, shared social circles, and geography — you met people through friends, at work, in your neighbourhood, constrained by whoever happened to occupy the same physical spaces as you. That world has largely disappeared for an entire generation, replaced by an economy of profiles, algorithms, and an almost unlimited pool of theoretical options available at any hour of the day.",
       "The appeal is obvious enough. Dating apps have genuinely expanded access for people who might otherwise have struggled to meet partners — those in small towns, those with demanding schedules, those simply too shy to approach strangers in person. For many users, particularly in marginalised communities where finding compatible partners locally was historically difficult, this expanded access has been transformative rather than merely convenient.",
@@ -2422,6 +2425,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   crime_and_justice: {
     title: "Rethinking Prison: What Norway Got Right",
+    audioUrl: `${MEDIA_BASE}/audio/real-world/crime_and_justice.mp3`,
     passage: [
       "Halden Prison, roughly two hours from Oslo, looks almost nothing like the popular image of incarceration. Inmates live in private rooms with their own bathrooms, cook meals in shared kitchens, and take classes in music production and woodworking. Guards, deliberately unarmed, are trained to build genuine relationships with prisoners rather than simply enforce rules from a distance. To visitors accustomed to more punitive systems, it can look, at first glance, almost indistinguishable from a modest college campus.",
       "The philosophy underpinning Norway's approach is straightforward, if counterintuitive to many outside observers: nearly every incarcerated person will eventually be released, so the central question a justice system should ask isn't how severely to punish someone, but how effectively to prepare them to return to society without reoffending. Norway's reconviction rate, hovering around twenty percent within two years of release, compares strikingly with rates exceeding fifty percent in several countries that favour harsher, more punitive approaches.",
@@ -2438,6 +2442,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   health_healthcare_systems: {
     title: "Two Systems, Two Bills: A Tale of Two Surgeries",
+    audioUrl: `${MEDIA_BASE}/audio/real-world/health_healthcare_systems.mp3`,
     passage: [
       "When David Okafor tore his knee ligament playing football in Manchester, his treatment — including surgery, physiotherapy, and follow-up consultations — cost him nothing beyond what he already paid in taxes. His American cousin, Michael, suffering an almost identical injury the same year in Ohio, received a bill exceeding forty thousand dollars, a portion of which his insurance eventually covered after months of negotiation and paperwork.",
       "The two cousins' experiences illustrate, in miniature, one of the most consequential policy divides between wealthy nations: how a society chooses to fund and deliver healthcare. The UK's National Health Service, funded through general taxation and free at the point of use, represents one end of a spectrum; the United States' predominantly private, insurance-based model sits at the other, with most developed nations occupying various hybrid positions in between.",
@@ -2493,6 +2498,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   advanced_vocabulary: {
     title: "Book Review: A Quiet, Devastating Debut",
+    audioUrl: `${MEDIA_BASE}/audio/real-world/advanced_vocabulary.mp3`,
     passage: [
       "It would be easy to dismiss The Long Winter as yet another entry in the increasingly crowded genre of quiet literary fiction about grief, were it not for how thoroughly it earns its emotional weight rather than simply assuming it. Debut novelist Fiona Marsh has produced a work of remarkable restraint, one that resists the temptation toward melodrama at nearly every turn, opting instead for a kind of accumulated, understated devastation that lingers considerably longer than more overtly dramatic treatments of similar material.",
       "The novel follows Aisling, a widowed schoolteacher navigating her first winter alone in rural Ireland, but to describe it purely in terms of plot is to fundamentally misrepresent what makes it succeed. Marsh's prose is spare almost to the point of austerity, yet never feels impoverished; each carefully chosen sentence carries a density of implication that more verbose writers might require an entire paragraph to convey. There is an admirable discipline here, a willingness to trust the reader with silence and inference rather than spelling out every emotional beat.",
