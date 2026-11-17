@@ -474,7 +474,11 @@ export type OrderUpTicketInfo = {
   totalSeconds: number;
   secondsLeft: number;
   claimedBy?: string | number;
-  // Only meaningful once answerMode is "typing" — undefined in "spoken" the whole game through.
+  // Set once a phone submits its sentence for this ticket — undefined until then. Phone mode is
+  // typing-only (there used to be a "spoken" alternative — a phone claimed a ticket but the team
+  // showed/told the teacher in person, same as screen mode — removed as a pointless extra choice
+  // that just confused teachers: screen mode already covers in-person answers, so there was never
+  // a reason to pick it over typing once you're already using phones).
   submittedSentence?: string;
 };
 
@@ -485,9 +489,6 @@ export type OrderUpStatePayload = {
   sessionTimeLeft: number;
   scores: Record<string, number>;
   connectedTeamIds: (string | number)[];
-  // Whole-session choice (picked once alongside phone mode itself, like Hot Seat's teamStructure)
-  // — never varies per team or per ticket.
-  answerMode: "spoken" | "typing";
   // Mirrors the screen's own judging?.ticketId ?? null — lets a phone tell "still mine to edit"
   // from "the teacher is looking at this right now," so a typed answer can't change out from under
   // an in-progress judgment.

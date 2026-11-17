@@ -74,17 +74,6 @@ export function PhoneOrderUpView({ state, teamId, onAction }: Props) {
           <div style={{ fontSize: "12px", fontWeight: "800", color: "#BE185D", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: "8px" }}>Your claimed orders</div>
           <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
             {myTickets.map(t => {
-              if (state.answerMode !== "typing") {
-                return (
-                  <div key={t.id} style={{ background: "white", border: "2px solid #BE185D", borderRadius: "14px", padding: "10px 12px" }}>
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "6px" }}>
-                      <span style={{ fontSize: "22px" }}>{t.customerEmoji}</span>
-                      <span style={{ fontSize: "12px", fontWeight: "800", color: t.secondsLeft <= t.totalSeconds * 0.25 ? "#EF4444" : "#9D174D" }}>⏱️ {t.secondsLeft}s</span>
-                    </div>
-                    <div>{t.items.map((item, i) => <ItemBadge key={i} item={item} />)}</div>
-                  </div>
-                );
-              }
               const value = drafts[t.id] ?? t.submittedSentence ?? "";
               const isBeingJudged = state.judgingTicketId === t.id;
               const submitted = t.submittedSentence !== undefined && t.submittedSentence === value;

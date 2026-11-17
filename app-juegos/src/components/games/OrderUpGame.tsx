@@ -333,12 +333,16 @@ function ItemBadge({ item }: { item: TicketItem }) {
   );
 }
 
-function TicketCard({ ticket, teams, judging, isPhoneMode, answerMode, onClaim, onOpenJudging, onRelease, onCorrect, onWrong, onSkip }: {
+// Phone mode is always typing — there used to be a "spoken" alternative (a phone claimed a ticket
+// but the team showed/told the teacher in person, same as screen mode), removed as a pointless
+// extra choice: screen mode already covers in-person answers, so picking phones over the shared
+// screen only ever made sense if you wanted typing. isPhoneMode now doubles as "does this ticket
+// carry a typed sentence" — screen mode never populates ticket.submittedSentence at all.
+function TicketCard({ ticket, teams, judging, isPhoneMode, onClaim, onOpenJudging, onRelease, onCorrect, onWrong, onSkip }: {
   ticket: Ticket;
   teams: GameProps["teams"];
   judging: JudgingState;
   isPhoneMode: boolean;
-  answerMode: "spoken" | "typing";
   onClaim: (ticketId: number, teamId: string | number) => void;
   onOpenJudging: (ticketId: number) => void;
   onRelease: (ticketId: number) => void;
@@ -377,7 +381,7 @@ function TicketCard({ ticket, teams, judging, isPhoneMode, answerMode, onClaim, 
 
       {isJudging ? (
         <div>
-          {answerMode === "typing" && ticket.submittedSentence ? (
+          {isPhoneMode && ticket.submittedSentence ? (
             <div style={{ background: "white", border: "1px solid #FBCFE8", borderRadius: "8px", padding: "6px 10px", margin: "0 0 8px", fontSize: "13px", fontWeight: "700", color: "#831843" }}>
               “{ticket.submittedSentence}”
             </div>
@@ -396,13 +400,13 @@ function TicketCard({ ticket, teams, judging, isPhoneMode, answerMode, onClaim, 
           <div style={{ fontSize: "12px", fontWeight: "800", color: claimedTeam.color.dark, marginBottom: "8px" }}>
             <TeamIcon team={claimedTeam} /> Claimed by {claimedTeam.name}
           </div>
-          {answerMode === "typing" && ticket.submittedSentence && (
+          {isPhoneMode && ticket.submittedSentence && (
             <div style={{ background: "white", border: "1px solid #FBCFE8", borderRadius: "8px", padding: "6px 10px", margin: "0 0 8px", fontSize: "13px", fontWeight: "700", color: "#831843" }}>
               “{ticket.submittedSentence}”
             </div>
           )}
           <div style={{ display: "flex", gap: "6px", justifyContent: "center", flexWrap: "wrap" }}>
-            {answerMode === "typing" && !ticket.submittedSentence ? (
+            {isPhoneMode && !ticket.submittedSentence ? (
               <div style={{ fontSize: "11px", fontWeight: "700", color: "#9D174D", padding: "8px 0", display: "inline-flex", alignItems: "center", gap: "4px" }}><Icon name="pencil" size={11} /> {claimedTeam.name} is typing…</div>
             ) : (
               <button
@@ -417,7 +421,7 @@ function TicketCard({ ticket, teams, judging, isPhoneMode, answerMode, onClaim, 
                   display: "inline-flex", alignItems: "center", gap: "5px",
                   cursor: judgingBlocked ? "not-allowed" : "pointer", transition: "transform 0.15s ease",
                 }}
-              >{answerMode === "typing" ? <><Icon name="check" size={13} /> Judge it</> : <><Icon name="hand" size={13} /> Ready to judge</>}</button>
+              >{isPhoneMode ? <><Icon name="check" size={13} /> Judge it</> : <><Icon name="hand" size={13} /> Ready to judge</>}</button>
             )}
             <button onClick={() => onRelease(ticket.id)} className="ou-btn" style={{
               background: "none", color: "#9CA3AF", border: "1px solid #E5E7EB", borderRadius: "10px",
@@ -528,24 +532,14 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
   const [inputMode, setInputMode] = useState<"screen" | "phone">(presetPhoneSession ? "phone" : "screen");
   // Must track presetPhoneSession the same way inputMode above does — a teacher continuing a
   // class-level phone session into this game starts already in "phone" mode with a sessionCode
-  // ready, but introStep used to stay stuck at "setup" regardless, which hid the "qr" step
-  // entirely — including the answerMode toggle below, which only renders there. That silently
-  // stranded every class-check-in game on answerMode's default ("spoken") with no way to switch
-  // to "Type it on your phone," since the teacher never saw the toggle to begin with. Caught live:
-  // a teacher's students couldn't type their answers after claiming an order.
+  // ready, but introStep used to stay stuck at "setup" regardless, which hid the "qr" step (the
+  // phone join panel) entirely.
   const [introStep, setIntroStep] = useState<"setup" | "qr">(presetPhoneSession ? "qr" : "setup");
   const [sessionCode, setSessionCode] = useState<string | null>(presetPhoneSession?.code ?? null);
   // See BountyBoardGame.tsx's own copy of this for the full explanation — true whenever sessionCode
   // is class-level (so the QR points at ?classJoin=, which follows the teacher game to game).
   const [sessionIsClassLevel, setSessionIsClassLevel] = useState(!!presetPhoneSession);
   const [connectedTeamIds, setConnectedTeamIds] = useState<Set<string | number>>(new Set());
-  // "spoken": however a team wants to show the teacher their sentence in person (written down,
-  // said aloud, whatever) — teacher taps "Ready to judge" once they've seen/heard it (today's only
-  // mode). "typing": type it on the claimed phone instead, submit, and the shared screen shows the
-  // actual text for the teacher to judge remotely, no need to physically show anyone anything.
-  // Whole-session choice, same shape as Hot Seat's teamStructure toggle — never varies per team or
-  // per ticket.
-  const [answerMode, setAnswerMode] = useState<"spoken" | "typing">("spoken");
   const channelRef = useRef<RealtimeChannel | null>(null);
 
   const ticketIdRef = useRef(0);
@@ -845,12 +839,10 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
   const phaseRef = useRef(phase);
   const sessionTimeLeftRef = useRef(sessionTimeLeft);
   const connectedTeamIdsRef = useRef<Set<string | number>>(new Set());
-  const answerModeRef = useRef(answerMode);
   const judgingRef = useRef(judging);
   const sendStateRef = useRef<(() => void) | null>(null);
   useEffect(() => { phaseRef.current = phase; }, [phase]);
   useEffect(() => { sessionTimeLeftRef.current = sessionTimeLeft; }, [sessionTimeLeft]);
-  useEffect(() => { answerModeRef.current = answerMode; }, [answerMode]);
   useEffect(() => { judgingRef.current = judging; }, [judging]);
 
   // Opens/closes the realtime channel only when phone mode itself is toggled on/off. Screen-
@@ -879,7 +871,6 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
         sessionTimeLeft: sessionTimeLeftRef.current,
         scores,
         connectedTeamIds: Array.from(connectedTeamIdsRef.current),
-        answerMode: answerModeRef.current,
         judgingTicketId: judgingRef.current?.ticketId ?? null,
         ts: Date.now(),
       };
@@ -1072,27 +1063,13 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
                   </button>
                 }
               >
-                <div style={{ marginBottom: "14px" }}>
-                  <div style={{ fontSize: "12px", color: "#9D174D", fontWeight: "700", marginBottom: "8px" }}>How will orders be answered?</div>
-                  <div style={{ display: "flex", gap: "8px", justifyContent: "center" }}>
-                    <button onClick={() => setAnswerMode("spoken")} className="ou-btn" style={{
-                      padding: "6px 14px", borderRadius: "10px", fontWeight: "800", fontSize: "12px", cursor: "pointer",
-                      border: `2px solid ${answerMode === "spoken" ? "#BE185D" : "rgba(0,0,0,0.1)"}`,
-                      background: answerMode === "spoken" ? "rgba(190,24,93,0.15)" : "rgba(255,255,255,0.6)",
-                      color: answerMode === "spoken" ? "#BE185D" : "#9D174D",
-                      display: "inline-flex", alignItems: "center", gap: "5px",
-                    }}><Icon name="hand" size={12} /> Show your teacher</button>
-                    <button onClick={() => setAnswerMode("typing")} className="ou-btn" style={{
-                      padding: "6px 14px", borderRadius: "10px", fontWeight: "800", fontSize: "12px", cursor: "pointer",
-                      border: `2px solid ${answerMode === "typing" ? "#BE185D" : "rgba(0,0,0,0.1)"}`,
-                      background: answerMode === "typing" ? "rgba(190,24,93,0.15)" : "rgba(255,255,255,0.6)",
-                      color: answerMode === "typing" ? "#BE185D" : "#9D174D",
-                      display: "inline-flex", alignItems: "center", gap: "5px",
-                    }}><Icon name="keyboard" size={12} /> Type it on your phone</button>
-                  </div>
-                  <div style={{ fontSize: "11px", color: "#9D174D99", marginTop: "6px" }}>
-                    {answerMode === "spoken" ? "A team writes their sentence and shows it to you directly; you decide when to judge it." : "A team types their sentence on their phone — it shows up here for you to judge."}
-                  </div>
+                {/* Used to offer a "Show your teacher" (spoken) choice alongside typing here —
+                    removed as a pointless extra decision: screen mode already covers in-person
+                    answers, so there was never a real reason to pick spoken over typing once
+                    you're already on phones. Caught live: a teacher picked it without realizing
+                    what it meant, then couldn't figure out why her students couldn't type. */}
+                <div style={{ fontSize: "11px", color: "#9D174D99", marginBottom: "4px" }}>
+                  A team types their sentence on their phone once they claim an order — it shows up here for you to judge.
                 </div>
               </PhoneJoinPanel>
             );
@@ -1232,7 +1209,7 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
         <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
           {tickets.map(t => (
             <TicketCard
-              key={t.id} ticket={t} teams={teams} judging={judging} isPhoneMode={inputMode === "phone"} answerMode={answerMode}
+              key={t.id} ticket={t} teams={teams} judging={judging} isPhoneMode={inputMode === "phone"}
               onClaim={claimTicket} onOpenJudging={openJudging} onRelease={releaseClaim}
               onCorrect={resolveCorrect} onWrong={resolveWrong} onSkip={skipTicket}
             />
