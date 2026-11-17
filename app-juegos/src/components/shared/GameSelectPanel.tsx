@@ -1,7 +1,7 @@
 import type { GameMode } from "../../types";
 import type { Theme } from "../../data/themes";
 import { GAME_ICONS } from "../../data/constants";
-import { getGameBlocks, filterGameBlocks, gameModalityIcon, helpLevelColor, type GameModality } from "../../data/gameCategories";
+import { getGameBlocks, filterGameBlocks, gameModalityIcon, helpLevelColor } from "../../data/gameCategories";
 import { PHONE_CAPABLE_GAME_IDS } from "../../lib/liveSession";
 import { GameGauge } from "./GameGauge";
 import { IconBadge } from "./IconBadge";
@@ -13,7 +13,7 @@ import { Icon } from "./Icon";
 // entirely from data/gameCategories.ts — this file has no opinion about which game is where.
 // `randomSpinIndex` indexes the same filtered order (see `order` below), which is also what the
 // Surprise Me wheel in LessonGamesGenerator steps through — both call filterGameBlocks/
-// filteredGameModes with the same activeCategoryIds/activeModalities so the two stay in sync.
+// filteredGameModes with the same activeCategoryIds so the two stay in sync.
 const CSS = `
   .cc-gs-block { display: grid; grid-template-columns: 195px minmax(0,1fr); gap: 20px; align-items: start; }
   .cc-gs-info-inner { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 10px 12px 14px; }
@@ -33,11 +33,10 @@ type Props = {
   randomSpinIndex: number | null;
   onPick: (game: GameMode) => void;
   activeCategoryIds: ReadonlySet<string>;
-  activeModalities: ReadonlySet<GameModality>;
 };
 
-export function GameSelectPanel({ theme, loadingGame, randomSpinIndex, onPick, activeCategoryIds, activeModalities }: Props) {
-  const blocks = filterGameBlocks(getGameBlocks(), activeCategoryIds, activeModalities);
+export function GameSelectPanel({ theme, loadingGame, randomSpinIndex, onPick, activeCategoryIds }: Props) {
+  const blocks = filterGameBlocks(getGameBlocks(), activeCategoryIds);
   const order = blocks.flatMap(b => b.games);
   const canPick = !loadingGame && randomSpinIndex === null;
 

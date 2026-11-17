@@ -1,15 +1,16 @@
-import { GAME_CATEGORIES, CATEGORY_SHORT_LABELS, MODALITY_LABELS, MODALITY_ICON, usedModalities, type GameModality } from "../../data/gameCategories";
-import { Icon } from "./Icon";
+import { GAME_CATEGORIES, CATEGORY_SHORT_LABELS } from "../../data/gameCategories";
 
-// Narrows which game cards show below (and what "Surprise Me!" picks from) along two independent
-// axes — the same "I need…" category each card is already grouped by, and how a game wants an
-// answer (tap/speak/write). Either row left empty means "no restriction from that axis"; both
-// empty (the default) shows every game. Chips wrap on narrow screens rather than scrolling.
+// Narrows which game cards show below (and what "Surprise Me!" picks from) by the same "I need…"
+// category each card is already grouped by. An empty set means "no restriction" — every game
+// shows, same as before this existed. Chips wrap on narrow screens rather than scrolling.
+//
+// This used to have a second row filtering by how a game wants an answer (tap/speak/write), but
+// that axis mostly just restated the category row less precisely (e.g. "Tap / pick" and
+// "Understand the topic" always picked out the exact same 2 games) — dropped rather than kept as
+// a row that looked like it was narrowing something but mostly wasn't.
 type Props = {
   activeCategoryIds: ReadonlySet<string>;
-  activeModalities: ReadonlySet<GameModality>;
   onToggleCategory: (id: string) => void;
-  onToggleModality: (m: GameModality) => void;
   onClear: () => void;
   visibleCount: number;
   totalCount: number;
@@ -41,9 +42,8 @@ function Chip({ active, onClick, children }: { active: boolean; onClick: () => v
   );
 }
 
-export function GameFilterBar({ activeCategoryIds, activeModalities, onToggleCategory, onToggleModality, onClear, visibleCount, totalCount }: Props) {
-  const modalities = usedModalities();
-  const hasFilters = activeCategoryIds.size > 0 || activeModalities.size > 0;
+export function GameFilterBar({ activeCategoryIds, onToggleCategory, onClear, visibleCount, totalCount }: Props) {
+  const hasFilters = activeCategoryIds.size > 0;
 
   return (
     <div style={{ background: "white", border: "2px solid #E5E7EB", borderRadius: "16px", padding: "14px 18px", marginBottom: "22px", display: "flex", flexDirection: "column", gap: "10px" }}>
@@ -52,14 +52,6 @@ export function GameFilterBar({ activeCategoryIds, activeModalities, onToggleCat
         {GAME_CATEGORIES.map(cat => (
           <Chip key={cat.id} active={activeCategoryIds.has(cat.id)} onClick={() => onToggleCategory(cat.id)}>
             {CATEGORY_SHORT_LABELS[cat.id] ?? cat.id}
-          </Chip>
-        ))}
-      </div>
-      <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "8px" }}>
-        <span style={{ fontSize: "11px", fontWeight: 800, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.06em", marginRight: "2px" }}>Students answer by</span>
-        {modalities.map(m => (
-          <Chip key={m} active={activeModalities.has(m)} onClick={() => onToggleModality(m)}>
-            <Icon name={MODALITY_ICON[m]} size={12} /> {MODALITY_LABELS[m]}
           </Chip>
         ))}
       </div>

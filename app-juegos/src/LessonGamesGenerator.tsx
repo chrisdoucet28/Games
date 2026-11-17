@@ -3,7 +3,7 @@ import * as Sentry from "@sentry/react";
 import { TeamIcon, MASCOT_ICON_BY_EMOJI } from "./components/shared/TeamIcon";
 import type { Team, GameMode, QuestionData, SavedClass, Subscription, TeamRosterEntry } from "./types";
 import { TEAM_COLORS, GAME_MODES, GAME_ICONS, MASCOT_OPTIONS, LEVELS_META, FREE_PLAN_LIMITS, FREE_LAUNCH_ALL_PREMIUM } from "./data/constants";
-import { filteredGameModes, type GameModality } from "./data/gameCategories";
+import { filteredGameModes } from "./data/gameCategories";
 import { GameSelectPanel } from "./components/shared/GameSelectPanel";
 import { GameFilterBar } from "./components/shared/GameFilterBar";
 // TOPIC_OPTIONS (lightweight metadata, needed immediately for topic-select) lives in its own
@@ -408,21 +408,14 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
   // as their own buttons.
   const [moreTeamOptionsOpen, setMoreTeamOptionsOpen] = useState(false);
   // Game-select's filter bar — narrows which game cards show (and what Surprise Me! picks from)
-  // by "I need…" category and/or how students answer. Empty set on either = no restriction from
-  // that axis; both empty (the default) shows every game, same as before this existed.
+  // by "I need…" category. Empty set = no restriction, the default, same as before this existed.
   const [categoryFilter, setCategoryFilter] = useState<Set<string>>(new Set());
-  const [modalityFilter, setModalityFilter] = useState<Set<GameModality>>(new Set());
   const toggleCategoryFilter = (id: string) => setCategoryFilter(prev => {
     const next = new Set(prev);
     if (next.has(id)) next.delete(id); else next.add(id);
     return next;
   });
-  const toggleModalityFilter = (m: GameModality) => setModalityFilter(prev => {
-    const next = new Set(prev);
-    if (next.has(m)) next.delete(m); else next.add(m);
-    return next;
-  });
-  const clearGameFilters = () => { setCategoryFilter(new Set()); setModalityFilter(new Set()); };
+  const clearGameFilters = () => setCategoryFilter(new Set());
   const [questions, setQuestions] = useState<QuestionData[]>([]);
   const [level, setLevel] = useState("all");
   const [focus, setFocus] = useState("all");
@@ -756,7 +749,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     // filter bar's current selection, same as the cards themselves — if a filter combination
     // leaves nothing to pick from, the button is disabled below before this can ever run on an
     // empty list.
-    const games = filteredGameModes(categoryFilter, modalityFilter);
+    const games = filteredGameModes(categoryFilter);
     if (games.length === 0) return;
     const targetIndex = Math.floor(Math.random() * games.length);
     const totalSteps = games.length * 3 + targetIndex;
@@ -2295,7 +2288,7 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
   );
 
   if (screen === "game-select") {
-    const filteredCount = filteredGameModes(categoryFilter, modalityFilter).length;
+    const filteredCount = filteredGameModes(categoryFilter).length;
     return (
     <div style={{ minHeight: "100vh", background: "#F0F9FF", padding: "20px", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
       {renderSavePicker()}
@@ -2400,14 +2393,14 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
           from — same filteredGameModes() call feeds both. */}
       <div style={{ maxWidth: "1120px", margin: "28px auto 0" }}>
         <GameFilterBar
-          activeCategoryIds={categoryFilter} activeModalities={modalityFilter}
-          onToggleCategory={toggleCategoryFilter} onToggleModality={toggleModalityFilter} onClear={clearGameFilters}
+          activeCategoryIds={categoryFilter}
+          onToggleCategory={toggleCategoryFilter} onClear={clearGameFilters}
           visibleCount={filteredCount} totalCount={GAME_MODES.length}
         />
         <GameSelectPanel
           theme={theme} loadingGame={loadingGame} randomSpinIndex={randomSpinIndex}
           onPick={g => startGame(g)}
-          activeCategoryIds={categoryFilter} activeModalities={modalityFilter}
+          activeCategoryIds={categoryFilter}
         />
       </div>
       <div style={{ height: "50px" }} />
