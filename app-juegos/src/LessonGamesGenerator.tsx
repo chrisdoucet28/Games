@@ -401,6 +401,11 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
   const [teamRoster, setTeamRoster] = useState<TeamRosterEntry[]>([]);
   const [rosterSaveStatus, setRosterSaveStatus] = useState<"idle" | "saving" | "saved">("idle");
   const [teamsSaveStatus, setTeamsSaveStatus] = useState<"idle" | "saving" | "saved">("idle");
+  // Game-select's "More options" dropdown (Reset all scores to 0 / Reset teams to normal / Edit
+  // teams & settings) — collapsed in here since they're all "tidy up between classes" actions, not
+  // ones a teacher reaches for every lesson, unlike Save teams to class / Change topics which stay
+  // as their own buttons.
+  const [moreTeamOptionsOpen, setMoreTeamOptionsOpen] = useState(false);
   const [questions, setQuestions] = useState<QuestionData[]>([]);
   const [level, setLevel] = useState("all");
   const [focus, setFocus] = useState("all");
@@ -2298,14 +2303,20 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
         </div>
 
         <ScoreBoard teams={teams} headingFont={theme.headingFont} />
-        {/* Below ~480px these 4 utility buttons pack into a fixed 2x2 grid instead of each
-            wrapping onto its own full-width line — the flex-wrap layout above works fine on
-            desktop since 2-3 fit per row naturally, but on a phone every button's text is wide
-            enough to fill the row alone. */}
+        {/* Only 2 persistent buttons now (Save teams to class / Change topics) — the ones a
+            teacher reaches for most lessons — plus a "More options" menu for the 3 rarer
+            "tidy up between classes" actions (reset scores, reset teams, edit teams & settings).
+            Below ~480px they still pack into a row instead of each wrapping onto its own line. */}
         <style>{`
           @media (max-width: 480px) {
             .cc-team-actions-row { display: grid !important; grid-template-columns: repeat(2,1fr) !important; }
-            .cc-team-actions-row button { width: 100%; box-sizing: border-box; justify-content: center; }
+            .cc-team-actions-row > button { width: 100%; box-sizing: border-box; justify-content: center; }
+            /* The "More options" trigger sits in a wrapping div (it needs position:relative for its
+               dropdown) — spanning both grid columns keeps that wrapper (and so the dropdown's
+               right:0 anchor) flush with the row's own right edge, instead of wherever a single
+               1fr column happens to land it, which could be the LEFT column with no room for a
+               220px-wide dropdown to open without running off the screen's left edge. */
+            .cc-team-actions-row > div { grid-column: 1 / -1; display: flex; justify-content: center; }
           }
         `}</style>
         <div className="cc-team-actions-row" style={{ textAlign: "center", marginTop: "10px", display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "20px" }}>
@@ -2323,10 +2334,26 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
             >
               {teamsSaveStatus === "saving" ? "Saving…" : teamsSaveStatus === "saved" ? <><Icon name="check" size={12} /> Saved!</> : <><Icon name="save" size={12} /> Save teams to class</>}
             </button>
-            <button onClick={() => setTeams(ts => ts.map(t => ({ ...t, score: 0 })))} style={{ background: "none", border: "2px solid #D1D5DB", borderRadius: "20px", padding: "4px 16px", fontWeight: "700", fontSize: "12px", color: "#9CA3AF", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "5px" }}><Icon name="refresh" size={12} /> Reset all scores to 0</button>
-            <button onClick={() => resetTeamsToNormal()} title="0 points, no mascots, original colors and names" style={{ background: "none", border: "2px solid #D1D5DB", borderRadius: "20px", padding: "4px 16px", fontWeight: "700", fontSize: "12px", color: "#9CA3AF", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "5px" }}><Icon name="refresh" size={12} /> Reset teams to normal</button>
-            <button onClick={() => setScreen("team-setup")} style={{ background: "none", border: "2px solid #D1D5DB", borderRadius: "20px", padding: "4px 16px", fontWeight: "700", fontSize: "12px", color: "#9CA3AF", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "5px" }}><Icon name="gear" size={12} /> Edit teams & settings</button>
             <button onClick={() => setScreen("topic-select")} style={{ background: "none", border: "2px solid #D1D5DB", borderRadius: "20px", padding: "4px 16px", fontWeight: "700", fontSize: "12px", color: "#9CA3AF", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "5px" }}><Icon name="target" size={12} /> Change topics</button>
+            <div style={{ position: "relative" }}>
+              <button
+                onClick={() => setMoreTeamOptionsOpen(o => !o)}
+                aria-expanded={moreTeamOptionsOpen}
+                style={{ background: moreTeamOptionsOpen ? "#F3F4F6" : "none", border: "2px solid #D1D5DB", borderRadius: "20px", padding: "4px 16px", fontWeight: "700", fontSize: "12px", color: "#9CA3AF", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "5px" }}
+              >
+                <Icon name="options" size={12} /> More options
+              </button>
+              {moreTeamOptionsOpen && (
+                <>
+                  <div onClick={() => setMoreTeamOptionsOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 20 }} />
+                  <div style={{ position: "absolute", top: "calc(100% + 6px)", right: 0, background: "white", border: "2px solid #D1D5DB", borderRadius: "14px", boxShadow: "0 10px 30px rgba(0,0,0,0.15)", padding: "6px", display: "flex", flexDirection: "column", gap: "2px", zIndex: 21, minWidth: "220px", maxWidth: "calc(100vw - 24px)" }}>
+                    <button onClick={() => { setTeams(ts => ts.map(t => ({ ...t, score: 0 }))); setMoreTeamOptionsOpen(false); }} style={{ background: "none", border: "none", borderRadius: "8px", padding: "8px 10px", fontWeight: "700", fontSize: "13px", color: "#374151", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px", textAlign: "left", width: "100%" }} onMouseEnter={e => e.currentTarget.style.background = "#F3F4F6"} onMouseLeave={e => e.currentTarget.style.background = "none"}><Icon name="refresh" size={13} /> Reset all scores to 0</button>
+                    <button onClick={() => { resetTeamsToNormal(); setMoreTeamOptionsOpen(false); }} title="0 points, no mascots, original colors and names" style={{ background: "none", border: "none", borderRadius: "8px", padding: "8px 10px", fontWeight: "700", fontSize: "13px", color: "#374151", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px", textAlign: "left", width: "100%" }} onMouseEnter={e => e.currentTarget.style.background = "#F3F4F6"} onMouseLeave={e => e.currentTarget.style.background = "none"}><Icon name="refresh" size={13} /> Reset teams to normal</button>
+                    <button onClick={() => { setScreen("team-setup"); setMoreTeamOptionsOpen(false); }} style={{ background: "none", border: "none", borderRadius: "8px", padding: "8px 10px", fontWeight: "700", fontSize: "13px", color: "#374151", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px", textAlign: "left", width: "100%" }} onMouseEnter={e => e.currentTarget.style.background = "#F3F4F6"} onMouseLeave={e => e.currentTarget.style.background = "none"}><Icon name="gear" size={13} /> Edit teams & settings</button>
+                  </div>
+                </>
+              )}
+            </div>
         </div>
 
         {loadError && <div style={{ color: "red", fontWeight: "bold", textAlign: "center" }}>{loadError}</div>}
