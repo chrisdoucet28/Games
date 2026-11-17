@@ -66,7 +66,6 @@ export function GameSelectPanel({ theme, loadingGame, randomSpinIndex, onPick }:
                   onClick={() => canPick && onPick(g)}
                   onKeyDown={e => { if ((e.key === "Enter" || e.key === " ") && canPick) { e.preventDefault(); onPick(g); } }}
                   style={{
-                    position: "relative",
                     background: isSpinLit ? `${g.color}1A` : "white",
                     border: `3px solid ${g.color}`,
                     borderRadius: "18px",
@@ -77,20 +76,22 @@ export function GameSelectPanel({ theme, loadingGame, randomSpinIndex, onPick }:
                     boxShadow: isSpinLit ? `0 0 0 4px ${g.color}55, 0 10px 24px ${g.color}55` : "none",
                   }}
                 >
-                  {PHONE_CAPABLE_GAME_IDS.has(g.id) && (
-                    <div
-                      title="Students can play this one on their phones"
-                      style={{ position: "absolute", top: "12px", right: "12px", display: "flex", alignItems: "center", gap: "3px", background: "#0C1E3D", color: "white", borderRadius: "999px", padding: "4px 8px 4px 6px" }}
-                    >
-                      <Icon name="phone" size={11} color="white" />
-                      <span style={{ fontSize: "10px", fontWeight: 800, letterSpacing: "0.02em" }}>Phone</span>
-                    </div>
-                  )}
                   <div style={{ marginBottom: "10px" }}><IconBadge icon={GAME_ICONS[g.id]} color={g.color} size={52} /></div>
                   <div style={{ fontWeight: 900, fontSize: "17px", color: theme.heroBg[0], marginBottom: "4px", fontFamily: theme.headingFont }}>{g.name}</div>
                   <div style={{ fontSize: "13px", color: "#6B7280", marginBottom: "8px" }}>{g.desc}</div>
-                  <div style={{ fontSize: "12px", color: g.color, fontWeight: 700, lineHeight: 1.4, borderTop: `1px solid ${g.color}33`, paddingTop: "8px", marginTop: "auto", display: "flex", alignItems: "center", gap: "6px" }}>
-                    <Icon name={gameModalityIcon(g.id)} size={13} /> {g.tag}
+                  <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: "8px", borderTop: `1px solid ${g.color}33`, paddingTop: "8px", marginTop: "auto" }}>
+                    <div style={{ fontSize: "12px", color: g.color, fontWeight: 700, lineHeight: 1.4, display: "flex", alignItems: "center", gap: "6px" }}>
+                      <Icon name={gameModalityIcon(g.id)} size={13} /> {g.tag}
+                    </div>
+                    {PHONE_CAPABLE_GAME_IDS.has(g.id) && (
+                      <div
+                        title="Students can play this one on their phones"
+                        style={{ display: "flex", alignItems: "center", gap: "3px", background: "#0C1E3D", color: "white", borderRadius: "999px", padding: "4px 8px 4px 6px", flexShrink: 0 }}
+                      >
+                        <Icon name="phone" size={11} color="white" />
+                        <span style={{ fontSize: "10px", fontWeight: 800, letterSpacing: "0.02em" }}>Phone</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               );
