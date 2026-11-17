@@ -1,7 +1,7 @@
 import type { GameMode } from "../../types";
 import type { Theme } from "../../data/themes";
 import { GAME_ICONS } from "../../data/constants";
-import { getGameBlocks, orderedGameModes, gameModalityIcon, helpLevelColor } from "../../data/gameCategories";
+import { getGameBlocks, filterGameBlocks, gameModalityIcon, helpLevelColor, type GameModality } from "../../data/gameCategories";
 import { PHONE_CAPABLE_GAME_IDS } from "../../lib/liveSession";
 import { GameGauge } from "./GameGauge";
 import { IconBadge } from "./IconBadge";
@@ -11,8 +11,9 @@ import { Icon } from "./Icon";
 // with an info box on the left (help-level dial + what the teacher needs) that sits beside that
 // block's games and scrolls with them (deliberately not sticky), and the game cards on the right. Grouping and order come
 // entirely from data/gameCategories.ts — this file has no opinion about which game is where.
-// `randomSpinIndex` indexes orderedGameModes() (the on-screen order), which is also what the
-// Surprise Me wheel in LessonGamesGenerator steps through.
+// `randomSpinIndex` indexes the same filtered order (see `order` below), which is also what the
+// Surprise Me wheel in LessonGamesGenerator steps through — both call filterGameBlocks/
+// filteredGameModes with the same activeCategoryIds/activeModalities so the two stay in sync.
 const CSS = `
   .cc-gs-block { display: grid; grid-template-columns: 195px minmax(0,1fr); gap: 20px; align-items: start; }
   .cc-gs-info-inner { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 10px 12px 14px; }
@@ -31,12 +32,22 @@ type Props = {
   loadingGame: boolean;
   randomSpinIndex: number | null;
   onPick: (game: GameMode) => void;
+  activeCategoryIds: ReadonlySet<string>;
+  activeModalities: ReadonlySet<GameModality>;
 };
 
-export function GameSelectPanel({ theme, loadingGame, randomSpinIndex, onPick }: Props) {
-  const blocks = getGameBlocks();
-  const order = orderedGameModes();
+export function GameSelectPanel({ theme, loadingGame, randomSpinIndex, onPick, activeCategoryIds, activeModalities }: Props) {
+  const blocks = filterGameBlocks(getGameBlocks(), activeCategoryIds, activeModalities);
+  const order = blocks.flatMap(b => b.games);
   const canPick = !loadingGame && randomSpinIndex === null;
+
+  if (blocks.length === 0) {
+    return (
+      <div style={{ background: "white", border: "2px dashed #D1D5DB", borderRadius: "16px", padding: "32px", textAlign: "center", color: "#6B7280", fontWeight: 700 }}>
+        No games match these filters — try clearing one of them above.
+      </div>
+    );
+  }
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "34px" }}>

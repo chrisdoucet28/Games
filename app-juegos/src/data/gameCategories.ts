@@ -123,6 +123,33 @@ export function gameModalityIcon(gameId: string): IconName {
   return MODALITY_ICON[GAME_MODALITY[gameId] ?? "speak"];
 }
 
+export const MODALITY_LABELS: Record<GameModality, string> = {
+  tap: "Tap / pick",
+  speak: "Speak",
+  write: "Write",
+  "speak-or-write": "Speak or write",
+};
+
+// Every modality a real game actually uses right now — "speak-or-write" is defined for a future
+// game but nothing uses it yet, so the filter bar below doesn't show a chip that could never
+// narrow anything.
+export function usedModalities(): GameModality[] {
+  return Array.from(new Set(Object.values(GAME_MODALITY)));
+}
+
+// Short, chip-sized labels for the game-select filter bar — category.need is a full "I need:"
+// sentence (by design, for the info box next to each block) and is too long for a toggle chip.
+export const CATEGORY_SHORT_LABELS: Record<string, string> = {
+  understand: "Understand the topic",
+  grammar: "Grammar practice",
+  review: "Review",
+  vocabulary: "Vocabulary",
+  handicap: "Sentence handicap",
+  writing: "Writing",
+  no_help: "Open speaking",
+  more: "More games",
+};
+
 export type GameBlock = { category: GameCategory; games: GameMode[] };
 
 // The blocks as the page renders them. A game in GAME_MODES that no category lists is not dropped:
@@ -163,4 +190,23 @@ export function getGameBlocks(): GameBlock[] {
 // Every game in the order the cards appear on the page — what "Surprise Me!" steps through.
 export function orderedGameModes(): GameMode[] {
   return getGameBlocks().flatMap(b => b.games);
+}
+
+// The game-select filter bar's two independent toggle rows — "I need…" category and "how do
+// students answer" modality. An empty set on either means "no restriction from this axis", not
+// "show nothing" — that's what lets a teacher narrow by just one axis, or clear back to both empty
+// to see everything again. A block left with zero games after the modality pass is dropped
+// entirely, so an active filter never leaves an empty "I need…" box on screen with nothing beside it.
+export function filterGameBlocks(blocks: GameBlock[], categoryIds: ReadonlySet<string>, modalities: ReadonlySet<GameModality>): GameBlock[] {
+  const byCategory = categoryIds.size === 0 ? blocks : blocks.filter(b => categoryIds.has(b.category.id));
+  if (modalities.size === 0) return byCategory;
+  return byCategory
+    .map(b => ({ category: b.category, games: b.games.filter(g => modalities.has(GAME_MODALITY[g.id] ?? "speak")) }))
+    .filter(b => b.games.length > 0);
+}
+
+// What "Surprise Me!" steps through and picks from once filters are active — same on-screen order,
+// just narrowed the same way the cards are.
+export function filteredGameModes(categoryIds: ReadonlySet<string>, modalities: ReadonlySet<GameModality>): GameMode[] {
+  return filterGameBlocks(getGameBlocks(), categoryIds, modalities).flatMap(b => b.games);
 }

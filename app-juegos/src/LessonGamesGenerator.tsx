@@ -3,8 +3,9 @@ import * as Sentry from "@sentry/react";
 import { TeamIcon, MASCOT_ICON_BY_EMOJI } from "./components/shared/TeamIcon";
 import type { Team, GameMode, QuestionData, SavedClass, Subscription, TeamRosterEntry } from "./types";
 import { TEAM_COLORS, GAME_MODES, GAME_ICONS, MASCOT_OPTIONS, LEVELS_META, FREE_PLAN_LIMITS, FREE_LAUNCH_ALL_PREMIUM } from "./data/constants";
-import { orderedGameModes } from "./data/gameCategories";
+import { filteredGameModes, type GameModality } from "./data/gameCategories";
 import { GameSelectPanel } from "./components/shared/GameSelectPanel";
+import { GameFilterBar } from "./components/shared/GameFilterBar";
 // TOPIC_OPTIONS (lightweight metadata, needed immediately for topic-select) lives in its own
 // module now, separate from topics.ts's TOPIC_LIBRARY (the ~5MB actual question content) — see
 // data/topicOptions.ts's header comment. TOPIC_LIBRARY itself is loaded via a dynamic import()
@@ -406,6 +407,22 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
   // ones a teacher reaches for every lesson, unlike Save teams to class / Change topics which stay
   // as their own buttons.
   const [moreTeamOptionsOpen, setMoreTeamOptionsOpen] = useState(false);
+  // Game-select's filter bar — narrows which game cards show (and what Surprise Me! picks from)
+  // by "I need…" category and/or how students answer. Empty set on either = no restriction from
+  // that axis; both empty (the default) shows every game, same as before this existed.
+  const [categoryFilter, setCategoryFilter] = useState<Set<string>>(new Set());
+  const [modalityFilter, setModalityFilter] = useState<Set<GameModality>>(new Set());
+  const toggleCategoryFilter = (id: string) => setCategoryFilter(prev => {
+    const next = new Set(prev);
+    if (next.has(id)) next.delete(id); else next.add(id);
+    return next;
+  });
+  const toggleModalityFilter = (m: GameModality) => setModalityFilter(prev => {
+    const next = new Set(prev);
+    if (next.has(m)) next.delete(m); else next.add(m);
+    return next;
+  });
+  const clearGameFilters = () => { setCategoryFilter(new Set()); setModalityFilter(new Set()); };
   const [questions, setQuestions] = useState<QuestionData[]>([]);
   const [level, setLevel] = useState("all");
   const [focus, setFocus] = useState("all");
@@ -735,8 +752,12 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     if (loadingGame || randomSpinIndex !== null) return;
 
     // Steps through the games in on-screen order (grouped by block), not GAME_MODES order — the
-    // highlight index is compared against that same order in GameSelectPanel.
-    const games = orderedGameModes();
+    // highlight index is compared against that same order in GameSelectPanel. Narrowed by the
+    // filter bar's current selection, same as the cards themselves — if a filter combination
+    // leaves nothing to pick from, the button is disabled below before this can ever run on an
+    // empty list.
+    const games = filteredGameModes(categoryFilter, modalityFilter);
+    if (games.length === 0) return;
     const targetIndex = Math.floor(Math.random() * games.length);
     const totalSteps = games.length * 3 + targetIndex;
 
@@ -2273,7 +2294,9 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     </div>
   );
 
-  if (screen === "game-select") return (
+  if (screen === "game-select") {
+    const filteredCount = filteredGameModes(categoryFilter, modalityFilter).length;
+    return (
     <div style={{ minHeight: "100vh", background: "#F0F9FF", padding: "20px", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
       {renderSavePicker()}
       {renderClassCheckInBadge()}
@@ -2361,9 +2384,9 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
         <div style={{ textAlign: "center" }}>
           <button
             onClick={playRandomGame}
-            disabled={loadingGame || randomSpinIndex !== null}
-            title="Not sure which game to pick? Let us choose for you."
-            style={{ background: `linear-gradient(135deg,${theme.cta[0]},${theme.cta[1]})`, color: "white", border: "none", borderRadius: "14px", padding: "12px 28px", fontSize: "15px", fontWeight: "800", cursor: (loadingGame || randomSpinIndex !== null) ? "not-allowed" : "pointer", opacity: (loadingGame || randomSpinIndex !== null) ? 0.6 : 1, fontFamily: theme.headingFont, boxShadow: `0 6px 20px ${hexToRgba(theme.cta[1], 0.35)}`, display: "inline-flex", alignItems: "center", gap: "6px" }}
+            disabled={loadingGame || randomSpinIndex !== null || filteredCount === 0}
+            title={filteredCount === 0 ? "No games match the current filters" : "Not sure which game to pick? Let us choose for you."}
+            style={{ background: `linear-gradient(135deg,${theme.cta[0]},${theme.cta[1]})`, color: "white", border: "none", borderRadius: "14px", padding: "12px 28px", fontSize: "15px", fontWeight: "800", cursor: (loadingGame || randomSpinIndex !== null || filteredCount === 0) ? "not-allowed" : "pointer", opacity: (loadingGame || randomSpinIndex !== null || filteredCount === 0) ? 0.6 : 1, fontFamily: theme.headingFont, boxShadow: `0 6px 20px ${hexToRgba(theme.cta[1], 0.35)}`, display: "inline-flex", alignItems: "center", gap: "6px" }}
           >
             <Icon name="dice" size={15} /> {randomSpinIndex !== null ? "Picking..." : "Surprise Me! (Random Game)"}
           </button>
@@ -2373,18 +2396,26 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
 
       {/* Games grouped by the job a teacher needs done (data/gameCategories.ts), each group with its
           help-level dial in a box beside the cards — wider than the 760px column above so that box
-          has room. */}
+          has room. The filter bar narrows both the cards below AND what Surprise Me! (above) picks
+          from — same filteredGameModes() call feeds both. */}
       <div style={{ maxWidth: "1120px", margin: "28px auto 0" }}>
+        <GameFilterBar
+          activeCategoryIds={categoryFilter} activeModalities={modalityFilter}
+          onToggleCategory={toggleCategoryFilter} onToggleModality={toggleModalityFilter} onClear={clearGameFilters}
+          visibleCount={filteredCount} totalCount={GAME_MODES.length}
+        />
         <GameSelectPanel
           theme={theme} loadingGame={loadingGame} randomSpinIndex={randomSpinIndex}
           onPick={g => startGame(g)}
+          activeCategoryIds={categoryFilter} activeModalities={modalityFilter}
         />
       </div>
       <div style={{ height: "50px" }} />
       <FeedbackButton />
       <BrandBadge isPaid={isPaid} />
     </div>
-  );
+    );
+  }
 
   if (screen === "game" && selectedGame) {
     const selectedLevels = uniqueValues(selectedTopics.map(value => getTopicOption(value)?.level).filter((value): value is string => Boolean(value)));
