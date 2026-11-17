@@ -665,9 +665,9 @@ export type BountyBoardRosterEntry = { id: string | number; name: string; color:
 
 export type BountyBoardPhase = "lobby" | "playing" | "final";
 
-// One team's status against the CURRENT round's shared prompt. `text` is the typing-mode draft/
-// submission (unused in spoken mode until a Wrong judgment fills it in from what the teacher typed
-// in by hand — see BountyBoardGame.tsx). `resolved` covers BOTH ways a team's round obligation gets
+// One team's status against the CURRENT round's shared prompt. `text` is the phone-typed draft/
+// submission in phone mode; in screen mode it's whatever the teacher transcribed by hand instead
+// (see BountyBoardGame.tsx's PostToBoardPrompt). `resolved` covers BOTH ways a team's round obligation gets
 // satisfied: answered correctly immediately, or the bounty it spawned was eventually solved by
 // someone else — a round only advances once every entry reads resolved.
 export type BountyRoundEntry = {
@@ -690,8 +690,9 @@ export type Bounty = {
   excludedTeamId: string | number;   // most recent team to fail this — cannot reclaim until someone
                                       // else takes it over (then THAT team becomes excluded instead).
   claimedBy?: string | number;       // undefined = open for claiming.
-  // Typing-mode only — the claiming team's current fix draft/submission, same role as Order Up's
-  // Ticket.submittedSentence. Unused (stays undefined) the whole game through in spoken mode.
+  // Phone mode only — the claiming team's current fix draft/submission, same role as Order Up's
+  // Ticket.submittedSentence. In screen mode this stays undefined; the teacher's transcription goes
+  // straight onto `wrongText`/the fix text shown via PostToBoardPrompt instead.
   fixText?: string;
   resolved: boolean;
 };
@@ -703,7 +704,6 @@ export type BountyBoardStatePayload = {
   roundNumber: number;
   totalRounds: number;
   promptText: string;
-  answerMode: "spoken" | "typing";
   roundEntries: BountyRoundEntry[];
   bounties: Bounty[];
   scores: Record<string, number>;

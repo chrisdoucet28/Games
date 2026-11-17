@@ -137,17 +137,21 @@ function PostToBoardPrompt({ value, onChange, onPost, placeholder }: { value: st
 // round (unlike a Bounty card, there's no claiming step here, it's always that team's own attempt).
 // Disappears once resolved OR once it's spawned an open bounty (from that point on, the Bounty
 // section is the live thing to look at for this team's entry).
-function RoundEntryCard({ entry, team, answerMode, isPhoneMode, onPost, onCorrect, onWrong }: {
+// Phone mode is always typing now — there used to be a "spoken" alternative where the team wrote/
+// said their sentence and the TEACHER transcribed it here via PostToBoardPrompt, even with phones
+// connected. Removed as a pointless extra choice: it only ever existed because screen mode (no
+// phones at all) has no other way to get a sentence onto the board, so PostToBoardPrompt is now
+// just what plain screen mode always does, rather than a toggle a teacher could pick by mistake
+// while on phones.
+function RoundEntryCard({ entry, team, isPhoneMode, onPost, onCorrect, onWrong }: {
   entry: BountyRoundEntry;
   team: GameProps["teams"][number] | undefined;
-  answerMode: "spoken" | "typing";
   isPhoneMode: boolean;
   onPost: (text: string) => void;
   onCorrect: () => void;
   onWrong: (text: string) => void;
 }) {
   const [draft, setDraft] = useState("");
-  const spoken = answerMode === "spoken";
   const ready = entry.text.trim() !== "";
 
   return (
@@ -164,17 +168,15 @@ function RoundEntryCard({ entry, team, answerMode, isPhoneMode, onPost, onCorrec
       </div>
 
       {!ready ? (
-        spoken
-          ? <PostToBoardPrompt value={draft} onChange={setDraft} onPost={() => onPost(draft.trim())} placeholder="Type what the team wrote, so the class can read it…" />
-          : isPhoneMode
-            ? <div style={{ fontSize: "11px", fontWeight: "700", color: "#92400E", padding: "8px 0", display: "inline-flex", alignItems: "center", gap: "4px" }}><Icon name="pencil" size={11} /> Typing on their phone…</div>
-            : <div style={{ fontSize: "11px", fontWeight: "700", color: "#92400E", padding: "8px 0" }}>Waiting…</div>
+        isPhoneMode
+          ? <div style={{ fontSize: "11px", fontWeight: "700", color: "#92400E", padding: "8px 0", display: "inline-flex", alignItems: "center", gap: "4px" }}><Icon name="pencil" size={11} /> Typing on their phone…</div>
+          : <PostToBoardPrompt value={draft} onChange={setDraft} onPost={() => onPost(draft.trim())} placeholder="Type what the team wrote, so the class can read it…" />
       ) : (
         <>
           <div style={{ background: "white", border: "1px solid #FDE68A", borderRadius: "8px", padding: "8px 10px", margin: "0 0 8px", fontSize: "16px", fontWeight: "800", color: "#78350F", lineHeight: 1.35 }}>
             “{entry.text}”
           </div>
-          {spoken && (
+          {!isPhoneMode && (
             <button onClick={() => { setDraft(entry.text); onPost(""); }} className="bb-btn" style={{ background: "none", border: "none", color: "#9CA3AF", fontSize: "11px", fontWeight: "700", cursor: "pointer", marginBottom: "6px", textDecoration: "underline" }}>Edit</button>
           )}
           <div style={{ display: "flex", gap: "6px", justifyContent: "center" }}>
@@ -248,11 +250,10 @@ function CpuCorrectRevealCard({ team, text }: { team: GameProps["teams"][number]
 // A wanted poster for an open (or being-fixed) bounty. `claimableTeams` already has the exclusion
 // rule (and the solo-play fallback) baked in by the caller — this component just renders whatever
 // list it's handed.
-function BountyCard({ bounty, team, claimableTeams, answerMode, isPhoneMode, onClaim, onPostFix, onCorrect, onWrong, cpuSteal, isCpuFixing, humanExcluded }: {
+function BountyCard({ bounty, team, claimableTeams, isPhoneMode, onClaim, onPostFix, onCorrect, onWrong, cpuSteal, isCpuFixing, humanExcluded }: {
   bounty: Bounty;
   team: GameProps["teams"][number] | undefined; // the claiming team, once claimed
   claimableTeams: GameProps["teams"];
-  answerMode: "spoken" | "typing";
   isPhoneMode: boolean;
   onClaim: (teamId: string | number) => void;
   onPostFix: (text: string) => void;
@@ -273,7 +274,6 @@ function BountyCard({ bounty, team, claimableTeams, answerMode, isPhoneMode, onC
   humanExcluded?: boolean;
 }) {
   const [draft, setDraft] = useState("");
-  const spoken = answerMode === "spoken";
   const claimed = bounty.claimedBy !== undefined;
   const ready = claimed && (bounty.fixText ?? "").trim() !== "";
 
@@ -322,17 +322,15 @@ function BountyCard({ bounty, team, claimableTeams, answerMode, isPhoneMode, onC
               <Icon name="robot" size={11} style={{ animation: "bbCpuThinkPulse 1.1s ease-in-out infinite" }} /> Trying to fix it…
             </div>
           ) : !ready ? (
-            spoken
-              ? <PostToBoardPrompt value={draft} onChange={setDraft} onPost={() => onPostFix(draft.trim())} placeholder="Type the fixed sentence they wrote, so the class can read it…" />
-              : isPhoneMode
-                ? <div style={{ fontSize: "11px", fontWeight: "700", color: "#991B1B", padding: "4px 0", display: "inline-flex", alignItems: "center", gap: "4px" }}><Icon name="pencil" size={11} /> Typing a fix…</div>
-                : <div style={{ fontSize: "11px", fontWeight: "700", color: "#991B1B", padding: "4px 0" }}>Waiting…</div>
+            isPhoneMode
+              ? <div style={{ fontSize: "11px", fontWeight: "700", color: "#991B1B", padding: "4px 0", display: "inline-flex", alignItems: "center", gap: "4px" }}><Icon name="pencil" size={11} /> Typing a fix…</div>
+              : <PostToBoardPrompt value={draft} onChange={setDraft} onPost={() => onPostFix(draft.trim())} placeholder="Type the fixed sentence they wrote, so the class can read it…" />
           ) : (
             <>
               <div style={{ background: "white", border: "1px solid #FCA5A5", borderRadius: "8px", padding: "8px 10px", margin: "0 0 8px", fontSize: "15px", fontWeight: "800", color: "#7F1D1D", lineHeight: 1.35 }}>
                 “{bounty.fixText}”
               </div>
-              {spoken && (
+              {!isPhoneMode && (
                 <button onClick={() => { setDraft(bounty.fixText ?? ""); onPostFix(""); }} className="bb-btn" style={{ background: "none", border: "none", color: "#9CA3AF", fontSize: "11px", fontWeight: "700", cursor: "pointer", marginBottom: "6px", textDecoration: "underline" }}>Edit</button>
               )}
               <div style={{ display: "flex", gap: "6px", justifyContent: "center" }}>
@@ -355,7 +353,6 @@ function BountyCard({ bounty, team, claimableTeams, answerMode, isPhoneMode, onC
 // bounties) — same philosophy as Order Up's own snapshot, which never tries to restore exact
 // mid-flight tickets/timers either. Only round-level/score-level state survives.
 type BountyBoardSnapshot = {
-  answerMode: "spoken" | "typing";
   roundNumber: number;
   gameScoreByTeam: Record<string | number, number>;
   // Solo only.
@@ -366,10 +363,9 @@ type BountyBoardSnapshot = {
 function validateBountyBoardSnapshot(raw: unknown): BountyBoardSnapshot | undefined {
   const s = raw as Partial<BountyBoardSnapshot> | null | undefined;
   if (!s) return undefined;
-  if (s.answerMode !== "spoken" && s.answerMode !== "typing") return undefined;
   if (typeof s.roundNumber !== "number" || s.roundNumber < 0) return undefined;
   const difficulty = s.difficulty === "easy" || s.difficulty === "hard" ? s.difficulty : "medium";
-  return { answerMode: s.answerMode, roundNumber: s.roundNumber, gameScoreByTeam: s.gameScoreByTeam ?? {}, cpuScore: s.cpuScore ?? 0, difficulty };
+  return { roundNumber: s.roundNumber, gameScoreByTeam: s.gameScoreByTeam ?? {}, cpuScore: s.cpuScore ?? 0, difficulty };
 }
 
 export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, onEnd, forceFinalRef, serializeStateRef, initialGameState, presetPhoneSession, onRequestPhoneSession }: GameProps) {
@@ -429,8 +425,7 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
   const [inputMode, setInputMode] = useState<"screen" | "phone">(presetPhoneSession ? "phone" : "screen");
   // Must track presetPhoneSession the same way inputMode above does — see OrderUpGame.tsx's own
   // copy of this comment for the full bug: a teacher continuing a class-level phone session into
-  // this game never saw the "qr" step (where the answerMode toggle below lives), so it silently
-  // stranded on "spoken" with no way to switch to "Type it on your phone."
+  // this game never saw the "qr" step (the phone join panel) at all.
   const [introStep, setIntroStep] = useState<"setup" | "qr">(presetPhoneSession ? "qr" : "setup");
   const [sessionCode, setSessionCode] = useState<string | null>(presetPhoneSession?.code ?? null);
   // True whenever sessionCode is a class-level code (either seeded from presetPhoneSession, or
@@ -441,7 +436,6 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
   // no class-session concept at all).
   const [sessionIsClassLevel, setSessionIsClassLevel] = useState(!!presetPhoneSession);
   const [connectedTeamIds, setConnectedTeamIds] = useState<Set<string | number>>(new Set());
-  const [answerMode, setAnswerMode] = useState<"spoken" | "typing">(resumed?.answerMode ?? "spoken");
   const channelRef = useRef<RealtimeChannel | null>(null);
 
   const bountyIdRef = useRef(0);
@@ -459,7 +453,10 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
   // `submitted`/`text` are irrelevant for it (a dedicated card renders it, never RoundEntryCard),
   // only `resolved` matters, for `roundComplete` to correctly wait on it like any other entry.
   const seedRoundEntries = (): BountyRoundEntry[] => {
-    const entries = propTeams.map(t => ({ teamId: t.id, text: "", submitted: answerMode === "spoken", resolved: false }));
+    // Screen mode (no phones) gets its text from the teacher transcribing it directly, which is
+    // itself the "submission" — there's no separate submit step to wait on, unlike phone mode
+    // where a connected phone still has to actually type and send one.
+    const entries = propTeams.map(t => ({ teamId: t.id, text: "", submitted: inputMode !== "phone", resolved: false }));
     if (isSolo && cpuRef.current) entries.push({ teamId: cpuRef.current.id, text: "", submitted: true, resolved: false });
     return entries;
   };
@@ -497,9 +494,9 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
 
   useEffect(() => {
     if (!serializeStateRef) return;
-    serializeStateRef.current = (): BountyBoardSnapshot => ({ answerMode, roundNumber, gameScoreByTeam, cpuScore, difficulty });
+    serializeStateRef.current = (): BountyBoardSnapshot => ({ roundNumber, gameScoreByTeam, cpuScore, difficulty });
     return () => { if (serializeStateRef) serializeStateRef.current = null; };
-  }, [serializeStateRef, answerMode, roundNumber, gameScoreByTeam, cpuScore, difficulty]);
+  }, [serializeStateRef, roundNumber, gameScoreByTeam, cpuScore, difficulty]);
 
   const submitRoundEntry = (teamId: string | number, text: string) => {
     setRoundEntries(prev => prev.map(e => (e.teamId === teamId ? { ...e, text, submitted: true } : e)));
@@ -751,7 +748,6 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
   const currentPromptRef = useRef(currentPrompt);
   const roundEntriesRef = useRef(roundEntries);
   const bountiesRef = useRef(bounties);
-  const answerModeRef = useRef(answerMode);
   const connectedTeamIdsRef = useRef<Set<string | number>>(new Set());
   const sendStateRef = useRef<(() => void) | null>(null);
   // Solo's `teams` array gets a new identity every time cpuScore changes — kept out of the channel
@@ -764,7 +760,6 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
   useEffect(() => { currentPromptRef.current = currentPrompt; }, [currentPrompt]);
   useEffect(() => { roundEntriesRef.current = roundEntries; }, [roundEntries]);
   useEffect(() => { bountiesRef.current = bounties; }, [bounties]);
-  useEffect(() => { answerModeRef.current = answerMode; }, [answerMode]);
   useEffect(() => { teamsRef.current = teams; }, [teams]);
 
   useEffect(() => {
@@ -784,7 +779,6 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
         roundNumber: roundNumberRef.current,
         totalRounds,
         promptText: currentPromptRef.current?.question ?? "",
-        answerMode: answerModeRef.current,
         roundEntries: roundEntriesRef.current,
         bounties: bountiesRef.current,
         scores,
@@ -914,24 +908,13 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
                   </button>
                 }
               >
-                <div style={{ marginBottom: "14px" }}>
-                  <div style={{ fontSize: "12px", color: "#92400E", fontWeight: "700", marginBottom: "8px" }}>How do teams hand in their sentence?</div>
-                  <div style={{ display: "flex", gap: "8px", justifyContent: "center" }}>
-                    <button onClick={() => setAnswerMode("spoken")} className="bb-btn" style={{
-                      padding: "6px 14px", borderRadius: "10px", fontWeight: "800", fontSize: "12px", cursor: "pointer",
-                      border: `2px solid ${answerMode === "spoken" ? "#92400E" : "rgba(0,0,0,0.1)"}`,
-                      background: answerMode === "spoken" ? "rgba(146,64,14,0.15)" : "rgba(255,255,255,0.6)",
-                      color: answerMode === "spoken" ? "#92400E" : "#78350F",
-                      display: "inline-flex", alignItems: "center", gap: "5px",
-                    }}><Icon name="hand" size={12} /> Write it down, tell the teacher</button>
-                    <button onClick={() => setAnswerMode("typing")} className="bb-btn" style={{
-                      padding: "6px 14px", borderRadius: "10px", fontWeight: "800", fontSize: "12px", cursor: "pointer",
-                      border: `2px solid ${answerMode === "typing" ? "#92400E" : "rgba(0,0,0,0.1)"}`,
-                      background: answerMode === "typing" ? "rgba(146,64,14,0.15)" : "rgba(255,255,255,0.6)",
-                      color: answerMode === "typing" ? "#92400E" : "#78350F",
-                      display: "inline-flex", alignItems: "center", gap: "5px",
-                    }}><Icon name="keyboard" size={12} /> Type it on your phone</button>
-                  </div>
+                {/* Used to offer a "write it down, tell the teacher" (spoken) choice alongside
+                    typing here — removed as a pointless extra decision, same reasoning as Order
+                    Up's own copy of this fix: screen mode already covers teacher-transcribed
+                    answers, so there was never a real reason to pick spoken over typing once
+                    you're already on phones. */}
+                <div style={{ fontSize: "12px", color: "#92400E99", marginBottom: "4px" }}>
+                  A team types their sentence on their phone — it shows up here for you to judge.
                 </div>
               </PhoneJoinPanel>
             );
@@ -1052,7 +1035,6 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
                   key={e.teamId}
                   entry={e}
                   team={teams.find(t => t.id === e.teamId)}
-                  answerMode={answerMode}
                   isPhoneMode={inputMode === "phone"}
                   onPost={text => submitRoundEntry(e.teamId, text)}
                   onCorrect={() => resolveRoundCorrect(e.teamId)}
@@ -1095,7 +1077,6 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
                     cpuSteal={isSolo && isOpenBounty ? { timeLeft: cpuStealTimeLeft, totalSeconds: CPU_STEAL_SECONDS } : undefined}
                     isCpuFixing={isCpuFixing}
                     humanExcluded={humanExcluded}
-                    answerMode={answerMode}
                     isPhoneMode={inputMode === "phone"}
                     onClaim={teamId => claimBounty(b.id, teamId)}
                     onPostFix={text => { if (b.claimedBy !== undefined) submitBountyFix(b.id, b.claimedBy, text); }}
