@@ -142,7 +142,11 @@ export function HotSeatGame({ questions, teams, onUpdateScore, onEnd, forceFinal
   // within-team secrecy problem phones would solve there. Always defaults to screen, even on
   // Resume: a resumed game skips the welcome screen entirely, same as the other phone-mode games.
   const [inputMode, setInputMode] = useState<"screen" | "phone">(presetPhoneSession ? "phone" : "screen");
-  const [introStep, setIntroStep] = useState<"setup" | "qr">("setup");
+  // Must track presetPhoneSession the same way inputMode above does — see OrderUpGame.tsx's own
+  // copy of this comment for the full bug: a teacher continuing a class-level phone session into
+  // this game never saw the "qr" step (where the teamStructure toggle below lives), so it silently
+  // stranded on "groups" with no way to switch to "solo."
+  const [introStep, setIntroStep] = useState<"setup" | "qr">(presetPhoneSession ? "qr" : "setup");
   const [sessionCode, setSessionCode] = useState<string | null>(presetPhoneSession?.code ?? null);
   // See BountyBoardGame.tsx's own copy of this for the full explanation — true whenever sessionCode
   // is class-level (so the QR points at ?classJoin=, which follows the teacher game to game).

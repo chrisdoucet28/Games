@@ -427,7 +427,11 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
   const cpuCorrectRevealIdRef = useRef(0);
 
   const [inputMode, setInputMode] = useState<"screen" | "phone">(presetPhoneSession ? "phone" : "screen");
-  const [introStep, setIntroStep] = useState<"setup" | "qr">("setup");
+  // Must track presetPhoneSession the same way inputMode above does — see OrderUpGame.tsx's own
+  // copy of this comment for the full bug: a teacher continuing a class-level phone session into
+  // this game never saw the "qr" step (where the answerMode toggle below lives), so it silently
+  // stranded on "spoken" with no way to switch to "Type it on your phone."
+  const [introStep, setIntroStep] = useState<"setup" | "qr">(presetPhoneSession ? "qr" : "setup");
   const [sessionCode, setSessionCode] = useState<string | null>(presetPhoneSession?.code ?? null);
   // True whenever sessionCode is a class-level code (either seeded from presetPhoneSession, or
   // obtained from onRequestPhoneSession when the teacher picks "Play on Phones" with no Class

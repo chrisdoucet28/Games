@@ -526,7 +526,14 @@ export function OrderUpGame({ questions, teams, onUpdateScore, onEnd, forceFinal
   // gets everything phone mode offers except an actual claiming step, since there's nobody else to
   // claim against. Always defaults to screen, even on Resume, same as every other phone-mode game.
   const [inputMode, setInputMode] = useState<"screen" | "phone">(presetPhoneSession ? "phone" : "screen");
-  const [introStep, setIntroStep] = useState<"setup" | "qr">("setup");
+  // Must track presetPhoneSession the same way inputMode above does — a teacher continuing a
+  // class-level phone session into this game starts already in "phone" mode with a sessionCode
+  // ready, but introStep used to stay stuck at "setup" regardless, which hid the "qr" step
+  // entirely — including the answerMode toggle below, which only renders there. That silently
+  // stranded every class-check-in game on answerMode's default ("spoken") with no way to switch
+  // to "Type it on your phone," since the teacher never saw the toggle to begin with. Caught live:
+  // a teacher's students couldn't type their answers after claiming an order.
+  const [introStep, setIntroStep] = useState<"setup" | "qr">(presetPhoneSession ? "qr" : "setup");
   const [sessionCode, setSessionCode] = useState<string | null>(presetPhoneSession?.code ?? null);
   // See BountyBoardGame.tsx's own copy of this for the full explanation — true whenever sessionCode
   // is class-level (so the QR points at ?classJoin=, which follows the teacher game to game).
