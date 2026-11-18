@@ -483,19 +483,16 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
   //   - screen mode: always "peek" from the top, unchanged.
   //   - group mode + phone: peek is skipped entirely (every real team already got its role via
   //     phone) straight to "discuss", unchanged from the group-mode-only version of this feature.
-  //   - real 2-team + phone: both sides already have their role via their own phone, so peek is
-  //     skipped too, but — unlike solo below — a real 2-team game's "teams" can each be a genuine
-  //     multi-student group, not one student each, so it gets the same "discuss" huddle group mode
-  //     gets before speaking (caught live: a teacher's actual two teams had no chance to plan what
-  //     to say, only solo-vs-teacher 1v1 was ever meant to skip that). speak-2p's order is picked
-  //     here already so it's ready the moment discuss ends.
-  //   - solo + phone (the teacher's computer-generated stand-in, see makeTeacherTeam): nobody real
-  //     to actually discuss with, so this alone still skips straight into speak-2p. The teacher's
-  //     stand-in used to be excluded from phone eligibility and had to peek on the shared screen
-  //     instead — which meant their secret role was displayed on a screen the whole class
-  //     (including the one real team) could see, the exact privacy the phone-mode feature exists
-  //     to provide. Now that the teacher can claim their own phone the same way any team does,
-  //     solo behaves identically to a real 2-team 1v1 except for this one skip.
+  //   - any 2-player + phone (real 2-team OR solo vs. the teacher's stand-in): both sides already
+  //     have their role via their own phone, so peek is skipped, but everyone still gets "discuss"
+  //     before speaking. This used to skip straight to speak-2p for solo specifically, on the
+  //     theory that solo has "nobody real to discuss with" — but that confused "no teammate to
+  //     confer WITH" (true, there's only one person per side in a 1v1) with "nobody needs a
+  //     moment to think" (false: the teacher's stand-in is a real participant on their own phone
+  //     with their own real topic — see makeTeacherTeam/teacherJoining — and needs the same
+  //     prep time the student gets). Caught live: a teacher playing solo 1v1 got zero planning
+  //     time at all, same bug the real-2-team fix above was supposed to have already covered.
+  //     speak-2p's order is picked here already so it's ready the moment discuss ends.
   const enterRoundStartPhase = () => {
     if (inputMode !== "phone") {
       setPhase("peek");
@@ -506,7 +503,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
       setTp2SpeakOrder([...teams].sort(() => Math.random() - 0.5));
       setTp2SpeakIdx(0);
     }
-    setPhase(isTwoPlayer && isSolo ? "speak-2p" : "discuss");
+    setPhase("discuss");
   };
 
   // Wraps enterRoundStartPhase for the very first round's "Start Mission" click only (never for
@@ -798,10 +795,11 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
     final: "Final Results",
   };
 
-  // A real 2-team game now goes through discuss before speak-2p/guess-2p (see
-  // enterRoundStartPhase), so its phase badge needs those two numbered one later than solo's.
+  // Every 2-player game (solo included) now goes through discuss before speak-2p/guess-2p (see
+  // enterRoundStartPhase), so those two are always one phase number later than PHASES' own
+  // solo-only numbering assumed.
   const phaseLabel = (p: Phase): string => {
-    if (isTwoPlayer && !isSolo) {
+    if (isTwoPlayer) {
       if (p === "speak-2p") return "Phase 3: Speak";
       if (p === "guess-2p") return "Phase 4: Guess";
     }
@@ -1079,9 +1077,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
             }}
           >
             <div style={{ fontWeight: "900", fontSize: "14px", marginBottom: "4px", display: "flex", alignItems: "center", gap: "5px" }}><Icon name="ufo" size={13} /> 1v1 Mode</div>
-            {isSolo
-              ? "Both players peek their secret card, then each speaks about their topic. Afterwards, each player tries to guess what the other topic was."
-              : "Both teams peek their secret card, get a minute to plan what they'll say, then each speaks about their topic. Afterwards, each team tries to guess what the other topic was."}
+            Both sides peek their secret card, get a minute to plan what they'll say, then each speaks about their topic. Afterwards, each side tries to guess what the other topic was.
           </div>
         )}
 
@@ -1181,13 +1177,13 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
                       if (peekIdx + 1 < teams.length) {
                         setPeekIdx((value) => value + 1);
                       } else {
-                        // Same discuss-before-speaking rule as enterRoundStartPhase: solo alone
-                        // skips it (nobody real to huddle with); a real 2-team game gets it too.
+                        // Same discuss-before-speaking rule as enterRoundStartPhase — everyone
+                        // gets a moment to think before speaking, solo included.
                         if (isTwoPlayer) {
                           setTp2SpeakOrder([...teams].sort(() => Math.random() - 0.5));
                           setTp2SpeakIdx(0);
                         }
-                        setPhase(isTwoPlayer && isSolo ? "speak-2p" : "discuss");
+                        setPhase("discuss");
                       }
                     }}
                     className="sau-btn"
