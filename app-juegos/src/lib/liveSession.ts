@@ -109,7 +109,12 @@ export type SpyPhase =
   | "lobby" | "peek" | "discuss" | "order-roll" | "speak" | "speak-2p"
   | "vote" | "spy-guess" | "guess-2p" | "reveal-2p" | "reveal" | "final";
 
-export type SpyRoleInfo = { role: "spy" | "crew"; prompt: string };
+// `topic` is the short crewmateTopic/spyTopic label (e.g. "Present Perfect (Travel)") — shown
+// alongside `prompt` on the player's own card during play, not just at reveal, so a team can
+// actually check their assigned topic against what the reveal later states instead of only
+// finding out after the fact (caught live: a student disputed the reveal's stated topic because
+// the card they'd been looking at the whole round never showed it in the first place).
+export type SpyRoleInfo = { role: "spy" | "crew"; topic: string; prompt: string };
 
 // Broadcast phone -> teacher's screen, only ever acted on during the "vote" phase. The teacher's
 // screen already shows every team's current pick live as votes come in (walking around tapping

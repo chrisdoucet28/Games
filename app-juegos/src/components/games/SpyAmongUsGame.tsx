@@ -5,6 +5,7 @@ import type { RealtimeChannel } from "@supabase/supabase-js";
 import type { GameProps, QuestionData, Team } from "../../types";
 import { teamsGridCols, GAME_MODES, GAME_ICONS } from "../../data/constants";
 import { denseRank } from "../../utils/ranking";
+import { splitPromptExample } from "../../utils/promptExample";
 import { RankBadge } from "../shared/RankBadge";
 import { makeTeacherTeam } from "../../lib/soloOpponent";
 import { HowToPlayBar } from "../shared/HowToPlayModal";
@@ -356,8 +357,8 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
       const roles: Record<string, SpyRoleInfo> = {};
       teams.forEach(t => {
         roles[String(t.id)] = t.id === spyId
-          ? { role: "spy", prompt: currentSpyRound?.spyPrompt ?? "" }
-          : { role: "crew", prompt: currentRound?.crewmatePrompt ?? "" };
+          ? { role: "spy", topic: currentSpyRound?.spyTopic ?? "", prompt: currentSpyRound?.spyPrompt ?? "" }
+          : { role: "crew", topic: currentRound?.crewmateTopic ?? "", prompt: currentRound?.crewmatePrompt ?? "" };
       });
       // Only "intro" (not started) collapses to "lobby" — every other phase is reported as-is.
       // "peek" itself is never reachable in phone mode (see enterRoundStartPhase), so phones only
@@ -482,25 +483,30 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
   //   - screen mode: always "peek" from the top, unchanged.
   //   - group mode + phone: peek is skipped entirely (every real team already got its role via
   //     phone) straight to "discuss", unchanged from the group-mode-only version of this feature.
-  //   - two-player + phone (solo's teacher stand-in is a normal joinable team now, see the
-  //     `roster` broadcast above and the intro QR panel below): both sides already have their
-  //     role via their own phone, so peek is skipped entirely too, straight into speak-2p. The
-  //     teacher's stand-in used to be excluded from
-  //     phone eligibility and had to peek on the shared screen instead — which meant their secret
-  //     role was displayed on a screen the whole class (including the one real team) could see,
-  //     the exact privacy the phone-mode feature exists to provide. Now that the teacher can claim
-  //     their own phone the same way any team does, solo behaves identically to a real 2-team 1v1.
+  //   - real 2-team + phone: both sides already have their role via their own phone, so peek is
+  //     skipped too, but — unlike solo below — a real 2-team game's "teams" can each be a genuine
+  //     multi-student group, not one student each, so it gets the same "discuss" huddle group mode
+  //     gets before speaking (caught live: a teacher's actual two teams had no chance to plan what
+  //     to say, only solo-vs-teacher 1v1 was ever meant to skip that). speak-2p's order is picked
+  //     here already so it's ready the moment discuss ends.
+  //   - solo + phone (the teacher's computer-generated stand-in, see makeTeacherTeam): nobody real
+  //     to actually discuss with, so this alone still skips straight into speak-2p. The teacher's
+  //     stand-in used to be excluded from phone eligibility and had to peek on the shared screen
+  //     instead — which meant their secret role was displayed on a screen the whole class
+  //     (including the one real team) could see, the exact privacy the phone-mode feature exists
+  //     to provide. Now that the teacher can claim their own phone the same way any team does,
+  //     solo behaves identically to a real 2-team 1v1 except for this one skip.
   const enterRoundStartPhase = () => {
     if (inputMode !== "phone") {
       setPhase("peek");
       setPeekIdx(0);
-    } else if (!isTwoPlayer) {
-      setPhase("discuss");
-    } else {
+      return;
+    }
+    if (isTwoPlayer) {
       setTp2SpeakOrder([...teams].sort(() => Math.random() - 0.5));
       setTp2SpeakIdx(0);
-      setPhase("speak-2p");
     }
+    setPhase(isTwoPlayer && isSolo ? "speak-2p" : "discuss");
   };
 
   // Wraps enterRoundStartPhase for the very first round's "Start Mission" click only (never for
@@ -617,6 +623,18 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
     setRollDone(false);
     setPhase("order-roll");
     setTimeout(() => runOrderRoll(teams.map((_, i) => i), {}), 300);
+  };
+
+  // The discuss screen's "Ready" button — a real 2-team game has nothing to roll dice for (there's
+  // only one other team it could possibly be), so it goes straight into speak-2p instead of
+  // order-roll. tp2SpeakOrder is already set from enterRoundStartPhase, still valid here.
+  const finishDiscuss = () => {
+    if (isTwoPlayer) {
+      if (timerRef.current) clearInterval(timerRef.current);
+      setPhase("speak-2p");
+      return;
+    }
+    startOrderRoll();
   };
 
   useEffect(() => {
@@ -771,10 +789,23 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
     vote: "Phase 5: Vote",
     "spy-guess": "Spy's Last Chance",
     reveal: "Reveal",
+    // Solo skips "discuss" (nothing to huddle about alone), so its speak-2p/guess-2p stay one
+    // phase number earlier than a real 2-team game's, which goes through discuss first — see
+    // phaseLabel below, which overrides these two for the non-solo case.
     "speak-2p": "Phase 2: Speak",
     "guess-2p": "Phase 3: Guess",
     "reveal-2p": "Reveal",
     final: "Final Results",
+  };
+
+  // A real 2-team game now goes through discuss before speak-2p/guess-2p (see
+  // enterRoundStartPhase), so its phase badge needs those two numbered one later than solo's.
+  const phaseLabel = (p: Phase): string => {
+    if (isTwoPlayer && !isSolo) {
+      if (p === "speak-2p") return "Phase 3: Speak";
+      if (p === "guess-2p") return "Phase 4: Guess";
+    }
+    return PHASES[p];
   };
 
   const arenaStyle: React.CSSProperties = {
@@ -1029,7 +1060,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
               fontSize: "13px",
             }}
           >
-            {PHASES[phase]}
+            {phaseLabel(phase)}
           </span>
         </div>
 
@@ -1048,8 +1079,9 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
             }}
           >
             <div style={{ fontWeight: "900", fontSize: "14px", marginBottom: "4px", display: "flex", alignItems: "center", gap: "5px" }}><Icon name="ufo" size={13} /> 1v1 Mode</div>
-            Both players peek their secret card, then each speaks about their topic. Afterwards, each player tries to
-            guess what the other topic was.
+            {isSolo
+              ? "Both players peek their secret card, then each speaks about their topic. Afterwards, each player tries to guess what the other topic was."
+              : "Both teams peek their secret card, get a minute to plan what they'll say, then each speaks about their topic. Afterwards, each team tries to guess what the other topic was."}
           </div>
         )}
 
@@ -1090,7 +1122,10 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
                 >
                   <Icon name="satellite" size={16} /> Reveal my role
                 </button>
-              ) : (
+              ) : (() => {
+                const myPrompt = (isSpy(peekTeam.id) ? spyRound.spyPrompt : round.crewmatePrompt) ?? "";
+                const { instruction, example } = splitPromptExample(myPrompt);
+                return (
                 <div>
                   <div
                     key={peekIdx}
@@ -1109,6 +1144,9 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
                     <div style={{ fontWeight: "900", fontSize: "20px", marginBottom: "6px" }}>
                       {isSpy(peekTeam.id) ? "You are the SPY!" : "You are a CREWMATE"}
                     </div>
+                    <div style={{ fontWeight: "900", fontSize: "12px", textTransform: "uppercase", letterSpacing: "0.04em", opacity: 0.85, marginBottom: "6px" }}>
+                      Your topic: {isSpy(peekTeam.id) ? spyRound.spyTopic : round.crewmateTopic}
+                    </div>
                     <div
                       style={{
                         background: "rgba(0,0,0,0.25)",
@@ -1118,9 +1156,17 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
                         lineHeight: 1.6,
                         fontWeight: "700",
                         marginBottom: "6px",
+                        textAlign: "left",
                       }}
                     >
-                      {isSpy(peekTeam.id) ? spyRound.spyPrompt : round.crewmatePrompt}
+                      <div>{instruction}</div>
+                      {example && (
+                        <>
+                          <div style={{ borderTop: "1px solid rgba(255,255,255,0.25)", margin: "10px 0 8px" }} />
+                          <div style={{ fontSize: "10.5px", fontWeight: "900", textTransform: "uppercase", letterSpacing: "0.06em", opacity: 0.7, marginBottom: "4px" }}>Example</div>
+                          <div style={{ fontWeight: "600", opacity: 0.9 }}>{example}</div>
+                        </>
+                      )}
                     </div>
                     {isSpy(peekTeam.id) && (
                       <div style={{ fontSize: "12px", opacity: 0.8, marginTop: "6px" }}>
@@ -1134,12 +1180,14 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
                       setRevealed(false);
                       if (peekIdx + 1 < teams.length) {
                         setPeekIdx((value) => value + 1);
-                      } else if (isTwoPlayer) {
-                        setTp2SpeakOrder([...teams].sort(() => Math.random() - 0.5));
-                        setTp2SpeakIdx(0);
-                        setPhase("speak-2p");
                       } else {
-                        setPhase("discuss");
+                        // Same discuss-before-speaking rule as enterRoundStartPhase: solo alone
+                        // skips it (nobody real to huddle with); a real 2-team game gets it too.
+                        if (isTwoPlayer) {
+                          setTp2SpeakOrder([...teams].sort(() => Math.random() - 0.5));
+                          setTp2SpeakIdx(0);
+                        }
+                        setPhase(isTwoPlayer && isSolo ? "speak-2p" : "discuss");
                       }
                     }}
                     className="sau-btn"
@@ -1159,7 +1207,8 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
                     {peekIdx + 1 < teams.length ? ` (Next: ${teams[peekIdx + 1].name})` : " (Start discussion!)"}
                   </button>
                 </div>
-              )}
+                );
+              })()}
             </div>
 
             <div style={{ display: "flex", gap: "8px", justifyContent: "center" }}>
@@ -1227,7 +1276,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
             </div>
             <div style={{ textAlign: "center" }}>
               <button
-                onClick={startOrderRoll}
+                onClick={finishDiscuss}
                 className="sau-btn"
                 style={{
                   background: "#38BDF8",
@@ -1241,7 +1290,7 @@ export function SpyAmongUsGame({ questions, teams: propTeams, onUpdateScore, onE
                   cursor: "pointer",
                 }}
               >
-                Ready - Roll for Speaking Order!
+                {isTwoPlayer ? "Ready - Start Speaking!" : "Ready - Roll for Speaking Order!"}
               </button>
             </div>
           </div>
