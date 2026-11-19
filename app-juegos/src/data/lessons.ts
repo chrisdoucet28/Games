@@ -2978,11 +2978,12 @@ export const LESSONS: Record<string, Lesson> = {
         heading: "Word order, negatives and questions",
         body: [
           "The intensifier goes before the adjective, after 'be': It is absolutely freezing.",
-          "In a negative sentence, use 'very' with a normal adjective: It isn't very hot. After 'not', the extreme version sounds strange, so choose the normal adjective instead.",
+          "In a negative sentence, 'not very' goes with a normal adjective: It isn't very hot. You can also say the extreme adjective on its own: It isn't boiling. But never put 'absolutely' after 'not'.",
           "In a question, 'be' goes first: Is it absolutely freezing? Was the soup delicious?",
         ],
         examples: [
           "The soup isn't **very hot**, so you can eat it.",
+          "The water isn't **freezing**, so we can swim.",
           "Was the hotel **absolutely spotless**?",
         ],
       },
