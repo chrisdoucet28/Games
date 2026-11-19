@@ -2921,6 +2921,91 @@ export const LESSONS: Record<string, Lesson> = {
     ],
   },
 
+  extreme_adjectives: {
+    title: "Extreme Adjectives",
+    intro: "Some adjectives can be made stronger with 'very' (very cold, very tired). Others already mean 'extremely' something, so 'very' sounds wrong with them: you cannot say 'very freezing'. These are called extreme adjectives (or ungradable adjectives). This lesson gives you 20 common ones, the normal adjective each one comes from, and the words that go with them.",
+    sections: [
+      {
+        heading: "Normal adjectives and extreme adjectives",
+        body: [
+          "A normal adjective has levels: a bit cold, quite cold, very cold. You can make it stronger or weaker.",
+          "An extreme adjective is already at the top. 'Freezing' means extremely cold, so there is nothing stronger to add. It does not have levels.",
+        ],
+        examples: [
+          "It's **very cold** today. (normal adjective)",
+          "It's **absolutely freezing** today. (extreme adjective)",
+        ],
+      },
+      {
+        heading: "20 extreme adjectives and the normal adjective they come from",
+        body: [
+          "cold → freezing; hot → boiling; tired → exhausted; hungry → starving; big → huge; small → tiny; scared → terrified; angry → furious; funny → hilarious; tasty → delicious.",
+          "dirty → filthy; clean → spotless; interesting → fascinating; surprised → astonished; old → ancient; noisy → deafening; crowded → packed; strange → bizarre; bad → terrible; good → fantastic.",
+        ],
+        examples: [
+          "I'm not just tired. I'm **exhausted**.",
+          "The soup isn't just tasty. It's **delicious**.",
+          "The street isn't just noisy. It's **deafening**.",
+        ],
+      },
+      {
+        heading: "Which word goes with which adjective",
+        body: [
+          "With normal adjectives, use very, really, quite, a bit, fairly: very tall, quite interesting, a bit tired.",
+          "With extreme adjectives, use absolutely or completely: absolutely delicious, completely exhausted. Absolutely goes with almost all of them. Completely sounds best with words about a state, like exhausted, spotless, filthy or astonished.",
+          "Really works with both: really tall, really freezing. It is the safe choice if you are not sure.",
+        ],
+        examples: [
+          "The film was **very interesting**.",
+          "The film was **absolutely fascinating**.",
+          "The kitchen is **completely spotless**.",
+        ],
+      },
+      {
+        heading: "Common mistakes: very + extreme, absolutely + normal",
+        body: [
+          "Never use 'very' with an extreme adjective: not 'very freezing', 'very delicious', 'very huge'.",
+          "Never use 'absolutely' with a normal adjective: not 'absolutely tired', 'absolutely tall'.",
+          "Extreme adjectives also have no comparative. You cannot say 'more huge' or 'more freezing'. Use the normal adjective: bigger, colder.",
+        ],
+        examples: [
+          "❌ It was very freezing. → ✅ It was **absolutely freezing**.",
+          "❌ I was absolutely tired. → ✅ I was **very tired**.",
+          "❌ This room is more huge. → ✅ This room is **bigger**.",
+        ],
+      },
+      {
+        heading: "Word order, negatives and questions",
+        body: [
+          "The intensifier goes before the adjective, after 'be': It is absolutely freezing.",
+          "In a negative sentence, use 'very' with a normal adjective: It isn't very hot. After 'not', the extreme version sounds strange, so choose the normal adjective instead.",
+          "In a question, 'be' goes first: Is it absolutely freezing? Was the soup delicious?",
+        ],
+        examples: [
+          "The soup isn't **very hot**, so you can eat it.",
+          "Was the hotel **absolutely spotless**?",
+        ],
+      },
+      {
+        heading: "-ed and -ing endings",
+        body: [
+          "Some extreme adjectives come in two forms. Use -ed for how a person feels: terrified, astonished, exhausted. Use -ing for the thing that causes the feeling: fascinating, deafening.",
+        ],
+        examples: [
+          "The children were **terrified** of the dog.",
+          "The documentary was **fascinating**.",
+        ],
+      },
+    ],
+    commonMistakes: [
+      "❌ It was very freezing last night. → ✅ It was absolutely freezing last night. ('freezing' is an extreme adjective — use 'absolutely')",
+      "❌ I was absolutely tired after the match. → ✅ I was very tired after the match. ('tired' is a normal adjective — use 'very')",
+      "❌ The soup was very delicious. → ✅ The soup was absolutely delicious. ('delicious' is extreme)",
+      "❌ This room is more huge than that one. → ✅ This room is bigger than that one. (extreme adjectives have no comparative)",
+      "❌ The documentary was absolutely fascinated. → ✅ The documentary was absolutely fascinating. (-ing for the thing that causes the feeling)",
+    ],
+  },
+
   describing_locations: {
     title: "Describing Locations",
     intro: "Describing a place uses a small set of adjectives and fixed collocations (situated in, known for, home to) — most mistakes come from the wrong preposition or verb form.",

@@ -1858,6 +1858,20 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
     ],
   },
 
+  extreme_adjectives: {
+    title: "A Weekend in the Mountains",
+    passage: [
+      "Last weekend, my friends and I went to the mountains for two days. The journey was very long, and by the time we arrived I was completely exhausted. The weather was another surprise. It was absolutely freezing, much colder than we expected, and our little cabin had no heating.",
+      "Luckily, the owner was very friendly. She gave us some hot soup, and it was absolutely delicious. We were all starving, so we ate every drop. Later, she showed us around the village. It was tiny, with only about thirty houses, but the old church was ancient. People said it was more than eight hundred years old.",
+      "On Sunday we climbed a hill. The view from the top was absolutely fantastic, and the air was very fresh. We met a man there who told us a fascinating story about the valley. Some of it was a bit bizarre, but we loved it. By the evening we were filthy and tired, but really happy. It was a trip I will never forget.",
+    ],
+    questions: [
+      { type: "reading comprehension", question: "Why was the writer exhausted when they arrived?", answer: "The journey was very long." },
+      { type: "reading comprehension", question: "What was the soup like?", answer: "It was absolutely delicious." },
+      { type: "reading comprehension", question: "How old was the village church?", answer: "More than eight hundred years old." },
+    ],
+  },
+
   describing_locations: {
     title: "Where Should We Stay?",
     audioUrl: `${MEDIA_BASE}/audio/real-world/describing_locations-2v.mp3`,
