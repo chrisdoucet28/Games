@@ -1858,6 +1858,20 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
     ],
   },
 
+  extreme_adjectives: {
+    title: "A Weekend in the Mountains",
+    passage: [
+      "Last weekend, my friends and I went to the mountains for two days. The journey was very long, and by the time we arrived I was completely exhausted. The weather was another surprise. It was absolutely freezing, much colder than we expected, and our little cabin had no heating.",
+      "Luckily, the owner was very friendly. She gave us some hot soup, and it was absolutely delicious. We were all starving, so we ate every drop. Later, she showed us around the village. It was tiny, with only about thirty houses, but the old church was ancient. People said it was more than eight hundred years old.",
+      "On Sunday we climbed a hill. The view from the top was absolutely fantastic, and the air was very fresh. We met a man there who told us a fascinating story about the valley. Some of it was a bit bizarre, but we loved it. By the evening we were filthy and tired, but really happy. It was a trip I will never forget.",
+    ],
+    questions: [
+      { type: "reading comprehension", question: "Why was the writer exhausted when they arrived?", answer: "The journey was very long." },
+      { type: "reading comprehension", question: "What was the soup like?", answer: "It was absolutely delicious." },
+      { type: "reading comprehension", question: "How old was the village church?", answer: "More than eight hundred years old." },
+    ],
+  },
+
   describing_locations: {
     title: "Where Should We Stay?",
     audioUrl: `${MEDIA_BASE}/audio/real-world/describing_locations-2v.mp3`,
@@ -2353,6 +2367,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   passive_reporting_structures: {
     title: "The Mystery of Flight 227",
+    audioUrl: `${MEDIA_BASE}/audio/real-world/passive_reporting_structures.mp3`,
     passage: [
       "Three days after cargo flight 227 disappeared from radar over the Atlantic, it is still not known exactly what happened to the aircraft or its two-person crew. The plane is believed to have lost contact shortly after entering a severe storm system, and it is thought that the pilots attempted an emergency descent before all communication was lost entirely.",
       "Investigators say the aircraft is understood to have been carrying routine cargo, and no distress signal was ever received, which has been described by aviation experts as unusual given the circumstances. It is widely reported that similar aircraft are equipped with automatic emergency beacons designed to activate on impact, yet none has so far been detected in the search area.",
@@ -2371,6 +2386,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   memory_mind_psychology: {
     title: "Why You Don't Remember What You Think You Remember",
+    audioUrl: `${MEDIA_BASE}/audio/real-world/memory_mind_psychology.mp3`,
     passage: [
       "Ask someone to describe a vivid childhood memory, and they'll usually do so with total confidence — the colour of the walls, the exact words spoken, the emotional weight of the moment. What almost none of them realise is that this confidence tells you almost nothing about accuracy. Memory, psychologists have discovered, is far less like a video recording than most people assume, and far more like a story we quietly rewrite every time we tell it.",
       "The landmark research here comes from cognitive psychologist Elizabeth Loftus, whose decades of work demonstrated something genuinely unsettling: false memories can be implanted with surprising ease, and once implanted, they feel exactly as real as genuine ones. In one famous study, Loftus's team convinced a meaningful percentage of participants that they had been lost in a shopping mall as children — an event that had never actually happened — simply by describing it convincingly alongside real memories supplied by family members.",
@@ -2387,6 +2403,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   future_of_work: {
     title: "The Office That Never Reopened",
+    audioUrl: `${MEDIA_BASE}/audio/real-world/future_of_work.mp3`,
     passage: [
       "When Marisol Fernandez's company sent everyone home in early 2020, she assumed, like most of her colleagues, that it would last a matter of weeks. Five years later, she has never returned to a permanent desk, her company has sold its headquarters entirely, and roughly sixty percent of its four thousand employees now work from locations scattered across a dozen countries.",
       "Fernandez's experience, once considered an unusual exception, has become something closer to the norm across large sections of the global economy. What began as an emergency accommodation has, for many industries, calcified into permanent infrastructure, forcing a fundamental reconsideration of what \"work\" actually requires in terms of physical presence.",
@@ -2404,6 +2421,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   relationships_modern_life: {
     title: "Swiping Right on Everything: Dating in the Algorithm Age",
+    audioUrl: `${MEDIA_BASE}/audio/real-world/relationships_modern_life.mp3`,
     passage: [
       "There was a time, not especially long ago, when meeting a romantic partner typically involved some combination of chance, shared social circles, and geography — you met people through friends, at work, in your neighbourhood, constrained by whoever happened to occupy the same physical spaces as you. That world has largely disappeared for an entire generation, replaced by an economy of profiles, algorithms, and an almost unlimited pool of theoretical options available at any hour of the day.",
       "The appeal is obvious enough. Dating apps have genuinely expanded access for people who might otherwise have struggled to meet partners — those in small towns, those with demanding schedules, those simply too shy to approach strangers in person. For many users, particularly in marginalised communities where finding compatible partners locally was historically difficult, this expanded access has been transformative rather than merely convenient.",
@@ -2421,6 +2439,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   crime_and_justice: {
     title: "Rethinking Prison: What Norway Got Right",
+    audioUrl: `${MEDIA_BASE}/audio/real-world/crime_and_justice.mp3`,
     passage: [
       "Halden Prison, roughly two hours from Oslo, looks almost nothing like the popular image of incarceration. Inmates live in private rooms with their own bathrooms, cook meals in shared kitchens, and take classes in music production and woodworking. Guards, deliberately unarmed, are trained to build genuine relationships with prisoners rather than simply enforce rules from a distance. To visitors accustomed to more punitive systems, it can look, at first glance, almost indistinguishable from a modest college campus.",
       "The philosophy underpinning Norway's approach is straightforward, if counterintuitive to many outside observers: nearly every incarcerated person will eventually be released, so the central question a justice system should ask isn't how severely to punish someone, but how effectively to prepare them to return to society without reoffending. Norway's reconviction rate, hovering around twenty percent within two years of release, compares strikingly with rates exceeding fifty percent in several countries that favour harsher, more punitive approaches.",
@@ -2437,6 +2456,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   health_healthcare_systems: {
     title: "Two Systems, Two Bills: A Tale of Two Surgeries",
+    audioUrl: `${MEDIA_BASE}/audio/real-world/health_healthcare_systems.mp3`,
     passage: [
       "When David Okafor tore his knee ligament playing football in Manchester, his treatment — including surgery, physiotherapy, and follow-up consultations — cost him nothing beyond what he already paid in taxes. His American cousin, Michael, suffering an almost identical injury the same year in Ohio, received a bill exceeding forty thousand dollars, a portion of which his insurance eventually covered after months of negotiation and paperwork.",
       "The two cousins' experiences illustrate, in miniature, one of the most consequential policy divides between wealthy nations: how a society chooses to fund and deliver healthcare. The UK's National Health Service, funded through general taxation and free at the point of use, represents one end of a spectrum; the United States' predominantly private, insurance-based model sits at the other, with most developed nations occupying various hybrid positions in between.",
@@ -2454,6 +2474,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   inversion: {
     title: "Never Had I Felt So Lost",
+    audioUrl: `${MEDIA_BASE}/audio/real-world/inversion.mp3`,
     passage: [
       "Never had I felt so completely out of my depth as I did on my first day working the night shift at St. Agnes's hospital. Not only was I unfamiliar with half the equipment on the ward, but I also had no idea where anything was kept, having transferred from a much smaller unit only that morning.",
       "Rarely does a hospital corridor feel as long as it did that night, stretching endlessly under flickering fluorescent lights while I searched, increasingly desperate, for a supply cupboard I'd been told was \"just past reception.\" Little did I know that the directions I'd been given referred to an entirely different wing of the building.",
@@ -2472,6 +2493,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   mixed_conditionals: {
     title: "The Job I Didn't Take",
+    audioUrl: `${MEDIA_BASE}/audio/real-world/mixed_conditionals.mp3`,
     passage: [
       "If I had accepted the transfer to Singapore eight years ago, I would probably be a completely different person today — more confident in some ways, perhaps more isolated in others, certainly wealthier, given the salary difference between what I earn now and what that role would have paid.",
       "I think about it more than I'd like to admit, usually late at night when a work email reminds me of some frustration that a fresh start might have avoided entirely. If I hadn't stayed here to care for my father during his illness, I would be living somewhere else right now, possibly running the regional office I was offered instead of the smaller team I currently manage.",
@@ -2490,6 +2512,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   advanced_vocabulary: {
     title: "Book Review: A Quiet, Devastating Debut",
+    audioUrl: `${MEDIA_BASE}/audio/real-world/advanced_vocabulary.mp3`,
     passage: [
       "It would be easy to dismiss The Long Winter as yet another entry in the increasingly crowded genre of quiet literary fiction about grief, were it not for how thoroughly it earns its emotional weight rather than simply assuming it. Debut novelist Fiona Marsh has produced a work of remarkable restraint, one that resists the temptation toward melodrama at nearly every turn, opting instead for a kind of accumulated, understated devastation that lingers considerably longer than more overtly dramatic treatments of similar material.",
       "The novel follows Aisling, a widowed schoolteacher navigating her first winter alone in rural Ireland, but to describe it purely in terms of plot is to fundamentally misrepresent what makes it succeed. Marsh's prose is spare almost to the point of austerity, yet never feels impoverished; each carefully chosen sentence carries a density of implication that more verbose writers might require an entire paragraph to convey. There is an admirable discipline here, a willingness to trust the reader with silence and inference rather than spelling out every emotional beat.",
@@ -2506,6 +2529,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   cleft_sentences: {
     title: "What Really Went Wrong at Kelder Manufacturing",
+    audioUrl: `${MEDIA_BASE}/audio/real-world/cleft_sentences.mp3`,
     passage: [
       "It wasn't the recession that destroyed Kelder Manufacturing, whatever the official statement claimed. What actually happened was years of quiet mismanagement finally catching up with a company that had been coasting on reputation alone for the better part of a decade.",
       "It was the board's decision to reject automation upgrades in 2015, not any external economic shock, that left the company producing goods at nearly double the cost of its competitors. What management chose to prioritise instead — a lavish new headquarters, expensive executive bonuses — tells you everything about where the real failure originated.",
@@ -2525,6 +2549,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   business_professional_vocabulary: {
     title: "Quarterly Results: A Mixed Picture",
+    audioUrl: `${MEDIA_BASE}/audio/real-world/business_professional_vocabulary.mp3`,
     passage: [
       "Torvald Industries reported its third-quarter earnings yesterday, revealing a mixed picture that left analysts divided over the company's near-term outlook. Revenue rose by 6.2 percent year-on-year, comfortably beating market expectations, yet net profit margins contracted for the second consecutive quarter, driven largely by rising input costs and an aggressive expansion into overseas markets that has yet to deliver returns.",
       "\"We're seeing solid top-line growth, but the bottom line tells a more complicated story,\" said chief financial officer Elena Marsh during yesterday's earnings call. \"We anticipated some short-term margin compression as we scale operations in Southeast Asia, and that's precisely what we're seeing play out.\" The company's overseas division, launched eighteen months ago, currently operates at a loss, though executives maintain it remains on track to reach profitability within the next two fiscal years.",
@@ -2542,6 +2567,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   media_misinformation: {
     title: "The Story That Wasn't True (But Spread Anyway)",
+    audioUrl: `${MEDIA_BASE}/audio/real-world/media_misinformation.mp3`,
     passage: [
       "Within six hours of being posted, the claim had been shared over two hundred thousand times: a well-known food company, the post alleged, was secretly using a banned chemical preservative in its products, with \"internal documents\" supposedly proving the cover-up. By the time independent fact-checkers had thoroughly debunked the claim the following day, it had already reached millions of people, and the company's stock had briefly dropped nearly four percent in response.",
       "The correction, when it eventually arrived, reached a fraction of that original audience. This asymmetry — false claims spreading dramatically faster and further than the corrections that follow them — has been documented repeatedly by researchers studying online misinformation, and it represents one of the most stubborn challenges facing efforts to combat false information at scale.",

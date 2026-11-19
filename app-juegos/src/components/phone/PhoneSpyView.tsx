@@ -1,6 +1,7 @@
 import type { SpyStatePayload, SpyVoteActionPayload } from "../../lib/liveSession";
 import { TeamIcon } from "../shared/TeamIcon";
 import { Icon } from "../shared/Icon";
+import { splitPromptExample } from "../../utils/promptExample";
 
 type Props = {
   state: SpyStatePayload;
@@ -64,12 +65,29 @@ export function PhoneSpyView({ state, teamId, onAction }: Props) {
           <div style={{ fontWeight: "900", fontSize: "18px", marginBottom: "10px" }}>
             {isSpy ? "You are the SPY!" : "You are a CREWMATE"}
           </div>
-          <div style={{
-            background: "rgba(0,0,0,0.25)", borderRadius: "12px", padding: "14px",
-            fontSize: "15px", lineHeight: 1.6, fontWeight: "700",
-          }}>
-            {role.prompt}
-          </div>
+          {role.topic && (
+            <div style={{ fontWeight: "900", fontSize: "12px", textTransform: "uppercase", letterSpacing: "0.04em", opacity: 0.85, marginBottom: "6px" }}>
+              Your topic: {role.topic}
+            </div>
+          )}
+          {(() => {
+            const { instruction, example } = splitPromptExample(role.prompt);
+            return (
+              <div style={{
+                background: "rgba(0,0,0,0.25)", borderRadius: "12px", padding: "14px",
+                fontSize: "15px", lineHeight: 1.6, fontWeight: "700", textAlign: "left",
+              }}>
+                <div>{instruction}</div>
+                {example && (
+                  <>
+                    <div style={{ borderTop: "1px solid rgba(255,255,255,0.25)", margin: "10px 0 8px" }} />
+                    <div style={{ fontSize: "10.5px", fontWeight: "900", textTransform: "uppercase", letterSpacing: "0.06em", opacity: 0.7, marginBottom: "4px" }}>Example</div>
+                    <div style={{ fontWeight: "600", opacity: 0.9 }}>{example}</div>
+                  </>
+                )}
+              </div>
+            );
+          })()}
           {isSpy && (
             <div style={{ fontSize: "12px", opacity: 0.8, marginTop: "10px" }}>
               Blend in and try to guess the real topic if you get caught.

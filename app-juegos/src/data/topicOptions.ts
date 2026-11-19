@@ -140,6 +140,7 @@ export const TOPIC_OPTIONS: { value: string; label: string; level: string | null
   { value: "future_continuous", label: "Future Continuous (will be + -ing)", level: "B1", focus: "grammar" , order: 42 },
   { value: "wish_if_only", label: "I wish / If only", level: "B2", focus: "grammar" , order: 10 },
   { value: "describing_locations", label: "Describing Locations", level: "B1", focus: "vocabulary" , order: 35 },
+  { value: "extreme_adjectives", label: "Extreme Adjectives", level: "B1", focus: "vocabulary" , order: 36 },
   { value: "too_much_many", label: "Too vs Too much / Too many", level: "A2", focus: "grammar" , order: 23 },
   { value: "quantifiers", label: "Quantifiers (Much/Many/A Lot/A Few/A Little)", level: "A2", focus: "grammar" , order: 24 },
   { value: "gerunds_infinitives", label: "Gerunds vs Infinitives", level: "B2", focus: "grammar" , order: 19 },

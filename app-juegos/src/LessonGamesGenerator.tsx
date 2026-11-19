@@ -3,8 +3,9 @@ import * as Sentry from "@sentry/react";
 import { TeamIcon, MASCOT_ICON_BY_EMOJI } from "./components/shared/TeamIcon";
 import type { Team, GameMode, QuestionData, SavedClass, Subscription, TeamRosterEntry } from "./types";
 import { TEAM_COLORS, GAME_MODES, GAME_ICONS, MASCOT_OPTIONS, LEVELS_META, FREE_PLAN_LIMITS, FREE_LAUNCH_ALL_PREMIUM } from "./data/constants";
-import { orderedGameModes } from "./data/gameCategories";
+import { filteredGameModes } from "./data/gameCategories";
 import { GameSelectPanel } from "./components/shared/GameSelectPanel";
+import { GameFilterBar } from "./components/shared/GameFilterBar";
 // TOPIC_OPTIONS (lightweight metadata, needed immediately for topic-select) lives in its own
 // module now, separate from topics.ts's TOPIC_LIBRARY (the ~5MB actual question content) — see
 // data/topicOptions.ts's header comment. TOPIC_LIBRARY itself is loaded via a dynamic import()
@@ -306,6 +307,19 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
   // calls) doesn't need to touch it.
   const [activeClassName, setActiveClassName] = useState<string | null>(null);
 
+  // The currently-linked class's own live record, re-fetched whenever activeClassId changes --
+  // just enough to know if IT has an unfinished game, so team-setup's Saved Teams panel can offer
+  // "Resume" right where a class is already naturally linked (auto-matched roster names, the
+  // in-panel Switch/link drawer, or My Classes) -- no extra screen, no extra step. null while
+  // nothing's linked, or while the fetch for a freshly-linked class hasn't resolved yet.
+  const [activeClassFull, setActiveClassFull] = useState<SavedClass | null>(null);
+  useEffect(() => {
+    if (!activeClassId) { setActiveClassFull(null); return; }
+    let cancelled = false;
+    getClass(activeClassId).then(cls => { if (!cancelled) setActiveClassFull(cls); }).catch(() => {});
+    return () => { cancelled = true; };
+  }, [activeClassId]);
+
   // Mirrors activeClassId into localStorage so a browser refresh (which wipes every piece of React
   // state above, teams/scores included) isn't a dead end: a teacher who refreshes mid-class and
   // then starts a fresh, unlinked session under the same team names has no way to get their real
@@ -388,6 +402,20 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
   const [teamRoster, setTeamRoster] = useState<TeamRosterEntry[]>([]);
   const [rosterSaveStatus, setRosterSaveStatus] = useState<"idle" | "saving" | "saved">("idle");
   const [teamsSaveStatus, setTeamsSaveStatus] = useState<"idle" | "saving" | "saved">("idle");
+  // Game-select's "More options" dropdown (Reset all scores to 0 / Reset teams to normal / Edit
+  // teams & settings) — collapsed in here since they're all "tidy up between classes" actions, not
+  // ones a teacher reaches for every lesson, unlike Save teams to class / Change topics which stay
+  // as their own buttons.
+  const [moreTeamOptionsOpen, setMoreTeamOptionsOpen] = useState(false);
+  // Game-select's filter bar — narrows which game cards show (and what Surprise Me! picks from)
+  // by "I need…" category. Empty set = no restriction, the default, same as before this existed.
+  const [categoryFilter, setCategoryFilter] = useState<Set<string>>(new Set());
+  const toggleCategoryFilter = (id: string) => setCategoryFilter(prev => {
+    const next = new Set(prev);
+    if (next.has(id)) next.delete(id); else next.add(id);
+    return next;
+  });
+  const clearGameFilters = () => setCategoryFilter(new Set());
   const [questions, setQuestions] = useState<QuestionData[]>([]);
   const [level, setLevel] = useState("all");
   const [focus, setFocus] = useState("all");
@@ -717,8 +745,12 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
     if (loadingGame || randomSpinIndex !== null) return;
 
     // Steps through the games in on-screen order (grouped by block), not GAME_MODES order — the
-    // highlight index is compared against that same order in GameSelectPanel.
-    const games = orderedGameModes();
+    // highlight index is compared against that same order in GameSelectPanel. Narrowed by the
+    // filter bar's current selection, same as the cards themselves — if a filter combination
+    // leaves nothing to pick from, the button is disabled below before this can ever run on an
+    // empty list.
+    const games = filteredGameModes(categoryFilter);
+    if (games.length === 0) return;
     const targetIndex = Math.floor(Math.random() * games.length);
     const totalSteps = games.length * 3 + targetIndex;
 
@@ -2235,13 +2267,29 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
         <button onClick={handleSetup} style={{ width: "100%", background: `linear-gradient(135deg,${theme.accent[0]},${theme.accent[1]})`, color: "white", border: "none", borderRadius: "16px", padding: "18px", fontSize: "20px", fontWeight: "900", cursor: "pointer", fontFamily: theme.headingFont, display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
           {pendingLessonTopicId ? <><Icon name="school" size={20} /> Start Lesson</> : <><Icon name="controller" size={20} /> Choose a Game!</>}
         </button>
+
+        {/* The linked class already has a game in progress -- same "Resume X" a teacher would see
+            on My Classes for this exact class, right here instead, since this is where a class
+            actually gets linked day to day (auto-matched roster names, or the Switch drawer
+            above) -- no extra screen, nothing to visit first. Full-width and below the main CTA
+            so it reads as its own clear choice, not a small aside easy to miss. */}
+        {activeClassFull?.in_progress && (
+          <button
+            onClick={() => resumeClass(activeClassFull)}
+            style={{ width: "100%", marginTop: "12px", background: `linear-gradient(135deg,${theme.cta[0]},${theme.cta[1]})`, color: "white", border: "none", borderRadius: "16px", padding: "18px", fontSize: "20px", fontWeight: "900", cursor: "pointer", fontFamily: theme.headingFont, display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}
+          >
+            <Icon name="play" size={20} /> Resume {GAME_MODES.find(g => g.id === activeClassFull.selected_game)?.name ?? "an unavailable game"}
+          </button>
+        )}
       </div>
       <FeedbackButton />
       <BrandBadge isPaid={isPaid} />
     </div>
   );
 
-  if (screen === "game-select") return (
+  if (screen === "game-select") {
+    const filteredCount = filteredGameModes(categoryFilter).length;
+    return (
     <div style={{ minHeight: "100vh", background: "#F0F9FF", padding: "20px", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
       {renderSavePicker()}
       {renderClassCheckInBadge()}
@@ -2271,14 +2319,20 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
         </div>
 
         <ScoreBoard teams={teams} headingFont={theme.headingFont} />
-        {/* Below ~480px these 4 utility buttons pack into a fixed 2x2 grid instead of each
-            wrapping onto its own full-width line — the flex-wrap layout above works fine on
-            desktop since 2-3 fit per row naturally, but on a phone every button's text is wide
-            enough to fill the row alone. */}
+        {/* Only 2 persistent buttons now (Save teams to class / Change topics) — the ones a
+            teacher reaches for most lessons — plus a "More options" menu for the 3 rarer
+            "tidy up between classes" actions (reset scores, reset teams, edit teams & settings).
+            Below ~480px they still pack into a row instead of each wrapping onto its own line. */}
         <style>{`
           @media (max-width: 480px) {
             .cc-team-actions-row { display: grid !important; grid-template-columns: repeat(2,1fr) !important; }
-            .cc-team-actions-row button { width: 100%; box-sizing: border-box; justify-content: center; }
+            .cc-team-actions-row > button { width: 100%; box-sizing: border-box; justify-content: center; }
+            /* The "More options" trigger sits in a wrapping div (it needs position:relative for its
+               dropdown) — spanning both grid columns keeps that wrapper (and so the dropdown's
+               right:0 anchor) flush with the row's own right edge, instead of wherever a single
+               1fr column happens to land it, which could be the LEFT column with no room for a
+               220px-wide dropdown to open without running off the screen's left edge. */
+            .cc-team-actions-row > div { grid-column: 1 / -1; display: flex; justify-content: center; }
           }
         `}</style>
         <div className="cc-team-actions-row" style={{ textAlign: "center", marginTop: "10px", display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "20px" }}>
@@ -2296,10 +2350,26 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
             >
               {teamsSaveStatus === "saving" ? "Saving…" : teamsSaveStatus === "saved" ? <><Icon name="check" size={12} /> Saved!</> : <><Icon name="save" size={12} /> Save teams to class</>}
             </button>
-            <button onClick={() => setTeams(ts => ts.map(t => ({ ...t, score: 0 })))} style={{ background: "none", border: "2px solid #D1D5DB", borderRadius: "20px", padding: "4px 16px", fontWeight: "700", fontSize: "12px", color: "#9CA3AF", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "5px" }}><Icon name="refresh" size={12} /> Reset all scores to 0</button>
-            <button onClick={() => resetTeamsToNormal()} title="0 points, no mascots, original colors and names" style={{ background: "none", border: "2px solid #D1D5DB", borderRadius: "20px", padding: "4px 16px", fontWeight: "700", fontSize: "12px", color: "#9CA3AF", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "5px" }}><Icon name="refresh" size={12} /> Reset teams to normal</button>
-            <button onClick={() => setScreen("team-setup")} style={{ background: "none", border: "2px solid #D1D5DB", borderRadius: "20px", padding: "4px 16px", fontWeight: "700", fontSize: "12px", color: "#9CA3AF", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "5px" }}><Icon name="gear" size={12} /> Edit teams & settings</button>
             <button onClick={() => setScreen("topic-select")} style={{ background: "none", border: "2px solid #D1D5DB", borderRadius: "20px", padding: "4px 16px", fontWeight: "700", fontSize: "12px", color: "#9CA3AF", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "5px" }}><Icon name="target" size={12} /> Change topics</button>
+            <div style={{ position: "relative" }}>
+              <button
+                onClick={() => setMoreTeamOptionsOpen(o => !o)}
+                aria-expanded={moreTeamOptionsOpen}
+                style={{ background: moreTeamOptionsOpen ? "#F3F4F6" : "none", border: "2px solid #D1D5DB", borderRadius: "20px", padding: "4px 16px", fontWeight: "700", fontSize: "12px", color: "#9CA3AF", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "5px" }}
+              >
+                <Icon name="options" size={12} /> More options
+              </button>
+              {moreTeamOptionsOpen && (
+                <>
+                  <div onClick={() => setMoreTeamOptionsOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 20 }} />
+                  <div style={{ position: "absolute", top: "calc(100% + 6px)", right: 0, background: "white", border: "2px solid #D1D5DB", borderRadius: "14px", boxShadow: "0 10px 30px rgba(0,0,0,0.15)", padding: "6px", display: "flex", flexDirection: "column", gap: "2px", zIndex: 21, minWidth: "220px", maxWidth: "calc(100vw - 24px)" }}>
+                    <button onClick={() => { setTeams(ts => ts.map(t => ({ ...t, score: 0 }))); setMoreTeamOptionsOpen(false); }} style={{ background: "none", border: "none", borderRadius: "8px", padding: "8px 10px", fontWeight: "700", fontSize: "13px", color: "#374151", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px", textAlign: "left", width: "100%" }} onMouseEnter={e => e.currentTarget.style.background = "#F3F4F6"} onMouseLeave={e => e.currentTarget.style.background = "none"}><Icon name="refresh" size={13} /> Reset all scores to 0</button>
+                    <button onClick={() => { resetTeamsToNormal(); setMoreTeamOptionsOpen(false); }} title="0 points, no mascots, original colors and names" style={{ background: "none", border: "none", borderRadius: "8px", padding: "8px 10px", fontWeight: "700", fontSize: "13px", color: "#374151", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px", textAlign: "left", width: "100%" }} onMouseEnter={e => e.currentTarget.style.background = "#F3F4F6"} onMouseLeave={e => e.currentTarget.style.background = "none"}><Icon name="refresh" size={13} /> Reset teams to normal</button>
+                    <button onClick={() => { setScreen("team-setup"); setMoreTeamOptionsOpen(false); }} style={{ background: "none", border: "none", borderRadius: "8px", padding: "8px 10px", fontWeight: "700", fontSize: "13px", color: "#374151", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px", textAlign: "left", width: "100%" }} onMouseEnter={e => e.currentTarget.style.background = "#F3F4F6"} onMouseLeave={e => e.currentTarget.style.background = "none"}><Icon name="gear" size={13} /> Edit teams & settings</button>
+                  </div>
+                </>
+              )}
+            </div>
         </div>
 
         {loadError && <div style={{ color: "red", fontWeight: "bold", textAlign: "center" }}>{loadError}</div>}
@@ -2307,9 +2377,9 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
         <div style={{ textAlign: "center" }}>
           <button
             onClick={playRandomGame}
-            disabled={loadingGame || randomSpinIndex !== null}
-            title="Not sure which game to pick? Let us choose for you."
-            style={{ background: `linear-gradient(135deg,${theme.cta[0]},${theme.cta[1]})`, color: "white", border: "none", borderRadius: "14px", padding: "12px 28px", fontSize: "15px", fontWeight: "800", cursor: (loadingGame || randomSpinIndex !== null) ? "not-allowed" : "pointer", opacity: (loadingGame || randomSpinIndex !== null) ? 0.6 : 1, fontFamily: theme.headingFont, boxShadow: `0 6px 20px ${hexToRgba(theme.cta[1], 0.35)}`, display: "inline-flex", alignItems: "center", gap: "6px" }}
+            disabled={loadingGame || randomSpinIndex !== null || filteredCount === 0}
+            title={filteredCount === 0 ? "No games match the current filters" : "Not sure which game to pick? Let us choose for you."}
+            style={{ background: `linear-gradient(135deg,${theme.cta[0]},${theme.cta[1]})`, color: "white", border: "none", borderRadius: "14px", padding: "12px 28px", fontSize: "15px", fontWeight: "800", cursor: (loadingGame || randomSpinIndex !== null || filteredCount === 0) ? "not-allowed" : "pointer", opacity: (loadingGame || randomSpinIndex !== null || filteredCount === 0) ? 0.6 : 1, fontFamily: theme.headingFont, boxShadow: `0 6px 20px ${hexToRgba(theme.cta[1], 0.35)}`, display: "inline-flex", alignItems: "center", gap: "6px" }}
           >
             <Icon name="dice" size={15} /> {randomSpinIndex !== null ? "Picking..." : "Surprise Me! (Random Game)"}
           </button>
@@ -2319,18 +2389,26 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
 
       {/* Games grouped by the job a teacher needs done (data/gameCategories.ts), each group with its
           help-level dial in a box beside the cards — wider than the 760px column above so that box
-          has room. */}
+          has room. The filter bar narrows both the cards below AND what Surprise Me! (above) picks
+          from — same filteredGameModes() call feeds both. */}
       <div style={{ maxWidth: "1120px", margin: "28px auto 0" }}>
+        <GameFilterBar
+          activeCategoryIds={categoryFilter}
+          onToggleCategory={toggleCategoryFilter} onClear={clearGameFilters}
+          visibleCount={filteredCount} totalCount={GAME_MODES.length}
+        />
         <GameSelectPanel
           theme={theme} loadingGame={loadingGame} randomSpinIndex={randomSpinIndex}
           onPick={g => startGame(g)}
+          activeCategoryIds={categoryFilter}
         />
       </div>
       <div style={{ height: "50px" }} />
       <FeedbackButton />
       <BrandBadge isPaid={isPaid} />
     </div>
-  );
+    );
+  }
 
   if (screen === "game" && selectedGame) {
     const selectedLevels = uniqueValues(selectedTopics.map(value => getTopicOption(value)?.level).filter((value): value is string => Boolean(value)));

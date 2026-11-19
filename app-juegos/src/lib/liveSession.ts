@@ -109,7 +109,12 @@ export type SpyPhase =
   | "lobby" | "peek" | "discuss" | "order-roll" | "speak" | "speak-2p"
   | "vote" | "spy-guess" | "guess-2p" | "reveal-2p" | "reveal" | "final";
 
-export type SpyRoleInfo = { role: "spy" | "crew"; prompt: string };
+// `topic` is the short crewmateTopic/spyTopic label (e.g. "Present Perfect (Travel)") — shown
+// alongside `prompt` on the player's own card during play, not just at reveal, so a team can
+// actually check their assigned topic against what the reveal later states instead of only
+// finding out after the fact (caught live: a student disputed the reveal's stated topic because
+// the card they'd been looking at the whole round never showed it in the first place).
+export type SpyRoleInfo = { role: "spy" | "crew"; topic: string; prompt: string };
 
 // Broadcast phone -> teacher's screen, only ever acted on during the "vote" phase. The teacher's
 // screen already shows every team's current pick live as votes come in (walking around tapping
@@ -278,6 +283,11 @@ export type HotSeatStatePayload = {
   // emptiness to decide whether IT needs to show the word and controls instead.
   describerDeviceIds: string[];
   currentWord: string;
+  // Bumped every time currentWord is redrawn (correct/skip/new turn) -- lets an incoming action
+  // broadcast be checked against "is this still the word the phone actually tapped for," instead
+  // of the old wall-clock debounce, which didn't know whether two taps from two different phones
+  // were for the same word or two different ones. See HotSeatGame.tsx's action handler.
+  wordSeq: number;
   timeLeft: number;
   turnSeconds: number;
   turnCorrect: number;
@@ -288,7 +298,9 @@ export type HotSeatStatePayload = {
 
 // Broadcast phone -> screen. deviceId is validated against describerDeviceIds — the only phones
 // ever allowed to act (see HotSeatGame.tsx); teamId travels alongside for scoring attribution.
-export type HotSeatActionPayload = { teamId: string | number; deviceId: string; action: "correct" | "skip" | "endTurn" };
+// wordSeq echoes back whichever HotSeatStatePayload.wordSeq this phone last saw -- a "correct"/
+// "skip" tap is only honoured if it still matches the screen's current word.
+export type HotSeatActionPayload = { teamId: string | number; deviceId: string; action: "correct" | "skip" | "endTurn"; wordSeq: number };
 
 function hotSeatChannelName(code: string): string {
   return `hotseat-${code}`;
@@ -467,7 +479,11 @@ export type OrderUpTicketInfo = {
   totalSeconds: number;
   secondsLeft: number;
   claimedBy?: string | number;
-  // Only meaningful once answerMode is "typing" — undefined in "spoken" the whole game through.
+  // Set once a phone submits its sentence for this ticket — undefined until then. Phone mode is
+  // typing-only (there used to be a "spoken" alternative — a phone claimed a ticket but the team
+  // showed/told the teacher in person, same as screen mode — removed as a pointless extra choice
+  // that just confused teachers: screen mode already covers in-person answers, so there was never
+  // a reason to pick it over typing once you're already using phones).
   submittedSentence?: string;
 };
 
@@ -478,9 +494,6 @@ export type OrderUpStatePayload = {
   sessionTimeLeft: number;
   scores: Record<string, number>;
   connectedTeamIds: (string | number)[];
-  // Whole-session choice (picked once alongside phone mode itself, like Hot Seat's teamStructure)
-  // — never varies per team or per ticket.
-  answerMode: "spoken" | "typing";
   // Mirrors the screen's own judging?.ticketId ?? null — lets a phone tell "still mine to edit"
   // from "the teacher is looking at this right now," so a typed answer can't change out from under
   // an in-progress judgment.
@@ -657,9 +670,9 @@ export type BountyBoardRosterEntry = { id: string | number; name: string; color:
 
 export type BountyBoardPhase = "lobby" | "playing" | "final";
 
-// One team's status against the CURRENT round's shared prompt. `text` is the typing-mode draft/
-// submission (unused in spoken mode until a Wrong judgment fills it in from what the teacher typed
-// in by hand — see BountyBoardGame.tsx). `resolved` covers BOTH ways a team's round obligation gets
+// One team's status against the CURRENT round's shared prompt. `text` is the phone-typed draft/
+// submission in phone mode; in screen mode it's whatever the teacher transcribed by hand instead
+// (see BountyBoardGame.tsx's PostToBoardPrompt). `resolved` covers BOTH ways a team's round obligation gets
 // satisfied: answered correctly immediately, or the bounty it spawned was eventually solved by
 // someone else — a round only advances once every entry reads resolved.
 export type BountyRoundEntry = {
@@ -682,8 +695,9 @@ export type Bounty = {
   excludedTeamId: string | number;   // most recent team to fail this — cannot reclaim until someone
                                       // else takes it over (then THAT team becomes excluded instead).
   claimedBy?: string | number;       // undefined = open for claiming.
-  // Typing-mode only — the claiming team's current fix draft/submission, same role as Order Up's
-  // Ticket.submittedSentence. Unused (stays undefined) the whole game through in spoken mode.
+  // Phone mode only — the claiming team's current fix draft/submission, same role as Order Up's
+  // Ticket.submittedSentence. In screen mode this stays undefined; the teacher's transcription goes
+  // straight onto `wrongText`/the fix text shown via PostToBoardPrompt instead.
   fixText?: string;
   resolved: boolean;
 };
@@ -695,7 +709,6 @@ export type BountyBoardStatePayload = {
   roundNumber: number;
   totalRounds: number;
   promptText: string;
-  answerMode: "spoken" | "typing";
   roundEntries: BountyRoundEntry[];
   bounties: Bounty[];
   scores: Record<string, number>;
@@ -769,24 +782,27 @@ export function openClassSessionChannel(code: string): RealtimeChannel {
 // --- Rocket Fuel ---
 //
 // Individual people, not one phone per team (same idea as Hot Seat/Word Relay) — every connected
-// phone on the CURRENTLY ACTIVE team gets its own prompt and works it independently and privately,
-// instead of one person speaking in front of the room while everyone else just watches (teacher
-// feedback: some students do much better given a quiet, untimed-per-item way to answer, instead of
-// needing to be the one talking). Each connected phone runs its OWN clock, not a team-wide pool —
-// teacher feedback on an earlier version that pooled bonus time across the whole team: it let one
-// fast/accurate student's bonus benefit teammates who hadn't done anything, and a slow typer on an
-// otherwise-fast team got cut off early through no fault of their own. A device's clock starts at
-// TURN_SECONDS the moment it's first dealt a prompt (a late joiner gets a full one, not whatever's
-// left of someone else's), and a submission (right or wrong; see below) hands back a random time
-// bonus to THAT device's own clock the moment it's SENT, rewarding steady work over accuracy. A
-// device that runs out stops getting new prompts; the team's turn as a whole ends once every
-// connected device has run out, or the teacher ends it early — see RocketFuelGame.tsx.
+// phone on EVERY team gets its own prompt and works it independently and privately, all at once,
+// instead of one team going at a time while every other team's phones sit idle. (That's exactly
+// what the first version of this did — teams took turns, one at a time — and teacher feedback
+// playing it live was immediate: the other teams had nothing going on for them and just sat there.
+// All-teams-at-once is a deliberate fix for that, not the original design.) Each connected phone
+// runs its OWN clock, not a team-wide pool and not a shared game-wide pool — teacher feedback on an
+// earlier version that pooled bonus time across a whole team: it let one fast/accurate student's
+// bonus benefit teammates who hadn't done anything, and a slow typer on an otherwise-fast team got
+// cut off early through no fault of their own. A device's clock starts at TURN_SECONDS the moment
+// it's first dealt a prompt (a late joiner gets a full one, not whatever's left of someone else's),
+// and a submission (right or wrong; see below) hands back a random time bonus to THAT device's own
+// clock the moment it's SENT, rewarding steady work over accuracy. A device that runs out stops
+// getting new prompts; the round as a whole ends once every connected device on every team has run
+// out, or the teacher ends it early for everyone at once — see RocketFuelGame.tsx.
 //
-// Unlike Hot Seat/Relay, judging never happens live here: every submission just queues up, and the
-// teacher works through a small review (Correct/Wrong per sentence) on the existing team-end
-// screen once the turn's over — see RocketFuelGame.tsx's reviewQueue/judgeSubmission. There's no
-// live "correct" moment on a phone to react to (fuel is a secret until launch, same as always),
-// which is exactly why the time bonus triggers on SEND, not on a judgment that hasn't happened yet.
+// Unlike Hot Seat/Relay, judging never happens live here: every submission from every team just
+// queues into one shared pool, and the teacher works through a small review (Correct/Wrong per
+// sentence, labeled by team) on the existing team-end screen once the round's over — see
+// RocketFuelGame.tsx's reviewQueue/judgeSubmission. There's no live "correct" moment on a phone to
+// react to (fuel is a secret until launch, same as always), which is exactly why the time bonus
+// triggers on SEND, not on a judgment that hasn't happened yet.
 export type RocketFuelRosterEntry = { id: string | number; name: string; color: TeamColor; mascot?: string | null };
 
 export type RocketFuelPhase = "lobby" | "turn" | "final";
@@ -794,10 +810,9 @@ export type RocketFuelPhase = "lobby" | "turn" | "final";
 export type RocketFuelStatePayload = {
   phase: RocketFuelPhase;
   roster: RocketFuelRosterEntry[];
-  activeTeamId: string | number | null;
-  // This device's own currently-assigned prompt — a different one per connected phone on the
-  // active team, dealt out independently (see RocketFuelGame.tsx's promptsByDevice). Absent for any
-  // device not currently working a prompt (wrong team, between turns, turn just ended and is being
+  // This device's own currently-assigned prompt — a different one per connected phone, on every
+  // team at once, dealt out independently (see RocketFuelGame.tsx's promptsByDevice). Absent for
+  // any device not currently working a prompt (between rounds, round just ended and is being
   // reviewed, this phone hasn't been dealt one yet, or its own clock has run out).
   promptByDevice: Record<string, { word?: string; question: string }>;
   // This device's own remaining seconds — see the header comment above. Absent until the device is

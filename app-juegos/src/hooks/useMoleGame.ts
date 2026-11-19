@@ -16,10 +16,14 @@ export type Difficulty = "easy" | "medium" | "hard";
 export const DIFFICULTY_OPTIONS: Difficulty[] = ["easy", "medium", "hard"];
 // Difficulty only changes how long each mole stays up before ducking — the 90s turn length never
 // changes. Each mode still ramps faster as the clock runs down (t>60/t>30/t>10/else).
+// All three tiers raised ~15% (2026-11), direct teacher feedback that even medium — the default,
+// most players never touch the difficulty picker — felt too fast to read the prompt, find the
+// right mole among up to 4, and click before it ducked, especially on a laptop trackpad rather
+// than a touchscreen. Kept the same relative ramp shape and gap between tiers, just slower overall.
 export const DUCK_MS: Record<Difficulty, [number, number, number, number]> = {
-  easy: [5800, 5000, 4400, 3800],
-  medium: [4900, 4200, 3600, 3000],
-  hard: [4500, 3800, 3100, 2600],
+  easy: [6700, 5800, 5100, 4400],
+  medium: [5600, 4800, 4100, 3500],
+  hard: [5200, 4400, 3600, 3000],
 };
 
 export type ParsedMCQ = { prompt: string; choices: string[]; correctIdx: number };

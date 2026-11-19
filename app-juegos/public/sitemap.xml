@@ -301,6 +301,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://www.playclasscade.com/learn/extreme_adjectives</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://www.playclasscade.com/learn/describing_locations</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>

@@ -959,6 +959,20 @@ export const LESSON_PLANS: Record<string, RoundOut> = {
     ],
   },
 
+  extreme_adjectives: {
+    kind: "matching",
+    pairs: [
+      { term: "freezing", definition: "Extremely cold (the extreme form of 'cold')" },
+      { term: "exhausted", definition: "Extremely tired (the extreme form of 'tired')" },
+      { term: "starving", definition: "Extremely hungry (the extreme form of 'hungry')" },
+      { term: "huge", definition: "Extremely big (the extreme form of 'big')" },
+      { term: "furious", definition: "Extremely angry (the extreme form of 'angry')" },
+      { term: "delicious", definition: "Extremely tasty (the extreme form of 'tasty')" },
+      { term: "spotless", definition: "Completely clean (the extreme form of 'clean')" },
+      { term: "ancient", definition: "Extremely old (the extreme form of 'old')" },
+    ],
+  },
+
   describing_locations: {
     kind: "matching",
     pairs: [

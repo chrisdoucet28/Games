@@ -123,6 +123,19 @@ export function gameModalityIcon(gameId: string): IconName {
   return MODALITY_ICON[GAME_MODALITY[gameId] ?? "speak"];
 }
 
+// Short, chip-sized labels for the game-select filter bar — category.need is a full "I need:"
+// sentence (by design, for the info box next to each block) and is too long for a toggle chip.
+export const CATEGORY_SHORT_LABELS: Record<string, string> = {
+  understand: "Understand the topic",
+  grammar: "Grammar practice",
+  review: "Review",
+  vocabulary: "Vocabulary",
+  handicap: "Sentence handicap",
+  writing: "Writing",
+  no_help: "Open speaking",
+  more: "More games",
+};
+
 export type GameBlock = { category: GameCategory; games: GameMode[] };
 
 // The blocks as the page renders them. A game in GAME_MODES that no category lists is not dropped:
@@ -160,7 +173,15 @@ export function getGameBlocks(): GameBlock[] {
   return blocks;
 }
 
-// Every game in the order the cards appear on the page — what "Surprise Me!" steps through.
-export function orderedGameModes(): GameMode[] {
-  return getGameBlocks().flatMap(b => b.games);
+// The game-select filter bar's "I need…" toggle row. An empty set means "no restriction" — every
+// game shows, same as before this existed — which is also what lets "Clear filters" just mean
+// "select nothing."
+export function filterGameBlocks(blocks: GameBlock[], categoryIds: ReadonlySet<string>): GameBlock[] {
+  return categoryIds.size === 0 ? blocks : blocks.filter(b => categoryIds.has(b.category.id));
+}
+
+// Every game in the on-screen order, narrowed by the filter bar's current selection — what
+// "Surprise Me!" steps through and picks from.
+export function filteredGameModes(categoryIds: ReadonlySet<string>): GameMode[] {
+  return filterGameBlocks(getGameBlocks(), categoryIds).flatMap(b => b.games);
 }

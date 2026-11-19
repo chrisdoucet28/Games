@@ -282,9 +282,11 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
   // dealPromptTo below. Cleared for a team's devices the moment its turn ends (endTurn), so a
   // phone's view naturally falls back to "being reviewed" instead of a stale prompt.
   const [promptsByDevice, setPromptsByDevice] = useState<Record<string, QuestionData>>({});
-  // One turn's worth of phone submissions, judged on the team-end screen — see reviewQueue.
-  // Cleared at the start of every team's turn (startTeamTurn), same lifetime as turnFuel.
-  const [submissions, setSubmissions] = useState<{ id: number; deviceId: string; text: string; word?: string }[]>([]);
+  // One round's worth of phone submissions from EVERY team, judged together on the team-end
+  // screen — see reviewQueue. teamId records which team each one came from (there's no single
+  // "active team" anymore — see liveSession.ts's Rocket Fuel section — so a submission has to
+  // carry its own). Cleared at the start of every round (startTeamTurn).
+  const [submissions, setSubmissions] = useState<{ id: number; deviceId: string; teamId: string | number; text: string; word?: string }[]>([]);
   // Phone mode only — each connected device's own remaining seconds, NOT a shared team pool (see
   // liveSession.ts's Rocket Fuel section for why that changed). Starts at TURN_SECONDS the moment
   // a device is first dealt a prompt (dealPromptTo), ticks down once a second while it's that
@@ -421,8 +423,11 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Clears every team's devices, not just the active one — harmless in screen mode (no phones are
+  // ever dealt prompts there, so there's nothing to clear), and correct in phone mode, where every
+  // team is live at once and the round has to end for everyone together.
   const endTurn = () => {
-    if (activeTeam) clearPromptsForTeam(activeTeam.id);
+    teams.forEach(t => clearPromptsForTeam(t.id));
     setPhase("team-end");
   };
 
@@ -443,10 +448,11 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
   // below) so one student's bonus can't extend everyone else's time.
   const { timeLeft, addTime } = useTurnTimer(TURN_SECONDS, phase === "team-turn" && inputMode === "screen", endTurn, teamIdx, showAnswer || reading);
 
-  // Phone mode's per-device clock — ticks every device with a running clock down once a second; a
-  // device that reaches 0 loses its current prompt (its own phone shows "time's up for you," not
-  // the rest of the team), and the whole team's turn ends once every device that's been dealt a
-  // clock has run out (or the teacher ends it early via the same End Turn button screen mode has).
+  // Phone mode's per-device clock — ticks every device with a running clock down once a second,
+  // across EVERY team at once; a device that reaches 0 loses its current prompt (its own phone
+  // shows "time's up for you," not the rest of its team), and the round as a whole ends once
+  // every device on every team that's been dealt a clock has run out (or the teacher ends it
+  // early for everyone via the same End Turn/Round button screen mode has).
   useEffect(() => {
     if (phase !== "team-turn" || inputMode !== "phone") return;
     const interval = setInterval(() => {
@@ -478,20 +484,23 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, inputMode]);
 
+  // idx only matters in screen mode (which team's turn it is). Phone mode always deals to every
+  // connected device on every team at once, so idx is unused there — call sites still pass one
+  // (startTeamTurn(0)) just to keep a single signature between the two modes.
   const startTeamTurn = (idx: number) => {
     setTeamIdx(idx);
     turnFuelRef.current = 0;
     setTurnFuel(0);
-    fuelRef.current[teams[idx].id] = fuelRef.current[teams[idx].id] ?? 0;
+    teams.forEach(t => { fuelRef.current[t.id] = fuelRef.current[t.id] ?? 0; });
     setSubmissions([]);
     if (inputMode === "phone") {
-      // Every phone already connected to this team gets its own first prompt right away — a
-      // phone that connects mid-turn is dealt one the instant it shows up instead (see the
+      // Every phone already connected, on EVERY team, gets its own first prompt right away — a
+      // phone that connects mid-round is dealt one the instant it shows up instead (see the
       // channel effect's presence-sync handler below). The screen itself never draws its own
       // currentQ here — there's nothing for it to show that would mean anything (each phone is
       // working a different prompt), so phase === "team-turn"'s render branches on inputMode
       // instead of ever touching currentQ in this mode.
-      (connectedByTeamRef.current[String(teams[idx].id)] ?? []).forEach(dealPromptTo);
+      Object.values(connectedByTeamRef.current).flat().forEach(dealPromptTo);
     } else {
       drawPrompt();
     }
@@ -527,17 +536,20 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
 
   // Phone mode's judging — the submission was already sent and its time bonus already applied the
   // instant it arrived (see the channel effect's action handler), so this only ever awards fuel
-  // and clears the item off the review queue; nothing else to replay.
+  // and clears the item off the review queue; nothing else to replay. Every team is live at once
+  // now, so the submission carries its own teamId rather than crediting whatever `activeTeam`
+  // happens to be — there isn't a single one anymore.
   const judgeSubmission = (id: number, correct: boolean) => {
-    if (correct) {
-      fuelRef.current[activeTeam.id] = (fuelRef.current[activeTeam.id] ?? 0) + 1;
-      turnFuelRef.current += 1;
-      setTurnFuel(turnFuelRef.current);
+    const teamId = submissions.find(s => s.id === id)?.teamId;
+    if (correct && teamId !== undefined) {
+      fuelRef.current[teamId] = (fuelRef.current[teamId] ?? 0) + 1;
       if (teams.length === 1) roundFuelRef.current[round] = (roundFuelRef.current[round] ?? 0) + 1;
     }
     setSubmissions(prev => prev.filter(s => s.id !== id));
   };
 
+  // Screen mode only — teams still take turns on the one shared screen (see the module comment
+  // in liveSession.ts for why phone mode doesn't).
   const nextTeam = () => {
     const next = teamIdx + 1;
     if (next >= teams.length) {
@@ -547,6 +559,14 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
       return;
     }
     startTeamTurn(next);
+  };
+
+  // Phone mode's equivalent of nextTeam — every team already played this round together, so the
+  // only thing left to do is move on to the next round (or the launchpad once rounds are done).
+  const nextRound = () => {
+    if (round >= TOTAL_ROUNDS) { setPhase("launchpad"); return; }
+    setRound(r => r + 1);
+    startTeamTurn(0);
   };
 
   useEffect(() => {
@@ -580,15 +600,13 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase]);
 
-  // Refs the channel effect's own long-lived callbacks read instead of closing over phase/teamIdx
+  // A ref the channel effect's own long-lived callbacks read instead of closing over phase
   // directly — those callbacks are only recreated when [inputMode, sessionCode, teams] changes,
-  // so without this they'd keep seeing whatever phase/team was current the moment the channel was
+  // so without this they'd keep seeing whatever phase was current the moment the channel was
   // opened, not whatever it actually is by the time a presence sync or action broadcast arrives.
   const phaseRef = useRef(phase);
-  const teamIdxRef = useRef(teamIdx);
   useEffect(() => {
     phaseRef.current = phase;
-    teamIdxRef.current = teamIdx;
   });
 
   // Opens/closes the realtime channel only when phone mode itself is toggled on/off — screen-
@@ -604,8 +622,6 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
       const mappedPhase: RocketFuelPhase = rawPhase === "intro" ? "lobby"
         : rawPhase === "team-turn" || rawPhase === "team-end" ? "turn"
         : "final";
-      const inTurn = rawPhase === "team-turn" || rawPhase === "team-end";
-      const liveActiveTeam = teams[teamIdxRef.current];
       const promptByDevice: Record<string, { word?: string; question: string }> = {};
       Object.entries(promptsByDeviceRef.current).forEach(([deviceId, q]) => {
         promptByDevice[deviceId] = { word: q.word, question: q.question ?? "" };
@@ -613,7 +629,6 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
       const payload: RocketFuelStatePayload = {
         phase: mappedPhase,
         roster: teams.map(t => ({ id: t.id, name: t.name, color: t.color, mascot: t.mascot })),
-        activeTeamId: inTurn ? (liveActiveTeam?.id ?? null) : null,
         promptByDevice,
         timeLeftByDevice: { ...deviceTimeLeftRef.current },
         lastBonusByDevice: { ...lastBonusByDeviceRef.current },
@@ -640,11 +655,11 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
       connectedByTeamRef.current = byTeam;
       setConnectedTeamIds(ids);
       setConnectedByTeam(byTeam);
-      // A late-joiner on the CURRENTLY ACTIVE team, mid-turn, with no prompt yet — deal it one
-      // right away rather than leaving it stuck on the "waiting" view for the rest of the turn.
-      const liveActiveTeam = teams[teamIdxRef.current];
-      if (phaseRef.current === "team-turn" && liveActiveTeam) {
-        (byTeam[String(liveActiveTeam.id)] ?? []).forEach(deviceId => {
+      // A late-joiner on ANY team, mid-round, with no prompt yet — deal it one right away rather
+      // than leaving it stuck on the "waiting" view for the rest of the round. Every team is live
+      // at once now, so this isn't scoped to a single active team.
+      if (phaseRef.current === "team-turn") {
+        Object.values(byTeam).flat().forEach(deviceId => {
           if (!previouslyKnown.has(deviceId) && !promptsByDeviceRef.current[deviceId]) dealPromptTo(deviceId);
         });
       }
@@ -652,18 +667,18 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
     });
 
     // The only place phone input touches game logic — there's no live judging to validate against
-    // (see liveSession.ts), just "accept this submission if it's really this device's turn to
-    // answer," then deal it a fresh prompt and hand back its time bonus immediately.
+    // (see liveSession.ts), just "accept this submission if this device genuinely has a live
+    // prompt assigned," then deal it a fresh prompt and hand back its time bonus immediately.
+    // Every team is live at once, so there's no single active team to match the action against.
     channel.on("broadcast", { event: "action" }, ({ payload }) => {
       const action = payload as RocketFuelActionPayload;
-      const liveActiveTeam = teams[teamIdxRef.current];
-      if (phaseRef.current !== "team-turn" || !liveActiveTeam || action.teamId !== liveActiveTeam.id) return;
+      if (phaseRef.current !== "team-turn") return;
       if (!promptsByDeviceRef.current[action.deviceId]) return;
       const text = action.text.trim();
       if (!text) return;
       const prompt = promptsByDeviceRef.current[action.deviceId];
       submissionIdRef.current += 1;
-      setSubmissions(prev => [...prev, { id: submissionIdRef.current, deviceId: action.deviceId, text, word: prompt.word }]);
+      setSubmissions(prev => [...prev, { id: submissionIdRef.current, deviceId: action.deviceId, teamId: action.teamId, text, word: prompt.word }]);
       dealPromptTo(action.deviceId);
       // See TIME_BONUS_OPTIONS — the reward is time, never points. Goes to THIS device's own
       // clock only, never a shared pool (see liveSession.ts's Rocket Fuel section for why) — a
@@ -793,7 +808,7 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
                 }}><Icon name="phone" size={14} /> Play on Phones</button>
               </div>
               <div style={{ fontSize: "11px", color: "#C7D2FE99", marginTop: "8px", maxWidth: "420px", margin: "8px auto 0" }}>
-                On Phones, every connected phone on the team up at mission control works its own prompt privately on its own clock — a bonus only ever extends that one phone's own time, never the whole team's. You review and judge everyone's sentences once their turn ends.
+                On Phones, every connected phone on EVERY team works its own prompt privately, all at once, on its own clock — a bonus only ever extends that one phone's own time, never anyone else's. You review and judge every sentence once the round ends.
               </div>
             </div>
           )}
@@ -852,12 +867,17 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
         </div>
       )}
       <div style={{ position: "relative", zIndex: 1 }}>
-        <div style={{ background: activeTeam.color.bg, border: "3px solid #1A1A2E", borderRadius: "14px", padding: "10px 16px", marginBottom: "14px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px", boxShadow: "4px 4px 0 #1A1A2E" }}>
-          <span style={{ color: "white", fontWeight: "900", fontSize: "16px", textShadow: "0 1px 3px rgba(0,0,0,0.4)", display: "inline-flex", alignItems: "center", gap: "6px" }}><Icon name="rocket" size={15} /> {activeTeam.name}'s turn — {round > TOTAL_ROUNDS ? "Bonus Round" : `Round ${round}/${TOTAL_ROUNDS}`}, Team {teamIdx + 1} of {teams.length}</span>
+        <div style={{ background: inputMode === "phone" ? "#312E81" : activeTeam.color.bg, border: "3px solid #1A1A2E", borderRadius: "14px", padding: "10px 16px", marginBottom: "14px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px", boxShadow: "4px 4px 0 #1A1A2E" }}>
+          <span style={{ color: "white", fontWeight: "900", fontSize: "16px", textShadow: "0 1px 3px rgba(0,0,0,0.4)", display: "inline-flex", alignItems: "center", gap: "6px" }}>
+            <Icon name="rocket" size={15} />
+            {inputMode === "phone"
+              ? <>Every team is fuelling up — {round > TOTAL_ROUNDS ? "Bonus Round" : `Round ${round}/${TOTAL_ROUNDS}`}</>
+              : <>{activeTeam.name}'s turn — {round > TOTAL_ROUNDS ? "Bonus Round" : `Round ${round}/${TOTAL_ROUNDS}`}, Team {teamIdx + 1} of {teams.length}</>}
+          </span>
           {phase === "team-turn" && (
             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
               {/* Screen mode only — there's no single clock left to show in phone mode, every
-                  device runs its own (see the mission-control placeholder below for those). */}
+                  device runs its own (see the mission-control grid below for those). */}
               {inputMode === "screen" && (
                 /* Swapped in for READING_SECONDS on every new prompt — see the `reading` sub-timer
                    above — so the room sees why the race clock hasn't started moving yet, instead
@@ -870,66 +890,77 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
                   <TurnTimerBar timeLeft={timeLeft} totalSeconds={TURN_SECONDS} />
                 )
               )}
-              <button onClick={endTurn} className="rf-btn" style={{ display: "inline-flex", alignItems: "center", gap: "5px", background: "rgba(0,0,0,0.25)", color: "white", border: "1.5px solid rgba(255,255,255,0.4)", borderRadius: "10px", padding: "6px 14px", fontSize: "12px", fontWeight: "800", cursor: "pointer", whiteSpace: "nowrap", transition: "transform 0.15s ease" }}><Icon name="stop" size={11} /> End Turn</button>
+              <button onClick={endTurn} className="rf-btn" style={{ display: "inline-flex", alignItems: "center", gap: "5px", background: "rgba(0,0,0,0.25)", color: "white", border: "1.5px solid rgba(255,255,255,0.4)", borderRadius: "10px", padding: "6px 14px", fontSize: "12px", fontWeight: "800", cursor: "pointer", whiteSpace: "nowrap", transition: "transform 0.15s ease" }}><Icon name="stop" size={11} /> {inputMode === "phone" ? "End Round" : "End Turn"}</button>
             </div>
           )}
         </div>
 
         {phase === "team-turn" && (
           <>
-            {/* No number shown here on purpose — a live count would tip off every other team.
-                A correct answer just makes the rocket visibly gulp down a bit of fuel. */}
-            <div style={{ textAlign: "center", marginBottom: "10px", position: "relative", height: "70px" }}>
-              <div key={`shake-${turnFuel}`} style={{ display: "inline-flex", alignItems: "flex-end", gap: "4px", filter: `drop-shadow(0 0 10px ${activeTeam.color.bg})`, animation: turnFuel > 0 ? "rfMiniShake 0.45s ease-in-out" : "none" }}>
-                <MascotSprite mascot={activeTeam.mascot} fallback={null} size={26} />
-                <Icon name="rocket" size={44} />
+            {/* Screen mode only — the gulp animation is tied to turnFuel, which only ever moves
+                for the one team whose turn screen mode runs live (see judge()). Phone mode's fuel
+                is only known once the teacher judges the review queue afterward, so there's never
+                a live moment to animate here; the all-teams grid below replaces it. */}
+            {inputMode === "screen" && (
+              // No number shown here on purpose — a live count would tip off every other team.
+              // A correct answer just makes the rocket visibly gulp down a bit of fuel.
+              <div style={{ textAlign: "center", marginBottom: "10px", position: "relative", height: "70px" }}>
+                <div key={`shake-${turnFuel}`} style={{ display: "inline-flex", alignItems: "flex-end", gap: "4px", filter: `drop-shadow(0 0 10px ${activeTeam.color.bg})`, animation: turnFuel > 0 ? "rfMiniShake 0.45s ease-in-out" : "none" }}>
+                  <MascotSprite mascot={activeTeam.mascot} fallback={null} size={26} />
+                  <Icon name="rocket" size={44} />
+                </div>
+                {turnFuel > 0 && (
+                  <div key={`burst-${turnFuel}`} style={{ position: "absolute", left: "50%", bottom: "0", animation: "rfFuelRise 0.6s ease-out forwards" }}><Icon name="fuel" size={20} color="#FDBA74" /></div>
+                )}
               </div>
-              {turnFuel > 0 && (
-                <div key={`burst-${turnFuel}`} style={{ position: "absolute", left: "50%", bottom: "0", animation: "rfFuelRise 0.6s ease-out forwards" }}><Icon name="fuel" size={20} color="#FDBA74" /></div>
-              )}
-            </div>
+            )}
 
             {inputMode === "phone" ? (
-              // Nothing for the screen to show that would mean anything — each connected phone is
-              // working a DIFFERENT prompt in parallel, there's no single "the current word" the
-              // way screen mode has one. Just confirms things are moving, and fills the space.
-              <div style={{ maxWidth: "460px", margin: "0 auto", background: "#1E1B4B", border: "3px dashed #4338CA", borderRadius: "22px", padding: "28px 18px", textAlign: "center" }}>
-                <div style={{ fontWeight: "900", fontSize: "17px", color: "#A5B4FC", marginBottom: "6px" }}>
-                  {activeTeam.name}'s phones are at mission control!
-                </div>
-                <div style={{ color: "#C7D2FE99", fontSize: "13px", fontWeight: "600", marginBottom: "16px" }}>
-                  Everyone's answering their own prompt privately on their own phone — you'll review every sentence once this turn ends.
-                </div>
-                <div style={{ display: "flex", justifyContent: "center", gap: "36px" }}>
-                  <div>
-                    <div style={{ fontSize: "26px", fontWeight: "900", color: "#FDE047" }}>{(connectedByTeam[String(activeTeam.id)] ?? []).length}</div>
-                    <div style={{ fontSize: "11px", fontWeight: "800", color: "#A5B4FC99", textTransform: "uppercase", letterSpacing: "0.04em" }}>
-                      phone{(connectedByTeam[String(activeTeam.id)] ?? []).length === 1 ? "" : "s"} connected
+              // Every team is live at once now (see liveSession.ts's Rocket Fuel section) — one
+              // card per team instead of a single placeholder for whichever team used to be
+              // "active," so nobody's phones sit idle waiting to be let in.
+              <div style={{ display: "grid", gridTemplateColumns: teamsGridCols(teams.length), gap: "10px", maxWidth: "720px", margin: "0 auto" }}>
+                {teams.map(t => {
+                  const deviceIds = connectedByTeam[String(t.id)] ?? [];
+                  const sentCount = submissions.filter(s => s.teamId === t.id).length;
+                  return (
+                    <div key={t.id} style={{ background: "#1E1B4B", border: `3px solid ${t.color.bg}`, borderRadius: "18px", padding: "16px 12px", textAlign: "center" }}>
+                      <div style={{ fontWeight: "900", fontSize: "14px", color: "white", marginBottom: "10px", display: "flex", alignItems: "center", justifyContent: "center", gap: "5px" }}>
+                        <TeamIcon team={t} color="white" /> {t.name}
+                      </div>
+                      <div style={{ display: "flex", justifyContent: "center", gap: "20px", marginBottom: deviceIds.length > 0 ? "12px" : 0 }}>
+                        <div>
+                          <div style={{ fontSize: "22px", fontWeight: "900", color: "#FDE047" }}>{deviceIds.length}</div>
+                          <div style={{ fontSize: "10px", fontWeight: "800", color: "#A5B4FC99", textTransform: "uppercase", letterSpacing: "0.03em" }}>
+                            phone{deviceIds.length === 1 ? "" : "s"}
+                          </div>
+                        </div>
+                        <div>
+                          <div style={{ fontSize: "22px", fontWeight: "900", color: "#5EEAD4" }}>{sentCount}</div>
+                          <div style={{ fontSize: "10px", fontWeight: "800", color: "#A5B4FC99", textTransform: "uppercase", letterSpacing: "0.03em" }}>
+                            sent
+                          </div>
+                        </div>
+                      </div>
+                      {/* Each phone runs its own clock now (see liveSession.ts's Rocket Fuel
+                          section) — no student names to label these with, so just numbered in
+                          connection order; good enough for a quick "who's running low" glance. */}
+                      {deviceIds.length > 0 && (
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: "5px", justifyContent: "center" }}>
+                          {deviceIds.map((deviceId, i) => {
+                            const dt = deviceTimeLeft[deviceId];
+                            const color = dt === undefined ? "#94A3B8" : dt <= 0 ? "#6B7280" : dt > TURN_SECONDS * 0.5 ? "#4ADE80" : dt > TURN_SECONDS * 0.25 ? "#FBBF24" : "#F87171";
+                            return (
+                              <span key={deviceId} style={{ background: "rgba(0,0,0,0.3)", border: `1.5px solid ${color}`, color, borderRadius: "7px", padding: "3px 8px", fontSize: "11px", fontWeight: "800" }}>
+                                {i + 1}: {dt === undefined ? "—" : `${dt}s`}
+                              </span>
+                            );
+                          })}
+                        </div>
+                      )}
                     </div>
-                  </div>
-                  <div>
-                    <div style={{ fontSize: "26px", fontWeight: "900", color: "#5EEAD4" }}>{submissions.length}</div>
-                    <div style={{ fontSize: "11px", fontWeight: "800", color: "#A5B4FC99", textTransform: "uppercase", letterSpacing: "0.04em" }}>
-                      sentence{submissions.length === 1 ? "" : "s"} sent in
-                    </div>
-                  </div>
-                </div>
-                {/* Each phone runs its own clock now (see liveSession.ts's Rocket Fuel section) —
-                    no student names to label these with, so just numbered in connection order;
-                    good enough for a quick "who's running low" glance. */}
-                {(connectedByTeam[String(activeTeam.id)] ?? []).length > 0 && (
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", justifyContent: "center", marginTop: "18px" }}>
-                    {(connectedByTeam[String(activeTeam.id)] ?? []).map((deviceId, i) => {
-                      const t = deviceTimeLeft[deviceId];
-                      const color = t === undefined ? "#94A3B8" : t <= 0 ? "#6B7280" : t > TURN_SECONDS * 0.5 ? "#4ADE80" : t > TURN_SECONDS * 0.25 ? "#FBBF24" : "#F87171";
-                      return (
-                        <span key={deviceId} style={{ background: "rgba(0,0,0,0.3)", border: `1.5px solid ${color}`, color, borderRadius: "8px", padding: "4px 10px", fontSize: "12px", fontWeight: "800" }}>
-                          Phone {i + 1}: {t === undefined ? "—" : `${t}s`}
-                        </span>
-                      );
-                    })}
-                  </div>
-                )}
+                  );
+                })}
               </div>
             ) : (
               <div style={{ maxWidth: "520px", margin: "0 auto" }}>
@@ -953,46 +984,62 @@ export function RocketFuelGame({ questions, teams, onUpdateScore, onEnd, forceFi
           <div style={{ textAlign: "center" }}>
             <div style={{ background: "#312E81", border: "3px solid #1A1A2E", boxShadow: "4px 4px 0 #1A1A2E", borderRadius: "16px", padding: "20px", marginBottom: "16px" }}>
               <div style={{ marginBottom: "6px" }}><Icon name="rocket" size={34} /></div>
-              <div style={{ fontWeight: "900", fontSize: "20px", color: "white", marginBottom: "8px" }}>{activeTeam.name}'s tank is sealed!</div>
+              <div style={{ fontWeight: "900", fontSize: "20px", color: "white", marginBottom: "8px" }}>
+                {inputMode === "phone" ? "Every tank is sealed!" : `${activeTeam.name}'s tank is sealed!`}
+              </div>
               <div style={{ fontSize: "14px", color: "#C7D2FE" }}>
-                {submissions.length > 0 ? "Review what they sent in from their phones:" : "Nice work! Time for the next team."}
+                {submissions.length > 0
+                  ? "Review what they sent in from their phones:"
+                  : inputMode === "phone" ? "Nice work, everyone! On to the next round." : "Nice work! Time for the next team."}
               </div>
             </div>
 
-            {/* Phone mode only — every sentence that team's phones sent in this turn, judged here
-                since there's no live "correct" moment on a phone to react to (see
-                liveSession.ts's Rocket Fuel section). Next Team stays disabled until every item's
-                resolved, so a forgotten submission can never silently cost a team fuel it earned. */}
+            {/* Phone mode only — every sentence every team's phones sent in this round, judged
+                here since there's no live "correct" moment on a phone to react to (see
+                liveSession.ts's Rocket Fuel section). Each card names its own team now that
+                submissions come from every team at once, not just one. Next Round stays disabled
+                until every item's resolved, so a forgotten submission can never silently cost a
+                team fuel it earned. */}
             {submissions.length > 0 && (
               <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", justifyContent: "center", marginBottom: "18px", maxWidth: "700px", margin: "0 auto 18px" }}>
-                {submissions.map(s => (
-                  <div key={s.id} style={{ width: "230px", background: "linear-gradient(160deg,#1E1B4B,#0B0B2E)", border: "2px solid #4338CA", borderRadius: "14px", padding: "12px", textAlign: "left" }}>
-                    {s.word && (
-                      <div style={{ fontSize: "10px", fontWeight: "800", color: "#A5B4FC99", textTransform: "uppercase", marginBottom: "6px" }}>“{s.word}”</div>
-                    )}
-                    <div style={{ background: "rgba(0,0,0,0.3)", borderRadius: "8px", padding: "8px 10px", fontSize: "14px", fontWeight: "700", color: "#E0E7FF", marginBottom: "10px", lineHeight: 1.35 }}>
-                      {s.text}
+                {submissions.map(s => {
+                  const submTeam = teams.find(t => t.id === s.teamId);
+                  return (
+                    <div key={s.id} style={{ width: "230px", background: "linear-gradient(160deg,#1E1B4B,#0B0B2E)", border: `2px solid ${submTeam?.color.bg ?? "#4338CA"}`, borderRadius: "14px", padding: "12px", textAlign: "left" }}>
+                      {submTeam && (
+                        <div style={{ fontSize: "11px", fontWeight: "800", color: "white", display: "flex", alignItems: "center", gap: "4px", marginBottom: "8px" }}>
+                          <TeamIcon team={submTeam} color="white" size={13} /> {submTeam.name}
+                        </div>
+                      )}
+                      {s.word && (
+                        <div style={{ fontSize: "10px", fontWeight: "800", color: "#A5B4FC99", textTransform: "uppercase", marginBottom: "6px" }}>“{s.word}”</div>
+                      )}
+                      <div style={{ background: "rgba(0,0,0,0.3)", borderRadius: "8px", padding: "8px 10px", fontSize: "14px", fontWeight: "700", color: "#E0E7FF", marginBottom: "10px", lineHeight: 1.35 }}>
+                        {s.text}
+                      </div>
+                      <div style={{ display: "flex", gap: "6px", justifyContent: "center" }}>
+                        <button onClick={() => judgeSubmission(s.id, true)} className="rf-btn" style={{ display: "inline-flex", alignItems: "center", gap: "5px", background: "#22C55E", color: "white", border: "2px solid #1A1A2E", borderRadius: "10px", padding: "8px 12px", fontSize: "13px", fontWeight: "700", cursor: "pointer" }}><Icon name="check" size={13} /> Correct</button>
+                        <button onClick={() => judgeSubmission(s.id, false)} className="rf-btn" style={{ display: "inline-flex", alignItems: "center", gap: "5px", background: "#EF4444", color: "white", border: "2px solid #1A1A2E", borderRadius: "10px", padding: "8px 12px", fontSize: "13px", fontWeight: "700", cursor: "pointer" }}><Icon name="close" size={12} /> Wrong</button>
+                      </div>
                     </div>
-                    <div style={{ display: "flex", gap: "6px", justifyContent: "center" }}>
-                      <button onClick={() => judgeSubmission(s.id, true)} className="rf-btn" style={{ display: "inline-flex", alignItems: "center", gap: "5px", background: "#22C55E", color: "white", border: "2px solid #1A1A2E", borderRadius: "10px", padding: "8px 12px", fontSize: "13px", fontWeight: "700", cursor: "pointer" }}><Icon name="check" size={13} /> Correct</button>
-                      <button onClick={() => judgeSubmission(s.id, false)} className="rf-btn" style={{ display: "inline-flex", alignItems: "center", gap: "5px", background: "#EF4444", color: "white", border: "2px solid #1A1A2E", borderRadius: "10px", padding: "8px 12px", fontSize: "13px", fontWeight: "700", cursor: "pointer" }}><Icon name="close" size={12} /> Wrong</button>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
 
             <button
-              onClick={nextTeam} disabled={submissions.length > 0} className="rf-btn"
+              onClick={inputMode === "phone" ? nextRound : nextTeam} disabled={submissions.length > 0} className="rf-btn"
               style={{
                 display: "inline-flex", alignItems: "center", gap: "8px", border: "3px solid #1A1A2E", borderRadius: "14px", padding: "14px 36px", fontSize: "17px", fontWeight: "900",
                 background: submissions.length > 0 ? "#4B5563" : "#4338CA", color: "white",
                 cursor: submissions.length > 0 ? "not-allowed" : "pointer", boxShadow: "5px 5px 0 #1A1A2E",
               }}
             >
-              {teamIdx + 1 >= teams.length
+              {inputMode === "phone"
                 ? (round >= TOTAL_ROUNDS ? <><Icon name="rocket" size={18} /> Go to Launchpad</> : <><Icon name="next" size={18} /> Start Round {round + 1}</>)
-                : <><Icon name="next" size={18} /> Next Team's Turn</>}
+                : (teamIdx + 1 >= teams.length
+                  ? (round >= TOTAL_ROUNDS ? <><Icon name="rocket" size={18} /> Go to Launchpad</> : <><Icon name="next" size={18} /> Start Round {round + 1}</>)
+                  : <><Icon name="next" size={18} /> Next Team's Turn</>)}
             </button>
             {submissions.length > 0 && (
               <div style={{ fontSize: "11px", color: "#C7D2FE99", marginTop: "8px" }}>Review every answer above before moving on.</div>

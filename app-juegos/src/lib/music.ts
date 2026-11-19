@@ -29,7 +29,10 @@
 // replacing a track.
 const MEDIA_BASE = "https://es8h1nft4dvfmlmp.public.blob.vercel-storage.com";
 
-const MUSIC_FILES = {
+// Exported (alongside GAME_OVERRIDES/MUSIC_VOLUME/TENSION_VOLUME_SCALE below) so AdminMusicPanel.tsx
+// can read the real track list straight from this module instead of keeping its own copy that
+// could silently drift out of sync with what actually plays in-game.
+export const MUSIC_FILES = {
   ambient: `${MEDIA_BASE}/music/ambient.mp3`,
   gameplay: `${MEDIA_BASE}/music/gameplay.mp3`,
   tension: `${MEDIA_BASE}/music/tension.mp3`,
@@ -40,7 +43,7 @@ export type MusicContext = keyof typeof MUSIC_FILES;
 // Custom Suno tracks for one specific game's own gameplay/tension moments, in place of the shared
 // defaults above. A game with no entry here (or missing one of the two contexts) just falls
 // through to the shared track for that context — additive, never a replacement for the defaults.
-const GAME_OVERRIDES: Partial<Record<string, Partial<Record<MusicContext, string>>>> = {
+export const GAME_OVERRIDES: Partial<Record<string, Partial<Record<MusicContext, string>>>> = {
   whack: {
     gameplay: `${MEDIA_BASE}/music/whack-gameplay.mp3`,
     tension: `${MEDIA_BASE}/music/whack-tension.mp3`,
@@ -159,7 +162,7 @@ function resolveSrc(ctx: MusicContext, gameId: string | null): string {
 // Kept low relative to SFX — this plays continuously under everything else, including a
 // teacher's own voice, so it should always read as background, never foreground. Applies
 // regardless of which actual file plays for a context (shared default or a game's own override).
-const MUSIC_VOLUME: Record<MusicContext, number> = {
+export const MUSIC_VOLUME: Record<MusicContext, number> = {
   // Teacher feedback: this read as noticeably louder than the gameplay/tension tracks it sits
   // between (menus, setup, results) — nudged down to close that gap.
   ambient: 0.18,
@@ -175,7 +178,7 @@ const MUSIC_VOLUME: Record<MusicContext, number> = {
 // mixed at a much bigger contrast to their own gameplay track than that — for those, the sudden
 // switch itself (not just the volume) reads as jarring. Scales tension's volume up for just that
 // game; every other game (no entry, scale 1) is unaffected.
-const TENSION_VOLUME_SCALE: Partial<Record<string, number>> = {
+export const TENSION_VOLUME_SCALE: Partial<Record<string, number>> = {
   // Teacher feedback (on the old Auction-borrowed pair): "the switch up is crazy" the moment a
   // lock's question appears. The new vault-tension.mp3 is ~3.4dB quieter than vault-gameplay.mp3
   // at the shared volumes, which would put the switch about 8.5dB down — the house default is ~9dB

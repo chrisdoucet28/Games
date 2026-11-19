@@ -108,8 +108,6 @@ export function PhoneBountyBoardView({ state, teamId, onAction }: Props) {
           </div>
         ) : myEntry?.resolved ? (
           <div style={{ background: "#DCFCE7", border: "1px solid #86EFAC", borderRadius: "10px", padding: "10px 12px", fontSize: "12px", fontWeight: "700", color: "#166534" }}>✅ Correct! Waiting for the round to finish.</div>
-        ) : state.answerMode !== "typing" ? (
-          <div style={{ fontSize: "12px", fontWeight: "700", color: "#92400E", padding: "6px 0" }}>Write your sentence down, then tell it to your teacher — they'll post it on the board.</div>
         ) : (
           <>
             <textarea
@@ -152,32 +150,26 @@ export function PhoneBountyBoardView({ state, teamId, onAction }: Props) {
                 <div key={b.id} style={{ background: "white", border: "2px solid #B91C1C", borderRadius: "14px", padding: "10px 12px" }}>
                   <div style={{ fontSize: "11px", fontWeight: "800", color: "#B91C1C", marginBottom: "6px" }}>💰 {b.value} pts</div>
                   <div style={{ background: "#FEE2E2", border: "1px solid #FCA5A5", borderRadius: "8px", padding: "6px 8px", fontSize: "12px", fontWeight: "700", color: "#7F1D1D", marginBottom: "8px" }}>“{b.wrongText}”</div>
-                  {state.answerMode !== "typing" ? (
-                    <div style={{ fontSize: "11px", fontWeight: "700", color: "#7F1D1D" }}>Write your fixed sentence down, then tell it to your teacher — they'll post it on the board.</div>
-                  ) : (
-                    <>
-                      <textarea
-                        value={draftValue}
-                        onChange={e => setFixDrafts(prev => ({ ...prev, [b.id]: e.target.value }))}
-                        maxLength={300}
-                        rows={2}
-                        placeholder="Type your fix…"
-                        style={{ width: "100%", boxSizing: "border-box", border: "1px solid #FCA5A5", borderRadius: "8px", padding: "6px 8px", fontSize: "13px", fontFamily: "inherit", resize: "vertical" }}
-                      />
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "8px", marginTop: "6px" }}>
-                        {b.fixText === draftValue && draftValue !== "" && <span style={{ fontSize: "11px", fontWeight: "800", color: "#22C55E" }}>✅ Submitted</span>}
-                        <button
-                          onClick={() => onAction({ teamId, action: "submitBountyFix", bountyId: b.id, text: draftValue.trim() })}
-                          disabled={draftValue.trim() === ""}
-                          style={{
-                            background: draftValue.trim() === "" ? "#D1D5DB" : "linear-gradient(135deg,#991B1B,#B91C1C)", color: "white", border: "none",
-                            borderRadius: "8px", padding: "6px 14px", fontSize: "12px", fontWeight: "800",
-                            cursor: draftValue.trim() === "" ? "not-allowed" : "pointer",
-                          }}
-                        >Submit fix</button>
-                      </div>
-                    </>
-                  )}
+                  <textarea
+                    value={draftValue}
+                    onChange={e => setFixDrafts(prev => ({ ...prev, [b.id]: e.target.value }))}
+                    maxLength={300}
+                    rows={2}
+                    placeholder="Type your fix…"
+                    style={{ width: "100%", boxSizing: "border-box", border: "1px solid #FCA5A5", borderRadius: "8px", padding: "6px 8px", fontSize: "13px", fontFamily: "inherit", resize: "vertical" }}
+                  />
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "8px", marginTop: "6px" }}>
+                    {b.fixText === draftValue && draftValue !== "" && <span style={{ fontSize: "11px", fontWeight: "800", color: "#22C55E" }}>✅ Submitted</span>}
+                    <button
+                      onClick={() => onAction({ teamId, action: "submitBountyFix", bountyId: b.id, text: draftValue.trim() })}
+                      disabled={draftValue.trim() === ""}
+                      style={{
+                        background: draftValue.trim() === "" ? "#D1D5DB" : "linear-gradient(135deg,#991B1B,#B91C1C)", color: "white", border: "none",
+                        borderRadius: "8px", padding: "6px 14px", fontSize: "12px", fontWeight: "800",
+                        cursor: draftValue.trim() === "" ? "not-allowed" : "pointer",
+                      }}
+                    >Submit fix</button>
+                  </div>
                 </div>
               );
             })}

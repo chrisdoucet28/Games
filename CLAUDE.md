@@ -188,6 +188,34 @@ handout) with no guarantee they've seen any other specific lesson first.
   rewrite topics — invitations, suggestions, clarification requests, indefinite pronouns — are
   inherently phrased as a question/negative by their own function, not transformed from a
   positive sentence, and don't need the tag).
+- **Vault Heist `transform` tags must never name the answer to the skill being tested** — a second,
+  distinct failure mode from the one above, caught live in `auxiliary_verbs_be_do`
+  (2026-11): its items used `transform:"be-question-negative"`/`"do-question-negative"`, so the
+  lock-reveal card literally told the student "use BE" or "use DO" *before* they answered —
+  the exact thing the topic exists to make them figure out from the sentence's own verb. Same bug,
+  same fix, in `subject_object_questions`'s `"subject-question"`/`"object-question"` tags (told the
+  student which word-order the topic is entirely about choosing). Both were merged into one shared,
+  non-disclosing tag per topic (bare `"negative"`/`"question"` for auxiliary_verbs_be_do since the
+  fragment already made that choice unrecoverable any other way; a fresh neutral tag,
+  `"question-word-order"`, for subject_object_questions, chosen to not collide with the unrelated
+  existing `"wh-question"` tag).
+  The test before giving a topic's rewrite pool a transform tag (or a family of them): **does this
+  tag's name supply information the fragment itself withholds, and is recovering that missing
+  information the actual grammar point being tested?** If yes, the tag is unauthored content, not
+  a label — rename it to something that discloses *which transformation variant is wanted* (that
+  part is fine and often necessary) without disclosing *the answer to the inference the student is
+  supposed to make*. This is a judgment call, not a script-checkable pattern (a reliable check would
+  also misfire on the legitimate uses below), so apply this test by hand to every new topic's
+  transform-tag scheme. Calibration — these are NOT the same bug, don't "fix" them:
+  `causative-active`/`causative-passive` and `permission-formal`/`permission-informal`/
+  `permission-polite` share an identical fragment across tags (e.g. `'use your phone'` → three
+  different required registers) but the fragment is genuinely, arbitrarily ambiguous between
+  several equally-correct outputs with nothing in the sentence itself to decide between them — the
+  tag is disclosing *which variant is wanted*, exactly like a `form` tag does, not revealing an
+  inference. `modal-obligation`/`modal-no-obligation` are fine too, for the opposite reason: the
+  fragment already contains the modal itself (`'she / have to / wake up early'`), so there's no
+  hidden choice to leak — the skill being tested is forming the sentence correctly, not picking the
+  modal.
 - **Vault Heist rewrite-sentence fragments must only show words that specific answer needs**: the
   `question` field is a literal set of words the player is meant to build the answer from — never
   show a word or clause there that the correct answer for that exact item doesn't use. When one
@@ -201,6 +229,33 @@ handout) with no guarantee they've seen any other specific lesson first.
   words, not just the variable content (event/time/reason) — otherwise the player has no way to
   know which of several correct phrasings the answer key actually expects, and a different, equally
   valid response gets marked wrong purely because nothing ever cued which one to use.
+- **Vault Heist answers must keep the fragment's own word order — never silently restructure the
+  sentence, non-negotiable**: a player reads a `question` fragment left to right and builds the
+  answer by adding grammar glue (conjugating a verb, inserting "is"/"isn't"/"Is", adding articles)
+  roughly in place — they do not, and should not be expected to, pick up a chunk from the end of
+  the fragment and move it to the front, or invent a different sentence type the fragment never
+  suggested. This is a stricter, more fundamental version of the "fragment must only show words the
+  answer needs" rule above: even when every word in the fragment genuinely appears in the answer,
+  the item is still broken if the answer's *order* doesn't match. Caught live, twice, in the same
+  `giving_directions` topic (2026-11) — both earlier "fixes" to it were wrong because they kept
+  patching the fragment's wording while leaving the answer's reordering in place: fragment `'the
+  bank / be / around the corner, to your left'` kept getting answered as "Turn left for the bank,
+  just around the corner" (subject moved from front to middle, a new verb "turn" introduced, the
+  location clue's own words scattered around it) — a student reading the fragment in order will
+  always produce "The bank is around the corner, to your left" instead, and they are not wrong to.
+  The actual fix was to rewrite the *answer* to match the fragment's order (`"The bank is around
+  the corner, to your left."`), not to keep reshaping the fragment around an answer that reorders
+  it. Same rule for negative/question forms: negate or invert in place (`'the bank / not / be /
+  around the corner...'` → `"The bank isn't around the corner..."`; `'the bank / be / around the
+  corner...'` → `"Is the bank around the corner...?"`) — never introduce a rule-out-the-opposite
+  framing ("It isn't on your right — turn left...") that requires inventing content nowhere in the
+  fragment just to explain why the order changed. The test: read the fragment's chunks in order,
+  then read the answer's chunks in order — do they line up one-for-one, with only conjugation/
+  function-word glue added between them? If producing the answer requires relocating a chunk, the
+  answer (not the fragment) is what needs rewriting. **Only `giving_directions` has been swept for
+  this so far — a full pass over the rest of Vault Heist's rewrite-sentences content for the same
+  bug class is still pending** (flagged 2026-11, not yet scheduled); treat any other topic's
+  fragment/answer pair with the same suspicion until it's actually been checked.
 - **Minefield's `minefieldGrid` — non-negotiable, check on every single new topic**:
   `MinefieldGame.tsx` hard-codes a 5x5 board (`ROWS = 5, COLS = 5`) and indexes `colLabels`/
   `rowLabels` by that fixed size regardless of how many entries the arrays actually have — a topic

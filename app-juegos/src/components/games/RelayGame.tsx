@@ -168,7 +168,11 @@ export function RelayGame({ questions, teams: propTeams, onUpdateScore, onEnd, f
   // "Play on Phones" — available whenever there's more than one team. Each phone is one PERSON:
   // several phones can join the same team, and the screen rotates which one is the asker.
   const [inputMode, setInputMode] = useState<"screen" | "phone">(presetPhoneSession ? "phone" : "screen");
-  const [introStep, setIntroStep] = useState<"setup" | "qr">("setup");
+  // Must track presetPhoneSession the same way inputMode above does — see OrderUpGame.tsx's own
+  // copy of this comment for the full bug: a teacher continuing a class-level phone session into
+  // this game never saw the "qr" step (where the playStyle toggle below lives), so it silently
+  // stranded on "together" with no way to switch to "Take turns."
+  const [introStep, setIntroStep] = useState<"setup" | "qr">(presetPhoneSession ? "qr" : "setup");
   const [sessionCode, setSessionCode] = useState<string | null>(presetPhoneSession?.code ?? null);
   const [connectedTeamIds, setConnectedTeamIds] = useState<Set<string | number>>(new Set());
   // Connected phone (device) ids per team, in the order each was first seen — stable, so the asker
