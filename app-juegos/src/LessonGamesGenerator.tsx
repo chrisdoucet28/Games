@@ -28,7 +28,8 @@ import { BillingScreen } from "./components/shared/BillingScreen";
 import { ThemeAmbience } from "./components/shared/ThemeAmbience";
 import { FeedbackButton } from "./components/shared/FeedbackButton";
 import { BrandBadge } from "./components/shared/BrandBadge";
-import { Icon, type IconName } from "./components/shared/Icon";
+import { Icon } from "./components/shared/Icon";
+import { FloatingMascots, GameShowcase, HowItWorks, StatBand } from "./components/shared/WelcomeShowcase";
 import { MascotIcon } from "./components/shared/MascotArt";
 import { saveProgress, clearProgress, listClasses, createClass, upsertTeamRoster, deleteFromTeamRoster, saveTeams, getClass } from "./lib/classes";
 import { recordClassCoverage } from "./lib/classMembership";
@@ -1531,37 +1532,19 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
   const winners = finalRanking.filter(r => r.rank === 0).map(r => r.item);
 
   if (screen === "welcome") return (
-    <div ref={appRef} style={{ minHeight: "100vh", position: "relative", background: `linear-gradient(160deg,${theme.heroBg[0]} 0%,${theme.heroBg[1]} 45%,${theme.heroBg[2]} 100%)`, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "32px 20px 24px", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
+    <div ref={appRef} style={{ minHeight: "100vh", position: "relative", overflowX: "hidden", background: `linear-gradient(160deg,${theme.heroBg[0]} 0%,${theme.heroBg[1]} 45%,${theme.heroBg[2]} 100%)`, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "32px 20px 40px", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
       <ThemeAmbience themeId={theme.id} />
-      <div style={{ maxWidth: "680px", width: "100%", textAlign: "center", flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", position: "relative", zIndex: 1 }}>
-        <div style={{ marginBottom: "28px" }}>
+      <div style={{ maxWidth: "1000px", width: "100%", textAlign: "center", flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", position: "relative", zIndex: 1 }}>
+        <div style={{ marginBottom: "28px", position: "relative", maxWidth: "720px", width: "100%", marginLeft: "auto", marginRight: "auto" }}>
+          <FloatingMascots />
           <Icon name="joystick" size={64} color="#FCD34D" style={{ marginBottom: "14px", filter: "drop-shadow(0 4px 16px rgba(0,0,0,0.4))" }} />
           <h1 style={{ fontSize: "clamp(34px,6.5vw,60px)", fontWeight: "900", color: "white", margin: "0 0 10px", letterSpacing: "-0.02em", lineHeight: 1.1, textShadow: "0 2px 24px rgba(0,0,0,0.4)", fontFamily: theme.headingFont }}>
             Class<span style={{ color: "#FCD34D" }}>Cade</span>
           </h1>
           <p style={{ color: theme.accent[1], fontSize: "clamp(15px,2.5vw,18px)", margin: "0", lineHeight: 1.7, maxWidth: "500px", marginLeft: "auto", marginRight: "auto" }}>
-            {realTopicOptions.length}+ built-in topics from A1 to C1 across Grammar, Vocabulary & Speaking.<br />
-            {GAME_MODES.length} competitive game modes. Zero prep. Ready in seconds.
+            Turn any grammar or vocabulary point into a team game your class actually wants to play.<br />
+            Zero prep. Ready in seconds.
           </p>
-        </div>
-        <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "28px" }}>
-          {([{ icon: "target", label: `${GAME_MODES.length} Game Modes` }, { icon: "books", label: `${realTopicOptions.length}+ Built-in Topics` }, { icon: "trophy", label: "Up to 5 Teams" }, { icon: "bolt", label: "Instant Play" }] as { icon: IconName; label: string }[]).map(s => (
-            <div key={s.label} style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: "20px", padding: "8px 16px", backdropFilter: "blur(8px)", display: "flex", alignItems: "center", gap: "7px" }}>
-              <Icon name={s.icon} size={16} color="white" />
-              <span style={{ color: "white", fontWeight: "700", fontSize: "13px" }}>{s.label}</span>
-            </div>
-          ))}
-        </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(180px,1fr))", gap: "8px", marginBottom: "32px" }}>
-          {GAME_MODES.map(g => (
-            <div key={g.id} style={{ background: "rgba(255,255,255,0.08)", borderRadius: "12px", padding: "10px 12px", border: "1px solid rgba(255,255,255,0.15)", display: "flex", flexDirection: "column", gap: "4px", backdropFilter: "blur(6px)" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "9px" }}>
-                <Icon name={GAME_ICONS[g.id]} size={20} color={g.color} />
-                <span style={{ color: "rgba(255,255,255,0.9)", fontWeight: "600", fontSize: "13px", textAlign: "left", lineHeight: 1.3, fontFamily: theme.headingFont }}>{g.name}</span>
-              </div>
-              <span style={{ color: "rgba(255,255,255,0.8)", fontSize: "11px", textAlign: "left", lineHeight: 1.35 }}>{g.tag}</span>
-            </div>
-          ))}
         </div>
         {/* "Continue where you left off?" — only ever appears once per fresh page load (see
             lastClassCandidate above), and only offers, never auto-applies: a refresh might just as
@@ -1627,6 +1610,9 @@ export default function LessonGamesGenerator({ theme, onThemeChange, subscriptio
             <button onClick={() => goToAccountScreen("billing")} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.75)", borderRadius: "999px", padding: "10px 18px", fontSize: "14px", fontWeight: "700", cursor: "pointer", fontFamily: theme.headingFont, display: "inline-flex", alignItems: "center", gap: "6px" }}><Icon name="gem" size={14} /> {isPaid ? "My Plan" : "Upgrade"}</button>
           )}
         </div>
+        <GameShowcase headingFont={theme.headingFont} />
+        <HowItWorks accent={`linear-gradient(135deg,${theme.cta[0]},${theme.cta[1]})`} headingFont={theme.headingFont} />
+        <StatBand topics={realTopicOptions.length} games={GAME_MODES.length} headingFont={theme.headingFont} />
       </div>
       <FeedbackButton />
       <BrandBadge isPaid={isPaid} />

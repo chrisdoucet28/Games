@@ -9,8 +9,8 @@ import { setMusicSuspended } from "../../lib/music";
 // Hosted on the same Vercel Blob store as the music. Blobs are cached for a year, so a re-edited
 // video must be uploaded under a NEW name (bump -v1 → -v2) and the entry below updated — never
 // overwrite the old file in place, or browsers keep showing the old one.
-const VIDEO_BASE = "https://es8h1nft4dvfmlmp.public.blob.vercel-storage.com/video/how-to";
-const HOW_TO_VIDEOS: Record<string, string> = {
+export const VIDEO_BASE = "https://es8h1nft4dvfmlmp.public.blob.vercel-storage.com/video/how-to";
+export const HOW_TO_VIDEOS: Record<string, string> = {
   whack: "whack-v2", auction: "auction-v2", battleship: "battleship-v2", vault: "vault-v1", hill: "hill-v1",
   hotpotato: "hotpotato-v1", castle: "castle-v1", racetrack: "racetrack-v1", minefield: "minefield-v1",
   rocket: "rocket-v1", orderup: "orderup-v1", bounty: "bounty-v1", hotseat: "hotseat-v2", relay: "relay-v2",
