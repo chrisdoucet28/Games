@@ -166,8 +166,15 @@ export function useMoleGame({ pool, difficulty, startRoundIdx, active, resetKey,
     // only reaches onUpdateScore once at the end of the whole turn (see WordWhackGame's
     // finalTurnScore), too late to double as the game's own hit/miss feedback.
     playSound("whack");
+    // ANY click ends the round, correct or not — previously a wrong click only removed that one
+    // mole and let the round keep running, so a student could rapid-click every hole and the
+    // correct one was guaranteed to be among them, for free. Treating a miss the same as a hit
+    // (round over, board clears, next question after the same short pause) makes a wrong guess
+    // cost the round's points instead of costing nothing, which is what actually discourages
+    // spam-clicking — the combo reset alone wasn't enough, since the base points per hit still
+    // came through at a much higher rate than reading-then-clicking ever could.
+    if (roundTimerRef.current) clearTimeout(roundTimerRef.current);
     if (mole.isCorrect) {
-      if (roundTimerRef.current) clearTimeout(roundTimerRef.current);
       const bonus = Math.min(MAX_COMBO_BONUS, comboRef.current * COMBO_STEP);
       turnScoreRef.current += BASE_HIT_PTS + bonus;
       setTurnScore(turnScoreRef.current);
@@ -175,16 +182,15 @@ export function useMoleGame({ pool, difficulty, startRoundIdx, active, resetKey,
       setCombo(comboRef.current);
       if (comboRef.current > bestComboRef.current) { bestComboRef.current = comboRef.current; setBestCombo(bestComboRef.current); }
       spawnFx(mole.holeIdx, "hit");
-      setMoles([]);
-      // A brief pause before the next mole pops up — long enough to see the +hit land and to stop
-      // a reflexive next click from landing mid pop-up on the new mole.
-      roundTimerRef.current = setTimeout(() => spawnRound(), 260);
     } else {
       comboRef.current = 0;
       setCombo(0);
       spawnFx(mole.holeIdx, "miss");
-      setMoles(prev => prev.filter(m => m.holeIdx !== mole.holeIdx));
     }
+    setMoles([]);
+    // A brief pause before the next mole pops up — long enough to see the hit/miss fx land and to
+    // stop a reflexive next click from landing mid pop-up on the new mole.
+    roundTimerRef.current = setTimeout(() => spawnRound(), 260);
   };
 
   return { moles, prompt, combo, bestCombo, turnScore, fx, hitMole, playedRounds, roundIdxRef };
