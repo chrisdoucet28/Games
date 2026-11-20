@@ -1860,6 +1860,7 @@ export const REAL_WORLD_READINGS: Record<string, RealWorldReading> = {
 
   extreme_adjectives: {
     title: "A Weekend in the Mountains",
+    audioUrl: `${MEDIA_BASE}/audio/real-world/extreme_adjectives.mp3`,
     passage: [
       "Last weekend, my friends and I went to the mountains for two days. The journey was very long, and by the time we arrived I was completely exhausted. The weather was another surprise. It was absolutely freezing, much colder than we expected, and our little cabin had no heating.",
       "Luckily, the owner was very friendly. She gave us some hot soup, and it was absolutely delicious. We were all starving, so we ate every drop. Later, she showed us around the village. It was tiny, with only about thirty houses, but the old church was ancient. People said it was more than eight hundred years old.",
