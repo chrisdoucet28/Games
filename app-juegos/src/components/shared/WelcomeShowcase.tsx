@@ -8,8 +8,9 @@ import type { GameMode } from "../../types";
 // Everything a first-time visitor sees on the welcome screen below the Start a Game / Lesson Plans
 // buttons: a moving wall of the real games (each card shows a still from that game's own How to
 // Play video and plays it, muted, when hovered), a 3-step "how it works", and a count-up stat band.
-// Purely presentational — no state a teacher cares about. Respects prefers-reduced-motion (the rows
-// stop scrolling and become swipeable; the stat numbers just appear).
+// Purely presentational — no state a teacher cares about. The rows scroll even when the OS asks for reduced motion
+// (owner's Windows has animations off and wanted to see it move), so a visible Pause button is the
+// off switch instead (WCAG 2.2.2).
 
 const FONT = "'Segoe UI',system-ui,sans-serif";
 
@@ -27,12 +28,7 @@ const css = `
 .cc-card img,.cc-card video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .cc-step{animation:ccPop .6s ease both}
 @media (max-width:900px){.cc-float{display:none!important}}
-@media (prefers-reduced-motion:reduce){
-  .cc-row.l,.cc-row.r{animation:none}
-  .cc-rows{overflow-x:auto}
-  .cc-float{animation:none!important}
-  .cc-step{animation:none}
-}`;
+.cc-paused .cc-row{animation-play-state:paused!important}`;
 
 // The floating mascots that bob around the title. Fixed list so the page looks the same every visit.
 const FLOATERS: { name: MascotName; left?: string; right?: string; top: string; size: number; r: string; delay: string; dur: string }[] = [
@@ -101,6 +97,7 @@ function GameCard({ game, onOpen, decoy }: { game: GameMode; onOpen: (g: GameMod
 
 export function GameShowcase({ headingFont }: { headingFont?: string }) {
   const [open, setOpen] = useState<GameMode | null>(null);
+  const [paused, setPaused] = useState(false);
   const half = Math.ceil(GAME_MODES.length / 2);
   const rowA = GAME_MODES.slice(0, half);
   const rowB = GAME_MODES.slice(half);
@@ -118,9 +115,14 @@ export function GameShowcase({ headingFont }: { headingFont?: string }) {
       <p style={{ margin: "0 20px 20px", color: "rgba(255,255,255,0.78)", textAlign: "center", fontSize: 15 }}>
         Hover a game to preview it, or click to see how it works.
       </p>
-      <div className="cc-rows" style={{ overflow: "hidden", display: "flex", flexDirection: "column", gap: 16, padding: "10px 0 14px", maskImage: "linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent)", WebkitMaskImage: "linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent)" }}>
+      <div className={paused ? "cc-rows cc-paused" : "cc-rows"} style={{ overflow: "hidden", display: "flex", flexDirection: "column", gap: 16, padding: "10px 0 14px", maskImage: "linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent)", WebkitMaskImage: "linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent)" }}>
         {renderRow(rowA, "l")}
         {renderRow(rowB, "r")}
+      </div>
+      <div style={{ display: "flex", justifyContent: "center", marginTop: 4 }}>
+        <button onClick={() => setPaused(p => !p)} aria-pressed={paused} style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.25)", color: "white", borderRadius: 999, padding: "6px 14px", fontSize: 12.5, fontWeight: 700, cursor: "pointer", fontFamily: FONT }}>
+          {paused ? "▶ Play scrolling" : "❚❚ Pause scrolling"}
+        </button>
       </div>
       {open && (
         <HowToPlayModal gameId={open.id} gameName={open.name} gameIcon={GAME_ICONS[open.id]} accentColor={open.color} onClose={() => setOpen(null)} />
@@ -154,15 +156,13 @@ export function HowItWorks({ accent, headingFont }: { accent: string; headingFon
   );
 }
 
-// Counts up from 0 once the stat scrolls into view; jumps straight to the number if the visitor
-// prefers reduced motion.
+// Counts up from 0 once the stat scrolls into view.
 function CountUp({ to, suffix = "" }: { to: number; suffix?: string }) {
   const ref = useRef<HTMLSpanElement>(null);
   const [n, setN] = useState(0);
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) { setN(to); return; }
     let raf = 0;
     const io = new IntersectionObserver(([entry]) => {
       if (!entry.isIntersecting) return;
