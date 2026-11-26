@@ -82,6 +82,21 @@ const CPU_ENTRY_DELAY_MS = { min: 30000, max: 50000 };
 type Phase = "intro" | "playing" | "final";
 type Banner = { text: React.ReactNode; kind: "success" | "wrong"; key: number };
 
+// Shown once, between a round completing and the teacher actually advancing to the next one (see
+// roundRecap state + handleRoundDone below) — direct teacher feedback that this is "more than just
+// a game, a learning moment too": a quick before/after of every sentence the class just wrote,
+// so a mistake someone made still gets looked at as a class even after the live back-and-forth that
+// fixed it has scrolled past. `finalText` is always something that actually got a live "Correct"
+// click — never fabricated — same principle as everywhere else the CPU's own text shows up in this
+// file.
+type RoundRecapEntry = {
+  teamId: string | number;
+  finalText: string;
+  // Present only if this team's sentence was ever marked Wrong this round — absent means they got
+  // it right on the very first try, so there's nothing to contrast finalText against.
+  originalWrongText?: string;
+};
+
 const STYLE_TAG = (
   <style>{`
     @keyframes bbPosterIn{0%{opacity:0;transform:translateY(14px) scale(0.94)}100%{opacity:1;transform:translateY(0) scale(1)}}
@@ -412,6 +427,11 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
   const [roundNumber, setRoundNumber] = useState(resumed?.roundNumber ?? 0);
   const [roundEntries, setRoundEntries] = useState<BountyRoundEntry[]>([]);
   const [bounties, setBounties] = useState<Bounty[]>([]);
+  // Non-null only in the gap between the round finishing and the teacher dismissing the recap
+  // screen (see handleRoundDone/dismissRoundRecap) — screen-only, same as every other post-round
+  // review in this app (Order Up's review queue, Rocket Fuel's), so phones see no state change at
+  // all while it's up; they're already idle waiting for the next round regardless.
+  const [roundRecap, setRoundRecap] = useState<RoundRecapEntry[] | null>(null);
   const [gameScoreByTeam, setGameScoreByTeam] = useState<Record<string | number, number>>(() => resumed?.gameScoreByTeam ?? {});
   const [banner, setBanner] = useState<Banner | null>(null);
   // Solo only — a real correct sentence (reused from cgmPool's own `answer` field, never
@@ -514,7 +534,7 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
   const resolveRoundWrong = (teamId: string | number, wrongText: string) => {
     const id = bountyIdRef.current++;
     const value = BOUNTY_VALUE * 2;
-    setBounties(prev => [...prev, { id, originalTeamId: teamId, wrongText, value, missCount: 1, excludedTeamId: teamId, claimedBy: undefined, resolved: false }]);
+    setBounties(prev => [...prev, { id, originalTeamId: teamId, wrongText, originalWrongText: wrongText, value, missCount: 1, excludedTeamId: teamId, claimedBy: undefined, resolved: false }]);
     const team = teams.find(t => t.id === teamId);
     pushBanner(<><Icon name="warning" size={14} /> {team?.name ?? "That"}'s sentence is now a bounty — {formatValue(value)}!</>, "wrong");
   };
@@ -712,6 +732,23 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
     setRoundEntries(seedRoundEntries());
     setBounties([]);
     setCpuCorrectReveal(null);
+  };
+
+  // Only ever called once roundComplete is already true (see the Next Round/Finish button below),
+  // so every entry either never became a bounty (correct first try) or has a resolved bounty with a
+  // real fixText — there's no "still open" case to handle here.
+  const buildRoundRecap = (): RoundRecapEntry[] =>
+    roundEntries.map(e => {
+      const bounty = bounties.find(b => b.originalTeamId === e.teamId);
+      if (!bounty) return { teamId: e.teamId, finalText: e.text };
+      return { teamId: e.teamId, finalText: bounty.fixText ?? bounty.wrongText, originalWrongText: bounty.originalWrongText };
+    });
+
+  const handleRoundDone = () => setRoundRecap(buildRoundRecap());
+
+  const dismissRoundRecap = () => {
+    setRoundRecap(null);
+    goToNextRound();
   };
 
   const handlePickPhoneMode = () => {
@@ -983,6 +1020,58 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
     );
   }
 
+  if (roundRecap) {
+    return (
+      <div style={{ ...arenaStyle, textAlign: "center" }}>
+        {STYLE_TAG}
+        <div style={{ position: "relative", zIndex: 1 }}>
+          <div style={{ marginBottom: "6px" }}><Icon name="sheriffStar" size={36} color="#92400E" /></div>
+          <div style={{ fontWeight: "900", fontSize: "20px", color: "#92400E", marginBottom: "4px" }}>Round {roundNumber + 1} recap</div>
+          <div style={{ fontSize: "13px", color: "#78350F", marginBottom: "18px" }}>Here's what everyone wrote this round.</div>
+          <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap", maxWidth: "900px", margin: "0 auto 20px" }}>
+            {roundRecap.map(r => {
+              const team = teams.find(t => t.id === r.teamId);
+              return (
+                <div key={r.teamId} style={{
+                  width: "250px", background: "linear-gradient(160deg,#FFFBEB,#FEF3C7)", border: "2px solid #D97706",
+                  borderRadius: "12px", padding: "12px", textAlign: "left", boxShadow: "0 4px 14px rgba(180,83,9,0.18)",
+                }}>
+                  <div style={{ fontSize: "12px", fontWeight: "800", color: team?.color.dark ?? "#78350F", marginBottom: "8px", display: "flex", alignItems: "center", gap: "6px" }}>
+                    <TeamIcon team={team} /> {team?.name ?? "Team"}
+                  </div>
+                  {r.originalWrongText ? (
+                    <>
+                      <div style={{ fontSize: "10px", fontWeight: "800", color: "#B91C1C", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: "2px" }}>First try</div>
+                      <div style={{ background: "#FEF2F2", border: "1px dashed #FCA5A5", borderRadius: "8px", padding: "6px 8px", marginBottom: "8px", fontSize: "12px", fontWeight: "600", color: "#7F1D1D", textDecoration: "line-through" }}>
+                        "{r.originalWrongText}"
+                      </div>
+                      <div style={{ fontSize: "10px", fontWeight: "800", color: "#166534", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: "2px" }}>Final version</div>
+                      <div style={{ background: "#F0FDF4", border: "1px solid #BBF7D0", borderRadius: "8px", padding: "6px 8px", fontSize: "13px", fontWeight: "800", color: "#166534" }}>
+                        "{r.finalText}"
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div style={{ fontSize: "10px", fontWeight: "800", color: "#166534", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: "2px", display: "flex", alignItems: "center", gap: "4px" }}>
+                        <Icon name="check" size={10} /> Got it first try
+                      </div>
+                      <div style={{ background: "#F0FDF4", border: "1px solid #BBF7D0", borderRadius: "8px", padding: "6px 8px", fontSize: "13px", fontWeight: "800", color: "#166534" }}>
+                        "{r.finalText}"
+                      </div>
+                    </>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+          <button onClick={dismissRoundRecap} className="bb-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#B45309", color: "white", border: "3px solid #1A1A2E", borderRadius: "14px", padding: "12px 32px", fontSize: "15px", fontWeight: "900", cursor: "pointer", boxShadow: "4px 4px 0 #1A1A2E" }}>
+            {isLastRound ? <><Icon name="trophy" size={16} /> See Final Results</> : <><Icon name="next" size={16} /> Next Round</>}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div style={arenaStyle}>
       {STYLE_TAG}
@@ -1091,7 +1180,7 @@ export function BountyBoardGame({ questions, teams: propTeams, onUpdateScore, on
 
         <div style={{ textAlign: "center", marginTop: "10px" }}>
           <button
-            onClick={goToNextRound}
+            onClick={handleRoundDone}
             disabled={!roundComplete}
             className="bb-btn"
             title={roundComplete ? undefined : "Every bounty has to be cleared first"}

@@ -690,6 +690,12 @@ export type Bounty = {
   originalTeamId: string | number;   // whose round entry this traces back to — flipping THIS
                                       // entry's resolved flag is what unblocks round advancement.
   wrongText: string;                 // the most recent wrong attempt — what a claimant must fix.
+  // Set once, at bounty creation, and never touched again by any later failed fix — unlike
+  // wrongText above, which gets overwritten on every miss so a claimant always sees the CURRENT
+  // thing to fix. This is what the end-of-round recap screen contrasts against the bounty's own
+  // fixText once resolved: the team's actual first attempt vs. whatever finally got approved,
+  // regardless of how many escalations it took in between.
+  originalWrongText: string;
   value: number;                     // current payout if claimed correctly: BOUNTY_VALUE * (missCount + 1).
   missCount: number;                 // consecutive wrong attempts so far, always >= 1 once it exists.
   excludedTeamId: string | number;   // most recent team to fail this — cannot reclaim until someone
