@@ -112,16 +112,18 @@ function spawnChanceForRound(round: number, teamCount: number): number {
   return Math.min(SPAWN_CHANCE_CAP, base * teamCountDifficultyScale(teamCount));
 }
 
-// A three-tier on-ramp, per teacher request: rounds 1-3 prefer halfSentences content (a
+// A three-tier on-ramp, per teacher request: rounds 1-5 prefer halfSentences content (a
 // sentence-starter a team completes aloud — the easiest tier, currently authored for conditional
-// topics only), rounds 4-6 prefer speaking-task content (each topic's own cardTasks pool, mapped
+// topics only), rounds 6-8 prefer speaking-task content (each topic's own cardTasks pool, mapped
 // onto the same crewmateTopic/crewmatePrompt shape — a single open task, no crewmate/spy roleplay
-// framing, universally available since every topic already has 20 cardTasks), and round 7+ uses
+// framing, universally available since every topic already has 20 cardTasks), and round 9+ uses
 // the normal spyRounds-shaped open prompt exactly as before any of this existed. A tier is only
 // used where the selected topic(s) actually have that content; otherwise pickNextQuestion falls
-// through to the next tier down, all the way to the normal pool.
-const HALF_SENTENCE_ROUND_CUTOFF = 3;
-const SPEAKING_TASK_ROUND_CUTOFF = 6;
+// through to the next tier down, all the way to the normal pool. (Widened from the original 1-3/
+// 4-6/7+ split — direct teacher feedback that the easiest tier should cover the first 5 rounds, not
+// 3 — keeping the speaking-task tier's own width at 3 rounds rather than compressing it to 1.)
+const HALF_SENTENCE_ROUND_CUTOFF = 5;
+const SPEAKING_TASK_ROUND_CUTOFF = 8;
 
 type EntryPointId = "frontDoor" | "backDoor" | "window1" | "window2";
 const ENTRY_POINTS: { id: EntryPointId; label: string; icon: IconName }[] = [
