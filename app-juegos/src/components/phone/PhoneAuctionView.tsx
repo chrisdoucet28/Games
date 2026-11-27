@@ -40,6 +40,17 @@ export function PhoneAuctionView({ state, teamId, onBet, onSubmitCorrection }: P
   const myResult = state.results?.[String(teamId)];
   const pendingCorrection = (state.pendingCorrectionTeamIds ?? []).includes(teamId);
 
+  // Pre-fill the box with the original (wrong) sentence the moment a correction becomes owed,
+  // instead of leaving it blank — the team only has to fix what's wrong, not retype a whole
+  // sentence they already got right about being false. Keyed on the boolean itself (not state.qi
+  // or state.sentence) so this only fires on the true transition, never again while they're
+  // actively editing — it also still fires correctly on a fresh mount/reconnect where
+  // pendingCorrection is already true.
+  useEffect(() => {
+    if (pendingCorrection) setCorrectionText(state.sentence);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingCorrection]);
+
   const submitCorrection = () => {
     if (!correctionText.trim()) return;
     onSubmitCorrection({ teamId, text: correctionText.trim() });

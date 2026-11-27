@@ -112,16 +112,18 @@ function spawnChanceForRound(round: number, teamCount: number): number {
   return Math.min(SPAWN_CHANCE_CAP, base * teamCountDifficultyScale(teamCount));
 }
 
-// A three-tier on-ramp, per teacher request: rounds 1-3 prefer halfSentences content (a
+// A three-tier on-ramp, per teacher request: rounds 1-5 prefer halfSentences content (a
 // sentence-starter a team completes aloud — the easiest tier, currently authored for conditional
-// topics only), rounds 4-6 prefer speaking-task content (each topic's own cardTasks pool, mapped
+// topics only), rounds 6-8 prefer speaking-task content (each topic's own cardTasks pool, mapped
 // onto the same crewmateTopic/crewmatePrompt shape — a single open task, no crewmate/spy roleplay
-// framing, universally available since every topic already has 20 cardTasks), and round 7+ uses
+// framing, universally available since every topic already has 20 cardTasks), and round 9+ uses
 // the normal spyRounds-shaped open prompt exactly as before any of this existed. A tier is only
 // used where the selected topic(s) actually have that content; otherwise pickNextQuestion falls
-// through to the next tier down, all the way to the normal pool.
-const HALF_SENTENCE_ROUND_CUTOFF = 3;
-const SPEAKING_TASK_ROUND_CUTOFF = 6;
+// through to the next tier down, all the way to the normal pool. (Widened from the original 1-3/
+// 4-6/7+ split — direct teacher feedback that the easiest tier should cover the first 5 rounds, not
+// 3 — keeping the speaking-task tier's own width at 3 rounds rather than compressing it to 1.)
+const HALF_SENTENCE_ROUND_CUTOFF = 5;
+const SPEAKING_TASK_ROUND_CUTOFF = 8;
 
 type EntryPointId = "frontDoor" | "backDoor" | "window1" | "window2";
 const ENTRY_POINTS: { id: EntryPointId; label: string; icon: IconName }[] = [
@@ -853,12 +855,22 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
   // opens up into free-for-all sentence-throwing. Any team can be credited any number of times
   // against the same prompt — there's no per-team cap, since the horde only gets harder and the
   // class needs to be able to keep pumping out barricades/power-ups at whatever pace it can manage.
-  const startRound = useCallback((question: QuestionData | null, roundNumber: number) => {
+  // skipPrep is for the mid-round prompt refresh only (see the call site below, in
+  // handleCorrectAnswer) — the siege is already underway at that point (zombies already spawning,
+  // HouseScene already animating, not gated by roundPhase at all), so re-running the "read the
+  // prompt, get ready" countdown and making the teacher press Ready again makes no sense: nothing
+  // about the attack actually paused, only the on-screen prompt changed. A genuinely fresh wave
+  // (the two other call sites, neither of which passes this) still gets the real countdown.
+  const startRound = useCallback((question: QuestionData | null, roundNumber: number, opts?: { skipPrep?: boolean }) => {
     answeredTeamIdsRef.current = new Set();
     setCurrentQuestion(question);
-    setRoundPhase("reveal");
     if (breakTimeoutRef.current) clearTimeout(breakTimeoutRef.current);
-    breakTimeoutRef.current = setTimeout(() => setRoundPhase("active"), roundReadPauseSeconds(roundNumber) * 1000);
+    if (opts?.skipPrep) {
+      setRoundPhase("active");
+    } else {
+      setRoundPhase("reveal");
+      breakTimeoutRef.current = setTimeout(() => setRoundPhase("active"), roundReadPauseSeconds(roundNumber) * 1000);
+    }
   }, []);
 
   useEffect(() => () => { if (breakTimeoutRef.current) clearTimeout(breakTimeoutRef.current); }, []);
@@ -1011,7 +1023,7 @@ export function ZombieSiegeGame({ questions, teams, onUpdateScore, onEnd, forceF
     if (teams.some(t => t.id === teamId)) {
       answeredTeamIdsRef.current.add(teamId);
       if (answeredTeamIdsRef.current.size >= teams.length) {
-        startRound(pickNextQuestion(siege.round), siege.round);
+        startRound(pickNextQuestion(siege.round), siege.round, { skipPrep: true });
       }
     }
   };
